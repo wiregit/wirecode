@@ -251,12 +251,7 @@ public class Connection {
      */
     private volatile long _nextPongTime = Long.MIN_VALUE;
     
-    /**
-     * Cache the 'connection closed' exception, so we have to allocate
-     * one for every closed connection.
-     */
-    protected static final IOException CONNECTION_CLOSED =
-        new IOException("connection closed");
+    private boolean _initialized = false;
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -397,7 +392,7 @@ public class Connection {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
-            throw CONNECTION_CLOSED;
+            throw new IOException("closed before initialize");
         } 
         
         // Check to see if this is an attempt to connect to ourselves
@@ -485,6 +480,8 @@ public class Connection {
             close();
             throw new BadHandshakeException(e);
         }
+        
+        _initialized = true;
     }
 
     /**
@@ -885,7 +882,7 @@ public class Connection {
     private String readLine(int timeout) throws IOException {
         int oldTimeout=_socket.getSoTimeout();
         // _in.read can throw an NPE if we closed the connection,
-        // so we must catch NPE and throw the CONNECTION_CLOSED.
+        // so we must catch NPE and throw the new IOException().
         try {
             _socket.setSoTimeout(timeout);
             String line=(new ByteReader(_in)).readLine();
@@ -897,7 +894,7 @@ public class Connection {
             }
             return line;
         } catch(NullPointerException npe) {
-            throw CONNECTION_CLOSED;
+            throw new IOException("npe in readline");
         } finally {
             //Restore socket timeout.
             _socket.setSoTimeout(oldTimeout);
@@ -952,7 +949,7 @@ public class Connection {
         //that Message.read may still throw IOException below.
         //See note on _closed for more information.
         if (_closed)
-            throw CONNECTION_CLOSED;
+            throw new IOException("close before receive");
 
         Message m = null;
         while (m == null) {
@@ -976,7 +973,7 @@ public class Connection {
 		throws IOException, BadPacketException, InterruptedIOException {
         //See note in receive().
         if (_closed)
-            throw CONNECTION_CLOSED;
+            throw new IOException("closed before receive w/timeout");
 
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
@@ -1012,9 +1009,8 @@ public class Connection {
             
             // DO THE ACTUAL READ
             msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
-            if(LOG.isTraceEnabled())
-                LOG.trace("Connection (" + toString() +
-                          ") read message: " + msg);
+            if(isBearShare() && LOG.isTraceEnabled() && msg instanceof PingReply)
+                System.out.println("Read: " + msg);
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will
@@ -1035,7 +1031,7 @@ public class Connection {
             }
         } catch(NullPointerException npe) {
             LOG.warn("Caught NPE in readAndUpdateStatistics, throwing IO.");
-            throw CONNECTION_CLOSED;
+            throw new IOException("npe in readandupdate");
         }
         return msg;
     }
@@ -1052,9 +1048,8 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
-        if(LOG.isTraceEnabled())
-            LOG.trace("Connection (" + toString() + 
-                      ") is sending message: " + m);
+        if(isBearShare() && LOG.isTraceEnabled() && m instanceof PingRequest)
+            System.out.println("Sending: " + m);
         
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
@@ -1074,7 +1069,7 @@ public class Connection {
 
             updateWriteStatistics(m, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {
-            throw CONNECTION_CLOSED;
+            throw new IOException("npe in send");
         }
     }
 
@@ -1102,7 +1097,7 @@ public class Connection {
             // because flushing forces the deflater to deflate.
             updateWriteStatistics(null, priorUncompressed, priorCompressed);
         } catch(NullPointerException npe) {
-            throw CONNECTION_CLOSED;
+            throw new IOException("npe in flush");
         }
     }
     
@@ -1407,6 +1402,11 @@ public class Connection {
         // Setting this flag insures that the socket is closed if this
         // method is called asynchronously before the socket is initialized.
         _closed = true;
+        
+        
+        if(_initialized && isBearShare())
+            Thread.dumpStack();
+        
         if(_socket != null) {
             try {				
                 _socket.close();
@@ -1780,6 +1780,10 @@ public class Connection {
      *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
 		return _headers.isQueryRoutingEnabled();
+    }
+    
+    boolean isBearShare() {
+        return getUserAgent() != null && getUserAgent().toLowerCase().startsWith("bearshare");
     }
 
     // overrides Object.toString

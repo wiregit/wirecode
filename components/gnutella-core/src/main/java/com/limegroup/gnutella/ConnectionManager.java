@@ -652,6 +652,16 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
+        
+        String agent = hr.getUserAgent();
+        if( agent != null && agent.toLowerCase().startsWith("bearshare") )
+            LOG.debug("Looking at: " + agent +
+                      "\ngood leaf: " + hr.isGoodLeaf() +
+                      "\ngood up: " + hr.isGoodUltrapeer() +
+                      "\nis leaf: " + hr.isLeaf() + 
+                      "\nis up: " + hr.isUltrapeer() +
+                      "\nquery routing: " + hr.isUltrapeerQueryRoutingConnection());
+        
 
 		// preferencing may not be active for testing purposes --
 		// just return if it's not

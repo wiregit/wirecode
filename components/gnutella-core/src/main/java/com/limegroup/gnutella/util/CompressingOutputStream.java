@@ -3,6 +3,9 @@ package com.limegroup.gnutella.util;
 import java.io.*;
 import java.util.zip.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Simulates zlib's Z_PARTIAL_FLUSH and Z_SYNC_FLUSH behaviour.
  * This is a workaround for the following bugParade bugs:<br>
@@ -12,6 +15,8 @@ import java.util.zip.*;
  * modified slightly.
  */
 public final class CompressingOutputStream extends DeflaterOutputStream {
+    
+    private static final Log LOG = LogFactory.getLog(CompressingOutputStream.class);
     
     public CompressingOutputStream (final OutputStream out, final Deflater flate) {
       super(out, flate);
@@ -43,7 +48,11 @@ public final class CompressingOutputStream extends DeflaterOutputStream {
     
     protected void deflate() throws IOException {
         try {
+            long now1 = System.currentTimeMillis();
             super.deflate();
+            long now2 = System.currentTimeMillis();
+            if( now2 - now1 != 0 )
+                LOG.debug("deflate took: " + (now2 - now1) + " millseconds");
         } catch(NullPointerException e) {
             //This will happen if 'end' was called on the deflater
             //while we were deflating.

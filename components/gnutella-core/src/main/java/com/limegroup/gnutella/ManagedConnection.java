@@ -17,6 +17,9 @@ import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.updates.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
  * method that runs forever (or until an IOException occurs), receiving and
@@ -55,6 +58,8 @@ import com.limegroup.gnutella.updates.*;
  */
 public class ManagedConnection extends Connection 
 	implements ReplyHandler, PushProxyInterface {
+	    
+	private static final Log LOG = LogFactory.getLog(ManagedConnection.class);
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -379,6 +384,7 @@ public class ManagedConnection extends Connection
         try {
             _lastQRPTableReceived.patch(ptm);
         } catch(BadPacketException e) {
+            LOG.debug("unable to patch QRP", e);
             // not sure what to do here!!
         }                    
     }
@@ -655,6 +661,8 @@ public class ManagedConnection extends Connection
                     repOk();
                 }                
             } catch (IOException e) {
+                if(isBearShare())
+                    e.printStackTrace();
                 if(_manager != null)
                     _manager.remove(ManagedConnection.this);
                 _runnerDied=true;
@@ -684,7 +692,7 @@ public class ManagedConnection extends Connection
             }
             
             if (! isOpen())
-                throw CONNECTION_CLOSED;
+                throw new IOException("closed while waiting for queued");
         }
         
         /** Send several queued message of each type. */
@@ -920,6 +928,7 @@ public class ManagedConnection extends Connection
      */
     void loopForMessages() throws IOException {
 		MessageRouter router = RouterService.getMessageRouter();
+		try {
         while (true) {
             Message m=null;
             try {
@@ -944,6 +953,11 @@ public class ManagedConnection extends Connection
 
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
+        }
+        } catch(IOException ioe) {
+            if(isBearShare())
+                ioe.printStackTrace();
+            throw ioe;
         }
     }
     
