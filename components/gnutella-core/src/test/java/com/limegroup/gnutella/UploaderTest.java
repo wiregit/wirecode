@@ -31,6 +31,11 @@ public class UploaderTest extends TestCase {
         fm = new FileManagerStub();
         a= new DummyAuthenticator();
         rs = new RouterService(ac);
+        try {
+            PrivilegedAccessor.setValue(rs,"fileManager",fm);
+        } catch(Exception e) {
+            fail("could not initialize test");
+        }
         FileDesc fd = fm.get(0);
         rfd1 = new RemoteFileDesc("1.1.1.1",0,0,"abc.txt",1000000,
                                              new byte[16], 56, false, 3,
@@ -87,6 +92,7 @@ public class UploaderTest extends TestCase {
      */
     public void testNormalQueueing() {
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -185,6 +191,7 @@ public class UploaderTest extends TestCase {
      */
     public void testQueueTiming() {
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -257,6 +264,7 @@ public class UploaderTest extends TestCase {
      */
     public void testNotQueuedUnlessHeaderSent() {
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -294,6 +302,7 @@ public class UploaderTest extends TestCase {
 
     public void testPerHostLimitedNotQueued() {
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(2);
@@ -333,6 +342,7 @@ public class UploaderTest extends TestCase {
  
     public void testSoftMax() {
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(9999);
         SettingsManager.instance().setSoftMaxUploads(2);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -380,6 +390,7 @@ public class UploaderTest extends TestCase {
      */
     public void testUploadLimtIncludesQueue() {
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
         SettingsManager.instance().setUploadsPerPerson(1);
@@ -404,6 +415,11 @@ public class UploaderTest extends TestCase {
                 fail("uploader should have been rejected not queued ");
             } catch (TryAgainLaterException talx) {
                 //expected behaviour
+            } catch (IOException e) {  
+                //IOException is OK because we are using pipedSocketFactory
+                //which does not allow the downloader to read the bytes in
+                //the buffer if the uploader closes the socket first, rather
+                //it throws an IOException.
             } catch (Exception e) {
                 fail("unknown exception");
             }
@@ -420,6 +436,7 @@ public class UploaderTest extends TestCase {
      */
     public void testSameFileSameHostGivenSlot() { 
         UploadManager upManager = new UploadManager();
+        setUploadManager(upManager);
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
         SettingsManager.instance().setUploadsPerPerson(99999);
@@ -560,6 +577,13 @@ public class UploaderTest extends TestCase {
         downloader.stop();
         try { Thread.sleep(400); } catch (InterruptedException ignored) { }
     }
-    
+
+    private void setUploadManager(UploadManager manager) {
+        try {
+            PrivilegedAccessor.setValue(rs,"uploadManager",manager);
+        } catch(Exception e) {
+            fail("could not initialize test");
+        }
+    }
  
 }

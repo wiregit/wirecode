@@ -50,7 +50,7 @@ public final class RouterService {
 	/**
 	 * <tt>FileManager</tt> instance that manages access to shared files.
 	 */
-    private static final FileManager fileManager = new MetaFileManager();
+    private static FileManager fileManager = new MetaFileManager();
 
     /**
      * For authenticating users.
@@ -88,7 +88,7 @@ public final class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static final UploadManager uploadManager = new UploadManager();
+    private static UploadManager uploadManager = new UploadManager();
 
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();

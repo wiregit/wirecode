@@ -125,7 +125,7 @@ public final class UploadManager implements BandwidthTracker {
                 String fileName = line._fileName;
                 
                 uploader = new HTTPUploader(currentMethod, fileName, 
-											socket, line._index);
+											socket, line._index,uploader);
                 
                 uploader.readHeader();
                 

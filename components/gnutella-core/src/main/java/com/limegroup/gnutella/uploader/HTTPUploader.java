@@ -72,8 +72,7 @@ public final class HTTPUploader implements Uploader {
      */
     private boolean _clientAcceptsXGnutellaQueryreplies = false;
 
-    private final BandwidthTrackerImpl bandwidthTracker=
-		new BandwidthTrackerImpl();
+    private BandwidthTrackerImpl bandwidthTracker=null;
 
 	/**
 	 * Stores any alternate locations specified in the HTTP headers for 
@@ -94,9 +93,11 @@ public final class HTTPUploader implements Uploader {
 	 * @param fileName the name of the file
 	 * @param socket the <tt>Socket</tt> instance to serve the upload over
 	 * @param index the index of the file in the set of shared files
+     * @param old the old HTTPDownloader which we use for bandwidth 
+     * to initialize this' bandwidth tracker so we have history
 	 */
 	public HTTPUploader(HTTPRequestMethod method, String fileName, Socket socket, 
-						int index) {
+						int index, HTTPUploader old) {
 		_method = method;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
@@ -105,6 +106,10 @@ public final class HTTPUploader implements Uploader {
 		_amountRead = 0;
 		_guid = null;
 		_port = 0;
+        if(old!=null)
+            bandwidthTracker=old.bandwidthTracker;
+        else
+            bandwidthTracker = new BandwidthTrackerImpl();
 		try {			
 			_ostream = _socket.getOutputStream();
 
