@@ -262,15 +262,9 @@ public final class SettingsManager {
 	 * default shutdown operation is set.
 	 */ 
 	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
-		!DEFAULT_MINIMIZE_TO_TRAY;
-        
-	public static final String  DEFAULT_CLASSPATH           
-		= "LimeWire.jar" + File.pathSeparator + 
-		"collections.jar" + File.pathSeparator + 
-		"xerces.jar" + File.pathSeparator + 
-		"jl011.jar";
-	private final String  DEFAULT_MAIN_CLASS           
-		= "com.limegroup.gnutella.gui.Main";
+		!DEFAULT_MINIMIZE_TO_TRAY;       
+
+	public static final String DEFAULT_JAR_NAME = "LimeWire.jar";
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
@@ -354,12 +348,6 @@ public final class SettingsManager {
      * The time when we last expired accumulated information
      */
     private final long DEFAULT_LAST_EXPIRE_TIME = 0L;
-
-	/**
-	 * Constant for the default status of whether or not Cydoor 
-	 * is installed on this machine.
-	 */
-	private final boolean DEFAULT_CYDOOR_INSTALLER_CALLED = false;
 
 	/**
 	 * Constant for the default ads version.
@@ -455,8 +443,9 @@ public final class SettingsManager {
 	private final String WINDOW_Y              = "WINDOW_Y";
 	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
 	private final String SHUTDOWN_AFTER_TRANSFERS = "SHUTDOWN_AFTER_TRANSFERS";
-	private final String CLASSPATH             = "CLASSPATH";
-	private final String MAIN_CLASS            = "MAIN_CLASS";
+	//private final String CLASSPATH             = "CLASSPATH";
+	//private final String MAIN_CLASS            = "MAIN_CLASS";
+	private final String JAR_NAME              = "JAR_NAME";
 
 	/**
 	 * Constant key for whether or not chat is enabled.
@@ -579,12 +568,6 @@ public final class SettingsManager {
      * information
      */
     private final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
-
-	/**
-	 * Constant key for whether or not the Cydoor installer was called on this
-	 * machine.
-	 */
-	private final String CYDOOR_INSTALLER_CALLED = "CYDOOR_INSTALLER_CALLED";
  
 	/**
 	 * Constant for the key for the current ads version.
@@ -1123,12 +1106,12 @@ public final class SettingsManager {
 					setShutdownAfterTransfers(afterTransfers.booleanValue());
 				}
 
-                else if(key.equals(CLASSPATH)){
-                    setClassPath(p);
-                }
-                else if(key.equals(MAIN_CLASS)){
-                    setMainClass(p);
-                }
+                //else if(key.equals(CLASSPATH)){
+				//  setClassPath(p);
+                //}
+                //else if(key.equals(MAIN_CLASS)){
+				//  setMainClass(p);
+                //}
 				else if(key.equals(LANGUAGE)) {
 					setLanguage(p);
 				}
@@ -1185,11 +1168,11 @@ public final class SettingsManager {
                 else if(key.equals(SERVER)){
                     setServer((new Boolean(p)).booleanValue());
                 }
-				else if(key.equals(CYDOOR_INSTALLER_CALLED)) {
-					setCydoorInstalled((new Boolean(p)).booleanValue());
-				}
 				else if(key.equals(AD_VERSION)) {
 					setAdVersion(p);
+				}
+				else if(key.equals(JAR_NAME)) {
+					setJarName(p);
 				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
@@ -1265,8 +1248,8 @@ public final class SettingsManager {
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
 		setShutdownAfterTransfers(DEFAULT_SHUTDOWN_AFTER_TRANSFERS);
-		setClassPath(DEFAULT_CLASSPATH);
-		setMainClass(DEFAULT_MAIN_CLASS);
+		//setClassPath(DEFAULT_CLASSPATH);
+		//setMainClass(DEFAULT_MAIN_CLASS);
 
 		setAppWidth(DEFAULT_APP_WIDTH);
 		setAppHeight(DEFAULT_APP_HEIGHT);
@@ -1311,8 +1294,6 @@ public final class SettingsManager {
 		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
-
-		setCydoorInstalled(DEFAULT_CYDOOR_INSTALLER_CALLED);
 		setAdVersion(DEFAULT_AD_VERSION);
 		
 		try {
@@ -1321,6 +1302,8 @@ public final class SettingsManager {
 		    e.printStackTrace();
 		    // this should not happen with the default directory
 		}
+
+		setJarName(DEFAULT_JAR_NAME);
     }
 
     /**
@@ -1939,26 +1922,6 @@ public final class SettingsManager {
 	 */
 	public boolean getEverAcceptedIncoming() {
 		return getBooleanValue(EVER_ACCEPTED_INCOMING);
-	}
-  
-	/**
-	 * Returns the classpath string used for loading jar files on startup.
-	 *
-	 * @return the classpath <tt>String</tt> used for loading jar files on
-	 *         startup.
-	 */
-	public String getClassPath() {
-		return PROPS.getProperty(CLASSPATH);
-	}
-	
-	/**
-	 * Returns the main class to load on startup.
-	 *
-	 * @return a <tt>String</tt> specifying the main class to load on
-	 *         startup
-	 */
-	public String getMainClass() {
-		return PROPS.getProperty(MAIN_CLASS);
 	}
 	
 	/**
@@ -3060,15 +3023,6 @@ public final class SettingsManager {
 	}
     
     /**
-     * Sets the classpath for loading files at startup.
-	 *
-	 * @param classpath the classpath to use at startup
-     */
-    public void setClassPath(final String classpath) {
-        PROPS.put(CLASSPATH, classpath);
-    }
-    
-    /**
      * Sets the type of the servant: client, xml-client, server etc
      */
     private void setServantType(String servantType) {
@@ -3079,15 +3033,6 @@ public final class SettingsManager {
             _servantType = DEFAULT_SERVANT_TYPE;
         }
         PROPS.put(SERVANT_TYPE, _servantType);
-    }
-
-    /**
-     * Sets the main class to use at startup.
-	 *
-	 * @param mainClass the main class to load at startup
-     */
-    public void setMainClass(final String mainClass) {
-        PROPS.put(MAIN_CLASS, mainClass);
     }
 
 	/**
@@ -3225,16 +3170,6 @@ public final class SettingsManager {
     public void setLastExpireTime(long lastExpireTime){
         setLongValue(LAST_EXPIRE_TIME, lastExpireTime);
     }
-
-	/**
-	 * Sets whether or not Cydoor is installed on the client system.
-	 * 
-	 * @param INSTALLED specifies whether or not Cydoor has been installed
-	 *  on the target system
-	 */
-	private void setCydoorInstalled(final boolean INSTALLED) {
-		setBooleanValue(CYDOOR_INSTALLER_CALLED, INSTALLED);
-	}
     
 	/**
 	 * Sets the ad version in use -- only read in from the props file.
@@ -3243,6 +3178,16 @@ public final class SettingsManager {
 	 */
 	public void setAdVersion(final String VERSION) {
 		setStringValue(AD_VERSION, VERSION);
+	}
+	
+	/**
+	 * Sets the name of the jar file to load on startup, which is read
+	 * in from the properties file by RunLime.
+	 *
+	 * @param jarName the name of the jar file to load
+	 */
+	public void setJarName(final String jarName) {
+		setStringValue(JAR_NAME, jarName);
 	}
 
 	/**
