@@ -291,7 +291,6 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         if(true) return;
          //1. Initialize connection.  It's always safe to recommend new headers.
          Thread.currentThread().setName("IncommingConnectionThread");
          ManagedConnection connection = new ManagedConnection(socket);
