@@ -249,13 +249,52 @@ public class FixedsizeForgetfulHashMap implements Map
             return ret.getValue();
     }
 
+    /**
+     * Tests if the map is full
+     * @return true, if the map is full (ie if adding any other entry will
+     * lead to removal of some other entry to maintain the fixed-size property
+     * of the map. Returns false, otherwise
+     */
+    public boolean isFull()
+    {
+        //if the count is more than max
+        if(currentSize >= maxSize)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    /**
+     * Removes the least recently used entry from the map
+     * @return Value corresponding to the key-value removed from the map
+     * @modifies this
+     */
+    public Object removeLRUEntry()
+    {
+        //get an element from the remove list to remove
+        DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
+
+        //remove it from the hashMap
+        ValueElement removed = (ValueElement)map.remove(toRemove.getKey());
+        
+        //decrement the count
+        currentSize--;
+        
+        //return the removed element (value)
+        return removed.getValue();
+    }
+    
 
     /**
      * Copies all of the mappings from the specified map to this one.
      * 
      * These mappings replace any mappings that this map had for any of the
      * keys currently in the specified Map.
-     * As this is fixed siz emapping, some older entries may get removed
+     * As this is fixed size mapping, some older entries may get removed
      *
      * @param t Mappings to be stored in this map.
      */

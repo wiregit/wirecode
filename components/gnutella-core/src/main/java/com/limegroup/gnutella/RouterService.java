@@ -20,52 +20,43 @@ public class RouterService
     private DownloadManager downloader;
     private UploadManager uploadManager;
 
-    /**
-     * Create a RouterService accepting connections on the default port.
-     * Some parts of the backend will not be started until postGuiInit()
-     * is called.
-     */
-    public RouterService(ActivityCallback activityCallback,
-                         MessageRouter router) {
-        this(SettingsManager.instance().getPort(),
-             activityCallback,
-             router);
-    }
+	/**
+	 * Simple constructor to allocate memory to this object
+	 * and to set several of the member variables.
+	 */
+  	public RouterService(ActivityCallback activityCallback,
+  						 MessageRouter router) {
+  		this.callback = activityCallback;
+  		this.router = router;
+  	}
 
-    /**
-     * Create a RouterService accepting connections on the specified port.
-     * Some parts of the backend will not be started until postGuiInit()
-     * is called.
-     */
-    public RouterService(int port,
-                         ActivityCallback activityCallback,
-                         MessageRouter router) {
-        callback = activityCallback;
+	/**
+	 * Initialization method that constructs and initializes many 
+	 * of the objects in the backend.
+	 */
+  	public void initialize() {
+		SettingsManager settings = SettingsManager.instance();
+  		int port = settings.getPort();
+  		this.acceptor = new Acceptor(port, callback);
+  		this.manager = new ConnectionManager(callback);
+  		this.catcher = new HostCatcher(callback);
+  		this.downloader = new DownloadManager();
+  		this.uploadManager = new UploadManager();
+		// Now, link all the pieces together, starting the various threads.
+		this.catcher.initialize(acceptor, manager,
+								SettingsManager.instance().getHostList());
+		this.router.initialize(acceptor, manager, catcher, uploadManager);
+		this.manager.initialize(router, catcher);		
+		this.uploadManager.initialize(callback, router, acceptor);
+		this.acceptor.initialize(manager, router, downloader, uploadManager);
+		this.downloader.initialize(callback, router, acceptor, FileManager.instance());
+		
+  		// Make sure connections come up ultra-fast (beyond default keepAlive)
+		int outgoing = settings.getKeepAlive();
+  		if ( outgoing > 0 ) 
+  			connect();
+  	}
 
-        // First, construct all the pieces
-        this.acceptor = new Acceptor(port, callback);
-        this.manager = new ConnectionManager(callback);
-        this.router = router;
-        this.catcher = new HostCatcher(callback);
-        downloader = new DownloadManager();
-		this.uploadManager = new UploadManager();
-
-        // Now, link all the pieces together, starting the various threads.
-        this.catcher.initialize(acceptor, manager,
-                                SettingsManager.instance().getHostList());
-        this.router.initialize(acceptor, manager, catcher, uploadManager);
-        this.manager.initialize(router, catcher);		
-        this.uploadManager.initialize(activityCallback, router, acceptor);
-        this.acceptor.initialize(manager, router, downloader, uploadManager);
-        this.downloader.initialize(
-            callback, router, acceptor, FileManager.instance());
-
-		// Make sure connections come up ultra-fast (beyond default keepAlive)
-        SettingsManager settings=SettingsManager.instance();
-        int outgoing=settings.getKeepAlive();
-		if ( outgoing > 0 )
-		    connect();
-    }
     
     /** Kicks off expensive backend tasks (like file loading) that should
      *  only be done after GUI is loaded. */
@@ -397,6 +388,15 @@ public class RouterService
         acceptor.setListeningPort(port);
     }
 
+    /** 
+     * Returns true if this has accepted an incoming connection, and hence
+     * probably isn't firewalled.  
+     */
+    public boolean acceptedIncomingConnection() {
+        return acceptor.acceptedIncoming();
+    }
+
+
     /**
      *  Return the total number of messages sent and received
      */
@@ -449,6 +449,11 @@ public class RouterService
     /** Same as ResponseVerifier.matchesType. */
     public boolean matchesType(byte[] guid, Response response) {
         return verifier.matchesType(guid, response);
+    }
+
+    /** Same as ResponseVerifier.isMandragoreWorm. */
+    public boolean isMandragoreWorm(byte[] guid, Response response) {
+        return verifier.isMandragoreWorm(guid, response);
     }
 
     /**

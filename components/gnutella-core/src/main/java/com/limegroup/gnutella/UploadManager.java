@@ -39,20 +39,21 @@ public class UploadManager {
     private List /* of PushRequestedFile */ _attemptingPushes=
         new LinkedList();
 	/**
-	 * A Map of all the uploads in progress.  If the number
+	 * The number of uploads in progress from each host. If the number
 	 * of uploads by a single user exceeds the SettingsManager's
 	 * uploadsPerPerson_ variable, then the upload is denied, 
 	 * and the used gets a Try Again Later message.
-     *
-
-     */
+	 */
 	private static Map /* String -> Integer */ _uploadsInProgress =
 		new HashMap();
-	/**
-	 * A SortedSet of the full uploads in progress.  
-	 * This is used to shutdown "Gnutella" uploads as needed.
-	 */
-	private static List _fullUploads = new LinkedList();
+
+    /**
+     * The number of uploads that are actually transferring data.
+     *
+     * INVARIANT: _activeUploads is always less than or equal to the
+     * summation of the values of _uploadsInProgress
+     */
+    private volatile int _activeUploads= 0;
 
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
@@ -92,22 +93,17 @@ public class UploadManager {
 			// the GET line was wrong, just exit.
 			return;
 		} 
-		
-		clearFailedPushes();
 
 		// check if it complies with the restrictions.
 		// if no, send an error.  
 		// if yes, constroct the uploader
 		uploader = new HTTPUploader(line._file, socket, line._index, this);
 
-		if (uploader.getState() == uploader.COULDNT_CONNECT)
-			return;
-
 		String host = socket.getInetAddress().getHostAddress();
 
 		insertAndTest(uploader, host);
 
-		UploadRunner runner = new UploadRunner(uploader, host);
+		UploadRunner runner = new UploadRunner(uploader, host, line._index);
 		Thread upThread = new Thread(runner);
 		upThread.setDaemon(true);
 		upThread.start();
@@ -121,21 +117,17 @@ public class UploadManager {
 
 		Uploader uploader;
 		uploader = new HTTPUploader(file, host, port, index, guid, this);
-		// check to see if the file is in the attempted pushes
-		// or if the upload limits have been reached for some 
-		// reason.
-
-		insertAndTest(uploader, host);
-
-		if (! testAttemptedPush(host) )
+		// testing if we are either currently attempting a push, 
+		// or we have unsuccessfully attempted a push with this host in the
+		// past.
+		if ( (! testAttemptedPush(host, index) )  ||
+			 (! testFailedPush(host, index) ) )
 			return;
 
-		insertAttemptedPush(host);
+		insertAndTest(uploader, host);
+		insertAttemptedPush(host, index);
 
-		if (! testFailedPush(host) )
-			uploader.setState(Uploader.PUSH_FAILED);
-
-		UploadRunner runner = new UploadRunner(uploader, host);
+		UploadRunner runner = new UploadRunner(uploader, host, index);
 		Thread upThread = new Thread(runner);
 		upThread.setDaemon(true);
 		upThread.start();
@@ -156,24 +148,29 @@ public class UploadManager {
 	}
 
 	public int uploadsInProgress() {
-		return _uploadsInProgress.size();
+		return _activeUploads;
 	}
 
 	//////////////////////// Private Interface /////////////////////////
 
-
+    /** Increments the count of uploads in progress for host.
+     *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
+     *  Notifies callback of this.
+     *      @modifies _uploadsInProgress, uploader, _callback */
 	private void insertAndTest(Uploader uploader, String host) {
 		// add to the Map
 		insertIntoMap(host);
 
-		if ( (! testPerHostLimit(host) ) || 
+		if ( (! testPerHostLimit(host) ) ||
 			 ( ! testTotalUploadLimit() ) )
-			uploader.setState(Uploader.LIMIT_REACHED);
+			 uploader.setState(Uploader.LIMIT_REACHED);
 
 		_callback.addUpload(uploader);		
 
 	}
 
+    /** Increments the count of uploads in progress for host. 
+     *      @modifies _uploadsInProgress */
 	private void insertIntoMap(String host) {
 		int numUploads = 1;
 		// check to see if the map aleady contains
@@ -183,9 +180,7 @@ public class UploadManager {
 			Integer myInteger = (Integer)_uploadsInProgress.get(host);
 			numUploads += myInteger.intValue();
 		}
-		_uploadsInProgress.put(host, new Integer(numUploads));
-		
-			
+		_uploadsInProgress.put(host, new Integer(numUploads));		
 	}
 
 	private void removeFromMap(String host) {
@@ -212,20 +207,28 @@ public class UploadManager {
 		return true;
 	}
 		
+
+	/**
+	 * Returns 'false' if the total number of uploads has been
+	 * reached, and true otherwise.  Note that because this test 
+	 * relies on the uploadsInProgress() method, it may sometimes
+	 * be incorrect if a push request takes a long time to respond. 
+	 */
 	private boolean testTotalUploadLimit() {
 		int max = SettingsManager.instance().getMaxUploads();
-		int current = _uploadsInProgress.size();
-		if (current > max)
+		int current = uploadsInProgress();
+		if (current >= max)
 			return false;
 		return true;
 	}
 
-	private void insertFailedPush(String host) {
-		_failedPushes.add(new PushedFile(host));
+    /** @requires caller has this' monitor */
+	private void insertFailedPush(String host, int index) {
+		_failedPushes.add(new PushedFile(host, index));
 	}
 	
-	private boolean testFailedPush(String host) {
-		PushedFile pf = new PushedFile(host);
+	private boolean testFailedPush(String host, int index) {
+		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _failedPushes.iterator();
 		while ( iter.hasNext() ) {
@@ -237,12 +240,12 @@ public class UploadManager {
 
 	}
 
-	private void insertAttemptedPush(String host) {
-		_attemptingPushes.add(new PushedFile(host));
+	private void insertAttemptedPush(String host, int index) {
+		_attemptingPushes.add(new PushedFile(host, index));
 	}
 
-	private boolean testAttemptedPush(String host) {
-		PushedFile pf = new PushedFile(host);
+	private boolean testAttemptedPush(String host, int index) {
+		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
@@ -253,18 +256,21 @@ public class UploadManager {
 		return true;
 	}
 	
-	private void removeAttemptedPush(String host) {
-		PushedFile pf = new PushedFile(host);
+	private void removeAttemptedPush(String host, int index) {
+		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
 		while ( iter.hasNext() ) {
 			pfile = (PushedFile)iter.next();
 			if ( pf.equals(pfile) ) 
-				_attemptingPushes.remove(host);
+				// calling iter.remove() rather than
+				// remove on the list, since this will be
+				// safer while iterating through the list.
+				iter.remove();
 		}
 	}
 
-
+    /** @requires caller has this' monitor */
 	private void clearFailedPushes() {
 		// First remove all files that were pushed more than a few minutes ago
 		Date time = new Date();
@@ -287,7 +293,8 @@ public class UploadManager {
 	 * @return burstSize.  if it is the special case, in which 
 	 *         we want to upload as quickly as possible.
 	 */
-	public int calculateBurstSize() {
+	public int calculateBandwidth() {
+		// public int calculateBurstSize() {
 		float totalBandwith = getTotalBandwith();
 		float burstSize = totalBandwith/uploadsInProgress();
 		return (int)burstSize;
@@ -314,7 +321,7 @@ public class UploadManager {
 		float speed = manager.getUploadSpeed();
 		// the total bandwith available then, is the percentage
 		// allocated of the total bandwith.
-		float totalBandwith = ((connectionSpeed*((float)speed/100)));
+		float totalBandwith = ((connectionSpeed*((float)speed/100.F)));
 		return totalBandwith;
 	}
 
@@ -333,7 +340,6 @@ public class UploadManager {
 
 	private GETLine parseGET(Socket socket) throws IOException {
 		try {
-			// System.out.println("GETLINE PARSEGET");
 			// Set the timeout so that we don't do block reading.
 			socket.setSoTimeout(SettingsManager.instance().getTimeout());
 			// open the stream from the socket for reading
@@ -382,31 +388,37 @@ public class UploadManager {
     private class UploadRunner implements Runnable {
 		private Uploader _up;
 		private String _host;
-		public UploadRunner(Uploader up, String host) {
+        private int _index;
+
+		public UploadRunner(Uploader up, String host, int index) {
 			_up = up;
 			_host = host;
+            _index = index;
 		}
 		public void run() {
 			try {
-				// is connect always safe to call?  it should be
+				// connect is always safe to call.  it should be
 				// if it is a non-push upload, then connect should
 				// just return.  if there is an error, it should
 				// be because the connection failed.
 				_up.connect();
-				// start doesn't throw an exception.  rather, it
-				// handles it internally.  is this the correct
-				// way to handle it?
-				_up.start();
+                try {
+                    synchronized(UploadManager.this) { _activeUploads++; }
+                    // start doesn't throw an exception.  rather, it
+                    // handles it internally.  is this the correct
+                    // way to handle it?
+                    _up.start();
+                }  finally {
+                    synchronized(UploadManager.this) { _activeUploads--; }
+                }
 			} catch (IOException e) {
 				// if it fails, insert it into the push failed list
-				// _up.setState(Uploader.PUSH_FAILED);
-				insertFailedPush(_host);
-				// remove it from the uploads in progress
+				synchronized(UploadManager.this) { insertFailedPush(_host, _index); }
 				return;
-			} finally {
+			} finally {			    
 				synchronized(UploadManager.this) {
 					removeFromMap(_host);
-					removeAttemptedPush(_host);
+					removeAttemptedPush(_host, _index);
 				}
 			}
 			
@@ -415,21 +427,26 @@ public class UploadManager {
 	
 
 	/**
-	 * keeps track of the host and time of pushed files
+	 * Keeps track of a push requested file and the host that requested it.
 	 */
 	private class PushedFile {
 		private String _host;
-		private Date _time;
+        private int _index;
+		private Date _time;        
 
-		public PushedFile(String host) {
+		public PushedFile(String host, int index) {
 			_host = host;
+            _index = index;
 			_time = new Date();
 		}
 		
-		public boolean equals(PushedFile pf) {
-			if (_host != pf._host)
-				return false;
-			return true;
+        /** Returns true iff o is a PushedFile with same _host and _index.
+         *  Time doesn't matter. */
+		public boolean equals(Object o) {
+            if (! (o instanceof PushedFile))
+                return false;
+            PushedFile pf=(PushedFile)o;
+			return _index==pf._index && _host.equals(pf._host);
 		}
 		
 		public boolean before(Date time) {

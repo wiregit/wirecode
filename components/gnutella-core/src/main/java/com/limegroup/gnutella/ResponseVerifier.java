@@ -4,15 +4,23 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 
 /**
- * Records information about queries so that responses can be
- * validated later.
+ * Records information about queries so that responses can be validated later.
+ * Typical use is to call record(..) on an outgoing query request, and
+ * score/matchesType/isMandragoreWorm on each incoming response.  
  */
 public class ResponseVerifier {
     private static class RequestData {
+        /** The original query. */
+        String query;
+        /** The keywords of the original query, lowercased. */
         String[] queryWords;
+        /** The type of the original query. */
         MediaType type;
-        RequestData(String[] queryWords, MediaType type) {
-            this.queryWords=queryWords;
+
+        RequestData(String query, MediaType type) {
+            this.query=query;
+            this.queryWords=StringUtils.split(query.toLowerCase(),
+                                              DELIMITERS);
             this.type=type;
         }
     }
@@ -24,6 +32,8 @@ public class ResponseVerifier {
         new ForgetfulHashMap(15);
     /** The characters to use in stripping apart queries. */
     private static final String DELIMITERS="+ ";
+    /** The size of a Mandragore worm response, i.e., 8KB. */
+    private static final long Mandragore_SIZE=8*1024l;
 
     /** Same as record(qr, null). */
     public synchronized void record(QueryRequest qr) {
@@ -38,9 +48,7 @@ public class ResponseVerifier {
      */
     public synchronized void record(QueryRequest qr, MediaType type){
         byte[] guid = qr.getGUID();
-        String[] queryWords=StringUtils.split(qr.getQuery().toLowerCase(),
-                                              DELIMITERS);
-        mapper.put(new GUID(guid),new RequestData(queryWords, type));
+        mapper.put(new GUID(guid),new RequestData(qr.getQuery(), type));
     }
 
 
@@ -88,6 +96,20 @@ public class ResponseVerifier {
         return request.type.matches(reply);
     }
 
+    /**
+     * Returns true if the given response is an instance of the Mandragore
+     * Worm.  This worm responds to the query "x" with a 8KB file named
+     * "x.exe".  In the rare case that the query for guid can't be found
+     * returns false.
+     */
+    public boolean isMandragoreWorm(byte[] guid, Response response) {
+        RequestData request=(RequestData)mapper.get(new GUID(guid));
+        if (request == null)
+            return false;
+        return response.getSize()==Mandragore_SIZE 
+                   && response.getName().equals(request.query+".exe");
+    }
+
     public String toString() {
         return mapper.toString();
     }
@@ -130,7 +152,7 @@ public class ResponseVerifier {
 
     qr4=new QueryRequest((byte)7,0,"*.mp3 weird*whoops weird*show");
     rv.record(qr4);
-    r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
+    r5=new Response(1,1,"Wierd Al-The WEIRD Al Show Theme.mp3");
     score2=rv.score(qr4.getGUID(), r5);
     Assert.that(score2==66, "Score is "+score2);
 
@@ -153,6 +175,18 @@ public class ResponseVerifier {
     rv.record(qr4, null);
     Assert.that(rv.matchesType(qr4.getGUID(), r5));
     Assert.that(rv.matchesType(qr4.getGUID(), r4));
+
+    ////////////////////// isMandragoreWorm tests /////////////////////
+    rv=new ResponseVerifier();
+    Assert.that(! rv.isMandragoreWorm(qr.getGUID(), r3));    
+    qr=new QueryRequest((byte)7,0, "test");
+    rv.record(qr);
+    r1 = new Response(1, 8192, "test response.exe");
+    r2 = new Response(1, 8000, "test.exe");
+    r3 = new Response(1, 8192, "test.exe");
+    Assert.that(! rv.isMandragoreWorm(qr.getGUID(), r1));
+    Assert.that(! rv.isMandragoreWorm(qr.getGUID(), r2));
+    Assert.that(rv.isMandragoreWorm(qr.getGUID(), r3));    
     }
     */
 }

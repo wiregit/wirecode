@@ -181,11 +181,16 @@ public class StandardMessageRouter
             // decrement the number of responses we have left
             numResponses-= arraySize;
 
+			// see id there are any open slots
 			boolean busy = _uploadManager.isBusy();
+
+			// see if we have ever accepted an incoming connection
+			boolean incoming = _acceptor.acceptedIncoming();
 
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
-                                        speed, res, clientGUID, false, busy);
+                                        speed, res, clientGUID, 
+										!incoming, busy);
 
             // try to send the new queryReply
             try {

@@ -12,15 +12,19 @@ public class Main implements ActivityCallback {
     //listening port number.
     RouterService service;
     ActivityCallback callback = new Main();
-    if (args.length==1) {
-        service=new RouterService(Integer.parseInt(args[0]),
-                                  callback,
-                                  new StandardMessageRouter(callback));
-    } else {
-        service=new RouterService(callback,
-                                  new StandardMessageRouter(callback));
 
-    }
+	// commented this segment out because RouterService changed--Adam
+    //if (args.length==1) {
+	//  service=new RouterService(Integer.parseInt(args[0]),
+	//                            callback,
+	//                            new StandardMessageRouter(callback));
+    //} else {
+        service=new RouterService(callback,
+              (new StandardMessageRouter(callback)));
+                                  
+        service.initialize();
+        
+		//}
 
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
     for ( ; ;) {
@@ -204,6 +208,8 @@ public class Main implements ActivityCallback {
 	public void addSharedDirectory(File file, File parent) {}
 
 	public void addSharedFile(File file, File parent) {}
+
+	public void clearSharedFiles() {}
 
 }
 

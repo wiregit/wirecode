@@ -26,10 +26,6 @@ public class SettingsManager implements SettingsInterface
     private String  forcedIPAddressString_;
     private int forcedPort_;
 
-    /** lastVersionChecked is the most recent version number checked.  Also,
-     * there is a boolean for don't check again. */
-    private final String CURRENT_VERSION=DEFAULT_LAST_VERSION_CHECKED;
-    private String lastVersionChecked_;
     private boolean checkAgain_;
 
     /** Variables for the various settings */
@@ -66,6 +62,7 @@ public class SettingsManager implements SettingsInterface
     private boolean  clearCompletedUpload_;
     private boolean  clearCompletedDownload_;
     private int      maxSimDownload_;
+    private boolean  promptExeDownload_;
     private int      maxUploads_;
 
     private int      searchAnimationTime_;
@@ -103,7 +100,7 @@ public class SettingsManager implements SettingsInterface
      *  Set up the manager instance to follow the
      *  singleton pattern.
      */
-    private static SettingsManager instance_ = new SettingsManager();
+    private static SettingsManager instance_;
 
     private String home_;
     private String fileName_;
@@ -119,6 +116,9 @@ public class SettingsManager implements SettingsInterface
      * accordance with the singleton pattern
      */
     public static SettingsManager instance() {
+		if(instance_ == null) {
+			instance_ = new SettingsManager();
+		}
         return instance_;
     }
 
@@ -142,12 +142,12 @@ public class SettingsManager implements SettingsInterface
         }
         catch(FileNotFoundException fne){}
         catch(SecurityException se) {}
-        initSettings();
+		initialize();
     }
 
 
     /** Check the properties file and set the props */
-    private void initSettings() {
+    private void initialize() {
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
@@ -207,6 +207,16 @@ public class SettingsManager implements SettingsInterface
                 }
                 else if(key.equals(MAX_SIM_DOWNLOAD)) {
                     setMaxSimDownload(Integer.parseInt(p));
+                } 
+                else if(key.equals(PROMPT_EXE_DOWNLOAD)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    setPromptExeDownload(bs);
                 }
                 else if(key.equals(MAX_UPLOADS)) {
                     setMaxUploads(Integer.parseInt(p));
@@ -273,9 +283,6 @@ public class SettingsManager implements SettingsInterface
 
                 else if(key.equals(EXTENSIONS)) {
                     setExtensions(p);
-                }
-                else if(key.equals(LAST_VERSION_CHECKED)) {
-                    setLastVersionChecked(p);
                 }
                 else if(key.equals(CHECK_AGAIN)) {
                     boolean bs;
@@ -424,12 +431,6 @@ public class SettingsManager implements SettingsInterface
 				else if(key.equals(SESSIONS)) {
 					setSessions(Integer.parseInt(p)+1);
 				}
-				else if(key.equals(OLD_JAR_NAME)) {
-					setOldJARName(p);
-				}
-				else if(key.equals(DELETE_OLD_JAR)) {
-					setDeleteOldJAR(Boolean.getBoolean(p));
-				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -488,13 +489,12 @@ public class SettingsManager implements SettingsInterface
         setClearCompletedUpload(DEFAULT_CLEAR_UPLOAD);
         setClearCompletedDownload(DEFAULT_CLEAR_DOWNLOAD);
         setMaxSimDownload(DEFAULT_MAX_SIM_DOWNLOAD);
+        setPromptExeDownload(DEFAULT_PROMPT_EXE_DOWNLOAD);
         setMaxUploads(DEFAULT_MAX_UPLOADS);
         setSearchAnimationTime(DEFAULT_SEARCH_ANIMATION_TIME);
         setConnectString(DEFAULT_CONNECT_STRING);
         setConnectOkString(DEFAULT_CONNECT_OK_STRING);
 
-        // RJS - setting the default values...
-        setLastVersionChecked(DEFAULT_LAST_VERSION_CHECKED);
         setCheckAgain(DEFAULT_CHECK_AGAIN);
         setBasicInfoForQuery(DEFAULT_BASIC_INFO_FOR_QUERY);
         setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
@@ -566,9 +566,7 @@ public class SettingsManager implements SettingsInterface
     public String getSaveDirectory() {
         File file = new File(saveDirectory_);
         if(!file.isDirectory()) {
-            boolean dirsMade = file.mkdirs();
-            if(!dirsMade)
-                return "";
+			setSaveDirectory(saveDirectory_);
         }
         return saveDirectory_;
     }
@@ -635,6 +633,7 @@ public class SettingsManager implements SettingsInterface
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}
     public int getParallelSearchMax(){return parallelSearchMax_;}
     public int getMaxSimDownload(){return maxSimDownload_;}
+    public boolean getPromptExeDownload(){return promptExeDownload_;}
     public int getMaxUploads(){return maxUploads_;}
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;}
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;}
@@ -677,17 +676,6 @@ public class SettingsManager implements SettingsInterface
         return forcedPort_;
     }
 
-    /**
-     * private methods to handle versioning
-     * control information
-     */
-    public String getCurrentVersion(){ 
-        //This is intentionally hard-coded in.
-        return CURRENT_VERSION;
-    }
-    public String getLastVersionChecked() {
-        return lastVersionChecked_;
-    }
     public boolean getCheckAgain() {
         return checkAgain_;
     }
@@ -711,14 +699,6 @@ public class SettingsManager implements SettingsInterface
 	}
 
 
-	public boolean getDeleteOldJAR() {
-		return deleteOldJAR_;
-	}
-
-	public String getOldJARName() {
-		return oldJARName_;
-	}
-
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
      ******************************************************/
@@ -728,8 +708,10 @@ public class SettingsManager implements SettingsInterface
      *************  START OF MUTATOR METHODS **************
      ******************************************************/
 
-	/** updates all of the uptime settings based on the
-	 *  passed in time value for the most recent session. */
+	/** 
+	 * updates all of the uptime settings based on the
+	 * passed in time value for the most recent session. 
+	 */
 	public void updateUptime(int currentTime) {
 		totalUptime_ += currentTime;
 		averageUptime_ = totalUptime_/sessions_;
@@ -764,7 +746,9 @@ public class SettingsManager implements SettingsInterface
 		props_.put(TOTAL_UPTIME, s);
 	}
 
-    /** sets the maximum length of packets (spam protection)*/
+    /** 
+	 * sets the maximum length of packets (spam protection)
+	 */
     public synchronized void setMaxLength(int maxLength)
         throws IllegalArgumentException {
         if(false)
@@ -776,7 +760,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the timeout */
+    /** 
+	 * sets the timeout 
+	 */
     public synchronized void setTimeout(int timeout)
         throws IllegalArgumentException {
         if(false)
@@ -835,8 +821,10 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** Returns the maximum number of connections for the given connection
-     *  speed.  */
+    /** 
+	 * Returns the maximum number of connections for the given connection
+     * speed.  
+	 */
     private int maxConnections() {
         int speed=getConnectionSpeed();
         //I'm copying these numbers out of GUIStyles.  I don't want this to
@@ -852,9 +840,11 @@ public class SettingsManager implements SettingsInterface
     }
 
 
-    /** sets the limit for the number of searches
-     *  throws an exception on negative limits
-     *  and limits of 10,000 or more */
+    /** 
+	 * sets the limit for the number of searches
+     * throws an exception on negative limits
+     * and limits of 10,000 or more 
+	 */
     public synchronized void setSearchLimit(byte limit) {
         if(limit < 0 || limit > 10000)
             throw new IllegalArgumentException();
@@ -924,26 +914,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-//  	/** sets the incomplete directory.  this is not 
-//  	 *  synchronized since it will only get called
-//  	 *  once on startup. */
-//      public void setIncompleteDirectory(String dir) {
-//          File f = new File(dir);
-//          boolean b = f.isDirectory();
-//          if(b == false)
-//              throw new IllegalArgumentException();
-//          else {
-//  			String incDir = dir;
-//  			try {
-//  				incDir = f.getCanonicalPath();
-//  			}
-//  			catch(IOException ioe) {}
-//              incompleteDirectory_ = incDir;
-//              props_.put(INCOMPLETE_DIR, incompleteDirectory_);
-//          }
-//      }
-
-    /** sets the hard maximum time to live */
+    /** 
+	 * sets the hard maximum time to live 
+	 */
     public synchronized void setMaxTTL(byte maxttl)
         throws IllegalArgumentException {
         if(maxttl < 0 || maxttl > 50)
@@ -955,10 +928,12 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the default save directory for when the user
-     *  presses the "use default" button in the config
-     *  window.  this method should only get called at
-     *  install time, and is therefore not synchronized */
+    /** 
+	 * sets the default save directory for when the user
+     * presses the "use default" button in the config
+     * window.  this method should only get called at
+     * install time, and is therefore not synchronized. 
+	 */
     public void setSaveDefault(String dir) {
         File f = new File(dir);
         boolean b = f.isDirectory();
@@ -994,32 +969,28 @@ public class SettingsManager implements SettingsInterface
         props_.put(ADVANCED_QUERY_INFO, s);
     }
 
-	public void setDeleteOldJAR(boolean delete) {
-		deleteOldJAR_ = delete;
-		String s = new Boolean(deleteOldJAR_).toString();
-		props_.put(DELETE_OLD_JAR, s);
-	}
-
-	public void setOldJARName(String name) {
-		oldJARName_ = name;
-		props_.put(OLD_JAR_NAME, oldJARName_);
-	}
 
     /******************************************************
      *********  START OF CONFIGURATION SETTINGS ***********
      ******************************************************/
 
-    /** set the directory for saving files */
+    /** 
+	 * set the directory for saving files 
+	 */
     public void setSaveDirectory(String dir) {
         File saveFile = new File(dir);
-		String tempPath = saveFile.getAbsolutePath();
-		if(tempPath.endsWith(File.separator)) {
-			tempPath = tempPath.substring(0, tempPath.length() -1);
+		File incFile  = null;
+		String tempPath = "";
+		try {
+			tempPath = saveFile.getCanonicalPath();
+			tempPath = saveFile.getParent();
+			tempPath += File.separator;
+			tempPath += "Incomplete";
+			incFile = new File(tempPath);
+		} catch(IOException ioe) {
+			return;
 		}
-		tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
-		tempPath += "Incomplete";
-		tempPath += File.separator;
-		File incFile  = new File(tempPath);
+		
 		if(!saveFile.isDirectory()) {
 			saveFile.mkdirs();
 		}
@@ -1040,13 +1011,15 @@ public class SettingsManager implements SettingsInterface
 		}
     }
 
-    /* set the directories to search.  this is synchronized
-     *  because some gui elements may want to make this call
-     *  in separate threads. this method will also filter
-     *  out any duplicate or invalid directories in the string.
-     *  note, however, that it does not currently filter out
-     *  listing subdirectories that have parent directories
-     *  also in the string.  this should change at some point.*/
+    /** 
+	 * set the directories to search.  this is synchronized
+     * because some gui elements may want to make this call
+     * in separate threads. this method will also filter
+     * out any duplicate or invalid directories in the string.
+     * note, however, that it does not currently filter out
+     * listing subdirectories that have parent directories
+     * also in the string.  this should change at some point.
+	 */
     public synchronized void setDirectories(String dir) {
         boolean dirsModified = false;
         directories_ = dir;
@@ -1100,8 +1073,10 @@ public class SettingsManager implements SettingsInterface
         props_.put(DIRECTORIES, directories_);
     }
 
-    /* adds one directory to the directory string (if
-     * it is a directory and is not already listed. */
+    /** 
+	 * adds one directory to the directory string (if
+     * it is a directory and is not already listed. 
+	 */
     public synchronized boolean addDirectory(String dir) {
         File f = new File(dir);
         if(f.isDirectory()) {
@@ -1131,13 +1106,17 @@ public class SettingsManager implements SettingsInterface
         return false;
     }
 
-    /** set the extensions to search for */
+    /** 
+	 * set the extensions to search for 
+	 */
     public void setExtensions(String ext) {
         extensions_ = ext;
         props_.put(EXTENSIONS, ext);
     }
 
-    /** sets the time to live */
+    /** 
+	 * sets the time to live 
+	 */
     public void setTTL(byte ttl)
         throws IllegalArgumentException {
         if (ttl < 1 || ttl > 14)
@@ -1149,7 +1128,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the soft maximum time to live */
+    /** 
+	 * sets the soft maximum time to live 
+	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
             throw new IllegalArgumentException();
@@ -1160,7 +1141,9 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the port to connect on */
+    /** 
+	 * sets the port to connect on 
+	 */
     public synchronized void setPort(int port) {
         // if the entered port is outside accepted
         // port numbers, throw the exception
@@ -1173,10 +1156,12 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** sets the connection speed.  throws an
-     *  exception if you try to set the speed
-     *  far faster than a T3 line or less than
-     *  0.*/
+    /** 
+	 * sets the connection speed.  throws an
+     * exception if you try to set the speed
+     * far faster than a T3 line or less than
+     * 0.
+	 */
     public void setConnectionSpeed(int speed) {
         if(speed < 0 || speed > 20000)
             throw new IllegalArgumentException();
@@ -1187,10 +1172,12 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-    /** Sets the percentage of total bandwidth (as given by
-     *  CONNECTION_SPEED) to use for uploads.  This is shared
-     *  equally among all uploads.  Throws IllegalArgumentException
-     *  if speed<0 or speed>100. */
+    /** 
+	 * Sets the percentage of total bandwidth (as given by
+     * CONNECTION_SPEED) to use for uploads.  This is shared
+     * equally among all uploads.  Throws IllegalArgumentException
+     * if speed<0 or speed>100. 
+	 */
     public synchronized void setUploadSpeed(int speed) {
         if (speed<0 || speed>100)
             throw new IllegalArgumentException();
@@ -1267,6 +1254,14 @@ public class SettingsManager implements SettingsInterface
             props_.put(MAX_SIM_DOWNLOAD, s);
         }
     }
+
+
+    public void setPromptExeDownload(boolean prompt) {        
+        promptExeDownload_ = prompt;
+        String s = String.valueOf(prompt);
+        props_.put(PROMPT_EXE_DOWNLOAD, s);
+    }
+
 
     public void setMaxUploads(int max) {
         if(false)
@@ -1489,15 +1484,7 @@ public class SettingsManager implements SettingsInterface
         props_.put(FREELOADER_FILES, s);
     }
 
-    /**
-     * private methods to handle versioning
-     * control information
-     */
-    public void setLastVersionChecked(String last) {
-        lastVersionChecked_ = last;
-        props_.put(LAST_VERSION_CHECKED, last);
-    }
-
+	
     public void setCheckAgain(boolean check) {
         checkAgain_ = check;
         String c;

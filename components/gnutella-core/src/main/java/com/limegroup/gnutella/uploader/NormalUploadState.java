@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import com.limegroup.gnutella.*;
 import java.io.*;
 import java.util.Date;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * auth: rsoule
@@ -43,7 +44,7 @@ public class NormalUploadState implements UploadState {
 		_uploadBegin =  _uploader.getUploadBegin();
 
 		/* prepare the file to be read */
-		prepareFile();
+		// prepareFile();
 		/* write the header information to the socket */
 		writeHeader();
 		/* write the file to the socket */
@@ -82,11 +83,13 @@ public class NormalUploadState implements UploadState {
         outerLoop:
             while (true) {
 
-				int max = _uploader.getManager().calculateBurstSize();
+				// int max = _uploader.getManager().calculateBurstSize();
+				int max = _uploader.getManager().calculateBandwidth();
                 int burstSize=max*cycleTime;
 
                 int burstSent=0;
-                Date start=new Date();
+                // Date start=new Date();
+				long start = System.currentTimeMillis();
                 while (burstSent<burstSize) {
 					c = _fis.read(buf);
                     if (c == -1)
@@ -101,10 +104,12 @@ public class NormalUploadState implements UploadState {
                     burstSent += c;
                 }
 
-                Date stop=new Date();
+                // Date stop=new Date();
+				long stop = System.currentTimeMillis();
 
                 //3.  Pause as needed so as not to exceed maxBandwidth.
-                int elapsed=(int)(stop.getTime()-start.getTime());
+                // int elapsed=(int)(stop.getTime()-start.getTime());
+                int elapsed=(int)(stop-start);
                 int sleepTime=cycleTime-elapsed;
                 if (sleepTime>0) {
                     try {
@@ -126,39 +131,37 @@ public class NormalUploadState implements UploadState {
 	/**
 	 * prepares the file to be read for sending accross the socket
 	 */
-	private void prepareFile() throws IOException {
-		// get the appropriate file descriptor
-		FileDesc fdesc;
-		try {
-			fdesc = FileManager.instance().get(_index);
-		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
-		}
+//  	private void prepareFile() throws IOException {
+//  		// get the appropriate file descriptor
+//  		FileDesc fdesc;
+//  		try {
+//  			fdesc = FileManager.instance().get(_index);
+//  		} catch (IndexOutOfBoundsException e) {
+//  			throw new IOException();
+//  		}
 		
-		/* For regular (client-side) uploads, get name. 
-		 * For pushed (server-side) uploads, check to see that 
-		 * the index matches the filename. */
-		String name = fdesc._name;
-		if (_filename == null) {
-            _filename = name;
-        } else {
-			/* matches the name */
-			if ( !name.equals(_filename) ) {
-				System.out.println("_filename '" + _filename + "'");
-				System.out.println("name '" + name + "'");
-				throw new IOException();
-			}
-        }
+//  		/* For regular (client-side) uploads, get name. 
+//  		 * For pushed (server-side) uploads, check to see that 
+//  		 * the index matches the filename. */
+//  		String name = fdesc._name;
+//  		if (_filename == null) {
+//              _filename = name;
+//          } else {
+//  			/* matches the name */
+//  			if ( !name.equals(_filename) ) {
+//  				throw new IOException();
+//  			}
+//          }
 
-		// set the file size
-        _fileSize = fdesc._size;
+//  		// set the file size
+//          _fileSize = fdesc._size;
 
-		// get the fileInputStream
-		String path = fdesc._path;
-		File myFile = new File(path);
-		_fis = new FileInputStream(myFile);
+//  		// get the fileInputStream
+//  		String path = fdesc._path;
+//  		File myFile = new File(path);
+//  		_fis = new FileInputStream(myFile);
 
-	}
+//  	}
 
 	/** eventually this method should determine the 
 	 * mime type of a file fill in the details of 
@@ -176,8 +179,7 @@ public class NormalUploadState implements UploadState {
 		String str;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		String version = SettingsManager.instance().getCurrentVersion();
-		str = "Server: LimeWire " + version + " \r\n";
+		str = "Server: "+CommonUtils.getVendor()+"\r\n";
 		_ostream.write(str.getBytes());
 		String type = getMimeType();       /* write this method later  */
 		str = "Content-type:" + type + "\r\n";

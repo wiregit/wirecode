@@ -52,7 +52,7 @@ public class URLOpener {
     public synchronized URLConnection connect(int timeout) 
             throws IOException {
         //Asynchronously establish connection.
-        Thread t=new URLOpenerThread();
+        Thread t = new Thread(new URLOpenerThread());
         t.start();
         
         //Wait for connection to be established, or for timeout.
@@ -78,12 +78,11 @@ public class URLOpener {
         }            
     }
 
-    private class URLOpenerThread extends Thread {
+    private class URLOpenerThread implements Runnable {
         public void run() {
             URLConnection conn=null;
             try {
-                conn=url.openConnection();
-                conn.connect();
+                conn = url.openConnection();
             } catch (IOException e) { }                
 
             synchronized (URLOpener.this) {
@@ -92,16 +91,16 @@ public class URLOpener {
                 else {
                     connection=conn;   //may be null
                     URLOpener.this.notify();
-                }
+				}
             }
         }
     }
 
     /** If conn is an HttpURLConnection, calls the disconnect() method.
      *      @modifies conn */
-    private static void close(URLConnection conn) {
-        if (conn instanceof HttpURLConnection) {
-            ((HttpURLConnection)conn).disconnect();
-        }
-    }
+	private static void close(URLConnection conn) {
+		if (conn instanceof HttpURLConnection) {
+			((HttpURLConnection)conn).disconnect();
+		}
+	}
 }

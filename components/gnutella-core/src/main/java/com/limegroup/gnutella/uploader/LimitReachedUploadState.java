@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.*;
+import com.limegroup.gnutella.util.CommonUtils;
+
 
 /**
  * auth: rsoule
@@ -29,7 +31,7 @@ public class LimitReachedUploadState implements UploadState {
 		String errMsg = "Server busy.  Too many active downloads.";
 		str = "HTTP/1.1 503 Service Unavailable\r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: " + "LimeWire" + "\r\n";
+		str = "Server: " + CommonUtils.getVendor() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		_ostream.write(str.getBytes());
@@ -39,7 +41,7 @@ public class LimitReachedUploadState implements UploadState {
 		_ostream.write(str.getBytes());
 		_ostream.write(errMsg.getBytes());
 		_ostream.flush();
-		_ostream.close();
+		_uploader.stop();
 
 	}
 

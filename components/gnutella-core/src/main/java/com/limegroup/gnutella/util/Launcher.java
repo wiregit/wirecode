@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.util;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
 import com.limegroup.gnutella.gui.Utilities;
+
+import NativeLauncher;
 
 /**
  * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may 
@@ -28,63 +29,113 @@ import com.limegroup.gnutella.gui.Utilities;
  * @author Eric Albert, Adam Fisk
  */
 public class Launcher {
-	/** Caches whether any classes, methods, etc
-	 *  are not part of the JDK and need to be dynamically 
-	 *  loaded at runtime loaded successfully. <p>
-	 *  Note that if this is <code>false</code>, 
-	 *  <code>openURL()</code> will always return an
-	 *  IOException. */
+	/** 
+	 * Caches whether any classes, methods, etc
+	 * are not part of the JDK and need to be dynamically 
+	 * loaded at runtime loaded successfully. <p>
+	 * Note that if this is <code>false</code>, 
+	 * <code>openURL()</code> will always return an
+	 * IOException. 
+	 */
 	private static boolean _macLoadedWithoutErrors;
 
-	/** The com.apple.mrj.MRJFileUtils class */
+	/** 
+	 * The com.apple.mrj.MRJFileUtils class 
+	 */
 	private static Class _mrjFileUtilsClass;
 
-	/** The com.apple.mrj.MRJOSType class */
+	/** 
+	 * The com.apple.mrj.MRJOSType class 
+	 */
 	private static Class _mrjOSTypeClass;
 	
-	/** The findFolder method of com.apple.mrj.MRJFileUtils */
+	/** 
+	 * The findFolder method of com.apple.mrj.MRJFileUtils 
+	 */
 	private static Method _findFolder;
 
-	/** The getFileType method of com.apple.mrj.MRJOSType */
+	/** 
+	 * The getFileType method of com.apple.mrj.MRJOSType 
+	 */
 	private static Method _getFileType;
 		
-	/** Actually an MRJOSType pointing to the System Folder 
-	 *  on a Macintosh */
+	/** 
+	 * Actually an MRJOSType pointing to the System Folder 
+	 * on a Macintosh 
+	 */
 	private static Object _kSystemFolderType;
 
-	/** The file type of the Finder on a Macintosh.  
-	 *  Hardcoding "Finder" would keep non-U.S. 
-	 *  English systems from working properly. */
+	/** 
+	 * The file type of the Finder on a Macintosh.  
+	 * Hardcoding "Finder" would keep non-U.S. 
+	 * English systems from working properly. 
+	 */
 	private static final String FINDER_TYPE = "FNDR";
 
-	/** The shell parameters for Netscape that opens a given URL in 
-	 *  an already-open copy of Netscape on many command-line systems. */
+	/** 
+	 * The shell parameters for Netscape that opens a given URL in 
+	 * an already-open copy of Netscape on many command-line systems. 
+	 */
 	private static final String NETSCAPE_REMOTE_PARAMETER = "-remote";
 	private static final String NETSCAPE_OPEN_PARAMETER_START = "openURL(";
 	private static final String NETSCAPE_OPEN_PARAMETER_END = ")";
 	
-	/** The message from any exception thrown throughout 
-	 *  the initialization process. */
+	/** 
+	 * The message from any exception thrown throughout 
+	 * the initialization process. 
+	 */
 	private static String _errorMessage;
 
+	private static final String NATIVE_LAUNCHER_NAME = "NativeLauncher.dll";
 
-	/** initialization block that determines the operating 
-	 *  system and loads the necessary runtime data. */
-	static {		
-		if(Utilities.isMac()) {
+
+	/** 
+	 * initialization block that determines the operating 
+	 * system and loads the necessary runtime data. 
+	 */
+	public static void initialize() {
+		if(CommonUtils.isWindows()) {
+			String libraryPath = CommonUtils.getCurrentDirectory();
+			File nativeLauncherLibrary = new File(libraryPath, 
+												  NATIVE_LAUNCHER_NAME);
+			
+			// return if the dll is already there
+			if(nativeLauncherLibrary.exists()) return;
+
+			InputStream is = ClassLoader.getSystemResourceAsStream(NATIVE_LAUNCHER_NAME);
+			if(is == null) return;
+			try {
+				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
+				int c;
+
+				while ((c = is.read()) != -1) fos.write(c);
+				
+				is.close();
+				fos.close();
+			} catch(FileNotFoundException fnfe) {
+				nativeLauncherLibrary.delete();
+			} catch(IOException ioe) {
+				nativeLauncherLibrary.delete();
+			}
+		}
+
+		else if(CommonUtils.isMacClassic()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
 	}
 
-	/** This class should be never be instantiated; this just ensures so. */
+	/** 
+	 * This class should be never be instantiated; this just ensures so. 
+	 */
 	private Launcher() {}
 	
-	/** 
+	/**
+	 * launches the passed-in file on the current platform. 
 	 * @requires the path String must either be a valid path name
 	 *  for the operating system, or it must be a URL of the form
 	 *  http://www.whatevername.com
-	 * @effects launches the passed-in file on the current platform. */
-	public static void launch(String path) throws IOException {
+	 */
+	public static int launch(String path) throws IOException {
 		String s = path.toLowerCase();
 		if(!path.endsWith(".exe") &&
 		   !path.endsWith(".vbs") &&
@@ -92,13 +143,13 @@ public class Launcher {
 		   !path.endsWith(".bat") &&
 		   !path.endsWith(".sys") &&
 		   !path.endsWith(".com")) {
-			if(Utilities.isWindows()) {
-				launchFileWindows(path);
+			if(CommonUtils.isWindows()) {
+				return launchFileWindows(path);
 			}	   
-			else if(Utilities.isMac()) {
-				launchFileMac(path);
+			else if(CommonUtils.isMacClassic()) {
+				launchFileMacClassic(path);
 			}
-			else if(Utilities.isUnix()) {
+			else if(CommonUtils.isUnix()) {
 				launchFileUnix(path);
 			}
 		}
@@ -107,21 +158,23 @@ public class Launcher {
 			"file for security reasons.";
 			Utilities.showError(msg);
 		}
+		return -1;
 	}
 
 	/**
-	 *  @requires that we are running on Windows
-	 *  @effects launches the given file on Windows
+	 * launches the given file on Windows
+	 * @requires that we are running on Windows
 	 */
-	private static void launchFileWindows(String path) {
-		NativeLauncher.launchFileWindows(path);
+	private static int launchFileWindows(String path) {
+		NativeLauncher nl = new NativeLauncher();
+		return nl.launchFileWindows(path);
 	}
 
 	/** 
-	 *  @requires that we are running on a Mac
-	 *  @effects launches the given file on the Mac
+	 * launches the given file on a Mac with and OS between 8.5 and 9.1
+	 * @requires that we are running on a Mac
 	 */
-	private static void launchFileMac(String path) throws IOException {
+	private static void launchFileMacClassic(String path) throws IOException {
 		if(_macLoadedWithoutErrors) {
 			try {
 				Runtime.getRuntime().exec(new String[] {getMacFinder(),path});
@@ -129,10 +182,11 @@ public class Launcher {
 			}
 		}
 	}
+
 	/**
-	 *  @requires that we are running on a Unix system
-	 *  @effects attempts to launch the given file on Unix
-	 *  NOTE: WE COULD DO THIS ONE BETTER!!
+	 * attempts to launch the given file on Unix
+	 * @requires that we are running on a Unix system
+	 * NOTE: WE COULD DO THIS ONE BETTER!!
 	 */
 	private static void launchFileUnix(String path) throws IOException {
 		// First, attempt to open the file in a 
@@ -157,8 +211,8 @@ public class Launcher {
 	}
 
 	/**  
+	 * returns the String specifying the "finder" on the mac.
 	 * @requires must be running on a mac 
-	 * @effects returns the String specifying the "finder" on the mac.
 	 */
 	private static String getMacFinder() {
 		File systemFolder;
@@ -205,10 +259,10 @@ public class Launcher {
 	}
 
 	/** 
-	 *  @effects loads specialized classes for the Mac needed to launch files
-	 *  @requires that we are running on a Mac
-	 *  @return <code>true</code>  if initialization succeeded
-	 *			<code>false</code> if initialization failed
+	 * loads specialized classes for the Mac needed to launch files
+	 * @requires that we are running on a Mac
+	 * @return <code>true</code>  if initialization succeeded
+	 *	   	<code>false</code> if initialization failed
 	 */
 	private static boolean loadMacClasses() {
 		try {

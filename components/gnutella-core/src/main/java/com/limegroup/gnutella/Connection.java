@@ -360,6 +360,11 @@ public class Connection {
         }
     }
 
+    public String toString()
+    {
+        return "host=" + _host  + " port=" + _port; 
+    }
+    
     ///** Unit test */
     /*
     public static void main(String args[]) {

@@ -59,14 +59,31 @@ public class HTTPUploader implements Uploader {
 		_manager = m;
 		_index = index;
 		_amountRead = 0;
-		FileDesc desc = FileManager.instance().get(_index);
-		_fileSize = desc._size;
-		setState(CONNECTING);
+		FileDesc desc;
+		boolean indexOut = false;
+		boolean ioexcept = false;
+
 		try {
-		    _ostream = _socket.getOutputStream();
+			// This line can't be moved, or FileNotFoundUploadState
+			// will have a null pointer exception.
+			_ostream = _socket.getOutputStream();
+			desc = FileManager.instance().get(_index);
+			_fileSize = desc._size;
+		} catch (IndexOutOfBoundsException e) {
+			// this is an unlikely case, but if for
+			// some reason the index is no longer valid.
+			indexOut = true;
 		} catch (IOException e) {
-		    setState(COULDNT_CONNECT);
+			// FileManager.get() throws an IOException if
+			// the file has been deleted
+			ioexcept = true;
 		}
+		if (indexOut)
+			setState(FILE_NOT_FOUND);
+		else if (ioexcept) 
+			setState(INTERRUPTED);
+		else 
+			setState(CONNECTING);
 	}
 		
 	// Push requested Upload
@@ -80,9 +97,14 @@ public class HTTPUploader implements Uploader {
 		_hostName = host;
 		_guid = guid;
 		_port = port;
-		FileDesc desc = FileManager.instance().get(_index);
-		_fileSize = desc._size;
-		setState(CONNECTING);
+		FileDesc desc;
+		try {
+			desc = FileManager.instance().get(_index);
+			_fileSize = desc._size;
+			setState(CONNECTING);
+		} catch (IndexOutOfBoundsException e) {
+			setState(PUSH_FAILED);
+		}
 	}
 
 	// This method must be called in the case of a push.
@@ -95,7 +117,6 @@ public class HTTPUploader implements Uploader {
 			return;
 
 		try {
-			// this.setState(UPLOADING);
 			// try to create the socket.
 			_socket = new Socket(_hostName, _port);
 			// open a stream for writing to the socket
@@ -170,12 +191,25 @@ public class HTTPUploader implements Uploader {
 	}
 
     
+	/*
+	 * Is called by the thread.  makes the
+	 * actual call upload the file or appropriate
+	 * error information.
+	 */
 	public void start() {
+		try {
+			prepareFile();
+		} catch (IOException e) {
+			setState(FILE_NOT_FOUND);
+		}
 		try {
 			readHeader();
 			_state.doUpload(this);
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
+			try {
+			    _state.doUpload(this);
+			} catch (IOException e2) {};
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
@@ -183,6 +217,10 @@ public class HTTPUploader implements Uploader {
 		
 	}
 
+	/**
+	 * closes the outputstream, inputstream, and socket
+	 * if they are not null.
+	 */
 	public void stop() {
 		try {
 			if (_ostream != null)
@@ -219,7 +257,10 @@ public class HTTPUploader implements Uploader {
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
 			break;
+		case FILE_NOT_FOUND:
+			_state = new FileNotFoundUploadState();
 		case COMPLETE:
+		case INTERRUPTED:
 			break;
 		}
 	}
@@ -244,6 +285,7 @@ public class HTTPUploader implements Uploader {
 
 
 	private void readHeader() throws IOException {
+
         String str = " ";
         _uploadBegin = 0;
         _uploadEnd = 0;
@@ -252,6 +294,9 @@ public class HTTPUploader implements Uploader {
 		InputStream istream = _socket.getInputStream();
 		ByteReader br = new ByteReader(istream);
         
+		// NOTE: it might improve readability to move
+		// the try and catches around the big loops.
+
 		while (true) {
 			// read the line in from the socket.
             str = br.readLine();
@@ -261,35 +306,73 @@ public class HTTPUploader implements Uploader {
 			// Look for the Range: header
 			// it will be in one of three forms.  either
 			// ' - n ', ' m - n', or ' 0 - '
-            if (str.indexOf("Range: bytes=") != -1) {
-                String sub = str.substring(13);
+			// We add the second check to accomodate old BearShares, 
+			// which break protocal by not sending the '='
+            if ( (indexOfIgnoreCase(str, "Range: bytes=") != -1) ||
+				 (indexOfIgnoreCase(str, "Range: bytes ") != -1) ) {
+				String sub;
+				String second;
+				try {
+					sub = str.substring(13);
+				} catch (IndexOutOfBoundsException e) {
+					throw new IOException();
+				}
 				// remove the white space
                 sub = sub.trim();   
                 char c;
 				// get the first character
-                c = sub.charAt(0);
+				try {
+					c = sub.charAt(0);
+				} catch (IndexOutOfBoundsException e) {
+					throw new IOException();
+				}
 				// - n  
                 if (c == '-') {  
-                    String second = sub.substring(1);
+					// String second;
+					try {
+						second = sub.substring(1);
+					} catch (IndexOutOfBoundsException e) {
+						throw new IOException();
+					}
                     second = second.trim();
-                    _uploadEnd = java.lang.Integer.parseInt(second);
+					try {
+						_uploadEnd = java.lang.Integer.parseInt(second);
+					} catch (NumberFormatException e) {
+						throw new IOException();
+					}
                 }
                 else {                
 					// m - n or 0 -
                     int dash = sub.indexOf("-");
-                    String first = sub.substring(0, dash);
+					String first;
+					try {
+						first = sub.substring(0, dash);
+					} catch (IndexOutOfBoundsException e) {
+						throw new IOException();
+					}
                     first = first.trim();
-                    _uploadBegin = java.lang.Integer.parseInt(first);
-                    String second = sub.substring(dash+1);
+					try {
+						_uploadBegin = java.lang.Integer.parseInt(first);
+					} catch (NumberFormatException e) {
+						throw new IOException();
+					}
+					try {
+						second = sub.substring(dash+1);
+					} catch (IndexOutOfBoundsException e) {
+						throw new IOException();
+					}
                     second = second.trim();
                     if (!second.equals("")) 
-                        _uploadEnd = java.lang.Integer.parseInt(second);
-                    
+						try {
+							_uploadEnd = java.lang.Integer.parseInt(second);
+                    } catch (NumberFormatException e) {
+						throw new IOException();
+					}
                 }
             }
 
 			// check the User-Agent field of the header information
-			if (str.indexOf("User-Agent:") != -1) {
+			if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
 				if (SettingsManager.instance().getAllowBrowser() == false) {
@@ -321,6 +404,54 @@ public class HTTPUploader implements Uploader {
 
 		if (_uploadEnd == 0)
 			_uploadEnd = _fileSize;
+	}
+
+	/**
+	 * a helper method to compare two strings 
+	 * ignoring their case.
+	 */ 
+	private int indexOfIgnoreCase(String str, String section) {
+		// convert both strings to lower case
+		String aaa = str.toLowerCase();
+		String bbb = section.toLowerCase();
+		// then look for the index...
+		return aaa.indexOf(bbb);
+	}
+
+
+	/**
+	 * prepares the file to be read for sending accross the socket
+	 */
+	private void prepareFile() throws IOException {
+		// get the appropriate file descriptor
+		FileDesc fdesc;
+		try {
+			fdesc = FileManager.instance().get(_index);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IOException();
+		}
+		
+		/* For regular (client-side) uploads, get name. 
+		 * For pushed (server-side) uploads, check to see that 
+		 * the index matches the filename. */
+		String name = fdesc._name;
+		if (_filename == null) {
+            _filename = name;
+        } else {
+			/* matches the name */
+			if ( !name.equals(_filename) ) {
+				throw new IOException();
+			}
+        }
+
+		// set the file size
+        _fileSize = fdesc._size;
+
+		// get the fileInputStream
+		String path = fdesc._path;
+		File myFile = new File(path);
+		_fis = new FileInputStream(myFile);
+
 	}
 
 }

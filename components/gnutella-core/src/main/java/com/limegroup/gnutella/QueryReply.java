@@ -46,7 +46,6 @@ public class QueryReply extends Message implements Serializable{
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte BUSY_MASK=(byte)0x4;
 
-
     /** Creates a new query reply.  The number of responses is responses.length
      *
      *  @requires  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
@@ -133,10 +132,10 @@ public class QueryReply extends Message implements Serializable{
             payload[i++]=(byte)69; //'E'
             //b) payload length
             payload[i++]=(byte)2;
-            //c) common area flags and controls
+            //c) common area flags and controls.  See format in parseResults2.
             payload[i++]=(byte)((needsPush ? PUSH_MASK : (byte)0) 
-                | (isBusy ? BUSY_MASK : (byte)0));
-            payload[i++]=PUSH_MASK | BUSY_MASK;  //always defined
+                | BUSY_MASK);
+            payload[i++]=(isBusy ? BUSY_MASK : (byte)0);
         }        
 
         //Write footer at payload[i...i+16-1]
@@ -362,13 +361,16 @@ public class QueryReply extends Message implements Serializable{
         //The normal 16 byte clientGUID follows, of course.
         //
         //The first byte of the common payload has a one in its first bit* if we
-        //should try a push.  Following this byte is an optional second byte
-        //that further defines/refines flags in the first byte.  If the third
-        //bit of the second byte is 1, then the server is busy iff the third bit
-        //of the first byte is 1.  Likewise, if the first bit of the second byte
-        //is zero, the first bit of the first byte is actually undefined!  Note
-        //that the second bit of both bytes is unused; this is to work around
-        //older versions of BearShare.
+        //should try a push.  The remaining bits tell whether the corresponding
+        //bits in the optional second byte is defined.  These bits are as 
+        //followed:
+        //      bit 2*  undefined, for historical reasons
+        //      bit 3   1 iff server is busy
+        //      bit 4   1 iff server has successfully completed an upload
+        //      bit 5   1 iff server's reported speed was actually measured, not
+        //              simply set by the user.
+        //The idea behind having two bits per flag is to distinguish between
+        //YES, NO, and MAYBE.
         //
         //*Here, we use 1-N numbering.  So "first bit" refers to the least
         //significant bit.
@@ -400,21 +402,20 @@ public class QueryReply extends Message implements Serializable{
             i++;
 
             //c) extract push and busy bits from common payload
-            if (length==1) {        //early BearShare
-                pushFlagT = (payload[i]&0x1)==1 ? TRUE : FALSE;
-            } else {                //BearShare 2.2.0+
-                byte flags=payload[i];
-                byte control=payload[i+1];                
-                if ((control & PUSH_MASK)!=0)
-                    pushFlagT = (flags&PUSH_MASK)!=0 ? TRUE : FALSE;
+            pushFlagT = (payload[i]&PUSH_MASK)==1 ? TRUE : FALSE;
+            if (length > 1) {   //BearShare 2.2.0+
+                byte control=payload[i];
+                byte flags=payload[i+1];
                 if ((control & BUSY_MASK)!=0)
                     busyFlagT = (flags&BUSY_MASK)!=0 ? TRUE : FALSE;
-//              System.out.println("Got extended QHD");
-//              System.out.println("   vendor: "+vendorT);
-//              System.out.println("   flags: "+Integer.toBinaryString(flags));
-//              System.out.println("   control: "+Integer.toBinaryString(control));
-//              System.out.println("   busy? "+(busyFlagT==TRUE));
-//              System.out.println("   push? "+(pushFlagT==TRUE));
+//                  System.out.println("Got extended QHD");
+//                  System.out.println("   vendor: "+vendorT);
+//                  System.out.println("   flags: "
+//                                     +Integer.toBinaryString(flags));
+//                  System.out.println("   control: "
+//                                     +Integer.toBinaryString(control));
+//                  System.out.println("   busy? "+busyFlagT);
+//                  System.out.println("   push? "+pushFlagT);
             }
             i+=length;
 
@@ -626,7 +627,7 @@ public class QueryReply extends Message implements Serializable{
         ///////////// BearShare 2.2.0 QHD (busy bits and friends) ///////////
 
 
-        //Normal case: busy and push bits undefined and unset.
+        //Normal case: busy bit undefined and push bits unset.
         //(We don't bother testing undefined and set.  Who cares?)
         payload=new byte[11+11+(4+3+0)+16];
         payload[0]=1;                //Number of results
@@ -636,8 +637,8 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-        payload[11+11+4+1]=(byte)0x0; 
-        payload[11+11+4+2]=(byte)0x0; //no data known
+        payload[11+11+4+1]=(byte)0x0; //no data known
+        payload[11+11+4+2]=(byte)0x0; 
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -650,11 +651,10 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(false);
         }                                        
         try {
-            Assert.that(qr.getNeedsPush()==true);
-            Assert.that(false);
+            Assert.that(!qr.getNeedsPush());
         } catch (BadPacketException e) { }
         try {
-            Assert.that(qr.getIsBusy()==true);
+            qr.getIsBusy();
             Assert.that(false);
         } catch (BadPacketException e) { }
        
@@ -669,7 +669,7 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
         payload[11+11+4+1]=(byte)0x5; 
-        payload[11+11+4+2]=(byte)0x5;  
+        payload[11+11+4+2]=(byte)0x4;  
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -694,8 +694,8 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-        payload[11+11+4+1]=(byte)0xa; //set second and fourth for kicks 
-        payload[11+11+4+2]=(byte)0x5;  
+        payload[11+11+4+1]=(byte)0x4;
+        payload[11+11+4+2]=(byte)0x0;
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {

@@ -2,6 +2,8 @@ package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
 import java.io.*;
+import com.limegroup.gnutella.util.CommonUtils;
+
 
 /**
  * auth: rsoule
@@ -30,7 +32,7 @@ public class FreeloaderUploadState implements UploadState {
 		String errMsg = HTTPPage.responsePage;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: " + "LimeWire" + "\r\n";
+		str = "Server: " + CommonUtils.getVendor() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Type: text/html\r\n";
 		_ostream.write(str.getBytes());

@@ -92,7 +92,6 @@ public class DownloadManager {
                     SettingsManager.instance().getDownloadSnapshotFile()));
             buf=(List)in.readObject();
         } catch (IOException e) {
-            System.out.println("IOException: "+e);
             return false;
         } catch (ClassCastException e) {
             return false;
@@ -101,13 +100,18 @@ public class DownloadManager {
         }
 
         //Initialize and start downloaders.  Must catch ClassCastException since
-        //the data could be corrupt.
+        //the data could be corrupt.  This code is a little tricky.  It is
+        //important that instruction (3) follow (1) and (2), because we must not
+        //pass an uninitialized Downloader to the GUI.  (The call to getFileName
+        //will throw NullPointerException.)  I believe the relative order of (1)
+        //and (2) does not matter since this' monitor is held.  (The download
+        //thread must obtain the monitor to acquire a queue slot.)
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
-                waiting.add(downloader);
-                callback.addDownload(downloader);
-                downloader.initialize(this);
+                waiting.add(downloader);             //1
+                downloader.initialize(this);         //2
+                callback.addDownload(downloader);    //3
             }
             return true;
         } catch (ClassCastException e) {

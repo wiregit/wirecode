@@ -27,7 +27,10 @@ public class FileManagerBenchmark {
         
         //Time directory scan.
         System.out.println("Adding files.  Waiting 60 seconds for load...");
-        fm.loadSettings();
+        //ANU
+        //false seemed to be the right parameter to the new method, chris should
+        //verify. Was causing compilation problems otherwise
+        fm.loadSettings(false);
         try {
             Thread.sleep(60000);
         } catch (InterruptedException e) { }
