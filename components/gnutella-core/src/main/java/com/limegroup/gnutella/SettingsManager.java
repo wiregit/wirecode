@@ -735,7 +735,7 @@ public class SettingsManager implements SettingsInterface
 	//else
 	//  {
 	FileManager.getFileManager().setExtensions(ext);
-	extensions_ = ext;			    
+	extensions_ = ext;		    
 	props_.put(SettingsInterface.EXTENSIONS, ext);
 	writeProperties();
 	//  }
