@@ -519,7 +519,12 @@ public class RouterService
                 BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
                 max);
 
-        //set the new keep alive
+        //set the new keep alive.  To allow connections to bootstrap servers, we
+        //expire the HostCatcher if the keep alive was zero.  This is similar to
+        //calling connect(), except that it does not get the keep alive from
+        //SettingsManager.
+        if (manager.getKeepAlive()==0)
+            catcher.expire();
         forceKeepAlive(newKeep);
     }
 
