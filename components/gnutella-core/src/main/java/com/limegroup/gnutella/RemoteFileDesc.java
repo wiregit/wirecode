@@ -20,6 +20,7 @@ public class RemoteFileDesc implements Serializable {
 	private int _speed;
 	private int _size;
 	private boolean _chatEnabled;
+    private int _quality;
 
 	/** 
 	 * @param host the host's ip
@@ -28,10 +29,13 @@ public class RemoteFileDesc implements Serializable {
 	 * @param filename the name of the file
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
+     * @param quality the quality of the connection, where 0 is the
+     *  worst and 3 is the best.  (This is the same system as in the
+     *  GUI but on a 0 to N-1 scale.)
 	 */
 	public RemoteFileDesc(String host, int port, int index, String filename,
 						  int size, byte[] clientGUID, int speed, 
-						  boolean chat) {	   
+						  boolean chat, int quality) {	   
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -40,6 +44,7 @@ public class RemoteFileDesc implements Serializable {
 		_size = size;
 		_clientGUID = clientGUID;
 		_chatEnabled = chat;
+        _quality = quality;
 	}
 
 	/* Accessor Methods */
@@ -51,6 +56,7 @@ public class RemoteFileDesc implements Serializable {
 	public byte[] getClientGUID() {return _clientGUID;}
 	public int getSpeed() {return _speed;}	
 	public boolean chatEnabled() {return _chatEnabled;}
+    public int getQuality() {return _quality;}
 
 	public boolean isPrivate() {
 		// System.out.println("host: " + _host);

@@ -59,6 +59,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //60 seconds: same as BearShare.
         return 60*1000;
     }
+    /** The minimum quality considered likely to work.  Value of two corresponds
+     *  to a THREE-star result. */
+    private static final int DECENT_QUALITY=2;
 
 
     ////////////////////////// Core Variables /////////////////////////////
@@ -737,10 +740,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             siblings.add(rfd);
         }
         //Now for each file, estimate remaining download time.  This assumes
-        //that we'll be able to download a file from all location in parallel at
-        //exactly the advertised speed.  Fat chance that will happen, but it's
-        //probably a good enough heuristic.  TODO2: look at which are reachable.
-        //Unfortunately this info is not passed from the GUI.
+        //that we'll be able to download a file from all (only) three and
+        //four-star locations in parallel at exactly the advertised speed.  Fat
+        //chance that will happen, but it's probably a good enough heuristic.
+        //Still, we may want to preference buckets with more quality loctions
+        //even if the total bandwidth is lower.
         FilePair[] pairs=new FilePair[buckets.keySet().size()];
         int i=0;
         for (Iterator iter=buckets.keySet().iterator(); iter.hasNext(); i++) {
@@ -750,8 +754,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             int size=((RemoteFileDesc)files.get(0)).getSize()
                         - incompleteFileManager.getBlockSize(incompleteFile);
             int bandwidth=1; //prevent divide by zero
-            for (Iterator iter2=files.iterator(); iter2.hasNext(); )
-                bandwidth+=((RemoteFileDesc)iter2.next()).getSpeed();
+            for (Iterator iter2=files.iterator(); iter2.hasNext(); ) {
+                RemoteFileDesc2 rfd2=(RemoteFileDesc2)iter2.next();
+                if (rfd2.getQuality()>=DECENT_QUALITY)
+                    bandwidth+=rfd2.getSpeed();
+            }
             float time=(float)size/(float)bandwidth;
             pairs[i]=new FilePair(incompleteFile, time);
         }
@@ -786,38 +793,32 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /** 
-     * Removes and returns the RemoteFileDesc with the smallest estimated
-     * remaining download time in filesLeft. 
-     *     @requires !filesLeft.isEmpty()
-     *     @modifies filesLeft
+     * Removes and returns the RemoteFileDesc with the highest quality in
+     * filesLeft.  If two or more entries have the same quality, returns the
+     * entry with the highest speed.  
+     *
+     * @param filesLeft the list of file/locations to choose from, which MUST
+     *  have length of at least one.  Each entry MUST be an instance of
+     *  RemoteFileDesc.  The assumption is that all are "same", though this
+     *  isn't strictly needed.
+     * @return the best file/endpoint location 
      */
-    public RemoteFileDesc2 removeBest(List filesLeft) {
-        //The best rfd found so far...
-        RemoteFileDesc2 ret=null;
-        //...with an estimated download time of "time" seconds.
-        long lowestTime=Integer.MAX_VALUE;
+    public static RemoteFileDesc removeBest(List filesLeft) {
+        Iterator iter=filesLeft.iterator();
+        //The best rfd found so far
+        RemoteFileDesc ret=(RemoteFileDesc)iter.next();
         
-        for (Iterator iter=filesLeft.iterator(); iter.hasNext(); ) {
-            RemoteFileDesc2 rfd=(RemoteFileDesc2)iter.next();
-            //The size of the incomplete file for this rfd.  If it doesn't
-            //exist, the incompleteFile.length() returns 0, so amountLeft is
-            //the full length of the file.
-            File incompleteFile=incompleteFileManager.getFile(rfd);
-            long amountLeft=rfd.getSize()-incompleteFile.length();
-            //The speed of this connection in kiloBYTES/sec.
-            long speed=rfd.getSpeed()/8;
-            //The estimated time
-            long estimatedTime=999999999;
-            if (speed != 0)  // Stop dividing by zero bug.
-                estimatedTime=amountLeft/speed;
-
-            if (estimatedTime < lowestTime) {
-                lowestTime=estimatedTime;
+        //Find max of each (remaining) ret...
+        while (iter.hasNext()) {
+            RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
+            if (rfd.getQuality() > ret.getQuality())
                 ret=rfd;
-            }
+            else if (rfd.getQuality() == ret.getQuality()) {
+                if (rfd.getSpeed() > ret.getSpeed())
+                    ret=rfd;
+            }            
         }
             
-        Assert.that(ret!=null, "Precondition to removeBest violated.");
         filesLeft.remove(ret);
         return ret;
     }
@@ -946,21 +947,25 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /*
     public static void main(String args[]) {
-        //Test bucketing
+        //Test bucketing.  Note that the 1-star result is ignored.
         System.out.println("Unit test");
         IncompleteFileManager ifm=new IncompleteFileManager();
         RemoteFileDesc rf1=new RemoteFileDesc(
             "1.2.3.4", 6346, 0, "some file.txt", 1000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false);
+            new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
         RemoteFileDesc rf2=new RemoteFileDesc(
             "1.2.3.5", 6346, 0, "some file.txt", 1000, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false);
+            new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
         RemoteFileDesc rf3=new RemoteFileDesc(
             "1.2.3.6", 6346, 0, "some file.txt", 1010, 
-            new byte[16], SpeedConstants.T1_SPEED_INT, false);
+            new byte[16], SpeedConstants.T1_SPEED_INT, false, 3);
+        RemoteFileDesc rf4=new RemoteFileDesc(
+            "1.2.3.6", 6346, 0, "some file.txt", 1010, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        
 
         //Simple case
-        RemoteFileDesc[] allFiles={rf3, rf2, rf1};
+        RemoteFileDesc[] allFiles={rf3, rf2, rf1, rf4};
         List[] files=bucket(allFiles, ifm);
         Assert.that(files.length==2);
         List list=files[0];
@@ -968,20 +973,40 @@ public class ManagedDownloader implements Downloader, Serializable {
         Assert.that(list.contains(rf1));
         Assert.that(list.contains(rf2));
         list=files[1];
-        Assert.that(list.size()==1);
+        Assert.that(list.size()==2);
         Assert.that(list.contains(rf3));
+        Assert.that(list.contains(rf4));
 
         //Large part written on disk
         ifm.addBlock(ifm.getFile(rf3), 0, 1009);
         files=bucket(allFiles, ifm);
         Assert.that(files.length==2);
         list=files[0];
-        Assert.that(list.size()==1);
+        Assert.that(list.size()==2);
         Assert.that(list.contains(rf3));
+        Assert.that(list.contains(rf4));
         list=files[1];
         Assert.that(list.size()==2);
         Assert.that(list.contains(rf1));
         Assert.that(list.contains(rf2));
+
+        //Test removeBest
+        RemoteFileDesc rf5=new RemoteFileDesc(
+            "1.2.3.6", 6346, 0, "some file.txt", 1010, 
+            new byte[16], SpeedConstants.T3_SPEED_INT+1, false, 0);
+        list=new LinkedList();
+        list.add(rf4);
+        list.add(rf1);
+        list.add(rf5);
+        Assert.that(removeBest(list)==rf1);  //quality over speed
+        Assert.that(list.size()==2);
+        Assert.that(list.contains(rf4));
+        Assert.that(list.contains(rf5));
+        Assert.that(removeBest(list)==rf5);  
+        Assert.that(list.size()==1);
+        Assert.that(list.contains(rf4));
+        Assert.that(removeBest(list)==rf4);  
+        Assert.that(list.size()==0);
     }
-   */
+    */
 }
