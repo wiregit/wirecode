@@ -27,8 +27,7 @@ public final class NIOMessageReader extends AbstractMessageReader {
 	/**
 	 * Constant for the <tt>ByteBuffer</tt> for reading headers.
 	 */
-     private final ByteBuffer HEADER = 
-    	ByteBuffer.allocate(HEADER_SIZE);
+     private final ByteBuffer HEADER = ByteBuffer.allocate(HEADER_SIZE);
         
     /**
      * Constant for the <tt>ByteBuffer</tt> for reading payloads.
@@ -62,7 +61,7 @@ public final class NIOMessageReader extends AbstractMessageReader {
 		
 	
 	/**
-	 * Creates a new <tt>Message</tt> that came in over TCP.
+	 * Creates a new <tt>Message</tt> from incoming data over TCP.
 	 * 
 	 * @param key the <tt>SelectionKey</tt> instance containing access to the 
      *  channel and the <tt>Connection</tt> for the message
@@ -163,7 +162,7 @@ public final class NIOMessageReader extends AbstractMessageReader {
 		if (length<0 || 
 			length>MessageSettings.MAX_LENGTH.getValue())  {
             HEADER.clear();
-            //PAYLOAD.clear();
+
             MessageReadErrorStat.BAD_MESSAGE_LENGTH.incrementStat();
 			throw new IOException("unreasonable message length");
 		}
