@@ -49,7 +49,6 @@ public class LeafRoutingTest extends BaseTestCase {
     private static Connection ultrapeer1;
     private static Connection ultrapeer2;
     private static Connection old1;
-    private static Connection old2;
     private static RouterService rs;
 
     public LeafRoutingTest(String name) {
@@ -77,6 +76,7 @@ public class LeafRoutingTest extends BaseTestCase {
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.setValue(Long.MAX_VALUE);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -95,6 +95,7 @@ public class LeafRoutingTest extends BaseTestCase {
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();
+        rs.connect();
         RouterService.clearHostCatcher();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
@@ -117,7 +118,6 @@ public class LeafRoutingTest extends BaseTestCase {
          ultrapeer1 = connect(6350, true);
          ultrapeer2 = connect(6351, true);
          old1 = connect(6352, true);
-         old2 = connect(6353, true);
      }
      
     private static Connection connect(int port, boolean ultrapeer) 
@@ -261,7 +261,7 @@ public class LeafRoutingTest extends BaseTestCase {
             assertNotNull("unexpected null value", hosts);
             Set s=list2set(hosts);
             assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+
-                         hosts, 4, s.size());
+                         hosts, 3, s.size());
             byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
             // because we used 'createExternal' to create the external pongs we
             // did not mark them with slot info.  we shoud do that at some point
@@ -272,8 +272,6 @@ public class LeafRoutingTest extends BaseTestCase {
                        s, new Endpoint(localhost, 6351));
             assertContains("expected Ultrapeer not present in list",
                        s, new Endpoint(localhost, 6352));
-            assertContains("expected Ultrapeer not present in list",
-                       s, new Endpoint(localhost, 6353));
 
             //assertTrue("expected Ultrapeer not present in list",
             //           s.contains(new Endpoint(localhost, 6350))); 
@@ -450,7 +448,6 @@ public class LeafRoutingTest extends BaseTestCase {
         ultrapeer1.close();
         ultrapeer2.close();
         old1.close();
-        old2.close();
     }
 
     private static final boolean DEBUG = false;
