@@ -185,6 +185,7 @@ public class StandardMessageRouter
 
 			// see id there are any open slots
 			boolean busy = _uploadManager.isBusy();
+            boolean uploaded = _uploadManager.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
 			boolean incoming = _acceptor.acceptedIncoming();
@@ -192,7 +193,7 @@ public class StandardMessageRouter
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
-										!incoming, busy);
+										!incoming, busy, uploaded, false);
 
             // try to send the new queryReply
             try {
