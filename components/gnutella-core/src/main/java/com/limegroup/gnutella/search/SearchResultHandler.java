@@ -294,61 +294,16 @@ public final class SearchResultHandler {
             LOG.debug("Error gettig results", e);
             return false;
         }
-        
-        // get xml collection string, then get dis-aggregated docs, then 
-        // in loop
-        // you can match up metadata to responses
-        String xmlCollectionString = "";
-        try {
-            LOG.trace("Trying to do uncompress XML.....");
-            byte[] xmlCompressed = qr.getXMLBytes();
-            if (xmlCompressed.length > 1) {
-                byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
-                xmlCollectionString = new String(xmlUncompressed,"UTF-8");
-            }
-        }
-        catch (UnsupportedEncodingException use) {
-            //b/c this should never happen, we will show and error
-            //if it ever does for some reason.
-            //we won't throw a BadPacketException here but we will show it.
-            //the uee will effect the xml part of the reply but we could
-            //still show the reply so there shouldn't be any ill effect if
-            //xmlCollectionString is ""
-            ErrorService.error(use);
-        }
-        catch (IOException ignored) {}
 
-        if(LOG.isDebugEnabled())
-            LOG.debug("xmlCollectionString = " + xmlCollectionString);
-        List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
-															   results.size());
-        Iterator iter = results.iterator();
         int numSentToFrontEnd = 0;
-        for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
+        for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
                 continue;
             //Throw away results from Mandragore Worm
             if (RouterService.isMandragoreWorm(data.getMessageGUID(),response))
                 continue;
-            
-            // If there was no XML in the response itself, try to create
-            // a doc from the EQHD.
-            if(xmlCollectionString!=null && !xmlCollectionString.equals("")) {
-                LimeXMLDocument[] metaDocs;
-                for(int schema = 0; schema < allDocsArray.size(); schema++) {
-                    metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
-                    // If there are no documents in this schema, try another.
-                    if(metaDocs == null)
-                        continue;
-                    // If this schema had a document for this response, use it.
-                    if(metaDocs[currentResponse] != null) {
-                        response.setDocument(metaDocs[currentResponse]);
-                        break; // we only need one, so break out.
-                    }
-                }
-            }
-            
+
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);

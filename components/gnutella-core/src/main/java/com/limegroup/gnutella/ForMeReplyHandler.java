@@ -5,14 +5,22 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
+import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * This is the class that goes in the route table when a request is
  * sent whose reply is for me.
  */
 public final class ForMeReplyHandler implements ReplyHandler {
+    
+    private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
 
 	/**
 	 * Instance following singleton.
@@ -67,10 +75,15 @@ public final class ForMeReplyHandler implements ReplyHandler {
             }
         } catch(BadPacketException bpe) {
             return;
-        }        
-			
-		//ActivityCallback callback = RouterService.getCallback();
-		//callback.handleQueryReply(reply);
+        }
+        
+        // XML must be added to the response first, so that
+        // whomever calls toRemoteFileDesc on the response
+        // will create the cachedRFD with the correct XML.
+        boolean validResponses = addXMLToResponses(reply);
+        // responses invalid?  exit.
+        if(!validResponses)
+            return;
 
 		SearchResultHandler resultHandler = 
 			RouterService.getSearchResultHandler();
@@ -80,6 +93,68 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		DownloadManager dm = RouterService.getDownloadManager();
 		dm.handleQueryReply(reply);
 	}
+	
+	/**
+	 * Adds XML to the responses in a QueryReply.
+	 */
+    private boolean addXMLToResponses(QueryReply qr) {
+        List results = null;
+        try {
+            results = qr.getResultsAsList();
+        } catch (BadPacketException e) {
+            LOG.debug("Error gettig results", e);
+            return false;
+        }
+        
+        // get xml collection string, then get dis-aggregated docs, then 
+        // in loop
+        // you can match up metadata to responses
+        String xmlCollectionString = "";
+        try {
+            LOG.trace("Trying to do uncompress XML.....");
+            byte[] xmlCompressed = qr.getXMLBytes();
+            if (xmlCompressed.length > 1) {
+                byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
+                xmlCollectionString = new String(xmlUncompressed,"UTF-8");
+            }
+        }
+        catch (UnsupportedEncodingException use) {
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            //we won't throw a BadPacketException here but we will show it.
+            //the uee will effect the xml part of the reply but we could
+            //still show the reply so there shouldn't be any ill effect if
+            //xmlCollectionString is ""
+            ErrorService.error(use);
+        }
+        catch (IOException ignored) {}
+        
+        // valid response, no XML in EQHD.
+        if(xmlCollectionString == null || xmlCollectionString.equals(""))
+            return true;
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("xmlCollectionString = " + xmlCollectionString);
+        List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
+                                                               results.size());
+        Iterator iter = results.iterator();
+        for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
+            Response response = (Response)iter.next();
+            LimeXMLDocument[] metaDocs;
+            for(int schema = 0; schema < allDocsArray.size(); schema++) {
+                metaDocs = (LimeXMLDocument[])allDocsArray.get(schema);
+                // If there are no documents in this schema, try another.
+                if(metaDocs == null)
+                    continue;
+                // If this schema had a document for this response, use it.
+                if(metaDocs[currentResponse] != null) {
+                    response.setDocument(metaDocs[currentResponse]);
+                    break; // we only need one, so break out.
+                }
+            }
+        }
+        return true;
+    }
 
     /**
      * If there are problems with the request, just ignore it.
