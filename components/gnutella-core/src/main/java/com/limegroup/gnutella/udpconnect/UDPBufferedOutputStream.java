@@ -70,6 +70,11 @@ public class UDPBufferedOutputStream extends OutputStream {
                 } else {
 					// Wait for room for a new chunk
                     try { wait(FOREVER); } catch(InterruptedException e) {}
+
+                    // Again, If there was no data before this, 
+                    // then ensure a writer is awake
+                    if ( getPendingChunks() == 0 )
+                        _processor.wakeupWriteEvent();
                 }
             }
         }
@@ -114,6 +119,11 @@ public class UDPBufferedOutputStream extends OutputStream {
                 } else {
 					// Wait for room for a new chunk
                     try { wait(FOREVER); } catch(InterruptedException e) {}
+
+                    // Again, If there was no data before this, 
+                    // then ensure a writer is awake
+                    if ( getPendingChunks() == 0 )
+                        _processor.wakeupWriteEvent();
                 }
             }
         }

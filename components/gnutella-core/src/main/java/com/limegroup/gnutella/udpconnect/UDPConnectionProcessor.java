@@ -1029,13 +1029,6 @@ public class UDPConnectionProcessor {
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
                     sendKeepAlive();
-if(LOG.isDebugEnabled())  
-LOG.debug("  -- write: "+_writeDataEvent.getEventTime() +" ack: "+
-_ackTimeoutEvent.getEventTime() +
-" wds: "+_waitingForDataSpace +
-" wda: "+_waitingForDataAvailable+
-" ic: "+_inputFromOutputStream.getPendingChunks()
-);
                 } else {
                     return;
                 }
