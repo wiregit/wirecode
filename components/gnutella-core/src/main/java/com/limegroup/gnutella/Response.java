@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 
 /**
  * A single result from a query reply message.
- * Create these to respond to a search.   Immutable.
+ * Create these to respond to a search. 
  */
 public class Response {
     /** Both index and size must fit into 4 unsigned bytes; see
@@ -28,7 +28,7 @@ public class Response {
 
     /** Per HUGE v0.93 proposal, urns includes returned urn-values
      */
-    private HashSet urns;
+    private Collection urns;
     // HUGE v.093 GeneralExtensionMechanism between-the-null extensions
     private byte[] extBytes;
     
@@ -84,7 +84,7 @@ public class Response {
         }
     }
     
-    protected void handleLegacyOrGemExtensionString(String ext) {      
+    private void handleLegacyOrGemExtensionString(String ext) {      
 		if(URN.isURN(ext)) {
 			// it's a HUGE v0.93 URN name for the same files
 			try {
@@ -181,7 +181,7 @@ public class Response {
         return i;
     }
     
-    protected void updateExtBytes() {
+    private void updateExtBytes() {
         if (extBytes != null) {
             // already up-to-date
             return;
@@ -318,8 +318,8 @@ public class Response {
 		return metadata;
 	}
 
-    public HashSet getUrns() {
-            return urns;
+    public Collection getUrns() {
+		return urns;
     }
   
     /**
