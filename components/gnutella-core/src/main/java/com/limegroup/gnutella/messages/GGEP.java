@@ -17,7 +17,7 @@ import com.limegroup.gnutella.*;
 public class GGEP extends Object {
 
     /** The extension header (key) for Browse Host. */
-    public static final String GGEP_HEADER_BROWSE_HOST = "BHOST";
+    public static final String GGEP_HEADER_BROWSE_HOST = "BH";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
