@@ -132,10 +132,10 @@ public class RouterService
 		this.downloader.initialize(callback, router, acceptor,
                                    fileManager);
 		
-		Thread supernodeThread = 
-		    new Thread(new SupernodeAssigner(uploadManager, downloader, manager));
-		supernodeThread.setDaemon(true);
-		supernodeThread.start();
+		SupernodeAssigner sa=new SupernodeAssigner(uploadManager, 
+                                                   downloader, 
+                                                   manager);
+		sa.start();
 
 		if(settings.getConnectOnStartup()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		

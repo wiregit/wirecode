@@ -17,7 +17,7 @@ import java.awt.event.*;
  * to determine the node's bandwidth.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public final class SupernodeAssigner implements Runnable {
+public final class SupernodeAssigner {
 
 	/**
 	 * Constant handle to the <tt>SettingsManager</tt> for accessing
@@ -140,11 +140,10 @@ public final class SupernodeAssigner implements Runnable {
     }
     
 	/**
-	 * Implements the <tt>Runnable</tt> interface.
-	 * Starts the <tt>Timer</tt> that continually updates the upload
-	 * and download bandwidth used.
-	 */
-    public void run() {
+	 * Starts the <tt>Timer</tt> that continually updates the upload and
+	 * download bandwidth used.  Non-blocking.
+     */
+    public void start() {
 		_bandwidthTimer.start();
     }
 
