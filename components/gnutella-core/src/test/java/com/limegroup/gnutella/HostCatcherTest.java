@@ -81,8 +81,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         hc.write();
         int numHosts = hc.getNumHosts();
-        
-        System.out.println("HostCatcherTest::num hosts: "+numHosts);
+
         for(int i=0; i<10; i++) {
             hc.getAnEndpoint();
         }
@@ -268,13 +267,15 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(0, hc.getNumUltrapeerHosts());
         assertEquals(new Endpoint("18.239.0.142", 1),
                      hc.getAnEndpoint());
-        // TODO: make sure this test is really working
-        for (int i=N; i>601; i--) {
+
+        // Note that we only go to 1 (not 0) because we already extracted
+        // a host in the line before this.
+        for (int i=N; i > 1; i--) {
             assertGreaterThan("No more hosts after "+i, 0, hc.getNumHosts());
             assertEquals(new Endpoint("18.239.0.142", i+1),
                          hc.getAnEndpoint());
         }
-        assertEquals(0, hc.getNumHosts());
+        assertEquals("some hosts leftover", 0, hc.getNumHosts());
 
         //Cleanup.
         tmp.delete();
