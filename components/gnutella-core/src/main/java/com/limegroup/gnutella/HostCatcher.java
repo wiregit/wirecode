@@ -448,6 +448,9 @@ public class HostCatcher implements HostListener {
         if(hosts.add(host) && hosts.size() > 200) {
             hosts.remove(hosts.iterator().next());
         }
+        
+        // Also add it to the list of permanent hosts stored on disk.
+        addPermanent(host);
         notify();
     }
 
