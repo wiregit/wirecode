@@ -21,7 +21,7 @@ public class GUESSStatistics {
     public static Object[] getAckStatistics(String host, int port) {
         float numAttempted = 0, numReceived = 0, timeSum = 0;
         GUESSTester tester = new GUESSTester("whatever");
-        while (numAttempted < 100) {
+        while (numAttempted < 10) {
             try {
                 long timeTook = tester.testAck(host, port);
                 if (timeTook > 0) {
@@ -74,7 +74,7 @@ public class GUESSStatistics {
         GUESSTester tester = new GUESSTester("whatever");
         int size = searchKey.length();
         int chop = 0;
-        while (numAttempted < 20) {
+        while (numAttempted < 5) {
             QueryRequest qr = new QueryRequest((byte)1, 0, 
                                                searchKey.substring(0,
                                                                    size-chop),
