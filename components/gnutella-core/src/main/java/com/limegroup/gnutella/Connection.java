@@ -54,7 +54,7 @@ public class Connection {
     private boolean _outgoing;
 
     /** The listener for connection events. */
-    private ConnectionListener _listener;
+    protected ConnectionListener _listener;
 
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -248,7 +248,8 @@ public class Connection {
             }
         }
         //Change to non-blocking mode for messaging.
-        _socket.getChannel().configureBlocking(false);
+        if (SettingsManager.instance().getUseNonBlockingIO())
+            _socket.getChannel().configureBlocking(false);
         //Notify of initialization.  TODO: notify of close as well.
         _listener.initialized(this);
     }
@@ -733,9 +734,10 @@ public class Connection {
         }                   
     }
 
-    /** Returns true if this has queued data, and hence is unable to accept
-     *  more messages. */
-    protected boolean hasQueued() {
+    /** Returns true if this has queued data.  For Connection, hasQueued()
+     *  implies that this is unable to accept more messages; subclasses with
+     *  additional buffering may change that. */
+    public boolean hasQueued() {
         return _writer.hasQueued();
     }
 

@@ -311,6 +311,7 @@ public class ManagedConnection
 
     /** 
      * Like Connection.write(m), but may queue and write more than one message. 
+     * Never blocks, even if this is a blocking connection.
      */
     public boolean write(Message m) {
         if (! supportsGGEP())
@@ -320,16 +321,29 @@ public class ManagedConnection
             _router.countMessage();   //why count messages snet?
             _numMessagesSent++;
             _queue.add(m);
-            _numSentMessagesDropped+=_queue.resetDropped();
-            //Attempt to write queued data, not necessarily m.  This calls
-            //super.write(m'), which may call listener.needsWrite().
-            return this.write();   
+            _numSentMessagesDropped+=_queue.resetDropped();            
+            if (! isBlocking()) {
+                //NON-BLOCKING IO: attempt to write queued data, not necessarily
+                //m.  This calls super.write(m'), which may call
+                //listener.needsWrite().
+                return this.write();
+            } else {
+                //BLOCKING IO: writing data could stall another reader thread.
+                //So queue it and notify write thread.
+                _listener.needsWrite(this);
+                return true;
+            }
         }
     }
 
+    private final boolean isBlocking() {
+        return channel().isBlocking();
+    }
+
     /**
-     * Like Connection.write(), but may write more than one message.
-     * May also call listener.needsWrite.
+     * Like Connection.write(), but may write more than one message.  May also
+     * call listener.needsWrite.  If this is a blocking connection, blocks until
+     * data is sent.
      */
     public synchronized boolean write() {
         //Terminate when either
@@ -359,7 +373,7 @@ public class ManagedConnection
         return false;                //socket closed (c)
     }
 
-    protected boolean hasQueued() {
+    public boolean hasQueued() {
         return _queue.size()>0;
     }
 

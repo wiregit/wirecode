@@ -111,7 +111,7 @@ public class RouterService
   		this.acceptor = new Acceptor(port, callback);
   		this.manager = createConnectionManager();
   		this.catcher = createHostCatcher();
-        this.driver = new ConnectionDriver();
+        this.driver = ConnectionDriver.newConnectionDriver();
   		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager(this.callback, this.router, 
 											   this.fileManager);

@@ -312,6 +312,9 @@ public final class SettingsManager {
     /** Specifies if the node is acting as server */
     private final boolean DEFAULT_SERVER = false;  
 
+    /** Use NIO and a single-threaded core? */
+    private final boolean DEFAULT_USE_NON_BLOCKING_IO = true;
+
 	/**
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
@@ -537,6 +540,10 @@ public final class SettingsManager {
     
     /** Specifies if the node is acting as server */
     private final String SERVER = "SERVER";
+
+    /** Specifies whether this should use non-blocking IO and a single-threaded
+     *  core, or threads per connection. */
+    private final String USE_NON_BLOCKING_IO = "USE_NON_BLOCKING_IO";
     
 	/**
 	 * Constant key for the minimum quality to allow in search results.
@@ -1114,6 +1121,9 @@ public final class SettingsManager {
                 else if(key.equals(SERVANT_TYPE)) {
 					setServantType(p);
 				}
+                else if(key.equals(USE_NON_BLOCKING_IO)) {
+                    setUseNonBlockingIO((new Boolean(p)).booleanValue());
+                }
 				else if(key.equals(INSTALLED)) {
 					Boolean installed = new Boolean(p);
 					setInstalled(installed.booleanValue());
@@ -1283,6 +1293,7 @@ public final class SettingsManager {
         setFractionalUptime(DEFAULT_FRACTIONAL_UPTIME);
         //anu added
         setServantType(DEFAULT_SERVANT_TYPE);
+        setUseNonBlockingIO(DEFAULT_USE_NON_BLOCKING_IO);
 		setInstalled(DEFAULT_INSTALLED);
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
@@ -1901,6 +1912,14 @@ public final class SettingsManager {
      */
     public String getServantType() {
         return _servantType;
+    }
+
+    /**
+     * Returns true if this should use non-blocking IO and a single-threaded
+     * core.
+     */
+    public boolean getUseNonBlockingIO() {
+        return getBooleanValue(USE_NON_BLOCKING_IO);
     }
 
 	/**
@@ -3127,6 +3146,16 @@ public final class SettingsManager {
             _servantType = DEFAULT_SERVANT_TYPE;
         }
         PROPS.put(SERVANT_TYPE, _servantType);
+    }
+
+
+    /**
+     * Sets whether this should use non-blocking IO and a single-threaded
+     * core.  Private because this should not be modified while the client
+     * is up.
+     */
+    private void setUseNonBlockingIO(boolean useNIO) {
+        setBooleanValue(USE_NON_BLOCKING_IO, useNIO);
     }
 
 	/**
