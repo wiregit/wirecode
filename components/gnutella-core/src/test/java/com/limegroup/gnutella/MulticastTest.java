@@ -90,7 +90,8 @@ public class MulticastTest extends BaseTestCase {
         MESSAGE_ROUTER.unicasted.clear();
         
         assertEquals("unexpected number of shared files", 1,
-            FMAN.getNumFiles() );    }
+            FMAN.getNumFiles() );
+	}
     
     public static void globalTearDown() throws Exception {
         ROUTER_SERVICE.disconnect();

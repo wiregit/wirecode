@@ -155,7 +155,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;  //The size of public area
-        payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
+        payload[11+11+4+1]=(byte)0xB1; // set push yes/no flag (and other stuff)
+        payload[11+11+4+1+1]=(byte)0x01; // set the push understood flag
         payload[11+11+4+1+2]=(byte)4;  // set xml length
         payload[11+11+4+1+3]=(byte)0;
 
@@ -177,6 +178,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
         payload[11+11+4+1]=(byte)0xF0; //no push flag (and other crap)
+        payload[11+11+4+1+1]=(byte)0x01; // push understood flag
         payload[11+11+4+1+2]=(byte)32; //size of xml lsb
         payload[11+11+4+1+3]=(byte)78; // size of xml msb
         for (int i = 0; i < 20000; i++)
@@ -255,7 +257,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         vendor=qr.getVendor();
         assertEquals("unexpected vendor", "LIME", vendor);
         
-        assertTrue(!qr.getNeedsPush());
+        try {
+            qr.getNeedsPush();
+            fail("qr should have been invalid");
+        } catch(BadPacketException e) {}
         try {
             qr.getIsBusy();
             fail("qr should have been invalid");
@@ -280,8 +285,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;    //common payload size
-        payload[11+11+4+1]=(byte)0x1d;  //111X1 
-        payload[11+11+4+1+1]=(byte)0x1c;  //111X0
+        payload[11+11+4+1]=(byte)0x1d;    // 0001 1101
+        payload[11+11+4+1+1]=(byte)0x1d;  // 0001 1101
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         payload[11+11+4+1+4]=(byte)0x1; //supports chat
 
@@ -290,12 +295,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
         assertTrue(qr.getNeedsPush());
-        assertTrue(qr.getNeedsPush());
-        assertTrue(qr.getIsBusy());
         assertTrue(qr.getIsBusy());
         assertTrue(qr.getIsMeasuredSpeed());
-        assertTrue(qr.getIsMeasuredSpeed());
-        assertTrue(qr.getHadSuccessfulUpload());
         assertTrue(qr.getHadSuccessfulUpload());
         assertTrue(qr.getSupportsChat());
           
@@ -308,8 +309,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
-        payload[11+11+4+1]=(byte)0x1c;  //111X1 
-        payload[11+11+4+1+1]=(byte)0x0;  //111X0
+        payload[11+11+4+1]=(byte)0x1c;    // 0001 1100
+        payload[11+11+4+1+1]=(byte)0x01;  // 0000 0001  //push understood
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
