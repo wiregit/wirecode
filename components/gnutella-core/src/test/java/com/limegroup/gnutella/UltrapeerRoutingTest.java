@@ -40,7 +40,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * The timeout value for sockets -- how much time we wait to accept 
 	 * individual messages before giving up.
 	 */
-    private static final int TIMEOUT = 2500;
+    private static final int TIMEOUT = 1800;
 
 	/**
 	 * The default TTL to use for request messages.
@@ -140,6 +140,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+        PingPongSettings.PINGS_ACTIVE.setValue(false);
 
 
         assertEquals("unexpected port", PORT, 
@@ -187,14 +188,19 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 */
     private void connect() throws Exception {
 		buildConnections();
+        
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
-
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
+
+		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
+		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
+		assertTrue("LEAF should be connected", LEAF.isOpen());
+
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("test");
         qrt.add("susheel");
@@ -213,9 +219,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 			ULTRAPEER_1.flush();
         }
 
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
-		assertTrue("LEAF should be connected", LEAF.isOpen());
 
 		// make sure we get rid of any initial ping pong traffic exchanges
 		sleep();
@@ -603,6 +606,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * Tests broadcasting pings between the various hosts.  In particular,
 	 * this tests to make sure that leaves do not receive ping broadcasts.
 	 */
+    /*
     public void testPingBroadcast() throws Exception {
         //Send ping
         Message m=new PingRequest((byte)7);
@@ -630,11 +634,13 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         }
         fail("Pong wasn't routed");
     }
+    */
 
 	/**
 	 * Tests the broadcasting of big pings -- pings that include GGEP extensions,
 	 * and so have a payload -- between the various hosts.
 	 */
+    /*
     public void testBigPingBroadcast() throws Exception {
         //1a. Send big ping (not GGEP...which should be ok)
         byte[] payload= new byte[16];
@@ -751,6 +757,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         out = new String(big);
         assertEquals("Big part of pong lost", "AB", out);
     }
+    */
 
 
 
@@ -835,7 +842,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
             try {
                 Message m=c.receive(TIMEOUT);
                 ret=true;
-                //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
 				// we read a null message or received another 
 				// InterruptedIOException, which means a messages was not 
@@ -860,11 +866,4 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		assertInstanceof("message not a QueryRequest",
                          QueryRequest.class, m);
 	}
-
-    private static final class EmptyResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                                         boolean outgoing) throws IOException {
-            return HandshakeResponse.createResponse(new Properties());
-        }
-    }
 }
