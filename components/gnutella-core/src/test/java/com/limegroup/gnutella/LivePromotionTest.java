@@ -13,6 +13,7 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.upelection.*;
 
 import java.net.*;
+import com.sun.java.util.collections.*;
 
 import junit.framework.Test;
 
@@ -49,8 +50,11 @@ public class LivePromotionTest extends ServerSideTestCase {
 				System.out.println("initializing " + c);
 			}
 			public void connectionInitialized(Connection c) {
-				if (c.getPort()==6346)
-					System.out.println("initialized "+c);
+				if (c.getPort()==6346 ||
+					c.getPort()==6700)
+					System.out.println("initialized "+c + " X-up "+
+					  c.getPropertyWritten("X-Ultrapeer"));
+					
 					synchronized(connectLock){
 						connectLock.notify();
 					}
@@ -59,6 +63,12 @@ public class LivePromotionTest extends ServerSideTestCase {
 			public void connectionClosed(Connection c) {
 				System.out.println("closed "+c);
 			}
+			
+			//just for the heck of it
+			public void handleQueryString(String query) {
+				System.out.println("received query "+query);
+			}
+			
 		};
 	}
 	
@@ -71,10 +81,10 @@ public class LivePromotionTest extends ServerSideTestCase {
 		//nothing again
 	}
 	
-	//Don't run this as part of suite, but do uncomment when running it.
-	public static Test suite() {
-        return buildTestSuite(LivePromotionTest.class);
-    }  
+	//Don't run this as part of automated suite, but do uncomment when running it manually.
+	//public static Test suite() {
+    //    return buildTestSuite(LivePromotionTest.class);
+   // }  
 	
 	public void testSetUP(){}
 	/**
@@ -96,46 +106,40 @@ public class LivePromotionTest extends ServerSideTestCase {
 		synchronized(connectLock) {
 			connectLock.wait();
 		}
-			
+		
 		Connection c = (Connection)manager.getInitializedClientConnections().get(0);
-		System.out.println("connected to me is " +c.getAddress());
+		System.out.println("connected to me is " +c.getInetAddress());
 		//at this point we should have one live leaf connected to us
 		assertEquals(1,manager.getNumInitializedClientConnections());
+		
+		//sleep some time, let it age
 		try {Thread.sleep(3000);}catch(InterruptedException iox){}
 		
-		//create a message and send it over.
-		_msg = new PromotionRequestVendorMessage (
-				new QueryReply.IPPortCombo("127.0.0.1",6346),
-				new QueryReply.IPPortCombo("127.0.0.1",6667),
-				0);
+		//make it our best candidate
+		BestCandidates.update(
+				new Candidate((Connection)manager.getInitializedClientConnections().get(0)));
 		
-		//register an UDP acker before sending
-		RouterService.getMessageRouter().registerMessageListener(
-				new GUID(_msg.getGUID()), new PromotionACKer("127.0.0.1",6346,false));
+
+		RouterService.getPromotionManager().requestPromotion();
+		System.out.println("sent promotion request, waiting");
+
 		
-		System.out.println("about to send message");
-		
-		c.send(_msg);
-		c.flush();
-		
-		//wait some time
+		//wait to get an incoming connection
 		synchronized(connectLock){
 			connectLock.wait();
 		}
 		
 		//at this point the candidate should have connected back to us, claiming to be an up
 		assertGreaterThan(0,manager.getNumConnections());
-		assertEquals(0,manager.getNumInitializedClientConnections());
-		assertGreaterThan(0,manager.getNumInitializedConnections());
 		
-		
-		c = (Connection)manager.getInitializedConnections().get(0);
+		c = (Connection)manager.getConnections().get(0);
+		assertTrue(c.isInitialized());
+		assertTrue(c.isSupernodeConnection());
 		assertTrue(c.isSupernodeSupernodeConnection());
 		
-		//	wait more time
-		synchronized(connectLock){
-			connectLock.wait();
-		}
+		//wait more time for connection to occur
+		Thread.sleep(30000);
+		System.out.println("exiting test");
 		
 	}
 	
