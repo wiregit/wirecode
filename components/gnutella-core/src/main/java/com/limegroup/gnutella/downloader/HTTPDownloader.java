@@ -321,7 +321,7 @@ System.out.println(_alternateLocationsReceived);
      * Returns the HTTP response code from the given string, throwing
      * an exception if it couldn't be parsed.
      *
-     * @param str an HTTP response string, e.g., "HTTP 200 OK \r\n"
+     * @param str an HTTP response string, e.g., "HTTP/1.1 200 OK \r\n"
      * @exception NoHTTPOKException str didn't contain "HTTP"
      * @exception ProblemReadingHeaderException some other problem
      *  extracting result code
@@ -602,7 +602,7 @@ System.out.println(_alternateLocationsReceived);
 
 //  		System.out.println("Starting Test...");
 
-//  		str = "HTTP 200 OK\r\n";
+//  		str = "HTTP/1.1 200 OK\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -613,7 +613,7 @@ System.out.println(_alternateLocationsReceived);
 //  		}
 		
 		
-//  		str = "HTTP 301 Moved Permanently\r\n";
+//  		str = "HTTP/1.1 301 Moved Permanently\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -622,7 +622,7 @@ System.out.println(_alternateLocationsReceived);
 //  		} catch (IOException e) {
 //  		}
 
-//          str = "HTTP 300 Multiple Choices\r\n";
+//          str = "HTTP/1.1 300 Multiple Choices\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -631,7 +631,7 @@ System.out.println(_alternateLocationsReceived);
 //  		} catch (IOException e) {
 //  		}
 
-//  		str = "HTTP 404 File Not Found \r\n";
+//  		str = "HTTP/1.1 404 File Not Found \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -643,7 +643,7 @@ System.out.println(_alternateLocationsReceived);
 //  			Assert.that(false);
 //  		}
 
-//  		str = "HTTP 410 Not Sharing \r\n";
+//  		str = "HTTP/1.1 410 Not Sharing \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -654,7 +654,7 @@ System.out.println(_alternateLocationsReceived);
 //  			Assert.that(false);
 //  		}
 
-//  		str = "HTTP 412 \r\n";
+//  		str = "HTTP/1.1 412 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -663,7 +663,7 @@ System.out.println(_alternateLocationsReceived);
 //  		} catch (IOException e) { 
 //  		}
 
-//  		str = "HTTP 503 \r\n";
+//  		str = "HTTP/1.1 503 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -674,7 +674,7 @@ System.out.println(_alternateLocationsReceived);
 //  			Assert.that(false);
 //  		}
 
-//  		str = "HTTP 210 \r\n";
+//  		str = "HTTP/1.1 210 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -683,7 +683,7 @@ System.out.println(_alternateLocationsReceived);
 //  			Assert.that(false);
 //  		}
 
-//  		str = "HTTP 204 Partial Content\r\n";
+//  		str = "HTTP/1.1 204 Partial Content\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
@@ -693,7 +693,7 @@ System.out.println(_alternateLocationsReceived);
 //  		}
 
 
-//  		str = "HTTP 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
+//  		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeaders();
