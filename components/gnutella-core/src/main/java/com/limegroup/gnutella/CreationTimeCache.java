@@ -36,17 +36,17 @@ public final class CreationTimeCache {
 
     /**
      * CreationTimeCache container.  LOCKING: obtain this.  Although 
-     * CREATE_TIME_MAP is static, CreationTimeCache is a singleton, so
+     * CREATE_URN_TO_TIME_MAP is static, CreationTimeCache is a singleton, so
      * obtaining CreationTimeCache's monitor is sufficient -- and slightly
      * more convenient.
      */
-    private final Map /* URN -> Creation Time (Long) */ TIME_MAP;
+    private final Map /* URN -> Creation Time (Long) */ URN_TO_TIME_MAP;
 
     /**
      * Alternate container.  LOCKING: obtain this.
      * Creation Time (Long) -> Set of URNs
      */
-    private final SortedMap URN_MAP;
+    private final SortedMap TIME_TO_URNSET_MAP;
 
     static {
         fileManager = RouterService.getFileManager();
@@ -68,10 +68,10 @@ public final class CreationTimeCache {
      * testing.
      */
     CreationTimeCache() {
-        TIME_MAP = createMap();
+        URN_TO_TIME_MAP = createMap();
         // use a custom comparator to sort the map in descending order....
-        URN_MAP = new TreeMap(new MyComparator());
-		removeOldEntries(TIME_MAP);
+        TIME_TO_URNSET_MAP = new TreeMap(new MyComparator());
+		removeOldEntries(URN_TO_TIME_MAP);
         constructURNMap();
 	}
     
@@ -82,16 +82,16 @@ public final class CreationTimeCache {
      * there is no association.
      */
     public synchronized Long getCreationTime(URN urn) {
-		return (Long) TIME_MAP.get(urn);
+		return (Long) URN_TO_TIME_MAP.get(urn);
     }
     
     /**
      * Removes the CreationTime that is associated with the specified URN.
      */
     public synchronized void removeTime(URN urn) {
-        TIME_MAP.remove(urn);
+        URN_TO_TIME_MAP.remove(urn);
         
-        Iterator iter = URN_MAP.entrySet().iterator();
+        Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry currEntry = (Map.Entry) iter.next();
             Set urnSet = (Set) currEntry.getValue();
@@ -116,13 +116,13 @@ public final class CreationTimeCache {
         Long cTime = new Long(time);
 
         // populate urn to time
-        TIME_MAP.put(urn, cTime);
+        URN_TO_TIME_MAP.put(urn, cTime);
 
         // populate time to set of urns
-        Set urnSet = (Set) URN_MAP.get(cTime);
+        Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
         if (urnSet == null) {
             urnSet = new HashSet();
-            URN_MAP.put(cTime, urnSet);
+            TIME_TO_URNSET_MAP.put(cTime, urnSet);
         }
         urnSet.add(urn);
     }
@@ -138,10 +138,10 @@ public final class CreationTimeCache {
         throws IllegalArgumentException {
         if (max < 1) throw new IllegalArgumentException("bad max = " + max);
         List urnList = new ArrayList();
-        Iterator iter = URN_MAP.entrySet().iterator();
+        Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
 
-        // we bank on the fact that the URN_MAP iterator returns the entries
-        // in descending order....
+        // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the 
+        // entries in descending order....
         while (iter.hasNext() && (urnList.size() < max)) {
             Map.Entry currEntry = (Map.Entry) iter.next();
             Set urns = (Set) currEntry.getValue();
@@ -172,7 +172,7 @@ public final class CreationTimeCache {
         try {
             ObjectOutputStream oos = 
 			    new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
-            oos.writeObject(TIME_MAP);
+            oos.writeObject(URN_TO_TIME_MAP);
             oos.close();
         } catch (Exception e) {
             ErrorService.error(e);
@@ -202,10 +202,11 @@ public final class CreationTimeCache {
     }
 
     /**
-     * Constructs the URN_MAP, which is based off the entries in the TIME_MAP.
+     * Constructs the TIME_TO_URNSET_MAP, which is based off the entries in the
+     * URN_TO_TIME_MAP.
      */
     private void constructURNMap() {
-        Set entries = TIME_MAP.entrySet();
+        Set entries = URN_TO_TIME_MAP.entrySet();
         Iterator iter = entries.iterator();
         while (iter.hasNext()) {
             // for each entry, get the creation time and the urn....
@@ -214,13 +215,13 @@ public final class CreationTimeCache {
             URN urn = (URN) currEntry.getKey();
 
             // put the urn in a set of urns that have that creation time....
-            Set urnSet = (Set) URN_MAP.get(cTime);
+            Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
             if (urnSet == null)
                 urnSet = new HashSet();
             urnSet.add(urn);
 
             // and populate the reverse mapping
-            URN_MAP.put(cTime, urnSet);
+            TIME_TO_URNSET_MAP.put(cTime, urnSet);
         }
     }
 
