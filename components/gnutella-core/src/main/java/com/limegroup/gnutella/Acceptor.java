@@ -207,7 +207,6 @@ public class Acceptor extends Thread {
 
         if (_port!=oldPort) {
             SettingsManager.instance().setPort(_port);
-            _callback.setPort(_port);
         }
 
         while (true) {
