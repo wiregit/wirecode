@@ -6,6 +6,7 @@ import com.limegroup.gnutella.downloader.Interval;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.NoSuchElementException;
+import java.util.Random;
 
 /**
  * Unit tests for IntervalSet
@@ -604,6 +605,23 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(new Interval(0, 100), getIntervalAt(0));
     }
         
+    public void testToBytes() {
+    	IntervalSet set = new IntervalSet();
+    	Random r = new Random();
+    	
+    	for (int i = 1;i < 10;i++) {
+    		int low = Math.abs(r.nextInt(100));
+    		Interval inter = new Interval(low,low+i);
+    		set.add(inter);
+    	}
+    	
+    	byte [] asByte = set.toBytes();
+    	
+    	IntervalSet set2 = IntervalSet.parseBytes(asByte);
+    	assertEquals(set.getSize(),set2.getSize());
+    	
+    	assertEquals(set.getAllIntervalsAsList(),set2.getAllIntervalsAsList());
+    }
     private int numIntervals() {
         return iSet.getAllIntervalsAsList().size();
     }

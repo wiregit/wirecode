@@ -2,17 +2,16 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.FixedSizeSortedSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.*;
+import com.sun.java.util.collections.*;
+
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
@@ -339,6 +338,26 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         
         assertEquals(set.first(), shouldSecond);
         assertEquals(set.last(), shouldThird);
+    }
+    
+    public void testToBytes() throws Exception {
+    	byte [] altlocs =_alCollection.toBytes();
+    	assertEquals(_alternateLocations.size()*6,altlocs.length);
+    	
+    	Collection parsed =NetworkUtils.unpackIps(altlocs);
+    	
+		assertEquals(_alternateLocations.size(),parsed.size());
+		Iterator parsedIter = parsed.iterator();
+		
+    	for(Iterator iter = _alCollection.iterator();iter.hasNext();) {
+    		AlternateLocation current = (AlternateLocation)iter.next();
+    		QueryReply.IPPortCombo address = (QueryReply.IPPortCombo) parsedIter.next();
+    		
+    		assertEquals(current.getHost().getInetAddress(),address.getInetAddress());
+    		assertEquals(current.getHost().getPort(),address.getPort());
+    		
+    	}
+    	
     }
 }
 
