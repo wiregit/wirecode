@@ -329,10 +329,6 @@ public class HostCatcher {
         if (isMe(e.getHostname(), e.getPort()))
             return false;
 
-        //Skip if this host is banned.
-        if (RouterService.getAcceptor().isBannedIP(e.getHostname()))
-            return false;
-
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
         addPermanent(e);
