@@ -408,12 +408,12 @@ public class DIMERecord {
         case TYPE_UNKNOWN:
             if(_typeLength != 0)
                 throw new IllegalArgumentException(
-                    "TYPE_UNKNOWN requires 0 type length.");
+                    "TYPE_UNKNOWN requires 0 type length");
             break;
         case TYPE_NONE:
             if(_typeLength != 0 || _dataLength != 0)
                 throw new IllegalArgumentException(
-                    "TYPE_NONE requires 0 type & data length.");
+                    "TYPE_NONE requires 0 type & data length");
             break;
         default:
             throw new IllegalArgumentException(
