@@ -139,7 +139,7 @@ public class LimeXMLReplyCollection{
                     if( xml != null && xml instanceof LimeXMLDocument ) {
                         debug("sync: 1");
                         doc = (LimeXMLDocument)xml;
-                    } else { // Pre LimeWire 2.5 or no XML stored. {
+                    } else { // Pre LimeWire 2.5 or no XML stored.
                         debug("sync: 2");
                         doc = constructDocument((String)xml, file);
                     }

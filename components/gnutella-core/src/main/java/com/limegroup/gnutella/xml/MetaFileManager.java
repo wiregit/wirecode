@@ -167,27 +167,30 @@ public class MetaFileManager extends FileManager {
     public int fileChanged(File f, URN oldHash) {
         // Let FileManager know and get the index of the changed file.
         int index = super.fileChanged(f, oldHash);
-        if( index == -1 ) // not shared of hashing failed, oh well.
+        if( index == -1 ) // not shared or hashing failed, oh well.
             return -1;
 
         FileDesc fd = super.get(index);
         URN newHash = fd.getSHA1Urn();
+        // if hashes are the same, do nothing.
+        if( oldHash.equals(newHash) )
+            return index;
         
-        // record we have a new shared file with metadata.
+        // record that we have a new shared file with metadata.
         writeToMap(f, newHash);
 
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         String[] schemas = rep.getAvailableSchemaURIs();
         int l = schemas.length;
-        for(int i=0;i<l;i++){
+        for (int i = 0; i < l; i++) {
             LimeXMLReplyCollection coll = map.getReplyCollection(schemas[i]);
-            LimeXMLDocument d=coll.getDocForHash(oldHash);
-            if(d!=null){//we have a value...must replace
+            LimeXMLDocument d = coll.getDocForHash(oldHash);
+            if (d != null) { //we have a value...must replace
                 coll.removeDoc(oldHash);
                 coll.addReply(newHash,d);
                 coll.write();
-            }//affected collection done
+            }
         }
         
         return index;
