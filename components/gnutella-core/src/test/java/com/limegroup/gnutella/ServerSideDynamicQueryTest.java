@@ -334,8 +334,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 	private static void assertQuery(Message m) {
 		if(m instanceof QueryRequest) return;
 
-		System.out.println(m); 
-		assertInstanceof("message not a QueryRequest",
+		assertInstanceof("message not a QueryRequest: " + m,
 		    QueryRequest.class, m);
 	}
 
@@ -353,7 +352,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
@@ -373,7 +372,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		LEAF.send(reply1);
 		LEAF.flush();
 		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
-        assertTrue(qRep!=null);
+        assertNotNull(qRep);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
         Thread.sleep(2*1000);
@@ -392,10 +391,10 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         catch (InterruptedIOException expected) {}
 
         reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
-        assertTrue(reqRecvd!=null);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertNotNull(reqRecvd);
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
-        assertEquals(reqRecvd.getHops(), (byte) 1);
+        assertEquals((byte)1, reqRecvd.getHops());
     }
 
 
@@ -405,13 +404,13 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         QueryRequest request = QueryRequest.createQuery("berkeley");
         request.hop();
         request.setTTL((byte)1);
-        assertTrue((request.getHops() == 1));
+        assertEquals(1, request.getHops());
 
         ULTRAPEER_2.send(request);
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
@@ -431,7 +430,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		LEAF.send(reply1);
 		LEAF.flush();
 		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
-        assertTrue(qRep!=null);
+        assertNotNull(qRep);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
         Thread.sleep(2*1000);
@@ -445,15 +444,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // noUnenexpectedMessages
         try {
             LEAF.receive(TIMEOUT);
-            assertTrue(false);
+            fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
 
         reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
-        assertTrue(reqRecvd!=null);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertNotNull(reqRecvd);
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
-        assertEquals(reqRecvd.getHops(), (byte) 2);
+        assertEquals((byte)2, reqRecvd.getHops());
     }
 
 
@@ -467,7 +466,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
@@ -502,7 +501,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.flush();
 
         QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
@@ -519,15 +518,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // noUnenexpectedMessages
         try {
             LEAF.receive(TIMEOUT);
-            assertTrue(false);
+            fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
 
         reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
-        assertTrue(reqRecvd!=null);
-        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertNotNull(reqRecvd);
+        assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
-        assertEquals(reqRecvd.getHops(), (byte) 1);
+        assertEquals((byte)1, reqRecvd.getHops());
 
         Thread.sleep(2*1000);
 
@@ -541,6 +540,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // noUnenexpectedMessages
         try {
             reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
 
@@ -560,15 +560,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             ULTRAPEER_2.flush();
 
             QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
-            assertTrue(reqRecvd.getQuery().equals("berkeley"));
+            assertEquals("berkeley", reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
             // should be forwarded to other Ultrapeer
             reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
-            assertTrue(reqRecvd!=null);
-            assertTrue(reqRecvd.getQuery().equals("berkeley"));
+            assertNotNull(reqRecvd);
+            assertEquals("berkeley", reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
-            assertEquals(reqRecvd.getHops(), (byte) 1);
+            assertEquals((byte)1, reqRecvd.getHops());
             
             Thread.sleep(2*1000);
             
@@ -582,7 +582,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             // noUnenexpectedMessages
             try {
                 LEAF.receive(TIMEOUT);
-                assertTrue(false);
+                fail("expected InterruptedIOException");
             }
             catch (InterruptedIOException expected) {}
 
