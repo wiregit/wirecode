@@ -9,6 +9,12 @@ public class EndpointData extends Endpoint
     
     private long speed = 56;
 
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        if(getAddress() == null)
+           setHostname("");
+    }
+
     /**
     * serial version
     */
