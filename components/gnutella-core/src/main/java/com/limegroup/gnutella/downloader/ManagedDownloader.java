@@ -489,8 +489,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.allFiles = files;
         this.incompleteFileManager = ifc;
         this.originalQueryGUID = originalQueryGUID;
-        for(int i = 0; i < allFiles.length && sha1 == null; i++)
-            sha1 = allFiles[i].getSHA1Urn();
     }
 
     /** 
@@ -531,11 +529,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         //initializer statements, as they're not executed.  Nor should it be
         //done in initialize, as that could cause problems in resume().
         reqLock=new RequeryLock();
-        
-        if(allFiles != null) {
-            for(int i = 0; i < allFiles.length && sha1 == null; i++)
-                sha1 = allFiles[i].getSHA1Urn();
-        }
     }
 
     /** 
@@ -571,6 +564,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         altLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
+        // get the SHA1 if we can.
+        if(allFiles != null) {
+            for(int i = 0; i < allFiles.length && sha1 == null; i++)
+                sha1 = allFiles[i].getSHA1Urn();
+        }
         // stores up to 1000 locations for up to an hour each
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
         // stores up to 10 locations for up to 10 minutes
@@ -1426,7 +1424,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 initializeFiles();
                 if(files.size() > 0) {
                     try {
-                        cleanup();
                         if(checkHosts()) {//files is global
                             setState(GAVE_UP);
                             return;
@@ -3395,11 +3392,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         return allDocs;
     }
-
-    private void cleanup() {
-        miniRFDToLock.clear();
-        threadLockToSocket.clear();
-    }    
 
     /////////////////////////////Display Variables////////////////////////////
 
