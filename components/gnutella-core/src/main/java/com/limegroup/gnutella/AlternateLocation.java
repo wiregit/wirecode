@@ -491,7 +491,7 @@ public final class AlternateLocation
 			// Handle bad ports in alternate locations 
             if( port < 1 || port > 0xFFFF ) {
                 throw new IOException("invalid port in alternate location: "+
-                                      "port: "+host+"header: "+locationHeader);
+                                      "port: "+port+"header: "+locationHeader);
             }
 
             // check for private addresses if it appears to be in dotted quad 
