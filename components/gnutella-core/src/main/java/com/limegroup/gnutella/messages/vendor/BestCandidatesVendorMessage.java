@@ -1,7 +1,8 @@
 /*
  * a message which contains this ultrapeer's best leaf and the best leaf of the
  * ultrapeers at hops 1.
- * 
+ *
+ * GUID really doesn't matter, since it will be sent at a specific rate. 
  */
 package com.limegroup.gnutella.messages.vendor;
 
