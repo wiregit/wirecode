@@ -95,7 +95,7 @@ public class UDPHeadTest extends BaseTestCase {
 		}
 		
 		_haveFull = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-		_notHave = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");
+		_notHave = FileManagerStub._notHave;
 		_havePartial = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
 		
 		createCollections();
@@ -130,12 +130,10 @@ public class UDPHeadTest extends BaseTestCase {
 	 */
 	public void testFileNotFound() throws Exception {
 		UDPHeadPing ping = new UDPHeadPing(_notHave);
-		UDPHeadPong pong = new UDPHeadPong(ping);
+		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
 		
 		assertEquals(pong.getGUID(),ping.getGUID());
 		
-		//if we don't have the file we don't set the firewalled bit
-		assertFalse(pong.isFirewalled());
 		assertFalse(pong.hasFile());
 		assertFalse(pong.hasCompleteFile());
 		assertNull(pong.getAltLocs());

@@ -9,6 +9,8 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.sun.java.util.collections.*;
 
+import java.io.IOException;
+
 /**
  * A simple FileManager that shares one file of (near) infinite length.
  */
@@ -17,6 +19,12 @@ public class FileManagerStub extends FileManager {
 	Map _urns;
 	List _descs;
     FileDescStub fdStub = new FileDescStub();
+    public static URN _notHave =null;
+    static {
+    	try{
+    	_notHave= URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZZZZZZZZZZ");
+    	}catch(IOException ignored){}
+    }
 
     public FileDesc get(int i) {
     	if (i < _descs.size())
@@ -33,6 +41,8 @@ public class FileManagerStub extends FileManager {
 
         if(urn.toString().equals(FileDescStub.urn))
             return fdStub;
+        else if (urn.equals(_notHave))
+        	return null;
         else if (_urns.containsKey(urn))
         	return (FileDesc)_urns.get(urn);
         else
