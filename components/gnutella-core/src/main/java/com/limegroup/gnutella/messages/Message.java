@@ -48,9 +48,6 @@ public abstract class Message
         return GUID.makeGuid();
     }
 
-    /** Define reused exceptions for efficiency */
-    private static final BadPacketException HOPS_EXCEED_SOFT_MAX = 
-        new BadPacketException("Hops already exceeds soft maximum");
 
     ////////////////////////// Instance Data //////////////////////
 
@@ -73,11 +70,6 @@ public abstract class Message
      */
     private final int network;
 
-	/**
-	 * Constant byte buffer for storing the GUID for incoming messages --
-	 * an easy optimization.
-	 */
-	//private final static byte[] GUID_BUF = new byte[16];
 
 	/**
 	 * Constant for whether or not to record stats.
@@ -266,8 +258,9 @@ public abstract class Message
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
-        else if ((hops >= softMax) && (func != F_QUERY_REPLY))
-            throw HOPS_EXCEED_SOFT_MAX;
+        else if ((hops >= softMax) && (func != F_QUERY_REPLY)) {
+            throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
+        }
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
         else if ((ttl+hops > softMax) && (func != F_QUERY_REPLY)) {
