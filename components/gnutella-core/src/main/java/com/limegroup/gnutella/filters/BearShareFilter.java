@@ -4,14 +4,14 @@ import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 import java.util.Locale;
 
-/** 
+/**
  * Blocks spammy "ping queries" from BearShare.
  * These are identified by long length, predominance of high bits,
  * and high TTLs.  We'll be nice and let short-lived messages through.
  */
 public class BearShareFilter extends SpamFilter {
     final int MAX_HIGHBITS=20;
-    
+
     public boolean allow(Message m) {
         if (! (m instanceof QueryRequest))
             return true;
@@ -20,13 +20,13 @@ public class BearShareFilter extends SpamFilter {
             return true;
 
         //Get query string
-        String query=((QueryRequest)m).getQuery();
+        String query=((QueryRequest)m).getTextQuery();
         if (query.length() < MAX_HIGHBITS) //An optimization
             return true;
         byte[] bytes=query.getBytes();
         if (bytes.length==0)               //Not really needed
             return true;
-        
+
         //Counts bytes with high bit set.
         int highbits=0;
         for (int i=0; i<bytes.length && highbits<MAX_HIGHBITS; i++) {
@@ -34,9 +34,9 @@ public class BearShareFilter extends SpamFilter {
                 highbits++;
             }
         }
-        
+
         return highbits<MAX_HIGHBITS;
-    }           
+    }
 
     /*
     public static void main(String args[]) {
@@ -45,15 +45,15 @@ public class BearShareFilter extends SpamFilter {
         String query=null;
         byte[] bytes=null;
 
-        Assert.that(f.allow(new PingRequest((byte)3)));        
+        Assert.that(f.allow(new PingRequest((byte)3)));
 
         query="ok";
-        qr=new QueryRequest((byte)3, (byte)0, query);        
+        qr=new QueryRequest((byte)3, (byte)0, query);
         Assert.that(f.allow(qr));
-        
+
         query=new String(new byte[30]);
         qr=new QueryRequest((byte)3, (byte)0, query);
-        Assert.that(f.allow(qr));        
+        Assert.that(f.allow(qr));
 
         bytes=new byte[30];
         for (int i=0; i<bytes.length; i++)

@@ -5,19 +5,19 @@ import com.limegroup.gnutella.Assert;
 
 /** Various static routines for manipulating strings.*/
 public class StringUtils {
-    
+
     /** Returns true if input contains the given pattern, which may contain the
      *  wildcard character '*'.  TODO: need more formal definition.  Examples:
      *
      *  <pre>
-     *  StringUtils.contains("", "") ==> true
-     *  StringUtils.contains("abc", "") ==> true
+     *  StringUtils.contains("", "") ==> false
+     *  StringUtils.contains("abc", "") ==> false
      *  StringUtils.contains("abc", "b") ==> true
      *  StringUtils.contains("abc", "d") ==> false
      *  StringUtils.contains("abcd", "a*d") ==> true
      *  StringUtils.contains("abcd", "*a**d*") ==> true
      *  StringUtils.contains("abcd", "d*a") ==> false
-     *  </pre> 
+     *  </pre>
      */
     public static final boolean contains(String input, String pattern) {
         return contains(input, pattern, false);
@@ -35,6 +35,11 @@ public class StringUtils {
         //allocations.
 
         final int n=pattern.length();
+
+        //There's never a match if the pattern is zero-length
+        if(n == 0)
+            return false;
+
         //Where to resume searching after last wildcard, e.g., just past
         //the last match in input.
         int last=0;
@@ -60,19 +65,19 @@ public class StringUtils {
 
             //3. Reset the starting search index if got ' ' or '+'.
             //Otherwise increment past the match in input.
-            if (c==' ' || c=='+') 
+            if (c==' ' || c=='+')
                 last=0;
             else if (c=='*')
                 last=k+j-i;
             i=j+1;
         }
-        return true;            
+        return true;
     }
 
-    /** 
+    /**
      * @requires TODO3: fill this in
      * @effects returns the the smallest i>=bigStart
-     *  s.t. little[littleStart...littleStop-1] is a prefix of big[i...] 
+     *  s.t. little[littleStart...littleStop-1] is a prefix of big[i...]
      *  or -1 if no such i exists.  If ignoreCase==false, case doesn't matter
      *  when comparing characters.
      */
@@ -83,7 +88,7 @@ public class StringUtils {
         // return big.indexOf(little.substring(littleStart, littleStop), bigStart);
         //but without an allocation.
         //Note special case for ignoreCase below.
-        
+
         if (ignoreCase) {
             final int n=big.length()-(littleStop-littleStart)+1;
         outerLoop:
@@ -91,13 +96,13 @@ public class StringUtils {
                 //Check if little[littleStart...littleStop-1] matches with shift i
                 final int n2=littleStop-littleStart;
                 for (int j=0 ; j<n2 ; j++) {
-                    char c1=big.charAt(i+j); 
+                    char c1=big.charAt(i+j);
                     char c2=little.charAt(littleStart+j);
                     if (c1!=c2 && c1!=toOtherCase(c2))  //Ignore case. See below.
                         continue outerLoop;
-                }            
+                }
                 return i;
-            }                
+            }
             return -1;
         } else {
             final int n=big.length()-(littleStop-littleStart)+1;
@@ -105,13 +110,13 @@ public class StringUtils {
             for (int i=bigStart; i<n; i++) {
                 final int n2=littleStop-littleStart;
                 for (int j=0 ; j<n2 ; j++) {
-                    char c1=big.charAt(i+j); 
+                    char c1=big.charAt(i+j);
                     char c2=little.charAt(littleStart+j);
                     if (c1!=c2)                        //Consider case.  See above.
                         continue outerLoop;
-                }            
+                }
                 return i;
-            }                
+            }
             return -1;
         }
     }
@@ -122,7 +127,7 @@ public class StringUtils {
      *  Note that this is <b>not internationalized</b>; but it is fast.
      */
     public static final char toOtherCase(char c) {
-        int i=(int)c; 
+        int i=(int)c;
         final int A=(int)'A';   //65
         final int Z=(int)'Z';   //90
         final int a=(int)'a';   //97
@@ -138,7 +143,7 @@ public class StringUtils {
         else if (i<=z)    //lower-case
             return (char)(i-SHIFT);
         else              //non alphabetic
-            return c;            
+            return c;
     }
 
     /** Returns the tokens of s delimited by the given delimeter,
@@ -177,7 +182,7 @@ public class StringUtils {
         Assert.that(toOtherCase('a')=='A');
         Assert.that(toOtherCase('h')=='H');
         Assert.that(toOtherCase('z')=='Z');
-        Assert.that(toOtherCase('{')=='{');        
+        Assert.that(toOtherCase('{')=='{');
 
         //Wildcards
         Assert.that(StringUtils.contains("", "") == true);
@@ -207,18 +212,18 @@ public class StringUtils {
         Assert.that(StringUtils.contains("abcde", "ab bcd") == true);
         Assert.that(StringUtils.contains("abcde", "ab bd") == false);
         Assert.that(StringUtils.contains("abcdefghj",
-                                         "+*+*ab*d+def*g c ") == true);  
+                                         "+*+*ab*d+def*g c ") == true);
 
-        //Cases 
+        //Cases
         Assert.that(StringUtils.contains("aBcDd", "bCD", true) == true);
         Assert.that(StringUtils.contains("aBcDd", "bCD", false) == false);
         Assert.that(StringUtils.contains("....", "..", true) == true);
         Assert.that(StringUtils.contains("....", "..", false) == true);
 
-        //Clip2 compatibility      
+        //Clip2 compatibility
         Assert.that(StringUtils.contains("abcd", " ") == true);
         Assert.that(StringUtils.contains("abcd", "    ") == true);
-                                         
+
         //Unit tests for split in HTTPUtil.
     }
     */

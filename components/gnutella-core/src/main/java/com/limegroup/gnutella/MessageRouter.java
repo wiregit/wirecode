@@ -221,7 +221,7 @@ public abstract class MessageRouter
         //any more.
         if ((receivingConnection.getNumMessagesReceived()<=2)
                 && (queryRequest.getHops()<=1)  //actually ==1 will do
-                && (queryRequest.getQuery().equals("    "))) {
+                && (queryRequest.getTextQuery().equals("    "))) {
             receivingConnection.setKillable(false);
         }
 

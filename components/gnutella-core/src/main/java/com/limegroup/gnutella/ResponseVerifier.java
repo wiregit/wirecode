@@ -38,7 +38,7 @@ public class ResponseVerifier {
      */
     public synchronized void record(QueryRequest qr, MediaType type){
         byte[] guid = qr.getGUID();
-        String[] queryWords=StringUtils.split(qr.getQuery().toLowerCase(),
+        String[] queryWords=StringUtils.split(qr.getTextQuery().toLowerCase(),
                                               DELIMITERS);
         mapper.put(new GUID(guid),new RequestData(queryWords, type));
     }

@@ -3,13 +3,13 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.Iterator;
 import com.limegroup.gnutella.gml.GMLDocument;
 import com.limegroup.gnutella.gml.GMLField;
+import com.limegroup.gnutella.gml.GMLParseException;
 import com.limegroup.gnutella.gml.TemplateNotFoundException;
 import com.limegroup.gnutella.gml.repository.SimpleTemplateRepository;
+import com.limegroup.gnutella.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.io.StringWriter;
 
 /**
  * This class stores meta-information found in an ID3 Tag.  Instances
@@ -19,6 +19,9 @@ import java.io.StringWriter;
  */
 public final class ID3Tag
 {
+    private static final String MP3_TEMPLATE_URI =
+        "http://content.limewire.com/gmlt/mp3.gmlt";
+
     private String _title;
     private String _artist;
     private String _album;
@@ -169,6 +172,67 @@ public final class ID3Tag
         return _gmlString;
     }
 
+    /**
+     * @return true iff the given GMLDocument can be matched to an ID3 tag.
+     */
+    public static final boolean isMatchableGMLDocument(GMLDocument document)
+    {
+        return document.getTemplateURI().equals(MP3_TEMPLATE_URI);
+    }
+
+    /**
+     * Behavior is undefined if document is not matchable to an ID3 Tag.
+     * @see isMatchableGMLDocument(GMLDocument)
+     * @return true iff the given document matches this ID3 tag.
+     */
+    public boolean matchGMLDocument(GMLDocument document)
+    {
+        Assert.that(isMatchableGMLDocument(document));
+        String title = document.getField("TIT1").getValue();
+        if((title != null) && !StringUtils.contains(_title, title))
+            return false;
+        String artist = document.getField("TPE1").getValue();
+        if((artist != null) && !StringUtils.contains(_artist, artist))
+            return false;
+        String album = document.getField("TALB").getValue();
+        if((album != null) && !StringUtils.contains(_album, album))
+            return false;
+        String year = document.getField("TYER").getValue();
+        if((year != null) && !StringUtils.contains(_year, year))
+            return false;
+        String trackString = document.getField("TRCK").getValue();
+        if(trackString != null)
+        {
+            int track;
+            try
+            {
+                track = Integer.parseInt(trackString);
+            }
+            catch(NumberFormatException e)
+            {
+                return false;
+            }
+            if(_track != track)
+                return false;
+        }
+        String genreString = document.getField("TCON").getValue();
+        if(genreString != null)
+        {
+            int genre;
+            try
+            {
+                genre = Integer.parseInt(genreString);
+            }
+            catch(NumberFormatException e)
+            {
+                return false;
+            }
+            if(_genre != genre)
+                return false;
+        }
+        return true;
+    }
+
     private static String createGMLString(String title, String artist,
         String album, String year, String comment, short track, short genre)
     {
@@ -178,37 +242,29 @@ public final class ID3Tag
         GMLDocument reply;
         try
         {
-            reply = SimpleTemplateRepository.getInstance().getTemplate(
-                "http://content.limewire.com/gmlt/mp3.gmlt").createReply();
+            reply = SimpleTemplateRepository.instance().getTemplate(
+                MP3_TEMPLATE_URI).createReply();
         }
         catch(TemplateNotFoundException e)
         {
             return "";
         }
 
-        for(Iterator iterFields = reply.getFields().iterator();
-            iterFields.hasNext();  )
-        {
-            GMLField field = (GMLField)iterFields.next();
-            if(field.getName().equals("TIT1") && !title.equals(""))
-                field.setValue(title);
-            else if(field.getName().equals("TPE1") && !artist.equals(""))
-                field.setValue(artist);
-            else if(field.getName().equals("TALB") && !album.equals(""))
-                field.setValue(album);
-            else if(field.getName().equals("TYER") && !year.equals(""))
-                field.setValue(year);
-            else if(field.getName().equals("COMM") && !comment.equals(""))
-                field.setValue(comment);
-            else if(field.getName().equals("TRCK") && track != 0)
-                field.setValue(String.valueOf(track));
-            else if(field.getName().equals("TCON") && genre != 255)
-                field.setValue(String.valueOf(genre));
-        }
+        if(!title.equals(""))
+            reply.getField("TIT1").setValue(title);
+        if(!artist.equals(""))
+            reply.getField("TPE1").setValue(artist);
+        if(!album.equals(""))
+            reply.getField("TALB").setValue(album);
+        if(!year.equals(""))
+            reply.getField("TYER").setValue(year);
+        if(!comment.equals(""))
+            reply.getField("COMM").setValue(comment);
+        if(track != 0)
+            reply.getField("TRCK").setValue(String.valueOf(track));
+        if(genre != 255)
+            reply.getField("TCON").setValue(String.valueOf(genre));
 
-
-        StringWriter writer = new StringWriter();
-        reply.write(new PrintWriter(writer));
-        return writer.toString();
+        return reply.toString();
     }
 }

@@ -22,7 +22,7 @@ public class StandardMessageRouter
         // should be informed of the query
         if (!receivingConnection.isPersonalSpam(queryRequest))
         {
-            _callback.handleQueryString(queryRequest.getQuery());
+            _callback.handleQueryString(queryRequest.getTextQuery());
         }
 
         super.handleQueryRequest(queryRequest, receivingConnection);

@@ -14,6 +14,10 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.gml.GMLDocument;
+import com.limegroup.gnutella.gml.GMLParseException;
+import com.limegroup.gnutella.gml.TemplateNotFoundException;
+import com.limegroup.gnutella.gml.repository.SimpleTemplateRepository;
 import com.limegroup.gnutella.util.StringUtils;
 
 public class FileManager{
@@ -92,8 +96,7 @@ public class FileManager{
      * allocations in the common case of no matches.)
      */
     public Response[] query(QueryRequest request) {
-        String str = request.getQuery();
-        ArrayList list = search(str);
+        ArrayList list = search(request.getTextQuery(), request.getRichQuery());
         if (list==null)
             return null;
 
@@ -338,7 +341,7 @@ public class FileManager{
      * Returns a list of FileDesc matching q, or null if there are no matches.
      * Subclasses may override to provide different notions of matching.
      */
-    protected synchronized ArrayList search(String query) {
+    private synchronized ArrayList search(String textQuery, String richQuery) {
         //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
         //Doing so would allow multiple queries to proceed in parallel.  But
         //then you need to make _files volatile and work on a local reference,
@@ -347,12 +350,32 @@ public class FileManager{
         // Don't allocate until needed
         ArrayList response_list=null;
 
+        // Create a GML request document from the string
+        GMLDocument requestDocument = null;
+        if(!richQuery.equals(""))
+        {
+            try
+            {
+                requestDocument =
+                    SimpleTemplateRepository.instance().parseRequest(richQuery);
+            }
+            catch(TemplateNotFoundException e) {}
+            catch(GMLParseException e) {}
+
+            if(!ID3Tag.isMatchableGMLDocument(requestDocument))
+                requestDocument = null;
+        }
+
         for(int i=0; i < _files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
             if (desc==null)
                 continue;
             String file_name = desc._path;  //checking the path too..
-            if (StringUtils.contains(file_name, query, true)) {
+            // Match by file name or ID3 Tag
+            if ((StringUtils.contains(file_name, textQuery, true)) ||
+                ((desc._id3Tag != null) && (requestDocument != null) &&
+                 (desc._id3Tag.matchGMLDocument(requestDocument))))
+            {
                 if (response_list==null)
                     response_list=new ArrayList();
                 response_list.add(_files.get(i));

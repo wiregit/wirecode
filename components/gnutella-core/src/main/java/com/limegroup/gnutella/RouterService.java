@@ -412,25 +412,43 @@ public class RouterService
 
     /**
      * Searches Gnutellanet files of the given type with the given
-     * query string and minimum speed.  If type is null, any file type
+     * text and rich query strings.  If type is null, any file type
      * is acceptable.  Returns the GUID of the query request sent as a
      * 16 byte array, or null if there was a network error.
      * ActivityCallback is notified asynchronously of responses.
      * These responses can be matched with requests by looking at
      * their GUIDs.  (You may want to wrap the bytes with a GUID
      * object for simplicity.)  */
-    public byte[] query(String query, int minSpeed, MediaType type) {
+    public byte[] query(String textQuery, String richQuery, MediaType type) {
+        // Note that we use a minimum speed of 0.  It's ignored anyway.
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query);
+                                         0, textQuery, richQuery);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
     }
 
-    /** Same as query(query, minSpeed, null), i.e.,
-      * searches for files of any type. */
-    public byte[] query(String query, int minSpeed) {
-        return query(query, minSpeed, null);
+    /**
+     * Same as query(textQuery, richQuery, null),
+     * i.e., searches for files of any type.
+     */
+    public byte[] query(String textQuery, String richQuery) {
+        return query(textQuery, richQuery, null);
+    }
+
+    /**
+     * Same as query(query, "", null), i.e., searches for files of any type,
+     * with no rich query
+     */
+    public byte[] query(String textQuery, MediaType type) {
+        return query(textQuery, "", type);
+    }
+
+    /**
+     * Same as query(query, null), i.e., searches for files of any type.
+     */
+    public byte[] query(String query) {
+        return query(query, (MediaType)null);
     }
 
     /** Same as ResponseVerifier.score. */
@@ -475,7 +493,7 @@ public class RouterService
         }
 
         //2. Send a query for "*.*" with a TTL of 1.
-        QueryRequest qr=new QueryRequest((byte)1, 0, "*.*");
+        QueryRequest qr=new QueryRequest((byte)1, 0, "*.*", "");
         router.sendQueryRequest(qr, c);
         try {
             c.flush();

@@ -70,7 +70,7 @@ public class Main implements ActivityCallback {
             int i=command.indexOf(' ');
             Assert.that(i!=-1 && i<command.length());
             String query=command.substring(i+1);
-            service.query(query,0);
+            service.query(query);
         } else if (commands.length==2 && commands[0].equals("listen")) {
             try {
             int port=Integer.parseInt(commands[1]);

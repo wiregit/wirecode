@@ -273,6 +273,9 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(INCOMPLETE_DIR)) {
                     setIncompleteDirectory(p);
                 }
+                else if(key.equals(GML_TEMPLATE_DIR)) {
+                    setGMLTemplateDirectory(p);
+                }
                 else if(key.equals(BANNED_IPS)) {
                     setBannedIps(decode(p));
                 }
