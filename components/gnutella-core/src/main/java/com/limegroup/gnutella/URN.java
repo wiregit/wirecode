@@ -137,8 +137,17 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		byte[] buffer = new byte[16384];
 		int read;
 		while ((read=fis.read(buffer))!=-1) {
+			long start = System.currentTimeMillis();
 			md.update(buffer,0,read);
+			long end = System.currentTimeMillis();
+			long interval = Math.abs(end - start);
+			try {
+				Thread.sleep(interval*2) ;
+			} catch(InterruptedException e) {
+				// just keep going!
+			}
 		}
+		
 		fis.close();
 		byte[] sha1 = md.digest();
 
