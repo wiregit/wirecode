@@ -14,18 +14,26 @@ import java.util.Date;
  * "gnutella.net").  The servent may then connect to these addresses
  * as necessary to maintain full connectivity.<p>
  *
- * Generally speaking, IP addresses from pong servers (e.g. router.limewire.com)
- * are preferred to other pongs.  For this reason, the HostCatcher may initiate
- * outgoing "router" connections.  Also, IP addresses from pongs are preferred to
- * those from the gnutella.net file, since they more likely to be live.  Hosts
- * we are connected to are not added to the host catcher, but they will be
- * written to disk.
+ * The HostCatcher currently prioritizes pongs as follows.  Note that supernode
+ * with a private address is still highest priority; hopefully this may allow
+ * you to find local supernodes.
+ * <ol>
+ * <li> Supernodes.  Supernodes are identified because the number of files they
+ *      are sharing is an exact power of two--a dirty but effective hack.
+ * <li> Normal pongs.
+ * <li> Private addresses.  This means that the host catcher will still 
+ *      work on private networks, although we will normally ignore private
+ *      addresses.        
+ * </ol>
+ * 
+ * The HostCatcher may initiate outgoing "router" connections.  This behavior is
+ * confusing and will likely be refactored in the future.  
  */
-public class HostCatcher {
-    /** The number of router pongs to store. */
-    private static final int GOOD_SIZE=30;
+public class HostCatcher {    
+    /** The number of supernode pongs to store. */
+    private static final int GOOD_SIZE=50;
     /** The number of normal pongs to store. */
-    private static final int NORMAL_SIZE=70;
+    private static final int NORMAL_SIZE=50;
     /** The number of private IP pongs to store. */
     private static final int BAD_SIZE=10;
     private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
@@ -228,65 +236,78 @@ public class HostCatcher {
 
 
     /**
-     * @modifies this
-     * @effects may choose to add hosts listed in pr to this.
-     *  If non-null, receivingConnection may be used to prioritize pr.
+     * Attempts to add a pong to this, possibly ejecting other elements from the
+     * cache.  This method used to be called "spy".
+     *
+     * @param pr the pong containing the address/port to add
+     * @param receivingConnection the connection on which we received
+     *  the pong.
+     * @return true iff pr was actually added 
      */
-    public void spy(PingReply pr, ManagedConnection receivingConnection) {
+    public boolean add(PingReply pr, ManagedConnection receivingConnection) {
+        //Convert to endpoint
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
                     pr.getFiles(), pr.getKbytes());
-                    
-        //add the endpoint
-        add(e,receivingConnection);
+
+        //Add the endpoint, forcing it to be high priority if marked pong from a
+        //supernode..
+        return add(e, pr.isMarked());
     }
-    
+
+    /**
+     * Adds an address to this, possibly ejecting other elements from the cache.
+     * This method is used when getting an address from headers, instad of the
+     * normal ping reply.
+     *
+     * @param pr the pong containing the address/port to add
+     * @param forceHighPriority true if this should always be of high priority
+     * @return true iff e was actually added
+     */
+    public boolean add(Endpoint e, boolean forceHighPriority) {
+        //See preamble for a discussion of priorities
+        if (forceHighPriority)
+            e.setWeight(GOOD_PRIORITY);
+        else if (e.isPrivateAddress())
+            e.setWeight(BAD_PRIORITY);
+        else
+            e.setWeight(NORMAL_PRIORITY);
+        return add(e);
+    }
+
     /**
      * Adds the passed endpoint to the set of hosts maintained. The endpoint 
      * may not get added due to various reasons (including it might be our
      * address itself, we migt be connected to it etc.). Also adding this
      * endpoint may lead to the removal of some other endpoint from the
      * cache.
+     *
      * @param e Endpoint to be added
-     * @param receivingConnection The connection on which we received the
-     * endpoint
+     * @return true iff e was actually added
      */
-    public void add(Endpoint e,ManagedConnection receivingConnection)
-    {
+    private boolean add(Endpoint e) {
         //Skip if we're connected to it.
         if (manager.isConnected(e))
-            return;
+            return false;
 
         //Skip if this would connect us to our listening port.
         if (isMe(e.getHostname(), e.getPort()))
-            return;
+            return false;
 
         //Skip if this is the router.
-        try{
+        try {
             if (isRouter(e.getHostBytes())) 
-                return;
+                return false;
         }
         catch(UnknownHostException uhe){
             //return in this case, without adding the host
-            return;
+            return false;
         }
 
-        //Current policy: Supernodes are the highest priority. Every other
-        //node is a normal priority. Private
-        //addresses are considered real bad (negative weight).  This means that
-        //the host catcher will still work on private networks, although we will
-        //normally ignore private addresses.  Note that if e is already in this,
-        //but with a different weight, we don't bother re-heapifying.
-        
-        //dont set the weight, if already good priority set
-        if(!(e.getWeight() == GOOD_PRIORITY))
-            if (e.isPrivateAddress())
-                e.setWeight(BAD_PRIORITY);
-            else
-                e.setWeight(NORMAL_PRIORITY);
-
+        boolean ret=false;
         boolean notifyGUI=false;
         synchronized(this) {
             if (! (set.contains(e))) {
+                ret=true;
                 //Adding e may eject an older point from queue, so we have to
                 //cleanup the set to maintain rep. invariant.
                 set.add(e);
@@ -309,12 +330,11 @@ public class HostCatcher {
 
         //If we're trying to connect to pong, notify the router connection
         //thread.  This will in turn notify any connection fetchers waiting for
-        //the cache to refresh.
-        if (e.getWeight()==GOOD_PRIORITY) { 
-            synchronized (gotGoodPongLock) {
-                gotGoodPong=true;
-                gotGoodPongLock.notify();
-            }
+        //the cache to refresh.  We used to do this only for router pongs.  Now
+        //GOOD_PRIORITY is redefined to mean supernode.  Is this new code ok?
+        synchronized (gotGoodPongLock) {
+            gotGoodPong=true;
+            gotGoodPongLock.notify();
         }
 
         //we notify the callback in two different situations.  One situation, we
@@ -331,6 +351,7 @@ public class HostCatcher {
             if (notifyGUI)
                 callback.knownHost(e);
         }
+        return ret;
     }
 
     /**
