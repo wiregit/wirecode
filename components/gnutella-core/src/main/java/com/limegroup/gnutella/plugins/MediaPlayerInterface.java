@@ -5,6 +5,27 @@ package com.limegroup.gnutella.plugins;
 */
 public interface MediaPlayerInterface extends MinimalPlayerInterface {
 
+    /** final variable used to keep track of MediaPlayer status
+     */
+	public static final int STATUS_PLAYING = 0;
+    /** final variable used to keep track of MediaPlayer status
+     */
+	public static final int STATUS_PAUSED  = 1;
+    /** final variable used to keep track of MediaPlayer status
+     */
+	public static final int STATUS_STOPPED = 2;
+
+	/**
+	 * getStatus
+	 *
+	 * - called by client to determine what
+	 *   the MediaPlayerInterface is doing at that momemt
+	 * - returns STATUS_PLAYING, STATUS_STOPPED, STATUS_PAUSED
+	 *
+	 */
+	public int getStatus();
+
+
     /** Pause play of the currently playing media.
      */
     public void pause();
