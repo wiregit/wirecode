@@ -114,7 +114,7 @@ public class SettingsManager {
     /** Default for whether user should be prompted before downloading exe's. */
     private final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
     private final int     DEFAULT_MAX_UPLOADS      = 8;
-    private final boolean DEFAULT_CLEAR_UPLOAD     = false;
+    private final boolean DEFAULT_CLEAR_UPLOAD     = true;
     private final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     private final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
     public static final String  DEFAULT_CONNECT_STRING    
