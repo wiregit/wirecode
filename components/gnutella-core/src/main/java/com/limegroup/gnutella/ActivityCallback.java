@@ -106,6 +106,16 @@ public interface ActivityCallback
 	 * The list of shared files has been emptied.
 	 */
 	public void clearSharedFiles();           
+        
+     /** 
+      * Notifies the GUI that all active downloads have been completed.
+      */   
+    public void downloadsComplete();
+    
+    /** 
+     * Notifies the GUI that all active uploads have been completed.
+     */  
+    public void uploadsComplete();
 
     /**
      * An error has occured.
