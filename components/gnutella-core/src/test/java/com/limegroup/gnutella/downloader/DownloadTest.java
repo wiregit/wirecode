@@ -1346,6 +1346,50 @@ public class DownloadTest extends BaseTestCase {
         
     }
     
+    public void testIdenticalRFDsMerged() throws Exception {
+        LOG.debug("-Testing that when we have two rfds pointing to the same host" +
+        		" we merge their proxies...");
+        
+        RemoteFileDesc rfd1 = newRFDPush(PPORT_1,1);
+        RemoteFileDesc rfd2 = newRFDPush(PPORT_2,1);
+        
+        assertEquals(rfd1,rfd2);
+        
+        // create two test uploaders
+        TestUploader pusher1 = new TestUploader("pusher1");
+        TestUploader pusher2 = new TestUploader("pusher2");
+        
+        pusher1.setRate(500);
+        pusher2.setRate(500);
+        
+        PushAcceptor pa1 = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),pusher1);
+        
+        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+                savedFile.getName(),pusher2);
+        
+        // we should create a single HTTPDownloader, but send the pushes to 
+        // both uploaders.  Therefore one of the GIV requests will be ignored
+        
+        RemoteFileDesc [] rfds = {rfd1,rfd2};
+        
+        ManagedDownloader download=null;
+
+        download= (ManagedDownloader)RouterService.download(rfds, false, null);
+        
+        Thread.sleep(2000);
+        
+        assertEquals(1,download.getNumDownloaders());
+        assertTrue(pa1.sentGIV);
+        assertTrue(pa2.sentGIV);
+        
+        waitForComplete(false);
+        
+        // one of the uploaders should not have uploaded anything
+        assertTrue(pusher1.amountUploaded() == 0 || pusher2.amountUploaded()==0);
+        
+    }
+    
     public void testAlternateLocationsAreRemoved() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
@@ -2502,6 +2546,7 @@ public class DownloadTest extends BaseTestCase {
         private DatagramSocket sock;
         private final String _fileName;
         private final TestUploader _uploader;
+        public boolean sentGIV;
         
         public PushAcceptor(int portL,int portC,String filename,TestUploader uploader) {
             super("push acceptor "+portL+"->"+portC);
@@ -2542,6 +2587,7 @@ public class DownloadTest extends BaseTestCase {
                 os.flush();
                 
                 LOG.debug("wrote GIV");
+                sentGIV=true;
                 _uploader.setSocket(s);
                 
             }catch(BadPacketException bad) {
