@@ -211,7 +211,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private boolean _wantsFalts = false;
     
     /**
-     * whether the other side wants to receive only fwt altlocs.
+     * whether the other side wants to receive only fwt altlocs. (not used atm)
      * INVARIANT: if this is set, _wantsFalts must be set too.
      */
     private boolean _wantsFWTFalts = false;
@@ -529,9 +529,7 @@ public class HTTPDownloader implements BandwidthTracker {
         			writeClone = new HashSet();
         			Iterator iter = _goodPushLocs.iterator();
         			while(iter.hasNext()) {
-        				PushAltLoc next = (PushAltLoc)iter.next();
-        				if (_wantsFWTFalts && !next.supportsF2FTransfers())
-        					continue;
+        				Object next = iter.next();
         				writeClone.add(next);
         				_writtenPushLocs.add(next);
         			}
@@ -549,9 +547,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     writeClone = new HashSet();
                     Iterator iter = _badPushLocs.iterator();
                     while(iter.hasNext()) {
-                        PushAltLoc next = (PushAltLoc)iter.next();
-                        if (_wantsFWTFalts && !next.supportsF2FTransfers())
-        					continue;
+                        Object next = iter.next();
                         writeClone.add(next);
                         _writtenBadPushLocs.add(next);
                     }
@@ -1552,6 +1548,14 @@ public class HTTPDownloader implements BandwidthTracker {
 
 	public boolean browseEnabled() {
 		return _browseEnabled;
+	}
+	
+	/**
+	 * @return whether the remote host is interested in receiving
+	 * firewalled alternate locations.
+	 */
+	public boolean wantsFalts() {
+		return _wantsFalts;
 	}
 	
 	public String getVendor() { return _server; }

@@ -1473,11 +1473,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(r.getHost()==rfd.getHost() && r.getPort()==rfd.getPort()) 
                 continue;//no need to tell uploader about itself
             
-            //inform downloaders only about altlocs
-           	if(good)
-           		httpDloader.addSuccessfulAltLoc(loc);
-           	else
-           		httpDloader.addFailedAltLoc(loc);
+            
+            //no need to send push altlocs to older uploaders
+            if (loc instanceof DirectAltLoc || 
+            		httpDloader.wantsFalts())
+            	if (good)
+            		httpDloader.addSuccessfulAltLoc(loc);
+            	else
+            		httpDloader.addFailedAltLoc(loc);
+           	
         }
 
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
