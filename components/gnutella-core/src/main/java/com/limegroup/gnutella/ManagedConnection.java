@@ -793,8 +793,6 @@ public class ManagedConnection extends Connection
         //IMPORTANT: note that we do not use this' send or receive methods.
         //This is an important optimization to prevent calling
         //RouteTable.removeReplyHandler when the connection is closed.
-        //Unfortunately it still can be triggered by the
-        //OutputRunnerThread.
 
         //send the pongs for the Ultrapeer & 0.4 connections
         List /*<ManagedConnection>*/ nonLeafConnections 
