@@ -71,6 +71,8 @@ public class M4AMetaData extends AudioMetaData {
     final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
 	final static int  GENRE_ATOM = 0x676e7265; //"gnre"
 	final static int  TRACK_ATOM = 0x74726b6e; //"trkn"
+	final static int COMMENT_ATOM = 0xA9636D74; //'�cmt' 
+	final static int DISK_ATOM = 0x6469736b; //"disk"
 	
 	/**
 	 * the data atom within each metadata atom
@@ -99,7 +101,7 @@ public class M4AMetaData extends AudioMetaData {
 		
 		populateMetaDataMap();
 		
-		//the title, artist and album tags are in string format.
+		//the title, artist album and comment tags are in string format.
 		//so we just set them
 		byte []current = (byte []) _metaData.get(new Integer(NAME_ATOM));
 		setTitle(current == null ? "" : new String(current, "UTF-8"));
@@ -109,6 +111,9 @@ public class M4AMetaData extends AudioMetaData {
 		
 		current = (byte []) _metaData.get(new Integer(ALBUM_ATOM));
 		setAlbum(current == null ? "" : new String(current,"UTF-8"));
+		
+		current = (byte []) _metaData.get(new Integer(COMMENT_ATOM));
+		setComment(current == null ? "" : new String(current,"UTF-8"));
 		
 		
 		//the genre is byte encoded the same way as with id3 tags
@@ -138,6 +143,15 @@ public class M4AMetaData extends AudioMetaData {
 			setTrack(trackShort);
 			short trackTotal = ByteOrder.beb2short(current,current.length-4);
 			setTotalTracks(trackTotal);
+		}
+		
+		//get the disk # & total # of disks on album
+		current = (byte []) _metaData.get(new Integer(DISK_ATOM));
+		if (current != null) {
+			short diskShort = ByteOrder.beb2short(current,current.length-4);
+			setDisk(diskShort);
+			short diskTotal = ByteOrder.beb2short(current,current.length-2);
+			setTotalDisks(diskTotal);
 		}
 		
 		//TODO: add more fields as we discover their meaning.
@@ -247,6 +261,10 @@ public class M4AMetaData extends AudioMetaData {
 						_metaData.put(new Integer(GENRE_ATOM), readDataAtom());break;
 					case DATE_ATOM:
 						_metaData.put(new Integer(DATE_ATOM), readDataAtom());break;
+					case COMMENT_ATOM:
+						_metaData.put(new Integer(COMMENT_ATOM), readDataAtom());break;
+					case DISK_ATOM:
+						_metaData.put(new Integer(DISK_ATOM), readDataAtom());break;
 						//add more atoms as we learn their meaning
 					default:
 						//skip unknown atoms.
