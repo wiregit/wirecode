@@ -49,10 +49,13 @@ public class ApplicationSettings extends LimeProps {
     
     /**
 	 * Specifies whether or not the program has been installed, either by
-	 * a third-party installer, or by our own.
+	 * a third-party installer, or by our own.  This is the old value for 
+     * legacy InstallShield installers that set the save directory and the
+     * connection speed.
 	 */
     public static final BooleanSetting INSTALLED =
-        FACTORY.createBooleanSetting("INSTALLED", false);   
+        FACTORY.createBooleanSetting("INSTALLED", false);
+    
     /**
 	 * The width that the application should be.
 	 */

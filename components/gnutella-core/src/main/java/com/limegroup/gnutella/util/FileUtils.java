@@ -145,6 +145,10 @@ public class FileUtils
      *
      * @param f the <tt>File</tt> instance whose read only flag should
      *  be unset.
+     * 
+     * @return whether or not <tt>f</tt> is writable after trying to make it
+     *  writeable -- note that if the file doesn't exist, then this returns
+     *  <tt>true</tt> 
      */
     public static boolean setWriteable(File f) {
         if( f.canWrite() || !f.exists() )
