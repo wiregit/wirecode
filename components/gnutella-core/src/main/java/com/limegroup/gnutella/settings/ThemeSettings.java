@@ -29,7 +29,9 @@ public final class ThemeSettings {
 		File themeFile = Settings.THEME_FILE.getValue();
 		String dirName = themeFile.getName();
 		dirName = dirName.substring(0, dirName.length()-4);
-		File themeDir = new File("themes", dirName);
+		File themeDir = 
+			new File(new File(CommonUtils.getUserSettingsDir(),"themes"), 
+					 dirName);
 
 		final File THEME_PROPS = new File(themeDir, "theme.txt");
 
@@ -657,6 +659,25 @@ public final class ThemeSettings {
 	 */
 	public static final IntSetting SEARCH_RESULT_SPEED_COLOR_B = 
 		FACTORY.createIntSetting("SEARCH_RESULT_SPEED_COLOR_B", 0);
+
+
+	/**
+	 * Setting for the playlist "playing song" color red value.
+	 */
+	public static final IntSetting PLAYING_SONG_COLOR_R = 
+		FACTORY.createIntSetting("PLAYING_SONG_COLOR_R", 7);
+
+	/**
+	 * Setting for the playlist "playing song" color green value.
+	 */
+	public static final IntSetting PLAYING_SONG_COLOR_G = 
+		FACTORY.createIntSetting("PLAYING_SONG_COLOR_G", 170);
+
+	/**
+	 * Setting for the playlist "playing song" color blue value.
+	 */
+	public static final IntSetting PLAYING_SONG_COLOR_B = 
+		FACTORY.createIntSetting("PLAYING_SONG_COLOR_B", 0);
 
 	public static void main(String[] args) {
 		ThemeSettings.reload();
