@@ -3,15 +3,12 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 import java.io.*;
-import java.net.*;
 import java.util.Properties;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 
 
 /**
@@ -42,7 +39,7 @@ public class ManagedConnectionTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
-        if(ROUTER_SERVICE.isStarted()) return;
+        if(RouterService.isStarted()) return;
         sleep(4000);
         setStandardSettings();
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
@@ -58,7 +55,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         // HostCatcher in particular
         ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
-		ROUTER_SERVICE.connect();
+		RouterService.connect();
     }
 
 	public void tearDown() {
@@ -151,7 +148,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         ManagedConnection mc= new ManagedConnection("", 1);
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
-        hc.HORIZON_UPDATE_TIME=1*200;   
+        HorizonCounter.HORIZON_UPDATE_TIME=1*200;   
 
         PingReply pr1 = PingReply.create(
             GUID.makeGuid(), (byte)3, 6346,
@@ -266,7 +263,6 @@ public class ManagedConnectionTest extends BaseTestCase {
 	 */
     public void testClientSideClose() throws Exception {
         ManagedConnection out=null;
-        Connection in=null;
         //com.limegroup.gnutella.MiniAcceptor acceptor=null;                
         //When receive() or sendQueued() gets IOException, it calls
         //ConnectionManager.remove().  This in turn calls
@@ -336,21 +332,6 @@ public class ManagedConnectionTest extends BaseTestCase {
         assertTrue("connection should not be open", !out.isOpen());
         assertTrue("runner should be dead", out.runnerDied());
 		sleep(2000);
-    }
-
-    /** Tries to receive any outstanding messages on c 
-     *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m = c.receive(2000);
-                ret=true;
-            } catch (InterruptedIOException e) {
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
     }
 
     class GGEPResponder implements HandshakeResponder {
