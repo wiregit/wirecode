@@ -2269,11 +2269,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }                    
     }
     
-    void removeWorker(DownloadWorker worker) {
+    synchronized void removeWorker(DownloadWorker worker) {
         removeActiveWorker(worker);
-        synchronized(this) {
-            _workers.remove(worker);
-        }
+        _workers.remove(worker);
     }
     
     synchronized void removeActiveWorker(DownloadWorker worker) {

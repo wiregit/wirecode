@@ -422,7 +422,7 @@ public class DownloadWorker implements Runnable {
             // information.  despite the rarity of the situation,
             // we should be prepared.
             synchronized(_stealLock){
-                _manager.removeWorker(this);
+                _manager.removeActiveWorker(this);
             }
             
             Thread.sleep(status.getQueuePollTime());//value from QueuedException
