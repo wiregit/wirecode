@@ -60,6 +60,34 @@ public class QueryRequest extends Message implements Serializable{
             query=new String(payload,2,payload.length-3);
         return query;
     }
+    
+    /** This method has been added  to get number of bytes in the raw query 
+     *  the raw query is just the query part of the payload
+     *  the value this method returns is different than payload.length
+     * @author Sumeet Thadani
+     */
+    public int getQueryLength(){
+        //if it's double null terminated
+        if (super.getLength()>3 && payload[payload.length-2]==(byte)0)
+            return payload.length-4;
+        else //normal case
+            return payload.length-3;
+    }
+
+    /**This method returns the byte at the specified index from the payload only
+     * It throws an ArrayIndexOutOfBoundsException if 
+     * the given index is either in
+     * within the first two bytes or goes into the null termination
+     * <p>It also assumes that the index 0 corresponds to the first byte of the 
+     * query not of the whole payload
+     * @author Sumeet Thadani
+     */
+    public byte getQueryByteAt(int pseudoIndex)throws 
+                                      ArrayIndexOutOfBoundsException{
+        if (pseudoIndex<0 || pseudoIndex > getQueryLength()-1)
+            throw new ArrayIndexOutOfBoundsException();
+        return payload[pseudoIndex+2];
+    }
 
     /**
       * Note: the minimum speed can be represented as a 2-byte unsigned
@@ -78,36 +106,50 @@ public class QueryRequest extends Message implements Serializable{
             +", "+super.toString()+")";
     }
 
-//      /** Unit test */
-//      public static void main(String args[]) {
-//      int u2=0x0000FFFF;
-//      QueryRequest qr=new QueryRequest((byte)3,u2,"");
-//      Assert.that(qr.getMinSpeed()==u2);
-//      Assert.that(qr.getQuery().equals(""));
+    /** Unit test */
+    /*
+    public static void main(String args[]) {
+        int u2=0x0000FFFF;
+        QueryRequest qr=new QueryRequest((byte)3,u2,"");
+        Assert.that(qr.getMinSpeed()==u2);
+        Assert.that(qr.getQuery().equals(""));
+        Assert.that(qr.getQueryLength()==0);
+        
 
-//      qr=new QueryRequest((byte)3,(byte)1,"ZZZ");
-//      Assert.that(qr.getMinSpeed()==(byte)1);
-//      Assert.that(qr.getQuery().equals("ZZZ"));
+        qr=new QueryRequest((byte)3,(byte)1,"ZZZ");
+        Assert.that(qr.getMinSpeed()==(byte)1);
+        Assert.that(qr.getQuery().equals("ZZZ"));
+        Assert.that(qr.getQueryLength()==3);
+        System.out.println("(ZZZ) First byte = "+qr.getQueryByteAt(0));
 
-//      //String is single null-terminated.
-//      byte[] payload=new byte[2+2];
-//      payload[2]=(byte)65;
-//      qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-//      Assert.that(qr.getLength()==4);
-//      String s=qr.getQuery();
-//      Assert.that(s.equals("A"), s);
+        //String is single null-terminated.
+        byte[] payload=new byte[2+2];
+        payload[2]=(byte)65;
+        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        Assert.that(qr.getLength()==4);
+        String s=qr.getQuery();
+        Assert.that(s.equals("A"), s);
+        Assert.that(qr.getQueryLength()==1);
+        Assert.that(qr.getQueryByteAt(0)==65);//first byte of query.
 
-//      //String is double null-terminated.
-//      payload=new byte[2+3];
-//      payload[2]=(byte)65;
-//      qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-//      s=qr.getQuery();
-//      Assert.that(s.equals("A"), s);
 
-//      //String is empty.
-//      payload=new byte[2+1];
-//      qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-//      s=qr.getQuery();
-//      Assert.that(s.equals(""), s);
-//      }
+        //String is double null-terminated.
+        payload=new byte[2+3];
+        payload[2]=(byte)65;
+        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        s=qr.getQuery();
+        Assert.that(s.equals("A"), s);
+        Assert.that(qr.getQueryLength()==1);
+        Assert.that(qr.getQueryByteAt(0)==65);
+
+        //String is empty.
+        payload=new byte[2+1];
+        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+        s=qr.getQuery();
+        Assert.that(s.equals(""), s);
+        Assert.that(qr.getQueryLength()==0);
+        System.out.println("here comes an exception");
+        qr.getQueryByteAt(0);
+    }
+    */
 }

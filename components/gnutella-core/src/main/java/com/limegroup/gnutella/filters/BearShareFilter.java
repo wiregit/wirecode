@@ -19,6 +19,20 @@ public class BearShareFilter extends SpamFilter {
         if ((m.getHops()+m.getTTL()) <= 2)
             return true;
 
+        //Edited by Sumeet Thadani (2/27/01)
+        QueryRequest qReq = (QueryRequest)m;
+        int rawQueryLength = qReq.getQueryLength();
+        //Not enough bytes in payload to be above threshold
+        if (rawQueryLength < MAX_HIGHBITS)
+            return true;
+        int highbits=0;
+        byte currByte;
+        for(int i=0; i<rawQueryLength; i++){
+            currByte = qReq.getQueryByteAt(i);
+            if((currByte & 0x80)!=0)
+                highbits++;
+        }
+        /*
         //Get query string
         String query=((QueryRequest)m).getQuery();
         if (query.length() < MAX_HIGHBITS) //An optimization
@@ -34,10 +48,12 @@ public class BearShareFilter extends SpamFilter {
                 highbits++;
             }
         }
-        
+        */
+        //End of code added by Sumeet Thadani
+
         return highbits<MAX_HIGHBITS;
     }           
-
+    
     /*
     public static void main(String args[]) {
         BearShareFilter f=new BearShareFilter();
