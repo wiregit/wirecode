@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * This class contains a systemwide File creation time cache that persists these
@@ -177,19 +178,33 @@ public final class CreationTimeCache {
         urnSet.add(urn);
     }
 
-    
 
     /**
-     * Returns an iterator of URNs, from 'youngest' to 'oldest'.
+     * Returns an List of URNs, from 'youngest' to 'oldest'.
      * @param max the maximum number of URNs you want returned.  if you
      * want all, give Integer.MAX_VALUE.
      * @return a List ordered by younger URNs.
      */
-    public synchronized List getFiles(final int max) 
+    public synchronized List getFiles(final int max)
+        throws IllegalArgumentException {
+        return getFiles(null, max);
+    }    
+
+    /**
+     * Returns an List of URNs, from 'youngest' to 'oldest'.
+     * @param max the maximum number of URNs you want returned.  if you
+     * want all, give Integer.MAX_VALUE.
+     * @param request in case the query has meta-flags, you can give it to
+     * me. null is fine though.
+     * @return a List ordered by younger URNs.
+     */
+    public synchronized List getFiles(final QueryRequest request, final int max)
         throws IllegalArgumentException {
         if (max < 1) throw new IllegalArgumentException("bad max = " + max);
         List urnList = new ArrayList();
         Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
+        final MediaType.Aggregator filter = 
+            (request == null ? null : MediaType.getAggregator(request));
 
         // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the 
         // entries in descending order....
@@ -197,10 +212,17 @@ public final class CreationTimeCache {
             Map.Entry currEntry = (Map.Entry) iter.next();
             Set urns = (Set) currEntry.getValue();
 
-            // only put as many as desired
+            // only put as many as desired, and possibly filter results based
+            // on what the query desires
             Iterator innerIter = urns.iterator();
-            while ((urnList.size() < max) && innerIter.hasNext())
-                urnList.add(innerIter.next());
+            while ((urnList.size() < max) && innerIter.hasNext()) {
+                if (filter == null) urnList.add(innerIter.next());
+                else {
+                    URN currURN = (URN) innerIter.next();
+                    FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                    if (filter.allow(fd.getName())) urnList.add(currURN);
+                }
+            }
         }
 
         return urnList;
