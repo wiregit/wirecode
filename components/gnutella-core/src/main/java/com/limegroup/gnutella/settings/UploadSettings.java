@@ -20,5 +20,10 @@ public final class UploadSettings extends LimeProps {
      */
     public static final IntSetting UPLOAD_QUEUE_SIZE =
         FACTORY.createIntSetting("UPLOAD_QUEUE_SIZE", 10);
-    
+        
+	/**
+     * Setting for the amount of uploads per person.
+     */
+    public static final IntSetting UPLOADS_PER_PERSON =
+        FACTORY.createIntSetting("UPLOADS_PER_PERSON", 3);
 }

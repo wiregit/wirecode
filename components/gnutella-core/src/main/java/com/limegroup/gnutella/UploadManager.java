@@ -643,7 +643,7 @@ public final class UploadManager implements BandwidthTracker {
      * upload.
      */
 	private synchronized boolean hostLimitReached(String host) {
-        int max = SettingsManager.instance().getUploadsPerPerson();
+        int max = UploadSettings.UPLOADS_PER_PERSON.getValue();
         int i=0;
         Iterator iter = _activeUploadList.iterator();
         while(iter.hasNext()) { //count active uploads to this host

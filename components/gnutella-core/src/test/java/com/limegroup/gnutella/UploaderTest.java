@@ -88,7 +88,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testStalledUploader() throws Exception {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
-        SettingsManager.instance().setUploadsPerPerson(99999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
        
         HTTPDownloader d1, d2, d3, d4;
@@ -137,7 +137,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testNormalQueueing() throws Exception {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
-        SettingsManager.instance().setUploadsPerPerson(99999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
         //first two uploads to get slots
@@ -219,7 +219,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testQueueTiming() throws Exception {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
-        SettingsManager.instance().setUploadsPerPerson(99999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
         //first two uploads to get slots
@@ -282,7 +282,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testNotQueuedUnlessHeaderSent() throws Exception {
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(9999);
-        SettingsManager.instance().setUploadsPerPerson(99999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
         //take the only available slto
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -314,7 +314,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testPerHostLimitedNotQueued() throws Exception {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
-        SettingsManager.instance().setUploadsPerPerson(2);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
    
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -348,7 +348,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testSoftMax() throws Exception {
         SettingsManager.instance().setMaxUploads(9999);
         SettingsManager.instance().setSoftMaxUploads(2);
-        SettingsManager.instance().setUploadsPerPerson(99999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
         //first two uploads to get slots
@@ -386,7 +386,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testUploadLimtIncludesQueue() throws Exception {
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
-        SettingsManager.instance().setUploadsPerPerson(1);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(1);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -422,7 +422,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testSameFileSameHostGivenSlot() throws Exception { 
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
-        SettingsManager.instance().setUploadsPerPerson(99999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         //connect the first downloader.
         PipedSocketFactory psf = null;

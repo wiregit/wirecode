@@ -67,7 +67,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		SettingsManager.instance().setDirectories(new File[] {testDir});
 		SettingsManager.instance().setExtensions("txt");
 		SettingsManager.instance().setMaxUploads(10);
-		SettingsManager.instance().setUploadsPerPerson(10);
+		UploadSettings.UPLOADS_PER_PERSON.setValue(10);
 
         SettingsManager.instance().setFilterDuplicates(false);
 

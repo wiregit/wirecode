@@ -44,7 +44,8 @@ public class MulticastTest extends BaseTestCase {
     private static void setSettings() {
         SettingsManager settings=SettingsManager.instance();
         settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*"});
+        // TODO: make this work for people not in 10.254.x.x
+        settings.setAllowedIps(new String[] {"10.254.*.*"});
         settings.setPort(PORT);
         settings.setExtensions("mp3;");
         File mp3 = CommonUtils.getResourceFile(MP3_NAME);
@@ -167,6 +168,125 @@ public class MulticastTest extends BaseTestCase {
         assertEquals("wrong qos", 4, qr.calculateQualityOfService(true));
 	}
     
+    /**
+     * Tests that a push sent from a multicast RFD is sent via multicast.
+     * This does NOT test that ManagedDownloader will actively push
+     * multicast requests, nor does it check that we can parse
+     * the incoming GIV.  It also does not test to ensure that multicast
+     * pushes are given priority over all other uploads.
+     */
+    public void testPushSentThroughMulticast() throws Exception {
+        // first go through some boring stuff to get a correct QueryReply
+        // that we can convert to an RFD.
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "metadata");
+        sleep(300);
+        assertEquals("should have sent query", 1,
+            MESSAGE_ROUTER.multicasted.size());
+        assertEquals("should have gotten reply", 1,
+            MESSAGE_ROUTER.unicasted.size());
+
+        Message m = (Message)MESSAGE_ROUTER.unicasted.get(0);
+        assertInstanceof( QueryReply.class, m);
+        QueryReply qr = (QueryReply)m;
+        // Because we're acting as both the sender & receiver, our
+        // routing tables are a little confused, so we must reset
+        // the push route table to map the guid to ForMeReplyHandler
+        // from a UDPReplyHandler
+        reroutePush(qr.getClientGUID());
+                
+        // okay, now we have a QueryReply to convert to an RFD.
+        RemoteFileDesc[] rfdArray = qr.toRemoteFileDescArray(true);
+        assertEquals("should only be one rfd", 1, rfdArray.length);
+        RemoteFileDesc rfd = rfdArray[0];
+        
+        assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
+        
+        // clear the data to make it easier to look at again...
+        MESSAGE_ROUTER.multicasted.clear();
+        MESSAGE_ROUTER.unicasted.clear();        
+        
+        // Finally, we have the RFD we want to push.
+        boolean ret = RouterService.getDownloadManager().sendPush(rfd);
+        assertTrue("sendPush should have worked", ret);
+        
+        // sleep to make sure the push goes through.
+        sleep(300);
+        
+        assertEquals("should have sent & received push", 1,
+            MESSAGE_ROUTER.multicasted.size());
+        // should be a push.
+        m = (Message)MESSAGE_ROUTER.multicasted.get(0);
+        assertInstanceof(PushRequest.class, m);
+        PushRequest pr = (PushRequest)m;
+        // note it was hopped.
+        assertEquals("wrong ttl", 0, pr.getTTL());
+        assertEquals("wrong hops", 1, pr.getHops());
+        assertTrue("wrong client guid",
+            Arrays.equals(rfd.getClientGUID(), pr.getClientGUID()));
+        assertEquals("wrong index", rfd.getIndex(), pr.getIndex());
+        
+        assertEquals("should not have unicasted anything", 0,
+            MESSAGE_ROUTER.unicasted.size());
+	}
+    
+    /**
+     * Tests to ensure multicast requests are sent via push
+     * and will upload regardless of the slots left.
+     */
+    public void testPushesHaveUploadPriority() throws Exception {
+        UploadSettings.UPLOADS_PER_PERSON.setValue(0);        
+    
+        // first go through some boring stuff to get a correct QueryReply
+        // that we can convert to an RFD.
+        byte[] guid = RouterService.newQueryGUID();
+        RouterService.query(guid, "metadata");
+        sleep(300);
+        assertEquals("should have sent query", 1,
+            MESSAGE_ROUTER.multicasted.size());
+        assertEquals("should have gotten reply", 1,
+            MESSAGE_ROUTER.unicasted.size());
+
+        Message m = (Message)MESSAGE_ROUTER.unicasted.get(0);
+        assertInstanceof( QueryReply.class, m);
+        QueryReply qr = (QueryReply)m;
+        // Because we're acting as both the sender & receiver, our
+        // routing tables are a little confused, so we must reset
+        // the push route table to map the guid to ForMeReplyHandler
+        // from a UDPReplyHandler
+        reroutePush(qr.getClientGUID());
+        
+        // okay, now we have a QueryReply to convert to an RFD.
+        RemoteFileDesc rfds[] = qr.toRemoteFileDescArray(true);
+        
+        // clear the data to make it easier to look at again...
+        MESSAGE_ROUTER.multicasted.clear();
+        MESSAGE_ROUTER.unicasted.clear();
+        
+        assertFalse("file should not be saved yet", 
+            new File( _savedDir, "metadata.mp3").exists());
+        assertTrue("file should be shared",
+            new File(_sharedDir, "metadata.mp3").exists());
+        
+        RouterService.download(rfds, false);
+        
+        // sleep to make sure the download starts & push goes through.
+        sleep(10000);
+        
+        assertEquals("should have sent & received push", 1,
+            MESSAGE_ROUTER.multicasted.size());
+        // should be a push.
+        m = (Message)MESSAGE_ROUTER.multicasted.get(0);
+        assertInstanceof(PushRequest.class, m);
+        PushRequest pr = (PushRequest)m;
+        
+        assertEquals("should not have unicasted anything", 0,
+            MESSAGE_ROUTER.unicasted.size());
+        
+        assertTrue("file should have been downloaded & saved",
+            new File(_savedDir, "metadata.mp3").exists());
+	}
+    
     private static void setGUID(Message m, GUID g) {
         try {
             PrivilegedAccessor.invokeMethod( m, "setGUID", g );
@@ -178,6 +298,12 @@ public class MulticastTest extends BaseTestCase {
     private static void wipeAddress(QueryReply qr) throws Exception {
         PrivilegedAccessor.setValue(qr, "_address", new byte[4]);
 	}
+    
+    private static void reroutePush(byte[] guid) throws Exception {
+        RouteTable rt = (RouteTable)PrivilegedAccessor.getValue(
+            MESSAGE_ROUTER, "_pushRouteTable");
+        rt.routeReply(guid, ForMeReplyHandler.instance());
+    }
     
     private static class MulticastMessageRouter extends StandardMessageRouter {
 
@@ -191,7 +317,8 @@ public class MulticastTest extends BaseTestCase {
         public void handleMulticastMessage(Message msg, DatagramPacket dp) {
             multicasted.add(msg);
             // change the guid so we can pretend we've never seen it before
-            setGUID( msg, new GUID(RouterService.newQueryGUID()) );
+            if( msg instanceof QueryRequest )
+                setGUID( msg, new GUID(RouterService.newQueryGUID()) );
             super.handleMulticastMessage(msg, dp);
         }
         
@@ -200,4 +327,5 @@ public class MulticastTest extends BaseTestCase {
             super.handleUDPMessage(msg, dp);
         }
 	}
+        
 }
