@@ -1142,15 +1142,25 @@ public class DownloadTest extends BaseTestCase {
         final int SLOW_RATE=5;
         final int FAST_RATE=100;
         uploader1.setBusy(true);
-        uploader1.setRetryAfter(1);
         uploader1.setTimesBusy(1);
         uploader1.setRate(FAST_RATE);
         uploader2.setRate(SLOW_RATE);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1, rfd2};
+        RemoteFileDesc[] rfds = {rfd1}; // see note below about why only rfd1
+        RemoteFileDesc[] later = {rfd2};
         
-        tGeneric(rfds);
+        // Interesting odd factoid about the test:
+        // Whether or not RFD1 or RFD2 is tried first is a BIG DEAL.
+        // This test is making sure that RFD1 is reused even though
+        // RFD2 is actively downloading.  However, because ManagedDownloader
+        // sets the RetryAfter time differently depending on if
+        // someone is already downloading (and this test will fail
+        // if it sets the time to be the longer 10 minute wait),
+        // we must ensure that RFD1 is tried first, so the wait
+        // is only set to 1 minute.
+        
+        tGeneric(rfds, later);
         
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
@@ -1582,17 +1592,32 @@ public class DownloadTest extends BaseTestCase {
 
     ////////////////////////// Helping Code ///////////////////////////
     private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
-        tGeneric(rfds, DataUtils.EMPTY_LIST);
+        tGeneric(rfds, new RemoteFileDesc[0]);
+    }
+    
+    private static void tGeneric(RemoteFileDesc[] rfds, List alts)
+      throws Exception {
+        tGeneric(rfds, null, alts);
+    }
+    
+    private static void tGeneric(RemoteFileDesc[] now, RemoteFileDesc[] later)
+      throws Exception {
+        tGeneric(now, later, DataUtils.EMPTY_LIST);
     }
     
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
-    private static void tGeneric(RemoteFileDesc[] rfds, List alts)
-      throws Exception {
+    private static void tGeneric(RemoteFileDesc[] rfds, RemoteFileDesc[] later, 
+      List alts) throws Exception {
         Downloader download=null;
 
         download=RouterService.download(rfds, alts, false);
+        if(later != null) {
+            Thread.sleep(100);
+            for(int i = 0; i < later.length; i++)
+                ((ManagedDownloader)download).addDownload(later[i], true);
+        }
 
         waitForComplete(false);
         if (isComplete())

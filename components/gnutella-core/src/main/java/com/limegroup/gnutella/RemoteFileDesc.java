@@ -8,6 +8,9 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import java.net.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * A reference to a single file on a remote machine.  In this respect
  * RemoteFileDesc is similar to a URL, but it contains Gnutella-
@@ -23,6 +26,9 @@ import java.net.*;
  * newer serialized file.  
  */
 public class RemoteFileDesc implements Serializable {
+    
+    private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
+    
     private static final long serialVersionUID = 6619479308616716538L;
     
     private static final int COPY_INDEX = Integer.MAX_VALUE;
@@ -328,6 +334,9 @@ public class RemoteFileDesc implements Serializable {
      * @param seconds number of seconds to wait before retrying
      */
     public void setRetryAfter(int seconds) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("setting retry after to be [" + seconds + 
+                      "] seconds for " + this);        
         _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
     }
 

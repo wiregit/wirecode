@@ -471,13 +471,9 @@ public class HTTPDownloader implements BandwidthTracker {
                     throw new RangeNotAvailableException();
                     
                 //no QueuedException or RangeNotAvailableException? not queued.
-                //test if we already read a Retry-After header: if not, set 
-                //time to wait before retrying this RFD to MIN_RETRY_AFTER 
-                //seconds
-                if ( ! _rfd.isBusy() ) {
-                    _rfd.setRetryAfter(MIN_RETRY_AFTER);
-                }
+                //throw a generic busy exception.
 				throw new TryAgainLaterException();
+
                 // a general catch for 4xx and 5xx's
                 // should maybe be a different exception?
                 // else if ( (code >= 400) && (code < 600) ) 
@@ -821,9 +817,6 @@ public class HTTPDownloader implements BandwidthTracker {
         seconds = Math.max(seconds, MIN_RETRY_AFTER);
         // make sure the value is not larger than MAX_RETRY_AFTER seconds
         seconds = Math.min(seconds, MAX_RETRY_AFTER);
-        if(LOG.isDebugEnabled())
-            LOG.debug("setting retry after to be [" + seconds + 
-                      "] seconds for " + rfd);
         rfd.setRetryAfter(seconds);
     }
     

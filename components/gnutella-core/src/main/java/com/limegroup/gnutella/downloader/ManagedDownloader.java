@@ -224,11 +224,47 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int REQUERY_ATTEMPTS = 1;
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
-    /** The number of seconds to wait for hosts that don't have any ranges we
-     *  would be interested in. */
+    
+    /**
+     * The number of seconds to wait for hosts that don't have any ranges we
+     *  would be interested in.
+     */
     private static final int NO_RANGES_RETRY_AFTER = 60 * 5; // 5 minutes
-    /** The number of seconds to wait for hosts that failed once. */
+    
+    /**
+     * The number of seconds to wait for hosts that failed once.
+     */
     private static final int FAILED_RETRY_AFTER = 60 * 1; // 1 minute
+    
+    /**
+     * The number of seconds to wait for a busy host (if it didn't give us a
+     * retry after header) if we don't have any active downloaders.
+     *
+     * Note that there are some acceptable problems with the way this
+     * values are used.  Namely, if we have sources X & Y and source
+     * X is tried first, but is busy, its busy-time will be set to
+     * 1 minute.  Then source Y is tried and is accepted, source X
+     * will still retry after 1 minute.  This 'problem' is considered
+     * an acceptable issue, given the complexity of implementing
+     * a method that will work under the circumstances.
+     */
+    private static final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
+    
+    /**
+     * The minimum number of seconds to wait for a busy host if we do
+     * have some active downloaders.
+     *
+     * Note that there are some acceptable problems with the way this
+     * values are used.  Namely, if we have sources X & Y and source
+     * X is tried first and is accepted.  Then source Y is tried and
+     * is busy, so its busy-time is set to 10 minutes.  Then X disconnects,
+     * leaving Y with 9 or so minutes left before being retried, despite
+     * no other sources available.  This 'problem' is considered
+     * an acceptable issue, given the complexity of implementing
+     * a method that will work under the circumstances.
+     */
+    private static final int RETRY_AFTER_SOME_ACTIVE = 60 * 10; // 10 minutes
+    
 	/** The value of an unknown filename - potentially overridden in 
       * subclasses */
 	protected static final String UNKNOWN_FILENAME = "";  
@@ -2453,7 +2489,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     //forget the ranges we are preteding uploader is busy.
                     rfd.setAvailableRanges(null);
-                    rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
+                    //if this RFD did not already give us a retry-after header
+                    //then set one for it.
+                    if(!rfd.isBusy())
+                        rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
                     files.add(rfd);
                 }
                 rfd.resetFailedCount();                
@@ -2463,7 +2502,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                     DownloadStat.TAL_EXCEPTION.incrementStat();
                 if(LOG.isDebugEnabled())
                     LOG.debug("talx thrown in assignAndRequest "+dloader,talx);
+                    
+                //if this RFD did not already give us a retry-after header
+                //then set one for it.
+                if ( !rfd.isBusy() ) {
+                    rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
+                }
+                
                 synchronized(this) {
+                     //if we already have downloads going, then raise the
+                     //retry-after if it was less than the appropriate amount
+                    if(dloaders.size() > 0 &&
+                       rfd.getWaitTime() < RETRY_AFTER_SOME_ACTIVE)
+                       rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
+
                     files.add(rfd);//try this rfd later
                 }
                 rfd.resetFailedCount();                
@@ -2975,9 +3027,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     rfd.incrementFailedCount();
                     // if we failed less than twice in succession,
                     // try to use the file again much later.
-                    if( rfd.getFailedCount() < 2 )
+                    if( rfd.getFailedCount() < 2 ) {
+                        rfd.setRetryAfter(FAILED_RETRY_AFTER);
                         files.add(rfd);
-                    else
+                    } else
                         informMesh(rfd, false);
                 } else {
                     informMesh(rfd, true);
