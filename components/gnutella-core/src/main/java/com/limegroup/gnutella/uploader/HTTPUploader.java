@@ -135,10 +135,11 @@ public class HTTPUploader implements Runnable {
         _priorAmountRead = 0;
         _socket = s;
         try {
+            //The try-catch below is a work-around for JDK bug 4091706.
             _ostream = s.getOutputStream();
         } catch (IOException e) {
             _state = ERROR;
-        }
+        } 
         _filename = file;
     }
 
@@ -254,7 +255,13 @@ public class HTTPUploader implements Runnable {
         //   It should really be factored into some method.
         //   TODO2:  range headers.
         try {
-            ByteReader in=new ByteReader(_socket.getInputStream());
+            //The try-catch below is a work-around for JDK bug 4091706.
+            ByteReader in=null;
+            try {                
+                in=new ByteReader(_socket.getInputStream());
+            } catch (Exception e) {
+                throw new IOException();
+            }
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             String line=in.readLine();
             _socket.setSoTimeout(0);

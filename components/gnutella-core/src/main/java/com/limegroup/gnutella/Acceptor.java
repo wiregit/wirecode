@@ -277,7 +277,13 @@ public class Acceptor extends Thread {
 
         public void run() {
             try {
-                InputStream in=_socket.getInputStream();
+                //The try-catch below is a work-around for JDK bug 4091706.
+                InputStream in=null;
+                try {
+                    in=_socket.getInputStream(); 
+                } catch (Exception e) {
+                    throw new IOException();
+                }
                 _socket.setSoTimeout(SettingsManager.instance().getTimeout());
                 String word=readWord(in);
                 _socket.setSoTimeout(0);

@@ -44,7 +44,12 @@ public class HTTPManager {
             //reset the timeout immediately before downloading;
             //otherwise, it isn't touched again.
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
-            _istream = _socket.getInputStream();
+            //The try-catch below is a work-around for JDK bug 4091706.
+            try {
+                _istream = _socket.getInputStream();
+            } catch (Exception e) {
+                throw new IOException();
+            }
             _br = new ByteReader(_istream);
             command = _br.readLine();   /* read in the first line */
             if (command==null)

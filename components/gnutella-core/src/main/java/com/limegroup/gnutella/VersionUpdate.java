@@ -65,6 +65,7 @@ public class VersionUpdate implements Runnable
 							  "/version.txt");
 			URLConnection conn = url.openConnection();
 			conn.connect();
+            //The try-catch below works around JDK bug 4091706.
 			InputStream input = conn.getInputStream();
 			br = new ByteReader(input);
 		} catch(Exception e) {

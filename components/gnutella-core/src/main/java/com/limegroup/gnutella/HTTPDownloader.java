@@ -194,6 +194,7 @@ public class HTTPDownloader implements Runnable {
     public void initOne() {
         try {
             _istream = _socket.getInputStream();
+            //The try-catch below works around JDK bug 4091706.
             _br = new ByteReader(_istream);
         }
         catch (Exception e) {
@@ -211,9 +212,15 @@ public class HTTPDownloader implements Runnable {
         //established the connection).  Ideally we should have special methods
         //to handle the HTTP formatting, but this is kind of a hack.
         try {
-            OutputStream os = _socket.getOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(os);
-            BufferedWriter out=new BufferedWriter(osw);
+            //The try-catch below works around JDK bug 4091706.
+            BufferedWriter out=null;
+            try {
+                OutputStream os = _socket.getOutputStream();
+                OutputStreamWriter osw = new OutputStreamWriter(os);
+                out=new BufferedWriter(osw);
+            } catch (Exception e) {
+                throw new IOException();
+            }
 
             out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
             out.write("User-Agent: Gnutella\r\n");
@@ -238,7 +245,12 @@ public class HTTPDownloader implements Runnable {
             URL url = new URL(_protocol, _host, _port, furl);
             conn = url.openConnection();
             conn.connect();
-            _istream = conn.getInputStream();
+            //The try-catch below work-around for JDK bug 4091706.
+            try {
+                _istream = conn.getInputStream();
+            } catch (Exception e) {
+                throw new IOException();
+            }
             _br = new ByteReader(_istream);
         }
         catch (java.net.MalformedURLException e) {
@@ -335,6 +347,7 @@ public class HTTPDownloader implements Runnable {
         }
         // try to get the input stream from the connection
         try {
+            //The try-catch below works JDK bug 4091706.
             _istream = conn.getInputStream();
             _br = new ByteReader(_istream);
         }
