@@ -336,7 +336,7 @@ public abstract class VendorMessage extends Message {
         	return new UPListVendorMessage(guid,ttl,hops,version,restOf);
         
         if ((selector == F_BEST_CANDIDATE) &&
-        		(Arrays.equals(vendorID,F_LIME_VENDOR_ID)) && restOf.length!=0)
+        		(Arrays.equals(vendorID,F_LIME_VENDOR_ID)))
         	return new BestCandidatesVendorMessage(guid,ttl,hops,version,restOf);
         
         
