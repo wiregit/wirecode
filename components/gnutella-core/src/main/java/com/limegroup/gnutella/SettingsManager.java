@@ -296,6 +296,7 @@ public class SettingsManager implements SettingsInterface
                 }
                 else if(key.equals(SettingsInterface.KEEP_ALIVE)) {
                     try {
+                        //Verified for real later.  See note below.
                         i = Integer.parseInt(p);
                         try {setKeepAlive(i);}
                         catch (IllegalArgumentException ie){}
@@ -343,6 +344,7 @@ public class SettingsManager implements SettingsInterface
 
                 else if(key.equals(SettingsInterface.MAX_INCOMING_CONNECTIONS)) {
                     try {
+                        //Verified for real later.  See note below.
                         i = Integer.parseInt(p);
                         try {setMaxIncomingConnections(i);}
                         catch (IllegalArgumentException ie){}
@@ -497,6 +499,15 @@ public class SettingsManager implements SettingsInterface
             }
             catch(ClassCastException cce){}
         }
+
+        //Special case: the legality of KEEP_ALIVE and MAX_INCOMING_CONNECTIONS
+        //are dependent on the connection speed.  Now that the connection speed
+        //has been loaded in, verify the properties for real.  If they don't
+        //work, use suggested value.
+        int incoming=getMaxIncomingConnections();
+        int outgoing=getKeepAlive();
+        setBothConnections(incoming, outgoing);
+            
         write_ = true;
         writeProperties();
     }
@@ -734,6 +745,20 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
+    /** Internal method to set both connections at the same time,
+     *  adjust both values as necessary. */
+    private synchronized void setBothConnections(int outgoing,
+                                                 int incoming) {
+        incoming=Math.max(0, incoming);
+        incoming=Math.min(incoming, maxConnections(true));
+        outgoing=Math.max(0, outgoing);
+        outgoing=Math.min(outgoing, maxConnections(false));
+        if (incoming < outgoing)
+            outgoing=incoming;
+        setKeepAlive(outgoing);
+        setMaxIncomingConnections(incoming);
+    }
+
     /**
      * Sets the keep alive. If keepAlive is negative, throws
      * BadConnectionSettingException with a suggested value of 0.
@@ -741,7 +766,9 @@ public class SettingsManager implements SettingsInterface
      * If checkLimit is true, then if keepAlive is too large for the current
      * connection speed or too large for the current number of incoming
      * connections, BadConnectionSettingException is thrown with suggested new
-     * values.
+     * values.  The suggestions attempt to set KEEP_ALIVE to keepAlive, even if
+     * that means adjusting MAX_INCOMING_CONNECTIONS.  The suggestions are not
+     * necessarily guaranteed to be valid however.
      */
     public synchronized void setKeepAlive(int keepAlive,
                                           boolean checkLimit)
@@ -822,9 +849,8 @@ public class SettingsManager implements SettingsInterface
     }
 
     /**
-     * Sets the max number of incoming connections without checking
-     * the maximum value. Throws IllegalArgumentException if maxConn
-     * is negative.
+     * Sets the max number of incoming connections without checking the maximum
+     * value. Throws IllegalArgumentException if maxConn is negative.  
      */
     public synchronized void setMaxIncomingConnections(int maxConn)
         throws IllegalArgumentException {
@@ -843,7 +869,9 @@ public class SettingsManager implements SettingsInterface
      * If checkLimit is true, then if keepAlive is too large for the current
      * connection speed or too small for the current number of outgoing
      * connections, throws BadConnectionSettingException with suggested new
-     * values.
+     * values.  The suggestions attempt to set MAX_INCOMING_CONNECTIONS to
+     * maxConn, even if that means adjusting the KEEP_ALIVE.  The suggestions are
+     * not necessarily guaranteed to be valid however.
      */
     public synchronized void setMaxIncomingConnections(int maxConn,
                                                        boolean checkLimit)
