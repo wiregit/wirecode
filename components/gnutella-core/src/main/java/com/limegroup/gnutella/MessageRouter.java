@@ -934,26 +934,35 @@ public abstract class MessageRouter {
      */
     protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
-        int portToContact = tcp.getConnectBackPort();
-        InetAddress addrToContact = null;
+        final int portToContact = tcp.getConnectBackPort();
+        final String addrToContact;
         try {
-            addrToContact = source.getInetAddress();
+            addrToContact = source.getInetAddress().getHostAddress();
         }
         catch (IllegalStateException ise) {
             return;
         }
-        try {
-            Socket sock = new Socket(addrToContact, portToContact);
-            OutputStream os = sock.getOutputStream();
-            os.write("\n\n".getBytes());
-            sock.close();
-        }
-        catch (IOException ioe) {
-            // whatever
-        }
-        catch (SecurityException se) {
-            // whatever
-        }
+        Thread connectBack = new Thread( new Runnable() {
+            public void run() {
+                Socket sock = null;
+                OutputStream os = null;
+                try {
+                    sock = Sockets.connect(addrToContact, portToContact, 12);
+                    os = sock.getOutputStream();
+                    os.write("\n\n".getBytes());
+                } catch (IOException ignored) {
+                } catch (SecurityException ignored) {
+                } catch (Throwable t) {
+                    ErrorService.error(t);
+                } finally {
+                    if(sock != null)
+                        try { sock.close(); } catch(IOException ignored) {}
+                    if(os != null)
+                        try { os.close(); } catch(IOException ignored) {}
+                }
+            }
+        }, "TCPConnectBackThread");
+        connectBack.start();
     }
 
 
