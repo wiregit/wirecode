@@ -29,6 +29,13 @@ public final class UDPService implements Runnable {
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
 
+	/**
+	 * Variable for whether or not this node is capable of running its
+	 * own GUESS-style searches, dependent upon whether or not it
+	 * has successfully received an incoming UDP packet.
+	 */
+	private boolean _isGUESSCapable = false;
+
 	//private final int SOCKET_TIMEOUT = 2*1000;
 
 	/**
@@ -86,14 +93,12 @@ public final class UDPService implements Runnable {
 		MessageRouter router = RouterService.getMessageRouter();
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 
-		while(port == RouterService.getPort() && RouterService.isSupernode()) {
+		while(port == RouterService.getPort()) {
 			try {
-                // this line may need to be optimized
-                // -------------			
                 DatagramPacket datagram = 
                     new DatagramPacket(datagramBytes, BUFFER_SIZE);
-                // -------------			
 				_socket.receive(datagram);
+				_isGUESSCapable = true;
 				byte[] data = datagram.getData();
 				int length = datagram.getLength();
 				try {
@@ -192,6 +197,17 @@ public final class UDPService implements Runnable {
 		}
 	}
 
+	/**
+	 * Returns whether or not this node is capable of sending its own
+	 * GUESS queries.  This would not be the case only if this node
+	 * has not successfully received an incoming UDP packet.
+	 *
+	 * @return <tt>true</tt> if this node is capable of running its own
+	 *  GUESS queries, <tt>false</tt> otherwise
+	 */	
+	public boolean isGUESSCapable() {
+		return _isGUESSCapable;
+	}
 
 	/** 
 	 * Overrides Object.toString to give more informative information
