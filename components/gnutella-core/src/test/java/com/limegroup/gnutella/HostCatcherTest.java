@@ -82,7 +82,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         hc.write();
         int numHosts = hc.getNumHosts();
         
-        System.out.println("HostCatcherTest::num hosts: "+numHosts);
         for(int i=0; i<10; i++) {
             hc.getAnEndpoint();
         }
