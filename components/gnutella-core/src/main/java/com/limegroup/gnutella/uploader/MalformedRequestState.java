@@ -13,9 +13,7 @@ import java.io.*;
  */
 public final class MalformedRequestState extends UploadState {
 
-	public MalformedRequestState() {
-		super(null);
-	}
+
 	/**
 	 * Constant for the error message to send.
 	 */

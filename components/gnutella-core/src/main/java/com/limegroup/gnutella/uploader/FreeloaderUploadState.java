@@ -17,9 +17,6 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public class FreeloaderUploadState extends UploadState {
 	
-	public FreeloaderUploadState() {
-		super(null);
-	}
 
     public static final String RESPONSE_PAGE =
 		"<html>\r\n"+

@@ -12,9 +12,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class BannedUploadState extends UploadState {
 
 
-	public BannedUploadState() {
-		super(null);
-	}
 	/**
 	 * Constant for the error message to send.
 	 */

@@ -187,31 +187,19 @@ public class HeadPong extends VendorMessage {
 				_isDownloading=true;
 			
 			if ( (_features & HeadPing.INTERVALS) == 
-				HeadPing.INTERVALS){
-			
-				short rangeLength=dais.readShort();
-				byte [] ranges = new byte [rangeLength];
-				dais.readFully(ranges);
-				_ranges = IntervalSet.parseBytes(ranges);
-			}
+				HeadPing.INTERVALS)
+				_ranges = readRanges(dais);
 		}
+		
 		//parse any included firewalled altlocs
-		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) {
-			int size = dais.readShort();
-			byte [] altlocs = new byte[size];
-			dais.readFully(altlocs);
-			_pushLocs = new HashSet();
-			_pushLocs.addAll(NetworkUtils.unpackPushEPs(altlocs));
-		}
+		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
+			_pushLocs=readPushLocs(dais);
+		
 			
 		//parse any included altlocs
-		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) {
-			int size = dais.readShort();
-			byte [] altlocs = new byte[size];
-			dais.readFully(altlocs);
-			_altLocs = new HashSet();
-			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
-		}
+		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
+			_altLocs=readLocs(dais);
+		
 		
 		}catch(IOException oops) {oops.printStackTrace();
 			throw new BadPacketException(oops.getMessage());
@@ -313,101 +301,25 @@ public class HeadPong extends VendorMessage {
 		
 		
 		//if we sent partial file and the remote asked for ranges, send them 
-		if (retCode == PARTIAL_FILE && ping.requestsRanges()) {
-			LOG.debug("adding ranges to pong");
-			IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
-			byte [] ranges =ifd.getRangesAsByte();
+		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
+			didNotSendRanges=!writeRanges(caos,desc);
 			
-			//write the ranges only if they will fit in the packet
-			if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
-				LOG.debug("added ranges");
-				daos.writeShort((short)ranges.length);
-				caos.write(ranges);
-			} 
-			else { //the ranges will not fit - say we didn't send them.
-				LOG.debug("ranges will not fit :(");
-				didNotSendRanges=true;
-			}
+		
+		
+		//if we have any firewalled altlocs and enough room in the packet, add them.		
+		if (ping.requestsPushLocs()){
 			
+			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
+				HeadPing.FWT_PUSH_ALTLOCS;
+			
+			didNotSendPushAltLocs = !writePushLocs(caos,desc,
+					FWTOnly);
 		}
 		
-		
-		//if we have any altlocs and enough room in the packet, add them.
-		
-		//first add any firewalled altlocs, if they were requested.
-		//this operates on a copy of the alternate location collection
-		//since it may need to remove any PushLocs that do not support
-		//FW2FW transfer.
-		AlternateLocationCollection altlocs = 
-			AlternateLocationCollection.create(desc.getSHA1Urn());
-		
-		altlocs.addAll(desc.getPushAlternateLocationCollection());
-		
-		boolean FWTonly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
-			HeadPing.FWT_PUSH_ALTLOCS;
-		
-		if (FWTonly) {
-			LOG.debug("adding only fwt-enabled pushlocs in pong");
-			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
-				PushAltLoc current = (PushAltLoc)iter.next();
-				if (current.supportsFWTVersion() <1)
-					iter.remove();
-			}
-		}	
-		if (altlocs !=null && altlocs.hasAlternateLocations() &&
-			ping.requestsPushLocs()) {
-			
-				
-				//push altlocs are bigger than normal altlocs, however we 
-				//don't know by how much.  The size can be between
-				//23 and 41 bytes.  We assume its 41.
-				int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 41;
-				
-				if (LOG.isDebugEnabled())
-					LOG.debug("trying to add up to "+available+ " push locs to pong");
-				
-				byte [] altbytes = altlocs.toBytesPush(available);
-				
-				if (altbytes == null){
-					//altlocs will not fit or none available - say we didn't send them
-					LOG.debug("push locs will not fit :(");
-					didNotSendPushAltLocs=true;
-				} else { 
-					LOG.debug("adding push altlocs");
-					daos.writeShort((short)altbytes.length);
-					caos.write(altbytes);
-				}
-				
-		}else
-			didNotSendPushAltLocs=true;
-		
-		
 		//now add any non-firewalled altlocs in case they were requested. 
-		
-		altlocs = desc.getAlternateLocationCollection();
-		
-		if (altlocs!= null && altlocs.hasAlternateLocations() &&
-				ping.requestsAltlocs()) {
+		if (ping.requestsAltlocs()) 
+			didNotSendAltLocs=!writeLocs(caos,desc);
 			
-			int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
-			
-			if (LOG.isDebugEnabled())
-				LOG.debug("trying to add up to "+toPack+" push locs to pong");
-			
-			byte [] altbytes = altlocs.toBytes(toPack);
-			
-			if (altbytes ==null){
-				//altlocs will not fit or none available - say we didn't send them
-				LOG.debug("altlocs will not fit :(");
-				didNotSendAltLocs=true;
-			} else { 
-				LOG.debug("adding altlocs");
-				daos.writeShort((short)altbytes.length);
-				caos.write(altbytes);
-			}
-				
-		} else
-			didNotSendAltLocs=true;
 			
 		}catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -525,5 +437,154 @@ public class HeadPong extends VendorMessage {
 	public boolean isDownloading() {
 		return _isDownloading;
 	}
+	
+	//*************************************
+	//utility methods
+	//**************************************
+	
+	/**
+	 * reads available ranges from an inputstream
+	 */
+	private final IntervalSet readRanges(DataInputStream dais)
+		throws IOException{
+		short rangeLength=dais.readShort();
+		byte [] ranges = new byte [rangeLength];
+		dais.readFully(ranges);
+		return IntervalSet.parseBytes(ranges);
+	}
+	
+	/**
+	 * reads firewalled alternate locations from an input stream
+	 */
+	private final Set readPushLocs(DataInputStream dais) 
+		throws IOException, BadPacketException {
+		int size = dais.readShort();
+		byte [] altlocs = new byte[size];
+		dais.readFully(altlocs);
+		Set ret = new HashSet();
+		ret.addAll(NetworkUtils.unpackPushEPs(altlocs));
+		return ret;
+	}
+	
+	/**
+	 * reads non-firewalled alternate locations from an input stream
+	 */
+	private final Set readLocs(DataInputStream dais) 
+		throws IOException, BadPacketException {
+		int size = dais.readShort();
+		byte [] altlocs = new byte[size];
+		dais.readFully(altlocs);
+		Set ret = new HashSet();
+		ret.addAll(NetworkUtils.unpackIps(altlocs));
+		return ret;
+	}
+	
+	
+	/**
+	 * @param daos the output stream to write the ranges to
+	 * @return if they were written or not.
+	 */
+	private static final boolean writeRanges(CountingOutputStream caos,
+			FileDesc desc) throws IOException{
+		DataOutputStream daos = new DataOutputStream(caos);
+		LOG.debug("adding ranges to pong");
+		IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
+		byte [] ranges =ifd.getRangesAsByte();
+		
+		//write the ranges only if they will fit in the packet
+		if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
+			LOG.debug("added ranges");
+			daos.writeShort((short)ranges.length);
+			caos.write(ranges);
+			return true;
+		} 
+		else { //the ranges will not fit - say we didn't send them.
+			LOG.debug("ranges will not fit :(");
+			return false;
+		}
+	}
+	
+	private static final boolean writePushLocs(CountingOutputStream caos,
+			FileDesc desc,boolean FWTonly) throws IOException {
+	
+		
+		DataOutputStream daos = new DataOutputStream(caos);
+		//this operates on a copy of the alternate location collection
+		//since it may need to remove any PushLocs that do not support
+		//FW2FW transfer.
+		AlternateLocationCollection altlocs = 
+			AlternateLocationCollection.create(desc.getSHA1Urn());
+		
+		altlocs.addAll(desc.getPushAlternateLocationCollection());
+		
+		
+		if (FWTonly) {
+			LOG.debug("adding only fwt-enabled pushlocs in pong");
+			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
+				PushAltLoc current = (PushAltLoc)iter.next();
+				if (current.supportsFWTVersion() <1)
+					iter.remove();
+			}
+		}
+		
+		//do we have any (left) ?
+		if (altlocs.getAltLocsSize()==0)
+			return false;
+		
+		//push altlocs are bigger than normal altlocs, however we 
+		//don't know by how much.  The size can be between
+		//23 and 41 bytes.  We assume its 41.
+		int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 41;
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("trying to add up to "+available+ " push locs to pong");
+		
+		byte [] altbytes = altlocs.toBytesPush(available);
+		
+		if (altbytes == null){
+			//altlocs will not fit or none available - say we didn't send them
+			LOG.debug("push locs will not fit :(");
+			return false;
+		} else { 
+			LOG.debug("adding push altlocs");
+			daos.writeShort((short)altbytes.length);
+			caos.write(altbytes);
+			return true;
+		}
+
+	}
+	
+	private static final boolean writeLocs(CountingOutputStream caos,
+			FileDesc desc) throws IOException {
+		
+		DataOutputStream daos = new DataOutputStream(caos);
+		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
+		
+		//do we have any altlocs?
+		if (altlocs==null)
+			return false;
+		
+		//how many can we fit in the packet?
+		int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("trying to add up to "+toPack+" locs to pong");
+		
+		byte [] altbytes = altlocs.toBytes(toPack);
+		
+		if (altbytes ==null){
+			//altlocs will not fit or none available - say we didn't send them
+			LOG.debug("altlocs will not fit :(");
+			return false;
+			
+		} else { 
+			LOG.debug("adding altlocs");
+			daos.writeShort((short)altbytes.length);
+			caos.write(altbytes);
+			return true;
+		}
+			
+	}
+	
 }
 	

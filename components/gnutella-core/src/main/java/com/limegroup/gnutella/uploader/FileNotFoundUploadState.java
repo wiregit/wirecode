@@ -14,9 +14,6 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class FileNotFoundUploadState extends UploadState {
 
-	public FileNotFoundUploadState(){
-		super(null);
-	}
 	/**
 	 * Constant for the error message to send.
 	 */

@@ -11,12 +11,16 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.sun.java.util.collections.Set;
 
 /**
- * an Upload State.
+ * an Upload State.  has some utility methods all upload states can use.
  */
 public abstract class UploadState implements HTTPMessage {
 
 	protected final HTTPUploader UPLOADER;
 	protected final FileDesc FILE_DESC;
+	
+	public UploadState() {
+		this(null);
+	}
 	
 	public UploadState(HTTPUploader uploader) {
 		UPLOADER=uploader;
