@@ -340,21 +340,6 @@ public class ManagedConnectionTest extends BaseTestCase {
 		sleep(2000);
     }
 
-    /** Tries to receive any outstanding messages on c 
-     *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                c.receive(2000);
-                ret=true;
-            } catch (InterruptedIOException e) {
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-
     class GGEPResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response,
                                          boolean outgoing) throws IOException {

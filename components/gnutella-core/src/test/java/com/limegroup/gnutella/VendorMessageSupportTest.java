@@ -317,23 +317,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
             fail("Did not get correct UDP guid back!!");
 
         // we be golden dawg!!!
-    }
-
-    /** Tries to receive any outstanding messages on c 
-     *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                ret=true;
-            } catch (InterruptedIOException e) {
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-    
+    }    
 
     private static final boolean debugOn = false;
     private static final void debug(Exception e) {

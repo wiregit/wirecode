@@ -191,41 +191,6 @@ public class ClientSideOutOfBandReplyTest
         c.flush();
      }
 
-
-    /** @return The first QueyrRequest received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryRequest getFirstQueryRequest(Connection c)
-        throws BadPacketException, IOException {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof QueryRequest) 
-                    return (QueryRequest)m;
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-        }
-    }
-
-    /** @return The first QueyrRequest received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryStatusResponse getFirstQueryStatus(Connection c) 
-        throws BadPacketException, IOException {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof QueryStatusResponse) 
-                    return (QueryStatusResponse)m;
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-        }
-    }
-
     ///////////////////////// Actual Tests ////////////////////////////
 
     // MUST RUN THIS TEST FIRST
@@ -566,24 +531,7 @@ public class ClientSideOutOfBandReplyTest
     //////////////////////////////////////////////////////////////////
 
     private void drainAll() throws Exception {
-        for (int i = 0; i < testUPs.length; i++)
-            drain(testUPs[i]);
-    }
-
-    /** Tries to receive any outstanding messages on c 
-     *  @return true if this got a message */
-    private boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(500);
-                ret=true;
-                //System.out.println("Draining "+m+" from "+c);
-            } catch (InterruptedIOException e) {
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
+        drainAll(testUPs);
     }
 
     private static void shutdown() throws IOException {

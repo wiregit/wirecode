@@ -833,29 +833,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 				   !drain(ULTRAPEER_1));   
     }
 
-
-    /** 
-	 * Tries to receive any outstanding messages on c 
-	 *
-     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
-	 */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                ret=true;
-            } catch (InterruptedIOException e) {
-				// we read a null message or received another 
-				// InterruptedIOException, which means a messages was not 
-				// received
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-
-
 	/**
 	 * Asserts that the given message is a query, printing out the 
 	 * message and failing if it's not.

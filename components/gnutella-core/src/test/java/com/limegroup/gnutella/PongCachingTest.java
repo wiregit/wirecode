@@ -223,31 +223,6 @@ public final class PongCachingTest extends BaseTestCase {
         drainAll();
     }
 
-
-
-    /** 
-	 * Tries to receive any outstanding messages on c 
-	 *
-     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
-	 */
-    private static boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                ret=true;
-                //System.out.println("Draining "+m+" from "+c);
-            } catch (InterruptedIOException e) {
-				// we read a null message or received another 
-				// InterruptedIOException, which means a messages was not 
-				// received
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-
-
     /**
      * Tests to make sure that pongs are received properly via
      * pong caching.

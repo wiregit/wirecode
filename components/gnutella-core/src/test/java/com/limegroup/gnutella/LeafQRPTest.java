@@ -219,25 +219,6 @@ public class LeafQRPTest extends BaseTestCase {
         */
    }
 
-
-    //////////////////////////////////////////////////////////////////
-
-    /** Tries to receive any outstanding messages on c 
-     *  @return true if this got a message */
-    private boolean drain(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m=c.receive(500);
-                ret=true;
-                //System.out.println("Draining "+m+" from "+c);
-            } catch (InterruptedIOException e) {
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
-
     private static void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
         debug("-Shutting down");
