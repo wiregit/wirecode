@@ -297,17 +297,8 @@ public class HTTPDownloader implements BandwidthTracker {
         if(supportQueueing) 
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
-        // Add ourselves to the mesh if:
-        //  This rfd has a SHA1,
-        //  We are allowing partial sharing,
-        //  The VerifyingFile is not corrupted,
-        //  We have downloaded a large enough portion of the file,
-        //  and We have accepted incoming during this session.
-        if(_rfd.getSHA1Urn()!=null && 
-           UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-           !_outIsCorrupted &&
-           RouterService.acceptedIncomingConnection() &&
-           _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES) {
+        // Add ourselves to the mesh if the partial file is valid
+        if( isPartialFileValid() ) {
             AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
             addSuccessfulAltLoc(me);
         }
@@ -509,6 +500,28 @@ public class HTTPDownloader implements BandwidthTracker {
 			}
 		}
 	}
+	
+	/**
+	 * Determines whether or not the partial file is valid for us
+	 * to add ourselves to the mesh.
+	 *
+	 * Checks the following:
+	 *  - RFD has a SHA1.
+	 *  - We are allowing partial sharing
+	 *  - The VerifyingFile is not corrupted
+	 *  - We've accepted an incoming connection this session
+	 *  - Our port and IP address are valid and not private.
+	 */
+	private boolean isPartialFileValid() {
+	    return _rfd.getSHA1Urn() != null && 
+               UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+               !_outIsCorrupted &&
+               RouterService.acceptedIncomingConnection() &&
+               _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES &&
+               NetworkUtils.isValidPort(RouterService.getPort()) &&
+               NetworkUtils.isValidAddress(RouterService.getAddress()) &&
+               !NetworkUtils.isPrivateAddress(RouterService.getAddress());
+    }
 	
 	/**
 	 * Reads the Server header.  All information after the ':' is considered
