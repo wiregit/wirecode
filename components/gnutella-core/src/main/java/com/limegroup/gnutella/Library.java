@@ -22,7 +22,7 @@ public class Library {
 
     private HashMap _files;
     private static Library _lib;
-
+ 
     private Library() {
 	_files = new HashMap();
     }
@@ -86,12 +86,12 @@ public class Library {
     
     private static String checkChars(String str) {
 	
-	String escapeChars = "&";
+	String escapeChars = "&()";
 	
 	char[] chars = str.toCharArray();
 	int length = chars.length;
 
-	char[] new_chars = new char[length*2];
+	char[] new_chars = new char[length*3];
 	
 	int index = 0;
 	
@@ -99,10 +99,19 @@ public class Library {
 	    
 	    if (escapeChars.indexOf(chars[i]) != -1 ) {
 		// add escape char
-		new_chars[index++] = '\\';
+		new_chars[index++] = '^';
+		new_chars[index++] = chars[i];
 	    }
-	    
-	    new_chars[index++] = chars[i];
+	    else if(chars[i] == ' ') {
+		new_chars[index++] = '"';
+		new_chars[index++] = chars[i];
+		new_chars[index++] = '"';
+	    }
+	    else {
+		new_chars[index++] = chars[i];
+	    }
+		
+
 	    
 	    
 	}
