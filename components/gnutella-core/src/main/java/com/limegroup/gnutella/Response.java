@@ -389,6 +389,7 @@ public class Response {
 			Iterator iter = urns.iterator();
 			while (iter.hasNext()) {
 				URN urn = (URN)iter.next();
+                Assert.that(urn!=null, "Null URN");
 				baos.write(urn.toString().getBytes());
 				if (iter.hasNext()) {
 					baos.write(0x1c);
