@@ -965,7 +965,6 @@ public final class CommonUtils {
 		if( !forceOverwrite && newFile.exists() ) return;
 		String parentString = newFile.getParent();
         if(parentString == null) {
-            System.out.println("Parent is null, exiting early.");
             return;
         }
 		File parentFile = new File(parentString);
