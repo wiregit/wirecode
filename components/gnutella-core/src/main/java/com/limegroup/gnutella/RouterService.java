@@ -399,6 +399,14 @@ public class RouterService
         acceptor.setListeningPort(port);
     }
 
+    /**
+     * Sets the host catcher's flag for always notifing ActivityCallback on a 
+     * known host added to the catcher.
+     */
+    public void setAlwaysNotifyKnownHost(boolean notify) {
+        catcher.setAlwaysNotifyKnownHost(true);
+    }
+
     /** 
      * Returns true if this has accepted an incoming connection, and hence
      * probably isn't firewalled.  
