@@ -34,6 +34,10 @@ public final class AlternateLocationCollection
 	 * entry inserted is removed when the limit is reached.
      * LOCKING: obtain LOCATIONS monitor when iterating -- otherwise 
 	 *          it's synchronized on its own
+     * LOCKING: Obtain LOCATIONS monitor before removing or adding elements to
+     *          REMOVED. 
+     * LOCKING: Never try to obtain LOCATIONS's monitor when holding REMOVED's
+     *          monitor
      * INVARIANT: LOCATIONS.get(k)==k
      *
      * This is NOT SORTED because of the way we look for locations.
@@ -200,31 +204,34 @@ public final class AlternateLocationCollection
 	 * Determine if the time of the alternate location is valid.
 	 */
 	private boolean isValidTime(long alTime) {
-	    long now = System.currentTimeMillis();
-		int size = LOCATIONS.size() + REMOVED.size();
-		long diff = now - alTime;
-		
-		// always allow locations
-		if ( size <= 25 )
-		    return true;
-		
-		// only allow if location was generated under a day ago
-	    if ( size <= 75 ) {
-	        return diff <= DAY;
-	    }
-	    
-	    // only allow if location was generated under 5 hours ago
-	    if ( size <= 150 ) {
-	        return diff <= FIVEHOURS;
-	    }
-	    
-	    // only allow if location was generated under 1 hour ago
-	    if ( size <= 300 ) {
-	        return diff <= ONEHOUR;
+        //Hold this monitor so we don't get an incorrect value of size
+        synchronized(LOCATIONS) {
+            long now = System.currentTimeMillis();
+            int size = LOCATIONS.size() + REMOVED.size();
+            long diff = now - alTime;
+            
+            // always allow locations
+            if ( size <= 25 )
+                return true;
+            
+            // only allow if location was generated under a day ago
+            if ( size <= 75 ) {
+                return diff <= DAY;
+            }
+            
+            // only allow if location was generated under 5 hours ago
+            if ( size <= 150 ) {
+                return diff <= FIVEHOURS;
+            }
+            
+            // only allow if location was generated under 1 hour ago
+            if ( size <= 300 ) {
+                return diff <= ONEHOUR;
+            }
+            
+            // only allow if location was generated under a half hour ago
+            return diff <= HALFHOUR;
         }
-        
-        // only allow if location was generated under a half hour ago
-        return diff <= HALFHOUR;
     }
 	        
 	/**
@@ -255,21 +262,23 @@ public final class AlternateLocationCollection
         // it could never have been added (or removed) if the sh1 is different
         if(!sha1.equals(SHA1))
             return false;
-        
-        AlternateLocation removed = (AlternateLocation)REMOVED.get(al);
-    
-        // it was never removed.
-        if( removed == null )
-            return false;
+        synchronized(LOCATIONS) {
+            AlternateLocation removed = (AlternateLocation)REMOVED.get(al);
             
-        // it was removed, but this is a newer location, remove it from REMOVED
-        if(removed.compareTo(al) > 0) {
-            REMOVED.remove(al);
-            return false;
-        }
+            // it was never removed.
+            if( removed == null )
+                return false;
+            
+            // it was removed, but this is a newer location, remove it from
+            // REMOVED
+            if(removed.compareTo(al) > 0) {
+                REMOVED.remove(al);
+                return false;
+            }
         
-        // it is older or the same.
-        return true;
+            // it is older or the same.
+            return true;
+        }
     }
     
 	/**
@@ -436,10 +445,8 @@ public final class AlternateLocationCollection
         // This must be synchronized on both LOCATIONS and alc.LOCATIONS
         // because we not using the SynchronizedMap versions, and equals
         // will inherently call methods that would have been synchronized.
-        synchronized(LOCATIONS) {
-            synchronized(alc.LOCATIONS) {
+        synchronized(AlternateLocationCollection.class) {
                 ret = _locations.equals(alc._locations);
-            }
         }
         return ret;
     }
