@@ -220,10 +220,10 @@ MENU_NAV_LIB_ACCESSIBLE=عرض شاشة المكتبة.
 
 MENU_VIEW_TITLE=(V) عرض
 MENU_VIEW_TITLE_MNEMONIC=V
-#??? MENU_VIEW_SMALL_ICONS=(S) Use small icons
+#??? MENU_VIEW_SMALL_ICONS=(S) Small icons
 #??? MENU_VIEW_SMALL_ICONS_MNEMONIC=S
 #??? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use small icons.
-#??? MENU_VIEW_TEXT_WITH_ICONS=(T) Show icon text
+#??? MENU_VIEW_TEXT_WITH_ICONS=(T) Icon text
 #??? MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 #??? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show text below icons.
 MENU_VIEW_SHOW_HIDE_TITLE=(W) عرض/إخفاء
@@ -254,16 +254,16 @@ MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_RESTART_REQUIRED=يجب إعادة تشغيل LimeWire لكي يظهر تأثير اللغة الجديدة.
 #??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=(T) Help translate LimeWire
 #??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
-#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language.
 MENU_VIEW_SEARCH_TITLE=(S) بحث
-#??? MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
-#??? MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
-#??? MENU_VIEW_SEARCH_FILTERS=Result Filters
+MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
+#??? MENU_VIEW_SEARCH_ACCESSIBLE=Search tab options.
+#??? MENU_VIEW_SEARCH_FILTERS=Result filters
 #??? MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
-#??? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show Search Result Filters
+#??? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show search result filters.
 MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
-#??? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
+#??? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show the Magnetmix button.
 
 MENU_RESOURCES_TITLE=(R) الموارد
 MENU_RESOURCES_TITLE_MNEMONIC=R
@@ -337,7 +337,7 @@ SEARCH_PUBLIC_LAUNCH_STRING=Launch action
 SEARCH_PUBLIC_STOP_STRING=إيقاف البحث
 SEARCH_PUBLIC_BROWSE_STRING=استعراض المضيف
 SEARCH_PUBLIC_CHAT_STRING=دردشة مع المضيف
-SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi web lookup...
+#??? SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi web lookup...
 #??? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet details for file
 #??? SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=إعادة البحث
@@ -363,7 +363,7 @@ SEARCH_TYPE_WHATSNEW=مجتمع
 #??? SEARCH_WHATSNEW_HIDE_ADULT=Hide adult content
 #??? SEARCH_WHATSNEW_TITLE_ONE=Don't know
 #??? SEARCH_WHATSNEW_TITLE_TWO=what to look for?
-#??? SEARCH_WHATSNEW_DESC=لا تعرف عن ماذا تبحث؟ بحث المجتمع سيبحث في الملفات التي تم إضافتها مؤخرا للشبكة.
+SEARCH_WHATSNEW_DESC=لا تعرف عن ماذا تبحث؟ بحث المجتمع سيبحث في الملفات التي تم إضافتها مؤخرا للشبكة.
 #??? SEARCH_CURRENT_SEARCH=Current search:
 SEARCH_WHATS_NEW_SMALL=جديد
 #??? SEARCH_SELECT_TYPE=Select type:
@@ -397,7 +397,7 @@ SEARCH_FILTER_OPTION=خيار
 SEARCH_FILTER_OPTIONS=خيارات
 SEARCH_FILTER_MEDIA=الوسائط
 
-#??? DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
+DOWNLOAD_LAUNCH_BUTTON_LABEL=مشاهدة
 #??? DOWNLOAD_LAUNCH_BUTTON_TIP=Preview the selected download.
 DOWNLOAD_KILL_BUTTON_LABEL=إنهاء التنزيل
 DOWNLOAD_KILL_BUTTON_TIP=أوقف تنزيل الملفات المختارة.
@@ -552,7 +552,7 @@ UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=المدى غير متاح
 UPLOAD_TABLE_STRING_MALFORMED_REQUEST=طلب غير صحيح
 UPLOAD_TABLE_STRING_COMPLETE=مكتمل
 #??? UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned greedy servent
-#??? UPLOAD_TABLE_STRING_HASH_TREE=Uploading Hash tree
+#??? UPLOAD_TABLE_STRING_HASH_TREE=Uploading hash tree
 UPLOAD_TABLE_STRING_FNF=الملف غير موجود
 UPLOAD_TABLE_STRING_QUEUED=في قائمة الانتظار عند
 UPLOAD_STRING_KBPSEC=ك.ب/ث
@@ -600,8 +600,8 @@ CV_COLUMN_PROTOCOL=بروتوكول
 CV_COLUMN_VENDOR=الموزع/الإصدارة
 CV_COLUMN_TIME=الوقت
 CV_COLUMN_COMPRESSION=مضغوط (I/O)
-CV_COLUMN_QRP_FULL=QRP (%)
-#??? CV_COLUMN_QRP_USED=QRP Empty
+CV_COLUMN_QRP_FULL=QRP (%/الحجم)
+#??? CV_COLUMN_QRP_USED=QRP empty
 CV_BUTTON_REMOVE=إزالة
 CV_BUTTON_TOOLTIP_REMOVE=إزالة الاتصالات المختارة
 CV_BUTTON_ADD=إضافة
@@ -609,15 +609,15 @@ CV_BUTTON_TOOLTIP_ADD=إنشاء اتصال خارجي جديد
 CV_LABEL_KEEP_BEGIN=احتفظ تقريبا ب 
 CV_LABEL_KEEP_END=اتصالات مفتوحة.
 CV_TABLE_STRING_CONNECTING=جاري الاتصال...
-#??? CV_TABLE_STRING_CONNECTINGS=Connecting
+CV_TABLE_STRING_CONNECTINGS=جاري الاتصال
 CV_TABLE_STRING_LEAF=طرف
 #??? CV_TABLE_STRING_LEAVES=Leaves
 CV_TABLE_STRING_ULTRAPEER=ند فائق
 CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
 #??? CV_TABLE_STRING_PEER=Peer
-#??? CV_TABLE_STRING_PEERS=Peers
+#??? CV_TABLE_STRING_PEERS=peers
 CV_TABLE_STRING_STANDARD=0.6
-CV_TABLE_STRING_STANDARDS=Standard
+#??? CV_TABLE_STRING_STANDARDS=standard
 CV_TABLE_STRING_INCOMING=الوارد
 CV_TABLE_STRING_OUTGOING=الصادر
 CV_TABLE_STRING_CONNECTED_ON=متصل على
@@ -752,7 +752,7 @@ VIEW_CHOOSER_CANCEL_BUTTON_LABEL=إلغاء الأمر
 #IndentingPanel
 XML_SEARCH_MORE_OPTIONS_LABEL=المزيد من خيارات البحث
 
-#??? META_EDITOR_INFO_TAB_LABEL=Info
+META_EDITOR_INFO_TAB_LABEL=معلومات
 META_EDITOR_OK_BUTTON_LABEL=موافق
 META_EDITOR_CANCEL_BUTTON_LABEL=إلغاء الأمر
 META_EDITOR_ADVANCED_BUTTON_LABEL=متقدم
@@ -766,18 +766,18 @@ META_EDITOR_ARTIST_LABEL=الفنان:
 #??? META_EDITOR_YEAR_LABEL=Year:
 META_EDITOR_TYPE_LABEL=النوع:
 #??? META_EDITOR_TRACK_LABEL=Track:
-#??? META_EDITOR_LANGUAGE_LABEL=Language:
-#??? META_EDITOR_SECONDS_LABEL=Length:
-#??? META_EDITOR_BITRATE_LABEL=Bitrate:
+META_EDITOR_LANGUAGE_LABEL=اللغة:
+META_EDITOR_SECONDS_LABEL=الطول:
+META_EDITOR_BITRATE_LABEL=سرعة النقل:
 #??? META_EDITOR_COMMENTS_LABEL=Comments:
-#??? META_EDITOR_SHA1_LABEL=SHA1:
+META_EDITOR_SHA1_LABEL=SHA1:
 #??? META_EDITOR_PRICE_LABEL=Price:
 #??? META_EDITOR_LINK_LABEL=Link:
 #??? META_EDITOR_ACTION_LABEL=Action:
 #??? META_EDITOR_STARS_LABEL=Stars:
 
 META_EDITOR_SIZE_LABEL=الحجم:
-#??? META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
+#??? META_EDITOR_DATE_MODIFIED_LABEL=Date modified:
 #??? META_EDITOR_KIND_LABEL=Kind:
 META_EDITOR_MP3_KIND_LABEL=MPEG-1 صوت Layer 3
 META_EDITOR_MP4_KIND_LABEL=MPEG-4 صوت
@@ -827,7 +827,7 @@ CHAT_YOU=أنت
 # Key/value pairs for splash screen status text
 ###################################################################
 SPLASH_STATUS_RESOURCE_MANAGER=يتم الآن تحيل الموارد...
-#??? SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
+SPLASH_STATUS_HTML_ENGINE=يتم الآن تحميل HTML-engine...
 SPLASH_STATUS_SEARCH_WINDOW=يتم الآن تحميل نافذة البحث...
 SPLASH_STATUS_OPTIONS_WINDOW=يتم الآن تحميل نافذة الخيارات...
 SPLASH_STATUS_USER_SETTINGS =يتم الآن تحميل إعدادات المستخدم...
@@ -842,25 +842,25 @@ SPLASH_STATUS_MONITOR_WINDOW=يتم الآن تحميل نافذة المتاب�
 SPLASH_STATUS_CONNECTION_WINDOW=يتم الآن تحميل نافذة الاتصال...
 SPLASH_STATUS_STATISTICS_WINDOW=يتم الآن تحميل نافذة الإحصائيات...
 SPLASH_STATUS_STATUS_WINDOW=يتم الآن تحميل نافذة إظهار الحالة...
-#??? SPLASH_STATUS_PLAYLIST_WINDOW=Loading playlist window...
+SPLASH_STATUS_PLAYLIST_WINDOW=يتم الآن تحميل نافذة قائمة القراءة...
 SPLASH_STATUS_MENUS=يتم الآن تحميل القوائم...
 SPLASH_STATUS_MESSAGE_SERVICE=يتم الآن تحميل الرسائل...
-#??? SPLASH_STATUS_ICONS=Loading icons...
-#??? SPLASH_STATUS_I18N=Loading internationalization support...
-#??? SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
-#??? SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading connection listener...
-#??? SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Loading message router...
-#??? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading connection management...
+SPLASH_STATUS_ICONS=يتم الآن تحميل icons...
+SPLASH_STATUS_I18N=يتم الآن تحميل internationalization-support...
+SPLASH_STATUS_DAAP=يتم الآن تحميل Digital Audio Access Protocol...
+SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=يتم الآن تحميل connection-listener...
+SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=يتم الآن تحميل message-router...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=يتم الآن تحميل نافذة connection-management...
 #??? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating peers...
-#??? SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading shared files...
-#??? SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Loading old downloads...
+SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=يتم الآن تحميل الملفات المشارَكة...
+SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=يتم الآن تحميل old-downloads...
 #??? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
-#??? SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading directed querier...
-#??? SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading MAGNET listener...
-#??? SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading peer listener...
-#??? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading stale connection management...
-#??? SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Loading saved files...
-#??? SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Loading secure settings...
+SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=يتم الآن تحميل directed-querier...
+SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=يتم الآن تحميل MAGNET-listener...
+SPLASH_STATUS_COMPONENT_LOADING_PINGER=يتم الآن تحميل peer-listener...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=يتم الآن تحميل stale-connection-management...
+SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=يتم الآن تحميل saved-files...
+SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=يتم الآن تحميل secure-settings...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to
@@ -981,8 +981,8 @@ ERROR_INTERNAL_SERVLET_FAILED=لم يتمكن LimeWire من الاتصال بم�
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
-#??? ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
-#??? ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
 #??? ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
 ERROR_PORT_UNAVAILABLE=المنفذ غير متاح. من فضلك اختر منفذ آخر.
 ERROR_KEEP_ALIVE=لا يسمح LimeWire بتدعيم هذا العدد من الاتصالات، لأن ذلك يعمل على تقليل كفاءة الشبكة.
@@ -1060,7 +1060,7 @@ OPTIONS_CHAT_MAIN_TITLE=دردشة
 OPTIONS_PLAYER_MAIN_TITLE=المشغل
 OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #??? OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
-#??? OPTIONS_ITUNES_DAAP_MAIN_TITLE=Sharing
+OPTIONS_ITUNES_DAAP_MAIN_TITLE=مشاركة
 OPTIONS_APPS_MAIN_TITLE=التطبيقات المساعدة
 OPTIONS_BUGS_MAIN_TITLE=تقارير الخطأ
 OPTIONS_GUI_MAIN_TITLE=عرض
@@ -1171,10 +1171,10 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات الت
 # Key/Value pairs for the options for setting the bandwidth devoted
 # to downloads in the options window
 ################################################################################
-#??? OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
-#??? OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to downloads.
-#??? OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
-#??? OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Download Speed:
+OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=سرعة الملفات
+OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=يمكنك تحديد نسبة من سرعة النقل لتستخدم في الملفات.
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=غير محدد
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=سرعة الملفات:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -1182,7 +1182,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات الت
 ################################################################################
 OPTIONS_UPLOAD_CLEAR_TITLE=مسح الملفات التي تم تحميلها
 OPTIONS_UPLOAD_CLEAR_LABEL=يمكنك الاختيار بين مسح الملفات التي تم تحميلها بالكامل أو لا.
-OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات التي يتم تحميلها:
+OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات التي يتم تحميلها
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
@@ -1262,11 +1262,11 @@ OPTIONS_ITUNES_PREFERENCE_LABEL=يمكنك تفعيل دعم iTunes (Mac OS X on
 ################################################################################
 # Key/Value pairs for the iTunes/DAAP options in the options window
 ################################################################################
-#??? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
-#??? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
-#??? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my Music:
+OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=مشاركة
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your music on the local area network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled players.\n\nEnable compatability mode if you experience problems with iTunes sharing. This mode uses more resources and is slower, but may fix problems.
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
 #??? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
-#??? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability Mode
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability mode
 
 #??? OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
 #??? OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
@@ -1416,7 +1416,7 @@ OPTIONS_ALLOW_MESSAGES_TITLE=السماح للمضيفين
 # Key/Value pairs for disabling compression support
 ################################################################################
 OPTIONS_COMPRESSION_TITLE=إمكانيات الضغط
-#??? OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disa?ling these options.
+#??? OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disabling these options.
 OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=عدم تفعيل ضغط الصادرات
 OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=عدم تفعيل ضغط الواردات
 
@@ -1599,7 +1599,7 @@ STATS_QUERY_REQUEST_HOPS_LABEL=جميع الاستعلامات المستقبل�
 STATS_QUERY_REQUEST_TTL_TITLE=TTL
 STATS_QUERY_REQUEST_TTL_LABEL=جميع الاستعلامات المستقبلة، حسب زمن الرحيل (TTL).
 # Advanced Gnutella Message special queries
-#??? STATS_SPECIAL_QUERIES_TITLE=Special Queries
+#??? STATS_SPECIAL_QUERIES_TITLE=Special queries
 #??? STATS_SPECIAL_QUERIES_LABEL=All of the special marked queries.
 # Advanced Gnutella Message hops/ttl for query hits
 STATS_QUERY_REPLY_HOPS_TITLE=قفزات
@@ -1970,7 +1970,7 @@ UPLOAD_STATISTICS=التحميلات
 STATS_UPLOAD_REQUESTS_TITLE=طلبات
 #??? STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
 STATS_UPLOAD_RESPONSES_TITLE=ردود
-#??? STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the amount of requests for which we have attempted to transf?r a portion of a file.
+#??? STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the amount of requests for which we have attempted to transfer a portion of a file.
 STATS_UPLOAD_METHODS_TITLE=طرق الطلب
 #??? STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
 STATS_UPLOAD_GENERAL_TITLE=عام
@@ -2200,8 +2200,8 @@ DOWNLOAD_PUSH_FAILURE_INTERRUPTED=فشل الدفع (انقطع)
 DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=فشل الدفع ( لم يتم استقبال GIV)
 DOWNLOAD_PUSH_FAILURE_LOST=فشل الدفع (اتصال مفقود)
 DOWNLOAD_TCP_CONNECT_TIME=وقت اتصال TCP
-#??? DOWNLOAD_FW_FW_SUCCESS=Succesful FW-FW Connection
-#??? DOWNLOAD_FW_FW_FAILURE=Failed FW-FW Connection
+DOWNLOAD_FW_FW_SUCCESS=نجاح FW-FW محاولات
+DOWNLOAD_FW_FW_FAILURE=فشل FW-FW محاولات
 
 # Advanced Upload statistics
 #??? UPLOAD_STAT_THEX=THEX request
@@ -2216,7 +2216,7 @@ UPLOAD_STAT_UNKNOWN_URN_GET=غير معروف URN GET
 UPLOAD_STAT_URN_GET=URN GET
 UPLOAD_STAT_MALFORMED_REQUEST=طلب غير صحيح
 UPLOAD_STAT_LIMIT_REACHED=تم الوصول للحد المسموح
-#??? UPLOAD_STAT_LIMIT_REACHED_GREEDY=Greedy Request
+#??? UPLOAD_STAT_LIMIT_REACHED_GREEDY=Greedy request
 UPLOAD_STAT_BANNED=مستخدم ممنوع
 UPLOAD_STAT_UNAVAILABLE_RANGE=المدى غير متاح
 UPLOAD_STAT_FILE_NOT_FOUND=الملف غير موجود
@@ -2235,8 +2235,8 @@ UPLOAD_STAT_COMPLETED=الردود التامة
 UPLOAD_STAT_INTERRUPTED=انقطع
 UPLOAD_STAT_STALLED=توقف
 UPLOAD_STAT_COMPLETED_FILE=الملفات التي تم تحويلها
-#??? UPLOAD_FW_FW_SUCCESS=Succesful FW-FW Connection
-#??? UPLOAD_FW_FW_FAILURE=Failed FW-FW Connection
+UPLOAD_FW_FW_SUCCESS=نجاح FW-FW محاولات
+UPLOAD_FW_FW_FAILURE=فشل FW-FW محاولات
 
 # Advanced Handshaking statistics
 LEAF_OUTGOING_REJECT_LEAF=رفض صادر. (طرف)
