@@ -84,25 +84,17 @@ public class Acceptor extends Thread {
      * If that fails, ActivityCallback.error will be called.  A port
      * of 0 means do not accept incoming connections.
      */
-    public Acceptor(int port, ActivityCallback callback) {
+    public Acceptor(int port) {
         _port = port;
-        _callback = callback;
     }
 
     /**
-     * Links the HostCatcher up with the other back end pieces and launches
-     * the port monitoring thread
+     * Launches the port monitoring thread.
      */
-    public void initialize(ConnectionManager connectionManager,
-                           DownloadManager downloadManager,
-                           UploadManager uploadManager) {
-        _connectionManager = connectionManager;
-        _downloadManager = downloadManager;
-        _uploadManager = uploadManager;
-		
+	public void initialize() {		
         setDaemon(true);
         start();
-    }
+	}
 
     /**
      * Returns this' address to use for ping replies, query replies,
@@ -207,6 +199,9 @@ public class Acceptor extends Thread {
      *   changed accordingly.
      */
     public void run() {
+
+		ActivityCallback callback = RouterService.instance().getCallback();
+
         //0. Get local address.  This must be done here--not in the static
         //   initializer--because it can block under certain conditions.
         //   See the notes for _address.
@@ -235,7 +230,7 @@ public class Acceptor extends Thread {
 
             // If we still don't have a socket, there's an error
             if(_socket == null)
-                _callback.error(ActivityCallback.PORT_ERROR);
+                callback.error(ActivityCallback.PORT_ERROR);
         }
 
         if (_port!=oldPort) {
@@ -285,11 +280,11 @@ public class Acceptor extends Thread {
                 new ConnectionDispatchRunner(client);
 
             } catch (SecurityException e) {
-                _callback.error(ActivityCallback.SOCKET_ERROR);
+                callback.error(ActivityCallback.SOCKET_ERROR);
                 return;
             } catch (Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }
@@ -313,6 +308,11 @@ public class Acceptor extends Thread {
         }
 
         public void run() {
+			RouterService rs          = RouterService.instance();
+			ActivityCallback callback = rs.getCallback();
+			ConnectionManager cm      = rs.getConnectionManager();
+			UploadManager um          = rs.getUploadManager();
+			DownloadManager dm        = rs.getDownloadManager();
             try {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
@@ -338,21 +338,21 @@ public class Acceptor extends Thread {
 
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
-                    _connectionManager.acceptConnection(_socket);
+                    cm.acceptConnection(_socket);
                 }
                 else if (useDefaultConnect && word.equals("LIMEWIRE")) {
-                    _connectionManager.acceptConnection(_socket);
+                    cm.acceptConnection(_socket);
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
-					_uploadManager.acceptUpload(HTTPRequestMethod.GET, _socket);
+					um.acceptUpload(HTTPRequestMethod.GET, _socket);
                 }
 				else if (word.equals("HEAD")) {
-					_uploadManager.acceptUpload(HTTPRequestMethod.HEAD, _socket);
+					um.acceptUpload(HTTPRequestMethod.HEAD, _socket);
 				}
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
-                    _downloadManager.acceptDownload(_socket);
+                    dm.acceptDownload(_socket);
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);
@@ -366,7 +366,7 @@ public class Acceptor extends Thread {
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
             } catch(Exception e) {
-				_callback.error(ActivityCallback.INTERNAL_ERROR, e);
+				callback.error(ActivityCallback.INTERNAL_ERROR, e);
 			}
         }
     }
