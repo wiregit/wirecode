@@ -215,6 +215,34 @@ public class ClientSideLeafGuidanceTest
         }
     }
 
+    /** @return The first QueyrRequest received from this connection.  If null
+     *  is returned then it was never recieved (in a timely fashion).
+     */
+    private static QueryStatusResponse getFirstQueryStatus(Connection c) {
+        while (true) {
+            try {
+                Message m=c.receive(TIMEOUT);
+                if (m instanceof RouteTableMessage)
+                    ;
+                if (m instanceof PingRequest)
+                    ;
+                else if (m instanceof QueryStatusResponse) 
+                    return (QueryStatusResponse)m;
+                else
+                    return null;  // this is usually an error....
+            }
+            catch (InterruptedIOException ie) {
+                return null;
+            }
+            catch (BadPacketException e) {
+                // ignore....
+            }
+            catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
@@ -239,6 +267,28 @@ public class ClientSideLeafGuidanceTest
             assertEquals(new GUID(qr.getGUID()), queryGuid);
         }
 
+        // now send back results and make sure that we get a QueryStatus
+        // from the leaf
+        Message m = null;
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[2];
+            res[0] = new Response(10, 10, "susheel"+i);
+            res[1] = new Response(10, 10, "susheel smells good"+i);
+            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+        
+        // all UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            assertNotNull(stat);
+            assertEquals(new GUID(stat.getGUID()), queryGuid);
+            assertEquals(1, stat.getNumResults());
+        }
     }
 
 
@@ -270,7 +320,7 @@ public class ClientSideLeafGuidanceTest
     }
     
     private static byte[] myIP() {
-        return new byte[] { (byte)192, (byte)168, 0, 1 };
+        return new byte[] { (byte)127, (byte)0, 0, 1 };
     }
 
     private static final boolean DEBUG = false;
