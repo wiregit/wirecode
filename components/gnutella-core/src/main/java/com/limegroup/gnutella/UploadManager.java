@@ -516,7 +516,7 @@ public final class UploadManager implements BandwidthTracker {
         boolean limitReached = hostLimitReached(host);//greedy downloader?
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
-        int maxQueueSize = SettingsManager.instance().getUploadQueueSize();
+        int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
         boolean wontAccept = size >= maxQueueSize;
         int ret = -1;
         //Note: The current policy is to not put uploadrers in a queue, if they 
