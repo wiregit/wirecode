@@ -64,54 +64,26 @@ public class UpdateManager {
      * safe for the constructor to set these two values for the whole session.
      */
     private UpdateManager() {
-        RandomAccessFile raf = null;
-        try {
-            File file =
-                new File(CommonUtils.getUserSettingsDir(),"update.xml");
-            raf = new RandomAccessFile(file,"r");
-            byte[] content = new byte[(int)raf.length()];
-            raf.readFully(content);
+        latestVersion = "0.0.0";
+        
+        byte[] content = FileUtils.readFileFully(new File(CommonUtils.getUserSettingsDir(),"update.xml"));
+        if(content != null) {
             //we dont really need to verify, but we may as well...so here goes.
-            UpdateMessageVerifier verifier = 
-                          new UpdateMessageVerifier(content, true);//from disk
-            boolean verified = false;
-            try {
-                verified = verifier.verifySource();
-            } catch(ClassCastException ccx) {
-                verified = false;
-            }
-            if(!verified) {
-                latestVersion = CommonUtils.getLimeWireVersion();
-                return;
-            }
-            String xml = new String(verifier.getMessageBytes(),"UTF-8");
-            UpdateFileParser parser = new UpdateFileParser(xml);
-            latestVersion = parser.getVersion();
-            message = parser.getMessage();
-            usesLocale = parser.usesLocale();
-            isValid = true;
-        } catch(SAXException sax) {
-            LOG.error("invalid update xml", sax);
-            latestVersion = CommonUtils.getLimeWireVersion();
-            isValid = false;
-        } catch(IOException iox) {
-            LOG.error("iox updating", iox);
-            latestVersion = CommonUtils.getLimeWireVersion();
-            isValid = false;
-        } catch(VerifyError error) {
-            LOG.error("verification problem", error);
-            // report the bug, but still allow things to continue.
-            // otherwise LimeWire is rendered completely useless
-            // (it won't connect to anyone because it can't build the
-            //  DefaultHeaders)
-            latestVersion = CommonUtils.getLimeWireVersion();
-            isValid = false;
-            ErrorService.error(error);
-        } finally {
-            if(raf != null) {
+            UpdateMessageVerifier verifier = new UpdateMessageVerifier(content, true);//from disk
+            boolean verified = verifier.verifySource();
+            if(verified) {
                 try {
-                    raf.close();
-                } catch(IOException ignored) {}
+                    String xml = new String(verifier.getMessageBytes(),"UTF-8");
+                    UpdateFileParser parser = new UpdateFileParser(xml);
+                    latestVersion = parser.getVersion();
+                    message = parser.getMessage();
+                    usesLocale = parser.usesLocale();
+                    isValid = true;
+                } catch(SAXException sax) {
+                    LOG.error("invalid update xml", sax);
+                } catch(IOException iox) {
+                    LOG.error("iox updating", iox);
+                }
             }
         }
     }
@@ -141,8 +113,7 @@ public class UpdateManager {
                       latestVersion+", theirs: "+nv);
         String myVersion = null;
         if(latestVersion.equals(SPECIAL_VERSION))
-            //if I have @version@ on disk check against my real version
-            myVersion = CommonUtils.getLimeWireVersion();
+            myVersion = "0.0.0"; // consider special to be empty for this purpose.
         else //use the original value of latestVersion
             myVersion = latestVersion;
         if(!isGreaterVersion(nv,myVersion))
