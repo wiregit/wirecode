@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
@@ -1613,5 +1614,22 @@ public class ManagedConnection extends Connection
             }
         }
     }
+
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#getInetAddress()
+	 */
+	public InetAddress getInetAddress() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
+	 */
+	public void handleUPListVM(UPListVendorMessage m) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

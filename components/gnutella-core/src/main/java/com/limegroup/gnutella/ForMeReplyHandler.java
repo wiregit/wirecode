@@ -279,6 +279,14 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public boolean isStable() {
         return true;
     }
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
+	 */
+	public void handleUPListVM(UPListVendorMessage m) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

@@ -497,6 +497,16 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
+        } 
+        else if(msg instanceof GiveUPVendorMessage) {
+        	if(RECORD_STATS)
+        		;
+        	handleGiveUPVendorMessage((GiveUPVendorMessage)msg, handler);
+        }
+        else if(msg instanceof UPListVendorMessage) {
+        	if(RECORD_STATS)
+        		;
+        	//handleUPListVendorMessage((UPListVendorMessage)msg, handler);
         }
         notifyMessageListener(msg);
     }
@@ -2580,6 +2590,18 @@ public abstract class MessageRouter {
     		
     	//then update our lists
     	BestCandidates.update(candidates);
+    }
+    
+    /**
+     * responds to a request for the list of ultrapeers or leaves.  It is sent right back to the
+     * requestor on the UDP receiver thread.
+     * @param msg the request message
+     * @param handler the UDPHandler to send it to.
+     */
+    private void handleGiveUPVendorMessage(GiveUPVendorMessage msg, ReplyHandler handler){
+    	//REDFLAG: add some code to prevent people from flooding us
+    	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
+    	handler.handleUPListVM(newMsg);
     }
 
 
