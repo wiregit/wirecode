@@ -47,16 +47,21 @@ public final class AlternateLocationTest extends TestCase {
 				URL url1 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, 
 								   "/uri-res/N2R?"+HugeTestUtils.URNS[i].httpStringValue());
 				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], "/test.htm");
-				AlternateLocation al1 = new AlternateLocation(url1);
-				AlternateLocation al2 = new AlternateLocation(url2);
+				AlternateLocation al1 = 
+				    AlternateLocation.createAlternateLocation(url1);
+				AlternateLocation al2 = 
+				    AlternateLocation.createAlternateLocation(url2);
 				Date date = new Date();
+				String alStr = ("http://"+HugeTestUtils.URL_STRINGS[i] + ":6346"+
+								"/uri-res/N2R?"+urn.httpStringValue()+
+								" "+AlternateLocation.convertDateToString(date));
 				AlternateLocation al3 = 
-				    new AlternateLocation("http://"+HugeTestUtils.URL_STRINGS[i] + ":6346"+
-										  "/uri-res/N2R?"+urn.httpStringValue()+
-										  " "+AlternateLocation.convertDateToString(date));
+				    AlternateLocation.createAlternateLocation(alStr);
+
+				alStr = ("http://"+HugeTestUtils.URL_STRINGS[i] + "/test.htm"+
+						 " "+AlternateLocation.convertDateToString(date));
 				AlternateLocation al4 = 
-				    new AlternateLocation("http://"+HugeTestUtils.URL_STRINGS[i] + "/test.htm"+
-										  " "+AlternateLocation.convertDateToString(date));
+				    AlternateLocation.createAlternateLocation(alStr);
 			}
 		} catch(IOException e) {
 			// this also catches MalformedURLException
@@ -72,7 +77,8 @@ public final class AlternateLocationTest extends TestCase {
 	public void testStringConstructorForTimestampedLocs() {
 		try {
 			for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
-				AlternateLocation al = new AlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				if(!AlternateLocation.isTimestamped(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i])) {
 					assertTrue("test failed -- alternate location string not "+
 							   "considered stamped", false);
@@ -96,7 +102,7 @@ public final class AlternateLocationTest extends TestCase {
 		try {
 			for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
 				AlternateLocation al = 
-				    new AlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
+				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
 			}
 		} catch(IOException e) {
 			assertTrue("test failed with exception: "+e, false); 
@@ -111,7 +117,7 @@ public final class AlternateLocationTest extends TestCase {
 		try {
 			for(int i=0; i<HugeTestUtils.INVALID_LOCS.length; i++) {
 				AlternateLocation al = 
-				    new AlternateLocation(HugeTestUtils.INVALID_LOCS[i]);
+				    AlternateLocation.createAlternateLocation(HugeTestUtils.INVALID_LOCS[i]);
 				assertTrue("alternate location string should not have been accepted",
 						   false);
 			}
@@ -139,9 +145,11 @@ public final class AlternateLocationTest extends TestCase {
 
 		for(int i=0; i<equalLocs.length; i++) {
 			try {
-				AlternateLocation curLoc = new AlternateLocation(equalLocs[i]);
+				AlternateLocation curLoc = 
+				    AlternateLocation.createAlternateLocation(equalLocs[i]);
 				for(int j=0; j<equalLocs.length; j++) {
-					AlternateLocation newLoc = new AlternateLocation(equalLocs[j]);
+					AlternateLocation newLoc = 
+					    AlternateLocation.createAlternateLocation(equalLocs[j]);
 					assertEquals("locations should be equal", curLoc, newLoc);
 				}
 			} catch(IOException e) {
@@ -152,10 +160,10 @@ public final class AlternateLocationTest extends TestCase {
 		TreeMap testMap = new TreeMap();
 		for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
 			try {
-				AlternateLocation al0 = 
-				    new AlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
+				AlternateLocation al0 = 				    
+				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				AlternateLocation al1 = 
-				    new AlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
+				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				timeStampedAltLocs0.put(al0, al0);
 				testMap.put(al1, al1);
 				//timeStampedAltLocs0.add(al);
@@ -219,9 +227,11 @@ public final class AlternateLocationTest extends TestCase {
 	public void testAlternateLocationCompareTo() {
 		for(int i=0; i<equalLocs.length; i++) {
 			try {
-				AlternateLocation curLoc = new AlternateLocation(equalLocs[i]);
+				AlternateLocation curLoc = 
+				    AlternateLocation.createAlternateLocation(equalLocs[i]);
 				for(int j=0; j<equalLocs.length; j++) {
-					AlternateLocation newLoc = new AlternateLocation(equalLocs[j]);
+					AlternateLocation newLoc = 
+					    AlternateLocation.createAlternateLocation(equalLocs[j]);
 					int z = curLoc.compareTo(newLoc);
 					assertEquals("locations should be equal", z, 0);
 				}

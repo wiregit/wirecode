@@ -94,7 +94,8 @@ public final class AlternateLocationCollectionTest extends TestCase {
 		for(int i=0; i<hostNameStrings.length; i++) {
 			try {
 				URL url = new URL("http", hostNameStrings[i], 6346, "/test.htm");
-				AlternateLocation al = new AlternateLocation(url);
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(url);
 				_alternateLocations.add(al);
 			} catch(IOException e) {
 				assertTrue("unexpected exception: "+e, false);
@@ -169,7 +170,8 @@ public final class AlternateLocationCollectionTest extends TestCase {
 			String str = st.nextToken();
 			str = str.trim();
 			try {
-				AlternateLocation al = new AlternateLocation(str);
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(str);
 				alc1.addAlternateLocation(al);
 			} catch(IOException e) {
 				assertTrue("Exception in AlternateLocation contruction: "+e, false);
