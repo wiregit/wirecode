@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.FileUtils;
 import java.util.Properties;
 import java.io.*;
 import java.awt.*;
@@ -202,21 +203,34 @@ public final class SettingsFactory {
         
         FileOutputStream out = null;
         try {
-            // since we can't use store, we must test to make sure we can
-            // write the output (because save doesn't throw an IOException)
+            // some bugs were reported where the settings file was a directory.
             if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
+
+            // some bugs were reported where the settings file's parent
+            // directory was deleted.
+            File parent = FileUtils.getParentFile(SETTINGS_FILE);
+            if(parent != null)
+                parent.mkdirs();
+
             out = new FileOutputStream(SETTINGS_FILE);
+
+            // Properties.store is not in Java 1.1.8, and Properties.save
+            // doesn't throw an IOException, so we must test the writing
+            // to ensure that an IOException won't be thrown.
             out.write( PRE_HEADER );
+
+            // save the properties to disk.
             toSave.save( out, HEADING);            
         } catch(FileNotFoundException e) {
 			ErrorService.error(e);
         } catch (IOException e) {
 			ErrorService.error(e);
         } finally {
-            if ( out != null )
-            try {
-                out.close();
-            } catch (IOException ignored) {}
+            if ( out != null ) {
+                try {
+                    out.close();
+                } catch (IOException ignored) {}
+            }
         }
     }
     
