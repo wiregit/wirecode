@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.udpconnect;
 
+import com.sun.java.util.collections.*;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 /** 
  *  Calculate and control the timing of data writing.
  */
@@ -25,8 +26,15 @@ public class WriteRegulator {
     private int        _limitReset = 400;
     private int        _zeroCount  = 0;
 
+
+    /** Keep track of how many successes/failures there are in 
+        writing messages */
+    private FailureTracker _tracker;
+        
+
     public WriteRegulator( DataWindow sendWindow ) {
         _sendWindow = sendWindow;
+        _tracker    = new FailureTracker();
     }
 
     /** 
@@ -206,5 +214,127 @@ System.out.println("_skipLimit = "+_skipLimit);
 
         return (long) sleepTime;
         //------------- Sleep ------------------------
+    }
+
+
+    /** 
+     * Record a message success 
+     */
+    public void addMessageSuccess() {
+        _tracker.addSuccess();
+    }
+
+    /** 
+     * Record a message failure 
+     */
+    public void addMessageFailure() {
+        _tracker.addFailure();
+    }
+
+    /**
+     *  Keep track of successes and failures at a discrete level
+     */
+    class FailureBlock {
+
+        /** How many entries are in the block */
+        public int count;
+
+        /** How many successes are in the block */
+        public int success;
+
+        /** How many failures are in the block */
+        public int failure;
+
+        public FailureBlock() {
+            count   = 0;
+            success = 0;
+            failure = 0;
+        }
+    }
+
+    /**
+     *  Keep track of overall successes and failures 
+     */
+    class FailureTracker {
+
+        /** The number of discrete success/failure blocks to keep */
+        private static final int MAX_BLOCKS       = 5;
+
+        /** The number of discrete success/failures per block */
+        private static final int NUMBER_PER_BLOCK = 20;
+
+
+        /** The list of success/failures stored as discrete aging blocks */
+        private ArrayList blocks = new ArrayList(MAX_BLOCKS+1);
+
+        /**
+         * Add one to the successful count
+         */
+        public void addSuccess() {
+            FailureBlock block = ensureSpace(); 
+
+            block.count++;
+            block.success++;
+        }
+
+        /**
+         * Add one to the failure count
+         */
+        public void addFailure() {
+            FailureBlock block = ensureSpace(); 
+
+            block.count++;
+            block.failure++;
+        }
+
+        /**
+         * Compute the failure rate of last 100 blocks once up and running
+         */
+        public float failureRate() {
+            FailureBlock block;
+            int          count   = 0; 
+            int          failure = 0; 
+            
+            for (int i = 0; i < blocks.size(); i++) {
+                block = (FailureBlock) blocks.get(i);
+                count   += block.count;
+                failure += block.failure;
+            }
+
+            if ( count == 0 )
+                count = 1;
+
+            return ((float) failure) / ((float) count);
+        }
+
+        /**
+         * Make sure there is space for an addition and 
+         * return the active block
+         */
+        private FailureBlock ensureSpace() {
+            FailureBlock block;
+
+            // If nothing, initialize
+            if ( blocks.size() == 0 ) {
+                block = new FailureBlock();
+                blocks.add(0, block);
+                return block;
+            }
+
+            // Check latest block for room
+            block = (FailureBlock) blocks.get(0);
+
+            // Add new block if current is full
+            if ( block.count >= NUMBER_PER_BLOCK ) {
+                block = new FailureBlock();
+                blocks.add(0, block);
+
+                // Remove oldest block if too many
+                if ( blocks.size() > MAX_BLOCKS )
+                    blocks.remove(MAX_BLOCKS);
+            }
+
+            return block;
+        }
     }
 }
