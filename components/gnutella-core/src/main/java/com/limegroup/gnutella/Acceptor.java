@@ -78,6 +78,7 @@ public class Acceptor extends Thread {
      * Launches the port monitoring thread.
      */
 	public void initialize() { 
+        setName("Acceptor");
         setDaemon(true);
         start();
 	}
