@@ -161,15 +161,18 @@ public class DirectAltLoc extends AlternateLocation {
 
 	public int compareTo(Object o) {
 	    
+        if (this==o) //equal
+            return 0;
+	    
 	    int ret = super.compareTo(o);
 	    
 	    // if comparing to PushLocs count is all we need.
 	    // if that is the same, compare by hashCode()
-	    if (o instanceof PushAltLoc) { 
+	    if (!(o instanceof DirectAltLoc)) { 
 	        if (ret!=0) 
 	            return ret;
 	        else
-	            return hashCode() - o.hashCode();
+	            return -1;
 	    }
 		
 		DirectAltLoc other = (DirectAltLoc)o;

@@ -66,8 +66,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      * of 1.
      */
     protected volatile int _count = 0;
-
-
+    
     ////////////////////////"Constructors"//////////////////////////////
     
 	/**
@@ -445,12 +444,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
      * uploader. 
      */
     public int compareTo(Object obj) {
-        if (this==obj) //equal
-            return 0;
-        if(obj == null) //I am greater
-            return 1;
-        if( !(obj instanceof AlternateLocation) ) //I am greater
-            return 1;
+        
         AlternateLocation other = (AlternateLocation) obj;
         
         int ret = _count - other._count;
@@ -459,7 +453,6 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         
         return ret;
  
-        			
     }
     
     protected abstract String generateHTTPString();

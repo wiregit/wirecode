@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -146,12 +147,23 @@ public class PushAltLoc extends AlternateLocation {
 
 
 	public int compareTo(Object obj) {
+	    
+        if (this==obj) //equal
+            return 0;
+        
 	    int ret = super.compareTo(obj); 
 	    
 		if (ret!=0)
 			return ret;
-
-		return hashCode() - obj.hashCode();
+		if (!(obj instanceof PushAltLoc))
+		    return 1;
+		
+		PushAltLoc pal = (PushAltLoc) obj;
+		
+		return GUID.GUID_BYTE_COMPARATOR.compare(
+		        _pushAddress.getClientGUID(),
+		        pal.getPushAddress().getClientGUID());
+		        
 	}
 	
 	public int hashCode() {
