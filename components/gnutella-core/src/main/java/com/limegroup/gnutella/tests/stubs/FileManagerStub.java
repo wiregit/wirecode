@@ -8,7 +8,8 @@ import java.io.*;
  */
 public class FileManagerStub extends FileManager {
     public FileDesc get(int i) {
-        return new FileDesc(i, "fake.txt", "z:/fake.txt", Integer.MAX_VALUE);
+        return new FileDesc(new File("com.limegroup.gnutella.tests.stubs.FileManagerStub.java"), 
+							i);
     }
     public InputStream getInputStream(FileDesc ignored) {
         return new InputStream() {
