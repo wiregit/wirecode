@@ -35,13 +35,13 @@ public class ID3Editor {
     private static final String BITRATE_STRING = "bitrate=\"";
     private static final String SECONDS_STRING = "seconds=\"";
 
-    private static final String TITLE_ID = "TIT2";
-    private static final String ARTIST_ID = "TPE1";
-    private static final String ALBUM_ID = "TALB";
-    private static final String YEAR_ID = "TYER";
-    private static final String TRACK_ID = "TRCK";
-    private static final String COMMENT_ID = "COMM";
-    private static final String GENRE_ID = "TCON";
+    static final String TITLE_ID = "TIT2";
+    static final String ARTIST_ID = "TPE1";
+    static final String ALBUM_ID = "TALB";
+    static final String YEAR_ID = "TYER";
+    static final String TRACK_ID = "TRCK";
+    static final String COMMENT_ID = "COMM";
+    static final String GENRE_ID = "TCON";
 
 
     private final boolean debugOn = false;
@@ -76,7 +76,7 @@ public class ID3Editor {
      * (String) value of tag.
      * @exception Throw if rip failed.
      */
-    private Object[] ripTag(String source, String tagToRip) throws IOException{
+    private Object[] ripTag(String source, String tagToRip) throws IOException {
 
         Object[] retObjs = new Object[3];
 

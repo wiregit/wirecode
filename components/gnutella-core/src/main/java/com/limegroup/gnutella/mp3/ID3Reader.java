@@ -215,62 +215,61 @@ public final class ID3Reader {
     private static ID3Data parseID3v2Data(File file) {
         ID3Data data = new ID3Data();
         
-        MP3File mp3File = null;
+        ID3v2 id3v2Parser = null;
         try {
-            mp3File = new MP3File(file.getParentFile(), file.getName());
+            id3v3Parser = new ID3v2(file);
         } catch (ID3v2Exception idvx) { //can't go on
-            return data;
-        } catch (NoMP3FrameException nmfx) {//can't go on
             return data;
         } catch (IOException iox) {
             return data;
         }
-
-        try {
-            data.setTitle(mp3File.getTitle().getTextContent());
-        } catch(FrameDamagedException ignored) {}
         
+        Vector frames = null;
         try {
-            data.setArtist(mp3File.getArtist().getTextContent());
-        } catch(FrameDamagedException ignored) {}
-        
-        try {
-            data.setAlbum(mp3File.getAlbum().getTextContent());
-        } catch(FrameDamagedException ignored) {}
-
-        try {
-            data.setYear(mp3File.getYear().getTextContent());
-        } catch(FrameDamagedException ignored) {}
-        
-        try {
-            data.setComment(mp3File.getComments().getTextContent());
-        } catch(FrameDamagedException ignored) {}
-
-        try {
-            String track = mp3File.getTrack().getTextContent();
-            if(track != null)
-                data.setTrack(Short.parseShort(track));
+            frames = id3v2Parser.getFrames();
+        } catch (NoID3v2TagException ntx) {
+            return data;
         }
-        catch(FrameDamagedException ignored) {}
-        catch(NumberFormatException nfe) {}
         
-        try {
-            String genre = mp3File.getGenre().getTextContent();
-            if(genre != null) {
-                //ID3v2 frame for genre has the byte used in ID3v1 encoded within it
-                //-- we need to parse that out
-                int index = genre.indexOf(")");
-                //Note: It's possible that the user entered her own genre in which
-                //case there could be spurious braces, the id3v2 braces enclose
-                //values between 0 -127 so the index of the closing brace should be
-                //either 2, 3 or 4
-                if(index == -1 || !(index==2 || index==3 || index==4) )
-                    data.setGenre(genre);
-                else 
-                    data.setGenre(genre.substring(index+1));
+        //rather than getting each frame indvidually, we can get all the frames
+        //and iterate, leaving the ones we are not concerned with
+
+        for(Iterator iter=frames.iterator() ; iter.hasNext() ; ) {
+            ID2v3Frame frame = (ID3v2Frame)iter.next();
+            String frameID = frame.getID();
+            String frameContent = new String(frame.getContent());
+            if(frameContent == null || frameContent.trim().equals(""))
+                continue;
+            //check which tag we are looking at
+            if(ID3Editor.TITLE_ID.equals(frameID)) 
+                data.setTitle(frameContent);
+            else if(ID3Editor.ARTIST_ID.equals(frameID)) 
+                data.setArtist(frameContent);
+            else if(ID3Editor.ALBUM_ID.equals(frameID)) 
+                data.setAlbum(frameContent);
+            else if(ID3Editor.YEAR_ID.equals(frameID)) 
+                data.setYear(frameContent);
+            else if(ID3Editor.COMMENT_ID.equals(frameID)) 
+                data.setComment(frameContent);
+           else if(ID3Editor.TRACK_ID.equals(frameID)) {
+                try {
+                    data.setTrack(Short.parseShort(frameContent));
+                } catch (NumberFormatException ignored) {} 
             }
-        } catch(FrameDamagedException ignored) {}
-        
+            else if(ID3Editor.GENRE_ID.equals(frameID)) {
+                //ID3v2 frame for genre has the byte used in ID3v1 encoded
+                //within it -- we need to parse that out
+                int index = frameContent.indexOf(")");
+                //Note: It's possible that the user entered her own genre in
+                //which case there could be spurious braces, the id3v2 braces
+                //enclose values between 0 - 127 so the index of the closing
+                //brace should be either 2, 3 or 4
+                if(index == -1 || !(index==2 || index==3 || index==4) )
+                    data.setGenre(frameContent);
+                else 
+                    data.setGenre(frameContent.substring(index+1));
+            }
+        }
         return data;
     }
 
