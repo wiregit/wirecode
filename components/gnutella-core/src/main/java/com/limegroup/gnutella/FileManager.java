@@ -1317,8 +1317,7 @@ public abstract class FileManager {
                 // should never happen since we don't add times for IFDs and
                 // we clear removed files...
                 if ((desc==null) || (desc instanceof IncompleteFileDesc))
-                    ErrorService.error(new Exception("Unexpected file = " +
-                                                     desc));
+                    throw new RuntimeException("Bad Rep - No IFDs allowed!");
 
                 // Formulate the response
                 Response r = new Response(desc);
