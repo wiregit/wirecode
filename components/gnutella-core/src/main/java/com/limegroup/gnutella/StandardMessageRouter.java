@@ -74,6 +74,7 @@ public class StandardMessageRouter extends MessageRouter {
         //This results in a GGEP extension, which will be stripped before
         //sending it to older clients.
         int dailyUptime=Statistics.instance().calculateDailyUptime();
+        boolean isGUESSCapable = UDPService.instance().isGUESSCapable();
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
                                             RouterService.getPort(),
@@ -81,7 +82,8 @@ public class StandardMessageRouter extends MessageRouter {
                                             num_files,
                                             kilobytes,
                                             markPong,
-                                            dailyUptime);
+                                            dailyUptime,
+                                            isGUESSCapable);
 
         try {
             sendPingReply(pingReply);

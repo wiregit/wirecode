@@ -144,7 +144,7 @@ public class ManagedConnectionTest extends TestCase {
             assertTrue(out.supportsGGEP());
 
             out.send(new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   13l, 14l, false, 4321));
+                                   13l, 14l, false, 4321, false));
             PingReply reply=(PingReply)in.receive(TIMEOUT);
             assertEquals(reply.getPort(), 6349);
             try {
@@ -176,7 +176,7 @@ public class ManagedConnectionTest extends TestCase {
             assertTrue("Connection should not support GGEP", !out.supportsGGEP());
 
             out.send(new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   13l, 14l, false, 4321));
+                                   13l, 14l, false, 4321, false));
             PingReply reply=(PingReply)in.receive(TIMEOUT);
             assertEquals(14, reply.getLength());
             assertEquals(reply.getPort(), 6349);

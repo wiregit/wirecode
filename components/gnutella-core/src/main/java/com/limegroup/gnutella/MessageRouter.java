@@ -299,12 +299,13 @@ public abstract class MessageRouter {
 								 RouterService.getNumSharedFiles(),
 								 RouterService.getSharedFileSize()/1024,
 								 RouterService.isSupernode(),
-								 Statistics.instance().calculateDailyUptime());		
+								 Statistics.instance().calculateDailyUptime(),
+                                 UDPService.instance().isGUESSCapable());
 		} else {
 			return new PingReply(guid, (byte)1,
 								 endpoint.getPort(),
 								 endpoint.getAddress().getAddress(),
-								 0, 0, true, 0);
+								 0, 0, true, 0, true);
 		}
 	}
 
