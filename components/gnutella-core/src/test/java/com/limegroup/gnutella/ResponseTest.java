@@ -579,9 +579,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         // See if we can correctly read the GGEP block.
         baos.flush();
         byte[] output = baos.toByteArray();
-        GGEP[] blocks = GGEP.read(output, 0);
-        assertEquals("wrong ggep size", 1, blocks.length);
-        GGEP alt = blocks[0];
+        GGEP alt = new GGEP(output, 0, null);
         Set headers = alt.getHeaders();
         assertEquals("wrong size", 1, headers.size());
         assertEquals("wrong header", "ALT", headers.iterator().next());
@@ -690,10 +688,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
     
     private Response.GGEPContainer getGGEP(GGEP info) throws Exception {
         Class c = PrivilegedAccessor.getClass(Response.class, "GGEPUtil");
-
-        Set blocks = new HashSet();
-        blocks.add(info);
         return (Response.GGEPContainer)PrivilegedAccessor.invokeMethod(
-            c, "getGGEP", new Object[] { blocks }, new Class[] {Set.class} );
+            c, "getGGEP", new Object[] { info } );
     }    
 }

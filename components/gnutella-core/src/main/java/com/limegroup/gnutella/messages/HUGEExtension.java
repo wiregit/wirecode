@@ -17,7 +17,7 @@ public class HUGEExtension {
     // the disparate types of objects encoded in a HUGE extension - one set per
     // (lazily constructed)
     // -----------------------------------------
-    private Set _ggeps = null;
+    private GGEP _ggep = null;
     private Set _urns = null;
     private Set _urnTypes = null;
     private Set _miscBlocks = null;
@@ -25,27 +25,32 @@ public class HUGEExtension {
 
     /** @return the set of GGEP Objects in this HUGE extension.
      */
-    public Set getGGEPBlocks() {
-        if (_ggeps == null) return Collections.EMPTY_SET;
-        return _ggeps;
+    public GGEP getGGEP() {
+        return _ggep;
     }
     /** @return the set of URN Objects in this HUGE extension.
      */
     public Set getURNS() {
-        if (_urns == null) return Collections.EMPTY_SET;
-        return _urns;
+        if (_urns == null)
+            return Collections.EMPTY_SET;
+        else
+            return _urns;
     }
     /** @return the set of URN Type Objects in this HUGE extension.
      */
     public Set getURNTypes() {
-        if (_urnTypes == null) return Collections.EMPTY_SET;
-        return _urnTypes;
+        if (_urnTypes == null)
+            return Collections.EMPTY_SET;
+        else
+            return _urnTypes;
     }
     /** @return the set of miscellaneous blocks (Strings) in this extension.
      */
     public Set getMiscBlocks() {
-        if (_miscBlocks == null) return Collections.EMPTY_SET;
-        return _miscBlocks;
+        if (_miscBlocks == null)
+            return Collections.EMPTY_SET;
+        else 
+            return _miscBlocks;
     }
 
     public HUGEExtension(byte[] extsBytes) {
@@ -60,22 +65,18 @@ public class HUGEExtension {
                 endIndex[0] = currIndex+1;
                 try {
                     GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
-                    if (_ggeps == null)
-                        _ggeps = new HashSet();
-                    _ggeps.add(ggep);
-                }
-                catch (BadGGEPBlockException ignored) {}
-                    
+                    if (_ggep == null)
+                        _ggep = ggep;
+                    else
+                        _ggep.merge(ggep);
+                } catch (BadGGEPBlockException ignored) {}
                 currIndex = endIndex[0];
-            }
-            else { // HANDLE HUGE STUFF
+            } else { // HANDLE HUGE STUFF
                 int delimIndex = currIndex;
                 while ((delimIndex < extsBytes.length) 
                        && (extsBytes[delimIndex] != (byte)0x1c))
                     delimIndex++;
-                if (delimIndex > extsBytes.length) 
-                    ; // we've overflown and not encounted a 0x1c - discard
-                else {
+                if (delimIndex <= extsBytes.length) {
                     try {
                         // another GEM extension
                         String curExtStr = new String(extsBytes, currIndex,
@@ -85,27 +86,24 @@ public class HUGEExtension {
                             // it's an URN to match, of form "urn:namespace:etc"
                             URN urn = URN.createSHA1Urn(curExtStr);
                             if(_urns == null) 
-                                _urns = new HashSet();
+                                _urns = new HashSet(1);
                             _urns.add(urn);
-                        } 
-                        else if (UrnType.isSupportedUrnType(curExtStr)) {
+                        } else if (UrnType.isSupportedUrnType(curExtStr)) {
                             // it's an URN type to return, of form "urn" or 
                             // "urn:namespace"
                             if(UrnType.isSupportedUrnType(curExtStr)) {
                                 if(_urnTypes == null) 
-                                    _urnTypes = new HashSet();
+                                    _urnTypes = new HashSet(1);
                                 _urnTypes.add(UrnType.createUrnType(curExtStr));
                             }
-                        } 
-                        else {
+                        } else {
                             // miscellaneous, but in the case of queries, xml
                             if (_miscBlocks == null)
-                                _miscBlocks = new HashSet();
+                                _miscBlocks = new HashSet(1);
                             _miscBlocks.add(curExtStr);
                         }
-                    }
-                    catch (IOException bad) {}
-                }
+                    } catch (IOException bad) {}
+                } // else we've overflown and not encounted a 0x1c - discard
                 currIndex = delimIndex+1;
             }
         }        

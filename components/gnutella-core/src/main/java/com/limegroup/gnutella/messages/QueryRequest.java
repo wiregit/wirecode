@@ -1293,32 +1293,25 @@ public class QueryRequest extends Message implements Serializable{
             // handle extensions, which include rich query and URN stuff
             byte[] extsBytes = super.readNullTerminatedBytes(bais);
             HUGEExtension huge = new HUGEExtension(extsBytes);
+            GGEP ggep = huge.getGGEP();
 
-            Iterator ggeps = huge.getGGEPBlocks().iterator();
-            final String QK_SUPP = GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT;
-            while (ggeps.hasNext()) {
-                GGEP ggep = (GGEP) ggeps.next();
+            if(ggep != null) {
                 try {
-                    if (ggep.hasKey(QK_SUPP)) {
-                        byte[] qkBytes = ggep.getBytes(QK_SUPP);
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                        byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
                         tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                     }
                     if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                        _featureSelector = 
-                        ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
+                        _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
                     if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
                         _doNotProxy = true;
                     if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                        _metaMask = 
-                        new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
-                        // if the value is something we can't handle, don't
-                        // even set it
-                        if ((_metaMask.intValue() < 4) ||
-                            (_metaMask.intValue() > 248))
+                        _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                        // if the value is something we can't handle, don't even set it
+                        if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
                             _metaMask = null;
                     }
-                }
-                catch (BadGGEPPropertyException ignored) {}
+                } catch (BadGGEPPropertyException ignored) {}
             }
 
             tempQueryUrns = huge.getURNS();
@@ -1329,13 +1322,11 @@ public class QueryRequest extends Message implements Serializable{
                 if (currMiscBlock.startsWith("<?xml"))
                     tempRichQuery = currMiscBlock;                
             }
-        }
-        catch(UnsupportedEncodingException uee) {
+        } catch(UnsupportedEncodingException uee) {
             //couldn't build query from network due to unsupportedencodingexception
             //so throw a BadPacketException 
-            throw new BadPacketException("encountered UnsupportedEncodingException with data snatched from network");
-        }
-        catch (IOException ioe) {
+            throw new BadPacketException(uee.getMessage());
+        } catch (IOException ioe) {
             ErrorService.error(ioe);
         }
 		QUERY = tempQuery;
