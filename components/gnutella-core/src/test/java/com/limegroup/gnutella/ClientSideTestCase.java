@@ -37,7 +37,7 @@ public abstract class ClientSideTestCase
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
     protected static Connection testUP[];
-    private static RouterService rs;
+    protected static RouterService rs;
 
     private static ActivityCallback callback;
     protected static ActivityCallback getCallback() {
@@ -197,6 +197,10 @@ public abstract class ClientSideTestCase
 
     ///////////////////////// NO Actual Tests ////////////////////////////
     //////////////////////////////////////////////////////////////////
+
+    protected void drainAll() throws Exception {
+        drainAll(testUP);
+    }
 
     private static void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
