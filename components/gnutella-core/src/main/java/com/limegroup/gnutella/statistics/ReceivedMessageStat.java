@@ -12,8 +12,8 @@ import com.limegroup.gnutella.*;
 public class ReceivedMessageStat extends AdvancedStatistic {
 
 	/**
-	 * Constructs a new <tt>MessageStat</tt> instance with 
-	 * 0 for all historical data fields.
+	 * Constructs a new <tt>MessageStat</tt> instance.  Private to
+     * ensure that only this class can construct new instances.
 	 */
 	private ReceivedMessageStat() {}
 
