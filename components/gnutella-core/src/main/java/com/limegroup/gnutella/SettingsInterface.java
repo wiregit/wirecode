@@ -47,7 +47,7 @@ public interface SettingsInterface {
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client guid */
-    public static final String  DEFAULT_LIENT_ID      = null;
+    public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
     public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
@@ -78,7 +78,7 @@ public interface SettingsInterface {
     /** Use quick connect hosts instead of gnutella.net? */
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
 	/** This is limewire's public pong cache */
-    public static final String  DEFAULT_LIMEWIRE_ROUTER  = 
+    public static final String  DEFAULT_LIMEWIRE_ROUTER    = 
 	  "router.limewire.com";
 	/** This is limewire's dedicated pong cache */
     public static final String  DEDICATED_LIMEWIRE_ROUTER  = 
@@ -93,7 +93,7 @@ public interface SettingsInterface {
     /** Default for whether user should be prompted before downloading exe's. */
     public static final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
     public static final int     DEFAULT_MAX_UPLOADS      = 8;
-    public static final boolean DEFAULT_CLEAR_UPLOAD     = true;
+    public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
     public static final String  DEFAULT_CONNECT_STRING    
