@@ -167,6 +167,11 @@ public class Endpoint implements Cloneable, Serializable,
         return kbytes;
     }
 
+    /**
+    * If the number of files or the kbytes exceed certain limit, it
+    * considers them as false data, and initializes the number of files as well
+    * as kbytes to zero in that case
+    */
     public void normalizeFilesAndSize()
     {
         //normalize files
