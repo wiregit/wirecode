@@ -19,6 +19,7 @@ public class AllTests {
 		suite.addTest(VendorMessageTest.suite());
 		suite.addTest(ConnectBackVMPTest.suite());
 		suite.addTest(VendorMessagePayloadTest.suite());
+		suite.addTest(MessagesSupportedVMPTest.suite());
         return suite;
     }
 
