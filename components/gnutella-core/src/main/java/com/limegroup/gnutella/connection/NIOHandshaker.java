@@ -17,6 +17,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 /**
  * This class performs non-blocking handshaking, responding to read and write
  * events from the NIO selector.
+ * 
+ * TODO: make sure writers are added in all necessary cases.
  */
 public class NIOHandshaker extends AbstractHandshaker {
 
@@ -664,9 +666,6 @@ public class NIOHandshaker extends AbstractHandshaker {
             }
             
             if(_responseStatus == null) {
-                // TODO1: add writer??  Make sure we correctly add writers in 
-                // all states.
-                
                 return this;
             }
 
@@ -711,22 +710,16 @@ public class NIOHandshaker extends AbstractHandshaker {
             if(_ourResponse.getStatusCode() 
                == HandshakeResponse.UNAUTHORIZED_CODE){
                    
-                // TODO: what happens if these calls fail?? 
                 if(!readHeaders(USER_INPUT_WAIT_TIME)) {
                     return this;
                 } 
             } else {
-
-                // TODO1:: Major issue here.  What if this call fails?  We also
-                // need to handle any leftover data that we've read -- this is
-                // really the key case where we can read too much, and probably
-                // will!!
                 if(!readHeaders()) {
                     return this;
                 }
             }
     
-
+            // TODO1:: deal with any message data we may have read here.
 
             HandshakeResponse theirResponse = 
                 HandshakeResponse.createResponse(
@@ -734,7 +727,7 @@ public class NIOHandshaker extends AbstractHandshaker {
                         HEADERS_READ);
 
 
-            //Decide whether to proceed.
+            // Decide whether to proceed.
             int code = _ourResponse.getStatusCode();
             if(code == HandshakeResponse.OK) {
                 if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
