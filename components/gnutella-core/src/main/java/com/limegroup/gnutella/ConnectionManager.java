@@ -478,16 +478,15 @@ public class ConnectionManager implements Runnable {
 	return endpoints.contains(host);
     }	
     
-    /** Returns an unmodifiable iterator of a clone of this' connections.
+    /** Returns an iterator of a clone of this' connections.
      *  The iterator yields items in any order.  It <i>is</i> permissible
      *  to modify this while iterating through the elements of this, but
      *  the modifications will not be visible during the iteration.
      */
     public synchronized Iterator connections() {
-	//Iterator cannot be modified after it is returned.
 	List clone=new ArrayList();	
 	clone.addAll(connections);
-	return new UnmodifiableIterator(clone.iterator());
+	return new clone.iterator();
     }
 
     /**
