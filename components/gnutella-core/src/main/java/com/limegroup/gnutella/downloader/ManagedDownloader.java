@@ -129,6 +129,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The number of tries we've made.  0 means on the first try. */
     private int tries;
 
+	/**
+	 * Stores the number of bytes read the last time there was a reading
+	 * taken.
+	 */
+	private int _oldAmountRead = 0;
+
+    private FileManager fileManager;
+
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -139,8 +147,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
      */
-    public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
+    public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files,
+                             FileManager fm) {
         this.allFiles=files;
+        this.fileManager = fm;
         incompleteFileManager=new IncompleteFileManager();
         initialize(manager);
     }
@@ -271,7 +281,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //thread to consume this downloader.  If downloader isn't waiting, this
         //may not be serviced for some time.
         HTTPDownloader downloader=new HTTPDownloader(
-            socket, rfd, incompleteFileManager.getFile(rfd));
+            socket, rfd, incompleteFileManager.getFile(rfd),fileManager);
             
             
         synchronized (this) {
@@ -607,7 +617,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //afterwards since creating a downloader MAY be blocking
             //depending if SocketOpener is used.
             HTTPDownloader dloader2=new HTTPDownloader(
-                rfd, CONNECT_TIME, incompleteFileManager.getFile(rfd));
+                rfd, CONNECT_TIME, incompleteFileManager.getFile(rfd),
+                fileManager);
             synchronized (ManagedDownloader.this) {
                 if (stopped) {
                     dloader2.stop();
@@ -839,7 +850,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retArray;
     }
 
-
+	/**
+	 * Implements the <tt>BandwidthTracker</tt> interface.
+	 * Returns the number of bytes read since the last time this method
+	 * was called.
+	 *
+	 * @return the number of new bytes read since the last time this method
+	 *         was called
+	 */
+	public synchronized int getNewBytesTransferred() {
+  		int newAmountRead = getAmountRead();
+  		int newBytesTransferred = newAmountRead - _oldAmountRead;
+  		_oldAmountRead = newAmountRead;
+  		return newBytesTransferred;
+	}
 }
 
 /** A RemoteFileDesc and the number of times we've tries to push it. */
