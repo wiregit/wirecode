@@ -5,6 +5,7 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -51,16 +52,27 @@ public class OGGWritingTest extends BaseTestCase {
     public void testOGGTagsWriting() throws Exception {
         AudioMetaData data = null;
         
+        data = (AudioMetaData)MetaData.parse(TEST_FILE);
+        assertEquals("Incorrect album","allAlbum", data.getAlbum());
+        assertEquals("Incorrect year", "1234",data.getYear());
+        assertEquals("Incorrect track", 3, data.getTrack());
+        assertEquals("Incorrect comment", "allComment",data.getComment());        
         
+        // Read existing stuff in file.
+        LimeXMLDocument doc = MetaDataReader.readDocument(TEST_FILE);
         //2. Write data into the file 
         MetaDataEditor editor = MetaDataEditor.getEditorForFile(TEST_FILE.getPath());
+        editor.populate(doc);
+        
+        
         PrivilegedAccessor.setValue(editor, "title_", "New Title");
         PrivilegedAccessor.setValue(editor, "artist_", "new Artist");
         PrivilegedAccessor.setValue(editor, "genre_", "Classic Rock");
+        PrivilegedAccessor.setValue(editor, "license_", "some license");
         
         int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
-	assertEquals(0,retVal);
+    	assertEquals(0,retVal);
 
         //3. Test if the data was written correctly
         data = (AudioMetaData)MetaData.parse(TEST_FILE);
@@ -68,11 +80,12 @@ public class OGGWritingTest extends BaseTestCase {
         assertTrue(data.toString(), data.isComplete());
         assertEquals("Title not written", "New Title", data.getTitle());
         assertEquals("Artist not written", "new Artist",  data.getArtist());
-        assertEquals("Incorrect genre ", "Classic Rock", data.getGenre());
+        assertEquals("Genre not written", "Classic Rock", data.getGenre());
         assertEquals("Incorrect album","allAlbum", data.getAlbum());
         assertEquals("Incorrect year", "1234",data.getYear());
         assertEquals("Incorrect track", 3, data.getTrack());
         assertEquals("Incorrect comment", "allComment",data.getComment());
+        assertEquals("License not written", "some license", data.getLicense());
     }
     
 }

@@ -34,10 +34,10 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 						comments[0]==null) ? 
 							new Comment() : comments[0];
 			
-			comment.comments=7;
-			comment.comment_lengths= new int[7];
+			comment.comments=8;
+			comment.comment_lengths= new int[8];
 			
-			byte [][] commentBytes = new byte[7][];
+			byte [][] commentBytes = new byte[8][];
 			
 			String tmp;
 			
@@ -78,6 +78,9 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 			commentBytes[6]=tmp.getBytes("UTF-8");
 			comment.comment_lengths[6] = commentBytes[6].length;
 			
+			tmp=OGGMetaData.LICENSE_TAG+"="+(license_!=null ? license_ :"");
+			commentBytes[7]=tmp.getBytes("UTF-8");
+			comment.comment_lengths[7] = commentBytes[7].length;
 			
 			comment.user_comments=commentBytes;
 			
