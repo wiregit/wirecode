@@ -5,7 +5,10 @@
  */
 
 package com.limegroup.gnutella.xml;
+
 import java.util.*;
+import java.io.File;
+import com.limegroup.gnutella.SettingsManager;
 
 /**
  * Provides utility methods to process the canonicalized strings we use to
@@ -149,6 +152,38 @@ public class XMLStringUtils
         System.out.println("finished tokenizing");
         //return the list of chopped/tokenized elements    
         return choppedElements;
+    }
+
+
+    public static void saveMetaInfo(LimeXMLDocument doc, 
+                                    String fileName) {
+
+        // file needs to be properly located...
+        fileName = SettingsManager.instance().getSaveDirectory() +
+        File.separator + fileName;
+
+        // get all needed info
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        String uri = doc.getSchemaURI();
+        LimeXMLReplyCollection collection = map.getReplyCollection(uri);
+        doc.setIdentifier(fileName);
+
+        if (collection == null){ //there is no reply collection yet
+            collection = new LimeXMLReplyCollection(uri,doc);
+            map.add(uri,collection);
+        }
+        else 
+            //we are adding new data
+            collection.addReply(doc);
+        
+        boolean committed;
+        if (collection.audio)
+           committed  = collection.mp3ToDisk(fileName);
+        else
+            committed = collection.toDisk("");
+        if (!committed){
+            // this is bad            
+        }
     }
     
 }
