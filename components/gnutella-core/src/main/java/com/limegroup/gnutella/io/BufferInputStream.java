@@ -17,6 +17,8 @@ import com.limegroup.gnutella.RouterService;
  */
  class BufferInputStream extends InputStream {
     
+    private static final Log LOG = LogFactory.getLog(BufferInputStream.class);
+    
     
     /** the lock that reading waits on. */
     private final Object LOCK = new Object();
@@ -27,6 +29,9 @@ import com.limegroup.gnutella.RouterService;
     /** the buffer that has data for reading */
     private final ByteBuffer buffer;
     
+    /** the SelectableChannel that the buffer is read from. */
+    private final SelectableChannel channel;
+    
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
     
@@ -34,9 +39,10 @@ import com.limegroup.gnutella.RouterService;
      * Constructs a new BufferInputStream that reads from the given buffer,
      * using the given socket to retrieve the soTimeouts.
      */
-    BufferInputStream(ByteBuffer buffer, NIOSocket handler) {
+    BufferInputStream(ByteBuffer buffer, NIOSocket handler, SelectableChannel channel) {
         this.handler = handler;
         this.buffer = buffer;
+        this.channel = channel;
     }
     
     /** Returns the lock object upon which writing into the buffer should lock */
@@ -52,6 +58,10 @@ import com.limegroup.gnutella.RouterService;
             buffer.flip();
             byte read = buffer.get();
             buffer.compact();
+            
+            // there's room in the buffer now, the channel needs some data.
+            NIODispatcher.instance().interestRead(channel);
+            
             return read;
         }
     }
@@ -65,6 +75,10 @@ import com.limegroup.gnutella.RouterService;
             int available = Math.min(buffer.remaining(), len);
             buffer.get(buf, off, available);
             buffer.compact();
+            
+            // now that there's room in the buffer, fill up the channel
+            NIODispatcher.instance().interestRead(channel);
+            
             return available; // the amount we read.
         }
     }
@@ -89,11 +103,13 @@ import com.limegroup.gnutella.RouterService;
                 
             if(looped && timeout != 0)
                 throw new java.io.InterruptedIOException("read timed out (" + timeout + ")");
+                
             try {
                 LOCK.wait(timeout);
             } catch(InterruptedException ix) {
                 throw new InterruptedIOException(ix);
             }
+
             looped = true;
         }
     }

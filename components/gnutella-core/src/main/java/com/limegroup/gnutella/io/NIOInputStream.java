@@ -46,7 +46,7 @@ class NIOInputStream {
             throw new IOException("Already closed!");
         
         buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
-        source = new BufferInputStream(buffer, handler);
+        source = new BufferInputStream(buffer, handler, channel);
         bufferLock = source.getBufferLock();
         
         NIODispatcher.instance().interestRead(channel);

@@ -78,16 +78,26 @@ class NIODispatcher implements Runnable {
     
     /** Registers a SelectableChannel as being interested in a write again. */
     void interestWrite(SelectableChannel channel) {
-        SelectionKey sk = channel.keyFor(selector);
-        if(sk != null)
-            sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
+        interest(channel, SelectionKey.OP_WRITE);
     }
     
     /** Registers a SelectableChannel as being interested in a read again. */
     void interestRead(SelectableChannel channel) {
-        SelectionKey sk = channel.keyFor(selector);
-        if(sk != null)
-            sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
+        interest(channel, SelectionKey.OP_READ);
+    }    
+    
+    /** Registers interest on the channel for the given op */
+    private void interest(SelectableChannel channel, int op) {
+        try {
+            SelectionKey sk = channel.keyFor(selector);
+            if(sk != null && sk.isValid())
+                sk.interestOps(sk.interestOps() | op);
+        } catch(CancelledKeyException cke) {
+            // It is possible to register interest on any thread, which means
+            // that the key could have been cancelled at any time.
+            // Despite checking for isValid above, it may become invalid.
+            // It's a harmless exception, so ignore it.
+       }
     }
     
     /**
@@ -232,7 +242,7 @@ class NIODispatcher implements Runnable {
             LOG.debug("Selecting");
             try {
                 // see register(...) for why this has a timeout
-                selector.select(50);
+                selector.select(100);
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
