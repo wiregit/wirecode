@@ -8,6 +8,7 @@ import java.io.InputStream;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
@@ -111,5 +112,9 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	
 	public void setAlternateLocationCollection(AlternateLocationCollection what) {
 		_altlocCollection=what;
+	}
+	
+	public boolean addVerified(AlternateLocation al) {
+		return _altlocCollection.add(al);
 	}
 }

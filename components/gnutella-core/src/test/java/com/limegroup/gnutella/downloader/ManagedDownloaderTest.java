@@ -10,26 +10,14 @@ import java.lang.reflect.Method;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.DownloadManagerStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.*;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;
@@ -59,6 +47,75 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         manager.initialize(callback, router, fileman);
     }
 
+    
+    /**
+     * tests if firewalled altlocs are added to the file descriptor
+     * but not sent to uploaders.
+     */
+    public void testFirewalledLocs() throws Exception {
+    	
+    	//first make sure we are sharing an incomplete file
+    	
+    	URN partialURN = 
+    		URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+    	
+    	AlternateLocationCollection 
+			col = AlternateLocationCollection.create(partialURN);
+    	
+    	IncompleteFileDescStub partialDesc = 
+    		new IncompleteFileDescStub("incomplete",partialURN,3);
+    	
+    	partialDesc.setAlternateLocationCollection(col);
+    	
+    	Map urnMap = new HashMap(); urnMap.put(partialURN,partialDesc);
+    	List descList = new LinkedList();descList.add(partialDesc);
+    	File f = new File("incomplete");
+    	Map fileMap = new HashMap();fileMap.put(f,partialDesc);
+    	
+    	FileManagerStub newFMStub = new FileManagerStub(urnMap,descList);
+    	newFMStub.setFiles(fileMap);
+    	
+    	PrivilegedAccessor.setValue(RouterService.class,"fileManager",newFMStub);
+    	
+    	// then create an rfd from a firewalled host
+    	RemoteFileDesc rfd = 
+    		newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
+    	
+    	//test that currently we have no altlocs for the incomplete file
+    	
+    	FileDesc test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	
+    	assertEquals(0,test.getAlternateLocationCollection().getAltLocsSize());
+    	
+    	//add one fake downloader to the downloader list
+    	Endpoint e = new Endpoint("1.2.3.5",12345);
+    	RemoteFileDesc other = new RemoteFileDesc(newRFD("incomplete"),e);
+    	AltlocDownloaderStub fakeDownloader = new AltlocDownloaderStub(other);
+    	
+    	List l = new LinkedList();l.add(fakeDownloader);
+    	
+    	TestManagedDownloader md = new TestManagedDownloader(new RemoteFileDesc[]{rfd});
+    	md.initialize(manager,newFMStub,callback);
+    	md.setDloaders(l);
+    	md.setSHA1(partialURN);
+    	md.setFM(newFMStub);
+    	md.setIncompleteFile(f);
+    	
+    	
+    	//and see if it behaves correctly
+    	PrivilegedAccessor.invokeMethod(
+    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
+				new Class[]{RemoteFileDesc.class,boolean.class});
+    	
+    	//make sure the downloader did not get notified
+    	assertFalse(fakeDownloader._addedFailed);
+    	assertFalse(fakeDownloader._addedSuccessfull);
+    	
+    	//make sure the file was added to the file descriptor
+    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    }
+    
     public void testLegacy() throws Exception {
         //Test removeBest
         Set urns1 = new HashSet();
@@ -312,6 +369,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         }
     }
 
+
+    
     private static RemoteFileDesc newRFD(String name) {
         return newRFD(name, null);
     }
@@ -331,7 +390,20 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   new byte[16], 56, false, 4, true, null, urns,
                                   false, false,"",0,null, -1);
     }
-
+    
+    private static RemoteFileDesc newPushRFD(String name,String hash,byte [] guid) 
+    	throws Exception {
+    	
+		QueryReply.PushProxyContainer ppi = 
+			new QueryReply.PushProxyContainer("1.2.3.10",2000);
+		
+		Set ppis = new HashSet();ppis.add(ppi);
+		
+    	PushEndpoint pe = new PushEndpoint(guid,ppis);   
+    	
+    	return new RemoteFileDesc(newRFD(name,hash),pe);
+	}
+    
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
@@ -341,5 +413,48 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         public QueryRequest newRequery2() throws CantResumeException {
             return super.newRequery(2);
         }
+        
+        /**
+         * allows overriding of the list of current downloaders
+         */
+        public void setDloaders(List l) {
+        	try {
+        		PrivilegedAccessor.setValue(this,"dloaders",l);
+        	}catch(Exception e) {
+        		ErrorService.error(e);
+        	}
+        }
+        
+        public void setSHA1(URN sha1) throws Exception{
+        	PrivilegedAccessor.setValue(this,"sha1",sha1);
+        }
+        
+        public void setFM(FileManager fm) throws Exception{
+        	PrivilegedAccessor.setValue(this,"fileManager",fm);
+        }
+        
+        public void setIncompleteFile(File f) throws Exception {
+        	PrivilegedAccessor.setValue(this,"incompleteFile",f);
+        }
+    }
+    
+    static class AltlocDownloaderStub extends HTTPDownloaderStub {
+    	
+    	RemoteFileDesc rfd;
+    	public AltlocDownloaderStub(RemoteFileDesc fd){
+    		super(fd,null);
+    		rfd =fd;
+    	}
+    	public boolean _addedFailed,_addedSuccessfull;
+   		public void addFailedAltLoc(AlternateLocation loc) {
+   			_addedFailed = true;
+		}
+		public void addSuccessfulAltLoc(AlternateLocation loc) {
+			_addedSuccessfull=true;
+		}
+		
+		public RemoteFileDesc getRemoteFileDesc() {
+			return rfd;
+		}
     }
 }

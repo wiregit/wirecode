@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public class FileManagerStub extends FileManager {
 
-	Map _urns;
+	Map _urns,_files;
 	List _descs;
     FileDescStub fdStub = new FileDescStub();
     public static URN _notHave =null;
@@ -71,6 +71,14 @@ public class FileManagerStub extends FileManager {
     
     public FileDesc addFileIfShared(File f, List docs) {
         return addFileIfShared(f);
+    }
+    
+    public void setFiles(Map m) {
+    	_files = m;
+    }
+    
+    public FileDesc getFileDescForFile(File f) {
+    	return (FileDesc)_files.get(f);
     }
 }
 
