@@ -36,13 +36,16 @@ public class LimeXMLReplyCollection {
     private final HashMap /* URN -> LimeXMLDocument */ mainMap;
     
     /**
-     * An index mapping keywords in the LimeXMLDocuments to the list
-     * of documents that have that keyword.
+     * A mapping of fields in the LimeXMLDocument to a Trie
+     * that has a lookup table for the values of that field.
+     *
+     * The Trie value is a mapping of keywords in LimeXMLDocuments
+     * to the list of documents that have that keyword.
      *
      * SYNCHRONIZATION: Synchronize on mainMap when accessing,
      *  adding or removing.
      */
-    private final Trie /* String -> Set */ index;
+    private final Map /* String -> Trie (String -> List) */ trieMap;
     
     /**
      * Whether or not this LimeXMLReplyCollection is for audio files.
@@ -88,7 +91,7 @@ public class LimeXMLReplyCollection {
 
         // construct a backing store object (for serialization)
         mainMap = new HashMap();
-        index = new Trie(true); // ignore case.
+        trieMap = new HashMap();
         MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXML;
 
@@ -286,20 +289,26 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Adds the keywords of this LimeXMLDocument into the index Trie.
-     *
-     * This purposely does not use the getKeyWords method of LimeXMLDocument,
-     * as that method strips out numeric values.  We DO want numeric values
-     * listed in the Trie, otherwise no numeric searches would ever suceed.
+     * Adds the keywords of this LimeXMLDocument into the correct Trie 
+     * for the field of the value.
      */
     private void addKeywords(LimeXMLDocument doc) {
         synchronized(mainMap) {
-            for(Iterator i = doc.getValueList().iterator(); i.hasNext(); ) {
-                String value = (String)i.next();
-                Set allDocs = (Set)index.get(value);
+            for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)i.next();
+                final String name = (String)entry.getKey();
+                final String value = (String)entry.getValue();
+                Trie trie = (Trie)trieMap.get(name);
+                // if no lookup table created yet, create one & insert.
+                if(trie == null) {
+                    trie = new Trie(true); //ignore case.
+                    trieMap.put(name, trie);
+                }
+                List allDocs = (List)trie.get(value);
+                // if no list of docs for this value created, create & insert.
                 if( allDocs == null ) {
-                    allDocs = new HashSet();
-                    index.add(value, allDocs);
+                    allDocs = new LinkedList();
+                    trie.add(value, allDocs);
                 }
                 //Add the value to the list of docs
                 allDocs.add(doc);
@@ -308,18 +317,27 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Removes the keywords of this LimeXMLDocument from the Trie.
+     * Removes the keywords of this LimeXMLDocument from the appropriate Trie.
+     * If the list is emptied, it is removed from the Trie.
      */
     private void removeKeywords(LimeXMLDocument doc) {
         synchronized(mainMap) {
-            for(Iterator i = doc.getValueList().iterator(); i.hasNext(); ) {
-                String value = (String)i.next();
-                Set allDocs = (Set)index.get(value);
-                if (allDocs != null) {
-                    allDocs.remove(doc);
-                    if( allDocs.size() == 0 )
-                        index.remove(value);
-                }
+            for(Iterator i = doc.getNameValueSet().iterator(); i.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)i.next();
+                final String name = (String)entry.getKey();
+                final String value = (String)entry.getValue();
+                Trie trie = (Trie)trieMap.get(name);
+                // if no trie, ignore.
+                if(trie == null)
+                    continue;
+                List allDocs = (List)trie.get(value);
+                // if no list, ignore.
+                if( allDocs == null )
+                    continue;
+                allDocs.remove(doc);
+                // if we emptied the doc, remove from trie...
+                if( allDocs.size() == 0 )
+                    trie.remove(value);
             }
         }
     }
@@ -409,21 +427,25 @@ public class LimeXMLReplyCollection {
      * 4) Returns an empty list if nothing matched or
      *    a list of the matching documents.
      */    
-    public List getMatchingReplies(LimeXMLDocument queryDoc) {
+    public List getMatchingReplies(LimeXMLDocument query) {
         // First get a list of anything that could possibly match.
         // This uses a set so we don't add the same doc twice ...
         Set matching = null;
         synchronized(mainMap) {
-            for(Iterator i = queryDoc.getValueList().iterator(); i.hasNext(); ) {
-                String val = (String)i.next();
-                Iterator /* of List */ iter = index.getPrefixedBy(val);
+            for(Iterator i = query.getNameValueSet().iterator(); i.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)i.next();
+                final String name = (String)entry.getKey();
+                Trie trie = (Trie)trieMap.get(name);
+                // no matching trie?.. ignore.
+                if(trie == null)
+                    continue;
+                final String value = (String)entry.getValue();
+                Iterator /* of List */ iter = trie.getPrefixedBy(value);
                 while(iter.hasNext()) {
-                    Set matchesVal = (Set)iter.next();
-                    if( matchesVal != null ) {
-                        if( matching == null )
-                            matching = new HashSet();
-                        matching.addAll(matchesVal);
-                    }
+                    List matchesVal = (List)iter.next();
+                    if( matching == null ) // delayed allocation of the set..
+                        matching = new HashSet();
+                    matching.addAll(matchesVal);
                 }
             }
         }
@@ -436,8 +458,8 @@ public class LimeXMLReplyCollection {
         List actualMatches = null;
         for(Iterator i = matching.iterator(); i.hasNext(); ) {
             LimeXMLDocument currReplyDoc = (LimeXMLDocument)i.next();
-            if (LimeXMLUtils.match(currReplyDoc, queryDoc)) {
-                if( actualMatches == null )
+            if (LimeXMLUtils.match(currReplyDoc, query)) {
+                if( actualMatches == null ) // delayed allocation of the list..
                     actualMatches = new LinkedList();
                 actualMatches.add(currReplyDoc);
             }
