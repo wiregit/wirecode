@@ -378,12 +378,12 @@ public final class HandshakeResponse {
 		// add any leaves
 		headers.put(HeaderNames.LEAVES, 
 			createEndpointString(RouterService.
-                getConnectionManager().getInitializedClientConnections2()));
+                getConnectionManager().getInitializedClientConnections()));
 
 		// add any Ultrapeers
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(RouterService.
-                getConnectionManager().getInitializedConnections2()));
+                getConnectionManager().getInitializedConnections()));
 			
 		return new HandshakeResponse(HandshakeResponse.OK,
 			HandshakeResponse.OK_MESSAGE, headers);        

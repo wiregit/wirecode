@@ -1378,7 +1378,7 @@ public abstract class MessageRouter {
         //Broadcast the ping to other connected nodes (supernodes or older
         //nodes), but DON'T forward any ping not originating from me 
         //along leaf to ultrapeer connections.
-        List list = manager.getInitializedConnections2();
+        List list = manager.getInitializedConnections();
         int size = list.size();
 
         boolean randomlyForward = false;
@@ -1422,7 +1422,7 @@ public abstract class MessageRouter {
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
-        List list = _manager.getInitializedClientConnections2();
+        List list = _manager.getInitializedClientConnections();
         List hitConnections = new ArrayList();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
@@ -1521,7 +1521,7 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List list = _manager.getInitializedConnections2();
+		List list = _manager.getInitializedConnections();
         int limit = list.size();
 
 		for(int i=0; i<limit; i++) {
@@ -1546,7 +1546,7 @@ public abstract class MessageRouter {
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
 	 
-		List list = _manager.getInitializedConnections2();
+		List list = _manager.getInitializedConnections();
         int limit = list.size();
 
         int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
@@ -1620,7 +1620,7 @@ public abstract class MessageRouter {
      * @param qr the <tt>QueryRequest</tt> to send
      */
     private void originateLeafQuery(QueryRequest qr) {
-		List list = _manager.getInitializedConnections2();
+		List list = _manager.getInitializedConnections();
 
         // only send to at most 4 Ultrapeers, as we could have more
         // as a result of race conditions
@@ -1790,7 +1790,7 @@ public abstract class MessageRouter {
         //prevalent, this may consume too much bandwidth.
 		//Also forward any GUESS pongs to all leaves.
         if (newAddress && (reply.isUltrapeer() || supportsUnicast)) {
-            List list=_manager.getInitializedClientConnections2();
+            List list=_manager.getInitializedClientConnections();
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
                 Assert.that(c != null, "null c.");
@@ -2301,7 +2301,7 @@ public abstract class MessageRouter {
 		long time = System.currentTimeMillis();
 
 		//For all connections to new hosts c needing an update...
-		List list=_manager.getInitializedConnections2();
+		List list=_manager.getInitializedConnections();
 		QueryRouteTable table = null;
 		List /* of RouteTableMessage */ patches = null;
 		QueryRouteTable lastSent = null;
@@ -2422,7 +2422,7 @@ public abstract class MessageRouter {
 	 * @param qrt the <tt>QueryRouteTable</tt> to add to
 	 */
 	private static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
-		List leaves = _manager.getInitializedClientConnections2();
+		List leaves = _manager.getInitializedClientConnections();
 		
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);

@@ -137,7 +137,7 @@ public class StandardMessageRouter extends MessageRouter {
         
         //send the pongs for leaves
         List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections2();
+            = _manager.getInitializedClientConnections();
         
         for(Iterator iterator = leafConnections.iterator(); 
             iterator.hasNext();) {

@@ -678,7 +678,7 @@ public class RouterService {
 		int count = 0;
 
         // Count the messages on initialized connections
-        for (Iterator iter=manager.getInitializedConnections2().iterator();
+        for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             count += c.getNumMessagesSent();
@@ -695,7 +695,7 @@ public class RouterService {
 		int msgs; 
 
         // Count the messages on initialized connections
-        for (Iterator iter=manager.getInitializedConnections2().iterator();
+        for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             msgs = c.getNumMessagesSent();
@@ -733,10 +733,10 @@ public class RouterService {
     public static void dumpConnections() {
         //dump ultrapeer connections
         System.out.println("UltraPeer connections");
-        dumpConnections(manager.getInitializedConnections2());
+        dumpConnections(manager.getInitializedConnections());
         //dump leaf connections
         System.out.println("Leaf connections");
-        dumpConnections(manager.getInitializedClientConnections2());
+        dumpConnections(manager.getInitializedClientConnections());
     }
     
     /**
