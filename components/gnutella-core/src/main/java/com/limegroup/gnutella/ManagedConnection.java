@@ -78,14 +78,7 @@ public class ManagedConnection
      * indicates whether the connection is to an "old Gnutella client" 
      * (according to the the Protocol Version number in any message GUID).
      */
-    private boolean _isOldClient = false;
-
-    /**
-     * First Ping is used to determine if this is a connection to an older
-     * client or not.  Then, we can set the accept time for allowing Pings
-     * from this older client.
-     */
-    private boolean _receivedFirstPing = false;
+    private boolean _isOldClient = true;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -403,14 +396,7 @@ public class ManagedConnection
             // Increment hops and decrease TTL
             m.hop();
 
-            if(m instanceof PingRequest) {
-                //first ping should be checked if it is an older client (by
-                //Gnutella protocol version in GUID).
-                if (!_receivedFirstPing) 
-                    checkForOlderClient(m); 
-                //if (!isHandshake(m)) //if handshake, just continue;  TODO: why?
-                //    _router.handlePingRequest((PingRequest)m, this);
-            }
+            checkForOlderClient(m);
             _router.handleMessage(m, this);
         }
     }
@@ -422,12 +408,14 @@ public class ManagedConnection
      */
     private void checkForOlderClient(Message m)
     {
-        _receivedFirstPing = true;
-
-        //if the protocol version is less than 1, it's an older client.
-        if (GUID.getProtocolVersion(m.getGUID()) < 
-            GUID.GNUTELLA_VERSION_06) 
-            _isOldClient = true;
+        //m.hop() already called
+        if (m.getHops()==1 && (m instanceof PingRequest)) 
+        {  
+            //if the protocol version is less than 1, it's an older client.
+            byte[] guid=m.getGUID();
+            _isOldClient = ! (GUID.isNewGUID(guid) 
+                && GUID.getProtocolVersion(guid)>GUID.GNUTELLA_VERSION_05);
+        }                            
     }
 
     /**
