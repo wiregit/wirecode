@@ -20,6 +20,7 @@ class LanguageInfo implements Comparable {
     private final String fileName;
     private final Properties properties;
     private double percentage;
+    private final boolean utf8;
     
     /**
      * Constructs a new LanguageInfo object with the given
@@ -29,7 +30,8 @@ class LanguageInfo implements Comparable {
     public LanguageInfo(String lc, String cc, String vc, String sc,
                         String ln, String cn, String vn, String sn,
                         String dn, boolean rtl,
-                        String fn, Properties props) {
+                        String fn, Properties props,
+                        boolean isUTF8) {
         languageCode = lc.trim();
         countryCode  = cc.trim();
         variantCode  = vc.trim();
@@ -42,6 +44,7 @@ class LanguageInfo implements Comparable {
         displayName  = dn.trim();
         fileName     = fn.trim();
         properties   = props;
+        utf8 = isUTF8;
     }
     
     /**
@@ -128,5 +131,8 @@ class LanguageInfo implements Comparable {
            "\" title=\"" + toString() + "\">" +
            displayName + "</a>";
     }
+    
+    public boolean isUTF8() { return utf8; }
+    
     
 }

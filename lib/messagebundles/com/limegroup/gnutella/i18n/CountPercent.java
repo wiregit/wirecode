@@ -8,21 +8,27 @@ public class CountPercent {
     private static final int ACTION_STATISTICS = 0;
     private static final int ACTION_HTML = 1;
     private static final int ACTION_CHECK = 2;
+    private static final int ACTION_UPDATE = 3;
     
     public static void main(String[] args) throws java.io.IOException {
         final int action;
+        String code = null;
         if (args != null && args.length > 0) {
-            if (args[0].equals("html"))
+            if (args[0].equals("html")) {
                 action = ACTION_HTML;
-            else if (args[0].equals("check"))
+            } else if (args[0].equals("check")) {
                 action = ACTION_CHECK;
-            else {
-                System.err.println("Usage: java CountPercent [html|check]");
+            } else if(args[0].equals("update")) {
+                action = ACTION_UPDATE;
+                if(args.length > 1)
+                    code = args[1];
+            } else {
+                System.err.println("Usage: java CountPercent [html|check|update <code>]");
                 return;
             }
         } else
             action = ACTION_STATISTICS;
-        new CountPercent(action);
+        new CountPercent(action, code);
     }
     
     private final DateFormat df;
@@ -32,7 +38,7 @@ public class CountPercent {
     private final Set/*<String key>*/ basicKeys, advancedKeys;
     private final int basicTotal;
 
-    CountPercent(int action) throws java.io.IOException {
+    CountPercent(int action, String code) throws java.io.IOException {
         df = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
 
         rc = NumberFormat.getNumberInstance(Locale.US);
@@ -45,7 +51,8 @@ public class CountPercent {
         pc.setMaximumFractionDigits(2);
         pc.setMaximumIntegerDigits(3);
         
-        LanguageLoader loader = new LanguageLoader(new File("."));
+        File root = new File(".");
+        LanguageLoader loader = new LanguageLoader(root);
 
         Properties defaultProps = loader.getDefaultProperties();
         advancedKeys = loader.getAdvancedKeys();
@@ -70,6 +77,20 @@ public class CountPercent {
             HTMLOutput html = new HTMLOutput(df, pc, langs, basicTotal);
             html.printHTML(System.out);
             break;
+        case ACTION_UPDATE:
+            loader.extendVariantLanguages();
+            Set validKeys = new HashSet();
+            validKeys.addAll(basicKeys);
+            validKeys.addAll(advancedKeys);
+            loader.retainKeys(validKeys);
+            List lines = loader.getEnglishLines();
+            LanguageUpdater updater = new LanguageUpdater(root, langs, lines);
+            if(code == null)
+                updater.updateAllLanguages();
+            else {
+                LanguageInfo info = (LanguageInfo)langs.get(code);
+                updater.updateLanguage(info);
+            }
         }
     }
     
@@ -96,7 +117,9 @@ public class CountPercent {
         }
     }
     
-    
+    /**
+     * Prints statistics about the number of translated resources.
+     */
     private void printStatistics() {
         System.out.println("Total Number of Resources: " + basicTotal);
         System.out.println("---------------------------------");

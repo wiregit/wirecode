@@ -72,6 +72,23 @@ class LanguageLoader {
     }
     
     /**
+     * Constructs a list of each line in the default English properties file.
+     */
+    List /* of Line */ getEnglishLines() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+            new FileInputStream(new File(lib, BUNDLE_NAME + PROPS_EXT)),
+            "ISO-8859-1"));
+            
+        List lines = new LinkedList();
+        String read;
+        while( (read = reader.readLine()) != null)
+            lines.add(new Line(read));
+        
+        return lines;
+    }
+        
+    
+    /**
      * Retrieves the default properties.
      */
     Properties getDefaultProperties() throws java.io.IOException {
@@ -164,6 +181,7 @@ class LanguageLoader {
              * correct the parsed values after the file is read and interpreted as a set of
              * properties (keys,values).
              */
+            
             if (isUTF8) {
                 // actually the file was UTF-8-encoded: convert bytes read incorrectly as
                 // ISO-8859-1 characters, into actual Unicode UTF-16 code units.
@@ -199,7 +217,8 @@ class LanguageLoader {
             
             LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
                                                ln, cn, vn, sn,
-                                               dn, rtl, filename, props);
+                                               dn, rtl, filename, props,
+                                               isUTF8);
             langs.put(li.getCode(), li);
             return li;
         } catch (IOException e) {
