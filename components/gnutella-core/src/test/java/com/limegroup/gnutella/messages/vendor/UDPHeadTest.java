@@ -217,7 +217,7 @@ public class UDPHeadTest extends BaseTestCase {
 		//fit in a packet
 		_partial.setRangesByte(_rangesTooBig.toBytes());
 		
-		pingi = new UDPHeadPing(_haveFull,UDPHeadPing.INTERVALS);
+		pingi = new UDPHeadPing(_havePartial,UDPHeadPing.INTERVALS);
 		pongi = reparse(new UDPHeadPong(pingi));
 		
 		assertNull(pongi.getRanges());
