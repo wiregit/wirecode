@@ -196,9 +196,8 @@ class HTMLOutput {
 "       #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download\n" +
 "       SEARCH_DOWNLOAD_BUTTON_LABEL=Charger</pre>\n" +
 "     Note that the line starting with a &quot;#&quot; is a comment line,\n" +
-"     meaning it is not used by LimeWire.  Translators frequently preserve\n" +
-"     the English translation as a reference for the non-English\n" +
-"     translation.<br /><br />\n" +
+"     meaning it is not used by LimeWire.  The English translation will always\n"+
+"     be present as a reference.<br /><br />\n" +
 "     \n" +
 "     \n");
     }
