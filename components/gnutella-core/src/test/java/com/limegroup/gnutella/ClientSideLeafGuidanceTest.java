@@ -375,13 +375,33 @@ public class ClientSideLeafGuidanceTest
                            GUID.makeGuid(), new byte[0], false, false, true,
                            true, false, false, null);
         
-        testUPs[0].send(m);
-        testUPs[0].flush();
+        testUPs[2].send(m);
+        testUPs[2].flush();
 
         // no UPs should get a QueryStatusResponse
         for (int i = 0; i < testUPs.length; i++) {
             QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
             assertTrue(stat==null);
+        }
+
+        // simply send 2 more responses....
+        res = new Response[2];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "anita is young"+j);
+
+        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        testUPs[1].send(m);
+        testUPs[1].flush();
+
+        // and all UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            assertNotNull(stat);
+            assertEquals(new GUID(stat.getGUID()), queryGuid);
+            assertEquals(5+((REPORT_INTERVAL+1)/4), stat.getNumResults());
         }
     }
 
