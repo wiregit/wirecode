@@ -253,7 +253,7 @@ public class FileManager {
             for (int i=0; iter.hasNext(); i++) {
                 FileDesc fd=(FileDesc)_files.get(iter.next());
                 Assert.that(fd!=null, "Directory has null entry");
-                ret[i]=new File(fd._path);
+                ret[i]=fd.getFile();
             }
             return ret;
         } else {
@@ -262,7 +262,7 @@ public class FileManager {
             for (int i=0; i<_files.size(); i++) {
                 FileDesc fd=(FileDesc)_files.get(i);
                 if (fd!=null)
-                    buf.add(new File(fd._path));                
+                    buf.add(fd.getFile());                
             }
             File[] ret=new File[buf.size()];
             Object[] out=buf.toArray(ret);
@@ -460,10 +460,6 @@ public class FileManager {
             //So we just approximate this by sorting by filename length, from
             //smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
-            //final String[] directories = 
-            //StringUtils.split(SettingsManager.instance().getDirectories().trim(),
-			//                ';');
-
 			final File[] directories = SettingsManager.instance().getDirectories();
 
             Arrays.sort(directories, new Comparator() {
@@ -471,12 +467,6 @@ public class FileManager {
                     return (a.toString()).length()-(b.toString()).length();
                 }
             });
-
-            //Arrays.sort(directories, new Comparator() {
-			//  public int compare(Object a, Object b) {
-			//      return ((String)a).length()-((String)b).length();
-			//  }
-			// });
             tempDirVar = directories;
         }
 
@@ -554,7 +544,7 @@ public class FileManager {
             if (file_list[i].isDirectory())     /* the recursive call */
                 directories.add(file_list[i]);
             else                                /* add the file with the */
-                addFile((File)file_list[i]); 
+                addFile(file_list[i]); 
         }
         //Now add directories discovered in previous pass.
         Iterator iter=directories.iterator();
@@ -688,7 +678,7 @@ public class FileManager {
 			}
 
 			// hmmnn...suspicious line.
-			indices.add(fileDesc._index);
+			indices.add(fileDesc.getIndex());
 		}
     }
     
@@ -716,13 +706,13 @@ public class FileManager {
             FileDesc fd=(FileDesc)_files.get(i);
             if (fd==null)
                 continue;
-            File candidate=new File(fd._path);
+            File candidate = fd.getFile();
 
             //Aha, it's shared. Unshare it by nulling it out.
             if (f.equals(candidate)) {
                 _files.set(i,null);
                 _numFiles--;
-                _size-=fd._size;
+                _size-=fd.getSize();
 
                 //Remove references to this from directory listing
                 File parent=getParentFile(f);
@@ -733,7 +723,7 @@ public class FileManager {
                 Assert.that(removed, "File "+i+" not found in "+siblings);
 
                 //Remove references to this from index.
-                String[] keywords=StringUtils.split(fd._path,
+                String[] keywords=StringUtils.split(fd.getPath(),
                                                     DELIMETERS);
                 for (int j=0; j<keywords.length; j++) {
                     String keyword=keywords[j];
@@ -767,7 +757,7 @@ public class FileManager {
             Assert.that(indices!=null, "Invariant broken");
 
             //Delete index from set.  Remove set if empty.
-            indices.remove(fileDesc._index);
+            indices.remove(fileDesc.getIndex());
             if (indices.size()==0)
                 _urnIndex.remove(urn);
 		}
@@ -911,7 +901,7 @@ public class FileManager {
             for (int i=0; i<_files.size(); i++) {
                 FileDesc desc = (FileDesc)_files.get(i);
                 if (desc==null) 
-                    continue;                    
+                    continue;    
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
                 ret[j] = new Response(desc);
@@ -954,7 +944,7 @@ public class FileManager {
             FileDesc fd=(FileDesc)_files.get(i);
             if (fd==null)  file://unshared
             continue;
-            else if (fd._path.equals(fullName))
+            else if (fd.getPath().equals(fullName))
                 return fd;
         }
         return null;//The file with this name was not found.
@@ -1117,11 +1107,11 @@ public class FileManager {
                 continue;
             FileDesc desc=(FileDesc)_files.get(i);
             numFilesCount++;
-            sizeFilesCount+=desc._size;
+            sizeFilesCount+=desc.getSize();
 
             //a) Ensure is has the right index.
-            Assert.that(desc._index==i,
-                        "Bad index value.  Got "+desc._index+" not "+i);
+            Assert.that(desc.getIndex()==i,
+                        "Bad index value.  Got "+desc.getIndex()+" not "+i);
             //b) Ensured name indexed indexed. 
             //   (Note we don't check filenames; I'm lazy.)
             Assert.that(indices.contains(i),
@@ -1129,9 +1119,9 @@ public class FileManager {
             //c) Ensure properly listed in directory
             try {
                 IntSet siblings=(IntSet)_sharedDirectories.get(
-                    getCanonicalFile(getParentFile(new File(desc._path))));
+                    getCanonicalFile(getParentFile(desc.getFile())));
                 Assert.that(siblings!=null, 
-                    "Directory for "+desc._path+" isn't shared");
+                    "Directory for "+desc.getPath()+" isn't shared");
                 Assert.that(siblings.contains(i),
                     "Index "+i+" not in directory");
             } catch (IOException e) {
@@ -1142,7 +1132,7 @@ public class FileManager {
                 URN urn=(URN)iter.next();
                 IntSet indices2=(IntSet)_urnIndex.get(urn);
                 Assert.that(indices2!=null, "Urn not found");
-                Assert.that(indices2.contains(desc._index));
+                Assert.that(indices2.contains(desc.getIndex()));
             }
         }   
         Assert.that(_numFiles==numFilesCount,
