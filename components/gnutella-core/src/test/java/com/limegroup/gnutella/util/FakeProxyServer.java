@@ -87,13 +87,17 @@ public class FakeProxyServer {
                          "test not set up correctly, incorrect proxy version");
                 int a = 0;
                 if(_isHTTPRequest) {
+                    consumeHttpHeaders(is);
                     writeHTTPBack(os);
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(1000); 
                     } catch (InterruptedException x) { }
                 }
-                while(a != -1) 
-                    a = is.read();
+                else {
+                    //os.write('x');
+                    while(a != -1) 
+                        a = is.read();
+                }
                 if(!incomingProxy.isClosed())
                     incomingProxy.close();
             }
@@ -129,13 +133,13 @@ public class FakeProxyServer {
         else
             os.write(0x5A);//write correct status code
         //write out random ip port 
-        byte[] ip = {(byte)1,(byte)1,(byte)1,(byte)1,(byte)1, (byte)1, (byte)1};
+        byte[] ip = {(byte)1,(byte)1,(byte)1,(byte)1,(byte)1, (byte)1};
         os.write(ip);
         os.flush();
     }
     
     private void checkSOCKS5(InputStream is, OutputStream os) 
-                                                           throws IOException{
+                                                           throws IOException {
         byte currByte = (byte)is.read();
         Assert.that((byte)5==currByte,"Wrong version sent by LW to proxy");
         currByte = (byte)is.read();
@@ -186,8 +190,9 @@ public class FakeProxyServer {
             os.write((byte)8); //make error send bad status
         else
             os.write((byte)0);//status
+        os.write((byte)1);//write reserved byte
         os.write((byte)1);//ip v4
-        byte[] ip = {(byte)1,(byte)1,(byte)1,(byte)1,(byte)1, (byte)1, (byte)1};
+        byte[] ip = {(byte)1,(byte)1,(byte)1,(byte)1,(byte)1, (byte)1};
         os.write(ip);
         os.flush();
     }
@@ -234,14 +239,25 @@ public class FakeProxyServer {
     }
 
 
-    private void writeHTTPBack(OutputStream os) throws IOException {
-        os.write("HTTP/1.1 200 OK \r\n".getBytes());
+    private void writeHTTPBack(OutputStream os) throws IOException {        
+        os.write("HTTP/1.1 200 OK\r\n".getBytes());
         os.write("Server: limewire \r\n".getBytes());
         os.write("Content-Type: txt/html \r\n".getBytes());
         os.write("Content-Length: 5 \r\n".getBytes());
         os.write("\r\n".getBytes());
         os.write("hello".getBytes());
+        os.flush();
     }
+    
+    private void consumeHttpHeaders(InputStream is) throws IOException {
+        ByteReader reader = new ByteReader(is);
+        String line = " ";
+        while(!line.equals("")) {      
+            line = reader.readLine();  
+            //System.out.println("\t\t"+line);
+        }
+    }
+
 
     void killServers() {
         try {

@@ -33,7 +33,7 @@ public class ProxyTest extends BaseTestCase {
     }
     
     public static Test suite() {
-        return buildTestSuite(ProxyTest.class);//, "testHTTPClientWithSocks4");
+        return buildTestSuite(ProxyTest.class);//,"testHTTPClientProxiesWithAuthSocks5");
     }
     
     public static void main(String[] args) {
@@ -198,7 +198,6 @@ public class ProxyTest extends BaseTestCase {
     }
 
     public void testHTTPClentWithProxyOff() throws Exception {
-        ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(false);
         ConnectionSettings.CONNECTION_METHOD.setValue(
                                                ConnectionSettings.C_NO_PROXY);
         fps.setProxyOn(false);
@@ -215,10 +214,10 @@ public class ProxyTest extends BaseTestCase {
         byte[] resp = get.getResponseBody();
     }
 
-    public void testHTTPClientProxies() throws Exception {
-        ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
-        //ConnectionSettings.CONNECTION_METHOD.setValue(
-        //                                   ConnectionSettings.C_HTTP_PROXY);
+    public void testHTTPClientProxiesWithHttpProxy() throws Exception {
+        //ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                              ConnectionSettings.C_HTTP_PROXY);
         fps.setProxyOn(true);
         fps.setAuthentication(false);
         //fps.setProxyVersion(HTTP);
@@ -229,16 +228,111 @@ public class ProxyTest extends BaseTestCase {
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                                      "close");
         HttpClient client = HttpClientManager.getNewClient();
+        //release the connections. 
+        client.setHttpConnectionManager(new SimpleHttpConnectionManager());
         client.executeMethod(get);
-        byte[] resp = get.getResponseBody(); 
+        String resp = new String(get.getResponseBody());
+        assertEquals("invalid response from server","hello",resp);
+        get.abort();
     }
     
-    //connect using httpclient with socks4
+    public void testHTTPClientProxiesWithSocks4() throws Exception {
+        //ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                             ConnectionSettings.C_SOCKS4_PROXY);
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(SOCKS4);
+        fps.setHttpRequest(true);
+        
+        String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile3.txt";
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+        HttpClient client = HttpClientManager.getNewClient();
+        //release the connections. 
+        client.setHttpConnectionManager(new SimpleHttpConnectionManager());
+        client.executeMethod(get);
+        String resp = new String(get.getResponseBody());
+        assertEquals("invalid response from server","hello",resp);
+        get.abort();
+    }
 
-    //connect using httpclient with socks4 with auth
 
-    //connect using httpclient with socks 5
+    public void testHTTPClientProxiesWithSocks5() throws Exception {
+        //ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                            ConnectionSettings.C_SOCKS5_PROXY);
+        fps.setProxyOn(true);
+        fps.setAuthentication(false);
+        fps.setProxyVersion(SOCKS5);
+        fps.setHttpRequest(true);
 
-    //connect using httpclient with socks 5 with auth
+        
+        String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile4.txt";
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+        HttpClient client = HttpClientManager.getNewClient();
+        //release the connections. 
+        client.setHttpConnectionManager(new SimpleHttpConnectionManager());
+        client.executeMethod(get);
+        String resp = new String(get.getResponseBody());
+        assertEquals("invalid response from server","hello",resp);
+        get.abort();
+    }
+    
+    public void testHTTPClientProxiesWithAuthSocks4() throws Exception {
+        //ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                             ConnectionSettings.C_SOCKS4_PROXY);
+        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
+        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
+        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+
+        fps.setProxyOn(true);
+        fps.setAuthentication(true);
+        fps.setProxyVersion(SOCKS4);
+        fps.setHttpRequest(true);
+        
+        String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile3.txt";
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+        HttpClient client = HttpClientManager.getNewClient();
+        //release the connections. 
+        client.setHttpConnectionManager(new SimpleHttpConnectionManager());
+        client.executeMethod(get);
+        String resp = new String(get.getResponseBody());
+        assertEquals("invalid response from server","hello",resp);
+        get.abort();
+    }
+
+    public void testHTTPClientProxiesWithAuthSocks5() throws Exception {
+        //ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.setValue(true);
+        ConnectionSettings.CONNECTION_METHOD.setValue(
+                                            ConnectionSettings.C_SOCKS5_PROXY);
+        ConnectionSettings.PROXY_AUTHENTICATE.setValue(true);
+        ConnectionSettings.PROXY_USERNAME.setValue(FakeProxyServer.USER);
+        ConnectionSettings.PROXY_PASS.setValue(FakeProxyServer.PASS);
+
+        fps.setProxyOn(true);
+        fps.setAuthentication(true);
+        fps.setProxyVersion(SOCKS5);
+        fps.setHttpRequest(true);
+
+        
+        String connectTo = "http://"+"localhost:"+DEST_PORT+"/myFile4.txt";
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                                     "close");
+        HttpClient client = HttpClientManager.getNewClient();
+        //release the connections. 
+        client.setHttpConnectionManager(new SimpleHttpConnectionManager());
+        client.executeMethod(get);
+        String resp = new String(get.getResponseBody());
+        assertEquals("invalid response from server","hello",resp);
+        get.abort();
+    }
     
 }

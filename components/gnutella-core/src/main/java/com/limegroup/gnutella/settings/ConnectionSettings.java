@@ -227,12 +227,6 @@ public final class ConnectionSettings extends LimeProps {
     public static final BooleanSetting PROXY_AUTHENTICATE = 
         FACTORY.createBooleanSetting("PROXY_AUTHENTICATE", false);
     
-    /**
-     * Setting for whether or not to use the proxy settings for HttpClient 
-     * connections
-     */
-    public static final BooleanSetting PROXY_SIMPLE_HTTP_CONNECTIONS = 
-    	FACTORY.createBooleanSetting("PROXY_SIMPLE_HTTP_CONNECTIONS", false);
 
     /**
      * Setting for the username to use for the proxy
