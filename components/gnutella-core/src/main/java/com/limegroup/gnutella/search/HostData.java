@@ -71,6 +71,11 @@ public final class HostData {
 	 */
 	private final int QUALITY;
 		
+    /** 
+     * Constant for the Vendor code of the reply.
+     */
+    private final String VENDOR_CODE;
+
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
 	 * <tt>QueryReply</tt>.
@@ -90,6 +95,7 @@ public final class HostData {
 		boolean chatEnabled       = false;
 		boolean measuredSpeed     = false;
 		boolean multicast     = false;
+        String  vendor = "";
 
 		try {
 			firewalled = reply.getNeedsPush();
@@ -122,12 +128,18 @@ public final class HostData {
 		    multicast = false;
 		}
 
+		try {
+            vendor = reply.getVendor();
+		} catch(BadPacketException bad) {
+		}
+
 		FIREWALLED = firewalled && !multicast;
 		BUSY = busy;
 		BROWSE_HOST_ENABLED = browseHostEnabled;
 		CHAT_ENABLED = chatEnabled;
 		MEASURED_SPEED = measuredSpeed || multicast;
 		MULTICAST = multicast;
+        VENDOR_CODE = vendor;
 		boolean ifirewalled = !RouterService.acceptedIncomingConnection();
         QUALITY = reply.calculateQualityOfService(ifirewalled);
         
@@ -144,6 +156,15 @@ public final class HostData {
 	 */
 	public byte[] getClientGUID() {
 		return CLIENT_GUID;
+	}
+
+	/**
+	 * Accessor for the vendor code of the host.
+	 * 
+	 * @return the host's vendor code
+	 */
+	public String getVendorCode() {
+		return VENDOR_CODE;
 	}
 
 	/**
