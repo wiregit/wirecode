@@ -217,11 +217,13 @@ public class StandardMessageRouter extends MessageRouter {
         // out-of-band replies we should do things differently.  else just
         // send it off as usual.  only send out-of-band if you are GUESS-
         // capable (being GUESS capable implies that you can receive 
-        // incoming TCP) and not firewalled
+        // incoming TCP) AND not firewalled AND not servicing too many
+        // uploads
         if (query.desiresOutOfBandReplies() && (query.getHops() > 1) &&
             !query.isFirewalledSource() &&
             RouterService.isGUESSCapable() && 
-            RouterService.acceptedIncomingConnection()) {
+            RouterService.acceptedIncomingConnection() &&
+            !RouterService.getUploadManager().isBusy()) {
             
             // send the replies out-of-band - we need to
             // 1) buffer the responses
