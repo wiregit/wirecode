@@ -31,7 +31,7 @@ public final class ThemeFileHandler {
 	public static void reload() {
 		File themeFile = ThemeSettings.THEME_FILE.getValue();
 		String dirName = themeFile.getName();
-		dirName = dirName.substring(0, dirName.length()-4);
+		dirName = dirName.substring(0, dirName.length()-5);
 		File themeDir = 
 			new File(new File(CommonUtils.getUserSettingsDir(),"themes"), 
 					 dirName);
