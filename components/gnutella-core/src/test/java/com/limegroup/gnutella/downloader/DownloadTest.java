@@ -90,11 +90,7 @@ public class DownloadTest extends TestCase {
             System.exit(1);
         }
 		RouterService rs = new RouterService(new ActivityCallbackStub());
-		//RouterService rs = RouterService.instance();
-        //RouterService rs=new RouterService(null, null, null, null);
-        //dm.initialize(callback, new MessageRouterStub(), 
-		//            null, new FileManagerStub());
-        //dm.postGuiInit(rs);
+        dm.initialize();
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
