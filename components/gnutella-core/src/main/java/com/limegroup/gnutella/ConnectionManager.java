@@ -421,8 +421,10 @@ public class ConnectionManager {
             iterator.hasNext();)
         {
             Connection connection = (Connection)iterator.next();
-            retSet.add(new Endpoint(connection.getInetAddress().getAddress(),
-                connection.getPort()));
+            if(connection.isSupernodeConnection())
+                retSet.add(new Endpoint(
+                    connection.getInetAddress().getAddress(),
+                    connection.getOrigPort()));
         }
         return retSet;
     }
@@ -900,8 +902,7 @@ public class ConnectionManager {
         
         //update the addresses in the host cache (in case we received some
         //in the headers)
-        updateHostCache(headers.getProperty(ConnectionHandshakeHeaders.X_TRY),
-            connection);
+        updateHostCache(headers, connection);
         
         //set client/supernode flag for the connection
         String supernodeStr = headers.getProperty(
@@ -913,6 +914,24 @@ public class ConnectionManager {
             else
                 connection.setClientConnectionFlag(true);
         }
+        
+        //get remote address
+        String remoteAddress 
+            = headers.getProperty(ConnectionHandshakeHeaders.MY_ADDRESS);
+        if(remoteAddress != null)
+        {
+            try
+            {
+                connection.setOrigPort(
+                    Integer.parseInt(remoteAddress.substring(
+                    remoteAddress.indexOf(':') + 1).trim()));
+            }
+            catch(Exception e){
+                //no problem
+                //should never happen though if the other client is well-coded
+            }
+        }
+        
         
         //check Supernode-Needed header
         String supernodeNeededStr = headers.getProperty(
@@ -954,8 +973,9 @@ public class ConnectionManager {
         //become supernode, discard it
         if(supernodeNeeded
             && !SettingsManager.instance().getEverSupernodeCapable())
+        {
             return;
-            
+        }
        
         //if the remote address is not null, connect to the remoteAddress
         try{
@@ -967,7 +987,6 @@ public class ConnectionManager {
                     
                 //open connection to the specified host
                 Endpoint endpoint = new Endpoint(remoteAddress);
-                System.out.println("opening connection to :" + endpoint);
                 ManagedConnection connection = new ManagedConnection(
                     endpoint.getHostname(), endpoint.getPort(), _router,
                     ConnectionManager.this);
@@ -996,21 +1015,43 @@ public class ConnectionManager {
      * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347 
      * @param connection The connection on which we received the addresses
      */
-    private void updateHostCache(String hostAddresses, ManagedConnection
+    private void updateHostCache(Properties headers, ManagedConnection
         connection){
+            String hostAddresses 
+                = headers.getProperty(ConnectionHandshakeHeaders.X_TRY);
         //check for null param
-         if(hostAddresses == null)
-             return;
-       
-        //tokenize to retrieve individual addresses
-        StringTokenizer st = new StringTokenizer(hostAddresses,";");
-        //iterate over the tokens
-        while(st.hasMoreTokens()){
-            //get an address
-            String address = ((String)st.nextToken()).trim();
-            //add it to the catcher
-            _catcher.add(new Endpoint(address), connection);
-        }
+         if(hostAddresses != null)
+         {
+            //tokenize to retrieve individual addresses
+            StringTokenizer st = new StringTokenizer(hostAddresses,";");
+            //iterate over the tokens
+            while(st.hasMoreTokens()){
+                //get an address
+                String address = ((String)st.nextToken()).trim();
+                //add it to the catcher
+                _catcher.add(new Endpoint(address), connection);
+            }
+         }
+        
+        //get the supernodes, and add those to the host cache
+        hostAddresses 
+                = headers.getProperty(
+                    ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
+        //check for null param
+         if(hostAddresses != null)
+         {
+            //tokenize to retrieve individual addresses
+            StringTokenizer st = new StringTokenizer(hostAddresses,";");
+            //iterate over the tokens
+            while(st.hasMoreTokens()){
+                //get an address
+                String address = ((String)st.nextToken()).trim();
+                Endpoint e = new Endpoint(address);
+                e.setWeight(HostCatcher.GOOD_PRIORITY);
+                //add it to the catcher
+                _catcher.add(e, connection);
+            }
+         }
     }
     
     /**
