@@ -14,10 +14,10 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 
 /**
+ * Class holding a DIMERecord as part of a DIME Message.
+ *
  * @author Gregorio Roper
- * @author Sam Berlin
- * 
- * Class holding a DIMERecord as part of a <tt>DIMEMessage</tt>
+ * @author Sam Berlin 
  */
 public class DIMERecord {
     // A DIME Record looks like the following:
@@ -42,10 +42,11 @@ public class DIMERecord {
     ///////////////////////////////////////////////////////////////////
     // Where padding brings the field equal to a multiple octects.
     // There must not be more than 3 octects of padding.
-    // All integer fields (anything ending in _LENGTH) is in BIG ENDIAN
+    // All integer fields (anything ending in _LENGTH) are in BIG ENDIAN
     // format.
     // The header is considered to be bytes 0-12 (up to the end of DATA_LENGTH)
     // since all DIMERecords must contain atleast those 12 bytes.
+    // For the particulars of DIME, see: http://www.perfectxml.com/DIME.asp
     
     /**
      * The current (and only) version of a DIME Record.
@@ -251,7 +252,7 @@ public class DIMERecord {
             return new DIMERecord(header[0], header[1],
                                   options, id, type, data);
         } catch(IllegalArgumentException iae) {
-            throw new IOException("invalid data: " + iae);
+            throw new IOException(iae.getMessage());
         }
     }
     
@@ -315,7 +316,7 @@ public class DIMERecord {
      *  TYPE_UNKNOWN
      *  TYPE_NONE
      */
-    public int getTypeId() throws DIMEMessageException {
+    public int getTypeId() {
         return _byte2 & TYPE_MASK;
     }
 
@@ -387,7 +388,7 @@ public class DIMERecord {
     private void validate() {
         if((_byte1 & VERSION_MASK) != VERSION)
             throw new IllegalArgumentException("invalid version: " + 
-                                            ((_byte1 << 3) >> 3));
+                                     (((_byte1 & VERSION_MASK) >> 3) & 0x1F));
                                   
         if((_byte2 & RESERVED_MASK) != RESERVED)
             throw new IllegalArgumentException("invalid reserved: " +
