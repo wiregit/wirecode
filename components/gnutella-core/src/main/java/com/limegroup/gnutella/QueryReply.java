@@ -285,6 +285,16 @@ public class QueryReply extends Message implements Serializable{
         this.payload = reply.payload;
     }
 
+    /**
+     * Sets the guid for this message. Is needed, when we want to cache 
+     * query replies or sfor some other reason want to change the GUID as 
+     * per the guid of query request
+     * @param guid The guid to be set
+     */
+    public void setGUID(GUID guid) {
+        super.setGUID(guid);
+    }
+    
     /** Returns the number of bytes necessary to represent responses
      *  in the payload .
      */
