@@ -136,7 +136,7 @@ public class Launcher {
 	 *  http://www.whatevername.com
 	 */
 	public static int launch(String path) throws IOException {
-		String s = path.toLowerCase();
+		path = path.toLowerCase();
 		if(!path.endsWith(".exe") &&
 		   !path.endsWith(".vbs") &&
 		   !path.endsWith(".lnk") &&
