@@ -237,7 +237,7 @@ public final class HandshakeResponse {
         }
 
         //add the connected Ultrapeers to the handshake headers
-        headers.put(ConnectionHandshakeHeaders.X_TRY_SUPERNODES, 
+        headers.put(ConnectionHandshakeHeaders.X_TRY_ULTRAPEERS, 
                     hostString.toString());        
     }
 
@@ -267,7 +267,7 @@ public final class HandshakeResponse {
             }
         }
 
-        headers.put(ConnectionHandshakeHeaders.X_TRY_SUPERNODES,
+        headers.put(ConnectionHandshakeHeaders.X_TRY_ULTRAPEERS,
                     hostString.toString());
     }
 
@@ -375,7 +375,7 @@ public final class HandshakeResponse {
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER);
         if (value==null)
             return false;
         else
@@ -386,7 +386,7 @@ public final class HandshakeResponse {
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER);
         if (value==null)
             return false;
         else

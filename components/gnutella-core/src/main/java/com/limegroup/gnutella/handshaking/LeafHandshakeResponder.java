@@ -5,21 +5,21 @@ import java.util.Properties;
 import java.io.IOException;
 
 /**
- * A very simple responder to be used by client-nodes during the
+ * A very simple responder to be used by leaf-nodes during the
  * connection handshake while accepting incoming connections
  */
-public final class ClientHandshakeResponder 
+public final class LeafHandshakeResponder 
     extends AuthenticationHandshakeResponder {    
     
     /**
-     * Creates a new instance of ClientHandshakeResponder
+     * Creates a new instance of LeafHandshakeResponder
      * @param manager Instance of connection manager, managing this
      * connection
      * @param router Instance of message router, to get correct local
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public ClientHandshakeResponder(String host) {
+    public LeafHandshakeResponder(String host) {
         super(RouterService.getConnectionManager(), host);
     }
     
@@ -53,7 +53,7 @@ public final class ClientHandshakeResponder
      */
     private HandshakeResponse 
         respondToIncoming(HandshakeResponse response) {
-        Properties props = new ClientProperties(getRemoteIP());
+        Properties props = new LeafHeaders(getRemoteIP());
         
         if (RouterService.isLeaf()) {
             //b) Incoming, with ultrapeer connection: reject (redirect)

@@ -5,49 +5,48 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
-public class LazyProperties extends Properties
-{
-    
-    protected LazyProperties(String remoteIP)
-    {
+/**
+ * This class contains the headers that all LimeWires pass in connection
+ * handshakes.
+ */
+public class Headers extends Properties {
+
+    protected Headers(String remoteIP) {
 		put(ConnectionHandshakeHeaders.LISTEN_IP, "");
 		//just temporary!
 
-        if (remoteIP!=null)
-        {
+        if (remoteIP!=null) {
             put(ConnectionHandshakeHeaders.REMOTE_IP, remoteIP);
         }
+
+        addCommonHeaders(this);
     }
     
-    public String getProperty(String key, String defaultValue)
-    {
-        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP))
-        {
+    public String getProperty(String key, String defaultValue) {
+        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP)) {
             Endpoint e=new Endpoint(RouterService.getAddress(), 
 									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
-        } else
-        {
-            return super.getProperty(key, defaultValue);
+        } else {
+            return getProperty(key, defaultValue);
         }
     }
     
-    public String getProperty(String key)
-    {
-        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP))
-        {
+    public String getProperty(String key) {
+        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP)) {
             Endpoint e=new Endpoint(RouterService.getAddress(), 
 									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
-        } else
-        {
-            return super.getProperty(key);
+        } else {
+            return getProperty(key);
         }
     }
     
-    /** Sets the common properties in props, like Query-Routing and
-     *  User-Agent.*/
-    protected void addCommonProperties(Properties props) {
+    /** 
+     * Writes the common headers -- headers that all LimeWires should
+     * send, like Query-Routing and User-Agent.
+     */
+    private static void addCommonHeaders(Properties props) {
         props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, 
 				  ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
         props.put(ConnectionHandshakeHeaders.USER_AGENT,
@@ -60,14 +59,14 @@ public class LazyProperties extends Properties
         // even though these are only really used by Ultrapeers, we
         // include them with leaves to as an indication that they
         // understand these protocols
-        put(ConnectionHandshakeHeaders.X_DEGREE, 
-			Integer.toString(ConnectionManager.ULTRAPEER_CONNECTIONS));
-		put(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING, 
-			ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
+        props.put(ConnectionHandshakeHeaders.X_DEGREE, 
+                  Integer.toString(ConnectionManager.ULTRAPEER_CONNECTIONS));
+		props.put(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING, 
+                  ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
         if(!latestVersion.equals("@version@"))//don't send header for @version@
-           props.put(ConnectionHandshakeHeaders.X_VERSION, latestVersion);
+            props.put(ConnectionHandshakeHeaders.X_VERSION, latestVersion);
     }
     
 }
