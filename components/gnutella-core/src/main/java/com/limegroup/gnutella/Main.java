@@ -110,8 +110,8 @@ public class Main implements ActivityCallback, ErrorCallback {
     /////////////////////////// ActivityCallback methods //////////////////////
 
     public void connectionInitializing(Connection c) {
-		String host = c.getOrigHost();
-		int    port = c.getOrigPort();
+//		String host = c.getOrigHost();
+//		int    port = c.getOrigPort();
 		String direction=null;
 		String direction2=null;
 		if (c.isOutgoing()) {
@@ -126,14 +126,14 @@ public class Main implements ActivityCallback, ErrorCallback {
     }
 
     public void connectionInitialized(Connection c) {
-		String host = c.getOrigHost();
-		int    port = c.getOrigPort();
+//		String host = c.getOrigHost();
+//		int    port = c.getOrigPort();
 		;//System.out.println("Connected to "+host+":"+port+".");
     }
 
     public void connectionClosed(Connection c) {
-		String host = c.getOrigHost();
-		int    port = c.getOrigPort();
+//		String host = c.getOrigHost();
+//		int    port = c.getOrigPort();
 		//System.out.println("Connection to "+host+":"+port+" closed.");
     }
 
