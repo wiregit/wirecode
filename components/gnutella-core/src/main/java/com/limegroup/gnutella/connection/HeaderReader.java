@@ -59,4 +59,17 @@ public interface HeaderReader {
      * @return the connect string read from the remote host
      */
     String readConnect(int timeout) throws IOException;
+
+    /**
+     * Accessor for whether or not there's more data that was read off of the
+     * channel that has not been read.  This is typically called after the 
+     * header reading is complete to see whether or not we've read some 
+     * Gnutella message data as well.  This is particularly important for 
+     * non-blocking reads where reads happen in chunks instead of one 
+     * character at a time.
+     * 
+     * @return <tt>true</tt> if there's more data that we've read in from the
+     *  channel but have not processed, otherwise <tt>false</tt>
+     */
+    boolean hasRemainingData();
 }
