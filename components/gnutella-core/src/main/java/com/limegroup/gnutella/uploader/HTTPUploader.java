@@ -377,8 +377,10 @@ public class HTTPUploader implements Runnable {
         try {
             String str = "HTTP 200 OK \r\n";
 
+			String version = SettingsManager.instance().getCurrentVersion();
+
             _ostream.write(str.getBytes());
-            str = "Server: Gnutella \r\n";
+            str = "Server: LimeWire " + version + " \r\n";
             _ostream.write(str.getBytes());
             String type = getMimeType();       /* write this method later  */
             str = "Content-type:" + type + "\r\n";
@@ -392,8 +394,8 @@ public class HTTPUploader implements Runnable {
     //          else
     //          end = _sizeOfFile;
 
-            str = "Content-range: bytes=" + (_uploadBegin + 1) +
-            "-" + _sizeOfFile + "/" + _sizeOfFile + "\r\n";
+            str = "Content-range: bytes=" + _uploadBegin  +
+            "-" + ( _sizeOfFile - 1 )+ "/" + _sizeOfFile + "\r\n";
 
 
             _ostream.write(str.getBytes());

@@ -711,12 +711,7 @@ public class HTTPDownloader implements Runnable {
                     return;
                 }
 				_amountRead = resumeInit;
-				// tempSize++;
-				// amountRead is actually one less than the value sent, 
-				// becasue the value sent says you will be getting the
-				// values of n - m, which means we've already only read
-				// (n-1)
-				_amountRead--;  
+
                 _resume = true;
 				foundLength = true;
             }
@@ -727,7 +722,8 @@ public class HTTPDownloader implements Runnable {
 				_sizeOfFile = tempSize;
 
 			}
-        } else {
+        } 
+		else {
             _state = ERROR;
         }
     }
