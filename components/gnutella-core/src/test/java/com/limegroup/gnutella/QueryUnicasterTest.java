@@ -24,8 +24,7 @@ public class QueryUnicasterTest extends TestCase {
     }
 
     static {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        rs.start();
+        Backend.instance();
     }
 
 
@@ -74,7 +73,7 @@ public class QueryUnicasterTest extends TestCase {
         // add a Query
         QueryRequest qr = new QueryRequest((byte)2, 0, "Susheel");
         assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
-        QueryUnicaster.instance().addQuery(qr);
+        QueryUnicaster.instance().addQuery(qr, null);
         assertTrue(QueryUnicaster.instance().getQueryNumber() == 1);
 
         // give udpLoopers time to execute
@@ -148,7 +147,7 @@ public class QueryUnicasterTest extends TestCase {
 
         // add a Query
         QueryRequest qr = new QueryRequest((byte)2, 0, "Daswani");
-        QueryUnicaster.instance().addQuery(qr);
+        QueryUnicaster.instance().addQuery(qr, null);
 
         // add these endpoints....
         InetAddress addr = null;
