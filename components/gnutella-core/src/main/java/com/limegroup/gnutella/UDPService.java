@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.messages.*;
@@ -282,9 +283,13 @@ public final class UDPService implements Runnable {
 	 */
 	private boolean isValidForIncoming(GUID match, GUID guidReceived,
 	                                   DatagramPacket d) {
+        if(!match.equals(guidReceived))
+            return false;
+            
 	    String host = d.getAddress().getHostAddress();
-	    return match.equals(guidReceived) &&
-	           !RouterService.getConnectionManager().isConnectedTo(host);
+
+        return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() ||
+               !RouterService.getConnectionManager().isConnectedTo(host);
     }
     
     /**
