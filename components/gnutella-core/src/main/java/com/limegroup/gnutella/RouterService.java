@@ -53,6 +53,7 @@ public class RouterService
     private ResponseVerifier verifier = new ResponseVerifier();
     private DownloadManager downloader;
     private UploadManager uploadManager;
+    private FileManager fileManager;
 
 	/**
 	 * Creates a unitialized RouterService.  No work is done until
@@ -61,9 +62,11 @@ public class RouterService
      * @param router the algorithm to use for routing messages.  
 	 */
   	public RouterService(ActivityCallback activityCallback,
-  						 MessageRouter router) {
+  						 MessageRouter router,
+                         FileManager fManager) {
   		this.callback = activityCallback;
   		this.router = router;
+        this.fileManager = fManager;
 		Assert.setCallback(this.callback);
   	}
 
@@ -84,14 +87,14 @@ public class RouterService
 								SettingsManager.instance().getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
 		this.manager.initialize(router, catcher);		
-		this.uploadManager.initialize(callback, router, acceptor);
+		this.uploadManager.initialize(callback, router, acceptor,fileManager);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
 
 		// Make the call to connect to the router after everything else has
 		// been initialized
 		this.catcher.connectToRouter();
 		this.downloader.initialize(callback, router, acceptor,
-                                   FileManager.instance());
+                                   fileManager);
 		
   		// Make sure connections come up ultra-fast (beyond default keepAlive)
 		int outgoing = settings.getKeepAlive();
@@ -99,13 +102,17 @@ public class RouterService
   			connect();
   	}
 
-    
+    public FileManager getFileManager(){
+        return fileManager;
+    }
+
+
     /** Kicks off expensive backend tasks (like file loading) that should
      *  only be done after GUI is loaded. */
     public void postGuiInit() {
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
-        FileManager.instance().initialize(callback);
+        fileManager.initialize(callback);
         // Restore any downloads in progress.
         downloader.readSnapshot();
     }
@@ -721,7 +728,7 @@ public class RouterService
      * Returns the number of files being shared locally.
      */
     public int getNumSharedFiles( ) {
-        return( FileManager.instance().getNumFiles() );
+        return( fileManager.getNumFiles() );
     }
 
     /**
@@ -734,7 +741,7 @@ public class RouterService
      * If directory is not a shared directory, returns null.
      */
     public File[] getSharedFiles(File directory) {
-        return FileManager.instance().getSharedFiles(directory);
+        return fileManager.getSharedFiles(directory);
     }
     
 

@@ -20,12 +20,14 @@ public class Main implements ActivityCallback {
 	//                            callback,
 	//                            new StandardMessageRouter(callback));
     //} else {
-        service=new RouterService(callback,
-              (new StandardMessageRouter(callback)));
-                                  
-        service.initialize();
+    
+    FileManager fm = new FileManager();
+    service=new RouterService(callback,
+                              (new StandardMessageRouter(callback,fm)),fm);
+    
+    service.initialize();
         
-		//}
+    //}
 
 
 

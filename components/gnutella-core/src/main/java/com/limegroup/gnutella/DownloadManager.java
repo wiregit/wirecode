@@ -167,7 +167,8 @@ public class DownloadManager {
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
-        ManagedDownloader downloader=new ManagedDownloader(this, files);
+        ManagedDownloader downloader=new ManagedDownloader
+                                     (this, files,fileManager);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.

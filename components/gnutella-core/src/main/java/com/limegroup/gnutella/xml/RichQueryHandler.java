@@ -38,7 +38,7 @@ public class RichQueryHandler{
      * that have a match with the XMLQuery String
      * Warning: Returns null if the XMLQuery is malformed.
      */
-    public Response[] query(String XMLQuery){
+    public Response[] query(String XMLQuery,FileManager fManager){
         //System.out.println("Sumeet: "+XMLQuery);
         if (XMLQuery.equals(""))
             return null;
@@ -62,7 +62,7 @@ public class RichQueryHandler{
         //matchingReplies = a List of LimeXMLDocuments that match the query
         int s = matchingReplies.size();
         Response[] retResponses = new Response[s];
-        FileManager fManager = FileManager.instance();
+        //FileManager fManager = FileManager.instance();
         //We need the MetaFileManager to get the FileDesc from full FileName
         //Note:FileManager has been changed to return a MetaFileManager now
         Response res;

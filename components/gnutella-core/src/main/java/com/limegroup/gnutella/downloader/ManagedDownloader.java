@@ -129,6 +129,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The number of tries we've made.  0 means on the first try. */
     private int tries;
 
+    private FileManager fileManager;
+
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -139,8 +141,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
      */
-    public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
+    public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files,
+                             FileManager fm) {
         this.allFiles=files;
+        this.fileManager = fm;
         incompleteFileManager=new IncompleteFileManager();
         initialize(manager);
     }
@@ -271,7 +275,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //thread to consume this downloader.  If downloader isn't waiting, this
         //may not be serviced for some time.
         HTTPDownloader downloader=new HTTPDownloader(
-            socket, rfd, incompleteFileManager.getFile(rfd));
+            socket, rfd, incompleteFileManager.getFile(rfd),fileManager);
             
             
         synchronized (this) {
@@ -607,7 +611,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //afterwards since creating a downloader MAY be blocking
             //depending if SocketOpener is used.
             HTTPDownloader dloader2=new HTTPDownloader(
-                rfd, CONNECT_TIME, incompleteFileManager.getFile(rfd));
+                rfd, CONNECT_TIME, incompleteFileManager.getFile(rfd),
+                fileManager);
             synchronized (ManagedDownloader.this) {
                 if (stopped) {
                     dloader2.stop();

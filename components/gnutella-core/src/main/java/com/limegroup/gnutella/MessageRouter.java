@@ -510,18 +510,7 @@ public abstract class MessageRouter
     /**
      * Allow the controlled creation of a GroupPingRequest
      */
-    public GroupPingRequest createGroupPingRequest(String group)
-    {
-        FileManager fm = FileManager.instance();
-        int num_files = fm.getNumFiles();
-        int kilobytes = fm.getSize()/1024;
-
-        GroupPingRequest pingRequest =
-          new GroupPingRequest(SettingsManager.instance().getTTL(),
-            _acceptor.getPort(), _acceptor.getAddress(),
-            num_files, kilobytes, group);
-        return( pingRequest );
-    }
+    public abstract GroupPingRequest createGroupPingRequest(String group);
 
 
     /**

@@ -71,17 +71,18 @@ public class FileManager {
 
     /** The single instance of FileManager.  (Singleton pattern.) */
     private static FileManager _instance = null;
+    /*
     //initialize _instance
     static
     {
-        //get the servant type
-        String servantType = SettingsManager.instance().getServantType();
-        if(servantType.equals(Constants.XML_CLIENT))
-            _instance = new MetaFileManager();
-        else
-            _instance = new FileManager();
+    //get the servant type
+    String servantType = SettingsManager.instance().getServantType();
+    if(servantType.equals(Constants.XML_CLIENT))
+    _instance = new MetaFileManager();
+    else
+    _instance = new FileManager();
     }
-    
+    */
     
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
@@ -123,9 +124,11 @@ public class FileManager {
     
     /** Returns the single instance of the FileManager.  The FileManager has no
      *  files or callback until loadSettings() or initialize is called.  */
-    public static FileManager instance() {
-        return _instance;
-    }
+    /*
+      public static FileManager instance() {
+      return _instance;
+      }
+    */
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
      *  callback to be "callback", and notifies "callback" of all file loads.

@@ -29,6 +29,7 @@ public class LimeXMLReplyCollection{
     private int count;
     private HashMap outMap = null;
     private String changedHash = null;
+    private MetaFileManager metaFileManager=null;
 
     /**
      * Special audio constructor. The signature is the same as the other
@@ -36,8 +37,9 @@ public class LimeXMLReplyCollection{
      * for non audio stuff. TODO2: This is BAD! Users may reverse the order
      * by mistake and they would die.
      */
-    public LimeXMLReplyCollection(String URI, Map fileToHash ){
+    public LimeXMLReplyCollection(String URI, Map fileToHash,FileManager fm ){
         audio = true;
+        this.metaFileManager = (MetaFileManager)fm;
         MapSerializer ms = initialize(URI);//contains strings now 
         Map hashToXMLStr = ms.getMap();
         ID3Reader id3Reader = new ID3Reader();
@@ -69,8 +71,9 @@ public class LimeXMLReplyCollection{
      * @param hashToFile contains all hashes for all the non-mp3 files found
      * by the MetaFileManager
      */
-    public LimeXMLReplyCollection(Map fileToHash, String URI) {
+    public LimeXMLReplyCollection(Map fileToHash, String URI, FileManager fm) {
         audio = false;
+        this.metaFileManager = (MetaFileManager)fm;
         MapSerializer ms = initialize(URI);
         Map hashToXMLStr = ms.getMap();
         Iterator iter = hashToXMLStr.keySet().iterator();
@@ -301,9 +304,10 @@ public class LimeXMLReplyCollection{
             }
             Object mainValue = mainMap.remove(changedHash);
             mainMap.put(newHash,mainValue);
-            MetaFileManager manager = (MetaFileManager)FileManager.instance();
+            //MetaFileManager manager=(MetaFileManager)FileManager.instance();
             //Object metaValue = manager.mp3HashToFiles.remove(changedHash);
-            manager.mp3FileToHash.put(file,newHash);//replace the old hashValue
+            //replace the old hashValue
+            metaFileManager.mp3FileToHash.put(file,newHash);
             Object outValue = outMap.remove(changedHash);
             outMap.put(changedHash,outValue);
             wrote = write();

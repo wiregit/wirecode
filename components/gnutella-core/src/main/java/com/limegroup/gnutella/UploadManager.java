@@ -83,6 +83,8 @@ public class UploadManager {
      *  INVARIANT: speeds.size()<MIN_SPEED_SAMPLE_SIZE <==> highestSpeed==-1
      */
     private volatile int highestSpeed=-1;
+    
+    private FileManager _fileManager;
 
 
    //////////////////////// Main Public Interface /////////////////////////
@@ -98,7 +100,9 @@ public class UploadManager {
 
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
-                           Acceptor acceptor) {
+                           Acceptor acceptor,
+                           FileManager fileManager) {
+        _fileManager = fileManager;
         _callback = callback;
         _router = router;
         _acceptor = acceptor;
@@ -120,7 +124,8 @@ public class UploadManager {
 		// check if it complies with the restrictions.
 		// if no, send an error.  
 		// if yes, constroct the uploader
-		uploader = new HTTPUploader(line._file, socket, line._index, this);
+		uploader = new HTTPUploader(line._file, socket, line._index, this,
+                                    _fileManager);
 
 		String host = socket.getInetAddress().getHostAddress();
 
@@ -139,7 +144,8 @@ public class UploadManager {
 		clearFailedPushes();
 
 		Uploader uploader;
-		uploader = new HTTPUploader(file, host, port, index, guid, this);
+		uploader = new HTTPUploader(file, host, port, index, guid, this,
+                                    _fileManager);
 		// testing if we are either currently attempting a push, 
 		// or we have unsuccessfully attempted a push with this host in the
 		// past.

@@ -32,7 +32,7 @@ public class MetaFileManager extends FileManager {
         Response[] normals=super.query(request);//normal text query.
         addAudioMetadata(normals);
         RichQueryHandler richHandler = RichQueryHandler.instance();
-        Response[] metas=richHandler.query(rich);
+        Response[] metas=richHandler.query(rich,this);
         if (metas == null)// the rich query is malformed OR non-existent
             return normals;
         Response[] result = union(normals,metas);
@@ -109,11 +109,11 @@ public class MetaFileManager extends FileManager {
                     if (s.equalsIgnoreCase("audio")){
                         //Map nameToFile = getAllMP3FilesRecursive();
                         collection=new LimeXMLReplyCollection
-                        (schemas[i],mp3FileToHash);
+                        (schemas[i],mp3FileToHash,this);
                     }
                     else
                         collection = new LimeXMLReplyCollection
-                                           (nonMP3FileToHash,schemas[i]);
+                                       (nonMP3FileToHash,schemas[i],this);
                     //Note: the collection may have size==0!
                     mapper.add(schemas[i],collection);
                 }                

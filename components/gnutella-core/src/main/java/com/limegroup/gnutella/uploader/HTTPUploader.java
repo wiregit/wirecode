@@ -36,6 +36,8 @@ public class HTTPUploader implements Uploader {
 	private boolean  _chatEnabled;
 	private String  _chatHost;
 	private int _chatPort;
+    private FileManager _fileManager;
+
 
 	/****************** Constructors ***********************/
 	/**
@@ -55,13 +57,15 @@ public class HTTPUploader implements Uploader {
 	 */
 
 	// Regular upload
-	public HTTPUploader(String file, Socket s, int index, UploadManager m) {
+	public HTTPUploader(String file, Socket s, int index, UploadManager m,
+                        FileManager fm) {
 		_socket = s;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_filename = file;
 		_manager = m;
 		_index = index;
 		_amountRead = 0;
+        _fileManager = fm;
 		FileDesc desc;
 		boolean indexOut = false;
 		boolean ioexcept = false;
@@ -70,7 +74,7 @@ public class HTTPUploader implements Uploader {
 			// This line can't be moved, or FileNotFoundUploadState
 			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
-			desc = FileManager.instance().get(_index);
+			desc = _fileManager.get(_index);
 			_fileSize = desc._size;
 		} catch (IndexOutOfBoundsException e) {
 			// this is an unlikely case, but if for
@@ -91,7 +95,7 @@ public class HTTPUploader implements Uploader {
 		
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
-						String guid, UploadManager m) {
+						String guid, UploadManager m, FileManager fm) {
 		_filename = file;
 		_manager = m;
 		_index = index;
@@ -100,9 +104,10 @@ public class HTTPUploader implements Uploader {
 		_hostName = host;
 		_guid = guid;
 		_port = port;
+        _fileManager = fm;
 		FileDesc desc;
 		try {
-			desc = FileManager.instance().get(_index);
+			desc = _fileManager.get(_index);
 			_fileSize = desc._size;
 			setState(CONNECTING);
 		} catch (IndexOutOfBoundsException e) {
@@ -460,7 +465,7 @@ public class HTTPUploader implements Uploader {
 		// get the appropriate file descriptor
 		FileDesc fdesc;
 		try {
-			fdesc = FileManager.instance().get(_index);
+			fdesc = _fileManager.get(_index);
 		} catch (IndexOutOfBoundsException e) {
 			throw new IOException();
 		}
@@ -482,7 +487,7 @@ public class HTTPUploader implements Uploader {
         _fileSize = fdesc._size;
 
 		// get the fileInputStream
-		_fis = FileManager.instance().getInputStream(fdesc);
+		_fis = _fileManager.getInputStream(fdesc);
 
 	}
 
