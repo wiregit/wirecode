@@ -93,7 +93,7 @@ public class BootstrapServerManager {
      * Sets the observer that will be notified when endpoint fetching
      * finishes.
      */
-    public void setEndpointFetchObserver(FetchObserver fo) {
+    public void setFetchObserver(FetchObserver fo) {
         _fetchObserver = fo;
     }
 
@@ -149,6 +149,13 @@ public class BootstrapServerManager {
             _hostFetchInProgress=true;  //unset in HostfileRequest.done()
             requestAsync(new HostfileRequest(), "GWebCache hostfile");
         }
+    }
+    
+    /**
+     * Determines whether or not a fetch is currently in progress.
+     */
+    public synchronized boolean isFetchInProgress() {
+        return _hostFetchInProgress;
     }
 
     /** 

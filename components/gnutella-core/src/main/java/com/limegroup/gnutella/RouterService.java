@@ -17,6 +17,7 @@ import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
 import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 
 
 /**
@@ -196,6 +197,7 @@ public class RouterService {
 	 */
 	public void start() {
 	    if ( isStarted() ) return;
+	    
         _started = true;
 
 		acceptor.start();			   
@@ -946,7 +948,13 @@ public class RouterService {
 	public static boolean isConnected() {
 		return manager.isConnected();
 	}
-
+	
+	/**
+	 * Determines whether or not a GWebCache endpoint fetch is in progress.
+	 */
+	public static boolean isGWebCacheFetchInProgress() {
+        return BootstrapServerManager.instance().isFetchInProgress();
+    }
 
     /**
      * Returns the number of files being shared locally.
