@@ -57,6 +57,14 @@ public class HashTreeTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    public void testLargeFile()  throws Throwable {
+    	URN urn = URN.createSHA1Urn(file);
+    	try {
+    		HashTree tree = createHashTree(1780149344l,urn);
+    		fail("shouldn't have read whole file");
+    	}catch(IOException expected){}
+    }
+    
     //Due to the long setup time of creating a TigerTree,
     //these tests assign global variables as they go by.
     //These tests must all be run in the exact order they're
@@ -431,6 +439,21 @@ public class HashTreeTest extends BaseTestCase {
             ret = PrivilegedAccessor.invokeMethod(
                 HashTree.class, "createHashTree", 
                 new Object[] { new Long(file.length()), new FileInputStream(file),
+                            sha1 },
+                new Class[] { long.class, InputStream.class, URN.class }
+            );
+        } catch(InvocationTargetException ite) {
+            throw ite.getCause();
+        }
+        return (HashTree)ret;
+    }
+    
+    private HashTree createHashTree(long size, URN sha1) throws Throwable {
+        Object ret = null;
+        try {
+            ret = PrivilegedAccessor.invokeMethod(
+                HashTree.class, "createHashTree", 
+                new Object[] { new Long(size), new ByteArrayInputStream(new byte[0]),
                             sha1 },
                 new Class[] { long.class, InputStream.class, URN.class }
             );

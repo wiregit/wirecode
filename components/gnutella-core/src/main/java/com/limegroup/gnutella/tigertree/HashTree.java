@@ -139,11 +139,11 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that(nodeSize * maxNodes >= fileSize,
+        Assert.that((long)nodeSize * maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-        Assert.that(nodeSize * maxNodes <= fileSize * 2,
+        Assert.that((long)nodeSize * maxNodes <= ((long)fileSize * 2),
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
