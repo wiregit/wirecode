@@ -297,9 +297,11 @@ public class CountPercent {
     }
     
     private void printHTML() {
-        List completed = new LinkedList();
-        List midway = new LinkedList();
-        List started = new LinkedList();
+        List langsCompleted = new LinkedList();
+        List langsNeedRevision = new LinkedList();
+        List langsMidway = new LinkedList();
+        List langsStarted = new LinkedList();
+        List langsEmbryonic = new LinkedList();
         Map charsets = new HashMap();
         
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
@@ -311,11 +313,15 @@ public class CountPercent {
             final double percentage = (double)count / (double)basicTotal;
             li.setPercentage(percentage);
             if (percentage >= 0.75)
-                completed.add(li);
-            else if (percentage >= 0.50)
-                midway.add(li);
+                langsCompleted.add(li);
+            else if (percentage >= 0.66)
+                langsNeedRevision.add(li);
+            else if (percentage >= 0.40)
+                langsMidway.add(li);
+            else if (percentage >= 0.03)
+                langsStarted.add(li);
             else
-                started.add(li);
+                langsEmbryonic.add(li);
             
             String script = li.getScript();
             List inScript = (List)charsets.get(script);
@@ -328,7 +334,11 @@ public class CountPercent {
         
         StringBuffer page = new StringBuffer();
         buildStartOfPage(page);
-        buildStatus(page, completed, midway, started);
+        buildStatus(page, langsCompleted,
+                          langsNeedRevision,
+                          langsMidway,
+                          langsStarted,
+                          langsEmbryonic);
         buildAfterStatus(page);
         buildProgress(page, charsets);
         buildEndOfPage(page);
@@ -412,60 +422,55 @@ public class CountPercent {
     }
     
     private void buildStatus(StringBuffer page,
-                             List completed, List midway, List started) {
-        boolean first = false;
+                             List langsCompleted,
+                             List langsNeedRevision,
+                             List langsMidway,
+                             List langsStarted,
+                             List langsEmbryonic) {
         page.append(
 "     <b>Translations Status:</b>\n" +
 "     <br>\n" +
-"     <ol>\n" +
-"      <li>");
-        first = true;
-        for (Iterator i = completed.iterator(); i.hasNext(); ) {
-            LanguageInfo l = (LanguageInfo)i.next();
-            if (!first && !i.hasNext())
-                page.append(" and");
-            else if (!first)
-                page.append(",");
-            page.append("\n" +
-"       <b>" + l.getLink() + "</b>");
-            first = false;
-        }
-        page.append("\n"+
+"     <ol>\n");
+        buildStatus(page, langsCompleted,
 "       are complete and will require only small revisions during the project\n" +
-"       evolution.</li>\n" +
+"       evolution.");
+        buildStatus(page, langsNeedRevision,
+"       are mostly complete and can still be used reliably, but may need some\n" +
+"       revisions and a few missing translations to work best with newest versions.");
+        buildStatus(page, langsMidway,
+"       have been completed for an old version, but may now require some work, tests\n" +
+"       and revisions plus additional missing translations to reach a reliable status.");
+        buildStatus(page, langsStarted,
+"       are partly translated but still unfinished, and their use in LimeWire\n" +
+"       may be difficult for native language users. Providing a more complete\n" +
+"       translation would be very much appreciated.\n");
+        buildStatus(page, langsEmbryonic,
+"       are only embryonic and actually need a complete translation.\n" +
+"       The current files are only there for demonstration purpose.");
+        page.append(
+"     </ol>\n");
+    }
+    
+    private void buildStatus(StringBuffer page,
+                             List langs, String status) {
+        boolean first = true;
+        for (Iterator i = langs.iterator(); i.hasNext(); ) {
+            LanguageInfo l = (LanguageInfo)i.next();
+            if (first)
+                page.append(
 "      <li>");
-        first = true;
-        for (Iterator i = midway.iterator(); i.hasNext(); ) {
-            LanguageInfo l = (LanguageInfo)i.next();
-            if (!first && !i.hasNext())
-                page.append(" and");
-            else if (!first)
-                page.append(",");
-            page.append("\n" +
-"       <b>" + l.getLink() + "</b>");
-            first = false;
-        }
-        page.append("\n" +
-"       are mostly complete but still require some work, tests and revisions,\n" +
-"       plus additional missing translations to reach a reliable status.</li>\n" +
-"      <li>\n");
-        first = true;
-        for (Iterator i = started.iterator(); i.hasNext(); ) {
-            LanguageInfo l = (LanguageInfo)i.next();
-            if (!first && !i.hasNext())
+            else if (!i.hasNext())
                 page.append(" and\n");
-            else if (!first)
+            else
                 page.append(",\n");
             page.append(
 "       <b>" + l.getLink() + "</b>");
             first = false;
         }
-        page.append("\n" +
-"       are only embryonic and actually need a highly wanted complete translation.\n" +
-"       The current files are only there for demonstration purpose.</li>\n" +
-"     </ol>\n");
+        if (!first)
+            page.append("\n" + status + "</li>\n");
     }
-    
+
     private void buildAfterStatus(StringBuffer page) {
         page.append(
 "     <br>\n" +
