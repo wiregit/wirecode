@@ -32,10 +32,30 @@ public class LimeXMLDocument{
     public LimeXMLDocument(String XMLString) throws SAXException, 
                                         SchemaNotFoundException, IOException{
         InputSource doc = new InputSource(new StringReader(XMLString));
-        //this.XMLString = XMLString;
         initialize(doc);
     }
     
+    public LimeXMLDocument(Node node, Node rootElement){        
+        try{
+            grabDocInfo(rootElement);
+            grabDocInfo(node);
+        }catch(SchemaNotFoundException e){
+            //not the fault of the grabDocInfo method
+        }
+        createMap(node);
+    }
+
+    /**
+     * Special constructor to deal with a multiple children.
+     */
+    public LimeXMLDocument(Node rootElement){        
+        try{
+            grabDocInfo(rootElement);
+        }catch(SchemaNotFoundException e){
+            //not the fault of the grabDocInfo method
+        }
+        createMap(rootElement);
+    }    
     /**
      * Constructs a new LimeXMLDocument
      * @param nameValueList List (of NameValue) of fieldnames (in canonicalized
@@ -72,13 +92,14 @@ public class LimeXMLDocument{
         Document document = null;
         parser.parse(doc);
         document=parser.getDocument();
-        grabDocInfo(document);
-        createMap(document);
+        Element docElement = document.getDocumentElement();
+        grabDocInfo(docElement);
+        createMap(docElement);
     }
 
-    private void grabDocInfo(Document doc) throws SchemaNotFoundException{
+    private void grabDocInfo(Node docElement)throws SchemaNotFoundException{
         fieldToValue = new HashMap();
-        Element docElement = doc.getDocumentElement();
+        //Element docElement = doc.getDocumentElement();
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
         for(int i=0; i< size; i++){
@@ -91,8 +112,12 @@ public class LimeXMLDocument{
                 identifier = att.getNodeValue();
             else if (lowerAttName.indexOf("action") >= 0)
                 action = att.getNodeValue();
+            else if(lowerAttName.indexOf("index") >= 0)
+                ;//This index corresponds to the index of the response in 
+            //the QR. NOP.
             else{//these are attributes that have a value
-                String canonicalizedAttName= docElement.getTagName()+
+                //String canonicalizedAttName= docElement.getTagName()+
+                String canonicalizedAttName= docElement.getNodeName()+
                 XMLStringUtils.DELIMITER+att.getNodeName()+
                 XMLStringUtils.DELIMITER;                
                 fieldToValue.put(canonicalizedAttName,att.getNodeValue());
@@ -106,8 +131,8 @@ public class LimeXMLDocument{
         //action associated with this Document. 
     }
 
-    private void createMap(Document doc) {
-        Element docElement = doc.getDocumentElement();
+    private void createMap(Node docElement) {
+        //Element docElement = doc.getDocumentElement();
         doAllChildren(docElement,"");
     }
 
