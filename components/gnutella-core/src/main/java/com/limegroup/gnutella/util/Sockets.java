@@ -13,6 +13,34 @@ import com.limegroup.gnutella.Assert;
  */
 public class Sockets {
     /**
+     * Sets the SO_KEEPALIVE option on the socket, if this platform supports it.
+     * (Otherwise, it does nothing.)  
+     *
+     * @param socket the socket to modify
+     * @param on the desired new value for SO_KEEPALIVE
+     * @return true if this was able to set SO_KEEPALIVE
+     */
+    public static boolean setKeepAlive(Socket socket, boolean on) {
+        if (CommonUtils.isJava13OrLater()) {
+            //Call socket.setKeepAlive(on) using reflection.  See below for
+            //any explanation of why reflection must be used.
+            try {
+                Class socketClass=socket.getClass();
+                Method m=socketClass.getMethod("setKeepAlive",
+                    new Class[] { Boolean.TYPE });
+                m.invoke(socket, new Object[] { new Boolean(on) });
+                return true;
+            } catch (Exception ignored) { 
+                //I don't like generic "catch Exception"'s, but I think it's
+                //clearer than listing the zillion cases from above.  This
+                //should never happen, but we can go on to the emulation step
+                //below.
+            }                    
+        }
+        return false;
+    }
+
+    /**
      * Connects and returns a socket to the given host, with a timeout.
      *
      * @param host the address of the host to connect to
@@ -42,9 +70,11 @@ public class Sockets {
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
             try {  //TODO1: does this use the right class loader?
-                Class inetSocketAddress=Class.forName("java.net.InetSocketAddress");
-                Constructor inetSocketAddressCtor=inetSocketAddress.getConstructor(
-                    new Class[] { String.class, Integer.TYPE });
+                Class inetSocketAddress=
+                    Class.forName("java.net.InetSocketAddress");
+                Constructor inetSocketAddressCtor=
+                    inetSocketAddress.getConstructor(
+                        new Class[] { String.class, Integer.TYPE });
                 Object addr=inetSocketAddressCtor.newInstance(
                     new Object[] { host, new Integer(port) });
 

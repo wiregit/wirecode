@@ -263,6 +263,18 @@ public final class CommonUtils {
 	}
 
 	/**
+	 * Returns whether or not the current JVM is a 1.3.x or later
+	 *
+	 * @return <tt>true</tt> if we are running on 1.3.x or later, 
+     *  <tt>false</tt> otherwise
+	 */
+	public static boolean isJava13OrLater() {        
+		return !CommonUtils.getJavaVersion().startsWith("1.0") 
+            && !CommonUtils.getJavaVersion().startsWith("1.1") 
+		    && !CommonUtils.getJavaVersion().startsWith("1.2"); 
+	}	
+
+	/**
 	 * Returns whether or not the current JVM is a 1.4.x implementation.
 	 *
 	 * @return <tt>true</tt> if we are running on 1.4.x, <tt>false</tt>
