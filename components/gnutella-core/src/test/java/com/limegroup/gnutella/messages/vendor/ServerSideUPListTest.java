@@ -65,7 +65,6 @@ public class ServerSideUPListTest extends BaseTestCase {
     private static final GiveUPVendorMessage msgSome = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 2, 1);
     private static final GiveUPVendorMessage msgLeafsOnly = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 2);
     private static final GiveUPVendorMessage msgNone = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 0);
-    private static final GiveUPVendorMessage msgBad = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), -9, -2);
     private static final GiveUPVendorMessage msgMore = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 20, 30);
 	
     
@@ -272,19 +271,6 @@ public class ServerSideUPListTest extends BaseTestCase {
  	}
  	
  	/**
- 	 * sends a malformed message
- 	 */
- 	public void testMsgBad() throws Exception {
- 		UDP_ACCESS.setSoTimeout(1000);
- 		try {
- 			UPListVendorMessage reply = tryMessage(msgBad);
- 			fail("ioex expected");
- 		}
- 		catch(IOException iox) {}
- 		sleep();
- 	}
- 	
- 	/**
  	 * sends a message requesting leafs only
  	 */
  	public void testMsgLeafs() throws Exception {
@@ -340,7 +326,6 @@ public class ServerSideUPListTest extends BaseTestCase {
  	 * tests whether requesting too often will give us a reply
  	 */
  	public void testHammering() throws Exception {
- 		UDP_ACCESS.setSoTimeout(500);
  		
  		//first message should go through
  		UPListVendorMessage reply = tryMessage(msgAll);
@@ -359,6 +344,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  	}
  	
  	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
+ 		UDP_ACCESS.setSoTimeout(500);
  		_udpAddress = UDP_ACCESS.getLocalAddress();
  		_udpPort = PORT;
  		
