@@ -223,21 +223,23 @@ public abstract class MessageRouter
         // Increment hops and decrease TTL.
         msg.hop();
 
+		UDPReplyHandler handler = 
+		    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
+		
         if (msg instanceof QueryRequest) {
-			QueryRequest request = (QueryRequest)msg;
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
-			if(request.getTTL() > 0) return;
-
-			InetAddress udpAddress = datagram.getAddress();
-			int udpPort = datagram.getPort();
-			UDPReplyHandler handler = 
-			    new UDPReplyHandler(udpAddress, udpPort);
-            handleUDPQueryRequestPossibleDuplicate(request, handler);
+			if(msg.getTTL() > 0) return;
+            handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
+												   handler);
 		} else if (msg instanceof QueryReply) {			
-			UDPReplyHandler handler = 
-			    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
             handleQueryReply((QueryReply)msg, handler);
+		} else if(msg instanceof PingRequest) {
+			handlePingRequestPossibleDuplicate((PingRequest)msg, handler);
+		} else if(msg instanceof PingReply) {
+			handlePingReply((PingReply)msg, handler);
+		} else if(msg instanceof PushRequest) {
+			handlePushRequest((PushRequest)msg, handler);
 		}
     }
 	
