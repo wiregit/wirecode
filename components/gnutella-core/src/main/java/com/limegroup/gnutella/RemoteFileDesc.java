@@ -113,6 +113,12 @@ public class RemoteFileDesc implements IpPort, Serializable {
     private transient IntervalSet _availableRanges = null;
     
     /**
+     * The last known queue status of the remote host
+     * negative values mean free slots
+     */
+    private transient int _queueStatus = Integer.MAX_VALUE;
+    
+    /**
      * The number of times this download has failed while attempting
      * to transfer data.
      */
@@ -856,8 +862,8 @@ public class RemoteFileDesc implements IpPort, Serializable {
             result = (37* result)+_port;
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
-            if (_clientGUID!=null){
-                result = (37* result)+(new GUID(_clientGUID)).hashCode();}
+            if (_clientGUID!=null)
+                result = (37* result)+(new GUID(_clientGUID)).hashCode();
             _hashCode = result;
         }
 		return _hashCode;
@@ -877,5 +883,13 @@ public class RemoteFileDesc implements IpPort, Serializable {
             return InetAddress.getByName(getAddress());
         }catch(UnknownHostException bad){}
         return null;
+    }
+    
+    public void setQueueStatus(int status) {
+        _queueStatus = status;
+    }
+    
+    public int getQueueStatus() {
+        return _queueStatus;
     }
 }

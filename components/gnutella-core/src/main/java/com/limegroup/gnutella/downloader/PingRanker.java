@@ -32,7 +32,14 @@ import com.limegroup.gnutella.util.IpPort;
 
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 
+    /**
+     * a cached instance of the ping to send to non-firewalled hosts
+     */
     private HeadPing ping;
+    
+    /**
+     * the pinger to send the pings
+     */
     private UDPPinger pinger;
     
     /**
@@ -41,28 +48,29 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private Set newHosts;
     
     /**
-     * IpPorts to whom we have sent a ping out to but have not received a response.
-     * Each entry points to the RFD it was extracted from
+     * Mapping IpPort -> RFD to which we have sent pings.
+     * Whenever we send pings to push proxies, each proxy points to the same
+     * RFD.
      */
     private TreeMap pingedHosts;
     
     /**
-     * Hosts that have responded to our pings, mapping HeadPong -> RFD
+     * RFDs that have responded to our pings.
      */
-    private TreeMap verifiedHosts;
+    private TreeSet verifiedHosts;
     
     /**
      * The urn to use to create pings
      */
     private URN sha1;
     
-    private static final Comparator PONG_COMPARATOR = new HeadPongComparator();
+    private static final Comparator RFD_COMPARATOR = new RFDComparator();
     
     public PingRanker() {
         pinger = new UDPPinger();
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         newHosts = new HashSet();
-        verifiedHosts = new TreeMap(PONG_COMPARATOR);
+        verifiedHosts = new TreeSet(RFD_COMPARATOR);
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
@@ -77,8 +85,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         RemoteFileDesc ret;
         
         // try a verified host
-        if (!verifiedHosts.isEmpty()) 
-            ret =(RemoteFileDesc) verifiedHosts.remove(verifiedHosts.firstKey());
+        if (!verifiedHosts.isEmpty()){ 
+            ret =(RemoteFileDesc) verifiedHosts.first();
+            verifiedHosts.remove(ret);
+        }
         // try a host we've recently pinged
         else if (!pingedHosts.isEmpty()){
             ret =(RemoteFileDesc) pingedHosts.remove(pingedHosts.firstKey());
@@ -192,12 +202,15 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // if the pong didn't have the file, drop it
         if (!pong.hasFile())
             return;
+
+        // update the rfd with information from the pong
+        pong.updateRFD(rfd);
         
         // extract any altlocs the pong had
         newHosts.addAll(pong.getAllLocsRFD(rfd));
         
         // and sort the host.
-        verifiedHosts.put(pong,rfd);
+        verifiedHosts.add(rfd);
         
     }
 
@@ -212,54 +225,44 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     
     protected synchronized Collection getShareableHosts(){
         Set ret = new HashSet(verifiedHosts.size()+newHosts.size()+pingedHosts.size());
-        ret.addAll(verifiedHosts.values());
+        ret.addAll(verifiedHosts);
         ret.addAll(newHosts);
         ret.addAll(pingedHosts.values());
         return ret;
     }
     
     /**
-     * class that actually does the preferencing of headpongs
+     * class that actually does the preferencing of RFDs
      * 
      * HeadPongs with highest number of free slots get the highest priority
      * Within the same queue rank, firewalled hosts get priority
      * Within the same queue/fwall, partial hosts get priority
-     * If everything is the same and both pongs are partial, the one that is 
-     * currently downloading gets priority
      */
-    private static final class HeadPongComparator implements Comparator {
+    private static final class RFDComparator implements Comparator {
         public int compare(Object a, Object b) {
-            HeadPong pongA = (HeadPong)a;
-            HeadPong pongB = (HeadPong)b;
+            RemoteFileDesc pongA = (RemoteFileDesc)a;
+            RemoteFileDesc pongB = (RemoteFileDesc)b;
             
             if (pongA.getQueueStatus() > pongB.getQueueStatus())
                 return 1;
             else if (pongA.getQueueStatus() < pongB.getQueueStatus())
                 return -1;
             
-            if (pongA.isFirewalled() != pongB.isFirewalled()) {
-                if (pongA.isFirewalled())
+            if (pongA.needsPush() != pongB.needsPush()) {
+                if (pongA.needsPush())
                     return -1;
                 else 
                     return 1;
             }
             
-            if (pongA.hasCompleteFile() != pongB.hasCompleteFile()) {
-                if (pongA.hasCompleteFile())
-                    return 1;
-                else
-                    return -1;
-            }
-            
-            
-            if (pongA.isDownloading() != pongB.isDownloading()) {
-                if (pongA.isDownloading())
+            if (pongA.isPartialSource() != pongB.isPartialSource()) {
+                if (pongA.isPartialSource())
                     return -1;
                 else
                     return 1;
             }
-                    
-            // the two pongs seem completely the same, but since this is a treemap..
+            
+            // the two pongs seem completely the same
             return pongA.hashCode() - pongB.hashCode();
         }
     }

@@ -405,6 +405,14 @@ public class HeadPong extends VendorMessage {
 		return ret;
 	}
 	
+    /**
+     * updates the rfd with information in this pong
+     */
+    public void updateRFD(RemoteFileDesc rfd) {
+        rfd.setQueueStatus(getQueueStatus());
+        rfd.setAvailableRanges(getRanges());
+    }
+    
 	/**
 	 * 
 	 * @return the remote vendor as string

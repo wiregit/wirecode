@@ -331,16 +331,13 @@ public class PingRankerTest extends BaseTestCase {
         RemoteFileDesc open = newRFDWithURN("1.2.3.4",3);
         RemoteFileDesc openMoreSlots = newRFDWithURN("1.2.3.5",3);
         RemoteFileDesc push = newPushRFD(GUID.makeGuid(),"1.2.3.6:6",null);
-        
         ranker.addToPool(open);
         ranker.addToPool(openMoreSlots);
         ranker.addToPool(push);
         
-        Thread.sleep(100);
-        
         MockPong openPong = new MockPong(true,true,-1,false,false,true,null,null,null);
         MockPong pushPong = new MockPong(true,true,-1,true,false,true,null,null,null);
-        MockPong openMorePong = new MockPong(true,true,-2,true,false,true,null,null,null);
+        MockPong openMorePong = new MockPong(true,true,-2,false,false,true,null,null,null);
         
         ranker.processMessage(openPong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
         ranker.processMessage(openMorePong,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
@@ -371,16 +368,16 @@ public class PingRankerTest extends BaseTestCase {
         MockPong oneFreeOpen= new MockPong(true,true,-1,false,false,true,null,null,null);
         
         ranker.processMessage(noSlotsFull,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
-        ranker.processMessage(oneFree,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        ranker.processMessage(oneFreeOpen,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
         ranker.processMessage(oneFreePartial,new UDPReplyHandler(InetAddress.getByName("1.2.3.6"),1));
-        ranker.processMessage(oneFreeOpen,new UDPReplyHandler(InetAddress.getByName("1.2.3.7"),7));
+        ranker.processMessage(oneFree,new UDPReplyHandler(InetAddress.getByName("1.2.3.7"),7));
         
         RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.6",best.getHost()); // partial, firewalled, one slot
+        assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.7",7))); // full, firewalled , one slot
         best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getHost()); // full, firewalled, one slot 
+        assertEquals("1.2.3.6",best.getHost()); // partial, open, one slot
         best = ranker.getBest();
-        assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.7",7))); // full, open, one slot
+        assertEquals("1.2.3.5",best.getHost()); // full, open, one slot 
         best = ranker.getBest();
         assertEquals("1.2.3.4",best.getHost()); // full, no slots, firewalled
     }
