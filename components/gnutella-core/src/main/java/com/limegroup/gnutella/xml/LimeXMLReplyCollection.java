@@ -75,6 +75,7 @@ public class LimeXMLReplyCollection {
     public static final int FAILED_TRACK  = 9;
     public static final int FAILED_GENRE  = 10;
     public static final int HASH_FAILED  = 11;
+    public static final int INCORRECT_FILETYPE = 12;
 
     /**
      * Creates a new LimeXMLReplyCollection.  The reply collection
@@ -601,6 +602,9 @@ public class LimeXMLReplyCollection {
         if (commitWith != null)  // commit to disk.
             mp3WriteState = commitID3Data(mp3FileName, commitWith);
         
+        Assert.that(mp3WriteState != INCORRECT_FILETYPE, 
+                    "trying to write id3 to non mp3 file");
+
         // write out the mainmap in serial form...
         wrote = write();
 
@@ -670,7 +674,8 @@ public class LimeXMLReplyCollection {
         // any error where the file wasn't changed ... 
         if( retVal == FILE_DEFECTIVE ||
             retVal == RW_ERROR ||
-            retVal == BAD_ID3 )
+            retVal == BAD_ID3 ||
+            retVal == INCORRECT_FILETYPE)
             return retVal;
             
         // We do not remove the hash from the hashMap because
