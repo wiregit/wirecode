@@ -373,7 +373,7 @@ public class DataWindow
 		// blocks - This ensures that the data is successfully acked before 
         // it is removed.  Note: windowSpace must reflect the true 
         // potential space.
-        for (int i = windowStart; i < lastBlock - windowSize; i++) {
+        for (int i = windowStart; i < lastBlock - windowSize + 1; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
