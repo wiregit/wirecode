@@ -449,7 +449,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         qr.write(out);
 
         byte[] bytes=out.toByteArray();
-        int ggepLen = _ggepUtil.getQRGGEP(true, false, 
+        int ggepLen = _ggepUtil.getQRGGEP(true, false, false,
                                           new HashSet()).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -493,7 +493,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         qr.write(out);
 
         bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, false, 
+        ggepLen = _ggepUtil.getQRGGEP(true, false, false,
                                       new HashSet()).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -586,7 +586,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // test standard null GGEP....
         try {
             // this shouldn't even work....
-            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false,
+            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,
                                                     new HashSet()), 
                                 0, null);
             assertTrue(false);
@@ -594,7 +594,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         catch (BadGGEPBlockException expected) {}
 
         // test just BH GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, 
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,
                                                 new HashSet()), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
@@ -602,7 +602,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test just multicast GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, 
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,
                                                 new HashSet()), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
@@ -610,7 +610,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test combo GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,
                                                 new HashSet()),
                             0, null);
         assertEquals(2, testGGEP.getHeaders().size());
@@ -637,7 +637,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     proxies), 
+                                                     false, proxies), 
                                  0, null);
         if (browseHost) {
             numHeaders++;
