@@ -148,30 +148,46 @@ public class FileManager {
     /**
      * Returns a list of all shared files in the given directory, in any order.
      * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in any
-     * of the directory's children are not returned.  
+     * shared but contains no files.  This method is not recursive; files in 
+     * any of the directory's children are not returned.   
+     * <p>
+     * If directory is null, returns all shared files.
      */
-    public synchronized File[] getSharedFiles(File directory) {        
-        //Remove case, trailing separators, etc.
-        try {
-            directory=getCanonicalFile(directory);
-        } catch (IOException e) {
-            return null;
+    public synchronized File[] getSharedFiles(File directory) {
+        if(directory!=null){
+            // a. Remove case, trailing separators, etc.
+            try {
+                directory=getCanonicalFile(directory);
+            } catch (IOException e) {
+                return null;
+            }
+            
+            //Lookup indices of files in the given directory...
+            IntSet indices=(IntSet)_sharedDirectories.get(directory);
+            if (indices==null)
+                return null;
+            //...and pack them into an array.
+            File[] ret=new File[indices.size()];
+            IntSet.IntSetIterator iter=indices.iterator(); 
+            for (int i=0; iter.hasNext(); i++) {
+                FileDesc fd=(FileDesc)_files.get(iter.next());
+                Assert.that(fd!=null, "Directory has null entry");
+                ret[i]=new File(fd._path);
+            }
+            return ret;
+        } else {
+            // b. Filter out unshared entries.
+            ArrayList buf=new ArrayList(_files.size());
+            for (int i=0; i<_files.size(); i++) {
+                FileDesc fd=(FileDesc)_files.get(i);
+                if (fd!=null)
+                    buf.add(new File(fd._path));                
+            }
+            File[] ret=new File[buf.size()];
+            Object[] out=buf.toArray(ret);
+            Assert.that(out==ret, "Couldn't fit list in returned value");
+            return ret;
         }
-
-        //Lookup indices of files in the given directory...
-        IntSet indices=(IntSet)_sharedDirectories.get(directory);
-        if (indices==null)
-            return null;
-        //...and pack them into an array.
-        File[] ret=new File[indices.size()];
-        IntSet.IntSetIterator iter=indices.iterator(); 
-        for (int i=0; iter.hasNext(); i++) {
-            FileDesc fd=(FileDesc)_files.get(iter.next());
-            Assert.that(fd!=null, "Directory has null entry");
-            ret[i]=new File(fd._path);
-        }
-        return ret;
     }
 
     /**
@@ -697,7 +713,10 @@ public class FileManager {
      */
     public List getKeyWords(){
         File[] files = getSharedFiles(null);
-        return Arrays.asList(files);
+        ArrayList retList = new ArrayList();
+        for(int i=0;i<files.length;i++)
+            retList.add(files[i].getAbsolutePath());
+        return retList;
     }
     
     /** Same as f.getCanonicalFile() in JDK1.3. */
