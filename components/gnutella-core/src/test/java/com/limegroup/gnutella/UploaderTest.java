@@ -36,19 +36,19 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
 
         FileDesc fd = fm.get(0);
-        rfd1 = new RemoteFileDesc("1.1.1.1",0,0,"abc.txt",1000000,
+        rfd1 = new RemoteFileDesc("1.1.1.1",1,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
                                   false, null, null, false, false,"",0, null);
-        rfd2 = new RemoteFileDesc("1.1.1.2",0,0,"abc.txt",1000000,
+        rfd2 = new RemoteFileDesc("1.1.1.2",1,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
                                   false, null, null, false, false,"",0, null);
-        rfd3 = new RemoteFileDesc("1.1.1.3",0,0,"abc.txt",1000000,
+        rfd3 = new RemoteFileDesc("1.1.1.3",1,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
                                   false, null, null, false, false,"",0, null);
-        rfd4 = new RemoteFileDesc("1.1.1.4",0,0,"abc.txt",1000000,
+        rfd4 = new RemoteFileDesc("1.1.1.4",1,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
                                   false, null, null, false, false,"",0, null);
-        rfd5 = new RemoteFileDesc("1.1.1.5",0,0,"abc.txt",1000000,
+        rfd5 = new RemoteFileDesc("1.1.1.5",1,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
                                   false, null, null, false, false,"",0, null);
                                   
