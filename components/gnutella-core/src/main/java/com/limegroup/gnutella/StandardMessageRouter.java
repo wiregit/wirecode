@@ -57,7 +57,21 @@ public class StandardMessageRouter extends MessageRouter {
             //address. We though return it below for compatibility with old
             //ConnectionWatchdogPing which had TTL=2 (instead of 1).
         }
-        
+
+        // handle heartbeat pings specially -- bypass pong caching code
+        if(hops == 1 && ttl == 0) {
+            PingReply pr = 
+                PingReply.create(pingRequest.getGUID(), (byte)1);
+            
+            try {
+                sendPingReply(pr);
+            }
+            catch(IOException e) {
+                // broken reply route, can't send
+            }
+            return;
+        }
+
         //send its own ping in all the cases
         int newTTL = hops+1;
         if ( (hops+ttl) <=2)
@@ -66,10 +80,7 @@ public class StandardMessageRouter extends MessageRouter {
         // send our own pong if we have free slots or if our average
         // daily uptime is more than 1/2 hour
         if(RouterService.getConnectionManager().hasFreeSlots()  ||
-           Statistics.instance().calculateDailyUptime() > 60*30 ||
-           (hops == 1 && ttl == 0)  // Answer heartbeat ping
-        ) {
-
+           Statistics.instance().calculateDailyUptime() > 60*30) {
             PingReply pr = 
                 PingReply.create(pingRequest.getGUID(), (byte)newTTL);
             
