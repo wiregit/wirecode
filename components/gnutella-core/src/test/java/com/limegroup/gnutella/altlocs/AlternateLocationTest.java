@@ -163,9 +163,6 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
                                    false,false,"",0,null, -1);
-        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-        GUID guid = new GUID(rfd.getClientGUID());
-        m.put(guid,Collections.EMPTY_SET);
 
         AlternateLocation.create(rfd);
 
@@ -187,13 +184,11 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
                                    false,true,"",0,proxies,-1);
-        guid = new GUID(fwalled.getClientGUID());
-        m.put(guid,proxies);
-        // its ok to lose the previous mapping at this point
         
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
         assertTrue(loc instanceof PushAltLoc);
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         m.clear();
         
 	}
@@ -224,9 +219,6 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
                                    false,true,"",0,proxies,-1);
-        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-        GUID guid = new GUID(fwalled.getClientGUID());
-        m.put(guid,proxies);
         
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
@@ -234,6 +226,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         
         assertEquals(fwalled.getClientGUID(),other.getClientGUID());
         assertEquals(fwalled.getPushAddr(),other.getPushAddr());
+        
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         m.clear();
 	}
 	
@@ -249,10 +243,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
                                    false,true,"",0,proxies,-1);
-        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-        GUID guid = new GUID(fwalled.getClientGUID());
-        m.put(guid,proxies);
-        
+
         AlternateLocation loc = AlternateLocation.create(fwalled);
         
         assertTrue(loc instanceof PushAltLoc);
@@ -262,6 +253,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         assertTrue(loc2 instanceof PushAltLoc);
         
         assertEquals(loc,loc2);
+        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         m.clear();
 	}
 
