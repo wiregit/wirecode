@@ -153,7 +153,7 @@ public final class CommonUtils {
 	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isSupernodeOS() {
-		if(!_isWindows98 && !_isWindows95 && !_isMacClassic) {
+		if(_isWindows98 || _isWindows95 || _isMacClassic) {
 			return false;
 		}
 		return true;
