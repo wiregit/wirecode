@@ -65,6 +65,12 @@ public class LimeXMLReplyCollection{
         if (this.audio) // special processing for mp3s needed
             constructAudioCollection(fileToHash, hashToXMLStr);
 
+        // OLD VS. NEW - this code is here because we are changing the
+        // representation of the .sxml file for LimeWire 2.5 and on.  Now the
+        // hashToXMLStr is actually hashToXMLDoc - but we don't want older
+        // clients to lose any annotations, so we'll convert them at the first
+        // opportunity.
+
         // get the hash to xml (from the serialized file) and create a
         // LimeXMLDocument out of each.  Then add it to the collection.
         Iterator iter = null;
@@ -73,10 +79,13 @@ public class LimeXMLReplyCollection{
             iter = hashToXMLStr.keySet().iterator();
         while((iter != null) && iter.hasNext()){
             String hash = (String)iter.next();
-            String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
+            Object xml = hashToXMLStr.get(hash); //cannot be null
             LimeXMLDocument doc=null;
             try{
-                doc = new LimeXMLDocument(xmlStr);
+                if (xml instanceof LimeXMLDocument)
+                    doc = (LimeXMLDocument) xml;
+                else 
+                    doc = new LimeXMLDocument((String) xml);
                 addReply(hash, doc);
             }
             catch(Exception e){
@@ -98,18 +107,25 @@ public class LimeXMLReplyCollection{
         // (possiblY) join it with the ID3 info.  Then add the reply.
         synchronized(fileToHash){
             Iterator iter = fileToHash.keySet().iterator();
-            LimeXMLDocument doc=null;
+            LimeXMLDocument doc = null;
+            boolean solo = false; //rich data only from ID3?
             while(iter.hasNext()) {
-                boolean solo = false; //rich data only from ID3?
                 File file = (File)iter.next();
                 String hash = metaFileManager.readFromMap(file, audio);
-                String fileXMLString=(String)hashToXMLStr.remove(hash);
-                solo = ((fileXMLString == null) || fileXMLString.equals(""));
+                Object xml = hashToXMLStr.get(hash);
                 try{
-                    String xmlString = id3Reader.readDocument(file,solo);
-                    if(!solo)
-                        xmlString =joinAudioXMLStrings(xmlString,fileXMLString);
-                    doc = new LimeXMLDocument(xmlString);
+                    if (xml instanceof LimeXMLDocument)
+                        doc = (LimeXMLDocument) xml;
+                    else {
+                        String fileXMLString = (String) xml;
+                        solo = ((fileXMLString == null) || 
+                                fileXMLString.equals(""));
+                        String xmlString = id3Reader.readDocument(file,solo);
+                        if(!solo)
+                            xmlString = 
+                            joinAudioXMLStrings(xmlString,fileXMLString);
+                        doc = new LimeXMLDocument(xmlString);
+                    }
                     addReply(hash,doc);
                 }
                 catch(Exception e){
