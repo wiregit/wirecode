@@ -16,6 +16,7 @@ import junit.extensions.*;
  */
 public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+    private static final byte[] IP = new byte[] {1, 1, 1, 1};
     private static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
 
@@ -66,7 +67,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Runs the legacy unit test that was formerly in QueryReply.
 	 */
 	public void testLegacy() throws Exception {		
-		byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
+		byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)0x1};
 		long u4=0x00000000FFFFFFFFl;
 		byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
 		Response[] responses=new Response[0];
@@ -84,7 +85,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		qr=new QueryReply(guid, (byte)5,
 						  0xFFFF, ip, u4, responses,
 						  guid, false);
-		assertEquals("255.0.0.1",qr.getIP());
+		assertEquals("254.0.0.1",qr.getIP());
 		assertEquals(0xFFFF, qr.getPort());
 		assertEquals(u4, qr.getSpeed());
 		assertTrue(Arrays.equals(qr.getClientGUID(),guid));
@@ -103,6 +104,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+		payload[3]=1;            //non-blank ip
 		payload[11+8]=(byte)65;  //The character 'A'
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
@@ -129,6 +131,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+15];
         payload[0]=1;                    //Number of results
 		payload[1]=1;                    //non-zero port
+		payload[3]=1;                    //non-blank ip
         payload[11+8]=(byte)65;          //The character 'A'
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
@@ -147,7 +150,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Test case modified by Susheel Daswani to check the metadata part
         payload=new byte[11+11+(4+1+4+5)+16];
         payload[0]=1;                    //Number of results
-		payload[1]=1;                    //non-zero port        
+		payload[1]=1;                    //non-zero port
+		payload[3]=1;                    //non-blank ip		
         payload[11+8]=(byte)65;          //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -183,6 +187,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+4)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+		payload[3]=1;            //non-blank ip		
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -206,6 +211,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+20000)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+		payload[3]=1;            //non-blank ip		
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -237,6 +243,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+2)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+        payload[3]=1;           //non-blank ip
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
 
@@ -255,6 +262,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+2+0)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+        payload[3]=1;            //non-blank ip
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -280,6 +288,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
+        payload[3]=1;                //non-blank ip		
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -318,6 +327,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+1+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
+        payload[3]=1;                //non-blank ip				
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)73;   //The character 'I'
@@ -343,6 +353,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
+        payload[3]=1;                //non-blank ip
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -375,7 +386,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           0xFFFF, ip, u4, responses,
                           guid,
                           false, true, true, false, true, false);
-        assertEquals("255.0.0.1", qr.getIP());
+        assertEquals("254.0.0.1", qr.getIP());
         assertEquals(0xFFFF, qr.getPort());
         assertEquals(u4, qr.getSpeed());
         assertTrue(Arrays.equals(qr.getClientGUID(),guid));
@@ -707,7 +718,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             else if (i < 6) 
                 assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
             else  {// length is fine
-                assertEquals((i / 6), 
+                   // -1 because the first entry is invalid since it
+                   // begins with 0.               
+                assertEquals((i / 6) - 1,
                              _ggepUtil.getPushProxies(ggep).size());
                 
             }
@@ -722,9 +735,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         for (int i = 0; i < 10; i++) {
             byte[] bytes = new byte[6*(i+1)];
             rand.nextBytes(bytes);
-            // don't trust zeroes in IP....
+            // don't trust zeroes or 255 in IP...
             for (int j = 0; j < bytes.length; j++) {
                 if (bytes[j] == (byte) 0) bytes[j] = (byte) 1;
+                if (bytes[j] == (byte)255)bytes[j] = (byte)254;
             }
 
             // from the network
@@ -785,7 +799,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                     new QueryReply.PushProxyContainer(hosts[i], 6346));
             
             QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, new byte[4], 0, new Response[0],
+                                           6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
                                            proxies);
@@ -851,7 +865,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 			// then actually create a QueryReply and read it, to make
 			// sure we can write & read stuff correctly.
             QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, new byte[4], 0, hits,
+                                           6346, IP, 0, hits,
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
                                            null);			    
@@ -880,6 +894,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		byte[] payload=new byte[11+11+16];
 		payload[0] = 1;            //Number of results
 		payload[1]=1;              //non-zero port
+        payload[3]=1;                //non-blank ip
 		//payload[11+8]=(byte)65;  //The character 'A'
 
 		QueryReply qr = 
