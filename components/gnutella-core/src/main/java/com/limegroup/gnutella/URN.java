@@ -11,6 +11,10 @@ import java.security.*;
  * the Gnutella Developers Forum (GDF).<p>
  *
  * This class is immutable.
+ *
+ * @see UrnCache
+ * @see FileDesc
+ * @see UrnFactory
  */
 public final class URN implements HTTPHeaderValue, Serializable {
 
@@ -49,12 +53,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	/**
 	 * The string representation of the URN.
 	 */
-	private final transient String URN_STRING;
+	private transient String _urnString;
 
 	/**
 	 * Cached hash code that is lazily initialized.
 	 */
-	private volatile int hashCode = 0;  
+	private volatile transient int hashCode = 0;  
 
 	/**
 	 * Constructs a new URN based on the specified <tt>File</tt> instance.
@@ -70,7 +74,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public URN(final File file, final int urnType) throws IOException {
 		switch(urnType) {
 		case SHA1_URN:
-			this.URN_STRING = URN.createSHA1String(file);
+			this._urnString = URN.createSHA1String(file);
 			break;
 		default:
 			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED");
@@ -89,7 +93,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("INVALID URN STRING");
 		}
-		this.URN_STRING = urnString;
+		this._urnString = urnString;
 	}
 
 	/**
@@ -103,12 +107,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * urn:sha1:
 	 */
 	public String getTypeString() {
-		return URN_STRING.substring(0,URN_STRING.indexOf(':',4)+1);		
+		return _urnString.substring(0,_urnString.indexOf(':',4)+1);		
 	}
 
 	// implements HTTPHeaderValue
 	public String httpStringValue() {
-		return URN_STRING;
+		return _urnString;
 	}
 
 	/**
@@ -265,7 +269,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
 	 */
 	public boolean isSHA1() {
-		return URN_STRING.toLowerCase().startsWith(URN_SHA1);
+		return _urnString.toLowerCase().startsWith(URN_SHA1);
 	}
 
 	/**
@@ -282,8 +286,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		}
 		URN urn = (URN)o;
 		
-		return (URN_STRING == null ? urn.URN_STRING == null : 
-				URN_STRING.equals(urn.URN_STRING));
+		return (_urnString == null ? urn._urnString == null : 
+				_urnString.equals(urn._urnString));
 	}
 
 	/**
@@ -298,7 +302,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public int hashCode() {
 		if(hashCode == 0) {
 			int result = 17;
-			result = (37*result) + this.URN_STRING.hashCode();
+			result = (37*result) + this._urnString.hashCode();
 			hashCode = result;
 		}
 		return hashCode;
@@ -310,6 +314,31 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return the string representation of the URN
 	 */
 	public String toString() {
-		return URN_STRING;
+		return _urnString;
+	}
+
+	/**
+	 * Serializes this instance.
+	 *
+	 * @serialData the string representation of the URN
+	 */
+	private void writeObject(ObjectOutputStream s) 
+		throws IOException {
+		s.defaultWriteObject();
+		s.writeObject(_urnString);
+	}
+
+	/**
+	 * Deserializes this <tt>URN</tt> instance, validating the urn string
+	 * to ensure that it's valid.
+	 */
+	private void readObject(ObjectInputStream s) 
+		throws IOException, ClassNotFoundException {
+		s.defaultReadObject();
+		_urnString = (String)s.readObject();
+		if(URN.isValidUrn(_urnString)) {
+			throw new InvalidObjectException("invalid urn: "+_urnString);
+		}
+		
 	}
 }
