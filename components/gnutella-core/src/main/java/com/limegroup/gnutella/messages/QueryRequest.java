@@ -297,18 +297,100 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
 
-    public static QueryRequest createOutOfBandQuery(String query,
-                                                    byte[] ip, int port) {
+	/**
+	 * Creates a new query for the specified file name, with no XML.
+	 *
+	 * @param query the file name to search for
+     * @param guid I trust that this is a address encoded guid.  Your loss if
+     * it isn't....
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of band support.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 */
+    public static QueryRequest createOutOfBandQuery(byte[] guid, String query) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
 		if(query.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-        return new QueryRequest(GUID.makeAddressEncodedGuid(ip, port),
-                                DEFAULT_TTL, query, "", true);
+        return new QueryRequest(guid, DEFAULT_TTL, query, "", true);
     }                                
     
+
+	/**
+	 * Creates a new query for the specified file name and the designated XML.
+	 *
+	 * @param query the file name to search for
+     * @param guid I trust that this is a address encoded guid.  Your loss if
+     * it isn't....
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of band support.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 */
+    public static QueryRequest createOutOfBandQuery(byte[] guid, String query, 
+                                                    String xmlQuery) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+		if(xmlQuery == null) {
+			throw new NullPointerException("null xml query");
+		}
+		if(query.length() == 0 && xmlQuery.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
+		}
+        return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true);
+    }                                
+
+	/**
+	 * Creates a new query for the specified file name, with no XML.
+	 *
+	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of band support.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 */
+    public static QueryRequest createOutOfBandQuery(String query,
+                                                    byte[] ip, int port) {
+        byte[] guid = GUID.makeAddressEncodedGuid(ip, port);
+        return QueryRequest.createOutOfBandQuery(guid, query, "");
+    }                                
+    
+
+	/**
+	 * Creates a new query for the specified file name and the designated XML.
+	 *
+	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of band support.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 */
+    public static QueryRequest createOutOfBandQuery(String query, String xmlQuery,
+                                                    byte[] ip, int port) {
+        byte[] guid = GUID.makeAddressEncodedGuid(ip, port);
+        return QueryRequest.createOutOfBandQuery(guid, query, xmlQuery);
+    }                                
+    
+
 
 	/**
 	 * Creates a new query for the specified file name, with no XML.
@@ -417,6 +499,21 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
+								qr.getNetwork(), qr.desiresOutOfBandReplies());
+	}
+
+	/**
+	 * Creates a new query from the existing query and loses the OOB marking.
+	 *
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @return a new <tt>QueryRequest</tt> with no OOB marking
+	 */
+	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
+		return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getQuery(),
+								qr.getRichQueryString(), 
+								qr.getRequestedUrnTypes(),
+								qr.getQueryUrns(), qr.getQueryKey(),
+								qr.isFirewalledSource(),
 								qr.getNetwork(), false);
 	}
 
@@ -472,10 +569,9 @@ public class QueryRequest extends Message implements Serializable{
 		}
         QueryRequest mQr =
             new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
-								qr.getRichQueryString(), 
-								qr.getRequestedUrnTypes(),
-								qr.getQueryUrns(), qr.getQueryKey(),
-								false, Message.N_MULTICAST, false);
+                             qr.getRichQueryString(),  qr.getRequestedUrnTypes(),
+                             qr.getQueryUrns(), qr.getQueryKey(), false, 
+                             Message.N_MULTICAST, qr.desiresOutOfBandReplies());
         mQr.setHops(qr.getHops());
         return mQr;
 	}
@@ -495,7 +591,7 @@ public class QueryRequest extends Message implements Serializable{
                                 qr.getQuery(), qr.getRichQueryString(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                                 key, qr.isFirewalledSource(), Message.N_UNKNOWN,
-                                false);
+                                qr.desiresOutOfBandReplies());
 	}
 
 	/**

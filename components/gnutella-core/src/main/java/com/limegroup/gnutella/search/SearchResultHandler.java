@@ -2,6 +2,7 @@ package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
@@ -25,6 +26,12 @@ public final class SearchResultHandler {
     private static final int BUFFER_SIZE = 2000;
 
     /** 
+     * The maximum number of results to send in a QueryStatusResponse -
+     * basically sent to say 'shut off query'.
+	 */
+    public static final int MAX_RESULTS = 65535;
+
+    /** 
 	 * The maximum number of replies to display per SECOND.  Must be greater
      * than 0. Note that one query reply may have many (up to 255!) results. 
 	 */
@@ -35,6 +42,11 @@ public final class SearchResultHandler {
      * DELAY_TIME==1/(MAX_RATE [replies/sec] * .001 [sec/msec]) 
 	 */
     private static final int DELAY_TIME = 1000/MAX_RATE;
+
+    /**
+     * The "delay" between responses to wait to send a QueryStatusResponse.
+     */
+    public static final int REPORT_INTERVAL = 15;
 
     /** 
 	 * The queue of buffered query replies.  Used to decouple backend,
@@ -52,6 +64,15 @@ public final class SearchResultHandler {
 	 */
     private long lastTime;
 
+
+    /** Used to keep track of the number of non-filtered responses per GUID.
+     *  I need synchronization for every call I make, so a Vector is fine.
+     */
+    private final List GUID_COUNTS = new Vector();
+
+    /*---------------------------------------------------    
+      PUBLIC INTERFACE METHODS
+     ----------------------------------------------------*/
 
 	/**
 	 * Starts the thread that processes search results.
@@ -80,6 +101,63 @@ public final class SearchResultHandler {
         }
     }
 
+
+    /**
+     * Adds the Query to the list of queries kept track of.  You should do this
+     * EVERY TIME you start a query so we can leaf guide it when possible.
+     *
+     * @param qr The query that has been started.  We really just acces the guid.
+     */ 
+    public void addQuery(QueryRequest qr) {
+        GuidCount gc = new GuidCount(qr.getGUID());
+        GUID_COUNTS.add(gc);
+    }
+
+    /**
+     * Removes the Query frome the list of queries kept track of.  You should do
+     * this EVERY TIME you stop a query.
+     *
+     * @param guid the guid of the query that has been removed.
+     */ 
+    public void removeQuery(GUID guid) {
+        if (removeQueryInternal(guid) != null) {
+            // shut off the query at the UPs....
+            try {
+                QueryStatusResponse stat = new QueryStatusResponse(guid, 
+                                                                   MAX_RESULTS);
+                RouterService.getConnectionManager().updateQueryStatus(stat);
+            }
+            catch (BadPacketException terrible) {
+                ErrorService.error(terrible);
+            }
+        }
+    }
+
+
+    /**
+     * Use this to see how many results have been displayed to the user for the
+     * specified query.
+     *
+     * @param guid the guid of the query.
+     *
+     * @return the number of non-filtered results for query with guid guid. -1
+     * is returned if the guid was not found....
+     */    
+    public int getNumResultsForQuery(GUID guid) {
+        GuidCount gc = retrieveGuidCount(guid);
+        if (gc != null)
+            return gc.getNumResults();
+        else
+            return -1;
+    }
+    
+    /*---------------------------------------------------    
+      END OF PUBLIC INTERFACE METHODS
+     ----------------------------------------------------*/
+
+    /*---------------------------------------------------    
+      PRIVATE INTERFACE METHODS
+     ----------------------------------------------------*/
 
 	/**
 	 * Private class for processing replies as they come in -- does some
@@ -186,6 +264,7 @@ public final class SearchResultHandler {
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
 															   results.size());
         Iterator iter = results.iterator();
+        int numSentToFrontEnd = 0;
         for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
@@ -214,14 +293,134 @@ public final class SearchResultHandler {
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
-
+            numSentToFrontEnd++;
         } //end of response loop
-        return true;
+
+        // ok - some responses may have got through to the GUI, we should account
+        // for them....
+        accountAndUpdateDynamicQueriers(qr, numSentToFrontEnd);
+
+        return (numSentToFrontEnd > 0);
     }
+
+
+    private void accountAndUpdateDynamicQueriers(final QueryReply qr,
+                                                 final int numSentToFrontEnd) {
+
+        debug("SRH.accountAndUpdateDynamicQueriers(): entered.");
+        // we should execute if results were consumed
+        // technically Ultrapeers don't use this info, but we are keeping it
+        // around for further use
+        if (numSentToFrontEnd > 0) {
+            // get the correct GuidCount
+            GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
+            if (gc == null)
+                // 0. probably just hit lag, or....
+                // 1. we could be under attack - hits not meant for us
+                // 2. programmer error - ejected a query we should not have
+                return;
+            
+            // update the object
+            debug("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
+            gc.increment(numSentToFrontEnd);
+
+            // inform proxying Ultrapeers....
+            if (RouterService.isShieldedLeaf()) {
+                if (!gc.isFinished() && 
+                    (gc.getNumResults() > gc.getNextReportNum())) {
+                    debug("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
+                    gc.tallyReport();
+                    if (gc.getNumResults() > QueryHandler.ULTRAPEER_RESULTS)
+                        gc.markAsFinished();
+                    // if you think you are done, then undeniably shut off the
+                    // query.
+                    final int numResultsToReport = (gc.isFinished() ?
+                                                    MAX_RESULTS :
+                                                    gc.getNumResults()/4);
+                    try {
+                        QueryStatusResponse stat = 
+                            new QueryStatusResponse(gc.getGUID(), 
+                                                    numResultsToReport);
+                        RouterService.getConnectionManager().updateQueryStatus(stat);
+                    }
+                    catch (BadPacketException terrible) {
+                        ErrorService.error(terrible);
+                    }
+                }
+
+            }
+        }
+        debug("SRH.accountAndUpdateDynamicQueriers(): returning.");
+    }
+
+
+    private GuidCount removeQueryInternal(GUID guid) {
+        synchronized (GUID_COUNTS) {
+            Iterator iter = GUID_COUNTS.iterator();
+            while (iter.hasNext()) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if (currGC.getGUID().equals(guid)) {
+                    iter.remove();  // get rid of this dude
+                    return currGC;  // and return it...
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private GuidCount retrieveGuidCount(GUID guid) {
+        synchronized (GUID_COUNTS) {
+            Iterator iter = GUID_COUNTS.iterator();
+            while (iter.hasNext()) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if (currGC.getGUID().equals(guid))
+                    return currGC;
+            }
+        }
+        return null;
+    }
+
+    /*---------------------------------------------------    
+      END OF PRIVATE INTERFACE METHODS
+     ----------------------------------------------------*/
 
     private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }
+
+    
+    /** A container that simply pairs a GUID and an int.  The int should
+     *  represent the number of non-filtered results for the GUID.
+     */
+    private static class GuidCount {
+
+        private final GUID _guid;
+        private int _numResults;
+        private int _nextReportNum = REPORT_INTERVAL;
+        private boolean markAsFinished = false;
+
+        public GuidCount(byte[] guid) {
+            _guid = new GUID(guid);
+            _numResults = 0;
+        }
+
+        public GUID getGUID() { return _guid; }
+        public int getNumResults() { return _numResults; }
+        public int getNextReportNum() { return _nextReportNum; }
+        public boolean isFinished() { return markAsFinished; }
+        public void tallyReport() { 
+            _nextReportNum = _numResults + REPORT_INTERVAL; 
+        }
+
+        public void increment(int incr) { _numResults += incr; }
+        public void markAsFinished() { markAsFinished = true; }
+
+        public String toString() {
+            return "" + _guid + ":" + _numResults + ":" + _nextReportNum;
+        }
+    }
+
 }

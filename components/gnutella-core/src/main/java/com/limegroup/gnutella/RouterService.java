@@ -746,7 +746,10 @@ public class RouterService {
      * Returns a new GUID for passing to query.
      */
     public static byte[] newQueryGUID() {
-        return QueryRequest.newQueryGUID(false);
+        if (isGUESSCapable() && !uploadManager.isBusy())
+            return GUID.makeAddressEncodedGuid(getAddress(), getPort());
+        else
+            return QueryRequest.newQueryGUID(false);
     }
 
     /**
@@ -796,8 +799,19 @@ public class RouterService {
 
 		try {
 			_lastQueryTime = System.currentTimeMillis();
-			QueryRequest qr = QueryRequest.createQuery(guid, query, richQuery);
+            QueryRequest qr = null;
+            if ((new GUID(guid)).addressesMatch(getAddress(), getPort()))
+                // if the guid is encoded with my address, mark it as needing out
+                // of band support.  note that there is a VERY small chance that
+                // the guid will be address encoded but not meant for out of band
+                // delivery of results.  bad things may happen in this case but 
+                // it seems tremendously unlikely, even over the course of a 
+                // VERY long lived client
+                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery);
+            else
+                qr = QueryRequest.createQuery(guid, query, richQuery);
 			verifier.record(qr, type);
+            RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
 			router.sendDynamicQuery(qr);
 		} catch(Throwable t) {
 			ErrorService.error(t);
@@ -815,12 +829,13 @@ public class RouterService {
 		return _lastQueryTime;
 	}
 
-    /** Will make all attempts to stop a query from executing.  Really only 
-     *  applicable to GUESS queries...
+    /** Purges the query from the QueryUnicaster (GUESS) and the ResultHandler
+     *  (which maintains query stats for the purpose of leaf guidance).
      *  @param guid The GUID of the query you want to get rid of....
      */
     public static void stopQuery(GUID guid) {
         QueryUnicaster.instance().purgeQuery(guid);
+        RESULT_HANDLER.removeQuery(guid);
     }
 
     /** 

@@ -1322,6 +1322,15 @@ public class Connection {
         return -1;
     }
 
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsLeafGuidance() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsLeafGuidance();
+        return -1;
+    }
+
     /**
      * Returns whether or not this connection represents a local address.
      *

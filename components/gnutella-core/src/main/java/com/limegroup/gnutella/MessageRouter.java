@@ -325,9 +325,13 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 		} else if (msg instanceof QueryReply) {
-			if(RECORD_STATS)
+            QueryReply qr = (QueryReply) msg;
+			if(RECORD_STATS) {
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-            handleQueryReply((QueryReply)msg, handler);
+                int numResps = qr.getResultCount();
+                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+            }
+            handleQueryReply(qr, handler);
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
@@ -346,7 +350,11 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, datagram);
         }
-        
+        else if(msg instanceof ReplyNumberVendorMessage) {
+			if(RECORD_STATS)
+                ;
+            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, datagram);
+        }
     }
     
     /**
@@ -830,6 +838,42 @@ public abstract class MessageRouter {
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
     }
+
+    /** This is called when a client on the network has results for us that we
+     *  may want.  We may contact them back directly or just cache them for
+     *  use.
+     */
+    protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
+                                            DatagramPacket datagram) {
+        try {
+            GUID qGUID = new GUID(reply.getGUID());
+            int numResults = 
+            RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
+
+            // see if we need more results for this query....
+            // TODO: remember this location for a future, 'find more sources'
+            // targeted GUESS query.
+            if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
+            if (RECORD_STATS)
+                OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+                return;
+            }
+            
+            LimeACKVendorMessage ack = 
+                new LimeACKVendorMessage(qGUID, reply.getNumResults());
+            UDPService.instance().send(ack, datagram.getAddress(),
+                                       datagram.getPort());
+            if (RECORD_STATS)
+                OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
+        }
+        catch (BadPacketException terrible) {
+            ErrorService.error(terrible);
+        }
+        catch (IOException ioe) {
+            ErrorService.error(ioe);
+        }        
+    }
+
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -
      *  interacts with handleLimeACKMessage
@@ -1319,9 +1363,13 @@ public abstract class MessageRouter {
         // only send to at most 4 Ultrapeers, as we could have more
         // as a result of race conditions
         int limit = Math.min(4, list.size());
+        final boolean wantsOOB = qr.desiresOutOfBandReplies();
         for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);       
-            sendQueryRequest(qr, mc, FOR_ME_REPLY_HANDLER);
+			ManagedConnection mc = (ManagedConnection)list.get(i);
+            QueryRequest qrToSend = qr;
+            if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
+                qrToSend = QueryRequest.unmarkOOBQuery(qr);
+            sendQueryRequest(qrToSend, mc, FOR_ME_REPLY_HANDLER);
         }
     }
     

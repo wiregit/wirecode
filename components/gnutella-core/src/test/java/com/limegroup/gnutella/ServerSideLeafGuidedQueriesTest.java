@@ -207,9 +207,6 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
                        " should be connected", ULTRAPEERS[i].isOpen());
 		assertTrue("LEAF should be connected", LEAF.isOpen());
 
-		// make sure we get rid of any initial ping pong traffic exchanges
-		sleep();
-		drainAll();
     }
 
     /** 
@@ -335,6 +332,30 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 
     // BEGIN TESTS
     // ------------------------------------------------------
+
+    public void testConfirmSupport() throws Exception {
+        while (true) {
+            try {
+                Message m=LEAF.receive(TIMEOUT);
+                if (m instanceof MessagesSupportedVendorMessage) {
+                    MessagesSupportedVendorMessage msvm =
+                        (MessagesSupportedVendorMessage) m;
+                    assertTrue(msvm.supportsLeafGuidance() > 0);
+                    return;
+                }
+            }
+            catch (InterruptedIOException ie) {
+                assertTrue(false);
+            }
+            catch (BadPacketException e) {
+                // ignore....
+            }
+            catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+
 
     public void testLeafIsDone() throws Exception {
         drainAll();
