@@ -76,7 +76,8 @@ public class UDPHostCache {
     private boolean dirty = false;
     
     /**
-     * Constructs a new UDPHostCache that remembers attempting hosts for 10 minutes.
+     * Constructs a new UDPHostCache that remembers attempting hosts for 10 
+	 * minutes.
      */
     public UDPHostCache() {
         this(10 * 60 * 1000);
@@ -262,7 +263,8 @@ public class UDPHostCache {
      */
     private void createAndAdd(String host, int port) {
         try {
-            ExtendedEndpoint ep = new ExtendedEndpoint(host, port).setUDPHostCache(true);
+            ExtendedEndpoint ep = 
+			  new ExtendedEndpoint(host, port).setUDPHostCache(true);
             add(ep);
         } catch(IllegalArgumentException ignored) {}
     }
@@ -325,19 +327,22 @@ public class UDPHostCache {
                 // OPTIMIZATION: if we've gotten succesful responses from
                 // each hosts, unregister ourselves early.
                 if(hosts.isEmpty())
-                    RouterService.getMessageRouter().unregisterMessageListener(guid, this);
+                    RouterService.getMessageRouter().
+					  unregisterMessageListener(guid, this);
             }
         }
         
         /**
-         * Notification that this listener is now registered with the specified GUID.
+         * Notification that this listener is now registered with the 
+		 * specified GUID.
          */
         public void registered(byte[] g) {
             this.guid = g;
         }
         
         /**
-         * Notification that this listener is now unregistered for the specified guid.
+         * Notification that this listener is now unregistered for the 
+		 * specified guid.
          */
         public void unregistered(byte[] g) {
             synchronized(UDPHostCache.this) {
