@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.zip.*;
 import java.io.*;
@@ -90,11 +91,29 @@ public class QueryRouteTable {
      * been decremented, i.e., is the outbound not inbound TTL.  
      */
     public boolean contains(QueryRequest qr) {
+        String richQuery = qr.getRichQuery();
+        LimeXMLDocument doc = null;
+        try{
+            doc = new LimeXMLDocument(richQuery);
+        }catch(Exception e){
+            doc = null;
+        }
+        String richQueryWords="";
+        if(doc!=null){            
+            Iterator iter = doc.getKeyWords().iterator();
+            while(iter.hasNext()){
+                String str = (String)iter.next();
+                richQueryWords=richQueryWords+" "+str;
+            }
+        }
+        String allwords = richQueryWords+" "+qr.getQuery();
+        //there are bound to be some blank spaces on either left side
+        allwords = allwords.trim();
         //Check that all hashed keywords are reachable with given TTL.
-        String[] keywords=HashFunction.keywords(qr.getQuery());
+        String[] keywords=HashFunction.keywords(allWords);
         int ttl=qr.getTTL();
         for (int i=0; i<keywords.length; i++) {
-            String keyword=keywords[i];
+            String keyword=allWords[i];
             int hash=HashFunction.hash(keyword, log2(table.length));
             if (table[hash]>ttl || table[hash]>=infinity)
                 return false;

@@ -180,7 +180,7 @@ public class LimeXMLDocument{
     /**
      * returns all the values - so long they are not numbers
      */
-    protected List getKeyWords(){
+    public List getKeyWords(){
         List retList = new ArrayList();
         Iterator iter = fieldToValue.values().iterator();
         while(iter.hasNext()){
