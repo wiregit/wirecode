@@ -42,6 +42,8 @@ public abstract class Message
     /** Priority for flow-control.  Lower numbers mean higher priority.NOT
      *  written to network. */
     private int priority=0;
+    /** Time this was created.  Not written to network. */
+    private long creationTime=System.currentTimeMillis();
 
     /** Rep. invariant */
     protected void repOk() {
@@ -296,6 +298,14 @@ public abstract class Message
             return ttl--;
         else
             return ttl;
+    }
+
+    /** 
+     * Returns the system time (i.e., the result of System.currentTimeMillis())
+     * this was instantiated.
+     */
+    public long getCreationTime() {
+        return creationTime;
     }
 
     /** Returns this user-defined priority.  Lower values are higher priority. */

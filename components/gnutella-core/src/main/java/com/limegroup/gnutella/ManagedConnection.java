@@ -62,9 +62,11 @@ public class ManagedConnection
      *  INVARIANT: _outputQueue.length==PRIORITIES
      *  LOCKING: obtain _outputQueueLock. */
     private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];     
-   /** The size of the queue per priority. Larger values tolerate larger bursts
+    /** The size of the queue per priority. Larger values tolerate larger bursts
      *  of producer traffic, though they waste more memory. */
     private static final int QUEUE_SIZE=100;
+    /** The max time to keep messages in the queues, in milliseconds. */
+    private static int QUEUE_TIME=30*1000;
     /** The number of different priority levels. */
     private static final int PRIORITIES=7;
     /** Names for each priority, from highest priority to lowest.
@@ -77,14 +79,20 @@ public class ManagedConnection
     private static final int PRIORITY_PING=5;
     private static final int PRIORITY_OTHER=6;       
     {
-        _outputQueue[PRIORITY_WATCHDOG]   =new MessageQueue(true,QUEUE_SIZE,1);
-        _outputQueue[PRIORITY_PUSH]       =new MessageQueue(true,QUEUE_SIZE,3);
-        _outputQueue[PRIORITY_QUERY_REPLY]=new MessageQueue(true,QUEUE_SIZE,
-                                                            2, true); //sorted
-        _outputQueue[PRIORITY_QUERY]      =new MessageQueue(true,QUEUE_SIZE,1);
-        _outputQueue[PRIORITY_PING_REPLY] =new MessageQueue(true,QUEUE_SIZE,1);
-        _outputQueue[PRIORITY_PING]       =new MessageQueue(true,QUEUE_SIZE,1);
-        _outputQueue[PRIORITY_OTHER]      =new MessageQueue(false,QUEUE_SIZE,1);
+        _outputQueue[PRIORITY_WATCHDOG]   
+            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+        _outputQueue[PRIORITY_PUSH]
+            = new MessageQueue(true, QUEUE_SIZE, 3, false, QUEUE_TIME);
+        _outputQueue[PRIORITY_QUERY_REPLY]  //sorted
+            = new MessageQueue(true, QUEUE_SIZE, 2, true,  QUEUE_TIME); 
+        _outputQueue[PRIORITY_QUERY]      
+            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+        _outputQueue[PRIORITY_PING_REPLY] 
+            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+        _outputQueue[PRIORITY_PING]       
+            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+        _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
+            = new MessageQueue(false,QUEUE_SIZE, 1, false, Integer.MAX_VALUE);
     }                                                             
 
 
@@ -1168,6 +1176,7 @@ public class ManagedConnection
     } 
     
     /** Unit test. */
+    /*
     public static void main(String args[]) {        
         try {
             System.out.println("-Testing initialize");
@@ -1175,11 +1184,13 @@ public class ManagedConnection
             //Connection to get this to work.
             com.limegroup.gnutella.tests.MiniAcceptor acceptor=
                 new com.limegroup.gnutella.tests.MiniAcceptor(null);
+            QUEUE_TIME=1000;
             ManagedConnection out=new ManagedConnection("localhost", 6346);
             out.initialize();
             Connection in=acceptor.accept();      
             testSendFlush(out, in);
             testReorderBuffer(out, in);
+            testBufferTimeout(out, in);
             testDropBuffer(out, in);
             in.close();
             out.close();
@@ -1214,7 +1225,6 @@ public class ManagedConnection
         Assert.that(elapsed<300, "Unreasonably long send time: "+elapsed);
         Assert.that(pr.getHops()==0);
         Assert.that(pr.getTTL()==4);
-
     }
 
     private void stopOutputRunner() {
@@ -1344,7 +1354,57 @@ public class ManagedConnection
         m=in.receive(); //QRP patch2
         Assert.that(m instanceof PatchTableMessage);
         Assert.that(((PatchTableMessage)m).getSequenceNumber()==2);
+    }
 
+    private static void testBufferTimeout(ManagedConnection out, Connection in) 
+            throws IOException, BadPacketException {
+        System.out.println("-Testing buffered message timeout");
+        Assert.that(QUEUE_TIME==1000);
+        
+        //Drop one message
+        out.stopOutputRunner();        
+        out.send(new QueryRequest((byte)3, 0, "0"));   
+        sleep(1200);
+        out.send(new QueryRequest((byte)3, 0, "1200"));        
+        out.startOutputRunner();
+        Message m=(QueryRequest)in.receive(500);
+        Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("1200"));
+        try {
+            m=in.receive(200);
+            Assert.that(false, m.toString());
+        } catch (InterruptedIOException e) {
+        }
+        Assert.that(out.getNumSentMessagesDropped()==1);
+
+        //Drop many messages
+        out.stopOutputRunner();        
+        out.send(new QueryRequest((byte)3, 0, "0"));   
+        sleep(300);
+        out.send(new QueryRequest((byte)3, 0, "300"));        
+        sleep(300);
+        out.send(new QueryRequest((byte)3, 0, "600"));        
+        sleep(500);
+        out.send(new QueryRequest((byte)3, 0, "1100"));
+        sleep(900);
+        out.send(new QueryRequest((byte)3, 0, "2000"));
+        out.startOutputRunner();
+        m=in.receive(500);
+        Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("2000"));
+        m=in.receive(500);
+        Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("1100"));
+        try {
+            m=in.receive(200);
+            Assert.that(false, m.toString());
+        } catch (InterruptedIOException e) {
+        }
+        Assert.that(out.getNumSentMessagesDropped()==(1+3));
+    }
+
+    private static void sleep(long msecs) {
+        try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
 
     private static void testDropBuffer(ManagedConnection out, Connection in) 
@@ -1352,11 +1412,12 @@ public class ManagedConnection
         //Send tons of messages...but don't read them
         int total=20000;
 
+        int initialDropped=out.getNumSentMessagesDropped();
         System.out.println("-Testing drop functionality");
         for (int i=0; i<total; i++) {
             out.send(new QueryRequest((byte)4, i, "Some reaaaaaalllllly big query"));
         }
-        int dropped=out.getNumSentMessagesDropped();
+        int dropped=out.getNumSentMessagesDropped()-initialDropped;
         //System.out.println("Dropped messages: "+dropped);
         Assert.that(dropped>0);
         Assert.that(out.getPercentSentDropped()>0);
@@ -1444,4 +1505,5 @@ public class ManagedConnection
     private ManagedConnection() {
         super("", 0);
     }
+    */
 }

@@ -9,12 +9,21 @@ Steps
 +add ratios
         -by volume
         -fractional
--add timeouts.  Don't forget to increment drop count (see
--add GUID prioritization (yay heap!)
+-add timeouts.  Don't forget to increment drop count.  
+        +add for simple buffer.  Test
+        -add for BinaryHeap.  Just check time when extractingMax?
+
+        Note: we're currently discarding messages when adding to the queue.
+        An alternative is to delete when removing.  Delete-on-add is easier
+        to implement because you don't need to get the system time (assume
+        that time of the message to add is close enough.)  The problem is
+        that there COULD be a long delay between add and remove
+
++add GUID prioritization (yay heap!)
         +Add priorities to Message
         +Augment RouteTable
-        -Use new RouteTable method in MessageRouter
-        -Add heap support to MessageQueue
+        +Use new RouteTable method in MessageRouter
+        +Add heap support to MessageQueue
 +refactor.  
         +Make OutputRunner smaller.
         +can we use an array of smart object for each priority level?
@@ -23,10 +32,9 @@ Steps
         -avoid inner loop for common case ratio
         -locking?
 -change GUI to eliminate race condition displaying results.
--cap max throughput, using ThrottledOutputStream
-
--this assumes that the internal latency between reading queueing for send is 0.
- What if filtering/matching takes a long time?
+-cap max throughput, using ThrottledOutputStream.  Perhaps this should be negotiated, i.e.,
+  the min A and B's desired bandwidth.
+-prioritize by hops for queries.
 
 
 
