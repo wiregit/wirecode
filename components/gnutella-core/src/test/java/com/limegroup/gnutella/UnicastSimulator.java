@@ -110,7 +110,7 @@ public class UnicastSimulator {
                 // established
                 Socket sock = servSock.accept();
                 debug("UnicastSimulator.tcpLoop(): got a incoming connection.");
-                sock.setSoTimeout(SettingsManager.instance().getTimeout());
+                sock.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
                 String word=IOUtils.readWord(sock.getInputStream(),8);
