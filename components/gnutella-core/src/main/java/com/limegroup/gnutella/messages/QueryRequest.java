@@ -121,6 +121,61 @@ public class QueryRequest extends Message implements Serializable{
 								Message.N_UNKNOWN);
 
 	}
+	/**
+	 * Creates a new requery for the specified SHA1 value with file name 
+     * thrown in for good measure (or at least until \ works as a query).
+	 *
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
+	 *  is <tt>null</tt>
+	 */
+	public static QueryRequest createRequery(URN sha1, String filename) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
+        }
+        if(filename == null) {
+            throw new NullPointerException("null query");
+        }
+		if(filename.length() == 0) {
+			filename = "\\";
+		}
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN);
+
+	}
+
+	/**
+	 * Creates a new query for the specified SHA1 value with file name 
+     * thrown in for good measure (or at least until \ works as a query).
+	 *
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
+	 *  is <tt>null</tt>
+	 */
+	public static QueryRequest createQuery(URN sha1, String filename) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
+        }
+        if(filename == null) {
+            throw new NullPointerException("null query");
+        }
+		if(filename.length() == 0) {
+			filename = "\\";
+		}
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								Message.N_UNKNOWN);
+
+	}
 
 	/**
 	 * Creates a new requery for the specified SHA1 value and the specified
