@@ -398,7 +398,7 @@ public class FileManager {
         String name = file.getName();    
         if (hasExtension(name)) {
             long n = file.length();  
-            if (n > Integer.MAX_VALUE)
+            if (n>Integer.MAX_VALUE || n<0)
                 return false;
             _size += n;                    
             _files.add(new FileDesc(_files.size(), name, path,  (int)n));
