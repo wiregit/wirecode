@@ -8,10 +8,13 @@ import com.sun.java.util.collections.*;
  * Stops queries that are bound to match too many files.  
  *
  * Currently, queries that are blocked include "a.asf, d.mp3, etc." or
- * single-character searches.  Queries that are not stopped include "*.mp3" or
- * "mpg", since these can be useful.  
+ * single-character searches.  Additionally, queries such as "*.mp3" or 
+ * "mpg" or "*.*" are to be blocked, are at least set to travel less than
+ * other queries.
  */
 public class GreedyQueryFilter extends SpamFilter {
+    private static final int GREEDY_QUERY_MAX = 3;
+
     public boolean allow(Message m) {
         if (! (m instanceof QueryRequest))
             return true;
@@ -23,9 +26,41 @@ public class GreedyQueryFilter extends SpamFilter {
         if ((n==5 || n==6) 
                && query.charAt(1)=='.' 
                && Character.isLetter(query.charAt(0)) )
-            return false;    
-    
+            return false; 
+        if (this.isVeryGeneralSearch(query)) {
+            int hops = (int)m.getHops();
+            int ttl = (int)m.getTTL();
+            if (hops >= this.GREEDY_QUERY_MAX)
+                return false;
+            if ( (hops + ttl) > this.GREEDY_QUERY_MAX) 
+                m.setTTL((byte)(this.GREEDY_QUERY_MAX - hops));
+        }
+ 
         return true;
+    }
+
+    /**
+     * Search through a query string and see if matches a very general search
+     * such as "*.*", "*.mp3", or "*.mpg" and check for uppercase also
+     */
+    private boolean isVeryGeneralSearch(String queryString) {
+        int length = queryString.length();
+
+        if ((length == 3) && 
+            ( (queryString.charAt(1) == '.') ||
+              (queryString.equalsIgnoreCase("mp3")) ||
+              (queryString.equalsIgnoreCase("mpg")) ) ) 
+            return true;
+
+        if (length == 5) { //could by of type "*.mp3" or "*.mpg"
+            String fileFormat = queryString.substring(2,5);
+            if ((queryString.charAt(1) == '.') &&
+                ( (fileFormat.equalsIgnoreCase("mp3")) ||
+                  (fileFormat.equalsIgnoreCase("mpg")) ) )
+                return true;
+        }
+        
+        return false; //not a general search
     }
     
     /*
@@ -55,11 +90,61 @@ public class GreedyQueryFilter extends SpamFilter {
         Assert.that(filter.allow(msg));
 
         msg=new QueryRequest((byte)5, 0, "*.mpg");
-        Assert.that(filter.allow(msg));
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(!filter.allow(msg));
 
         msg=new QueryRequest((byte)5, 0, "1.mpg");
         Assert.that(filter.allow(msg));
-    }
-    */
-    
+
+        msg=new QueryRequest((byte)5, 0, "*.mp3");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "*.*");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "*.MP3");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "*.MPG");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "mp3");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "mpg");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "MP3");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "MPG");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+
+        msg=new QueryRequest((byte)5, 0, "a.b");
+        GreedyQueryFilter.setHops(msg);
+        Assert.that(! filter.allow(msg));
+    } */
+
+    /**
+     * Increments the hops count 4 times by calling hop on the QueryRequest.
+     * Used for testing the Greedy Filter and making the hops count > what
+     * the max allowed hops for a general search (i.e., "*.*", "*.mp3", etc.)
+     */
+
+    /*
+    private static void setHops(Message m)
+    {
+        m.hop();
+        m.hop();
+        m.hop();
+        m.hop();
+    }*/
 }
