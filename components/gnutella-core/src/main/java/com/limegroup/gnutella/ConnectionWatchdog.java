@@ -1,8 +1,12 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.HashMap;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Map;
 
 /*
  * A "watchdog" thread that periodically examines connections and
@@ -104,7 +108,7 @@ public final class ConnectionWatchdog implements Runnable {
 
         //Wait a bit more.
         try {
-            Thread.currentThread().sleep(EVALUATE_TIME);
+            Thread.sleep(EVALUATE_TIME);
         } catch (InterruptedException e) { /* do nothing */ }
 
         //Loop through all connections, trying to find ones that
@@ -153,7 +157,7 @@ public final class ConnectionWatchdog implements Runnable {
         
         //Wait a tiny amount of time.
         try {
-            Thread.currentThread().sleep(REEVALUATE_TIME);
+            Thread.sleep(REEVALUATE_TIME);
         } catch (InterruptedException e) { /* do nothing */ }
 
         //Loop through all connections again.  This time, any that
