@@ -14,7 +14,7 @@ import de.vdheide.mp3.*;
  * @author Sumeet Thadani
  */
 public final class ID3Reader {
-    private static final String schemaURI = 
+    public static final String schemaURI = 
          "http://www.limewire.com/schemas/audio.xsd";
 
     private static final String ISO_LATIN_1 = "8859_1";
@@ -351,6 +351,18 @@ public final class ID3Reader {
         return i + 1;
     }
     
+    public static boolean isNonID3Field(String fieldName) {
+        return (!fieldName.equals(TRACK_KEY) &&
+                !fieldName.equals(ARTIST_KEY) &&
+                !fieldName.equals(ALBUM_KEY) &&
+                !fieldName.equals(TITLE_KEY) &&
+                !fieldName.equals(GENRE_KEY) &&
+                !fieldName.equals(YEAR_KEY) &&
+                !fieldName.equals(COMMENTS_KEY) &&
+                !fieldName.equals(BITRATE_KEY) &&
+                !fieldName.equals(SECONDS_KEY) );
+    }
+
     /**
      * Takes a short and returns the corresponding genre string
      */

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.mp3.ID3Reader;
 import java.io.*;
@@ -94,12 +95,21 @@ public class MetaFileManager extends FileManager {
         if( fd == null )
             return null;
         // store the creation time for later re-input
-        // *----
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
-        // ----*
-        List xmlDocs = new LinkedList();
-        xmlDocs.addAll(fd.getLimeXMLDocuments());
+
+        List xmlDocs = fd.getLimeXMLDocuments();
+        if(LimeXMLUtils.isMP3File(f)) {
+            try {
+                LimeXMLDocument diskID3Doc = ID3Reader.readDocument(f);
+                resolveAudioDocs(xmlDocs,diskID3Doc);
+            } catch(IOException e) {
+                // if we were unable to read this document,
+                // then simply add the file without metadata.
+                return super.fileChanged(f);
+            }
+        }
+
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
         _needRebuild = true;
@@ -107,17 +117,56 @@ public class MetaFileManager extends FileManager {
         // file may not be shared anymore or may be installer file
         if ((fd != null) && (cTime != null)) { 
             //re-populate the ctCache
-            // *----
             synchronized (ctCache) {
-                ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+                ctCache.removeTime(fd.getSHA1Urn());//addFile() put lastModified
                 ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
                 ctCache.commitTime(fd.getSHA1Urn());
             }
-            // ----*
         }
         return fd;
-    }        
+    }
     
+    /**
+     * Finds the audio metadata document in allDocs, and makes it's id3 fields
+     * identical with the fields of id3doc (which are only id3).
+     */
+    private void resolveAudioDocs(List allDocs, LimeXMLDocument id3Doc) {
+        LimeXMLDocument audioDoc = null;
+        LimeXMLSchema audioSchema = 
+        LimeXMLSchemaRepository.instance().getSchema(ID3Reader.schemaURI);
+        
+        for(Iterator iter = allDocs.iterator(); iter.hasNext() ;) {
+            LimeXMLDocument doc = (LimeXMLDocument)iter.next();
+            if(doc.getSchema() == audioSchema) {
+                audioDoc = doc;
+                iter.remove();
+                break;
+            }
+        }
+        if(audioDoc.equals(id3Doc)) {
+            allDocs.add(audioDoc);//no difference, add it right back and go home
+            return;
+        }
+
+        //now add the non-id3 tags from audioDoc to id3doc
+        List audioList = null;
+        List id3List = null;
+        try {
+            audioList = audioDoc.getOrderedNameValueList();
+            id3List = id3Doc.getOrderedNameValueList();
+        } catch (SchemaNotFoundException snfx) {
+            ErrorService.error(snfx);
+        }
+        for(int i = 0; i < audioList.size(); i++) {
+            NameValue nameVal = (NameValue)audioList.get(i);
+            if(ID3Reader.isNonID3Field(nameVal.getName()))
+                id3List.add(nameVal);
+        }
+        audioDoc = new LimeXMLDocument(id3List, ID3Reader.schemaURI);
+        allDocs.add(audioDoc);
+    }
+
+
     /**
      * Removes the LimeXMLDocuments associated with the removed
      * FileDesc from the various LimeXMLReplyCollections.
