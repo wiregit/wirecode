@@ -149,7 +149,7 @@ public class ConnectionManager {
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
         _watchdog = new ConnectionWatchdog(this, _router);
-        Thread watchdog=new Thread(_watchdog);
+        Thread watchdog = new Thread(_watchdog, "ConnectionWatchdog");
         watchdog.setDaemon(true);
   		watchdog.start();
         
@@ -202,6 +202,7 @@ public class ConnectionManager {
      */
      void acceptConnection(Socket socket) {
          //1. Initialize connection.  It's always safe to recommend new headers.
+         Thread.currentThread().setName("IncommingConnectionThread");
          ManagedConnection connection=null;
          try {
              connection = new ManagedConnection(socket, _router, this);
@@ -1395,6 +1396,7 @@ public class ConnectionManager {
                 boolean doInitialization) {
             _connection = connection;
             _doInitialization = doInitialization;
+            setName("OutgoingConnectionThread");
             setDaemon(true);
             start();
         }
@@ -1535,6 +1537,7 @@ public class ConnectionManager {
         public ConnectionFetcher() {
             // Record the fetcher creation
             _fetchers.add(this);
+            setName("ConnectionFetcher");
 
             // Kick off the thread.
             setDaemon(true);
