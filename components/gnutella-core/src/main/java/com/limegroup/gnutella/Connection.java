@@ -740,6 +740,12 @@ public class Connection {
                 continue;                  //ignore lines without ':'
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
+            if (HeaderNames.REMOTE_IP.equals(key) && SettingsManager.instance().getForceIPAddress()) {
+            	try {
+            		SettingsManager.instance().setForcedIPAddressString(value);
+            	} catch (IllegalArgumentException ex) {
+            	}
+            }
             HEADERS_READ.put(key, value);
         }
     }
