@@ -41,7 +41,7 @@ public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
             return new HandshakeResponse(new Properties());
         } else
         {
-            Properties props=new ClientProperties(_router);
+            Properties props=new ClientProperties(_router, getRemoteIP());
             addHostAddresses(props, _manager);
             
             if (_manager.hasClientSupernodeConnection())

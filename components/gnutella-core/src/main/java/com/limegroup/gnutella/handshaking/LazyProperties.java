@@ -9,13 +9,17 @@ public class LazyProperties extends Properties
     
     private MessageRouter router;
     
-    protected LazyProperties(MessageRouter router)
+    protected LazyProperties(MessageRouter router, String remoteIP)
     {
         this.router=router;
         if (router!=null)
         {
             put(ConnectionHandshakeHeaders.X_MY_ADDRESS, "");
             //just temporary!
+        }
+        if (remoteIP!=null)
+        {
+            put(ConnectionHandshakeHeaders.REMOTE_IP, remoteIP);
         }
     }
     

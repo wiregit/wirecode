@@ -86,6 +86,14 @@ public abstract class AuthenticationHandshakeResponder
     }
     
     /**
+     * Returns the Remote IP
+     */
+    protected String getRemoteIP()
+    {
+        return _host;
+    }    
+
+    /**
      * Returns the corresponding handshake to be written to the remote host
      * when responding to the connection handshake response just received,
      * for outgoing connection.

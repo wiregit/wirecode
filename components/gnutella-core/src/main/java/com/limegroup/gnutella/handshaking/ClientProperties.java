@@ -7,8 +7,8 @@ import com.limegroup.gnutella.*;
  */
 public class ClientProperties extends LazyProperties{
 
-    public ClientProperties(MessageRouter router){
-        super(router);
+    public ClientProperties(MessageRouter router, String remoteIP){
+        super(router, remoteIP);
         //set supernode property
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
         addCommonProperties(this);

@@ -40,7 +40,7 @@ public class SupernodeHandshakeResponder
         if(!outgoing)
         {
             //Incoming connection....
-            Properties ret=new SupernodeProperties(_router);
+            Properties ret=new SupernodeProperties(_router, getRemoteIP());
             
             //guide the incoming connection to be a supernode/clientnode
             ret.put(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,

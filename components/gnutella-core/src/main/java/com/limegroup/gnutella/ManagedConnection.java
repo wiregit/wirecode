@@ -278,8 +278,8 @@ public class ManagedConnection
               isRouter ? 
                   null :
                   (manager.isSupernode() ? 
-                      (Properties)(new SupernodeProperties(router)) : 
-                      (Properties)(new ClientProperties(router))),
+                      (Properties)(new SupernodeProperties(router, host)) : 
+                      (Properties)(new ClientProperties(router, host))),
               isRouter ? 
                   null : 
                   (manager.isSupernode() ?

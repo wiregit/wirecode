@@ -25,4 +25,5 @@ public class ConnectionHandshakeHeaders
     public static final String X_DOMAINS_AUTHENTICATED = 
         "X-Domains-Authenticated";
     public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
+    public static final String REMOTE_IP            = "Remote-IP";
 }
