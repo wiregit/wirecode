@@ -45,7 +45,7 @@ public class ID3Editor{
      * (String) value of tag.
      * @exception Throw if rip failed.
      */
-    private Object[] ripTag(String source, String tagToRip) throws Exception {
+    private Object[] ripTag(String source, String tagToRip) throws IOException{
 
         Object[] retObjs = new Object[3];
 
@@ -100,7 +100,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //artist
         try {
             rippedStuff = ripTag(xmlStr, ARTIST_STRING);
@@ -112,7 +112,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //album
         try {
             rippedStuff = ripTag(xmlStr, ALBUM_STRING);
@@ -123,7 +123,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //year
         try {
             rippedStuff = ripTag(xmlStr, YEAR_STRING);
@@ -134,7 +134,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //track
         try {
             rippedStuff = ripTag(xmlStr, TRACK_STRING);
@@ -145,7 +145,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //comment
         try {
             rippedStuff = ripTag(xmlStr, COMMENT_STRING);
@@ -156,7 +156,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //genre
         try {
             rippedStuff = ripTag(xmlStr, GENRE_STRING);
@@ -167,7 +167,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //bitrate
         try {
             rippedStuff = ripTag(xmlStr, BITRATE_STRING);
@@ -178,7 +178,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
         //seconds
         try {
             rippedStuff = ripTag(xmlStr, SECONDS_STRING);
@@ -189,7 +189,7 @@ public class ID3Editor{
             j = ((Integer)rippedStuff[1]).intValue();        
             xmlStr = xmlStr.substring(0,i) + xmlStr.substring(j,xmlStr.length());
         } 
-        catch (Exception e) {};
+        catch (IOException e) {};
 
 
 
@@ -236,7 +236,7 @@ public class ID3Editor{
                     byte[] tagBytes = "TAG".getBytes();//has to be len 3
                     file.seek(length-128);//reset the file-pointer
                     file.write(tagBytes,0,3);//write these three bytes into the File
-                } catch(Exception eee) {
+                } catch(IOException ioe) {
                     return LimeXMLReplyCollection.BAD_ID3;
                 }
             }
