@@ -36,6 +36,8 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_ID_ATTRIBUTE = "identifier__";
     public static final String XML_ACTION_ATTRIBUTE = "action__";
     public static final String XML_INDEX_ATTRIBUTE = "index__";
+    public static final String XML_LICENSE_ATTRIBUTE = "license__";
+    public static final String XML_LICENSE_TYPE_ATTRIBUTE = "license type__";
 
 	/**
 	 * Cached hash code for this instance.
@@ -90,9 +92,21 @@ public class LimeXMLDocument implements Serializable {
     private transient List CACHED_KEYWORDS = null;
     
     /**
-     * Whether or not this document has a creative commons license.
+     * A list with the CC License URI in it.
+     * This is purely an optimization that is possible because LimeXMLDocuments
+     * do not have any other indivisible keywords.
      */
-    private boolean hasCCLicense = false;
+    private static final List INDIVISIBLE_LIST;
+    static {
+        List l = new ArrayList(1);
+        l.add(CCConstants.CC_URI_PREFIX);
+        INDIVISIBLE_LIST = Collections.unmodifiableList(l);
+    }
+    
+    /**
+     * Whether or not this document has a CC license.
+     */
+    private transient boolean hasCCLicense = false;
 
     /**
      * Constructs a LimeXMLDocument with the given string.
@@ -111,7 +125,7 @@ public class LimeXMLDocument implements Serializable {
 
         this.fieldToValue = (Map)result.get(0);
         this.schemaUri = result.schemaURI;
-        this.action = (String)fieldToValue.get(result.canonicalKeyPrefix + XML_ACTION_ATTRIBUTE);
+        setFields(result.canonicalKeyPrefix);
         
         if(!isValid())
             throw new IOException("Invalid XML.");
@@ -132,8 +146,8 @@ public class LimeXMLDocument implements Serializable {
 
         this.schemaUri = schemaURI;
         this.fieldToValue = map;
-        this.action = (String)fieldToValue.get(keyPrefix + XML_ACTION_ATTRIBUTE);
         fieldToValue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
+        setFields(keyPrefix);
         
         if(!isValid())
             throw new IOException("invalid doc! "+map+" \nschema uri: "+schemaURI);
@@ -201,31 +215,16 @@ public class LimeXMLDocument implements Serializable {
         return fieldToValue.size();
     }
 
-    /** When parsing XML, some data should not be split up.  Note that here
-     *  and take action to dole out later.
-     */
-    public boolean shouldSkipIndivisibleKeyword(String currKey, String val) {
-        // unfortunately, parsing of CC stuff requires special casing
-        if (isAudioSchemaURI() && 
-            currKey.equals(CCConstants.LICENSE_KEY)) {
-            if ((val != null) && 
-                (val.startsWith(CCConstants.CC_URI_PREFIX))) {
-                hasCCLicense = true;
-                return true;
-                // suppose hasCCLicense is false here - should we really be
-                // skipping?  It may be masking a bug with LWs, but it could
-                // also be a third party decision.  Let it go....
-            }
-        }
-        return false;
-    }
-
     /**
      * Returns all the non-numeric fields in this.  These are
      * not necessarily QRP keywords.  For example, one of the
      * elements of the returned list may be "Some comment-blah".
      * QRP code may want to split this into the QRP keywords
      * "Some", "comment", and "blah".
+     *
+     * Indivisible keywords are not returned.  To retrieve those,
+     * use getIndivisibleKeywords().  Indivisible keywords are
+     * those which QRP will not split up.
      */
     public List getKeyWords() {
         if( CACHED_KEYWORDS != null )
@@ -234,18 +233,14 @@ public class LimeXMLDocument implements Serializable {
         List retList = new ArrayList();
         Iterator iter = fieldToValue.keySet().iterator();
         while(iter.hasNext()){
-            boolean number = true;//reset
             String currKey = (String) iter.next();
             String val = (String) fieldToValue.get(currKey);
-            if (shouldSkipIndivisibleKeyword(currKey, val))
-                continue;
-            try {
-                new Double(val); // will trigger NFE.
-            }catch(NumberFormatException e){
-                number = false;
+            if(val != null && !val.equals("") && !isIndivisible(currKey, val)) {
+                try {
+                    Double.parseDouble(val); // will trigger NFE.
+                    retList.add(val);
+                } catch(NumberFormatException ignored) {}
             }
-            if(!number && (val != null) && (!val.equals("")))
-                retList.add(val);
         }
         CACHED_KEYWORDS = retList;
         return retList;
@@ -253,17 +248,23 @@ public class LimeXMLDocument implements Serializable {
 
     /**
      * Returns all the indivisible keywords for entry into QRP tables.
-     * Currently adds a CC URI if this document has a CC license.
      */
     public List getKeyWordsIndivisible() {
-        if(hasCCLicense) {
-            List retList = new ArrayList(1);
-            retList.add(CCConstants.CC_URI_PREFIX);
-            return retList;
-        } else {
+        if(hasCCLicense) // optimization: the only indivisible keyword is CCLicense
+            return INDIVISIBLE_LIST;
+        else
             return Collections.EMPTY_LIST;
-        }
     }
+
+    /**
+     * Determines if this keyword & value is indivisible
+     * (thus making QRP not split it).
+     */
+    public boolean isIndivisible(String currKey, String val) {
+        // if this has a CC license & this it the license type attribute,
+        // then it must be indivisible.
+        return currKey.endsWith(XML_LICENSE_TYPE_ATTRIBUTE);
+    }    
 
     /**
      * Returns the unique identifier which identifies the schema this XML
@@ -403,12 +404,6 @@ public class LimeXMLDocument implements Serializable {
         String attributes = getAttributeString();
         return attributes + " index=\"" + i + "\"/>";
     }
-
-    /** Currently only useful internally.  Feel free to 'public'ize.
-     */
-    private boolean isAudioSchemaURI() {
-        return schemaUri.equals("http://www.limewire.com/schemas/audio.xsd");
-    }
     
     /**
      * Returns the attribute string. THIS IS NOT A FULL XML ELEMENT.
@@ -511,7 +506,7 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
-     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX.
+     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX, and a license.
      * Action is stored, index & identifier are removed.
      */
     private void scanFields() {
@@ -519,10 +514,38 @@ public class LimeXMLDocument implements Serializable {
         if(canonicalKey == null)
             return;
 
-        action = (String)fieldToValue.get(canonicalKey + XML_ACTION_ATTRIBUTE);
-        boolean removed = false;
-        removed |= fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE) != null;
-        removed |= fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE) != null;
+        setFields(canonicalKey);
+        fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
+        fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE);
+    }
+    
+    /**
+     * Stores whether or not an action or CC license are in this LimeXMLDocument.
+     */
+    private void setFields(String prefix) {
+        // store action.
+        action = (String)fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
+
+        // deal with updating license_type based on the license
+        String license = (String)fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
+        String licenseType = (String)fieldToValue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        // if the license indicates it's a CC kind of license, store that.
+        if(license != null &&
+           license.indexOf(CCConstants.CC_URI_PREFIX) != -1 &&
+           license.indexOf(CCConstants.URL_INDICATOR) != -1) {
+            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+            hasCCLicense = true;
+        // if the license type was 'creative commons', store it as the URI instead.
+        } else if(licenseType != null && licenseType.equalsIgnoreCase("creative commons")) {
+            hasCCLicense = true;
+            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+        // no license type we know about, remove it.
+        } else {
+            fieldToValue.remove(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Fields after setting: " + fieldToValue);
     }
     
     /**
@@ -562,8 +585,12 @@ public class LimeXMLDocument implements Serializable {
         int idx2 = full.indexOf(XMLStringUtils.DELIMITER, length);
         if(idx2 == -1)
             return null;
-        
-        return full.substring(length, idx2);
+            
+        // insert quotes around field name if it has a space.
+        String sub = full.substring(length, idx2);
+        if(sub.indexOf(" ") != -1)
+            sub = "\"" + sub + "\"";
+        return sub;
     }
 }
 

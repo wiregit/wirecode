@@ -38,7 +38,7 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 				album_=existing.getAlbum();
 				title_=existing.getTitle();
 				year_=existing.getYear();
-				track_=new String(""+existing.getTrack());
+				track_=""+existing.getTrack();
 				comment_=existing.getComment();
 				genre_= existing.getGenre();
 			}catch(IOException ignored) {}

@@ -200,7 +200,7 @@ public class MP3MetaData extends AudioMetaData {
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
                 setComment(frameContent);
             }
-           else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
+            else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
                 try {
                     setTrack(Short.parseShort(frameContent));
                 } catch (NumberFormatException ignored) {} 
@@ -238,16 +238,8 @@ public class MP3MetaData extends AudioMetaData {
                 else 
                     setGenre(frameContent);
             }
-            else if (CCConstants.CC_LICENSE_ID.equals(frameID)) {
-                // parse the TCOP frame and record the license
-                StringTokenizer st = new StringTokenizer(frameContent);
-                String license = null;
-                while ((license == null) && st.hasMoreTokens()) {
-                    String currToken = st.nextToken();
-                    if (currToken.startsWith(CCConstants.CC_URI_PREFIX))
-                        license = currToken;
-                }
-                setCCLicense(license);
+            else if (MP3DataEditor.LICENSE_ID.equals(frameID)) {
+                setLicense(frameContent);
             }
         }
         
@@ -321,7 +313,7 @@ public class MP3MetaData extends AudioMetaData {
 	    case 59: return "Gangsta";
 	    case 60: return "Top 40";
 	    case 61: return "Christian Rap";
-	    case 62: return "Pop/Funk";
+	    case 62: return "Pop+Funk";
 	    case 63: return "Jungle";
 	    case 64: return "Native American";
 	    case 65: return "Cabaret";
