@@ -90,7 +90,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() { 
-        return buildTestSuite(DownloadTest.class);//,"testPartialSourceNotAddedWithCorruption");
+        return buildTestSuite(DownloadTest.class);
     }
 
     public static void main(String[] args) {
