@@ -131,7 +131,12 @@ public final class SearchResultHandler {
 	 *  otherwise <tt>false</tt> 
      */
     private boolean handleReply(final QueryReply qr) {
-		HostData data = new HostData(qr);
+        HostData data;
+        try {
+            data = qr.getHostData();
+        } catch(BadPacketException bpe) {
+            return false;
+        }
         
         // always handle reply to multicast queries.
         if( !data.isReplyToMulticastQuery() ) {
@@ -190,15 +195,9 @@ public final class SearchResultHandler {
                 continue;
             
             LimeXMLDocument doc = null;
-            if(xmlCollectionString==null || xmlCollectionString.equals("")) {
-                // No XML in QHD, use raw metadata.
-                try {
-                    doc = new LimeXMLDocument(response.getMetadata());
-                }
-                catch(SAXException ignored) {}
-                catch(SchemaNotFoundException ignored) {}
-                catch(IOException ignored) {}
-            } else { //XML in QHD....make documents from there
+            // If there was no XML in the response itself, try to create
+            // a doc from the EQHD.
+            if(xmlCollectionString!=null && xmlCollectionString.equals("")) {
                 // The RFD is only going to use one doc, so only
                 // take one.
                 LimeXMLDocument[] metaDocs;
@@ -215,26 +214,7 @@ public final class SearchResultHandler {
                 }    
             }
             
-            RemoteFileDesc rfd = new RemoteFileDesc(
-                                     data.getIP(),
-                                     data.getPort(),
-                                     response.getIndex(),
-                                     response.getName(),
-                                     (int)response.getSize(),
-                                     data.getClientGUID(),
-                                     data.getSpeed(),
-                                     data.isChatEnabled(),
-                                     data.getQuality(),
-                                     data.isBrowseHostEnabled(),
-                                     doc,
-                                     response.getUrns(),
-                                     data.isReplyToMulticastQuery(),
-                                     data.isFirewalled(), 
-                                     data.getVendorCode(),
-                                     System.currentTimeMillis(),
-                                     data.getPushProxies()
-                                    );
-                                    
+            RemoteFileDesc rfd = response.toRemoteFileDesc(data, doc);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
 
