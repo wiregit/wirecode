@@ -336,8 +336,9 @@ public abstract class MessageRouter
         // also add the sender of the pong if different from the host
         // described in the reply...
         if((reply.getPort() != port) || 
-           (!reply.getIP().equals(address.getHostAddress()))) 
+           (!reply.getIP().equals(address.getHostAddress()))) {
             UNICASTER.addUnicastEndpoint(address, port);
+		}
 
 		// TODO: are we sure we want to do this?
         // notify neighbors of new unicast endpoint...
