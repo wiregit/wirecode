@@ -100,7 +100,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
 
             // get the xml collection string...
             String xmlCollectionString = 
-            (new LimeXMLDocumentHelper()).getAggregateString(res);
+            LimeXMLDocumentHelper.getAggregateString(res);
             if (xmlCollectionString == null)
                 xmlCollectionString = "";
 
@@ -113,7 +113,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                 while (!splitResps.isEmpty()) {
                     Response[] currResps = (Response[]) splitResps.remove(0);
                     String currXML = 
-                    (new LimeXMLDocumentHelper()).getAggregateString(currResps);
+                    LimeXMLDocumentHelper.getAggregateString(currResps);
                     if ((currXML.length() > QueryReply.XML_MAX_SIZE) &&
                         (currResps.length > 1)) 
                         splitAndAddResponses(splitResps, currResps);
