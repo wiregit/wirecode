@@ -105,7 +105,7 @@ public class FixedSizeSortedSet {
         Object obj = _map.remove(o);
         boolean b1 = (obj!=null);
         boolean b2 = _sortedSet.remove(obj);
-        Assert.that(b1==b2,"removed from map: "+b1+"from set: "+b2);
+        Assert.that(b1==b2,"removed from map: "+b1+" from set: "+b2);
         return b1;
     }
 
@@ -143,7 +143,8 @@ public class FixedSizeSortedSet {
     }
     
     public int size() { 
-        Assert.that(_sortedSet.size() == _map.size());
+        Assert.that(_sortedSet.size() == _map.size(),
+                    "Set size: "+_sortedSet.size()+" map size: "+_map.size());
         return _sortedSet.size(); 
     }
 
