@@ -52,7 +52,7 @@ public class HostCatcher {
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ActivityCallback callback;
-    private SettingsInterface settings=SettingsManager.instance();
+    private SettingsManager settings=SettingsManager.instance();
 
     private Thread routerConnectorThread;
     /* True if the cache has expired and the host catcher has not yet tried
