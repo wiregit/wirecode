@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.guess.*;
@@ -78,7 +79,13 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Constant for the default query TTL.
      */
-    private static final byte DEFAULT_TTL = 6;
+    private static final byte DEFAULT_TTL = 5;
+
+    /**
+     * Cached illegal characters in search strings.
+     */
+    private static final char[] ILLEGAL_CHARS =
+        SearchSettings.ILLEGAL_CHARS.getValue();
 
 	/**
 	 * Creates a new requery for the specified SHA1 value.
@@ -732,8 +739,9 @@ public class QueryRequest extends Message implements Serializable{
                     if (delimIndex > extsBytes.length) 
                         ; // we've overflown and not encounted a 0x1c - discard
                     else {
+                        // another GEM extension
                         String curExtStr = new String(extsBytes, currIndex,
-                                          delimIndex - currIndex, "UTF-8");
+                                                      delimIndex - currIndex, "UTF-8");
                         if (URN.isUrn(curExtStr)) {
                             // it's an URN to match, of form "urn:namespace:etc"
                             URN urn = null;
@@ -771,16 +779,16 @@ public class QueryRequest extends Message implements Serializable{
 		XML_QUERY = tempRichQuery;
 		MIN_SPEED = tempMinSpeed;
 		if(tempQueryUrns == null) {
-			this.QUERY_URNS = EMPTY_SET; 
+			QUERY_URNS = EMPTY_SET; 
 		}
 		else {
-			this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
+			QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
 		}
 		if(tempRequestedUrnTypes == null) {
-			this.REQUESTED_URN_TYPES = EMPTY_SET;
+			REQUESTED_URN_TYPES = EMPTY_SET;
 		}
 		else {
-			this.REQUESTED_URN_TYPES =
+			REQUESTED_URN_TYPES =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}	
         QUERY_KEY = tempQueryKey;
@@ -788,7 +796,36 @@ public class QueryRequest extends Message implements Serializable{
 		   XML_QUERY.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
 			throw new BadPacketException("empty query");
-		}
+		}       
+        if(QUERY_URNS.size() != 0) {
+            throw new BadPacketException("cannot accept URN queries");
+        }
+        if(QUERY.length() > 20) {
+            throw new BadPacketException("query too big: "+QUERY.length());
+        }        
+
+        if(XML_QUERY.length() > 40) {
+            throw new BadPacketException("XML query too big: "+XML_QUERY.length());
+        }
+
+        if(hasIllegalChars(QUERY)) {
+            throw new BadPacketException("illegal chars in query: "+QUERY);
+        }
+    }
+
+    /**
+     * Utility method for checking whether or not the query string contains
+     * illegal characters.
+     *
+     * @param query the query string to check
+     */
+    private static boolean hasIllegalChars(String query) {
+        char[] chars = query.toCharArray();
+        Arrays.sort(chars);
+        for(int i=0; i<ILLEGAL_CHARS.length; i++) {
+            if(Arrays.binarySearch(chars, ILLEGAL_CHARS[i]) >= 0) return true;
+        }
+        return false;
     }
 
     /**
