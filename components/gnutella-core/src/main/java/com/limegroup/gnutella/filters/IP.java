@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
 
 /**
  * An IP address.  More precisely, a set of IP addresses specified by a regular
@@ -19,9 +20,21 @@ public class IP {
 
     private final long addr;
     private final long mask;
+    
+    /**
+     * Creates an IP object out of a four byte array of the IP in
+     * BIG ENDIAN format (most significant byte first).
+     */
+    public IP(byte[] ip_bytes) throws IllegalArgumentException {
+        if( ip_bytes.length != 4 )
+            throw new IllegalArgumentException(MSG);
+        this.addr = bytesToLong(ip_bytes, 0);
+        this.mask = 0xFFFFFFFFL;
+    }
 
     /**
-     * Creates an IP object
+     * Creates an IP object out of a String in the format
+     * "0.0.0.0", "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
      *
      * @param ip_str a String of the format "0.0.0.0", "0.0.0.0/0.0.0.0",
      *               or "0.0.0.0/0" as an argument.
@@ -79,6 +92,13 @@ public class IP {
         } else
             return stringToLong(mask);
     }
+    
+    /**
+     * Converts a four byte array into a long.
+     */
+    private static long bytesToLong(byte[] ip_bytes, int offset) {
+        return ByteOrder.ubytes2long(ByteOrder.beb2int(ip_bytes, offset));
+    }   
 
     /**
      * Convert String containing an ip_address or subnetmask to long
