@@ -102,7 +102,6 @@ public class NormalUploadState implements UploadState {
         }
 
         _uploader.setState(_uploader.COMPLETE);
-		_uploader.storeAlternateLocation();
 	}
 
     /**
