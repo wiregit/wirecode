@@ -21,6 +21,8 @@ public class SystemUtils {
     public static long getIdleTime() {
         if(CommonUtils.isWindows2000orXP())
             return idleTime();
+        else if(CommonUtils.isMacOSX())
+            return idleTime();
         else
             return 0;
     }
