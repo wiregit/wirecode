@@ -428,20 +428,21 @@ public class Acceptor implements Runnable {
                     continue;
                 }
 				
+                // Set our IP address of the local address of this socket.
+                InetAddress localAddress = client.getLocalAddress();
+                setAddress( localAddress );                
+
 				// we have accepted an incoming socket -- only record
                 // that we've accepted incoming if it's definitely
                 // not from our local subnet
-                if(!NetworkUtils.isCloseIP(address.getAddress(), 
-                                           getAddress(false)) ||
+                if((!NetworkUtils.isCloseIP(address.getAddress(), 
+                                            getAddress(false)) &&
+                    !NetworkUtils.isLocalAddress(address)) ||
                    !ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
                     _acceptedIncoming = true;
                     ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
                 }
                 
-                // Set our IP address of the local address of this socket.
-                InetAddress localAddress = client.getLocalAddress();
-                setAddress( localAddress );                
-
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =
 					new ConnectionDispatchRunner(client);
