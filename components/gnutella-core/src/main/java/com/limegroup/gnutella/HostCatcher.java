@@ -127,7 +127,7 @@ public class HostCatcher {
      * empty.  The file is expected to contain a sequence of lines in the format
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
-    public void start() {
+    public void initialize() {
 		String filename = SettingsManager.instance().getHostList();
         this.acceptor = RouterService.instance().getAcceptor();
 
@@ -332,7 +332,6 @@ public class HostCatcher {
         //only in special cases such as a SimplePongCacheServer would the first 
         //situation occur.
         if (alwaysNotifyKnownHost || notifyGUI) {
-			
             RouterService.instance().getCallback().knownHost(e);
 		}
         repOk();
