@@ -64,6 +64,11 @@
     <delete dir="${reports}"/>
   </target>
   
+  <!-- clean testData dir -->
+  <target name="clean testData">
+    <delete dir="testData"/>
+  </target>
+  
   <!-- PREPARE -->
   <target name="prepare">
     <mkdir dir="${builddir}"/>
@@ -93,6 +98,7 @@
         <param name="haltonerror" value="no"/>
     </antcall>
     <antcall target="html"/>
+    <antcall target="clean testData"/>
  </target>
  
   <!-- Runs a specific package - passed by 'package' -->
@@ -106,6 +112,7 @@
         <param name="haltonerror" value="no"/>
     </antcall>
     <antcall target="html"/>
+    <antcall target="clean testData"/>
  </target>
  
  <!-- Runs a specific class, passing the output to the shell & XML file-->
@@ -121,11 +128,12 @@
         <param name="haltonerror" value="yes"/>
     </antcall>
     <antcall target="html"/>
+    <antcall target="clean testData"/>
  </target> 
 
  
  <!-- To be used internally by 'test all', 'test package' & 'test' -->
- <target name="batchunit" if="unit" depends="clean reports, prepare, build"> 
+ <target name="batchunit" if="unit" depends="clean reports, clean testData, prepare, build"> 
         <junit printsummary="withOutAndErr"
                haltonfailure="${haltonfailure}"
                haltonerror="${haltonerror}"

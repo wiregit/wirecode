@@ -255,17 +255,31 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     /**
      * Creates a new directory prepended by the given name.
      */
-    public static File createNewDirectory(String name) {
-        File f = new File(name);
+    public static File createNewBaseDirectory(String name) throws Exception {
+        File t = getTestDirectory();
+        File f = new File(t, name);
         
         int append = 1;
         while ( f.exists() ) {
-            f = new File(name + "_" + append);
+            f = new File(t, name + "_" + append);
             append++;
         }
         
-        return f;
+        return f.getCanonicalFile();
     }
+    
+    /**
+     * Get tests directory from a marker resource file.
+     */
+    public static File getTestDirectory() throws Exception {
+        File f =
+            CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");            
+        f = f.getCanonicalFile(); // make it a full (not relative) path
+        
+                 //gnutella       // limegroup    // com         // tests
+        f = f.getParentFile().getParentFile().getParentFile().getParentFile();
+        return new File(f, "testData");
+    }   
     
     /**
      * Sets this test up to have unique directories.
@@ -273,7 +287,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     public static void setupUniqueDirectories() throws Exception {
         
         if( _baseDir == null ) {
-            _baseDir = createNewDirectory( _testClass.getName() );
+            _baseDir = createNewBaseDirectory( _testClass.getName() );
         }
         _savedDir = new File(_baseDir, "saved");
         _sharedDir = new File(_baseDir, "shared");
