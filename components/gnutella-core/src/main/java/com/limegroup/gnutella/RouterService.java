@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.downloader.*;
 
 /**
  * The External interface into the router world.
@@ -578,7 +579,7 @@ public class RouterService
      *     @modifies this, disk 
      */
     public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
-        throws com.limegroup.gnutella.downloader.FileExistsException {
+        throws FileExistsException, AlreadyDownloadingException {
         return downloader.getFiles(files, overwrite);
     }
 }

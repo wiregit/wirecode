@@ -71,22 +71,11 @@ public class HTTPDownloader {
 		_fileSize = size;
 		_initialReadingPoint = 0;
 		
-		if (resume) {
-			// First, get the incomplete directory where the 
-			// file will be temperarily downloaded.
-			SettingsManager sm = SettingsManager.instance();
-			String incompleteDir;
-			incompleteDir = sm.getIncompleteDirectory();
-			// check to see if we actually get a directory
-			
-			if (incompleteDir == "") 
-				throw new NullIncompleteDirectoryException();
-			
-			// now, check to see if a file of that name alread
-			// exists in the temporary directory.
-			File incompleteFile = new File(incompleteDir, _filename);
-			// incompleteFile represents the file as it would
-			// be named in the temporary incomplete directory.			
+		if (resume) {			
+			// now, check to see if a file of that name alread exists in the
+			// temporary directory.  incompleteFile represents the file as it
+			// would be named in the temporary incomplete directory
+			File incompleteFile = new TemporaryFile(_filename, guid);			
 			if (incompleteFile.exists()) {
 				// dont alert an error if the file doesn't 
 				// exist, just assume a starting range of 0;
@@ -300,18 +289,11 @@ public class HTTPDownloader {
     }
 
 	private void doDownload() throws IOException {
-
-		SettingsManager settings = SettingsManager.instance();
-		
+        //1. For security, check that download location is OK.
+        //   This is to prevent against any files with '.' or '/' or '\'.
+		SettingsManager settings = SettingsManager.instance();		
 		String download_dir = settings.getSaveDirectory();
-		String incomplete_dir = settings.getIncompleteDirectory();
-		
-		// a reference file that will be stored, until the download
-		// is complete.
-		File incomplete_file = new File(incomplete_dir, _filename);
-		String path_to_incomplete = incomplete_file.getAbsolutePath();
-		
-		// the eventual fully downloaded file, and the path to it.
+
 		File complete_file = new File(download_dir, _filename);
 		String path_to_complete = complete_file.getAbsolutePath();
 		
@@ -326,20 +308,10 @@ public class HTTPDownloader {
 			throw new InvalidPathException();  
 		}
 
-		if ( complete_file.exists() ){
-            //It's up to the caller to prompt before overwriting.  So this can
-            //just go ahead and overwrite.
-			try {
-                complete_file.delete();
-            } catch (SecurityException e) {
-                //Hmm...shouldn't happen under normal contexts, but we can
-                //recover.
-                throw new IOException("Couldn't delete file");
-            }
-		}
-		
-
-
+	  
+        //2. Do actual download, appending to incomplete file if necessary.
+		File incomplete_file = new TemporaryFile(_filename, _guid);
+		String path_to_incomplete = incomplete_file.getAbsolutePath();
 		boolean append = false;
 
 		if (_initialReadingPoint > 0)
@@ -376,10 +348,12 @@ public class HTTPDownloader {
 		_byteReader.close();
 		_fos.close();
 
-		//Move from temporary directory to final directory.
+
+		//3. If not interrupted, move from temporary directory to final directory.
 		if ( _amountRead == _fileSize ) {
-			//If target doesn't exist, this will fail silently.  Otherwise,
-			//it's always safe to do this since we prompted the user above.
+			//If target doesn't exist, this will fail silently.  Otherwise, it's
+			//always safe to do this since we prompted the user in
+			//SearchView/DownloadManager.
 			complete_file.delete();
 			boolean ok = incomplete_file.renameTo(complete_file);
 			if (! ok) 

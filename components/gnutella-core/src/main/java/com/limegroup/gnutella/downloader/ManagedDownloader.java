@@ -34,12 +34,15 @@ import java.net.*;
  * signal from a host.
  */
 public class ManagedDownloader implements Downloader {
-    /* LOCKING: obtain this's monitor before modifying any of these. */
+    ///////////////////////////////////////////////////////////////////////
+    //// LOCKING: obtain this's monitor before modifying any of these. ////
+    ///////////////////////////////////////////////////////////////////////
 
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
     /** The files to get, each represented by a RemoteFileDesc. 
-     *  INVARIANT: files is sorted by priority. */
+     *  INVARIANT: files is sorted by priority. 
+     *  LOCKING: obtain this' monitor */
     private List /* RemoteFileDesc */ files;
     /** The files to get by pushes, each represented by a RFDPushPair.
      *  These are not sorted.  They contain former members of files. */
@@ -74,7 +77,7 @@ public class ManagedDownloader implements Downloader {
     }
 
 
-    ////////////////////////// Core Variables ////////////////////////////
+    ////////////////////////// Core Variables /////////////////////////////
     /** If started, the thread trying to do the downloads.  Otherwise null. */
     private Thread dloaderThread=null;
     /** The connection we're using for the current attempt, or last attempt if
@@ -128,6 +131,31 @@ public class ManagedDownloader implements Downloader {
         dloaderThread.setDaemon(true);
         dloaderThread.start();
     }
+   
+    /**
+     * Returns true if 'other' could conflict with one of the files in this.  In
+     * other if this.conflicts(other)==true, no other ManagedDownloader should
+     * attempt to download other.  
+     */
+    public boolean conflicts(RemoteFileDesc other) {
+        synchronized (this) {
+            TemporaryFile otherFile=new TemporaryFile(other);
+            //These iterators include any download in progress.
+            for (Iterator iter=files.iterator(); iter.hasNext(); ) {
+                RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
+                TemporaryFile thisFile=new TemporaryFile(rfd);
+                if (thisFile.equals(otherFile))
+                    return true;
+            }
+            for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
+                RFDPushPair pair=(RFDPushPair)iter.next();
+                TemporaryFile thisFile=new TemporaryFile(pair.rfd);
+                if (thisFile.equals(otherFile))
+                    return true;
+            }
+        }
+        return false;
+    }
     
     /** 
      * Accepts a push download.  If this chooses to download the given file
@@ -172,7 +200,6 @@ public class ManagedDownloader implements Downloader {
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;   
-        setState(ABORTED);
         //This guarantees any downloads in progress will be killed.  New
         //downloads will not start because of the flag above.
         if (dloader!=null)
@@ -184,11 +211,6 @@ public class ManagedDownloader implements Downloader {
         //a long time.
         if (dloaderThread!=null)
             dloaderThread.interrupt();        
-        //Relinquish slot immediately.  Always safe.  Should be done after call
-        //to interrupt in case download thread is about to call waitForSlot.
-        manager.yieldSlot(this);   
-        //Notify callback.
-        manager.remove(this, false);
     }
 
     /** Actually does the download. */
@@ -236,19 +258,24 @@ public class ManagedDownloader implements Downloader {
                     //attempted too much.  This used to be done during
                     //sendPushes, but it made the getPushesWaiting method harder
                     //to implement.
-                    for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
-                        RFDPushPair pair=(RFDPushPair)iter.next();
-                        pair.pushAttempts++;
-                        if (pair.pushAttempts>=PUSH_TRIES)
-                            iter.remove();   //can't call pushFiles.remove(..)
+                    synchronized (ManagedDownloader.this) {
+                        for (Iterator iter=pushFiles.iterator();
+                                iter.hasNext(); ) {
+                            RFDPushPair pair=(RFDPushPair)iter.next();
+                            pair.pushAttempts++;
+                            if (pair.pushAttempts>=PUSH_TRIES)
+                                iter.remove();   //can't call pushFiles.remove(..)
+                        }
                     }
                 }
                 //We've failed.  Notify my manager.
                 setState(GAVE_UP);
                 manager.remove(ManagedDownloader.this, false);            
             } catch (InterruptedException e) {
-                //We've been stopped.  No need to use callback, since stop calls
-                //remove.
+                //We've been stopped.  Remove this self from active queue or
+                //waiting set.
+                setState(ABORTED);
+                manager.remove(ManagedDownloader.this, false);
                 return;
             } finally {
                 //Clean up any queued push downloads.  Also clean up dloader if
@@ -281,8 +308,10 @@ public class ManagedDownloader implements Downloader {
                     //If the host is on a different network, this wouldn't
                     //possibly work.  TODO2: look at push flag here as well.
                     if (isPrivate(rfd)) {
-                        iter.remove();
-                        pushFiles.add(new RFDPushPair(rfd));
+                        synchronized (ManagedDownloader.this) {
+                            iter.remove();
+                            pushFiles.add(new RFDPushPair(rfd));
+                        }
                         continue;
                     }
                     try {
@@ -293,17 +322,18 @@ public class ManagedDownloader implements Downloader {
                         //it later.                            
                     } catch (CantConnectException e) {
                         //Host unreachable.  Try push later.
-//                          System.out.println("    Host not reachable.");
-                        iter.remove();  //Don't call files.remove(..)!
-                        pushFiles.add(new RFDPushPair(rfd));
+                        synchronized (ManagedDownloader.this) {
+                            iter.remove();  //Don't call files.remove(..)!
+                            pushFiles.add(new RFDPushPair(rfd));
+                        }
                     } catch (TryAgainLaterException e) {
                         //Go on to next one.  We will try normal attempt later.
-//                          System.out.println("    Got busy signal.");
                         continue;
                     } catch (IOException e) {
-//                          System.out.println("    Misc. IO problem.");
                         //Miscellaneous problems.  Don't try again.
-                        iter.remove();
+                        synchronized (ManagedDownloader.this) {
+                            iter.remove();
+                        }
                     } finally {
                         //Was this forcibly closed? 
                         synchronized (ManagedDownloader.this) {
@@ -452,13 +482,11 @@ public class ManagedDownloader implements Downloader {
     private void purgeOldPushRequests() {
         Date time=new Date();
         time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
-        synchronized (requested) {
-            Iterator iter=requested.iterator();
-            while (iter.hasNext()) {
-                PushRequestedFile prf=(PushRequestedFile)iter.next();
-                if (prf.before(time))
-                    iter.remove();
-            }
+        Iterator iter=requested.iterator();
+        while (iter.hasNext()) {
+            PushRequestedFile prf=(PushRequestedFile)iter.next();
+            if (prf.before(time))
+                iter.remove();
         }
     }
 

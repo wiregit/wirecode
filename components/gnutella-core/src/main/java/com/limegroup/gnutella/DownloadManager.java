@@ -56,6 +56,11 @@ public class DownloadManager {
     /** 
      * Tries to "smart download" any of the given files.<p>  
      *
+     * If any of the files already being downloaded (or queued for downloaded)
+     * has the same temporary name as any of the files in 'files', throws
+     * AlreadyDownloadingException.  Note, however, that this doesn't guarantee
+     * that a successfully downloaded file can be moved to the library.<p>
+     *
      * If overwrite==false, then if any of the files already exists in the
      * download directory, FileExistsException is thrown and no files are
      * modified.  If overwrite==true, the files may be overwritten.<p>
@@ -66,15 +71,33 @@ public class DownloadManager {
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
      *
-     *     @modifies this, disk 
-     */
-    public synchronized Downloader getFiles(
-            RemoteFileDesc[] files,
-            boolean overwrite) throws FileExistsException {
-        //Check if file exists.  This code is borrowed from HTTPDownloader.
-        //TODO2: we can avoid race conditions by actually reserving a space on
-        //disk for the file.  TODO3: perhaps we should pass all conflicting files
-        //to constructor.
+     *     @modifies this, disk */
+    public synchronized Downloader getFiles(RemoteFileDesc[] files,
+                                            boolean overwrite) 
+            throws FileExistsException, AlreadyDownloadingException {
+        //Check if file would conflict with any other downloads in progress.
+        //TODO3: if only a few of many files conflicts, we could just ignore
+        //them.
+        for (int i=0; i<files.length; i++) {
+            //Active downloads...
+            for (Iterator iter=active.iterator(); iter.hasNext(); ) {
+                ManagedDownloader md=(ManagedDownloader)iter.next();
+                if (md.conflicts(files[i]))
+                    throw new AlreadyDownloadingException(
+                        files[i].getFileName());
+            }
+            //Queued downloads...
+            for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
+                ManagedDownloader md=(ManagedDownloader)iter.next();
+                if (md.conflicts(files[i]))
+                    throw new AlreadyDownloadingException(
+                        files[i].getFileName());
+            }
+        }
+
+
+        //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
+        //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
             String downloadDir = SettingsManager.instance().getSaveDirectory();
             for (int i=0; i<files.length; i++) {
@@ -84,7 +107,6 @@ public class DownloadManager {
                     throw new FileExistsException(filename);            
             }
         }
-
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
@@ -167,15 +189,15 @@ public class DownloadManager {
     /**
      * Removes downloader entirely from the list of current downloads.
      * Notifies callback of the change in status.
-     *     @requires downloader active or queued
      *     @modifies this, callback
      */
-    public synchronized void remove(ManagedDownloader downloader, boolean success) {
-        boolean activated=active.remove(downloader);
-        if (! activated)  //minor optimization.  Always safe to execute both paths.
-            waiting.remove(downloader);
-        else
-            notify();
+    public synchronized void remove(ManagedDownloader downloader,
+                                    boolean success) {
+        //As a minor optimization, only waiting.remove(..) or notify(..)
+        //is needed.  But we do both just to be safe.
+        active.remove(downloader);
+        waiting.remove(downloader);
+        notify();  
         callback.removeDownload(downloader);
     }
 
