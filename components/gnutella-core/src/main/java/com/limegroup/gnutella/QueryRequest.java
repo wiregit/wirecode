@@ -325,7 +325,7 @@ public class QueryRequest extends Message implements Serializable{
 		       "query:             "+getQuery()+"\r\n"+
 		       "rich query:        "+getRichQuery()+"\r\n"+
 		       "requestedUrnTypes: "+getRequestedUrnTypes()+"\r\n"+
-		       "query urns:        "+getQueryUrns()+"\r\n"+
+		       "query urns:        "+getQueryUrns().size()+"\r\n"+
 		       "min speed:         "+getMinSpeed();
     }
 }
