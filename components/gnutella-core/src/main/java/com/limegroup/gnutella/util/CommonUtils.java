@@ -1081,6 +1081,20 @@ public final class CommonUtils {
         return name;
     }
 
+    /**
+     * Utility method for determining whether or not we should record 
+     * statistics.  This can depend on the operating system or other factors.
+     * For example, the OS 9 implementation of Java 118 appears not to handle
+     * classloading correctly, and therefore cannot properly load the statistics
+     * recording classes.
+     * 
+     * @return <tt>true</tt> if we should record statistics, otherwise 
+     *  <tt>false</tt>
+     */
+    public static boolean recordStats() {
+        return !CommonUtils.isJava118();
+    }
+
     /*
     public static void main(String args[]) {
         System.out.println("Is 1.3 or later? "+isJava13OrLater());
