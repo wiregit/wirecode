@@ -934,9 +934,9 @@ public abstract class MessageRouter {
                      && !c.isClientSupernodeConnection())) {
 
                 if(c.supportsPongCaching()) {
-                    percentToIgnore = 0.20;
+                    percentToIgnore = 0.40;
                 } else {
-                    percentToIgnore = 0.80;
+                    percentToIgnore = 0.95;
                 }
                 if(randomlyForward && 
                    (Math.random() < percentToIgnore)) {
