@@ -1095,7 +1095,7 @@ public class RouterService {
 	public static void doBrowseHost(String host, int port, 
                                     GUID guid, GUID serventID,
                                     Set proxies) {
-        BrowseHostHandler handler = new BrowseHostHandler(callback, router,
+        BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
         handler.browseHost(host, port, proxies);
 	}
