@@ -221,6 +221,20 @@ public class RouterService {
             _started = true;
     
     		// Now, link all the pieces together, starting the various threads.
+
+            //Note: SimppManager and SimppSettingsManager must go first to make
+            //sure all the settings are created with the simpp values. Other
+            //components may rely on the settings, so they must have the right
+            //values when they are being initialized.
+            LOG.trace("START SimppManager.instance");
+            callback.componentLoading("SIMPP_MANAGER");
+            SimppManager.instance();//initialize
+            LOG.trace("STOP SimppManager.instance");
+            
+            LOG.trace("START SimppSettingsManager.instance");
+            SimppSettingsManager.instance();
+            LOG.trace("STOP SimppSettingsManager.instance");
+
             LOG.trace("START MessageRouter");
             callback.componentLoading("MESSAGE_ROUTER");
     		router.initialize();
@@ -280,15 +294,6 @@ public class RouterService {
             callback.componentLoading("UPDATE_MANAGER");
             UpdateManager.instance();//initialize
             LOG.trace("STOP UpdateManager.instance");
-            
-            LOG.trace("START SimppManager.instance");
-            callback.componentLoading("SIMPP_MANAGER");
-            SimppManager.instance();//initialize
-            LOG.trace("STOP SimppManager.instance");
-            
-            //Note: this MUST be after SimppManager is initialized
-            SimppSettingsManager.instance();
-
 
             LOG.trace("START QueryUnicaster");
             callback.componentLoading("QUERY_UNICASTER");
