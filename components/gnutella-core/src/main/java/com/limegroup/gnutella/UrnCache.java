@@ -22,7 +22,7 @@ public final class UrnCache {
     /**
      * File where urns (currently SHA1 urns) get persisted to
      */
-    private static final String URN_CACHE_FILE = "fileurns.cache";
+    private static final File URN_CACHE_FILE = new File("fileurns.cache");
 
     /**
      * UrnCache instance variable
@@ -32,7 +32,7 @@ public final class UrnCache {
     /**
      * UrnCache container
      */
-    private Map /* URNSetKey -> HashSet */ theUrnCache;
+    private final Map /* URNSetKey -> HashSet */ URN_MAP;
 
     /**
 	 * Returns the <tt>UrnCache</tt> instance.
@@ -50,7 +50,7 @@ public final class UrnCache {
      *  Create and initialize urn cache
      */
     private UrnCache() {
-        initCache();
+        URN_MAP = createMap();//initCache();
 	}
     
     /**
@@ -60,8 +60,8 @@ public final class UrnCache {
 	 *
 	 * @param file the <tt>File</tt> instance to look up URNs for
 	 * @return a new <tt>Set</tt> containing any cached URNs for the
-	 *  speficied <tt>File</tt> instance, guaranteed to be non-null, but
-	 *  possibly empty
+	 *  speficied <tt>File</tt> instance, guaranteed to be non-null and 
+	 *  unmodifiable, but possibly empty
      */
     public Set getUrns(File file) {
         // don't trust failed mod times
@@ -71,25 +71,24 @@ public final class UrnCache {
 		URNSetKey key = new URNSetKey(file);
 
         // one or more "urn:" names for this file 
-        
-		Set cachedUrns = (Set)theUrnCache.get(key);
+		Set cachedUrns = (Set)URN_MAP.get(key);
 		if(cachedUrns == null) {
 			return Collections.EMPTY_SET;
 		}
 
-		return cachedUrns;
+		return Collections.unmodifiableSet(cachedUrns);
     }
 
 
 
     /**
-     * Add URNs for the specified <tt>FileDesc</tt> instance to theUrnCache.
+     * Add URNs for the specified <tt>FileDesc</tt> instance to URN_MAP.
 	 *
 	 * @param fileDesc the <tt>FileDesc</tt> instance containing URNs to store
      */
     public void addUrns(File file, Set urns) {
 		URNSetKey key = new URNSetKey(file);
-        theUrnCache.put(key, urns);
+        URN_MAP.put(key, Collections.unmodifiableSet(urns));
     }
     
     //
@@ -97,44 +96,50 @@ public final class UrnCache {
     //
     
     /**
-     * load values from cache file, if available
+     * Loads values from cache file, if available
      */
-    private void initCache() {
-        try {
+    private static Map createMap() {//void initCache() {
+		if(!URN_CACHE_FILE.isFile()) {
+			return new Hashtable();
+		}
+		Map urnMap = null;
+		try {
             ObjectInputStream ois = 
 			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
-            theUrnCache = (Hashtable)ois.readObject();
-            ois.close();
-        } catch (Exception e) {
-            // lack of cache is non-fatal
-        } 
-        if (theUrnCache == null) {
-            theUrnCache = new Hashtable();
-            return;
-        }
+			urnMap = (Hashtable)ois.readObject();
+		} catch(FileNotFoundException e) {
+			// this should never happen, given our check above
+			e.printStackTrace();
+		} catch(IOException e) {
+			e.printStackTrace();
+		} catch(ClassNotFoundException e) {
+			e.printStackTrace();
+		}
         // discard outdated info
-        Iterator iter = theUrnCache.keySet().iterator();
+        Iterator iter = urnMap.keySet().iterator();
         while (iter.hasNext()) {
 			URNSetKey key = (URNSetKey)iter.next();
 
             // check to see if file still exists unmodified
-            File f = new File(key.PATH);
-            if (!f.exists() || f.lastModified() != key.MOD_TIME) {
+            File f = new File(key._path);
+            if (!f.exists() || f.lastModified() != key._modTime) {
                 iter.remove();
             }
         }
+		return urnMap;
     }
     
     /**
-     * write cache to disk to save recalc time later
+     * Write cache to disk to save recalc time later
      */
     public void persistCache() {
         try {
             ObjectOutputStream oos = 
 			    new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
-            oos.writeObject(theUrnCache);
+            oos.writeObject(URN_MAP);
             oos.close();
         } catch (Exception e) {
+			e.printStackTrace();
             // no great loss
         }
     }
@@ -142,23 +147,26 @@ public final class UrnCache {
 	/**
 	 * Private class for the key for the set of URNs for files.
 	 */
-	private static class URNSetKey {
+	private static class URNSetKey implements Serializable {
 		
 		/**
 		 * Constant for the file modification time.
+		 * @serial
 		 */
-		private final long MOD_TIME;
+		transient long _modTime;
 
 		/**
 		 * Constant for the file path.
+		 * @serial
 		 */
-		private final String PATH;
+		transient String _path;
 
 		/**
 		 * Constant cached hash code, since this class is used exclusively
 		 * as a hash key.
+		 * @serial
 		 */
-		private final int HASH_CODE;
+		transient int _hashCode;
 
 		/**
 		 * Constructs a new <tt>URNSetKey</tt> instance from the specified
@@ -167,10 +175,10 @@ public final class UrnCache {
 		 * @param file the <tt>File</tt> instance to use in constructing the
 		 *  key
 		 */
-		private URNSetKey(File file) {
-			MOD_TIME = file.lastModified();
-			PATH = file.getAbsolutePath();
-			HASH_CODE = calculateHashCode();
+		URNSetKey(File file) {
+			_modTime = file.lastModified();
+			_path = file.getAbsolutePath();
+			_hashCode = calculateHashCode();
 		}
 
 		/**
@@ -178,10 +186,10 @@ public final class UrnCache {
 		 *
 		 * @return the hash code for this instance
 		 */
-		private int calculateHashCode() {
+		int calculateHashCode() {
 			int result = 17;
-			result = result*37 + (int)(MOD_TIME ^(MOD_TIME >>> 32));
-			result = result*37 + PATH.hashCode();
+			result = result*37 + (int)(_modTime ^(_modTime >>> 32));
+			result = result*37 + _path.hashCode();
 			return result;
 		}
 
@@ -200,20 +208,76 @@ public final class UrnCache {
 			URNSetKey key = (URNSetKey)o;
 
 			// note that the path is guaranteed to be non-null
-			return ((MOD_TIME == key.MOD_TIME) &&
-					(PATH.equals(key.PATH)));
+			return ((_modTime == key._modTime) &&
+					(_path.equals(key._path)));
 		}
 
 		/**
 		 * Overrides Object.hashCode to meet the specification of Object.equals
-		 * and to make this class function properly as a hash key.
+		 * and to make this class functions properly as a hash key.
 		 *
 		 * @return the hash code for this instance
 		 */
 		public int hashCode() {
-			return HASH_CODE;
+			return _hashCode;
+		}
+
+		/**
+		 * Serializes this instance.
+		 *
+		 * @serialData the modification time followed by the file path
+		 */
+		private void writeObject(ObjectOutputStream s) 
+			throws IOException {
+			s.defaultWriteObject();
+			s.writeLong(_modTime);
+			s.writeObject(_path);
+		}
+
+		/**
+		 * Deserializes this instance, restoring all invariants.
+		 */
+		private void readObject(ObjectInputStream s) 
+			throws IOException, ClassNotFoundException {
+			s.defaultReadObject();
+			_modTime = s.readLong();
+			_path = (String)s.readObject();
+			_hashCode = calculateHashCode();
 		}
 	}
+
+
+	/*
+	private static void main(String[] args) {
+		UrnCache cache = UrnCache.instance();
+		File dir = new File("S:\\Gnutella\\installers\\LimeWire210\\winNoVM");
+		File[] files = dir.listFiles();
+		URN[] urns = new URN[files.length];
+		Set[] sets = new Set[files.length];
+		for(int i=0; i<files.length; i++) {
+			try {
+				urns[i] = URNFactory.createSHA1Urn(files[i]);
+			} catch(IOException e) {
+			}
+			sets[i] = new HashSet();
+			sets[i].add(urns[i]);
+			cache.addUrns(files[i], sets[i]);
+		}
+		System.out.println("map size before out: "+cache.URN_MAP.size()); 
+		cache.persistCache();
+		//cache.URN_MAP = null;
+		//cache.URN_MAP = UrnCache.createMap();
+		cache.URN_MAP.clear();
+		System.out.println("map size after out:  "+cache.URN_MAP.size()); 
+		for(int i=0; i<files.length; i++) {
+			Set set = cache.getUrns(files[i]);
+			System.out.println("sets equal: "+set.equals(sets[i])); 
+			//urns[i] = URNFactory.createSHA1Urn(files[i]);
+			//sets[i] = new HashSet(files[i], urns[i]);
+			//cache.addUrns(files[i], sets[i]);
+		}		
+	}
+	*/
 }
 
 
