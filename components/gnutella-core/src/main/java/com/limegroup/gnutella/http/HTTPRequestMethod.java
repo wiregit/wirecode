@@ -32,6 +32,10 @@ public abstract class HTTPRequestMethod {
 	 * @param response the <tt>HTTPMessage</tt> instance that handles
 	 *  writing the actual message
 	 * @param os the <tt>OutputStream</tt> to write to
+	 * @throws <tt>IOException</tt> if there was an IO error writing 
+	 *  the response
+	 * @throws <tt>NullPointerException</tt> if either the <tt>response</tt>
+	 *  or the <tt>os</tt> arguments are <tt>null</tt>
 	 */
 	public abstract void writeHttpResponse(HTTPMessage response, 
 										   OutputStream os) 
@@ -42,8 +46,16 @@ public abstract class HTTPRequestMethod {
 	 */
 	public static final HTTPRequestMethod GET = 
 		new HTTPRequestMethod("GET") {
-			public void writeHttpResponse(HTTPMessage response, OutputStream os) 
-			    throws IOException {
+			public void writeHttpResponse(HTTPMessage response, 
+										  OutputStream os) 
+			throws IOException {
+				if(response == null) {
+					throw new NullPointerException
+					    ("cannot write null response object");
+				} else if(os == null) {
+					throw new NullPointerException
+					    ("cannot write to null output stream");
+				}
 				response.writeMessageHeaders(os);
 				response.writeMessageBody(os);
 				os.flush();
@@ -55,8 +67,16 @@ public abstract class HTTPRequestMethod {
 	 */
 	public static final HTTPRequestMethod HEAD = 
 		new HTTPRequestMethod("HEAD") {
-			public void writeHttpResponse(HTTPMessage response, OutputStream os) 
+			public void writeHttpResponse(HTTPMessage response, 
+										  OutputStream os) 
 			    throws IOException {
+				if(response == null) {
+					throw new NullPointerException
+					    ("cannot write null response object");
+				} else if(os == null) {
+					throw new NullPointerException
+					    ("cannot write to null output stream");
+				}
 				response.writeMessageHeaders(os);
 				os.flush();
 			}
