@@ -229,26 +229,32 @@ public class LimeXMLReplyCollection {
     private LimeXMLDocument constructDocument(String xmlStr, File file) {
         // old style may exist or there may be no xml associated
         // with this file yet.....
-        if (audio && LimeXMLUtils.isSupportedAudioFormat(file)) {
-            // first try to get the id3 out of it.  if this file has
-            // no id3 tag, just construct the doc out of the xml 
+    	
+        if (LimeXMLUtils.isSupportedFormat(file)) {
+        	
+            // first try to get the metadata out of it.  if this file has
+            // no metadata, just construct the doc out of the xml 
             // string....
-            boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
+            boolean onlyFileInfo=((xmlStr == null) || xmlStr.equals(""));
+            
             try {
-                if(!onlyID3) {  //non-id3 values with mp3 file
-                    String id3XML = MetaDataReader.readDocument(file,onlyID3);
-                    String joinedXML = joinAudioXMLStrings(id3XML, xmlStr);
+                if(!onlyFileInfo) {  //non-id3 values with mp3 file
+                	
+                    String fileXML = MetaDataReader.readDocument(file,onlyFileInfo);
+                    
+                    String joinedXML = joinXMLStrings(fileXML, xmlStr);
                     if( joinedXML != null )
                         return new LimeXMLDocument(joinedXML);
                 }
-                // no XML data we can use.
+                
+                // no XML data we can use - parse from the file
                 return MetaDataReader.readDocument(file);
             }
             catch (SAXException ignored) { }
             catch (IOException ignored) { }
             catch (SchemaNotFoundException ignored) { }
         }
-        else { // !audio || !mp3
+        else { // not a supported format
             try {
                 if ((xmlStr != null) && (!xmlStr.equals(""))) 
                     return new LimeXMLDocument(xmlStr);
@@ -260,6 +266,7 @@ public class LimeXMLReplyCollection {
         
         return null;
     }
+    
 
     /**
      * Gets a list of keywords from all the documents in this collection.
@@ -304,16 +311,18 @@ public class LimeXMLReplyCollection {
      * Joins two XML strings together.
      * Returns null if the second string is malformed.
      */
-    private String joinAudioXMLStrings(String mp3Str, String fileStr) {
-        int p = fileStr.lastIndexOf("></audio>");
+    private String joinXMLStrings(String str1, String str2) {
+        int p = str2.lastIndexOf("></audio>");
         if( p == -1 )
+        	p = str2.lastIndexOf("></video>");
+		if(p == -1)
             return null;
             
         //above line is the one closing the root element
-        String a = fileStr.substring(0,p);//all but the closing part
-        String b = fileStr.substring(p);//closing part
+        String a = str2.substring(0,p);//all but the closing part
+        String b = str2.substring(p);//closing part
         //phew, thank god this schema has depth 1.
-        return(a+mp3Str+b);
+        return(a+str1+b);
     }
 
     

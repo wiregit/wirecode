@@ -30,16 +30,12 @@ public class MetaDataReader {
 	 */
 	public static LimeXMLDocument readDocument(File file) throws IOException {
 		
-		String schemaURI=null;
-		if (LimeXMLUtils.isSupportedAudioFormat(file))
-			schemaURI="http://www.limewire.com/schemas/audio.xsd";
-		
 		MetaData data = MetaData.parse(file);
 		List nameValList = data.toNameValueList();
 		if(nameValList.isEmpty())
 			throw new IOException("invalid/no data.");
 
-		return new LimeXMLDocument(nameValList, schemaURI);
+		return new LimeXMLDocument(nameValList, LimeXMLUtils.getSchemaURI(file));
 	}
 	
 	

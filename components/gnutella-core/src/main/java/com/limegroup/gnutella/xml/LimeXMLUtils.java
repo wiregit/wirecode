@@ -396,6 +396,37 @@ public class LimeXMLUtils
     	return isMP3File(file) || isOGGFile(file);
     }
     
+    //stub
+    public static boolean isSupportedVideoFormat(File file) {
+    	return false;
+    }
+    
+    //stub
+    public static boolean isSupportedVideoFormat(String file) {
+    	return false;
+    }
+    
+    public static boolean isSupportedFormat(File file) {
+    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file);
+    }
+    public static boolean isSupportedFormat(String file) {
+    	return isSupportedAudioFormat(file) || isSupportedVideoFormat(file);
+    }
+    
+    /**
+     * 
+     * @param file The file that is about to be parsed for metadata
+     * @return the URI of the schema which should be used to validate the xml.
+     */
+    public static String getSchemaURI(File file) {
+    	if (isSupportedAudioFormat(file))
+			return "http://www.limewire.com/schemas/audio.xsd";
+		else if (isSupportedVideoFormat(file))
+			return "http://www.limewire.com/schemas/video.xsd";
+		else 
+			return null;
+    }
+    
     /**
       * Converts the given list of xml documents to an array of responses
       * @param xmlDocuments List (of LimeXMLDocument) of xml documentst that
