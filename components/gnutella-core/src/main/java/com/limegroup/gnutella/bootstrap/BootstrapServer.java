@@ -67,13 +67,24 @@ public class BootstrapServer {
     public String toString() {
         return _url.toString();
     }
+ 
+    /**
+     * Creates an integer suitable for hash table indexing.<p>
+     * The hash code is based upon all the URL components relevant for URL
+     * comparison. As such, this operation is a blocking operation.
+     */
+    public int hashCode() {
+        return _url.hashCode();
+    }
 
     /** 
      * Returns true if o is a BootStrapServer with the same URL.
      */
     public boolean equals(Object o) {
-        if (! (o instanceof BootstrapServer))
-            return false;
-        return o.toString().equals(this.toString());
+        if(o == this)
+            return true;
+        if (o instanceof BootstrapServer)
+            return this._url.equals(((BootstrapServer)o)._url);
+        return false;
     }
 }
