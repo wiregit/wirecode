@@ -335,11 +335,15 @@ public final class AlternateLocationCollection
 	FixedSizeSortedSet clone=null;
 
 	
+	
 	if (number <=0)
 		return null;
 	
+	synchronized(this) {
+		clone = (FixedSizeSortedSet) LOCATIONS.clone();
+	}
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	DataOutputStream daos = new DataOutputStream(baos);
+	
 	
 	try{
     	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
@@ -350,7 +354,7 @@ public final class AlternateLocationCollection
     		DirectAltLoc current = (DirectAltLoc)o;
     		byte [] addr = current.getHost().getInetAddress().getAddress();
     		baos.write(addr);
-    		daos.writeShort(current.getHost().getPort());
+    		ByteOrder.short2leb((short)current.getHost().getPort(),baos);
     		number--;
     	}
 	}catch(IOException impossible){
