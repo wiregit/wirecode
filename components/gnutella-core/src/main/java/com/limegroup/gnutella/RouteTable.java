@@ -84,7 +84,7 @@ public class RouteTable {
 	    Assert.that(conn!=null);
 	    buf.append(guid.toString());
 	    buf.append(" -> ");
-	    buf.append(conn.sock.toString());
+	    buf.append(conn.toString());
 	    buf.append("\n");
 	}
 	return buf.toString();

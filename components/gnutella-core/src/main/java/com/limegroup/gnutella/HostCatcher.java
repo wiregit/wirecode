@@ -140,8 +140,8 @@ public class HostCatcher {
      *  written to disk later.
      */
     public void addGood(Connection c) {
-	String host=c.sock.getInetAddress().getHostAddress();
-	int port=c.sock.getPort();
+	String host=c.getInetAddress().getHostAddress();
+	int port=c.getPort();
 	synchronized (elected) {
 	    elected.add(new Endpoint(host,port));
 	}	
