@@ -16,6 +16,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.updates.*;
+import com.limegroup.gnutella.simpp.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -967,7 +968,6 @@ public class ManagedConnection extends Connection
             Message m=null;
             try {
                 m = receive();
-                System.out.println("\t\t\t"+m);
                 if (m==null)
                     continue;
             } catch (BadPacketException e) {
@@ -1251,6 +1251,17 @@ public class ManagedConnection extends Connection
             }
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
+        }
+        else if(vm instanceof CapabilitiesVM) {
+            //we need to see if there is a new simpp version out there.
+            CapabilitiesVM capVM = (CapabilitiesVM)vm;
+            int publishedSimpp = 
+            capVM.supportsCapability(CapabilitiesVM.SIMPP_CAPABILITY_BYTES);
+            if(publishedSimpp <= SimppManager.instance().getVersion())
+                return;
+            //request the simpp message
+            SimppRequestVM simppReq = new SimppRequestVM();
+            send(simppReq);
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        
             // If this is a ClientSupernodeConnection and the host supports

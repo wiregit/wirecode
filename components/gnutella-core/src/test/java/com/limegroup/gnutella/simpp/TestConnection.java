@@ -96,6 +96,7 @@ public class TestConnection {
         //testing can be done.
         
         CapabilitiesVM capVM = makeCapabilitiesVM();
+        System.out.println("Test Connection sending"+capVM);
         capVM.write(os);
         os.flush();
         //now, lets see if we expect a request or not
@@ -111,82 +112,24 @@ public class TestConnection {
             if(message instanceof SimppRequestVM) {
                 System.out.println("Sumeet: we are done");
                 done = true;
-            }
+            }            
         }
-        
+        //TODO: now write back the SIMPP_DATA and let the testing continue
 
         //Read messages, if (_expectSimppRequest) make sure we get it, otherwise
         //make sure we do not get it. Then based on _sendSimppData send the data
         //back once if we got the SimppRequestVM        
     }
 
-    private CapabilitiesVM makeCapabilitiesVM() {        
-        //1. Get the capabilitiesVM and cache it
-        CapabilitiesVM capVM = CapabilitiesVM.instance();
-        //2. Nullify the instance of CapabilitiesVM and recreate instance
+    private CapabilitiesVM makeCapabilitiesVM() {
         try {
-            PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);
-        } catch(IllegalAccessException iax) {
-            Assert.that(false,
-                "couldn't set up test -- failed to manipulate CapabilitiesVM");
-        } catch(NoSuchFieldException nsfx) {
-            Assert.that(false,
+            return  CapabilitiesVMStubHelper.makeCapVM(_simppMessageNumber);
+        } catch (Exception e) {
+            Assert.that(false, 
                 "couldn't set up test -- failed to manipulate CapabilitiesVM");
         }
-        CapabilitiesVM.instance();//recreate it for RouterService
-        
-        //3. Modify the cached copy of CapabilitiesVM 
-        
-        //a. Make a new SupportedMessageBlock with the simpp capability and
-        //version
-        byte[] simpp_bytes = {(byte)83, (byte) 73, (byte)77, (byte)80};
-
-        //smb is of type CapabilitiesVM.SupportedMessageBlock which is in
-        //accessible from this package, never mind we just need to add it to the
-        //HashSet
-        Object smb = 
-        CapabilitiesVMStubHelper.makeSMB(simpp_bytes, _simppMessageNumber);
-        //b.clear the hashset in capVM
-        Set set = null;
-        try {
-            set = (Set)PrivilegedAccessor.getValue(
-                                              capVM, "_capabilitiesSupported");
-        } catch (IllegalAccessException iax) {
-            Assert.that(false, "problem with cached CapabilitiesVM");
-        } catch(NoSuchFieldException nsfx) {
-            Assert.that(false, "problem with cached CapabilitiesVM");
-        }
-        set.clear();
-        //c. add the SupportedMessageBlock created in a to the HashSet of CapVM
-        set.add(smb);
-        //4. return the modified CapabilitiesVM
-        return capVM;
+        return null;
     }
-
-
-//      private CapabilitiesVM makeCapVM() {
-//          Integer oldVer = null;
-//          int prevSimppVersion = -1;
-//          //1.
-//          CapabilitiesVM capVM = CapabilitiesVM.instance();
-//          //2. cache the older value of simppVersion
-//          try {
-//              oldVer = (Integer)PrivilegedAccessor.getValue(
-//                                           CapabilitiesVM.class, "_simppVersion");
-//          } catch (IllegalAccessException iax) {
-//              Assert.that(false, 
-//                  "couldn't set up test -- failed to manipulate CapabilitiesVM");
-//          } catch (NoSuchFieldException nsfx) {
-//              Assert.that(false,
-//                  "couldn't set up test -- failed to manipulate CapabilitiesVM");
-//          }
-//          prevSimppVersion = oldVer.intValue();
-//          //3. set the simppversion to what we want to send
-//          CapabilitiesVM.updateSimppVersion(_simppMessageNumber);
-//          CapabilitiesVM ret = CapabilitiesVM.instance();
-//          CapabilitiesVM.updateSimppVersion(prevSimppVersion);
-//          return ret;
-//      }
 
     ////////////////////////////setter methods////////////////////////
 

@@ -15,9 +15,17 @@ import com.limegroup.gnutella.simpp.*;
 public final class CapabilitiesVM extends VendorMessage {
 
     /** Bytes for Feature search the first flavor of which is called 'WHAT'
+     *  Package access for tests
      */
-    private static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
+    static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
+    /**
+     * Bytes for the SIMPP capability 'SIMP'. Public, ManagedConnection needs
+     * access to it
+     */
+    public static final byte[] SIMPP_CAPABILITY_BYTES = {(byte)83, (byte) 73,
+                                                          (byte)77, (byte)80};
+
     /**
      *  This value can change - it is the version number of the highest 
      *  Feature Search Capability -- for now 1 for What is new
@@ -35,12 +43,6 @@ public final class CapabilitiesVM extends VendorMessage {
      * Feature query.
      */
     public  static final int FEATURE_SEARCH_MIN_SELECTOR = 1;
-
-    /**
-     * Bytes for the SIMPP capability 'SIMP'
-     */
-    private static final byte[] SIMPP_CAPABILITY_BYTES = {(byte)83, (byte) 73,
-                                                          (byte)77, (byte)80};
 
     /**
      * The version of the latest simpp version this node knows about. 

@@ -326,8 +326,12 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_STATISTICS) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
-        
-
+        if((selector == F_SIMPP_REQ) &&
+           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new SimppRequestVM(guid, ttl, hops, version, restOf);
+        if((selector == F_SIMPP) && 
+           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new SimppVM(guid, ttl, hops, version, restOf);
         if ((selector == F_GIVE_ULTRAPEER) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
         	return new UDPCrawlerPing(guid,ttl,hops,version,restOf);

@@ -22,12 +22,16 @@ public final class SimppRequestVM extends VendorMessage {
     }
     
     public SimppRequestVM() {
-        super(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ, VERSION,
+        super(F_LIME_VENDOR_ID, F_SIMPP_REQ, VERSION,
                                                 DataUtils.EMPTY_BYTE_ARRAY);
     }
     
     public int getVersion() {
         return super.getVersion();
     }
-
+    
+    public String toString() {
+        return "{SimppRequestVM:"+super.toString()+"}";
+    }
+    
 }

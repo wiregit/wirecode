@@ -12,19 +12,19 @@ import com.limegroup.gnutella.stubs.*;
 
 public class SimppManagerTest extends BaseTestCase {
     
-    static final int OLD = 0;
+    static final int OLD = 1;
     
-    static final int MIDDLE = 1;
+    static final int MIDDLE = 2;
 
-    static final int NEW = 2;
+    static final int NEW = 3;
     
-    static final int DEF_SIGNATURE = 3;
+    static final int DEF_SIGNATURE = 4;
 
-    static final int DEF_MESSAGE = 4;
+    static final int DEF_MESSAGE = 5;
 
-    static final int BAD_XML = 5;
+    static final int BAD_XML = 6;
     
-    static final int RANDOM_BYTES = 6;
+    static final int RANDOM_BYTES = 7;
 
     private static File OLD_SIMPP_FILE;
     
@@ -104,7 +104,7 @@ public class SimppManagerTest extends BaseTestCase {
                                                    new String[] {"127.*.*.*"});
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.PORT.setValue(PORT);
-        ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+        //ConnectionSettings.ENCODE_DEFLATE.setValue(false);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -259,7 +259,6 @@ public class SimppManagerTest extends BaseTestCase {
         }
         //reload the SimppManager and Capabilities VM
         SimppManager.instance();
-        CapabilitiesVM.instance();
     }
 
 }
