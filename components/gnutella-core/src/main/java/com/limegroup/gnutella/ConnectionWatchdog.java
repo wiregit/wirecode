@@ -150,7 +150,7 @@ public final class ConnectionWatchdog implements Runnable {
             if (! c.isKillable())
 				continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
-            c.setHorizonEnabled(false);
+            c.stats().setHorizonEnabled(false);
             RouterService.getMessageRouter().sendPingRequest(
 			    new PingRequest((byte)1), c);
         }
@@ -166,7 +166,7 @@ public final class ConnectionWatchdog implements Runnable {
             ManagedConnection c=(ManagedConnection)iter.next();
             if (! c.isKillable())
 				continue; //e.g., Clip2 reflector
-            c.setHorizonEnabled(true);
+            c.stats().setHorizonEnabled(true);
             Object state=snapshot.get(c);
             if (state==null)
                 continue;  //this is a new connection

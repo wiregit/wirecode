@@ -36,17 +36,6 @@ public class StandardMessageRouter extends MessageRouter {
             && !_manager.allowAnyConnection())
             return;
 
-        //SPECIAL CASE: for crawler ping
-        // TODO:: this means that we can never send TTL=2 pings without
-        // them being interpreted as from the crawler!!
-        if(hops ==1 && ttl==1) {
-            handleCrawlerPing(ping, handler);
-            return;
-            //Note that the while handling crawler ping, we dont send our own
-            //pong, as that is unnecessary, since crawler already has our
-            //address.
-        }
-
         // handle heartbeat pings specially -- bypass pong caching code
         if(hops == 1 && ttl == 0) {
             PingReply pr = 
@@ -114,44 +103,6 @@ public class StandardMessageRouter extends MessageRouter {
 			sendAcknowledgement(datagram, request.getGUID());
 		}
 	}
-
-    /**
-     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
-     * corresponding to all its leaves
-     * @param m The ping request received
-     * @param handler the <tt>ReplyHandler</tt> that should handle any
-     *  replies
-     */
-    private void handleCrawlerPing(PingRequest m, ReplyHandler handler) {
-        //TODO: why is this any different than the standard pong?  In other
-        //words, why no ultrapong marking, proper address calculation, etc?
-        
-        //send the pongs for leaves
-        List /*<ManagedConnection>*/ leafConnections 
-            = _manager.getInitializedClientConnections2();
-        
-        for(Iterator iterator = leafConnections.iterator(); 
-            iterator.hasNext();) {
-            //get the next connection
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            //create the pong for this connection
-
-            PingReply pr = 
-                PingReply.createExternal(m.getGUID(), (byte)2, 
-                                         connection.getListeningPort(),
-                                         connection.getInetAddress().getAddress(),
-                                         false);
-                                                    
-            
-            //hop the message, as it is ideally coming from the connected host
-            pr.hop();
-            
-            sendPingReply(pr, handler);
-        }
-        
-        //pongs for the neighbors will be sent by neighbors themselves
-        //as ping will be broadcasted to them (since TTL=2)        
-    }
     
     protected void handlePingReply(PingReply pingReply,
 								   ReplyHandler receivingConnection) {
@@ -159,7 +110,7 @@ public class StandardMessageRouter extends MessageRouter {
         //statistics are updated whether or not this is for me.
 		if(receivingConnection instanceof ManagedConnection) {
 			ManagedConnection mc = (ManagedConnection)receivingConnection;
-			mc.updateHorizonStats(pingReply);
+			mc.stats().updateHorizonStats(pingReply);
 		}
         super.handlePingReply(pingReply, receivingConnection);
     }

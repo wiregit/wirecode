@@ -175,8 +175,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         assertEquals("unexpected number of hosts", 0, hc.getNumHosts());
         assertEquals("unexted total file size", 0, hc.getTotalFileSize());
 
-        mc.updateHorizonStats(pr1);
-        mc.updateHorizonStats(pr1);  //check duplicates
+        mc.stats().updateHorizonStats(pr1);
+        mc.stats().updateHorizonStats(pr1);  //check duplicates
         assertEquals("unexpected number of files", 1, hc.getNumFiles());
         assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
         assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
@@ -185,9 +185,9 @@ public class ManagedConnectionTest extends BaseTestCase {
         catch (InterruptedException e) { }
             
         hc.refresh();
-        mc.updateHorizonStats(pr1);  //should be ignored for now
-        mc.updateHorizonStats(pr2);
-        mc.updateHorizonStats(pr3);
+        mc.stats().updateHorizonStats(pr1);  //should be ignored for now
+        mc.stats().updateHorizonStats(pr2);
+        mc.stats().updateHorizonStats(pr3);
         assertEquals("unexpected number of files", 1, hc.getNumFiles());
         assertEquals("unexpected number of hosts", 1, hc.getNumHosts());
         assertEquals("unexpected total filesize", 10, hc.getTotalFileSize());
