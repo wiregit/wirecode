@@ -75,7 +75,7 @@ public class StandardMessageRouter
         Response[] responses = FileManager.getFileManager().query(queryRequest);
 
         // If we have responses, send back a QueryReply
-        if (responses.length > 0)
+        if (responses!=null && (responses.length>0))
         {
             byte[] guid = queryRequest.getGUID();
             byte ttl = (byte)(queryRequest.getHops() + 1);
