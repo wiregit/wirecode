@@ -295,6 +295,9 @@ public final class SettingsManager {
      */
     private final boolean DEFAULT_EVER_SUPERNODE_CAPABLE = false;
 
+    /** By default we don't disable supernodes. */
+    private final boolean DEFAULT_DISABLE_SUPERNODE_MODE = false;
+
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
 	 * per second downstream.
@@ -415,7 +418,6 @@ public final class SettingsManager {
        = "MAX_SHIELDED_CLIENT_CONNECTIONS";
     private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
        = "MIN_SHIELDED_CLIENT_CONNECTIONS";
-    private final String SUPERNODE_MODE             = "SUPERNODE_MODE";
 
 	/**
 	 * Constant key for the minimum quality to allow in search results.
@@ -455,6 +457,9 @@ public final class SettingsManager {
      * "supernode capable" across all sessions.
      */
     private final String EVER_SUPERNODE_CAPABLE = "EVER_SUPERNODE_CAPABLE";
+
+    /** Key to disable supernode capability. */
+    private final String DISABLE_SUPERNODE_MODE = "DISABLE_SUPERNODE_MODE";
 
 	/**
 	 * Constant key for whether or not to connect on startup.
@@ -997,7 +1002,10 @@ public final class SettingsManager {
                     Boolean b = new Boolean(p);
                     setEverSupernodeCapable(b.booleanValue());
                 }
-				
+				else if(key.equals(DISABLE_SUPERNODE_MODE)) {
+                    Boolean b = new Boolean(p);
+                    setDisableSupernodeMode(b.booleanValue());
+                }
                 else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMaxShieldedClientConnections((new Integer(p)).intValue());
                 }
@@ -1109,6 +1117,7 @@ public final class SettingsManager {
 		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
 		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
         setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
+        setDisableSupernodeMode(DEFAULT_DISABLE_SUPERNODE_MODE);
         
         //settings for Supernode implementation
         setMaxShieldedClientConnections(
@@ -1845,6 +1854,11 @@ public final class SettingsManager {
      */
     public boolean getEverSupernodeCapable() {
 		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
+    }
+    
+    /** Returns true iff the user has disabled supernode mode. */
+    public boolean getDisableSupernodeMode() {
+        return getBooleanValue(DISABLE_SUPERNODE_MODE);
     }
 
 	/**
@@ -2935,7 +2949,10 @@ public final class SettingsManager {
 	public void setMaxDownstreamBytesPerSec(final int bytes) {
 		PROPS.put(MAX_DOWNSTREAM_BYTES_PER_SEC, Integer.toString(bytes));
 	}
-    
+
+
+    //settings for Supernode implementation    
+
     /**
      * Sets whether or not this node has ever met all of the requirements 
      * necessary to become a supernode, reqardless of whether or not it
@@ -2950,7 +2967,13 @@ public final class SettingsManager {
         PROPS.put(EVER_SUPERNODE_CAPABLE, b.toString());
     }
 
-    //settings for Supernode implementation
+    /** 
+     * Sets whether supernode mode is disabled. 
+     * @param disable true iff supernode mode should be disabled
+     */
+    public void setDisableSupernodeMode(boolean disable) {
+        setBooleanValue(DISABLE_SUPERNODE_MODE, disable);
+    }
     
     /**
      * Sets the maximum number of shielded connections to be supported by

@@ -155,15 +155,19 @@ public final class SupernodeAssigner implements Runnable {
     }
 
 	/**
-	 * Returns whether or not this node meets all the necessary 
+	 * Sets EVER_SUPERNODE_CAPABLE to true if this has the necessary
 	 * requirements for becoming a supernode if needed, based on 
 	 * the node's bandwidth, operating system, firewalled status, 
-	 * uptime, etc.
-	 *
-	 * @return <tt>true</tt> if this node meets the requirements of 
-	 *         a supernode, <tt>false</tt> otherwise
+	 * uptime, etc.  Does not modify the property if the capabilities
+     * are not met.  If the user has disabled supernode support, 
+     * sets EVER_SUPERNODE_CAPABLE to false.
 	 */
-	public boolean isSupernodeCapable() {
+	public void setSupernodeCapable() {
+        if (SETTINGS.getDisableSupernodeMode()) {
+            SETTINGS.setEverSupernodeCapable(false);
+            return;
+        }
+
         boolean isSupernodeCapable = 
             (((_maxUpstreamBytesPerSec >= 
             MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND) ||
@@ -176,7 +180,6 @@ public final class SupernodeAssigner implements Runnable {
         
         // if this is supernode capable, make sure we record it
         if(isSupernodeCapable) SETTINGS.setEverSupernodeCapable(true);
-        return isSupernodeCapable;
 	}
 
 	/**
@@ -201,7 +204,7 @@ public final class SupernodeAssigner implements Runnable {
   		}
     
         //check if became supernode capable
-        isSupernodeCapable();
+        setSupernodeCapable();
         
 	}
 
