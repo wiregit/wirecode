@@ -160,22 +160,6 @@ public class UrnType implements Serializable {
 		return true;
 	}
 
-	/**
-	 * Returns whether or not the specified namespace string represents a 
-	 * namespace that is supported.
-	 *
-	 * @return <tt>true</tt> if the namespace is supported, <tt>false</tt>
-	 *  otherwise
-	 */
-	//public static boolean isSupportedUrnNamespace(final String namespaceId) {
-		// we should add other namespace identifiers to this check as
-		// they become registered
-	//if(namespaceId.equalsIgnoreCase(SHA1_STRING)) {
-	//	return true;
-	//}
-	//return false;
-	//}
-
 	// the enum constants
 
 	/**
