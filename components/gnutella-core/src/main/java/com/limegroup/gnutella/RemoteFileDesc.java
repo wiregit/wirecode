@@ -8,12 +8,13 @@ package com.limegroup.gnutella;
  * @file RemoteFileDesc.java
  */
 
+import java.io.Serializable;
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
 import com.limegroup.gnutella.gui.GUIStyles;
 import com.sun.java.util.collections.Arrays;
 
-public class RemoteFileDesc implements Comparable {
+public class RemoteFileDesc implements Comparable, Serializable {
 
 	/**
 	 * RemoteFileDesc's have a priority associated with 

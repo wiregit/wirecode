@@ -73,6 +73,8 @@ public class RouterService
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         FileManager.instance().initialize(callback);
+        // Restore any downloads in progress.
+        downloader.readSnapshot();
     }
 
     /**

@@ -609,6 +609,15 @@ public class SettingsManager implements SettingsInterface
 		temp += getIncompleteDirectory();
         return HTTPUtil.stringSplit(temp, ';');		
 	}
+    
+    /** Returns the name of the file used to store the downloader state.  This
+     *  file is stored in the incomplete directory and is a read-only
+     *  property. */
+    public String getDownloadSnapshotFile() {
+        return 
+            (new File(incompleteDirectory_, "downloads.dat")).getAbsolutePath();
+    }
+
 
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}

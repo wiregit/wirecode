@@ -13,7 +13,12 @@ import java.net.*;
  *
  * As with other classes in this package, a DownloadManager instance may not be
  * used until initialize(..) is called.  The arguments to this are not passed
- * in to the constructor in case there are circular dependencies.
+ * in to the constructor in case there are circular dependencies.<p>
+ *
+ * DownloadManager provides ways to serialize download state to disk.  Reads are
+ * initiated by RouterService, since we have to wait until the GUI is initiated.
+ * Writes are initiated by this, since we need to be notified of completed
+ * downloads.  Downloads in the COULDNT_DOWNLOAD state are not serialized.  
  */
 public class DownloadManager {
     /** The callback for notifying the GUI of major changes. */
@@ -33,7 +38,7 @@ public class DownloadManager {
     private List /* of ManagedDownloader */ waiting=new LinkedList();
 
 
-    //////////////////////// Main Public Interface /////////////////////////
+    //////////////////////// Creation and Saving /////////////////////////
 
     /** 
      * Initializes this manager. <b>This method must be called before any other
@@ -52,7 +57,67 @@ public class DownloadManager {
         this.acceptor=acceptor;
         this.fileManager=fileManager;
     }
-                
+
+    /** Writes a snapshot of all downloaders in this to the file named
+     *  DOWNLOAD_SNAPSHOT_FILE.  Returns true iff the file was successfully
+     *  written. */
+    private synchronized boolean writeSnapshot() {
+        List buf=new ArrayList();
+        buf.addAll(active);
+        buf.addAll(waiting);
+
+        try {
+            ObjectOutputStream out=new ObjectOutputStream(
+                new FileOutputStream(
+                    SettingsManager.instance().getDownloadSnapshotFile()));
+            out.writeObject(buf);
+            out.flush();
+            out.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
+     *  to this, queued.  The queued downloads will restart immediately if slots
+     *  are available.  Returns false iff the file could not be read for any
+     *  reason. */
+    public synchronized boolean readSnapshot() {
+        //Read downloaders from disk.
+        List buf=null;
+        try {
+            ObjectInputStream in=new ObjectInputStream(
+                new FileInputStream(
+                    SettingsManager.instance().getDownloadSnapshotFile()));
+            buf=(List)in.readObject();
+        } catch (IOException e) {
+            System.out.println("IOException: "+e);
+            return false;
+        } catch (ClassCastException e) {
+            return false;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+
+        //Initialize and start downloaders.  Must catch ClassCastException since
+        //the data could be corrupt.
+        try {
+            for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
+                ManagedDownloader downloader=(ManagedDownloader)iter.next();
+                waiting.add(downloader);
+                callback.addDownload(downloader);
+                downloader.initialize(this);
+            }
+            return true;
+        } catch (ClassCastException e) {
+            return false;
+        }
+    }
+
+     
+    ////////////////////////// Main Public Interface ///////////////////////
+           
     /** 
      * Tries to "smart download" any of the given files.<p>  
      *
@@ -113,6 +178,8 @@ public class DownloadManager {
         ManagedDownloader downloader=new ManagedDownloader(this, files);
         waiting.add(downloader);
         callback.addDownload(downloader);
+        //Save this' state to disk for crash recovery.
+        writeSnapshot();
         return downloader;
     }   
     
@@ -154,6 +221,7 @@ public class DownloadManager {
         } catch (IOException e) { }
     }
 
+
     ////////////// Callback Methods for ManagedDownloaders ///////////////////
 
     private boolean hasFreeSlot() {
@@ -181,6 +249,9 @@ public class DownloadManager {
      *     @modifies this
      */
     public synchronized void yieldSlot(ManagedDownloader downloader) {
+        Assert.that(downloader!=null, "Null downloader");
+        Assert.that(active!=null, "Null active");
+        Assert.that(waiting!=null, "Null waiting");
         active.remove(downloader);
         waiting.add(downloader);
         notify();
@@ -199,6 +270,10 @@ public class DownloadManager {
         waiting.remove(downloader);
         notify();  
         callback.removeDownload(downloader);
+        //Save this' state to disk for crash recovery.  Note that a downloader
+        //in the GAVE_UP state is not serialized here even if still displayed in
+        //the GUI.  Maybe this callback model needs a little tweaking.
+        writeSnapshot();
     }
 
     /**
@@ -294,6 +369,5 @@ public class DownloadManager {
         } catch (IllegalArgumentException e) {
             throw new IOException();
         }          
-    }
-
+    }   
 }

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.File;
+import java.io.*;
 import com.limegroup.gnutella.*;
 
 /** 
@@ -18,7 +18,7 @@ import com.limegroup.gnutella.*;
  * Note that this class is responsible for determining if two similar files are
  * duplicates!  
  */
-public class IncompleteFileManager {
+public class IncompleteFileManager implements Serializable {
     /** The ID for the next instantiation of IncompleteFileManager.  Used to
      *  guarantee incomplete files of different downloads never conflict.
      *  LOCKING: obtain IncompleteFileManager's lock. */

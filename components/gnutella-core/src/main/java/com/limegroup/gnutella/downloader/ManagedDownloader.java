@@ -32,9 +32,17 @@ import java.net.*;
  * </ol>
  *
  * Note that the whole process will be repeated as long as we get the busy
- * signal from a host.
+ * signal from a host.<p>
+ *
+ * This class implements the Serializable interface but defines its own
+ * writeObject and readObject methods.  This is necessary because parts of the
+ * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
+ * reason, serializing and deserializing a ManagedDownloader M results in a
+ * ManagedDownloader M' that is the same as M except it is
+ * unconnected. <b>Furthermore, it is necessary to explicitly call
+ * initialize(..) after reading a ManagedDownloader from disk.</b> 
  */
-public class ManagedDownloader implements Downloader {
+public class ManagedDownloader implements Downloader, Serializable {
     /*********************************************************************
      *                     General Implementation Notes
      *
@@ -53,7 +61,7 @@ public class ManagedDownloader implements Downloader {
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
     /** The repository of incomplete files. */
-    private IncompleteFileManager incompleteFileManager=new IncompleteFileManager();
+    private IncompleteFileManager incompleteFileManager;
     /** The complete list of files passed to the constructor. */
     private RemoteFileDesc[] allFiles;
 
@@ -97,19 +105,19 @@ public class ManagedDownloader implements Downloader {
      *  These are not sorted.  They contain former members of files. */
     private List /* of RFDPushPair */ pushFiles;
     /** If started, the thread trying to do the downloads.  Otherwise null. */
-    private Thread dloaderThread=null;
+    private Thread dloaderThread;
     /** The connection we're using for the current attempt, or last attempt if
      *  we aren't actively downloading.  Or null if we've never attempted a
      *  download. */
-    private HTTPDownloader dloader=null;
+    private HTTPDownloader dloader;
     /** True iff this has been forcibly stopped. */
-    private boolean stopped=false;
+    private boolean stopped;
     /** A queue of incoming HTTPDownloaders from push downloads.  Call wait()
      *  and notify() on this if it changes.  Add to tail, remove from head. */
-    private List /* of HTTPDownloader */ pushQueue=new LinkedList();
+    private List /* of HTTPDownloader */ pushQueue;
     /** The list of all files we've requested via push messages.  Only files
      * matching this description may be accepted from incoming connections. */
-    private List /* of PushRequestedFile */ requested=new LinkedList();
+    private List /* of PushRequestedFile */ requested;
 
 
     ///////////////////////// Variables for GUI Display  /////////////////
@@ -121,31 +129,52 @@ public class ManagedDownloader implements Downloader {
     private long stateTime;
     /** The current address we're trying, or last address if waiting, or null
      *  if unknown. */
-    private String lastAddress=null;
+    private String lastAddress;
     /** The number of tries we've made.  0 means on the first try. */
-    private int tries=0;
+    private int tries;
 
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
-     * attempts to begin immediately.  Non-blocking.
+     * attempts to begin immediately; there is no need to call initialize.
+     * Non-blocking.
      *     @param manager the delegate for queueing purposes.  Also the callback
      *      for changes in state.
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
      */
     public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
-        this.manager=manager;
         this.allFiles=files;
-        initialize();
+        incompleteFileManager=new IncompleteFileManager();
+        initialize(manager);
+    }
+
+    /** See note on serialization at top of file */
+    private void writeObject(ObjectOutputStream stream)
+            throws IOException {
+        stream.writeObject(allFiles);
+        stream.writeObject(incompleteFileManager);
+    }
+
+    /** See note on serialization at top of file.  You must call initialize on
+     *  this!  */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {        
+        allFiles=(RemoteFileDesc[])stream.readObject();
+        incompleteFileManager=(IncompleteFileManager)stream.readObject();
     }
 
     /** 
-     * (Re)initializes and (re)starts this.  
-     *     @requires this is uninitialized or stopped.
-     *     @modifies files, pushFiles, dloaderThread, state, stopped
-     */
-    private void initialize() {
+     * Initializes a ManagedDownloader read from disk.  Also used for internally
+     * initializing or resuming a normal download; there is no need to
+     * explicitly call this method in that case.  After the call, this is in the
+     * queued state, at least for the moment.
+     *     @requires this is uninitialized or stopped, 
+     *      and allFiles, and incompleteFileManager are set
+     *     @modifies everything but the above fields */
+    public void initialize(DownloadManager manager) {
+        this.manager=manager;
+
         //Sort files by size and store in this.files and this.pushFiles.  Note
         //that Arrays.sort(..)  sorts in ASCENDING order, so we iterate through
         //the array backwards.
@@ -165,8 +194,14 @@ public class ManagedDownloader implements Downloader {
                 this.files.add(rfd);
         }
 
+        this.dloader=null;
         stopped=false;
+        pushQueue=new LinkedList();
+        requested=new LinkedList();
         setState(QUEUED);
+        this.lastAddress=null;
+        this.tries=0;
+            
         this.dloaderThread=new Thread(new ManagedDownloadRunner());
         dloaderThread.setDaemon(true);
         dloaderThread.start();       
@@ -252,7 +287,7 @@ public class ManagedDownloader implements Downloader {
             //This stopped because all hosts were tried.  (Note that this
             //couldn't have been user aborted.)  Therefore no threads are
             //running in this and it may be safely resumed.
-            initialize();
+            initialize(this.manager);
         } else {
             //The current download is only affected if waiting to retry--which
             //is exactly what we want.
