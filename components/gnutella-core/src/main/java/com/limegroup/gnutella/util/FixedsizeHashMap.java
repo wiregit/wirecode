@@ -48,7 +48,7 @@ public FixedsizeHashMap(int size)
 * already full or not
 * @see isfull()
  */
-public Object put(Object key, Object value) 
+public synchronized Object put(Object key, Object value) throws NoMoreStorageException
 {
     Object retValue = null;
     
@@ -92,7 +92,7 @@ public Object put(Object key, Object value)
 * @param key The given key
 * @return the value given key maps to
 */
-public Object get(Object key)
+public synchronized Object get(Object key)
 {
     return hashMap.get(key);
 }
@@ -102,7 +102,7 @@ public Object get(Object key)
 * @param key The key to be removed
 * @return the value associated with the key, or null if the key was not present
 */
-public Object remove(Object key)
+public synchronized Object remove(Object key)
 {
     //remove the mapping
     Object ret = hashMap.remove(key);
@@ -122,8 +122,19 @@ public Object remove(Object key)
 
 
 /**
+* Returns the Set that contains all the entries in the Map
+* @return the Set that contains all the entries in the Map
+*/
+public synchronized Set entrySet()
+{
+    return hashMap.entrySet();
+}
+
+/**
  * checks if the hash Map is full or not (ie if for adding new item we need
  * to remove some item
+ * This method is not synchronized (it doesnt matter much if the count is 1 off
+ * or so)
  * @return true if the map is full, false otherwise
  */
 public boolean isFull()
