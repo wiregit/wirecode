@@ -375,27 +375,7 @@ public class QueryRequest extends Message implements Serializable{
         byte[] guid = GUID.makeAddressEncodedGuid(ip, port);
         return QueryRequest.createOutOfBandQuery(guid, query, "");
     }                                
-    
-
-	/**
-	 * Creates a new query for the specified file name and the designated XML.
-	 *
-	 * @param query the file name to search for
-	 * @return a new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip and port into the GUID and appropriate marked the
-	 * query to signify out of band support.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-    public static QueryRequest createOutOfBandQuery(String query, String xmlQuery,
-                                                    byte[] ip, int port) {
-        byte[] guid = GUID.makeAddressEncodedGuid(ip, port);
-        return QueryRequest.createOutOfBandQuery(guid, query, xmlQuery);
-    }                                
-    
-
+   
 
 	/**
 	 * Creates a new query for the specified file name, with no XML.
