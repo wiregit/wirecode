@@ -132,27 +132,36 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		HashSet proxies = new HashSet();
 		
-		while(tok.hasMoreTokens()) {
+		int parsedProxies = 0;
+		
+		while(tok.hasMoreTokens() && parsedProxies < 4) {
 			String current = tok.nextToken();
 			
 			int separator = current.indexOf(":");
 			
 			//see if this is a valid; skip gracefully invalid altlocs
-			if (separator == -1 || separator!= current.lastIndexOf(":"))
+			if (separator == -1 || separator!= current.lastIndexOf(":") ||
+					separator == current.length())
 				continue;
 				
 			String host = current.substring(0,separator);
 			String portS = current.substring(separator+1);
-			int port = Integer.parseInt(portS);
+			
 			
 			try {
+				int port = Integer.parseInt(portS);
+				
 				QueryReply.PushProxyContainer ppc = 
 					new QueryReply.PushProxyContainer(host, port);
 				
 				hashcode = 37* hashcode + ppc.hashCode();
 				
 				proxies.add(ppc);
+				parsedProxies++;
+				
 			}catch(UnknownHostException notBad) {
+				continue;
+			}catch(IllegalArgumentException notBad) {
 				continue;
 			}
 		}
