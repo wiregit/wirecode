@@ -32,26 +32,61 @@ class NIODispatcher implements Runnable {
     
     private Selector selector = null;
     
-    /**
-     * A set of items pending registration for selection.
-     */
-    private final Set PENDING = new HashSet();
+    /** Lock for pending items. */
+    private final Object PENDING_LOCK = new Object();
+    /** List of pending channels/attachments wanting OP_ACCEPT */
+    private final List PENDING_ACCEPT = new LinkedList();
+    /** List of pending channels/attachments wanting OP_CONNECT */
+    private final List PENDING_CONNECT = new LinkedList();
+    /** List of pending channels/attachments wanting OP_READ */
+    private final List PENDING_READ = new LinkedList();
+    /** List of pending channels/attachments wanting OP_WRITE */
+    private final List PENDING_WRITE = new LinkedList();
+    /** List of pending channels/attachments wanting OP_WRITE & OP_READ */
+    private final List PENDING_RW = new LinkedList();
     
-    /**
-     * Register interest.
-     */
-    public void register(NIOHandler handler) {
-        LOG.debug("Wanting to register: " + handler);
-        
-        SelectableChannel channel = handler.getSelectableChannel();
-        SelectionKey sk = channel.keyFor(selector);
-        if(sk == null || sk.interestOps() != handler.interestOps()) {
-            synchronized(PENDING) {
-                PENDING.add(handler);
-            }
-            
-            selector.wakeup();
+    /** Register interest in accepting */
+    void registerAccept(SelectableChannel channel, NIOHandler attachment) {
+        register(PENDING_ACCEPT, channel, attachment);
+    }
+    
+    /** Register interest in connecting */
+    void registerConnect(SelectableChannel channel, NIOHandler attachment) {
+        register(PENDING_CONNECT, channel, attachment);
+    }
+    
+    /** Register interest in reading */
+    void registerRead(SelectableChannel channel, NIOHandler attachment) {
+        register(PENDING_READ, channel, attachment);
+    }
+    
+    /** Register interest in writing */
+    void registerWrite(SelectableChannel channel, NIOHandler attachment) {
+        register(PENDING_WRITE, channel, attachment);
+    }
+    
+    /** Register interest in both reading & writing */
+    void registerReadWrite(SelectableChannel channel, NIOHandler attachment) {
+        register(PENDING_RW, channel, attachment);
+    }
+    
+    /** Register interest */
+    private void register(List list, SelectableChannel channel, NIOHandler attachment) {
+        synchronized(PENDING_LOCK) {
+            list.add(new Object[] { channel, attachment });
         }
+    }
+    
+    /** Registers a SelectableChannel as being interested in a write again. */
+    void interestWrite(SelectableChannel channel) {
+        SelectionKey sk = channel.keyFor(selector);
+        sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
+    }
+    
+    /** Registers a SelectableChannel as being interested in a read again. */
+    void interestRead(SelectableChannel channel) {
+        SelectionKey sk = channel.keyFor(selector);
+        sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
     }
     
     /**
@@ -112,9 +147,10 @@ class NIODispatcher implements Runnable {
         SocketChannel channel = (SocketChannel)sk.channel();
         
         boolean finished = channel.finishConnect();
-        if(finished)
+        if(finished) {
             handler.handleConnect();
-        else
+            sk.interestOps(SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+        } else
             cancel(sk, handler);
     }
     
@@ -131,8 +167,10 @@ class NIODispatcher implements Runnable {
             return;
         
         SocketChannel channel = (SocketChannel)sk.channel();
-        handler.handleRead();
-        sk.interestOps(handler.interestOps());
+        boolean more = handler.handleRead();
+        if(!more)
+            sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
+        // else it's already set.
     }
     
     /**
@@ -148,29 +186,36 @@ class NIODispatcher implements Runnable {
             return;
         
         SocketChannel channel = (SocketChannel)sk.channel();
-        handler.handleWrite();
-        sk.interestOps(handler.interestOps());
+        boolean more  = handler.handleWrite();
+        if(!more)
+            sk.interestOps(sk.interestOps() & ~SelectionKey.OP_WRITE);
+        // else it's already set.
     }
     
     /**
      * Adds any pending registrations.
      */
     private void addPendingItems() {
-        synchronized(PENDING) {
-            for(Iterator i = PENDING.iterator(); i.hasNext(); ) {
-                NIOHandler next = (NIOHandler)i.next();
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Adding pending: " + next);
-                SelectableChannel channel = next.getSelectableChannel();
-                try {
-                    channel.register(selector, next.interestOps(), next);
-                } catch(ClosedChannelException cce) {
-                    LOG.warn("Closed while registering", cce);
-                    next.handleIOException(cce);
-                }
+        synchronized(PENDING_LOCK) {
+            doRegister(PENDING_ACCEPT, SelectionKey.OP_ACCEPT);
+            doRegister(PENDING_CONNECT, SelectionKey.OP_CONNECT);
+            doRegister(PENDING_READ, SelectionKey.OP_READ);
+            doRegister(PENDING_WRITE, SelectionKey.OP_WRITE);
+            doRegister(PENDING_RW, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        }
+    }
+    
+    /** Register pending items from a list with the given op */
+    private void doRegister(List l, int op) {
+        for(Iterator i = l.iterator(); i.hasNext(); ) {
+            Object[] next = (Object[])i.next();
+            SelectableChannel channel = (SelectableChannel)next[0];
+            NIOHandler attachment = (NIOHandler)next[1];
+            try {
+                channel.register(selector, op, attachment);
+            } catch(IOException iox) {
+                attachment.handleIOException(iox);
             }
-            
-            PENDING.clear();
         }
     }
     
@@ -182,18 +227,11 @@ class NIODispatcher implements Runnable {
         int n = -1;
                 
         while(true) {
-            
-            try {
-                Thread.sleep(50);
-            } catch(InterruptedException ix) {
-                LOG.warn("IX", ix);
-            }
-            
             addPendingItems();
 
             LOG.debug("Selecting");
             try {
-                n = selector.select();
+                n = selector.select(50);
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -205,10 +243,8 @@ class NIODispatcher implements Runnable {
                 throw new RuntimeException(iox);
             }
             
-            if (n == 0) {
-                LOG.debug("Nothing selected, continuing");
+            if (n == 0)
                 continue;
-            }
                 
             Collection keys = selector.selectedKeys();
             if(LOG.isDebugEnabled())

@@ -29,9 +29,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     
     // Constructs an NIOSocket using a preestablished socket.
     // Used by NIOServerSocket.
-    NIOSocket(Socket s) {
+    NIOSocket(Socket s) throws IOException {
         channel = s.getChannel();
         socket = s;
+        NIODispatcher.instance().registerReadWrite(channel, this);
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
         connectedTo = s.getInetAddress();
@@ -40,26 +41,26 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     public NIOSocket() throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
+        init();
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        init();
     }
     
     public NIOSocket(InetAddress addr, int port) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
+        init();
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        init();
         connect(new InetSocketAddress(addr, port));
     }
     
     public NIOSocket(InetAddress addr, int port, InetAddress localAddr, int localPort) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
+        init();
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        init();
         bind(new InetSocketAddress(localAddr, localPort));
         connect(new InetSocketAddress(addr, port));
     }
@@ -76,34 +77,53 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         channel.configureBlocking(false);
     }
     
-    public void handleConnect() {
+    public void handleConnect() throws IOException {
         synchronized(LOCK) {
             LOCK.notify();
         }
     }
     
-    public void handleRead() {
-        reader.bump();
+    public boolean handleRead() throws IOException {
+        return reader.readChannel();
     }
     
-    public void handleWrite() {
-        writer.bump();
+    public boolean handleWrite() throws IOException {
+        return writer.writeChannel();
     }
     
     public void handleIOException(IOException iox) {
         synchronized(LOCK) {
             storedException = iox;
+            LOCK.notify();
         }
+        
+        shutdown();
     }
     
-    public int interestOps() {
-        if(isConnected())
-            return reader.interestOps() | writer.interestOps();
-        else if(!isClosed())
-            return SelectionKey.OP_CONNECT;
-        else
-            return 0;
+    /**
+     * Shuts down this socket & all its streams.
+     */
+    void shutdown() {
+        try {
+            shutdownInput();
+        } catch(IOException ignored) {}
+            
+        try {
+            shutdownOutput();
+        } catch(IOException ignored) {}
+            
+        reader.shutdown();
+        writer.shutdown();
+        
+        try {
+            socket.close();
+        } catch(IOException ignored) {}
+            
+        try {
+            channel.close();
+        } catch(IOException ignored) {}
     }
+           
     
     public SelectableChannel getSelectableChannel() {
         return channel;
@@ -121,25 +141,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     }
     
     public void connect(SocketAddress addr) throws IOException {
-        synchronized(LOCK) {
-            if(!channel.connect(addr)) {
-                NIODispatcher.instance().register(this);
-                try {
-                    LOCK.wait();
-                } catch(InterruptedException ix) {
-                    throw new InterruptedIOException(ix);
-                }
-                
-                IOException x = storedException;
-                storedException = null;
-                if(x != null)
-                    throw x;
-                    
-            }
-            
-            if(LOG.isTraceEnabled())
-                LOG.trace("Connected to: " + addr);
-        }
+        connect(addr, 0);
     }
     
     public void connect(SocketAddress addr, int timeout) throws IOException {
@@ -147,7 +149,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
 
         synchronized(LOCK) {
             if(!channel.connect(addr)) {
-                NIODispatcher.instance().register(this);
+                NIODispatcher.instance().registerConnect(channel, this);
                 try {
                     LOCK.wait(timeout);
                 } catch(InterruptedException ix) {
@@ -189,11 +191,11 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     }
     
     public InputStream getInputStream() {
-        return reader;
+        return reader.getInputStream();
     }
     
     public OutputStream getOutputStream() {
-        return writer;
+        return writer.getOutputStream();
     }
     
     public int getPort() {
@@ -297,6 +299,6 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     }
     
     public String toString() {
-        return "NIOSocket::" + channel.toString() + "interest: " + interestOps();
+        return "NIOSocket::" + channel.toString();
     }
 }

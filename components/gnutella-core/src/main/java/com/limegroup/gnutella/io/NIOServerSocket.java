@@ -111,12 +111,12 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
     
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);
-        NIODispatcher.instance().register(this);
+        NIODispatcher.instance().registerAccept(channel, this);
     }
      
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
         socket.bind(endpoint, backlog);
-        NIODispatcher.instance().register(this);
+        NIODispatcher.instance().registerAccept(channel, this);
     }
     
     public void close() throws IOException {

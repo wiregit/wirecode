@@ -9,118 +9,100 @@ import java.net.*;
 import org.apache.commons.logging.*;
 
 /**
- * A blocking inputstream that uses non-blocking I/O
- * as its core.
+ * Manages reading data from the network & piping it to a blocking input stream.
  *
- * Phase-1 in converting to NIO.
+ * This implements WriteHandler because it uses Pipes to write to a blocking
+ * input stream.  The Pipe.SinkChannel is writeable and needs to be notified via
+ * NIODispatcher when writing is ready.
  */
-class NIOInputStream extends InputStream {
+class NIOInputStream implements WriteHandler {
     
     private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
     
-    private final ReadHandler handler;
+    private final NIOSocket handler;
     private final SocketChannel channel;
-    private ByteBuffer buffer;
-    private volatile boolean interested = false;
+    private final InputStream source;
+    private final Pipe.SinkChannel sink;
+    private final ByteBuffer buffer;
     
-    private final Object LOCK = new Object();
-    
-    NIOInputStream(ReadHandler handler, SocketChannel channel) {
+    /**
+     * Constructs a new pipe to allow SocketChannel's reading to funnel
+     * to a blocking InputStream.
+     */
+    NIOInputStream(NIOSocket handler, SocketChannel channel) throws IOException {
         this.handler = handler;
         this.channel = channel;
+        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
+        
+        Pipe pipe = Pipe.open();
+        sink = pipe.sink();
+        sink.configureBlocking(false);
+        pipe.source().configureBlocking(true);
+        source = Channels.newInputStream(pipe.source());
+        NIODispatcher.instance().registerWrite(sink, this);
     }
     
-    public void close() throws IOException {
-        channel.close();
+    /**
+     * Retrieves the InputStream to read from.
+     */
+    InputStream getInputStream() {
+        return source;
     }
     
-    public int available() throws IOException {
-        return 0;
+    /**
+     * Notification that a read can happen on the SocketChannel.
+     */
+    boolean readChannel() throws IOException {
+        // read everything we can.
+        while(buffer.hasRemaining() && channel.read(buffer) != 0);
+        
+        // If there's data in the buffer, we're interested in writing.
+        if(buffer.position() > 0)
+            NIODispatcher.instance().interestWrite(sink);
+        
+        // if there's room in the buffer, we're interested in more reading ...
+        // if not, we're not interested in more reading.
+        return buffer.hasRemaining();
     }
     
-    public void mark(int readlimit) {
-        throw new UnsupportedOperationException();
-    }
-    
-    public boolean markSupported() {
-        return false;
-    }
-    
-
-    public void reset() {
-        throw new UnsupportedOperationException();
-    }
-    
-    public long skip(long n) throws IOException {
-        synchronized(LOCK) {
-            return super.skip(n);
-        }
-    }
-    
-    public int read() throws IOException {
-        byte[] b = new byte[1];
-        read(b);
-        return b[0];
-    }
-    
-    public int read(byte[] b) throws IOException {
-        return read(b, 0, b.length);
-    }
-    
-    public int read(byte[] b, int off, int len) throws IOException {
-        synchronized(LOCK) {
-            if(len != 0) {
-                buffer = ByteBuffer.wrap(b, off, len);
-                interested = true;
-                NIODispatcher.instance().register(handler);
-                readImpl();
-            }
+    /**
+     * Notification that a write can happen on the SinkChannel.
+     */
+    public boolean handleWrite() throws IOException {
+        // write everything we can.
+        buffer.flip();
+        while(buffer.hasRemaining() && sink.write(buffer) != 0);
+        buffer.compact();
+        
+        // If there's room in the buffer, we're interested in reading.
+        if(buffer.hasRemaining())
+            NIODispatcher.instance().interestRead(channel);
             
-            interested = false;
-            return len - buffer.remaining();
-        }
+        // if we were able to write everything, we're not interested in more writing.
+        // otherwise, we are interested.
+        return buffer.position() > 0;
     }
     
-    private void readImpl() throws IOException {
-        if(interested) {
-            boolean looped = false;
-            int wanted = buffer.remaining();
-            while(buffer.remaining() - wanted == 0) {
-                while(channel.read(buffer) != 0 && buffer.hasRemaining());
-                if(LOG.isTraceEnabled())
-                    LOG.trace("Remaining: " + buffer.remaining() + ", wanted: " + wanted);
-                if(buffer.remaining() - wanted == 0) {
-                    if(looped) {
-                        IOException x = new java.io.InterruptedIOException("read timed out");
-                        LOG.debug("Timeout while reading", x);
-                        throw x;
-                    }
-                    
-                    NIODispatcher.instance().register(handler);
-                    try {
-                        int timeout = Math.max(0, handler.getSoTimeout());
-                        LOCK.wait(timeout);
-                        if(timeout != 0)
-                            looped = true;
-                    } catch(InterruptedException ix) {
-                        throw new InterruptedIOException(ix);
-                    }
-                }
-            }
-        }
+    /**
+     * Notification that an IOException has occurred on one of these channels.
+     */
+    public void handleIOException(IOException iox) {
+        // Inform the NIOSocket that things are dead.  That will shut us down.
+        handler.shutdown();
     }
     
-    int interestOps() {
-        if(interested)
-            return SelectionKey.OP_READ;
-        else
-            return 0;
-    }
-    
-    void bump() {
-        synchronized(LOCK) {
-            LOCK.notify();
-        }
+    /**
+     * Shuts down all internal channels.
+     * The SocketChannel should be shut by NIOSocket.
+     */
+    void shutdown() {
+        try {
+            sink.close();
+        } catch(IOException ignored) {}
+            
+        try {
+            source.close();
+        } catch(IOException ignored) {}
     }
 }
                 
