@@ -28,11 +28,22 @@ import com.limegroup.gnutella.statistics.*;
  * <tt>Connection</tt> supports only 0.6 handshakes.  Gnutella 0.6 connections
  * have a list of properties read and written during the handshake sequence.
  * Typical property/value pairs might be "Query-Routing: 0.3" or "User-Agent:
- * LimeWire".  
+ * LimeWire".<p>
  *
  * This class augments the basic 0.6 handshaking mechanism to allow
  * authentication via "401" messages.  Authentication interactions can take
- * multiple rounds.  
+ * multiple rounds.<p>
+ * 
+ * Finally, <tt>Connection</tt> also handles setting the SOFT_MAX_TTL on a
+ * per-connection basis.  The SOFT_MAX TTL is the limit for hops+TTL on all
+ * incoming traffic, with the exception of query hits.  If an incoming 
+ * message has hops+TTL greater than SOFT_MAX, we set the TTL to 
+ * SOFT_MAX-hops.  We do this on a per-connection basis because on newer
+ * connections that understand X-Max-TTL, we can regulate the TTLs they 
+ * send us.  This helps prevent malicious hosts from using headers like 
+ * X-Max-TTL to simply get connections.  This way, they also have to abide
+ * by the contract of the X-Max-TTL header, illustrated by sending lower
+ * TTL traffic generally.
  */
 public class Connection {
     /** 
@@ -316,7 +327,7 @@ public class Connection {
             else
                 initializeIncoming();
 
-            _headers = HandshakeResponse.createResponse(HEADERS_READ);            
+            _headers = HandshakeResponse.createResponse(HEADERS_READ);     
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
@@ -324,11 +335,12 @@ public class Connection {
             // may come from a leaf, and therefore can have an extra hop.
             // "Good" connections are connections with features such as 
             // intra-Ultrapeer QRP passing.
+            _softMax = ConnectionSettings.SOFT_MAX.getValue();
             if(isGoodUltrapeer()) {
-                _softMax = (byte)(_headers.getMaxTTL()+(byte)1);
-            } else {
-                _softMax = ConnectionSettings.SOFT_MAX.getValue();
-            }
+                // we give these an extra hop because they might be sending
+                // us traffic from their leaves
+                _softMax++;
+            } 
 						
         } catch (NoGnutellaOkException e) {
             close();
