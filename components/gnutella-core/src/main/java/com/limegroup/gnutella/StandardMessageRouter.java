@@ -36,15 +36,12 @@ public class StandardMessageRouter
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
-        System.out.println("About to respond to ping request");
         //only return our own address if we still have any available incoming
         //slots or 
         int hops = (int)pingRequest.getHops();
         int ttl = (int)pingRequest.getTTL();
         if ( (!_manager.hasAvailableIncoming()) && ((hops+ttl > 2)) )
             return;
-
-        System.out.println("Responding with our own address");
 
         int num_files = FileManager.instance().getNumFiles();
         int kilobytes = FileManager.instance().getSize()/1024;
