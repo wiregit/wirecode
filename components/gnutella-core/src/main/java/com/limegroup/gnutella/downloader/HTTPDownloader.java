@@ -1292,7 +1292,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private void parseAvailableRangesHeader(String line, RemoteFileDesc rfd) 
                                                             throws IOException {
         IntervalSet availableRanges = new IntervalSet();
-        
+
         line = line.toLowerCase();
         // start parsing after the word "bytes"
         int start = line.indexOf("bytes") + 6;
@@ -1333,6 +1333,11 @@ public class HTTPDownloader implements BandwidthTracker {
                 // bytes A-B, C-D
                 //         ^
                 int high = Integer.parseInt(line.substring(start, stop).trim());
+
+                // start parsing after the next comma. If we are at the
+                // end of the header line start will be set to 
+                // line.length() +1
+                start = stop + 1;
                 
                 if(high >= rfd.getSize())
                     high = rfd.getSize()-1;
@@ -1342,11 +1347,6 @@ public class HTTPDownloader implements BandwidthTracker {
 
                 // this interval should be inclusive at both ends
                 interval = new Interval( low, high );
-                
-                // start parsing after the next comma. If we are at the
-                // end of the header line start will be set to 
-                // line.length() +1
-                start = stop + 1;
                 
             } catch (NumberFormatException e) {
                 throw new ProblemReadingHeaderException(e);
