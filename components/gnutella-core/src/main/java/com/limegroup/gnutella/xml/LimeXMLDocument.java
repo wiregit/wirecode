@@ -51,8 +51,8 @@ public class LimeXMLDocument{
             e.printStackTrace();
         }
         document = parser.getDocument();
-        createMap(document);
         makeSchemaURI(document);
+        createMap(document);
     }
     
     private void makeSchemaURI(Document doc){
