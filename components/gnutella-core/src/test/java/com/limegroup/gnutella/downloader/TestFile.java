@@ -18,6 +18,10 @@ public class TestFile {
     private static final int A_INT=0x4F1BBCDC;
     private static URN myHash = null;
     private static HashTree myTree = null;
+    static {
+        hash();
+        tree();
+    }
 
     public static byte getByte(int i) {
         //Generates a consistent stream of psuedorandom bytes

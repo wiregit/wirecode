@@ -153,7 +153,7 @@ public final class NormalUploadState implements HTTPMessage {
                     features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
                 // Write X-Features header.
                 if (features.size() > 0) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
+                    HTTPUtils.writeHeader(HTTPHeaderName.FEATURES,
                              new HTTPHeaderValueCollection(features),
                                           ostream);
                 }
@@ -161,7 +161,7 @@ public final class NormalUploadState implements HTTPMessage {
                 // write X-Thex-URI header with root hash if we have already 
                 // calculated the tigertree
                 if (FILE_DESC.getHashTree()!=null)
-                    HTTPUtils.writeHeader(HTTPHeaderName.X_THEX_URI,
+                    HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
                                           FILE_DESC.getHashTree(),
                                           ostream);                                   
             }

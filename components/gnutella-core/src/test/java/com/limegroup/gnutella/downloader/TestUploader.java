@@ -40,6 +40,8 @@ public class TestUploader extends AssertComparisons {
     private volatile int totalUploaded;
     /** The number of connections received */
     private int connects=0;
+    /** The maximum number of connect attempts */
+    private int maxConnects = Integer.MAX_VALUE;
     /** The last request sent, e.g., "GET /get/0/file.txt HTTP/1.0" */
     private String request=null;
 
@@ -51,6 +53,8 @@ public class TestUploader extends AssertComparisons {
     private boolean stopped;
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
+    /** the boundary between stop/start to send corrupt bytes */
+    private int corruptBoundary;
 
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
@@ -115,6 +119,21 @@ public class TestUploader extends AssertComparisons {
      * Whether or not thex was requested.
      */
     private boolean thexWasRequested = false;
+    
+    /**
+     * Whether or not to send the content length in the response.
+     */
+    private boolean sendContentLength = true;
+    
+    /**
+     * If we should queue when thex is requested.
+     */
+    private boolean queueOnThex = false;
+    
+    /**
+     * Whether or not we should use a bad THEX response header.
+     */
+    private boolean useBadThexResponseHeader = false;
     
     /**
      * The sum of the number of bytes we need to upload across all requests.  If
@@ -192,6 +211,7 @@ public class TestUploader extends AssertComparisons {
         rate = 10000;
         stopped = false;
         sendCorrupt = false;
+        corruptBoundary = 0;
         busy = false;
         retryAfter = -1;
         timesBusy = Integer.MAX_VALUE;
@@ -205,12 +225,16 @@ public class TestUploader extends AssertComparisons {
         totalAmountToUpload = 0;
         requestsReceived = 0;
         connects = 0;
+        maxConnects = Integer.MAX_VALUE;
         lowChunkOffset = 0;
         highChunkOffset = 0;
         respondWithHTTP11 = true;
         sendThexTreeHeader = false;
         sendThexTree = false;
         thexWasRequested = false;
+        sendContentLength = true;
+        queueOnThex = false;
+        useBadThexResponseHeader = false;
     }
 
     public int amountUploaded() {
@@ -269,6 +293,13 @@ public class TestUploader extends AssertComparisons {
     /** Sets whether this should send bad data. */
     public void setCorruption(boolean corrupt) {
         this.sendCorrupt = corrupt;
+    }
+    
+    /**
+     * Sets the boundary around stop/start to send corrupted bytes.
+     */
+    public void setCorruptBoundary(int num) {
+        this.corruptBoundary = num;
     }
 
     /** 
@@ -330,6 +361,27 @@ public class TestUploader extends AssertComparisons {
         return thexWasRequested;
     }
     
+    /**
+     * Sets whether or not to send the content length in the response.
+     */
+    public void setSendContentLength(boolean yes) {
+        sendContentLength = yes;
+    }
+    
+    /**
+     * Sets whether or not to queue on the thex request.
+     */
+    public void setQueueOnThex(boolean yes) {
+        queueOnThex = yes;
+    }
+    
+    /**
+     * Sets whether or not we'll use a bad thex response header.
+     */
+    public void setUseBadThexResponseHeader(boolean yes ) {
+        useBadThexResponseHeader = yes;
+    }   
+    
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
@@ -347,6 +399,13 @@ public class TestUploader extends AssertComparisons {
     /** Returns the number of connections this accepted. */
     public int getConnections() {
         return connects;
+    }
+    
+    /**
+     * Sets the maximum amount of connects allowed.
+     */
+    public void setMaxConnects(int max) {
+        maxConnects = max;
     }
     
     /**
@@ -371,6 +430,12 @@ public class TestUploader extends AssertComparisons {
             try {
                 socket = server.accept();
                 connects++;
+                if(connects > maxConnects) {
+                    LOG.debug("over-connected");
+                    socket.close();
+                    continue;
+                }
+                    
 
                 // make sure it's from us
 				InetAddress address = socket.getInetAddress();
@@ -444,6 +509,7 @@ public class TestUploader extends AssertComparisons {
         boolean firstLine=true;
         AlternateLocationCollection badLocs = null;
         AlternateLocationCollection goodLocs = null;
+        boolean thexReq = false;
         while (true) {
             String line=input.readLine();
             if (firstLine) {
@@ -485,8 +551,8 @@ public class TestUploader extends AssertComparisons {
             i = line.indexOf("GET");
             if(i==0) {
                 http11 = line.indexOf("1.1") > 0;
-                thexWasRequested |= 
-                    line.indexOf(TestFile.tree().getThexURI()) > 0;
+                thexReq = line.indexOf(TestFile.tree().getThexURI()) > 0;
+                thexWasRequested |= thexReq;
             }
 		}
         if(_sha1!=null) {
@@ -507,9 +573,18 @@ public class TestUploader extends AssertComparisons {
                 }        
             }
         }
-        //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
+
+        if(thexReq && queueOnThex) {
+            queueOnThex = false;
+            queue = true;
+            sendThexTree = true;
+        }
         
-        if(thexWasRequested && sendThexTree) {
+        if(thexReq && useBadThexResponseHeader) {
+            sendThexTree = true;
+        }
+        
+        if(thexReq && sendThexTree && !queue) {
             LOG.debug("sending thex tree.");
             sendThexTree = false;
             sendThexTree(output);
@@ -522,12 +597,21 @@ public class TestUploader extends AssertComparisons {
     }
     
     private void sendThexTree(OutputStream out) throws IOException {
-        String str = "HTTP/1.1 200 OK\r\n" +
-                     "ugly-header: ugly-value\r\n" + 
-                     "hot diggity doo\r\n" +
-                     "\r\n";
-        out.write(str.getBytes());
-        TestFile.tree().write(out);
+        if(!useBadThexResponseHeader) {
+            String str = "HTTP/1.1 200 OK\r\n" +
+                         "ugly-header: ugly-value\r\n" + 
+                         "hot diggity doo\r\n" +
+                         "\r\n";
+            out.write(str.getBytes());
+            TestFile.tree().write(out);
+        } else {
+            String body = "You have failed miserably in your attempts.";
+            String str = "HTTP/1.1 9000 Failed Miserably\r\n" +
+                         "Content-Length: " + body.length() + "\r\n" +
+                         "\r\n";
+            out.write(str.getBytes());
+            out.write(body.getBytes());
+        }
     }
 
     private void send(OutputStream out, int start, int stop) 
@@ -593,8 +677,11 @@ public class TestUploader extends AssertComparisons {
                 return;
             }
         }
-		str = "Content-Length:"+ (stop - start) + "\r\n";
-		out.write(str.getBytes());	   
+        if(sendContentLength) {
+		    str = "Content-Length:"+ (stop - start) + "\r\n";
+		    out.write(str.getBytes());	   
+        }
+        
 		if (start != 0 || (stop - start != TestFile.length())) {
             //Note that HTTP stop values are INCLUSIVE.  Our internal values
             //are EXCLUSIVE.  Hence the -1.
@@ -616,7 +703,7 @@ public class TestUploader extends AssertComparisons {
                                   out);
         }
         if(sendThexTreeHeader) {
-            HTTPUtils.writeHeader(HTTPHeaderName.X_THEX_URI,
+            HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
                                   TestFile.tree(),
                                   out);
         }
@@ -639,7 +726,9 @@ public class TestUploader extends AssertComparisons {
                 out.flush();
                 throw new IOException();
             }
-            if(sendCorrupt)
+            if(sendCorrupt &&
+               i-start >= corruptBoundary &&
+               stop-i >= corruptBoundary )
                 out.write(TestFile.getByte(i)+(byte)1);
             else
                 out.write(TestFile.getByte(i));

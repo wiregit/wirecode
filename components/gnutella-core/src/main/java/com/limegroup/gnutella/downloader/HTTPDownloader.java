@@ -11,6 +11,7 @@ import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.CountingInputStream;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import java.io.*;
 import java.net.*;
@@ -423,7 +424,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		
 		// Write X-Features header.
         if (features.size() > 0) {
-            HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
+            HTTPUtils.writeHeader(HTTPHeaderName.FEATURES,
                         new HTTPHeaderValueCollection(features),
                         out);
         }
@@ -475,14 +476,30 @@ public class HTTPDownloader implements BandwidthTracker {
             }
             
             // Code was 2xx, consume the headers
-            consumeHeaders(null);
+            int contentLength = consumeHeaders(null);
             // .. and read the body.
-            HashTree hashTree =
-                HashTree.createHashTree(_input, _rfd.getSHA1Urn().toString(),
-                                        _root32, (long)_rfd.getSize());
-            return ConnectionStatus.getThexResponse(hashTree);
+            // if it fails for any reason, try consuming however much we
+            // have left to read
+            InputStream in = _input;
+            if(contentLength != -1)
+                in = new CountingInputStream(_input);
+            try {
+                HashTree hashTree =
+                    HashTree.createHashTree(in, _rfd.getSHA1Urn().toString(),
+                                            _root32, (long)_rfd.getSize());
+                return ConnectionStatus.getThexResponse(hashTree);
+            } catch(IOException ioe) {
+                if(in instanceof CountingInputStream) {
+                    LOG.debug("failed with contentLength", ioe);
+                    _rfd.setTHEXFailed();                    
+                    int read = ((CountingInputStream)in).getAmountRead();
+                    return consumeBody(contentLength - read);
+                } else {
+                    throw ioe;
+                }
+            }       
         } catch (IOException ioe) {
-            LOG.debug(ioe);
+            LOG.debug("failed without contentLength", ioe);
             
             _rfd.setTHEXFailed();
             // any other replies that can possibly cause an exception
@@ -537,14 +554,21 @@ public class HTTPDownloader implements BandwidthTracker {
             if(min != -1 && max != -1 && pos != -1)
                 return ConnectionStatus.getQueued(pos, min);
         }
-        
-        if(contentLength == -1)
+        return consumeBody(contentLength);
+    }
+    
+    /**
+     * Consumes the body portion of an HTTP Message.
+     */
+    private ConnectionStatus consumeBody(int contentLength)
+      throws IOException {
+        if(contentLength < 0)
             throw new IOException("unknown content-length, can't consume");
 
         byte[] buf = new byte[1024];
         // read & ignore all the content.
         while(contentLength > 0) {
-            int toRead = Math.max(buf.length, contentLength);
+            int toRead = Math.min(buf.length, contentLength);
             int read = _input.read(buf, 0, toRead);
             if(read == -1)
                 break;
@@ -621,9 +645,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseRetryAfterHeader(str, _rfd);
             else if (HTTPHeaderName.CREATION_TIME.matchesStartOfString(str))
                 parseCreationTimeHeader(str, _rfd);
-            else if (HTTPHeaderName.X_FEATURES.matchesStartOfString(str))
+            else if (HTTPHeaderName.FEATURES.matchesStartOfString(str))
             	parseFeatureHeader(str);
-            else if (HTTPHeaderName.X_THEX_URI.matchesStartOfString(str))
+            else if (HTTPHeaderName.THEX_URI.matchesStartOfString(str))
                 parseTHEXHeader(str);
             else if (str.indexOf("urn:bitprint:") > -1) { 
                 // REMOVEME this is a hack for testing because Shareaza doesn't comply

@@ -159,20 +159,14 @@ public class HTTPHeaderName {
 	 * 
 	 * Example: X-Features: chat/0.1, browse/1.0, queue/0.1
 	 */
-	public static final HTTPHeaderName X_FEATURES =
+	public static final HTTPHeaderName FEATURES =
         new HTTPHeaderName("X-Features");
 
     /**
      * Header for sending your own "<ip>:
      * <listening port>"
      */
-    public static final HTTPHeaderName X_NODE = new HTTPHeaderName("X-Node");
-
-    /**
-     * Header for sending the THEX URI. 
-     * Expected form: "<URI>,<TigerTree root in Base32 format>"
-     */
-    public static final HTTPHeaderName X_THEX_URI = new HTTPHeaderName("X-Thex-URI");
+    public static final HTTPHeaderName NODE = new HTTPHeaderName("X-Node");
 
 	/**
 	 * Returns whether or not the start of the passed in string matches the 

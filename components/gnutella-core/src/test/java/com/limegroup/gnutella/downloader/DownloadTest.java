@@ -161,6 +161,7 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(1000);
         
         callback.delCorrupt = false;
+        callback.corruptChecked = false;
     }    
 
     public void tearDown() {
@@ -604,15 +605,35 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         TigerTreeCache.instance().purgeTree(TestFile.hash());
         
-        // it will fail the first time, then re-use the host after
-        // a little waiting and not request thex.
+        // the tree will fail, but it'll pick up the content-length
+        // and discard the rest of the bad data.
         tGeneric(new RemoteFileDesc[] { rfd1 } );
         
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
         assertNull(tree);
         
         assertTrue(uploader1.thexWasRequested());
-        assertEquals(2, uploader1.getRequestsReceived());        
+        assertEquals(1, uploader1.getConnections());        
+    }
+    
+    public void testReuseHostWithBadTreeAndNoContentLength() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(false);
+        uploader1.setSendContentLength(false);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // the tree will fail, but it'll pick up the content-length
+        // and discard the rest of the bad data.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(2, uploader1.getConnections());
     }
     
     public void testGetsThex() throws Exception {
@@ -634,6 +655,44 @@ public class DownloadTest extends BaseTestCase {
         assertTrue(uploader1.thexWasRequested());
         assertEquals(1, uploader1.getConnections());        
     }
+    
+    public void testQueuedOnThexContinues() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setQueueOnThex(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());
+    }
+    
+    public void testBadHeaderOnThexContinues() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setUseBadThexResponseHeader(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());
+    }    
     
     public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
         tOverlapCheckGrey(false);
@@ -662,6 +721,7 @@ public class DownloadTest extends BaseTestCase {
         ((ManagedDownloader)download).addDownload(rfd2,true);
                                         
         waitForComplete(deleteCorrupt);
+        assertTrue(callback.corruptChecked);
         LOG.debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }
@@ -694,33 +754,113 @@ public class DownloadTest extends BaseTestCase {
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
         waitForComplete(deleteCorrupt);
+        assertTrue(callback.corruptChecked);
         LOG.debug("passed"+"\n");//got here? Test passed
     }
     
+    public void testThexFixesDownload() throws Exception {
+        LOG.debug("-Testing that thex can identify a corrupt download range" +
+                  " and the downloader will automatically get it back.");
+        final int RATE = 100;
+        uploader1.setCorruption(true);
+        uploader1.setCorruptBoundary(50);
+        uploader1.setMaxConnects(1);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        tGeneric( new RemoteFileDesc[] { rfd1, rfd2 } );
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNotNull(tree);
+        assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
+        assertFalse(callback.corruptChecked);
+        
+        // tried once or if twice then failed the second time.
+        assertLessThanOrEquals(2, uploader1.getConnections());
+        // tried once or twice.
+        assertLessThanOrEquals(2, uploader2.getConnections());
+    }
+    
+    public void testThexOnlyWorksFiveTimes() throws Exception {
+        LOG.debug("-Testing that thex can identify a corrupt download range" +
+                  " but will only try and fix it up to 5 times.");
+        final int RATE = 500;
+        uploader1.setCorruption(true);
+        uploader1.setCorruptBoundary(50);
+        uploader1.setMaxConnects(6);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        uploader1.setRate(RATE);
+
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        tGenericCorrupt( new RemoteFileDesc[] { rfd1 } );
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        assertTrue(callback.corruptChecked);
+        
+        // tried exactly six times. (initial + 5 retries)
+        assertEquals(6, uploader1.getConnections());
+    }        
+
+    
     public void testMismatchedVerifyHashNoStopOnCorrupt() throws Exception {
-        tMismatchedVerifyHash(false);
+        tMismatchedVerifyHash(false, false);
     }
     
     public void testMismatchedVerifyHashStopOnCorrupt() throws Exception {
         callback.delCorrupt = true;        
-        tMismatchedVerifyHash(true);
+        tMismatchedVerifyHash(true, false);
+    }
+    
+    public void testMismatchedVerifyHashWithThexNoStopOnCorrupt()
+      throws Exception {
+        tMismatchedVerifyHash(false, true);
+    }
+    
+    public void testMismatchedVerifyHashWithThexStopOnCorrupt() throws Exception{
+        callback.delCorrupt = true;
+        tMismatchedVerifyHash(true, true);
     }
 
-    private void tMismatchedVerifyHash(boolean deleteCorrupt) throws Exception {
+    // note that this test ONLY works because the TestUploader does NOT SEND
+    // a Content-Urn header.  if it did, the download would immediately fail
+    // when reading the header. 
+    private void tMismatchedVerifyHash(boolean deleteCorrupt, boolean getThex )
+      throws Exception {
         LOG.debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
-                         
+        String badSha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+
         final int RATE=100;
         uploader1.setRate(RATE);
-        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100,
-        "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+        uploader1.setSendThexTreeHeader(getThex);
+        uploader1.setSendThexTree(getThex);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100, badSha1);
         Downloader download = null;
+        
+        URN badURN = URN.createSHA1Urn(badSha1);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        TigerTreeCache.instance().purgeTree(badURN);
         
         download = RouterService.download(new RemoteFileDesc[] {rfd1}, false, 
                                           null);
+        // even though the download completed, we ignore the tree 'cause the
+        // URNs didn't match.
+        assertNull(TigerTreeCache.instance().getHashTree(TestFile.hash()));
+        assertNull(TigerTreeCache.instance().getHashTree(badURN));
+
         waitForComplete(deleteCorrupt);
-        LOG.debug("passed"+"\n");//got here? Test passed
+        assertTrue(callback.corruptChecked);
+        assertEquals(getThex, uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());
     }
 
     public void testDownloaderAddsSmallFilesWithHead() throws Exception {  

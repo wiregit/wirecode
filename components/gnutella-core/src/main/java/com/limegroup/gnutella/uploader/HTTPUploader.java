@@ -852,7 +852,7 @@ public final class HTTPUploader implements Uploader {
      * @return true if the header had an node description value
      */
     private boolean readNodeHeader(final String str) {
-        if ( !HTTPHeaderName.X_NODE.matchesStartOfString(str) )
+        if ( !HTTPHeaderName.NODE.matchesStartOfString(str) )
             return false;
            
         StringTokenizer st = 
@@ -884,7 +884,7 @@ public final class HTTPUploader implements Uploader {
 	 * @return true if the header had an node description value
 	 */
 	private boolean readFeatureHeader(String str) {
-		if ( !HTTPHeaderName.X_FEATURES.matchesStartOfString(str) )
+		if ( !HTTPHeaderName.FEATURES.matchesStartOfString(str) )
 			return false;
         str = HTTPUtils.extractHeaderValue(str);
         StringTokenizer tok = new StringTokenizer(str, ",");

@@ -44,11 +44,6 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     private static transient final int  MB                   = 1024 * KB;
             static transient final int  BLOCK_SIZE           = 1024;
     private static transient final byte INTERNAL_HASH_PREFIX = 0x01;
-    
-    /**
-     * The maximum depth we'll store the intermediary nodes.
-     */
-    private static transient final int MAX_DEPTH_TO_STORE = 5;
 
     // constants written to the outputstream when serialized.
     

@@ -22,6 +22,8 @@ public class ActivityCallbackStub implements ActivityCallback {
     
     //don't delete corrupt file on detection
     public static boolean delCorrupt = false;
+    //if corruptness was queried
+    public static boolean corruptChecked = false;
 
     public void connectionInitializing(Connection c) { }
     public void connectionInitialized(Connection c) { }
@@ -53,6 +55,7 @@ public class ActivityCallbackStub implements ActivityCallback {
         return null;
     }    
     public void promptAboutCorruptDownload(Downloader dloader) {
+        corruptChecked = true;
         dloader.discardCorruptDownload(delCorrupt);
     }    
     public void browseHostFailed(GUID guid) {}
