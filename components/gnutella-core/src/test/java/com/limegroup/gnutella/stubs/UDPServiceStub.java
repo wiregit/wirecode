@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Random;
 
 import com.limegroup.gnutella.ErrorCallback;
@@ -118,7 +119,11 @@ public final class UDPServiceStub extends UDPService {
 	 */
 	public void clearReceivers() {
 		synchronized(RECEIVER_LIST) {
-			RECEIVER_LIST.clear();
+			for (Iterator iter = RECEIVER_LIST.iterator();iter.hasNext();) {
+			    Receiver rec = (Receiver)iter.next();
+			    iter.remove();
+			    rec.interrupt();
+			}
 		}
 	}
 
@@ -165,7 +170,7 @@ public final class UDPServiceStub extends UDPService {
             while (true) {
 				// Add some delay to the loop
 				try { Thread.sleep( 1 ); 
-				} catch(InterruptedException e) {}
+				} catch(InterruptedException e) {return;}
 
 				time = System.currentTimeMillis();
 			    synchronized(_messages) {
@@ -193,7 +198,7 @@ public final class UDPServiceStub extends UDPService {
 					if ( waitTime > 0 ) {
 						try {
 							_messages.wait( LONG_TIME );
-               			} catch(InterruptedException e) {}
+               			} catch(InterruptedException e) {return;}
 						continue;
 					}
 				}
