@@ -18,7 +18,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-import quicktime.std.music.ToneDescription;
 
 
 /** 
