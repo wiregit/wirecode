@@ -47,6 +47,18 @@ public final class ThemeSettings extends LimeProps {
      */
     public static final String WINDOWS_LAF_THEME_NAME =
         "windows_theme."+EXTENSION;
+        
+    /**
+     * The default name of the theme file name for non-OS X pro users.
+     */
+    public static final String DEFAULT_PRO_THEME_NAME =
+        "limewirePro_theme."+EXTENSION;
+        
+    /**
+     * The default name of the theme file name for the new LimeWire theme.
+     */
+    public static final String LIMEWIRE_THEME_NAME =
+        "limewire_theme."+EXTENSION;
     
     /**
      * The full path to the default theme file.
@@ -65,6 +77,13 @@ public final class ThemeSettings extends LimeProps {
      */
     static final File WINDOWS_LAF_THEME_FILE =
         new File(THEME_DIR_FILE, WINDOWS_LAF_THEME_NAME);
+        
+        
+    /**
+     * The full path to the default theme file on OS X.
+     */
+    static final File DEFAULT_PRO_THEME_FILE =
+        new File(THEME_DIR_FILE, DEFAULT_PRO_THEME_NAME);
     
     /**
      * The array of all theme files that should be copied by default
@@ -72,6 +91,7 @@ public final class ThemeSettings extends LimeProps {
      */
     private static final String[] THEMES = {
         DEFAULT_THEME_NAME,
+        DEFAULT_PRO_THEME_NAME,
         DEFAULT_OSX_THEME_NAME,
         WINDOWS_LAF_THEME_NAME,
         "black_theme."+EXTENSION,
@@ -94,12 +114,11 @@ public final class ThemeSettings extends LimeProps {
         if(!themesJar.isFile()) {
             String url =
             ThemeSettings.class.getClassLoader().
-            getResource(DEFAULT_THEME_NAME).toString();
+                getResource(DEFAULT_THEME_NAME).toString();
             if (url != null && url.startsWith("jar:file:")) {
                 url = url.substring("jar:file:".length(), url.length());
-                url =
-                url.substring(0, url.length()-
-                DEFAULT_THEME_NAME.length()-"!/".length());
+                url = url.substring(0, url.length()-
+                    DEFAULT_THEME_NAME.length()-"!/".length());
                 themesJar = new File(url);
             }
         }
@@ -224,19 +243,21 @@ public final class ThemeSettings extends LimeProps {
      */
     public static final FileSetting THEME_DEFAULT =
 		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
-									  DEFAULT_OSX_THEME_FILE :
-									  DEFAULT_THEME_FILE);
+								  DEFAULT_OSX_THEME_FILE :
+                                  CommonUtils.isPro() ?
+                                  DEFAULT_PRO_THEME_FILE :
+							      DEFAULT_THEME_FILE);
 	
 	/**
 	 * Setting for the default theme directory to use in LimeWire display.
 	 */
 	public static final FileSetting THEME_DEFAULT_DIR =
         FACTORY.createFileSetting("THEME_DEFAULT_DIR",
-									  CommonUtils.isMacOSX() ?
-									  new File(THEME_DIR_FILE,
-											   "default_osx_theme") :
-									  new File(THEME_DIR_FILE,
-											   "default_theme"));
+								  CommonUtils.isMacOSX() ?
+							      new File(THEME_DIR_FILE,
+										   "default_osx_theme") :
+								  new File(THEME_DIR_FILE,
+										   "default_theme"));
 	
 	/**
 	 * Setting for the file name of the theme file.
@@ -250,5 +271,5 @@ public final class ThemeSettings extends LimeProps {
 	 */
 	public static final FileSetting THEME_DIR =
 		FACTORY.createFileSetting("THEME_DIR",
-									  THEME_DEFAULT_DIR.getValue());
+								  THEME_DEFAULT_DIR.getValue());
 }
