@@ -252,8 +252,9 @@ public class StandardMessageRouter
         }
         String file = desc._name;
 
-        HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
-                                           _callback);
+        HTTPUploader up = new HTTPUploader(file, h, port, index, 
+										   req_guid_hexstring);
+                                          
         Thread t=new Thread(up);
         t.setDaemon(true);
         t.start();
