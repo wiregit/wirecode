@@ -38,6 +38,7 @@ public class DownloadTester {
         cleanup();
         testUnbalancedSwarm();
         cleanup();
+        testAddDownload();
     }
 
 
@@ -82,12 +83,7 @@ public class DownloadTester {
 
     private static void testUnbalancedSwarm() {
         System.out.print("-Testing swarming from two unbalanced sources...");
-        //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=10;
-        //The first uploader got a range of 0-100%.  After the download receives
-        //50%, it will close the socket.  But the uploader will send some data
-        //between the time it sent byte 50% and the time it receives the FIN
-        //segment from the downloader.  Half a second latency is tolerable.  
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
@@ -111,6 +107,53 @@ public class DownloadTester {
         check(u1<9*TestFile.length()/10+FUDGE_FACTOR*10, "u1 did all the work");
         check(u2<TestFile.length()/10+FUDGE_FACTOR, "u2 did all the work");
     }
+
+
+    private static void testAddDownload() {
+        System.out.print("-Testing addDownload (increases swarming)...");
+        final int RATE=10;
+        final int FUDGE_FACTOR=15000;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+
+        Downloader download=null;
+        try {
+            //Start one location, wait a bit, then add another.
+            download=dm.getFiles(new RemoteFileDesc[] {rfd1}, false);
+            try { Thread.sleep(10); } catch (InterruptedException e) { }
+            ((ManagedDownloader)download).addDownload(rfd2);
+        } catch (FileExistsException e) {
+            check(false, "FAILED: already exists");
+            return;
+        } catch (AlreadyDownloadingException e) {
+            check(false, "FAILED: already downloading");
+            return;
+        } catch (java.io.FileNotFoundException e) {
+            check(false, "FAILED: file not found (huh?)");
+            return;
+        }
+        waitForComplete(download);
+        if (isComplete())
+            System.out.println("pass");
+        else
+            check(false, "FAILED: complete corrupt");
+
+        //Make sure there weren't too many overlapping regions. Each upload should
+        //do roughly half the work.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tTotal: "+(u1+u2));
+
+        check(u1<TestFile.length()/2+FUDGE_FACTOR, "u1 did all the work");
+        check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
+    }
+
 
 
     ////////////////////////// Helping Code ///////////////////////////
@@ -152,6 +195,7 @@ public class DownloadTester {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) { }
+            dm.writeSnapshot();  //Try to mess up downloaders
         }
     }
 
