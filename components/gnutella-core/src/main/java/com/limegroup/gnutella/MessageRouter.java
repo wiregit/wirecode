@@ -2135,10 +2135,10 @@ public abstract class MessageRouter {
             return;
         Connection c  = (Connection) handler;
         if(request.getHops()==1 && c.isOldLimeWire()) {
-            if(Constants.updateReply ==null) 
+            if(StaticMessages.updateReply ==null) 
                 return;
             QueryReply qr
-                      =new QueryReply(request.getGUID(),Constants.updateReply);
+                 = new QueryReply(request.getGUID(),StaticMessages.updateReply);
             try {
                 sendQueryReply(qr);
             } catch (IOException ignored) {}
