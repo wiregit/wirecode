@@ -26,12 +26,6 @@ public final class BIOHandshaker extends AbstractHandshaker {
     public static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
     
     /**
-     * The number of times we will respond to a given challenge 
-     * from the other side, or otherwise, during connection handshaking
-     */
-    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;  
-    
-    /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
     private HandshakeResponse _headers = 
@@ -337,7 +331,7 @@ public final class BIOHandshaker extends AbstractHandshaker {
      */
     private void readHeaders(int timeout) throws IOException {
         int headersRead = 0;
-        while (headersRead < 30) {
+        while (headersRead < MAX_HEADERS_TO_READ) {
             //This doesn't distinguish between \r and \n.  That's fine.
             HTTPHeader header = _headerReader.readHeader(timeout);
             
@@ -352,6 +346,7 @@ public final class BIOHandshaker extends AbstractHandshaker {
                 header.getHeaderValueString());
             headersRead++;
         }
+        throw new IOException("too many headers read");
     }
     
     /**
