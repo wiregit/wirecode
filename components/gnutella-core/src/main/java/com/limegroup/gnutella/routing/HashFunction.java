@@ -5,14 +5,18 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Assert;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.I18NConvert;
 
 /** 
  * The official platform-independent hashing function for query-routing.  The
  * key property is that it allows interpolation of hash tables of different
- * sizes.  More formally k*hash(x,n)<=hash(x, kn)<=k*hash(x,n)+1.<p>
+ * sizes.  More formally, with x&gt;=0, n&gt;=0, k&gt;=0, 0&lt;=r&lt;=n,<ul>
+ * <li>2 ^ k * hash(x, n) &lt;= hash(x, n+k) &lt 2 ^ (k+1) * hash(x, n);</li>
+ * <li>hash(x, n-r) = int(hash(x, n) / 2 ^ r).</li>
+ * </ul>
  *
- * This experimental version does not necessarily work cross-platform,
- * however, nor is it secure in any sense.   See Chapter 12.3.2. of 
+ * This version should now work cross-platform, however it is not intended
+ * to be secure, only very fast to compute.  See Chapter 12.3.2. of CLR
  * for details of multiplication-based algorithms.
  */
 public class HashFunction {
@@ -27,30 +31,48 @@ public class HashFunction {
      * between 0 and (2^bits)-1.
      */
     private static int hashFast(int x, byte bits) {
-        //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
-        long prod= (long)x * (long)A_INT;
-        long ret= prod << 32;
-        ret = ret >>> (32 + (32 - bits));
-        return (int)ret;
+        // Keep only the "bits" highest bits of the 32 *lowest* bits of the
+        // product (ignore overflowing bits of the 64-bit product result).
+        // The constant factor should distribute equally each byte of x in
+        // the returned bits.
+        return (int)(x * A_INT) >>> (32 - bits);
     }
 
     /*
-     * Returns the n-<b>bit</b> hash of x.toLowerCase(), where n="bits".  That
-     * is, the returned value value can fit in "bits" unsigned bits, and is
-     * between 0 and (2^bits)-1.
+     * Returns the n-bit hash of x.toLowerCase(), where n=<tt>bits</tt>.
+     * That is, the returned value value can fit in "<tt>bits</tt>" unsigned
+     * bits, and is between 0 and <tt>(2 ^ bits) - 1</tt>.
      *
      * @param x the string to hash
      * @param bits the number of bits to use in the resulting answer
      * @return the hash value
+     * @see hash(String,int,int,byte)
      */    
     public static int hash(String x, byte bits) {
         return hash(x, 0, x.length(), bits);
     }       
 
     /**
-     * Returns the same value as hash(x.substring(start, end), bits),
-     * but tries to avoid allocations.  Note that x is lower-cased
-     * when hashing.
+     * Returns the same value as hash(x.substring(start, end), bits), but tries
+     * to avoid allocations.<p>
+     *
+     * Note that x is lower-cased when hashing, using a locale-neutral
+     * character case conversion based on the UTF-16 representation of the
+     * source string to hash.  So it is stable across all platforms and locales.
+     * However this does not only convert ASCII characters but ALL Unicode
+     * characters having a single lowercase mapping character.  No attempt is
+     * made here to remove accents and diacritics.<p>
+     *
+     * The string is supposed to be in NFC canonical form, but this is not
+     * enforced here.  Conversion to lowercase of characters uses Unicode rules
+     * built into the the java.lang.Character core class, excluding all special
+     * case rules (N-to-1, 1-to-M, N-to-M, locale-sensitive and contextual).<p>
+     *
+     * A better way to hash strings would be to use String conversion in the
+     * Locale.US context (for stability across servents) after transformation
+     * to NFKD and removal of all diacritics from hashed keywords.  If needed,
+     * this should be done before splitting the query string into hashable
+     * keywords.
      *
      * @param x the string to hash
      * @param bits the number of bits to use in the resulting answer
@@ -66,13 +88,15 @@ public class HashFunction {
         //a rolling value one byte at a time, taking advantage of the fact that
         //x XOR 0==x.
         int xor=0;  //the running total
-        int j=0;    //the byte position in xor.  INVARIANT: j==(i-start)%4
+        int j=0;    //the byte position in xor.  INVARIANT: j==8*((i-start)%4)
         for (int i=start; i<end; i++) {
-            //TODO: internationalization be damned?
-            int b=Character.toLowerCase(x.charAt(i)) & 0xFF; 
-            b=b<<(j*8);
-            xor=xor^b;
-            j=(j+1)%4;
+            // TODO: internationalization be damned? Not a problem here:
+            // we just hash the lower 8 bits of the lowercase UTF-16 code-units
+            // representing characters, ignoring only the high 8 bits that
+            // indicate a Unicode page, and it is not very widely distributed
+            // even though they could also have feeded the hash function.
+            xor ^= (Character.toLowerCase(x.charAt(i)) & 0xFF) << j;
+            j = (j + 8) & 24;
         }
         //2. Now map number to range 0 - (2^bits-1).
         return hashFast(xor, bits);
@@ -83,7 +107,20 @@ public class HashFunction {
      * Returns a list of canonicalized keywords in the given query, suitable
      * for passing to hash(String,int).  The returned keywords are
      * lower-cased, though that is not strictly needed as hash ignores
-     * case.
+     * case.<p>
+     *
+     * This function is not consistent for case conversion: it uses a locale
+     * dependant String conversion, which also considers special casing rules
+     * (N-to-1, 1-to-M, N-to-N, locale-sensitive and contextual variants),
+     * unlike the simplified case conversion done in
+     * <tt>hash(String, int, int, byte)</tt>, which is locale-neutral.<p>
+     *
+     * A better way to hash strings would be to use String conversion in the
+     * Locale.US context (for stability across servents) after transformation
+     * to NFKD and removal of all diacritics from hashed keywords.  If needed,
+     * this should be done before splitting the query string into hashable
+     * keywords. Then we should remove the unneeded toLowerCase() call in
+     * the <tt>hash(String, int, int, byte)</tt> function.
      */
     public static String[] keywords(String query) {
         //TODO1: this isn't a proper implementation.  It should really be
@@ -92,8 +129,13 @@ public class HashFunction {
         //TODO2: perhaps we should do an English-specific version that accounts
         //for plurals, common keywords, etc.  But that's only necessary for 
         //our own files, since the assumption is that queries have already been
-        //canonicalized.
-        return StringUtils.split(query.toLowerCase(), FileManager.DELIMETERS);
+        //canonicalized. //yn:
+        return StringUtils.split(
+            // TODO: a better canonicalForm(query) function here that
+            // also removes accents by converting first to NFKD and keeping
+            // only PRIMARY differences
+            I18NConvert.instance().getNorm(query),
+            FileManager.DELIMETERS);
     }
 
     /** 
@@ -121,7 +163,7 @@ public class HashFunction {
      * position of query, or query.length() if no such index.
      */
     public static int keywordEnd(String query, int i) {
-        //Search for the first character that is a delimiterer.  
+        //Search for the first character that is a delimiter.  
         //TODO3: see above
         final String DELIMETERS=FileManager.DELIMETERS;
         for ( ; i<query.length() ; i++) {
@@ -138,21 +180,78 @@ public class HashFunction {
      * @return an array of strings with the original strings and prefixes
      */
     public static String[] getPrefixes(String[] words){
-        ArrayList l = new ArrayList();
-        for(int i=0;i<words.length;i++){
-            //add the string itself
-            l.add(words[i]);
-            int len = words[i].length();
-            if(len>4){//if we can have prefixes add them to the list
-                l.add(words[i].substring(0,len-1));
-                l.add(words[i].substring(0,len-2));
+        // 1. Count the number of words that can have prefixes (5 chars or more)
+        int prefixable = 0;
+        for (int i = 0; i < words.length; i++) {
+            if (words[i].length() > 4)
+                prefixable++;
+        }
+        // 2. If none, just returns the same words (saves allocations)
+        if (prefixable == 0)
+            return words;
+        // 3. Create an expanded array with words and prefixes
+        final String[] retArray = new String[words.length + prefixable * 2];
+        int j = 0;
+        for (int i = 0; i < words.length; i++) {
+            final String word = words[i];
+            retArray[j++] = word;
+            final int len = word.length();
+            if (len > 4) {
+                retArray[j++] = word.substring(0, len - 1);
+                retArray[j++] = word.substring(0, len - 2);
             }
-        }//done!
-        //convert to a String[]...could not do this directly...since
-        //we did not know now many of the words are longer than 4 chars
-        String[] retArray = new String[l.size()];
-        for(int i=0;i<l.size();i++)
-            retArray[i]=(String)l.get(i);
+        }
         return retArray;
     }
+
+    
+    public static void main(String[] args) {
+        assertEquals(0, HashFunction.hash("", (byte)13));
+        assertEquals(6791, HashFunction.hash("eb", (byte)13));
+        assertEquals(7082, HashFunction.hash("ebc", (byte)13));
+        assertEquals(6698, HashFunction.hash("ebck", (byte)13));
+        assertEquals(3179, HashFunction.hash("ebckl", (byte)13));
+        assertEquals(3235, HashFunction.hash("ebcklm", (byte)13));
+        assertEquals(6438, HashFunction.hash("ebcklme", (byte)13));
+        assertEquals(1062, HashFunction.hash("ebcklmen", (byte)13));
+        assertEquals(3527, HashFunction.hash("ebcklmenq", (byte)13));
+        assertEquals(0, HashFunction.hash("", (byte)16));
+        assertEquals(65003, HashFunction.hash("n", (byte)16));
+        assertEquals(54193, HashFunction.hash("nd", (byte)16));
+        assertEquals(4953, HashFunction.hash("ndf", (byte)16));
+        assertEquals(58201, HashFunction.hash("ndfl", (byte)16));
+        assertEquals(34830, HashFunction.hash("ndfla", (byte)16));
+        assertEquals(36910, HashFunction.hash("ndflal", (byte)16));
+        assertEquals(34586, HashFunction.hash("ndflale", (byte)16));
+        assertEquals(37658, HashFunction.hash("ndflalem", (byte)16));
+        assertEquals(45559, HashFunction.hash("ndflaleme", (byte)16));
+        assertEquals(318, HashFunction.hash("ol2j34lj", (byte)10));
+        assertEquals(503, HashFunction.hash("asdfas23", (byte)10));
+        assertEquals(758, HashFunction.hash("9um3o34fd", (byte)10));
+        assertEquals(281, HashFunction.hash("a234d", (byte)10));
+        assertEquals(767, HashFunction.hash("a3f", (byte)10));
+        assertEquals(581, HashFunction.hash("3nja9", (byte)10));
+        assertEquals(146, HashFunction.hash("2459345938032343", (byte)10));
+        assertEquals(342, HashFunction.hash("7777a88a8a8a8", (byte)10));
+        assertEquals(861, HashFunction.hash("asdfjklkj3k", (byte)10));
+        assertEquals(1011, HashFunction.hash("adfk32l", (byte)10));
+        assertEquals(944, HashFunction.hash("zzzzzzzzzzz", (byte)10));
+
+        //2. Offset tests.
+        assertEquals(58201, HashFunction.hash("ndfl", 0, 4, (byte)16));
+        assertEquals(58201, HashFunction.hash("_ndfl_", 1, 1+4, (byte)16));
+        assertEquals(58201, HashFunction.hash("__ndfl__", 2, 2+4, (byte)16));
+        assertEquals(58201, HashFunction.hash("___ndfl___", 3, 3+4, (byte)16));
+
+        //3. Case tests.
+        assertEquals(581, HashFunction.hash("3nja9", (byte)10));
+        assertEquals(581, HashFunction.hash("3NJA9", (byte)10));
+        assertEquals(581, HashFunction.hash("3nJa9", (byte)10));
+    }
+
+    
+    private static void assertEquals(int i, int x) {
+        System.out.println(i + " ?= " + x);
+    }
+    
 }
