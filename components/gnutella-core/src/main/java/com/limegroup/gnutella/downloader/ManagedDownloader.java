@@ -1412,13 +1412,40 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Determines if we already have this RFD in our lists.
      */
     private synchronized boolean isRFDAlreadyStored(RemoteFileDesc rfd) {
-        if( currentRFDs != null && currentRFDs.contains(rfd))
+        if( currentRFDs != null && currentRFDs.contains(rfd)) {
+            updateRFDList(rfd,currentRFDs);
             return true;
-        if( files != null && files.contains(rfd))
+        }
+        if( files != null && files.contains(rfd)) {
+            updateRFDList(rfd,files);
             return true;
+        }
         return false;
     }
     
+    /**
+     * finds all occurences of the rfd in the list 
+     * whose equals() method matches the given rfd and merges 
+     * the proxies of the two.
+     */
+    private static void updateRFDList(RemoteFileDesc rfd, List coll) {
+        if (rfd.getPushProxies().size() == 0)
+            return;
+        
+        RemoteFileDesc updated =null;
+        for (ListIterator iter = coll.listIterator();iter.hasNext();) {
+            RemoteFileDesc current = (RemoteFileDesc)iter.next();
+            
+            if (!current.equals(rfd)) 
+                continue;
+            
+            if (updated==null)
+                updated = RemoteFileDesc.mergeProxies(current,rfd);
+            
+            iter.remove();
+            iter.add(updated);
+        }
+    }
     /**
      * Returns true if we have received more possible source since the last
      * time we went inactive.

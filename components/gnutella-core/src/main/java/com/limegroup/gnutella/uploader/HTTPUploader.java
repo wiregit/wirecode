@@ -1059,7 +1059,7 @@ public final class HTTPUploader implements Uploader {
             else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
                 // for this header we care about the version
             	try {
-            	    _FWTVersion = (int)HTTPUtils.parseFeatureToken(protocol);
+            	    _FWTVersion = (int)HTTPUtils.parseFeatureToken(feature);
             	    _wantsFalts=true;
             	}catch(ProblemReadingHeaderException prhe){
             	    continue;

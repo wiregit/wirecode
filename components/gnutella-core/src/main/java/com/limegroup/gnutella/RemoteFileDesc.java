@@ -795,6 +795,13 @@ public class RemoteFileDesc implements Serializable {
 
         if (_size != other._size)
             return false;
+        
+        if ( (_clientGUID ==null) != (other._clientGUID==null) )
+            return false;
+        
+        if ( _clientGUID!= null &&
+                ! ( Arrays.equals(_clientGUID,other._clientGUID)))
+            return false;
 
         if (_urns.isEmpty() && other._urns.isEmpty())
             return nullEquals(_filename, other._filename);
@@ -835,8 +842,8 @@ public class RemoteFileDesc implements Serializable {
             result = (37* result)+_port;
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
-            if (_pushAddr!=null)
-            	result = (37 * result)+_pushAddr.hashCode();
+            if (_clientGUID!=null)
+                result = (37* result)+_clientGUID.hashCode();
             _hashCode = result;
         }
 		return _hashCode;
