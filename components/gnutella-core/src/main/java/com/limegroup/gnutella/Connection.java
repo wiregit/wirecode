@@ -110,6 +110,9 @@ public class Connection {
     private Properties _propertiesRead;
     /** The properties wrote to the connection, or null if Gnutella 0.4.  */
     private Properties _propertiesWritten;
+    /** True iff this should try to reconnect at a lower protocol level on
+     *  outgoing connections. */
+    private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
     public static final String GNUTELLA_CONNECT_10="GNUTELLA CONNECT/1.0";
@@ -125,18 +128,24 @@ public class Connection {
      * initalize() must be called before anything else.
      */
     public Connection(String host, int port) {
-        this(host, port, null);
+        this(host, port, null, false);
     }
 
 
     /**
-     * Creates an outgoing Gnutella 1.0 connection with the specified outgoing
-     * properties.  initialize() must be called before anything else.
+     * Creates an outgoing Gnutella 1.0 connection 
+     * initialize() must be called before anything else.
+     * 
+     * @param properties the properties to send upon connection
+     * @param negotiate if true and if the first connection attempt fails, try
+     *  to reconnect and use Gnutella 0.4 with no headers
      */
-    public Connection(String host, int port, Properties properties) {
+    public Connection(String host, int port,
+                      Properties properties, boolean negotiate) {
         _host = host;
         _port = port;
         _outgoing = true;
+        _negotiate = negotiate;
         _propertiesWritten=properties;
     }
     
@@ -175,6 +184,26 @@ public class Connection {
      * in the first line of the override.
      */
     public void initialize() throws IOException {
+        try {
+            initialize2();
+        } catch (BadHandshakeException e) {
+            //If an outgoing attempt at Gnutella 1.0 failed, and the user
+            //has requested we try lower protocol versions, try again.
+            if (_negotiate && isOutgoing() && _propertiesWritten!=null) {
+                _propertiesWritten=null;
+                initialize2();
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private static class BadHandshakeException extends IOException { }
+
+    /*
+     * Exactly like initialize, but without the re-connection.
+     */
+    private void initialize2() throws IOException {
         SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
 
@@ -221,10 +250,14 @@ public class Connection {
                     sendString(GNUTELLA_CONNECT_10+CRLF);
                     sendHeaders();                
                 }
+                //We require that the response be at the same protocol level as
+                //we sent out.  This is necessary because BearShare will accept
+                //"GNUTELLA CONNECT/1.0" and respond with "GNUTELLA OK", only to
+                //be confused by the headers later.
                 String line=readLine();
-                if (line.equals(GNUTELLA_OK_04))
+                if (_propertiesWritten==null && line.equals(GNUTELLA_OK_04))
                     readLine();
-                else if (line.equals(GNUTELLA_OK_10))
+                else if (_propertiesWritten!=null && line.equals(GNUTELLA_OK_10))
                     readHeaders();
                 else
                     throw new IOException("Bad connect string");                
@@ -251,7 +284,7 @@ public class Connection {
             }
         } catch(IOException e) {
             _socket.close();
-            throw e;
+            throw new BadHandshakeException();
         }
     }
 

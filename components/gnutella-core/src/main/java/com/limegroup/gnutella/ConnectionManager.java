@@ -127,13 +127,15 @@ public class ConnectionManager {
 
     /**
      * Create a new connection, blocking until it's initialized, but launching
-     * a new thread to do the message loop.
+     * a new thread to do the message loop.  The new connection will support
+     * query routing and pong caching if possible, but speak plain Gnutella 0.4
+     * otherwise.
      */
     public ManagedConnection createConnectionBlocking(
             String hostname, int portnum) throws IOException {
-        //TODO: should there be an option to specify new or old or both?
-        ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
-                                                    this, false, true);
+        ManagedConnection c = new ManagedConnection(
+            hostname, portnum, _router, this, false,
+            ManagedConnection.PROTOCOL_BEST);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -145,15 +147,17 @@ public class ConnectionManager {
 
     /**
      * Create a new connection, allowing it to initialize and loop for messages
-     * on a new thread.
+     * on a new thread.  The new connection will support query routing and pong
+     * caching if possible, but speak plain Gnutella 0.4 otherwise.  
      */
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
         // Initialize and loop for messages on another thread.
         //TODO: should there be an option to specify new or old or both?
         new OutgoingConnectionThread(
-                new ManagedConnection(hostname, portnum, _router, this,
-                                      false, true),
+                new ManagedConnection(hostname, portnum, _router, 
+                                      this, false,
+                                      ManagedConnection.PROTOCOL_BEST),
                 true);
     }
 
@@ -172,9 +176,9 @@ public class ConnectionManager {
 			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
 		}
 
-        //TODO: should there be an option to specify new or old or both?
         ManagedConnection c = 
-		  new ManagedConnection(hostname, portnum, _router, this, true, false);
+		  new ManagedConnection(hostname, portnum, _router, this, true,
+                                ManagedConnection.PROTOCOL_BEST);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -206,7 +210,8 @@ public class ConnectionManager {
          //1. Initialize connection.  It's always safe to recommend new headers.
          ManagedConnection connection=null;
          try {
-             connection = new ManagedConnection(socket, _router, this, true);
+             connection = new ManagedConnection(socket, _router, this,
+                                                ManagedConnection.PROTOCOL_NEW);
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
              return;
@@ -749,7 +754,8 @@ public class ConnectionManager {
 	  throws IOException {
         //TODO: make sure server is upgraded so isNew=true works.
         ManagedConnection c = 
-		  new ManagedConnection(hostname, portnum, _router, this, true, true);
+		  new ManagedConnection(hostname, portnum, _router, this, true,
+                                ManagedConnection.PROTOCOL_BEST);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -850,7 +856,9 @@ public class ConnectionManager {
 
             ManagedConnection connection = new ManagedConnection(
                 endpoint.getHostname(), endpoint.getPort(), _router,
-                ConnectionManager.this, false, _isNew);
+                ConnectionManager.this, false,
+                _isNew ? ManagedConnection.PROTOCOL_NEW 
+                       : ManagedConnection.PROTOCOL_OLD);
 
             try {
                 initializeFetchedConnection(connection, this);

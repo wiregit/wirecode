@@ -28,6 +28,10 @@ import com.limegroup.gnutella.routing.*;
 public class ManagedConnection
         extends Connection
         implements ReplyHandler {
+    public static final int PROTOCOL_NEW=0x2;
+    public static final int PROTOCOL_BEST=0x1;
+    public static final int PROTOCOL_OLD=0x0;
+
     private MessageRouter _router;
     private ConnectionManager _manager;
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
@@ -148,17 +152,25 @@ public class ManagedConnection
     }
     
     /**
-     * Creates an outgoing connection.  The connection is considered a special
-     * "router connection" iff isRouter==true.  ManagedConnections should only
-     * be constructed within ConnectionManager.  
+     * Creates an outgoing connection.  Should only be constructed within
+     * ConnectionManager.  
+     *
+     * @param isRouter true iff this is a special pong-cache connection (e.g.
+     *  to router.limewire.com)
+     * @param protocol PROTOCOL_OLD if this should try the Gnutella 0.4
+     *  handshake, PROTOCOL_NEW if this should try the Gnutella 1.0 handshake
+     *  only, or PROTOCOL_BEST if this should try 1.0, followed by 0.4 if the
+     *  former failed.
      */
     ManagedConnection(String host,
                       int port,
                       MessageRouter router,
                       ConnectionManager manager,
                       boolean isRouter,
-                      boolean isNew) { 
-        super(host, port, isNew ? createNewProperties() : null);
+                      int protocol) { 
+        super(host, port,
+              protocol!=PROTOCOL_OLD ? createNewProperties() : null,
+              protocol==PROTOCOL_BEST ? true : false);
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
@@ -167,18 +179,19 @@ public class ManagedConnection
     }
     
     /**
-     * Creates an incoming connection.
-     * ManagedConnections should only be constructed within ConnectionManager.
+     * Creates an incoming connection.   Should only be constructed within
+     * ConnectionManager.  
+     *
      * @requires the word "GNUTELLA " and nothing else has just been read
      *  from socket
-     * @effects wraps a connection around socket and does the rest of the
-     *  Gnutella handshake.
+     * @param protocol PROTOCOL_OLD if this should try the Gnutella 0.4
+     *  handshake or PROTOCOL_NEW if this should try the Gnutella 1.0 handshake.
      */
     ManagedConnection(Socket socket,
                       MessageRouter router,
                       ConnectionManager manager,
-                      boolean isNew) {
-        super(socket, isNew ? createNewProperties() : null);
+                      int protocol) {
+        super(socket, protocol!=PROTOCOL_OLD ? createNewProperties() : null);
         _router = router;
         _manager = manager;
 
