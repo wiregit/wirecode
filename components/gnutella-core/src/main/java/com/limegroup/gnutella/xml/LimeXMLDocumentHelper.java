@@ -86,13 +86,16 @@ public class LimeXMLDocumentHelper{
         int i = xml.indexOf(SCHEMA_PRECEDE_STRING);
         if (i > -1) {
             i += SCHEMA_PRECEDE_STRING.length();
-            while (xml.charAt(i) != '"')
-                i++;
-            int begin = ++i;
-            while (xml.charAt(i) != '"')
-                i++;
-            int end = i;
-            retString = xml.substring(begin,end);
+            if (xml.charAt(i++) == '=') 
+                if ((xml.charAt(i) == '\'') || ((xml.charAt(i) == '"'))) {
+                    char delim = xml.charAt(i);
+                    int begin = ++i;
+                    while (xml.charAt(i) != delim)
+                        i++;
+                    int end = i;
+                    retString = xml.substring(begin,end);
+            
+                }
         }
         return retString;
     }
