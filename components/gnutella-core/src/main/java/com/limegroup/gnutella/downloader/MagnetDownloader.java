@@ -249,6 +249,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         //make ResponseVerifier.getSearchTerms/score(keywords[], name) public?
         if (_textQuery!=null) {
             int score=ResponseVerifier.score(_textQuery, null, other);
+System.out.println(
+  "score="+score+
+  " textQ="+_textQuery+
+  " other="+other);
             if (score==100)
                 return true;
         }
@@ -263,15 +267,19 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     public synchronized String getFileName() {        
         if (_filename!=null)
             return _filename;
-        else
-            return super.getFileName();
+        else {
+            String fname = super.getFileName();
+            if ( fname == null || fname.equals(UNKNOWN_FILENAME) )
+			    fname = getFileNameHint();
+			return fname;
+		}
     }
 
     /**
      * Overrides ManagedDownloader to display a reasonable file name 
      * when neither it or we have an idea of what the filename is.
      */
-    public synchronized String getFileNameHint() {        
+    private String getFileNameHint() {        
         if ( _urn != null )
 			return _urn.toString();
         else if ( _textQuery != null )

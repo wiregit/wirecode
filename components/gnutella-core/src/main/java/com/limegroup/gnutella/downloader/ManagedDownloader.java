@@ -211,6 +211,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int REQUERY_ATTEMPTS = 60;
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
+
+	/** The value of an unknown filename - potentially overridden in 
+      * subclasses */
+	protected static final String UNKNOWN_FILENAME = "";  
+
     /** This is used for matching of filenames.  kind of big so we only want
      *  one. */
     private static ApproximateMatcher matcher = 
@@ -2064,22 +2069,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 			if (allFiles.length > 0)
                 return allFiles[0].getFileName();
 			else
-				return getFileNameHint();
+				// Note that subclasses can override this result.
+				return UNKNOWN_FILENAME;  
         else 
             //Could also use currentFileName, but this works.
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getFileName();
-    }
-
-    /**
-     * This is a secondary backup filename to display.  If subclasses 
-     * don't know the name and we don't know the name, then 
-     * subclasses can give a default temporary name until the 
-     * situation changes.  Once we know the name, this will stop being
-     * used.
-     */
-    public synchronized String getFileNameHint() {        
-		return "";
     }
 
     public synchronized int getContentLength() {
