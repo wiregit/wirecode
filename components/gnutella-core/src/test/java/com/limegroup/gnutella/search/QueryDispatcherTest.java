@@ -5,7 +5,6 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
-import java.lang.reflect.*;
 import junit.framework.*;
 
 /**
@@ -31,7 +30,7 @@ public class QueryDispatcherTest extends BaseTestCase {
      * from the query dispatcher.
      */
     public void testRemoveReplyHandler() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+        new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
         qd.start();
         
@@ -91,14 +90,14 @@ public class QueryDispatcherTest extends BaseTestCase {
      * removed correctly
      */
     public void testRemoveStoppedQuery() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
+        new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
         qd.start();
         
-        Set toR = (Set)PrivilegedAccessor.getValue(qd, "_toRemove");
+        Set toR = (Set)PrivilegedAccessor.getValue(qd, "TO_REMOVE");
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
         
-        assertEquals("_toRemove should be empty", 0, toR.size());
+        assertEquals("TO_REMOVE should be empty", 0, toR.size());
         
         QueryRequest qr = QueryRequest.createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
@@ -126,8 +125,8 @@ public class QueryDispatcherTest extends BaseTestCase {
                      qhand2.getGUID(),
                      ((QueryHandler)iter.next()).getGUID());
         //also make sure the removed GUID was deleted from the
-        //_toRemove set
-        assertEquals("_toRemove should be empty", 0, toR.size());
+        //TO_REMOVE set
+        assertEquals("TO_REMOVE should be empty", 0, toR.size());
     }
 
     private static final class TestReplyHandler extends ReplyHandlerStub {
