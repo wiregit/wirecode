@@ -5,6 +5,7 @@ import java.net.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
+import com.limegroup.gnutella.handshaking.*;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -203,38 +204,6 @@ public class Connection {
         }
     }
     
-    private static class BadHandshakeException extends IOException { 
-        /** Root cause for BadHandshakeException */
-        private IOException _originalCause;
-        
-        public BadHandshakeException(IOException originalCause) {
-            _originalCause = originalCause;
-        }
-        
-        /**
-         * prints its own stack trace, plus the stack trace for the
-         * original exception that caused this exception
-         */
-        public void printStackTrace() {
-            super.printStackTrace();
-            System.err.println("Parent Cause:");
-            _originalCause.printStackTrace();
-        }
-    }
-
-    /**
-     * Exception thrown when the other side understands the Gnutella
-     * Handshaking Protocol, but doesnt want to keep the connection up
-     */
-    private static class NoGnutellaOkException extends IOException { 
-        
-        public NoGnutellaOkException() {}
-        
-        public NoGnutellaOkException(String message) {
-            super(message);
-        }
-    }
-
     /*
      * Exactly like initialize, but without the re-connection.
      *
