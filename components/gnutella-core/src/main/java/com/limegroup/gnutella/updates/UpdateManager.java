@@ -124,8 +124,7 @@ public class UpdateManager {
     }
     
     /**
-     * This method will be called just once from RouterService at startup
-     * and it should prompt the user if there is an update message.
+     * Prompts the user about an update if one is available.
      */
     public boolean displayUpdate() {
         String myVersion = CommonUtils.getLimeWireVersion();
@@ -136,9 +135,9 @@ public class UpdateManager {
         if(!isGreaterVersion(latestVersion,myVersion))
             return false;
         //OK. myVersion < latestVersion
-        String guiMessage = latestVersion+". "+message;
+        String guiMessage = latestVersion + ". " + message;
         RouterService.getCallback().
-            notifyUserAboutUpdate(guiMessage, CommonUtils.isPro(),usesLocale);
+            notifyUserAboutUpdate(guiMessage, CommonUtils.isPro(), usesLocale);
         return true;
     }
 
