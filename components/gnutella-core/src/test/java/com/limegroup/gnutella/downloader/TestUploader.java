@@ -136,6 +136,11 @@ public class TestUploader extends AssertComparisons {
     private boolean useBadThexResponseHeader = false;
     
     /**
+     * Use this to throttle sending our data
+     */
+    private BandwidthThrottle throttle;
+
+    /**
      * The sum of the number of bytes we need to upload across all requests.  If
      * this value is less than totalUploaded and the uploader encountered an
      * IOException in handle request it means the downloader killed the
@@ -501,9 +506,8 @@ public class TestUploader extends AssertComparisons {
         BufferedReader input = 
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-        ThrottledOutputStream output = new ThrottledOutputStream(
-            new BufferedOutputStream(socket.getOutputStream()),
-            new BandwidthThrottle(rate*1024));
+        OutputStream output = socket.getOutputStream();
+        throttle = new BandwidthThrottle(rate*1024);
         int start = 0;
         int stop = TestFile.length();
         boolean firstLine=true;
@@ -726,6 +730,7 @@ public class TestUploader extends AssertComparisons {
                 out.flush();
                 throw new IOException();
             }
+            throttle.request(1);
             if(sendCorrupt &&
                i-start >= corruptBoundary &&
                stop-i >= corruptBoundary )

@@ -275,14 +275,14 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   new FileManagerStub(),
                                   new ActivityCallbackStub(), false);
             //Wait for it to download until error, need to wait 
-            try { Thread.sleep(66000); } catch (InterruptedException e) { }
+            Thread.sleep(140000);
             // no more auto requeries - so the download should be waiting for
             // input from the user
+            assertEquals("should have read 100 bytes", 100, 
+                         downloader.getAmountRead());
             assertEquals("should be waiting for user",
                          Downloader.WAITING_FOR_USER, 
                          downloader.getState());
-            assertEquals("should have read 100 bytes", 100, 
-                         downloader.getAmountRead());
             //Hit resume, make sure progress not erased.
             try { 
                 downloader.resume(); 
