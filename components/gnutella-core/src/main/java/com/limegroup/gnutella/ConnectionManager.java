@@ -951,11 +951,14 @@ public class ConnectionManager {
     private synchronized void gotShieldedClientSupernodeConnection(
         ManagedConnection supernodeConnection)
     {
-        //If we're quick-connecting (on startup or from file menu), set
-        //KEEP_ALIVE to preferred value.  Note that this is not stored in
-        //limewire.props.  Otherwise, we use the user's desired value.
-        //In either case, make sure the ultra-fast connect logic is disabled,
-        //since it tries to get keep-alive connections.
+        //How many leaf connections should we have?  There's a tension between
+        //doing what LimeWire thinks is best and what the user wants.  Here's
+        //how we compromise.  If we're quick-connecting automatically (on
+        //startup, from file menu, or after loosing all shielded connections),
+        //set KEEP_ALIVE to LimeWire's preferred value.  (Note that this is not
+        //stored in limewire.props.)  Otherwise, we use the user's desired
+        //value.  In either case, make sure the ultra-fast connect logic is
+        //disabled, since it tries to get KEEP_ALIVE connections.
         boolean wasQuickConnecting=(_ultraFastCheck!=null) && _keepAlive>0;
   		deactivateUltraFastConnectShutdown(); 
         if (wasQuickConnecting)
@@ -991,12 +994,11 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        //Return KEEP_ALIVE to old value...unless we're disconnected.
-        //(Recall that the KEEP_ALIVE is set to *one* when getting 
-        //a shielded leaf connection.)
-        if(_connections.size() == 0 && _keepAlive>0)
+        //If the user is connected and we've lost all client connections, run
+        //the quick connect logic.  See gotShieldedClientSupernodeConnection.
+        if(_keepAlive>0 && !hasClientSupernodeConnection())
         {
-            setKeepAlive(SettingsManager.instance().getKeepAlive());
+            connect();
         }
     }
     
