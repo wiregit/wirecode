@@ -1346,11 +1346,13 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        if(RouterService.isShieldedLeaf() 
-           && _needPref 
-           && _dedicatedPrefFetcher == null) {
-            //System.out.println("creating dedicated fetcher");
-            _dedicatedPrefFetcher = new ConnectionFetcher(true);
+        if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+            if(RouterService.isShieldedLeaf() 
+               && _needPref 
+               && _dedicatedPrefFetcher == null) {
+                //System.out.println("creating dedicated fetcher");
+                _dedicatedPrefFetcher = new ConnectionFetcher(true);
+            }
         }
         //How many connections do we need?  To prefer ultrapeers, we try to
         //achieve NUM_CONNECTIONS ultrapeer connections.  But to prevent
