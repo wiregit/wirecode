@@ -13,15 +13,16 @@ import java.io.*;
 public final class UrnFactoryTest extends TestCase {
 	
 	private final String [] validURNStrings = {
-		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		"GET /URI-RES/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		"GET /uri-res/n2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		"GET /uri-res/N2r?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		"GET /uri-res/n2r?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		"GET /uri-res/N2R?UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		"GET /uri-res/N2R?urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HtTP/1.0"
+		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/URI-RES/N2R?urn:sha1:WLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/n2R?urn:sha1:RLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2r?urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/n2r?urn:sha1:GLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
+		"/uri-res/N2R?UrN:sha1:LLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2R?urn:sHa1:VLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2R?urn:sha1:OLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
+		"/uri-res/N2R?urn:sha1:ULSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HtTP/1.0"
 	};
 
 	private final URN[] validURNS = new URN[validURNStrings.length];
@@ -29,7 +30,7 @@ public final class UrnFactoryTest extends TestCase {
 	private final String [] invalidURNStrings = {
 		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
 		"GET /urires/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		"/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJcdirnZWUGYQYPFB HTTP/1.0",
+		"/uri-es/N2R?urn:sha1:PLSTHIPQGSSZTS5FJcdirnZWUGYQYPFB HTTP/1.0",
 		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
 		"GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
 		"GET /uri-res/N2R?urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
@@ -72,9 +73,9 @@ public final class UrnFactoryTest extends TestCase {
 	protected void setUp() {
 		for(int i=0; i<validURNStrings.length; i++) {
 			try {
-				validURNS[i] = URNFactory.createSHA1UrnFromGetRequest(validURNStrings[0]);
+				validURNS[i] = URNFactory.createSHA1UrnFromHttpRequest(validURNStrings[0]);
 			} catch(IOException e) {
-				assertTrue("could not create urns for UrnFactorTest setup", false);
+				assertTrue("could not create urns for UrnFactoryTest setup: "+e, false);
 			}
 		}
 	}
@@ -86,16 +87,17 @@ public final class UrnFactoryTest extends TestCase {
 	public void testUrnGetConstructor() {
 		for(int i=0; i<validURNStrings.length; i++) {
 			try {
-				URNFactory.createSHA1UrnFromGetRequest(validURNStrings[i]);
+				URNFactory.createSHA1UrnFromHttpRequest(validURNStrings[i]);
 			} catch(IOException e) {
-				assertTrue("construction of an URN from a valid get request failed",
+				assertTrue("construction of an URN from a valid get request failed: "+e,
 						   false);
 			}
 		}
 		for(int i=0; i<invalidURNStrings.length; i++) {
 			try {
-				URNFactory.createSHA1UrnFromGetRequest(invalidURNStrings[i]);
-				assertTrue("construction of a URN from an invalid get request succeeded",
+				URNFactory.createSHA1UrnFromHttpRequest(invalidURNStrings[i]);
+				assertTrue("construction of a URN from an invalid get request succeeded: "+
+						   invalidURNStrings[i],
 						   false);				
 			} catch(IOException e) {
 				continue;
@@ -112,7 +114,7 @@ public final class UrnFactoryTest extends TestCase {
 		for(int i=0;i<validURNS.length; i++) {
 			String str = URNFactory.createHttpUrnServiceRequest(validURNS[i]);
 			try {
-				URNFactory.createUrnFromServiceRequest(str);
+				URNFactory.createSHA1UrnFromServiceRequest(str);
 			} catch(IOException e) {
 				assertTrue("urn construction failed for generated http urn "+
 						   "service request string: "+e, false);
