@@ -14,6 +14,7 @@ core/com/limegroup/gnutella/DownloadManager.java
       Imagine "yellow submarine beatles" and "beatles yellow
       submarine".  Or what about "yellow submarine" and "beatles
       yellow submarine".  Should we send the intersection of the sets? DONE
+   ***unit tests?  SOME
 
 core/com/limegroup/gnutella/Downloader.java
    ***why bother with REQUERYING_NETWORK if we've got WAITING_FOR_RESULTS DONE
@@ -29,17 +30,14 @@ core/com/limegroup/gnutella/RouterService.java
 core/com/limegroup/gnutella/GUID.java 
    ***1 in 255 chance of false positive is still too high.  Use two bytes.DONE
  
+core/com/limegroup/gnutella/StandardMessageRouter.java
+   *** better to just hold reference to DownloadManager than go
+       through RS....if it's possible. DONE
+ 
 ------------------ PENDING
 
-core/com/limegroup/gnutella/DownloadManager.java
-   ***unit tests?
-  
 core/com/limegroup/gnutella/downloader/ManagedDownloader.java
    ***can't lots of requeries happen if a result comes in that doesn't work?
    ***I'm worried about the code that is similar to TableLine here
    ***also, if you're going to wait before requerying, why not keep retrying busy hosts as well?
 
- 
-core/com/limegroup/gnutella/StandardMessageRouter.java
-   *** better to just hold reference to DownloadManager than go
-       through RS....if it's possible. 
