@@ -83,4 +83,44 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 		newResourceFile.delete();
 	}
 
+	/**
+	 * Tests that the method for converting file name strings to use
+	 * only cross-platform characters works correctly.
+	 */
+	public void testCommonUtilsConvertFileName() throws Exception {
+		char[] illegalChars = 
+			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+												"ILLEGAL_CHARS_ANY_OS");
+
+		char[] illegalCharsUnix = 
+			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+												"ILLEGAL_CHARS_UNIX");
+
+		char[] illegalCharsWindows = 
+			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+												"ILLEGAL_CHARS_WINDOWS");
+
+		runCharTest(illegalChars);
+		
+		if(CommonUtils.isUnix()) {
+			runCharTest(illegalCharsUnix);
+		}
+		if(CommonUtils.isWindows()) {
+			runCharTest(illegalCharsWindows);
+		}
+	}
+
+	/**
+	 * Helper method for testing illegal character conversion method.
+	 */
+	private void runCharTest(char[] illegalChars) {
+		String test = "test";
+		String correctResult = "test_";
+		for(int i=0; i<illegalChars.length; i++) {
+			String curTest = CommonUtils.convertFileName(test + illegalChars[i]);
+			assertEquals("illegal char: "+illegalChars[i]+ " not replaced correctly",
+						 correctResult, curTest);
+		}
+	}
+
 }
