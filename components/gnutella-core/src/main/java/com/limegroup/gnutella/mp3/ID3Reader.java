@@ -22,57 +22,65 @@ public final class ID3Reader {
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         long length = randomAccessFile.length();
 
+        String title = "", artist = "", album = "", year = "", comment = "";
+        short track = -1, gen = -1;
+        // short circuit to bitrate if not ID3 tag can be properly read...
         // We need to read at least 128 bytes
-        if(length < 128)
-            return null;
+        if(length >= 128) {
 
-        randomAccessFile.seek(length - 128);
-        byte[] buffer = new byte[30];
+            randomAccessFile.seek(length - 128);
+            byte[] buffer = new byte[30];
+            
+            // Read ID3 Tag, return null if not present
+            randomAccessFile.readFully(buffer, 0, 3);
+            String tag = new String(buffer, 0, 3);
+            
+            if(tag.equals("TAG")) {
+            
+                // We have an ID3 Tag, now get the parts
+                // Title
+                randomAccessFile.readFully(buffer, 0, 30);
+                title = new String(buffer, 0, 
+                                   getTrimmedLength(buffer, 30));
+                
+                // Artist
+                randomAccessFile.readFully(buffer, 0, 30);
+                artist = new String(buffer, 0, 
+                                    getTrimmedLength(buffer, 30));
+                
+                // Album
+                randomAccessFile.readFully(buffer, 0, 30);
+                album = new String(buffer, 0, 
+                                   getTrimmedLength(buffer, 30));
+                
+                // Year
+                randomAccessFile.readFully(buffer, 0, 4);
+                year = new String(buffer, 0, 
+                                  getTrimmedLength(buffer, 4));
+                
+                // Comment and track
+                randomAccessFile.readFully(buffer, 0, 30);
+                int commentLength;
+                if(buffer[28] == 0)
+                {
+                    track = (short)ByteOrder.ubyte2int(buffer[29]);
+                    commentLength = 28;
+                }
+                else
+                {
+                    track = 0;
+                    commentLength = 30;
+                }
+                comment = new String(buffer, 0,
+                                     getTrimmedLength(buffer, 
+                                                      commentLength));
+                
+                // Genre
+                randomAccessFile.readFully(buffer, 0, 1);
+                gen = (short)ByteOrder.ubyte2int(buffer[0]);
 
-        // Read ID3 Tag, return null if not present
-        randomAccessFile.readFully(buffer, 0, 3);
-        String tag = new String(buffer, 0, 3);
-
-        if(!tag.equals("TAG"))
-            return null;
-
-        // We have an ID3 Tag, now get the parts
-        // Title
-        randomAccessFile.readFully(buffer, 0, 30);
-        String title = new String(buffer, 0, getTrimmedLength(buffer, 30));
-
-        // Artist
-        randomAccessFile.readFully(buffer, 0, 30);
-        String artist = new String(buffer, 0, getTrimmedLength(buffer, 30));
-
-        // Album
-        randomAccessFile.readFully(buffer, 0, 30);
-        String album = new String(buffer, 0, getTrimmedLength(buffer, 30));
-
-        // Year
-        randomAccessFile.readFully(buffer, 0, 4);
-        String year = new String(buffer, 0, getTrimmedLength(buffer, 4));
-
-        // Comment and track
-        short track;
-        randomAccessFile.readFully(buffer, 0, 30);
-        int commentLength;
-        if(buffer[28] == 0)
-        {
-            track = (short)ByteOrder.ubyte2int(buffer[29]);
-            commentLength = 28;
+            }            
         }
-        else
-        {
-            track = 0;
-            commentLength = 30;
-        }
-        String comment = new String(buffer, 0,
-            getTrimmedLength(buffer, commentLength));
-
-        // Genre
-        randomAccessFile.readFully(buffer, 0, 1);
-        short gen = (short)ByteOrder.ubyte2int(buffer[0]);
 
         // Bitrate
         int bitrate = (new MP3Info(file.getCanonicalPath())).getBitRate();
