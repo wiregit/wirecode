@@ -619,7 +619,8 @@ public class ConnectionManager {
         if(!c.receivedHeaders()) return false;
         
         if (c.isCandidateConnection()) {
-        	dropWorstUPAsync(c);  //schedule a trimming of the UPs
+        	//dropWorstUPAsync(c);  //schedule a trimming of the UPs
+        	//currently disabled
         	return true;
         }
 		return allowConnection(c.headers(), false);
@@ -1632,7 +1633,6 @@ public class ConnectionManager {
 		
 		//become an UP! :)
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		isSupernode();
 		
 		//fetch UP connections using the classic method.  This should be removed
 		//when the crawler is implemented
