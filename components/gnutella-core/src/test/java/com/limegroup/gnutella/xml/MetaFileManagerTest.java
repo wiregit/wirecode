@@ -24,11 +24,7 @@ import junit.framework.*;
  */
 public class MetaFileManagerTest 
     extends com.limegroup.gnutella.FileManagerTest {
-    //extends com.limegroup.gnutella.util.BaseTestCase {
 
-    //private MetaFileManager _mFM = null;
-    //private Object loaded = new Object();
-    
     public MetaFileManagerTest(String name) {
         super(name);
     }
@@ -117,7 +113,7 @@ public class MetaFileManagerTest
         l1.add(newDoc1);
 
 
-        String dir2 = "director=\"francis\"";
+        String dir2 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
         File f2 = createNewNamedTestFile(11, "hmm");
 
         LimeXMLDocument newDoc2 = 
@@ -126,7 +122,7 @@ public class MetaFileManagerTest
         l2.add(newDoc2);
 
         
-        String dir3 = "director=\"francis\"";
+        String dir3 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
         File f3 = createNewNamedTestFile(12, "testtesttest");
         
         LimeXMLDocument newDoc3 = 
