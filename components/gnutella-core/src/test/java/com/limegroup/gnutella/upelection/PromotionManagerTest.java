@@ -32,6 +32,10 @@ public class PromotionManagerTest extends BaseTestCase {
 	
 	static PromotionACKVendorMessage _ack;
 	
+	static GUID _guid = new GUID(GUID.makeGuid());
+	
+	static BestCandidates _bestCandidates =BestCandidates.instance();
+	
 	public PromotionManagerTest(String name) {
 		super(name);
 	}
@@ -48,8 +52,10 @@ public class PromotionManagerTest extends BaseTestCase {
 	public static void globalSetUp() {
 		
 		try {
-			PrivilegedAccessor.setValue(PromotionManager.class,"REQUEST_TIMEOUT",
+			PrivilegedAccessor.setValue(PromotionManager.class,"UP_REQUEST_TIMEOUT",
 				new Long(NEW_TIMEOUT));
+			PrivilegedAccessor.setValue(PromotionManager.class,"LEAF_REQUEST_TIMEOUT",
+					new Long(NEW_TIMEOUT));
 			
 			_udpStub = new UDPSendingStub();
 			PrivilegedAccessor.setValue(PromotionManager.class,"_udpService",_udpStub);
@@ -63,7 +69,7 @@ public class PromotionManagerTest extends BaseTestCase {
 		_partner1 = new IpPortPair("1.2.3.1",15);
 		_partner2 = new IpPortPair("1.2.3.2",15);
 		
-		_ack = new PromotionACKVendorMessage();
+		_ack = new PromotionACKVendorMessage(_guid);
 	}
 	
 	/**
@@ -83,7 +89,7 @@ public class PromotionManagerTest extends BaseTestCase {
 		try{
 			Object expirerObj = PrivilegedAccessor.getValue(_manager,"_expirer");
 			if (expirerObj != null)
-				((Thread)expirerObj).interrupt();
+				PrivilegedAccessor.setValue(expirerObj,"_cancelled",new Boolean(true));
 			
 		}catch(Exception e){e.printStackTrace();}
 	}
@@ -165,9 +171,9 @@ public class PromotionManagerTest extends BaseTestCase {
 		update[0].setAdvertiser(stubAdv);
 		update[1].setAdvertiser(stubAdv);
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertTrue(_partner1.isSame(BestCandidates.getBest()));
+		assertTrue(_partner1.isSame(_bestCandidates.getBest()));
 		
 		assertFalse(_manager.isPromoting());
 		
@@ -183,9 +189,9 @@ public class PromotionManagerTest extends BaseTestCase {
 		
 		update[1] = new RemoteCandidate("1.2.3.2",15,(short)10);
 		update[1].setAdvertiser(stubAdv);
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertTrue(_partner2.isSame(BestCandidates.getBest()));
+		assertTrue(_partner2.isSame(_bestCandidates.getBest()));
 		fake.forwarded=false;
 		
 		Thread.sleep(NEW_TIMEOUT/2);
@@ -221,10 +227,11 @@ public class PromotionManagerTest extends BaseTestCase {
 		PrivilegedAccessor.setValue(RouterService.class,"manager",fake);
 		assertFalse(RouterService.isSupernode());
 		
+		
 		//1. test when we receive an ACK but are not partnering with anybody.
 		
 		assertFalse(_manager.isPromoting(_partner1));
-		_manager.handleACK(_partner1);
+		_manager.handleACK(_partner1,_guid);
 		
 		Thread.sleep(100);
 		
@@ -236,20 +243,28 @@ public class PromotionManagerTest extends BaseTestCase {
 		assertTrue(_manager.isPromoting());
 		assertTrue(_manager.isPromoting(_partner2));
 		
-		_manager.handleACK(_partner1);
+		_manager.handleACK(_partner1,_guid);
 		
 		Thread.sleep(NEW_TIMEOUT/3);
 		
 		assertFalse(fake.called);
 		
-		//3. test when we receive a proper ACK as a leaf
-		_manager.handleACK(_partner2);
+		//3. test when we receive an ACK with wrong guid
+		_manager.handleACK(_partner2,_guid);
+		
+		Thread.sleep(NEW_TIMEOUT/3);
+		
+		assertFalse(fake.called);
+		
+		//4.  test when we receive a proper ACK as a leaf
+		PrivilegedAccessor.setValue(_manager,"_guid",_guid);
+		_manager.handleACK(_partner2,_guid);
 		
 		Thread.sleep(NEW_TIMEOUT/3);
 		
 		assertTrue(fake.called);
 		
-		//4. test when we receive a proper ACK as an UP
+		//5. test when we receive a proper ACK as an UP
 		
 		Thread.sleep(NEW_TIMEOUT);
 		fake.setSupernode(true);
@@ -259,10 +274,11 @@ public class PromotionManagerTest extends BaseTestCase {
 		PrivilegedAccessor.setValue(_manager,"_promotionPartner",_partner1);
 		assertTrue(_manager.isPromoting(_partner1));
 		
-		_manager.handleACK(_partner1);
+		_manager.handleACK(_partner1,_guid);
 		
 		Thread.sleep(NEW_TIMEOUT/3);
 		assertEquals(PromotionACKVendorMessage.class,_udpStub._lastSent.getClass());
+		assertEquals(_guid, new GUID(_udpStub._lastSent.getGUID()));
 		assertTrue(_partner1.isSame(_udpStub._lastDest));
 	}
 	

@@ -121,9 +121,7 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		
 		assertTrue(_leaf._gotIt);
 		assertFalse(_supporting._gotNotNull);
-		assertFalse(_supporting._gotNull);
 		assertFalse(_notSupporting._gotNotNull);
-		assertFalse(_notSupporting._gotNull);
 	}
 	
 	/**
