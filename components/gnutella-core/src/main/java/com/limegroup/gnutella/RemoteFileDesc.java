@@ -690,6 +690,7 @@ public class RemoteFileDesc implements Serializable {
      */
     public boolean canPushUDP() {
     	return _isOOBFirewalled && 
+			getOOBAddress()!=null &&
 			_arrivalTime + ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue() >
 				System.currentTimeMillis();
     }
