@@ -327,6 +327,16 @@ public abstract class MessageRouter
             if(c != receivingConnection)
                 c.send(queryRequest);
         }
+        
+        //broadcast to client connections also
+        //TODO use query routing instead
+        list=manager.getInitializedClientConnections2();
+        for(int i=0; i<list.size(); i++)
+        {
+            ManagedConnection c = (ManagedConnection)list.get(i);
+            if(c != receivingConnection)
+                c.send(queryRequest);
+        }
     }
 
     /**
