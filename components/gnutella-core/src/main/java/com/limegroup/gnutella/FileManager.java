@@ -1075,25 +1075,28 @@ public class FileManager {
             return EMPTY_RESPONSES;
 		}
 
-        Response[] response = new Response[matches.size()];
-        int j=0;
+        List responses = new LinkedList();
+
+        boolean busy = 
+            RouterService.getUploadManager().isBusy() &&
+            RouterService.getUploadManager().isQueueFull();
         for (IntSet.IntSetIterator iter=matches.iterator(); 
-             iter.hasNext(); 
-             j++) {            
-            int i=iter.next();
+             iter.hasNext();) { 
+            int i = iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
-            if(desc != null) {
-                desc.incrementHitCount();
-                if ( _callback != null )
-                    _callback.handleSharedFileUpdate(desc.getFile());
-                response[j] = new Response(desc);
-            } else {
+            if(desc == null) {
                 Assert.that(false, 
                             "unexpected null in FileManager for query:\n"+
                             request);
-            }
+            } if(!busy || 
+                 desc.getNumberOfAlternateLocations() < 10) {
+                desc.incrementHitCount();
+                if ( _callback != null )
+                    _callback.handleSharedFileUpdate(desc.getFile());
+                responses.add(new Response(desc));
+            } 
         }
-        return response;
+        return (Response[])responses.toArray();
     }
 
     public synchronized FileDesc file2index(String fullName) {  
