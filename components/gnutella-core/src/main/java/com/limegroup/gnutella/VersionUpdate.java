@@ -32,6 +32,7 @@ public class VersionUpdate
 	private int    _updateSize;
 	private UpdateHandler _updateHandler;
 	private SettingsManager _settings;
+	
 
 	// private constructor for singleton
 	private VersionUpdate() 
@@ -72,6 +73,12 @@ public class VersionUpdate
 
 		ByteReader br;
 		String latest = "";
+		String fileName = "";
+		if(Utilities.isWindows()) {
+			fileName = "WindowsVersion.txt";
+		} else if(Utilities.isMacClassic()) {
+		} else if(Utilities.isUnix()) {
+		}
 
 		try {
 			// open the http connection, and grab 
