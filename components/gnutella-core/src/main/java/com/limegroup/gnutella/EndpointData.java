@@ -55,6 +55,20 @@ public EndpointData(String hostname, int port)
     super(hostname,port);
 }
 
+
+/**
+* Creates a new EndpointData instance
+* @param hostname Hostname of the node this endpoint refers to
+* @param port The port number for the host
+* @param speed Spped in kbps of the host
+*/
+public EndpointData(String hostname, int port, long speed)
+{
+    //initialize the fields in the super class
+    super(hostname,port);
+    this.speed = speed;
+}
+
 /**
 * Creates a new EndpointData instance
 * @param hostname Hostname of the node this endpoint refers to
