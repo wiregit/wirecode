@@ -30,6 +30,7 @@ public final class HTTPUploader implements Uploader {
 	private OutputStream _ostream;
 	private InputStream _fis;
 	private Socket _socket;
+	private int _previousAmountRead; // _amountRead + previous uploaders
 	private int _amountRead;
 	// useful so we don't have to do _uploadEnd - _uploadBegin everywhere
     private int _amountRequested;
@@ -95,28 +96,58 @@ public final class HTTPUploader implements Uploader {
      * to initialize this' bandwidth tracker so we have history
 	 */
 	public HTTPUploader(HTTPRequestMethod method, String fileName, Socket socket, 
-						int index, HTTPUploader old) {
-		_method = method;
+						int index) {
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
 		_index = index;
-		_amountRead = 0;
 		_guid = null;
 		_port = 0;
-        if(old!=null)
-            bandwidthTracker=old.bandwidthTracker;
-        else
+        reinitialize(method);
+    }
+
+    /**
+     * Reinitializes this downloader to a clean state.
+     * This should be used for reconstructing subsequent chunked uploaders
+     * instead of creating a new HTTPUploader.
+     */
+    public void reinitialize(HTTPRequestMethod method) {
+		_method = method;
+        _amountRequested = 0;
+	    _uploadBegin = 0;
+	    _uploadEnd = 0;
+	    _fileSize = 0;
+	    _userAgent = null;
+	    _headersParsed = false;
+	    _stateNum = CONNECTING;
+        _state = null;
+        _chatEnabled = false;
+	    _browseEnabled = false;
+	    _gnutellaPort = 0;
+        _supportsQueueing = false;
+        _requestedURN = null;
+        _fileDesc = null;
+        _clientAcceptsXGnutellaQueryreplies = false;
+        _alternateLocationCollection = null;
+        
+        if(bandwidthTracker != null) {
+            _previousAmountRead += _amountRead;
+		    _amountRead = 0;
+        }            
+        else {
             bandwidthTracker = new BandwidthTrackerImpl();
+            _previousAmountRead = 0;
+            _amountRead = 0;
+        }
 		try {			
 			_ostream = _socket.getOutputStream();
 
             //special case for browse host
-            if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
+            if(_index == UploadManager.BROWSE_HOST_FILE_INDEX) {
                 setState(BROWSE_HOST);
                 return;
             } 
-            else if(index == UploadManager.UPDATE_FILE_INDEX) {
+            else if(_index == UploadManager.UPDATE_FILE_INDEX) {
                 setState(UPDATE_FILE);
                 return;
             }
@@ -128,8 +159,13 @@ public final class HTTPUploader implements Uploader {
 			// report File Not Found
 			if(!_fileName.equals(_fileDesc.getName())) {
 				setState(FILE_NOT_FOUND);
-			}
-			else {
+			// if we're continuing an old uploader, we want to be 
+			// uploading (not connecting)
+			} else if ( _fis != null ) {
+			   _fis = _fileDesc.createInputStream();
+			   setState(CONNECTING); // to create the NormalUploadState
+			   setState(UPLOADING);
+			} else {
 				// get the fileInputStream
 				_fis = _fileDesc.createInputStream();
 				setState(CONNECTING);
@@ -163,6 +199,7 @@ public final class HTTPUploader implements Uploader {
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
+		_previousAmountRead = 0;
 		_hostName = host;
 		_guid = guid;
 		_port = port;
@@ -266,10 +303,6 @@ public final class HTTPUploader implements Uploader {
 			} catch (IOException e2) {};
 		} catch (IOException e) {
             // set it to be completed if they read what they wanted.
-            // some servents (BearShare 4.0.0+) will read files in 'blocks'
-            // when swarming, and rather than interpret the disco as 
-            // interuption, it makes more sense to consider it complete,
-            // since they read what they wanted.
             if ( _amountRead >= _amountRequested ) {
                 setState(COMPLETE);
             }
@@ -407,19 +440,19 @@ public final class HTTPUploader implements Uploader {
 
     public boolean supportsQueueing() {return _supportsQueueing; }
     
-    /**The number of bytes read. The way we calculate the number of bytes 
-     * read is a little wierd if the range header begins from the middle of 
-     * the file (say from byte x). Then we consider that bytes 0-x have 
-     * already been read. 
-     * <p>
-     * This may lead to some wierd behaviour with chunking. For example if 
-     * a host requests the last 10% of a file, the GUI will display 90%
-     * downloaded. Later if the same host requests from 20% to 30% the 
-     * progress will reduce to 20% onwards. 
-	 * 
+    /**
+     * The number of bytes uploaded.
+     *
 	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {return _amountRead;}
+	
+	/**
+	 * The total amount of bytes uploaded, included previous uploaders.
+	 */
+	public int getTotalAmountUploaded() {
+	    return _previousAmountRead + _amountRead;
+    }
 
 	/**
 	 * Returns the <tt>FileDesc</tt> instance for this uploader.
@@ -799,7 +832,7 @@ public final class HTTPUploader implements Uploader {
 	}
   
     public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(amountUploaded());
+        bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
     }
 
     public float getMeasuredBandwidth() {

@@ -63,6 +63,12 @@ public interface Uploader extends BandwidthTracker {
 	 * name was changed to make more sense.
 	 */ 
 	public int amountUploaded();
+	
+	/**
+	 * returns the total amount uploaded, including the amount that previous
+	 * uploaders transfered for this upload.
+	 */
+	public int getTotalAmountUploaded();
 
 	/**
 	 * returns the string representation of the IP Address
