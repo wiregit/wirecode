@@ -152,21 +152,6 @@ public final class LimeXMLDocumentHelper{
     }
 
 
-    private static String getSchemaURIXML(Element tree) {
-        String retString="<"+tree.getNodeName()+" ";
-        List attributes=LimeXMLUtils.getAttributes(tree.getAttributes());
-        int z = attributes.size();
-        for(int i=0;i<z;i++){
-            Node att = (Node)attributes.get(i);
-            String attName = att.getNodeName();//.toLowerCase();Sumeet
-            String attVal = att.getNodeValue();
-            retString = retString+attName+"=\""+attVal+"\" ";
-        }
-        retString = retString +">";//closed root
-        return retString;
-    }
-
-
     private static String internalGetAggregateString2 (Response[] responses) { 
         //this hashmap remembers the current state of the string for each uri
         HashMap uriToString /*LimeXMLSchemaURI -> String */ = new HashMap();
@@ -257,68 +242,6 @@ public final class LimeXMLDocumentHelper{
         }
     }
 
-    private static String getNodeString(Node node){
-
-        StringBuffer retStringB = new StringBuffer();
-
-        // start everything off....
-        retStringB.append("<"+node.getNodeName());
-
-        //deal with attributes
-        List attributes=LimeXMLUtils.getAttributes(node.getAttributes());
-        int z = attributes.size();
-        for(int i=0;i<z;i++){
-            Node att = (Node)attributes.get(i);
-            String attName = att.getNodeName().toLowerCase();
-            String attVal = LimeXMLUtils.encodeXML(att.getNodeValue());
-            retStringB.append(" "+attName+"=\""+attVal+"\"");
-        }
-
-        // deal with children
-        if (node.hasChildNodes()) {
-            // i have children, so don't close off this node...
-            retStringB.append(">");
-            NodeList children = node.getChildNodes();
-            for (int i = 0; i < children.getLength();i++) {
-                Node child = (Node)children.item(i);
-                if (child.getNodeType() == Node.TEXT_NODE)
-                    retStringB.append(((Text)child).getData());
-                if (child.getNodeType() == Node.ELEMENT_NODE)
-                    retStringB.append(getNodeString(child));
-            }
-        }
-
-        if (node.hasChildNodes())
-            retStringB.append("</"+node.getNodeName()+">");
-        else 
-            retStringB.append("/>");
-            
-        return retStringB.toString();
-        //TODO2:review and test
-    }
-        
-    private static void addIndex(Node node, int childIndex){
-        //find the only child of node - called newLeaf
-        Element newLeaf = getFirstNonTextChild(node);
-        //then  add the index as the attribute of newLeaf
-        if(newLeaf == null)
-            return;
-        String ind = ""+childIndex;//cast it!
-        newLeaf.setAttribute("index", ind);
-        //then add newLeaf as a child of parent.
-    }
-
-     private static Element getFirstNonTextChild(Node node){
-           List children = LimeXMLUtils.getElements(node.getChildNodes());
-           int z = children.size();
-           for (int i=0;i<z;i++){
-                Node n = (Node)children.get(i);
-                if(n.getNodeType() == Node.ELEMENT_NODE)
-                      return (Element)n;
-           }
-           return null;
-     }
-    
         
     private static Element getDOMTree(DOMParser parser, 
                                       String aggrigateXMLStr){
@@ -394,7 +317,7 @@ public final class LimeXMLDocumentHelper{
         resps[5] = new Response(1, 200, "File 6", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Blues\" city=\"New York\"/></radioStations>"));
         resps[6] = new Response(1, 200, "File 7", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"160\" genre=\"Chamber Music\"/></audios>"));
         resps[7] = new Response(1, 200, "File 8", new LimeXMLDocument("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"170\" genre=\"Pop\"/></audios>"));
-        resps[8] = new Response(1, 200, "File 9", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Classic Rock=\"></radioStation></radioStations>"));
+        resps[8] = new Response(1, 200, "File 9", new LimeXMLDocument("<?xml version=\"1.0\"?><radioStations xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/radioStations.xsd\"><radioStation format=\"Classic Rock\"></radioStation></radioStations>"));
         resps[9] = new Response(1, 200, "File 10", new LimeXMLDocument("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
         
         for (int i = 0; i < resps.length; i++)
