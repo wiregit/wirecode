@@ -155,5 +155,10 @@ public class ResponseVerifier {
     Assert.that(rv.matchesType(qr4.getGUID(), r4));
     }
     */
+
+    //////////////////////// quality tests //////////////////////
+	// QueryRequest qr2=new QueryRequest((byte)7,0,"Weird Al Cantina");
+
+
 }
 
