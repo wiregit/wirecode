@@ -101,7 +101,7 @@ public class LimeXMLProperties
      * Default value for the max number of xml results
      * to be returned by direct querying of a database
      */
-    private static final int MAX_JDBC_XML_RESULTS_DEF = 255;
+    private static final int MAX_JDBC_XML_RESULTS_DEF = 250;
     
     /**
      * The property that denotes the file that stores the 
@@ -426,8 +426,8 @@ public class LimeXMLProperties
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
-        return SettingsManager.instance().getPath();
-        //return "e:/work/";
+//        return SettingsManager.instance().getPath();
+        return "e:/work/";
     }    
     
 }//end of class
