@@ -40,6 +40,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),14));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),15));
                                              
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -63,6 +65,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),14));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),15));
     }
 
     public void testNetworkConstructor() throws Exception {
