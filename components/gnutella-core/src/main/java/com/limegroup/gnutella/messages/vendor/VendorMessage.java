@@ -20,6 +20,7 @@ public abstract class VendorMessage extends Message {
     protected static final int F_HOPS_FLOW = 4;
     protected static final int F_TCP_CONNECT_BACK = 7;
     protected static final int F_UDP_CONNECT_BACK = 7;
+    protected static final int F_UDP_CONNECT_BACK_REDIR = 8;
     protected static final int F_LIME_ACK = 11;
     protected static final int F_REPLY_NUMBER = 12;
     protected static final int F_PUSH_PROXY_REQ = 21;
@@ -251,6 +252,13 @@ public abstract class VendorMessage extends Message {
             (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
             // Query Status Response
             return new QueryStatusResponse(guid, ttl, hops, version, restOf);
+        if ((selector == F_TCP_CONNECT_BACK) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new TCPConnectBackRedirect(guid, ttl, hops, version, restOf);
+        if ((selector == F_UDP_CONNECT_BACK_REDIR) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
+
 
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();

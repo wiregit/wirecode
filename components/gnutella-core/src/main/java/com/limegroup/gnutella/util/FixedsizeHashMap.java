@@ -143,6 +143,14 @@ public boolean isFull()
     return count >= size ;
 }
 
+/**
+ * clears all entries from the map.
+ */
+public synchronized void clear()
+{
+    hashMap.clear();
+}
+
 
 /**
 * Returns the string representation of the mappings

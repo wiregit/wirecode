@@ -28,6 +28,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             MessagesSupportedVendorMessage.instance();
         assertGreaterThan(0, vmp.supportsTCPConnectBack());
         assertGreaterThan(0, vmp.supportsUDPConnectBack());
+        assertGreaterThan(0, vmp.supportsTCPConnectBackRedirect());
+        assertGreaterThan(0, vmp.supportsUDPConnectBackRedirect());
         assertGreaterThan(0, vmp.supportsHopsFlow());
         assertGreaterThan(0, vmp.supportsPushProxy());
         assertGreaterThan(0, vmp.supportsLeafGuidance());
@@ -36,6 +38,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
         assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),11));
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
                                              
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -47,6 +51,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertEquals(vmp, vmpRead);
         assertGreaterThan(0, vmpRead.supportsTCPConnectBack());
         assertGreaterThan(0, vmpRead.supportsUDPConnectBack());
+        assertGreaterThan(0, vmp.supportsTCPConnectBackRedirect());
+        assertGreaterThan(0, vmp.supportsUDPConnectBackRedirect());
         assertGreaterThan(0, vmpRead.supportsHopsFlow());
         assertGreaterThan(0, vmp.supportsPushProxy());
         assertGreaterThan(0, vmp.supportsLeafGuidance());
@@ -55,6 +61,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
         assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),11));
         assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),21));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("LIME".getBytes(),8));
     }
 
     public void testNetworkConstructor() throws Exception {

@@ -102,9 +102,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // -----------------------------
         // test network constructor....
 
-        byte[] bytes = new byte[6];
-        for (int i = 0; i < bytes.length; i++)
-            bytes[i] = (byte)33;
+        byte[] bytes = new byte[] {(byte)192, (byte)168, (byte)1, (byte)1,
+                                   (byte)1, (byte)1};
 
         // make sure deprecation is working....
         try {
@@ -140,6 +139,28 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // test other constructor....
         vm = new QueryStatusResponse(new GUID(GUID.makeGuid()), 65535);
         testRead(vm);
+
+        // TCP ConnectBack Redirect
+        // -----------------------------
+        // test network constructor....
+        vm = new TCPConnectBackRedirect(GUID.makeGuid(), (byte) 1, 
+                                        (byte) 0, 1, bytes);
+        testWrite(vm);
+        // test other constructor....
+        vm = new TCPConnectBackRedirect(InetAddress.getLocalHost(), 65535);
+        testRead(vm);
+
+        // TCP ConnectBack Redirect
+        // -----------------------------
+        // test network constructor....
+        vm = new UDPConnectBackRedirect(GUID.makeGuid(), (byte) 1, 
+                                        (byte) 0, 1, bytes);
+        testWrite(vm);
+        // test other constructor....
+        vm = new UDPConnectBackRedirect(new GUID(GUID.makeGuid()),
+                                        InetAddress.getLocalHost(), 65535);
+        testRead(vm);
+
     }
 
 
@@ -349,22 +370,164 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
 
 
+    public void testUDPConnectBackRedirectConstructor() throws Exception {
+        final int UDP_VERSION = UDPConnectBackRedirect.VERSION;
+
+        byte[] guid = GUID.makeGuid();
+        UDPConnectBackRedirect udp = null;
+        byte ttl = 1, hops = 0;
+        
+        try {
+            // try a VERSION we don't support with a payload that is ok
+            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+                                                UDP_VERSION+1, bytes(6));
+        }
+        catch (BadPacketException expected) {
+            fail("should not have thrown bpe");
+        }
+        
+        try {
+            // try a VERSION we don't support, with the old 18-byte payload
+            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+                                                UDP_VERSION+1, bytes(4));
+            fail("should have thrown bpe");
+        }
+        catch (ArrayIndexOutOfBoundsException expected) {}
+
+        try {
+            // in the next few tests, try bad sizes of the payload....
+            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+                                                UDP_VERSION, bytes(0));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+        try {
+            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+                                                UDP_VERSION, bytes(5));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+        try {
+            udp = new UDPConnectBackRedirect(guid, ttl, hops,
+                                                UDP_VERSION, bytes(7));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+
+        // Test version 1 constructor -- 18 bytes in payload
+        udp = new UDPConnectBackRedirect(guid, ttl, hops, 1, bytes(6));
+        // no bpe ...
+        
+        // make sure we encode things just fine....
+        GUID guidObj = new GUID(GUID.makeGuid());
+
+        UDPConnectBackRedirect VendorMessage1 = 
+            new UDPConnectBackRedirect(guidObj, InetAddress.getLocalHost(),
+                                       6346);
+        UDPConnectBackRedirect VendorMessage2 = 
+            new UDPConnectBackRedirect(VendorMessage1.getGUID(), ttl, hops,
+                                            VendorMessage1.getVersion(),
+                                            VendorMessage1.getPayload());
+        assertEquals(1, VendorMessage1.getVersion());
+        assertEquals(VendorMessage2, VendorMessage1);
+        assertEquals(VendorMessage1.getConnectBackPort(),
+                     VendorMessage2.getConnectBackPort());
+        assertEquals(VendorMessage1.getConnectBackAddress(),
+                     VendorMessage2.getConnectBackAddress());
+        assertEquals(VendorMessage1.getConnectBackGUID(),
+                     VendorMessage2.getConnectBackGUID());
+
+    }
+    
+    /**
+     * Creates a byte array whose first byte is non zero.
+     */
+    private byte[] bytes(int length) {
+        byte[] stuff = new byte[length];
+        for (int i = 0; i < stuff.length; i++)
+            stuff[i] = (byte)3;
+        return stuff;
+    }
+
+    public void testTCPConnectBackConstructor() throws Exception {
+        final int TCP_VERSION = TCPConnectBackRedirect.VERSION;
+
+        byte[] guid = GUID.makeGuid();
+        byte ttl = 1, hops = 0;
+        try {
+            // try a VERSION we don't support but should be ok
+            TCPConnectBackRedirect TCP = 
+                new TCPConnectBackRedirect(guid, ttl, hops,
+                                                TCP_VERSION+1, bytes(6));
+        }
+        catch (BadPacketException expected) {
+            fail("should not have thrown bpe");
+        }
+        try {
+            // in the next few tests, try bad sizes of the payload....
+            TCPConnectBackRedirect TCP = 
+                new TCPConnectBackRedirect(guid, ttl, hops,
+                                                TCP_VERSION, bytes(0));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+        try {
+            TCPConnectBackRedirect TCP = 
+                new TCPConnectBackRedirect(guid, ttl, hops,
+                                                TCP_VERSION, bytes(5));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+        try {
+            TCPConnectBackRedirect TCP = 
+                new TCPConnectBackRedirect(guid, ttl, hops,
+                                                TCP_VERSION, bytes(7));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+
+        // this is the correct size of the payload
+        TCPConnectBackRedirect TCP = 
+            new TCPConnectBackRedirect(guid, ttl, hops,
+                                            TCP_VERSION, bytes(6));
+
+
+        // make sure we encode things just fine....
+        TCPConnectBackRedirect VendorMessage1 = 
+            new TCPConnectBackRedirect(InetAddress.getLocalHost(), 6346);
+        TCPConnectBackRedirect VendorMessage2 = 
+            new TCPConnectBackRedirect(VendorMessage1.getGUID(),
+                                            ttl, hops, TCP_VERSION, 
+                                            VendorMessage1.getPayload());
+        assertEquals(VendorMessage1, VendorMessage2);
+        assertEquals(VendorMessage1.getConnectBackPort(),
+                     VendorMessage2.getConnectBackPort());
+
+    }
+
     public void testGetSpecificVendorMessages() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         TCPConnectBackVendorMessage tcp = null;
         UDPConnectBackVendorMessage udp = null;
+        TCPConnectBackRedirect tcpR = null;
+        UDPConnectBackRedirect udpR = null;
         HopsFlowVendorMessage hops = null;
         MessagesSupportedVendorMessage ms = null;
             
         tcp = new TCPConnectBackVendorMessage(6346);
         udp = new UDPConnectBackVendorMessage(6346, 
                                               new GUID(GUID.makeGuid()));
+        tcpR = new TCPConnectBackRedirect(InetAddress.getLocalHost(), 6346);
+        udpR = new UDPConnectBackRedirect(new GUID(GUID.makeGuid()), 
+                                          InetAddress.getLocalHost(), 6346);
         hops = new HopsFlowVendorMessage((byte)4);
 
         ms = MessagesSupportedVendorMessage.instance();
         
         tcp.write(baos);
         udp.write(baos);
+        tcpR.write(baos);
+        udpR.write(baos);
         ms.write(baos);
         hops.write(baos);
         
@@ -376,6 +539,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
 
         vm = (VendorMessage) Message.read(bais);
         assertEquals(vm,(udp));
+
+        vm = (VendorMessage) Message.read(bais);
+        assertEquals(vm,(tcpR));
+
+        vm = (VendorMessage) Message.read(bais);
+        assertEquals(vm,(udpR));
 
         vm = (VendorMessage) Message.read(bais);
         assertEquals(vm,(ms));

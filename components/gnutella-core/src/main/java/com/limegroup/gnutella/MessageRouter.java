@@ -91,6 +91,22 @@ public abstract class MessageRouter {
      */
     private final Map _outOfBandReplies = new Hashtable();
 
+    /**
+     * Keeps track of what hosts we have recently tried to connect back to via
+     * UDP.  The size is limited and once the size is reached, no more connect
+     * back attempts will be honored.
+     */
+    private static final FixedsizeHashMap _udpConnectBacks = 
+        new FixedsizeHashMap(200);
+
+    /**
+     * Keeps track of what hosts we have recently tried to connect back to via
+     * TCP.  The size is limited and once the size is reached, no more connect
+     * back attempts will be honored.
+     */
+    private static final FixedsizeHashMap _tcpConnectBacks = 
+        new FixedsizeHashMap(200);
+
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
@@ -169,6 +185,9 @@ public abstract class MessageRouter {
 
         // schedule a runner to clear unused out-of-band replies
         RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
+        // schedule a runner to clear guys we've connected back to
+        RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
+                               10 * CLEAR_TIME);
     }
 
     public String getPingRouteTableDump() {
@@ -264,6 +283,18 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                                         receivingConnection);
+        }
+        else if (msg instanceof TCPConnectBackRedirect) {
+			if(RECORD_STATS)
+                ;
+            handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
+                                         receivingConnection);
+        }
+        else if (msg instanceof UDPConnectBackRedirect) {
+			if(RECORD_STATS)
+                ;
+            handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
+                                         receivingConnection);
         }
         else if (msg instanceof PushProxyRequest) {
 			if(RECORD_STATS)
@@ -903,6 +934,8 @@ public abstract class MessageRouter {
     /**
      * Basically, just get the correct parameters, create a temporary 
      * DatagramSocket, and send a Ping.
+     * This method will soon change to just forward a new message, a 
+     * UDPConnectBackRedirect, to a third party.
      */
     protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
                                                Connection source) {
@@ -927,8 +960,56 @@ public abstract class MessageRouter {
 
 
     /**
+     * Basically, just get the correct parameters, create a temporary 
+     * DatagramSocket, and send a Ping.
+     */
+    protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
+                                               Connection source) {
+        // only allow other UPs to send you this message....
+        if (!source.isSupernodeSupernodeConnection()) return;
+
+        GUID guidToUse = udp.getConnectBackGUID();
+        int portToContact = udp.getConnectBackPort();
+        InetAddress addrToContact = udp.getConnectBackAddress();
+
+        // only connect back if you aren't connected to the host - that is the
+        // whole point of redirect after all....
+        Endpoint endPoint = new Endpoint(addrToContact.getAddress(),
+                                         portToContact);
+        if (_manager.isConnectedTo(endPoint)) return;
+
+        // keep track of who you tried connecting back too, don't do it too
+        // much....
+        String addrString = addrToContact.getHostAddress();
+        Object placeHolder = _udpConnectBacks.get(addrString);
+        if (placeHolder == null) {
+            try {
+                _udpConnectBacks.put(addrString, new Object());
+            }
+            catch (NoMoreStorageException nomo) {
+                return;  // we've done too many connect backs, stop....
+            }
+        }
+        else
+            return;  // we've connected back to this guy recently....
+
+        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
+                                         (byte) 0);
+        try {
+            UDPService.instance().send(pr, addrToContact, portToContact);
+        } catch(IOException e) {
+            ErrorService.error(e, 
+                "invalid ip/port: " + addrToContact + ":" + portToContact);
+        }
+    }
+
+
+
+    /**
      * Basically, just get the correct parameters, create a Socket, and
      * send a "/n/n".
+     * This method will soon change to just forward a new message, a 
+     * UDPConnectBackRedirect, to a third party.
      */
     protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
@@ -940,6 +1021,62 @@ public abstract class MessageRouter {
         catch (IllegalStateException ise) {
             return;
         }
+
+        Thread connectBack = new Thread( new Runnable() {
+            public void run() {
+                Socket sock = null;
+                OutputStream os = null;
+                try {
+                    sock = Sockets.connect(addrToContact, portToContact, 12);
+                    os = sock.getOutputStream();
+                    os.write("\n\n".getBytes());
+                } catch (IOException ignored) {
+                } catch (SecurityException ignored) {
+                } catch (Throwable t) {
+                    ErrorService.error(t);
+                } finally {
+                    if(sock != null)
+                        try { sock.close(); } catch(IOException ignored) {}
+                    if(os != null)
+                        try { os.close(); } catch(IOException ignored) {}
+                }
+            }
+        }, "TCPConnectBackThread");
+        connectBack.start();
+    }
+
+
+    /**
+     * Basically, just get the correct parameters, create a Socket, and
+     * send a "/n/n".
+     */
+    protected void handleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
+                                                Connection source) {
+        // only allow other UPs to send you this message....
+        if (!source.isSupernodeSupernodeConnection()) return;
+
+        final int portToContact = tcp.getConnectBackPort();
+        final String addrToContact =tcp.getConnectBackAddress().getHostAddress();
+
+        // only connect back if you aren't connected to the host - that is the
+        // whole point of redirect after all....
+        Endpoint endPoint = new Endpoint(addrToContact, portToContact);
+        if (_manager.isConnectedTo(endPoint)) return;
+
+        // keep track of who you tried connecting back too, don't do it too
+        // much....
+        Object placeHolder = _tcpConnectBacks.get(addrToContact);
+        if (placeHolder == null) {
+            try {
+                _tcpConnectBacks.put(addrToContact, new Object());
+            }
+            catch (NoMoreStorageException nomo) {
+                return;  // we've done too many connect backs, stop....
+            }
+        }
+        else
+            return;  // we've connected back to this guy recently....
+
         Thread connectBack = new Thread( new Runnable() {
             public void run() {
                 Socket sock = null;
@@ -2250,5 +2387,22 @@ public abstract class MessageRouter {
             }
         }
     }
+
+
+    /** This is run to clear out the registry of connect back attempts...
+     *  Made package access for easy test access.
+     */
+    static class ConnectBackExpirer implements Runnable {
+        public void run() {
+            try {
+                _tcpConnectBacks.clear();
+                _udpConnectBacks.clear();
+            } 
+            catch(Throwable t) {
+                ErrorService.error(t);
+            }
+        }
+    }
+
 
 }
