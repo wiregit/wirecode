@@ -35,7 +35,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT1 = 6667;
+    private static final int PORT = 6667;
 
 
 	/**
@@ -155,27 +155,27 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	
 	private static void buildConnections() throws Exception {
 	    LEAF_1 =
-			new Connection("localhost", PORT1, new LeafHeaders("localhost"),
+			new Connection("localhost", PORT, new LeafHeaders("localhost"),
                                                           new EmptyResponder());
 
 	    LEAF_2 =
-			new Connection("localhost", PORT1, new LeafHeaders("localhost"),
+			new Connection("localhost", PORT, new LeafHeaders("localhost"),
 						                                  new EmptyResponder());
 
 	    LEAF_3 =
-			new Connection("localhost", PORT1, new LeafHeaders("localhost"),
+			new Connection("localhost", PORT, new LeafHeaders("localhost"),
                                                          new EmptyResponder());
 
 	    LEAF_4 =
-			new Connection("localhost", PORT1, new LeafHeaders("localhost"),
+			new Connection("localhost", PORT, new LeafHeaders("localhost"),
                                                         new EmptyResponder() );
 
 	    TCP_TEST_LEAF =
-			new Connection("localhost", PORT1, new LeafHeaders("localhost"),
+			new Connection("localhost", PORT, new LeafHeaders("localhost"),
 						                                 new EmptyResponder() );
         
         ULTRAPEER_1 = 
-			new Connection("localhost", PORT1,
+			new Connection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
@@ -183,7 +183,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         UDP_ACCESS = new DatagramSocket();
 
         ULTRAPEER_2 = 
-			new Connection("localhost", PORT1,
+			new Connection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
@@ -194,7 +194,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT1);
+        ConnectionSettings.PORT.setValue(PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
@@ -208,8 +208,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(7);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(9);
+		UltrapeerSettings.MAX_LEAVES.setValue(30);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(30);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
@@ -218,14 +218,14 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	public static void globalSetUp() throws Exception {
         setSettings();
 
-        assertEquals("unexpected port", PORT1, 
+        assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
 		ROUTER_SERVICE.connect();	
 		connect();
-        assertEquals("unexpected port", PORT1, 
+        assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
 	}
 
@@ -296,7 +296,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         LEAF_3.initialize();
         LEAF_4.initialize();
         TCP_TEST_LEAF.initialize();
-
+                
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("ashish");
         qrt.add("sumeet");
@@ -312,7 +312,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
             TCP_TEST_LEAF.send(message);
 			TCP_TEST_LEAF.flush();
         }
-
         // for Ultrapeer 1
         qrt = new QueryRouteTable();
         qrt.add("sumeet");
@@ -335,8 +334,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 		// make sure we get rid of any initial ping pong traffic exchanges
 		sleep();
 		drainAll();
-		//sleep();
-		drainAll();
 		sleep();
     }
 
@@ -350,7 +347,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         DatagramPacket pack = null;
         // set up solicited UDP support
         {
-            drainAll();
+            //drainAll(); //We just did drainAll before this test was started
             PingReply pong = 
                 PingReply.create(GUID.makeGuid(), (byte) 4,
                                  UDP_ACCESS.getLocalPort(), 
@@ -420,7 +417,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
                                       ULTRAPEER_1.getInetAddress(), cbPort);
             UDP_ACCESS.send(pack);
         }
-     
         //GiveStatsSpecific traffic within our small network
 
         TCP_TEST_LEAF.send(query1);
@@ -441,6 +437,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
                                                     LEAF_1,query2.getClass());
         q3  = (QueryRequest)getFirstInstanceOfMessageType(
                                                     LEAF_1,query3.getClass());
+        System.out.println("Sumeet:"+q1);
         assertEquals("Wrong message reached LEAF_1", q1.getGUID(), GUID1);
         assertEquals("Wrong message reached LEAF_1", q2.getGUID(), GUID2);
         assertNull("Leaf got three messages instead of 2", q3);
@@ -515,7 +512,6 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 
         //OK. Now we can send the Give Stats Message to the central UP, and see
         //what the response is
-
     }
      
     public void testTCPGiveStatsVM() throws Exception {
