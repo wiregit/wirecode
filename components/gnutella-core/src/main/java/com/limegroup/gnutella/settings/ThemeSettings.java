@@ -42,6 +42,11 @@ public final class ThemeSettings extends LimeProps {
     public static final String DEFAULT_OSX_THEME_NAME =
 		"default_osx_theme."+EXTENSION;
     
+    /**
+     * The default name of the windows laf theme file name.
+     */
+    public static final String WINDOWS_LAF_THEME_NAME =
+        "windows_laf_theme."+EXTENSION;
     
     /**
      * The full path to the default theme file.
@@ -54,7 +59,12 @@ public final class ThemeSettings extends LimeProps {
      */
     static final File DEFAULT_OSX_THEME_FILE =
 		new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
-    
+		
+    /** 
+     * The full path to the windows theme file for the windows LAF
+     */
+    static final File WINDOWS_LAF_THEME_FILE =
+        new File(THEME_DIR_FILE, WINDOWS_LAF_THEME_NAME);
     
     /**
      * The array of all theme files that should be copied by default
@@ -63,6 +73,7 @@ public final class ThemeSettings extends LimeProps {
     private static final String[] THEMES = {
         DEFAULT_THEME_NAME,
         DEFAULT_OSX_THEME_NAME,
+        WINDOWS_LAF_THEME_NAME,
         "black_theme."+EXTENSION,
     };
     
@@ -117,6 +128,16 @@ public final class ThemeSettings extends LimeProps {
      */
     public static boolean isDefaultTheme() {
         return THEME_FILE.getValue().equals(THEME_DEFAULT.getValue());
+    }
+    
+    /** 
+     * Determines whether or not the current theme is the windows theme,
+     * designed to be used for the windows laf.
+     * @return <tt>true</tt> if the current theme is the windows theme,
+     *  otherwise <tt>false</tt>
+     */
+    public static boolean isWindowsTheme() {
+        return THEME_FILE.getValue().equals(WINDOWS_LAF_THEME_FILE);
     }
     
     /**
