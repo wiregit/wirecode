@@ -196,6 +196,17 @@ public class LimeXMLProperties
      */
     private static final int NUM_QUERY_DISPATCHER_THREADS_DEF = 50;
     
+    /**
+     * The property that denotes the name of the file that stores the 
+     * user information map
+     */
+    private static final String USER_MAP_FILE = "USER_MAP_FILE";
+
+    /**
+     * The name of the file that stores the user information map
+     */
+    private static final String USER_MAP_FILE_DEF = "UserMap.dat";
+    
     
     /**
      * Constructor: Initializes various default values, and loads the settings
@@ -299,6 +310,17 @@ public class LimeXMLProperties
             files[i]  = new File(dir,fileNames[i]);
         }
         return files;
+    }
+    
+    /**
+     * Returns the name of the file that stores user information map
+     */
+    public String getUserMapFile()
+    {
+        String userMapFile = _properties.getProperty(
+            USER_MAP_FILE, USER_MAP_FILE_DEF);
+
+        return getPath() + userMapFile;                   
     }
     
     /**
