@@ -56,13 +56,16 @@ public abstract class TestConnection extends ManagedConnection {
      * Overridden to keep track of messages sent.
      */
     public void send(Message msg) {            
-        if(msg instanceof RouteTableMessage) {
+        if(msg instanceof ResetTableMessage) {
+            QRT.reset((ResetTableMessage)msg);
+        } else if(msg instanceof PatchTableMessage) {
             try {
-                QRT.update((RouteTableMessage)msg);
+                QRT.patch((PatchTableMessage)msg);
             } catch (BadPacketException e) {
                 throw new IllegalArgumentException("should not have received a bad packet");
             }
         }
+
         if(!(msg instanceof QueryRequest)) return;
         
         _receivedQuery = true;
