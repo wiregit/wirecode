@@ -67,7 +67,9 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * After we discover a router or give up on trying to, we should call stop().
  * 
  */
-public class UPnPManager extends ControlPoint implements DeviceChangeListener{
+public class UPnPManager extends ControlPoint implements DeviceChangeListener {
+
+    private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
 	/** some schemas */
 	private static final String ROUTER_DEVICE= 
@@ -86,9 +88,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
 	
 	private static final UPnPManager INSTANCE = new UPnPManager();
-	
-	private static final Log LOG = LogFactory.getLog(UPnPManager.class);
-	
+
 	public static UPnPManager instance() {
 		return INSTANCE;
 	}
@@ -109,8 +109,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	
 	private UPnPManager() {
 		super();
-		addDeviceChangeListener(this);
 		
+		LOG.debug("Starting UPnP Manager.");
+		addDeviceChangeListener(this);
 		start();
 	}
 	
@@ -141,6 +142,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			getIP = _service.getAction("GetExternalIPAddress");
 		}
 		
+		if(getIP == null) {
+		    LOG.debug("Couldn't find GetExternalIPAddress action!");
+		    return null;
+		}
+		    
+		
 		if (!getIP.postControlAction()) {
 			LOG.debug("couldn't get our external address");
 			return null;
@@ -154,6 +161,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 * this method will be called when we discover a UPnP device.
 	 */
 	public synchronized void deviceAdded(Device dev) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Device added: " + dev.getFriendlyName());
 		
 		// we've found what we need
 		if (_service != null && _router != null) {
@@ -177,7 +186,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			LOG.debug("couldn't find service");
 			_router=null;
 		} else {
-			LOG.debug("found service");
+		    if(LOG.isDebugEnabled())
+		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
 			stop();
 		}
 	}
@@ -195,7 +205,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			
 			DeviceList l = current.getDeviceList();
 			if (LOG.isDebugEnabled())
-				LOG.debug("found "+current.getDeviceType()+" "+l.size());
+				LOG.debug("found "+current.getDeviceType()+", size: "+l.size() + ", on: " + current.getFriendlyName());
 			
 			for (int i=0;i<current.getDeviceList().size();i++) {
 				Device current2 = l.getDevice(i);
@@ -204,7 +214,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 					continue;
 			
 				if (LOG.isDebugEnabled())
-					LOG.debug("found "+current2.getDeviceType());
+					LOG.debug("found "+current2.getDeviceType() + ", on: " + current2.getFriendlyName());
 				
 				_service = current2.getService(SERVICE_TYPE);
 				return;
@@ -217,6 +227,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 * @return the external port that was actually mapped. 0 if failed
 	 */
 	public int mapPort(int port) {
+	    if(LOG.isTraceEnabled())
+	        LOG.trace("Attempting to map port: " + port);
 		
 		Random gen=null;
 		
@@ -304,6 +316,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			add = _service.getAction("AddPortMapping");
 		}
 		
+		if(add == null) {
+		    LOG.debug("Couldn't find AddPortMapping action!");
+		    return false;
+		}
+		    
+		
 		add.setArgumentValue("NewRemoteHost",m._externalAddress);
 		add.setArgumentValue("NewExternalPort",m._externalPort);
 		add.setArgumentValue("NewInternalClient",m._internalAddress);
@@ -313,7 +331,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		add.setArgumentValue("NewEnabled","1");
 		add.setArgumentValue("NewLeaseDuration",0);
 		
-		return add.postControlAction();
+		boolean success = add.postControlAction();
+		if(LOG.isTraceEnabled())
+		    LOG.trace("Post succeeded: " + success);
+		return success;
 	}
 	
 	/**
@@ -329,6 +350,11 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		synchronized(this) {
 			remove = _service.getAction("DeletePortMapping");
 		}
+		
+		if(remove == null) {
+		    LOG.debug("Couldn't find DeletePortMapping action!");
+		    return false;
+	    }
 		
 		remove.setArgumentValue("NewRemoteHost",m._externalAddress);
 		remove.setArgumentValue("NewExternalPort",m._externalPort);
@@ -425,17 +451,37 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 * It can take several minutes to finish, depending on how many mappings there are.  
 	 */
 	private class StaleCleaner implements Runnable {
+	    
+	    // TODO: remove
+	    private String list(java.util.List l) {
+	        String s = "";
+	        for(Iterator i = l.iterator(); i.hasNext(); ) {
+	            Argument next = (Argument)i.next();
+	            s += next.getName() + "->" + next.getValue() + ", ";
+	        }
+	        return s;
+	    }
+	    
 		public void run() {
+		    
+		    LOG.debug("Looking for stale mappings...");
+		    
 			Set mappings = new HashSet();
 			Action getGeneric;
 			synchronized(UPnPManager.this) {
 				getGeneric = _service.getAction("GetGenericPortMappingEntry");
 			}
 			
+			if(getGeneric == null) {
+			    LOG.debug("Couldn't find GetGenericPortMappingEntry action!");
+			    return;
+			}
+			
 			// get all the mappings
 			try {
 				for (int i=0;;i++) {
-					getGeneric.setArgumentValue("NewPortMappingIndex",i);
+    				getGeneric.setArgumentValue("NewPortMappingIndex",i);
+				    LOG.debug("Stale Iteration: " + i + ", generic.input: " + list(getGeneric.getInputArgumentList()) + ", generic.output: " + list(getGeneric.getOutputArgumentList()));
 					
 					if (!getGeneric.postControlAction())
 						break;
@@ -447,8 +493,11 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 							getGeneric.getArgumentValue("NewInternalPort"),
 							getGeneric.getArgumentValue("NewProtocol"),
 							getGeneric.getArgumentValue("NewPortMappingDescription")));
+				    // TODO: erase output arguments.
+				
 				}
 			}catch(NumberFormatException bad) {
+			    LOG.error("NFE reading mappings!", bad);
 				//router broke.. can't do anything.
 				return;
 			}
@@ -459,6 +508,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			// iterate and clean up
 			for (Iterator iter = mappings.iterator();iter.hasNext();) {
 				Mapping current = (Mapping)iter.next();
+				if(LOG.isDebugEnabled())
+				    LOG.debug("Analyzing: " + current);
 				
 				// does it have our description?
 				if (current._description.equals(TCP_PREFIX+GUID_SUFFIX) ||

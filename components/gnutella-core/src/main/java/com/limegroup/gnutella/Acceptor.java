@@ -449,22 +449,29 @@ public class Acceptor implements Runnable {
         
         // if we created a socket and have a NAT, and the user is not 
         // explicitly forcing a port, create the mappings 
-        if (_socket != null && 
-        		UPNP_MANAGER != null) {
+        if (_socket != null && UPNP_MANAGER != null) {
         	
         	// if we haven't discovered the router by now, its not there
         	UPNP_MANAGER.stop();
         	
-        	if(UPNP_MANAGER.isNATPresent() &&
-				NetworkUtils.isValidPort(_port) &&
-				!ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+        	boolean natted = UPNP_MANAGER.isNATPresent();
+        	boolean validPort = NetworkUtils.isValidPort(_port);
+        	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+        	if(LOG.isDebugEnabled())
+        	    LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
+        	if(natted && validPort && !forcedIP) {
         		int mappedPort = UPNP_MANAGER.mapPort(_port);
+        		if(LOG.isDebugEnabled())
+        		    LOG.debug("UPNP port mapped: " + _port);
         		
-			//if we created a mapping successfully, update the forced port
-			if (mappedPort != 0 ) {
+			    //if we created a mapping successfully, update the forced port
+			    if (mappedPort != 0 ) {
+			        // TODO: mark UPNP as being on so that if LimeWire shuts
+			        //  down prematurely, we know the FORCE_IP was from UPnP
+			        //  and that we can continue trying to use UPnP
         		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        	    	    ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
         		
         		    // we could get our external address from the NAT but its too slow
         		    // so we just trigger another connect back request
@@ -473,7 +480,7 @@ public class Acceptor implements Runnable {
         		    resetLastConnectBackTime();
         		    RouterService.schedule(new IncomingValidator(),500,0);
         		    UDPService.instance().triggerConnectBack();
-			}
+			    }			        
         	}
         }
         
