@@ -32,6 +32,7 @@ public class HTTPUploader implements Uploader {
 
 	private UploadState _state;
 	private UploadManager _manager;
+    private MessageRouter _router;
 	
 	private boolean  _chatEnabled;
 	private String  _chatHost;
@@ -59,7 +60,7 @@ public class HTTPUploader implements Uploader {
 
 	// Regular upload
 	public HTTPUploader(String file, Socket s, int index, UploadManager m,
-                        FileManager fm) {
+                        FileManager fm, MessageRouter router) {
 		_socket = s;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_filename = file;
@@ -67,14 +68,22 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
+        _router = router;
 		FileDesc desc;
 		boolean indexOut = false;
 		boolean ioexcept = false;
-
+        
 		try {
 			// This line can't be moved, or FileNotFoundUploadState
 			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
+            
+            //special case for browse host
+            if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
+                setState(BROWSE_HOST);
+                return;
+            }
+            
 			desc = _fileManager.get(_index);
 			_fileSize = desc._size;
 		} catch (IndexOutOfBoundsException e) {
@@ -96,7 +105,8 @@ public class HTTPUploader implements Uploader {
 		
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
-						String guid, UploadManager m, FileManager fm) {
+						String guid, UploadManager m, FileManager fm,
+                        MessageRouter router) {
 		_filename = file;
 		_manager = m;
 		_index = index;
@@ -106,6 +116,7 @@ public class HTTPUploader implements Uploader {
 		_guid = guid;
 		_port = port;
         _fileManager = fm;
+        _router = router;
 		FileDesc desc;
 		try {
 			desc = _fileManager.get(_index);
@@ -207,7 +218,8 @@ public class HTTPUploader implements Uploader {
 	 */
 	public void start() {
 		try {
-			prepareFile();
+            if(_stateNum != BROWSE_HOST)
+                prepareFile();
 		} catch (IOException e) {
 			setState(FILE_NOT_FOUND);
 		}
@@ -264,6 +276,9 @@ public class HTTPUploader implements Uploader {
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
 			break;
+        case BROWSE_HOST:
+            _state = new BrowseHostUploadState(_fileManager, _router);
+            break;
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
 		case COMPLETE:
@@ -429,7 +444,9 @@ public class HTTPUploader implements Uploader {
 			if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
-				if (SettingsManager.instance().getAllowBrowser() == false) {
+                //Allow them to browse the host though
+				if (SettingsManager.instance().getAllowBrowser() == false
+                    && !(_stateNum == BROWSE_HOST)) {
 					// if we are not supposed to read from them
 					// throw an exception
 					if( (str.indexOf("Mozilla") != -1) ||
