@@ -418,6 +418,116 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
+    public void testTHEXDownloadSwarm() throws Exception {
+    	LOG.debug("-Testing the grey area allocation during swarm downloads");
+    	
+    	final RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
+    	final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        final IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        RemoteFileDesc[] rfds = {rfd,rfd2};
+        
+        HTTP11Listener grayVerifier = new HTTP11Listener() {
+        	private int requestNo;
+        	private int thexStatus;
+        	private Interval lastInterval;
+        	public synchronized void requestHandled(){
+        		if (thexStatus == 1)
+        			thexStatus = 2;
+        	}
+        	public synchronized void thexRequestStarted() {thexStatus=1;}
+        	
+        	// checks whether we request chunks at the proper offset, etc.
+        	public synchronized void requestStarted() {
+        		
+        		List l = null;
+        		try {
+        			IntervalSet leased = null;
+        			File incomplete = null;
+        			incomplete = ifm.getFile(rfd);
+        			assertNotNull(incomplete);
+        			VerifyingFile vf = ifm.getEntry(incomplete);
+            		assertNotNull(vf);
+            		leased = (IntervalSet)
+    					PrivilegedAccessor.getValue(vf,"leasedBlocks");
+            		assertNotNull(leased);
+            		l = leased.getAllIntervalsAsList();
+            		assertGreaterThan(0,l.size());
+            		assertLessThanOrEquals(2,l.size());
+        		} catch (Exception bad) {
+        			fail(bad);
+        		}
+        		
+        		Interval i;
+        		switch(requestNo) {
+        			case 0: 
+        				assertEquals(1,l.size());
+        				assertEquals(0,thexStatus);
+        				i = (Interval)l.get(0);
+        				// first request, we should have 0-99999 gray
+        				assertEquals(0,i.low);
+        				assertEquals(99999,i.high);
+        				lastInterval=i;
+        				break;
+        			case 1:
+        				assertEquals(1,l.size());
+        				i = (Interval)l.get(0);
+        				lastInterval = i;
+        				
+    					// if no thex yet, so 100K-200K        				
+        				if (thexStatus == 0) 
+        					assertEquals(199999,i.high);
+        				
+    					// else 100K-256K        				
+        				if (thexStatus == 2) 
+        					assertEquals(256*1024 -1,i.high);
+        				break;
+        			case 2:
+        				i = (Interval)l.get(l.size()-1);
+        				assertEquals(lastInterval.high+1,i.low);
+        				// should have tree by now
+        				assertEquals(2,thexStatus);
+        				
+        				// either 200-256 or 256-512
+        				if (lastInterval.high == 256 *1024)
+        					assertEquals(512*1024 -1, i.high);
+        				else if (lastInterval.high == 199999)
+        					assertEquals(256*1024 -1, i.high);
+        				else
+        					fail("invalid high range on second request");
+        				break;
+        		}
+        		requestNo++;
+        		
+        	}
+        };
+        
+        uploader1.setHTTPListener(grayVerifier);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        uploader2.setHTTPListener(grayVerifier);
+        uploader2.setSendThexTreeHeader(true);
+        uploader2.setSendThexTree(true);
+        
+        Downloader download=null;
+
+        download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+
+        waitForComplete(false);
+        assertEquals(6,uploader1.getRequestsReceived());
+        if (isComplete())
+            LOG.debug("pass"+"\n");
+        else
+            fail("FAILED: complete corrupt");
+
+        
+        for (int i=0; i<rfds.length; i++) {
+            File incomplete=ifm.getFile(rfds[i]);
+            VerifyingFile vf=ifm.getEntry(incomplete);
+            assertNull("verifying file should be null", vf);
+        }
+        
+    }
+    
     public void testSimplePushDownload() throws Exception {
         LOG.debug("-Testing non-swarmed push download");
         
