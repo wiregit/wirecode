@@ -356,7 +356,7 @@ public class LimeXMLReplyCollection{
 
         /** Where to serialize/deserialize from.
          */
-        private String _backingStoreName;
+        private File _backingStoreFile;
         
         /** underlying map for hashmap access.
          */
@@ -366,19 +366,18 @@ public class LimeXMLReplyCollection{
          *  deserialize to.  
          *  @exception Exception Thrown if input file whereToStore is invalid.
          */
-        public MapSerializer(String whereToStore) throws Exception {
-            _backingStoreName = whereToStore;
-            File file = new File(_backingStoreName);
-            if (file.isDirectory())
+        public MapSerializer(File whereToStore) throws Exception {
+            _backingStoreFile = whereToStore;
+            if (_backingStoreFile.isDirectory())
                 throw new Exception();
-            else if (file.exists())
+            else if (_backingStoreFile.exists())
                 deserializeFromFile();
             else
                 _hashMap = new HashMap();
         }
 
         private void deserializeFromFile() throws Exception {            
-            FileInputStream istream = new FileInputStream(_backingStoreName);
+            FileInputStream istream = new FileInputStream(_backingStoreFile);
             ObjectInputStream objStream = new ObjectInputStream(istream);
             _hashMap = (HashMap) objStream.readObject();
             istream.close();
@@ -394,7 +393,7 @@ public class LimeXMLReplyCollection{
 
         
         private void serializeToFile() throws Exception {
-            FileOutputStream ostream = new FileOutputStream(_backingStoreName);
+            FileOutputStream ostream = new FileOutputStream(_backingStoreFile);
             ObjectOutputStream objStream = new ObjectOutputStream(ostream);
             objStream.writeObject(_hashMap);
             ostream.close();
@@ -411,25 +410,25 @@ public class LimeXMLReplyCollection{
 
     /*
     public static void testMapSerializer(String argv[]) throws Exception {   
-    LimeXMLReplyCollection.MapSerializer hms =
-    new LimeXMLReplyCollection.MapSerializer("test.txt");
-    
-    Map hm = hms.getMap();
-    
-    System.out.println(""+hm);
-    
-    for (int i = 0; i < argv.length; i+=2) {
-    try{
-    hm.put(argv[i],argv[i+1]);
-    }
-    catch (Exception e) {};
-    }
-    hms.commit();
+        LimeXMLReplyCollection.MapSerializer hms =
+        new LimeXMLReplyCollection.MapSerializer(new File("test.txt"));
+        
+        Map hm = hms.getMap();
+        
+        System.out.println(""+hm);
+        
+        for (int i = 0; i < argv.length; i+=2) {
+            try{
+                hm.put(argv[i],argv[i+1]);
+            }
+            catch (Exception e) {};
+        }
+        hms.commit();
     }
     
     
     public static void main(String argv[]) throws Exception {
-    testMapSerializer(argv);
+        testMapSerializer(argv);
     }
     */
 
