@@ -13,7 +13,7 @@ import java.io.*;
  */
 public class UltrapeerTester {
     static final int PORT=6347;
-    static final int TIMEOUT=2000;
+    static final int TIMEOUT=500;
     static Connection leaf;
     static Connection ultrapeer;
     static Connection old;
