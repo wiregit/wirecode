@@ -2,10 +2,12 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.Serializable;
 
+import com.sun.java.util.collections.Comparable;
+
 import com.limegroup.gnutella.Assert;
 
 /** The half-open interval [low, high) inclusive on the low end. */
-public class Interval implements Serializable {
+public class Interval implements Serializable, Comparable {
     /** Ensure backwards compatibility. */
     static final long serialVersionUID = -2562093104400487554L;
 
@@ -18,9 +20,22 @@ public class Interval implements Serializable {
         this.low=low;
         this.high=high;
     }
+    
     public Interval(int singleton) {
         this.low=singleton;
         this.high=singleton;
+    }
+    
+    /**
+     * Compares this to another interval by the 'low' element of the interval.
+     * If the low elements are the same, then the high element is compared.
+     */
+    public int compareTo(Object o) {
+        Interval other = (Interval)o;
+        if( this.low == other.low )
+            return this.low - other.low;
+        else
+            return this.high - other.high;
     }
 
     /** 

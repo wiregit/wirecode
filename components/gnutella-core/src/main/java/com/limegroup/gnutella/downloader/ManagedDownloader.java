@@ -37,7 +37,7 @@ import java.net.*;
  * reason, serializing and deserializing a ManagedDownloader M results in a
  * ManagedDownloader M' that is the same as M except it is
  * unconnected. <b>Furthermore, it is necessary to explicitly call
- * initialize(..) after reading a ManagedDownloader from disk.</b> 
+ * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
 public class ManagedDownloader implements Downloader, Serializable {
     /*
@@ -1504,7 +1504,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //update needed
                 Iterator iter=commonOutFile.getFreeBlocks(rfd.getSize());
                 while (iter.hasNext())
-                    needed.add((Interval)iter.next());
+                    addToNeeded((Interval)iter.next());
             }
         }
 
@@ -1973,7 +1973,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     int max = temp.low+CHUNK_SIZE-1;
                     interval = new Interval(temp.low, max);
                     temp = new Interval(max+1,temp.high);
-                    needed.add(0,temp);
+                    // this is not strictly necessary, as we know
+                    // the interval will always be added at element 0.
+                    // for efficiency, we could simply call needed.add(0, temp)
+                    addToNeeded(temp);
                 } 
                 else //temp's size <= CHUNK_SIZE
                     interval = temp;
@@ -2135,8 +2138,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( (high-low)>0) {//dloader failed to download a part assigned to it?
             Interval in = new Interval(low,high);
             debug("Updating needed. Adding interval "+in+" from "+dloader);
-            needed.add(in);
+            addToNeeded(in);
         }
+    }
+    
+    /**
+     * Adds an Interval into the needed list in the correctly sorted position.
+     */
+    private synchronized void addToNeeded(Interval val) {
+        int position = Collections.binarySearch(needed, val);
+        // if it is not there, then binarySearch returns a negative
+        // number that is one greater than where we should insert it.
+        if(position < 0)
+            position = -(position + 1);
+        needed.add(position, val);
     }
 
     /** 
