@@ -97,4 +97,27 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	public Candidate[] getBestCandidates() {
 		return _bestCandidates;
 	}
+	
+	/**
+	 * Checks the equality of two BestCandidatesMessages.
+	 * @param other the <tt>BestCandidatesVendorMessage</tt> to compare to
+	 * @return true if this and other advertise the same candidates.
+	 */
+	public final boolean isSame(BestCandidatesVendorMessage other) {
+		if (other==null)
+			return false;
+		
+		Candidate [] otherCandidates = other.getBestCandidates();
+		
+		if (!_bestCandidates[0].isSame(otherCandidates[0]))
+			return false;
+		
+		if (_bestCandidates[1]==null && otherCandidates[1]==null)
+			return true;
+		
+		if (_bestCandidates[1]!=null && _bestCandidates[1].isSame(otherCandidates[1]))
+			return true;
+		
+		return false;
+	}
 }

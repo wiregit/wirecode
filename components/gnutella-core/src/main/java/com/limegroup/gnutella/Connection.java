@@ -160,7 +160,13 @@ public class Connection implements Candidate {
      * The possibly non-null VendorMessagePayload which describes what
      * candidates the guy on the other side of this connection advertises.
      */
-    protected BestCandidatesVendorMessage _candidates = null;
+    protected BestCandidatesVendorMessage _candidatesReceived = null;
+    
+    /**
+     * The possibly non-null VendorMessagePayload
+     * LOCKING: obtain _advertisementLock
+     */
+    protected BestCandidatesVendorMessage _candidatesSent = null;
     
     /**
      * the last time we received an advertisement on this connection
@@ -169,6 +175,7 @@ public class Connection implements Candidate {
     
     /**
      * the last time we sent an advertisement on this connection
+     * LOCKING: obtain _advertisementLock
      */
     private long _lastSentAdvertisementTime;
     
@@ -177,6 +184,17 @@ public class Connection implements Candidate {
      * interval.  Not final so that tests can change it.
      */
     private static long ADVERTISEMENT_INTERVAL = 2 * Constants.MINUTE;  // 2 minutes?
+    
+    /**
+     * this flag is set only if we needed to update the connection with
+     * new candidates before the advertisement  interval had expired.
+     */
+    private boolean _needsAdvertisement;
+    
+    /**
+     * lock for the BestCandidates instance and the timers.
+     */
+    private Object _advertisementLock = new Object();
     
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -404,10 +422,10 @@ public class Connection implements Candidate {
         	
         	//update the values
         	_lastReceivedAdvertisementTime = System.currentTimeMillis();
-        	_candidates = (BestCandidatesVendorMessage)vm;
+        	_candidatesReceived = (BestCandidatesVendorMessage)vm;
         	
         	//then add a ref of the advertiser to each candidate received
-        	Candidate [] candidates = _candidates.getBestCandidates();
+        	Candidate [] candidates = _candidatesReceived.getBestCandidates();
         	
         	candidates[0].setAdvertiser(this);
         	if (candidates[1]!=null)
@@ -2183,6 +2201,64 @@ public class Connection implements Candidate {
 	 * @return Returns the candidates the remote host advertised.
 	 */
 	public Candidate [] getCandidates() {
-		return _candidates == null ? null : _candidates.getBestCandidates();
+		return _candidatesReceived == null ? null : _candidatesReceived.getBestCandidates();
+	}
+	
+	/**
+	 * sends the <tt>BestCandidatesMessage</tt> if it should be sent.
+	 * @param m the message to send accross the network.  If its called with a 
+	 * null value we just check if an update is necessary.
+	 * 
+	 * the whole method is syncrhonized.  There's no real need for finer locking.
+	 */
+	public void handleBestCandidatesMessage(BestCandidatesVendorMessage m) throws IOException {
+		synchronized(_advertisementLock) {
+			handleBestCandidatesMessageInternal(m);
+		}
+	}
+	
+	private void handleBestCandidatesMessageInternal(BestCandidatesVendorMessage m) 
+		throws IOException {
+		
+		//we got called just to check if we couldn't send the last update on time.
+		if (m==null) {
+			if (_needsAdvertisement && _candidatesSent!=null){ 
+				_needsAdvertisement=false;
+				_lastSentAdvertisementTime = System.currentTimeMillis();
+				send(_candidatesSent);
+			}
+			return;
+		}
+		
+		//we got called to send a real message.
+		
+		boolean identical = m.isSame(_candidatesSent);
+		
+		//first see if we are not sending to this connection too soon.
+		//do not lock for reading.
+		if (System.currentTimeMillis() - _lastSentAdvertisementTime 
+				< ADVERTISEMENT_INTERVAL) {
+			
+			//we are trying to send too soon.  However if the message is not the same, it should
+			//still be updated.
+			if (!identical){
+				_needsAdvertisement=true;
+				_candidatesSent=m;
+			}
+			
+			return;
+		}
+		
+		//also see if anything has changed since last time.
+		if (identical)
+			return;
+		
+		//if not we should send the new message
+		
+		_lastSentAdvertisementTime = System.currentTimeMillis();
+		_candidatesSent=m;
+		_needsAdvertisement = false;
+		
+		send(m);
 	}
 }
