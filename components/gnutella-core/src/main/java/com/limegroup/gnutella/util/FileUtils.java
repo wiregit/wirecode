@@ -130,6 +130,46 @@ public class FileUtils
         if(index == (name.length()-1)) return null;
         
         return name.substring(index+1);
-    }    
+    }
     
+    /**
+     * Utility method to set a file as non read only.
+     * If the file is already writable, does nothing.
+     *
+     * @param f the <tt>File</tt> instance whose read only flag should
+     *  be unset.
+     */
+    public static boolean setWriteable(File f) {
+        if( f.canWrite() )
+            return true;
+            
+        String fName;
+        try {
+            fName = f.getCanonicalPath();
+        } catch(IOException ioe) {
+            fName = f.getPath();
+        }
+        
+        System.out.println("fName: " + fName);
+            
+        String cmds[] = null;
+        if( CommonUtils.isWindows() )
+            cmds = new String[] { "attrib", "-r", fName};
+        else if ( CommonUtils.isMacClassic() )
+            cmds = null; // TODO: fill in.
+        else
+            cmds = new String[] { "chmod", "u+w", fName};
+        
+        if( cmds != null ) {
+            try { 
+                Process p = Runtime.getRuntime().exec(cmds);
+                p.waitFor();
+            }
+            catch(SecurityException ignored) { }
+            catch(IOException ignored) { }
+            catch(InterruptedException ignored) { }
+        }
+
+        return f.canWrite();
+    }
 }
