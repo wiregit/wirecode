@@ -282,6 +282,8 @@ public final class HugeTestUtils {
 	 */
 	public static URN UNIQUE_SHA1;
 
+	public static URN SHA1;
+	
 	private static final HugeTestUtils INSTANCE = new HugeTestUtils();
 
 	static {
@@ -296,6 +298,12 @@ public final class HugeTestUtils {
 			BAD_PORT_URLS[0] = new URL("http", "www.limewire.org", -1, "test");
 			BAD_PORT_URLS[1] = new URL("http", "www.limewire.org", 66000, "test");				
 		} catch(MalformedURLException e) {
+			ErrorService.error(e);
+		}
+
+		try {
+			SHA1 = URN.createSHA1Urn(VALID_URN_STRINGS[3]);
+		} catch(IOException e) {
 			ErrorService.error(e);
 		}
 
