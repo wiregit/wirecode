@@ -30,6 +30,8 @@ public class HTTPUploader implements Uploader {
 	protected int _stateNum = CONNECTING;
 
 	private UploadState _state;
+
+	private UploadManager _manager;
 	
 	/****************** Constructors ***********************/
 	/**
@@ -49,11 +51,12 @@ public class HTTPUploader implements Uploader {
 	 */
 
 	// Regular upload
-	public HTTPUploader(String file, Socket s, int index) {
+	public HTTPUploader(String file, Socket s, int index, UploadManager m) {
 		_socket = s;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_filename = file;
 		_index = index;
+		_manager = m;
 		_amountRead = 0;
 		FileDesc desc = FileManager.instance().get(_index);
 		_fileSize = desc._size;
@@ -67,9 +70,10 @@ public class HTTPUploader implements Uploader {
 		
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
-						String guid) {
+						String guid, UploadManager m) {
 		_filename = file;
 		_index = index;
+		_manager = m;
 		_uploadBegin = 0;
 		_amountRead = 0;
 		_hostName = host;
@@ -233,6 +237,8 @@ public class HTTPUploader implements Uploader {
 	public int getUploadBegin() {return _uploadBegin;}
 	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
+	public int uploadsInProgress() {return _manager.uploadsInProgress();}
+	public int getBurstSize() {return _manager.calculateBurstSize();}
 
 	/****************** private methods *******************/
 
