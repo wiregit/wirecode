@@ -93,9 +93,7 @@ public class UDPMultiplexor {
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
-log("before handleMessage:"+System.currentTimeMillis());
 					 con.handleMessage(msg);
-log("after handleMessage:"+System.currentTimeMillis());
 					 break;
 				} 
 			}
@@ -106,14 +104,8 @@ log("after handleMessage:"+System.currentTimeMillis());
 			con = _connections[connID];
 			if ( con != null &&
                  con.matchAddress(senderIP, senderPort) ) {
-log("before2 handleMessage:"+System.currentTimeMillis());
 				con.handleMessage(msg);
-log("after2 handleMessage:"+System.currentTimeMillis());
 			}
 		}
-	}
-
-	public static void log(String str) {
-		//System.err.println(str);
 	}
 }
