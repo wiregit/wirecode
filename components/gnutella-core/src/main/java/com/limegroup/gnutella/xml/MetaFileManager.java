@@ -98,11 +98,11 @@ public class MetaFileManager extends FileManager {
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
-        List xmlDocs = fd.getLimeXMLDocuments();
+        List xmlDocs = fd.getLimeXMLDocuments();        
         if(LimeXMLUtils.isMP3File(f)) {
             try {
                 LimeXMLDocument diskID3Doc = ID3Reader.readDocument(f);
-                resolveAudioDocs(xmlDocs,diskID3Doc);
+                xmlDocs = resolveAudioDocs(xmlDocs,diskID3Doc);
             } catch(IOException e) {
                 // if we were unable to read this document,
                 // then simply add the file without metadata.
@@ -130,7 +130,7 @@ public class MetaFileManager extends FileManager {
      * Finds the audio metadata document in allDocs, and makes it's id3 fields
      * identical with the fields of id3doc (which are only id3).
      */
-    private void resolveAudioDocs(List allDocs, LimeXMLDocument id3Doc) {
+    private List resolveAudioDocs(List allDocs, LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = 
         LimeXMLSchemaRepository.instance().getSchema(ID3Reader.schemaURI);
@@ -139,15 +139,23 @@ public class MetaFileManager extends FileManager {
             LimeXMLDocument doc = (LimeXMLDocument)iter.next();
             if(doc.getSchema() == audioSchema) {
                 audioDoc = doc;
-                iter.remove();
                 break;
             }
         }
-        if(audioDoc.equals(id3Doc)) {
-            allDocs.add(audioDoc);//no difference, add it right back and go home
-            return;
+        if(id3Doc.equals(audioDoc)) //No issue -- both documents are the same
+            return allDocs; //did not modify list, keep using it
+        
+        List retList = new ArrayList();
+        retList.addAll(allDocs);
+        
+        if(audioDoc == null) {//nothing to resolve
+            retList.add(id3Doc);
+            return retList;
         }
-
+        
+        //OK. audioDoc exists, remove it
+        retList.remove(audioDoc);
+        
         //now add the non-id3 tags from audioDoc to id3doc
         List audioList = null;
         List id3List = null;
@@ -163,7 +171,8 @@ public class MetaFileManager extends FileManager {
                 id3List.add(nameVal);
         }
         audioDoc = new LimeXMLDocument(id3List, ID3Reader.schemaURI);
-        allDocs.add(audioDoc);
+        retList.add(audioDoc);
+        return retList;
     }
 
 
