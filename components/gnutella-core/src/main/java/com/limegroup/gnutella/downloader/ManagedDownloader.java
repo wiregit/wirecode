@@ -42,8 +42,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int TRIES=300;
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
-    /** The max number of downloads to try in parallel. */
-    private static final int PARALLEL_DOWNLOAD=4;
     /** The time to wait trying to establish each connection, in milliseconds.*/
     private static final int CONNECT_TIME=8000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
@@ -59,6 +57,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         //60 seconds: same as BearShare.
         return 60*1000;
     }
+    /** Returns true if another downloader is allowed. */
+    private synchronized boolean allowAnotherDownload() {
+        //TODO1: this should really be done dynamically by observing capacity
+        //and load, but that's hard to do.
+        int downloads=dloaders.size();
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        if (capacity<=SpeedConstants.MODEM_SPEED_INT)
+            //Modems can't swarm.
+            return downloads<1;
+        else if (capacity<=SpeedConstants.T1_SPEED_INT)
+            //DSL, Cable, and "T1" can swarm from up to 4 locations.
+            return downloads<4;
+        else 
+            return downloads<6;
+    }
+        
     /** The minimum quality considered likely to work.  Value of two corresponds
      *  to a THREE-star result. */
     private static final int DECENT_QUALITY=2;
@@ -519,10 +533,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //1. Try dividing remaining work among PARALLEL_DOWNLOAD-|dloaders|
             //locations, so that that desired parallelism will be reached.
             while (true) {
-                synchronized (this) { 
-                    if (PARALLEL_DOWNLOAD-dloaders.size() <= 0)
-                        break;
-                }
+                if (! allowAnotherDownload())
+                    break;
                 try {
                     startBestDownload(files, needed,
                                       busy, terminated);
