@@ -114,6 +114,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     public void testStartsUDPTransfer() throws Exception {
 
         drain(testUP[0]);
+        drainUDP();
 
         // make sure leaf is sharing
         assertEquals(2, RouterService.getFileManager().getNumFiles());
@@ -164,16 +165,19 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // we should get an incoming UDP transmission
-        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
-        try {
-            UDP_ACCESS.receive(pack);
+        while (true) {
+            DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get SYN", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            Message syn = Message.read(in);
+            if (syn instanceof SynMessage) break;
         }
-        catch (IOException bad) {
-            fail("Did not get SYN", bad);
-        }
-        InputStream in = new ByteArrayInputStream(pack.getData());
-        // as long as we don't get a ClassCastException we are good to go
-        SynMessage syn = (SynMessage) Message.read(in);
 
         // but we should NOT get a incoming GIV
         try {
@@ -187,6 +191,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
     public void testHTTPRequest() throws Exception {
         drain(testUP[0]);
+        drainUDP();
         // some setup
         byte[] clientGUID = GUID.makeGuid();
 
@@ -222,9 +227,21 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        RouterService.download((new RemoteFileDesc[] 
-            { ((MyActivityCallback)getCallback()).getRFD() }), true, 
-                new GUID(m.getGUID()));
+        final GUID fGuid = new GUID(m.getGUID());
+        Thread runLater = new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    RouterService.download((new RemoteFileDesc[] 
+                                            {((MyActivityCallback)getCallback()).getRFD() }), 
+                                           true, fGuid);
+                }
+                catch (Exception damn) {
+                    assertTrue(false);
+                }
+            }
+        };
+        runLater.start();
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
@@ -273,6 +290,23 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         writer.flush();
         httpSock.close();
 
+        Thread.sleep(500);
+
+        // we should get an incoming UDP transmission
+        while (true) {
+            DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get SYN", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            Message syn = Message.read(in);
+            if (syn instanceof SynMessage) break;
+        }
+
         try {
             do {
                 m = testUP[0].receive(TIMEOUT);
@@ -280,18 +314,6 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             } while (true) ;
         }
         catch (InterruptedIOException expected) {}
-
-        // we should get some incoming UDP
-        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
-        try {
-            UDP_ACCESS.receive(pack);
-        }
-        catch (IOException bad) {
-            fail("Did not get SYN", bad);
-        }
-        InputStream in = new ByteArrayInputStream(pack.getData());
-        // as long as we don't get a ClassCastException we are good to go
-        SynMessage syn = (SynMessage) Message.read(in);
 
         // awesome - everything checks out!
         ss.close();
@@ -308,7 +330,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     }
 
     private static byte[] myIP() {
-        return new byte[] { (byte)192, (byte)168, 0, 1 };
+        return new byte[] { (byte)127, (byte)0, 0, 1 };
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {
@@ -323,6 +345,22 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             this.rfd = rfd;
         }
     }
+
+    public void drainUDP() throws Exception {
+        while (true) {
+            DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (InterruptedIOException bad) {
+                break;
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            Message syn = Message.read(in);
+        }
+    }
+
 
 
 }
