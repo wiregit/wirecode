@@ -19,9 +19,25 @@ public class UpdateManager {
     
 
     private UpdateManager() {
-        //Use a class called UpdateFileParser for this.
-        //TODO1: parse the xml file from disk and find out the version.
-        latestVersion = "3.0.0";//temporary solution
+        try {
+            File file = new File("lib\\signed_update_file.xml");
+            RandomAccessFile f=new RandomAccessFile(file,"r");
+            byte[] content = new byte[(int)f.length()];
+            f.readFully(content);
+            f.close();
+            //we dont really need to verify, but we may as well...so here goes.
+            UpdateMessageVerifier verifier = new UpdateMessageVerifier(content);
+            boolean verified = verifier.verifySource();
+            if(!verified) {
+                latestVersion = CommonUtils.getLimeWireVersion();
+                return;
+            }
+            String xml = new String(verifier.getMessageBytes(),"UTF-8");
+            UpdateFileParser parser = new UpdateFileParser(xml);
+            latestVersion = parser.getVersion();
+        } catch(Exception e) {//TODO2: Deal w/ each exception separately
+            latestVersion = CommonUtils.getLimeWireVersion();
+        }
     }
     
     public static synchronized UpdateManager instance() {
@@ -39,9 +55,14 @@ public class UpdateManager {
      * This method will be called just once from RouterService at startup
      * and it should prompt the user if there is an update message.
      */
-    void postGuiInit(ActivityCallback gui) {
-//          if(latestVersion > CommonUtils.getVersion())
-//              gui.promptUser();
+    public void postGuiInit(ActivityCallback gui) {
+        String myVersion = CommonUtils.getLimeWireVersion();
+        if(myVersion.equalsIgnoreCase(latestVersion))//equal version
+            return;
+        if(isGreaterVersion(myVersion))
+            return;
+        //OK. myVersion < latestVersion
+        gui.notifyUserAboutUpdate(latestVersion);
     }
 
     public void checkAndUpdate(Connection connection) {
