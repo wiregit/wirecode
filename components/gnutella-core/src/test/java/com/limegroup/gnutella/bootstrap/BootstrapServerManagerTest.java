@@ -225,14 +225,69 @@ public class BootstrapServerManagerTest extends TestCase {
         assertEquals(null, s1.getRequest());
     }
 
-    public void testGiveUp() {        
-        bman.MAX_HOSTS_PER_REQUEST=2;
-        s3.setResponseData("");
+    public void testGiveUp() {    
+        int old=bman.MAX_HOSTS_PER_REQUEST;
+        try {
+            bman.MAX_HOSTS_PER_REQUEST=2;
+            s3.shutdown();
+            s2.shutdown();
+            bman.fetchEndpointsAsync();
+            sleep();
+            assertEquals(null, s1.getRequest());
+            assertEquals(0, catcher.list.size());
+            Iterator iter=bman.getBootstrapServers();
+            assertEquals(url1, iter.next());
+            assertTrue(! iter.hasNext());
+        } finally {
+            bman.MAX_HOSTS_PER_REQUEST=old;
+        }
+    }
+
+    public void testAddBootstrapServer() {
+        for (int i=0; i<1000; i++) {
+            try {
+                BootstrapServer server=new BootstrapServer(
+                    "http://18.239.0.144:"+(i+80)+"/script.jsp");
+                bman.addBootstrapServer(server);
+            } catch (ParseException e) { 
+                fail("Bad exception");
+            }
+        }
+        int count=0;
+        for (Iterator iter=bman.getBootstrapServers(); 
+                 iter.hasNext(); 
+                 iter.next()) { 
+            count++; 
+        }
+        assertEquals(200, count);   //e.g., BootstrapServer.MAX_BOOTSTRAP_SERVERS        
+        //We could also test the replacement policy, but that's a bit of a pain.
+    }
+
+    public void testDefaults() {
+        //Clear out the list of urls.
+        s3.shutdown();
         s2.shutdown();
+        s1.shutdown();
         bman.fetchEndpointsAsync();
         sleep();
-        assertEquals(null, s1.getRequest());
-        assertEquals(0, catcher.list.size());
+        assertTrue(! bman.getBootstrapServers().hasNext());
+
+        //Now second call should load defaults...and actually go on the network!
+        bman.fetchEndpointsAsync();
+        try { Thread.sleep(3000); } catch (InterruptedException e) { }
+
+        //Make sure defaults were loaded
+        int count=0;
+        for (Iterator iter=bman.getBootstrapServers(); 
+                 iter.hasNext(); 
+                 iter.next()) { 
+            count++; 
+        }        
+        assertTrue(count>100);
+
+        //Make sure this actually got some endpoints.  Note: this requires a
+        //network connection, as it actually uses GWebCache.
+        assertTrue(catcher.list.size()>10);
     }
 
     private void sleep() {
@@ -240,9 +295,7 @@ public class BootstrapServerManagerTest extends TestCase {
         try { Thread.sleep(200); } catch (InterruptedException e) { }
     }
 
-    //test no infinite loops
-    //handles 303 redirects properly
-    //test real randomness
+    //TODO: handles 303 redirects properly
 }
 
 /** Overrides the add(Endpoint, boolean) method) */

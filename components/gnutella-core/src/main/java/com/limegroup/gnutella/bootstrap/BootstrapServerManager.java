@@ -20,9 +20,9 @@ public class BootstrapServerManager {
     private static final int ENDPOINTS_TO_ADD=10;
     /** The maximum number of bootstrap servers to retain in memory. */
     private static final int MAX_BOOTSTRAP_SERVERS=200;
-    /** The maximum number of hosts to try per request.  
-     *  (Prevents infinite loops.)  Non-final for testing. */
-    public static int MAX_HOSTS_PER_REQUEST=10;
+    /** The maximum number of hosts to try per request.  Prevents us from
+     *  consuming all hosts if disconnected.  Non-final for testing. */
+    public static int MAX_HOSTS_PER_REQUEST=20;
     /** The amount of time in milliseconds between update requests. 
      *  Public and non-final for testing purposes. */
     public static int UPDATE_DELAY_MSEC=60*60*1000;
@@ -59,7 +59,10 @@ public class BootstrapServerManager {
      * Adds server to this.
      */
     public synchronized void addBootstrapServer(BootstrapServer server) {
-        _servers.add(server);
+        if (! _servers.contains(server))
+            _servers.add(server);
+        if (_servers.size()>MAX_BOOTSTRAP_SERVERS) 
+            _servers.remove(randomServer());
     }
 
     /**
@@ -79,6 +82,7 @@ public class BootstrapServerManager {
      * the "urlfile=1" message.
      */
     public void fetchBootstrapServersAsync() {
+        addDefaultsIfNeeded();
         requestAsync(new UrlfileRequest(), "GWebCache urlfile");
     }
 
@@ -88,6 +92,7 @@ public class BootstrapServerManager {
      * exhausting all caches.  Uses the "hostfile=1" message.
      */
     public void fetchEndpointsAsync() {
+        addDefaultsIfNeeded();
         requestAsync(new HostfileRequest(), "GWebCache hostfile");
     }
 
@@ -99,12 +104,21 @@ public class BootstrapServerManager {
      *  incoming connections or am not a supernode.
      */
     public void sendUpdatesAsync(Endpoint myIP) {
+        addDefaultsIfNeeded();
         //For now we only send updates if the "ip=" parameter is null,
         //regardless of whether we have a url.
         if (myIP!=null)
             requestAsync(new UpdateRequest(myIP), "GWebCache update");
     }
 
+    /**
+     * Adds default bootstrap servers to this if this needs more entries.
+     */
+    private void addDefaultsIfNeeded() {
+        if (_servers.size()>0)
+            return;
+        DefaultBootstrapServers.addDefaults(this);        
+    }
 
 
     /////////////////////////// Request Types ////////////////////////////////
@@ -163,10 +177,7 @@ public class BootstrapServerManager {
                 //Ensure url in this.  If list is too big, remove random
                 //element.  Eventually we may remove "worst" element.
                 synchronized (BootstrapServerManager.this) {
-                    if (! _servers.contains(e))
-                        _servers.add(e);
-                    if (_servers.size()>MAX_BOOTSTRAP_SERVERS) 
-                        _servers.remove(randomServer());
+                    addBootstrapServer(e);
                 }
                 responses++;
             } catch (ParseException error) { 
@@ -183,7 +194,8 @@ public class BootstrapServerManager {
         private boolean gotResponse=false;
         private Endpoint myIP;
 
-        /** @param ip my ip address, or null if this can't accept incoming connections. */ 
+        /** @param ip my ip address, or null if this can't accept incoming
+         *  connections. */ 
         public UpdateRequest(Endpoint myIP) {
             this.myIP=myIP;
         }
