@@ -144,5 +144,13 @@ public final class NIOMessageWriter implements MessageWriter {
     public void simpleWrite(Message msg) throws IOException {
         write(msg);   
     }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageWriter#flush()
+     */
+    public void flush() throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
     
 }

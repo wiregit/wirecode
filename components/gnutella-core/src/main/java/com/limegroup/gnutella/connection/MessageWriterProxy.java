@@ -70,4 +70,11 @@ public final class MessageWriterProxy implements MessageWriter {
         DELEGATE.simpleWrite(msg);
     }
 
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageWriter#flush()
+     */
+    public void flush() throws IOException {
+        DELEGATE.flush();
+    }
+
 }
