@@ -57,4 +57,20 @@ public class PingReply extends Message {
     public String toString() {
 	return "PingReply("+super.toString()+")";
     }
+
+    /** 
+     * Returns the ip field in dotted decimal format, e.g., 
+     * "127.0.0.1".
+     */
+    public String getIP() {
+	return ip2string(ip);
+    }
+
+    public int getFiles() {
+	return files;
+    }
+    
+    public int getKbytes() {
+	return kbytes;
+    }
 }
