@@ -83,9 +83,17 @@
 	  <classpath>
 	    <pathelement location="${builddir}"/>
 	    <pathelement location="${collections}"/>
-	    <pathelement location="${xerces}"/>
+		<pathelement location="${xerces}"/>
+	    <pathelement location="${skins}"/>
+	    <pathelement location="${lib}"/>
 	  </classpath>
 	</junit>
   </target>
 
 </project>
+
+
+
+
+
+
