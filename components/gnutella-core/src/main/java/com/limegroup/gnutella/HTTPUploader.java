@@ -71,7 +71,12 @@ public class HTTPUploader implements Runnable {
 	    return;
 	}
 	/* check to see if the index */
-	if (! (_fdesc._name.trim()).equals(_filename.trim())) { /* matches the name */
+
+	_filename = _filename.trim();
+
+	_fdesc._name = _fdesc._name.trim(); 
+
+	if (! (_fdesc._name).equals(_filename)) { /* matches the name */
   	    doNoSuchFile();
 	    _state = ERROR;
     	    return;
