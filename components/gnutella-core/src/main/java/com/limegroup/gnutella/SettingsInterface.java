@@ -171,7 +171,9 @@ public interface SettingsInterface
     /** Default directories for file searching */
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
-    public static final String  DEFAULT_EXTENSIONS     = "";
+    public static final String  DEFAULT_EXTENSIONS     = "mp3;"+
+	"mp2;mp1;mpg;vqf;avi;mpeg;wav;mod;voc;it;xm;s3m;stm;"+
+	"wma;mov;asf;zip;rar";
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
     public static final String[] DEFAULT_BANNED_WORDS   = {};

@@ -359,16 +359,16 @@ public class SettingsManager implements SettingsInterface
 	setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
 	setStats(SettingsInterface.DEFAULT_STATS);
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
-	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 	setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
 	setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
 	setFilterAdult(SettingsInterface.DEFAULT_FILTER_ADULT);
 	setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
 	setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
-	try {setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);}
+	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
+	try{setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);}
 	catch(IllegalArgumentException e){setDirectories(home_);}
-	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
+	try{setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){setSaveDirectory(home_);}
     }
 
@@ -649,7 +649,7 @@ public class SettingsManager implements SettingsInterface
     /** set the directories to search */
     public synchronized void setDirectories(String dir)
     {	
-	if(dir == "")
+	if(dir.equals(""))
 	    throw new IllegalArgumentException();
 	else
 	    {
@@ -664,7 +664,7 @@ public class SettingsManager implements SettingsInterface
     /** set the extensions to search for */
     public synchronized void setExtensions(String ext)
     {
-	if(ext == null)
+	if(ext.equals(""))
 	    throw new IllegalArgumentException();
 	else
 	    {
