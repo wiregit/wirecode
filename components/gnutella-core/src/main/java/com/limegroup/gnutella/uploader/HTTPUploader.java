@@ -1,6 +1,16 @@
 package com.limegroup.gnutella.uploader;
 
-/*
+
+
+import java.io.*;
+import java.net.*;
+import java.util.Date;
+import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.URLDecoder;
+
+/**
  * There are two constructors that are necessary.  The 
  * first is to handle the case where there is a regular
  * upload.  in that case, the manager class has already
@@ -15,18 +25,6 @@ package com.limegroup.gnutella.uploader;
  * then writing out the GIV 0:99999999/sample.txt
  * and then wait for the GET to come back.
  */
-
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-
-import java.io.*;
-import java.net.*;
-import java.util.Date;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.URLDecoder;
-
-
 public class HTTPUploader implements Uploader {
     //See accessors for documentation
 	protected OutputStream _ostream;
