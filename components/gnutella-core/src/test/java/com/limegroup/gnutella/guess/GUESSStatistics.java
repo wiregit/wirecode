@@ -47,7 +47,7 @@ public class GUESSStatistics {
     public static Object[] getPingStatistics(String host, int port) {
         float numAttempted = 0, numReceived = 0, timeSum = 0;
         GUESSTester tester = new GUESSTester("whatever");
-        while (numAttempted < 100) {
+        while (numAttempted < 5) {
             try {
                 long timeTook = tester.testPing(host, port);
                 if (timeTook > 0) {
@@ -55,6 +55,7 @@ public class GUESSStatistics {
                     long endTime = System.currentTimeMillis();
                     timeSum += timeTook;
                 }
+                Thread.sleep(2*1000); // wait a couple of seconds for pings...
             }
             catch (Exception ignored) {}
             numAttempted++;
