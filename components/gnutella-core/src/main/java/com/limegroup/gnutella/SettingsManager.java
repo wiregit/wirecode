@@ -120,6 +120,12 @@ public final class SettingsManager {
     private final String ND_PROPS_NAME  = "nd.props";
     
     /**
+     * Constant <tt>File</tt> instance for the properties file
+     */
+    private final File PROPS_FILE = 
+        new File(CommonUtils.getUserSettingsDir(), PROPS_NAME);
+        
+    /**
      * Time interval, after which the accumulated information expires
      */
     private final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
@@ -150,24 +156,14 @@ public final class SettingsManager {
     private final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
     private final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
-    /** Default directories for file searching */
-    private final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default time to expire incomplete files, in days. */
     private final int     DEFAULT_INCOMPLETE_PURGE_TIME = 7;
-    /** Default directories for file searching */
-    private final String  DEFAULT_DIRECTORIES    = "";
-    /** Default file extensions */
-    private final String  DEFAULT_EXTENSIONS     =
-		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
-		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
-		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg;jve";
-
+    
     private final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
     private final String SERVANT_TYPE          = "SERVANT_TYPE";
 
 	/** the number of uplads allowed per person at a given time */
-    private final int     DEFAULT_UPLOADS_PER_PERSON=3;
+    private final int DEFAULT_UPLOADS_PER_PERSON=3;
 
     /** default banned ip addresses */
     private final String[] DEFAULT_BANNED_IPS     = {};
@@ -367,6 +363,27 @@ public final class SettingsManager {
 	 * Constant for the default ads version.
 	 */
 	private final String DEFAULT_AD_VERSION = "1.0";
+	
+	/**
+	 * Constant for the default save directory.
+	 */
+	private final File DEFAULT_SAVE_DIRECTORY = 
+	    new File(CommonUtils.getUserHomeDir(), SAVE_DIRECTORY_NAME);
+	    
+	/** 
+	 * Default directories for file searching. 
+	 */
+    private final String  DEFAULT_DIRECTORIES = 
+        DEFAULT_SAVE_DIRECTORY.getAbsolutePath();
+    
+    /** 
+     * Default file extensions.
+     */
+    private final String  DEFAULT_EXTENSIONS =
+		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
+		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
+		"bin;dmg;jve";
     
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -435,7 +452,7 @@ public final class SettingsManager {
 	private final String WINDOW_X              = "WINDOW_X";
 	private final String WINDOW_Y              = "WINDOW_Y";
 	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
-	private final String SHUTDOWN_AFTER_TRANSFERS   = "SHUTDOWN_AFTER_TRANSFERS";
+	private final String SHUTDOWN_AFTER_TRANSFERS = "SHUTDOWN_AFTER_TRANSFERS";
 	private final String CLASSPATH             = "CLASSPATH";
 	private final String MAIN_CLASS            = "MAIN_CLASS";
 
@@ -560,7 +577,7 @@ public final class SettingsManager {
 	/**
 	 * Constant for the key for the current ads version.
 	 */
-	private final String AD_VERSION = "AD_VERSION";
+	private final String AD_VERSION = "AD_VERSION"; 
 
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -674,7 +691,8 @@ public final class SettingsManager {
 	 * Private constructor to ensure that this can only be constructed 
 	 * from inside this class.
      */
-    private SettingsManager() {		
+    private SettingsManager() {	
+        // load the specialized property file for network discovery	
         FileInputStream ndfis;
         try {
             ndfis = new FileInputStream(new File(ND_PROPS_NAME));
@@ -683,28 +701,27 @@ public final class SettingsManager {
         }
         catch(FileNotFoundException fne){}
         catch(SecurityException se) {}
-
-
+        
+        // load the main application properties file
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
-            fis = new FileInputStream(new File(PROPS_NAME));
+            fis = new FileInputStream(PROPS_FILE);
             try {
                 tempProps.load(fis);
                 loadDefaults();
                 try {
                     fis.close();
                     validateFile(tempProps);
-                }
-                catch(IOException e) {
-					// error closing the file, so continue using the 
-					// defaults.
+                } catch(IOException e) {
+			        // error closing the file, so continue using the 
+			        // defaults.
 				}
-            }
-            catch(IOException e){loadDefaults();}
+            } catch(IOException e){loadDefaults();}
         }
         catch(FileNotFoundException fnfe){loadDefaults();}
         catch(SecurityException se){loadDefaults();}
+        
         
         //reset the values that have expired
         resetExpiredValues();
@@ -889,17 +906,11 @@ public final class SettingsManager {
                 else if(key.equals(SAVE_DIRECTORY)) {
 					try {
 						setSaveDirectory(new File(p));
-					} catch(IOException ioe) {
-						// if we get an IOException, then the save 
-						// directory could not be set for some reason,
-						// so simply use the default
-						try {
-							setSaveDirectory(getSaveDefault());							
-							addDirectory(getSaveDefault());
-						} catch(IOException ioe2) {
-							// not much we can do if this also throws
-							// an exception.
-						}
+					} catch(IOException e) {
+                        e.printStackTrace();
+                        // this should never happen unless the user manually
+                        // enters the save directory in the props file or
+                        // if the user changes directory permissions
 					}
                 }
 
@@ -1159,12 +1170,6 @@ public final class SettingsManager {
 			catch(IllegalArgumentException iae){ /* continue */ }
 			catch(ClassCastException cce){ /* continue */ }
 		}
-	
-		//Special case: if this is a modem, ensure that KEEP_ALIVE 
-        //is sufficiently low.
-		//if ( getConnectionSpeed()<=56 ) { //modem
-		//setKeepAlive(Math.min(2, getKeepAlive()));
-		//}
 	}
 
     /** 
@@ -1281,6 +1286,13 @@ public final class SettingsManager {
 
 		setCydoorInstalled(DEFAULT_CYDOOR_INSTALLER_CALLED);
 		setAdVersion(DEFAULT_AD_VERSION);
+		
+		try {
+		    setSaveDirectory(DEFAULT_SAVE_DIRECTORY);
+		} catch(IOException e) {
+		    e.printStackTrace();
+		    // this should not happen with the default directory
+		}
     }
 
     /**
@@ -1354,6 +1366,17 @@ public final class SettingsManager {
 		if(_saveDirectory == null) throw new FileNotFoundException();
 		return _saveDirectory;
 	}
+	
+	/**
+	 * Returns the <tt>File</tt> instance denoting the abstract pathname
+	 * of the default save directory.
+	 *
+	 * @return the <tt>File</tt> instance denoting the abstract pathname
+	 * of the default save directory
+	 */
+	public File getSaveDefault() {
+	    return DEFAULT_SAVE_DIRECTORY;
+	}
 
 	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
@@ -1400,18 +1423,6 @@ public final class SettingsManager {
      *  are deleted from disk. */
     public int getIncompletePurgeTime() {
         return _incompletePurgeTime;
-    }
-
-    /** 
-	 * Returns a new <tt>File</tt> instance that denotes the abstract
-	 * pathname of the default directory for saving incomplete files. This
-	 * is a shared directory within the current working directory.
-	 *
-	 * @return  A <tt>File</tt> instance denoting the abstract
-	 *          pathname of the default directory for saving files.
-	 */	
-    public File getSaveDefault() {		
-		return new File(SAVE_DIRECTORY_NAME);
     }
 
     /** 
@@ -3296,10 +3307,6 @@ public final class SettingsManager {
             (new Boolean(isServer)).toString());
     }
     
-    
-    /******************************************************
-     ***************  END OF MUTATOR METHODS **************
-     ******************************************************/
 
     /** 
 	 * Writes out the properties file to with the specified
@@ -3309,7 +3316,7 @@ public final class SettingsManager {
     public void writeProperties() {
 		FileOutputStream ostream = null;
 		try {
-			ostream = new FileOutputStream(new File(PROPS_NAME));
+			ostream = new FileOutputStream(PROPS_FILE);
 			PROPS.save(ostream, "");
 			ostream.close();
 		}
