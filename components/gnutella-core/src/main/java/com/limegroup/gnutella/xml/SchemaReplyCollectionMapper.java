@@ -19,7 +19,7 @@ public class SchemaReplyCollectionMapper{
     static SchemaReplyCollectionMapper instance;
     
     //constructor
-    public SchemaReplyCollectionMapper(){
+    private SchemaReplyCollectionMapper(){
         mapper = new HashMap();
     }
 

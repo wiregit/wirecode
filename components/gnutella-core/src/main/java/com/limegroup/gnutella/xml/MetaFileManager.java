@@ -349,6 +349,8 @@ public class MetaFileManager extends FileManager {
         int len = schemas.length;
         for(int i=0;i<len;i++){
             collection = map.getReplyCollection(schemas[i]);
+            if(collection==null)//not loaded? skip it and keep goin'
+                continue;
             words.addAll(collection.getKeyWords());
         }
         return words;
