@@ -14,12 +14,20 @@ public class MetaFileManager extends FileManager {
     
     /**
      * keeps a hash of Hashes of files to files, for all .mp3 files
+     * <p>
+     * <b>You must use the synchronized method in this class to read
+     *  or write from this map
+     * </b>
      */
-    HashMap mp3FileToHash;
+    private HashMap mp3FileToHash = new HashMap();
     /**
      * keeps a hash of Hashes of files to files, for all non-mp3 file
+     * <p>
+     * <b>You must use the synchronized method in this class to read
+     *  or write from this map
+     * </b>
      */
-    HashMap nonMP3FileToHash;
+    private HashMap nonMP3FileToHash = new HashMap();
 
     //constructor
     public MetaFileManager(){
@@ -50,7 +58,7 @@ public class MetaFileManager extends FileManager {
         for(int i=0;i<z;i++){
             FileDesc f = get((int)responses[i].getIndex());
             File file = new File(f._path);
-            String hash=(String)mp3FileToHash.get(file);
+            String hash=readFromMap(file,true);
             LimeXMLDocument doc = coll.getDocForHash(hash);
             if(doc==null)
                 continue;
@@ -67,6 +75,44 @@ public class MetaFileManager extends FileManager {
             }
         }
     }
+    
+    /**
+     * The rule is that to either read or write to/from this
+     * map you have to obtain a lock on it
+     */    
+    public String readFromMap(Object file,boolean mp3){
+        String hash = null;
+        if(mp3){//synch mp3FileToHash
+            synchronized(mp3FileToHash){
+                hash = (String)mp3FileToHash.get(file);
+            }
+            return hash;
+        }
+        else{
+            synchronized(nonMP3FileToHash){
+                hash = (String)nonMP3FileToHash.get(file);
+            }
+            return hash;
+        }
+    }
+
+    /**
+     * The rule is that to either read or write to/from this
+     * map you have to obtain a lock on it
+     */    
+    public void writeToMap(Object file, Object hash, boolean mp3){
+        if(mp3){
+            synchronized(mp3FileToHash){
+                mp3FileToHash.put(file,hash);
+            }
+        }
+        else{
+            synchronized(nonMP3FileToHash){
+                nonMP3FileToHash.put(file,hash);
+            }
+        }
+    }
+
 
     /**This method overrides FileManager.loadSettingsBlocking(), though
      * it calls the super method to load up the shared file DB.  Then, it
@@ -160,12 +206,11 @@ public class MetaFileManager extends FileManager {
      * <p> 
      * Also creates another map that stores the hash to File of non mp3 files
      */
-    public void createFileToHashMaps(){
+    private void createFileToHashMaps(){
         SettingsManager man = SettingsManager.instance();
         ArrayList dirs = new 
                       ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
-        mp3FileToHash = new HashMap();
-        nonMP3FileToHash = new HashMap();
+
         int k=0;
         while(k < dirs.size()) {
             String dir = (String)dirs.get(k);
@@ -202,9 +247,9 @@ public class MetaFileManager extends FileManager {
                     if(j>0)
                         ext = name.substring(j);
                     if(ext.equalsIgnoreCase(".mp3"))
-                        mp3FileToHash.put(files[i],hash);
+                        writeToMap(files[i],hash,true);
                     else
-                        nonMP3FileToHash.put(files[i],hash);
+                        writeToMap(files[i],hash,false);
             }
         }
     }

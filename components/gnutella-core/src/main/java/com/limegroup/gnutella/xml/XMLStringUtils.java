@@ -191,7 +191,7 @@ public class XMLStringUtils
         if (collection.audio)
             committed  = collection.mp3ToDisk(fileName);
         else
-            committed = collection.toDisk("",false);
+            committed = collection.toDisk("");
         if (!committed){
             // this is bad            
         }
