@@ -135,7 +135,8 @@ public final class SettingsManager {
     private final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
     private final int     DEFAULT_TIMEOUT        = 8000;
-
+    /** Default timeout for persistent HTTP connections */
+    private final int     DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT = 15000;
     /** Default value for the keep alive */
     public static final int DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
@@ -375,6 +376,8 @@ public final class SettingsManager {
     private final String MAX_TTL               = "MAX_TTL";
     private final String MAX_LENGTH            = "MAX_LENGTH";
     private final String TIMEOUT               = "TIMEOUT";
+    private final String PERSISTENT_HTTP_CONNECTION_TIMEOUT
+        = "PERSISTENT_HTTP_CONNECTION_TIMEOUT";
     private final String KEEP_ALIVE            = "KEEP_ALIVE";
     private final String PORT                  = "PORT";
     private final String SPEED                 = "CONNECTION_SPEED";
@@ -570,6 +573,7 @@ public final class SettingsManager {
     private volatile byte     _maxttl;
     private volatile int      _maxLength;
     private volatile int      _timeout;
+    private volatile int      _persistentHTTPConnectionTimeout;
     private volatile String   _hostList;
     private volatile int      _keepAlive;
     private volatile int      _port;
@@ -808,6 +812,9 @@ public final class SettingsManager {
                 }
                 else if(key.equals(TIMEOUT)) {
                     setTimeout(Integer.parseInt(p));
+                }
+                else if(key.equals(PERSISTENT_HTTP_CONNECTION_TIMEOUT)) {
+                    setPersistentHTTPConnectionTimeout(Integer.parseInt(p));
                 }
 				else if(key.equals(UPLOADS_PER_PERSON)){
 					setUploadsPerPerson(Integer.parseInt(p));
@@ -1182,6 +1189,8 @@ public final class SettingsManager {
         setTTL(DEFAULT_TTL);
         setMaxLength(DEFAULT_MAX_LENGTH);
         setTimeout(DEFAULT_TIMEOUT);
+        setPersistentHTTPConnectionTimeout(
+            DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT);
         setKeepAlive(DEFAULT_KEEP_ALIVE);
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_SPEED);
@@ -1306,6 +1315,11 @@ public final class SettingsManager {
 
     /** Returns the timeout value*/
     public int getTimeout(){return _timeout;}
+    
+    /** Returns the timeout value for persistent HTTP connections*/
+    public int getPersistentHTTPConnectionTimeout(){
+        return _persistentHTTPConnectionTimeout;
+    }
 
     /** 
 	 * Returns a string specifying the full pathname of the file listing 
@@ -2130,6 +2144,16 @@ public final class SettingsManager {
 		_timeout = timeout;
 		String s = Integer.toString(_timeout);
 		PROPS.put(TIMEOUT, s);        
+    }
+    
+    /** 
+	 * Sets the timeout value for persistent HTTP connections
+     * @param timeout The timeout (in milliseconds) to be set
+	 */
+    public void setPersistentHTTPConnectionTimeout(int timeout) {
+		_persistentHTTPConnectionTimeout = timeout;
+		String s = Integer.toString(_persistentHTTPConnectionTimeout);
+		PROPS.put(PERSISTENT_HTTP_CONNECTION_TIMEOUT, s);
     }
 
     /**
