@@ -21,11 +21,6 @@ public class PromotionManager {
 	private List _requestors = Collections.synchronizedList(new ArrayList());
 	
 	/**
-	 * the time we sent out the last ACK.
-	 */
-	private long _lastRequestTime;
-	
-	/**
 	 * if we don't get a pong from the request[or|ee] within 30 secs, discard.
 	 */
 	private static final long REQUEST_TIMEOUT = 30*1000;
@@ -90,6 +85,8 @@ public class PromotionManager {
     	
     	//schedule the expiration of the process
     	_expirer = new ManagedThread(new Expirer());
+    	_expirer.setDaemon(true);
+    	_expirer.start();
     	
     	//ping the original requestor
     	
@@ -156,6 +153,35 @@ public class PromotionManager {
     		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
     		UDPService.instance().send(pong, sender);
     	}
+	}
+	
+	/**
+	 * sends a promotion request to the best candidate.
+	 */
+	public void requestPromotion() {
+		
+		Endpoint candidate = new Endpoint (BestCandidates.getBest().getInetAddress().getAddress(),
+							BestCandidates.getBest().getPort());
+		
+		synchronized(_promotionLock) {
+			//check if we are already requesting promotion and if so,
+			if (_promotionPartner!=null)
+				return;
+			
+			//set the promotion partner 
+			_promotionPartner = candidate;
+		}
+		
+		//*******
+		//send a PromotionRequestVM to the appropriate route
+		PromotionRequestVendorMessage msg = new PromotionRequestVendorMessage(BestCandidates.getBest());
+		
+		RouterService.getMessageRouter().forwardPromotionRequest(msg);
+		
+		//start a cleaner thread
+		_expirer = new ManagedThread(new Expirer());
+		_expirer.setDaemon(true);
+		_expirer.start();
 	}
 	
 	/**

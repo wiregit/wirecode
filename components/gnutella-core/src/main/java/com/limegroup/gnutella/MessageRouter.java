@@ -2688,15 +2688,15 @@ public abstract class MessageRouter {
     			msg.getDistance()<2) ||
 			(ourCandidates[1].getInetAddress().equals(candidateAddress) &&
     			msg.getDistance()<1))
-    		forwardPromotionRequest(msg);
+    		forwardPromotionRequest(new PromotionRequestVendorMessage(msg));
     	
     }
     
     
     
     /**
-     * forwards a promotion request to a candidate.  This method will create a new
-     * PromotionRequestVendorMessage and route it to the appropriate destination.
+     * forwards a promotion request to a candidate.  This method will route
+     * the Promotion Request VM to the appropriate destination.
      * If the route to the target is no longer open, the message is dropped.
      * 
      * Note: if we decide that every routing UP needs to ACK the message, this method 
@@ -2704,12 +2704,10 @@ public abstract class MessageRouter {
      *  
      * @param msg the original message received from the network.
      */
-    private void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
+    public void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
     	//get the address of the candidate
     	InetAddress address = msg.getCandidate().getInetAddress();
     	
-    	//create a new promotion message
-    	PromotionRequestVendorMessage newMsg = new PromotionRequestVendorMessage(msg);
     	
     	//see if the target is at ttl 0 from us
     	//if so, send the message to the leaf directly.
@@ -2730,7 +2728,7 @@ public abstract class MessageRouter {
     		//if we have found the leaf, forward the new request to it.
     		if (leaf !=null)
     			try {
-    				leaf.send(newMsg);
+    				leaf.send(msg);
     			}catch(IOException ohWell) {
     				//sending failed.  not much we can do.
     			}
@@ -2753,7 +2751,7 @@ public abstract class MessageRouter {
     	//forward the message to the ultrapeer.
     	if (up!=null)
     		try {
-				up.send(newMsg);
+				up.send(msg);
 			}catch(IOException ohWell) {
 				//sending failed.  not much we can do.
 			}
