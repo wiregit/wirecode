@@ -245,7 +245,9 @@ public class UDPConnectionProcessor {
 
 
 	public InputStream getInputStream() throws IOException {
-        _outputToInputStream = new UDPBufferedInputStream(this);
+        if (_outputToInputStream == null) {
+            _outputToInputStream = new UDPBufferedInputStream(this);
+        }
         return _outputToInputStream;
 	}
 
@@ -254,13 +256,14 @@ public class UDPConnectionProcessor {
 	 *  into this connection.
      */
 	public OutputStream getOutputStream() throws IOException {
-		// Start looking for data to write after an initial startup time
-		// Note: the caller needs to open the output connection and write
-		// some data before we can do anything.
-		scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+        if ( _inputFromOutputStream == null ) {
+            // Start looking for data to write after an initial startup time
+            // Note: the caller needs to open the output connection and write
+            // some data before we can do anything.
+            scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
 
-        _inputFromOutputStream = new UDPBufferedOutputStream(this);
-
+            _inputFromOutputStream = new UDPBufferedOutputStream(this);
+        }
         return _inputFromOutputStream;
 	}
 
