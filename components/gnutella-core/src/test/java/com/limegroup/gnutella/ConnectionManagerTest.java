@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import junit.framework.*;
 import java.util.Properties;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
@@ -26,8 +27,10 @@ public class ConnectionManagerTest extends TestCase {
     }
 
     public void setUp() {
-        SettingsManager.instance().setKeepAlive(0);
-        SettingsManager.instance().setConnectOnStartup(false);
+		ConnectionSettings.KEEP_ALIVE.setValue(0);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        //SettingsManager.instance().setKeepAlive(0);
+        //SettingsManager.instance().setConnectOnStartup(false);
         cm=new ConnectionManager(new DummyAuthenticator());
         hc=new TestHostCatcher();
         cm.initialize();        

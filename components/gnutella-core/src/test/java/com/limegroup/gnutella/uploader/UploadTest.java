@@ -5,6 +5,7 @@ import junit.extensions.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
@@ -63,14 +64,20 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().setPort(port);
 		SettingsManager.instance().setDirectories(new File[] {testDir});
 		SettingsManager.instance().setExtensions("txt");
-		SettingsManager.instance().setKeepAlive(8);
+		ConnectionSettings.KEEP_ALIVE.setValue(8);
+		//SettingsManager.instance().setKeepAlive(8);
 		SettingsManager.instance().setMaxUploads(10);
 		SettingsManager.instance().setUploadsPerPerson(10);
-		SettingsManager.instance().setConnectOnStartup(true);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
+		//SettingsManager.instance().setConnectOnStartup(true);
         SettingsManager.instance().setFilterDuplicates(false);
-        SettingsManager.instance().setEverSupernodeCapable(true);
-        SettingsManager.instance().setForceSupernodeMode(true);
-        SettingsManager.instance().setDisableSupernodeMode(false);
+
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+        //SettingsManager.instance().setEverSupernodeCapable(true);
+        //SettingsManager.instance().setForceSupernodeMode(true);
+        //SettingsManager.instance().setDisableSupernodeMode(false);
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();

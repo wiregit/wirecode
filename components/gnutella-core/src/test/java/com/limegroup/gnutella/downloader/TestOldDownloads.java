@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.*;
@@ -35,7 +36,8 @@ public class TestOldDownloads extends TestCase {
         DownloadTest.debug("-Trying to read downloads.dat from \""+file+"\"");
 
         //Build part of backend 
-        SettingsManager.instance().setConnectOnStartup(false);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        //SettingsManager.instance().setConnectOnStartup(false);
         SettingsManager.instance().setMaxSimDownload(0);  //queue everything
         TestActivityCallback callback=new TestActivityCallback();
         RouterService rs = new RouterService(callback);

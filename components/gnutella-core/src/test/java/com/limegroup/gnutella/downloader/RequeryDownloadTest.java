@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
 import junit.framework.*;
@@ -66,10 +67,13 @@ public class RequeryDownloadTest extends TestCase {
 
     public void setUp() {
         (new File(filename)).delete();
-        SettingsManager.instance().setKeepAlive(0);
-        SettingsManager.instance().setConnectOnStartup(false);
-        SettingsManager.instance().setLocalIsPrivate(false);
-        SettingsManager.instance().setPort(6399);
+		ConnectionSettings.KEEP_ALIVE.setValue(0);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        //SettingsManager.instance().setKeepAlive(0);
+        //SettingsManager.instance().setConnectOnStartup(false);
+        //SettingsManager.instance().setLocalIsPrivate(false);
+        SettingsManager.instance().setPort(0);
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
         } catch (IOException e) {
