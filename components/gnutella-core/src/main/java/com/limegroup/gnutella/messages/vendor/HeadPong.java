@@ -396,7 +396,7 @@ public class HeadPong extends VendorMessage {
 		
 		if (_altLocs!=null)
 			for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
-				Endpoint current = (Endpoint)iter.next();
+				IpPort current = (IpPort)iter.next();
 				ret.add(new RemoteFileDesc(original,current));
 			}
 		
