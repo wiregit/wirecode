@@ -65,4 +65,14 @@ public interface Statistic {
 	 * setting the currently recorded data back to zero.
 	 */
 	void storeCurrentStat();
+
+	/**
+	 * Sets whether or not to write this <tt>Statistic</tt> out to a file.
+	 * If it does write to a file, the file name is automatically generated
+	 * from the name of the class, which should easily label the data.
+	 * All data is written in comma-delimited format.
+	 *
+	 * @param write whether or not to write the data to a file
+	 */
+	void setWriteStatToFile(boolean write);
 }
