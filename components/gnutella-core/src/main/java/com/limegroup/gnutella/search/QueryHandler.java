@@ -156,6 +156,13 @@ public final class QueryHandler {
 	 */
 	private QueryHandler(QueryRequest query, int results, ReplyHandler handler,
                          ResultCounter counter) {
+        if( query == null )
+            throw new IllegalArgumentException("null query");
+        if( handler == null )
+            throw new IllegalArgumentException("null reply handler");
+        if( counter == null )
+            throw new IllegalArgumentException("null result counter");
+            
 		boolean isHashQuery = !query.getQueryUrns().isEmpty();
 		QUERY = query;
 		if(isHashQuery) {
