@@ -711,14 +711,14 @@ public class HostCatcher {
     
     /**
      * Accessor for the <tt>Collection</tt> of Ultrapeers that have advertised
-     * free leaf slots.  The returned <tt>Collection</tt> will throw an
-     * exception if it is modified in any way.
+     * free leaf slots.  The returned <tt>Collection</tt> is a complete copy
+     * of the hosts with free slots and can therefore be modified in any way.
      * 
-     * @return a <tt>Collection</tt> of hosts that have advertised that they
-     *  have free leaf slots
+     * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
+     *  that they have free leaf slots
      */
     public synchronized Collection getUltrapeersWithFreeLeafSlots() {
-        return Collections.unmodifiableCollection(FREE_LEAF_SLOTS);
+        return new HashSet(FREE_LEAF_SLOTS);
     }
 
     /**
