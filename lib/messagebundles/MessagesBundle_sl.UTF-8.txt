@@ -4,7 +4,7 @@
 # Thanks to: Aleks Reinhardt.
 ################################################################################
 LOCALE_LANGUAGE_CODE=sl
-LOCALE_LANGUAGE_NAME=Slovenski
+LOCALE_LANGUAGE_NAME=Slovenščina
 LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=Slovenija
 LOCALE_VARIANT_CODE=
