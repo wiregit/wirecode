@@ -5,6 +5,8 @@ import junit.framework.Test;
 import com.sun.java.util.collections.Collection;
 import com.sun.java.util.collections.ArrayList;
 
+//lets hope it doesn't!
+
 /**
  * Unit tests for FixedsizeForgetfulHashMap
  */
