@@ -47,7 +47,7 @@ public class BestCandidates {
 	 * @return the absolutely best candidate at all hops
 	 */
 	public static Candidate getBest() {
-		Comparator comparator = Candidate.priorityComparator();
+		Comparator comparator = RemoteCandidate.priorityComparator();
 		Candidate best = instance._best[0];
 		if (comparator.compare(instance._best[1],best) > 1)
 			best = instance._best[1];
@@ -62,7 +62,7 @@ public class BestCandidates {
 	 * node.  Null values means we don't have values for that ttl.
 	 */
 	public static void update(Candidate [] newCandidates) {
-		Comparator comp = Candidate.priorityComparator();
+		Comparator comp = new CandidatePriorityComparator();
 		
 		//if the other guy doesn't have a best leaf, he shouldn't
 		//have sent this message in the first place.  discard, regardless

@@ -99,17 +99,7 @@ public class CandidateAdvertiser implements Runnable {
 					
 				}
 		}
-		//couldn't elect anybody.
-		if (best==null)
-			return null;
-		
-		//return the selected candidate
-		Candidate ret = null;
-		try {
-			ret = new Candidate(best);
-		}catch(UnknownHostException ignored){}
-		
-		return ret;
+		return best;
 	}
 	
 	/**

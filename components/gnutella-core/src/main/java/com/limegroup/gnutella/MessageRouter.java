@@ -2630,7 +2630,8 @@ public abstract class MessageRouter {
     	
     	for (int i = 0;i<candidates.length;i++) 
     		if (candidates[i]!=null)
-    			candidates[i].setAdvertiser(advertiser);
+    			candidates[i].setAdvertiser((ManagedConnection)advertiser);
+    		//sorry about the cast but this ReplyHandler is getting monstrous.
     		
     	//then update our lists
     	BestCandidates.update(candidates);
@@ -2700,9 +2701,9 @@ public abstract class MessageRouter {
     	Candidate [] ourCandidates = BestCandidates.getCandidates();
     	InetAddress candidateAddress = msg.getCandidate().getInetAddress();
     	
-    	if ((ourCandidates[0].getInetAddress().equals(candidateAddress) && 
+    	if ((ourCandidates[0].equals(msg.getCandidate()) && 
     			msg.getDistance()<2) ||
-			(ourCandidates[1].getInetAddress().equals(candidateAddress) &&
+			(ourCandidates[1].equals(msg.getCandidate()) &&
     			msg.getDistance()<1))
     		forwardPromotionRequest(new PromotionRequestVendorMessage(msg));
     	
@@ -2721,54 +2722,14 @@ public abstract class MessageRouter {
     	//get the address of the candidate
     	InetAddress address = msg.getCandidate().getInetAddress();
     	
-    	
-    	//see if the target is at ttl 0 from us
-    	//if so, send the message to the leaf directly.
-    	if (BestCandidates.getCandidates()[0].getInetAddress().equals(address)) {
-    		//see if such leaf is still connected.
-    		Connection leaf=null;
-    		Iterator iter = RouterService.getConnectionManager().
-				getInitializedClientConnections().iterator();
-    		
-    		while(iter.hasNext()) {
-    			Connection handler = (Connection)iter.next();
-    			if (handler.getInetAddress().equals(address)) {
-    				leaf = handler;
-    				break;
-    			}
+    	try {
+    		for (int i = 0; i< BestCandidates.getCandidates().length;i++) {
+    			Candidate current = BestCandidates.getCandidates()[i];
+    			if (current.isOpen())    		
+    				((Connection)current.getAdvertiser()).send(msg);
+
     		}
-    		
-    		//if we have found the leaf, forward the new request to it.
-    		if (leaf !=null)
-    			try {
-    				leaf.send(msg);
-    			}catch(IOException ohWell) {
-    				//sending failed.  not much we can do.
-    			}
-    		
-    		return;
-    	}
-    	
-    	//the target is ttl 1 from us.  Forward the query to its advertiser.
-    	Connection up = null;
-    	Iterator iter = RouterService.getConnectionManager().getInitializedConnections().iterator();
-    	while (iter.hasNext()) {
-    		Connection current = (Connection)iter.next();
-    		if (current.getInetAddress().equals(
-    				BestCandidates.getCandidates()[1].getAdvertiser().getInetAddress())) {
-    			up = current;
-    			break;
-    		}
-    	}
-    	
-    	//forward the message to the ultrapeer.
-    	if (up!=null)
-    		try {
-				up.send(msg);
-			}catch(IOException ohWell) {
-				//sending failed.  not much we can do.
-			}
-		
+    	}catch(IOException tooBad){} //sending failed - not much we can do.
     }
     
     /**

@@ -17,6 +17,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.updates.*;
+import com.limegroup.gnutella.upelection.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -55,7 +56,7 @@ import com.limegroup.gnutella.updates.*;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, PushProxyInterface {
+	implements ReplyHandler, PushProxyInterface, Candidate {
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -1707,4 +1708,5 @@ public class ManagedConnection extends Connection
 	public boolean isCandidateConnection() {
 		return _isCandidate;
 	}
+	
 }

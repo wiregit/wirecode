@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.upelection.Candidate;
+import com.limegroup.gnutella.upelection.RemoteCandidate;
 
 import java.net.UnknownHostException;
 
@@ -72,19 +73,24 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 		
 		//these fields should not be used when constructing the object this way,
 		//but lets initialize them just in case
-		_candidate = candidate.getAddress();
+		
 		
 		//(stupid final beurocracy)
-		QueryReply.IPPortCombo requestor;
+		QueryReply.IPPortCombo requestor,candidateIP;
 		
 		try {
 			requestor = new QueryReply.IPPortCombo(
 				NetworkUtils.ip2string(RouterService.getAddress()),
 				RouterService.getPort()); 
+			candidateIP = new QueryReply.IPPortCombo(
+				NetworkUtils.ip2string(candidate.getInetAddress().getAddress()),
+				candidate.getPort());	
 		}catch (UnknownHostException yeah) {
 			requestor=null;
+			candidateIP=null;
 		}
 		_requestor = requestor;
+		_candidate = candidateIP;
 		_distance = 0;
 	}
 	

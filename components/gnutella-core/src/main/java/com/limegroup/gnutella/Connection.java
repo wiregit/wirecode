@@ -11,6 +11,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.upelection.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -61,7 +62,7 @@ import org.apache.commons.logging.Log;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection implements IpPort {
+public class Connection implements IpPort, Candidate {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -2106,5 +2107,43 @@ public class Connection implements IpPort {
 	 */
 	public int getBandwidth() {
 		return _features !=null ? _features.getBandidth() : -1;
+	}
+	
+	/**
+	 * local candidates are advertised by the same ultrapeer
+	 * @return the route to the candidate which in this case
+	 * is this very connection.
+	 */
+	public Connection getAdvertiser() {
+		return this;
+	}
+	
+	public void setAdvertiser(Connection r) {} //ignore.
+	
+	public byte [] toBytes() { 
+		byte [] res = new byte[8];
+		System.arraycopy(getInetAddress().getAddress(),0,res,0,4);
+		ByteOrder.short2leb((short)getPort(),res,4);
+		ByteOrder.short2leb((short)getUptime(),res,6);
+		
+		return res;
+	}
+	
+	public short getUptime() {
+		return (short) ((System.currentTimeMillis() - getConnectionTime()) / 
+			(Constants.MINUTE));
+	}
+	
+	public boolean equals(Object o) {
+		if (o==null) return false;
+		
+		if (! (o instanceof IpPort))
+			return false;
+		
+		
+		IpPort other = (IpPort)o;
+		return other.getInetAddress().equals(getInetAddress()) &&
+				other.getPort() == getPort();
+		
 	}
 }

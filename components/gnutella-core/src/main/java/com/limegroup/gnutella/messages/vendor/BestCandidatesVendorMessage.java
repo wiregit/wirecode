@@ -76,17 +76,17 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 				!(payload.length==8 || payload.length==16))
 			throw new BadPacketException("invalid length payload");
 		
-		_bestCandidates = new Candidate[2];
+		_bestCandidates = new RemoteCandidate[2];
 		
 		//we have at least one candidate, it should start at offset 0
-		_bestCandidates[0] = new Candidate(payload,0);
+		_bestCandidates[0] = new RemoteCandidate(payload,0);
 		
 		//get the size of the candidates based on version
-		int candidateSize = Candidate.getBytesForVersion(getVersion());
+		int candidateSize = RemoteCandidate.getBytesForVersion(getVersion());
 		
 		//if the size is more than one candidate, try to parse the second one
 		if (payload.length > candidateSize) 
-			_bestCandidates[1]= new Candidate(payload,candidateSize);
+			_bestCandidates[1]= new RemoteCandidate(payload,candidateSize);
 		else //otherwise the other peer advertised just a single candidate
 			_bestCandidates[1]=null;
 		

@@ -28,11 +28,6 @@ public class UDPCrawlerPong extends VendorMessage {
 	 */
 	private final byte _format;
 	
-
-	/**
-	 * for testing purposes
-	 */
-	private static long MINUTE = 60*1000;
 	
 	//this message is sent only as a reply to a request message, so when 
 	//constructing it we need the object representing the request message
@@ -167,7 +162,7 @@ public class UDPCrawlerPong extends VendorMessage {
 			//represent it as a short with the # of minutes
 			if (request.hasConnectionTime()) {
 				long uptime = now - c.getConnectionTime();
-				short packed = (short) ( uptime / MINUTE);
+				short packed = (short) ( uptime / Constants.MINUTE);
 				ByteOrder.short2leb(packed, result, index);
 				index+=2;
 			}
