@@ -2028,11 +2028,6 @@ public abstract class MessageRouter {
      * all connections.
      */
     private void handleSimppVM(final SimppVM simppVM) {
-        //TODO1: Should this be in a thread of it's own? Maybe we should check
-        //that this is a solicited SimppVM and if it is, then create a thread to
-        //handle it otherwise not.
-        if(false) //change this to check  if the SimppVM was solicited
-            return;
         SimppManager.instance().checkAndUpdate(simppVM.getPayload());
     }
 

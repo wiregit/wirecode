@@ -24,6 +24,8 @@ public class TestConnection {
     //The simpp message number this connection is expected to send
     private int _simppMessageNumber;
 
+    private int _capabilitySimppNo;
+
     /**
      * When creating a TestConnection you want to specify 4 things
      * @param port The port on which the TestConnection should connect to LW
@@ -37,12 +39,18 @@ public class TestConnection {
      */
     public TestConnection(int simppNumber, boolean expectSimppReq,
                                      boolean sendSimppData) throws IOException {
+        this(simppNumber, expectSimppReq, sendSimppData, simppNumber);
+    }
+    
+    public TestConnection(int simppNumber, boolean expectSimppReq, 
+               boolean sendSimppData, int capabilitySimpp) throws IOException {
         _simppData = readCorrectFile(simppNumber);        
         _simppMessageNumber = simppNumber;
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
+        _capabilitySimppNo = capabilitySimpp;
     }
-    
+
     public void start() {
         Thread t = new Thread() {
             public void run() {
@@ -122,7 +130,7 @@ public class TestConnection {
             Assert.that(message == null, "shouldn't have gotten simpp message");
 
         //send back the simppdata if reqd. 
-        if(_expectSimppRequest && _sendSimppData) {//we dont want 
+        if( _sendSimppData) {//we dont want 
             Message simppVM = new SimppVM(_simppData);
             simppVM.write(os);
             os.flush();
@@ -135,7 +143,7 @@ public class TestConnection {
 
     private CapabilitiesVM makeCapabilitiesVM() {
         try {
-            return  CapabilitiesVMStubHelper.makeCapVM(_simppMessageNumber);
+            return  CapabilitiesVMStubHelper.makeCapVM(_capabilitySimppNo);
         } catch (Exception e) {
             Assert.that(false, 
                 "couldn't set up test -- failed to manipulate CapabilitiesVM");

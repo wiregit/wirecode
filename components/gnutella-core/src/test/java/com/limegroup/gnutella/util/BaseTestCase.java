@@ -590,12 +590,12 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     }
     
     public static Message getFirstInstanceOfMessageType(Connection c,
-                          Class type)  throws IOException, BadPacketException {
+                          Class type) throws BadPacketException {
         return getFirstInstanceOfMessageType(c, type, TIMEOUT);
     }
 
     public static Message getFirstInstanceOfMessageType(Connection c,
-               Class type, int timeout) throws IOException, BadPacketException {
+               Class type, int timeout) throws BadPacketException {
         for(int i = 0; i < 200; i++) {
             if(!c.isOpen()){
                 //System.out.println(c + " is not open");
@@ -615,7 +615,9 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
             } catch (InterruptedIOException ie) {
                 //ie.printStackTrace();
                 return null;            
-            } 
+            } catch (IOException iox) {
+                //ignore iox
+            }
         }
         throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
@@ -637,6 +639,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 Message m=Message.read(socket.getInputStream(), Message.N_TCP);
                 if(type.isInstance(m))
                     return m;
+                else if(m instanceof PingRequest)
+                    ;//continue
                 else if(m == null) //interruptedIOException thrown
                     return null;                    
                 i=0;

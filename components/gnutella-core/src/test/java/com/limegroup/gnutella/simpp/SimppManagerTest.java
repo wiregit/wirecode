@@ -182,7 +182,7 @@ public class SimppManagerTest extends BaseTestCase {
         //not receive a simpprequest
         TestConnection conn = null;
         try {
-            conn = new TestConnection(OLD, false, false);
+            conn = new TestConnection(OLD, false, false);//!expect, !respond
         } catch (IOException iox) {
             fail("could not set up test connection");
         }
@@ -198,6 +198,33 @@ public class SimppManagerTest extends BaseTestCase {
         //2 above.
         SimppManager man = SimppManager.instance();
         assertEquals("SimppManager should not have updated", MIDDLE, 
+                                                              man.getVersion());
+        conn.killConnection();
+    }
+    
+    public void testOlderSimppNotRequestedUnsolicitedAccepted() {
+        //1. Set up LimeWire 
+        _simppMessageNumber = MIDDLE;
+        changeSimppFile();
+
+        //2. Set up the TestConnection to advertise same version, not expect a
+        //SimppReq, and to send an unsolicited newer SimppResponse
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(NEW ,false, true, MIDDLE);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            //6s = 2s * 3 (timeout in TestConnection == 2s)
+            Thread.sleep(6000);//let messages be exchanged, 
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        //3. let the test run and make sure state is OK, 
+        SimppManager man = SimppManager.instance();
+        assertEquals("SimppManager should not have updated", NEW, 
                                                               man.getVersion());
         conn.killConnection();
     }
@@ -221,7 +248,7 @@ public class SimppManagerTest extends BaseTestCase {
         }
         conn.start();
         try {
-            Thread.sleep(10000);//let the message exchange take place
+            Thread.sleep(6000);//let the message exchange take place
         } catch (InterruptedException ix) {
             fail("interrupted while waiting for simpp exchange to complete");
         }
@@ -274,6 +301,7 @@ public class SimppManagerTest extends BaseTestCase {
         
         try {
             PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
+            PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);
             PrivilegedAccessor.setValue(SimppManager.class, "MIN_VERSION", 
                                         new Integer(0));//so we can use 1,2,3
         } catch (IllegalAccessException eax) {
@@ -283,6 +311,7 @@ public class SimppManagerTest extends BaseTestCase {
         }
         //reload the SimppManager and Capabilities VM
         SimppManager.instance();
+        CapabilitiesVM.instance();
     }
 
 }

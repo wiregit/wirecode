@@ -179,7 +179,9 @@ public final class CapabilitiesVM extends VendorMessage {
     }
     
     public static void updateSimppVersion(int newSimppVersion) {
-        Assert.that(newSimppVersion > _simppVersion,"bad new simpp version");
+        Assert.that(newSimppVersion > _simppVersion,
+                    "Can't decrement simpp message. New version="
+                              +newSimppVersion+" old version="+_simppVersion);
         _simppVersion = newSimppVersion;
         //nullify the older instance so a newer one is created with the correct
         //simppVersion, a new _capabilitiesSupported will be created
