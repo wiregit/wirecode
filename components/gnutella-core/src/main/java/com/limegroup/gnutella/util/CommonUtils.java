@@ -630,6 +630,15 @@ public final class CommonUtils {
                 throw new RuntimeException(msg);
             }
         }
+
+        if(!settingsDir.canWrite()) {
+            throw new RuntimeException("settings dir not writable");
+        }
+
+        if(!settingsDir.canRead()) {
+            throw new RuntimeException("settings dir not readable");
+        }
+
         // make sure Windows files are moved
         moveWindowsFiles(settingsDir);
         // make sure old metadata files are moved
@@ -681,7 +690,9 @@ public final class CommonUtils {
             if(curUserFile.isFile()) {
                 continue;
             }
-            copy(curDirFile, curUserFile);
+            if(!copy(curDirFile, curUserFile)) {
+                throw new RuntimeException();
+            }
         }
         _windowsFilesMoved = true;
     }
