@@ -259,7 +259,6 @@ public final class SettingsManager {
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
-    private volatile long DEFAULT_SUPERNODE_PROBATION_TIME = 300000; //5 min
     private volatile boolean DEFAULT_SUPERNODE_MODE = false;
     
 
@@ -400,8 +399,6 @@ public final class SettingsManager {
        = "MAX_SHIELDED_CLIENT_CONNECTIONS";
     private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
        = "MIN_SHIELDED_CLIENT_CONNECTIONS";
-    private final String SUPERNODE_PROBATION_TIME 
-       = "SUPERNODE_PROBATION_TIME"; 
     private final String SUPERNODE_MODE             = "SUPERNODE_MODE";
 
 	/**
@@ -521,7 +518,6 @@ public final class SettingsManager {
     //settings for Supernode implementation
     private volatile int _maxShieldedClientConnections;
     private volatile int _minShieldedClientConnections;
-    private volatile long _supernodeProbationTime;
     /** This is the forced supernode mode */
     private volatile boolean _supernodeModeForced;
     /** This is the transitional supernode mode, set automatically during
@@ -958,9 +954,6 @@ public final class SettingsManager {
                 else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMinShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(SUPERNODE_PROBATION_TIME)) {
-                    setSupernodeProbationTime((new Long(p)).longValue());
-                }
                 else if(key.equals(SUPERNODE_MODE))
                 {
                     setForcedSupernodeMode((new Boolean(p)).booleanValue());
@@ -1082,7 +1075,6 @@ public final class SettingsManager {
             DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
         setMinShieldedClientConnections(
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
-        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
         setForcedSupernodeMode(DEFAULT_SUPERNODE_MODE);
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
@@ -1787,14 +1779,6 @@ public final class SettingsManager {
      */
     public boolean getEverSupernodeCapable() {
 		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
-    }
-    
-    /**
-     * Returns the probation time for s supernode, during which supernode
-     * decides whether to swith to client mode or stay as supernode
-     */
-    public long getSupernodeProbationTime() {
-        return _supernodeProbationTime;
     }
     
     /**
@@ -2920,16 +2904,6 @@ public final class SettingsManager {
         this._minShieldedClientConnections = minShieldedClientConnections;
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
-    }
-
-    /**
-     * Sets the probation time for s supernode, during which supernode
-     * decides whether to swith to client mode or stay as supernode
-     */
-    public void setSupernodeProbationTime(long supernodeProbationTime) {
-        this._supernodeProbationTime = supernodeProbationTime;
-        PROPS.put(SUPERNODE_PROBATION_TIME, 
-            Long.toString(supernodeProbationTime));
     }
     
     /**
