@@ -315,7 +315,7 @@ public final class ConnectionSettings extends LimeProps {
      * Time in milliseconds to delay prior to flushing data on peer -> peer connections
      */
     public static final LongSetting FLUSH_DELAY_TIME =
-        FACTORY.createSettableLongSetting("FLUSH_DELAY_TIME", 200, "flushdelay", 300, 0);
+        FACTORY.createSettableLongSetting("FLUSH_DELAY_TIME", 0, "flushdelay", 300, 0);
                                             
     
     /**
