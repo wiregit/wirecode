@@ -40,6 +40,7 @@ public class ID3ReaderTest extends BaseTestCase {
                         s.getOutputStream().flush();
                         s.getOutputStream().write(webPageContent.getBytes());
                         s.getOutputStream().flush();
+                        Thread.sleep(500);
                         s.close();
                     }
                     catch (Exception bad) {
