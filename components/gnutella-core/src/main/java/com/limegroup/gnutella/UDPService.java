@@ -646,6 +646,7 @@ public class UDPService implements Runnable {
 	    return canReceiveSolicited() && 
 	    	_portStable &&
 	    	_lastReportedPort==RouterService.getPort() &&
+		_lastReportedIP!=null &&
 	    	Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
 	}
 
