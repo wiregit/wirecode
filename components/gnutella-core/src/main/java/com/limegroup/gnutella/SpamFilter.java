@@ -1,11 +1,14 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.filters.*;
+
+
 /** 
  * A filter to eliminate Gnutella spam.  Each Gnutella connection
  * has its own SpamFilter.  (Strategy pattern.) Subclass to implement
  * custom spam filters.
  */
-public class SpamFilter {
+public abstract class SpamFilter {
     /**
      * Returns a new instance of a SpamFilter subclass based on 
      * the current settings manager.  (Factory method)
@@ -17,9 +20,6 @@ public class SpamFilter {
 
     /** 
      * Returns true iff this is considered spam and should not be processed. 
-     * The default implementation always returns true; subclass to override.
      */
-    public boolean allow(Message m) {
-	return true;
-    }
+    public abstract boolean allow(Message m);
 }
