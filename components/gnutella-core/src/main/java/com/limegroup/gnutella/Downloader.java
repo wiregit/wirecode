@@ -26,6 +26,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int HASHING           = 11;
     public static final int SAVING            = 12;
     public static final int WAITING_FOR_USER  = 13;
+    public static final int WAITING_FOR_CONNECTIONS = 14;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.

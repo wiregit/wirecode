@@ -623,7 +623,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (!stopped)
                     weird.printStackTrace();
             }
-            setState(WAITING_FOR_RESULTS);
+            // state will be set by tryAllDownloads()
         }
         return retVal;
     }
@@ -1162,7 +1162,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Try to wait for good, stable, connections with some amount of reach
 	 *  or message flow.
      */
-    private static void waitForStableConnections() 
+    private void waitForStableConnections() 
       throws InterruptedException {
 
 		if ( NO_DELAY )  return;  // For Testing without network connection
@@ -1177,6 +1177,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			  < MIN_NUM_CONNECTIONS) &&
 		  (RouterService.getActiveConnectionMessages() < MIN_TOTAL_MESSAGES) 
         ) {
+            setState(WAITING_FOR_CONNECTIONS);
 			Thread.sleep(CONNECTION_DELAY); 
 		}
     }
