@@ -1619,7 +1619,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    protected void sendQueryReply(QueryRequest query, QueryReply queryReply)
+    protected void sendQueryReply(QueryReply queryReply)
         throws IOException {
         
         if(queryReply == null) {
