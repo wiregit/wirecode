@@ -429,9 +429,7 @@ public abstract class MessageRouter {
 		int port = datagram.getPort();
 		// Verify that the address and port are valid.
 		// If they are not, we cannot send any replies to them.
-		if(!NetworkUtils.isValidAddress(address) ||
-		   !NetworkUtils.isValidPort(port))
-		    return;
+		if(!RouterService.isIpPortValid()) return;
 
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
@@ -619,8 +617,7 @@ public abstract class MessageRouter {
 	private PingReply createPingReply(byte[] guid) {
 		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
 		if(endpoint == null) {
-		    if(NetworkUtils.isValidPort(RouterService.getPort()) &&
-		       NetworkUtils.isValidAddress(RouterService.getAddress()))
+		    if(RouterService.isIpPortValid())
                 return PingReply.create(guid, (byte)1);
             else
                 return null;
@@ -1232,9 +1229,8 @@ public abstract class MessageRouter {
      */
     protected void handlePushProxyRequest(PushProxyRequest ppReq,
                                           ManagedConnection source) {
-        if (source.isSupernodeClientConnection() &&
-            NetworkUtils.isValidAddress(RouterService.getAddress()) &&
-            NetworkUtils.isValidPort(RouterService.getPort())) {
+        if (source.isSupernodeClientConnection() && 
+            RouterService.isIpPortValid()) {
             String stringAddr = 
                 NetworkUtils.ip2string(RouterService.getAddress());
             InetAddress addr = null;

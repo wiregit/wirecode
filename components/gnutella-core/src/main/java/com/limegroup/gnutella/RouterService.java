@@ -863,9 +863,7 @@ public class RouterService {
      * queries.
      */
     public static byte[] newQueryGUID() {
-        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe() &&
-            NetworkUtils.isValidAddress(getAddress()) &&
-            NetworkUtils.isValidPort(getPort()))
+        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
@@ -918,9 +916,8 @@ public class RouterService {
 
 		try {
             QueryRequest qr = null;
-            if (NetworkUtils.isValidAddress(getAddress()) &&
-                NetworkUtils.isValidPort(getPort()) &&
-                (new GUID(guid)).addressesMatch(getAddress(), getPort())) {
+            if (isIpPortValid() && (new GUID(guid)).addressesMatch(getAddress(), 
+                                                                   getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
                 // of band support.  note that there is a VERY small chance that
                 // the guid will be address encoded but not meant for out of band
@@ -1441,7 +1438,7 @@ public class RouterService {
         return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
                !NetworkUtils.isPrivate() &&
                SearchSettings.OOB_ENABLED.getValue() &&
-               acceptor.isAddressExternal();
+               acceptor.isAddressExternal() && isIpPortValid();
     }
 
 
@@ -1449,4 +1446,11 @@ public class RouterService {
         return udpService.getConnectBackGUID();
     }
 
+    
+    /** @return true if your IP and port information is valid.
+     */
+    public static boolean isIpPortValid() {
+        return (NetworkUtils.isValidAddress(getAddress()) &&
+                NetworkUtils.isValidPort(getPort()));
+    }
 }
