@@ -16,8 +16,11 @@ import java.io.*;
  * for your setting name -- otherwise there will be conflicts, and a runtime
  * exception will be thrown.
  */
-public final class ThemeSettings extends AbstractSettings {
+public final class ThemeSettings {
     
+    private static final SettingsFactory FACTORY =
+        LimeProps.instance().getFactory();
+            
     /**
      * The extension for theme packs to allow people to search for them --
      * stands for "LimeWire Theme Pack".

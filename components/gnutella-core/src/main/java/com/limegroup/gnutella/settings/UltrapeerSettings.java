@@ -3,7 +3,10 @@ package com.limegroup.gnutella.settings;
 /**
  * Settings for Ultrapeers.
  */
-public final class UltrapeerSettings extends AbstractSettings {
+public final class UltrapeerSettings {
+    
+    private static final SettingsFactory FACTORY =
+        LimeProps.instance().getFactory();
 
 	/**
 	 * Setting for whether or not we've ever been Ultrapeer capable.

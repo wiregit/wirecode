@@ -3,8 +3,11 @@ package com.limegroup.gnutella.settings;
 /**
  * Settings for Gnutella TCP connections.
  */
-public final class ConnectionSettings extends AbstractSettings {
-
+public final class ConnectionSettings {
+    
+    private static final SettingsFactory FACTORY =
+        LimeProps.instance().getFactory();
+        
 	/**
 	 * Settings for whether or not an incoming connection has ever been
 	 * accepted.

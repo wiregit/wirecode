@@ -3,7 +3,10 @@ package com.limegroup.gnutella.settings;
 /**
  * Settings for searches.
  */
-public final class SearchSettings extends AbstractSettings {
+public final class SearchSettings {
+    
+    private static final SettingsFactory FACTORY =
+        LimeProps.instance().getFactory();
 
 	/**
 	 * Setting for whether or not GUESS searching is enabled.
