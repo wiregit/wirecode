@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
+import com.sun.java.util.collections.*;
 
 /**
  * A Connection managed by a connection managed.  Includes a loopForMessages
@@ -13,6 +14,7 @@ import com.limegroup.gnutella.util.Buffer;
  * from it.
  *
  * @author Ron Vogl
+ * @author Christopher Rohrs
  */
 public class ManagedConnection
         extends Connection
@@ -73,26 +75,59 @@ public class ManagedConnection
     private int _numSentMessagesDropped;
 
 
-    /*
-     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the
-     * values of _numMessagesSent/_numSentMessagesDropped and
-     * _numMessagesReceived/_numReceivedMessagesDropped at
-     * the last call to getPercentDropped.  These are synchronized by this;
-     * finer-grained schemes could be used.
+    /**
+     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
+     * of _numMessagesSent/_numSentMessagesDropped and
+     * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
+     * getPercentDropped.  LOCKING: These are synchronized by this;
+     * finer-grained schemes could be used. 
      */
     private int _lastReceived;
     private int _lastRecvDropped;
     private int _lastSent;
     private int _lastSentDropped;
 
-    /**
-     * These are the horizon statistics kept whenever a PingReply is received
-     * on this connection.
-     */
-    private volatile boolean _horizonEnabled=true;
-    private volatile long _totalHorizonFileSize;
-    private volatile long _numHorizonFiles;
-    private volatile long _numHorizonHosts;
+    /***************************************************************************
+     * Horizon statistics. We measure the horizon by looking at all ping replies
+     * coming per connection--regardless whether they are in response to pings
+     * originating from us.  To avoid double-counting ping replies, we keep a
+     * set of Endpoint's around, bounded in size to save memory.  This scheme is
+     * robust in the face of pong throttling.  Note however that we cannot
+     * discern pings from multiple hosts with the same private address.  But you
+     * are probably not interested in such hosts anyway.  Also, it cannot detect
+     * duplicates reachable through multiple connections.
+     *
+     * The problem with this scheme is that the numbers tend to grow without
+     * bound, even if hosts leave the network.  Ideally we'd like to clear all
+     * pongs that are more than HORIZON_UPDATE_TIME milliseconds old, but that's
+     * difficult to implement efficiently.  As a simplication, we periodically
+     * clear the set of pongs every HORIZON_UPDATE_TIME milliseconds (by calling
+     * updateHorizonStats) and start recounting.  While we are recounting, we
+     * return the last size of the set.  So pongs in the set are
+     * HORIZON_UPDATE_TIME to 2*HORIZON_UPDATE_TIME milliseconds old.
+     * 
+     * LOCKING: obtain this' monitor
+     **************************************************************************/
+    private boolean _horizonEnabled=true;
+    /** The approximate time to expire pongs, in milliseconds. */
+    private final static long HORIZON_UPDATE_TIME=10*60*1000; //10 minutes
+    /** The last time refreshHorizonStats was called. */
+    private long _lastRefreshHorizonTime=System.currentTimeMillis();
+    /** True iff refreshHorizonStats has been called. */
+    private boolean _refreshedHorizonStats=false;
+    /** The max number of pongs to save. */
+    private static final int MAX_PING_REPLIES=4000;
+    /** The endpoints of pongs seen before.  Eliminates duplicates. */
+    private Set /* of Endpoint */ _pingReplies=new HashSet();
+    /** The size of _pingReplies before updateHorizonStats was called. */
+    private long _totalHorizonFileSize=0;
+    private long _numHorizonFiles=0;
+    private long _numHorizonHosts=0;
+    /** INVARIANT: _nextTotalHorizonFileSize==_pingReplies.size() */
+    private long _nextTotalHorizonFileSize=0;
+    private long _nextNumHorizonFiles=0;
+    private long _nextNumHorizonHosts=0;
+    
 
 
     /** The total number of bytes sent/received since last checked. 
@@ -497,11 +532,6 @@ public class ManagedConnection
     // Begin statistics accessors
     //
 
-    /** Returns the size of all files reachable from me. */
-    public long getTotalFileSize() {
-        return _totalHorizonFileSize;
-    }
-
     /** Returns the number of messages sent on this connection */
     public int getNumMessagesSent() {
         return _numMessagesSent;
@@ -582,21 +612,13 @@ public class ManagedConnection
         return ret;
     }
 
-
-    /** Clears the statistics about files reachable from me. */
-    public void clearHorizonStats() {
-        _totalHorizonFileSize = 0;
-        _numHorizonHosts = 0;
-        _numHorizonFiles = 0;
-    }
-
     /** 
      * @modifies this
      * @effects enables or disables updateHorizon. Typically this method
      *  is used to temporarily disable horizon statistics before sending a 
      *  ping with a small TTL to make sure a connection is up.
      */
-    public void setHorizonEnabled(boolean enable) {
+    public synchronized void setHorizonEnabled(boolean enable) {
         _horizonEnabled=enable;
     }
 
@@ -607,24 +629,72 @@ public class ManagedConnection
      * @modifies this 
      * @effects adds the statistics from pingReply to this' horizon statistics,
      *  unless horizon statistics have been disabled via setHorizonEnabled(false).
+     *  It's possible that the horizon statistics will not actually be updated
+     *  until refreshHorizonStats is called.
      */
-    public void updateHorizonStats(PingReply pingReply) {
+    public synchronized void updateHorizonStats(PingReply pingReply) {
         if (! _horizonEnabled)
             return;
 
-        _totalHorizonFileSize += pingReply.getKbytes();
-        _numHorizonFiles += pingReply.getFiles();
-        _numHorizonHosts++;
+        //Have we already seen a ping from this hosts?
+        Endpoint host=new Endpoint(pingReply.getIP(), pingReply.getPort());
+        if (_pingReplies.size()<MAX_PING_REPLIES && _pingReplies.add(host)) {
+            //Nope.  Increment numbers. 
+            _nextTotalHorizonFileSize += pingReply.getKbytes();
+            _nextNumHorizonFiles += pingReply.getFiles();
+            _nextNumHorizonHosts++;           
+        }
+    }
+
+    /**
+     * Updates this' horizon statistics based on the ping replies seen.  
+     * This should be called at least every HORIZON_UPDATE_TIME milliseconds,
+     * and may safely be called more often.
+     *     @modifies this
+     */
+     public synchronized void refreshHorizonStats() {         
+         //Makes sure enough time has elapsed.
+         long now=System.currentTimeMillis();
+         long elapsed=now-_lastRefreshHorizonTime;        
+         if (elapsed<HORIZON_UPDATE_TIME)
+             return;
+         _lastRefreshHorizonTime=now;
+        
+         //Ok, now update stats.
+         _numHorizonHosts=_nextNumHorizonHosts;
+         _numHorizonFiles=_nextNumHorizonFiles;
+         _totalHorizonFileSize=_nextTotalHorizonFileSize;
+
+         _nextNumHorizonHosts=0;
+         _nextNumHorizonFiles=0;
+         _nextTotalHorizonFileSize=0;
+
+         _pingReplies.clear();
+         _refreshedHorizonStats=true;
     }
 
     /** Returns the number of hosts reachable from me. */
-    public long getNumHosts() {
-        return _numHorizonHosts;
+    public synchronized long getNumHosts() {
+        if (_refreshedHorizonStats)
+            return _numHorizonHosts;
+        else 
+            return _nextNumHorizonHosts;
     }
 
     /** Returns the number of files reachable from me. */
-    public long getNumFiles() {
-        return _numHorizonFiles;
+    public synchronized long getNumFiles() {
+        if (_refreshedHorizonStats) 
+            return _numHorizonFiles;
+        else
+            return _nextNumHorizonFiles;
+    }
+
+    /** Returns the size of all files reachable from me. */
+    public synchronized long getTotalFileSize() {
+        if (_refreshedHorizonStats) 
+            return _totalHorizonFileSize;
+        else
+            return _nextTotalHorizonFileSize;
     }
 
     //
@@ -650,4 +720,68 @@ public class ManagedConnection
     public boolean isKillable() {
         return _isKillable;
     }
+
+    /** Unit test.  Only tests statistics methods. */
+    /*
+    public static void main(String args[]) {        
+        ManagedConnection mc=new ManagedConnection();
+        //For testing.  Make HORIZON_UPDATE_TIME non-final to compile.
+        mc.HORIZON_UPDATE_TIME=1*1000;   
+        PingReply pr1=new PingReply(GUID.makeGuid(), (byte)3, 6346,
+                                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+                                    1, 10);
+        PingReply pr2=new PingReply(GUID.makeGuid(), (byte)3, 6347,
+                                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+                                    2, 20);
+        PingReply pr3=new PingReply(GUID.makeGuid(), (byte)3, 6346,
+                                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
+                                    3, 30);
+
+        Assert.that(mc.getNumFiles()==0);
+        Assert.that(mc.getNumHosts()==0);
+        Assert.that(mc.getTotalFileSize()==0);
+
+        mc.updateHorizonStats(pr1);
+        mc.updateHorizonStats(pr1);  //check duplicates
+        Assert.that(mc.getNumFiles()==1);
+        Assert.that(mc.getNumHosts()==1);
+        Assert.that(mc.getTotalFileSize()==10);
+
+        try { Thread.sleep(HORIZON_UPDATE_TIME*2); } 
+        catch (InterruptedException e) { }
+            
+        mc.refreshHorizonStats();    
+        mc.updateHorizonStats(pr1);  //should be ignored for now
+        mc.updateHorizonStats(pr2);
+        mc.updateHorizonStats(pr3);
+        Assert.that(mc.getNumFiles()==1);
+        Assert.that(mc.getNumHosts()==1);
+        Assert.that(mc.getTotalFileSize()==10);
+        mc.refreshHorizonStats();    //should be ignored
+        Assert.that(mc.getNumFiles()==1);
+        Assert.that(mc.getNumHosts()==1);
+        Assert.that(mc.getTotalFileSize()==10);
+
+        try { Thread.sleep(HORIZON_UPDATE_TIME*2); } 
+        catch (InterruptedException e) { }            
+
+        mc.refreshHorizonStats();    //update stats
+        Assert.that(mc.getNumFiles()==(1+2+3));
+        Assert.that(mc.getNumHosts()==3);
+        Assert.that(mc.getTotalFileSize()==(10+20+30));
+
+        try { Thread.sleep(HORIZON_UPDATE_TIME*2); } 
+        catch (InterruptedException e) { }       
+
+        mc.refreshHorizonStats();
+        Assert.that(mc.getNumFiles()==0);
+        Assert.that(mc.getNumHosts()==0);
+        Assert.that(mc.getTotalFileSize()==0);                
+    }
+
+    // Stub for testing statistics
+    private ManagedConnection() {
+        super("", 0);
+    }
+    */
 }

@@ -401,24 +401,20 @@ public class RouterService
     }
 
     /**
-     * Updates the horizon statistics.
+     * Updates the horizon statistics.  This should called at least every five
+     * minutes or so to prevent the reported numbers from growing too large.
+     * You can safely call it more often.  Note that it does not modify the
+     * network; horizon stats are calculated by passively looking at messages.
      *
-     * @modifies manager, network
-     * @effects resets manager's horizon statistics and sends
-     *  out a ping request.  Ping replies come back asynchronously
-     *  and modify the horizon statistics.  Poll for them with
-     *  getNumHosts, getNumFiles, and getTotalFileSize.
+     * @modifies this (values returned by getNumFiles, getTotalFileSize, and
+     *  getNumHosts) 
      */
-    public void updateHorizon() {
-        //Reset statistics first
+    public void updateHorizon() {        
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext() ; )
-            ((ManagedConnection)iter.next()).clearHorizonStats();
-
-        //Send ping to everyone.
-        PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
-        router.broadcastPingRequest(pr);
+            ((ManagedConnection)iter.next()).refreshHorizonStats();
     }
+
 
     /**
      * Searches Gnutellanet files of the given type with the given
