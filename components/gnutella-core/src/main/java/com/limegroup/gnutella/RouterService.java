@@ -431,7 +431,7 @@ public class RouterService
     /**
      * Initialize a download request
      */
-    public HTTPDownloader initDownload(String ip, int port, int index,
+    private HTTPDownloader initDownload(String ip, int port, int index,
           String fname, byte[] bguid, int size) {
      //     return new HTTPDownloader("http", ip, port, index, fname, router,
 //                                    acceptor, callback, bguid, size);
@@ -471,6 +471,19 @@ public class RouterService
 
         kickoffDownload(down);
     }
+
+    /**
+     * Create and kickoff a smart download.  The following files will be
+     * downloaded in parallel or serial until there is success or total failure.
+     * It is assumed they are "similar", in some sense of the word.
+     * TODO: is this really the place for it?  Also, we need queued downloads     
+     */
+    public void tryDownload(RemoteFileDesc[] files) {
+        SmartDownloader down=new SmartDownloader(router, files,
+                                                 acceptor, callback);
+        kickoffDownload(down);
+    }
+
 
     /**
      * Create a queued download request
