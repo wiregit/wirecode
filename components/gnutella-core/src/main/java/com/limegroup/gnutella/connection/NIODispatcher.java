@@ -134,6 +134,14 @@ public final class NIODispatcher implements Runnable {
 		SELECTOR.wakeup();
 	}
     
+    /**
+     * Adds the specified <tt>Connection</tt> to the list of connections that
+     * need to have their TCP connections completed -- they need to be fully
+     * connected.
+     * 
+     * @param conn the <tt>Connection</tt> whose TCP connection is not yet 
+     *  fully established
+     */
     public void addConnector(Connection conn)  {
         if(conn == null)  {
             throw new NullPointerException("adding null connection");
@@ -143,8 +151,8 @@ public final class NIODispatcher implements Runnable {
         SELECTOR.wakeup();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Runnable#run()
+    /**
+     * Runs the selector event processing thread.
      */
     public void run() {
     	try {
@@ -194,9 +202,10 @@ public final class NIODispatcher implements Runnable {
                 
                 // remove the current entry 
                 iter.remove();
-                if(key.isAcceptable())  {
-                    // we don't handle this yet
-                }
+                
+                // Check the state of the key.  We need to check all states 
+                // because individual channels can be registered for multiple 
+                // events, so we need to handle all of them.
                 if(key.isReadable())  {
                     handleReader(key);
                 }
@@ -234,6 +243,13 @@ public final class NIODispatcher implements Runnable {
         }
     }
     
+    /**
+     * Handles a connection event for an individual channel.  This responds to
+     * the event by attempting to complete TCP connection establishment on the
+     * channel.
+     * 
+     * @param key the <tt>SelectionKey</tt> for the connection event
+     */
     private void handleConnector(SelectionKey key)  {
         SocketChannel sc = (SocketChannel)key.channel();
         
@@ -345,6 +361,14 @@ public final class NIODispatcher implements Runnable {
 		}
 	}
     
+    /**
+     * Handles a read event for the specified <tt>SelectionKey</tt> instance 
+     * and it's contained channel.  The event indicates that there's data
+     * available for reading from the channel, and we should read it.
+     * 
+     * @param key the <tt>SelectionKey</tt> for the read event, containing the
+     *  channel with data to read
+     */
     private void handleReader(SelectionKey key)  {
         // ignore invalid keys
         if(!key.isValid()) return;
