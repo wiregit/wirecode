@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.BucketQueue;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
@@ -26,21 +26,26 @@ import java.util.Date;
  *      addresses.        
  * </ol>
  * 
+ * Within any given bucket, hosts are prioritized by hops distance, with farther
+ * pongs receiving higher priority.  Hosts with unknown hops values, e.g., from 
+ * gnutella.net or X-Try/X-Try-Ultrapeer headers, are given a hops value of
+ * (the lowest priority).
+ *
  * The HostCatcher may initiate outgoing "router" connections.  This behavior is
  * confusing and will likely be refactored in the future.  
  */
 public class HostCatcher {    
     /** The number of supernode pongs to store. */
-    private static final int GOOD_SIZE=400;
+    static final int GOOD_SIZE=400;
     /** The number of normal pongs to store. */
-    private static final int NORMAL_SIZE=100;
+    static final int NORMAL_SIZE=100;
     /** The number of private IP pongs to store. */
-    private static final int BAD_SIZE=15;
-    private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
+    static final int BAD_SIZE=15;
+    static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
 
-    public static final int GOOD_PRIORITY=2;
-    public static final int NORMAL_PRIORITY=1;
-    public static final int BAD_PRIORITY=0;
+    static final int GOOD_PRIORITY=2;
+    static final int NORMAL_PRIORITY=1;
+    static final int BAD_PRIORITY=0;
 
     /* Our representation consists of a set and a queue, both bounded in size.
      * The set lets us quickly check if there are duplicates, while the queue
@@ -52,8 +57,7 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.
      */
-    private BucketQueue /* of Endpoint */ queue=
-        new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
+    private BinaryHeapArray queue=new BinaryHeapArray();
     private Set /* of Endpoint */ set=new HashSet();
 
     private Acceptor acceptor;
@@ -179,14 +183,11 @@ public class HostCatcher {
 
             //Everything passed!  Add it.
             Endpoint e = new Endpoint(host, port);
-            if (e.isPrivateAddress())
-                e.setWeight(BAD_PRIORITY);
-            else
-                e.setWeight(NORMAL_PRIORITY);
+            int type=e.isPrivateAddress() ? BAD_PRIORITY : NORMAL_PRIORITY;
 
             if ((! set.contains(e)) && (! isMe(host, port))) {
                 //add e to the head.  Order matters!
-                Object removed=queue.insert(e, e.getWeight());
+                Object removed=queue.insert(e, type);
                 //Shouldn't happen...
                 if (removed!=null)
                     set.remove(removed);
@@ -245,9 +246,10 @@ public class HostCatcher {
      * @return true iff pr was actually added 
      */
     public boolean add(PingReply pr, ManagedConnection receivingConnection) {
-        //Convert to endpoint
+        //Convert to endpoint.  Set weight based on endpoint.
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
                     pr.getFiles(), pr.getKbytes());
+        e.setWeight(pr.getHops());
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
         //supernode..
@@ -259,19 +261,19 @@ public class HostCatcher {
      * This method is used when getting an address from headers, instad of the
      * normal ping reply.
      *
-     * @param pr the pong containing the address/port to add
+     * @param e the host to add, whose weight has been set to the hops value
+     *  if known
      * @param forceHighPriority true if this should always be of high priority
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
         //See preamble for a discussion of priorities
         if (forceHighPriority)
-            e.setWeight(GOOD_PRIORITY);
+            return add(e, GOOD_PRIORITY);
         else if (e.isPrivateAddress())
-            e.setWeight(BAD_PRIORITY);
+            return add(e, BAD_PRIORITY);
         else
-            e.setWeight(NORMAL_PRIORITY);
-        return add(e);
+            return add(e, NORMAL_PRIORITY);
     }
 
     /**
@@ -282,9 +284,10 @@ public class HostCatcher {
      * cache.
      *
      * @param e Endpoint to be added
+     * @param type one of GOOD_PRIORITY, NORMAL_PRIORITY, or BAD_PRIORITY
      * @return true iff e was actually added
      */
-    private boolean add(Endpoint e) {
+    private boolean add(Endpoint e, int type) {
         //Skip if we're connected to it.
         if (manager.isConnected(e))
             return false;
@@ -311,7 +314,7 @@ public class HostCatcher {
                 //Adding e may eject an older point from queue, so we have to
                 //cleanup the set to maintain rep. invariant.
                 set.add(e);
-                Object ejected=queue.insert(e, e.getWeight());
+                Object ejected=queue.insert(e, type);
                 if (ejected!=null)
                     set.remove(ejected);
 
@@ -352,22 +355,6 @@ public class HostCatcher {
                 callback.knownHost(e);
         }
         return ret;
-    }
-
-    /**
-     *  @requires this' monitor held by caller
-     *  @effects returns true iff this has a host with weight GOOD_PRIORITY
-     */
-    private boolean hasRouterHost() {
-        //Because priorities are only -1, 0, or 1, it suffices to look at the
-        //head of the queue.  If this were not the case, we would likely have
-        //to augment the state of this.
-        if (! queue.isEmpty()) {
-            Endpoint e=(Endpoint)queue.getMax();
-            return e.getWeight()==GOOD_PRIORITY;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -543,7 +530,7 @@ public class HostCatcher {
     }
 
     /**
-     *  Return the number of hosts
+     *  Return the total number of hosts
      */
     public int getNumHosts() {
         return( queue.size() );
@@ -562,8 +549,8 @@ public class HostCatcher {
      * the modifications will not be observed.
      */
     public synchronized Iterator getHosts() {
-        //Clone the queue before iterating.
-        return (new BucketQueue(queue)).iterator();
+        //Note that queue clones before iterating
+        return queue.iterator();
     }
 
     /**
@@ -573,10 +560,7 @@ public class HostCatcher {
      *  observed.  
      */
     public synchronized Iterator getUltrapeerHosts(int n) {
-        //TODO2: do we really need to clone this?!
-        BucketQueue clone=new BucketQueue(queue);
-        return clone.iterator(GOOD_PRIORITY,
-                              Math.min(n, clone.size(GOOD_PRIORITY)));
+        return queue.iterator(GOOD_PRIORITY, n);        
     }
 
     /**
@@ -586,20 +570,9 @@ public class HostCatcher {
      *  not be observed.  
      */
     public synchronized Iterator getNormalHosts(int n) {
-        //TODO2: do we really need to clone this?!
-        BucketQueue clone=new BucketQueue(queue);
-        return clone.iterator(NORMAL_PRIORITY, n);
-    }
-
-    /**
-     *  Remove unwanted or used entries
-     */
-    public synchronized void removeHost(String host, int port) {
-        Endpoint e=new Endpoint(host, port);
-        boolean removed1=set.remove(e);
-        boolean removed2=queue.removeAll(e);
-        //Check that set.contains(e) <==> queue.contains(e)
-        Assert.that(removed1==removed2, "Rep. invariant for HostCatcher broken.");
+        //Note that queue clones before iterating.  TODO: include private
+        //addresses.
+        return queue.iterator(NORMAL_PRIORITY, n);
     }
 
     /**
@@ -708,7 +681,7 @@ public class HostCatcher {
 
 
     /** A simpler unit test */
-    /*
+    
     public static void main(String args[]) {
         HostCatcher hc=new HostCatcher(new Main());
         hc.initialize(new Acceptor(6346, null),
@@ -719,37 +692,254 @@ public class HostCatcher {
         iter=hc.getUltrapeerHosts(10);
         Assert.that(! iter.hasNext());
 
+        //Add some ultrapeer pongs from X-Try-Ultrapeer header...
         Assert.that(hc.getNumUltrapeerHosts()==0);
-        hc.add(new Endpoint("18.239.0.1", 6346), true);
+        Assert.that(hc.getNumHosts()==0);
+        hc.add(new Endpoint("18.239.0.0", 6346), true);
+        //...and from marked pongs of different hops.
         Assert.that(hc.getNumUltrapeerHosts()==1);
-        hc.add(new Endpoint("18.239.0.2", 6346), true);
-        hc.add(new Endpoint("128.103.60.1", 6346), false);
-        hc.add(new Endpoint("128.103.60.2", 6346), false);
-        Assert.that(hc.getNumUltrapeerHosts()==2);
+        PingReply pong5=makeTestPong(18, 239, 0, 5, 5, true);
+        hc.add(pong5, null);
+        PingReply pong2=makeTestPong(18, 239, 0, 2, 2, true);
+        hc.add(pong2, null);
+        Assert.that(hc.getNumUltrapeerHosts()==3);
 
+        //Add some normal pongs from X-Try header...
+        hc.add(new Endpoint("128.103.60.0", 6346), false);
+        //...and from normal pongs of different hops.
+        pong2=makeTestPong(128, 103, 60, 2, 2, false);
+        hc.add(pong2, null);
+        pong5=makeTestPong(128, 103, 60, 5, 5, false);
+        hc.add(pong5, null);
+        Assert.that(hc.getNumHosts()==6);
+
+        //This test is stricter than necessary since pongs are not necessarily
+        //yielded in priority order; BinaryHeap only guarantees that the best
+        //entry is yielded first.
         iter=hc.getUltrapeerHosts(100);
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.5", 6346)));
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.1", 6346)));
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.0", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
         Assert.that(! iter.hasNext());
 
         iter=hc.getUltrapeerHosts(1);
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.5", 6346)));
         Assert.that(! iter.hasNext());
 
+        //This test is stricter than necessary since pongs are not necessarily
+        //yielded in priority order; BinaryHeap only guarantees that the best
+        //entry is yielded first.
         iter=hc.getNormalHosts(100);
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.5", 6346)));
         Assert.that(iter.hasNext());
-        Assert.that(iter.next().equals(new Endpoint("128.103.60.1", 6346)));
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.0", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
         Assert.that(! iter.hasNext());
 
         iter=hc.getNormalHosts(1);
         Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.5", 6346)));
+        Assert.that(! iter.hasNext());
+
+        iter=hc.getHosts();
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.5", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.0", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.5", 6346)));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(new Endpoint("128.103.60.0", 6346)));
+        Assert.that(iter.hasNext());
         Assert.that(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
         Assert.that(! iter.hasNext());
+
+        Assert.that(hc.getAnEndpointInternal().equals(
+                                new Endpoint("18.239.0.5", 6346)));
+        Assert.that(hc.getNumHosts()==5);
+        Assert.that(hc.getNumUltrapeerHosts()==2);
+        Assert.that(hc.getAnEndpointInternal().equals(
+                                new Endpoint("18.239.0.2", 6346)));
+        Assert.that(hc.getAnEndpointInternal().equals(
+                                new Endpoint("18.239.0.0", 6346)));
+        Assert.that(hc.getAnEndpointInternal().equals(
+                                new Endpoint("128.103.60.5", 6346)));
+        Assert.that(hc.getNumHosts()==2);
+        Assert.that(hc.getNumUltrapeerHosts()==0);
+        Assert.that(hc.getAnEndpointInternal().equals(
+                                new Endpoint("128.103.60.2", 6346)));
+        Assert.that(hc.getAnEndpointInternal().equals(
+                                new Endpoint("128.103.60.0", 6346)));
+        Assert.that(hc.getNumHosts()==0);
+        Assert.that(hc.getNumUltrapeerHosts()==0);
+        try {
+            hc.getAnEndpointInternal();
+            Assert.that(false);
+        } catch (NoSuchElementException e) {            
+        }        
+
+        //TODO: test private hosts.
+        //TODO: test modification during iteration (clone)
     }
-    */
+    
+    private static PingReply makeTestPong(int addr1, int addr2, 
+                                          int addr3, int addr4, 
+                                          int hops, boolean mark) {
+        PingReply ret=new PingReply(
+            new byte[16],
+            (byte)7,
+            6346, new byte[] {(byte)addr1, (byte)addr2, (byte)addr3, (byte)addr4},
+            0l, 0l, mark);
+        for (int i=0; i<hops; i++)
+            ret.hop();
+        return ret;
+    }
+    
+}
+
+
+/** 
+ * Aggregates a number of BinaryHeap's, providing a BucketQueue-like
+ * interface.  In other words, prioritizes Endpoints by type (ultrapeer,
+ * normal, or private) and then by hops.  Specialized for HostCatcher's
+ * three priority scheme; could be generalized.  Not thread-safe.
+ */
+class BinaryHeapArray {
+    /** One heap for each type.  Then each heap is sorted by weight, which is
+     *  equal to hops. */
+    private BinaryHeap[] heaps;
+
+    BinaryHeapArray() {
+        heaps=new BinaryHeap[3];
+        heaps[HostCatcher.BAD_PRIORITY]=
+            new BinaryHeap(HostCatcher.BAD_SIZE); 
+        heaps[HostCatcher.NORMAL_PRIORITY]=
+            new BinaryHeap(HostCatcher.NORMAL_SIZE);
+        heaps[HostCatcher.GOOD_PRIORITY]=
+            new BinaryHeap(HostCatcher.GOOD_SIZE);
+    }
+
+    /**
+     * @param e the endpoint to add, whose weight must be set according
+     *  to hops
+     * @param type is this an ultrapeer or private?  One of
+     *  HostCatcher.GOOD_PRIORITY, HostCatcher.NORMAL_PRIORITY, or
+     *  HostCatcher.BAD_PRIORITY.
+     */
+    public Endpoint insert(Endpoint e, int type) {
+        return (Endpoint)heaps[type].insert(e);
+    }
+
+    public Endpoint getMax() throws NoSuchElementException {
+        if (! heaps[HostCatcher.GOOD_PRIORITY].isEmpty())
+            return (Endpoint)heaps[HostCatcher.GOOD_PRIORITY].getMax();
+        else if (! heaps[HostCatcher.NORMAL_PRIORITY].isEmpty())
+            return (Endpoint)heaps[HostCatcher.NORMAL_PRIORITY].getMax();
+        else if (! heaps[HostCatcher.BAD_PRIORITY].isEmpty())
+            return (Endpoint)heaps[HostCatcher.BAD_PRIORITY].getMax();
+        throw new NoSuchElementException();
+    }
+
+    public Endpoint extractMax() throws NoSuchElementException {
+        if (! heaps[HostCatcher.GOOD_PRIORITY].isEmpty())
+            return (Endpoint)heaps[HostCatcher.GOOD_PRIORITY].extractMax();
+        else if (! heaps[HostCatcher.NORMAL_PRIORITY].isEmpty())
+            return (Endpoint)heaps[HostCatcher.NORMAL_PRIORITY].extractMax();
+        else if (! heaps[HostCatcher.BAD_PRIORITY].isEmpty())
+            return (Endpoint)heaps[HostCatcher.BAD_PRIORITY].extractMax();
+        throw new NoSuchElementException();
+    }
+
+    public boolean isEmpty() {
+        return heaps[HostCatcher.GOOD_PRIORITY].isEmpty()
+            && heaps[HostCatcher.NORMAL_PRIORITY].isEmpty()
+            && heaps[HostCatcher.BAD_PRIORITY].isEmpty();
+    }
+
+    public int size() {
+        return heaps[HostCatcher.GOOD_PRIORITY].size()
+             + heaps[HostCatcher.NORMAL_PRIORITY].size()
+             + heaps[HostCatcher.BAD_PRIORITY].size();
+    }
+
+    /** @param type one of GOOD_PRIORITY, NORMAL_PRIORITY, or BAD_PRIORITY */
+    public int size(int type) {
+        return heaps[type].size();
+    }
+
+    public void clear() {
+        heaps[HostCatcher.GOOD_PRIORITY].clear();
+        heaps[HostCatcher.NORMAL_PRIORITY].clear();
+        heaps[HostCatcher.BAD_PRIORITY].clear();
+    }
+
+    /** Returns an iterator of the clone of this.  Modifying the iterator does
+     *  not affect this and vice versa. */
+    public Iterator iterator() {
+        List buf=new ArrayList(size());
+        for (Iterator iter=heaps[HostCatcher.GOOD_PRIORITY].iterator()
+                 ; iter.hasNext(); ) 
+            buf.add(iter.next());
+        for (Iterator iter=heaps[HostCatcher.NORMAL_PRIORITY].iterator()
+                 ; iter.hasNext(); ) 
+            buf.add(iter.next());
+        for (Iterator iter=heaps[HostCatcher.BAD_PRIORITY].iterator()
+                 ; iter.hasNext(); ) 
+            buf.add(iter.next());            
+        return buf.iterator();
+    }
+
+    /**
+     * Returns an iterator of the given number of hosts of the given type.
+     * Clone the elements while working, so modifying the iterator does * not
+     * affect this and vice versa.
+     *
+     * @param type one of GOOD_PRIORITY, NORMAL_PRIORITY, or BAD_PRIORITY
+     * @param n an upper bound on the number of element to return
+     */
+    public Iterator iterator(int type, int n) {
+        BinaryHeap heap=heaps[type];
+        n=Math.min(heap.size(), n);
+        List buf=new ArrayList(n);
+
+        Iterator iter=heap.iterator();
+        for (int i=0; i<n; i++) 
+            buf.add(iter.next());
+        return buf.iterator();        
+    }
+
+//     /**
+//      * Returns an iterator of the given number of hosts starting with the given type.
+//      * Clone the elements while working, so modifying the iterator does * not
+//      * affect this and vice versa.
+//      *
+//      * @param type one of GOOD_PRIORITY, NORMAL_PRIORITY, or BAD_PRIORITY
+//      * @param n an upper bound on the number of element to return
+//      */
+//     public Iterator iterator(int type1, type2, int n) {
+//         BinaryHeap heap=heaps[type];
+//         n=Math.min(heap.size(), n);
+//         List buf=new ArrayList(n);
+
+//         Iterator iter=heap.iterator();
+//         for (int i=0; i<n; i++) 
+//             buf.add(iter.next());
+//         return buf.iterator();        
+//     }
+
+    public String toString() {
+        return "["+heaps[HostCatcher.GOOD_PRIORITY]+", "
+               +heaps[HostCatcher.NORMAL_PRIORITY]+", "
+               +heaps[HostCatcher.BAD_PRIORITY]+"]";
+    }
+
+    //Unit tests?  See HostCatcher.main()
 }
