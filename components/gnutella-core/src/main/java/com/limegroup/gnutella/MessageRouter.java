@@ -294,6 +294,7 @@ public abstract class MessageRouter {
      *  port of the client node.
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
+		System.out.println("MessageRouter::handleMulticastMessage: "+msg); 
         // Increment hops and decrement TTL.
         msg.hop();
 
@@ -302,6 +303,8 @@ public abstract class MessageRouter {
 		
         if (CommonUtils.isLocalAddress(address))
             return;
+
+		System.out.println("MessageRouter::handleMulticastMessage"); 
 		
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
@@ -434,11 +437,11 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
+		System.out.println("MessageRouter::handleQueryRequestPossibleDuplicate: "+request); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
 		if(counter != null) {
-			//if(_queryRouteTable.tryToRouteReply(request.getGUID(), receivingConnection)) {
 			//Hack! If this is the indexing query from a Clip2 reflector, mark the
 			//connection as unkillable so the ConnectionWatchdog will not police it
 			//any more.
@@ -463,6 +466,7 @@ public abstract class MessageRouter {
 	 */
 	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
+		System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
@@ -606,6 +610,7 @@ public abstract class MessageRouter {
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
 									  ResultCounter counter) {
+		System.out.println("MessageRouter::handleQueryRequest"); 
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -640,6 +645,7 @@ public abstract class MessageRouter {
 		forwardQueryRequestToLeaves(request, handler);
 		
         // if I'm not firewalled and the source isn't firewalled THEN reply....
+		System.out.println("MessageRouter::about to respond to request"); 
         if (request.isFirewalledSource() &&
             !RouterService.acceptedIncomingConnection())
             return;
@@ -770,7 +776,10 @@ public abstract class MessageRouter {
 		} 
 		
 		// always send the query to your multicast people
-		multicastQueryRequest(query);
+		multicastQueryRequest(
+		    QueryRequest.createMulticastQuery(query.getGUID(), query.getQuery(),
+											  query.getRichQuery(), 
+											  query.getQueryUrns()));
 		
 	}
 
@@ -1336,7 +1345,7 @@ public abstract class MessageRouter {
     }
 
     /**
-     * Sends route updated query routing tables to all connections which haven't
+     * Sends updated query routing tables to all connections which haven't
      * been updated in a while.  You can call this method as often as you want;
      * it takes care of throttling.
      *     @modifies connections
@@ -1358,21 +1367,22 @@ public abstract class MessageRouter {
 				// continue if I'm an Ultrapeer and the node on the
 				// other end doesn't support Ultrapeer-level query
 				// routing
-				if(RouterService.isSupernode()) {
-					if(!c.isUltrapeerQueryRoutingConnection()) continue;
-				} else {
-					
-					// otherwise, I'm a leaf, and don't send routing
-					// tables is it's not a connection to an Ultrapeer
-					// or if query routing is not enabled
-					if (!(c.isClientSupernodeConnection() && 
-						  c.isQueryRoutingEnabled()))
-						continue;
+				if(RouterService.isSupernode() && 
+				   !c.isUltrapeerQueryRoutingConnection()) { 
+					continue;
+				} 				
+				// otherwise, I'm a leaf, and don't send routing
+				// tables is it's not a connection to an Ultrapeer
+				// or if query routing is not enabled
+				else if (!(c.isClientSupernodeConnection() && 
+						   c.isQueryRoutingEnabled())) {
+					continue;
 				}
                 
                 if (time<c.getNextQRPForwardTime())
                     continue;
-                c.setNextQRPForwardTime(time+QUERY_ROUTE_UPDATE_TIME);
+                //c.setNextQRPForwardTime(time+QUERY_ROUTE_UPDATE_TIME);
+				c.incrementNextQRPForwardTime(time);
 
                 ManagedConnectionQueryInfo qi=c.getQueryRouteState();
                 if (qi==null) {
