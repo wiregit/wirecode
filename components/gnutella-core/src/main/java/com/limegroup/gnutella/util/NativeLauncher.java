@@ -14,7 +14,9 @@ public class NativeLauncher {
 	static {
 		// load the native libary only if we're on Windows
 		if(Utilities.isWindows()) {
-			System.loadLibrary("NativeLauncher");
+			try {
+				System.loadLibrary("NativeLauncher");
+			} catch(UnsatisfiedLinkError ule) {}
 		}
 	}
 
