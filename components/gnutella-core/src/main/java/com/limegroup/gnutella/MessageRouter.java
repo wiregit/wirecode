@@ -439,6 +439,10 @@ public abstract class MessageRouter {
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
 		forwardQueryRequestToLeaves(request, handler);
+        // if I'm not firewalled and the source isn't firewalled THEN reply....
+        if (request.isFirewalledSource() &&
+            !RouterService.acceptedIncomingConnection())
+            return;
         respondToQueryRequest(request, _clientGUID);
     }
 
