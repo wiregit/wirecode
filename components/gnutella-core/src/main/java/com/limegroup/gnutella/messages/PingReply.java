@@ -174,7 +174,7 @@ public class PingReply extends Message implements Serializable {
             if (dailyUptime >= 0)
                 ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
 
-            if (isGUESSCapable) {
+            if (isGUESSCapable && isUltrapeer) {
                 // indicate guess support
                 byte[] vNum = {
                 convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
