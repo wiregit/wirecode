@@ -535,13 +535,12 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload) 
 		throws BadPacketException {
-        super(guid, Message.F_QUERY, ttl, hops, payload.length);
+        super(guid, Message.F_QUERY, ttl, hops, payload.length);		
 		if(payload == null) {
-			this.PAYLOAD = EMPTY_BYTE_ARRAY;
+			throw new BadPacketException("no payload");
 		}
-		else {
-			this.PAYLOAD=payload;
-		}
+
+		PAYLOAD=payload;
 		String tempQuery = "";
 		String tempRichQuery = "";
 		int tempMinSpeed = 0;
