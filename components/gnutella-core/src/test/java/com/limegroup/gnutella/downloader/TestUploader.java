@@ -48,8 +48,8 @@ public class TestUploader {
     private long maxPollTime = -1;
     //Note if either of these is changed we must change the X-Queue header in
     //this test
-    private final int MIN_POLL = 5000;
-    private final int MAX_POLL = 15000;
+    private final int MIN_POLL = 45000;
+    private final int MAX_POLL = 120000;
 
 
     /** 
