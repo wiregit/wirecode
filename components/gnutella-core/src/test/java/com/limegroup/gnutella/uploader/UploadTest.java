@@ -1630,7 +1630,7 @@ public class UploadTest extends BaseTestCase {
             expectedHeader = new Header(requiredHeader);
             
         while (true) { 
-            String line = readLine(in);System.out.println(line);
+            String line = readLine(in);
             if( line == null)
                 throw new InterruptedIOException("connection closed");
             //System.out.println("<< " + line);

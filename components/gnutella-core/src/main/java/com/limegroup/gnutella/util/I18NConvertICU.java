@@ -34,17 +34,16 @@ final class I18NConvertICU extends AbstractI18NConverter {
 
         InputStream fi = CommonUtils.getResourceStream("excluded.dat");
         //read in the explusion bitset
-        ObjectInputStream ois = 
-            new ObjectInputStream(fi);
+        ObjectInputStream ois = new ConverterObjectInputStream(fi);
         bs = (java.util.BitSet)ois.readObject();
         
         fi = CommonUtils.getResourceStream("caseMap.dat");
         //read in the case map
-        ois = new ObjectInputStream(fi);
+        ois = new ConverterObjectInputStream(fi);
         hm = (HashMap)ois.readObject();
         
         fi = CommonUtils.getResourceStream("replaceSpace.dat");
-        ois = new  ObjectInputStream(fi);
+        ois = new ConverterObjectInputStream(fi);
         bs2 = (java.util.BitSet)ois.readObject();
 
     	_excluded = bs;

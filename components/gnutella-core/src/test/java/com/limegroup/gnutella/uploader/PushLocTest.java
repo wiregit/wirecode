@@ -462,8 +462,8 @@ public class PushLocTest extends BaseTestCase {
 		
 		//clean up for next test
 		fd.remove(direct);fd.remove(direct);
-		fd.remove(push);fd.remove(push);
-		fd.remove(pushFwt);fd.remove(pushFwt);
+		fd.remove(push);
+		fd.remove(pushFwt);
 			
 	}
 	
@@ -538,8 +538,8 @@ public class PushLocTest extends BaseTestCase {
 		
 		//clean up for next test
 		fd.remove(direct);fd.remove(direct);
-		fd.remove(push);fd.remove(push);
-		fd.remove(pushFwt);fd.remove(pushFwt);
+		fd.remove(push);
+		fd.remove(pushFwt);
 	
 	}
 		
@@ -621,8 +621,8 @@ public class PushLocTest extends BaseTestCase {
 		
 		//clean up for next test
 		fd.remove(direct);fd.remove(direct);
-		fd.remove(push);fd.remove(push);
-		fd.remove(pushFwt);fd.remove(pushFwt);
+		fd.remove(push);
+		fd.remove(pushFwt);
 		
 	}
 	
@@ -692,7 +692,7 @@ public class PushLocTest extends BaseTestCase {
 		assertTrue(fd.getAlternateLocationCollection().contains(direct));
 		
 		
-		fd.remove(push);fd.remove(push);
+		fd.remove(push);
 		fd.remove(direct);fd.remove(direct);
 		assertEquals(0,fd.getAltLocsSize());
 		

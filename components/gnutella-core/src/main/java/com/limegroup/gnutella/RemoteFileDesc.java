@@ -795,8 +795,8 @@ public class RemoteFileDesc implements Serializable {
 	 * the same "remote file".
 	 * 
 	 * The _host field may be equal for many firewalled locations; 
-	 * therefore it is necessary that we distinguish those by their different
-	 * push addresses.
+	 * therefore it is necessary that we distinguish those by their 
+	 * client GUIDs
 	 */
     public boolean equals(Object o) {
 		if(o == this) return true;

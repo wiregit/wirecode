@@ -40,3 +40,4 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         return ObjectStreamClass.lookup(Class.forName(className)); 
     } 
 }
+
