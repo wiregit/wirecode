@@ -243,6 +243,7 @@ public final class SettingsManager {
 	private final int     DEFAULT_APP_HEIGHT          = 620;
 	private final boolean DEFAULT_RUN_ONCE            = false;
 	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
+	private final boolean DEFAULT_SHUTDOWN_WHEN_READY = true;
 	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
 	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
 	public static final String  DEFAULT_CLASSPATH           
@@ -383,6 +384,7 @@ public final class SettingsManager {
 	private final String WINDOW_Y              = "WINDOW_Y";
 	private final String SHOW_TRAY_DIALOG      = "SHOW_TRAY_DIALOG";
 	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
+	private final String SHUTDOWN_WHEN_READY   = "SHUTDOWN_WHEN_READY";
 	private final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
 	private final String CLASSPATH             = "CLASSPATH";
 	private final String MAIN_CLASS            = "MAIN_CLASS";
@@ -954,6 +956,11 @@ public final class SettingsManager {
 					setMinimizeToTray(minimize.booleanValue());
 				}
 
+				else if(key.equals(SHUTDOWN_WHEN_READY)) {
+					Boolean whenReady = new Boolean(p);
+					setShutdownWhenReady(whenReady.booleanValue());
+				}
+
 				else if(key.equals(SHOW_CLOSE_DIALOG)) {
 					Boolean showCloseDialog = new Boolean(p);
 					setShowCloseDialog(showCloseDialog.booleanValue());
@@ -1083,6 +1090,7 @@ public final class SettingsManager {
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
+		setShutdownWhenReady(DEFAULT_SHUTDOWN_WHEN_READY);
 		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
 		setClassPath(DEFAULT_CLASSPATH);
 		setMainClass(DEFAULT_MAIN_CLASS);
@@ -1680,8 +1688,19 @@ public final class SettingsManager {
 	 *         system tray, <tt>false</tt> otherwise
 	 */
 	public boolean getMinimizeToTray() {
-		Boolean b = new Boolean(PROPS.getProperty(MINIMIZE_TO_TRAY));
-		return b.booleanValue();	
+		return getBooleanValue(MINIMIZE_TO_TRAY);
+	}
+
+	/**
+	 * Returns a boolean specifying whether or not to shutdown the application
+	 * only after file transfers are complete
+	 *
+	 * @param whenReady <tt>true</tt> if the application should shutdown
+	 *          only after file transfers are complete, false otherwise
+	 */
+	public boolean getShutdownWhenReady() {
+		Boolean b = new Boolean(PROPS.getProperty(SHUTDOWN_WHEN_READY));
+		return b.booleanValue();
 	}
 
 	/**
@@ -2779,6 +2798,17 @@ public final class SettingsManager {
 		setBooleanValue(MINIMIZE_TO_TRAY, minimize);
 	}	
 
+	/**
+	 * Sets the flag for whether or not the application should shutdown
+	 * immediately, or when file transfers are complete
+	 *
+	 * @param minimize <tt>boolean</tt> for whether or not the application
+	 *                 should shutdown only after transfers are complete
+	 */
+	public void setShutdownWhenReady(final boolean whenReady) {
+		setBooleanValue(SHUTDOWN_WHEN_READY, whenReady);
+	}
+	
 	/**
 	 * Sets whether or not the application has accepted an incoming
 	 * connection during this session.
