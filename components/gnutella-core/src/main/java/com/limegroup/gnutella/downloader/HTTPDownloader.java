@@ -169,7 +169,7 @@ public class HTTPDownloader {
         out.flush();
 
         //Read response.
-        readHeader();
+        readHeaders();
 	}
 	
 
@@ -223,27 +223,71 @@ public class HTTPDownloader {
      * Reads the headers from this, setting _initialReadingPoint and _amountToRead.
      * Throws any of the exceptions listed in connect().  
      */
-	private void readHeader() throws IOException {
-
-		String str = " ";
-
+	private void readHeaders() throws IOException {
 		if (_byteReader == null) 
 			throw new ReaderIsNullException();
 
-		// Read the first line and then check for any possible errors
-		str = _byteReader.readLine();  
+		// Read the response code from the first line and check for any errors
+		String str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
 			return;
-		
-		// str should be some sort of HTTP connect string.
-		// The string should look like:	
-		// str = "HTTP 200 OK \r\n";
-		// We will accept any 2xx's, but reject other codes.
-		
-		// create a new String tokenizer with the space as the 
-		// delimeter.
-		StringTokenizer tokenizer = new StringTokenizer(str, " ");
-		
+        int code=parseHTTPCode(str);		
+
+		//Accept any 2xx's, but reject other codes.
+		if ( (code < 200) || (code > 300) ) {
+			if (code == 404)
+				throw new 
+				    com.limegroup.gnutella.downloader.FileNotFoundException();
+			else if (code == 410)
+				throw new 
+                    com.limegroup.gnutella.downloader.NotSharingException();
+			else if (code == 503)
+				throw new TryAgainLaterException();
+			// a general catch for 4xx and 5xx's
+			// should maybe be a different exception?
+			// else if ( (code >= 400) && (code < 600) ) 
+			else 
+				throw new IOException();			
+		}
+
+        //Now read each header...
+		while (true) {            
+			str = _byteReader.readLine();			
+            if (str==null || str.equals(""))
+                break;
+
+            //As of LimeWire 1.9, we ignore the "Content-length" header;
+            //handling an unexpectedly low Content-length value is no different
+            //from handling premature connection termination.  Look at LimeWire
+            //1.8 and earlier for parsing code.
+			
+            //For "Content-range" headers, we only look at the start of the
+            //range, terminating the download if it's not what we expected.  We
+            //ignore the ending value and length for the same reasons as
+            //Content-length.  TODO3: it's possible to recover from a starting
+            //range that's too small, though this will rarely come up.
+            if (str.toUpperCase().startsWith("CONTENT-RANGE:")) {
+				int startOffset=parseContentRangeStart(str);
+                if (startOffset!=_initialReadingPoint)
+                    throw new IOException(
+                        "Unexpected start offset; too dumb to recover");
+            }
+        }
+        
+    }
+
+
+    /**
+     * Returns the HTTP response code from the given string, throwing
+     * an exception if it couldn't be parsed.
+     *
+     * @param str an HTTP response string, e.g., "HTTP 200 OK \r\n"
+     * @exception NoHTTPOKException str didn't contain "HTTP"
+     * @exception ProblemReadingHeaderException some other problem
+     *  extracting result code
+     */
+    private static int parseHTTPCode(String str) throws IOException {		
+		StringTokenizer tokenizer = new StringTokenizer(str, " ");		
 		String token;
 
 		// just a safety
@@ -264,129 +308,76 @@ public class HTTPDownloader {
 		token = tokenizer.nextToken();
 		
 		String num = token.trim();
-		int code;
 		try {
-			code = java.lang.Integer.parseInt(num);
+			return java.lang.Integer.parseInt(num);
 		} catch (NumberFormatException e) {
 			throw new ProblemReadingHeaderException();
 		}
-		
-		// accept anything that is 2xx
-		if ( (code < 200) || (code > 300) ) {
-			if (code == 404)
-				throw new 
-				    com.limegroup.gnutella.downloader.FileNotFoundException();
-			else if (code == 410)
-				throw new 
-                    com.limegroup.gnutella.downloader.NotSharingException();
-			else if (code == 503)
-				throw new TryAgainLaterException();
-			// a general catch for 4xx and 5xx's
-			// should maybe be a different exception?
-			// else if ( (code >= 400) && (code < 600) ) 
-			else 
-				throw new IOException();
-			
-		}
 
-		// if we've gotten this far, then we can assume that we should
-		// be alright to prodeed.
-
-
-	
-		while (true) {
-            /*
-            //TODO: we currently ignore the Content-length and 
-            //content-range headers.  Maybe we shouldn't.
-			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
-
-                String sub;
-                try {
-                    sub=str.substring(15);
-                } catch (IndexOutOfBoundsException e) {
-					throw new ProblemReadingHeaderException();
-                }
-                sub = sub.trim();
-				int tempSize;
-				
-                try {
-                    tempSize = java.lang.Integer.parseInt(sub);
-                }
-                catch (NumberFormatException e) {
-					throw new ProblemReadingHeaderException();
-                }
-
-				_amountToRead = tempSize;
-				
-            }  // end of content length if
-			
-            if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
-				
-				int dash;
-				int slash;
-				
-				String beforeDash;
-				int numBeforeDash;
-
-				String afterSlash;
-				int numAfterSlash;
-
-				String beforeSlash;
-				int numBeforeSlash;
-
-                try {
-					str = str.substring(21);
-
-					dash=str.indexOf('-');
-					slash = str.indexOf('/');
-
-					afterSlash = str.substring(slash+1);
-					afterSlash = afterSlash.trim();
-
-                    beforeDash = str.substring(0, dash);
-					beforeDash = beforeDash.trim();
-
-					beforeSlash = str.substring(dash+1, slash);
-					beforeSlash = beforeSlash.trim();
-                } catch (IndexOutOfBoundsException e) {
-					throw new ProblemReadingHeaderException();
-                }
-				try {
-					numAfterSlash = java.lang.Integer.parseInt(afterSlash);
-					numBeforeDash = java.lang.Integer.parseInt(beforeDash);
-                    numBeforeSlash = java.lang.Integer.parseInt(beforeSlash);
-                }
-                catch (NumberFormatException e) {
-					throw new ProblemReadingHeaderException();
-                }
-
-				// In order to be backwards compatible with
-				// LimeWire 0.5, which sent broken headers like:
-				// Content-range: bytes=1-67818707/67818707
-				//
-				// If the number preceding the '/' is equal 
-				// to the number after the '/', then we want
-				// to decrement the first number and the number
-				// before the '/'.
-				if (numBeforeSlash == numAfterSlash) {
-					numBeforeDash--;
-					numBeforeSlash--;
-				}
-
-				_initialReadingPoint = numBeforeDash;
-				// _amountRead = numBeforeSlash;
-				_amountToRead = numAfterSlash;
-
-            } // end of content range if
-            */
-            
-			str = _byteReader.readLine();
-			
-            //EOF?
-            if (str==null || str.equals(""))
-                break;
-        }
     }
+
+
+    /** 
+     * Returns the start byte offset in the given "Content-range" header,
+     * throwing an exception if it couldn't be parsed.  Does not strictly
+     * enforce HTTP; allows minor errors like replacing the space after "bytes"
+     * with an equals.  Also tries to interpret malformed LimeWire 0.5 headers.
+     *
+     * @param str a Content-range header line, e.g.,
+     *      "Content-range: bytes 0-9/10" or
+     *      "Content-range:bytes 0-9/10" or
+     *      "Content-range:bytes 0-9/X" (replacing X with "*") or
+     *      "Content-range:bytes X/10" (replacing X with "*") or
+     *      "Content-range:bytes X/X" (replacing X with "*") or
+     *  Will also accept the incorrect but common 
+     *      "Content-range: bytes=0-9/10"
+     * @exception ProblemReadingHeaderException some problem
+     *  extracting the start offset.  
+     */
+    private static int parseContentRangeStart(String str) throws IOException {
+        int numBeforeDash;
+        int numBeforeSlash;
+        int numAfterSlash;
+
+        //Try to parse all three numbers from header for verification.
+        //Special case "*" before or after slash.
+        try {
+            int start=str.indexOf("bytes")+6;  //skip "bytes " or "bytes="
+            int slash=str.indexOf('/');
+            
+            if (str.substring(start, slash).equals("*"))
+                return 0;                      //"bytes */*" or "bytes */10"
+
+            int dash=str.lastIndexOf("-");     //skip past "Content-range"
+            numBeforeDash=Integer.parseInt(str.substring(start, dash));
+            numBeforeSlash=Integer.parseInt(str.substring(dash+1, slash));
+
+            if (str.substring(slash+1).equals("*"))
+                return numBeforeDash; //bytes 0-9/*
+
+            numAfterSlash=Integer.parseInt(str.substring(slash+1));
+        } catch (IndexOutOfBoundsException e) {
+            throw new ProblemReadingHeaderException();
+        } catch (NumberFormatException e) {
+            throw new ProblemReadingHeaderException();
+        }
+
+        // In order to be backwards compatible with
+        // LimeWire 0.5, which sent broken headers like:
+        // Content-range: bytes=1-67818707/67818707
+        //
+        // If the number preceding the '/' is equal 
+        // to the number after the '/', then we want
+        // to decrement the first number and the number
+        // before the '/'.
+        if (numBeforeSlash == numAfterSlash) {
+            numBeforeDash--;
+            numBeforeSlash--;
+        }
+
+        return numBeforeDash;
+    }
+
 
     /*
      * Downloads the content from the server and writes it to a temporary
@@ -439,6 +430,7 @@ public class HTTPDownloader {
 
 
 	/****************** UNIT TEST *********************/
+
 	
 //  	private HTTPDownloader(String str) {
 //  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
@@ -446,6 +438,27 @@ public class HTTPDownloader {
 //  	}
 
 //  	public static void main(String[] argv) {
+//          //Unit tests for parseContentRangeStart
+//          try {
+//              Assert.that(parseContentRangeStart("Content-range: bytes 1-9/10")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes=1-9/10")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes */10")==0);
+//              Assert.that(parseContentRangeStart("Content-range:bytes */*")==0);
+//              Assert.that(parseContentRangeStart("Content-range:bytes 1-9/*")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes 1-9/*")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes 1-10/10")==0);
+//          } catch (IOException e) {
+//              e.printStackTrace();
+//              Assert.that(false);
+//          }
+//          try {
+//              parseContentRangeStart("Content-range:bytes 1 10 10");
+//          } catch (IOException e) {
+//              Assert.that(true);
+//          }
+        
+
+//          //readHeaders tests
 //  		String str;
 //  		HTTPDownloader down;
 //  		boolean ok = true;
@@ -455,7 +468,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 200 OK\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  		} catch (IOException e) {
 //  			// should not throw an error
@@ -466,7 +479,7 @@ public class HTTPDownloader {
 //  		down = new HTTPDownloader(str);
 
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  			Assert.that(false);
 //  		} catch (FileNotFoundException e) {
@@ -478,7 +491,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 410 Not Sharing \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  			Assert.that(false);
 //  		} catch (NotSharingException e) {
@@ -489,7 +502,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 412 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  			Assert.that(false);
 //  		} catch (IOException e) { 
@@ -498,7 +511,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 503 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  			Assert.that(false);
 //  		} catch (TryAgainLaterException e) {
@@ -509,7 +522,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 210 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  		} catch (IOException e) {
 //  			Assert.that(false);
@@ -518,7 +531,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 204 Partial Content\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  		} catch (IOException e) {
 //  			Assert.that(false);
@@ -528,7 +541,7 @@ public class HTTPDownloader {
 //  		str = "HTTP 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			Assert.that((char)down._byteReader.read()=='x');
 //  			down.stop();
 //  		} catch (IOException e) {
@@ -538,7 +551,7 @@ public class HTTPDownloader {
 //  		str = "200 OK\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
-//  			down.readHeader();
+//  			down.readHeaders();
 //  			down.stop();
 //  			Assert.that(false);
 //  		} catch (NoHTTPOKException e) {
