@@ -187,7 +187,7 @@ public class UploadManager implements BandwidthTracker {
      * Does some book-keeping and makes the downloader, start the download
      * @param uploader This method assumes that uploader is connected.
      */
-    private void doSingleUpload(HTTPUploader uploader, String host,
+    private void doSingleUpload(Uploader uploader, String host,
         int index) {
         long startTime=-1;
 
@@ -219,7 +219,7 @@ public class UploadManager implements BandwidthTracker {
         // handles it internally.  is this the correct
         // way to handle it?
         startTime=System.currentTimeMillis();
-        uploader.start();
+        uploader.startUpload();
         // check the state of the upload once the
         // start method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE)
@@ -367,7 +367,7 @@ public class UploadManager implements BandwidthTracker {
      *  Always accept Browse Host requests, though....
      *  Notifies callback of this.
      *      @modifies _uploadsInProgress, uploader, _callback */
-	private synchronized boolean insertAndTest(HTTPUploader uploader, 
+	private synchronized boolean insertAndTest(Uploader uploader, 
                                                String host) {
 		// add to the Map
 		insertIntoMapAndList(uploader, host);
