@@ -39,7 +39,8 @@ public class ServerSideWhatIsNewTest
 
     private static File berkeley = null;
     private static File susheel = null;
-
+    private static File tempFile1 = null;
+    private static File tempFile2 = null;
 
     public ServerSideWhatIsNewTest(String name) {
         super(name);
@@ -194,6 +195,7 @@ public class ServerSideWhatIsNewTest
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
+    // just test that What Is New support is advertised
     public void testSendsCapabilitiesMessage() throws Exception {
 
         testUP = connect(rs, 6355, true);
@@ -214,6 +216,7 @@ public class ServerSideWhatIsNewTest
     }
 
 
+    // test that the CreationTimeCache is as expected
     public void testCreationTimeCacheInitialState() throws Exception {
         // wait for fm to finish
         int i = 0;
@@ -271,7 +274,8 @@ public class ServerSideWhatIsNewTest
     }
 
 
-    public void testWhatIsNewQuery() throws Exception {
+    // make sure that a what is new query is answered correctly
+    public void testWhatIsNewQueryBasic() throws Exception {
         drain(testUP);
 
         QueryRequest whatIsNewQuery = 
@@ -301,14 +305,16 @@ public class ServerSideWhatIsNewTest
     }
 
 
+    // test that the creation time cache handles the additional sharing of files
+    // fine
     public void testAddSharedFiles() throws Exception {
         CreationTimeCache ctCache = CreationTimeCache.instance();
         FileManager fm = rs.getFileManager();
         URN berkeleyURN = fm.getURNForFile(berkeley);
         URN susheelURN = fm.getURNForFile(susheel);
 
-        File tempFile1 = new File("tempFile1.txt");
-        File tempFile2 = new File("tempFile2.txt");
+        tempFile1 = new File("tempFile1.txt");
+        tempFile2 = new File("tempFile2.txt");
         tempFile1.deleteOnExit(); tempFile2.deleteOnExit();
 
         FileWriter writer = null;
@@ -357,6 +363,39 @@ public class ServerSideWhatIsNewTest
             assertTrue((longToUrns.size() == 2) || (longToUrns.size() == 3) ||
                        (longToUrns.size() == 4));
         }
+    }
+
+    // test that after teh sharing of additional files, the what is new query
+    // results in something else
+    public void testWhatIsNewQueryNewFiles() throws Exception {
+        drain(testUP);
+
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        testUP.send(whatIsNewQuery);
+        testUP.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        QueryReply reply = 
+            (QueryReply) getFirstInstanceOfMessageType(testUP,
+                                                       QueryReply.class);
+        assertNotNull(reply);
+        assertEquals(3, reply.getResultCount());
+        boolean gotTempFile1 = false, gotTempFile2 = false;
+        
+        Iterator iter = reply.getResults();
+        while (iter.hasNext()) {
+            Response currResp = (Response) iter.next();
+            if (currResp.getName().equals(tempFile1.getName()))
+                gotTempFile1 = true;
+            if (currResp.getName().equals(tempFile2.getName()))
+                gotTempFile2 = true;
+        }
+        assertTrue(gotTempFile1 && gotTempFile2);
     }
 
 
