@@ -6,7 +6,7 @@ import java.io.IOException;
  * Exception thrown when someone understands responds with a handshaking
  * code other than 200 or 401.
  */
-public class NoGnutellaOkException extends IOException {
+public final class NoGnutellaOkException extends IOException {
 
     /**
      * Constant for whether or not the <tt>NoGnutellaOkException</tt>
