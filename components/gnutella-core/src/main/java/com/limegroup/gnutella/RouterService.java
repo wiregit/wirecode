@@ -430,7 +430,7 @@ public final class RouterService {
             
             //Write gnutella.net
             try {
-                catcher.write(SETTINGS.getHostList());
+                catcher.write();
             } catch (IOException e) {}
             finally {
                 SETTINGS.writeProperties();
