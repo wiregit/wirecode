@@ -26,7 +26,7 @@ public class LimeXMLReplyCollection{
      *  Note: Each ReplyCollection is written out to 1 physical file on 
      *  shutdown.
      *  Locking: Never obtain a lock on mainMap PRIOR to obtaining that of
-     *  hashSet (the input hashSet upon construction).
+     *  fileToHash (the input hashSet upon construction).
      */
     private HashMap mainMap;
     public boolean audio = false;//package access
@@ -88,6 +88,9 @@ public class LimeXMLReplyCollection{
         ID3Reader id3Reader = new ID3Reader();
         while((iter != null) && iter.hasNext()) {
             File file = (File)iter.next();
+            //Note: Ordinarily, we should have called mfm.readMap, but since
+            //we already have the lock to what that method synchronizes on,
+            //its OK to do it in this case.
             String hash = (String) fileToHash.get(file);
             Object xml = hashToXMLStr.get(hash); //lookup in store from disk
             // at this point, xml can be either 1. a LimeXMLDoc, 2. a string 
@@ -255,7 +258,7 @@ public class LimeXMLReplyCollection{
     }
 
 
-    public void addReplyWithCommit(File f, String hash, 
+    void addReplyWithCommit(File f, String hash, 
                                    LimeXMLDocument replyDoc) {
         String identifier ="";
         try{
@@ -276,7 +279,9 @@ public class LimeXMLReplyCollection{
     }
 
     public int getCount(){
-        return mainMap.size();
+        synchronized(mainMap) {
+            return mainMap.size();
+        }
     }
     
     /**
