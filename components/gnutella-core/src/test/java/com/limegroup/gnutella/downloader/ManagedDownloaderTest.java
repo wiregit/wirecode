@@ -133,9 +133,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   new ActivityCallbackStub());
             //Wait for it to download until error.
             try { Thread.sleep(4000); } catch (InterruptedException e) { }
-            assertEquals(Downloader.WAITING_FOR_RESULTS, 
+            assertEquals("should be waiting for results",
+                         Downloader.WAITING_FOR_RESULTS, 
                          downloader.getState());
-            assertEquals(100, 
+            assertEquals("should have read 100 bytes", 100, 
                          downloader.getAmountRead());
             //Hit resume, make sure progress not erased.
             try { 
@@ -176,7 +177,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
     /** Provides access to protected methods. */
-    class TestManagedDownloader extends ManagedDownloader {
+    private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
             super(files);
         }
