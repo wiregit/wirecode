@@ -322,6 +322,20 @@ public class RouterService
         return(catcher.getNumHosts());
     }
 
+    /**
+     * Returns the number of downloads in progress.
+     */
+    public int getNumDownloads() {
+        return downloader.downloadsInProgress();
+    }
+    
+    /**
+     * Returns the number of uploads in progress.
+     */
+    public int getNumUploads() {
+        return uploadManager.uploadsInProgress();
+    }
+
 
     /**
      * Shuts down the backend and writes the gnutella.net file.
