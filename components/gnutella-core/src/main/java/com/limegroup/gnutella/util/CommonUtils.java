@@ -204,6 +204,18 @@ public final class CommonUtils {
         return 7;
     }
 
+    /** Gets the major revision of the UltraPeer version supported.
+     */
+    public static int getUPMajorVersionNumber() {
+        return 0;
+    }
+
+    /** Gets the minor revision of the UltraPeer version supported.
+     */
+    public static int getUPMinorVersionNumber() {
+        return 1;
+    }
+
 	/**
 	 * Returns a version number appropriate for upload headers.
      * Same as '"LimeWire "+getLimeWireVersion'.
