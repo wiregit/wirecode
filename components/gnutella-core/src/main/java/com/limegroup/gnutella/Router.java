@@ -8,13 +8,28 @@ import java.util.*;
  * A Gnutella router.  This is a server that manages connections.  It
  * is currently implemented with a thread-per-connection model.  It 
  * does not deal with the details of GUID->Connection routing (that's
- * handled by RouteTable) but it may deal with "semantic routing".
+ * handled by RouteTable) but it may deal with "semantic routing".<p>
+ *
+ * The router thread creates HostFetcher threads to create outgoing
+ * connections as needed.  This does NOT guarantee that the router
+ * will have the desired number of connections.  That's kind of tricky,
+ * as you have to consider three events:
+ * <ul>
+ * <li>Connections removed
+ * <li>Startup
+ * <li><b>New hosts available</b> that weren't before
+ * </ul>
+ *
+ * You should call the shutdown() method when you're done to ensure
+ * that the gnutella.net file is written to disk.
  */
 public class Router implements Runnable {
     private int port;
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
     private List /* of Connection */ connections=Collections.synchronizedList(
 						      new ArrayList());
+    public HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
+    private int keepAlive=0;
 
     /** Creates a router that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
@@ -57,6 +72,15 @@ public class Router implements Runnable {
      *   and services incoming requests.
      */
     public void run() {	
+	//1. Start background threads to fetch the desired number of
+	//   connections.  These run in parallel until each has launched
+	//   a connection--or there are no connections left to try.
+	for (int i=0; i<keepAlive; i++) {	    
+	    Thread fetcher=new ConnectionFetcher(this,1);
+	    fetcher.start();
+	}
+	//2. Create the server socket, bind it to a port, listen for incoming
+	//   connections, and accept them.
 	ServerSocket sock=null;
 	try {
 	    sock=new ServerSocket(port);
@@ -90,17 +114,29 @@ public class Router implements Runnable {
      */
     public synchronized void add(Connection c) {
 	connections.add(c);
+	//Don't record incoming connections, since the foreign host's
+	//port is ephemeral.
+	if (c.isOutgoing())
+	    catcher.addGood(c);
     }
 	
     /** 
      * @modifies this
      * @effects removes c from this' connection list.  If
-     *  c is not in the connection list, does nothing. 
+     *  c is not in the connection list, does nothing.  May
+     *  try to establish a new outgoing connection to replace
+     *  this one.
      */
     public synchronized void remove(Connection c) {
 	int i=connections.indexOf(c);
-	if (i != -1)
+	if (i != -1) {
 	    connections.remove(i);
+	    if (keepAlive!=0) {
+		//Asynchronously fetch a connection to replace c
+		Thread t=new ConnectionFetcher(this,1);
+		t.start();
+	    }
+	}	
     }
 
     /** Returns an unmodifiable iterator of this' connections.
@@ -109,5 +145,59 @@ public class Router implements Runnable {
     public Iterator connections() {
 	return new UnmodifiableIterator(connections.iterator());
     }
+
+    /**
+     * @requires x>=0, run() not called
+     * @modifies this
+     * @effects tells this to try to keep at least x active connections.
+     *  You must call this before starting the run() method.
+     */
+    public void setKeepAlive(int x) {
+	Assert.that(x>=0);
+	this.keepAlive=x;
+    }
+
+    /**
+     * @modifies the file gnutella.net, or its user-defined equivalent
+     * @effects writes the gnutella.net file to disk.
+     */
+    public void shutdown() {
+	try {
+	    catcher.write(Const.HOSTLIST);
+	} catch (IOException e) { }
+    }
 }
 
+/** Asynchronously fetches new connections from hostcatcher.  */
+class ConnectionFetcher extends Thread {
+    private Router router;
+    private int n;
+
+    /** 
+     * Tries to add N connections to the router.  This
+     * is always a Daemon thread.  Often N=1, and multiple
+     * threads of this are running; this gives parallelism. 
+     */
+    public ConnectionFetcher(Router router, int n) {
+	this.router=router;
+	this.n=n;
+	setDaemon(true);
+    }
+
+    public void run() {
+	for ( ; n>0 ; n--) {
+	    try {
+		//Note: this add c to router if successful */
+		Connection c=router.catcher.choose();
+		Thread t=new Thread(c);
+		t.setDaemon(true);
+		t.start();
+		//Router.error("Asynchronously established outgoing connection.");
+	    } catch (NoSuchElementException e) {
+		//give up
+		//Router.error("Host catcher is empty");
+		return;
+	    }
+	}
+    }		
+}
