@@ -41,6 +41,12 @@ public final class QueryHandler {
 	private static final int NEW_LEAF_RESULTS = 80;
 
 	/**
+	 * The number of results to try to get for queries by hash -- really
+	 * small since you need relatively few exact matches.
+	 */
+	private static final int HASH_QUERY_RESULTS = 10;
+
+	/**
 	 * Constant for the query quid.
 	 */
 	private final byte[] GUID;
@@ -137,16 +143,25 @@ public final class QueryHandler {
 	/**
 	 * Private constructor to ensure that only this class creates new
 	 * <tt>QueryFactory</tt> instances.
+	 *
+	 * @param request the <tt>QueryRequest</tt> to construct a handler for
+	 * @param results the number of results to get -- this varies based
+	 *  on the type of servant sending the request and is respeceted unless
+	 *  it's a query for a specific hash, in which case we try to get
+	 *  far fewer matches, ignoring this parameter
 	 */
- 	private QueryHandler(byte[] guid, String query, String xmlQuery, 
- 						 byte hops, byte[] payload, int results) {
- 		GUID = guid;
- 		QUERY = query;
- 		XML_QUERY = xmlQuery;
- 		HOPS = hops;
- 		PAYLOAD = payload;
-		RESULTS = results;
- 	}
+	private QueryHandler(QueryRequest query, int results) {
+		GUID = query.getGUID();
+		QUERY = query.getQuery();
+		XML_QUERY = query.getRichQuery();
+		HOPS = query.getHops();
+		PAYLOAD = query.getPayload();
+		if(query.getQueryUrns().isEmpty()) {
+			RESULTS = results;
+		} else {
+			RESULTS = HASH_QUERY_RESULTS;
+		}
+	}
 
 
 	/**
@@ -157,9 +172,7 @@ public final class QueryHandler {
 	 *  for this set of queries
 	 */
 	public static QueryHandler createHandler(QueryRequest query) {	
-		return new QueryHandler(query.getGUID(), query.getQuery(), 
-								query.getRichQuery(), query.getHops(),
-								query.getPayload(), ULTRAPEER_RESULTS);
+		return new QueryHandler(query, ULTRAPEER_RESULTS); 
 	}
 
 	/**
@@ -170,9 +183,7 @@ public final class QueryHandler {
 	 *  for this set of queries
 	 */
 	public static QueryHandler createHandlerForOldLeaf(QueryRequest query) {	
-		return new QueryHandler(query.getGUID(), query.getQuery(), 
-								query.getRichQuery(), query.getHops(),
-								query.getPayload(), OLD_LEAF_RESULTS);
+		return new QueryHandler(query, OLD_LEAF_RESULTS);
 	}
 
 	/**
@@ -183,9 +194,7 @@ public final class QueryHandler {
 	 *  for this set of queries
 	 */
 	public static QueryHandler createHandlerForNewLeaf(QueryRequest query) {	
-		return new QueryHandler(query.getGUID(), query.getQuery(), 
-								query.getRichQuery(), query.getHops(),
-								query.getPayload(), NEW_LEAF_RESULTS);
+		return new QueryHandler(query, NEW_LEAF_RESULTS);
 	}
 
 	/**
