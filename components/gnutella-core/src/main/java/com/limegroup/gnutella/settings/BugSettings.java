@@ -12,7 +12,7 @@ public final class BugSettings extends LimeProps {
      * to the bug servlet.
      */
     public static final BooleanSetting USE_BUG_SERVLET =
-		FACTORY.createBooleanSetting("USE_BUG_SERVLET", true);
+		FACTORY.createBooleanSetting("USE_BUG_SERVLET", false);
 		
     /**
      * Setting for whether or not to completely ignore all bugs.
