@@ -82,9 +82,10 @@ public final class RouterService {
 		new ConnectionManager(authenticator);
 
 	/**
-	 * <tt>HostCatcher</tt> that handles Gnutella pongs.
+	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
+     * for tests.
 	 */
-    private static final HostCatcher catcher = new HostCatcher();
+    private static HostCatcher catcher = new HostCatcher();
 	
 	/**
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
@@ -138,6 +139,12 @@ public final class RouterService {
 	private static final SettingsManager SETTINGS = 
 		SettingsManager.instance();
 
+    /**
+     * Variable for whether or not that backend threads have been started.
+     */
+    private static boolean _started;
+
+
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
 	 * the backend.
@@ -160,8 +167,6 @@ public final class RouterService {
      *  all messages
 	 */
   	public RouterService(ActivityCallback callback, MessageRouter router) {
-        //TODO: expand parameter list to allow for easy testing with stubs for
-        //FileManager, Acceptor, etc.
 		RouterService.callback = callback;
   		RouterService.router = router;
 
@@ -189,6 +194,8 @@ public final class RouterService {
 	 * been constructed.
 	 */
 	public void start() {
+        _started = true;
+
 		// start up the UDP server thread
 		catcher.initialize();
 		acceptor.initialize();
@@ -203,6 +210,17 @@ public final class RouterService {
         UpdateManager updater = UpdateManager.instance();//initialize
         updater.postGuiInit(callback);
 	}
+
+    /**
+     * Used to determine whether or not the backend threads have been
+     * started.
+     *
+     * @return <tt>true</tt> if the backend threads have been started,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isStarted() {
+        return _started;
+    }
 
     /**
      * Returns the <tt>ActivityCallback</tt> passed to this' constructor.
@@ -521,15 +539,6 @@ public final class RouterService {
     }
 
     /**
-     * Sets the max number of incoming Gnutella connections allowed by the
-     * connection manager.  This does not affect the permanent
-     * MAX_INCOMING_CONNECTIONS property.  
-     */
-    //public static void setMaxIncomingConnections(int max) {
-	//manager.setMaxIncomingConnections(max);
-    //}
-
-    /**
      * Notifies the backend that spam filters settings have changed, and that
      * extra work must be done.
      */
@@ -571,29 +580,6 @@ public final class RouterService {
     public static boolean acceptedIncomingConnection() {
 		return acceptor.acceptedIncoming();
     }
-
-
-    /**
-     *  Returns the total number of messages sent and received.
-     */
-//      public static int getTotalMessages() {
-//          return( router.getNumMessages() );
-//      }
-
-    /**
-     *  Returns the total number of dropped messages.
-     */
-//      public static int getTotalDroppedMessages() {
-//          return( router.getNumDroppedMessages() );
-//      }
-
-    /**
-     *  Returns the total number of misrouted messages.
-     */
-//      public static int getTotalRouteErrors() {
-//          return( router.getNumRouteErrors() );
-//      }
-
 
     /**
      * Count up all the messages on active connections
