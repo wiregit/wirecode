@@ -109,14 +109,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         return set.cardinality();
     }
 
-
-    public void testLegacy() throws Exception {
-        //TODO: test handle bad packets (sequences, etc)
-
-        //-1. Just for sanity's sake....
-        assertEquals((byte)-6, QueryRouteTable.KEYWORD_PRESENT);
-        assertEquals((byte)6, QueryRouteTable.KEYWORD_ABSENT);
-
+    public void testCompressionAndUncompress() throws Exception {
         //0. compress/uncompress.  First we make a huge array with lots of
         //random bytes but also long strings of zeroes.  This means that
         //compression will work, but not too well.  Then we take the compressed
@@ -145,8 +138,9 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         baos.flush();
         assertTrue(Arrays.equals(data, baos.toByteArray()),
                     "Compress/uncompress loop failed");
-
-
+    }
+    
+    public void testHalveAndUnhalve() throws Exception {
         //0.1. halve/unhalve
         assertEquals(0x03, QueryRouteTable.extendNibble((byte)0x03));
         assertEquals((byte)0xF9, QueryRouteTable.extendNibble((byte)0x09));
@@ -154,7 +148,9 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         byte[] small={(byte)0x17, (byte)0xF8};
         assertTrue(Arrays.equals(QueryRouteTable.halve(big), small));
         assertTrue(Arrays.equals(QueryRouteTable.unhalve(small), big));
-
+    }
+    
+    public void testEntries() throws Exception {
         QueryRouteTable qrt=new QueryRouteTable(1000);
         qrt.add("good book");
         assertEquals(2,entries(qrt));
@@ -162,33 +158,46 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertEquals(3,entries(qrt));
         qrt.add("bad");   //{good, book, bad}
         assertEquals(3,entries(qrt));
+        //{good, book, bad, SHA1}
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         assertEquals(4,entries(qrt));
 
 
         //1. Simple keyword tests (add, contains)
         //we have moved to 1-bit entry per hash, so either absent or present....
-        assertTrue(! qrt.contains(QueryRequest.createQuery("garbage",(byte)4)));
+        assertTrue(! qrt.contains(
+                QueryRequest.createQuery("garbage",(byte)4)));
         assertTrue(qrt.contains(QueryRequest.createQuery("bad", (byte)2)));
         assertTrue(qrt.contains(QueryRequest.createQuery("bad", (byte)3)));
         assertTrue(qrt.contains(QueryRequest.createQuery("bad", (byte)4)));
-        assertTrue(qrt.contains(QueryRequest.createQuery("good bad", (byte)2)));
-        assertTrue(! qrt.contains(QueryRequest.createQuery("good bd", (byte)3)));
+        assertTrue(qrt.contains(
+                QueryRequest.createQuery("good bad", (byte)2)));
+        assertTrue(! qrt.contains(
+                QueryRequest.createQuery("good bd", (byte)3)));
         assertTrue(qrt.contains(QueryRequest.createQuery(
                                                   "good bad book", (byte)3)));
         assertTrue(! qrt.contains(QueryRequest.createQuery(
                                                     "good bad bok", (byte)3)));
-        assertTrue(qrt.contains(QueryRequest.createQuery(
-                                                         HugeTestUtils.UNIQUE_SHA1)));
+        assertTrue(qrt.contains(
+                QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1)));
+    }
+    
+    public void testAddAll() throws Exception {
+        // set up initial qrt.
+        QueryRouteTable qrt = new QueryRouteTable(1000);
+        qrt.add("good book");
+        qrt.add("bad");
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000);
         assertEquals(0,entries(qrt2));
         qrt2.add("new");
         qrt2.add("book");
-        qrt2.addAll(qrt);     //{book, good, new, bad}
-        QueryRouteTable qrt3=new QueryRouteTable(1000);
+        qrt2.addAll(qrt);     //{book, good, new, bad, SHA1}
         assertEquals(5, entries(qrt2));
+
+        QueryRouteTable qrt3=new QueryRouteTable(1000);
         qrt3.add("book");
         qrt3.add("good");
         qrt3.add("new");
@@ -196,10 +205,18 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt3.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         assertEquals(qrt2,qrt3);
         assertEquals(qrt3,qrt2);
+    }
+    
+    public void testEncodeAndDecode() throws Exception {
+        // set up initial qrt.
+        QueryRouteTable qrt = new QueryRouteTable(1000);
+        qrt.add("good book");
+        qrt.add("bad");
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
 
         //3. encode-decode test--with compression
         //qrt={good, book, bad}
-        qrt2=new QueryRouteTable(1000);
+        QueryRouteTable qrt2=new QueryRouteTable(1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
@@ -242,20 +259,22 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         iter=(new QueryRouteTable(1000).encode(null).iterator()); //blank table
         assertInstanceof(ResetTableMessage.class, iter.next());
         assertTrue(! iter.hasNext());
-        
+    }
+    
+    public void testEncodeAndDecodeNoCompression() throws Exception {
         //4. encode-decode test--without compression.  (We know compression
         //won't work because the table is very small and filled with random 
         //bytes.)
-        qrt=new QueryRouteTable(10);
-        rand=new Random();
+        QueryRouteTable qrt=new QueryRouteTable(10);
+        Random rand=new Random();
         for (int i=0; i<getBitTableLength(qrt); i++) 
             if (rand.nextBoolean())
                 getBitTable(qrt).set(i);
         getBitTable(qrt).set(0);
-        qrt2=new QueryRouteTable(10);
+        QueryRouteTable qrt2=new QueryRouteTable(10);
         assertNotEquals(qrt2,qrt);
 
-        for (iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
+        for (Iterator iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
                 try { 
@@ -270,17 +289,19 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                 ((PatchTableMessage)m).getCompressor());
         }
         assertEquals(qrt2,(qrt));
-
+    }
+    
+    public void testEncodeAndDecodeMultiplePatches() throws Exception {
         //4b. Encode/decode tests with multiple patched messages.
-        qrt=new QueryRouteTable(5000);
-        rand=new Random();
+        QueryRouteTable qrt=new QueryRouteTable(5000);
+        Random rand=new Random();
         for (int i=0; i<getBitTableLength(qrt); i++)
             if (rand.nextBoolean())
                 getBitTable(qrt).set(i);
-        qrt2=new QueryRouteTable(5000);
+        QueryRouteTable qrt2=new QueryRouteTable(5000);
         assertNotEquals(qrt2,(qrt));
 
-        for (iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
+        for (Iterator iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
                 try { 
@@ -292,11 +313,52 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             }
         }
         assertEquals(qrt2,(qrt));
+        
+        //4c. Encode/decode tests with multiple patched messages, 
+        //    and a different infinity.
+        qrt = new QueryRouteTable(5000, (byte)15);
+        rand=new Random();
+        for (int i=0; i<getBitTableLength(qrt); i++)
+            if (rand.nextBoolean())
+                getBitTable(qrt).set(i);
+        qrt2 = new QueryRouteTable(5000);
+        assertNotEquals(qrt2,(qrt));
 
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
+            RouteTableMessage m=(RouteTableMessage)iter.next();
+            if(m instanceof PatchTableMessage) {
+                try { 
+                    qrt2.patch((PatchTableMessage)m); 
+                } catch (BadPacketException e) {
+                }
+            } else {
+                qrt2.reset((ResetTableMessage)m);
+            }
+        }
+        assertEquals(qrt2,(qrt));        
+    }
+    
+    public void testDifferentInfinities() throws Exception {
+        //Simple test -- make sure different infinities don't change
+        //equality.
+        QueryRouteTable qrt = new QueryRouteTable(5000, (byte)7);
+        qrt.add("good");
+        qrt.add("bad");
+        qrt.add("book");
+        
+        QueryRouteTable qrt2 = new QueryRouteTable(5000, (byte)15);
+        qrt2.add("good");
+        qrt2.add("bad");
+        qrt2.add("book");
+        
+        assertEquals(qrt, qrt2);
+    }
+    
+    public void testInterpolationAndExtrapolation() throws Exception {
         //5. Interpolation/extrapolation glass-box tests.  Remember that +1 is
         //added to everything!
-        qrt=new QueryRouteTable(4);  // 1 4 5 X ==> 2 6
-        qrt2=new QueryRouteTable(2);
+        QueryRouteTable qrt=new QueryRouteTable(4);  // 1 4 5 X ==> 2 6
+        QueryRouteTable qrt2=new QueryRouteTable(2);
         getBitTable(qrt).set(0);
         getBitTable(qrt).set(1);
         getBitTable(qrt).set(2);
@@ -340,12 +402,14 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertTrue(getBitTable(qrt2).get(2));
         assertTrue(!getBitTable(qrt2).get(3));
         assertEquals(3, entries(qrt2));
-
+    }
+    
+    public void testAddAllBlackBox() throws Exception {
         //5b. Black-box test for addAll.
-        qrt=new QueryRouteTable(128);
+        QueryRouteTable qrt=new QueryRouteTable(128);
         qrt.add("good book");
         qrt.add("bad");   //{good/1, book/1, bad/3}
-        qrt2=new QueryRouteTable(512);
+        QueryRouteTable qrt2=new QueryRouteTable(512);
         qrt2.addAll(qrt);
         assertTrue(qrt2.contains(QueryRequest.createQuery("bad", (byte)4)));
         assertTrue(qrt2.contains(QueryRequest.createQuery("good", (byte)4)));
@@ -353,9 +417,11 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt2.addAll(qrt);
         assertTrue(qrt2.contains(QueryRequest.createQuery("bad", (byte)4)));
         assertTrue(qrt2.contains(QueryRequest.createQuery("good", (byte)4)));
-
+    }
+    
+    public void testBadPackets() throws Exception {
         //6. Test sequence numbers.
-        qrt=new QueryRouteTable();   //a. wrong sequence after reset
+        QueryRouteTable qrt=new QueryRouteTable();   //a. wrong sequence after reset
         ResetTableMessage reset=null;
         PatchTableMessage patch=new PatchTableMessage((short)2, (short)2,
             PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
