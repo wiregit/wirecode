@@ -1120,9 +1120,9 @@ public final class SettingsManager {
 	
 		//Special case: if this is a modem, ensure that KEEP_ALIVE 
         //is sufficiently low.
-		if ( getConnectionSpeed()<=56 ) { //modem
-			setKeepAlive(Math.min(2, getKeepAlive()));
-		}
+		//if ( getConnectionSpeed()<=56 ) { //modem
+		//setKeepAlive(Math.min(2, getKeepAlive()));
+		//}
 	}
 
     /** 
