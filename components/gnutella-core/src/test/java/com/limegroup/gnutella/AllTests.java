@@ -22,6 +22,9 @@ public class AllTests {
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
+		suite.addTest(QueryReplyTest.suite());
+		suite.addTest(QueryRequestTest.suite());
+		suite.addTest(FileDescTest.suite());
 		suite.addTest(AlternateLocationTest.suite());
 		suite.addTest(AlternateLocationCollectionTest.suite());
 
