@@ -20,9 +20,9 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  */
 public class NIOHandshaker extends AbstractHandshaker {
 
-    private ByteBuffer _responseBuffer;
+    private WriteHeaderWrapper _responseBuffer;
 
-    private ByteBuffer _requestBuffer;
+    private WriteHeaderWrapper _requestBuffer;
 
     private HandshakeResponse _ourResponse;
 
@@ -62,7 +62,7 @@ public class NIOHandshaker extends AbstractHandshaker {
         super(conn, requestHeaders, responseHeaders);
         if(CONNECTION.isOutgoing())  {
             _requestBuffer = 
-                createBuffer(GNUTELLA_CONNECT_06, REQUEST_HEADERS);
+                new WriteHeaderWrapper(GNUTELLA_CONNECT_06, REQUEST_HEADERS);
             _writeState = new OutgoingRequestWriteState();
             _readState = new OutgoingResponseReadState();
         } else  {
@@ -71,35 +71,7 @@ public class NIOHandshaker extends AbstractHandshaker {
         }
     }
     
-    /**
-     * Creates a new byte buffer for the outgoing connection request.
-     * 
-     * @param headers the headers to include in the request
-     * @return a new byte buffer with the connect string and headers for the
-     *  outgoing connection request
-     */
-    private static ByteBuffer createBuffer(String statusLine, 
-        Properties headers)  {
-        StringBuffer sb = new StringBuffer();
-        Enumeration headerNames = headers.propertyNames();
-        while(headerNames.hasMoreElements())  {
-            String key = (String)headerNames.nextElement();
-            sb.append(key);
-            sb.append(": ");
-            sb.append(headers.getProperty(key));
-            sb.append(CRLF);
-        }
-        sb.append(CRLF);
-        // TODO: deal with Remote-IP header -- see old Connection sendHeaders
-        
-        byte[] connectBytes = (statusLine + CRLF).getBytes();
-        byte[] headerBytes = sb.toString().getBytes();
-        ByteBuffer buffer = 
-            ByteBuffer.allocate(connectBytes.length+headerBytes.length);
-        buffer.put(connectBytes);
-        buffer.put(headerBytes);
-        return buffer;
-    }
+
     
     
     /**
@@ -168,6 +140,7 @@ public class NIOHandshaker extends AbstractHandshaker {
         while(headersRead < MAX_HEADERS_TO_READ)  {
             HTTPHeader header = _headerReader.readHeader();
             if(_headerReader.headersComplete()) {
+                
                 _headers = HandshakeResponse.createResponse(HEADERS_READ);
                 // we're all done
                 return true;
@@ -180,6 +153,9 @@ public class NIOHandshaker extends AbstractHandshaker {
             // TODO: handle authentication -- see old Connection readHeaders
             // method
             handleRemoteIP(header);
+            
+            //System.out.println(header.getHeaderNameString()+": "+
+              //  header.getHeaderValueString());
             HEADERS_READ.put(header.getHeaderNameString(),
                 header.getHeaderValueString());
             headersRead++;
@@ -218,35 +194,39 @@ public class NIOHandshaker extends AbstractHandshaker {
         return !_writeState.hasRemaining();  
     }
     
+
     /**
-     * Helper method that writes the specified buffer to this connection's
-     * channel and adds the connection as a writer if the reading doesn't
-     * complete and it's not already added.
+     * Creates a new byte buffer for the outgoing connection request.
      * 
-     * @param buffer the <tt>ByteBuffer</tt> containing headers to write
-     * @return <tt>true</tt> if the entire buffer was successfully written,
-     *  otherwise <tt>false</tt>
-     * @throws IOException if there was an IO error writing to the buffer
+     * @param headers the headers to include in the request
+     * @return a new byte buffer with the connect string and headers for the
+     *  outgoing connection request
      */
-    private boolean writeBuffer(ByteBuffer buffer) throws IOException  {
-        //printBuffer(buffer);
-        buffer.flip();
-        CONNECTION.getSocket().getChannel().write(buffer);
-        if(buffer.hasRemaining())  {
-            
-            if(!CONNECTION.writeRegistered())  {
-                NIODispatcher.instance().addWriter(CONNECTION);
-            } 
-                
-            // we need to stay registered and keep writing
-            return false;
+    private static ByteBuffer createBuffer(String statusLine, 
+        Properties headers)  {
+        StringBuffer sb = new StringBuffer();
+        Enumeration headerNames = headers.propertyNames();
+        while(headerNames.hasMoreElements())  {
+            String key = (String)headerNames.nextElement();
+            sb.append(key);
+            sb.append(": ");
+            sb.append(headers.getProperty(key));
+            sb.append(CRLF);
         }
-        return true;       
-    }
+        sb.append(CRLF);
+        // TODO: deal with Remote-IP header -- see old Connection sendHeaders
+        
+        byte[] connectBytes = (statusLine + CRLF).getBytes();
+        byte[] headerBytes = sb.toString().getBytes();
+        ByteBuffer buffer = 
+            ByteBuffer.allocate(connectBytes.length+headerBytes.length);
+        buffer.put(connectBytes);
+        buffer.put(headerBytes);
+        return buffer;
+    }  
     
     private static void printBuffer(ByteBuffer buffer)  {
         buffer.flip();
-        //CharBuffer cb = buffer.asCharBuffer();
         for(int i=0; i<buffer.limit(); i++)  {
             System.out.print((char)buffer.get(i));
         }
@@ -310,7 +290,7 @@ public class NIOHandshaker extends AbstractHandshaker {
          * @throws IOException if an IO error occurs during writing
          */
         public HandshakeWriteState write() throws IOException {
-            if(writeBuffer(_requestBuffer))  {
+            if(_requestBuffer.writeBuffer())  {
                 return new OutgoingResponseWriteState();
             }
             
@@ -355,10 +335,11 @@ public class NIOHandshaker extends AbstractHandshaker {
                 //conclusion.  The values here are kind of a hack.
                 throw NoGnutellaOkException.UNRESOLVED_SERVER;
             }
-            if(!writeBuffer(_responseBuffer)) {
+            if(!_responseBuffer.writeBuffer()) {
                 _hasRemaining = true;
                 return this;
             }
+           
             _hasRemaining = false;
             _handshakeAttempts++;
             int code = _ourResponse.getStatusCode();
@@ -444,16 +425,28 @@ public class NIOHandshaker extends AbstractHandshaker {
     
     /**
      * Specialized class for reading the handshake response headers from an
-     * outgoing hanshake attempt.
+     * outgoing hanshake attempt.  This is the second step in an outgoing
+     * handshake.  First we write, then we read (this step), then we write.
      */
     private final class OutgoingResponseReadHeaderState 
         implements HandshakeReadState  {
         
+        /**
+         * Constant for the Gnutella connection response line sent back from
+         * the remote host.
+         */
+        private final String RESPONSE_LINE;
 
-        private String CONNECT_LINE;
-
-        OutgoingResponseReadHeaderState(String connectLine) throws IOException {
-            CONNECT_LINE = connectLine;        
+        /**
+         * Creates a new <tt>OutgoingResponseReadHeaderState</tt> with the 
+         * specified response line returned from the remote host.
+         * 
+         * @param responseLine
+         * @throws IOException
+         */
+        OutgoingResponseReadHeaderState(String responseLine) 
+            throws IOException {
+            RESPONSE_LINE = responseLine;        
         }
     
         /**
@@ -465,7 +458,7 @@ public class NIOHandshaker extends AbstractHandshaker {
          *  is complete
          */
         public HandshakeReadState read() throws IOException  {
-
+            //System.out.println("OutgoingResponseReadHeaderState::read");
             // First make sure we read all of the headers.
             if(readHeaders())  {
                 _readComplete = true;
@@ -476,7 +469,7 @@ public class NIOHandshaker extends AbstractHandshaker {
             // Terminate abnormally if we read something other than 200 or 401.
             HandshakeResponse theirResponse = 
                 HandshakeResponse.createResponse(
-                    CONNECT_LINE.substring(GNUTELLA_06.length()).trim(), 
+                    RESPONSE_LINE.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
             
             int code = theirResponse.getStatusCode();
@@ -497,7 +490,8 @@ public class NIOHandshaker extends AbstractHandshaker {
 
             Assert.that(_ourResponse != null, "null ourResponse");
             _responseBuffer = 
-                createBuffer(GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
+                new WriteHeaderWrapper(
+                    GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
                     _ourResponse.props());
             
             // Proceed to write our response if we're not already registered
@@ -605,14 +599,16 @@ public class NIOHandshaker extends AbstractHandshaker {
                 _ourResponse = 
                     RESPONSE_HEADERS.respond(_headers, false);  
                 _responseBuffer = 
-                    createBuffer(GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
+                    new WriteHeaderWrapper(
+                        GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
                         _ourResponse.props());
             }
                     
-            if(!writeBuffer(_responseBuffer)) {
+            if(!_responseBuffer.writeBuffer()) {
                 _hasRemaining = true;
                 return this;
             }
+
             _hasRemaining = false;
             _writeComplete = true;
             _handshakeAttempts++;
@@ -659,9 +655,10 @@ public class NIOHandshaker extends AbstractHandshaker {
             String connectLine;
             if(_ourResponse.getStatusCode() 
                == HandshakeResponse.UNAUTHORIZED_CODE){
+                   
+                // TODO: what happens if these calls fail??
                 connectLine = _headerReader.readConnect(USER_INPUT_WAIT_TIME);  
-                  readHeaders(USER_INPUT_WAIT_TIME); 
-                  _headers = HandshakeResponse.createResponse(HEADERS_READ);
+                readHeaders(USER_INPUT_WAIT_TIME); 
             } else {
                 connectLine = _headerReader.readConnect(); 
                 readHeaders();
@@ -677,35 +674,141 @@ public class NIOHandshaker extends AbstractHandshaker {
                         HEADERS_READ);
 
 
-              //Decide whether to proceed.
-              int code = _ourResponse.getStatusCode();
-              if(code == HandshakeResponse.OK) {
-                  if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
-                      // if it's the crawler, we throw an exception to make  
-                      // sure we correctly disconnect
-                      if(_isCrawler) {
-                          throw new IOException("crawler -- disconnect");
-                      }
+            //Decide whether to proceed.
+            int code = _ourResponse.getStatusCode();
+            if(code == HandshakeResponse.OK) {
+                if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
+                    // if it's the crawler, we throw an exception to make  
+                    // sure we correctly disconnect
+                    if(_isCrawler) {
+                        throw new IOException("crawler -- disconnect");
+                    }
                       
-                      _readComplete = true;
+                    _readComplete = true;
                       
-                      CONNECTION.handshakeComplete();
+                    CONNECTION.handshakeComplete();
                       
-                      //a) If we wrote 200 and they wrote 200 OK, stop normally.
-                      return this;
+                    //a) If we wrote 200 and they wrote 200 OK, stop normally.
+                    return this;
                   }
-              } else {
-                  Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
-                              "Response code: "+code);
-                  if(theirResponse.getStatusCode()==HandshakeResponse.OK)  {
-                      //b) If we wrote 401 and they wrote "200...", keep looping.
+            } else {
+                Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
+                            "Response code: "+code);
+                if(theirResponse.getStatusCode()==HandshakeResponse.OK)  {
+                    //b) If we wrote 401 and they wrote "200...", keep looping.
                       
-                      return this;
-                  }
-              }
-              //c) Terminate abnormally
-              throw NoGnutellaOkException.
-                  createServerUnknown(theirResponse.getStatusCode());            
+                    return this;
+                }
+            }
+            //c) Terminate abnormally
+            throw NoGnutellaOkException.
+                createServerUnknown(theirResponse.getStatusCode());            
+        }
+    }
+        
+    /**
+     * Helper class that takes care of recording written message headers and
+     * creating <tt>ByteBuffer</tt>s for writing.
+     */
+    private final class WriteHeaderWrapper {
+        
+        /**
+         * Variable specifying whether or not the <tt>ByteBuffer</tt> has been
+         * flipped.
+         */
+        private boolean _flipped;
+    
+        /**
+         * Constant for the headers to write.  This is stored to enable the 
+         * recording of headers once they are actually written to the network.
+         */
+        private final Properties HEADERS;
+
+        /**
+         * Constant for the <tt>ByteBuffer</tt> instance containing all of the
+         * bytes to be written, both from the message request or response line
+         * and from the headers.
+         */    
+        private final ByteBuffer BUFFER;
+         
+        /**
+         * @param statusLine the Gnutella request or response message to write
+         * @param headers the Gnutella 0.6 (HTTP style) message headers to 
+         *  write
+         */
+        public WriteHeaderWrapper(String statusLine, Properties headers) {
+            HEADERS = headers;
+            BUFFER = createBuffer(statusLine, headers);
+        }
+        
+        /**
+         * Make sure we only flip the write buffer once.
+         */
+        public void flip() {
+            if(!_flipped) {
+                BUFFER.flip();
             }
         }
+
+        /**
+         * Records the fact that the headers for this wrapper have been written.
+         * This MUST only be called once all headers have actually been written
+         * to the network.
+         */
+        void recordHeaderWrites() {
+            Enumeration headers = HEADERS.keys();
+            while(headers.hasMoreElements()) {
+                String key = (String)headers.nextElement();
+                String value = (String)HEADERS.getProperty(key);
+            
+                HEADERS_WRITTEN.put(key, value);
+            }
+        }
+
+        /**
+         * Helper method that writes the specified buffer to this connection's
+         * channel and adds the connection as a writer if the reading doesn't
+         * complete and it's not already added.
+         * 
+         * @param buffer the <tt>ByteBuffer</tt> containing headers to write
+         * @return <tt>true</tt> if the entire buffer was successfully written,
+         *  otherwise <tt>false</tt>
+         * @throws IOException if there was an IO error writing to the buffer
+         */
+        private boolean writeBuffer() throws IOException  {
+
+            // Make sure we flip the buffer for writing if we haven't already
+            flip();
+        
+            //printBuffer(buffer);
+        
+            CONNECTION.getSocket().getChannel().write(BUFFER);
+            if(BUFFER.hasRemaining())  {
+            
+                if(!CONNECTION.writeRegistered())  {
+                    NIODispatcher.instance().addWriter(CONNECTION);
+                } 
+                
+                // we need to stay registered and keep writing
+                return false;
+            }
+
+            
+            // Make sure all written headers are recorded
+            recordHeaderWrites();
+
+            return true;       
+        }
+        /**
+         * Accessor for the <tt>ByteBuffer</tt> instance used for writing out
+         * headers.
+         *
+         * @return the <tt>ByteBuffer</tt> containing the message and message
+         *  headers to be written to the network
+         */
+        //public ByteBuffer getByteBuffer() {
+          //  return BUFFER;
+            
+        //}      
+    }
 }
