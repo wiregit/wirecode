@@ -21,9 +21,7 @@ public class FileManager{
     /** the total size of all files, in bytes. 
      *  INVARIANT: _size=sum of all size of the elements of _files */
     private int _size;                  
-    /** the total number of files.  INVARIANT: _numFiles==number of 
-     *  elements of _files that are not null. */
-    private int _numFiles;      
+
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in the shared folder with the shareable extension. 
@@ -37,7 +35,6 @@ public class FileManager{
 
     public FileManager() {               /* the constructor initializes */
         _size = 0;                       /* all the provate variables */
-        _numFiles = 0;
         _files = new ArrayList();
         _extensions = new String[0];
 
@@ -52,11 +49,10 @@ public class FileManager{
 
     /** Returns the size of all files, in <b>bytes</b>. */
     public int getSize() {return _size;}
-    public int getNumFiles() {return _numFiles;}
+    public int getNumFiles() {return _files.size();}//_numFiles;}
 
     public synchronized void reset() {
         _size = 0;
-        _numFiles = 0;
         _files = new ArrayList();
         // _extensions = new String[0];
     }
@@ -103,7 +99,7 @@ public class FileManager{
         return response;
     }
 
-    public void setExtensions(String str) {
+    public synchronized void setExtensions(String str) {
         /* recieves a semi-colon separated list of extensions */
         _extensions =  HTTPUtil.stringSplit(str, ';');
         // int length = _extensions.length;
@@ -146,8 +142,7 @@ public class FileManager{
         if (hasExtension(name)) {
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
-            _files.add(new FileDesc(_files.size(), name, path,  n));
-            _numFiles++;
+            _files.add(new FileDesc(_files.size(), name, path, n));
         }
     }
 
@@ -204,7 +199,6 @@ public class FileManager{
             //Aha, it's shared. Unshare it by nulling it out.
             if (file.equals(candidate)) {
                 _files.set(i,null);
-                _numFiles--;
                 _size-=fd._size;
                 return true;  //No more files in list will match this.
             }                
@@ -219,6 +213,7 @@ public class FileManager{
      */
     public synchronized void addDirectories(String dir_names) {
 		
+		_files.clear();
 		dir_names.trim();
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
 
