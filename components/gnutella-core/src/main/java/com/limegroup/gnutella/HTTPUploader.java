@@ -10,8 +10,33 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.util.Date;
+import com.sun.java.util.collections.*;
 
 public class HTTPUploader implements Runnable {
+    /**
+     * The list of all files that we've tried unsuccessfully to upload
+     * via pushes.  (Here successful means we were able to connect.
+     * It does not mean the file was actually transferred.) If we get
+     * another push request from one of these hosts (e.g., because the
+     * host is firewalled and sends multiple push packets) we will not
+     * try again.  
+     *
+     * INVARIANT: for all i>j, ! failedPushes[i].before(failedPushes[j])
+     * 
+     * This is not really the best place to store the data, but it is
+     * the most appropriate place until HTTPManager is persistent.  
+     * Besides, it's consistent with the push requests stored in
+     * HTTPDownloader.
+     */
+    private static List /* of PushRequestedFile */ failedPushes=
+        Collections.synchronizedList(new LinkedList());
+    /** The maximum time in SECONDS after an unsuccessful push until we will
+     *  try the push again.  This should be larger than the 15+4*30=135 sec
+     *  window in which Gnotella resends pushes by default */
+    private static final int PUSH_INVALIDATE_TIME=60*5;  //5 minutes
+
+
     //////////// Initialized in Constructors ///////////
     public static final int NOT_CONNECTED = 0;
     public static final int CONNECTED = 1;
@@ -113,10 +138,15 @@ public class HTTPUploader implements Runnable {
      * The call to run will actually establish the connection, send
      * GIV, wait for GET, and send OK followed by data.
      *
+     * If we tried to push this file earlier but could not connect,
+     * this is put in the ERROR state.  Subsequently calling run
+     * will cause the method to exit immediately.  The GUI will
+     * never be notified.
+     *
      * @param host the host to push the file to
      * @param port the port to contact that host on
      * @param index the index of the file to push
-     * @param myClientGUID my client ID (given to remote host as
+     * @param guidString my client ID (given to remote host as
      *  a crude form of authentication) as a hex String representation
      *  as given by GUID.toHexString
      * @param m my manager.  (used for callbacks, etc.)
@@ -137,6 +167,33 @@ public class HTTPUploader implements Runnable {
         _amountRead = 0;
         _priorAmountRead = 0;
         _clientGUID=guidString;
+
+        synchronized (failedPushes) {
+            //First remove all files that were pushed more than a few
+            //minutes ago.
+            Date time=new Date();
+            time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
+            Iterator iter=failedPushes.iterator();
+            while (iter.hasNext()) {
+                PushedFile pf=(PushedFile)iter.next();
+                if (pf.before(time))
+                    iter.remove();
+            }
+
+            //Now see if we tried unsuccessfully to push this file
+            //earlier.  If so put this in the error state.  Note that
+            //this could be integrated with the loop above, but the
+            //savings aren't worth it.
+            iter=failedPushes.iterator();
+            PushedFile thisFile=new PushedFile(_host, _port, _index);
+            while (iter.hasNext()) {
+                PushedFile pf=(PushedFile)iter.next();
+                if (pf.equals(thisFile)) {
+                    _state = ERROR;
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -218,7 +275,7 @@ public class HTTPUploader implements Runnable {
         try {                            /* look for the file */
             _fdesc = (FileDesc)_fmanager._files.get(_index);
         }                                /* if its not found... */
-        catch (ArrayIndexOutOfBoundsException e) {
+        catch (IndexOutOfBoundsException e) {
             throw new FileNotFoundException();
         }
 
@@ -325,10 +382,21 @@ public class HTTPUploader implements Runnable {
 
         try {
             _callback.addUpload(this);
+            //1. For push requests only, establish the connection.
             if (! _isServer) {
-                connect();
+                try {
+                    connect();
+                } catch (IOException e) {
+                    //If we couldn't connect, make sure we don't try to push
+                    //this file again in the future.
+                    synchronized (failedPushes) {
+                        failedPushes.add(new PushedFile(_host, _port, _index));
+                    }
+                    throw e;
+                }
                 _state = CONNECTED;
             }
+            //2. Actually do the transfer.
             doUpload(); //sends headers via writeHeader
             _state = COMPLETE;
         } catch (IOException e) {
@@ -467,5 +535,87 @@ public class HTTPUploader implements Runnable {
 
     public int getState() {
         return _state;
+    }
+
+    ///** Unit test for timestamp stuff. */
+    /*
+    public static void main(String args[]) {
+        ConnectionManager manager=new ConnectionManager(6344);
+        FileManager.getFileManager().addDirectories(".");
+        manager.setActivityCallback(new Main());
+        HTTPUploader uploader;
+
+        //Try failed upload #1.
+        System.out.println("Trying upload to non-existent host.  Please wait...");
+        uploader=new HTTPUploader("bogus.host", 6347, 0, 
+                                  "bogus client string", manager);
+        Assert.that(uploader.getState()!=ERROR);
+        uploader.run();
+        Assert.that(uploader.getState()==ERROR);
+
+        //Try uploading same file again.  This should not even bother connecting.
+        System.out.println("Trying upload again...");
+        uploader=new HTTPUploader("bogus.host", 6347, 0, 
+                                  "bogus client string", manager);
+        Assert.that(uploader.getState()==ERROR);
+
+        //Wait the expiration time and try again.
+        int n=PUSH_INVALIDATE_TIME+2;
+        System.out.println("Waiting for a "+n+"seconds...");
+        try {
+            Thread.currentThread().sleep(n*1000);
+        } catch (InterruptedException e) { }
+        
+        System.out.println("  ...and checking state.");
+        uploader=new HTTPUploader("bogus.host", 6347, 0, 
+                                  "bogus client string", manager);
+        Assert.that(uploader.getState()!=ERROR);        
+    }
+    */
+}
+
+
+/** A file that we requested via a push message. */
+class PushedFile {
+    String host;
+    int port;
+    int index;
+    Date time;
+
+    /**
+     * @param host the host to connect to, in symbolic form or 
+     *  dotted-quad notation
+     * @param port the port to connect to on host
+     * @param index the index of the file we are trying to GIV    
+     */
+    public PushedFile(String host, int port, int index) {
+        this.host=host;
+        this.port=port;
+        this.index=index;
+        this.time=new Date();
+    }
+
+    /** Returns true if this request was made before the given time. */
+    public boolean before(Date time) {
+        return this.time.before(time);
+    }
+
+    public boolean equals(Object o) {
+        if (! (o instanceof PushedFile))
+            return false;
+
+        PushedFile pf=(PushedFile)o;
+        return this.host.equals(pf.host) 
+            && this.port==pf.port
+            && this.index==pf.index;
+    }
+
+    public int hashCode() {
+        //This is good enough
+        return host.hashCode()+index;
+    }
+
+    public String toString() {
+        return "<"+host+", "+index+", "+index+">";
     }
 }
