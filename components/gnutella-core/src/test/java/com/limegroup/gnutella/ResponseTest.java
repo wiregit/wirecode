@@ -45,8 +45,13 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 	 */
 	public void testLegacyResponseUnitTest() throws Exception {
         Response r = new Response(3,4096,"A.mp3");
-        assertEquals("A.mp3", r.getName());
-        assertNull(r.getDocument());
+        int nameSize = r.getNameBytesSize();
+		assertEquals(5, nameSize);
+        byte[] nameBytes = r.getNameBytes();
+		assertEquals(65, nameBytes[0]);
+		byte[] metaBytes = r.getMetaBytes();
+		assertEquals("Spurios meta", 0, metaBytes.length);
+		assertEquals("Meta size not right", 0, r.getMetaBytesSize());
 
         //
         //Response r2 = new Response("",999,4,"blah.txt");
@@ -83,7 +88,10 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         }
 		*/
         //Tests for checking new LimeXMLDocument code added.
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+
         String xml1 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Speech\" bitrate=\"192\"></audio></audios>";
+        
         String xml2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Speech\" bitrate=\"150\"></audio></audios>";
         
         //create documents.
@@ -95,6 +103,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         Response rb = new Response(13,232,"def2.txt",d2);
 		assertEquals("problem with doc constructor", d1, ra.getDocument());
 		assertEquals("problem with doc constructor", d2, rb.getDocument());
+		assertEquals("mismatched strings"+ra.getMetadata()+", "+xml1, xml1, ra.getMetadata());
+		assertEquals("mismatched strings"+rb.getMetadata()+", "+xml2, xml2, rb.getMetadata());		
 	}
 	
 	/**
@@ -569,7 +579,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         // See if we can correctly read the GGEP block.
         baos.flush();
         byte[] output = baos.toByteArray();
-        GGEP alt = new GGEP(output, 0, null);
+        GGEP[] blocks = GGEP.read(output, 0);
+        assertEquals("wrong ggep size", 1, blocks.length);
+        GGEP alt = blocks[0];
         Set headers = alt.getHeaders();
         assertEquals("wrong size", 1, headers.size());
         assertEquals("wrong header", "ALT", headers.iterator().next());
@@ -678,7 +690,10 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
     
     private Response.GGEPContainer getGGEP(GGEP info) throws Exception {
         Class c = PrivilegedAccessor.getClass(Response.class, "GGEPUtil");
+
+        Set blocks = new HashSet();
+        blocks.add(info);
         return (Response.GGEPContainer)PrivilegedAccessor.invokeMethod(
-            c, "getGGEP", new Object[] { info } );
+            c, "getGGEP", new Object[] { blocks }, new Class[] {Set.class} );
     }    
 }

@@ -307,10 +307,10 @@ public class RequeryDownloadTest
         return (Response)PrivilegedAccessor.invokeConstructor(
             Response.class, new Object[] {
                 new Long(index), new Long(size), name,
-                urns, null, null, null },
+                null, urns, null, null, null },
             new Class[] {
                 Long.TYPE, Long.TYPE, String.class,
-                Set.class, LimeXMLDocument.class,
+                String.class, Set.class, LimeXMLDocument.class,
                 gc, byte[].class } );
     }
 }

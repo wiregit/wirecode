@@ -100,7 +100,6 @@ public abstract class ClientSideTestCase
                                                          "getActivityCallback",
                                                          null);
         rs=new RouterService(callback);
-        rs.preGuiInit();
         assertEquals("unexpected port",
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         rs.start();
