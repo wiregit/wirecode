@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.downloader;
 
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.*;
 
 /** Encapsulates important details about a auto download....
  */
-class AutoDownloadDetails {
+public class AutoDownloadDetails {
     // the query associated with this search
     private String query = null;
     // the rich query associated with this search
