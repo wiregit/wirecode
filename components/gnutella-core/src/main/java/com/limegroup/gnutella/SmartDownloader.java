@@ -70,99 +70,122 @@ public class SmartDownloader extends HTTPDownloader {
 	}
 
 
+	private void tryHost() {
 
-	/* probably want to redefine doDownload() */
-	public void tryHost() {
-
-		int numFiles = _remoteFiles.length;  // the number of possible files;
 		RemoteFileDesc file;
+		int size;
 
-		int index;
-		String filename;
-		int port;
-		String host;
-		
-		int counter = 0;
-
-		while( _keepTrying ) {
-
-			if ( _qDownloads.isEmpty() )
-				break;
+		while (_keepTrying) {
 			
+			size = _qDownloads.capacity();
+			
+			if (size == 0)
+				break;
+
 			print();
 
-			/* get each possible file and host */
-			file = (RemoteFileDesc)_qDownloads.extractMax();
-
-			index  = file.getIndex();
-			filename = file.getFileName();
-			host = file.getHost();
-			port = file.getPort();
-			
-			// try to connect...
-			String furl = "/get/" + String.valueOf(index) + "/" + filename;
-			String protocal = "http";
-			URLConnection conn = null;
-			try {
+			for (int i= 0; i < size; i++) {
 				
-				URL url = new URL(protocal, host, port, furl);
-				conn = url.openConnection();
-				conn.connect();
-			}
-			// see if there is an error when we are trying to connect
-			catch (IOException e) {
-				if (conn == null) 
-  					break;  // a safety check
-				String str = conn.getHeaderField(0);
-				// if there is, check to see if the server is busy
-				if (str != null && (str.indexOf(" 503 " ) > 0) ) {
-					// if the server is busy, we would want to 
-					// insert this host back into the queue
-					int num = file.getNumAttempts();
-					if (num != 1) {
-						file.setNumAttempts(num--);
-						_qDownloads.insert(file);
+				// get a host (file) from the queue
+				file = (RemoteFileDesc)_qDownloads.extractMax();
+				// 1. try to connect
+				if ( tryConnect(file) ) {
+					// 2. try to download
+					if ( tryDownload(file) ) {
+						_keepTrying = false;;
+						break;
 					}
 				}
-
+				
 			}
-
-			try{
-				// try to open an input stream to read the file
-				_istream = conn.getInputStream();
-				_br = new ByteReader(_istream);
-
-				// if download fails, it should throw an IOException
-				super.doDownload();  
-				_state = COMPLETE;
-				break;
-			}
-			catch (IOException ioe) {
-				String str = ioe.getMessage();
-				String try_again = "Try Again Later"; 
-				if (try_again.equals(str) ) {
-					int num = file.getNumAttempts();
-					if (num != 1) {
-						file.setNumAttempts(num--);
-						_qDownloads.insert(file);
-					}
+			
+			if (_keepTrying) {
+				// wait..
+				try {
+					Thread.sleep(calculateWait());
+				} catch (InterruptedException e) {
 				}
 			}
-			catch (Exception e) {
-				// there was an error, then the download failed.
-				// increase the index, and try the next file
-				counter++;
-				_amountRead = 0;
-				_sizeOfFile = -1;
+
+		}
+
+	}
+
+	private int calculateWait() {
+		return 10000;
+	}
+
+
+	// returns a boolean for whether or not the file
+	// was downloaded succesfully
+	private boolean tryDownload(RemoteFileDesc file) {
+		try {
+			// attempt the download
+			super.doDownload();
+		} catch (IOException ioe) {
+			String msg = ioe.getMessage();
+			String try_again = "Try Again Later";
+			if (try_again.equals(msg)) {
+				// if it fails becasue the server is busy				
+				// then, insert the file back into the queue
+				file.incrementNumAttempts();
+				_qDownloads.insert(file);
 			}
-
-		} // end of while loop
-
+			return false;
+		} catch (Exception e) {
+			// if it failed for some other resaon
+			// re-initialize the download values.
+			_amountRead = 0;
+			_sizeOfFile = -1;
+			return false;
+		}
 		if (_state != COMPLETE) {
 			_state = ERROR;
 			_stateString = "Error";
+			return false;
 		}
+		return true;
+		
+	}
+
+
+	private boolean tryConnect(RemoteFileDesc file) {
+		/* the information needed for establishing a connection */
+		int index  = file.getIndex();
+		String filename = file.getFileName();
+		String host = file.getHost();
+		int port = file.getPort();
+		/* try to connect... */
+		String furl = "/get/" + String.valueOf(index) + "/" + filename;
+		String protocal = "http";
+		URLConnection conn = null;
+		try {
+			URL url = new URL(protocal, host, port, furl);
+			conn = url.openConnection();
+			conn.connect();
+		}
+		catch (IOException e) {
+			if (conn == null) 
+				return false;
+			// a safety check
+			String str = conn.getHeaderField(0);
+			// if there is, check to see if the server is busy
+			if (str != null && (str.indexOf(" 503 " ) > 0) ) {
+				// if busy inset back into the loop
+				file.incrementNumAttempts();
+				_qDownloads.insert(file);
 				
+			}
+			return false;
+		}
+		try {
+			// try to open an input stream to read the file
+			_istream = conn.getInputStream();
+			_br = new ByteReader(_istream);
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 
 
@@ -172,7 +195,7 @@ public class SmartDownloader extends HTTPDownloader {
 	 * variable, that will break  us out of the while loop
 	 * in the tryHost method
 	 */
-	public void shutdown() {
+		public void shutdown() {
 		_keepTrying = false;
 		super.shutdown();
 	}

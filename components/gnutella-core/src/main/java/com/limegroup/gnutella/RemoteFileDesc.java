@@ -32,20 +32,19 @@ public class RemoteFileDesc implements Comparable {
 	 */
 
 	/* speed priorities */
-	public static final int PRIVATE_MODEM_PRIORITY       = 1;
-	public static final int PRIVATE_ISDN_PRIORITY        = 2;
-	public static final int PRIVATE_CABLE_PRIORITY       = 3;
-	public static final int PRIVATE_T1_PRIORITY          = 4;
-	public static final int PRIVATE_T3_PRIORITY          = 5;
+	public static final int PRIVATE_MODEM_PRIORITY       = 10;
+	public static final int PRIVATE_ISDN_PRIORITY        = 9;
+	public static final int PRIVATE_CABLE_PRIORITY       = 8;
+	public static final int PRIVATE_T1_PRIORITY          = 7;
+	public static final int PRIVATE_T3_PRIORITY          = 6;
 
-	public static final int PUBLIC_MODEM_PRIORITY        = 6;
-	public static final int PUBLIC_ISDN_PRIORITY         = 7;
-	public static final int PUBLIC_CABLE_PRIORITY        = 8;
-	public static final int PUBLIC_T1_PRIORITY           = 9;
-	public static final int PUBLIC_T3_PRIORITY           = 10;
+	public static final int PUBLIC_MODEM_PRIORITY        = 5;
+	public static final int PUBLIC_ISDN_PRIORITY         = 4;
+	public static final int PUBLIC_CABLE_PRIORITY        = 3;
+	public static final int PUBLIC_T1_PRIORITY           = 2;
+	public static final int PUBLIC_T3_PRIORITY           = 1;
 
 	/* how many times a download will be attempted */
-	public static final int MAX_NUM_ATTEMPTS             = 5;
 
 	private String _host;
 	private int _port;
@@ -56,6 +55,7 @@ public class RemoteFileDesc implements Comparable {
 	private int _size;
 
 	private int _priority;  
+	private int _speed_priority;  
 	private int _numAttempts;  
 
 	
@@ -71,7 +71,7 @@ public class RemoteFileDesc implements Comparable {
 	public RemoteFileDesc(String host, int port, int index, String filename,
 						  int size, byte[] clientGUID, int speed) {
 		
-		_numAttempts = MAX_NUM_ATTEMPTS;
+		_numAttempts = 0;
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -79,14 +79,15 @@ public class RemoteFileDesc implements Comparable {
 		_filename = filename;
 		_size = size;
 		_clientGUID = clientGUID;
+		calculateSpeedPriority();
 		calculatePriority();
 	}
 
 	public void print() {
-		System.out.println(_filename);
-		System.out.println("    _priority:    " + _priority);
-		System.out.println("    _numAttempts: " + _numAttempts);
-		System.out.println("    _speed      : " + _speed);
+		//  System.out.println(_filename);
+//  		System.out.println("    _priority:    " + _priority);
+//  		System.out.println("    _numAttempts: " + _numAttempts);
+//  		System.out.println("    _speed      : " + _speed);
 
 	}
 
@@ -97,20 +98,14 @@ public class RemoteFileDesc implements Comparable {
 			rdf2 = (RemoteFileDesc)obj2;
 		}
 		catch (ClassCastException e) {
+			// System.out.println("Class cast exception");
 			return 0;  // probably want to go ahead and throw this?
 		}
-		
-		if ( _numAttempts < rdf2.getNumAttempts() ) {
-			return -1;
-		}
-		else if ( _numAttempts > rdf2.getNumAttempts() ) {
-			return 1;
-		}
 
-		if ( _priority < rdf2.getPriority() ) {
+		if ( calculatePriority() > rdf2.calculatePriority() ) {
 			return -1;
 		}
-		else if ( _priority > rdf2.getPriority() ) {
+		else if ( calculatePriority() < rdf2.calculatePriority() ) {
 			return 1;
 		}
 
@@ -141,53 +136,59 @@ public class RemoteFileDesc implements Comparable {
 
 	public int getNumAttempts() {return _numAttempts;}
 	public void setNumAttempts(int n) {_numAttempts = n;}
+	public void incrementNumAttempts() {_numAttempts++;}
 
 	public boolean isPrivate() {
-		System.out.println("host: " + _host);
+		// System.out.println("host: " + _host);
 		if (_host == null) return true;
 		Endpoint e = new Endpoint(_host, _port);
 		return e.isPrivateAddress();
 	}
 
 	public int calculatePriority() {
+		_priority = _speed_priority + (_numAttempts * 10) ;
+		return _priority;
+	}
+
+	public int calculateSpeedPriority() {
 
 		if (isPrivate()) {
 			if (_speed <= GUIStyles.MODEM_SPEED_INT) {
-				_priority = PRIVATE_MODEM_PRIORITY;
+				_speed_priority = PRIVATE_MODEM_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.ISDN_SPEED_INT) {
-				_priority = PRIVATE_ISDN_PRIORITY;
+				_speed_priority = PRIVATE_ISDN_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.CABLE_SPEED_INT) {
-				_priority = PRIVATE_CABLE_PRIORITY;
+				_speed_priority = PRIVATE_CABLE_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.T1_SPEED_INT) {
-				_priority = PRIVATE_T1_PRIORITY;
+				_speed_priority = PRIVATE_T1_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.T3_SPEED_INT) {
-				_priority = PRIVATE_T3_PRIORITY;
+				_speed_priority = PRIVATE_T3_PRIORITY;
 			}
 		}
 		
 		else {
 			if (_speed <= GUIStyles.MODEM_SPEED_INT) {
-				_priority = PUBLIC_MODEM_PRIORITY;
+				_speed_priority = PUBLIC_MODEM_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.ISDN_SPEED_INT) {
-				_priority = PUBLIC_ISDN_PRIORITY;
+				_speed_priority = PUBLIC_ISDN_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.CABLE_SPEED_INT) {
-				_priority = PUBLIC_CABLE_PRIORITY;
+				_speed_priority = PUBLIC_CABLE_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.T1_SPEED_INT) {
-				_priority = PUBLIC_T1_PRIORITY;
+				_speed_priority = PUBLIC_T1_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.T3_SPEED_INT) {
-				_priority = PUBLIC_T3_PRIORITY;
+				_speed_priority = PUBLIC_T3_PRIORITY;
 			}
 		}
 		
-		return _priority;
+		return _speed_priority;
 	}
 	
 	public static class RemoteFileDescComparator 
@@ -196,30 +197,27 @@ public class RemoteFileDesc implements Comparable {
 		public RemoteFileDescComparator() {}
 
 		public int compare(Object obj1, Object obj2) {
-			//  	RemoteFileDesc rdf1;
-//  				RemoteFileDesc rdf2;
-//  			try {
-//  				rdf1 = (RemoteFileDesc)obj1;
-//  				rdf2 = (RemoteFileDesc)obj2;
-//  			}
-//  			catch (ClassCastException e) {
-//  				return 0;  // probably want to go ahead and throw this?
-//  			}
 
-//  		    if (!rdf1.isPrivate() && rdf2.isPrivate())
-//  				return -1;
-//  			else if (rdf1.isPrivate() && !rdf2.isPrivate())
-//  				return 1;
-
-//  			int speed1 = rdf1.getSpeed();
-//  			int speed2 = rdf2.getSpeed();
+			RemoteFileDesc rdf1;
+			RemoteFileDesc rdf2;
+			try {
+				rdf1 = (RemoteFileDesc)obj1;
+				rdf2 = (RemoteFileDesc)obj2;
+			}
+			catch (ClassCastException e) {
+				// System.out.println("Class cast exception");
+			return 0;  // probably want to go ahead and throw this?
+			}
 			
-//  			if (speed1 < speed2) 
-//  				return -1;
-//  			else if (speed1 > speed2)
-//  				return 1;
-//  			else 
-				return 0;
+			if ( rdf1.calculatePriority() > rdf2.calculatePriority() ) {
+				return -1;
+			}
+			else if ( rdf1.calculatePriority() < rdf2.calculatePriority() ) {
+				return 1;
+			}
+			
+			return 0;  // they are the same
+
 		}
 	}
 
