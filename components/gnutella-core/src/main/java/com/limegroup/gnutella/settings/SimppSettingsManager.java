@@ -24,7 +24,7 @@ public class SimppSettingsManager {
      * them, false otherwise
      */
     private boolean _isDefault;
-    
+     
     /**
      *  The instance
      */
@@ -40,7 +40,7 @@ public class SimppSettingsManager {
     }
 
     //instance 
-    public static SimppSettingsManager instance() {
+    public static synchronized SimppSettingsManager instance() {
         if(INSTANCE == null)
             INSTANCE = new SimppSettingsManager();
         return INSTANCE;
@@ -62,7 +62,7 @@ public class SimppSettingsManager {
         try {
             _simppProps.load(bais);
         } catch(IOException iox) {
-            ErrorService.error(iox);//huh? IOEx with a BAIS frm String?
+            ErrorService.error(iox);//huh? IOEx with a BAIS from String?
         }
         if(activate)
             activateSimppSettings();
@@ -74,6 +74,8 @@ public class SimppSettingsManager {
      */
     public void activateSimppSettings() {
         System.out.println("activating new settings");
+        if(!_isDefault) //we are already activated...
+            return;
         synchronized(_simppProps) {
             Set set = _simppProps.entrySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
@@ -145,14 +147,10 @@ public class SimppSettingsManager {
         return rawSetting.substring(0,index);
     }
     
-    private String getSettingsClass(String rawSetting) {
-        int i = rawSetting.indexOf("{");
-        int j = rawSetting.indexOf("}");
-        if(i < 0 || j < 0) //we have a problem, the simpp message has bad format
-            return null;
-        return rawSetting.substring(i+1, j);
-    }
 
+    /**
+     * @param rawSetting has the form SETTING_NAME{setting_key} = setting_value
+     */
     private Setting loadSetting(String rawSetting) {
         System.out.println("Sumeet: loading setting");
         String fullname = getSettingsClass(rawSetting);
@@ -175,6 +173,16 @@ public class SimppSettingsManager {
         } catch(IllegalAccessException iax) {
             return null;
         }
+    }
+
+   private String getSettingsClass(String rawSetting) {
+        int i = rawSetting.indexOf("{");
+        int j = rawSetting.indexOf("}");
+        if(i < 0 || j < 0) //we have a problem, the simpp message has bad format
+            return null;
+        String settingKey = rawSetting.substring(i+1, j);
+        //the class from the settingkey from the simpp-settings properties
+        return SimppProps.instance().getClassNameForKey(settingKey); 
     }
 
 }
