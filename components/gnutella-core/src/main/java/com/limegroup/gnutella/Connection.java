@@ -212,7 +212,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof PingReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(!outConnection==null){ //we have a place to route it
+		    if(outConnection!=null){ //we have a place to route it
 			if (outConnection.equals(this)){ //I am the destination
 			    manager.catcher.spy(m);//update hostcatcher
 			    //TODO2: So what else do we have to do here??
@@ -247,7 +247,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(!outConnection==null){ //we have a place to route it
+		    if(outConnection!=null){ //we have a place to route it
 			pushRouteTable.put(this, m);//first store this in pushRouteTable
 			if (outConnection.equals(this)){ //I am the destination
 			    //TODO1: This needs to be interfaced with Rob
@@ -269,7 +269,7 @@ public class Connection implements Runnable {
 		    Connection nextHost = pushRouteTable.get(m);
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
-		    if (! nextHost==null){//we have a place to route this message
+		    if (nextHost!=null){//we have a place to route this message
 			nextHost.send(m); //send the message to appropriate host
 		    }
 		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
