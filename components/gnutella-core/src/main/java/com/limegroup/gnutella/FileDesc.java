@@ -162,7 +162,7 @@ public class FileDesc implements AlternateLocationCollector {
 		Set urns = UrnCache.instance().getUrns(file);
 		if(urns.size() == 0) {			
 			// expensive the first time a new file is added
-			urns = Collections.unmodifiableSet(calculateUrns(file));
+			urns = calculateUrns(file);
 			UrnCache.instance().addUrns(file, urns);
 		}
         return urns;
