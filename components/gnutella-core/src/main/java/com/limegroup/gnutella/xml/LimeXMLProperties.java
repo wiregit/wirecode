@@ -4,6 +4,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 
 /** 
  * This class manages the properties needed by the 
@@ -361,8 +362,12 @@ public class LimeXMLProperties
         String limeHome = System.getProperty("LIME_HOME"); 
         if(limeHome == null || limeHome.trim().equals(""))
         {
-            return SettingsManager.instance().getPath() + 
-                                                    "lib" + File.separator;
+            File libDir = new File(CommonUtils.getCurrentDirectory(), "lib");
+            String stringPath = libDir.getAbsolutePath();
+            if(!stringPath.endsWith(File.separator)) {
+                stringPath = stringPath + File.separator;
+            }
+            return stringPath;
         }
         else
         {
