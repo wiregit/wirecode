@@ -83,8 +83,7 @@ public class GGEPTest extends TestCase {
         }
     }
 
-    // tests normal behavior of the byte[] constructor
-    public void testByteArrayConstructor1() {
+    public void testStaticReadMethod() {
         byte[] bytes = new byte[24];
         bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
         bytes[1] = (byte)0x05;
@@ -111,7 +110,95 @@ public class GGEPTest extends TestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
         try {
-            GGEP temp = new GGEP(bytes,0);
+            GGEP[] temp = GGEP.read(bytes,0);
+            Assert.assertTrue("read() test - WRONG SIZE: " + temp.length, 
+                              temp.length == 1);
+        }
+        catch (BadGGEPBlockException hopefullyNot) {
+            Assert.assertTrue("Test 5 Constructor Failed!", false);
+        }
+        bytes = new byte[32];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x85;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[9] = (byte)0x05;
+        bytes[10] = (byte)'B';
+        bytes[11] = (byte)'H';
+        bytes[12] = (byte)'O';
+        bytes[13] = (byte)'S';
+        bytes[14] = (byte)'T';
+        bytes[15] = (byte)0x40;
+        bytes[16] = (byte)0x87;
+        bytes[17] = (byte)'S';
+        bytes[18] = (byte)'U';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'H';
+        bytes[21] = (byte)'E';
+        bytes[22] = (byte)'E';
+        bytes[23] = (byte)'L';
+        bytes[24] = (byte)0x47;
+        bytes[25] = (byte)'D';
+        bytes[26] = (byte)'A';
+        bytes[27] = (byte)'S';
+        bytes[28] = (byte)'W';
+        bytes[29] = (byte)'A';
+        bytes[30] = (byte)'N';
+        bytes[31] = (byte)'I';        
+        try {
+            GGEP[] temp = GGEP.read(bytes,0);
+            Assert.assertTrue("read() test - WRONG SIZE: " + temp.length, 
+                              temp.length == 2);
+            Assert.assertTrue("read() test - first ggep wrong size: " +
+                              temp[0].getHeaders().size(),
+                              temp[0].getHeaders().size() == 1);
+            Assert.assertTrue("read() test - second ggep wrong size: " +
+                              temp[1].getHeaders().size(),
+                              temp[1].getHeaders().size() == 2);
+        }
+        catch (BadGGEPBlockException hopefullyNot) {
+            Assert.assertTrue("Test 5 Constructor Failed!", false);
+        }
+
+
+    }
+
+
+    // tests normal behavior of the byte[] constructor
+    public void testByteArrayConstructor1() {
+        int[] endOffset = new int[1];
+        byte[] bytes = new byte[24];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)0x87;
+        bytes[9] =  (byte)'S';
+        bytes[10] = (byte)'U';
+        bytes[11] = (byte)'S';
+        bytes[12] = (byte)'H';
+        bytes[13] = (byte)'E';
+        bytes[14] = (byte)'E';
+        bytes[15] = (byte)'L';
+        bytes[16] = (byte)0x47;
+        bytes[17] = (byte)'D';
+        bytes[18] = (byte)'A';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'W';
+        bytes[21] = (byte)'A';
+        bytes[22] = (byte)'N';
+        bytes[23] = (byte)'I';        
+        try {
+            GGEP temp = new GGEP(bytes,0, endOffset);
             Set headers = temp.getHeaders();
             Assert.assertTrue("Test 5 - NO BHOST!", headers.contains("BHOST"));
             Object shouldBeNull = temp.getData("BHOST");
@@ -119,6 +206,8 @@ public class GGEPTest extends TestCase {
             Assert.assertTrue("Test 5 - NO SUSH!", headers.contains("SUSHEEL"));
             Object shouldNotBeNull = temp.getData("SUSHEEL");
             Assert.assertTrue("Test 5 - NULL!", shouldNotBeNull != null);
+            Assert.assertTrue("Test 5 - endOffset off: " + endOffset[0], 
+                              endOffset[0] == 24);
         }
         catch (BadGGEPBlockException hopefullyNot) {
             Assert.assertTrue("Test 5 Constructor Failed!", false);
@@ -156,7 +245,7 @@ public class GGEPTest extends TestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
         try {
-            GGEP temp = new GGEP(bytes,0);
+            GGEP temp = new GGEP(bytes,0,null);
             Set headers = temp.getHeaders();
             Assert.assertTrue("Test 6 - ENCODED!", !headers.contains("SUSHEEL"));
         }
@@ -166,7 +255,7 @@ public class GGEPTest extends TestCase {
 
         bytes[8] = (byte)0xA5; // compressed
         try {
-            GGEP temp = new GGEP(bytes,0);
+            GGEP temp = new GGEP(bytes,0,null);
             Set headers = temp.getHeaders();
             Assert.assertTrue("Test 6 - COMPRESSED!", 
                               !headers.contains("SUSHEEL"));
@@ -177,7 +266,7 @@ public class GGEPTest extends TestCase {
 
         bytes[8] = (byte)0x80; // 0 len header
         try {
-            GGEP temp = new GGEP(bytes,0);
+            GGEP temp = new GGEP(bytes,0,null);
             Assert.assertTrue("Test 6 - 0 LEN HEADER!", false);
         } 
         catch (BadGGEPBlockException hopefullySo) {
@@ -189,7 +278,7 @@ public class GGEPTest extends TestCase {
         bytes[18] = (byte)0xBF;
         bytes[19] = (byte)0xBF;
         try {
-            GGEP temp = new GGEP(bytes,0);
+            GGEP temp = new GGEP(bytes,0,null);
             Assert.assertTrue("Test 6 - >3 DATA LEN!", false);
         } 
         catch (BadGGEPBlockException hopefullySo) {
@@ -227,7 +316,7 @@ public class GGEPTest extends TestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
         try {
-            one = new GGEP(bytes,0);
+            one = new GGEP(bytes,0,null);
         }
         catch (BadGGEPBlockException hopefullyNot) {
             Assert.assertTrue("Write Test Failed!", false);
@@ -235,7 +324,7 @@ public class GGEPTest extends TestCase {
         ByteArrayOutputStream oStream = new ByteArrayOutputStream();
         try {
             one.write(oStream);
-            two = new GGEP(oStream.toByteArray(), 0);
+            two = new GGEP(oStream.toByteArray(), 0, null);
         }
         catch (IOException hopefullyNot1) {
             Assert.assertTrue("Instance Write Failed!!", false);

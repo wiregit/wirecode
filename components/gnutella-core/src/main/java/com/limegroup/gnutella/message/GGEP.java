@@ -102,10 +102,14 @@ public class GGEP extends Object {
      *  one GGEP Block, use the read method.
      *  @param messageBytes The bytes of the message.
      *  @param beginOffset  The begin index of the GGEP prefix.
+     *  @param endOffset If you want to get the offset where the GGEP block
+     *  ends (more precisely, one above the ending index), then send me a
+     *  int[1].  I'll put the endOffset in endOffset[0].  If you don't care, 
+     *  null will do....
      *  @exception BadGGEPBlockException Thrown if the block could not be parsed
      *  correctly.
      */
-    public GGEP(byte[] messageBytes, final int beginOffset) 
+    public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) 
         throws BadGGEPBlockException {
 
         _props = new HashMap();
@@ -174,6 +178,8 @@ public class GGEP extends Object {
             _props.put(extensionHeader, extensionData);
 
         }
+        if ((endOffset != null) && (endOffset.length > 0))
+            endOffset[0] = currIndex;
     }
 
     private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
@@ -345,8 +351,23 @@ public class GGEP extends Object {
      *  correctly.
      */
     public static GGEP[] read(byte[] messageBytes,
-                              int beginOffset) throws BadGGEPBlockException {
-        return new GGEP[0];
+                              final int beginOffset) 
+        throws BadGGEPBlockException {
+
+        GGEP[] retGGEPs = null;
+        List ggeps = new ArrayList();
+        int currIndex[] = {beginOffset};
+
+        while ((messageBytes.length > currIndex[0]) && 
+               (messageBytes[currIndex[0]] == GGEP_PREFIX_MAGIC_NUMBER))
+            ggeps.add(new GGEP(messageBytes, currIndex[0], currIndex));
+        
+        Object[] array = ggeps.toArray();
+        retGGEPs = new GGEP[array.length];
+        for (int i = 0; i < array.length; i++)
+            retGGEPs[i] = (GGEP)array[i];
+
+        return retGGEPs;
     }
 
     /** @return True if the two Maps that represent header/data pairs are
@@ -376,8 +397,8 @@ public class GGEP extends Object {
     }
 
 
-    public static final boolean debugOn = false;
-    public void debug(String out) {
+    private static final boolean debugOn = false;
+    private void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }
