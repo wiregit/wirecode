@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.DataInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import com.limegroup.gnutella.util.CountingInputStream;
@@ -424,16 +425,20 @@ public class WMAMetaData extends AudioMetaData {
     }
     
     /**
-     * Returns a String uses WMA's encoding.
-     * WMA strings have 0s interspersed between the characters.
-     * TODO:  These look like WCHAR -- how do you translate that in Java?
+     * Returns a String uses WMA's encoding (WCHAR: UTF-16 little endian).
+     * If we don't support that encoding for whatever, hack out the zeros.
      */
     private String wmaString(byte[] x) throws IOException {
-        int pos = 0;
-        for(int i = 0; i < x.length; i++) {
-            if(x[i] != 0)
-                x[pos++] = x[i];
+        try {
+            return new String(x, "UTF-16LE").trim();
+        } catch(UnsupportedEncodingException uee) {
+            // hack.
+            int pos = 0;
+            for(int i = 0; i < x.length; i++) {
+                if(x[i] != 0)
+                    x[pos++] = x[i];
+            }
+            return new String(x, 0, pos, "UTF-8");
         }
-        return new String(x, 0, pos, "UTF-8");
     }
 }
