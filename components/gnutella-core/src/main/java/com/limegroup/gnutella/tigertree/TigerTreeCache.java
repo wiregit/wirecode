@@ -192,16 +192,18 @@ public final class TigerTreeCache {
         Iterator iter = map.keySet().iterator();
         while (iter.hasNext()) {
             URN sha1 = (URN) iter.next();
-            if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
-                continue;
-            else if (RouterService.getDownloadManager()
-                     .getIncompleteFileManager().getFileForUrn(sha1) != null)
-                continue;
-            else if (Math.random() > map.size() / 200)
-                // lazily removing entries if we don't have
-                // that many anyway. Maybe some of the files are
-                // just temporarily unshared.
-                continue;
+            if (map.get(sha1) != BUSH) {
+                if (RouterService.getFileManager().getFileDescForUrn(sha1) != null)
+                    continue;
+                else if (RouterService.getDownloadManager()
+                        .getIncompleteFileManager().getFileForUrn(sha1) != null)
+                    continue;
+                else if (Math.random() > map.size() / 200)
+                    // lazily removing entries if we don't have
+                    // that many anyway. Maybe some of the files are
+                    // just temporarily unshared.
+                    continue;
+            }
             iter.remove();
         }
     }
