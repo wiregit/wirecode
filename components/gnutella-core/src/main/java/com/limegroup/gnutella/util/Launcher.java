@@ -7,6 +7,7 @@ import java.lang.String;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.settings.URLHandlerSettings;
 import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.util.PackagedMediaFileUtils;
 
 
 /**
@@ -173,6 +174,17 @@ public final class Launcher {
 	public static int launchFile(File file) throws IOException,SecurityException {
 		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase();
+
+        // Expand pmf files before display
+        if ( extCheckString.endsWith(".pmf") ) {
+            file = PackagedMediaFileUtils.preparePMFFile(file.toString());
+            // Don't launch an invalid file
+            if ( file == null )
+                return -1; 
+            path           = file.getCanonicalPath();
+            extCheckString = path.toLowerCase();
+        }
+
 		if(!extCheckString.endsWith(".exe") &&
 		   !extCheckString.endsWith(".vbs") &&
 		   !extCheckString.endsWith(".lnk") &&
