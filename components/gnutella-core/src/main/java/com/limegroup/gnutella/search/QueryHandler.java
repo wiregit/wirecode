@@ -48,15 +48,17 @@ public final class QueryHandler {
 
 
 	/**
-	 * Constant handle to the <tt>MessageRouter</tt> instance.
+	 * Handle to the <tt>MessageRouter</tt> instance.  Non-final for
+     * testing purposes.
 	 */
-	private static final MessageRouter MESSAGE_ROUTER =
+	private static MessageRouter _messageRouter =
 		RouterService.getMessageRouter();
 
 	/**
-	 * Constant handle to the <tt>ConnectionManager</tt> instance.
+	 * Handle to the <tt>ConnectionManager</tt> instance.  Non-final for
+     * testing purposes.
 	 */
-	private static final ConnectionManager CONNECTION_MANAGER =
+	private static ConnectionManager _connectionManager =
 		RouterService.getConnectionManager();
 
 	/**
@@ -72,7 +74,7 @@ public final class QueryHandler {
 	/**
 	 * The theoretical number of hosts that have been reached by this query.
 	 */
-	private int _theoreticalHostsQueried = 0;
+	private int _theoreticalHostsQueried = 1;
 
 	/**
 	 * Variable for the <tt>ResultCounter</tt> for this query -- used
@@ -81,9 +83,9 @@ public final class QueryHandler {
 	private ResultCounter _resultCounter;
 
 	/**
-	 * Constant set of <tt>ReplyHandler</tt>s that have already been queried.
+	 * Constant set of send handlers that have already been queried.
 	 */
-	private final Set QUERIED_REPLY_HANDLERS = new HashSet();
+	private final Set QUERIED_HANDLERS = new HashSet();
 
 	/**
 	 * The time the query started.
@@ -177,19 +179,19 @@ public final class QueryHandler {
 	 * @throw <tt>IllegalArgumentException</tt> if the ttl is not within
 	 *  what is considered reasonable bounds
 	 */
-	public QueryRequest createQuery(byte ttl) {
+	public static QueryRequest createQuery(QueryRequest query, byte ttl) {
 		if(ttl < 1 || ttl > 6) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 
 		// build it from scratch if it's from us
-		if(QUERY.getHops() == 0) {
-			return QueryRequest.createQuery(QUERY, ttl);
+		if(query.getHops() == 0) {
+			return QueryRequest.createQuery(query, ttl);
 		} else {
 			try {
-				return QueryRequest.createNetworkQuery(QUERY.getGUID(), ttl, 
-													   QUERY.getHops(), 
-													   QUERY.getPayload(),
-													   QUERY.getNetwork());
+				return QueryRequest.createNetworkQuery(query.getGUID(), ttl, 
+													   query.getHops(), 
+													   query.getPayload(),
+													   query.getNetwork());
 			} catch(BadPacketException e) {
 				// this should never happen, since the query was already 
 				// read from the network, so report an error
@@ -229,21 +231,43 @@ public final class QueryHandler {
 		long sysTime = System.currentTimeMillis();
 		if(sysTime < _nextQueryTime) return;
 
-		List list = CONNECTION_MANAGER.getInitializedConnections2();
-		int length = list.size();
 		if(_queryStartTime == 0) {
 			_queryStartTime = sysTime;
-			sendProbeQuery();
-			return;
+            _theoreticalHostsQueried += 
+                sendProbeQuery(this, 
+                               _connectionManager.getInitializedConnections2()); 
+            _nextQueryTime = System.currentTimeMillis() + 6000;
+            return;
 		}
 
-		for(int i=0; i<length; i++) {
+        
+        _theoreticalHostsQueried += 
+            sendQuery(this, _connectionManager.getInitializedConnections2()); 
+        _nextQueryTime = System.currentTimeMillis() + 1500;
+    }
+
+    /**
+     * Runs the query over the given list of connections.  This is static
+     * to decouple the algorithm from the specific <tt>QueryHandler</tt>
+     * instance, making testing significantly easier.
+     *
+     * @param handler the <tt>QueryHandler</tt> instance containing data
+     *  for this query
+     * @param list the <tt>List</tt> of Gnutella connections to send
+     *  queries over
+     * @return the number of new hosts theoretically reached by this
+     *  query iteration
+     */
+    private static int sendQuery(QueryHandler handler, List list) {
+		int length = list.size();
+        int newHosts = 0;
+        for(int i=0; i<length; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);			
 			
 			// if we've already queried this host, go to the next one
-			if(QUERIED_REPLY_HANDLERS.contains(mc)) continue;
+			if(handler.QUERIED_HANDLERS.contains(mc)) continue;
 			
-			int hostsQueried = QUERIED_REPLY_HANDLERS.size();
+			int hostsQueried = handler.QUERIED_HANDLERS.size();
 			
 			// assume there's minimal overlap between the connections
 			// we queried before and the new ones -- pretend we have
@@ -251,65 +275,65 @@ public final class QueryHandler {
 			int remainingConnections = length - hostsQueried - 2;
 			remainingConnections = Math.max(remainingConnections, 1);
 			
-			int results = _resultCounter.getNumResults();
+			int results = handler._resultCounter.getNumResults();
 			double resultsPerHost = 
-				(double)results/(double)_theoreticalHostsQueried;
+				(double)results/(double)handler._theoreticalHostsQueried;
 			
-			int resultsNeeded = RESULTS - results;
+			int resultsNeeded = handler.RESULTS - results;
 			
-			int hostsToQuery = 100000;
+			int hostsToQuery = 80000;
 			if(resultsPerHost != 0) {
 				hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
 			}
 			
 			int hostsToQueryPerConnection = 
 				hostsToQuery/remainingConnections;
-			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
+			byte ttl = calculateNewTTL(hostsToQueryPerConnection, 
+                                       mc.getNumIntraUltrapeerConnections());
 			
             byte maxTTL = mc.headers().getMaxTTL();
             if(ttl > maxTTL) {
                 ttl = maxTTL;
             }
 
-			QueryRequest query = createQuery(ttl);
+			QueryRequest query = createQuery(handler.QUERY, ttl);
 
  
 			// send out the query on the network
-			MESSAGE_ROUTER.sendQueryRequest(query, mc, REPLY_HANDLER);
+			_messageRouter.sendQueryRequest(query, mc, handler.REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
-			QUERIED_REPLY_HANDLERS.add(mc);
-
-			// adjust the next query time according to the ttl of what we
-			// just sent
-			_nextQueryTime = System.currentTimeMillis()+1500;
-
-			adjustTheoreticalHostsQueried(mc, ttl);
-
-			break;
-		}	
+			handler.QUERIED_HANDLERS.add(mc);
+            newHosts = calculateNewHosts(mc, ttl);
+            break;
+		}
+        return newHosts;
 	}
 
 	/**
-	 * Send the initial "probe" query to get an idea of how widely di
+	 * Send the initial "probe" query to get an idea of how widely distributed
+     * the content is.
+     *
+     * @param queriedHosts the set of hosts that have already been queried
+     * @return the next time to send out the query -- another query should
+     *  not be sent before this
 	 */
-	private void sendProbeQuery() {
-		List connections = CONNECTION_MANAGER.getInitializedConnections2();
-
+	private static int sendProbeQuery(QueryHandler handler, List list) {
 		byte ttl = 2;
-		QueryRequest query = createQuery(ttl);
-        int limit = Math.min(2, connections.size());
+		QueryRequest query = createQuery(handler.QUERY, ttl);
+        int limit = Math.min(3, list.size());
+        int newHosts = 0;
 		for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)connections.get(i);
-
-			MESSAGE_ROUTER.sendQueryRequest(query, mc, REPLY_HANDLER);
+			ManagedConnection mc = (ManagedConnection)list.get(i);
+			_messageRouter.sendQueryRequest(query, mc, 
+                                                              handler.REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
-			QUERIED_REPLY_HANDLERS.add(mc);
+			handler.QUERIED_HANDLERS.add(mc);
 
-			adjustTheoreticalHostsQueried(mc, ttl);
+			newHosts += calculateNewHosts(mc, ttl);
 		}
-		_nextQueryTime = System.currentTimeMillis() + 6000;
+        return newHosts;
 	}
 
 	/**
@@ -318,31 +342,51 @@ public final class QueryHandler {
 	 * 
 	 * @param hostsToQueryPerConnection the number of hosts we should reach on
 	 *  each remaining connections, to the best of our knowledge
+     * @param degree the out-degree of the next connection
 	 */
-	private byte calculateNewTTL(int hostsToQueryPerConnection) {
+	private static byte calculateNewTTL(int hostsToQueryPerConnection, int degree) {
+
+        // we'll give a rough estimate, based on the nodes reached at the
+        // last hop
+        
+
 		// the limits below are based on experimental, not theoretical 
 		// observations of results on the network
 		if(hostsToQueryPerConnection < 30)    return 1;
 		if(hostsToQueryPerConnection < 100)   return 2;
 		if(hostsToQueryPerConnection < 1000)  return 3;
-		if(hostsToQueryPerConnection < 2000)  return 4;
+		if(hostsToQueryPerConnection < 2500)  return 4;
 		else return 5;
 	}
 
 	/**
-	 * Modifies the number of hosts theoretically reached by this query by
-	 * adding a query with the given TTL.
+     * Calculate the number of new hosts that would be added to the 
+     * theoretical horizon if a query with the given ttl were sent down
+     * the given connection.
 	 *
+     * @param conn the <tt>Connection</tt> that will received the query
 	 * @param ttl the TTL of the query to add
 	 */
-	private void adjustTheoreticalHostsQueried(ManagedConnection mc, int ttl) {
-		final int intraUltrapeerConnections = 
-			mc.getNumIntraUltrapeerConnections();
+	private static int calculateNewHosts(Connection conn, int ttl) {
+        return calculateNewHosts(conn.getNumIntraUltrapeerConnections(), ttl);
+	}
+
+	/**
+     * Calculate the number of new hosts that would be added to the 
+     * theoretical horizon if a query with the given ttl were sent to
+     * a node with the given degree.  This is not precise because we're
+     * assuming that the nodes connected to the node in question also
+     * have the same degree, but there's not much we can do about it!
+	 *
+     * @param degree the degree of the node that will received the query
+	 * @param ttl the TTL of the query to add
+	 */    
+	private static int calculateNewHosts(int degree, int ttl) {
 		double newHosts = 0;
 		for(;ttl>0; ttl--) {
-			newHosts += Math.pow(intraUltrapeerConnections, ttl-1);
+			newHosts += Math.pow((degree-1), ttl-1);
 		}
-		_theoreticalHostsQueried += (int)newHosts;
+		return (int)newHosts;
 	}
 
 	/**
@@ -357,7 +401,12 @@ public final class QueryHandler {
 
 		if(_resultCounter.getNumResults() >= RESULTS) return true;
 	 
-		if(_theoreticalHostsQueried > 160000) return true;
+        // if our theoretical horizon has gotten too high, consider
+        // it enough results
+        // precisely what this number should be is somewhat hard to determine
+        // because, while connection have a specfic degree, the degree of 
+        // the connections they have cannot be determined
+		if(_theoreticalHostsQueried > 100000) return true;
 
 		// return true if we've been querying for longer than the specified 
 		// maximum
