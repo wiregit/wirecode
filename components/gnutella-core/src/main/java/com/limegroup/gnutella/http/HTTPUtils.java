@@ -30,6 +30,65 @@ public final class HTTPUtils {
 	 * Private constructor to ensure that this class cannot be constructed
 	 */
 	private HTTPUtils() {}
+	
+	/**
+	 * Writes an single http header to the specified 
+	 * <tt>OutputStream</tt> instance, with the specified header name 
+	 * and the specified header value.
+	 *
+	 * @param name the <tt>HTTPHeaderName</tt> instance containing the
+	 *  header name to write to the stream
+	 * @param value the <tt>String</tt> instance containing the
+	 *  header value to write to the stream
+	 * @param os the <tt>OutputStream</tt> instance to write to
+	 */
+	public static void writeHeader(HTTPHeaderName name, String value, 
+								   OutputStream os) 
+		throws IOException {
+		if(name == null) {
+			throw new NullPointerException("null name in writing http header");
+		} else if(value == null) {
+			throw new NullPointerException("null value in writing http header: "+
+										   name);
+		} else if(os == null) {
+			throw new NullPointerException("null os in writing http header: "+
+										   name);
+		}
+		String header = createHeader(name, value);
+		os.write(header.getBytes());
+		if(!CommonUtils.isJava118()) 
+			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+	}
+
+	/**
+	 * Writes an single http header to the specified 
+	 * <tt>OutputStream</tt> instance, with the specified header name 
+	 * and the specified header value.
+	 *
+	 * @param name the <tt>HTTPHeaderName</tt> instance containing the
+	 *  header name to write to the stream
+	 * @param value the <tt>HTTPHeaderValue</tt> instance containing the
+	 *  header value to write to the stream
+	 * @param out the <tt>Writer</tt> instance to write to
+	 */
+	public static void writeHeader(HTTPHeaderName name, String value, 
+								   Writer out) 
+		throws IOException {
+		if(name == null) {
+			throw new NullPointerException("null name in writing http header");
+		} else if(value == null) {
+			throw new NullPointerException("null value in writing http header: "+
+										   name);
+		} else if(out == null) {
+			throw new NullPointerException("null os in writing http header: "+
+										   name);
+		}
+		String header = createHeader(name, value);
+		out.write(header);
+		if(!CommonUtils.isJava118()) 
+			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+	}
+	
 
 	/**
 	 * Writes an single http header to the specified 
@@ -54,7 +113,7 @@ public final class HTTPUtils {
 			throw new NullPointerException("null os in writing http header: "+
 										   name);
 		}
-		String header = createHeader(name, value);
+		String header = createHeader(name, value.httpStringValue());
 		os.write(header.getBytes());
 		if(!CommonUtils.isJava118()) 
 			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
@@ -83,7 +142,7 @@ public final class HTTPUtils {
 			throw new NullPointerException("null os in writing http header: "+
 										   name);
 		}
-		String header = createHeader(name, value);
+		String header = createHeader(name, value.httpStringValue());
 		out.write(header);
 		if(!CommonUtils.isJava118()) 
 			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
@@ -95,20 +154,20 @@ public final class HTTPUtils {
 	 *
 	 * @param name the <tt>HTTPHeaderName</tt> instance containing the
 	 *  header name 
-	 * @param name the <tt>HTTPHeaderValue</tt> instance containing the
-	 *  header value 
+	 * @param valueStr the value of the header, generally the httpStringValue
+	 *  or a HttpHeaderValue, or just a String.
 	 */
 	private static String createHeader(HTTPHeaderName name, 
-									   HTTPHeaderValue value) 
+									   String valueStr) 
 		throws IOException {
-		if((name == null) || (value == null)) {
+		if((name == null) || (valueStr == null)) {
 			throw new NullPointerException("null value in creating http header");
 		}
-		String nameStr  = name.httpStringValue();
-		String valueStr = value.httpStringValue();
-		if((nameStr == null) || (valueStr == null)) {
+		String nameStr  = name.httpStringValue();;
+		if(nameStr == null) {
 			throw new NullPointerException("null value in creating http header");
 		}
+
 		StringBuffer sb = new StringBuffer();
 		sb.append(nameStr);
 		sb.append(COLON_SPACE);
