@@ -16,7 +16,14 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     private static final byte[] WHAT_IS_CAPABILITY = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
-    private static final int WHAT_IS_CAPABILITY_VERSION = 1;
+    /** This value can change - it is the version number of the highest 'What
+     *  Is' query we support.
+     */
+    public static final int WHAT_IS_CAPABILITY_VERSION = 1;
+    /** this value will NEVER change - this is the version number of the first
+     *  'What Is' type query
+     */
+    public  static final int WHAT_IS_BASE_VERSION = 1;
 
     public static final int VERSION = 0;
 

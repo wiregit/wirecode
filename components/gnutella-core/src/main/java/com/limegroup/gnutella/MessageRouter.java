@@ -1598,9 +1598,11 @@ public abstract class MessageRouter {
         // by a leaf to other Ultrapeers
         if(ultrapeer.isClientSupernodeConnection()) return;
 
-        if (query.isWhatIsNewRequest() &&
-            !ultrapeer.remoteHostSupportsWhatIsNew())
-            return;
+        // special what is queries have version numbers attached to them - make
+        // sure that the remote host can answer the query....
+        if ((query.getWhatIsVersionNumber() > 0) &&
+            (ultrapeer.remoteHostWhatIsVersion() <
+             CapabilitiesVM.WHAT_IS_BASE_VERSION)) return;
 
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
@@ -1698,8 +1700,11 @@ public abstract class MessageRouter {
         if( mc == null )
             throw new NullPointerException("null connection");
         
-        if (query.isWhatIsNewRequest() && !mc.remoteHostSupportsWhatIsNew())
-            return false;
+        // special what is queries have version numbers attached to them - make
+        // sure that the remote host can answer the query....
+        if ((query.getWhatIsVersionNumber() > 0) &&
+            (mc.remoteHostWhatIsVersion() < CapabilitiesVM.WHAT_IS_BASE_VERSION)
+            ) return false;
         mc.originateQuery(query);
         return true;
     }

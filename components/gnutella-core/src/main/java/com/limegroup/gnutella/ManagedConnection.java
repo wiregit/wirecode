@@ -397,7 +397,10 @@ public class ManagedConnection extends Connection
      *  in the tables, otherwise <tt>false</tt>
      */
     public boolean hitsQueryRouteTable(QueryRequest query) {
-        if(query.isWhatIsNewRequest()) return remoteHostSupportsWhatIsNew();
+        // special what is queries have version numbers attached to them - make
+        // sure that the remote host can answer the query....
+        if (query.getWhatIsVersionNumber() > 0)
+            return (remoteHostWhatIsVersion() >= query.getWhatIsVersionNumber());
         else if(_lastQRPTableReceived == null) return false;
         return _lastQRPTableReceived.contains(query);
     }

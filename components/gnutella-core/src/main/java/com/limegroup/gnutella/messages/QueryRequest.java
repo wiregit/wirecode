@@ -62,7 +62,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Whether or not the GGEP header for What is was found.
      */
-    private boolean whatIsGGEPHeaderFound = false;
+    private int whatIsVersionNumber = 0;
 
     // HUGE v0.93 fields
     /** 
@@ -863,7 +863,7 @@ public class QueryRequest extends Message implements Serializable{
 
             // add the What Is header
             if (isWhatIsNewRequest)
-                ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS);
+                ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS, 1);
 
             // if there are GGEP headers, write them out...
             if ((this.QUERY_KEY != null) || isWhatIsNewRequest) {
@@ -949,7 +949,8 @@ public class QueryRequest extends Message implements Serializable{
                             tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                         }
                         if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
-                            whatIsGGEPHeaderFound = true;
+                            whatIsVersionNumber = 
+                                ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
@@ -1215,7 +1216,15 @@ public class QueryRequest extends Message implements Serializable{
      * the top 3 YOUNGEST files in your library.
      */
     public boolean isWhatIsNewRequest() {
-        return QUERY.equals(WHAT_IS_NEW_QUERY_STRING) && whatIsGGEPHeaderFound;
+        return QUERY.equals(WHAT_IS_NEW_QUERY_STRING) && (whatIsVersionNumber == 1);
+    }
+
+    /**
+     * Returns 0 if this is not a What Is Query, else it returns the selector
+     * of the What Is query, e.g. What Is New returns 1.
+     */
+    public int getWhatIsVersionNumber() {
+        return whatIsVersionNumber;
     }
 
     /** Returns the address to send a out-of-band reply to.  Only useful

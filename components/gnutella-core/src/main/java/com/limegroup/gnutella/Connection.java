@@ -1444,6 +1444,14 @@ public class Connection implements IpPort {
         return -1;
     }
 
+    /** @return the version number of capability supported, else -1 if no support.
+     */
+    public int remoteHostWhatIsVersion() {
+        if (_capabilities != null)
+            return _capabilities.supportsWhatIsCapability();
+        return -1;
+    }
+
     /** @return true if the capability is supported.
      */
     public boolean remoteHostSupportsWhatIsNew() {
