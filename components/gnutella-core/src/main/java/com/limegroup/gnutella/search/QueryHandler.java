@@ -23,7 +23,7 @@ public final class QueryHandler {
 	/**
 	 * Constant for the query quid.
 	 */
-	private final GUID GUID;
+	private final byte[] GUID;
 
 	/**
 	 * Constamnt for the query string.
@@ -75,10 +75,10 @@ public final class QueryHandler {
 	private int _theoreticalHostsQueried = 0;
 
 	/**
-	 * Variable for the <tt>RouteTableEntry</tt> for this query -- used
+	 * Variable for the <tt>ResultCounter</tt> for this query -- used
 	 * to access the number of replies returned.
 	 */
-	private RouteTable.RouteTableEntry _routeTableEntry;
+	private ResultCounter _resultCounter;
 
 	/**
 	 * Constant set of <tt>ReplyHandler</tt>s that have already been queried.
@@ -106,7 +106,7 @@ public final class QueryHandler {
 	 * Private constructor to ensure that only this class creates new
 	 * <tt>QueryFactory</tt> instances.
 	 */
-	private QueryHandler(GUID guid, String query, String xmlQuery) {
+	private QueryHandler(byte[] guid, String query, String xmlQuery) {
 		GUID = guid;
 		QUERY = query;
 		XML_QUERY = xmlQuery;
@@ -123,7 +123,20 @@ public final class QueryHandler {
 	 */
 	public static QueryHandler createHandler(byte[] guid, String query, 
 											 String xmlQuery) {
-		return new QueryHandler(new GUID(guid), query, xmlQuery);
+		return new QueryHandler(guid, query, xmlQuery);
+	}
+
+
+	/**
+	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * for the given <tt>QueryRequest</tt>.
+	 *
+	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 *  for this set of queries
+	 */
+	public static QueryHandler createHandler(QueryRequest query) {
+		return new QueryHandler(query.getGUID(), query.getQuery(), 
+								query.getRichQuery());
 	}
 
 	/**
@@ -139,31 +152,31 @@ public final class QueryHandler {
 	public QueryRequest createQuery(byte ttl) {
 		if(ttl < 1 || ttl > 6) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
-		return new QueryRequest(GUID.bytes(), ttl, 0, QUERY, XML_QUERY, false, 
+		return new QueryRequest(GUID, ttl, 0, QUERY, XML_QUERY, false, 
 								URN_TYPES, QUERY_URNS, null,
 								!RouterService.acceptedIncomingConnection());
 	}
 
 	/**
-	 * Accessor for the <tt>GUID</tt> for this query.
+	 * Accessor for the guid for this query.
 	 *
-	 * @return the <tt>GUID</tt> for this query
+	 * @return the guid for this query
 	 */
-	public GUID getGUID() {
+	public byte[] getGUID() {
 		return GUID;
 	}
 
 
 	/**
-	 * Sets the <tt>RouteTableEntry</tt> for this query.
+	 * Sets the <tt>ResultCounter</tt> for this query.
 	 *
-	 * @param entry the <tt>RouteTableEntry</tt> to add
+	 * @param entry the <tt>ResultCounter</tt> to add
 	 */
-	public void setRouteTableEntry(RouteTable.RouteTableEntry entry) {
+	public void setResultCounter(ResultCounter entry) {
 		if(entry == null) {
 			throw new NullPointerException("null route table entry");
 		}
-		_routeTableEntry = entry;
+		_resultCounter = entry;
 	}
 	
 	/**
@@ -175,12 +188,12 @@ public final class QueryHandler {
 	 */
 	public void sendQuery() {
 		// do not allow the route table entry to be null
-		if(_routeTableEntry == null) {
+		if(_resultCounter == null) {
 			throw new NullPointerException("null route table entry");
 		}
 		if(hasEnoughResults()) return;
 
-		int results = _routeTableEntry.getRepliesRouted();
+		int results = _resultCounter.getNumResults();
 
 		long sysTime = System.currentTimeMillis();
 		if(sysTime < _nextQueryTime) return;
@@ -191,7 +204,7 @@ public final class QueryHandler {
 			return;
 		}
 
-		List list = CONNECTION_MANAGER.getInitializedConnections();
+		List list = CONNECTION_MANAGER.getInitializedConnections2();
 		int length = list.size();
 		for(int i=0; i<length; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);			
@@ -306,12 +319,12 @@ public final class QueryHandler {
 	 */
 	public boolean hasEnoughResults() {
 		//System.out.println("QueryHandler::hasEnoughResults::"+
-		//			   _routeTableEntry.getRepliesRouted());
+		//			   _resultCounter.getNumResults());
 		
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
-		if(_routeTableEntry.getRepliesRouted() >= RESULTS) return true;
+		if(_resultCounter.getNumResults() >= RESULTS) return true;
 	 
 		if(_theoreticalHostsQueried > 160000) return true;
 
