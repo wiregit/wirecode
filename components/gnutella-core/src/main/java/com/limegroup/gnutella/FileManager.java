@@ -108,7 +108,7 @@ public class FileManager {
         }
     }
 
-    protected FileManager() {
+    public FileManager() {
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
