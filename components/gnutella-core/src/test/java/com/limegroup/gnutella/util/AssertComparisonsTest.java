@@ -571,6 +571,25 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertInstanceof("string", java.lang.Comparable.class, new Integer(1));
     }
     
+    public void testNullChecks() {
+        try {
+            assertNull(new Object());
+            assertNull("string", new Object());
+            fail("an object isn't null.");
+        } catch (AssertionFailedError ignored) {}
+        
+        try {
+            assertNotNull(null);
+            assertNotNull("string", null);
+            fail("null isn't not null.");
+        } catch (AssertionFailedError ignored) {}
+        
+        assertNotNull(new Object());
+        assertNotNull("string", new Object());
+        assertNull(null);
+        assertNull("string", null);
+    }
+    
     public void testBadComparisons() {
         try {
             assertGreaterThan(null, null);

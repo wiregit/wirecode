@@ -8,6 +8,7 @@ import junit.framework.*;
  */
 public class AssertComparisons extends TestCase {
         
+    private static final int BLANK = -1;
     private static final int LESS_THAN = 0;
     private static final int GREATER_THAN = 1;
     private static final int LESS_THAN_OR_EQUALS = 2;
@@ -39,6 +40,38 @@ public class AssertComparisons extends TestCase {
         if (!instanceofCheck(expected, actual.getClass()))
             fail(formatComparison(INSTANCE_OF, msg, 
                     expected.getName(), actual.getClass().getName()));
+    }
+    
+    /**
+     * Asserts that an object is null.
+     */
+    static public void assertNull(Object actual) {
+        assertNull(null, actual);
+    }
+    
+    /**
+     * Asserts that an object is null.  If it isn't, throws an AssertionFailedError
+     * with the given message.
+     */
+    static public void assertNull(String msg, Object actual) {
+        if( actual != null)
+            fail( formatComparison(BLANK, msg, null, actual) );
+    }
+    
+    /**
+     * Asserts that an object is not null.
+     */
+    static public void assertNotNull(Object actual) {
+        assertNotNull(null, actual);
+    }
+    
+    /**
+     * Asserts that an object is not null.  If it is, throws an AssertionFailedError
+     * with the given message.
+     */
+    static public void assertNotNull(String msg, Object actual) {
+        if(actual == null)
+            fail( formatComparison(NOT_EQUAL, msg, null, actual) );
     }
     
     /**
