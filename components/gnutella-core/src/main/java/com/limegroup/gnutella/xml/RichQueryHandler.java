@@ -23,7 +23,7 @@ class RichQueryHandler{
     /**
      * Call this method to get the singleton
      */
-    public static RichQueryHandler instance(){
+    public static synchronized RichQueryHandler instance(){
         if (instance != null)
             return instance;
         else{
