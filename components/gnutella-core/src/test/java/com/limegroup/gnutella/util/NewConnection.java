@@ -69,6 +69,10 @@ public class NewConnection extends TestConnection {
         return QRT;
     }
 
+    public boolean hitsQueryRouteTable(QueryRequest query) {
+        return QRT.contains(query);
+    }
+
 
     public String toString() {
         return "NEW TEST CONNECTION";

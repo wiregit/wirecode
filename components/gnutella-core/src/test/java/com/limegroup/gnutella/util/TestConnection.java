@@ -52,6 +52,10 @@ public abstract class TestConnection extends ManagedConnection {
         return QRT;
     }
 
+    public void originateQuery(QueryRequest query) {
+        send(query);
+    }
+
     /**
      * Overridden to keep track of messages sent.
      */

@@ -139,18 +139,21 @@ public final class TestConnectionManager extends ConnectionManager {
         NUM_LEAF_CONNECTIONS = numLeafConnections;
         MY_KEYWORDS = myKeywords;
         for(int i=0; i<NUM_CONNECTIONS; i++) {
+            Connection curConn = null;
             if(i < numNewConnections) {
-                CONNECTIONS.add(new UltrapeerConnection(
-                    new String[]{ULTRAPEER_KEYWORDS[i]}));
+                curConn = 
+                    new UltrapeerConnection(new String[]{ULTRAPEER_KEYWORDS[i]});
             } else {
-                CONNECTIONS.add(new OldConnection(15));                    
+                curConn = new OldConnection(15); 
             }
+            CONNECTIONS.add(curConn);            
         }
 
         // now, give ourselves 30 leaves
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            LEAF_CONNECTIONS.add(new LeafConnection(
-                new String[]{LEAF_KEYWORDS[i]}));
+            Connection conn = new LeafConnection(
+                new String[]{LEAF_KEYWORDS[i]});
+            LEAF_CONNECTIONS.add(conn);
         }
         ULTRAPEER = ultrapeer;
     }
@@ -186,6 +189,13 @@ public final class TestConnectionManager extends ConnectionManager {
      */
     public List getInitializedConnections2() {
         return CONNECTIONS;
+    }
+
+    /**
+     * Accessor for the custom list of connections.
+     */
+    public List getInitializedConnections() {
+        return new LinkedList(CONNECTIONS);
     }
 
     public List getInitializedClientConnections2() {
