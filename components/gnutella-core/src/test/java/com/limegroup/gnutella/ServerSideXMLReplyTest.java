@@ -135,7 +135,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(1);
+		UltrapeerSettings.MAX_LEAVES.setValue(4);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);

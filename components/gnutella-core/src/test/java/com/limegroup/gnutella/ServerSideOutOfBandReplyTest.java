@@ -122,13 +122,6 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     }
 
     public static void setSettings() {
-        //Setup LimeWire backend.  For testing other vendors, you can skip all
-        //this and manually configure a client to listen on port 6667, with
-        //incoming slots and no connections.
-        //To keep LimeWire from connecting to the outside network, we filter out
-        //all addresses but localhost and 18.239.0.*.  The latter is used in
-        //pongs for testing.  TODO: it would be nice to have a way to prevent
-        //BootstrapServerManager from adding defaults and connecting.
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
@@ -147,7 +140,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(1);
+		UltrapeerSettings.MAX_LEAVES.setValue(4);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
