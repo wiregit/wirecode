@@ -20,8 +20,10 @@ import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.settings.*;
 
-import java.net.UnknownHostException;
+import junit.framework.Test;
 
 public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 	
@@ -37,9 +39,30 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 	static PromotionRequestVendorMessage leafPromoting, wrongLeaf,leafNotBest,leafGone,
 					advertiserGone, tooOld, fromLeaf, wrongIp, forwardedLeaf, forwardedUP;
 	
+	/**
+	 * an ultrapeer which will advertise the candidates
+	 */
+	static CountingConnection myUP;
 	
-	public static void globalSetUp() {
-		try {
+	public static void globalSetUp() throws Exception {
+		//do nothing
+		
+	}
+	
+	/**
+	 * please run this test first to set things up.
+	 */
+	public void testSetSettings() throws Exception {
+	
+			//add an ultrapeer, make it an advertiser for some of the candidates.
+			myUP = new CountingConnection("localhost",PORT,
+						new UltrapeerHeaders("1.2.3.4"),
+						new EmptyResponder());
+			myUP.initialize();
+		
+			myUP.send(leafPromoting);
+		
+			
 			
 			//set up the candidates table, it will be the same for all tests
 			
@@ -53,7 +76,7 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 			
 			//then set up the messages
 			leafPromoting = new PromotionRequestVendorMessage(
-						new QueryReply.IPPortCombo(NetworkUtils.ip2string(RouterService.getExternalAddress()),PORT),
+						new QueryReply.IPPortCombo("127.0.0.1",PORT),
 						new QueryReply.IPPortCombo("1.2.3.4",15),
 						2);
 			wrongLeaf = new PromotionRequestVendorMessage(
@@ -75,19 +98,21 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 					new QueryReply.IPPortCombo("localhost",PORT),
 					1);
 			wrongIp = new PromotionRequestVendorMessage(
-					new QueryReply.IPPortCombo(NetworkUtils.ip2string(RouterService.getExternalAddress()),PORT),
+					new QueryReply.IPPortCombo("127.0.0.1",PORT),
 					new QueryReply.IPPortCombo("1.2.3.4",15),
 					0);
-			forwardedLeaf = new PromotionRequestVendorMessage(
+			forwardedLeaf = new PromotionRequestVendorMessage( //reconnect the stub at PORT
 					new QueryReply.IPPortCombo("localhost",PORT),
 					new QueryReply.IPPortCombo("1.2.3.4",15),
 					2);
 			forwardedUP = advertiserGone; //don't forget to reconnect the advertiser
-			
-		} catch(UnknownHostException bad) {
-			fail(bad);
-		}
+				
+		
 	}
+	
+	public static Test suite() {
+        return buildTestSuite(ServerSidePromotionRequestTest.class);
+    }   
 	
 	public ServerSidePromotionRequestTest(String name) {
 		super(name);
@@ -105,7 +130,7 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 	 * only one leaf needed
 	 */
 	private static Integer numLeaves() {
-		return new Integer(1);
+		return new Integer(2);
 	}
 	
 	/**
@@ -113,5 +138,18 @@ public class ServerSidePromotionRequestTest extends ServerSideTestCase {
 	 */
 	private static Integer numUPs() {
 		return new Integer(3);
+	}
+	
+	/**
+	 * tests the scenario where a PromotionRequest arrives at a leaf and it
+	 * promotes itself.
+	 */
+	public void testLeafPromoting() throws Exception {
+		//first make sure we are a leaf
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+		assertFalse(RouterService.isSupernode());
+
 	}
 }
