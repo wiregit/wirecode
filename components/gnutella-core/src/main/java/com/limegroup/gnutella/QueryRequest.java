@@ -9,23 +9,40 @@ public class QueryRequest extends Message implements Serializable{
     /** The query string, if we've already extracted it.  Null otherwise. 
      *  LOCKING: obtain this' lock. */
     private String query=null;
+    private String richQuery = null;
 
     /**
      * Builds a new query from scratch
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
      */
-    public QueryRequest(byte ttl, int minSpeed, String query) {
+    public QueryRequest(byte ttl, int minSpeed, String query, String richQuery) {
         //Allocate two bytes for min speed plus query string and null terminator
-        super(Message.F_QUERY, ttl, 2+query.length()+1);
-        payload=new byte[2+query.length()+1];
+        super(Message.F_QUERY, ttl, 2+query.length()+1+richQuery.length()+1);
+        payload=new byte[2+query.length()+1+richQuery.length()+1];
+        int i = 0;//Num bytes in the payload
         //Extract minimum speed.  It's ok if "(short)minSpeed" is negative.
         ByteOrder.short2leb((short)minSpeed, payload, 0);
+        i +=2;//two bytes for this  min speed.
         //Copy bytes from query string to payload
         byte[] qbytes=query.getBytes();
-        System.arraycopy(qbytes,0,payload,2,qbytes.length);
-        //Null terminate it.
-        payload[payload.length-1]=(byte)0;
+        System.arraycopy(qbytes,0,payload,i,qbytes.length);
+        i += qbytes.length;
+        payload[i]=(byte)0;//Null terminate the plain text query
+        i++;
+        byte[] richBytes = richQuery.getBytes();
+        System.arraycopy(qbytes,0,payload,i,richBytes.length);
+        i += richBytes.length;
+        payload[i] = (byte)0;//Null to terminate the rich query.
+        i++; //just so the records are straight. 
+    }
+
+    /**
+     * Older form of the constructor calls the newer form of the constructor
+     * with a empty rich query
+     */
+    public QueryRequest(byte ttl, int minSpeed, String query) {
+        this(ttl, minSpeed, query, "");
     }
 
     /*
@@ -55,25 +72,57 @@ public class QueryRequest extends Message implements Serializable{
         //strings are immutable.
         if (query!=null)
             return query;
+        
+        int end;
+        //find the first null terminator from byte 2 till the null
+        for(end=2; (end < payload.length) && (payload[end] != (byte)0); end++);
 
-        int n=payload.length;
-        //Some clients (like Gnotella) DOUBLE null-terminate strings.
-        //When you make a Java string with 0 in it, it is NOT ignored.
-        //The solution is simple: just shave off the extra null terminator.
-        if (super.getLength()>3 && payload[n-2]==(byte)0)
-            query=new String(payload,2,payload.length-4);
-        //Normal case: single null-terminated.
-        //This also handles the special case of an empty search string.
-        else
-            query=new String(payload,2,payload.length-3);
-        Assert.that(query!=null, "Returning null value in getQuery");
+        query = new String(payload, 2, end-2);
         return query;
+
+        /* Sumeet : commented out the older version of this method
+          int n=payload.length;
+          //Some clients (like Gnotella) DOUBLE null-terminate strings.
+          //When you make a Java string with 0 in it, it is NOT ignored.
+          //The solution is simple: just shave off the extra null terminator.
+          if (super.getLength()>3 && payload[n-2]==(byte)0)
+          query=new String(payload,2,payload.length-4);
+          //Normal case: single null-terminated.
+          //This also handles the special case of an empty search string.
+          else
+          query=new String(payload,2,payload.length-3);
+          Assert.that(query!=null, "Returning null value in getQuery");
+          return query;
+        */
     }
-    
+
+    public synchronized String getRichQuery() {
+        if (richQuery != null)
+            return richQuery;
+        //if we have found it out already use it from before
+        // Find the first null terminator
+        int start;
+        for(start=2; (start < payload.length) && (payload[start] != (byte)0);
+            start++);
+        // Advance past the first null
+        start++;
+        // Find the second null terminator
+        int end;
+        for(end=start; (end < payload.length) && (payload[end] != (byte)0);
+            end++);
+
+        // Catch the no rich query case.
+        if(end < payload.length)
+            richQuery = new String(payload, start, end-start);
+        else
+            richQuery = "";// we have checked - the rich query is empty
+        return richQuery;
+    }
+            
     /** 
      * Returns the number of raw bytes used to represent the query in this
-     * message, excluding any null terminators.  The returned value is typically
-     * used in conjunction with getQueryByteAt.  Because of character encoding
+     * message, excluding any null terminators. The returned value is typically
+     * used in conjunction with getQueryByteAt. Because of character encoding
      * problems, the returned value does not necessarily equal getQuery.length()
      * or getQuery.getBytes().length.  
      */
@@ -84,9 +133,9 @@ public class QueryRequest extends Message implements Serializable{
         else //normal case
             return payload.length-3;
     }
-
+    
     /** 
-     * Returns the pseudoIndex'th byte of the raw query in this message.  Throws
+     * Returns the pseudoIndex'th byte of the raw query in this message. Throws
      * ArrayIndexOutOfBoundsException if pseudoIndex<0 or
      * pseudoIndex>=getQueryLength, i.e., if the given index is either within
      * the first two bytes of the payload or goes into the null termination
@@ -164,3 +213,11 @@ public class QueryRequest extends Message implements Serializable{
     }
     */
 }
+
+
+
+
+
+
+
+

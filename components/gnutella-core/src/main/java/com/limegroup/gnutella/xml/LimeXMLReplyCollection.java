@@ -3,6 +3,11 @@ package com.limegroup.gnutella.xml;
 import java.util.ArrayList;
 import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
+import java.io.RandomAccessFile;
+import java.io.File;
+import java.io.IOException;
+import java.util.StringTokenizer;
+
 
 /**
  *  Stores a schema and a list of Replies corresponding to the 
@@ -18,15 +23,58 @@ class LimeXMLReplyCollection{
     
     private String schemaURI;
     //a list of reply docs in the client machine that correspond to the Schema
+    //Note: Each ReplyCollection is written out to 1 physical file on shutdown.
     private ArrayList replyDocs;
-    
+    private boolean done= false;
     
     //Constructor
-    public LimeXMLReplyCollection(String URI){
+    public LimeXMLReplyCollection(String URI) {
         schemaURI = URI;
         replyDocs = new ArrayList();
+        //Load up the docs from the file.
+        LimeXMLProperties props = LimeXMLProperties.instance();
+        String path = props.getXMLDocsDir();
+        String content="";
+        try{
+            File file = new File(path,URI);
+            RandomAccessFile f = new RandomAccessFile(file,"r");
+            int len = (int)f.length();
+            byte[] con = new byte[len];
+            f.readFully(con,0,len);
+            f.close();
+            content = new String(con);
+            con=null;//free the memory
+        }catch (IOException e){//file had a problem. 
+            //Do not put this collection in mapper
+            done= false;
+            return;
+        }
+        StringTokenizer tokenizer = new StringTokenizer(content,"<?xml");
+        String xmlDoc = "";
+        while(tokenizer.hasMoreTokens()){
+            xmlDoc = tokenizer.nextToken();
+            xmlDoc = "<?xml" + xmlDoc;//bring back the string
+            String xmlString = "";
+            StringTokenizer tok = new StringTokenizer(xmlDoc,"\n\t");
+            while (tok.hasMoreTokens()){
+                xmlString = xmlString+tok.nextToken();
+            }
+            LimeXMLDocument doc= null;
+            try{
+                doc = new LimeXMLDocument(xmlString);
+            }catch(Exception e){//the xml is malformed
+                continue;//just ignore this document. do not add or set done
+            }
+            addReply(doc);
+            if(done == false)
+                done = true;//set it to true coz now we have some data
+        }
     }
     
+    public boolean getDone(){
+        return done;
+    }    
+
     public String getSchemaURI(){
         return schemaURI;
     }

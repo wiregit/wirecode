@@ -14,6 +14,9 @@ import com.sun.java.util.collections.*;
  * throw BadPacketException if the metadata cannot be extracted.  Note that
  * BadPacketException does not mean that other data (namely responses) cannot be
  * read; MissingDataException might have been a better name.  
+ * 
+ * Modified by Sumeet Thadani (5/22/2001) to handle Rich Queries
+ * 
  */
 public class QueryReply extends Message implements Serializable{
     //Rep rationale: because most queries aren't directed to us (we'll just
@@ -107,6 +110,7 @@ public class QueryReply extends Message implements Serializable{
         payload[6]=ip[3];
         ByteOrder.int2leb((int)speed,payload,7);
 
+        //Sumeet Thadani : added metadata between the 2 nulls
         //Write each response at index i
         int i=11;
         for (int left=n; left>0; left--) {
@@ -117,13 +121,19 @@ public class QueryReply extends Message implements Serializable{
             byte[] nameBytes = r.getNameBytes();
             System.arraycopy(nameBytes, 0, payload, i, nameBytes.length);
             i+=nameBytes.length;
-            //Write double null terminator.
+            //Write first null terminator.
             payload[i++]=(byte)0;
+            //insert metadata b/w the nulls
+            byte[] metaBytes = r.getMetaBytes();
+            System.arraycopy(metaBytes, 0, payload, i, metaBytes.length);
+            //add the second null terminator
             payload[i++]=(byte)0;
         }
 
         //Write QHD if desired
         if (includeQHD) {
+            //TODO3: We can add some info in the QHD if the reply 
+            //contains metadata. Where? How?
             //a) vendor code.  This is hardcoded here for simplicity,
             //efficiency, and to prevent character decoding problems.
             payload[i++]=(byte)76; //'L'
@@ -168,14 +178,18 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Returns the number of bytes necessary to represent responses
-     * in the payload */
+     * in the payload 
+     * Modified by Sumeet Thadani 5/22/2001 to account the Metadata part
+     * of the responses
+    */
     private static int rLength(Response[] responses) {
         int ret=0;
         for (int i=0; i<responses.length; i++)
             //8 bytes for index and size, plus name and two null terminators
             //response.getNameBytesSize() returns the size of the 
             //file name in bytes
-            ret += 8+responses[i].getNameBytesSize()+2;
+            ret += 8+responses[i].getNameBytesSize()+1/*regular part*/+
+            responses[i].getMetaBytesSize()+1/*meta part*/;
         return ret;
     }
 
@@ -316,7 +330,7 @@ public class QueryReply extends Message implements Serializable{
                 //The file name is supposed to be terminated by a double null
                 //terminator.  But Gnotella inserts meta-information between
                 //these null characters.  So we have to handle this.
-                //
+                //Sumeet: We also have meta info there now!!(5/22/2001)
                 //See http://gnutelladev.wego.com/go/
                 //         wego.discussion.message?groupId=139406&
                 //         view=message&curMsgId=319258&discId=140845&
@@ -331,17 +345,22 @@ public class QueryReply extends Message implements Serializable{
 
                 //payload[i..j-1] is name.  This excludes the null terminator.
                 String name=new String(payload,i,j-i);
-                responses[responses.length-left]=new Response(index,size,name);
 
                 //Search for remaining null terminator.
-                for ( j=j+1; ; j++) {
-                    if (payload[j]==(byte)0)
+                int k = j+1;//next byte after the first null
+                for ( ; ; k++) {
+                    if (k>=payload.length-16)//k is already in the GUID
+                        throw new BadPacketException("Missing null terminator "
+                                                     +"filename");
+                    if (payload[k]==(byte)0)
                         break;
                 }
-                i=j+1;
-                if (i>payload.length-16)
-                    throw new BadPacketException("Missing null terminator "
-                                                 +"filename");
+                String meta = new String(payload,j+1, k-(j+1) );
+                
+                responses[responses.length-left]=
+                                          new Response(index,size,name,meta);
+                //If there is no metadata meat.equals(""). We are OK.
+                i=k+1;//The byte after the second null
             }
 
             //All set.  Accept parsed results.
@@ -538,6 +557,28 @@ public class QueryReply extends Message implements Serializable{
             qr.getVendor();
             Assert.that(false);
         } catch (BadPacketException e) { }
+
+        //Test case added by Sumeet Thadani to check the metadata part
+        payload=new byte[11+8+2+2+16];
+        payload[0]=1;                    //Number of results
+        payload[11+8]=(byte)65;          //The character 'A'
+        payload[11+10] = (byte)65;
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Response r = (Response)iter.next();
+            Assert.that(r.getNameBytesSize()==1,"Sumeet test a");
+            Assert.that(r.getMetaBytesSize()==1,"Sumeet test b");
+            byte[] name = r.getNameBytes();
+            byte[] meta = r.getMetaBytes();
+            Assert.that(name[0]=='A',"sumeet test c");
+            Assert.that(meta[0]=='A',"sumeet test d");
+            Assert.that(r.getName().equals("A"),"Sumeet test1");
+            Assert.that(r.getMetadata().equals("A"),"Sumeet test2");
+        }catch(BadPacketException e){
+            System.out.println("MetaResponse not created well!");
+        }
 
         //Normal case: basic metainfo with no vendor data
         payload=new byte[11+11+(4+2+0)+16];

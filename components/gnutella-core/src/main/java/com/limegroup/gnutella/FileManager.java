@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.xml.MetaFileManager;
 
 
 /**
@@ -32,7 +33,7 @@ public class FileManager {
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in a shared directory with a shareable extension. */
-    private ArrayList /* of FileDesc */ _files;
+    protected ArrayList /* of FileDesc */ _files;
     /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  INVARIANT: For all keys k in
@@ -70,7 +71,7 @@ public class FileManager {
     private Object _loadThreadLock=new Object();
 
     /** The single instance of FileManager.  (Singleton pattern.) */
-    private static FileManager _instance = new FileManager();
+    private static MetaFileManager _instance = new MetaFileManager();
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
     private static ActivityCallback _callback;
@@ -95,7 +96,7 @@ public class FileManager {
         }
     }
 
-    private FileManager() {
+    protected FileManager() {
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
@@ -111,7 +112,7 @@ public class FileManager {
     
     /** Returns the single instance of the FileManager.  The FileManager has no
      *  files or callback until loadSettings() or initialize is called.  */
-    public static FileManager instance() {
+    public static MetaFileManager instance() {
         return _instance;
     }
 

@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileDesc;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.util.List;
@@ -38,6 +40,8 @@ class RichQueryHandler{
      * Warning: Returns null if the XMLQuery is malformed.
      */
     public Response[] query(String XMLQuery){
+        if (XMLQuery.equals(""))
+            return null;
         LimeXMLDocument queryDoc = null;
         try{// if we catch an exception here the query is malformed.
             queryDoc=new LimeXMLDocument(XMLQuery);
@@ -49,30 +53,59 @@ class RichQueryHandler{
             return null;
         }
         
-        String schema = queryDoc.getSchemaURI();        
+        String schema = queryDoc.getSchemaURI();
         SchemaReplyCollectionMapper mapper = 
                             SchemaReplyCollectionMapper.instance();
-        LimeXMLReplyCollection replyDocs = mapper.getReplyCollection(schema);
-        List matchingReplies = replyDocs.getMatchingReplies(queryDoc);
-        //TODO1: Complete
-        int size = matchingReplies.size();
-        for(int i=0; i<size;i++){            
-            
+        LimeXMLReplyCollection replyCol = mapper.getReplyCollection(schema);
+        List matchingReplies = replyCol.getMatchingReplies(queryDoc);
+        //matchingReplies = a List of LimeXMLDocuments that match the query
+        int s = matchingReplies.size();
+        Response[] retResponses = new Response[s];
+        MetaFileManager fManager = FileManager.instance();
+        //We need the MetaFileManager to get the FileDesc from full FileName
+        //Note:FileManager has been changed to return a MetaFileManager now
+        Response res;
+        long index=-1;
+        long size=-1;
+        String name="";
+        String metadata="";
+        int z =0;
+        boolean valid = true;
+        for(int i=0; i<s;i++){
+            LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
+            String subjectFile = currDoc.getIdentifier();//returns null if none
+            metadata = currDoc.getXMLString();
+            if(subjectFile==null){//pure data (data about NO file)
+                index = -1;
+                name = "";
+                size = metadata.length();//Here: size = size of metadata String
+            }
+            else { //meta-data about a specific file
+                FileDesc fd = fManager.file2index(subjectFile);
+                if (fd != null){//we found a file with the right name
+                index = fd._index;
+                name =  fd._name;//need not send whole path; just name + index
+                size =  fd._size;
+                }
+                else{//meaning fd == null 
+                    //this is a bad case: 
+                    //the metadata says that its about a file but the 
+                    //fileManager cannot find this file.
+                    //we should remove this meta-data from the repository
+                    //The above is a TODO2
+                    valid = false;
+                }
+            }
+            if (valid){
+                //if this code is NOT run s times 
+                //there will be nulls at the end of the array
+                res = new Response(index,size,name,metadata);                
+                retResponses[z] = res;
+                z++;
+            }
+            valid = true;
         }
-        //find out if these replyDocuments correspond to dome file 
-        //(by checking the identifier tags.)
-        //If they correspond to files we make responses in the 
-        // regular way...with an index and a a size and a name and the
-        // meta info.
-
-        //however if there is no file, we create the response with a
-        //special index (like -1) if that is legal. And then this will allow
-        //us to put the meta info in and not have the system check for
-        //corresponding file.
-
-        //Also, we have to a have a method called toXMLString in the 
-        //LimeXMLDocument class.
-        return null;
+        return retResponses;
     }
 
 }

@@ -45,6 +45,8 @@ public class LimeXMLProperties
      */
     private static final String XML_SCHEMA_DIR = "XML_SCHEMA_DIR";
 
+    private static final String XML_DOCS_DIR = "XML_DOCS_DIR";
+
 
     /**
      * The name of the directory in which XML Schemas will be 
@@ -52,7 +54,9 @@ public class LimeXMLProperties
      */
     private static final String XML_SCHEMA_DIR_DEF = "etc" + File.separator + 
                                                 "schemas" + File.separator;
-                                                
+    
+    private static final String XML_DOCS_DIR_DEF = "etc" + File.separator + 
+                                                "xml" + File.separator;
     /**
      * The property that denotes the file that stores the 
      * Schema Transformation DataMap
@@ -134,6 +138,17 @@ public class LimeXMLProperties
     }
         
     /**
+     * Returns the name of the directory where the XML Documents are located
+     */
+    public String getXMLDocsDir()
+    {
+        String xmlDocsDirRel = _properties.getProperty(XML_DOCS_DIR,
+                                                          XML_DOCS_DIR_DEF);
+        return getPath() + xmlDocsDirRel;
+    }
+    
+
+    /**
      * Returns the name of the file that stores the SchemaTransformationDataMap
      */
     public String getSchemaTransformationDataMapFile()
@@ -186,7 +201,7 @@ public class LimeXMLProperties
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
-        return "E:\\work\\";
+        return SettingsManager.instance().getPath();
     }
     
 }//end of class

@@ -21,6 +21,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.ArrayList;
 
+//import for Testing
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 /**
  * @author  Sumeet Thadani
  * @version
@@ -34,30 +38,25 @@ public class LimeXMLDocument{
     
     protected Map fieldToValue;
     protected String schemaUri;
+    protected String XMLString;//this is what is sent back on the wire.
     /** 
      * Field corresponds to the name of the file for which this
      * meta-data corresponds to. It can be null if the data is pure meta-data
      */
     protected String identifier;
     
-    //constructors
+    //constructor
     public LimeXMLDocument(String XMLString) throws SAXException, 
                                         SchemaNotFoundException, IOException{
         InputSource doc = new InputSource(new StringReader(XMLString));
+        this.XMLString = XMLString;
         initialize(doc);
-    }
-    
-    public LimeXMLDocument(File f) throws SchemaNotFoundException, 
-                             FileNotFoundException, SAXException, IOException{
-        InputSource doc = null;
-        doc = new InputSource(new FileInputStream(f));
-        initialize(doc);        
     }
     
     private void initialize(InputSource doc) throws SchemaNotFoundException,
                             IOException, SAXException {
         DOMParser parser = new DOMParser();
-        //TODO2: make sure that the schema actually validates documents
+        //TODO1: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
         Document document = null;
@@ -82,6 +81,8 @@ public class LimeXMLDocument{
         }
         if(schemaUri == null)//we cannot have a doc with out a schema
             throw new SchemaNotFoundException();
+        //Note: However if the identifier is null it just implies that
+        // the meta data is not associated with any file!
     }
 
     private void createMap(Document doc) {
@@ -111,8 +112,8 @@ public class LimeXMLDocument{
         else
             currTag = currNode.getNodeName();
             
-        if (currNode.getNodeType() == Node.CDATA_SECTION_NODE)
-            System.out.println("this node has type  "+ currNode.getNodeType());
+        //if (currNode.getNodeType() == Node.CDATA_SECTION_NODE)
+        //  System.out.println("this node has type  "+ currNode.getNodeType());
 
         Element currElement = (Element)currNode;
         String nodeValue = LimeXMLUtils.getText(currElement.getChildNodes());
@@ -137,11 +138,18 @@ public class LimeXMLDocument{
     /**
      * Returns the unique identifier which identifies the schema this XML
      * document conforms to
-     * @return the unique identifier which identifies the schema this XML
-     * document conforms to
      */
     public String getSchemaURI(){
         return schemaUri;
+    }
+
+    /**
+     * Returns the name of the file that the data in this XML document 
+     * corresponds to. If the meta-data does not correspond to any file
+     * in the file system, this method will rerurn a null.
+     */
+    public String getIdentifier(){
+        return identifier;
     }
     
     /**
@@ -186,28 +194,50 @@ public class LimeXMLDocument{
         String value = (String)fieldToValue.get(fieldName);
         return value;
     }
+    
+    /**
+     * Returns an XML string that will be re-created as this document 
+     * when it is re-assembled in another machine. 
+     */
 
-    //Unit Tester
-    /*
-      public static void main(String args[]){
-      //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
-      /*
+    public String getXMLString() {        
+        return XMLString;
+    }            
+
+    //Unit Tester    
+    public static void main(String args[]){
+        //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
+        
         Runtime rt = Runtime.getRuntime();
         long mem = rt.totalMemory()- rt.freeMemory();
         System.out.println("Sumeet : Used memory is "+mem);
-        File f = new File("C:/home/etc/xml","all-books-pub.xml");
-        LimeXMLDocument l = new LimeXMLDocument(f);
+        File f = new File("C:/home/etc/xml","junk.xml");
+        LimeXMLDocument l = null;
+        try{            
+            String buffer = "";
+            String xmlStruct = "";
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            while(buffer!=null){
+                buffer=br.readLine();
+                if (buffer!=null)
+                    xmlStruct = xmlStruct+buffer;
+                xmlStruct = xmlStruct.trim();
+            }
+            l = new LimeXMLDocument(xmlStruct);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         List list = l.getNameValueList();
         int size = list.size();
         for (int i =0; i< size; i++){
-        NameValue a = (NameValue)list.get(i);
-        String name = a.getName();
-        String value = (String)a.getValue();
-        System.out.println("Sumeet : name "+name);
-        System.out.println("Sumeet : value "+value);
+            NameValue a = (NameValue)list.get(i);
+            String name = a.getName();
+            String value = (String)a.getValue();
+            System.out.println("Sumeet : name "+name);
+            System.out.println("Sumeet : value "+value);
         }
-        }
-    */
+    }
+    
 }
 
 

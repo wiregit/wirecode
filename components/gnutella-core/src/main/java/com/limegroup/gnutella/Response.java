@@ -19,7 +19,8 @@ public class Response {
 	 *  will be added per response (as opposed to per QueryReply
 	 */
 	private String metadata;
-	
+
+    private byte[] metaBytes;
 
     /** Creates a fresh new response.
      *
@@ -37,6 +38,7 @@ public class Response {
         this.name=name;
         this.nameBytes = name.getBytes();
 		metadata = "";
+        this.metaBytes = metadata.getBytes();
     }
 
     /**Overloaded constructor that allows the creation of Responses with
@@ -53,6 +55,7 @@ public class Response {
         this.name=name;
         this.nameBytes = name.getBytes();
 		this.metadata = metadata;
+        this.metaBytes = metadata.getBytes();
     }
 
     public long getIndex() {
@@ -74,8 +77,16 @@ public class Response {
         return nameBytes.length;
     }
 
+    public int getMetaBytesSize() {
+        return metaBytes.length;
+    }
+
     public byte[] getNameBytes() {
         return nameBytes;
+    }
+
+    public byte[] getMetaBytes() {
+        return metaBytes;
     }
 
     public String getName() {
