@@ -87,9 +87,10 @@ public class SupernodeHandshakeResponder
             //Did the server request we become a leaf?
             String neededS=response.getHeaders().
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
-            if (neededS!=null
-                && !Boolean.valueOf(neededS).booleanValue()
-                && _manager.allowLeafDemotion())
+            if (neededS!=null && 
+				!Boolean.valueOf(neededS).booleanValue() && 
+				isLimeWire(headers) &&
+				_manager.allowLeafDemotion())
             {
                 //Fine, we'll become a leaf.
                 ret.put(ConnectionHandshakeHeaders.X_SUPERNODE,
@@ -98,6 +99,20 @@ public class SupernodeHandshakeResponder
             return new HandshakeResponse(ret);
         }
     }
+
+	/**
+	 * Returns whether or not the set of connection headers denotes that the
+	 * connecting host is a LimeWire -- useful in deciding whether or not
+	 * to ignore their leaf demotion request.
+	 *
+	 * @param headers the connection headers
+	 */
+	private boolean isLimeWire(Properties headers) {
+        String userAgent =
+			headers.getProperty(ConnectionHandshakeHeaders.USER_AGENT);		
+		if(userAgent == null) return false;
+		return userAgent.startsWith("LimeWire");
+	}
     
     /** 
      * Returns true if this incoming connections should be rejected with a 503. 
