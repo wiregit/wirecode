@@ -98,8 +98,12 @@ class HashTreeNodeManager {
      */
     private synchronized void insertEntry(HashTree tree, List nodes) {
         int size = calculateSize(nodes);
-        while(_currentNodes + size > MAX_NODES)
+        while(_currentNodes + size > MAX_NODES) {
+            if(MAP.isEmpty())
+                throw new IllegalStateException(
+                    "current: " + _currentNodes + ", size: " + size);
             purgeLRU();
+        }
         _currentNodes += size;
         MAP.put(tree, nodes);
     }
