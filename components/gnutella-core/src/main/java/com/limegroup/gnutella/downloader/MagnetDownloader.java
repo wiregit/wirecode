@@ -238,7 +238,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
         boolean isRequery=numRequeries!=0;
         return new QueryRequest(QueryRequest.newQueryGUID(isRequery),
-                                SettingsManager.instance().getTTL(),
+								(byte)4,
                                 0,                 //speed
                                 _textQuery==null ? "" : _textQuery,
                                 null,              //metadata

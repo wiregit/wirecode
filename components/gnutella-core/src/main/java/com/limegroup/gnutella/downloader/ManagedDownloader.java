@@ -547,7 +547,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (allFiles.length<0)                  //TODO: what filename?
             throw new CantResumeException("");  //      maybe another exception?
         return new QueryRequest(QueryRequest.newQueryGUID(true),
-                                SettingsManager.instance().getTTL(),
+								(byte)4,
                                 0,              //minimum speed
                                 extractQueryString(), 
                                 null,           //metadata query

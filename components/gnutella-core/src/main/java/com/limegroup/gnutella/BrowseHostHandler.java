@@ -97,11 +97,11 @@ public class BrowseHostHandler {
                 _callback.browseHostFailed(_guid);
             } else {
                 PushRequest pr = new PushRequest(GUID.makeGuid(),
-                                             SettingsManager.instance().getTTL(),
-                                             _serventID.bytes(), 
-                                             SPECIAL_INDEX,
-                                             _acceptor.getAddress(),
-                                             _acceptor.getPort());
+												 (byte)6,
+												 _serventID.bytes(), 
+												 SPECIAL_INDEX,
+												 _acceptor.getAddress(),
+												 _acceptor.getPort());
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {

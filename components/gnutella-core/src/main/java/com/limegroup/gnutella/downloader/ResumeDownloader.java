@@ -124,7 +124,7 @@ public class ResumeDownloader extends ManagedDownloader
         //ultrapeers may insist that all keywords are in the QRP tables.
         boolean isRequery=numRequeries!=0;
         return new QueryRequest(QueryRequest.newQueryGUID(isRequery),
-                                SettingsManager.instance().getTTL(),
+								(byte)4,
                                 0,                 //speed
                                 getFileName(),     //query string
                                 null,              //metadata
