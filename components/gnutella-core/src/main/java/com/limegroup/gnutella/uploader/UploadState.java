@@ -9,13 +9,13 @@ import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.util.IpPort;
 
 /**
  * an Upload State.  has some utility methods all upload states can use.
@@ -135,10 +135,10 @@ public abstract class UploadState implements HTTPMessage {
 	    int proxiesWritten =0;
 	    for (Iterator iter = proxies.iterator();
 	    	iter.hasNext() && proxiesWritten <4 ;) {
-	        PushProxyInterface current = (PushProxyInterface)iter.next();
-	        buf.append(current.getPushProxyAddress().getHostAddress())
+	        IpPort current = (IpPort)iter.next();
+	        buf.append(current.getAddress())
 	        	.append(":")
-	        	.append(current.getPushProxyPort())
+	        	.append(current.getPort())
 	        	.append(",");
 	        
 	        proxiesWritten++;
@@ -170,10 +170,10 @@ public abstract class UploadState implements HTTPMessage {
 	    int proxiesWritten =0;
 	    for (Iterator iter = proxies.iterator();
 	    	iter.hasNext() && proxiesWritten <4 ;) {
-	        PushProxyInterface current = (PushProxyInterface)iter.next();
-	        buf.append(current.getPushProxyAddress().getHostAddress())
+	        IpPort current = (IpPort)iter.next();
+	        buf.append(current.getAddress())
 	        	.append(":")
-	        	.append(current.getPushProxyPort())
+	        	.append(current.getPort())
 	        	.append(",");
 	        
 	        proxiesWritten++;

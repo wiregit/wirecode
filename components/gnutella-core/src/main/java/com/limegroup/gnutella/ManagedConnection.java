@@ -81,7 +81,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, PushProxyInterface {
+	implements ReplyHandler {
 
     /** 
      * The time to wait between route table updates for leaves, 
@@ -271,15 +271,10 @@ public class ManagedConnection extends Connection
      */
     private volatile int softMaxHops = -1;
 
-    /** Use this if a PushProxyAck is received for this MC meaning the remote
-     *  Ultrapeer can serve as a PushProxy
+    /**
+     * whether this connection is a push proxy for somebody
      */
-    private InetAddress pushProxyAddr = null;
-
-    /** Use this if a PushProxyAck is received for this MC meaning the remote
-     *  Ultrapeer can serve as a PushProxy
-     */
-    private int pushProxyPort = -1;
+    private volatile boolean _pushProxy;
 
     /** The class wide static counter for the number of udp connect back 
      *  request sent.
@@ -1305,8 +1300,7 @@ public class ManagedConnection extends Connection
             PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
             if (Arrays.equals(ack.getGUID(),
                               RouterService.getMessageRouter()._clientGUID)) {
-                pushProxyPort = ack.getListeningPort();
-                pushProxyAddr = ack.getListeningAddress();
+                _pushProxy = true;
             }
             // else mistake on the server side - the guid should be my client
             // guid - not really necessary but whatever
@@ -1572,19 +1566,8 @@ public class ManagedConnection extends Connection
     }
 
     
-    /** @return a non-negative integer representing the proxy's port for HTTP
-     *  communication, a negative number if PushProxy isn't supported.
-     */
-    public int getPushProxyPort() {
-        return pushProxyPort;
-    }
-
-    /** @return the InetAddress of the remote host - only meaningful if
-     *  getPushProxyPort() > -1
-     *  @see getPushProxyPort()
-     */
-    public InetAddress getPushProxyAddress() {
-        return pushProxyAddr;
+    public boolean isPushProxy() {
+        return _pushProxy;
     }
     
 

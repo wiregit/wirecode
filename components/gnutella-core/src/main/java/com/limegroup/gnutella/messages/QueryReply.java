@@ -21,7 +21,6 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
@@ -1237,10 +1236,10 @@ public class QueryReply extends Message implements Serializable{
                 int numWritten = 0;
                 Iterator iter = proxies.iterator();
                 while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
-                    PushProxyInterface ppi = (PushProxyInterface)iter.next();
+                    IpPort ppi = (IpPort)iter.next();
                     String host = 
-                        ppi.getPushProxyAddress().getHostAddress();
-                    int port = ppi.getPushProxyPort();
+                        ppi.getAddress();
+                    int port = ppi.getPort();
                     try {
                         IPPortCombo combo = new IPPortCombo(host, port);
                         baos.write(combo.toBytes());
@@ -1280,7 +1279,7 @@ public class QueryReply extends Message implements Serializable{
             return retGGEPBlock;
         }
         
-        /** @return a <tt>Set</tt> of <tt>PushProxyContainer</tt> instances,
+        /** @return a <tt>Set</tt> of <tt>IpPortCombo</tt> instances,
          *  which can be empty but is guaranteed not to be <tt>null</tt>, as 
          *  described by the GGEP blocks.
          *
@@ -1300,7 +1299,7 @@ public class QueryReply extends Message implements Serializable{
                             try {
                                 if(proxies == null)
                                     proxies = new HashSet(3);
-                                proxies.add(new PushProxyContainer(combo));
+                                proxies.add(new IPPortCombo(combo));
                             } catch (BadPacketException malformedPair) {}
                         }                        
                     }
@@ -1311,48 +1310,6 @@ public class QueryReply extends Message implements Serializable{
                 return Collections.EMPTY_SET;
             else
                 return proxies;
-        }
-    }
-
-    /** A simple utility class for doling out PushProxy information.
-     */
-    public static class PushProxyContainer implements PushProxyInterface {
-        IPPortCombo _combo;
-
-        public PushProxyContainer(String hostAddress, int port) 
-            throws UnknownHostException {
-            _combo = new IPPortCombo(hostAddress, port);
-        }
-
-        public PushProxyContainer(byte[] fromNetwork)
-            throws BadPacketException {
-            _combo = IPPortCombo.getCombo(fromNetwork);
-        }
-
-        public int getPushProxyPort() {
-            return _combo.getPort();
-        }
-        public InetAddress getPushProxyAddress() {
-            return _combo.getInetAddress();
-        }
-
-        public boolean equals(Object other) {
-            if(this == other) return true;
-            if (other instanceof PushProxyContainer) {
-                PushProxyContainer iface = (PushProxyContainer) other;
-                return _combo.equals(iface._combo);
-            }
-            return false;
-        }
-
-        // overridden to fulfill contract with equals for hash-based
-        // collections
-        public int hashCode() {
-            return _combo.hashCode() * 17;
-        }
-        
-        public String toString() {
-            return _combo.toString();
         }
     }
 
