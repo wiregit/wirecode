@@ -36,8 +36,6 @@ public class HTTPUploader implements Runnable {
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
 
-	// System.out.println("In the first upload constructor");
-
 	_okay = false;
 
 	file = file.trim();
@@ -57,13 +55,11 @@ public class HTTPUploader implements Runnable {
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
-	    //	    System.out.println("ERROR A");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 	/* check to see if the index */
 	if (! (_fdesc._name.trim()).equals(_filename.trim())) { /* matches the name */
-	    //	    System.out.println("ERROR B");
   	    doNoSuchFile();
     	    return;
     	}
@@ -77,24 +73,18 @@ public class HTTPUploader implements Runnable {
 	    _ostream = _socket.getOutputStream();
 	}
 	catch (Exception e) {
-	    //	    System.out.println("ERROR C");
-	    uploadError("unable to open outputsetream");
 	    return;
 	}
 
 	try {
-	    String f = _fdesc._path;
-	    
+	    String f = _fdesc._path;	    
 	    File myFile = new File(f);  /* _path is the full name */
-
 	    String foo = myFile.toString();
-	    
 	    _fis = new FileInputStream(myFile);
 
 	}
 
 	catch (Exception e) {
-	    uploadError("unable to open file");
 	    return;
 	}
 
@@ -141,7 +131,6 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
-	    uploadError("unable to open file");
 	    return;
 	}
 
@@ -152,29 +141,21 @@ public class HTTPUploader implements Runnable {
 	    conn = url.openConnection();
 	}
 	catch (java.net.MalformedURLException e) {
-	    uploadError("Bad URL");
 	    return;
 	}
 	catch (IOException e) {
-	    uploadError("can't opeInputStreamReader n connection");
 	    return;
 	}
 	catch (Exception e) {
-	    uploadError("Unknown error occured:");
-	    // e.printStackTrace();
 	    return;
 	}
 	try {
 	    _ostream = conn.getOutputStream();
 	}
 	catch (IOException e) {
-	    uploadError("can't open output stream");
-	    // e.printStackTrace();
 	    return;
 	}
 	catch (Exception e) {
-	    uploadError("Unknown error occured:");
-	    // e.printStackTrace();
 	    return;
 	}
 
@@ -208,11 +189,9 @@ public class HTTPUploader implements Runnable {
 	    return _socket.getInetAddress();
 	else {
 	    try {
-		//		System.out.println("Host " + new String(_host));
 		return InetAddress.getByName(new String(_host));
 	    }
 	    catch (Exception e) {
-		//   System.out.println("The get by name didn't work");
 	    }
 	}
 	return null;
@@ -221,14 +200,6 @@ public class HTTPUploader implements Runnable {
     public void writeHeader() {
 	try {
 	    
-	    // _out.write("HTTP 200 OK \r\n");
-	    // _out.write("Server: Gnutella \r\n");
-	    // String type = getMimeType();       /* write this method later  */
-	    // _out.write("Content-type:" + type + "\r\n"); 	
-	    // _out.write("Content-length:"+ _sizeOfFile + "\r\n");
-	    // _out.write("\r\n");
-	    // _out.flush();
-
 	    String str = "HTTP 200 OK \r\n";
 
 	    _ostream.write(str.getBytes());
@@ -245,30 +216,23 @@ public class HTTPUploader implements Runnable {
 	}
 
 	catch (Exception e) {
-	    uploadError("Unable to write header info");
 	    return;
 	}
     }
 
     public void run() {
 
-	//	System.out.println("In the upload run");
 	if (_okay) {
-	    // System.out.println("Uploader is okay");
 	    _callback.addUpload(this);
 	    doUpload();
 	    _callback.removeUpload(this);
 	}
 	else {
-	    // System.out.println("Uploader not okay");
 	    shutdown();
 	}
     }
 
     public void doUpload() {
-
-	//  if (!_okay)
-//  	    return;
 
 	writeHeader();
 	int c = -1;
@@ -288,7 +252,6 @@ public class HTTPUploader implements Runnable {
 		_ostream.write(buf, 0, c);
 	    }
 	    catch (IOException e) {
-		uploadError("Unable to write to the socket");		
 	    }
 	    _amountRead += c;
 
@@ -297,7 +260,6 @@ public class HTTPUploader implements Runnable {
 	    _ostream.close();
 	}
 	catch (IOException e) {
-	    uploadError("Unable to close the socket");		
 	}
 
 
@@ -322,7 +284,6 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
-	    uploadError("Unable to write out to the socket");
 	}
     }
     
@@ -337,8 +298,7 @@ public class HTTPUploader implements Runnable {
 
     private void uploadError(String str)
     {
-	//	System.out.println(str);
-	// These should not go anywhere for uploads
+
     }
 
 }
