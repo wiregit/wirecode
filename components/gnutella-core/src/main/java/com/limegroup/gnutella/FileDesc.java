@@ -526,7 +526,10 @@ public class FileDesc implements AlternateLocationCollector {
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
 				"urns:     "+listInformation(URNS.iterator())+"\r\n"+
-				"docs:     "+listInformation(_limeXMLDocs.iterator())+"\r\n"+
+				"docs:     "+
+				 (_limeXMLDocs == null ? "null" : 
+				        listInformation(_limeXMLDocs.iterator()) )
+				            +"\r\n"+
 				"alt locs: "+ALT_LOCS+"\r\n");
 	}
 }
