@@ -80,7 +80,7 @@ public class UltrapeerHandshakeResponder
 	 *
 	 * @param response the headers read from the connection
 	 */
-	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
+	private HandshakeResponse respondToIncoming(HandshakeResponse response) {		
 		// if this is a connections from the crawler, return the special crawler 
         // response
 		if(response.isCrawler()) {
@@ -182,7 +182,7 @@ public class UltrapeerHandshakeResponder
             else
                HandshakingStat.UP_INCOMING_REJECT_NO_ROOM_UP.incrementStat();
         }
-        
+
         return true;
     }
 }

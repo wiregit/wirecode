@@ -7,14 +7,17 @@ package com.limegroup.gnutella.handshaking;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.statistics.HandshakingStat;
+import com.limegroup.gnutella.util.*;
 
 
 public class ForcedUltrapeerHandshakeResponder
 		extends
-			UltrapeerHandshakeResponder {
+			AuthenticationHandshakeResponder {
+	
 	public ForcedUltrapeerHandshakeResponder(String str) {
-		super(str);
+		super(RouterService.getConnectionManager(), str);
 	}
 	
 	
@@ -24,13 +27,44 @@ public class ForcedUltrapeerHandshakeResponder
 	protected HandshakeResponse respondUnauthenticated(
 			HandshakeResponse response, boolean outgoing) throws IOException {
 		
-		Properties props = super.respondUnauthenticated(response, outgoing).props();
-		props.put("X-Ultrapeer","True");
+		if(outgoing) return respondToOutgoing(response);
+		return respondToIncoming(response);	
+	}
+	
+	/**
+	 * Accepts a connection from the client which we are promoting.
+	 * We must accept this connection disregarding the number of free slots.
+	 */
+	private HandshakeResponse respondToIncoming(HandshakeResponse response) throws IOException {
 		
-		if (outgoing)
-			return HandshakeResponse.createAcceptOutgoingResponse(props);
-		else
-			return HandshakeResponse.createAcceptIncomingResponse(response,props);
+		//if this is a connections from the crawler, freak out 
+		if(response.isCrawler()) 
+			throw new IOException("candidate leaf sent crawler header???");
+		
+		//the other side should be a limewire leaf posing as ultrapeer.
+		if (!response.isLimeWire() || !response.isUltrapeer()) 
+			return HandshakeResponse.createRejectOutgoingResponse();
+	
+		//Incoming connection....
+		Properties ret = new UltrapeerHeaders(getRemoteIP());
+		
+		//give own IP address
+		ret.put(HeaderNames.LISTEN_IP,
+				NetworkUtils.ip2string(RouterService.getAddress())+":"
+				+ RouterService.getPort());
+		
+		
+		//deflate
+		if(response.isDeflateAccepted()) {
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+		}
+		
+		// accept the connection, and let the connecting node know about 
+        // Ultrapeers that are as many hops away as possible, to avoid 
+        // cycles.
+        return HandshakeResponse.createAcceptIncomingResponse(response, ret);
+		
+		
 	}
 	
 	/**
@@ -45,7 +79,7 @@ public class ForcedUltrapeerHandshakeResponder
 		// They supposedly requested our promotion and are now giving us guidance?
 		// reject the connection.
         if(response.hasLeafGuidance()) {
-        	
+        	System.out.println("rejecting");
         	return HandshakeResponse.createRejectOutgoingResponse();
         	
 		} else if( RECORD_STATS )
@@ -55,10 +89,11 @@ public class ForcedUltrapeerHandshakeResponder
 		if(response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
-
-        // accept the response
-        return HandshakeResponse.createAcceptOutgoingResponse(ret);
-
+		
+		//add the UP header
+		ret.put(HeaderNames.X_ULTRAPEER,"True");
+		
+		return HandshakeResponse.createAcceptOutgoingResponse(ret);
 			
 	}
 	

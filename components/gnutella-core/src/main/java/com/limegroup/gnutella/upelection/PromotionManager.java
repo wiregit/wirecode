@@ -18,6 +18,8 @@ import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
 
+import java.net.InetAddress;
+
 public class PromotionManager {
 	
 	/**
@@ -120,13 +122,28 @@ public class PromotionManager {
 		}
 	}
 	
-	public boolean isPromoting(String host, int port) {
+	/**
+	 * Checks whether the current pair of InetAddress and port
+	 * match those of the promotion partner.
+	 * final as will be called often.
+	 */
+	public final boolean isPromoting(InetAddress addr, int port) {
+		//I'm not locking the first check as it will 
+		//1) happen too often
+		//2) its no big deal if the value gets changed by
+		//   a different thread.
+		if (_promotionPartner == null)
+			return false;
+		
+		//allow locals for testing
+		if (addr.isLoopbackAddress())
+			return true;
+		
 		synchronized(_promotionLock) {
-			if (_promotionPartner == null)
-				return false;
-			return (_promotionPartner.getAddress().equals(host) &&
-				_promotionPartner.getPort() == port ) ||
-				_promotionPartner.getInetAddress().isLoopbackAddress(); //for testing
+			//check for null again if it got nulled in the meantime
+			return _promotionPartner != null &&
+					_promotionPartner.getInetAddress().equals(addr) &&
+					_promotionPartner.getPort() == port;
 		}
 	}
 	

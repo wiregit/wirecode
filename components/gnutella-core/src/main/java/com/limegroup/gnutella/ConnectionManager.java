@@ -612,10 +612,16 @@ public class ConnectionManager {
      * @param c The connection we received, for which to 
      * test if we have incoming slot.
      * @return true, if we have incoming slot for the connection received,
+     * or it is from a candidate we asked to promote.
      * false otherwise
      */
     private boolean allowConnection(ManagedConnection c) {
         if(!c.receivedHeaders()) return false;
+        
+        if (c.isCandidateConnection()) {
+        	dropWorstUPAsync(c);  //schedule a trimming of the UPs
+        	return true;
+        }
 		return allowConnection(c.headers(), false);
     }
 
@@ -774,7 +780,7 @@ public class ConnectionManager {
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
             // Thus, we only worry about the case we're connecting to
-            // another ultrapeer (internally or externally generated)
+            // another ultrapeer (internally or externally generated) 	
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             int locale_num = 0;
@@ -782,7 +788,7 @@ public class ConnectionManager {
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
                 return false;
             }
-
+            
             if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
                 //if locale matches and we haven't satisfied the
                 //locale reservation then we force return a true
@@ -802,7 +808,7 @@ public class ConnectionManager {
                     getNumLimeWireLocalePrefSlots();
             }
 
-
+            
             // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
             // for non-limewire peers to ensure that the network
             // is well connected.
@@ -813,7 +819,7 @@ public class ConnectionManager {
                 }
             }
             
-            // Otherwise, allow only if we've left enough room for the quota'd
+			// Otherwise, allow only if we've left enough room for the quota'd
             // number of non-limewire peers.
             return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers 
                     + locale_num)
@@ -1598,7 +1604,6 @@ public class ConnectionManager {
     		}
     	
     	
-    	
     	//this connection must not fail.  If it does, the process will be aborted. 
 		final ManagedConnection UPconn = ManagedConnection.forceUP2UPConnection(host,port);
 		UPconn.initialize();
@@ -1624,7 +1629,7 @@ public class ConnectionManager {
 		try {
 			Thread.sleep(1000);
 		}catch(InterruptedException iex){}
-
+		
 		//become an UP! :)
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		isSupernode();
@@ -1634,6 +1639,62 @@ public class ConnectionManager {
 		recoverHosts();
 		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
 		
+    }
+    
+    /**
+     * This method is to be called by the UP which requested a leaf
+     * to promote itself after the leaf has promoted itself and has
+     * connected back to the UP.
+     * 
+     * It selects the worst UP2UP connection (the one with smallest uptime)
+     * apart from the promoted connection and drops it off-thread. 
+     * @param c The connection from the candidate which should not be dropped.
+     */
+    private void dropWorstUPAsync(ManagedConnection c) {
+    	
+    	final ManagedConnection exclude = c;
+    	
+    	Thread trimmer = new ManagedThread("UP connection trimmer") {
+    		
+    		public void ManagedRun() {
+    			
+    			//wait some time. 5 seconds sounds ok
+    			try{Thread.sleep(5000);}catch(InterruptedException ie){}
+    			
+    			synchronized(ConnectionManager.this) {
+    				while (getNumInitializedConnections() > ULTRAPEER_CONNECTIONS)
+    					remove(selectWorst());
+    			}
+    		}
+    		
+    		/**
+    		 * @return the worst currently connected UP2UP connection
+    		 */
+    		private ManagedConnection selectWorst() {
+    			
+    			ManagedConnection worst = null;
+    			
+    			for(Iterator i = getInitializedConnections().iterator();i.hasNext();) {
+    	    		ManagedConnection current = (ManagedConnection)i.next();
+    	    		
+    	    		if (current == exclude)
+    	    			continue;
+    	    		
+    	    		if (worst==null) {
+    	    			worst = current;
+    	    			continue;
+    	    		}
+    	    		//simply pick the one with shortest lifetime
+    	    		if (current.getConnectionTime() > worst.getConnectionTime())
+    	    			worst=current;
+    	    	}
+    			
+    			return worst;
+    		}
+    	};
+    	
+    	trimmer.setDaemon(true);
+    	trimmer.start();
     }
 
     /** 
@@ -1838,24 +1899,7 @@ public class ConnectionManager {
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
-        //
-        //however, always accept the connection if it comes from the
-        //leaf that we are trying to promote.
         
-        boolean fromCandidate = false;
-        if (c.isSupernodeSupernodeConnection() && !c.isOutgoing()) 
-        	//evaluate the big conditional only for incoming UP connections
-        	//because it involves locking stuff.
-        	fromCandidate =RouterService.getPromotionManager().
-					isPromoting(c.getAddress(),c.getPort());
-        
-        if (fromCandidate) {
-        	//free up an UP slot
-        	while (!hasFreeUltrapeerSlots())
-        		remove ( (ManagedConnection)
-        				_initializedConnections.get(0));
-        } 
-        else
         if (!c.isOutgoing() && !allowConnection(c)) {
             c.loopToReject();
             //No need to remove, since it hasn't been added to any lists.

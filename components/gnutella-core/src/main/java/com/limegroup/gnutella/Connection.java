@@ -438,14 +438,10 @@ public class Connection implements IpPort {
         try {
             //In all the line reading code below, we are somewhat lax in
             //distinguishing between '\r' and '\n'.  Who cares?
-            if(isOutgoing()) {
-                
+            if(isOutgoing()) 
                 initializeOutgoing();
-            }
-            else {
-                
+            else 
                 initializeIncoming();
-            }
 
             _headers = HandshakeResponse.createResponse(HEADERS_READ);
             _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
@@ -553,8 +549,8 @@ public class Connection implements IpPort {
                     HandshakingStat.OUTGOING_BAD_CONNECT.incrementStat();
                 }
                 throw new IOException("Bad connect string");
-            }
-				
+            }	
+			
 			//3. Read the Gnutella headers. 
 			readHeaders();
 

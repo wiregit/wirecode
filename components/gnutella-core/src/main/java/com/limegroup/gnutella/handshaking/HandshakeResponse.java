@@ -685,6 +685,13 @@ public final class HandshakeResponse {
 	public String getProperty(String prop) {
 		return HEADERS.getProperty(prop);
 	}
+	
+	/**
+	 * returns the listen IP of the remote host.
+	 */
+	public String getListenIP() {
+		return HEADERS.getProperty(HeaderNames.LISTEN_IP);
+	}
 
     /** Returns the vendor string reported by this connection, i.e., 
      *  the USER_AGENT property, or null if it wasn't set.
