@@ -426,7 +426,7 @@ public class LimeXMLProperties
     /**
      * Returns the base path for properties
      */
-    private static String getPath()
+    public String getPath()
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
