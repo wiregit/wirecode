@@ -88,7 +88,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.2b";
+    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.1";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
     public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
     public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
@@ -155,4 +155,6 @@ public interface SettingsInterface
     public static final String AVERAGE_UPTIME     = "AVERAGE_UPTIME";
     public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
     public static final String SESSIONS           = "SESSIONS";
+	public static final String DELETE_OLD_JAR     = "DELETE_OLD_JAR";
+	public static final String OLD_JAR_NAME       = "OLD_JAR_NAME";
 }
