@@ -20,6 +20,9 @@ import org.xml.sax.SAXException;
 import com.limegroup.gnutella.metadata.MP3MetaData;
 import com.limegroup.gnutella.util.NameValue;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 
 /**
  * @author  Sumeet Thadani
@@ -27,6 +30,8 @@ import com.limegroup.gnutella.util.NameValue;
  * Names of fields to the values as per a XML document.
  */
 public class LimeXMLDocument implements Serializable {
+    
+    private static final Log LOG = LogFactory.getLog(LimeXMLDocument.class);
 
     public static final String XML_ID_ATTRIBUTE = "identifier__";
     public static final String XML_ACTION_ATTRIBUTE = "action__";
@@ -56,7 +61,7 @@ public class LimeXMLDocument implements Serializable {
     /**
      * The action that this doc has.
      */
-    private String action;
+    private transient String action;
     
     /**
      * Indicator that the LimeXMLDocument was created after
@@ -175,40 +180,6 @@ public class LimeXMLDocument implements Serializable {
         // make sure any spaces are removed.
         if(xmlString != null)
             xmlString = xmlString.trim();
-    }
-    
-    /**
-     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX.
-     * Action is stored, index & identifier are removed.
-     */
-    private void scanFields() {
-        // If no fields to scan, nothing to do.
-        if(fieldToValue.isEmpty())
-            return;
-            
-        Map.Entry firstEntry = (Map.Entry)getNameValueSet().iterator().next();
-        String firstKey = (String)firstEntry.getKey();
-        
-        // The canonicalKey is always going to be x__x__<other stuff here>
-        int idx = firstKey.indexOf(XMLStringUtils.DELIMITER);
-        idx = firstKey.indexOf(XMLStringUtils.DELIMITER, idx+1);
-        // not two delimiters? can't find the canonicalKey
-        if(idx == -1)
-            return;
-            
-        // 2 == XMLStringUtils.DELIMITER.length()
-        String canonicalKey = firstKey.substring(0, idx + 2); 
-        action = (String)fieldToValue.get(canonicalKey + XML_ACTION_ATTRIBUTE);
-        fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
-        fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE);
-        
-        // regenerate the XML string.
-        if(xmlString != null) {
-            xmlString = null;
-            try {
-                getXMLString();
-            } catch(SchemaNotFoundException ignored) {}
-        }   
     }
 
     /**
@@ -407,98 +378,51 @@ public class LimeXMLDocument implements Serializable {
      * XML specifications. So the caller of this method need not 
      * pre-encode the special XML characters into the values. 
      */
-    public static String constructXML(List namValList, String uri){
+    private String constructXML(List namValList, String uri){
         if (namValList.size() == 0)
             return "";
 
         //encode the URI
-        uri = LimeXMLUtils.encodeXML(uri);
-        int size = namValList.size();
-        StringBuffer first = new StringBuffer();
-        StringBuffer last = new StringBuffer();
-        String prevString = "";
-        ArrayList tagsToClose = new ArrayList();
-        boolean prevAtt=false;
-        boolean rootAtts;//if there are root attributes besides identifier,URI
-        NameValue nv = (NameValue)namValList.get(0);
-        String n = nv.getName();
-        //if this string contains 2 sets of __ and the second set it at the 
-        //end then we know it that the root has attributes.
-        boolean end = n.endsWith(XMLStringUtils.DELIMITER);
-        StringTokenizer tok = new StringTokenizer(n,XMLStringUtils.DELIMITER);
-        int c = tok.countTokens();
-        if(end && c==2)
-            rootAtts = true;
-        else 
-            rootAtts = false;
-        int i = 0;
-        for(Iterator iter = namValList.iterator(); iter.hasNext(); i++) {
-            NameValue namevalue = (NameValue)iter.next();
-            String currString = namevalue.getName();
-            String value=LimeXMLUtils.encodeXML((String)namevalue.getValue());
-            List currFields = XMLStringUtils.split(currString);
-            int commonCount = 0;
-            List prevFields = null;            
-            boolean attribute = false;            
-            if (currString.endsWith(XMLStringUtils.DELIMITER))
-                attribute = true;
-            if(prevAtt && !attribute)//previous was attribute and this is not
-                first.append(">");
-            if (i > 0){
-                prevFields = XMLStringUtils.split(prevString);
-                commonCount = getCommonCount(currFields,prevFields);
-            }        
-            int z = currFields.size();
-            //close any tags that need to be closed
-            int numPending = tagsToClose.size();
-            if(commonCount < numPending){//close some tags
-                int closeCount = numPending-commonCount;
-                int currClose = numPending-1;
-                //close the last closeCount tags
-                for(int k=0; k<closeCount; k++){
-                    String closeStr=(String)tagsToClose.remove(currClose);
-                    currClose--;
-                    last.append("</" + closeStr + ">");
-                }
-            }
-            if(last.length() != 0) {
-                first.append(last);
-                last.setLength(0);
-            }
-            //deal with parents
-            for(int j = commonCount; j < z-1; j++) {
-                String str = (String)currFields.get(j);
-                first.append("<" + str);
-                if( i == 0 && j == 0) {
-                    first.append(" xsi:noNamespaceSchemaLocation=\""+uri+"\"");
-                    if(!rootAtts)
-                        first.append(">");
-                } else if (!attribute) {
-                    first.append(">");
-                }
-                tagsToClose.add(str);
-            }
-            String curr=(String)currFields.get(z-1);//get last=current one
-            if(!attribute)
-                first.append("<" + curr + ">" + value + "</" + curr + ">");
-            else {
-                first.append(" " + curr + "=\"" + value + "\"");
-                if(i==size-1)
-                    first.append(">");
-            }
-            prevString = currString;
-            prevAtt = attribute;
-        }
+        //uri = LimeXMLUtils.encodeXML(uri);
+        
+        StringBuffer xml = new StringBuffer();
+        // add the initial XML header.
+        xml.append(XML_HEADER);
+        
+        String canonicalKey = getCanonicalKey(namValList);
+        List split = XMLStringUtils.split(canonicalKey);
+        if(split.size() != 2)
+            return "";
+        String root = (String)split.get(0);
+        String type = (String)split.get(1);
+            
+        // Construct: '<things><thing '
+        xml.append("<");
+        xml.append(root);
+        xml.append(">");
+        xml.append("<");
+        xml.append(type);
 
-        //close remaining tags
-        int stillPending = tagsToClose.size();
-        for(int l = stillPending-1; l >= 0; l--) {
-            String tag = (String)tagsToClose.remove(l);
-            first.append("</" + tag + ">");
+        for(Iterator i = namValList.iterator(); i.hasNext(); ) {
+            NameValue next = (NameValue)i.next();
+            String name = getLastField(canonicalKey, next.getName());
+            if(name == null)
+                continue;
+            // Construct: ' attribute="value"'
+            xml.append(" ");
+            xml.append(name);
+            xml.append("=\"");
+            xml.append(LimeXMLUtils.encodeXML((String)next.getValue()));
+            xml.append("\"");
         }
-
-        first.insert(0, XML_HEADER);
-        return first.toString();
+        
+        // Construct: ' /></things>'
+        xml.append(" />");
+        xml.append("</");
+        xml.append(root);
+        xml.append(">");
+        
+        return xml.toString();
     }
 
     private static int getCommonCount(List currFields, List prevFields){
@@ -571,6 +495,76 @@ public class LimeXMLDocument implements Serializable {
 	    } catch(SchemaNotFoundException snfe) {
 	        return "no schema.";
         }
+    }
+    
+    /**
+     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX.
+     * Action is stored, index & identifier are removed.
+     */
+    private void scanFields() {
+        String canonicalKey = getCanonicalKey(getNameValueSet());
+        if(canonicalKey == null)
+            return;
+
+        action = (String)fieldToValue.get(canonicalKey + XML_ACTION_ATTRIBUTE);
+        boolean removed = false;
+        removed |= fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE) != null;
+        removed |= fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE) != null;
+        
+        // regenerate the XML string.
+        if(xmlString != null && removed) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Reconstructing XML, old: " + xmlString);
+            xmlString = null;
+            try {
+                getXMLString();
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Reconstructed XML, new: " + xmlString);
+            } catch(SchemaNotFoundException ignored) {
+                LOG.warn("No schema!", ignored);
+            }
+        }   
+    }
+    
+    /**
+     * Derives a canonicalKey from a collection of Map.Entry's.
+     */
+    private String getCanonicalKey(Collection entries) {
+        if(entries.isEmpty())
+            return null;
+        Map.Entry firstEntry = (Map.Entry)entries.iterator().next();
+        String firstKey = (String)firstEntry.getKey();
+        
+        // The canonicalKey is always going to be x__x__<other stuff here>
+        int idx = firstKey.indexOf(XMLStringUtils.DELIMITER);
+        idx = firstKey.indexOf(XMLStringUtils.DELIMITER, idx+1);
+        // not two delimiters? can't find the canonicalKey
+        if(idx == -1)
+            return null;
+            
+        // 2 == XMLStringUtils.DELIMITER.length()
+        return firstKey.substring(0, idx + 2);
+    }
+    
+    /**
+     * Derives the last field name from a given name.
+     * With input "things__thing__field__", this will return "field".
+     */
+    private String getLastField(String canonicalKey, String full) {
+        //      things__thing__field__
+        //      ^                   ^
+        //     idx                 idx2
+        
+        int idx = full.indexOf(canonicalKey);
+        if(idx == -1 || idx != 0)
+            return null;
+            
+        int length = canonicalKey.length();
+        int idx2 = full.indexOf(XMLStringUtils.DELIMITER, length);
+        if(idx2 == -1)
+            return null;
+        
+        return full.substring(length, idx2);
     }
 }
 
