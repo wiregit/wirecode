@@ -46,8 +46,6 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(
 #include <oleauto.h>
 #include <crtdbg.h>
 
-#define APP_NAME L"%ProgramFiles%\\LimeWire\\LimeWire.exe"
-
 //	Initialization code from:
 //	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/ics/ics/using_windows_firewall.asp
 
@@ -831,7 +829,7 @@ Java_com_limegroup_gnutella_util_SystemUtils_isFirewallWarningImminent(
 
 		size_t nChars = mbstowcs( &wcBuf[0], szAppPath, strlen(szAppPath)+1 );
 	    
-		nRet=(jshort)(CheckFirewallWarningImminent(APP_NAME));
+		nRet=CheckFirewallWarningImminent(&wcBuf[0]);
 		env->ReleaseStringUTFChars(appPath,szAppPath);
 	}
 	else
