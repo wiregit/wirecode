@@ -58,9 +58,9 @@ public class PingReplyTest extends TestCase {
         assertTrue(pr.hasGGEPExtension());
         try {
             pr.getDailyUptime();
+            assertTrue(false);
         } 
         catch (BadPacketException e) { 
-                    assertTrue(false);
         }
     }
       
@@ -172,9 +172,9 @@ public class PingReplyTest extends TestCase {
                    bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
         assertTrue(bytes[offset+2]==(byte)'D');
         assertTrue(bytes[offset+3]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+4]==(byte)'U');
-        assertTrue(bytes[offset+2+idLength+5]==(byte)'D');
-        assertTrue(bytes[offset+2+idLength+6]==(byte)'P');
+        assertTrue(bytes[offset+2+idLength+4]==(byte)'G');
+        assertTrue(bytes[offset+2+idLength+5]==(byte)'U');
+        assertTrue(bytes[offset+2+idLength+6]==(byte)'E');
                      //...etc.
         assertTrue(bytes[bytes.length-2-(3+udpLength)]==(byte)0x0B); //little byte of 523
         assertTrue(bytes[bytes.length-1-(3+udpLength)]==(byte)0x02); //big byte of 523
