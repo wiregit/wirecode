@@ -50,6 +50,11 @@ public final class AlternateLocation
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile int hashCode = 0;
+	
+	/**
+	 * Constant empty clientGUID for RFDs made from locations.
+	 */
+	private static final byte[] EMPTY_GUID = new byte[16];
 
 	/**
 	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
@@ -691,7 +696,7 @@ public final class AlternateLocation
 		urnSet.add(getSHA1Urn());
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
-								  GUID.makeGuid(), 1000,
+								  EMPTY_GUID, 1000,
 								  true, 3, false, null, urnSet, false);
 	}
 
