@@ -1,18 +1,25 @@
-<project name="Gnutella" default="clientonly" basedir="." >
+<project name="Gnutella" default="build tests" basedir="." >
 
   <!-- set global properties for this basedir -->
-  <property name="basedir" value="." />
-  <property name="builddir" value="build" />
-  <property name="tests" value="com/limegroup/gnutella" /> 
-  <property name="messages" value="com/limegroup/gnutella/messages" /> 
+  <property name="basedir"     value="." />
+  <property name="builddir"    value="build" />
+  <property name="tests"       value="com/limegroup/gnutella" /> 
+  <property name="messages"    value="com/limegroup/gnutella/messages" /> 
   <property name="util"        value="com/limegroup/gnutella/util" /> 
   <property name="lib"         value="../gui/lib/"/>
   <property name="collections" value="${lib}collections.jar"/>
   <property name="xerces"      value="${lib}xerces.jar"/>
   <property name="junit"       value="${lib}junit.jar"/>
-  <property name="coredir" value="../core"/>
-  <property name="guidir" value="../gui"/>
-  <property name="settings" value="${coredir}/com/limegroup/gnutella/settings"/>
+  <property name="jl011"       value="${lib}jl011.jar"/>
+  <property name="ui"          value="${lib}ui.jar"/>
+  <property name="mrj"         value="${lib}MRJToolkitStubs.jar"/>
+  <property name="mac"         value="${lib}MacStubs.jar"/>
+  <property name="quicktime"   value="${lib}QTJava.zip"/>
+  <property name="skins"       value="${lib}skinlf.jar"/>
+  <property name="coredir"     value="../core"/>
+  <property name="guidir"      value="../gui"/>
+  <property name="settings"    value="${coredir}/com/limegroup/gnutella/settings"/>
+  <property name="tests"       value="${coredir}/com/limegroup/gnutella/tests"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -22,51 +29,21 @@
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
-    <pathelement path="${CLASSPATH}" />
-    <pathelement location="${lib}collections.jar" />
     <pathelement location="${coredir}" />
-    <pathelement location="${lib}xerces.jar" />
-    <pathelement location="${lib}jl011.jar" />
-	<pathelement location="${lib}ui.jar" />
-    <pathelement location="${lib}MRJToolkitStubs.jar" />
-	<pathelement location="${lib}MacStubs.jar" />
-	<pathelement location="${lib}QTJava.zip"/>
+    <pathelement location="${collections}" />
+    <pathelement location="${xerces}" />
+    <pathelement location="${jl011}" />
+	<pathelement location="${ui}" />
+    <pathelement location="${mrj}" />
+	<pathelement location="${mac}" />
+	<pathelement location="${quicktime}"/>
+	<pathelement location="${skins}"/>
   </path>
 
   <!-- Initialization stuff -->
   <target name="init" >
     <!-- we dont do much here right now, but may do later -->
     <tstamp/>
-  </target>
-
-  <!-- everything -->
-  <target name="all" depends="init" >
-    <javac
-      debug="${DEBUG}"
-      optimize="${OPTIMIZE}"
-      srcdir="${basedir}" destdir="${basedir}"
-      excludes="${unused}/**"
-     >
-      <classpath refid="default.classpath" />
-    </javac>
-  </target>
-
-  <!-- Client, without tests -->
-  <target name="clientonly" depends="init" >
-    <javac
-      debug="${DEBUG}"
-      optimize="${OPTIMIZE}"
-      deprecation="${DEPRECATION}"
-      srcdir="${basedir}"
-      destdir="${basedir}"
-      includes="${tests}/**,${messages}/**,${util}/**"
-     >
-      <classpath refid="default.classpath" />
-    </javac>
-  </target>
-	
-  <!-- Client, with tests -->
-  <target name="client" depends="init,clientonly" >
   </target>
 
   <!-- CLEAN -->
@@ -82,7 +59,7 @@
    <javac debug="on" optimize="off" deprecation="on"
 	      srcdir="${coredir}:${guidir}:${basedir}"
 		  destdir="${builddir}"
-		  excludes="${settings}**">
+		  excludes="${settings}** {tests}**">
      <classpath refid="default.classpath" />
    </javac>
  </target>
@@ -92,6 +69,19 @@
     <junit printsummary="withOutAndErr" haltonfailure="yes">
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.AllTests" />
+	  <classpath>
+	    <pathelement location="${builddir}"/>
+	    <pathelement location="${collections}"/>
+	    <pathelement location="${xerces}"/>
+	  </classpath>
+	</junit>
+  </target>
+
+  <!-- tests individual class -->
+  <target name="test class" if="class" depends="build tests">
+    <junit printsummary="withOutAndErr" haltonfailure="yes">
+	  <formatter type="plain" useFile="false"/>
+	  <test name="com.limegroup.gnutella.${class}" />
 	  <classpath>
 	    <pathelement location="${builddir}"/>
 	    <pathelement location="${collections}"/>
