@@ -528,7 +528,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             // if our socket is already connected and it's an outgoing 
             // connection, we need to notify the handshaker to start the
             // handshake
-            HANDSHAKER.handshake();
+            if(!HANDSHAKER.handshake())  {
+                NIODispatcher.instance().addWriter(this);
+            }
         }
     }
     
