@@ -10,6 +10,7 @@ public class UnicastSimulator {
 
     public static final int NUM_LISTENERS = 400;
     public static final int PORT_RANGE_BEGIN = 7070;
+    public static final int GNUTELLA_PORT = 7000;
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
@@ -21,6 +22,9 @@ public class UnicastSimulator {
     private PingReply[] _pongs;
     private Thread[] _unicasters;
     private byte[] _localAddress;
+    private Thread _tcpListener;
+
+    private boolean _shouldRun = true;
 
     public UnicastSimulator() throws Exception {
         // create pings to return...
@@ -28,16 +32,19 @@ public class UnicastSimulator {
         // create unicast listeners
         createListeners();
         // create server socket to listen for incoming Gnutella's
+        createTCPListener(GNUTELLA_PORT);
     }
 
 
     private void createPongs() throws Exception {
         _pongs = new PingReply[NUM_LISTENERS];
         _localAddress = InetAddress.getLocalHost().getAddress();
-        for (int i = 0; i < NUM_LISTENERS; i++)
+        for (int i = 0; i < NUM_LISTENERS; i++) {
             _pongs[i] = new PingReply(GUID.makeGuid(), (byte) 5, 
                                       PORT_RANGE_BEGIN+i, _localAddress, 
                                       10, 100, true);
+            Assert.that(_pongs[i].isMarked());
+        }
     }
 
     
@@ -55,9 +62,69 @@ public class UnicastSimulator {
     }
 
 
-    private boolean shouldRun() {
-        return true;
+    private void createTCPListener(final int port) {
+        _tcpListener = new Thread() {
+                public void run() {
+                    tcpLoop(port);
+                }
+            };
+        _tcpListener.start();
     }
+
+
+    private boolean shouldRun() {
+        return _shouldRun;
+    }
+
+
+    private void tcpLoop(int port) {
+        ServerSocket servSock = null;
+        try {
+            // create a ServerSocket to listen for Gnutellas....
+            servSock = new ServerSocket(port);
+            debug("UnicastSimulator.tcpLoop(): listening on port " +
+                  port);            
+        }
+        catch (Exception noWork) {
+            debug("UnicastSimulator.tcpLoop(): couldn't listen on port " +
+                  port);
+			return;
+        }
+
+        while (shouldRun()) {
+            try {
+                // listen for GNUTELLA connections, send back pings when
+                // established
+                Socket sock = servSock.accept();
+                debug("UnicastSimulator.tcpLoop(): got a incoming connection.");
+                sock.setSoTimeout(SettingsManager.instance().getTimeout());
+                //dont read a word of size more than 8 
+                //("GNUTELLA" is the longest word we know at this time)
+                String word=IOUtils.readWord(sock.getInputStream(),8);
+                sock.setSoTimeout(0);
+
+                if (word.equals(SettingsManager.instance().
+                        getConnectStringFirstWord())) {
+                    Connection conn = new Connection(sock);
+                    conn.initialize();
+                    debug("UnicastSimulator.tcpLoop(): sending pings.");
+                    for (int i = 0; i < _pongs.length; i++) {
+                        conn.send(_pongs[i]);
+                        Thread.sleep(10);
+                    }
+                    conn.close();
+                }                
+            }
+            catch (Exception ignored) {
+            }
+        }
+
+        try {
+            servSock.close();
+        }
+        catch (Exception ignored) {}
+    }
+
 
     /* @param port the port to listen for queries on...
      */ 
