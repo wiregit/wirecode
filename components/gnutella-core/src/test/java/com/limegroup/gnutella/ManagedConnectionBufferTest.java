@@ -89,8 +89,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		out.initialize();
 		in = acceptor.accept();
         
-        if(CommonUtils.isJava14OrLater() &&
-           ConnectionSettings.USE_NIO.getValue()) {
+        if(ConnectionSettings.USE_NIO.getValue()) {
             PrivilegedAccessor.setValue(in, "_messageReader", 
                 TestNIOMessageReader.createReader(in));
         }
@@ -112,8 +111,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		out.initialize();
 		in = acceptor.accept();
         
-        if(CommonUtils.isJava14OrLater() &&
-           ConnectionSettings.USE_NIO.getValue()) {
+        if(ConnectionSettings.USE_NIO.getValue()) {
             PrivilegedAccessor.setValue(in, "_messageReader", 
                 TestNIOMessageReader.createReader(in));
         }
@@ -165,6 +163,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      * Tests that the priority hint works without compression
      */
     public void testPriorityHintNotCompressed() throws Exception {
+        System.out.println("ManagedConnectionBufferTest::testPriorityHintNotCompressed");
         setupNotCompressed();
         tPriorityHint();
     }
@@ -604,8 +603,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
     
     
-    private void tPriorityHint() 
-            throws Exception {
+    private void tPriorityHint() throws Exception {
+        System.out.println("ManagedConnectionBufferTest::tPriorityHint");
         //Tests wrap-around loop of sendQueuedMessages
         Message m=null;
 
@@ -739,6 +738,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
            Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+           
+           // TODO: PROXY/DELEGATE NO LONGER USED
            MessageWriter writer = 
                (MessageWriter)PrivilegedAccessor.getValue(obj, 
                     "DELEGATE");  
@@ -746,6 +747,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         } else {
 
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            // TODO: PROXY/DELEGATE NO LONGER USED
             BIOMessageWriter writer = 
                 (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
             Object writeLock = 
@@ -771,12 +773,14 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
            ConnectionSettings.USE_NIO.getValue()) {
             //ConnectionSettings.READ_ACTIVE.setValue(true);
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            // TODO: PROXY/DELEGATE NO LONGER USED
             MessageWriter writer = 
                 (MessageWriter)PrivilegedAccessor.getValue(obj, 
                     "DELEGATE");  
             writer.setClosed(false);             
         } else {
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            // TODO: PROXY/DELEGATE NO LONGER USED
             BIOMessageWriter writer = 
                 (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
             Method start = 
@@ -791,6 +795,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
            ConnectionSettings.USE_NIO.getValue()) {
         } else {
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            // TODO: PROXY/DELEGATE NO LONGER USED
             BIOMessageWriter writer = 
                 (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
             Method resetPriority = 
