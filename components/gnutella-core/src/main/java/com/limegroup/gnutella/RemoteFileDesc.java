@@ -263,6 +263,14 @@ public class RemoteFileDesc implements Serializable {
         _failedCount = 0;
     }
     
+    /**
+     * Determines whether or not this RemoteFileDesc was created
+     * from an alternate location.
+     */
+    public boolean isFromAlternateLocation() {
+        return "ALT".equals(_vendor);
+    }
+    
 	/**
 	 * Accessor for the host ip with this file.
 	 *
@@ -480,9 +488,6 @@ public class RemoteFileDesc implements Serializable {
 
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
-				 +getFileName()+"/"+getSize()+", "
-				 +getSpeed()+", "
-				 +getSHA1Urn()+", "+getQuality()
-				 +", mcast: " + _replyToMulticast +">");
+				 +getFileName()+">");
     }
 }

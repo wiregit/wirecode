@@ -98,6 +98,14 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return ret;
     }
     
+    /**
+     * Adds a verified location to this FileDesc, not notifying the
+     * ManagedDownloader of the location.
+     */
+    public boolean addVerified(AlternateLocation al) {
+        return super.add(al);
+    }
+    
 	/**
      * Adds the alternate locations to this FileDesc and also notifies the
      * ManagedDownloader of new locations for this.

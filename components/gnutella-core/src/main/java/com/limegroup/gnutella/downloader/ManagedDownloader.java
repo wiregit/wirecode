@@ -302,6 +302,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * when we have become active uploaders of the file.
      */
 	private AlternateLocationCollection validAlts; 
+	
+	/**
+	 * A list of the most recent failed locations, so we don't try them again.
+	 *
+	 * TODO: Use a Set and FixedsizeForgetfulHashSet
+	 */
+	private Map invalidAlts;
 
     private VerifyingFile commonOutFile;
     
@@ -500,6 +507,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptStateLock=new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
+        invalidAlts = new FixedsizeForgetfulHashMap(100);        
         this.dloaderManagerThread=new Thread("ManagedDownload") {
             public void run() {
                 try { 
@@ -792,6 +800,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         // before doing expensive stuff, see if connection is even possible...
         if (other.getQuality() < 1) // I only want 2,3,4 star guys....
             return false;
+            
+        // See if we have already tried and failed with this location
+        // This is only done if the location we're trying is an alternate..
+        if (other.isFromAlternateLocation() && invalidAlts.containsKey(other))
+            return false;
+        
 
         // get other info...
 		final URN otherUrn = other.getSHA1Urn();
@@ -907,25 +921,23 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
             return true;
         
-        boolean exists = false;
-        
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
         // However, when we add it to buckets, we have to make sure
         // it didn't already exist in the specified bucket.
         for (int i=0; i<allFiles.length; i++) {
             if (rfd.equals(allFiles[i])) {
                 cache = false; // do not store in allFiles.
-                exists = true; // do not add if already in bucket.
                 break;
             }
         }
-
         
         boolean added = false;
         //Add to buckets (will be seen because buckets exposes representation).        
         if (buckets != null) {
-            // Do not check for existing values if it didn't exist in allFiles
-            added = (buckets.add(rfd, exists) != -1);
+            // We must always check to see if this RFD was already added to
+            // the buckets now that we add downloads before adding to alt locs.
+            // (Previously altloccollection filtered out already-seen ones)
+            added = (buckets.add(rfd, true) != -1);
         }
         
         //Append to allFiles for resume purposes if caching...
@@ -1018,13 +1030,27 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloaderManagerThread.interrupt();
     }
 
+    /**
+     * Notifies all existing HTTPDownloaders about this RFD.
+     * If good is true, it notifies them of a succesful alternate location,
+     * otherwise it notifies them of a failed alternate location.
+     * The internal validAlts is also updated if good is true,
+     * and invalidAlts is updated if good is false.
+     * The IncompleteFileDesc is also notified of new locations for this
+     * file.
+     */
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         if(!rfd.isAltLocCapable())
             return;
         
+        //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
+        // of the AlternateLocationCollection, they must use seperate
+        // AlternateLocation objects.
         AlternateLocation loc = null;
+        AlternateLocation forFD = null;
         try {
             loc = AlternateLocation.create(rfd);
+            forFD = AlternateLocation.create(rfd);
         } catch(IOException iox) {
             return;
         }
@@ -1038,16 +1064,25 @@ public class ManagedDownloader implements Downloader, Serializable {
             else
                 httpDloader.addFailedAltLoc(loc);
         }
-
-        if(!good)
-            validAlts.remove(loc);
-
-        //keep statistics
-        if( RECORD_STATS && ("ALT".equals(rfd.getVendor())) ) {//this was an Alt
-            if(good)
-                DownloadStat.ALTERNATE_WORKED.incrementStat();
-            else
+        
+        FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
+        IncompleteFileDesc ifd = null;
+        if( fd != null && fd instanceof IncompleteFileDesc)
+            ifd = (IncompleteFileDesc)fd;
+        
+        if( good ) {
+            if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                DownloadStat.ALTERNATE_WORKED.incrementStat();                
+            validAlts.add(loc);
+            if( ifd != null )
+                ifd.addVerified(forFD);
+        } else {
+            if( RECORD_STATS && rfd.isFromAlternateLocation() )
                 DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+            validAlts.remove(loc);
+            if( ifd != null )
+                ifd.remove(forFD);
+            invalidAlts.put(rfd, rfd);
         }
     }
 
@@ -2003,7 +2038,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     ret = connectDirectly(rfd, incFile);
                 } catch(IOException e2) {
-                    informMesh(rfd,false);
                     return null; // impossible to connect.
                 }
             }
@@ -2018,18 +2052,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                 ret = connectDirectly(rfd, incFile);
                 return ret;
             } catch(IOException e) {
-                informMesh(rfd, false);
-                // oh well, fall through to the push.
+                // fall through to the push ...
             }
         }
         
+        // must notify that we cannot connect directly.
+        informMesh(rfd, false);
+
         try {
             ret = connectWithPush(rfd, incFile);
             return ret;
         } catch(IOException e) {
             // even the push failed :(
         }
-        informMesh(rfd, false);
+
         // if we're here, everything failed.
         return null;
     }
@@ -2190,19 +2226,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                     DownloadStat.RNA_EXCEPTION.incrementStat();
                 debug("rnae thrown in assignAndRequest"+dloader);
                 rfd.resetFailedCount();                
-                informMesh(dloader.getRemoteFileDesc(), true);
+                informMesh(rfd, true);
                 return 4; //no need to add to files or busy we keep iterating
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
                 debug("fnfx thrown in assignAndRequest "+dloader);
-                informMesh(dloader.getRemoteFileDesc(),false);
+                informMesh(rfd, false);
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
                 debug("nsx thrown in assignAndRequest "+dloader);
-                informMesh(dloader.getRemoteFileDesc(),false);
+                informMesh(rfd, false);
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
@@ -2228,14 +2264,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
                 debug("prhe thrown in assignAndRequest "+dloader);
-                informMesh(dloader.getRemoteFileDesc(),false);
+                informMesh(rfd, false);
                 return 0; //discard the rfd of dloader
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
                 debug("uce (" + uce.getCode() + ") thrown in assignAndRequest "
                       + dloader);
-                informMesh(dloader.getRemoteFileDesc(),false);
+                informMesh(rfd, false);
                 return 0; //discard the rfd of dloader
             } catch (IOException iox) {
                 if(RECORD_STATS)
@@ -2249,7 +2285,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if( rfd.getFailedCount() < 2 )
                     synchronized(this) {busy.add(rfd); }
                 else //tried the location twice -- it really is bad
-                    informMesh(dloader.getRemoteFileDesc(),false);         
+                    informMesh(rfd, false);         
                 return 0;
             } finally {
                 //add alternate locations, which we could have gotten from 
@@ -2260,9 +2296,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                         Iterator iter = c.iterator();
                         while(iter.hasNext()) {
                             AlternateLocation al=(AlternateLocation)iter.next();
-                            RemoteFileDesc rfd1 = al.createRemoteFileDesc
-                            (dloader.getRemoteFileDesc().getSize());
-                            addDownload(rfd1, false);//dont cache
+                            RemoteFileDesc rfd1 =
+                                al.createRemoteFileDesc(rfd.getSize());
+                            addDownload(rfd1, false);//don't cache
                         }
                     }
                 }
@@ -2305,21 +2341,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 DownloadStat.RESPONSE_OK.incrementStat();            
             return 2;
         }
-    }
-    
-    /**
-     * Attempts to add the given location to this.  If the location
-     * is accepted for future swarming, this returns true.  Otherwise,
-     * this returns false.
-     */
-    private void addAlternateLocation(AlternateLocation alt) {
-        // create the collection with the SHA1 of this alt if it hasn't
-        // been created yet.
-        if(validAlts == null)
-            validAlts =
-            AlternateLocationCollection.create(alt.getSHA1Urn());
-                
-        validAlts.add(alt);
     }
 	
 	/**
@@ -2615,7 +2636,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private boolean doDownload(HTTPDownloader downloader, boolean http11) {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
-        RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
+        RemoteFileDesc rfd = downloader.getRemoteFileDesc();            
         try {
             downloader.doDownload(commonOutFile);
             rfd.resetFailedCount();
@@ -2625,7 +2646,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 else
                     DownloadStat.SUCCESFULL_HTTP10.incrementStat();
             }
-            return true;
         } catch (IOException e) {
             if(RECORD_STATS) {
                 if(http11)
@@ -2634,13 +2654,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     DownloadStat.FAILED_HTTP10.incrementStat();
              }
             problem = true;
-            informMesh(downloader.getRemoteFileDesc(),false);
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);
-            return false;
-            //e.printStackTrace();
-        }
-        finally {
+        } finally {
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop+ 
@@ -2654,31 +2670,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // try to use the file again much later.
                     if( rfd.getFailedCount() < 2 )
                         busy.add(rfd);
+                    else
+                        informMesh(rfd, false);
+                } else {
+                    informMesh(rfd, true);
+                    if( !http11 ) // no need to add http11 dloaders to files
+                        files.add(rfd);
                 }
                 
                 dloaders.remove(downloader);
-                //no need to add http11 dloader to files                
-                if(!problem && !http11)
-                    files.add(rfd);
-                if(!problem && rfd.isAltLocCapable()) {
-                    //TODO3:Until IncompleteFileDesc and ManagedDownloader do
-                    //not share a common AlternateLocation, they should get
-                    //separate copies of AlternateLocations
-                    try {
-                        AlternateLocation loc = AlternateLocation.create(rfd);
-                        AlternateLocation loc2 = AlternateLocation.create(rfd);
-                        informMesh(rfd,true);
-                        FileDesc desc =
-                             fileManager.getFileDescForFile(incompleteFile);
-                        if(desc != null) 
-                            desc.add(loc);
-                        //TODO3:IncompleteFileDesc and this should share a
-                        //AlternateLocationCollection
-                        addAlternateLocation(loc2);
-                    } catch (IOException ignored) {}
-                }
             }
         }
+        
+        return !problem;
     }
 
     /**
