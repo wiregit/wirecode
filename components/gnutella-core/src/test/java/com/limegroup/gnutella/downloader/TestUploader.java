@@ -95,6 +95,11 @@ public class TestUploader {
     private int requestsReceived = 0;
     
     /**
+     * Whether or not this uploader should respond with HTTP/1.1
+     */
+    private boolean respondWithHTTP11 = true;
+    
+    /**
      * The sum of the number of bytes we need to upload across all requests.  If
      * this value is less than totalUploaded and the uploader encountered an
      * IOException in handle request it means the downloader killed the
@@ -184,6 +189,7 @@ public class TestUploader {
         connects = 0;
         lowChunkOffset = 0;
         highChunkOffset = 0;
+        respondWithHTTP11 = true;
     }
 
     public int amountUploaded() {
@@ -271,6 +277,13 @@ public class TestUploader {
         highChunkOffset = offset;
     }
     
+    /**
+     * Sets whether or not this uploader will respond with HTTP/1.1
+     */
+    public void setHTTP11(boolean yes) {
+        respondWithHTTP11 = yes;
+    }
+    
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
@@ -339,7 +352,7 @@ public class TestUploader {
                         } catch (IOException e) {
                             if(totalUploaded < totalAmountToUpload)
                                 killedByDownloader = true;
-                            LOG.debug("Exception in uploader", e);
+                            LOG.debug("Exception in uploader (" + name + ")", e);
                         } catch(Throwable t) {
                             ErrorService.error(t);
                         } finally {
@@ -464,11 +477,12 @@ public class TestUploader {
             Assert.that(t0 < maxPollTime,
                         "queued downloader responded too late, by "+
                         (t0-maxPollTime) +" mS");        
-        
-		String str =
-            busy || queue || partial==1 ?
-            "HTTP/1.1 503 Service Unavailable\r\n" :
-            "HTTP/1.1 200 OK \r\n";
+
+        String httpValue = respondWithHTTP11 ? "HTTP/1.1" : "HTTP/1.0";
+		String str = httpValue + " " +
+            (busy || queue || partial==1 ?
+            "503 Service Unavailable\r\n" :
+            "200 OK \r\n");
 		out.write(str.getBytes());
 		
 		if(busy && retryAfter != -1) {

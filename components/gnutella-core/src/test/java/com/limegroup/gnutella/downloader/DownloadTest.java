@@ -27,6 +27,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -94,10 +95,13 @@ public class DownloadTest extends BaseTestCase {
 	private static ManagedDownloader DOWNLOADER = null;
 	private static Object COMPLETE_LOCK = new Object();
 	private static boolean REMOVED = false;
-	private static final long TWO_MINUTES = 1000 * 60 * 2;
-	
+    
+    // default to waiting for 2 defaults.
+    private static long DOWNLOAD_WAIT_TIME = 1000 * 6 * 2;	
     
     public static void globalSetUp() throws Exception {
+        // raise the download-bytes-per-sec so stealing is easier
+        DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
@@ -117,7 +121,7 @@ public class DownloadTest extends BaseTestCase {
     }
 
     public static Test suite() { 
-        return buildTestSuite(DownloadTest.class);
+        return buildTestSuite(DownloadTest.class, "testHighSmallerStealingFromHttp10");
     }
 
     public static void main(String[] args) {
@@ -125,6 +129,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void setUp() {
+        DOWNLOAD_WAIT_TIME = 1000 * 60 * 2;
         DOWNLOADER = null;
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -467,6 +472,58 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("extra connection attempts", 1, c2);
         assertTrue("slower uploader not replaced",uploader1.killedByDownloader);
         assertFalse("faster uploader killed",uploader2.killedByDownloader);
+    }
+    
+    public void testHighSmallerStealingFromHttp10() throws Exception {
+        LOG.debug("-Testing that a download discards a stealer whose" +
+                  " high subrange is smaller than the current http10.");
+
+        final float SLOW_RATE = 0.30f;
+        final int RATE = 25;
+        uploader1.setRate(SLOW_RATE);
+        uploader2.setRate(RATE);
+        uploader3.setRate(RATE);
+        
+        uploader1.setHTTP11(false);
+        uploader2.setHighChunkOffset(-50);
+        
+        RemoteFileDesc rfd1 = newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
+        
+        // rfd3 is used to make sure the test finishes without
+        // waiting 10 hours.
+        
+        tGeneric( new RemoteFileDesc[] { rfd1 },
+                  new RemoteFileDesc[] { rfd2, rfd3 });
+                  
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        assertGreaterThan("u1 not used", 5000, u1);
+        assertLessThan("u2 used", 5000, u2);
+        assertGreaterThan("u3 not used", 5000, u3);
+        
+        int c1 = uploader1.getConnections();
+        int c2 = uploader2.getConnections();
+        int c3 = uploader3.getConnections();
+        //may be one or two.  will be two if it tries to connect
+        //again after it reached its stop point.
+        assertLessThanOrEquals("u1 invalid connections", 2, c1);
+        // may be one or two.  will be two if the first time
+        // it tried to connect we didn't have data on the speed
+        // of rfd1.
+        assertLessThanOrEquals("u2 invalid connections", 2, c2);
+        // may be one or two.  will be two if the first time it
+        // tried to connect we didn't have data on the speed of rfd1.
+        assertLessThanOrEquals("u3 invalid connections", 2, c3);
+        
+        int r1 = uploader1.getRequestsReceived();
+        int r2 = uploader2.getRequestsReceived();
+        int r3 = uploader3.getRequestsReceived();
+        assertEquals("u1 invalid requests", 1, r1);
+        assertEquals("u2 invalid requests", 1, r2);
+        assertGreaterThan("u3 invalid requests", 1, r3);
     }
     
     public void testUploaderWierdChunkSizes() throws Exception {
@@ -1883,7 +1940,7 @@ public class DownloadTest extends BaseTestCase {
         synchronized(COMPLETE_LOCK) {
             try {
                 REMOVED = false;
-                COMPLETE_LOCK.wait(TWO_MINUTES);
+                COMPLETE_LOCK.wait(DOWNLOAD_WAIT_TIME);
             } catch (InterruptedException e) {
                 //good.
             }
