@@ -12,7 +12,7 @@ import java.io.*;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-    private static final String EXTENSION = "xyz";
+    private static final String EXTENSION = "XYZ";
     
     private File f1 = null;
     private File f2 = null;
@@ -312,6 +312,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		
         File[] files = testDir.listFiles(new FileFilter() { 
             public boolean accept(File file) {
+                // use files with a $ because they'll generally
+                // trigger a single-response return, which is
+                // easier to check
                 return !file.isDirectory() && file.getName().indexOf("$")!=-1;
             }
         });
@@ -324,7 +327,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			if(!files[i].isFile()) continue;
 			File shared = new File(
 			    _sharedDir, files[i].getName() + "." + EXTENSION);
-			//System.out.println("[" + i + "] " + files[i]);
 			assertTrue("unable to get file",
 			    CommonUtils.copy( files[i], shared));
             assertTrue(fman.addFileIfShared(shared));
