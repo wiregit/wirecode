@@ -66,7 +66,7 @@ public abstract class AbstractStatHandler {
 		BYTE_STAT.addData(msg.getTotalLength());
 		if(new GUID(msg.getGUID()).isLimeGUID()) {
 			LIME_NUMBER_STAT.incrementStat();
-			LIME_BYTE_STAT.incrementStat();
+			LIME_BYTE_STAT.addData(msg.getTotalLength());
 		}
 	}	
 }
