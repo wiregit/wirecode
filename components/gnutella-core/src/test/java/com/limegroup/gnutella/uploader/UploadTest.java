@@ -108,14 +108,16 @@ public class UploadTest extends BaseTestCase {
 	 * Simple copy.  Horrible performance for large files.
 	 * Good performance for alphabets.
 	 */
-	private static void copyFile(File one, File two) throws Exception {
-	    FileInputStream fis = new FileInputStream(one);
-	    FileOutputStream fos = new FileOutputStream(two);
+	private static void copyFile(File source, File dest) throws Exception {
+	    FileInputStream fis = new FileInputStream(source);
+	    FileOutputStream fos = new FileOutputStream(dest);
 	    int read = fis.read();
 	    while(read != -1) {
 	        fos.write(read);
 	        read = fis.read();
 	    }
+	    fis.close();
+	    fos.close();
     }
 
 	protected void setUp() throws Exception {
@@ -147,6 +149,7 @@ public class UploadTest extends BaseTestCase {
 		// because the filename has a # in it which can't be a resource.
 		copyFile(testFile, sharedFile);
 		assertTrue("should exist", new File(_sharedDir, fileName).exists());
+		assertGreaterThan("should have data", 0, new File(_sharedDir, fileName).length());
 
         if ( !RouterService.isStarted() ) {
             startAndWaitForLoad();
