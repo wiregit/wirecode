@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -23,6 +24,8 @@ import java.net.*;
  */
 public class RemoteFileDesc implements Serializable {
     private static final long serialVersionUID = 6619479308616716538L;
+    
+    private static final int COPY_INDEX = 0;
 
 	private final String _host;
 	private final int _port;
@@ -96,6 +99,33 @@ public class RemoteFileDesc implements Serializable {
      * to transfer data.
      */
     private transient int _failedCount = 0;
+    
+    /**
+     * Constructs a new RemoteFileDesc exactly like the other one,
+     * but with a different remote host.
+     *
+     * It is okay to use the same internal structures
+     * for URNs because the Set is immutable.
+     */
+    public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
+        this( ep.getHostname(),             // host
+              ep.getPort(),                 // port
+              COPY_INDEX,                   // index (unknown)
+              rfd.getFileName(),            // filename
+              rfd.getSize(),                // filesize
+              DataUtils.EMPTY_GUID,         // client GUID
+              0,                            // speed
+              false,                        // chat capable
+              2,                            // quality
+              false,                        // browse hostable
+              rfd.getXMLDoc(),              // xml doc
+              rfd.getUrns(),                // urns
+              false,                        // reply to MCast
+              false,                        // is firewalled
+              AlternateLocation.ALT_VENDOR, // vendor
+              System.currentTimeMillis(),   // timestamp
+              DataUtils.EMPTY_SET );        // push proxies
+    }
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.

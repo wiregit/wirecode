@@ -507,7 +507,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptStateLock=new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
-        invalidAlts = new FixedsizeForgetfulHashMap(500);        
+        invalidAlts = new FixedsizeForgetfulHashMap(500);
+        synchronized (this) {
+            buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
+            if(shouldInitAltLocs(deserialized)) {
+                initializeAlternateLocations();
+            }
+        }
         this.dloaderManagerThread=new Thread("ManagedDownload") {
             public void run() {
                 try { 
@@ -924,16 +930,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
         // However, when we add it to buckets, we have to make sure
         // it didn't already exist in the specified bucket.
-        for (int i=0; i<allFiles.length; i++) {
-            if (rfd.equals(allFiles[i])) {
-                cache = false; // do not store in allFiles.
-                break;
+        // If cache is already false, there is no need to look.
+        if (cache) {
+            for (int i=0; i<allFiles.length; i++) {
+                if (rfd.equals(allFiles[i])) {
+                    cache = false; // do not store in allFiles.
+                    break;
+                }
             }
         }
         
         boolean added = false;
         //Add to buckets (will be seen because buckets exposes representation).
-        if (buckets != null && busy!=null && !busy.contains(rfd)) {
+        //If not already in busy.      
+        if (buckets != null &&
+            (busy==null || (busy != null && !busy.contains(rfd)))) {
             // We must always check to see if this RFD was already added to
             // the buckets now that we add downloads before adding to alt locs.
             // (Previously altloccollection filtered out already-seen ones)
@@ -1254,12 +1265,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // special state as dictated by subclasses (getFailedState)
         long timeSpentWaiting = 0;
 
-        synchronized (this) {
-            buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
-            if(shouldInitAltLocs(deserializedFromDisk)) {
-                initializeAlternateLocations();
-            }
-        }
         //While not success and still busy...
         while (true) {
             try {
@@ -1663,30 +1668,31 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(validAlts != null && fileDesc!=null) {
+		if(validAlts != null && 
+		   fileDesc!=null && 
+		   fileDesc.getSHA1Urn().equals(validAlts.getSHA1Urn())) {
+		    debug("MANAGER: adding valid alts to FileDesc");
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
-			if (fileDesc != null && 
-              fileDesc.getSHA1Urn().equals(validAlts.getSHA1Urn())) { 
-                fileDesc.addAll(validAlts);
-				//tell the library we have alternate locations
-				callback.handleSharedFileUpdate(completeFile);
-                HashSet set = null;
-                synchronized(this) {
-                    set = new HashSet(files);
-                }
-                if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES) {
-                    //for small files which never add themselves to the mesh
-                    //while downloading, we need to send head requests, so we
-                    //get added to the mesh
-                    HeadRequester requester = new HeadRequester(set, fileHash, 
-                           fileDesc, fileDesc.getAlternateLocationCollection());
-                    Thread headThread = 
-                                   new Thread(requester, "HEAD Request Thread");
-                    headThread.setDaemon(true);
-                    headThread.start();
-                }
+            fileDesc.addAll(validAlts);
+			//tell the library we have alternate locations
+			callback.handleSharedFileUpdate(completeFile);
+            HashSet set = null;
+            synchronized(this) {
+                set = new HashSet(files);
+            }
+            if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES) {
+                debug("MANAGER: starting HEAD request");
+                //for small files which never add themselves to the mesh
+                //while downloading, we need to send head requests, so we
+                //get added to the mesh
+                HeadRequester requester = new HeadRequester(set, fileHash, 
+                       fileDesc, fileDesc.getAlternateLocationCollection());
+                Thread headThread = 
+                               new Thread(requester, "HEAD Request Thread");
+                headThread.setDaemon(true);
+                headThread.start();
             }
         }
         return COMPLETE;
@@ -2093,6 +2099,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private HTTPDownloader connectDirectly(RemoteFileDesc rfd, 
       File incFile) throws IOException {
+        debug("WORKER: attempt direct connection");
         HTTPDownloader ret;
         //Establish normal downloader.              
         ret = new HTTPDownloader(rfd, incFile);
@@ -2116,7 +2123,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private HTTPDownloader connectWithPush(RemoteFileDesc rfd,
       File incFile) throws IOException {
-      
+        debug("WORKER: attempt push connection");
         HTTPDownloader ret;
         
         //When the push is complete and we have a socket ready to use

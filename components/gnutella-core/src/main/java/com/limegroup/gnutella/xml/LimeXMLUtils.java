@@ -594,7 +594,7 @@ public class LimeXMLUtils
     /** @return Correctly uncompressed data (according to Content-Type header) 
      *  May return a byte[] of length 0 if something bad happens. 
      */
-    public static byte[] uncompress(byte[] data) throws Exception {
+    public static byte[] uncompress(byte[] data) throws IOException {
         byte[] retBytes = new byte[0];
         String headerFragment = new String(data, 0, 
                                            C_HEADER_BEGIN.length());

@@ -12,8 +12,13 @@ import java.io.*;
  */
 public class SpamReplyFilterTest extends BaseTestCase {
         
+    /**
+     * A non blank IP
+     */
+    private static final byte[] IP = new byte[] {1, 1, 1, 1};
+
     private final QueryReply _reply = 
-         new QueryReply(GUID.makeGuid(), (byte) 1, 6346, new byte[4], (long) 3,
+         new QueryReply(GUID.makeGuid(), (byte) 1, 6346, IP, (long) 3,
                         new Response[] { new Response((long) 2, (long) 2,
                                                       "Susheel") },
                         GUID.makeGuid(), true, true, true, true, true, false);

@@ -130,8 +130,11 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("no SHA1 URN");
 		}
         ALT_LOCS = AlternateLocationCollection.create(SHA1_URN);
-        //add myself to the collection.
-        ALT_LOCS.add(AlternateLocation.create(SHA1_URN));//SHA1_URN is not null
+        try {
+            addUrnsForSelf();
+        } catch(IllegalArgumentException e) {
+            // oh well, we'll add it later.
+        }                        
         _hits = 0; // Starts off with 0 hits
     }		
 
@@ -322,6 +325,14 @@ public class FileDesc implements AlternateLocationCollector {
 	public AlternateLocationCollection getAlternateLocationCollection() {
 		return ALT_LOCS;
 	}
+	
+	/**
+	 * Adds URNs for this' location to the alternate location collection.
+	 * This should be called whenever the address changes.
+	 */
+    public void addUrnsForSelf() {
+        ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
+    }
 	
 
 	/** 

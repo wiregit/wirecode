@@ -169,7 +169,7 @@ com.sun.java.util.collections.Comparable
             }
 			if(!NetworkUtils.isValidPort(getPort())) {
 			    throw new IllegalArgumentException("invalid port");
-		    }	
+		    }
         }
 
         if (requireNumeric) 
@@ -189,12 +189,16 @@ com.sun.java.util.collections.Comparable
                 }
             }
         }
+        
+        if(!NetworkUtils.isValidAddress(hostname))
+            throw new IllegalArgumentException("invalid address: " + hostname);
     }
 
     public Endpoint(String hostname, int port) {
-        if(!NetworkUtils.isValidPort(port)) {
+        if(!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
-        }
+        if(!NetworkUtils.isValidAddress(hostname))
+            throw new IllegalArgumentException("invalid address: " + hostname);
         this.hostname = hostname;
         this.port=port;
     }
@@ -205,9 +209,10 @@ com.sun.java.util.collections.Comparable
     * @param port The port number for the host
     */
     public Endpoint(byte[] hostBytes, int port) {
-        if(!NetworkUtils.isValidPort(port)) {
+        if(!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
-        }
+        if(!NetworkUtils.isValidAddress(hostBytes))
+            throw new IllegalArgumentException("invalid address");
         this.hostBytes = hostBytes;
         this.port = port;
         

@@ -1,20 +1,23 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.sun.java.util.collections.*;
-import java.net.URL;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.gui.*;
 import com.limegroup.gnutella.settings.*;
-//import com.limegroup.gnutella.gui.search.*;
-import javax.swing.JOptionPane;
-import junit.framework.*;
 
+import javax.swing.JOptionPane;
+
+import java.io.*;
+import java.net.URL;
+import java.net.InetAddress;
+
+import com.sun.java.util.collections.*;
+
+import junit.framework.*;
 /**
  * Comprehensive test of downloads -- one of the most important tests in
  * LimeWire.
@@ -71,10 +74,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	private static final long TWO_MINUTES = 1000 * 60 * 2;
 	
     
-    public static void globalSetUp() {
+    public static void globalSetUp() throws Exception {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
+        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
@@ -360,7 +364,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=dm.download(new RemoteFileDesc[] {rfd1}, false);
+        download=RouterService.download(new RemoteFileDesc[] {rfd1}, false);
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
         waitForComplete(false);
@@ -431,7 +435,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         Downloader download=null;
         //Start one location, wait a bit, then add another.
-        download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
+        download=RouterService.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         waitForComplete(deleteCorrupt);
         debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
@@ -460,7 +464,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Downloader download=null;
 
         //Start one location, wait a bit, then add another.
-        download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
+        download=RouterService.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         waitForComplete(deleteCorrupt);
         debug("passed"+"\n");//got here? Test passed
     }
@@ -485,7 +489,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         Downloader download = null;
         
-        download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
+        download = RouterService.download(new RemoteFileDesc[] {rfd1}, false);        
         waitForComplete(deleteCorrupt);
         debug("passed"+"\n");//got here? Test passed
     }
@@ -1155,6 +1159,44 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertLessThan("u2 did all the work", TestFile.length()+FUDGE_FACTOR, u2);
     }
     
+    public void testSimpleDownloadWithInitialAlts() throws Exception {
+        debug("-Testing download with initial alts");
+        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc[] rfds1 = {rfd1};
+        List rfds2 = new LinkedList();
+        rfds2.add(rfd2);
+        
+        tGeneric(rfds1, rfds2);
+        
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }    
+    
+    /**
+     * This test MUST BE LAST because it leaves a file around.
+     * I suppose it could be cleaned up ... but oh well.
+     * Easier to make it last.
+     */
     public void testPartialDownloads() throws IOException {
         debug("-Testing partial downloads...");
         uploader1.setPartial(true);
@@ -1162,7 +1204,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         RemoteFileDesc[] rfds = {rfd1};
         Downloader downloader = null;
         try {
-            downloader = dm.download(rfds,false);
+            downloader = RouterService.download(rfds,false);
         } catch (AlreadyDownloadingException adx) {
             assertTrue("downloader already downloading??",false);
         }
@@ -1170,6 +1212,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Downloader did not go to busy after getting ranges",
                      Downloader.WAITING_FOR_RETRY, downloader.getState());
     }
+        
 
 
     /*
@@ -1211,14 +1254,18 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     ////////////////////////// Helping Code ///////////////////////////
+    private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
+        tGeneric(rfds, DataUtils.EMPTY_LIST);
+    }
     
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
-    private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
+    private static void tGeneric(RemoteFileDesc[] rfds, List alts)
+      throws Exception {
         Downloader download=null;
 
-        download=dm.download(rfds, false);
+        download=RouterService.download(rfds, alts, false);
 
         waitForComplete(false);
         if (isComplete())
@@ -1240,7 +1287,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static void tGenericCorrupt(RemoteFileDesc[] rfds) throws Exception {
         Downloader download=null;
 
-        download=dm.download(rfds, false);
+        download=RouterService.download(rfds, false);
 
         waitForComplete(false);
         if (isComplete())
@@ -1262,7 +1309,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static void tResume(File incFile) throws Exception {
         Downloader download = null;
         
-        download = dm.download(incFile);
+        download = RouterService.download(incFile);
         
         waitForComplete(false);
         if (isComplete())

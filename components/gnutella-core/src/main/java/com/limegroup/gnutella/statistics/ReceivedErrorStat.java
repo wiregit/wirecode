@@ -185,6 +185,12 @@ public class ReceivedErrorStat extends AdvancedStatistic {
      */
     public static final Statistic REPLY_INVALID_PORT =
         new QueryReplyErrorStat();
+        
+    /**
+     * Statistic for failure due to invalid address in QueryReply.
+     */
+    public static final Statistic REPLY_INVALID_ADDRESS =
+        new QueryReplyErrorStat();
     
     /**
      * Statistic for failure due to invalid speed in QueryReply.
@@ -196,6 +202,12 @@ public class ReceivedErrorStat extends AdvancedStatistic {
      * Statistic for failure due to invalid port in a push.
      */
     public static final Statistic PUSH_INVALID_PORT =
+        new PushErrorStat();
+    
+    /**
+     * Statistic for failure due to invalid address in a push.
+     */
+    public static final Statistic PUSH_INVALID_ADDRESS =
         new PushErrorStat();
     
     /**
@@ -214,6 +226,12 @@ public class ReceivedErrorStat extends AdvancedStatistic {
      * Statistic for failure due to an invalid ping reply port.
      */
     public static final Statistic PING_REPLY_INVALID_PORT =
+        new PingReplyErrorStat();
+        
+    /**
+     * Statistic for failure due to an invalid ping reply address.
+     */
+    public static final Statistic PING_REPLY_INVALID_ADDRESS =
         new PingReplyErrorStat();
         
     /**

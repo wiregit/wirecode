@@ -247,6 +247,7 @@ public class ClientSidePushProxyTest
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
+        ss.setReuseAddress(true);        
         ss.setSoTimeout(TIMEOUT);
 
         // test that the client responds to a PushRequest
@@ -299,15 +300,15 @@ public class ClientSidePushProxyTest
 
         // set up a server socket
         ServerSocket ss = new ServerSocket(7000);
-        ss.setSoTimeout(4*TIMEOUT);
+        ss.setReuseAddress(true);        
+        ss.setSoTimeout(15*TIMEOUT);
 
         // send a reply with some PushProxy info
-        //PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
         Set proxies = new HashSet();
         proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
-        m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
         testUP.send(m);
@@ -410,7 +411,7 @@ public class ClientSidePushProxyTest
         // send a reply with NO PushProxy info
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "golf is awesome");
-        m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, null);
         testUP.send(m);
@@ -426,7 +427,7 @@ public class ClientSidePushProxyTest
 
         // await a PushRequest
         do {
-            m = testUP.receive(4*TIMEOUT);
+            m = testUP.receive(15*TIMEOUT);
         } while (!(m instanceof PushRequest)) ;
     }
 
@@ -448,7 +449,8 @@ public class ClientSidePushProxyTest
 
         // set up a server socket
         ServerSocket ss = new ServerSocket(7000);
-        ss.setSoTimeout(4*TIMEOUT);
+        ss.setReuseAddress(true);
+        ss.setSoTimeout(15*TIMEOUT);
 
         // send a reply with some BAD PushProxy info
         //PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
@@ -457,7 +459,7 @@ public class ClientSidePushProxyTest
         proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 8000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "berkeley.edu");
-        m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
         testUP.send(m);
@@ -525,6 +527,10 @@ public class ClientSidePushProxyTest
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
     }
+    
+    private static byte[] myIP() {
+        return new byte[] { (byte)192, (byte)168, 0, 1 };
+    }
 
     private static final boolean DEBUG = false;
     
@@ -557,7 +563,9 @@ public class ClientSidePushProxyTest
             return rfd;
         }
 
-        public void handleQueryResult(RemoteFileDesc rfd, HostData data) {
+        public void handleQueryResult(RemoteFileDesc rfd,
+                                      HostData data,
+                                      Set locs) {
             this.rfd = rfd;
         }
     }

@@ -35,6 +35,12 @@ public class PushRequest extends Message implements Serializable {
                 ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
+		String ip = NetworkUtils.ip2string(payload, 20);
+		if(!NetworkUtils.isValidAddress(ip)) {
+		    if( RECORD_STATS )
+		        ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
+		    throw new BadPacketException("invalid address: " + ip);
+		}
     }
 
     /**
@@ -56,7 +62,9 @@ public class PushRequest extends Message implements Serializable {
 		} else if(ip.length!=4) {
 			throw new IllegalArgumentException("invalid ip length: "+
 											   ip.length);
-		} else if((port&0xFFFF0000)!=0) {
+        } else if(!NetworkUtils.isValidAddress(ip)) {
+            throw new IllegalArgumentException("invalid ip");
+		} else if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		}
 

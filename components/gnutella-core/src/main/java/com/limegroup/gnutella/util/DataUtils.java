@@ -44,4 +44,9 @@ public final class DataUtils {
      */
     public static final Map EMPTY_MAP =
         Collections.unmodifiableMap(new HashMap(0));
+        
+    /**
+     * An 16-length empty byte array, for GUIDs.
+     */
+    public static final byte[] EMPTY_GUID = new byte[16];
 }

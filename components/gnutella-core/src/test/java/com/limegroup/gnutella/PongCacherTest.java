@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.security.*;
 import junit.framework.*;
+import java.net.InetAddress;
 import com.sun.java.util.collections.*;
 
 /**
@@ -36,6 +37,7 @@ public final class PongCacherTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
+        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
         //PC.start();
     }
 

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
@@ -92,6 +93,12 @@ public class QueryReply extends Message implements Serializable{
     /** the PushProxy info for this hit.
      */
     private Set _proxies;
+    
+    /**
+     * The HostData containing information about this QueryReply.
+     * Only set if this QueryReply is parsed.
+     */
+    private HostData _hostData;
 
     /** Our static and final instance of the GGEPUtil helper class.
      */
@@ -238,6 +245,13 @@ public class QueryReply extends Message implements Serializable{
 		} 		
 		
 		setAddress();
+		
+		if(!NetworkUtils.isValidAddress(getIPBytes())) {
+		    if( RECORD_STATS )
+		        ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
+		    throw new BadPacketException("invalid address");
+		}
+		
         //repOk();                               
     }
 
@@ -287,6 +301,9 @@ public class QueryReply extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid port: "+port);
 		} else if(ip.length != 4) {
 			throw new IllegalArgumentException("invalid ip length: "+ip.length);
+        } else if(!NetworkUtils.isValidAddress(ip)) {
+            throw new IllegalArgumentException("invalid address: " + 
+                    NetworkUtils.ip2string(ip));
 		} else if((speed & 0xFFFFFFFF00000000l) != 0) {
 			throw new IllegalArgumentException("invalid speed: "+speed);
 		} else if(n >= 256) {
@@ -656,6 +673,17 @@ public class QueryReply extends Message implements Serializable{
         parseResults();
         return _proxies;
     }
+    
+    /**
+     * Returns the HostData object describing information
+     * about this QueryReply.
+     */
+    public HostData getHostData() throws BadPacketException {
+        parseResults();
+        if( _hostData == null )
+            throw new BadPacketException();
+        return _hostData;
+    }
 
     
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
@@ -667,8 +695,8 @@ public class QueryReply extends Message implements Serializable{
     private void parseResults() {
         if (_parsed)
             return;
-        parseResults2();
         _parsed=true;
+        parseResults2();
     }
 
     /**
@@ -886,7 +914,7 @@ public class QueryReply extends Message implements Serializable{
             } else {
                 this._proxies = proxies;
             }
-
+            this._hostData = new HostData(this);
             debug("QR.parseResults2(): returning w/o exception.");
 
         } catch (BadPacketException e) {
@@ -897,7 +925,6 @@ public class QueryReply extends Message implements Serializable{
             return;
         } 
     }
-
 
     /** Returns the 16 byte client ID (i.e., the "footer") of the
      *  responding host.  */
@@ -922,68 +949,6 @@ public class QueryReply extends Message implements Serializable{
 				super.toString()+"\r\n"+
 				"ip: "+getIP()+"\r\n");				
     }
-
-    /** Return all the responses in this as an array of RemoteFileDescriptor.
-     *   @param acceptedIncoming true if this has ever accepted an incoming
-     *    connection.  This is used to calculate the quality of service
-     *    (e.g., four stars) for RemoteFileDesc.
-     *   @exception java.lang.Exception Thrown if attempt fails.
-     */
-    public RemoteFileDesc[] toRemoteFileDescArray() 
-            throws BadPacketException {
-        List responses = null;
-        try { // get the responses, some data from them is needed...
-            responses = getResultsAsList();
-        }
-        catch (BadPacketException bpe) {
-            debug(bpe);
-            throw bpe;
-        }
-    
-        RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];
-        
-        Iterator respIter = responses.iterator();
-        int index = 0;
-        // these will be used over and over....
-        final String ip = getIP();
-        final int port = getPort();
-        final int qual = 
-            calculateQualityOfService(!RouterService.acceptedIncomingConnection());
-        final long speed = getSpeed();
-        final byte[] clientGUID = getClientGUID();
-        boolean supportsChat = false;
-        boolean supportsBrowseHost = false;
-        boolean isReplyToMulticast = false;
-        try {
-            isReplyToMulticast = isReplyToMulticastQuery();
-            supportsChat = getSupportsChat();
-            supportsBrowseHost = getSupportsBrowseHost();
-        }
-        catch (BadPacketException ignored) {} // don't let chat kill me....
-        
-        // construct RFDs....
-        while (respIter.hasNext()) {
-            Response currResp = (Response) respIter.next();
-            retArray[index++] = new RemoteFileDesc(ip, port, 
-                                                   currResp.getIndex(),
-                                                   currResp.getName(),
-                                                   (int) currResp.getSize(),
-                                                   clientGUID, (int) speed,
-                                                   supportsChat, 
-                                                   qual,
-												   supportsBrowseHost,
-												   currResp.getDocument(),
-												   currResp.getUrns(),
-												   isReplyToMulticast,
-                                                   getNeedsPush(),
-                                                   getVendor(),
-                                                   System.currentTimeMillis(),
-                                                   _proxies);
-        }
-        
-        return retArray;
-    }
-
 
 	/**
      * This method calculates the quality of service for a given host.  The
@@ -1380,12 +1345,12 @@ public class QueryReply extends Message implements Serializable{
 
         public IPPortCombo(String hostAddress, int port) 
             throws UnknownHostException, IllegalArgumentException  {
-            if (hostAddress.equals("0.0.0.0"))
-                throw new IllegalArgumentException("Host is bad: 0.0.0.0");
-            _addr = InetAddress.getByName(hostAddress);
             if (!NetworkUtils.isValidPort(port))
-                throw new IllegalArgumentException("Bad Port");
+                throw new IllegalArgumentException("Bad Port: " + port);
             _port = port;
+            _addr = InetAddress.getByName(hostAddress);
+            if (!NetworkUtils.isValidAddress(_addr))
+                throw new IllegalArgumentException("invalid addr: " + _addr);
         }
 
         public int getPort() {

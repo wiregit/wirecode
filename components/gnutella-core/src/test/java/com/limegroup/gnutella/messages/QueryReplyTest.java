@@ -2,6 +2,9 @@ package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*; 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -13,8 +16,14 @@ import junit.extensions.*;
  */
 public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+    private static final byte[] IP = new byte[] {1, 1, 1, 1};
+    private static final String EXTENSION = "XYZ";
+    private static final int MAX_LOCATIONS = 10;
+
     private QueryReply.GGEPUtil _ggepUtil = new QueryReply.GGEPUtil();
-	
+    private FileManager fman = null;
+    private Object loaded = new Object();
+    
 	/**
 	 * Constructs a new test instance for query replies.
 	 */
@@ -32,12 +41,33 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+	
+    
+    public static void globalSetUp() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        try {
+            RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        } catch (SecurityException e) {
+        }        
+    }
+    
+	public void setUp() throws Exception {
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        	    
+	    cleanFiles(_sharedDir, false);
+	    fman = new SimpleFileManager();
+	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+	    
+	}
+		
 
 	/**
 	 * Runs the legacy unit test that was formerly in QueryReply.
 	 */
 	public void testLegacy() throws Exception {		
-		byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
+		byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)0x1};
 		long u4=0x00000000FFFFFFFFl;
 		byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
 		Response[] responses=new Response[0];
@@ -55,7 +85,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		qr=new QueryReply(guid, (byte)5,
 						  0xFFFF, ip, u4, responses,
 						  guid, false);
-		assertEquals("255.0.0.1",qr.getIP());
+		assertEquals("254.0.0.1",qr.getIP());
 		assertEquals(0xFFFF, qr.getPort());
 		assertEquals(u4, qr.getSpeed());
 		assertTrue(Arrays.equals(qr.getClientGUID(),guid));
@@ -74,6 +104,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+		payload[3]=1;            //non-blank ip
 		payload[11+8]=(byte)65;  //The character 'A'
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
@@ -100,6 +131,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+15];
         payload[0]=1;                    //Number of results
 		payload[1]=1;                    //non-zero port
+		payload[3]=1;                    //non-blank ip
         payload[11+8]=(byte)65;          //The character 'A'
 
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
@@ -118,7 +150,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         //Test case modified by Susheel Daswani to check the metadata part
         payload=new byte[11+11+(4+1+4+5)+16];
         payload[0]=1;                    //Number of results
-		payload[1]=1;                    //non-zero port        
+		payload[1]=1;                    //non-zero port
+		payload[3]=1;                    //non-blank ip		
         payload[11+8]=(byte)65;          //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -154,6 +187,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+4)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+		payload[3]=1;            //non-blank ip		
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -177,6 +211,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+20000)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+		payload[3]=1;            //non-blank ip		
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
@@ -208,6 +243,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+2)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+        payload[3]=1;           //non-blank ip
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
 
@@ -226,6 +262,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+2+0)+16];
         payload[0]=1;            //Number of results
 		payload[1]=1;            //non-zero port
+        payload[3]=1;            //non-blank ip
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -251,6 +288,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
+        payload[3]=1;                //non-blank ip		
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -289,6 +327,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+1+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
+        payload[3]=1;                //non-blank ip				
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)73;   //The character 'I'
@@ -314,6 +353,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
 		payload[1]=1;                //non-zero port
+        payload[3]=1;                //non-blank ip
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
@@ -346,7 +386,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           0xFFFF, ip, u4, responses,
                           guid,
                           false, true, true, false, true, false);
-        assertEquals("255.0.0.1", qr.getIP());
+        assertEquals("254.0.0.1", qr.getIP());
         assertEquals(0xFFFF, qr.getPort());
         assertEquals(u4, qr.getSpeed());
         assertTrue(Arrays.equals(qr.getClientGUID(),guid));
@@ -678,7 +718,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             else if (i < 6) 
                 assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
             else  {// length is fine
-                assertEquals((i / 6), 
+                   // -1 because the first entry is invalid since it
+                   // begins with 0.               
+                assertEquals((i / 6) - 1,
                              _ggepUtil.getPushProxies(ggep).size());
                 
             }
@@ -693,9 +735,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         for (int i = 0; i < 10; i++) {
             byte[] bytes = new byte[6*(i+1)];
             rand.nextBytes(bytes);
-            // don't trust zeroes in IP....
+            // don't trust zeroes or 255 in IP...
             for (int j = 0; j < bytes.length; j++) {
                 if (bytes[j] == (byte) 0) bytes[j] = (byte) 1;
+                if (bytes[j] == (byte)255)bytes[j] = (byte)254;
             }
 
             // from the network
@@ -743,8 +786,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         }
 
     }
-
-
     
     public void testPushProxyQueryReply() throws Exception {
         String[] hosts = {"www.limewire.com", "www.limewire.org",
@@ -758,7 +799,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                     new QueryReply.PushProxyContainer(hosts[i], 6346));
             
             QueryReply qr = new QueryReply(GUID.makeGuid(), (byte) 4, 
-                                           6346, new byte[4], 0, new Response[0],
+                                           6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
                                            proxies);
@@ -797,7 +838,50 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         }
     }
-
+    
+    public void testQueryReplyHasAlternates() throws Exception {
+        addFilesToLibrary();
+        addAlternateLocationsToFiles();
+        
+        boolean checked = false;
+		for(int i = 0; i < fman.getNumFiles(); i++) {
+			FileDesc fd = fman.get(i);
+			Response testResponse = new Response(fd);
+			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			Response[] hits = fman.query(qr);
+			assertNotNull("didn't get a response for query " + qr, hits);
+			// we can only do this test on 'unique' names, so if we get more than
+			// one response, don't test.
+			if ( hits.length != 1 ) continue;
+			checked = true;
+			
+			// first check basic stuff on the response.
+			assertEquals("responses should be equal", testResponse, hits[0]);
+			assertEquals("should have 10 other alts",
+			    10, testResponse.getLocations().size());
+			assertEquals("should have equal alts",
+			    testResponse.getLocations(), hits[0].getLocations());
+			    
+			// then actually create a QueryReply and read it, to make
+			// sure we can write & read stuff correctly.
+            QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
+                                           6346, IP, 0, hits,
+                                           GUID.makeGuid(), new byte[0],
+                                           false, false, true, true, true, false,
+                                           null);			    
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            qReply.write(baos);
+            ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+            QueryReply readQR = (QueryReply) Message.read(bais);
+            
+            List readHits = readQR.getResultsAsList();
+            assertEquals("wrong # of results", hits.length, readHits.size());
+            Response hit = (Response)readHits.get(0);
+            assertEquals("wrong # of alts",
+                hits[0].getLocations(), hit.getLocations());
+		}        
+    }
 
 
     /**
@@ -810,6 +894,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		byte[] payload=new byte[11+11+16];
 		payload[0] = 1;            //Number of results
 		payload[1]=1;              //non-zero port
+        payload[3]=1;                //non-blank ip
 		//payload[11+8]=(byte)65;  //The character 'A'
 
 		QueryReply qr = 
@@ -822,5 +907,76 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         } catch(BadPacketException e) {
         }
     }
+
+	private void addFilesToLibrary() throws Exception {
+		String dirString = "com/limegroup/gnutella";
+		File testDir = CommonUtils.getResourceFile(dirString);
+		testDir = testDir.getCanonicalFile();
+		assertTrue("could not find the gnutella directory",
+		    testDir.isDirectory());
+		
+        File[] testFiles = testDir.listFiles(new FileFilter() { 
+            public boolean accept(File file) {
+                // use files with a $ because they'll generally
+                // trigger a single-response return, which is
+                // easier to check
+                return !file.isDirectory() && file.getName().indexOf("$")!=-1;
+            }
+        });
+		assertNotNull("no files to test against", testFiles);
+		assertNotEquals("no files to test against", 0, testFiles.length);
+
+        waitForLoad();
+
+   		for(int i=0; i<testFiles.length; i++) {
+			if(!testFiles[i].isFile()) continue;
+			File shared = new File(
+			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
+			assertTrue("unable to get file",
+			    CommonUtils.copy( testFiles[i], shared));
+            assertNotEquals(null, fman.addFileIfShared(shared));
+		}
+        
+        // the below test depends on the filemanager loading shared files in 
+        // alphabetical order, and listFiles returning them in alphabetical
+        // order since neither of these must be true, a length check can
+        // suffice instead.
+        //for(int i=0; i<files.length; i++)
+        //    assertEquals(files[i].getName()+".tmp", 
+        //                 fman.get(i).getFile().getName());
+            
+        assertEquals("unexpected number of shared files",
+            testFiles.length, fman.getNumFiles() );
+    }
     
+    private void addAlternateLocationsToFiles() throws Exception {
+        FileDesc[] fds = fman.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++) {
+            String urn = fds[i].getSHA1Urn().httpStringValue();
+            for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
+                String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
+                fds[i].add(AlternateLocation.create(loc));
+            }
+        }
+    }
+    
+    private class FManCallback extends ActivityCallbackStub {
+        public void fileManagerLoaded() {
+            synchronized(loaded) {
+                loaded.notify();
+            }
+        }
+    }
+    
+    private void waitForLoad() {
+        synchronized(loaded) {
+            try {
+                fman.loadSettings(false); // true won't matter either                
+                loaded.wait();
+            } catch (InterruptedException e) {
+                //good.
+            }
+        }
+    }   
+
 }

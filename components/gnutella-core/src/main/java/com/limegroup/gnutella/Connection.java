@@ -791,11 +791,14 @@ public class Connection {
                 continue;                  //ignore lines without ':'
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key) && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
-            	try {
-            		ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(value);
-            	} catch (IllegalArgumentException ex) {
-            	}
+            if (HeaderNames.REMOTE_IP.equals(key) &&
+                ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+                StringSetting adr=ConnectionSettings.FORCED_IP_ADDRESS_STRING;
+                String addr = adr.getValue();
+                if(NetworkUtils.isValidAddress(addr) && !value.equals(addr)) {
+        	        adr.setValue(value);
+        	        RouterService.addressChanged();
+                }
             }
             HEADERS_READ.put(key, value);
         }

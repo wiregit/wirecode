@@ -35,6 +35,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
+    /** The extension header (key) for AlternateLocation support */
+    public static final String GGEP_HEADER_ALTS = "ALT";
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
@@ -342,16 +344,21 @@ public class GGEP extends Object {
         out.write(toWrite);
     }
 
-    /** Constructs an array of all GGEP blocks starting at
+    /**
+     * Constructs an array of all GGEP blocks starting at
      *  messageBytes[beginOffset].
      *  @param messageBytes The input bytes to attempt to read one or more GGEP
      *  blocks from.
      *  @param beginOffset The begin index of the (first) GGEP prefix.
+     *  @param endOffset If the reader wants to know where the last GGEP block
+     *     was read, fill this with a blank int[1] and the endOffset will
+     *     be placed here.  Otherwise, null is allowed.
      *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
      *  correctly.
      */
     public static GGEP[] read(byte[] messageBytes,
-                              final int beginOffset) 
+                              final int beginOffset,
+                              int[] endOffset) 
         throws BadGGEPBlockException {
 
         GGEP[] retGGEPs = null;
@@ -370,9 +377,27 @@ public class GGEP extends Object {
         for (int i = 0; i < array.length; i++)
             retGGEPs[i] = (GGEP)array[i];
 
+        if( endOffset != null && endOffset.length > 0 )
+            endOffset[0] = currIndex[0];
+
         return retGGEPs;
     }
-
+    
+    /**
+     * Utility method for calling read(messageBytes, beginOffset, null).
+     * Constructs an array of all GGEP blocks starting at
+     *  messageBytes[beginOffset]. 
+     *  @param messageBytes The input bytes to attempt to read one or more GGEP
+     *  blocks from.
+     *  @param beginOffset The begin index of the (first) GGEP prefix.
+     *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
+     *  correctly.
+     */
+    public static GGEP[] read(byte[] messageBytes,
+                              final int beginOffset)
+        throws BadGGEPBlockException {
+            return read(messageBytes, beginOffset, null);
+    }
 
     ////////////////////////// Key/Value Mutators and Accessors ////////////////
 

@@ -19,7 +19,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] clientGUID=new byte[16]; clientGUID[0]=(byte)0xFF;
         clientGUID[15]=(byte)0xF1;
         long index=2343;
-        byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)1};
+        byte[] ip={(byte)0xFE, (byte)0, (byte)0, (byte)1};
         int port=6346;
 
         PushRequest pr=new PushRequest(guid, (byte)0,
@@ -45,6 +45,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[18]=(byte)1;     //hops
         bytes[19]=(byte)26+10; //payload length
         bytes[23+16]=(byte)3;  //index
+        bytes[23+20]=(byte)254; // non-zero ip.
         bytes[23+24]=(byte)1;  //non-zero port.
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);

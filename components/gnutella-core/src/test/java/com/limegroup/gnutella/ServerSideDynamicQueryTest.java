@@ -26,6 +26,11 @@ import java.io.*;
  *                             LEAF
  */
 public final class ServerSideDynamicQueryTest extends BaseTestCase {
+    
+    /**
+     * Simple IP so a blank one isn't used.
+     */
+    private static final byte[] IP = new byte[] { 1, 1, 1, 1};
 
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
@@ -371,7 +376,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		QueryReply reply1=new QueryReply(request.getGUID(),
 										 (byte)2,
 										 6346,
-										 new byte[4],
+										 IP,
 										 56,
 										 new Response[] {response1},
 										 guid1, false);
@@ -429,7 +434,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		QueryReply reply1=new QueryReply(request.getGUID(),
 										 (byte)2,
 										 6346,
-										 new byte[4],
+										 IP,
 										 56,
 										 new Response[] {response1},
 										 guid1, false);

@@ -6,7 +6,9 @@ import java.util.Locale;
 import org.apache.xerces.parsers.DOMParser;
 import org.xml.sax.*;
 import org.w3c.dom.*;
+
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.DataUtils;
 
 
 public final class LimeXMLDocumentHelper{
@@ -25,10 +27,11 @@ public final class LimeXMLDocumentHelper{
      */
     public static List getDocuments(String aggregrateXMLStr, 
                                                  int totalResponseCount){
+        if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
+            return DataUtils.EMPTY_LIST;
+
         ArrayList retList = new ArrayList();
         DOMParser parser = new DOMParser();
-        if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
-            return retList;
         int startIndex=aggregrateXMLStr.indexOf
                                 (XMLStringUtils.XML_DOC_START_IDENTIFIER);
         int endIndex = startIndex;

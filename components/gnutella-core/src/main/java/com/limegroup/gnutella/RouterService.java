@@ -987,6 +987,7 @@ public class RouterService {
      * succeeds.  
      *
      * @param files a group of "similar" files to smart download
+     * @param alts a List of secondary RFDs to use for other sources
      * @param overwrite true iff the download should proceded without
      *  checking if it's on disk
      * @return the download object you can use to start and resume the download
@@ -995,11 +996,24 @@ public class RouterService {
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public static Downloader download(RemoteFileDesc[] files, boolean overwrite)
+	public static Downloader download(RemoteFileDesc[] files, 
+	                                  List alts,
+	                                  boolean overwrite)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return downloader.download(files, overwrite);
+		return downloader.download(files, alts, overwrite);
 	}
+	
+	/**
+	 * Stub for calling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
+	 */
+	public static Downloader download(RemoteFileDesc[] files,
+	                                boolean overwrite)
+		throws FileExistsException, AlreadyDownloadingException, 
+  			   java.io.FileNotFoundException {
+		return download(files, DataUtils.EMPTY_LIST, overwrite);
+	}
+        
 
     /*
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -1138,6 +1152,23 @@ public class RouterService {
 	 */
     public static boolean getIsShuttingDown() {
 		return isShuttingDown;
+    }
+    
+    /**
+     * Notifies components that this' IP address has changed.
+     */
+    public static boolean addressChanged() {
+        // Only continue if the current address/port is valid.
+        if(!NetworkUtils.isValidAddress(getAddress()))
+            return false;
+        if(!NetworkUtils.isValidPort(getPort()))
+            return false;
+
+        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++)
+            fds[i].addUrnsForSelf();
+
+        return true;
     }
 
 	/**

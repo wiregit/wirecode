@@ -7,6 +7,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import junit.framework.*;
 
@@ -229,8 +230,8 @@ public class RequeryDownloadTest
             responseURNs = new HashSet(1);
             responseURNs.add(responseURN);
         }
-        Response response = new Response(0l, TestFile.length(), responseName,
-                                         null, responseURNs, null, null); 
+        Response response = newResponse(0l, TestFile.length(), responseName,
+                                         null, responseURNs, null, null, null); 
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply reply = new QueryReply(guidToUse, 
             (byte)6, 6666, ip, 0l, 
@@ -247,6 +248,7 @@ public class RequeryDownloadTest
             while (downloader.getState()!=Downloader.COMPLETE) {            
 			    if ( downloader.getState() != Downloader.CONNECTING &&
 			         downloader.getState() != Downloader.HASHING &&
+			         downloader.getState() != Downloader.SAVING &&
 			         downloader.getState() != Downloader.DOWNLOADING )
                     assertEquals(Downloader.DOWNLOADING, downloader.getState());
                 Thread.sleep(200);
@@ -292,8 +294,7 @@ public class RequeryDownloadTest
         //Send a mismatching response to the query, making sure it is ignored.
         //Give the downloader time to start up first.
         Response response = new Response(0l, TestFile.length(), 
-                                         "totally different.txt", null, null, 
-                                         null, null);
+                                         "totally different.txt");
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply reply = new QueryReply(guidToUse,
             (byte)6, 6666, ip, 0l, 
@@ -307,8 +308,7 @@ public class RequeryDownloadTest
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         //Send a good response to the query.
-        response = new Response(0l, TestFile.length(), "some file name.txt",
-                              null, null, null, null);
+        response = new Response(0l, TestFile.length(), "some file name.txt");
         reply = new QueryReply(guidToUse,
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
@@ -372,8 +372,7 @@ public class RequeryDownloadTest
         //Send a mismatching response to the query, making sure it is ignored.
         //Give the downloader time to start up first.
         Response response = new Response(0l, TestFile.length(), 
-                                         "totally different.txt", null, null, 
-                                         null, null);
+                                         "totally different.txt");
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply reply = new QueryReply(guidToUse,
             (byte)6, 6666, ip, 0l, 
@@ -387,8 +386,7 @@ public class RequeryDownloadTest
             Downloader.GAVE_UP, downloader.getState());
 
         //Send a good response to the query.
-        response = new Response(0l, TestFile.length(), "some file name.txt",
-                              null, null, null, null);
+        response = new Response(0l, TestFile.length(), "some file name.txt");
         reply = new QueryReply(guidToUse,
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
@@ -462,7 +460,7 @@ public class RequeryDownloadTest
         //Send a good response to the query.
         response=new Response(0l,   //index
                               TestFile.length(),
-                              "some file name.txt", null, null, null, null);
+                              "some file name.txt");
         reply=new QueryReply(guid, 
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
@@ -534,5 +532,20 @@ public class RequeryDownloadTest
         assertLessThanOrEquals("Unbalanced x/y count: "+xCount+"/"+yCount, 
                    2, Math.abs(xCount-yCount));
     }
-
+    
+    /**
+     * Utility method to create a new response.
+     */
+    private Response newResponse(long index, long size, String name,
+					 String metadata, Set urns, LimeXMLDocument doc, 
+					 Set endpoints, byte[] extensions) throws Exception {
+        return (Response)PrivilegedAccessor.invokeConstructor(
+            Response.class, new Object[] {
+                new Long(index), new Long(size), name,
+                metadata, urns, doc, endpoints, extensions },
+            new Class[] {
+                Long.TYPE, Long.TYPE, String.class,
+                String.class, Set.class, LimeXMLDocument.class,
+                Set.class, byte[].class } );
+    }
 }

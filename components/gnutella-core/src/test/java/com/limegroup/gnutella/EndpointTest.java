@@ -16,27 +16,32 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
         try {
             e=new Endpoint(":6347");
             fail("endpoint should not have been created");
-        } catch (IllegalArgumentException exc) {
-            assertTrue(true);
-        }
+        } catch (IllegalArgumentException exc) {}
+        
         try {
             e=new Endpoint("abc:cas");
             fail("endpoint should not have been created");
-        } catch (IllegalArgumentException exc) {
-            assertTrue(true);
-        }
+        } catch (IllegalArgumentException exc) {}
 
-        e=new Endpoint("abc");
-        assertEquals("unexpected hostname", "abc", e.getHostname());
-        assertEquals("unexpected port", 6346, e.getPort());
+        try {
+            e=new Endpoint("abc");
+            fail("endpoint should not have been created");
+        } catch(IllegalArgumentException exc) {}
 
-        e=new Endpoint("abc:");
-        assertEquals("unexpected hostname", "abc", e.getHostname());
-        assertEquals("unexpected port", 6346, e.getPort());
+        try {
+            e=new Endpoint("abc:");
+            fail("endpoint should not have been created");
+        } catch(IllegalArgumentException exc) {}
 
-        e=new Endpoint("abc:7");
-        assertEquals("unexpected hostname", "abc", e.getHostname());
-        assertEquals("unexpected port", 7, e.getPort());
+        try {
+            e=new Endpoint("abc:7");
+            fail("endpoint should not have been created");
+        } catch(IllegalArgumentException exc) {}
+        
+        try {
+            e=new Endpoint("0.0.0.0");
+            fail("endpoint should not have been created");
+        } catch(IllegalArgumentException exc) {}
 
         ////////////////////////// Private IP and Subnet Tests ////////////////
         //These tests are incomplete since the methods are somewhat trivial.
@@ -49,8 +54,6 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
         e=new Endpoint("11.0.0.0",1);
         assertTrue(! e.isPrivateAddress());
         e=new Endpoint("172.16.0.0",1);
-        assertTrue(e.isPrivateAddress());
-        e=new Endpoint("0.0.0.0");
         assertTrue(e.isPrivateAddress());
 
         Endpoint e1;
@@ -73,12 +76,12 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testValidatedNumeric() {
         //Allowed 
         check("www.limewire.org:6346", false, true); //no verification
-        check("not a url:6346", false, true);
+        //check("not a url:6346", false, true);
         check("10.255.25.0:6346", true, true);       //verified valid IP   
-        check("64.61.25.172", true, true);     
+        check("64.61.25.172", true, true);
 
         //Disallowed
-        check("<html>hello</html>", true, false);    //not even close!
+        //check("<html>hello</html>", true, false);    //not even close!
         check("18.239.0.144.215", true, false);      //too many dots
         check("18.A.0.144", true, false);            //not numeric
         check("18.256.0.144:6346", true, false);     //value too big

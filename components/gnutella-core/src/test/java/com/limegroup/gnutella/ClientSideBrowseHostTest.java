@@ -209,6 +209,7 @@ public class ClientSideBrowseHostTest
 
         // set up a server socket
         ServerSocket ss = new ServerSocket(7000);
+        ss.setReuseAddress(true);
         ss.setSoTimeout(TIMEOUT);
 
         // send a reply with some PushProxy info
@@ -308,6 +309,7 @@ public class ClientSideBrowseHostTest
 
         // set up a server socket to wait for proxy request
         ServerSocket ss = new ServerSocket(7000);
+        ss.setReuseAddress(true);
         ss.setSoTimeout(TIMEOUT*4);
 
         // send a reply with some PushProxy info
@@ -537,7 +539,9 @@ public class ClientSideBrowseHostTest
             return _rfd;
         }
         
-        public void handleQueryResult(RemoteFileDesc rfd, HostData data) {
+        public void handleQueryResult(RemoteFileDesc rfd,
+                                      HostData data,
+                                      Set locs) {
             _rfd = rfd;
         }
     }

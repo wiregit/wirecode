@@ -30,6 +30,11 @@ import java.io.*;
  */
 public final class UltrapeerRoutingTest extends BaseTestCase {
 
+    /**
+     * Simple non blank IP.
+     */
+    private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
+
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
@@ -288,7 +293,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		QueryReply reply1=new QueryReply(qr.getGUID(),
 										 (byte)2,
 										 6346,
-										 new byte[4],
+										 IP,
 										 56,
 										 new Response[] {response1},
 										 clientGUID, false);
@@ -303,7 +308,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		Response response2 = new Response(0l, 0l, "response2.txt");
 		byte[] guid2 = GUID.makeGuid();
 		QueryReply reply2 = 
-			new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
+			new QueryReply(qr.getGUID(), (byte)2, 6346, IP,
 						   56, new Response[] {response1}, guid2, false);
 		ULTRAPEER_1.send(reply2);
 		ULTRAPEER_1.flush();
@@ -321,7 +326,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
 		PushRequest push1 = 
             new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 0, 
-                            new byte[4], 6346);
+                            IP, 6346);
 		LEAF.send(push1);
 		LEAF.flush();
 		m = ULTRAPEER_2.receive(TIMEOUT);
@@ -335,7 +340,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         // check that pushes with unmatching client guids are not forwarded
 		PushRequest push2 = 
             new PushRequest(GUID.makeGuid(),(byte)2, guid2, 1, 
-                            new byte[4], 6346);
+                            IP, 6346);
 		LEAF.send(push2);
 		LEAF.flush();
 		m = ULTRAPEER_1.receive(TIMEOUT);
@@ -357,7 +362,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		assertTrue("unexpected GUID", 
 				   Arrays.equals(clientGUID, replyRead.getClientGUID()));
 		PushRequest push3 =
-			new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 3, new byte[4], 6346);
+			new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 3, IP, 6346);
 		LEAF.send(push3);
 		LEAF.flush();
 
@@ -769,7 +774,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     public void testMisroutedPong() throws Exception {
         Message m = 
             PingReply.createExternal(GUID.makeGuid(), (byte)6, 7399, 
-                                     new byte[4], false);
+                                     IP, false);
 
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();

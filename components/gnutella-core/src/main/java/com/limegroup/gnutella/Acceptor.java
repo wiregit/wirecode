@@ -9,6 +9,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
+import com.sun.java.util.collections.Arrays;
 
 
 /**
@@ -72,25 +73,35 @@ public class Acceptor implements Runnable {
 	private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 
+
 	/**
      * @modifes this
-     * @effects sets the IP address to use in pongs and query replies.  If addr
-     *  is localhost (127.x.x.x), this is not modified.  This method must be
-	 *  to get around JDK bug #4073539, as well as to try to handle the case 
-	 *  of a computer whose IP address keeps changing.
+     * @effects sets the IP address to use in pongs and query replies.
+     *  If addr is invalid or a local address, this is not modified.
+     *  This method must be to get around JDK bug #4073539, as well
+     *  as to try to handle the case of a computer whose IP address
+     *  keeps changing.
 	 */
 	public void setAddress(InetAddress address) {
-        //Ignore localhost.
 		byte[] byteAddr = address.getAddress();
-		if(byteAddr[0] == 127 && 
+		if( !NetworkUtils.isValidAddress(byteAddr) )
+		    return;
+		    
+		if( byteAddr[0] == 127 &&
            ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
             return;
         }
-        
 
+        boolean addrChanged = false;
 		synchronized(Acceptor.class) {
-			_address = byteAddr;
+		    if( !Arrays.equals(_address, byteAddr) ) {
+			    _address = byteAddr;
+			    addrChanged = true;
+			}
 		}
+		
+		if( addrChanged )
+		    RouterService.addressChanged();
 	}
 
     /**
@@ -112,19 +123,14 @@ public class Acceptor implements Runnable {
      *   If false, the forced IP address will never be used.
      *   If true, the forced IP address will only be used if one is set.
      */
-    public byte[] getAddress(boolean checkForce) {
+    public byte[] getAddress(boolean checkForce) {        
 		if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
-        
             String address = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
-            if (address.equals("0.0.0.0")) {
-                return (new byte[]{ (byte)0, (byte)0, (byte)0, (byte)0 });
-            } else {
-                try {
-                    InetAddress ia = InetAddress.getByName(address);
-                    return ia.getAddress();
-                } catch (UnknownHostException err) {
-                    // ignore and return _address
-                }
+            try {
+                InetAddress ia = InetAddress.getByName(address);
+                return ia.getAddress();
+            } catch (UnknownHostException err) {
+                // ignore and return _address
             }
         }
         
@@ -336,6 +342,7 @@ public class Acceptor implements Runnable {
         if (_port!=oldPort) {
             ConnectionSettings.PORT.setValue(_port);
             SettingsHandler.save();
+            RouterService.addressChanged();
         }
 
         while (true) {
