@@ -163,7 +163,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
 	 */
 	public void runBare() throws Throwable {
         String testName = getName();
-        //System.out.println("Running test: " + testName);
+        System.out.println("Running test: " + testName);
         assertNotNull(testName);
         try {
             preSetUp();
