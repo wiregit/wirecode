@@ -736,8 +736,10 @@ public class QueryReply extends Message implements Serializable{
 
             //Parse LimeWire's private area.  Currently only a single byte
             //whose LSB is 0x1 if we support chat, or 0x0 if we do.
+            //Shareaza also supports our chat, don't disclude them...
             int privateLength=payload.length-i;
-            if (privateLength>0 && vendorT.equals("LIME")) {
+            if (privateLength>0 && (vendorT.equals("LIME") ||
+                                    vendorT.equals("RAZA"))) {
                 byte privateFlags = payload[i];
                 supportsChatT = (privateFlags&CHAT_MASK)!=0 ? TRUE : FALSE;
             }
