@@ -196,6 +196,8 @@ public class Main implements ActivityCallback {
     public void addUpload(HTTPUploader mgr) {}
 
     public void removeUpload(HTTPUploader mgr) {}
+    
+    public void setPort(int port){}
 
 }
 

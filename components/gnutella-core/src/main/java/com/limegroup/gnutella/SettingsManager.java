@@ -58,6 +58,7 @@ public class SettingsManager implements SettingsInterface
      */
     private static SettingsManager instance_;
 
+    private String home_;
     private String fileName_;
     private String ndFileName_;
 
@@ -80,19 +81,38 @@ public class SettingsManager implements SettingsInterface
     {
 	props_      = new Properties();
 	ndProps_    = new Properties();
-	fileName_   = System.getProperty("java.class.path");
-	fileName_   = fileName_ + System.getProperty("file.separator");
-	ndFileName_ = fileName_;
-	fileName_   = fileName_ + SettingsInterface.DEFAULT_FILE_NAME;
-	ndFileName_ = ndFileName_ + SettingsInterface.DEFAULT_ND_PROPS_NAME;
-	try {
-	    FileInputStream fis = new FileInputStream(ndFileName_);
-	    try {
-		ndProps_.load(fis);
+	// the "/" maps the classpath to the root of our
+	// package structure
+	//fileName_   = "/" + SettingsInterface.DEFAULT_FILE_NAME;
+	//ndFileName_ = "/" + SettingsInterface.DEFAULT_ND_PROPS_NAME;
+	//InputStream fis  = getClass().getResourceAsStream(fileName_);
+	//InputStream ndis = getClass().getResourceAsStream(ndFileName_);
+	
+	//if(fis != null)
+	//  initSettings(fis);
+	//else
+	//    loadDefaults();
+	//if(ndis != null)
+	//  {
+	//      try{ndProps_.load(ndis);}
+	//      catch(IOException ioe){}
+	//  }
+	
+	home_       = System.getProperty("user.home");
+	home_       += System.getProperty("file.separator");
+	fileName_   = home_;
+	ndFileName_ = home_;
+	fileName_   += SettingsInterface.DEFAULT_FILE_NAME;
+	ndFileName_ += SettingsInterface.DEFAULT_ND_PROPS_NAME;
+	FileInputStream fis;
+	try 
+	    {
+		fis = new FileInputStream(ndFileName_);
+		try {ndProps_.load(fis);}
+		catch(IOException ioe) {}
 	    }
-	    catch(IOException ioe) {}
-	}
 	catch(FileNotFoundException fne){}	
+	catch(SecurityException se) {}
        	initSettings();
     }
 
@@ -100,28 +120,31 @@ public class SettingsManager implements SettingsInterface
     private void initSettings()
     {
 	Properties tempProps = new Properties();
-        try {
-	    FileInputStream fis = new FileInputStream(fileName_);
+	FileInputStream fis;
+	try {
+	    fis = new FileInputStream(fileName_);
 	    try {
 		tempProps.load(fis);
 		loadDefaults();
-		try {
-		    fis.close();
-		    validateFile(tempProps);
-		}
-		catch (IOException e){loadDefaults();}
+		try 
+		    {
+			fis.close();
+			validateFile(tempProps);
+		    }
+		catch(IOException e){loadDefaults();}
 	    }
-	    catch (IOException e){loadDefaults();}
+	    catch(IOException e){loadDefaults();}
 	}
-	catch(FileNotFoundException e){loadDefaults();}
+	catch(FileNotFoundException fnfe){loadDefaults();}
 	catch(SecurityException se){loadDefaults();}
-    }
+    }	    
 
     /** Makes sure that each property in the file 
      *  is valid.  If not, it sets that property
      *  to the default value.
      */
-    private void validateFile(Properties tempProps) throws IOException
+    private void validateFile(Properties tempProps) 
+	throws IOException
     {
 	String p;
 	byte b;
@@ -139,7 +162,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setTTL(b);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){} 	
 		    }
 		else if(key.equals(SettingsInterface.SOFT_MAX_TTL))
 		    {
@@ -148,7 +171,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setSoftMaxTTL(b);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}  				
+			catch(NumberFormatException nfe){}		
 		    }
 		else if(key.equals(SettingsInterface.MAX_TTL))
 		    {
@@ -157,7 +180,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setMaxTTL(b);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}  				
+			catch(NumberFormatException nfe){}		
 		    }
 		else if(key.equals(SettingsInterface.MAX_LENGTH))
 		    {			
@@ -166,7 +189,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setMaxLength(i);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){} 		
 		    }
 		else if(key.equals(SettingsInterface.TIMEOUT))
 		    {
@@ -175,7 +198,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setTimeout(i);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){}   	
 		    }
 		else if(key.equals(SettingsInterface.KEEP_ALIVE))
 		    {	
@@ -184,7 +207,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setKeepAlive(i);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){}  	
 		    }
 		else if(key.equals(SettingsInterface.PORT))
 		    {
@@ -193,7 +216,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setPort(i);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){}  	
 		    }
 		else if(key.equals(SettingsInterface.SPEED))
 		    {
@@ -202,7 +225,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setConnectionSpeed(i);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){}	    	
 		    }
 		else if(key.equals(SettingsInterface.SEARCH_LIMIT))
 		    {
@@ -211,7 +234,7 @@ public class SettingsManager implements SettingsInterface
 			    try {setSearchLimit(s);}
 			    catch (IllegalArgumentException ie){}
 			}
-			catch(NumberFormatException nfe){}			
+			catch(NumberFormatException nfe){} 	
 		    }
 
 		else if(key.equals(SettingsInterface.CLIENT_ID))
@@ -246,7 +269,10 @@ public class SettingsManager implements SettingsInterface
 		else if(key.equals(SettingsInterface.DIRECTORIES))
 		    {
 			try {setDirectories(p);}
-			catch (IllegalArgumentException ie){}
+			catch (IllegalArgumentException ie)
+			    {
+				setDirectories(home_);
+			    }
 		    }
 
 		else if(key.equals(SettingsInterface.EXTENSIONS))
@@ -345,11 +371,7 @@ public class SettingsManager implements SettingsInterface
 	setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
-	catch(IllegalArgumentException e){
-	    String dir = System.getProperty("java.class.path");
-	    dir += System.getProperty("file.separator");
-	    setSaveDirectory(dir);
-	}
+	catch(IllegalArgumentException e){setSaveDirectory(home_);}
     }
 
     /** returns the time to live */
@@ -395,7 +417,6 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the directory to save to */
     public String getSaveDirectory() {
-	// saveDirectory_ += System.getProperty("file.separator");
 	return saveDirectory_;
     }
 
@@ -405,7 +426,6 @@ public class SettingsManager implements SettingsInterface
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
 
-    /** returns the string of file extensions*/
     public String[] getBannedIps(){return bannedIps_;}
     public String[] getBannedWords(){return bannedWords_;}
     public boolean getFilterAdult(){return filterAdult_;}
@@ -425,9 +445,7 @@ public class SettingsManager implements SettingsInterface
     /** returns the path of the properties and host list files */
     public String getPath()
     {
-	String s = System.getProperty("user.home");
-	s = s + System.getProperty("file.separator");
-	return s;
+	return home_;
     }
 
  
@@ -749,7 +767,7 @@ public class SettingsManager implements SettingsInterface
      */
     private void setHostList(String hostList)
     {		
-	String fn = fileName_ + hostList;
+	String fn = home_ + hostList;
 	File f = new File(fn);
 	if(f.isFile() == true)
 	    hostList_ = fn;

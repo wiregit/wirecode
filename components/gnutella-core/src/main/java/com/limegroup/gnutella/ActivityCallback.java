@@ -55,6 +55,9 @@ public interface ActivityCallback
 
     public void removeUpload(HTTPUploader u);
 
+    /** sets the port in the configuration window */
+    public void setPort(int port);
+
 
     /**
      * REQUIRES: a string in the range of
