@@ -476,7 +476,7 @@ public class ConnectionManager {
      * Provides handle to the activity callback
      * @return Handle to the activity callback
      */
-    ActivityCallback getCallback(){
+    public ActivityCallback getCallback(){
         return _callback;
     }
 
@@ -504,7 +504,7 @@ public class ConnectionManager {
      * Provides handle to the authenticator instance
      * @return Handle to the authenticator
      */
-    Authenticator getAuthenticator(){
+    public Authenticator getAuthenticator(){
         return _authenticator;
     }
     
