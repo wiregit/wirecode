@@ -103,6 +103,23 @@ public final class HeaderNames {
      */
     public static final String DEFLATE_VALUE =
         ConstantHTTPHeaderValue.DEFLATE_VALUE.httpStringValue();
+        
+    /**
+     * Constant for the header indicating that the crawler is connecting.
+     */
+	public static final String CRAWLER = "Crawler";
+	
+	/**
+	 * Constant for the header indicating the number of leaf connections to
+	 * the crawler.
+	 */
+	public static final String LEAVES = "Leaves";
+		
+	/**
+	 * Constant for the header indicating the number of ultrapeer connections
+	 * to the crawler.
+	 */
+	public static final String PEERS = "Peers";
 
     /** 
      * The true/false values for some headers.  Note that these are not the only
