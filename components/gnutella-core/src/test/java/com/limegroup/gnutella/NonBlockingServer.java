@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * NIO server used to test blocking vs. non-blocking performance.
  */
-public class NonBlockingServer implements Runnable {
+public class NonBlockingServer {
 
     public static void main(String[] args) {
         try {
@@ -63,9 +63,6 @@ public class NonBlockingServer implements Runnable {
             ErrorService.error(e);
         }
         SELECTOR = selector;
-
-        Thread selectorThread = new Thread(this, "selector thread");
-        selectorThread.start();
         
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false);
@@ -74,6 +71,12 @@ public class NonBlockingServer implements Runnable {
 
         ssc.register(SELECTOR, SelectionKey.OP_ACCEPT);
         
+        try {
+            loopForMessages();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        
         //while(true) {
           //  Socket client = ss.accept();
             //client.getChannel().configureBlocking(false);
@@ -81,16 +84,6 @@ public class NonBlockingServer implements Runnable {
         //}      
     }
 
-    /**
-     * Runs the selector event processing thread.
-     */
-    public void run() {
-        try {
-            loopForMessages();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
     
     private void addReader(Socket client) {
         READERS.add(new SocketHandler(client));
