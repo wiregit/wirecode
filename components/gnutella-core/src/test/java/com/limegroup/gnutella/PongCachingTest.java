@@ -186,6 +186,12 @@ public final class PongCachingTest extends BaseTestCase {
  		if(ULTRAPEER_2.isOpen()) {
  			drain(ULTRAPEER_2, TIMEOUT);
  		}
+        if(ULTRAPEER_3.isOpen()) {
+            drain(ULTRAPEER_3, TIMEOUT);
+        }
+        if(ULTRAPEER_4.isOpen()) {
+            drain(ULTRAPEER_4, TIMEOUT);
+        }
  		if(LEAF.isOpen()) {
  			drain(LEAF, TIMEOUT);
  		}
@@ -283,10 +289,6 @@ public final class PongCachingTest extends BaseTestCase {
      * pong caching.
      */
     public void testPongsReceivedFromPingWithLocale() throws Exception {
-        drainAll();
-        drain(ULTRAPEER_3, TIMEOUT);
-        drain(ULTRAPEER_4, TIMEOUT);
-
         PingPongSettings.PINGS_ACTIVE.setValue(false);
         byte[] ip = { (byte)1, (byte)2, (byte)3, (byte)3 };
               
@@ -340,7 +342,7 @@ public final class PongCachingTest extends BaseTestCase {
             PongCacher.instance().addPong(curPong);            
         }
         
-
+        //check that all the pongs are in the PongCacher
         List pongs = PongCacher.instance().getBestPongs("ja");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
@@ -350,11 +352,13 @@ public final class PongCachingTest extends BaseTestCase {
         pongs = PongCacher.instance().getBestPongs("sv");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
+        //create a ja locale PingRequest
         ApplicationSettings.LANGUAGE.setValue("ja");
         Message m = new PingRequest((byte)7);
         assertEquals("locale of ping should be ja",
                      "ja", ((PingRequest)m).getLocale());
 
+        //create a sv locale PingRequest
         ApplicationSettings.LANGUAGE.setValue("sv"); 
         Message m2 = new PingRequest((byte)7);
         assertEquals("locale of ping should be sv",
@@ -362,6 +366,7 @@ public final class PongCachingTest extends BaseTestCase {
         
         ApplicationSettings.LANGUAGE.setValue("ja");
         
+        //send a ja ping using ULTRAPEER_3
         ULTRAPEER_3.send(m);
         ULTRAPEER_3.flush();        
 
@@ -371,7 +376,7 @@ public final class PongCachingTest extends BaseTestCase {
         ULTRAPEER_4.flush();
 
 
-
+        //check for ja pongs
         Message received;   
         for(int i=0; i< PongCacher.NUM_HOPS; i++) {
             received = getFirstMessageOfType(ULTRAPEER_3, 
@@ -380,12 +385,11 @@ public final class PongCachingTest extends BaseTestCase {
 
             assertNotNull("should have gotten pong. hop: " + i, received);
             PingReply pr = (PingReply)received;
-            System.out.println(pr);
             assertEquals("should be a ja locale pong ",
                          "ja", pr.getClientLocale());
         }
 
-        
+        //check ofr sv pongs
         List returnedPongs = new ArrayList();
         for(int i = 0; i < PongCacher.NUM_HOPS; i++) {
             received = getFirstMessageOfType(ULTRAPEER_4, 
