@@ -193,7 +193,49 @@ public final class NetworkUtils {
         sbuf.append(ByteOrder.ubyte2int(ip[offset+3]));
         return sbuf.toString();
     }
-    
+
+    /**
+     * Utility method for closing sockets.  This explicitly closes
+     * the input and output streams and has special handling for
+     * a bug in NIO on at least Windows NT/2000 etc and Linux where
+     * calling close() on a socket does not send a FIN even though
+     * it should.  This only occurs when socket timeouts are used,
+     * but we use socket timeouts frequently.  This was reported
+     * to Sun by Chris in 2002, which we just happened upon -- 
+     * JDK bug 4724030.  Nice work Chris!
+     *
+     * @param socket the socket to close
+     */
+    public static final void closeSocket(Socket socket) {
+        if(socket == null) return;
+        // This is necessary to work around the 1.4 bug where calling 
+        // close on a socket does not send a FIN to indicate the 
+        // socket is closed -- socket.shutdownOutput() ensures that
+        // the FIN is sent.  This was reported by Chris Rohrs back
+        // in the day -- JDK bug 4724030
+        if(CommonUtils.isJava14OrLater()) {
+            try {
+                socket.shutdownOutput();
+                socket.shutdownInput();
+            } catch(Exception e) {
+                // we don't care
+            }
+        } else {
+            // shut them down the normal way -- there is no bug on 
+            // non-1.4 systems, so we can just close the streams
+            try {
+                socket.getOutputStream().close();
+                socket.getInputStream().close();
+            } catch (Exception e) {
+                // we don't care
+            }
+        }
+        try {
+            socket.close();
+        } catch (Exception e) {
+            // we don't care
+        }        
+    }
 
 
 
