@@ -3000,6 +3000,16 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloader.connectHTTP(getOverlapOffset(start), stop, true);
             int newLow = dloader.getInitialReadingPoint();
             int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
+            if(newHigh < stop) {
+                // We have a stealer, but he isn't going to give us all the
+                // data we want, so discard him.
+                if(LOG.isDebugEnabled())
+                    LOG.debug("WORKER: not stealing because stealer " +
+                              "gave a lower high.  Expected high: " + 
+                              stop + ".  Was high: " + newHigh);
+                throw new IOException("bad stealer");
+            }
+            
             if(LOG.isDebugEnabled())
                 LOG.debug("WORKER: assigning split grey "
                   +newLow+"-"+newHigh+" from "+biggest+" to "+dloader);
