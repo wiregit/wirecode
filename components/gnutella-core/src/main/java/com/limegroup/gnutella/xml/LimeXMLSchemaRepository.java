@@ -41,16 +41,16 @@ public class LimeXMLSchemaRepository extends java.lang.Object
     {
         //get the schema files
         File[] schemaFiles = 
-                XMLProperties.instance().getAllXMLSchemaFiles();
+                LimeXMLProperties.instance().getAllXMLSchemaFiles();
         
-        XMLSchema xmlSchema;
+        LimeXMLSchema limeXmlSchema;
         //create schema objects and put them in the _uriSchemaMap
         for(int i=0; i < schemaFiles.length; i++)
         {
             try
             {
-                xmlSchema = new XMLSchema(schemaFiles[i]);
-                _uriSchemaMap.put(xmlSchema.getSchemaIdentifier(), xmlSchema);
+                limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
+                _uriSchemaMap.put(limeXmlSchema.getSchemaIdentifier(),limeXmlSchema);
             }
             catch(IOException ioe)
             {
@@ -78,11 +78,11 @@ public class LimeXMLSchemaRepository extends java.lang.Object
      * @return The schema corresponding to the given uri. If no mapping
      * exists, returns null.
      */
-    public XMLSchema getSchema(String uri)
+    public LimeXMLSchema getSchema(String uri)
     {
         synchronized(_uriSchemaMap)
         {
-            return (XMLSchema)_uriSchemaMap.get(uri);
+            return (LimeXMLSchema)_uriSchemaMap.get(uri);
         }
     }
     

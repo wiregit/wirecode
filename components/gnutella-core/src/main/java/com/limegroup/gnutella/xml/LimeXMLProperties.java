@@ -61,7 +61,7 @@ public class LimeXMLProperties
      * it maintains is thru the '_instance' using instance() method
      * @see LimeXMLProperties#_instance
      */
-    private LineXMLProperties()
+    private LimeXMLProperties()
     {
         //load the properties from file
         loadProperties();

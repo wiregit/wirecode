@@ -14,7 +14,7 @@ import java.io.*;
  * @author  asingla
  * @version
  */
-public class LimeXMLSchema extends CanonicalizedXMLDocument
+public class LimeXMLSchema extends LimeXMLDocument
 {
     
     /** 
