@@ -41,8 +41,8 @@ public class ForcedUltrapeerHandshakeResponder
 		if(response.isCrawler()) 
 			throw new IOException("candidate leaf sent crawler header???");
 		
-		//the other side should be a limewire leaf posing as ultrapeer.
-		if (!response.isLimeWire() || !response.isUltrapeer()) 
+		//the other side should be a leaf posing as ultrapeer.
+		if (!response.isUltrapeer()) 
 			return HandshakeResponse.createRejectOutgoingResponse();
 	
 		//Incoming connection....
@@ -75,7 +75,7 @@ public class ForcedUltrapeerHandshakeResponder
 		
 		// They supposedly requested our promotion and are now giving us guidance?
 		// reject the connection.
-        if(response.hasLeafGuidance() || response.isLeaf() || !response.isLimeWire()) 
+        if(response.hasLeafGuidance() || response.isLeaf() ) 
            	return HandshakeResponse.createRejectOutgoingResponse();
 		 else if( RECORD_STATS )
             HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
