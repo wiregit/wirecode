@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.zip.*;
 import java.util.Properties;
+import java.util.Enumeration;
 import java.io.*;
 import java.awt.*;
 import com.sun.java.util.collections.*;
@@ -18,6 +19,11 @@ import com.sun.java.util.collections.*;
  * will be conflicts.
  */
 public final class SettingsFactory {
+    
+    /**
+     * Bytes used to ensure that we can write to the settings file.
+     */
+    private final byte[] PRE_HEADER = "#LimeWire Properties IO Test\n".getBytes();
     
     /** 
 	 * <tt>File</tt> object from which settings are loaded and saved 
@@ -91,15 +97,63 @@ public final class SettingsFactory {
             set.reload();
         }
 	}
+	
+	/**
+	 * Reverts all settings to their factory defaults.
+	 */
+	public synchronized void revertToDefault() {
+	    Iterator ii = settings.iterator();
+	    while( ii.hasNext() ) {
+	        Setting set = (Setting)ii.next();
+	        set.revertToDefault();
+	    }
+	}
     
     /**
      * Save setting information to property file
+     * We want to NOT save any properties which are the default value.
+     * To avoid having to manually encode the file, we copy the props,
+     * remove any values which are default, and then save it.
+     * (Note that we cannot use 'store' since it's only available in 1.2)
+     * Do not call this often, it is expensive.
+     * (Perhaps a cheaper way would be to store all the keys that are removed,
+     *  remove them, save the properties, then re-add them?)
      */
-    public void save() {
+    public synchronized void save() {
+        Properties tempProps = (Properties)PROPS.clone();
+
+        // First scan over it for any settings that are in this factory
+        Iterator ii = settings.iterator();
+        while( ii.hasNext() ) {
+            Setting set = (Setting)ii.next();
+            if ( set.isDefault() ) {
+                tempProps.remove( set.getKey() );
+            }
+        }
+        // Then rescan over it for settings that are from the old
+        // SettingsManager
+        String key = null;
+        for (Enumeration e = tempProps.keys(); e.hasMoreElements();) {
+            key = (String)e.nextElement();
+            if ( SettingsManager.isDefault(key) ) {
+                tempProps.remove(key);
+            }
+        }
+        
+        FileOutputStream out = null;
         try {
-            PROPS.store(new FileOutputStream(SETTINGS_FILE), HEADING);
+            // since we can't use store, we must test to make sure we can
+            // write the output (because save doesn't throw an IOException)
+            out = new FileOutputStream(SETTINGS_FILE);
+            out.write( PRE_HEADER );
+            tempProps.save( out, HEADING);            
         } catch (IOException e) {
 			ErrorService.error(e);
+        } finally {
+            if ( out != null )
+            try {
+                out.close();
+            } catch (IOException ignored) {}
         }
     }
     

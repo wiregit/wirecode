@@ -46,6 +46,11 @@ abstract class AbstractSettings {
      */
     protected static final SettingsFactory CFG_FACTORY;
     
+    /**
+     * Value for whether or not settings should be saved to file.
+     */
+    protected static boolean _shouldSave = true;
+    
     static {
         File settingsDir = CommonUtils.getUserSettingsDir();
         PROPS_FILE = new File(settingsDir, PROPS_NAME);
@@ -81,6 +86,29 @@ abstract class AbstractSettings {
      * Save property settings to the property file
      */
     public static void save() {
-        FACTORY.save();
+        if ( _shouldSave)
+            FACTORY.save();
+    }
+    
+    /**
+     * Revert all settings to their default value
+     */
+    public static void revertToDefault() {
+        FACTORY.revertToDefault();
+        CFG_FACTORY.revertToDefault();
+    }
+    
+    /**
+     * Mutator for shouldSave
+     */
+    public static void setShouldSave(boolean shouldSave) {
+        _shouldSave = shouldSave;
+    }
+    
+    /**
+     * Access for shouldSave
+     */
+    public static boolean getShouldSave() {
+        return _shouldSave;
     }
 }

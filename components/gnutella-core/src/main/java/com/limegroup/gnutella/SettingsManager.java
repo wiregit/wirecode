@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -33,7 +34,7 @@ public final class SettingsManager {
 	/**
 	 * Default name of the shared directory.
 	 */
-	private final String  SAVE_DIRECTORY_NAME = "Shared";
+	private final String  DIRECTORY_NAME_FOR_SAVING_FILES = "Shared";
 
     /**
 	 * Default name for the network discovery properties
@@ -44,6 +45,11 @@ public final class SettingsManager {
      * Constant <tt>File</tt> instance for the properties file
      */
     private final File PROPS_FILE = Settings.getPropertiesFile();
+    
+    /**
+     * Stored default values learned from reflecting upon the class.
+     */
+    private static Map defaultValues;    
 
     /**
      * Time interval, after which the accumulated information expires
@@ -64,7 +70,7 @@ public final class SettingsManager {
     /** Default port*/
     private final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
-    private final int     DEFAULT_SPEED          = 56;
+    private final int     DEFAULT_CONNECTION_SPEED          = 56;
     private final int     DEFAULT_UPLOAD_SPEED   = 100;
     /** Default limit for the number of searches */
     private final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
@@ -81,8 +87,8 @@ public final class SettingsManager {
     private final int DEFAULT_UPLOAD_QUEUE_SIZE = 10;
 
     /** default banned ip addresses */
-    private final String[] DEFAULT_BANNED_IPS     = {};
-    private final String[] DEFAULT_ALLOWED_IPS     = {};
+    private final String[] DEFAULT_BLACK_LISTED_IP_ADDRESSES     = {};
+    private final String[] DEFAULT_WHITE_LISTED_IP_ADDRESSES     = {};
     private final String[] DEFAULT_BANNED_WORDS   = {};
     private final boolean DEFAULT_FILTER_ADULT   = false;
     private final boolean DEFAULT_FILTER_DUPLICATES = true;
@@ -91,7 +97,7 @@ public final class SettingsManager {
     /** Filter .htm[l] files? */
     private final boolean DEFAULT_FILTER_HTML    = false;
     private final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
-    private final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
+    private final boolean DEFAULT_FILTER_HIGHBIT_QUERIES = true;
 
     private final int     DEFAULT_PARALLEL_SEARCH  = 5;
     private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
@@ -215,13 +221,13 @@ public final class SettingsManager {
 	 * Constant default value for the maximum number of bytes ever passed
 	 * per second upstream.
 	 */
-	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
+	private final int DEFAULT_MAX_UPLOAD_BYTES_PER_SEC = 0;
 
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
 	 * per second downstream.
 	 */
-	private final int DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC = 0;
+	private final int DEFAULT_MAX_DOWNLOAD_BYTES_PER_SEC = 0;
 
 	/**
 	 * Default value for the number of times the application has been
@@ -237,20 +243,20 @@ public final class SettingsManager {
 	/**
 	 * Constant for the default save directory.
 	 */
-	private final File DEFAULT_SAVE_DIRECTORY =
-	    new File(CommonUtils.getUserHomeDir(), SAVE_DIRECTORY_NAME);
+	private final File DEFAULT_DIRECTORY_FOR_SAVING_FILES =
+	    new File(CommonUtils.getUserHomeDir(), DIRECTORY_NAME_FOR_SAVING_FILES);
 
 
 	/**
 	 * Default directories for file searching.
 	 */
-    private final String  DEFAULT_DIRECTORIES =
-        DEFAULT_SAVE_DIRECTORY.getAbsolutePath();
+    private final String  DEFAULT_DIRECTORIES_TO_SEARCH_FOR_FILES =
+        DEFAULT_DIRECTORY_FOR_SAVING_FILES.getAbsolutePath();
 
     /**
      * Default file extensions.
      */
-    private final String  DEFAULT_EXTENSIONS =
+    private final String  DEFAULT_EXTENSIONS_TO_SEARCH_FOR =
 		"asx;html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;mp4;wav;wax;au;aif;aiff;"+
 		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
@@ -267,22 +273,22 @@ public final class SettingsManager {
     private final String PERSISTENT_HTTP_CONNECTION_TIMEOUT
         = "PERSISTENT_HTTP_CONNECTION_TIMEOUT";
     private final String PORT                  = "PORT";
-    private final String SPEED                 = "CONNECTION_SPEED";
+    private final String CONNECTION_SPEED      = "CONNECTION_SPEED";
     private final String UPLOAD_SPEED          = "UPLOAD_SPEED";
     private final String SEARCH_LIMIT          = "SEARCH_LIMIT";
     private final String CLIENT_ID             = "CLIENT_ID";
     private final String MAX_INCOMING_CONNECTIONS
 		= "MAX_INCOMING_CONNECTIONS";
-    private final String SAVE_DIRECTORY
+    private final String DIRECTORY_FOR_SAVING_FILES
 		= "DIRECTORY_FOR_SAVING_FILES";
     private final String INCOMPLETE_PURGE_TIME = "INCOMPLETE_PURGE_TIME";
-    private final String DIRECTORIES
+    private final String DIRECTORIES_TO_SEARCH_FOR_FILES
 		= "DIRECTORIES_TO_SEARCH_FOR_FILES";
-    private final String EXTENSIONS
+    private final String EXTENSIONS_TO_SEARCH_FOR
 		= "EXTENSIONS_TO_SEARCH_FOR";
-    private final String BANNED_IPS
+    private final String BLACK_LISTED_IP_ADDRESSES
 		= "BLACK_LISTED_IP_ADDRESSES";
-    private final String ALLOWED_IPS            
+    private final String WHITE_LISTED_IP_ADDRESSES            
 		= "WHITE_LISTED_IP_ADDRESSES";
     private final String BANNED_WORDS          = "BANNED_WORDS";
     private final String FILTER_DUPLICATES     = "FILTER_DUPLICATES";
@@ -290,7 +296,7 @@ public final class SettingsManager {
     private final String FILTER_HTML           = "FILTER_HTML";
     private final String FILTER_VBS            = "FILTER_VBS";
     private final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
-    private final String FILTER_BEARSHARE_QUERIES
+    private final String FILTER_HIGHBIT_QUERIES
 		= "FILTER_HIGHBIT_QUERIES";
     private final String PARALLEL_SEARCH       = "PARALLEL_SEARCH";
     private final String MAX_SIM_DOWNLOAD      = "MAX_SIM_DOWNLOAD";
@@ -417,14 +423,14 @@ public final class SettingsManager {
 	 * Constant key for the maximum number of bytes per second ever passed
 	 * upstream.
 	 */
-	private final String MAX_UPSTREAM_BYTES_PER_SEC =
+	private final String MAX_UPLOAD_BYTES_PER_SEC =
 		"MAX_UPLOAD_BYTES_PER_SEC";
 
 	/**
 	 * Constant key for the maximum number of bytes per second ever passed
 	 * downstream.
 	 */
-	private final String MAX_DOWNSTREAM_BYTES_PER_SEC =
+	private final String MAX_DOWNLOAD_BYTES_PER_SEC =
 		"MAX_DOWNLOAD_BYTES_PER_SEC";
 
     /**
@@ -583,8 +589,8 @@ public final class SettingsManager {
         setLastExpireTime(System.currentTimeMillis());
         //reset the expired values;
         setAverageUptime(DEFAULT_AVERAGE_UPTIME);
-        setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
-		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
+        setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPLOAD_BYTES_PER_SEC);
+		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNLOAD_BYTES_PER_SEC);
 
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.revertToDefault();
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.revertToDefault();
@@ -682,7 +688,7 @@ public final class SettingsManager {
                 else if(key.equals(PORT)) {
                     setPort(Integer.parseInt(p));
                 }
-                else if(key.equals(SPEED)) {
+                else if(key.equals(CONNECTION_SPEED)) {
                     setConnectionSpeed(Integer.parseInt(p));
                 }
                 else if(key.equals(UPLOAD_SPEED)) {
@@ -757,12 +763,12 @@ public final class SettingsManager {
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
                 }
-                else if(key.equals(SAVE_DIRECTORY)) {
+                else if(key.equals(DIRECTORY_FOR_SAVING_FILES)) {
 					try {
 						setSaveDirectory(new File(p));
 					} catch(IOException e) {
 						try {
-							setSaveDirectory(DEFAULT_SAVE_DIRECTORY);
+							setSaveDirectory(DEFAULT_DIRECTORY_FOR_SAVING_FILES);
 						} catch(IOException ioe) {
 							// this should never happen
 						}
@@ -777,11 +783,11 @@ public final class SettingsManager {
                     setIncompletePurgeTime(Integer.parseInt(p));
                 }
 
-                else if(key.equals(DIRECTORIES)) {
+                else if(key.equals(DIRECTORIES_TO_SEARCH_FOR_FILES)) {
                     setDirectories(p);
                 }
 
-                else if(key.equals(EXTENSIONS)) {
+                else if(key.equals(EXTENSIONS_TO_SEARCH_FOR)) {
                     setExtensions(p);
                 }
                 else if(key.equals(CHECK_AGAIN)) {
@@ -794,10 +800,10 @@ public final class SettingsManager {
                         break;
                     setCheckAgain(bs);
                 }
-                else if(key.equals(BANNED_IPS)) {
+                else if(key.equals(BLACK_LISTED_IP_ADDRESSES)) {
                     setBannedIps(decode(p));
                 }
-                else if(key.equals(ALLOWED_IPS)) {
+                else if(key.equals(WHITE_LISTED_IP_ADDRESSES)) {
                     setAllowedIps(decode(p));
                 }
                 else if(key.equals(BANNED_WORDS)) {
@@ -854,7 +860,7 @@ public final class SettingsManager {
                     setFilterGreedyQueries(bs);
                 }
 
-                else if(key.equals(FILTER_BEARSHARE_QUERIES)) {
+                else if(key.equals(FILTER_HIGHBIT_QUERIES)) {
                     boolean bs;
                     if (p.equals("true"))
                         bs=true;
@@ -962,10 +968,10 @@ public final class SettingsManager {
 				else if(key.equals(MINIMUM_SEARCH_SPEED)) {
 					setMinimumSearchSpeed(Integer.parseInt(p));
 				}
-				else if(key.equals(MAX_UPSTREAM_BYTES_PER_SEC)) {
+				else if(key.equals(MAX_UPLOAD_BYTES_PER_SEC)) {
 					setMaxUpstreamBytesPerSec(Integer.parseInt(p));
 				}
-				else if(key.equals(MAX_DOWNSTREAM_BYTES_PER_SEC)) {
+				else if(key.equals(MAX_DOWNLOAD_BYTES_PER_SEC)) {
 					setMaxDownstreamBytesPerSec(Integer.parseInt(p));
 				}
                 else if(key.equals(LAST_EXPIRE_TIME)){
@@ -1001,6 +1007,9 @@ public final class SettingsManager {
      * failure in loading the properties file from disk.
 	 */
     public void loadDefaults() {
+        
+        reflectUponDefaults();
+        
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
         //setMaxTTL(DEFAULT_MAX_TTL);
         //setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
@@ -1009,27 +1018,27 @@ public final class SettingsManager {
         setPersistentHTTPConnectionTimeout(
             DEFAULT_PERSISTENT_HTTP_CONNECTION_TIMEOUT);
         setPort(DEFAULT_PORT);
-        setConnectionSpeed(DEFAULT_SPEED);
+        setConnectionSpeed(DEFAULT_CONNECTION_SPEED);
         setUploadSpeed(DEFAULT_UPLOAD_SPEED);
         setSearchLimit(DEFAULT_SEARCH_LIMIT);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
-        setBannedIps(DEFAULT_BANNED_IPS);
-        setAllowedIps(DEFAULT_ALLOWED_IPS);
+        setBannedIps(DEFAULT_BLACK_LISTED_IP_ADDRESSES);
+        setAllowedIps(DEFAULT_WHITE_LISTED_IP_ADDRESSES);
         setBannedWords(DEFAULT_BANNED_WORDS);
         setFilterAdult(DEFAULT_FILTER_ADULT);
         setFilterDuplicates(DEFAULT_FILTER_DUPLICATES);
         setFilterVbs(DEFAULT_FILTER_VBS);
         setFilterHtml(DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
-        setExtensions(DEFAULT_EXTENSIONS);
-        setBannedIps(DEFAULT_BANNED_IPS);
+        setExtensions(DEFAULT_EXTENSIONS_TO_SEARCH_FOR);
+        setBannedIps(DEFAULT_BLACK_LISTED_IP_ADDRESSES);
         setBannedWords(DEFAULT_BANNED_WORDS);
         setFilterAdult(DEFAULT_FILTER_ADULT);
         setFilterDuplicates(DEFAULT_FILTER_DUPLICATES);
         setFilterVbs(DEFAULT_FILTER_VBS);
         setFilterHtml(DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
-        setFilterBearShareQueries(DEFAULT_FILTER_BEARSHARE_QUERIES);
+        setFilterBearShareQueries(DEFAULT_FILTER_HIGHBIT_QUERIES);
         setParallelSearchMax(DEFAULT_PARALLEL_SEARCH);
         setClearCompletedUpload(DEFAULT_CLEAR_UPLOAD);
         setClearCompletedDownload(DEFAULT_CLEAR_DOWNLOAD);
@@ -1079,8 +1088,8 @@ public final class SettingsManager {
 
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
 		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
-		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
-		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
+		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPLOAD_BYTES_PER_SEC);
+		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNLOAD_BYTES_PER_SEC);
 
         //authentication settings
         setAcceptAuthenticatedConnectionsOnly(
@@ -1096,6 +1105,69 @@ public final class SettingsManager {
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
 		setJarName(DEFAULT_JAR_NAME);
 		setClasspath(DEFAULT_CLASSPATH);
+    }
+    
+    /**
+     * Dynamically scans this class to load up
+     * a HashMap with default values.
+     * Used to determine whether or not a value is default
+     * at save them (to know if we should save it or not)
+     */
+    private void reflectUponDefaults() {
+        // get a list of all the fields in this class
+        Field[] fields = SettingsManager.class.getDeclaredFields();
+        String theKey;
+        String theValue;
+        Class theClass;
+        
+        defaultValues = new HashMap( PROPS.size() );
+        
+        for( int i = 0; i < fields.length; i++) {
+            // if this particular one is a default value ...
+            if( fields[i].getName().startsWith("DEFAULT_")) {
+                //assume the rest of its name is the key.
+                theKey = fields[i].getName().substring(8);
+                // now we have to mutate the value based on its type
+                theClass = fields[i].getType();
+                try {
+                    if( theClass == String.class )
+                        theValue = (String)fields[i].get(this);
+                    else if (theClass == Boolean.TYPE )
+                        theValue = Boolean.toString(fields[i].getBoolean(this));
+                    else if (theClass == Byte.TYPE )
+                        theValue = Byte.toString(fields[i].getByte(this));
+                    else if (theClass == Character.TYPE )
+                        theValue = Character.toString(fields[i].getChar(this));
+                    else if (theClass == Double.TYPE )
+                        theValue = Double.toString(fields[i].getDouble(this));
+                    else if (theClass == Float.TYPE )
+                        theValue = Float.toString(fields[i].getFloat(this));
+                    else if (theClass == Integer.TYPE )
+                        theValue = Integer.toString(fields[i].getInt(this));
+                    else if (theClass == Long.TYPE )
+                        theValue = Long.toString(fields[i].getLong(this));
+                    else if (theClass == Short.TYPE )
+                        theValue = Short.toString(fields[i].getShort(this));
+                    else
+                        continue; //ignore anything else (including arrays)
+                    // add this key/value pair to the default hashMap
+                    defaultValues.put( theKey, theValue );
+                } catch (Exception ignored) { }
+            }
+        }
+    }
+    
+    /**
+     * Determine whether or not this key is currently
+     * stored as its default value.
+     */
+    public static boolean isDefault(String theKey) {
+        if ( defaultValues == null || PROPS == null )
+            return false;
+        String val = PROPS.getProperty(theKey);
+        if (val == null)
+            return false;
+        return val.equals(defaultValues.get(theKey));
     }
 
     /**
@@ -1169,7 +1241,7 @@ public final class SettingsManager {
 	 * of the default save directory
 	 */
 	public File getSaveDefault() {
-	    return DEFAULT_SAVE_DIRECTORY;
+	    return DEFAULT_DIRECTORY_FOR_SAVING_FILES;
 	}
 
 	/** Returns true if the chat is enabled */
@@ -1302,7 +1374,7 @@ public final class SettingsManager {
 
     /** Returns the string of default file extensions to share.*/
     public String getDefaultExtensions() {
-		return DEFAULT_EXTENSIONS;
+		return DEFAULT_EXTENSIONS_TO_SEARCH_FOR;
 	}
 
     /**
@@ -1743,7 +1815,7 @@ public final class SettingsManager {
 	 * passed by this node
 	 */
 	public int getMaxUpstreamBytesPerSec() {
-		return getIntValue(MAX_UPSTREAM_BYTES_PER_SEC);
+		return getIntValue(MAX_UPLOAD_BYTES_PER_SEC);
 	}
 
 	/**
@@ -1754,7 +1826,7 @@ public final class SettingsManager {
 	 * passed by this node
 	 */
 	public int getMaxDownstreamBytesPerSec() {
-		return getIntValue(MAX_DOWNSTREAM_BYTES_PER_SEC);
+		return getIntValue(MAX_DOWNLOAD_BYTES_PER_SEC);
 	}
 
 	/**
@@ -2005,7 +2077,7 @@ public final class SettingsManager {
 		_saveDirectory       = saveDir;
 		_incompleteDirectory = incDir;
 		
-		setStringValue(SAVE_DIRECTORY, saveDir.getAbsolutePath());
+		setStringValue(DIRECTORY_FOR_SAVING_FILES, saveDir.getAbsolutePath());
     }
 
 
@@ -2067,7 +2139,7 @@ public final class SettingsManager {
 		for(int r=0; r<prunedFiles.length; r++) {
 			_directories[r] = (File)prunedFiles[r];
 		}
-        PROPS.put(DIRECTORIES, sb.toString());
+        PROPS.put(DIRECTORIES_TO_SEARCH_FOR_FILES, sb.toString());
 	}
 
     /**
@@ -2111,7 +2183,7 @@ public final class SettingsManager {
 	 */
     public void setExtensions(String ext) {
         _extensions = ext;
-        PROPS.put(EXTENSIONS, ext);
+        PROPS.put(EXTENSIONS_TO_SEARCH_FOR, ext);
     }
 
     /**
@@ -2166,7 +2238,7 @@ public final class SettingsManager {
         else {
             _connectionSpeed = speed;
             String s = Integer.toString(_connectionSpeed);
-            PROPS.put(SPEED, s);
+            PROPS.put(CONNECTION_SPEED, s);
         }
     }
 
@@ -2504,7 +2576,7 @@ public final class SettingsManager {
             throw new IllegalArgumentException();
         else {
             _bannedIps = bannedIps;
-            PROPS.put(BANNED_IPS,encode(bannedIps));
+            PROPS.put(BLACK_LISTED_IP_ADDRESSES,encode(bannedIps));
         }
     }
 
@@ -2519,7 +2591,7 @@ public final class SettingsManager {
             throw new IllegalArgumentException();
         else {
             _allowedIps = allowedIps;
-            PROPS.put(ALLOWED_IPS,encode(allowedIps));
+            PROPS.put(WHITE_LISTED_IP_ADDRESSES,encode(allowedIps));
         }
     }
 
@@ -2588,7 +2660,7 @@ public final class SettingsManager {
         _filterBearShare = yes;
         Boolean b = new Boolean(yes);
         String s = b.toString();
-        PROPS.put(FILTER_BEARSHARE_QUERIES, s);
+        PROPS.put(FILTER_HIGHBIT_QUERIES, s);
     }
 
     /**
@@ -2762,7 +2834,7 @@ public final class SettingsManager {
 	 *              passed by this node
 	 */
 	public void setMaxUpstreamBytesPerSec(final int bytes) {
-		PROPS.put(MAX_UPSTREAM_BYTES_PER_SEC, Integer.toString(bytes));
+		PROPS.put(MAX_UPLOAD_BYTES_PER_SEC, Integer.toString(bytes));
 	}
 
 
@@ -2774,7 +2846,7 @@ public final class SettingsManager {
 	 *              passed by this node
 	 */
 	public void setMaxDownstreamBytesPerSec(final int bytes) {
-		PROPS.put(MAX_DOWNSTREAM_BYTES_PER_SEC, Integer.toString(bytes));
+		PROPS.put(MAX_DOWNLOAD_BYTES_PER_SEC, Integer.toString(bytes));
 	}
 
 

@@ -71,6 +71,23 @@ abstract class Setting {
 	public void revertToDefault() {
         setValue(DEFAULT_VALUE);
 	}
+	
+    /**
+     * Determines whether or not the current value is the default value.
+     */
+    public boolean isDefault() {
+        String value = PROPS.getProperty(KEY);
+        if (value == null)
+            return false;
+        return value.equals(DEFAULT_PROPS.getProperty(KEY));
+    }
+    
+    /**
+     * Get the key for this setting.
+     */
+    public String getKey() {
+        return KEY;
+    }	
     
     /**
      * Set new property value
