@@ -905,7 +905,10 @@ public class FileManager {
     public static boolean isFileShareable(File file, long fileLength) {
         if (fileLength>Integer.MAX_VALUE || fileLength<=0) 
         	return false;
-        if (file.isDirectory() || file.isHidden() || !file.canRead() ) 
+        
+        // we don't check for hidden files because this feature was not
+        // supported in 1.1.8
+        if (file.isDirectory() || !file.canRead() ) 
             return false;        
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
             !hasExtension(file.getName())) {
