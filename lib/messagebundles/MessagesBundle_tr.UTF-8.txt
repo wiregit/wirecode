@@ -754,6 +754,8 @@ LIBRARY_ANNOTATE_BUTTON_TIP=Seçili dosyaları yorumlar.
 LIBRARY_RESUME_BUTTON_LABEL=Sürdür
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
 LIBRARY_RESUME_BUTTON_TIP=Seçili, tamamlanmamış dosyayı indirmeyi sürdürür.
+#### LIBRARY_RENAME_BUTTON_LABEL=Rename
+#? LIBRARY_RENAME_BUTTON_LABEL=
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Aç...

@@ -754,6 +754,8 @@ LIBRARY_ANNOTATE_BUTTON_TIP=توثيق الملف المختار.
 LIBRARY_RESUME_BUTTON_LABEL=إيقاف مؤقت
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
 LIBRARY_RESUME_BUTTON_TIP=استأنف تنزيل الملفات المختارة الغير كاملة.
+#### LIBRARY_RENAME_BUTTON_LABEL=Rename
+#? LIBRARY_RENAME_BUTTON_LABEL=
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=فتح...

@@ -754,6 +754,8 @@ LIBRARY_ANNOTATE_BUTTON_TIP=Создать/изменить описание д�
 LIBRARY_RESUME_BUTTON_LABEL=Возобновить
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
 LIBRARY_RESUME_BUTTON_TIP=Продолжить загрузку выбранного недозагруженного файла
+#### LIBRARY_RENAME_BUTTON_LABEL=Rename
+#? LIBRARY_RENAME_BUTTON_LABEL=
 
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=Открыть...
