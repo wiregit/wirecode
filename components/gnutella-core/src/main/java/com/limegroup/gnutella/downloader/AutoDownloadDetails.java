@@ -128,13 +128,7 @@ public class AutoDownloadDetails implements Serializable {
             }
 
             // make sure the score for this file isn't too low....
-            String[] queryWords = 
-                ResponseVerifier.getSearchTerms(query, richQuery);
-            Response resp = deriveResponse(toAdd);
-            boolean isXMLQuery = (resp.getDocument() != null);
-            int score = ResponseVerifier.calculateScore(queryWords,
-                                                        resp,
-                                                        isXMLQuery);
+            int score = ResponseVerifier.score(query,richQuery,toAdd);
             if (score < LOW_SCORE) {
                 retVal = false;
                 debug("ADD.addDownload(): file " +

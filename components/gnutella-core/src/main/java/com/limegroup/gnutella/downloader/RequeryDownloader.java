@@ -75,11 +75,13 @@ public class RequeryDownloader extends ManagedDownloader
                getMediaType().toString().equals(add.getMediaType().toString()));
     }
 
-    protected QueryRequest newRequery() throws CantResumeException {
+    /** Overrides ManagedDownloader to use the original search keywords. */
+    protected QueryRequest newRequery(int numRequeries) 
+                                                    throws CantResumeException {
         //If this already started downloading, specifically ask for matches to
         //that file.
         if (_hasFile)
-            return super.newRequery();
+            return super.newRequery(numRequeries);
         //Otherwise just spit out the original search keywords.
         return new QueryRequest(SettingsManager.instance().getTTL(),
                                 0, getQuery(), true);

@@ -28,6 +28,11 @@ public class RequeryDownloadTest extends TestCase {
     File incompleteFile;    
     /** The hash of file when complete. */
     URN hash=TestFile.hash();
+    /** The singleton set {hash}. */
+    Set /* of URN */ hashes=new HashSet(1); {
+        hashes.add(hash);
+    }
+    
 
     /** The uploader */
     TestUploader uploader;
@@ -54,8 +59,8 @@ public class RequeryDownloadTest extends TestCase {
     }
 
     public static Test suite() {
+        //return new RequeryDownloadTest("testRequeryUnthrottled");
         return new TestSuite(RequeryDownloadTest.class);
-        //return new RequeryDownloadTest("testRequeryDownload");
     }
 
     public void setUp() {
@@ -140,6 +145,10 @@ public class RequeryDownloadTest extends TestCase {
         incompleteFile.delete();
         if (snapshot!=null)
            snapshot.delete();
+
+        //Restore defaults--or at least make sure they're not small.
+        ManagedDownloader.TIME_BETWEEN_REQUERIES=5*60*1000;
+        DownloadManager.TIME_BETWEEN_REQUERIES=45*60*1000;
     }
 
 
@@ -189,7 +198,7 @@ public class RequeryDownloadTest extends TestCase {
         Object m=router.broadcasts.get(0);
         assertTrue(m instanceof QueryRequest);
         QueryRequest qr=(QueryRequest)m;
-        assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+        assertTrue(! GUID.isLimeRequeryGUID(qr.getGUID()));
         assertEquals(filename, qr.getQuery());
         assertTrue(qr.getRequestedUrnTypes()==null
                    || qr.getRequestedUrnTypes().size()==0);
@@ -311,7 +320,124 @@ public class RequeryDownloadTest extends TestCase {
             try { Thread.sleep(200); } catch (InterruptedException e) { }
         }
     }
-    
+
+    /** Tests that MAGNET downloads work from a plain URL. */
+    public void testMagnetSimpleDownload() {
+        File f=null;
+        try {
+            f=new File(SettingsManager.instance().getSaveDirectory(),
+                        "filename.txt");
+        } catch (java.io.FileNotFoundException e) {
+            fail("Couldn't find "+f);
+        }
+        f.delete();
+        assertTrue(! f.exists());
+
+        //Start a download from a URL
+        Downloader downloader=null;
+        try {
+            downloader=mgr.download(null,           //no SHA1
+                                    "text query",   //requery string
+                                    "filename.txt", //display name
+                                    "http://127.0.0.1:6666/path"); //URL
+        } catch (AlreadyDownloadingException e) {
+            fail("Already downloading.");
+        } catch (IllegalArgumentException e) {
+            fail("Missing download info");
+        }
+
+        //Should go straight to download and then completion.  Verify file.
+        try { Thread.sleep(500); } catch (InterruptedException e) { }
+        while (downloader.getState()!=Downloader.COMPLETE) {            
+            assertEquals(Downloader.DOWNLOADING, downloader.getState());
+            try { Thread.sleep(200); } catch (InterruptedException e) { }
+        }
+        assertTrue(f.exists());
+        f.delete();
+
+        //Check that we sent a HEAD request followed by normal connect.  This is
+        //an artifact of the current implementation of MagnetDownloader.  In the
+        //future, only one connect may be needed.
+        assertEquals(2, uploader.getConnections());
+        //Check that no requeries were sent.
+        assertEquals(0, router.broadcasts.size());
+    }
+
+    /** Tests that a MAGNET download works from just a URN/keyword */
+    public void testMagnetRequeryDownload() {
+        //Start a download.  No starting location.
+        Downloader downloader=null;
+        try {
+            downloader=mgr.download(hash,           //no SHA1
+                                    "text query",   //requery string
+                                    null,           //display name
+                                    null);          //URL
+        } catch (AlreadyDownloadingException e) {
+            fail("Already downloading.");
+        } catch (IllegalArgumentException e) {
+            fail("Missing download info");
+        }
+
+        //Make sure a requery of right type was sent right away.
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        assertEquals(1, router.broadcasts.size());
+        Object m=router.broadcasts.get(0);
+        assertTrue(m instanceof QueryRequest);
+        QueryRequest qr=(QueryRequest)m;
+        assertTrue(!GUID.isLimeRequeryGUID(qr.getGUID()));
+        assertEquals("text query", qr.getQuery());
+        assertEquals(hashes, qr.getQueryUrns());
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+
+        //Send a mismatching response to the query, making sure it is ignored.
+        //Give the downloader time to start up first.
+        Response response=new Response(
+            0l, TestFile.length(), "totally different.txt",
+            null, null, null);
+        byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
+        QueryReply reply=new QueryReply(qr.getGUID(), 
+            (byte)6, 6666, ip, 0l, 
+            new Response[] { response }, new byte[16],
+            false, false, //needs push, is busy
+            true, false,  //finished upload, measured speed
+            false);       //supports chat
+        ManagedConnection stubConnection=new ManagedConnectionStub();
+        router.handleQueryReply(reply, stubConnection);
+        try { Thread.sleep(400); } catch (InterruptedException e) { }
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+
+        //Send a good response to the query.
+        response=new Response(0l,   //index
+                              TestFile.length(),
+                              "some file name.txt",
+                              null,  //metadata
+                              hashes,//URNs
+                              null); //metadata
+        reply=new QueryReply(qr.getGUID(), 
+            (byte)6, 6666, ip, 0l, 
+            new Response[] { response }, new byte[16],
+            false, false, //needs push, is busy
+            true, false,  //finished upload, measured speed
+            false);       //supports chat
+        router.handleQueryReply(reply, stubConnection);
+
+        //Make sure the downloader does the right thing with the response.
+        try { Thread.sleep(500); } catch (InterruptedException e) { }
+        while (downloader.getState()!=Downloader.COMPLETE) {            
+            assertEquals(Downloader.DOWNLOADING, downloader.getState());
+            try { Thread.sleep(200); } catch (InterruptedException e) { }
+        }
+    }
+
+    //TODO: more tests
+    //-downloads immediately requery if 
+    //  a. not given exact URL
+    //  b. don't get enough locations [optional]
+    //-requery constructed properly
+    //-accepts new results...by matching hash or keyword
+    //-downloads work with with filename extracted from URL
+    //-factor tests
+ 
     /** Tests that requeries are sent fairly and at appropriate rate. */
     public void testRequeryScheduling() {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=100; //0.1 seconds
@@ -345,5 +471,43 @@ public class RequeryDownloadTest extends TestCase {
         }
         assertTrue("Unbalanced: "+xCount+"/"+yCount, 
                    Math.abs(xCount-yCount)<=1);
+    }
+
+    /** Makes sure that magnet and resume downloads are not initially subject to
+     *  the global throttle rate and are not initially requeries. */
+    public void testRequeryUnthrottled() {
+        ManagedDownloader.TIME_BETWEEN_REQUERIES=100; //0.1 seconds
+        DownloadManager.TIME_BETWEEN_REQUERIES=2000;  //2 seconds
+
+        //Start a download.  No starting location.
+        Downloader downloader1=null;
+        Downloader downloader2=null;
+        try {
+            downloader1=mgr.download(new File("T-1232-some crap.txt"));
+            downloader2=mgr.download(null, "text query", null, "http://x.y.z"); 
+        } catch (AlreadyDownloadingException e) {
+            fail("Already downloading.");
+        } catch (IllegalArgumentException e) {
+            fail("Missing download info");
+        } catch (CantResumeException e) {
+            fail("Can't resume");
+        }
+        try { Thread.sleep(200); } catch (InterruptedException ignore) { }
+     
+        //Initial sent right away.
+        assertEquals(router.broadcasts.toString(), 2, router.broadcasts.size());
+        assertTrue(! isRequery((QueryRequest)router.broadcasts.get(0)));
+        assertTrue(! isRequery((QueryRequest)router.broadcasts.get(1)));
+        router.broadcasts.clear();
+
+        //Other queries sent more slowly
+        try { Thread.sleep(5000); } catch (InterruptedException ignore) { }
+        assertEquals(2, router.broadcasts.size());
+        assertTrue(isRequery((QueryRequest)router.broadcasts.get(0)));
+        assertTrue(isRequery((QueryRequest)router.broadcasts.get(1)));
+    }
+
+    private static boolean isRequery(QueryRequest query) {
+        return GUID.isLimeRequeryGUID(query.getGUID());
     }
 }

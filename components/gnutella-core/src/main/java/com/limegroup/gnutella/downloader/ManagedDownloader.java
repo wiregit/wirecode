@@ -22,7 +22,8 @@ import java.net.*;
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
  * Subclasses may refine the requery behavior by overriding the
- * newRequery(), allowAddition(..), and addDownload(..) methods.<p>
+ * nextRequeryTime, newRequery(n), allowAddition(..), and addDownload(..) 
+ * methods.<p>
  * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -504,9 +505,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
      * of all hashes.
      *
+     * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
      */
-    protected synchronized QueryRequest newRequery() throws CantResumeException { 
+    protected synchronized QueryRequest newRequery(int numRequeries) 
+                                                   throws CantResumeException {
         if (allFiles.length<0)                  //TODO: what filename?
             throw new CantResumeException("");  //      maybe another exception?
         return new QueryRequest(QueryRequest.newQueryGUID(true),
@@ -884,8 +887,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // until a few minutes after the initial download attempt--after all,
         // the user just started a query.  Hence initialize nextRequeryTime to
         // System.currentTimeMillis() plus a few minutes.
-        long nextRequeryTime = System.currentTimeMillis()
-                             + TIME_BETWEEN_REQUERIES;
+        long nextRequeryTime = nextRequeryTime(numRequeries);
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -956,11 +958,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                     (numRequeries < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
                     try {
-                        if (manager.sendQuery(this, newRequery()))
+                        if (manager.sendQuery(this, newRequery(numRequeries)))
                             numRequeries++;
                     } catch (CantResumeException ignore) { }
                     // set time for next requery...
-                    nextRequeryTime = currTime + TIME_BETWEEN_REQUERIES;
+                    nextRequeryTime = nextRequeryTime(numRequeries);
                 }
 
 
@@ -1014,6 +1016,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }
         }                 
+    }
+
+    /** Returns the next system time that we can requery.  Subclasses may
+     *  override to customize this behavior.  Note that this is still 
+     *  subject to global requery limits in DownloadManager.
+     *  @param requeries the number of requeries that have happened so far
+     *  @return an absolute system time of the next allowed requery */
+    protected long nextRequeryTime(int requeries) {
+        return System.currentTimeMillis()+TIME_BETWEEN_REQUERIES;
     }
 
     /** Returns the amount of time to wait in milliseconds before retrying,

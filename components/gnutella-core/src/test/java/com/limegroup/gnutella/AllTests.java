@@ -25,6 +25,7 @@ public class AllTests {
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
+        suite.addTest(ResponseVerifierTest.suite());
 
         //End-to-end integration tests (includes some unit tests too)
         suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());

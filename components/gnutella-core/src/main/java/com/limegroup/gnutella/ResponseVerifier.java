@@ -89,24 +89,46 @@ public class ResponseVerifier {
     }
 
     /**
-     * Returns the score of the given response to the reply with the given GUID,
-     * on a scale from 0 to 100.  If Guid is not recognized, a result of
-     * 100 is given.<p>
+     * Returns the score of the given response compared to a previosly recorded
+     * query with the given GUID, on a scale from 0 to 100.  If guid is not
+     * recognized, a result of 100 is given.
+     *
+     * @param guid the 16-byte guid used to look up the original query
+     * @param resp the response to score
+     * @return the percentage of query keywords (0-100) matching
      */
     public synchronized int score(byte[] guid, Response resp) {
+        //Lookup original query from guid.
         RequestData request=(RequestData)mapper.get(new GUID(guid));
         if (request == null)
             return 100; // assume 100% match if no corresponding query found.
         String[] queryWords = request.queryWords;
-        return calculateScore(queryWords, resp, request.xmlQuery());
+
+        //Calculate score.  Consider metadata part of filename.
+        String filename=request.xmlQuery()
+                            ? getSearchTerms(resp)
+                            : resp.getName().toLowerCase();
+        return score(queryWords, filename);
     }
 
-
-    /** The actual procedure for determining the score.  Needed for use by
-     *  AutoDownloadDetails.
+    /**
+     * Returns the score of the given response compared to the given query.
+     *
+     * @param query the query keyword string sent
+     * @param richQuery the XML metadata string sent, or null if none
+     * @param response the response to score, converted to RemoteFileDesc
+     * @return the percentage of query keywords (0-100) matching
      */
-    public static int calculateScore(String[] queryWords, Response resp,
-                                     boolean isXMLQuery) {
+    public static int score(String query, 
+                            String richQuery, 
+                            RemoteFileDesc response) {
+        return score(getSearchTerms(query, richQuery), response.getFileName());
+    }
+
+    /** Actual implementation of scoring; called from both public versions. 
+     *  @param queryWords the tokenized query keywords
+     *  @param filename the name of the response*/
+    private static int score(String[] queryWords, String filename) {
         int numMatchingWords=0;
         int numQueryWords=queryWords.length;
         if (numQueryWords==0)
@@ -114,14 +136,9 @@ public class ResponseVerifier {
 
         //Count the number of regular expressions from the query that
         //match the result's name.
-        String name = null;
-        if (isXMLQuery)
-            name=getSearchTerms(resp);
-        else
-            name=resp.getName().toLowerCase();
         for (int i=0; i<numQueryWords; i++) {
             String pattern=queryWords[i];
-            if (StringUtils.contains(name,pattern)) {
+            if (StringUtils.contains(filename,pattern)) {
                 numMatchingWords++;
                 continue;
             }
@@ -175,7 +192,7 @@ public class ResponseVerifier {
     }
 
     
-    public static String[] getSearchTerms(String query,
+    private static String[] getSearchTerms(String query,
                                            String richQuery) {
         String[] retTerms = null;
         // combine xml and standard keywords
@@ -214,115 +231,5 @@ public class ResponseVerifier {
         
         return retTerms;
     }
-
-
-    /* Unit tests */
-    /*
-    public static void main(String args[]){
-    ResponseVerifier rv = new ResponseVerifier();
-    QueryRequest qr = new QueryRequest((byte)7,0,"test Sumeet");
-    rv.record(qr);
-    byte[] guid = qr.getGUID();
-    Response r = new Response(1,1,"blah");
-    Assert.that(rv.score(guid,r)==0);
-    
-    Response r1 = new Response(1,1,"test this file will ya");
-    Assert.that(rv.score(guid,r1)==50);
-    
-    Response r2 = new Response(1,1,"Sumeet says that this is the best");
-    Assert.that(rv.score(guid,r2)==50, rv.score(guid,r2)+"");
-    
-    Response r3 = new Response(1,1,"Sumeet test the moon");
-    Assert.that(rv.score(guid,r3)==100,  rv.score(guid,r3)+"");
-    
-    QueryRequest qr2=new QueryRequest((byte)7,0,"Weird Al Cantina");
-    rv.record(qr2);
-    Response r4=new Response(1,1,"SSC2-CannibalTheMusical.asf");
-    int score=rv.score(qr2.getGUID(), r4);
-    Assert.that(score==33, "Score is "+score);
-    
-    QueryRequest qr3=new QueryRequest((byte)7,0,"");
-    rv.record(qr3);
-    Assert.that(rv.score(qr3.getGUID(), r4)==100);
-    
-    QueryRequest qr4=new QueryRequest((byte)7,0,"weird al");
-    Response r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
-    int score2=rv.score(qr4.getGUID(), r5);
-    Assert.that(score2==100, "Score is "+score2);
-    
-    //////////////////// Wildcard tests /////////////////////////////
-      
-    qr4=new QueryRequest((byte)7,0,"*.mp3 weird*whoops weird*show");
-    rv.record(qr4);
-    r5=new Response(1,1,"Wierd Al-The WEIRD Al Show Theme.mp3");
-    score2=rv.score(qr4.getGUID(), r5);
-    Assert.that(score2==66, "Score is "+score2);
-    
-    qr4=new QueryRequest((byte)7,0,"show+al+weir*+metallica");
-    rv.record(qr4);
-    r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
-    score2=rv.score(qr4.getGUID(), r5);
-    Assert.that(score2==75, "Score is "+score2);
-    
-    
-    //////////////////////// matchesType tests //////////////////////
-    MediaType mt=new MediaType("Audio", new String[] {"mp3"});
-    
-    rv=new ResponseVerifier();
-    rv.record(qr4, mt);
-    Assert.that(rv.matchesType(qr4.getGUID(), r5));
-    Assert.that(! rv.matchesType(qr4.getGUID(), r4));
-    
-    rv=new ResponseVerifier();
-    rv.record(qr4, null);
-    Assert.that(rv.matchesType(qr4.getGUID(), r5));
-    Assert.that(rv.matchesType(qr4.getGUID(), r4));
-    
-    ////////////////////// isMandragoreWorm tests /////////////////////
-    rv=new ResponseVerifier();
-    Assert.that(! rv.isMandragoreWorm(qr.getGUID(), r3));    
-    qr=new QueryRequest((byte)7,0, "test");
-    rv.record(qr);
-    r1 = new Response(1, 8192, "test response.exe");
-    r2 = new Response(1, 8000, "test.exe");
-    r3 = new Response(1, 8192, "test.exe");
-    Assert.that(! rv.isMandragoreWorm(qr.getGUID(), r1));
-    Assert.that(! rv.isMandragoreWorm(qr.getGUID(), r2));
-    Assert.that(rv.isMandragoreWorm(qr.getGUID(), r3));    
-    
-    //////////////////////        XML TESTS        /////////////////////
-    rv=new ResponseVerifier();
-    // the name hexML means nothing - it is just the way i like to pronounce
-    // 'xml'
-    String hexML = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio action=\"sumeet is cool\" identifier=\"/home/smd/music/Erasure - Piano Song.mp3\">";
-    String hexML2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio action=\"sumeet cool\" identifier=\"/home/smd/music/Erasure - Piano Song.mp3\">";
-    qr=new QueryRequest(GUID.makeGuid(), (byte)7, 0, 
-    "sumeet thadani",
-    hexML);
-    rv.record(qr);
-    r1=new Response(1, 9199, "sumeet", hexML2);
-    Assert.that(rv.score(qr.getGUID(), r1)==50);
-    
-    
-    hexML = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio action=\"sumeet is cool\" identifier=\"/home/smd/music/Erasure - Piano Song.mp3\">";
-    hexML2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio action=\"susheel cold\" identifier=\"/home/smd/music/Erasure - Piano Song.mp3\">";
-    qr=new QueryRequest(GUID.makeGuid(), (byte)7, 0, 
-    "sumeet thadani",
-    hexML);
-    rv.record(qr);
-    r1=new Response(1, 9199, "susheel", hexML2);
-    Assert.that(rv.score(qr.getGUID(), r1)==0);
-    
-    
-    hexML = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio action=\"sumeet is cool\" link=\"susheeldaswani.com\" identifier=\"/home/smd/music/Erasure\">";
-    hexML2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio action=\"sumeet is cool\" link=\"smd.com\" identifier=\"/home/smd/music/Erasure\">";
-    qr=new QueryRequest(GUID.makeGuid(), (byte)7, 0, 
-    "",
-    hexML);
-    rv.record(qr);
-    r1=new Response(1, 9199, "", hexML2);
-    Assert.that(rv.score(qr.getGUID(), r1)==100);
-    }
-    */
 }
 

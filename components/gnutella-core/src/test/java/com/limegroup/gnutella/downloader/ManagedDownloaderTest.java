@@ -91,6 +91,6 @@ class TestManagedDownloader extends ManagedDownloader {
     }
 
     public QueryRequest newRequery2() throws CantResumeException {
-        return super.newRequery();
+        return super.newRequery(0);
     }
 }

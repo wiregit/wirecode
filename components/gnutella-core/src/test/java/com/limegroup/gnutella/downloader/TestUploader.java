@@ -22,6 +22,8 @@ public class TestUploader {
     private boolean stopped;
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
+    /** The number of connections received */
+    private int connects=0;
 
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
@@ -144,15 +146,27 @@ public class TestUploader {
         return sha1;
     }
     
+    /** Returns the number of connections this accepted. */
+    public int getConnections() {
+        return connects;
+    }
+        
 
     /**
      * Repeatedly accepts connections and handles them.
      */
     private void loop(int port) {
         try {
-            server = new ServerSocket(port);
+            //Use Java 1.4's option to reuse a socket address.  This is
+            //important because some client thread may be using the given port
+            //even though no threads are listening on the given socket.
+            server = new ServerSocket();
+            server.setReuseAddress(true);
+            server.bind(new InetSocketAddress(port));
         } catch (IOException ioe) {
             DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
+            System.out.println("Couldn't listen on port "+port);
+            ioe.printStackTrace();
             return;
         }
 
@@ -160,6 +174,7 @@ public class TestUploader {
             Socket s=null;
             try {
                 s = server.accept();
+                connects++;
                 //spawn thread to handle request
                 final Socket mySocket=s;
                 Thread runner=new Thread() {
@@ -188,6 +203,7 @@ public class TestUploader {
                 runner.start();
             } catch (IOException e) {
                 //e.printStackTrace();
+                try { server.close(); } catch (IOException ignore) { }
                 return;  //server socket closed.
             }
             //handling next request

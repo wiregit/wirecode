@@ -916,6 +916,31 @@ public class RouterService
 		return downloader.download(files, overwrite);
 	}
 
+    /*
+     * Creates a new MAGNET downloader.  Immediately tries to download from
+     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
+     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
+     * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
+     * <tt>filename</tt> is specified, it will be used as the name of the
+     * complete file; otherwise it will be taken from any search results or
+     * guessed from <tt>defaultURL</tt>.
+     *
+     * @param urn the hash of the file (exact topic), or null if unknown
+     * @param textQuery requery keywords (keyword topic), or null if unknown
+     * @param filename the final file name, or null if unknown
+     * @param defaultURL the initial location to try (exact source), or null 
+     *  if unknown
+     *
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception IllegalArgumentException both urn and textQuery are null 
+     */
+    public synchronized Downloader download(
+            URN urn, String textQuery, String filename, String defaultURL) 
+            throws IllegalArgumentException, AlreadyDownloadingException { 
+        return downloader.download(urn, textQuery, filename, defaultURL);
+    }
+
    /**
      * Starts a resume download for the given incomplete file.
      * @exception AlreadyDownloadingException couldn't download because the
