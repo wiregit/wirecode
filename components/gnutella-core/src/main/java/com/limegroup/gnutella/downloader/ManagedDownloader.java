@@ -2209,8 +2209,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Return true if rfd is private or unreachable
         if (rfd.isPrivate())
             return true;
-        else if (rfd instanceof RemoteFileDesc2)
-            return ((RemoteFileDesc2)rfd).isUnreachable();
         else
             return false;
     }
