@@ -1509,20 +1509,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             loc = AlternateLocation.create(rfd);
             forFD = AlternateLocation.create(rfd);
+            
         } catch(IOException iox) {
             return;
         }
 
-        // if we are informing others about a PushLoc, we must tell the downloaders
-        // only about the set of proxies that we had at the time the connection
-        // failed or succeeded, so we cache a copy of the set we have.
+        // the forFD altloc will be stored in the rfd, so it needs to point to the
+        // current set of proxies.  The loc altloc will be sent to uploaders, so it 
+        // needs to contain a snapshot of the set of proxies it had when it failed or
+        // succeeded.
         if (forFD instanceof PushAltLoc) {
             PushAltLoc ploc = (PushAltLoc)loc;
-            ploc.getPushAddress().cacheProxies();
-            if (!good) {
-                PushAltLoc pFD = (PushAltLoc)forFD;
-                pFD.updateProxies(false);
-	    }
+            PushAltLoc pFD = (PushAltLoc)forFD;
+            pFD.updateProxies(good);
         }
         
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
@@ -1532,7 +1531,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // no need to tell uploader about itself and since many firewalled
             // downloads may have the same port and host, we also check their
             // push endpoints
-            if(!r.needsPush() ? 
+            if(! (loc instanceof PushAltLoc) ? 
                     (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
                     r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
                 continue;
@@ -1581,7 +1580,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }  else {
                     if(rfd.isFromAlternateLocation() )
-                        if(rfd.needsPush())
+                        if(loc instanceof PushAltLoc)
                                 DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
                         else
                                 DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();

@@ -172,7 +172,13 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		if (!rfd.needsPush()) {
 			return new DirectAltLoc(new Endpoint(rfd.getHost(),rfd.getPort()), urn);
 		}else {
-			return new PushAltLoc(rfd.getPushAddr(),urn);
+		    PushEndpoint copy = new PushEndpoint(
+		            rfd.getClientGUID(),
+		            rfd.getPushAddr().getProxies(),
+		            rfd.getPushAddr().getFeatures(),
+		            rfd.getPushAddr().supportsFWTVersion());
+		    
+			return new PushAltLoc(copy,urn);
 		}
 	}
 

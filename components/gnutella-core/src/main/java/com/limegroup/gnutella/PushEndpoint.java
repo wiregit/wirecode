@@ -470,13 +470,6 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	/**
-	 * establishes a reference to a copy of the global set of proxies
-	 */
-	public synchronized void cacheProxies() {
-	    _proxies = getProxies();
-	}
-	
-	/**
 	 * Overwrites the current known push proxies for the host specified
 	 * in the httpString with the set contained in the httpString.
 	 * 

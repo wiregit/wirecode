@@ -1281,13 +1281,8 @@ public class DownloadTest extends BaseTestCase {
         
         // create a set of the expected proxies and keep a ref to it
         PushEndpoint pe = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
-        pe.updateProxies(true);
         
         Set expectedProxies = new HashSet(pe.getProxies());
-        
-        // then purge the entry in the map
-        Map m = (Map) PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
-        m.clear();
         
         PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
@@ -1328,7 +1323,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     /**
-     * tests that bad push locs get demoted
+     * tests that bad push locs get removed
      */
     public void testBadPushLocGetsDemotedNotAdvertised() throws Exception {
         
@@ -1380,6 +1375,9 @@ public class DownloadTest extends BaseTestCase {
             current = (AlternateLocation)it.next();
         
         assertTrue(current instanceof PushAltLoc);
+        PushAltLoc pcurrent = (PushAltLoc)current;
+        assertTrue(pcurrent.getPushAddress().getProxies().isEmpty());
+        assertTrue(pcurrent.isDemoted());
         
     }
     

@@ -357,7 +357,7 @@ public class HTTPDownloader implements BandwidthTracker {
     			_goodPushLocs.remove(loc);
     		}
         
-    		synchronized(_badLocs) {
+    		synchronized(_badPushLocs) {
     			if(!_writtenBadPushLocs.contains(loc))//no need to repeat to uploader
     				_badPushLocs.add(loc); //duplicates make no difference
     		}

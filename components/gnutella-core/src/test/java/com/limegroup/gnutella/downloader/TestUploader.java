@@ -952,7 +952,7 @@ public class TestUploader extends AssertComparisons {
 				AlternateLocation al = 
 				    AlternateLocation.create(st.nextToken().trim(), _sha1);
 				if(al instanceof PushAltLoc)
-				    ((PushAltLoc)al).updateProxies(true);
+				    ((PushAltLoc)al).updateProxies(good);
 				if (good)
 				    alc.add(al);
 			} catch(IOException e) {
