@@ -78,11 +78,9 @@ public class ForcedUltrapeerHandshakeResponder
 		
 		// They supposedly requested our promotion and are now giving us guidance?
 		// reject the connection.
-        if(response.hasLeafGuidance()) {
-        	System.out.println("rejecting");
-        	return HandshakeResponse.createRejectOutgoingResponse();
-        	
-		} else if( RECORD_STATS )
+        if(response.hasLeafGuidance()) 
+           	return HandshakeResponse.createRejectOutgoingResponse();
+		 else if( RECORD_STATS )
             HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
 
 		// deflate if we can ...

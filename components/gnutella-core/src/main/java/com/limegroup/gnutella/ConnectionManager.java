@@ -1656,7 +1656,7 @@ public class ConnectionManager {
     	
     	Thread trimmer = new ManagedThread("UP connection trimmer") {
     		
-    		public void ManagedRun() {
+    		public void managedRun() {
     			
     			//wait some time. 5 seconds sounds ok
     			try{Thread.sleep(5000);}catch(InterruptedException ie){}
