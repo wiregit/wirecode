@@ -41,7 +41,12 @@ public class LimeXMLReplyCollection{
         audio = true;
         this.metaFileManager = (MetaFileManager)fm;
         MapSerializer ms = initialize(URI);//contains strings now 
-        Map hashToXMLStr = ms.getMap();
+        Map hashToXMLStr;
+        //if the file is invalid....ms == null
+        if(ms==null)//create a dummy
+            hashToXMLStr= new HashMap();
+        else
+            hashToXMLStr = ms.getMap();
         ID3Reader id3Reader = new ID3Reader();
         synchronized(fileToHash){
             Iterator iter = fileToHash.keySet().iterator();
@@ -95,7 +100,12 @@ public class LimeXMLReplyCollection{
         audio = false;
         this.metaFileManager = (MetaFileManager)fm;
         MapSerializer ms = initialize(URI);
-        Map hashToXMLStr = ms.getMap();
+        Map hashToXMLStr;
+        //if File is invalid, ms== null
+        if (ms==null)//create a dummy...
+            hashToXMLStr = new HashMap();
+        else
+            hashToXMLStr = ms.getMap();
         Iterator iter = hashToXMLStr.keySet().iterator();
         while(iter.hasNext()){
             boolean valid = true;
