@@ -49,6 +49,7 @@ public class PingRequest extends Message {
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
         addLocale();
+        addIPRequest();
     }
     
     /**
@@ -169,6 +170,29 @@ public class PingRequest extends Message {
             ErrorService.error(e);
         }
     }
+    
+    /**
+     * marks this ping request as requesting a pong carrying ip:port
+     * info
+     */
+    private void addIPRequest() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            //first put in the exsisting payload
+            baos.write(payload);
+            
+            GGEP ggep = new GGEP(false);
+            ggep.put(GGEP.GGEP_HEADER_IPPORT);
+            ggep.write(baos);
+            baos.write(0);
+            
+            payload = baos.toByteArray();
+            updateLength(payload.length);
+        }
+        catch(IOException e) {
+            ErrorService.error(e);
+        }
+    }
 
     /**
      * get locale of this PingRequest 
@@ -188,6 +212,25 @@ public class PingRequest extends Message {
         }
         else 
             return ApplicationSettings.DEFAULT_LOCALE.getValue();
+    }
+    
+    /**
+     * @return whether this ping wants a reply carrying IP:Port info.
+     */
+    public boolean requestsIP() {
+       if (payload==null)
+           return false;
+       
+       try{
+           GGEP [] ggeps = GGEP.read(payload,0);
+           for (int i=0;i<ggeps.length;i++) 
+               if (ggeps[i].hasKey(GGEP.GGEP_HEADER_IPPORT))
+                   return true;
+           
+       }catch(BadGGEPBlockException ignored) {}
+       
+       return false;
+       
     }
     //Unit tests: tests/com/limegroup/gnutella/messages/PingRequestTest.java
 }

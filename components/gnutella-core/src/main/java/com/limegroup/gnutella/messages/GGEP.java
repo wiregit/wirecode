@@ -35,6 +35,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
     /** The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
+    /** The extention header (key) for IpPort request */
+    public static final String GGEP_HEADER_IPPORT="IP";
     /**
      * The extension header (key) for a feature query.
      * This is 'WH' for legacy reasons, because 'What is New' was the first.

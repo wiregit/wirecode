@@ -140,6 +140,30 @@ public class PingReply extends Message implements Serializable, IpPort {
                        RouterService.getConnectionManager()
                        .getNumLimeWireLocalePrefSlots()));
     }
+    
+    /**
+     * creates a new PingReply for this host with the specified GUID, ttl and
+     * puts in the ggep extention indicating the remote host's return address.
+     */
+    public static PingReply create(byte [] guid, byte ttl,IpPort returnAddr) {
+        return create(guid,
+                ttl,
+                RouterService.getPort(),
+                RouterService.getAddress(),
+                (long)RouterService.getNumSharedFiles(),
+                (long)RouterService.getSharedFileSize()/1024,
+                RouterService.isSupernode(),
+                newGGEPWithLocaleAndAddress
+                (Statistics.instance().calculateDailyUptime(),
+                 RouterService.isSupernode(),
+                 UDPService.instance().isGUESSCapable(),
+                 (ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                  ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                  ApplicationSettings.LANGUAGE.getValue()),
+                 RouterService.getConnectionManager()
+                 .getNumLimeWireLocalePrefSlots(),
+                 returnAddr));
+    }
 
     /**
      * Creates a new <tt>PingReply</tt> for this host with the specified
@@ -713,6 +737,23 @@ public class PingReply extends Message implements Serializable, IpPort {
         payload[2] = (byte)slots;
         g.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
               payload);
+        
+        return g;
+    }
+    
+    private static GGEP
+    	newGGEPWithLocaleAndAddress(int dailyUptime,boolean isUltrapeer,
+    	        boolean isGuessCapable, String locale, int slots, IpPort address) {
+        
+        GGEP g = newGGEPWithLocale(dailyUptime,isUltrapeer,
+                isGuessCapable,locale,slots);
+        
+        byte []payload = new byte[6];
+        System.arraycopy(address.getInetAddress().getAddress(),
+                	0,payload,0,4);
+        ByteOrder.short2leb((short)address.getPort(),payload,4);
+        
+        g.put(GGEP.GGEP_HEADER_IPPORT,payload);
         
         return g;
     }

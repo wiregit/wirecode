@@ -101,11 +101,31 @@ public class StandardMessageRouter extends MessageRouter {
                                            ReplyHandler handler) {
         byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
+        
+        QueryReply.IPPortCombo ipport =null;
+        if (request.requestsIP())
+            try{
+        	    
+                ipport = 
+                    new QueryReply.IPPortCombo(
+                        datagram.getAddress().getHostAddress(),
+                        datagram.getPort());
+            }catch(IOException tooBad) {}
+        
+        PingReply reply=null;
+        
         if(NetworkUtils.isValidAddress(addr) &&
-           NetworkUtils.isValidPort(port)) {        
-            sendPingReply(PingReply.create(request.getGUID(), 
-                                           (byte)1), handler);
-        }
+           NetworkUtils.isValidPort(port)) 
+        	if (ipport != null)
+        	    reply = PingReply.create(request.getGUID(),
+        	            (byte)1,ipport);
+        	else
+        	    reply = PingReply.create(request.getGUID(),
+        	            (byte)1);
+        
+        if (reply!=null)
+            sendPingReply(reply, handler);
+        
 	}
 
     /**
