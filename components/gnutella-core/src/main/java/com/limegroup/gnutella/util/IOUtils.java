@@ -41,11 +41,18 @@ public class IOUtils {
             return true;
         }
         // If we don't have permissions to write, let them know.
-        if(StringUtils.contains(msg, "access is denied")) {
+        if(StringUtils.contains(msg, "access is denied") || 
+           StringUtils.contains(msg, "permission denied") ) {
             MessageService.showError("ERROR_ACCESS_DENIED_" + friendly);
             return true;
         }
         
+        if(StringUtils.contains(msg, "invalid argument")) {
+            MessageService.showError("ERROR_INVALID_NAME_" + friendly);
+            return true;
+        }
+            
+
         // dunno what to do, let the outer world handle it.
         return false;
     }       
