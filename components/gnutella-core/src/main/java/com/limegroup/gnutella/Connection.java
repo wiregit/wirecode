@@ -1137,7 +1137,11 @@ public class Connection {
         return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
     }
 
-    /** Returns the host set at construction */
+   /**
+    * Returns the IP address of the remote host as a string.
+    * 
+    * @return the IP address of the remote host as a string
+    */
     public String getIPString() {
         return _host;
     }
