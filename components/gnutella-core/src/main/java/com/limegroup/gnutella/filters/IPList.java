@@ -13,7 +13,6 @@ import com.sun.java.util.collections.*;
 class IPList {
     /** The list of IP's. */
     private Vector /* of IP */ ips = new Vector();
-    private static final long DEFAULT_MASK = 0xffffffffL; // 255.255.255.255 
 
     public IPList () {}
 
