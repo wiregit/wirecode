@@ -71,7 +71,7 @@ public final class CommonUtils {
 
 
 	/**
-	 * Variable for whether or not the JVM is 1.1,8.
+	 * Variable for whether or not the JVM is 1.1.8.
 	 */
 	private static boolean _isJava118 = false;
 
