@@ -59,13 +59,28 @@ public final class UrnHttpRequestTest extends TestCase {
 	protected void setUp() {
 		_testDir = new File(CommonUtils.getCurrentDirectory(), 
 							"gui/com/limegroup/gnutella/gui/images");		
+
+		if(!_testDir.isDirectory()) {
+			_testDir = new File(CommonUtils.getCurrentDirectory(), 
+								"tests/com/limegroup/gnutella/gui/images");		
+		}
+
+		if(!_testDir.isDirectory()) {
+			_testDir = new File(CommonUtils.getCurrentDirectory(), 
+								"limewire/tests/com/limegroup/gnutella/gui/images");		
+		}
+
+		assertTrue("could not find the images directory", _testDir.isDirectory());
+
 		// this is necessary to avoid getting multiple responses for 
 		// given queries
 		File flagsDir = new File(_testDir, "flags");
-		File[] files = flagsDir.listFiles();
-		for(int i=0; i<files.length; i++) {
-			if(!files[i].isFile()) continue;
-			assertTrue("delete needs to succeed", files[i].delete());
+		if(flagsDir.isDirectory()) {
+			File[] files = flagsDir.listFiles();		
+			for(int i=0; i<files.length; i++) {
+				if(!files[i].isFile()) continue;
+				assertTrue("delete needs to succeed", files[i].delete());
+			}
 		}
 		
 		// this is necessary to avoid getting multiple responses for
@@ -217,7 +232,8 @@ public final class UrnHttpRequestTest extends TestCase {
 					} catch(IOException e) {
 						assertTrue("unexpected exception: "+e, false);
 					}
-					assertEquals(HTTPHeaderName.CONTENT_URN.toString()+"s should be equal",
+					assertEquals(HTTPHeaderName.CONTENT_URN.toString()+
+								 "s should be equal for "+fd,
 								 fd.getSHA1Urn(), curUrn);
 					contentUrnHeaderPresent = true;
 				} else if(HTTPHeaderName.CONTENT_RANGE.matchesStartOfString(curString)) {
@@ -226,7 +242,7 @@ public final class UrnHttpRequestTest extends TestCase {
 					continue;
 				} else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(curString)) { 
 					String value = HTTPUtils.extractHeaderValue(curString);
-					assertEquals("sizes should match", (int)fd.getSize(), 
+					assertEquals("sizes should match for "+fd, (int)fd.getSize(), 
 								 Integer.parseInt(value));						
 				} else if(HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
 					continue;
