@@ -1788,8 +1788,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     {//debugging block
                       FileDesc f=fileManager.getFileDescForFile(incompleteFile);
                       URN bucketHash = buckets.getURNForBucket(bucketNumber);
-                      if(bucketHash != null && f!=null) {
-                          Assert.silent(bucketHash.equals(f.getSHA1Urn()),
+                      if(bucketHash != null && f!=null &&
+                         !bucketHash.equals(f.getSHA1Urn())) {
+                            Assert.silent(false,
                                         "IncompleteFileManager wrong fd");
                           //dont fail later
                           fileManager.removeFileIfShared(incompleteFile);
