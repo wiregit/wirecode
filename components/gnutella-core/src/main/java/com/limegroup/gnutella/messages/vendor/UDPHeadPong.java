@@ -28,6 +28,15 @@ import com.limegroup.gnutella.util.*;
  * two upload slots available we would send -2.  A value of 0 means all upload slots are taken but 
  * the queue is empty.  This information can be used by the downloaders to better judge chances of
  * successful start of the download. 
+ * 
+ * Format:
+ * 
+ * 1 byte - features byte
+ * 2 byte - response code
+ * 4 bytes - vendor id
+ * 1 byte - queue status
+ * n*8 bytes - n intervals (if requested && file partial && fits in packet)
+ * the rest - altlocs (if requested && fits in packet) 
  */
 public class UDPHeadPong extends VendorMessage {
 	
@@ -43,7 +52,17 @@ public class UDPHeadPong extends VendorMessage {
 	private static final byte COMPLETE_FILE= (byte)1;
 	private static final byte PARTIAL_FILE = (byte)2;
 	
+	/**
+	 * all our slots are full..
+	 */
+	private static final byte BUSY=(byte)0x7F;
+	
 	public static final int VERSION = 1;
+	
+	/**
+	 * the features contained in this pong.  Same as those of the originating ping
+	 */
+	private byte _features;
 	
 	/**
 	 * available ranges
@@ -66,6 +85,11 @@ public class UDPHeadPong extends VendorMessage {
 	private boolean _fileFound,_completeFile;
 	
 	/**
+	 * the remote host
+	 */
+	private byte [] _vendorId;
+	
+	/**
 	 * creates a message object with data from the network.
 	 */
 	protected UDPHeadPong(byte[] guid, byte ttl, byte hops,
@@ -74,21 +98,25 @@ public class UDPHeadPong extends VendorMessage {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
 		
 		//we should have some payload
-		if (payload==null || payload.length==0)
+		if (payload==null || payload.length<2)
 			throw new BadPacketException("empty payload");
+		
 		
 		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE 
 		//or COMPLETE_FILE
 		if (version == VERSION && 
-				payload[0]!=FILE_NOT_FOUND &&
-				payload[0]!=PARTIAL_FILE &&
-				payload[0]!=COMPLETE_FILE)
+				payload[1]!=FILE_NOT_FOUND &&
+				payload[1]!=PARTIAL_FILE &&
+				payload[1]!=COMPLETE_FILE)
 			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
 			
 		
 		DataInputStream dais = new DataInputStream(new ByteArrayInputStream(payload));
+		
+		//read and mask the features
+		_features = (byte) (dais.readByte() & UDPHeadPing.FEATURE_MASK);
 		
 		//read the response code
 		byte code = dais.readByte();
@@ -99,25 +127,32 @@ public class UDPHeadPong extends VendorMessage {
 		else
 			_fileFound=true;
 		
+		//read the vendor id
+		_vendorId = new byte[4];
+		dais.readFully(_vendorId);
+		
 		//read the queue status
 		_queueStatus = dais.readByte();
 		
 		//the queue status can be negative.. check the msb
-		if (_queueStatus > 127)
-			_queueStatus = 255 - _queueStatus;
+		if (_queueStatus > BUSY)
+			_queueStatus = _queueStatus - 0xFF;
 		
-		//if we have a partial file, parse the list of ranges
+		//if we have a partial file and the pong carries ranges, parse their list
 		if (code == COMPLETE_FILE) 
 			_completeFile=true;
-		else{
-			short rangeLength=dais.readShort();
-			byte [] ranges = new byte [rangeLength];
-			dais.readFully(ranges);
-			_ranges = IntervalSet.parseBytes(ranges);
-		}
+		else 
+			if ( (_features & UDPHeadPing.INTERVALS) == 
+				UDPHeadPing.INTERVALS){
+			
+				short rangeLength=dais.readShort();
+				byte [] ranges = new byte [rangeLength];
+				dais.readFully(ranges);
+				_ranges = IntervalSet.parseBytes(ranges);
+			}
 		
-		//if there is more data in the packet, it must be alternate locations.
-		if (dais.available() > 0) {
+		//parse any included altlocs
+		if ((_features & UDPHeadPing.ALT_LOCS) == UDPHeadPing.ALT_LOCS) {
 			byte [] altlocs = new byte[dais.available()];
 			dais.readFully(altlocs);
 			_altLocs = 
@@ -157,6 +192,10 @@ public class UDPHeadPong extends VendorMessage {
 		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		
 		try{
+			
+		byte features = ping.getFeatures();
+		
+		caos.write(features);
 		
 		//if we don't have the file..
 		if (desc == null) {
@@ -171,10 +210,15 @@ public class UDPHeadPong extends VendorMessage {
 			retCode = PARTIAL_FILE;
 		caos.write(retCode);
 		
+		//write the vendor id
+		caos.write(F_LIME_VENDOR_ID);
+		
 		//get our queue status.
 		int queueSize = RouterService.getUploadManager().getNumQueuedUploads();
 		
-		if (queueSize > 0) 
+		if (queueSize == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
+			queueStatus = BUSY;
+		else if (queueSize > 0) 
 			queueStatus = (byte) queueSize;
 		 else 	
 			//optimistic value
@@ -186,22 +230,37 @@ public class UDPHeadPong extends VendorMessage {
 		//write out the return code and the queue status
 		caos.write(queueStatus);
 		
-		//if we sent partial file, we need to send the available ranges
-		if (retCode == PARTIAL_FILE) {
+		//if we sent partial file and the remote asked for ranges, send them 
+		if (retCode == PARTIAL_FILE && ping.requestsRanges()) {
 			IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
-			byte [] ranges =ifd.getRangesAsByte(); 
-			caos.write((short)ranges.length);
-			caos.write(ranges);
+			byte [] ranges =ifd.getRangesAsByte();
+			
+			//write the ranges only if they will fit in the packet
+			if (caos.getAmountWritten() + ranges.length <= PACKET_SIZE) {
+				caos.write((short)ranges.length);
+				caos.write(ranges);
+			} 
+			else { //the ranges will not fit - say we didn't send them.
+				features = (byte) ( features & ~UDPHeadPing.INTERVALS);
+				baos.toByteArray()[0] = features;
+			}
+			
 		}
 		
 		//if we have any altlocs and enough room in the packet, add them.
 		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
 		
-		if (altlocs!= null && altlocs.hasAlternateLocations()) {
+		if (altlocs!= null && altlocs.hasAlternateLocations() &&
+				ping.requestsAltlocs()) {
 			byte [] altbytes = altlocs.httpStringValue().getBytes();
 			
 			if (caos.getAmountWritten() + altbytes.length <= PACKET_SIZE)
 				caos.write(altbytes);
+			else {
+				//altlocs will not fit - say we didn't send them
+				features = (byte) ( features & ~UDPHeadPing.ALT_LOCS);
+				baos.toByteArray()[0] = features;
+			}
 				
 		}
 			
@@ -243,6 +302,14 @@ public class UDPHeadPong extends VendorMessage {
 	 */
 	public AlternateLocationCollection getAltLocs() {
 		return _altLocs;
+	}
+	
+	/**
+	 * 
+	 * @return the remote vendor as string
+	 */
+	public String getVendor() {
+		return new String(_vendorId);
 	}
 }
 	
