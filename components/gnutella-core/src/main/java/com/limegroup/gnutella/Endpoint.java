@@ -447,5 +447,13 @@ com.sun.java.util.collections.Comparable
         else
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.util.IpPort#isSame(com.limegroup.gnutella.util.IpPort)
+	 */
+	public boolean isSame(IpPort other) {
+		if (other == null)
+			return false;
+		return getAddress().equals(other.getAddress()) && getPort() == other.getPort();
+	}
 }
 

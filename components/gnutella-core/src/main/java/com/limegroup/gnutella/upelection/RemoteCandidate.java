@@ -138,16 +138,17 @@ public class RemoteCandidate implements Candidate{
 		return _uptime;
 	}
 	
-	public boolean equals(Object o) {
+	public boolean isSame(IpPort o) {
 		if (o==null)
 			return false;
-		if (! (o instanceof Candidate))
-			return false;
 		
-		Candidate other = (Candidate)o;
+		//RemoteCandidates should not be compared to Connections
+		//that are not initialized.
+		if (o instanceof Connection) 
+			if (!((Connection)o).isInitialized())
+				return false;
 		
-		return getInetAddress().equals(other.getInetAddress()) &&
-			getPort() == other.getPort();
+		return _address.isSame(o);
 	}
 	
 	public String getAddress() {

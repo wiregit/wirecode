@@ -65,7 +65,7 @@ public class GiveStatsVendorMessage extends VendorMessage {
      * Constructs the payload of the message, given the desired control & type.
      */
     private static byte[] derivePayload(byte control, byte type) {
-        if(control < (byte)0 || control > (byte)3)
+        if(control < (byte)0 || control > (byte)4)
             throw new IllegalArgumentException(" invalid control byte ");
         if(type < (byte)0 || type > (byte)3)
             throw new IllegalArgumentException(" invalid stat type ");

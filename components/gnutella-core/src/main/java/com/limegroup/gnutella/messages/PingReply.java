@@ -1114,4 +1114,12 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.util.IpPort#isSame(com.limegroup.gnutella.util.IpPort)
+	 */
+	public boolean isSame(IpPort other) {
+		if (other==null)
+			return false;
+		return getAddress().equals(other.getAddress()) && getPort() == other.getPort();
+	}
 }

@@ -5,6 +5,7 @@ package com.limegroup.gnutella.upelection;
 
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.IpPort;
 
 
 
@@ -12,14 +13,13 @@ import java.io.*;
 
 public class Promoter implements Runnable {
 	
-	final String _host;
-	final int _port;
+	final IpPort _target;
 	
 	public void run() {
 		
 		//first thing we do is promote ourselves to an ultrapeer.
 		try {
-			RouterService.getConnectionManager().becomeAnUPWithBackupConn(_host,_port);
+			RouterService.getConnectionManager().becomeAnUPWithBackupConn(_target);
 			
 		}catch(IOException failed) {
 			//we couldn't connect to the guy who asked us to become an UP.  Abort
@@ -36,9 +36,8 @@ public class Promoter implements Runnable {
 	 * 
 	 * @param target the UP that asked us to promote ourselves.
 	 */
-	public Promoter(Endpoint target) {
-		_host = target.getAddress();
-		_port = target.getPort();
+	public Promoter(IpPort target) {
+		_target=target;
 	}
 	
 	//override for test purposes

@@ -57,7 +57,7 @@ public class PromotionManager {
 	/**
 	 * the endpoint of either the requestor or the candidate for promotion LOCKING: obtain _promotionLock
 	 */
-	private Endpoint _promotionPartner;
+	private IpPort _promotionPartner;
 	/**
 	 * keeps a list of the people who have requested our connection lists. used to make sure we don't get ping-flooded. not final so that tests won't take forever.
 	 */
@@ -76,7 +76,6 @@ public class PromotionManager {
      * TODO: decide what to do if a new request arrives while we're already promoting.
      */
     public void initiatePromotion(PromotionRequestVendorMessage msg) {
-    	
     	//set the promotion partner
     	Endpoint requestor = new Endpoint (
 				msg.getRequestor().getAddress(),
@@ -146,7 +145,7 @@ public class PromotionManager {
 		}
 	}
 	
-	public void handleACK(PromotionACKVendorMessage message, Endpoint sender) {
+	public void handleACK(PromotionACKVendorMessage message, IpPort sender) {
 		//cache the current status
 		boolean isSupernode = RouterService.isSupernode();
 		
@@ -159,7 +158,7 @@ public class PromotionManager {
     	
     		//check if we received the ACK from the right person
     		//also allow for loopback addresses for testing 
-    		if (!sender.equals(_promotionPartner) && 
+    		if (!sender.isSame(_promotionPartner) && 
     				!sender.getInetAddress().isLoopbackAddress())
     			return;
     			
@@ -221,7 +220,8 @@ public class PromotionManager {
 		
 		//*******
 		//send a PromotionRequestVM to the appropriate route
-		PromotionRequestVendorMessage msg = new PromotionRequestVendorMessage(BestCandidates.getBest());
+		PromotionRequestVendorMessage msg = 
+			new PromotionRequestVendorMessage(BestCandidates.getBest());
 		
 		RouterService.getMessageRouter().forwardPromotionRequest(msg);	
 		

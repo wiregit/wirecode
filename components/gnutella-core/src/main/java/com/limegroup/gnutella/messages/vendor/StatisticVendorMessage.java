@@ -10,9 +10,9 @@ public class StatisticVendorMessage extends VendorMessage {
     
     public static final int VERSION = 1;
 
-    private static final String DELIMITER = " | ";
+    public static final String DELIMITER = " | ";
     
-    private static final String DELIMITER2 = " ^ ";
+    public static final String DELIMITER2 = " ^ ";
     
 
     /**

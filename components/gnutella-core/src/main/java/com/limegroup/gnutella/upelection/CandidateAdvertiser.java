@@ -53,7 +53,8 @@ public class CandidateAdvertiser implements Runnable {
 		}
 		
 		//broadcast!
-		for (Iterator iter = RouterService.getConnectionManager().getInitializedConnections().iterator();iter.hasNext();) {
+		for (Iterator iter = RouterService.getConnectionManager().getInitializedConnections().iterator();
+			iter.hasNext();) {
 			ManagedConnection current = (ManagedConnection)iter.next();
 			if (current.isGoodUltrapeer() &&
 					current.remoteHostSupportsBestCandidates() >= 1);	
@@ -65,13 +66,15 @@ public class CandidateAdvertiser implements Runnable {
 	 * elects the best ultrapeer candidate amongst our leaf connections
 	 */
 	private Candidate electBest() {
+		BestCandidates.purgeDead();
+		
 		ManagedConnection best = null;
 		
-		for (Iterator iter = RouterService.getConnectionManager().getInitializedClientConnections().iterator();
+		for (Iterator iter = RouterService.getConnectionManager()
+				.getInitializedClientConnections().iterator();
 			iter.hasNext();){
 			ManagedConnection current = (ManagedConnection)iter.next();
-			if (current.isGoodLeaf() &&
-					current.isStable() && 
+			if (current.isGoodLeaf() && 
 					current.remoteHostSupportsBestCandidates() >=1 &&
 					current.isUDPCapable() && //unsolicited udp
 					current.hasRequestedOOB() && //double-check
@@ -106,20 +109,19 @@ public class CandidateAdvertiser implements Runnable {
 	 * compares connections with regard to their potential for
 	 * being good ultrapeers.  
 	 *
-	 * The most important one is uptime.  The available bandwidth
-	 * and the number of shared files are also taken in account.
+	 * The most important one is uptime.  The number of 
+	 * shared files are also taken in account.
 	 * 
 	 * Proposed formula:
-	 * score = uptime(minutes) + upbandwidth(kb)*3 - sharedFiles/4
+	 * score = uptime(minutes) - sharedFiles/4
 	 * 
 	 * Example: 
-	 * a node has been up for 7 hours, with 20k outgoing bw sharing
-	 * 400 files.
-	 * score = 7*60 + 60 - 100 = 380
+	 * a node has been up for 7 hours, sharing 400 files.
+	 * score = 7*60 - 100 = 320
 	 * 
-	 * will score better than a node that has been up for 8 hours and a half,
-	 * with 10k outgoing link and sharing 800 files.
-	 * score = 8*60 + 30 -200 = 310
+	 * will score better than a node that has been up for 8 hours 
+	 * but is sharing 800 files.
+	 * score = 8*60 - 200 = 280
 	 *
 	 */
 	private class ConnectionComparator implements Comparator {
@@ -132,11 +134,9 @@ public class CandidateAdvertiser implements Runnable {
 			Connection conn1 = (Connection)a;
 			Connection conn2 = (Connection)b;
 			
-			int score1 = (int)(System.currentTimeMillis() - conn1.getConnectionTime()) / (1000*60) + 
-						conn1.getBandwidth()*3 - conn1.getFileShared()/4;
+			int score1 = conn1.getUptime() - conn1.getFileShared()/4;
 			
-			int score2 = (int)(System.currentTimeMillis() - conn2.getConnectionTime()) / (1000*60) + 
-				conn2.getBandwidth()*30 - conn2.getFileShared()/4;
+			int score2 = conn2.getUptime() - conn2.getFileShared()/4;
 			
 			return score1-score2;
 			

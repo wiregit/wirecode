@@ -3,6 +3,7 @@
 package com.limegroup.gnutella.upelection;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.IpPort;
 import com.sun.java.util.collections.*;
 
 import java.net.*;
@@ -62,6 +63,10 @@ public class BestCandidates {
 	 * node.  Null values means we don't have values for that ttl.
 	 */
 	public static void update(Candidate [] newCandidates) {
+		
+		//always purge any candidates whose advertisers have died.
+		purgeDead();
+			
 		Comparator comp = new CandidatePriorityComparator();
 		
 		//if the other guy doesn't have a best leaf, he shouldn't
@@ -78,7 +83,7 @@ public class BestCandidates {
 			//or he is changing his mind about his best candidate
 			if (instance._best[1]==null || 
 					comp.compare(instance._best[1], newCandidates[0]) < 0 ||  
-							instance._best[1].getAdvertiser().equals(newCandidates[0].getAdvertiser()))  
+							instance._best[1].getAdvertiser().isSame(newCandidates[0].getAdvertiser()))  
 				instance._best[1] = newCandidates[0];
 			
 			
@@ -89,7 +94,7 @@ public class BestCandidates {
 			
 			if (instance._best[2]==null ||
 			 comp.compare(instance._best[2], newCandidates[1]) < 0 ||
-			 	newCandidates[1].getAdvertiser().equals(instance._best[2].getAdvertiser()))
+			 	newCandidates[1].getAdvertiser().isSame(instance._best[2].getAdvertiser()))
 					instance._best[2] = newCandidates[1];
 		}
 	}
@@ -101,6 +106,7 @@ public class BestCandidates {
 	 */
 	public static void update(Candidate myLeaf) {
 		synchronized(instance) {
+			purgeDead();
 			instance._best[0] = myLeaf;
 		}
 	}
@@ -108,19 +114,30 @@ public class BestCandidates {
 	/**
 	 * removes a candidate from the list if they fail to respond
 	 * to a promotion request
-	 * @param e an Endpoint representing the candidate
+	 * @param e a IpPort representing the candidate
 	 */
-	public static void fail(Endpoint e) {
+	public static void fail(IpPort e) {
 		if (instance == null)
 			return;
-		InetAddress address = e.getInetAddress();
 		synchronized(instance) {
 			for (int i =0;i<instance._best.length;i++)
 				if (instance._best[i]!=null && 
-						instance._best[i].getInetAddress().equals(address))
+						instance._best[i].isSame(e))
 					instance._best[i]=null;
+			purgeDead();
 		}
 	}
 	
-	
+	/**
+	 * cleans up candidates from the table if we've lost the
+	 * connection to their advertisers.
+	 */
+	public static final void purgeDead() {
+		if (instance != null)
+		synchronized(instance) {
+			for (int i =0;i<3;i++)
+				if (instance._best[i]!=null && !instance._best[i].isOpen())
+					instance._best[i]=null;
+		}
+	}
 }

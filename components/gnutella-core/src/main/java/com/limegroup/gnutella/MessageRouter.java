@@ -2681,7 +2681,8 @@ public abstract class MessageRouter {
     		//make sure the promotion request was intended for us
     		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
     				RouterService.getAddress()) ||
-					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())  
+					//msg.getCandidate().getInetAddress().isLoopbackAddress()) //keep this one around
     			//for testing purposes allows requests from localhost
     			_promotionManager.initiatePromotion(msg);
     		return; 
@@ -2691,19 +2692,15 @@ public abstract class MessageRouter {
     	//we are an ultrapeer that needs to forward this query.
     	//*********************
     	
-    	//first make sure the request hasn't been travelling for too long.
-    	if (msg.getDistance() > 2) {
-    		return;
-    	}
-    	//then see if the specified candidate is still on our lists
+    	//see if the specified candidate is still on our lists
     	//it should be either in the ttl 0 or ttl 1 slot.
     	//also, if it is in the ttl 1 slot is should not have traveled more than 1 hop.
     	Candidate [] ourCandidates = BestCandidates.getCandidates();
     	InetAddress candidateAddress = msg.getCandidate().getInetAddress();
     	
-    	if ((ourCandidates[0].equals(msg.getCandidate()) && 
+    	if ((msg.getCandidate().isSame(ourCandidates[0]) && 
     			msg.getDistance()<2) ||
-			(ourCandidates[1].equals(msg.getCandidate()) &&
+    			(msg.getCandidate().isSame(ourCandidates[1]) &&
     			msg.getDistance()<1))
     		forwardPromotionRequest(new PromotionRequestVendorMessage(msg));
     	
@@ -2714,7 +2711,8 @@ public abstract class MessageRouter {
     /**
      * forwards a promotion request to a candidate.  This method will route
      * the Promotion Request VM to the appropriate destination.
-     * If the route to the target is no longer open, the message is dropped.
+     * If the route to the target is no longer open, the message is dropped
+     * and the candidate purged from the table.
      *  
      * @param msg the PromotionRequestVendorMEssage to forward
      */
@@ -2725,11 +2723,20 @@ public abstract class MessageRouter {
     	try {
     		for (int i = 0; i< BestCandidates.getCandidates().length;i++) {
     			Candidate current = BestCandidates.getCandidates()[i];
-    			if (current.isOpen())    		
-    				((Connection)current.getAdvertiser()).send(msg);
+    			if (current!= null && current.isOpen())     		{
+    				current.getAdvertiser().send(msg);
+    				return;
+    			}
+    			else
+    				BestCandidates.getCandidates()[i]=null; 
+    			//manual purge.  BestCandidates.fail() may purge candidates to which 
+    			//we have a route at different ttl.
 
     		}
-    	}catch(IOException tooBad){} //sending failed - not much we can do.
+    	}catch(IOException tooBad){
+    		tooBad.printStackTrace();
+    		BestCandidates.purgeDead();
+    	} //sending failed - not much we can do.  try to purge the new connection if its dead.
     }
     
     /**

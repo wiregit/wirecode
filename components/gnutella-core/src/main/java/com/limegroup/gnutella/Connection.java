@@ -62,7 +62,7 @@ import org.apache.commons.logging.Log;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection implements IpPort, Candidate {
+public class Connection implements Candidate {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -2138,19 +2138,20 @@ public class Connection implements IpPort, Candidate {
 			(Constants.MINUTE));
 	}
 	
-	public boolean equals(Object o) {
+	public boolean isSame(IpPort o) {
 		
-		//first try a cast to connection
-		//and use the Object.equals
-		if (o instanceof Connection) {
-			return super.equals(o);
-		}
+		if (o==null)
+			return false;
 		
-		if (o instanceof IpPort) {
-			IpPort other = (IpPort)o;
-			return other.getInetAddress().equals(getInetAddress()) &&
-				other.getPort() == getPort();
+		//try to use InetAddresses; however they throw if the connection
+		// is not initialized.
+		
+		try {
+			return getInetAddress().equals(o.getInetAddress()) && getPort() == o.getPort();
+		} catch(IllegalStateException notInitialized) {
+			return getAddress().equals(o.getAddress()) && getPort() == o.getPort();
 		}
-		return false;
+			
+		
 	}
 }

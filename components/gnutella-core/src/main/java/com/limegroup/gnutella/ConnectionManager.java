@@ -1593,16 +1593,18 @@ public class ConnectionManager {
      * @param host the host to connect to that we are sure has a slot waiting for us
      * @param port the port that host is listening to
      */
-    public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
+    public void becomeAnUPWithBackupConn(IpPort target) throws IOException {
    
+    	String host = target.getAddress();
+    	int port = target.getPort();
+    	
     	//first, see if we are already connected to that host
     	//and if so, close the connection since morphing is not yet implemented
-    	if (isConnectedTo(host))
-    		for (Iterator iter = _initializedConnections.iterator();iter.hasNext();) {
-    			ManagedConnection c = (ManagedConnection) iter.next();
-    			if (c.getAddress().equals(host))
-    				remove(c);
-    		}
+    	for (Iterator iter = _initializedConnections.iterator();iter.hasNext();) {
+    		ManagedConnection c = (ManagedConnection) iter.next();
+    		if (c.isSame(target))
+    			remove(c);
+    	}
     	
     	
     	//this connection must not fail.  If it does, the process will be aborted. 
