@@ -529,12 +529,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * This should be called after the incomplete file has been initialized
      * and added to the incomplete file manager.
      */
-    protected void initializeAlternateLocations() {
+    protected synchronized void initializeAlternateLocations() {
         Assert.that( incompleteFile != null, "null incomplete file");
             
         // Locate the hash for this incomplete file, to retrieve the 
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
+        System.out.println("initializing: " + hash);
         if( hash != null ) {
             long size = incompleteFileManager.getCompletedSize(incompleteFile);
             // Create our AlternateLocationCollection if we haven't already.
@@ -1326,14 +1327,16 @@ public class ManagedDownloader implements Downloader, Serializable {
             return COULDNT_MOVE_TO_LIBRARY;
         }
 
-		// null out the alternate locations so we can create a new set
-		// for these files, ideally we could also call
-		// initializeAlternateLocations here, but because IncompleteFileManager
-		// may not yet have an 'entry' added to it, we do not.
-		totalAlternateLocations = null;		
+		boolean firstSHA1RFD = true;
 		RemoteFileDesc tempRFD;
 		String rfdStr;
 		URL    rfdURL;
+		
+		// Create a new AlternateLocationCollection (if needed).
+		// The resulting collection's SHA1 is based off the
+		// the SHA1 of the first RFD that has a SHA1.
+		// If an AlternateLocationCollection already existed with that
+		// SHA1, it reuses it.  Otherwise, it creates it new.
         synchronized (this) {
             for (Iterator iter=files.iterator(); iter.hasNext(); ) {
                 tempRFD = (RemoteFileDesc)iter.next();
@@ -1344,15 +1347,21 @@ public class ManagedDownloader implements Downloader, Serializable {
 				// if the RFD doesn't have a SHA1
 				if(sha1 == null)
 				    continue;
-
-                if(totalAlternateLocations == null) {
-                    totalAlternateLocations = 
+				 
+				// If no alternate location collection existed already,
+				// or one existed but this is the first new RFD,
+				// and current SHA1 is different than it,
+				// create a new collection.
+                if(totalAlternateLocations == null ||
+                   (firstSHA1RFD && 
+                    !totalAlternateLocations.getSHA1().equals(sha1))
+                   ) {
+                    totalAlternateLocations =
                         AlternateLocationCollection.createCollection(sha1);
                 }
-				//if(totalAlternateLocations.numberOfAlternateLocations() == 0) {
-					// Prepare a fresh set of alternate locations for these file
-                //totalAlternateLocations = 
-                //AlternateLocationCollection.createCollection(sha1);
+                
+                firstSHA1RFD = false;
+                
 				if(!sha1.equals(totalAlternateLocations.getSHA1Urn())) {
 					// if the SHA1s don't match, keep going
 					continue;
@@ -1364,6 +1373,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 				} catch( IOException e ) {
                 }  
 			}
+			
+			// if none had a URN, null out totalAltLocs.
+			if( firstSHA1RFD )
+			    totalAlternateLocations = null;
         }
 		
         

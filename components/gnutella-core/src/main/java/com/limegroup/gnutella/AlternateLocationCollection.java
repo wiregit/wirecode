@@ -153,6 +153,13 @@ public final class AlternateLocationCollection
 	public URN getSHA1Urn() {
 		return SHA1;
 	}
+	
+	/**
+	 * Returns the SHA1 for this AlternateLocationCollection.
+	 */
+	public URN getSHA1() {
+	    return SHA1;
+	}
 
 	/**
 	 * Adds a new <tt>AlternateLocation</tt> to the list.  If the 
