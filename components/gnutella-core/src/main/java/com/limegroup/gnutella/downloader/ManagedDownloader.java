@@ -1414,11 +1414,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(ITERATIVE_GUESSING);
                         boolean areThereNewResults = false;
                         URN bestURN = buckets.getBestURN();
+                        OnDemandUnicaster unicaster = new OnDemandUnicaster();
                         for (Iterator i = guessLocs.iterator();
                              i.hasNext() && !areThereNewResults; ) {
                             // send a guess query
                             GUESSEndpoint ep = (GUESSEndpoint) i.next();
-                            OnDemandUnicaster.instance().query(ep, bestURN);
+                            unicaster.query(ep, bestURN);
                             // wait a while for a result
                             areThereNewResults = reqLock.lock(750);
                         }

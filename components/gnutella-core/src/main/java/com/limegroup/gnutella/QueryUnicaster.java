@@ -216,7 +216,7 @@ public final class QueryUnicaster {
                 // no query key to use in my query!
                 if (!_queryKeys.containsKey(toQuery)) { 
                     // send a QueryKey Request
-                    PingRequest pr = new PingRequest();
+                    PingRequest pr = PingRequest.createQueryKeyRequest();
                     try {
                         udpService.send(pr,toQuery.getAddress(),
                                         toQuery.getPort());

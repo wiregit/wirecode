@@ -80,7 +80,7 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
             //}
 
         // first try to get a QueryKey....
-        PingRequest pr = new PingRequest();
+        PingRequest pr = PingRequest.createQueryKeyRequest();
         QueryKey qkToUse = null;
         send(pr, address, Backend.PORT);
         //try {
