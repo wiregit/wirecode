@@ -254,7 +254,9 @@ public final class NIODispatcher implements Runnable {
         SocketChannel sc = (SocketChannel)key.channel();
         
         // if the connection does not need completing, return
-        if(!sc.isConnectionPending()) return;        
+        if(!sc.isConnectionPending()) return;  
+        
+        Connection conn = (Connection)key.attachment();      
         // Attempt to complete the connection sequence
         try {
             if(sc.finishConnect()) {
@@ -262,21 +264,22 @@ public final class NIODispatcher implements Runnable {
                 
                 // now that we're fully connected, finish the connection 
                 // handshaking
-                Connection conn = (Connection)key.attachment();
                 addReader(conn);
+                
+                // these are always outgoing connections, so we need to 
+                // initiate the connection with a "write" event
                 if(!conn.handshaker().handshake())  {
                     addWriter(conn);
                 }
             }
         } catch (IOException e) {
-            // TODO: we need to notify ConnectionManager to remove this from
-            // its connecting list
             NetworkUtils.close(sc.socket());
             try {                        
                 sc.close();
             } catch(IOException ioe) {
                 // nothing to do
             }
+            RouterService.getConnectionManager().remove(conn);
         }
     }
     
@@ -396,7 +399,7 @@ public final class NIODispatcher implements Runnable {
             try {
                 conn.handshaker().read();
             } catch (IOException e) {
-                // TODO: remove from initializing connections in ConnectionManager
+                RouterService.removeConnection(conn);
             }
         }
     }
