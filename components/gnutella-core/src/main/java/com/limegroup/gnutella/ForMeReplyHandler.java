@@ -41,6 +41,8 @@ public final class ForMeReplyHandler implements ReplyHandler {
 
 		DownloadManager dm = rs.getDownloadManager();
 		dm.handleQueryReply(reply);
+
+        QueryUnicaster.instance().handleQueryReply(reply);
 	}
 
 	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler) {

@@ -153,11 +153,17 @@ public class QueryUnicaster {
         }
     }
 
+    /** Feed me QRs so I can keep track of stuff.
+     */
+    public void handleQueryReply(QueryReply qr) {
+        addResults(new GUID(qr.getGUID()), qr.getResultCount());
+    }
+
 
     /** Add results to a query so we can invalidate it when enough results are
      *  received.
      */
-    public void addResults(GUID queryGUID, int numResultsToAdd) {
+    private void addResults(GUID queryGUID, int numResultsToAdd) {
         synchronized (_queries) {
             QueryBundle qb = (QueryBundle) _queries.get(queryGUID);
             if (qb != null) // add results if possible...
