@@ -12,8 +12,10 @@ import com.limegroup.gnutella.statistics.*;
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
  * handle those connections.  Currently supports Gnutella messaging, HTTP, and
- * chat connections over TCP; more may be supported in the
- * future.<p> 
+ * chat connections over TCP; more may be supported in the future.<p> 
+ * This class has a special relationship with UDPService and should really be
+ * the only class that intializes it.  See setListeningPort() for more
+ * info.<p>
  */
 public class Acceptor extends Thread {
     /**
@@ -102,13 +104,15 @@ public class Acceptor extends Thread {
     /**
      * @requires only one thread is calling this method at a time
      * @modifies this
-     * @effects sets the port on which the ConnectionManager is listening.
-     *  If that fails, this is <i>not</i> modified and IOException is thrown.
-     *  If port==0, tells this to stop listening to incoming connections.
-     *  This is properly synchronized and can be called even while run() is
-     *  being called.
+     * @effects sets the port on which the ConnectionManager AND the UDPService
+     *  is listening.  If either service CANNOT bind TCP/UDP to the port,
+     *  <i>neither<i> service is modified and a IOException is throw.
+     *  If port==0, tells this to stop listening for incoming GNUTELLA TCP AND
+     *  UDP connections/messages.  This is properly synchronized and can be 
+     *  called even while run() is being called.  
      */
     public void setListeningPort(int port) throws IOException {
+        debug("Acceptor.setListeningPort(): entered.");
         //1. Special case: if unchanged, do nothing.
         if (_socket!=null && _port==port)
             return;
@@ -119,6 +123,7 @@ public class Acceptor extends Thread {
         //while holding the lock.  Also note that port
         //will not have changed before we grab the lock.
         else if (port==0) {
+            debug("Acceptor.setListeningPort(): shutting off service.");
             //Close old socket (if non-null)
             if (_socket!=null) {
                 try {
@@ -130,17 +135,43 @@ public class Acceptor extends Thread {
                 _port=0;
                 _socketLock.notify();
             }
+
+            //Shut off UDPService also!
+            UDPService.instance().setListeningSocket(null);
+
+            debug("Acceptor.setListeningPort(): service OFF.");
             return;
         }
         //3. Normal case.  See note about locking above.
+        /* Since we want the UDPService to bind to the same port as the 
+         * Acceptor, we need to be careful about this case.  Essentially, we 
+         * need to confirm that the port can be bound by BOTH UDP and TCP 
+         * before actually acceping the port as valid.  To effect this change,
+         * we first attempt to bind the port for UDP traffic.  If that fails, a
+         * IOException will be thrown.  If we successfully UDP bind the port 
+         * we keep that bound DatagramSocket around and try to bind the port to 
+         * TCP.  If that fails, a IOException is thrown and the valid 
+         * DatagramSocket is closed.  If that succeeds, we then 'commit' the 
+         * operation, setting our new TCP socket and UDP sockets.
+         */
         else {
+            
+            debug("Acceptor.setListeningPort(): changing port to " + port);
+
+            DatagramSocket udpServiceSocket = 
+                UDPService.instance().newListeningSocket(port);
+
+            debug("Acceptor.setListeningPort(): UDP Service is ready.");
+        
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
                 newSocket=new ServerSocket(port);
             } catch (IOException e) {
+                udpServiceSocket.close();
                 throw e;
             } catch (IllegalArgumentException e) {
+                udpServiceSocket.close();
                 throw new IOException();
             }
             //b) Close old socket (if non-null)
@@ -155,6 +186,13 @@ public class Acceptor extends Thread {
                 _port=port;
                 _socketLock.notify();
             }
+
+            debug("Acceptor.setListeningPort(): I am ready.");
+
+            // Commit UDPService's new socket
+            UDPService.instance().setListeningSocket(udpServiceSocket);
+
+            debug("Acceptor.setListeningPort(): listening UDP/TCP on " + _port);
             return;
         }
     }
@@ -370,6 +408,13 @@ public class Acceptor extends Thread {
      */
     public boolean isBannedIP(String ip) {        
         return !_filter.allow(ip);
+    }
+
+    
+    private static final boolean debug = false;
+    private static void debug(String out) {
+        if (debug)
+            System.out.println(out);
     }
 
 

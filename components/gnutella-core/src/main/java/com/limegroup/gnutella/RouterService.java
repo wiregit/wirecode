@@ -170,8 +170,6 @@ public final class RouterService {
 		catcher.initialize();
 		acceptor.initialize();
 		
-		udpService.start();
-
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         fileManager.initialize();

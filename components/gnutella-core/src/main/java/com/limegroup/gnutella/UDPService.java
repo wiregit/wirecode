@@ -24,11 +24,26 @@ public final class UDPService implements Runnable {
 	 */
 	private static final UDPService INSTANCE = new UDPService();
 
-	/**
+	/** 
+     * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
+     * before sending.  Moreover, only one thread should be wait()ing on one of
+     * these locks at a time or results cannot be predicted.
 	 * The socket that handles sending and receiving messages over UDP.
 	 */
 	private volatile DatagramSocket _socket;
 	
+    /**
+     * Used for synchronized RECEIVE access to the UDP socket.  Should only be
+     * used by the _udpThread.
+     */
+    private Object _receiveLock = new Object();
+
+    /**
+     * Used for synchronized SEND access to the UDP socket.  Should only be used
+     * in the send method.
+     */
+    private Object _sendLock = new Object();
+
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
@@ -66,75 +81,117 @@ public final class UDPService implements Runnable {
 	 */
 	private UDPService() {}
 
+    /** 
+     * Returns a new DatagramSocket that is bound to the given port.  This
+     * value should be passed to setListeningSocket(DatagramSocket) to commit
+     * to the new port.  If setListeningSocket is NOT called, you should close
+     * the return socket.
+     * @return a new DatagramSocket that is bound to the specified port.
+     * @exception IOException Thrown if the DatagramSocket could not be
+     * created.
+     */
+    DatagramSocket newListeningSocket(int port) throws IOException {
+        try {
+            return new DatagramSocket(port);
+        }
+        catch (SocketException se) {
+            throw new IOException();
+        }
+        catch (SecurityException se) {
+            throw new IOException();
+        }
+    }
 
-	/**
-	 * If the UDP listening socket thread is not already running, this
-	 * starts the thread, listening for incoming Gnutella messages
-	 * over UDP.
+
+	/** 
+     * Changes the DatagramSocket used for sending/receiving.  Typically called
+     * by Acceptor to commit to the new port.
+     * @param datagramSocket the new listening socket, which must be be the
+     * return value of newListeningSocket(int).  A value of null disables 
+     * UDP sending and receiving.
 	 */
-	public void start() {
-		// if we're already listening, return
-		if(_udpThread.isAlive()) return;
-        
-        if (SettingsManager.instance().getGuessEnabled()) {
-            _udpThread.setDaemon(true);		
+	void setListeningSocket(DatagramSocket datagramSocket) {
+        if (!SettingsManager.instance().getGuessEnabled()) {
+            if (datagramSocket != null)
+                datagramSocket.close();
+            return;
+        }
+        else if (!_udpThread.isAlive())
             _udpThread.start();
+
+        //a) Close old socket (if non-null) to alert lock holders...
+        if (_socket != null) 
+            _socket.close();
+        //b) Replace with new sock.  Notify the udpThread.
+        synchronized (_receiveLock) {
+            synchronized (_sendLock) {
+                // if the input is null, then the service will shut off ;) .
+                _socket = (DatagramSocket) datagramSocket;
+                _receiveLock.notify();
+                _sendLock.notify();
+            }
         }
 	}
+
 
 	/**
 	 * Busy loop that accepts incoming messages sent over UDP and 
 	 * dispatches them to their appropriate handlers.
 	 */
 	public void run() {
-		while(RouterService.getPort() == -1) {
-			try {
-				Thread.sleep(100);
-			} catch(InterruptedException e) {
-				return;
-			}
-		}
-		int port = RouterService.getPort();
-		try {
-			_socket = new DatagramSocket(port);
-			//_socket.setSoTimeout(SOCKET_TIMEOUT);
-		} catch(SocketException e) {
-			e.printStackTrace();
-			return;
-		}		
-		
 		MessageRouter router = RouterService.getMessageRouter();
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 
-		while(port == RouterService.getPort()) {
-			try {
-                DatagramPacket datagram = 
-                    new DatagramPacket(datagramBytes, BUFFER_SIZE);
-				_socket.receive(datagram);
-				_isGUESSCapable = true;
-				byte[] data = datagram.getData();
-				int length = datagram.getLength();
-				try {
-					// we do things the old way temporarily
-					InputStream in = new ByteArrayInputStream(data);
-					Message message = Message.read(in);		
-					if(message == null) continue;
-                    if (message instanceof QueryRequest)
-                        sendAcknowledgement(datagram, message.getGUID());
-					router.handleUDPMessage(message, datagram);					
-				} catch(BadPacketException e) {
-					continue;
-				}
-			} catch(InterruptedIOException e) {
-				continue;
-			} catch(IOException e) {
-				continue;
-			} 
-			//catch(Exception e) {
-			//continue;
-			//}
-		}
-		_socket.close();
+        while (true) {
+            // prepare to receive
+            DatagramPacket datagram = new DatagramPacket(datagramBytes, 
+                                                         BUFFER_SIZE);
+
+            // when you first can, try to recieve a packet....
+            // *----------------------------
+            synchronized (_receiveLock) {
+                if (_socket == null) {
+                    try {
+                        _receiveLock.wait();
+                    }
+                    catch (InterruptedException ignored) {
+                        continue;
+                    }
+                }
+                try {
+                    _socket.receive(datagram);
+                } 
+                catch(InterruptedIOException e) {
+                    continue;
+                } 
+                catch(IOException e) {
+                    continue;
+                } 
+            }
+            // ----------------------------*
+
+            // process packet....
+            // *----------------------------
+            _isGUESSCapable = true;
+            byte[] data = datagram.getData();
+            int length = datagram.getLength();
+            try {
+                // we do things the old way temporarily
+                InputStream in = new ByteArrayInputStream(data);
+                Message message = Message.read(in);		
+                if(message == null) continue;
+                if (message instanceof QueryRequest)
+                    sendAcknowledgement(datagram, message.getGUID());
+                router.handleUDPMessage(message, datagram);
+            }
+            catch (IOException e) {
+                continue;
+            }
+            catch (BadPacketException e) {
+                continue;
+            }
+            // ----------------------------*
+        }
 	}
 
 	/**
@@ -195,15 +252,13 @@ public final class UDPService implements Runnable {
 
 	/**
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
+     * This method should not be called if the client is not GUESS enabled.
      *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the <tt>port</tt> to send to
 	 */
     public synchronized void send(Message msg, InetAddress ip, int port) {
-		if(_socket == null) {
-			throw new NullPointerException("socket null");
-		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			msg.write(baos);
@@ -214,13 +269,17 @@ public final class UDPService implements Runnable {
 		}
 
 		byte[] data = baos.toByteArray();
-		DatagramPacket dg = new DatagramPacket(data, data.length, ip, port); 
-		try {
-            _socket.send(dg);
-		} catch(IOException e) {
-			e.printStackTrace();
-			// not sure what to do here -- try again??
-		}
+		DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
+        synchronized (_sendLock) {
+            if(_socket == null) // just drop it, don't wait - FOR NOW.  when we
+                                // thread this, we will wait...
+                return;
+            try {
+                _socket.send(dg);
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	/**
