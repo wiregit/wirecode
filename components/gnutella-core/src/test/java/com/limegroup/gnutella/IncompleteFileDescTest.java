@@ -72,7 +72,11 @@ public class IncompleteFileDescTest extends BaseTestCase {
     
     public void testisRangeSatisfiable() throws Exception {
         // no ranges.
-        assertFalse( ifd.isRangeSatisfiable(0, 0) );
+        
+        
+        
+        
+           assertFalse( ifd.isRangeSatisfiable(0, 0) );   
         assertFalse( ifd.isRangeSatisfiable(0, 150) );
         
         // add a range.
