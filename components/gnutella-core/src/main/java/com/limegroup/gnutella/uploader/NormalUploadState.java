@@ -180,9 +180,9 @@ public final class NormalUploadState implements HTTPMessage {
             int c = -1;
             // request the bytes from the throttle
             // BLOCKING (only if we need to throttle)
-            THROTTLE.request(BLOCK_SIZE);
+            int allowed = THROTTLE.request(BLOCK_SIZE);
             int burstSent=0;            
-            c = _fis.read(buf);
+            c = _fis.read(buf, 0, allowed);
             if (c == -1)
                 return;
             //dont upload more than asked
