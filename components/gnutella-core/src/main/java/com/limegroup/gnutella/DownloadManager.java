@@ -254,6 +254,12 @@ public class DownloadManager implements BandwidthTracker {
             return false;
         } catch (ClassNotFoundException e) {
             return false;
+        } catch(ArrayStoreException e) {
+            file.delete();
+            MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
+        } catch(IndexOutOfBoundsException e) {
+            file.delete();
+            MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
         }
         
         //Remove entries that are too old or no longer existent.  This is done
