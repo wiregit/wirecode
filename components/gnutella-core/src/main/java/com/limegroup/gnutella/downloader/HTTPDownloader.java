@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
  * </pre>
  */
 public class HTTPDownloader {
-
+    private boolean _isPush;
 	private int _index;
 	private String _filename; 
 	private byte[] _guid;
@@ -61,6 +61,7 @@ public class HTTPDownloader {
                           File incompleteFile) {
         //Dirty secret: this is implemented with the push constructor!
         this(null, rfd, incompleteFile);
+        _isPush=false;
 	}	
 
 	/**
@@ -79,6 +80,7 @@ public class HTTPDownloader {
 	public HTTPDownloader(Socket socket,
                           RemoteFileDesc rfd,
                           File incompleteFile) {
+        _isPush=true;
         _socket=socket;
         _incompleteFile=incompleteFile;
 		_filename = rfd.getFileName();
@@ -100,23 +102,39 @@ public class HTTPDownloader {
     }
 
     /** 
+     * Initializes this without timeout; same as connect(0).
+     * @see connect(int)
+     */
+    public void connect() throws IOException {
+        connect(0);
+    }
+
+    /** 
      * Initializes this by connecting to the remote host (in the case of a
      * normal client-side download), sending a GET request, and reading all
-     * headers.  Blocking.  This MUST be uninitialized, i.e., connect may
-     * not be called more than once..
-     * 
+     * headers.  Blocks for up to timeout milliseconds trying to connect, unless
+     * timeout is zero, in which case there is no timeout.  This MUST be
+     * uninitialized, i.e., connect may not be called more than once.
+     *
+     * @param timeout the timeout to use for connecting, in milliseconds,
+     *  or zero if no timeout
      * @exception TryAgainLaterException the host is busy
      * @exception FileNotFoundException the host doesn't recognize the file
      * @exception NotSharingException the host isn't sharing files
-     * @exception IOException couldn't contact server, or miscellaneous error 
+     * @exception IOException couldn't contact server in time, or miscellaneous 
+     *  error 
      */
-	public void connect() throws IOException {        
+	public void connect(int timeout) throws IOException {        
         //Connect, if not already done.  Ignore 
         //The try-catch below is a work-around for JDK bug 4091706.
         InputStream istream=null;
         try {            
-            if (_socket==null) 
-                _socket=new Socket(_host, _port);
+            if (_socket==null) {
+                if (timeout==0)  //minor optimization
+                    _socket=new Socket(_host, _port);
+                else
+                    _socket=(new SocketOpener(_host, _port)).connect(timeout);
+            }
             istream=_socket.getInputStream(); 
         } catch (Exception e) {
             throw new IOException();
@@ -177,7 +195,8 @@ public class HTTPDownloader {
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 	public int getPort() {return _port;}
-
+    /** Returns true iff this is a push download. */
+    public boolean isPush() {return _isPush;}
 	
 
 
