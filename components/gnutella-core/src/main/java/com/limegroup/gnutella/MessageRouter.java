@@ -57,6 +57,11 @@ public abstract class MessageRouter {
     private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
 
     /**
+     * The maximum number of bypassed results to remember per query.
+     */
+    private final int MAX_BYPASSED_RESULTS = 150;
+
+    /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
@@ -91,6 +96,12 @@ public abstract class MessageRouter {
      * TimedGUID->QueryResponseBundle.
      */
     private final Map _outOfBandReplies = new Hashtable();
+
+    /**
+     * Keeps track of potential sources of content.  Comprised of Sets of GUESS
+     * Endpoints.  Kept tidy when searches/downloads are killed.
+     */
+    private final Map _bypassedResults = new HashMap();
 
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
@@ -191,6 +202,51 @@ public abstract class MessageRouter {
                                10 * CLEAR_TIME);
     }
 
+    /** Call this to inform us that a query has been killed by a user or
+     *  whatever.  Useful for purging unneeded info.<br>
+     *  Callers of this should make sure that they have purged the guid from
+     *  their tables.
+     *  @throws IllegalArgumentException if the guid is null
+     */
+    public void queryKilled(GUID guid) throws IllegalArgumentException {
+        if (guid == null)
+            throw new IllegalArgumentException("Input GUID is null!");
+        synchronized (_bypassedResults) {
+        if (!RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
+            _bypassedResults.remove(guid);
+        }
+    }
+
+    /** Call this to inform us that a download is finished or whatever.  Useful
+     *  for purging unneeded info.<br>
+     *  If the caller is a Downloader, please be sure to clear yourself from the
+     *  active and waiting lists in DownloadManager.
+     *  @throws IllegalArgumentException if the guid is null
+     */
+    public void downloadFinished(GUID guid) throws IllegalArgumentException {
+        if (guid == null)
+            throw new IllegalArgumentException("Input GUID is null!");
+        synchronized (_bypassedResults) {
+        if (!_callback.isQueryAlive(guid) && 
+            !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
+            _bypassedResults.remove(guid);
+        }
+    }
+    
+    /** @returns a Set with GUESSEndpoints that had matches for the
+     *  original query guid.  may be empty.
+     *  @param guid the guid of the query you want endpoints for.
+     */
+    public Set getGuessLocs(GUID guid) {
+        Set clone = new HashSet();
+        synchronized (_bypassedResults) {
+            Set eps = (Set) _bypassedResults.get(guid);
+            if (eps != null)
+                clone.addAll(eps);
+        }
+        return clone;
+    }
+    
     public String getPingRouteTableDump() {
         return _pingRouteTable.toString();
     }
@@ -714,7 +770,7 @@ public abstract class MessageRouter {
         if (reply.getQueryKey() != null) {
             // this is a PingReply in reply to my QueryKey Request - 
             //consume the Pong and return, don't process as usual....
-            UNICASTER.handleQueryKeyPong(reply);
+            OnDemandUnicaster.handleQueryKeyPong(reply);
             return;
         }
 
@@ -874,11 +930,33 @@ public abstract class MessageRouter {
             RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
 
             // see if we need more results for this query....
-            // TODO: remember this location for a future, 'find more sources'
+            // if not, remember this location for a future, 'find more sources'
             // targeted GUESS query.
             if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-            if (RECORD_STATS)
-                OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+                if (RECORD_STATS)
+                    OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+
+                DownloadManager dManager = RouterService.getDownloadManager();
+                // only store result if it is being shown to the user or if a
+                // file with the same guid is being downloaded
+                if (!_callback.isQueryAlive(qGUID) && 
+                    !dManager.isGuidForQueryDownloading(qGUID))
+                    return;
+
+                GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
+                                                     datagram.getPort());
+                synchronized (_bypassedResults) {
+                    // this is a quick critical section for _bypassedResults
+                    // AND the set within it
+                    Set eps = (Set) _bypassedResults.get(qGUID);
+                    if (eps == null) {
+                        eps = new HashSet();
+                        _bypassedResults.put(qGUID, eps);
+                    }
+                    if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
+                        eps.add(ep);
+                }
+
                 return;
             }
             

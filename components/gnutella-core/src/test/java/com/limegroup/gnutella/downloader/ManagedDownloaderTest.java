@@ -86,7 +86,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
 		ManagedDownloader md = 
 			new ManagedDownloader(new RemoteFileDesc[]{rf1}, 
-								  new IncompleteFileManager());
+								  new IncompleteFileManager(), null);
 
 		Method m = PrivilegedAccessor.getMethod(ManagedDownloader.class, "removeBest",
 												new Class[]{List.class});
@@ -204,7 +204,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 
-			new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm);
+            new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm, null);
         downloader.initialize(manager, fileman, callback, false);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
@@ -251,7 +251,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             downloader=
 				new ManagedDownloader(
 						new RemoteFileDesc[] {newRFD("another testfile.txt")},
-                new IncompleteFileManager());
+                        new IncompleteFileManager(), null);
             downloader.initialize(new DownloadManagerStub(), 
                                   new FileManagerStub(),
                                   new ActivityCallbackStub(), false);
@@ -308,7 +308,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
-            super(files, new IncompleteFileManager());
+            super(files, new IncompleteFileManager(), null);
         }
 
         public QueryRequest newRequery2() throws CantResumeException {

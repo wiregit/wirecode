@@ -181,6 +181,20 @@ public class DownloadManager implements BandwidthTracker {
         return waiting.size();
     }
 
+    public synchronized boolean isGuidForQueryDownloading(GUID guid) {
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {
+            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            if ((dGUID != null) && (dGUID.equals(guid)))
+                return true;
+        }
+        for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
+            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            if ((dGUID != null) && (dGUID.equals(guid)))
+                return true;
+        }
+        return false;
+    }
+
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
@@ -290,11 +304,15 @@ public class DownloadManager implements BandwidthTracker {
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
      *
+     * @param queryGUID the guid of the query that resulted in the RFDs being
+     * downloaded.
+     *
      *     @modifies this, disk 
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
                                             List alts, 
-                                            boolean overwrite) 
+                                            boolean overwrite,
+                                            GUID queryGUID) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
         //Check if file would conflict with any other downloads in progress.
@@ -326,7 +344,7 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader =
-			new ManagedDownloader(files, incompleteFileManager);
+            new ManagedDownloader(files, incompleteFileManager, queryGUID);
 
         startDownload(downloader, false);
         
@@ -501,7 +519,7 @@ public class DownloadManager implements BandwidthTracker {
         incompleteFileManager.purge(false);
 
         RequeryDownloader downloader=
-            new RequeryDownloader(incompleteFileManager,add);
+            new RequeryDownloader(incompleteFileManager, add, new GUID(guid));
 
         startDownload(downloader, false);
         return downloader;        
@@ -756,6 +774,8 @@ public class DownloadManager implements BandwidthTracker {
         waiting.remove(downloader);
         querySentMDs.remove(downloader);
         downloader.finish();
+        if (downloader.getQueryGUID() != null)
+            router.downloadFinished(downloader.getQueryGUID());
         notify();
         callback.removeDownload(downloader);
         //Save this' state to disk for crash recovery.  Note that a downloader

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.guess.*;
 
 import java.io.*;
 import java.net.*;
@@ -472,14 +473,23 @@ public class ManagedDownloader implements Downloader, Serializable {
     static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
     /**
+     * The GUID of the original query.  may be null;
+     */
+    private final GUID _originalQueryGUID;
+
+
+    /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
      * any other methods until that point.
      * @param files the list of files to get.  This stops after ANY of the
      *  files is downloaded.
      * @param ifc the repository of incomplete files for resuming
+     * @param originalQueryGUID the guid of the original query.  sometimes
+     * useful for WAITING_FOR_USER state.  can be null.
      */
-    public ManagedDownloader(RemoteFileDesc[] files,IncompleteFileManager ifc) {
+    public ManagedDownloader(RemoteFileDesc[] files, IncompleteFileManager ifc,
+                             GUID originalQueryGUID) {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
@@ -488,6 +498,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
         this.allFiles = files;
         this.incompleteFileManager = ifc;
+        this._originalQueryGUID = originalQueryGUID;
     }
 
     /** 
@@ -1354,6 +1365,33 @@ public class ManagedDownloader implements Downloader, Serializable {
             commonOutFile.clearManagedDownloader();
     }
 
+    /** @return either the URN of the file that was downloaded the most so far
+     *  or the URN of the bucket with the most sources.
+     */
+    private URN getBestURN() {
+        URN retURN = null;
+
+        // Iterate through all available URNs and attempt to get one with the
+        // biggest size
+        List urns = buckets.getURNs();
+        int currBigSize = 0;
+        Iterator iter = urns.iterator();
+        while (iter.hasNext()) {
+            URN currURN = (URN) iter.next();
+            File incompleteFile = incompleteFileManager.getFileForUrn(currURN);
+            if (incompleteFile == null) continue;
+            VerifyingFile vF =incompleteFileManager.getEntry(incompleteFile);
+            if (vF == null) continue;
+            if ((retURN == null) || (vF.getBlockSize() > currBigSize)) {
+                currBigSize = vF.getBlockSize();
+                retURN = currURN;
+            }
+        }
+
+        // if we haven't downloaded anything, just get the most redundant URN
+        if (retURN == null) retURN = buckets.getBestURN();
+        return retURN;
+    }
 
     /** 
      * Actually does the download, finding duplicate files, trying all
@@ -1374,6 +1412,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         // the amount of time i've spent waiting for results or any other
         // special state as dictated by subclasses (getFailedState)
         long timeSpentWaiting = 0;
+        // only query GUESS sources once
+        boolean triedLocatingSources = false;
 
         //While not success and still busy...
         while (true) {
@@ -1434,6 +1474,29 @@ public class ManagedDownloader implements Downloader, Serializable {
                     manager.remove(this, false);
                     return;
                 }
+                
+                // try to do iterative guessing here
+                if ((_originalQueryGUID != null) && !triedLocatingSources) { 
+                    MessageRouter mr = RouterService.getMessageRouter();
+                    Set guessLocs = mr.getGuessLocs(_originalQueryGUID);
+                    
+                    if ((guessLocs != null) && !guessLocs.isEmpty()) {
+                        setState(ITERATIVE_GUESSING);
+                        triedLocatingSources = true;
+                        boolean areThereNewResults = false;
+                        URN bestURN = getBestURN();
+                        for (Iterator i = guessLocs.iterator();
+                             i.hasNext() && !areThereNewResults; ) {
+                            // send a guess query
+                            GUESSEndpoint ep = (GUESSEndpoint) i.next();
+                            OnDemandUnicaster.query(ep, bestURN);
+                            // wait a while for a result
+                            areThereNewResults = reqLock.lock(750);
+                        }
+                        if (areThereNewResults)
+                            continue;
+                    }
+                }
 
                 final long currTime = System.currentTimeMillis();
 
@@ -1473,6 +1536,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 } 
                 // 2.
                 else {
+                    
                     boolean areThereNewResults = false;
                     final long timeToWait = TIME_BETWEEN_REQUERIES - 
                         (System.currentTimeMillis() - timeQuerySent);
@@ -3264,6 +3328,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Accessors that delegate to dloader. Synchronized because dloader can
      * change.
      *************************************************************************/
+
+    /** @return the GUID of the query that spawned this downloader.  may be null.
+     */
+    public GUID getQueryGUID() {
+        return _originalQueryGUID;
+    }
 
     public synchronized int getState() {
         return state;

@@ -223,6 +223,13 @@ class RemoteFileDescGrouper implements Serializable {
         return 0;
     }
 
+    synchronized List getURNs() {
+        List retList = new ArrayList();
+        for (int i = 0; i < sha1s.length; i++)
+            retList.add(sha1s[i]);
+        return retList;
+    }
+
     synchronized URN getURNForBucket(int n) {
         if (n <0 || n>=buckets.size())
             throw new IllegalArgumentException("index: " + n + 
@@ -230,6 +237,20 @@ class RemoteFileDescGrouper implements Serializable {
         return sha1s[n];
     }
 
+    /** Returns the URN for the bucket with the most entries.
+     */
+    synchronized URN getBestURN() {
+        int index = 0;
+        final int numBuckets = numBuckets();
+        for (int i = 0, maxNum = 0; i < numBuckets; i++) {
+            List currBucket = (List)buckets.get(i);
+            if (currBucket.size() > maxNum) {
+                maxNum = currBucket.size();
+                index = i;
+            }
+        }
+        return sha1s[index];
+    }
 
 
     /**

@@ -24,7 +24,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     //TODO: test other parts of ping!
 
     public void testQueryKeyPing() throws Exception {
-        PingRequest pr = new PingRequest();
+        PingRequest pr = PingRequest.createQueryKeyRequest();
         assertFalse(pr.isQueryKeyRequest()); // hasn't been hopped yet
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);

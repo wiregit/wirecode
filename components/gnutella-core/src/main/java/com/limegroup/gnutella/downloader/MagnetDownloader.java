@@ -81,7 +81,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             String [] defaultURLs) {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0],ifm );
+        super(new RemoteFileDesc[0], ifm, null);
 
         this._textQuery=textQuery;
         this._urn=urn;

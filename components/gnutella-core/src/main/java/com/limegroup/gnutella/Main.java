@@ -267,4 +267,9 @@ public class Main implements ActivityCallback, ErrorCallback {
     }
 
     public void indicateNewVersion() {}
+
+    public boolean isQueryAlive(GUID guid) {
+        return false;
+    }
+
 }

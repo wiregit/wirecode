@@ -309,7 +309,7 @@ public class ServerSideLeafGuessTest
 
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a QueryKey request....
-        send(new PingRequest(), localHost, PORT);
+        send(PingRequest.createQueryKeyRequest(), localHost, PORT);
 
         // we should get a QueryKey....
         Message m = null;
@@ -348,7 +348,7 @@ public class ServerSideLeafGuessTest
     public void testGoodURNQuery() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a QueryKey request....
-        send(new PingRequest(), localHost, PORT);
+        send(PingRequest.createQueryKeyRequest(), localHost, PORT);
 
         // we should get a QueryKey....
         Message m = null;
@@ -397,7 +397,7 @@ public class ServerSideLeafGuessTest
     public void testQueryWithNoHit() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
         // first send a QueryKey request....
-        send(new PingRequest(), localHost, PORT);
+        send(PingRequest.createQueryKeyRequest(), localHost, PORT);
 
         // we should get a QueryKey....
         Message m = null;

@@ -59,10 +59,14 @@ public class PingRequest extends Message {
         super((byte)0x0, ttl, (byte)length);
     }
 
+    public static PingRequest createQueryKeyRequest() {
+        return new PingRequest();
+    }
+
     /**
      * Creates a QueryKey Request ping with a new GUID and TTL of 1
      */
-    public PingRequest() {
+    private PingRequest() {
         this((byte)1);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

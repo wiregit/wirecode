@@ -41,8 +41,8 @@ public class RequeryDownloader extends ManagedDownloader
      *     @param add the keywords to requery with
      */
     public RequeryDownloader(IncompleteFileManager incompleteFileManager,
-                             AutoDownloadDetails add) {
-        super(new RemoteFileDesc[0], incompleteFileManager);
+                             AutoDownloadDetails add, GUID queryGUID) {
+        super(new RemoteFileDesc[0], incompleteFileManager, queryGUID);
         Assert.that(add != null, 
                     "Instantiated with a null AutoDownloadDetail!");
         _add = add;
