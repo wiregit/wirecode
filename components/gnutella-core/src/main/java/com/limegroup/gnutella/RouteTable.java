@@ -76,6 +76,8 @@ public final class RouteTable {
         private int bytesRouted;
         /** The number of replies already routed for this GUID. */
         private int repliesRouted;
+        /** The ttl associated with this RTE - meaningful only if > 0. */
+        private byte ttl = 0;
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
             this.handlerID = handlerID;
@@ -83,6 +85,9 @@ public final class RouteTable {
 			this.repliesRouted = 0;
         }
 		
+        public void setTTL(byte ttl) { this.ttl = ttl; }
+        public byte getTTL() { return ttl; }
+
 		/** Accessor for the number of results for this entry. */
 		public int getNumResults() { return repliesRouted; }
     }
@@ -172,6 +177,49 @@ public final class RouteTable {
         } else {
             return null;
         }
+    }
+
+    /** Optional operation - if you want to remember the TTL associated with a
+     *  counter, in order to allow for extendable execution, you can set the TTL
+     *  a message (guid).
+     *  @param ttl should be greater than 0.
+     *  @exception IllegalArgumentException thrown if !(ttl > 0), or if entry is
+     *  null or is not something I recognize.  So only put in what I dole out.
+     */
+    public synchronized void setTTL(ResultCounter entry, byte ttl) {
+        if (entry == null)
+            throw new IllegalArgumentException("Null entry!!");
+        if (!(entry instanceof RouteTableEntry))
+            throw new IllegalArgumentException("entry is not recognized.");
+        if (!(ttl > 0))
+            throw new IllegalArgumentException("Input TTL too small: " + ttl);
+
+        ((RouteTableEntry)entry).setTTL(ttl);
+    }
+
+
+    /** Synchronizes a TTL get test with a set test.
+     *  @param getTTL the ttl you want getTTL() to be in order to setTTL().
+     *  @param setTTL the ttl you want to setTTL() if getTTL() was correct.
+     *  @return true if the TTL was set as you desired.
+     *  @throws IllegalArgumentException if getTTL or setTTL is less than 1, or
+     *  if setTTL < getTTL
+     */
+    public synchronized boolean getAndSetTTL(byte[] guid, byte getTTL, 
+                                             byte setTTL) {
+        if ((getTTL < 1) || (setTTL <= getTTL))
+            throw new IllegalArgumentException("Bad ttl input (get/set): " +
+                                               getTTL + "/" + setTTL);
+
+        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.get(guid);
+        
+        if ((entry != null) && (entry.getTTL() == getTTL)) {
+                entry.setTTL(setTTL);
+                return true;
+        }
+        return false;
     }
 
 
