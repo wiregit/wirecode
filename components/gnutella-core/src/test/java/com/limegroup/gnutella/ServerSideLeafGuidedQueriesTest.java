@@ -65,7 +65,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     /**
      * The Ultrapeer connections.
      */
-    private static Connection ULTRAPEERS[] = new Connection[30];
+    private static Connection ULTRAPEERS[] = new Connection[29];
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -118,7 +118,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(1);
+		UltrapeerSettings.MAX_LEAVES.setValue(4);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
