@@ -20,7 +20,7 @@ public class Response {
     private final String name;
 
 	/** The meta variable is a string of meta information that
-	 *  will be added per response (as opposed to per QueryReply
+	 *  will be added per response (as opposed to per QueryReply)
 	 */
 	private String metadata;
 
@@ -263,11 +263,10 @@ public class Response {
 	 */
 	private static byte[] createExtBytes(Set urns) {
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			if(urns == null) {
 				return EMPTY_BYTE_ARRAY;
 			}
-
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			Iterator iter = urns.iterator();
 			while (iter.hasNext()) {
 				URN urn = (URN)iter.next();
@@ -333,6 +332,10 @@ public class Response {
         }
         String betweenNulls = new String(baos.toByteArray());
         if(betweenNulls==null || betweenNulls.equals("")) {
+			int avail = is.available();
+			if(avail < 16) {
+				throw new IOException("not enough room for the GUID");
+			}
             return new Response(index,size,name);
         } else {
 			// now handle between-the-nulls
@@ -481,10 +484,22 @@ public class Response {
             && r.getName().equals(getName());
     }
 
+	// TODO: this violates the contract of hashCode
     public int hashCode() {
         //Good enough for the moment
         return name.hashCode()+(int)size+(int)index;
     }
+
+	/**
+	 * Overrides Object.toString to print out a more informative message.
+	 */
+	public String toString() {
+		return "index:    "+index+"\r\n"+
+		       "size:     "+size+"\r\n"+
+		       "name:     "+name+"\r\n"+
+		       "metadata: "+metadata+"\r\n"+
+		       "urns:     "+urns;
+	}
 
     //Unit Test Code 
     //(Added when bytes stuff was added here 3/2/2001 by Sumeet Thadani)
