@@ -21,11 +21,19 @@ public class MessageReaderProxy implements MessageReader {
      * Creates a new <tt>MessageReaderProxy</tt> for the specified connection.
      * 
      * @param conn the <tt>Connection</tt> this proxy will read messages for
+     * @param handshaker the <tt>Handshaker</tt> that performed the handshaking
+     *  for this connection -- needed to obtain any residual message data left 
+     *  over from NIO handshakes
+     * @throws BadPacketException if any residual data from handshaking does 
+     *  not match any known message format
+     * @throws IOException if there is an IO error reading any residual data
+     *  left over from handshaking
      */
-    public MessageReaderProxy(Connection conn) {
+    public MessageReaderProxy(Connection conn, Handshaker handshaker) 
+        throws IOException {
         if(CommonUtils.isJava14OrLater() &&
            ConnectionSettings.USE_NIO.getValue()) {
-            DELEGATE = NIOMessageReader.createReader(conn);       
+            DELEGATE = NIOMessageReader.createReader(conn, handshaker);       
         } else {
             DELEGATE = BIOMessageReader.createReader(conn);
         }
@@ -53,13 +61,9 @@ public class MessageReaderProxy implements MessageReader {
         return DELEGATE.read(i);
     }
 
+    // inherit doc comment
     public void routeMessage(Message msg) {
         DELEGATE.routeMessage(msg);
-    }
-
-    // inherit doc comment
-    public void handleMessage(SelectionKey key) {
-        DELEGATE.handleMessage(key);
     }
 }
 
