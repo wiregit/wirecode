@@ -507,7 +507,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptStateLock=new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
-        invalidAlts = new FixedsizeForgetfulHashMap(100);        
+        invalidAlts = new FixedsizeForgetfulHashMap(100);
+        synchronized (this) {
+            buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
+            if(shouldInitAltLocs(deserialized)) {
+                initializeAlternateLocations();
+            }
+        }        
         this.dloaderManagerThread=new Thread("ManagedDownload") {
             public void run() {
                 try { 
@@ -1254,12 +1260,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // special state as dictated by subclasses (getFailedState)
         long timeSpentWaiting = 0;
 
-        synchronized (this) {
-            buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
-            if(shouldInitAltLocs(deserializedFromDisk)) {
-                initializeAlternateLocations();
-            }
-        }
         //While not success and still busy...
         while (true) {
             try {
