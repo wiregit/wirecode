@@ -29,6 +29,9 @@ public class DownloadManager {
     private Acceptor acceptor;
     /** Used to check if the file exists. */
     private FileManager fileManager;
+    /** The repository of incomplete files */
+    private IncompleteFileManager incompleteFileManager
+        =new IncompleteFileManager();
 
     /** The list of all ManagedDownloader's attempting to download.
      *  INVARIANT: active.size()<=slots() && active contains no duplicates */
@@ -167,7 +170,8 @@ public class DownloadManager {
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
-        ManagedDownloader downloader=new ManagedDownloader(this, files);
+        ManagedDownloader downloader=new ManagedDownloader(
+            this, files, incompleteFileManager);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.

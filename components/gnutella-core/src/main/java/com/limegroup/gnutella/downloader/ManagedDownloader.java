@@ -45,7 +45,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
     /** The max number of downloads to try in parallel. */
-    private static final int PARALLEL_DOWNLOAD=2;
+    private static final int PARALLEL_DOWNLOAD=4;
     /** The time to wait trying to establish each connection, in milliseconds.*/
     private static final int CONNECT_TIME=8000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
@@ -95,10 +95,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      *      for changes in state.
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
+     *     @param incompleteFileManager the repository of incomplete files for
+     *      resuming
      */
-    public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
+    public ManagedDownloader(DownloadManager manager,
+                             RemoteFileDesc[] files,
+                             IncompleteFileManager incompleteFileManager) {
         this.allFiles=files;
-        incompleteFileManager=new IncompleteFileManager();
+        this.incompleteFileManager=incompleteFileManager;
         initialize(manager);
     }
 
@@ -419,8 +423,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         setState(CONNECTING);
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
-        List /* of Interval */ needed=new ArrayList(); 
-        needed.add(new Interval(0, fileSize));
+        List /* of Interval */ needed=new ArrayList(); {
+            Iterator iter=incompleteFileManager.
+                 getFreeBlocks(incompleteFile, fileSize);
+            while (iter.hasNext()) 
+                needed.add((Interval)iter.next());
+        }
+
         //The locations that were busy, for trying later.
         List /* of RemoteFileDesc2 */ busy=new LinkedList();
         //The downloaders that finished, either normally or abnormally.
@@ -600,25 +609,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         } finally {
             System.out.println("    WORKER: terminating from "+downloader);
             //In order to reuse this location again, we need to know the
-            //RemoteFileDesc.  We can nearly recreate this just from the
-            //HTTPDownloader, substituting the measured speed for the estimated
-            //speed.  TODO: use measured speed.  Is file size right?           
+            //RemoteFileDesc.  TODO: use measured speed.  Is file size right?           
             int speed=SpeedConstants.CABLE_SPEED_INT;
-            int fileSize=downloader.getInitialReadingPoint()+downloader.getAmountToRead();
-            RemoteFileDesc rfd=new RemoteFileDesc2(
-                new RemoteFileDesc(downloader.getInetAddress().getHostAddress(),
-                                   downloader.getPort(),
-                                   downloader.getIndex(),
-                                   downloader.getFileName(),
-                                   fileSize,
-                                   downloader.getGUID(),
-                                   speed,
-                                   downloader.chatEnabled()),
-                false);
+            RemoteFileDesc rfd=downloader.getRemoteFileDesc();
             synchronized (this) {
                 dloaders.remove(downloader);
                 terminated.add(downloader);
                 files.add(rfd);
+                incompleteFileManager.addBlock(
+                    incompleteFileManager.getFile(rfd),
+                    downloader.getInitialReadingPoint(),
+                    downloader.getInitialReadingPoint()+downloader.getAmountRead());
                 this.notifyAll();
             }
         }
@@ -754,10 +755,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getAmountRead() {
-//          if (dloader!=null)
-//              return dloader.getAmountRead();
-//          else
-        int sum=0;
+        RemoteFileDesc rfd=allFiles[0];   //TODO:this assumes all the same
+        File incompleteFile=incompleteFileManager.getFile(rfd);
+        //Add up all stuff already on disk...
+        int sum=incompleteFileManager.getBlockSize(incompleteFile);
+        //...and all downloads in progress.
         for (Iterator iter=dloaders.iterator(); iter.hasNext(); )
             sum+=((HTTPDownloader)iter.next()).getAmountRead();
         return sum;
@@ -781,29 +783,5 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public synchronized int getRetriesWaiting() {
         return files.size();
-    }
-}
-
-
-/** The interval from low to high, inclusive on both ends. */
-class Interval {
-    /** INVARIANT: low<=high */
-    int low;
-    int high;
-    /** @requires low<=high */
-    Interval(int low, int high) {
-        this.low=low;
-        this.high=high;
-    }
-    Interval(int singleton) {
-        this.low=singleton;
-        this.high=singleton;
-    }
-
-    public String toString() {
-        if (low==high)
-            return String.valueOf(low);
-        else
-            return String.valueOf(low)+"-"+String.valueOf(high);
     }
 }
