@@ -11,12 +11,19 @@ import com.limegroup.gnutella.messages.*;
  * everything is immutable including the contents of the set.
  * 
  * the network format this is serialized to is:
- * byte 0 : how many push proxies we have
+ * byte 0 : 
+ *    - bits 0-2 how many push proxies we have (so max is 7)
+ *    - bits 3-7 possible future features/flags
  * bytes 1-16 : the guid
  * followed by 6 bytes per PushProxy
  */
 public class PushEndpoint {
 
+	public static final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
+	public static final int PROXY_SIZE=6; //ip:port
+	
+	private static final int SIZE_MASK=0x7;
+	private static final int FEATURES_MASK=0xF8;
 	/**
 	 * the client guid of the endpoint
 	 */
@@ -27,6 +34,11 @@ public class PushEndpoint {
 	 */
 	private final Set _proxies;
 	
+	/**
+	 * how big this PE is/will be in bytes.
+	 */
+	private final int _size;
+	
 
 	/**
 	 * 
@@ -36,6 +48,7 @@ public class PushEndpoint {
 	public PushEndpoint(byte [] guid, Set proxies) {
 		_clientGUID=guid;
 		_proxies = Collections.unmodifiableSet(proxies);
+		_size = HEADER_SIZE+_proxies.size()*PROXY_SIZE;
 	}
 	
 	/**
@@ -50,7 +63,7 @@ public class PushEndpoint {
 	 * @return a byte-packed representation of this
 	 */
 	public byte [] toBytes() {
-		byte [] ret = new byte[17+_proxies.size()*6];
+		byte [] ret = new byte[_size];
 		toBytes(ret,0);
 		return ret;
 	}
@@ -62,7 +75,7 @@ public class PushEndpoint {
 	 */
 	public void toBytes(byte [] where, int offset) {
 		
-		if (where.length-offset < 17*_proxies.size()*6)
+		if (where.length-offset < _size)
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
@@ -79,8 +92,8 @@ public class PushEndpoint {
 			byte [] addr = ppi.getPushProxyAddress().getAddress();
 			short port = (short)ppi.getPushProxyPort();
 			
-			System.arraycopy(addr,0,where,offset+17+i*6,4);
-			ByteOrder.short2leb(port,where,offset+17+i*6+4);
+			System.arraycopy(addr,0,where,offset+HEADER_SIZE+i*PROXY_SIZE,4);
+			ByteOrder.short2leb(port,where,offset+HEADER_SIZE+i*PROXY_SIZE+4);
 			i++;
 		}
 	}
@@ -105,9 +118,9 @@ public class PushEndpoint {
 		Set proxies = new HashSet(); //PushProxyContainers are good with HashSets
 		
 		//get the number of push proxies
-		int number = data[offset];
+		int number = data[offset] & SIZE_MASK;
 		
-		if (data.length -offset < 17+number*6)
+		if (data.length -offset < HEADER_SIZE+number*PROXY_SIZE)
 			throw new BadPacketException("not a valid PushEndpoint");
 		
 		//get the guid
@@ -115,7 +128,7 @@ public class PushEndpoint {
 		
 		
 		for (int i=0;i<number;i++) {
-			System.arraycopy(data, offset+17+i*6,tmp,0,6);
+			System.arraycopy(data, offset+HEADER_SIZE+i*PROXY_SIZE,tmp,0,6);
 			proxies.add(new QueryReply.PushProxyContainer(tmp));
 		}
 		
@@ -128,5 +141,9 @@ public class PushEndpoint {
 	
 	public Set getProxies() {
 		return _proxies;
+	}
+	
+	public int getSize() {
+		return _size;
 	}
 }

@@ -92,6 +92,11 @@ public class HeadPong extends VendorMessage {
 	private Set _altLocs;
 	
 	/**
+	 * the firewalled altlocs that were sent, if any
+	 */
+	private Set _pushLocs;
+	
+	/**
 	 * the queue status, can be negative
 	 */
 	private int _queueStatus;
@@ -179,6 +184,15 @@ public class HeadPong extends VendorMessage {
 			dais.readFully(altlocs);
 			_altLocs = new HashSet();
 			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
+		}
+		
+		//parse any included firewalled altlocs
+		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) {
+			int size = dais.readShort();
+			byte [] altlocs = new byte[size];
+			dais.readFully(altlocs);
+			_pushLocs = new HashSet();
+			_pushLocs.addAll(NetworkUtils.unpackPushEPs(altlocs));
 		}
 		
 		}catch(IOException oops) {
@@ -344,10 +358,40 @@ public class HeadPong extends VendorMessage {
 	
 	/**
 	 * 
-	 * @return any alternate locations this alternate location returned.
+	 * @return set of <tt>Endpoint</tt> 
+	 * containing any alternate locations this alternate location returned.
 	 */
 	public Set getAltLocs() {
 		return _altLocs;
+	}
+	
+	/**
+	 * 
+	 * @return set of <tt>PushEndpoint</tt>
+	 * containing any firewalled locations this alternate location returned.
+	 */
+	public Set getPushLocs() {
+		return _pushLocs;
+	}
+	
+	/**
+	 * @return all altlocs carried in the pong as 
+	 * set of <tt>RemoteFileDesc</tt>
+	 */
+	public Set getAllLocsRFD(RemoteFileDesc original){
+		Set ret = new HashSet();
+		
+		for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
+			Endpoint current = (Endpoint)iter.next();
+			ret.add(new RemoteFileDesc(original,current));
+		}
+		
+		for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
+			PushEndpoint current = (PushEndpoint)iter.next();
+			ret.add(new RemoteFileDesc(original,current));
+		}
+		
+		return ret;
 	}
 	
 	/**
