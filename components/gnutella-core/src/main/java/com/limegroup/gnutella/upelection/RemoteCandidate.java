@@ -1,22 +1,19 @@
 /*
- * an ExtendedEndpoint which keeps a ref to the Ultrapeer Connection which advertised it.
+ * This class keeps a ref to the Ultrapeer Connection which advertised it.
  * Decorator pattern to allow parsing.  When comparing, make sure you use the provided Comparator.
  */
 package com.limegroup.gnutella.upelection;
 
 
 
-import java.io.IOException;
-import java.io.Writer;
+
 import java.net.InetAddress;
-import java.text.ParseException;
+
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 
-import com.sun.java.util.collections.Comparable;
-import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Comparator;
 
 import java.net.UnknownHostException;

@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.upelection.BestCandidates;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
@@ -334,7 +335,15 @@ public class ConnectionManager {
      */
     public synchronized void remove(ManagedConnection mc) {
 		// removal may be disabled for tests
-		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
+		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return; 
+		
+		//if we are not disconnecting, we may need to update the 
+		//list of best candidates
+		if (_disconnectTime==0)
+			BestCandidates.routeFailed(mc);
+		else
+			BestCandidates.purge();
+		
         removeInternal(mc);
 
         adjustConnectionFetchers();

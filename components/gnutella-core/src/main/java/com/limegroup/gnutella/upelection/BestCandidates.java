@@ -6,7 +6,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.IpPort;
 import com.sun.java.util.collections.*;
 
-import java.net.*;
+
 /**
  * contains the current list of best candidates.  Singleton and thread-safe.
  * Although the leaf info is serializable, there is no need for this class
@@ -14,9 +14,8 @@ import java.net.*;
  * The actual network de/serialization happens in BestCandidatesVendorMessage
  * 
  * A leaf can be present more than once if it is connected to more than one
- * advertising ultrapeer.  In that case the getBest() behavior is undefined; 
- * it will return the best candidate nevertheless but will not take the distance
- * in consideration.  (It actually depends on the implementation of TreeSet.addAll)
+ * advertising ultrapeer.  In that case the getBest() method will return the closest
+ * route to the leaf.
  * 
  * Locking: obtain instance.
  */
@@ -27,6 +26,15 @@ public class BestCandidates {
 	//index 2 the best leaf at ttl 2 excluding ttl 1 and our leaf
 	Candidate [] _best;
 	
+	/**
+	 * a comparator to compare the leaves for potential candidates
+	 */
+	static LeafComparator _leafComparator = new LeafComparator();
+	
+	/**
+	 * a comparator to use on already selected candidates.
+	 */
+	static CandidatePriorityComparator _candidateComparator = new CandidatePriorityComparator();
 	
 	private static BestCandidates instance = new BestCandidates();
 	
@@ -63,9 +71,6 @@ public class BestCandidates {
 	 * node.  Null values means we don't have values for that ttl.
 	 */
 	public static void update(Candidate [] newCandidates) {
-		
-		//always purge any candidates whose advertisers have died.
-		purgeDead();
 			
 		Comparator comp = new CandidatePriorityComparator();
 		
@@ -129,6 +134,26 @@ public class BestCandidates {
 	}
 	
 	/**
+	 * cleans up the table of the candidates whose route
+	 * has failed.
+	 * @param ip an <tt>IpPort</tt> that is no longer up.
+	 */
+	public static void routeFailed(IpPort ip) {
+		
+		//this method will be called every time a connection
+		//is removed from the ConnectionManager, so the first
+		//check needs to be unlocked.
+		
+		for (int i=0;i<3;i++)
+			if (instance._best[i].getAdvertiser().isSame(ip)) 
+				synchronized(instance) {
+					instance._best[i]=electBest(i);
+				}
+				
+		propagateChange();
+			
+	}
+	/**
 	 * cleans up candidates from the table if we've lost the
 	 * connection to their advertisers.
 	 */
@@ -140,4 +165,92 @@ public class BestCandidates {
 					instance._best[i]=null;
 		}
 	}
+	
+	private static void propagateChange(){} //do something here...
+	
+	/**
+	 * goes through our currnetly known candidates and selects
+	 * the best one at given ttl.
+	 * LOCKING: make sure you hold instance.
+	 * @param ttl the ttl of the candidate that needs election. 
+	 * valid values are 0, 1 and 2
+	 * @return the best candidate amongst the advertised connections.
+	 */
+	private static Candidate electBest(int ttl) {
+		
+		Candidate best = null;
+		
+		//if we are electing at ttl 0, cycle through the leaves.
+		if (ttl == 0)
+			for (Iterator iter = RouterService.getConnectionManager().
+				getInitializedClientConnections().iterator();iter.hasNext();) {
+			
+				ManagedConnection current = (ManagedConnection)iter.next();
+				if (current.isGoodLeaf() && 
+						current.remoteHostSupportsBestCandidates() >=1 &&
+						current.isUDPCapable() && //unsolicited udp
+						current.isTCPCapable() ) //incoming tcp
+						//add more criteria here
+					{
+						//filter out any old windowses
+						if (current.getOS().startsWith("windows") && 
+							current.getOS().indexOf("xp") ==-1 &&
+							current.getOS().indexOf("2000") ==-1)
+							continue;
+						
+						//and mac os 9
+						if (current.getOS().startsWith("mac os") &&
+								!current.getOS().endsWith("x"))
+							continue;
+						
+						//also, jre 1.4.0 is really really bad
+						if (current.getJVM().indexOf("1.4.0") != -1)
+							continue;
+						
+						//filter people on slow connections
+						if (current.getBandwidth() < 16)
+							continue;
+					
+						//get the best connection.	
+						if (_leafComparator.compare(current,best) > 0)
+								best = current;
+						
+					}
+			}
+		
+		else 
+			//we are electing amongst the candidates our connections 
+			//advertised - cycle through ultrapeers.
+			
+			for (Iterator iter = RouterService.getConnectionManager().
+					getInitializedConnections().iterator();iter.hasNext();) {
+				
+				Connection current = (Connection)iter.next();
+				
+				Candidate [] candidates = current.getCandidates();
+				
+				if (candidates == null)
+					continue;
+				
+				if (_candidateComparator.compare(candidates[ttl-1],best) >0)
+					best = candidates[ttl-1];
+			}
+		
+		return best;
+	}
+	
+	/**
+	 * purges the table of best candidates.
+	 * useful when disconnecting.
+	 */
+	public static void purge() {
+		if (instance == null)
+			instance = new BestCandidates();
+		else
+			synchronized(instance) {
+				instance._best = new Candidate[3];
+			}
+	}
+	
+	
 }

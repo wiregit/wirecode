@@ -1473,12 +1473,22 @@ public class Connection implements Candidate {
         return -1;
     }
     
-    /** @return -1 if UDP crawling is supported, else the version number 
+    /** @return -1 if UDP crawling isn't supported, else the version number 
      *  supported.
      */
     public int remoteHostSupportsUDPCrawling() {
     	if (_messagesSupported != null)
     		return _messagesSupported.supportsUDPCrawling();
+    	return -1;
+    }
+    
+    /**
+     * @return -1 if Best Candidates isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsBestCandidates() {
+    	if (_messagesSupported != null)
+    		return _messagesSupported.supportsBestCandidates();
     	return -1;
     }
     
@@ -2168,5 +2178,11 @@ public class Connection implements Candidate {
 	 */
 	public int getBandwidth() {
 		return _features !=null ? _features.getBandidth() : -1;
+	}
+	/**
+	 * @return Returns the candidates the remote host advertised.
+	 */
+	public Candidate [] getCandidates() {
+		return _candidates == null ? null : _candidates.getBestCandidates();
 	}
 }
