@@ -184,6 +184,10 @@ public class DownloadTest extends TestCase {
             tTwoAlternatesButOneWithNoSHA1();
             cleanup();
         }
+        if(args.length == 0 || args[0].equals("19")) {
+            tUpdateWhiteWithFailingFirstUploader();
+            cleanup();
+        }
     }
     
     
@@ -767,6 +771,31 @@ public class DownloadTest extends TestCase {
         check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
     }
 
+    private static void tUpdateWhiteWithFailingFirstUploader() {
+        debug("-Testing corruption of needed. \n");
+        final int RATE=500;
+        //The first uploader got a range of 0-100%. It will return busy, the
+        //needed could get corrupted becasue of this. The second downloader
+        //takes over, and it should get the whole file. If needed was corrupted
+        //the file will not go into complete state rather it will go to corrupt
+        //state
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.setBusy(true);
+        uploader2.setRate(RATE/4);//slower downloader - guarantee second spot
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        tGeneric(rfds);        
+        
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        debug("passed \n");
+    }
+
     private static void tGUI() {
         final int RATE=500;
         uploader1.setCorruption(true);
@@ -798,6 +827,7 @@ public class DownloadTest extends TestCase {
                           responses, new byte[16]);
         callback.handleQueryReply(qr);
     }
+
 
     ////////////////////////// Helping Code ///////////////////////////
     

@@ -163,7 +163,8 @@ public class HTTPDownloader implements BandwidthTracker {
      * headers. 
      * <p>
      * @param start The byte at which the HTTPDownloader should begin
-     * @param stop The byte at which the HTTPDownloader should stop
+     * @param stop the index just past the last byte to read;
+     *  stop-1 is the last byte the HTTPDownloader should download
      * <p>
      * @exception TryAgainLaterException the host is busy
      * @exception FileNotFoundException the host doesn't recognize the file
@@ -489,8 +490,9 @@ public class HTTPDownloader implements BandwidthTracker {
 	}
 
     /**
-     * Instructs this to stop after reading the given byte in the file.
-     * @param stop the byte offset to stop at
+     * Instructs this stop just before reading the given byte.
+     * @param stop the index just past the last byte to read;
+     *  stop-1 is the index of the last byte to be downloaded
      */
     public void stopAt(int stop) {
         _amountToRead=(stop-_initialReadingPoint);

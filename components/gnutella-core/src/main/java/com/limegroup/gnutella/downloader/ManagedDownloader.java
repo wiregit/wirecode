@@ -1012,8 +1012,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(bucketHash!=null) { //if bucketHash==null, we cannot check
             //if fileHash == null, it will be a mismatch
             synchronized(corruptStateLock) {
-                if(!fileHash.equals(bucketHash))
+                if(!bucketHash.equals(fileHash)) {
                     promptAboutCorruptDownload();
+                    debug("hash verification problem, fileHash="+
+                                       fileHash+", bucketHash="+bucketHash);
+                }
                 try {
                     while(corruptState==CORRUPT_WAITING_STATE)
                         corruptStateLock.wait();
@@ -1485,10 +1488,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(this) {
             interval=(Interval)needed.remove(0);
         }
-        //this line can throw a bunch of exceptions.
-        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high);
-        //Note: Intervals are used so the high'th byte will also be downloaded.
-        //But HTTPDownloader won't download the high'th byte.
+        //Intervals from the needed set are INCLUSIVE on the high end, but
+        //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
+        //code below.  Note connectHTTP can throw several exceptions.  Also, the
+        //call to stopAt does not appear necessary, but we're leaving it in just
+        //in case.
+        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high+1);
         dloader.stopAt(interval.high+1);
         debug("WORKER: picking white "+interval+" to "+dloader);
     }

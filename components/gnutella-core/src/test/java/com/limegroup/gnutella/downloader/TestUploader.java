@@ -27,7 +27,9 @@ public class TestUploader {
 	private AlternateLocationCollection incomingAltLocs;
 	private URN                         sha1;
     ServerSocket server = null;
-    
+    private boolean busy = false;
+
+
     /** 
      * Creates a TestUploader listening on the given port.  Will upload a
      * special test file to any requesters via HTTP.  Non-blocking; starts
@@ -76,6 +78,10 @@ public class TestUploader {
      */   
     public void setRate(float rate) {
         this.rate=rate;
+    }
+    
+    public void setBusy(boolean busy) {
+        this.busy = busy;
     }
 
 
@@ -206,8 +212,16 @@ public class TestUploader {
     private void send(OutputStream out, int start, int stop) 
             throws IOException {
         //Write header, stolen from NormalUploadState.writeHeader()
-		String str = "HTTP 200 OK \r\n";
+        
+		String str = busy?"HTTP 503 Service Unavailable":"HTTP 200 OK \r\n";
 		out.write(str.getBytes());
+        if (busy) {
+            String s = "\r\n"; 
+            out.write(s.getBytes());
+            out.flush();
+            out.close();
+            return;
+        }
 		str = "Content-length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
 		if (start != 0) {
