@@ -156,21 +156,18 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 			assertFalse(loc instanceof PushAltLoc);
 		}
 
-        try {
-            RemoteFileDesc rfd = 
-                new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
+
+        RemoteFileDesc rfd = 
+            new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
                                    false,false,"",0,null, -1);
 
-            // this should throw an exception, since it's a private address.
-            AlternateLocation.create(rfd);        
+        // this should not throw an exception, since private addresses are now ok.
+        AlternateLocation.create(rfd);        
 
-            fail("should have rejected the location because the address is private");
-        } catch(IOException e) {
-            // expected for private addresses
-        }
+
 
         try {
             AlternateLocation.create((RemoteFileDesc)null);
@@ -348,7 +345,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         try {
             AlternateLocation.create("0.1.2.3", urn);
             fail("IOException expected");
-        } catch(IOException expected) {}
+        } catch(IllegalArgumentException expected) {}
 
         try {
             AlternateLocation.create("1.2.3.4/25", urn);
