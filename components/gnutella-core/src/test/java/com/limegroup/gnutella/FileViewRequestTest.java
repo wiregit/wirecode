@@ -14,6 +14,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.uploader.FileViewUploadState;
+import com.limegroup.gnutella.html.FileListHTMLPage;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
@@ -25,7 +26,7 @@ import com.sun.java.util.collections.Set;
  */
 public class FileViewRequestTest extends ClientSideTestCase {
 
-    public final String BAD_PASS = FileViewUploadState.BAD_PASS_REPLY;
+    public final byte[] BAD_PASS = FileViewUploadState.BAD_PASS_REPLY;
 
     public FileViewRequestTest(String name) {
         super(name);
@@ -46,11 +47,27 @@ public class FileViewRequestTest extends ClientSideTestCase {
         URL url = new URL("http", "localhost", SERVER_PORT,
                           UploadManager.FV_REQ_BEGIN);
         URLConnection conn = url.openConnection();
-        assertEquals(BAD_PASS.length(), conn.getContentLength());
+        assertEquals(BAD_PASS.length, conn.getContentLength());
         InputStream is = conn.getInputStream();
-        byte[] bytes = new byte[BAD_PASS.length()];
+        byte[] bytes = new byte[BAD_PASS.length];
         is.read(bytes);
-        assertEquals(BAD_PASS, new String(bytes));
+        assertEquals(BAD_PASS, bytes);
+    }
+
+    public void testGoodFileViewRequest() throws Exception {
+        
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.FV_REQ_BEGIN + "/" +
+                          UploadManager.FV_PASS);
+        URLConnection conn = url.openConnection();
+        InputStream is = conn.getInputStream();
+        assertGreaterThan(FileListHTMLPage.htmlBegin.length() +
+                          FileListHTMLPage.htmlMiddle.length() +
+                          FileListHTMLPage.htmlEnd.length(),
+                          conn.getContentLength());
+        byte[] bytes = new byte[FileListHTMLPage.htmlBegin.length()];
+        is.read(bytes);
+        assertEquals(FileListHTMLPage.htmlBegin.getBytes(), bytes);
     }
 
     //////////////////////////////////////////////////////////////////

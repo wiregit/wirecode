@@ -14,7 +14,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class FileViewUploadState implements HTTPMessage {
 
-    public final static String BAD_PASS_REPLY = "Wrong Password!";
+    public final static byte[] BAD_PASS_REPLY = "Wrong Password!".getBytes();
     
     private final HTTPUploader _uploader;
 
@@ -32,7 +32,7 @@ public final class FileViewUploadState implements HTTPMessage {
             BAOS.write(htmlGen.getSharedFilePage().getBytes());
         }
         else
-            BAOS.write(BAD_PASS_REPLY.getBytes());
+            BAOS.write(BAD_PASS_REPLY);
      
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
