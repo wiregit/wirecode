@@ -96,13 +96,18 @@ public class RouterService
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
         this.chatManager.setActivityCallback(callback);
 
-
-		// Make the call to connect to the router after everything else has
-		// been initialized, but only if the user has specified that we
-		// should do so
-		if(settings.getConnectOnStartup()) {
-			this.catcher.connectToRouter();
-		}
+		//We used to call the following code here:
+        //  		if(settings.getConnectOnStartup()) {
+        //  			this.catcher.connectToRouter();
+        //  		}
+        //
+        //But that isn't needed; the call to connect() below calls
+        //ConnnectionManager.connect(), which in turns HostCatcher.expire(),
+        //which in turn calls HostCatcher.connectToRouter().
+        //
+        //If the code above were called (like in the old days)
+        //HostCatcher.expire() would instead call Thread.interrupt, causing
+        //HostCatcher.connectUntilPong to be restarted.       
 
 		this.downloader.initialize(callback, router, acceptor,
                                    fileManager);
