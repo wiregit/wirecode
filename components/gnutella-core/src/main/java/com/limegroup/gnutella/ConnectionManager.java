@@ -1017,7 +1017,7 @@ public class ConnectionManager {
         //REPLACE _connections with the list _connections+[c]
         List newConnections=new ArrayList(_connections);
         newConnections.add(c);
-        _connections=newConnections;
+        _connections = Collections.unmodifiableList(newConnections);
     }
 
     /**
@@ -1053,7 +1053,8 @@ public class ConnectionManager {
                 //_initializedConnections+[c]
                 List newConnections=new ArrayList(_initializedConnections);
                 newConnections.add(c);
-                _initializedConnections=newConnections;
+                _initializedConnections = 
+                    Collections.unmodifiableList(newConnections);
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
                     _shieldedConnections++;
@@ -1065,7 +1066,8 @@ public class ConnectionManager {
                 List newConnections
                     =new ArrayList(_initializedClientConnections);
                 newConnections.add(c);
-                _initializedClientConnections=newConnections;
+                _initializedClientConnections = 
+                    Collections.unmodifiableList(newConnections);
                 if(!c.isLimeWire())
                     _nonLimeWireLeaves++;                
             }
@@ -1188,7 +1190,8 @@ public class ConnectionManager {
                 List newConnections=new ArrayList();
                 newConnections.addAll(_initializedConnections);
                 newConnections.remove(c);
-                _initializedConnections=newConnections;
+                _initializedConnections = 
+                    Collections.unmodifiableList(newConnections);
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
                     _shieldedConnections--;                
@@ -1204,7 +1207,8 @@ public class ConnectionManager {
                 List newConnections=new ArrayList();
                 newConnections.addAll(_initializedClientConnections);
                 newConnections.remove(c);
-                _initializedClientConnections=newConnections;
+                _initializedClientConnections =
+                    Collections.unmodifiableList(newConnections);
                 if(!c.isLimeWire())
                     _nonLimeWireLeaves--;
             }
@@ -1217,7 +1221,7 @@ public class ConnectionManager {
             //REPLACE _connections with the list _connections-[c]
             List newConnections=new ArrayList(_connections);
             newConnections.remove(c);
-            _connections=newConnections;
+            _connections = Collections.unmodifiableList(newConnections);
         }
 
         // 2) Ensure that the connection is closed.  This must be done before
