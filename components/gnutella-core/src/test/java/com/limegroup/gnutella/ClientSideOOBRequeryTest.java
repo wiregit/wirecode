@@ -1306,6 +1306,137 @@ public class ClientSideOOBRequeryTest
     }
 
 
+    public void testMultipleDownloadsNoPurge() throws Exception {
+
+        keepAllAlive(testUPs);
+        // clear up any messages before we begin the test.
+        drainAll();
+
+        DatagramPacket pack = null;
+
+        Message m = null;
+
+        byte[] guid = rs.newQueryGUID();
+        rs.query(guid, "whatever");
+        // i need to pretend that the UI is showing the user the query still
+        callback.setGUID(new GUID(guid));
+        
+        QueryRequest qr = 
+            (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
+                                                         QueryRequest.class);
+        assertNotNull(qr);
+        assertTrue(qr.desiresOutOfBandReplies());
+
+        // ok, the leaf is sending OOB queries - good stuff, now we should send
+        // a lot of results back and make sure it buffers the bypassed OOB ones
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[200];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+
+        // create a test uploader and send back that response
+        final int UPLOADER_PORT = 10000;
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        uploader.setBusy(true);
+        URN urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        Set urns = new HashSet();
+        urns.add(urn);
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
+                                                "whatever", 10, GUID.makeGuid(),
+                                                1, false, 3, false, null, 
+                                                urns, false, false, 
+                                                "LIME", 0, new HashSet());
+        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT);
+        uploader2.setBusy(true);
+        urn = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
+        urns = new HashSet();
+        urns.add(urn);
+        RemoteFileDesc rfd2 = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
+                                                 "whatever", 10, GUID.makeGuid(),
+                                                 1, false, 3, false, null, 
+                                                 urns, false, false, 
+                                                 "LIME", 0, new HashSet());
+
+        // wait for processing
+        Thread.sleep(1500);
+
+        { // bypass 1 result only
+            ReplyNumberVendorMessage vm = 
+                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      testUPs[0].getInetAddress(), PORT);
+            UDP_ACCESS[0].send(pack);
+        }
+
+        // wait for processing
+        Thread.sleep(500);
+
+        {
+            // all the UDP ReplyNumberVMs should have been bypassed
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNotNull(endpoints);
+            assertEquals(1, endpoints.size());
+        }
+        
+        Downloader downloader = 
+            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        Downloader downloader2 = 
+            rs.download(new RemoteFileDesc[] { rfd2 }, false, new GUID(guid));
+        
+
+        // let downloaders do stuff  
+        Thread.sleep(2000);
+
+        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
+        assertEquals(Downloader.WAITING_FOR_RETRY, downloader2.getState());
+        
+        callback.clearGUID();  // isQueryAlive == false 
+        downloader.stop();
+
+        Thread.sleep(500);
+
+        {
+            // we should still have bypassed results since downloader2 alive
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNotNull(endpoints);
+            assertEquals(1, endpoints.size());
+        }
+
+        downloader2.stop();
+        Thread.sleep(1000);
+
+        {
+            // now we should make sure MessageRouter clears the map
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
+    }
+
+    // RUN THIS TEST LAST!!
     public void testUnicasterClearingCode() throws Exception {
 
         keepAllAlive(testUPs);
