@@ -144,6 +144,28 @@ public final class QueryRequestTest extends TestCase {
 	 * Tests the primary constructor that most of the other constructors
 	 * delegate to.
 	 */
-	public void testPrimaryConstructor() {
+	public void testQueryRequestPrimaryConstructor() {
+		byte ttl = 5;
+		int minSpeed = 30;
+		String query = "file i really want";
+		
+		// ideally this would be a real rich query
+		String richQuery = "";
+		boolean isRequery = false;
+		Set requestedUrnTypes = new HashSet();
+		requestedUrnTypes.add(UrnType.SHA1);
+		Set queryUrns = new HashSet();
+		queryUrns.add(HugeTestUtils.URNS[4]);
+
+		QueryRequest qr = new QueryRequest(ttl, minSpeed, query, richQuery, 
+										   isRequery, requestedUrnTypes, queryUrns);
+		
+		assertEquals("ttls should be equal", ttl, qr.getTTL());
+		assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
+		assertEquals("queries should be equal", query, qr.getQuery());
+		assertEquals("rich queries should be equal", richQuery, qr.getRichQuery());
+		assertEquals("query urn types should be equal", requestedUrnTypes, 
+					 qr.getRequestedUrnTypes());
+		assertEquals("query urns should be equal", queryUrns, qr.getQueryUrns());
 	}
 }
