@@ -78,6 +78,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	private ByteReader _byteReader;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
+    
+    /**
+     * The last state of commonOutFile.isCorrupted.
+     * Used to know whether or not to add ourselves to the mesh.
+     */
+    private boolean outIsCorrupted;
 
 	/**
 	 * The new alternate locations we've received for this file.
@@ -262,10 +268,12 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         // Add ourselves to the mesh if:
-        //  This rfd has a SHA1
-        //  We have downloaded a large enough portion of the file
+        //  This rfd has a SHA1,
+        //  The VerifyingFile is not corrupted,
+        //  We have downloaded a large enough portion of the file,
         //  and We have accepted incoming during this session.
         if (_rfd.getSHA1Urn() != null && 
+          !outIsCorrupted &&
           RouterService.acceptedIncomingConnection() &&
           _incompleteFile.length() > _minPartialFileSize) {
             if( alts == null ) // will be null if altsToSend is null.
@@ -687,9 +695,10 @@ public class HTTPDownloader implements BandwidthTracker {
     /*
      * Downloads the content from the server and writes it to a temporary
      * file.  Blocking.  This MUST be initialized via connect() beforehand, and
-     * doDownload MUST NOT have already been called.  If checkOverlap, the
-     * incomplete file is compared with the data being downloaded; if there is
-     * a mismatch, OverlapMismatchException is thrown immediately.
+     * doDownload MUST NOT have already been called. If there is
+     * a mismatch in overlaps, the VerifyingFile triggers a callback to
+     * the ManagedDownloader, which triggers a callback to the GUI to let us
+     * know whether to continue or interrupt.
      *  
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
@@ -728,6 +737,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
                 commonOutFile.writeBlock(currPos,c, buf);
+                outIsCorrupted = commonOutFile.isCorrupted();
 
                 currPos += c;//update the currPos for next iteration
                 _amountRead += c;

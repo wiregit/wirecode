@@ -22,6 +22,8 @@ public class VerifyingFile {
     private RandomAccessFile fos;
 
     private boolean checkOverlap;
+    
+    private volatile boolean isCorrupted;
 
     private ManagedDownloader managedDownloader; 
     /**
@@ -75,9 +77,11 @@ public class VerifyingFile {
                 fos.readFully(fileBuf,0,amountToCheck);
                 int j = findInitialPoint(overlapInterval,currPos, numBytes);
                 for(int i=0;i<amountToCheck;i++,j++) {
-                    if (buf[j]!=fileBuf[i]) //corrupt bytes
+                    if (buf[j]!=fileBuf[i]) { //corrupt bytes
+                        isCorrupted = true; // flag as corrupted.
                         if(managedDownloader!=null)//md may be null for testing
                             managedDownloader.promptAboutCorruptDownload();
+                    }
                 }
             }
         }
@@ -120,6 +124,13 @@ public class VerifyingFile {
         try { 
             fos.close();
         } catch (IOException ioe) {}
+    }
+    
+    /**
+     * Returns whether or not we have determined if the written is corrupted.
+     */
+    public boolean isCorrupted() {
+        return isCorrupted;
     }
     
     /////////////////////////private helpers//////////////////////////////

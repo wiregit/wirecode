@@ -2531,6 +2531,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     void promptAboutCorruptDownload() {
         synchronized(corruptStateLock) {
+            //If we are corrupt, we want to stop sharing the incomplete file,
+            //as it is not going to generate the same SHA1 anymore.
+            RouterService.getFileManager().removeFileIfShared(incompleteFile);
+            
             //For any other state we don't do anything
             if(corruptState == NOT_CORRUPT_STATE) {
                 corruptState = CORRUPT_WAITING_STATE;
@@ -2625,26 +2629,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Accessors that delegate to dloader. Synchronized because dloader can
      * change.
      *************************************************************************/
-     
-    /**
-     * Returns all URNs that have an associated incomplete file.
-     */     
-    public synchronized Iterator getUrnsAsIterator() {
-        HashSet set = new HashSet();
-        for ( int i = 0; i < allFiles.length; i++ ) {
-            Set urns = allFiles[i].getUrns();
-            URN urn = null;
-            for(Iterator it = urns.iterator(); it.hasNext(); ) {
-                urn = (URN)it.next();
-                // If no urn or urn already is added, ignore.
-                if(urn == null || set.contains(urn)) continue;
-                // If there is a file for this URN, add it.
-                if ( incompleteFileManager.getFileForUrn( urn ) != null )
-                    set.add( urn );
-            }
-        }
-        return set.iterator();
-    }        
 
     public synchronized int getState() {
         return state;
