@@ -435,7 +435,7 @@ public class ConnectionManager implements Runnable {
             Socket client=null;
             synchronized (socketLock) {
                 if (socket!=null) {
-                socket.setSoTimeout(500); //0.5 second
+                //socket.setSoTimeout(500); //0.5 second
                 try { 
                     client=socket.accept(); 
                 } catch (InterruptedIOException e) {
@@ -461,6 +461,7 @@ public class ConnectionManager implements Runnable {
             }//end of try
             catch (IOException e)
             {
+                e.printStackTrace();
                 error(ActivityCallback.ERROR_2);
                 return;
             } 
@@ -471,6 +472,7 @@ public class ConnectionManager implements Runnable {
             } 
             catch (Exception e)
             {
+                e.printStackTrace();
                 //Internal error!
                 error(ActivityCallback.ERROR_20, e);
             }
