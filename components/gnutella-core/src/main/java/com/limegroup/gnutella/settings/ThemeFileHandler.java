@@ -32,22 +32,14 @@ public final class ThemeFileHandler {
 	 * Reloads the file from disk to read values from.
 	 */
 	public static void reload() {
-		File themeFile = ThemeSettings.THEME_FILE.getValue();
-		String dirName = themeFile.getName();
-		dirName = dirName.substring(0, dirName.length()-5);
-		File themeDir = 
-			new File(new File(CommonUtils.getUserSettingsDir(),"themes"), 
-					 dirName);
-
-        // this will be ignored if the directory is already present
-        themeDir.mkdirs();
-            
-        // unpack the zip 
-        try {
-            Expand.expandFile(themeFile, themeDir);
-        } catch(IOException e) {
-            // this should never really happen, so report it
-            ErrorService.error(e);						
+  		File themeFile = ThemeSettings.THEME_FILE.getValue();            
+        File themeDir = ThemeSettings.extractThemeDir(themeFile);
+        
+        // if the theme hasn't already been expanded, then it's 
+        // probably a new theme, so expand it
+        if(!themeDir.isDirectory()) {
+            // unpack the zip 
+            ThemeSettings.expandTheme(themeFile, themeDir, false);
         }
 
 		final File THEME_PROPS = new File(themeDir, "theme.txt");

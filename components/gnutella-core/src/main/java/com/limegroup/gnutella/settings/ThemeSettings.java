@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.*;
+import java.util.zip.*;
 import java.io.*;
 
 /**
@@ -109,14 +110,66 @@ public final class ThemeSettings extends LimeProps {
                 File zipFile = new File(THEME_DIR_FILE, THEMES[i]);
                 if(zipFile.isFile()) {
                     long zipMod = zipFile.lastModified();
-                    if(jarMod > zipMod) {
-                        CommonUtils.copyResourceFile(THEMES[i], zipFile, true);
+                    if(jarMod > zipMod) {           
+                        copyZipWithNewTimestamp(THEMES[i], zipFile);
                     }
                 } else if(!zipFile.exists()) {
-                    CommonUtils.copyResourceFile(THEMES[i], zipFile, true);
+                    copyZipWithNewTimestamp(THEMES[i], zipFile);
                 }
             }
         }
+    }
+
+    /**
+     * Utility method that copies and expends the specified theme 
+     * file from the themes jar.
+     *
+     * @param name the name of the file in the jar
+     * @param themeFile the location on disk to copy the zip to
+     */
+    private static void copyZipWithNewTimestamp(String name, File themeFile) {
+        CommonUtils.copyResourceFile(name, themeFile, true);
+        File themeDir = extractThemeDir(themeFile);
+        expandTheme(themeFile, themeDir, true);
+    }
+
+    /**
+     * Expands the specified theme zip file to the specified directory.
+     *
+     * @param themeFile the theme zip file to expand
+     * @param themeDir the directory to expand to -- the themes directory
+     *  plus the name of the theme
+     * @param overwrite whether or not to force the overwriting of existing
+     *  files in the destination folder when we expand the zip, regardless 
+     *  of File/ZipEntry timestamp
+     */
+    static void expandTheme(File themeFile, File themeDir, 
+                            boolean overwrite) {
+        themeDir.mkdirs();
+        try {
+            Expand.expandFile(themeFile, themeDir, overwrite);
+        } catch(IOException e) {
+            // this should never really happen, so report it
+            ErrorService.error(e);						
+        }        
+    }
+
+    /**
+     * Convenience method for determing in the path of the themes directory
+     * for a given theme file.  The directory is the path of the themes
+     * directory plus the name of the theme.
+     *
+     * @param themeFile the <tt>File</tt> instance denoting the location 
+     *  of the theme file on disk
+     * @return a new <tt>File</tt> instance denoting the appropriate path
+     *  for the directory for this specific theme
+     */
+    static File extractThemeDir(File themeFile) {
+		String dirName = themeFile.getName();
+		dirName = dirName.substring(0, dirName.length()-5);
+		return new File(new File(CommonUtils.getUserSettingsDir(),"themes"), 
+                        dirName);
+        
     }
     
     /**
