@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.settings.*;
-import junit.framework.*;
-import com.sun.java.util.collections.*;
-import java.util.jar.*;
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
+import junit.framework.Test;
 
 /**
  * Tests certain features of CommonUtils
