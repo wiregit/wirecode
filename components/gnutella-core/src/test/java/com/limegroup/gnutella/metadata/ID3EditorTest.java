@@ -1,7 +1,8 @@
-package com.limegroup.gnutella.mp3;
+package com.limegroup.gnutella.metadata;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.metadata.MP3DataEditor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -9,7 +10,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * Unit tests for ID3Editor
  */
 public class ID3EditorTest extends BaseTestCase {
-    ID3Editor mine = new ID3Editor();
+    MP3DataEditor mine = new MP3DataEditor();
         
 	public ID3EditorTest(String name) {
 		super(name);
@@ -24,12 +25,6 @@ public class ID3EditorTest extends BaseTestCase {
 	}
 
 
-   public void testRemoveID3Tags() throws Exception {
-        String source = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\"><audio bitrate=\"192\" genre=\"Blues\" title=\"HonkyTonk Man\" artist=\"Elvis\" album=\"Live at Five\" year=\"1978\" comments=\"wiggidy wack!\" leftover=\"stay here\" track=\"3\"/></audios>";
-        String expected = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\"><audio leftover=\"stay here\"/></audios>";
-        String after = mine.removeID3Tags(source);
-        assertEquals(expected, after);
-    }
 
     public void testRipTag() throws Exception {
         

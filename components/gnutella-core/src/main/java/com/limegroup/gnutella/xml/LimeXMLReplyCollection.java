@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.mp3.*;
+import com.limegroup.gnutella.metadata.*;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.I18NConvert;
@@ -178,12 +178,12 @@ public class LimeXMLReplyCollection {
                 if( xml != null && xml instanceof LimeXMLDocument ) {
                     doc = (LimeXMLDocument)xml;
                 } else { // Pre LimeWire 2.5 or no XML stored.
-                    doc = constructDocument((String)xml, file);
+                    doc = constructDocument(file);
                 }
             } else { // After LimeWire 3.4
                 xml = hashToXML.get(hash);
                 if( xml == null ) { // no XML might exist, try and make some
-                    doc = constructDocument(null, file);
+                    doc = constructDocument(file);
                 } else { //it had a doc already.
                     doc = (LimeXMLDocument)xml;
                 }
@@ -195,21 +195,21 @@ public class LimeXMLReplyCollection {
             if(!doc.supportsID3v2() && LimeXMLUtils.isMP3File(file)) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("reconstructing document for id3v2: " + file);
-                LimeXMLDocument tempDoc = constructDocument(null, file);
+                LimeXMLDocument tempDoc = constructDocument(file);
                 if (tempDoc != null) doc = tempDoc;
             }
                 
             // Verify the doc has information in it.
             if(!doc.isValid()) {
                 //If it is invalid, try and rebuild it.
-                doc = constructDocument(null, file);
+                doc = constructDocument(file);
                 if(doc == null || !doc.isValid())
                     continue;
             }   
                 
             // check to see if it's corrupted and if so, fix it.
-            if( ID3Reader.isCorrupted(doc) ) {
-                doc = ID3Reader.fixCorruption(doc);
+            if( AudioMetaData.isCorrupted(doc) ) {
+                doc = AudioMetaData.fixCorruption(doc);
                 addReplyWithCommit(file, fd, doc, false);
             } else {
                 addReply(fd, doc);
@@ -222,44 +222,28 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Creates a LimeXMLDocument from the XML String.
-     * If the string is null, the collection is for audio files,
-     * and the file is an MP3 file, it reads the file to create some XML.
+     * Creates a LimeXMLDocument from the file.  
+     * @return null if the format is not supported or parsing fails,
+     *  <tt>LimeXMLDocument</tt> otherwise.
      */
-    private LimeXMLDocument constructDocument(String xmlStr, File file) {
-        // old style may exist or there may be no xml associated
-        // with this file yet.....
-        if (audio && LimeXMLUtils.isMP3File(file)) {
-            // first try to get the id3 out of it.  if this file has
-            // no id3 tag, just construct the doc out of the xml 
-            // string....
-            boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
-            try {
-                if(!onlyID3) {  //non-id3 values with mp3 file
-                    String id3XML = ID3Reader.readDocument(file,onlyID3);
-                    String joinedXML = joinAudioXMLStrings(id3XML, xmlStr);
-                    if( joinedXML != null )
-                        return new LimeXMLDocument(joinedXML);
-                }
-                // no XML data we can use.
-                return ID3Reader.readDocument(file);
+    private LimeXMLDocument constructDocument(File file) {
+
+    	
+        if (LimeXMLUtils.isSupportedFormatForSchema(file,schemaURI)) { 
+        	
+            try{    
+            	return MetaDataReader.readDocument(file);
             }
-            catch (SAXException ignored) { }
-            catch (IOException ignored) { }
-            catch (SchemaNotFoundException ignored) { }
-        }
-        else { // !audio || !mp3
-            try {
-                if ((xmlStr != null) && (!xmlStr.equals(""))) 
-                    return new LimeXMLDocument(xmlStr);
+            
+            catch (IOException ignored) { 
+            	return null; 
             }
-            catch (SAXException ignored) { }
-            catch (IOException ignored) { }
-            catch (SchemaNotFoundException ignored) { }
+            
         }
         
         return null;
     }
+    
 
     /**
      * Gets a list of keywords from all the documents in this collection.
@@ -300,21 +284,6 @@ public class LimeXMLReplyCollection {
         }
     }
 
-    /**
-     * Joins two XML strings together.
-     * Returns null if the second string is malformed.
-     */
-    private String joinAudioXMLStrings(String mp3Str, String fileStr) {
-        int p = fileStr.lastIndexOf("></audio>");
-        if( p == -1 )
-            return null;
-            
-        //above line is the one closing the root element
-        String a = fileStr.substring(0,p);//all but the closing part
-        String b = fileStr.substring(p);//closing part
-        //phew, thank god this schema has depth 1.
-        return(a+mp3Str+b);
-    }
 
     
     /**
@@ -419,7 +388,7 @@ public class LimeXMLReplyCollection {
         // commit to disk...
         if (audio) {
             try {
-                mp3ToDisk(fd, f.getCanonicalPath(), replyDoc, checkBetter);
+                mediaFileToDisk(fd, f.getCanonicalPath(), replyDoc, checkBetter);
             } catch(IOException ignored) {}
         } else
             write();
@@ -611,9 +580,9 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Writes this mp3 file to disk, using the XML in the doc.
+     * Writes this media file to disk, using the XML in the doc.
      */
-    public int mp3ToDisk(FileDesc fd, String mp3FileName, LimeXMLDocument doc, 
+    public int mediaFileToDisk(FileDesc fd, String mp3FileName, LimeXMLDocument doc, 
                                                           boolean checkBetter) {
         boolean wrote=false;
         int mp3WriteState = -1;
@@ -623,10 +592,10 @@ public class LimeXMLReplyCollection {
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        ID3Editor commitWith = ripMP3XML(mp3FileName, doc, checkBetter);
+        MetaDataEditor commitWith = getEditorIfNeeded(mp3FileName, doc, checkBetter);
         if (commitWith != null)  {// commit to disk.
             if(commitWith.getCorrectDocument() == null) 
-                mp3WriteState = commitID3Data(mp3FileName, commitWith);
+                mp3WriteState = commitMetaData(mp3FileName, commitWith);
             else { 
                 //The id3 data on disk is better than the data we got in the
                 //query reply. So we should update the Document we added
@@ -656,12 +625,16 @@ public class LimeXMLReplyCollection {
      * @return An ID3Editor to use when committing or null if nothing 
      *  should be editted.
      */
-    private ID3Editor ripMP3XML(String mp3File, LimeXMLDocument doc, 
+    private MetaDataEditor getEditorIfNeeded(String mp3File, LimeXMLDocument doc, 
                                                         boolean checkBetter) {
-        if (!LimeXMLUtils.isMP3File(mp3File))
-            return null;
-
-        ID3Editor newValues = new ID3Editor();
+        
+        MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
+        
+        //if this call returned null, we should store the data in our
+        //xml repository only.
+        if (newValues == null)
+        	return null;
+        
         String newXML = null;
 
         try {
@@ -669,13 +642,13 @@ public class LimeXMLReplyCollection {
         } catch(SchemaNotFoundException snfe) {
             return null;
         }
-        newValues.removeID3Tags(newXML);
+        newValues.populateFromString(newXML);
         
         // Now see if the file already has the same info ...
-        ID3Editor existing = new ID3Editor();
+        MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
         LimeXMLDocument existingDoc = null;
         try {
-            existingDoc = ID3Reader.readDocument(new File(mp3File));
+            existingDoc = MetaDataReader.readDocument(new File(mp3File));
         } catch(IOException e) {
             return null;
         }
@@ -685,7 +658,7 @@ public class LimeXMLReplyCollection {
         } catch(SchemaNotFoundException snfe) {
             return null;
         }
-        existing.removeID3Tags(existingXML);
+        existing.populateFromString(existingXML);
         
         
         if(!checkBetter) { //if we are not required to choose better tags
@@ -711,7 +684,7 @@ public class LimeXMLReplyCollection {
         else
             newValues.pickBetterFields(existing);        
             
-        // Commit using this ID3Editor ... 
+        // Commit using this Meta data editor ... 
         return newValues;
     }
 
@@ -720,9 +693,9 @@ public class LimeXMLReplyCollection {
      * Commits the changes to disk.
      * If anything was changed on disk, notifies the FileManager of a change.
      */
-    private int commitID3Data(String mp3FileName, ID3Editor editor) {
+    private int commitMetaData(String fileName, MetaDataEditor editor) {
         //write to mp3 file...
-        int retVal = editor.writeID3DataToDisk(mp3FileName);
+        int retVal = editor.commitMetaData(fileName);
         if(LOG.isDebugEnabled())
             LOG.debug("wrote data: " + retVal);
         // any error where the file wasn't changed ... 
@@ -739,7 +712,7 @@ public class LimeXMLReplyCollection {
         //to other schemas will be lost unless we update those tables
         //with the new hashValue. 
         //NOTE:This is the only time the hash will change-(mp3 and audio)
-        RouterService.getFileManager().fileChanged(new File(mp3FileName));
+        RouterService.getFileManager().fileChanged(new File(fileName));
         return retVal;
     }
 

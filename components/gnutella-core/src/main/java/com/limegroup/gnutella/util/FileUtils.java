@@ -3,6 +3,8 @@ package com.limegroup.gnutella.util;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.*;
+
 /**
  *  This class provides static functions to load/store the files.
  * @author Anurag Singla
@@ -220,5 +222,36 @@ public class FileUtils
                 } catch(IOException ignored) {}
             }
         }
+    }
+    
+    public static boolean forceRename(File a, File b) {
+    	 // First attempt to rename it.
+        boolean success = a.renameTo(b);
+        
+        // If that fails, try killing any partial uploads we may have
+        // to unlock the file, and then rename it.
+        if (!success) {
+            FileDesc fd = RouterService.getFileManager().getFileDescForFile(
+                a);
+            if( fd != null ) {
+                UploadManager upMan = RouterService.getUploadManager();
+                // This must all be synchronized so that a new upload
+                // doesn't lock the file before we rename it.
+                synchronized(upMan) {
+                    if( upMan.killUploadsForFileDesc(fd) )
+                        success = a.renameTo(b);
+                }
+            }
+        }
+        
+        // If that didn't work, try copying the file.
+        if (!success) {
+            success = CommonUtils.copy(a, b);
+            //if copying succeeded, get rid of the original
+            //at this point any active uploads will have been killed
+            if (success)
+            	a.delete();
+        }
+        return success;
     }
 }

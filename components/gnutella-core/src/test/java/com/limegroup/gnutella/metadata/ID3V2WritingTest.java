@@ -1,9 +1,13 @@
-package com.limegroup.gnutella.mp3;
+package com.limegroup.gnutella.metadata;
 
 
 import junit.framework.Test;
 
 import java.io.*;
+
+import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.MP3DataEditor;
+import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.util.*;
 
 public class ID3V2WritingTest extends BaseTestCase {
@@ -26,7 +30,7 @@ public class ID3V2WritingTest extends BaseTestCase {
     ////////////
 
     public void setUp() {
-        String dir = "com/limegroup/gnutella/mp3/";
+        String dir = "com/limegroup/gnutella/metadata/";
         File f = CommonUtils.getResourceFile(dir + "ID3EditorTestFile.mp3");
         assertTrue(f.exists());
         TEST_FILE = new File(TEST_NAME);
@@ -46,11 +50,12 @@ public class ID3V2WritingTest extends BaseTestCase {
      * Tests that the ID3v2 tags are read correctly
      */
     public void testID3v2TagsWriting() throws Exception {
-        ID3Reader.ID3Data data = null;
+        AudioMetaData data = null;
         
         //1. Test that the values we read initially were correct.
-        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
-               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
+        /*data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
+               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });*/
+        data = (AudioMetaData)MetaData.parse(TEST_FILE);
         
         assertFalse(data.toString(), data.isComplete());
         assertEquals(data.toString(), "Title 2", data.getTitle());
@@ -62,16 +67,15 @@ public class ID3V2WritingTest extends BaseTestCase {
         assertEquals(data.toString(), "Acid", data.getGenre());
         
         //2. Write new data into the file 
-        ID3Editor editor = new ID3Editor();
+        MP3DataEditor editor = new MP3DataEditor();
         PrivilegedAccessor.setValue(editor, "title_", "New Title");
         PrivilegedAccessor.setValue(editor, "artist_", "new Artist");
         PrivilegedAccessor.setValue(editor, "genre_", "Classic Rock");
         
-        int retVal = editor.writeID3DataToDisk(TEST_FILE.getAbsolutePath());
+        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
         //3. Test if the data was written correctly
-        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
-               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
+        data = (AudioMetaData)MetaData.parse(TEST_FILE);
 
         assertFalse(data.toString(), data.isComplete());
         assertEquals("Title not written", "New Title", data.getTitle());
@@ -82,13 +86,13 @@ public class ID3V2WritingTest extends BaseTestCase {
         assertLessThan("Incorrect track", 0, data.getTrack());
         assertNull("Incorrect comment", data.getComment());
 
-        ID3Editor editor2 = new ID3Editor();
+        MP3DataEditor editor2 = new MP3DataEditor();
         PrivilegedAccessor.setValue(editor2, "title_", "Title 2");
         PrivilegedAccessor.setValue(editor2, "year_", "2002");
         PrivilegedAccessor.setValue(editor2, "track_", "12");
         PrivilegedAccessor.setValue(editor2, "comment_", "Comment 2");
         PrivilegedAccessor.setValue(editor2, "genre_", "Acid");
-        editor2.writeID3DataToDisk(TEST_FILE.getAbsolutePath());
+        editor2.commitMetaData(TEST_FILE.getAbsolutePath());
     }
     
 }

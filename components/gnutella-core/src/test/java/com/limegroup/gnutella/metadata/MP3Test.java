@@ -1,8 +1,9 @@
-package com.limegroup.gnutella.mp3;
+package com.limegroup.gnutella.metadata;
 
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.metadata.MP3Info;
 import com.limegroup.gnutella.util.CommonUtils;
 /**
  * Test MP3Info class
@@ -15,7 +16,7 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
 	
 	private static final int runs = 900;
 	
-	private static final String d = "com/limegroup/gnutella/mp3/";
+	private static final String d = "com/limegroup/gnutella/metadata/";
 	
 	private static final String file[] = new String[] {
 	d+"mpg1layIII_96k-RIFFWAV_441000hz_joint_Xing.wav",
