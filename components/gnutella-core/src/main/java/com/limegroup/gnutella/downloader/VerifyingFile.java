@@ -61,6 +61,8 @@ public class VerifyingFile {
 
     public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
                                                     throws IOException {
+        if(numBytes==0) //nothing to write? return
+            return;
         if(fos == null)
             throw new IOException();
         boolean checkBeforeWrite = false;
