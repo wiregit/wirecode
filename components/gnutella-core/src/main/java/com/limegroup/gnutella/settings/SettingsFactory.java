@@ -289,8 +289,12 @@ public final class SettingsFactory {
 	 * @param defaultValue the default value for the setting
 	 */
 	public synchronized FileSetting createFileSetting(String key, File defaultValue) {
-		File parent = new File(defaultValue.getParent());        
-		if(!parent.isDirectory()) parent.mkdirs();
+	    String parentString = defaultValue.getParent();
+	    if( parentString != null ) {
+		    File parent = new File(parentString);
+		    if(!parent.isDirectory())
+		        parent.mkdirs();
+        }
 
 		FileSetting result = 
             new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);

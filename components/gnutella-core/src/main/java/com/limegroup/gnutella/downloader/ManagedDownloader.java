@@ -1309,7 +1309,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if( fileName.toLowerCase().endsWith("." + ThemeSettings.EXTENSION))
                 saveDir = ThemeSettings.THEME_DIR_FILE;
             else 
-                saveDir = SharingSettings.DIRECTORY_FOR_SAVING_FILES.getValue();
+                saveDir = SharingSettings.getSaveDirectory();
             completeFile=new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();		
             String completeFileParentPath = 

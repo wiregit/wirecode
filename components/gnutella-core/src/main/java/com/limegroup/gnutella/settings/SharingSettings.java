@@ -12,12 +12,15 @@ public class SharingSettings extends LimeProps {
     
     private SharingSettings() {}
     
+    public static final File DEFAULT_SAVE_DIR =
+        new File(CommonUtils.getUserHomeDir(), "Shared");
+    
     /**
      * The directory for saving files.
      */
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = 
         FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
-            new File(CommonUtils.getUserHomeDir(), "Shared"));
+            new File("."));
     
     /**
      * The directory where incomplete files are stored (downloads in progress).
@@ -89,6 +92,29 @@ public class SharingSettings extends LimeProps {
         DIRECTORY_FOR_SAVING_FILES.setValue(saveDir);
         INCOMPLETE_DIRECTORY.setValue(incDir);
         DOWNLOAD_SNAPSHOT_FILE.setValue(new File(incDir, "downloads.dat"));
+    }
+    
+    /**
+     * Retrieves the save directory.
+     * If it is blank, it uses a 'default' directory.
+     * This is used instead of the setting to ensure that the save
+     * directory is always saved to the user's file.
+     */
+    public static final File getSaveDirectory() {
+        File f = DIRECTORY_FOR_SAVING_FILES.getValue();
+        String path, defPath;
+        try {
+            path = f.getCanonicalPath();
+            defPath = new File(".").getCanonicalPath();
+        } catch(IOException damn) {
+            path = defPath = "default";
+        }
+        
+        if( path.equals(defPath) ) {
+            DIRECTORY_FOR_SAVING_FILES.setValue(DEFAULT_SAVE_DIR);
+        }
+        
+        return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
     
     /*********************************************************************/

@@ -267,7 +267,7 @@ public class DownloadManager implements BandwidthTracker {
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
-            File downloadDir = SharingSettings.DIRECTORY_FOR_SAVING_FILES.getValue();
+            File downloadDir = SharingSettings.getSaveDirectory();
             String filename=files[0].getFileName();
             File completeFile = new File(downloadDir, filename);  
             if ( completeFile.exists() ) 
