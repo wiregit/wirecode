@@ -125,9 +125,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The current address we're trying, or last address if waiting, or null
 		if unknown. */
     private String lastAddress;
-	/** The current port we're trying, or last address if waiting, or null
-		if unknown. */
-	private int lastPort;
     /** The number of tries we've made.  0 means on the first try. */
     private int tries;
 
@@ -198,7 +195,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         requested=new LinkedList();
         setState(QUEUED);
         this.lastAddress=null;
-        this.lastPort=0;
         this.tries=0;
             
         this.dloaderThread=new Thread(new ManagedDownloadRunner());
@@ -605,7 +601,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         private void downloadWithResume(RemoteFileDesc rfd)
                 throws IOException, InterruptedException {
             setState(CONNECTING, rfd.getHost());
-			lastPort = rfd.getPort();
             //Create downloader. Since this is blocking it cannot go in the
             //synchronized statement.  Also, we must check if stopped
             //afterwards since creating a downloader MAY be blocking
@@ -770,7 +765,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
 
-	public boolean chatEnabled() {
+	public synchronized boolean chatEnabled() {
 		if (dloader == null)
 			return false;
 		else 

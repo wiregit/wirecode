@@ -53,7 +53,7 @@ public class ChatManager {
 			InstantMessenger im = new InstantMessenger(socket, this, 
 													   _activityCallback);
 			// insert the newly created InstantMessager into the list
-			_chatsInProgress.add((Chat)im);
+			_chatsInProgress.add(im);
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
@@ -64,13 +64,13 @@ public class ChatManager {
 	}
 
 	/** request a chat connection from the host specified */
-	public Chat request(String host, int port) {
+	public InstantMessenger request(String host, int port) {
 		InstantMessenger im = null;
 		try {
 			im = new InstantMessenger(host, port, this, 
 									  _activityCallback);
 			// insert the newly created InstantMessager into the list
-			_chatsInProgress.add((Chat)im);
+			_chatsInProgress.add(im);
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
@@ -81,7 +81,7 @@ public class ChatManager {
 
 	/** remove the instance of chat from the list of chats
 		in progress */
-	public void removeChat(Chat chat) {
+	public void removeChat(InstantMessenger chat) {
 		_chatsInProgress.remove(chat);
 	}
 

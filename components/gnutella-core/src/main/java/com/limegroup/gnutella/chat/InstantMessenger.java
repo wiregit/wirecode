@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.io.*;
 
-public class InstantMessenger extends Chat {
+public class InstantMessenger implements Chatter {
 
 	// Attributes
 	private Socket _socket;
@@ -21,6 +21,8 @@ public class InstantMessenger extends Chat {
 	private String _host;
 	private int _port;
 	private String _message = "";
+	private ActivityCallback _activityCallback;
+	private ChatManager  _manager;
 
 	/** constructor for an incoming chat request */
 	public InstantMessenger(Socket socket, ChatManager manager, 
@@ -49,7 +51,7 @@ public class InstantMessenger extends Chat {
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		_out=new BufferedWriter(osw);
-        _out.write("CHAT /chat/" + " HTTP/1.0\r\n");
+        _out.write("CHAT lscp 0.1");
         _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         _out.write("\r\n");
 		_out.flush();
