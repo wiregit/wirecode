@@ -173,34 +173,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 				continue;
 			}
 			
-			int separator = current.indexOf(":");
-			
-			//see if this is a valid ip:port address; skip gracefully invalid altlocs
-			if (separator == -1 || separator!= current.lastIndexOf(":") ||
-					separator == current.length())
-				continue;
-				
-			String host = current.substring(0,separator);
-			
-			if (!NetworkUtils.isValidAddress(host))
-			    continue;
-			
-			String portS = current.substring(separator+1);
-			
-			
+			// if its not the header, try to parse it as a push proxy
+			// ignoring invalid ones
 			try {
-				int port = Integer.parseInt(portS);
-				
-				QueryReply.PushProxyContainer ppc = 
-					new QueryReply.PushProxyContainer(host, port);
-				
-				proxies.add(ppc);
-				
-			}catch(UnknownHostException notBad) {
-				continue;
-			}catch(NumberFormatException notBad) {
-				continue;
+			    proxies.add(parseIpPort(current));
+			}catch(IOException ohWell) {
+			    continue;
 			}
+			
 		}
 		
 		_proxies = Collections.synchronizedSet(proxies);
@@ -369,12 +349,15 @@ public class PushEndpoint implements HTTPHeaderValue{
 				.append(_fwtVersion)
 				.append(";");
 		
-		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
+		int proxiesWritten=0;
+		for (Iterator iter = getProxies().iterator();
+			iter.hasNext() && proxiesWritten <4;) {
 			PushProxyInterface cur = (PushProxyInterface)iter.next();
 			
 			httpString.append(NetworkUtils.ip2string(
 				        cur.getPushProxyAddress().getAddress()));
 			httpString.append(":").append(cur.getPushProxyPort()).append(";");
+			proxiesWritten++;
 		}
 		
 		//trim the ; at the end
@@ -433,17 +416,70 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	/**
+	 * 
+	 * @param http a string representing an ip and port
+	 * @return an object implementing PushProxyInterface 
+	 * @throws IOException parsing failed.
+	 */
+	private static PushProxyInterface parseIpPort(String http)
+		throws IOException{
+	    int separator = http.indexOf(":");
+		
+		//see if this is a valid ip:port address; 
+		if (separator == -1 || separator!= http.lastIndexOf(":") ||
+				separator == http.length())
+			throw new IOException();
+			
+		String host = http.substring(0,separator);
+		
+		if (!NetworkUtils.isValidAddress(host))
+		    throw new IOException();
+		
+		String portS = http.substring(separator+1);
+		
+		
+		try {
+			int port = Integer.parseInt(portS);
+			
+			QueryReply.PushProxyContainer ppc = 
+				new QueryReply.PushProxyContainer(host, port);
+			
+			return ppc;
+		}catch(NumberFormatException notBad) {
+		    throw new IOException(notBad.getMessage());
+		}
+	}
+	
+	/**
 	 * Overwrites the current known push proxies for the host specified
-	 * in the httpString with the set contained in the httpString
-	 * @param httpString the http representation of the PE
+	 * in the httpString with the set contained in the httpString.
+	 * 
+	 * @param guid the guid whose proxies to overwrite
+	 * @param httpString comma-separated list of proxies
 	 * @throws IOException if parsing of the http fails.
 	 */
-	public static PushEndpoint overwriteProxies(String httpString) 
+	public static void overwriteProxies(byte [] guid, String httpString) 
 		throws IOException{
-	    PushEndpoint pe = new PushEndpoint(httpString);
-	    GUID_PROXY_MAP.put(pe._guid,pe._proxies);
-	    pe._proxies=null;
-	    return pe;
+	    GUID g = new GUID(guid);
+	    Set oldSet = (Set)GUID_PROXY_MAP.get(g);
+	    
+	    // no use adding a new entry since the key may expire
+	    if (oldSet==null)
+	        return;
+	    
+	    Set newSet = new HashSet();
+	    StringTokenizer tok = new StringTokenizer(httpString,",");
+	    while(tok.hasMoreTokens()) {
+	        String proxy = tok.nextToken().trim();
+	        try {
+	            newSet.add(parseIpPort(proxy));
+	        }catch(IOException ohWell){}
+	    }
+	    
+	    synchronized(oldSet) {
+	        oldSet.clear();
+	        oldSet.addAll(newSet);
+	    }
 	}
 	
 }
