@@ -31,7 +31,7 @@ public class Buffer implements Cloneable {
      *            size>=2
      */
     private int size;
-    private Object buf[];
+    private final Object buf[];
     private int head;
     private int tail;
 
@@ -342,17 +342,17 @@ public class Buffer implements Cloneable {
     }
 
     public String toString() {
-        StringBuffer buf=new StringBuffer();
-        buf.append("[");
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
         boolean isFirst=true;
         for (Iterator iter=iterator(); iter.hasNext(); ) {
             if (! isFirst) 
-                buf.append(", ");
+                sb.append(", ");
             else
                 isFirst=false;
-            buf.append(iter.next().toString());            
+            sb.append(iter.next().toString());            
         }
-        buf.append("]");
-        return buf.toString();
+        sb.append("]");
+        return sb.toString();
     }
 }
