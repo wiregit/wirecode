@@ -130,17 +130,18 @@ public class IncompleteFileManager implements Serializable {
         Map retMap = new TreeMap(new FileComparator());
         for(Iterator i = map.keySet().iterator(); i.hasNext();) {
             Object incompleteFile = i.next();
-            Object o = map.remove(incompleteFile);
+            Object o = map.get(incompleteFile);
             if(o==null) //no entry??!
                 continue;
-            else if(o instanceof VerifyingFile)
-                retMap.put(incompleteFile,o);//move to new map
             else {// (o instanceof List) ie. old downloads.dat
                 Iterator iter = ((List)o).iterator();
                 VerifyingFile vf = new VerifyingFile(true);
                 while(iter.hasNext()) {
                     Interval interval = (Interval)iter.next();
-                    //older intervals excuded the high'th byte
+                    //older intervals excuded the high'th byte, so we decrease
+                    //the value of interval.high. An effect of this is that
+                    //an older client with a newer download.dat downloads one
+                    //byte extra for each interval.
                     interval.high = interval.high-1;
                     vf.addInterval(interval);
                 }
