@@ -1,10 +1,12 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import junit.extensions.*;
 import java.io.*;
+import java.net.*;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
@@ -67,7 +69,14 @@ public final class FileDescTest extends TestCase {
 
 		File curDir = CommonUtils.getCurrentDirectory();
 		File parDir = curDir.getParentFile();
-		_fileArray = parDir.listFiles();
+		File[] allFiles = parDir.listFiles();
+		List fileList = new LinkedList();
+		for(int i=0; i<allFiles.length; i++) {
+			if(allFiles[i].isFile()) {
+				fileList.add(allFiles[i]);
+			}
+		}
+		_fileArray = (File[])fileList.toArray(new File[0]);
 		_fileDescArray = new FileDesc[_fileArray.length];
 		for(int i=0; i<_fileArray.length; i++) {
 			Set urns = FileDesc.calculateAndCacheURN(_fileArray[i]);
@@ -79,17 +88,83 @@ public final class FileDescTest extends TestCase {
 	 * Tests the FileDesc construcotor.
 	 */
 	public void testConstructor() {
-		File file = new File("FileDescTester.java");
+		File file = new File("build.xml");
 
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
 			FileDesc fd = new FileDesc(null, urns, 0);
-			assertTrue("null values should not be permitted for FileDesc "+
-					   "constructor", false);
+			fail("null values should not be permitted for FileDesc "+
+				 "constructor");
 		} catch(NullPointerException e) {
 		}		
 	}
 
+	/**
+	 * Tests the calculateAndCacheURN method
+	 */
+	public void testCalculateAndCacheURN() {
+		File file = new File("nonexistentfile");
+		if(file.exists()) file.delete();
+		try {
+			Set urns = FileDesc.calculateAndCacheURN(file);
+			fail("nonexistent files should not be permitted");
+		} catch(IllegalArgumentException e) {
+		}		
+
+		try {
+			Set urns = FileDesc.calculateAndCacheURN(null);
+			fail("null files should not be permitted");
+		} catch(NullPointerException e) {
+		}		
+	}
+
+
+	/**
+	 * Tests that alternate locations with the same SHA1 values can be
+	 * added to a <tt>FileDesc</tt>.
+	 */
+	public void testAddingAlternateLocations() {
+		File file = new File("build.xml");
+		try {
+			Set urns = FileDesc.calculateAndCacheURN(file);
+			FileDesc fd = new FileDesc(file, urns, 0);
+			URN sha1 = fd.getSHA1Urn();
+  			URL sha1Url = new URL("http", "60.23.35.10", 6346, 
+								  "/uri-res/N2R?"+sha1.httpStringValue());
+			AlternateLocation loc =  
+				AlternateLocation.createAlternateLocation(sha1Url);
+			fd.addAlternateLocation(loc);
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
+		}
+	}
+
+	/**
+	 * Tests that alternate locations with the different SHA1 values cannot be
+	 * added to a <tt>FileDesc</tt>.
+	 */
+	public void testAddingDifferentAlternateLocations() {
+		File file = new File("build.xml");
+		try {
+			Set urns = FileDesc.calculateAndCacheURN(file);
+			FileDesc fd = new FileDesc(file, urns, 0);
+			URN sha1 = fd.getSHA1Urn();
+  			URL sha1Url = new URL("http", "60.23.35.10", 6346, 
+								  HTTPConstants.URI_RES_N2R+
+								  HugeTestUtils.URNS[0]);
+			AlternateLocation loc =  
+				AlternateLocation.createAlternateLocation(sha1Url);
+			assertNotNull("should not be null", loc.getSHA1Urn());
+			fd.addAlternateLocation(loc);
+			fail("should not have accepted location: "+loc+"when our sha1 is: "+sha1);
+		} catch(IllegalArgumentException e) {
+		} catch(MalformedURLException e) {
+		}
+	}
 
 	/**
 	 * Tests the containsUrn method that returns whether or not the 
