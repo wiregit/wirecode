@@ -261,18 +261,21 @@ public final class SearchResultHandler {
         try {
             data = qr.getHostData();
         } catch(BadPacketException bpe) {
+            LOG.debug("bad packet reading qr", bpe);
             return false;
         }
         
         // always handle reply to multicast queries.
-        if( !data.isReplyToMulticastQuery() ) {
+        if( !data.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
             // note that the minimum search quality will always be greater
             // than -1, so -1 qualities (the impossible case) are never
             // displayed
             if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
+                LOG.debug("Ignoring because low quality");
                 return false;
             }
             if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
+                LOG.debug("Ignoring because low speed");
                 return false;
             }
             // if the other side is firewalled AND
@@ -284,6 +287,7 @@ public final class SearchResultHandler {
                (!RouterService.acceptedIncomingConnection() ||
                 NetworkUtils.isPrivateAddress(RouterService.getAddress()))
                )  {
+               LOG.debug("Ignoring from firewall funkiness");
                return false;
             }
         }
@@ -292,6 +296,7 @@ public final class SearchResultHandler {
         try {
             results = qr.getResultsAsList();
         } catch (BadPacketException e) {
+            LOG.debug("Error gettig results", e);
             return false;
         }
         

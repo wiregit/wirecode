@@ -95,6 +95,11 @@ public class QueryReply extends Message implements Serializable{
     private Set _proxies;
     
     /**
+     * Whether or not this is a result from a browse-host reply.
+     */
+    private boolean _browseHostReply;
+    
+    /**
      * The HostData containing information about this QueryReply.
      * Only set if this QueryReply is parsed.
      */
@@ -432,6 +437,20 @@ public class QueryReply extends Message implements Serializable{
 		if(RECORD_STATS) {
 			SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
 		}
+    }
+    
+    /**
+     * Sets this reply to be considered a 'browse host' reply.
+     */
+    public void setBrowseHostReply(boolean isBH) {
+        _browseHostReply = isBH;
+    }
+    
+    /**
+     * Gets whether or not this reply is from a browse host request.
+     */
+    public boolean isBrowseHostReply() {
+        return _browseHostReply;
     }
 
     /** Return the associated xml metadata string if the queryreply
