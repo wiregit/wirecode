@@ -6,13 +6,15 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 
+/**
+ * This class is the message routing implementation for TCP messages.
+ */
 public class StandardMessageRouter extends MessageRouter {
 
     private ActivityCallback _callback;
     private FileManager _fileManager;
 
-    public StandardMessageRouter(ActivityCallback callback, FileManager fm)
-    {
+    public StandardMessageRouter(ActivityCallback callback, FileManager fm) {
         _callback = callback;
         _fileManager = fm;
     }
@@ -21,12 +23,10 @@ public class StandardMessageRouter extends MessageRouter {
      * Override of handleQueryRequest to send query strings to the callback.
      */
     protected void handleQueryRequest(QueryRequest queryRequest,
-                                      ReplyHandler receivingConnection)
-    {
+                                      ReplyHandler receivingConnection) {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
-        if (!receivingConnection.isPersonalSpam(queryRequest))
-        {
+        if (!receivingConnection.isPersonalSpam(queryRequest)) {
             _callback.handleQueryString(queryRequest.getQuery());
         }
 
@@ -82,8 +82,7 @@ public class StandardMessageRouter extends MessageRouter {
                                             markPong,
                                             dailyUptime);
 
-        try
-        {
+        try {
             sendPingReply(pingReply);
         }
         catch(IOException e) {}
@@ -164,8 +163,7 @@ public class StandardMessageRouter extends MessageRouter {
     }
     
     protected void handlePingReply(PingReply pingReply,
-								   ReplyHandler receivingConnection)
-    {
+								   ReplyHandler receivingConnection) {
         //We override the super's method so the receiving connection's
         //statistics are updated whether or not this is for me.
 		if(receivingConnection instanceof ManagedConnection) {
@@ -175,22 +173,6 @@ public class StandardMessageRouter extends MessageRouter {
         super.handlePingReply(pingReply, receivingConnection);
     }
 
-    /**
-     * Allow the controlled creation of a GroupPingRequest
-     */
-    public GroupPingRequest createGroupPingRequest(String group)
-    {
-        int num_files = RouterService.getNumSharedFiles();
-        int kilobytes = RouterService.getSharedFileSize()/1024;
-        
-        //also append everSupernodeCapable flag to the group
-        GroupPingRequest pingRequest =
-          new GroupPingRequest(SettingsManager.instance().getTTL(),
-            RouterService.getPort(), RouterService.getAddress(),
-            num_files, kilobytes, group + ":"
-            + SettingsManager.instance().getEverSupernodeCapable());
-        return( pingRequest );
-    }
 
     protected void respondToQueryRequest(QueryRequest queryRequest,
                                          byte[] clientGUID) {
