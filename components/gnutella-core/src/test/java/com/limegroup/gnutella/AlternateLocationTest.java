@@ -76,7 +76,7 @@ public final class AlternateLocationTest extends TestCase {
 				URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
 				URL url1 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, 
 								   "/uri-res/N2R?"+HugeTestUtils.URNS[i].httpStringValue());
-				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], "/test.htm");
+				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, "/test.htm");
 				AlternateLocation al1 = 
 				    AlternateLocation.createAlternateLocation(url1);
 				AlternateLocation al2 = 
@@ -135,11 +135,25 @@ public final class AlternateLocationTest extends TestCase {
 			for(int i=0; i<HugeTestUtils.INVALID_LOCS.length; i++) {
 				AlternateLocation al = 
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.INVALID_LOCS[i]);
-				assertTrue("alternate location string should not have been accepted",
-						   false);
+				fail("alternate location string should not have been accepted");
 			}
 		} catch(IOException e) {
 			// the exception is excpected in this case
+		}
+	}
+
+	public void testConstructorForBadPorts() {
+		try {
+			for(int i=0; i<HugeTestUtils.BAD_PORT_URLS.length; i++) {
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(HugeTestUtils.BAD_PORT_URLS[i]);
+				fail("alternate location string should not have been accepted: "+
+					 HugeTestUtils.BAD_PORT_URLS[i]);
+			}			
+		} catch (IOException e) {
+			fail("should not have received an IOException: "+e);
+		} catch(IllegalArgumentException e) {
+			// this is what we're expecting
 		}
 	}
 
