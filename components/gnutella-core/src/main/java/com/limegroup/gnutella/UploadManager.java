@@ -123,7 +123,7 @@ public class UploadManager implements BandwidthTracker {
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
-	 * if it successfully parses the HTTP 'get' header.
+	 * if it successfully parses the HTTP 'get' header.  BLOCKING.
 	 *
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
@@ -215,7 +215,7 @@ public class UploadManager implements BandwidthTracker {
                     reportUploadSpeed(finishTime-startTime,
                                       uploader.amountUploaded());
                 removeFromMapAndList(uploader, host);
-                removeAttemptedPush(host, index);
+                removeAttemptingPush(host, index);
                 _callback.removeUpload(uploader);		
             }
         }
@@ -242,6 +242,7 @@ public class UploadManager implements BandwidthTracker {
     
 	/**
 	 * Accepts a new push upload, creating a new <tt>HTTPUploader</tt>.
+     * NON-BLOCKING: creates a new thread to transfer the file.
 	 *
 	 * @param file the fully qualified pathname of the file to upload
 	 * @param host the ip address of the host to upload to
@@ -249,35 +250,36 @@ public class UploadManager implements BandwidthTracker {
 	 * @param index the index of the file in <tt>FileManager</tt>
 	 * @param guid the unique identifying client guid of the uploading client
 	 */
-	public synchronized void acceptPushUpload(String file, 
-											  String host, int port, 
-											  int index, String guid) { 
+	public synchronized void acceptPushUpload(final String file, 
+											  final String host, 
+                                              final int port, 
+											  final int index, 
+                                              final String guid) { 
+		final Uploader uploader = new HTTPUploader(file, host, port, index, 
+                                                   guid, this, _fileManager);
 
-        //increment the download count
-        synchronized(this) { _activeUploads++; }
+        // Test if we are either currently attempting a push, or we have
+        // unsuccessfully attempted a push with this host in the past.
 		clearFailedPushes();
+        if ( (! testAttemptingPush(host, index) )  ||
+             (! testFailedPush(host, index) ) )
+            return;
+        insertAttemptingPush(host, index);        
 
-		Uploader uploader = null;
-        try {
-            uploader = new HTTPUploader(file, host, port, index, guid, this,
-                                        _fileManager);
-            // testing if we are either currently attempting a push, 
-            // or we have unsuccessfully attempted a push with this host in the
-            // past.
-            if ( (! testAttemptedPush(host, index) )  ||
-                 (! testFailedPush(host, index) ) )
-                return;
-
-            insertAttemptedPush(host, index);
-
-            doSingleUpload(uploader, host, index);
-        } finally {
-            //decrement the download count
-            synchronized(this) { _activeUploads--; }
-            //close the socket
-            if(uploader != null)
-                uploader.stop();
-        }
+        Thread runner=new Thread() {
+            public void run() {
+                try {
+                    synchronized(UploadManager.this) { _activeUploads++; }
+                    doSingleUpload(uploader, host, index);
+                } finally {
+                    //decrement the download count
+                    synchronized(UploadManager.this) { _activeUploads--; }
+                    //close the socket
+                    uploader.stop();
+                }
+            }
+        };
+        runner.start();
 	}
 
 	/** 
@@ -433,11 +435,11 @@ public class UploadManager implements BandwidthTracker {
 
 	}
 
-	private void insertAttemptedPush(String host, int index) {
+	private void insertAttemptingPush(String host, int index) {
 		_attemptingPushes.add(new PushedFile(host, index));
 	}
 
-	private boolean testAttemptedPush(String host, int index) {
+	private boolean testAttemptingPush(String host, int index) {
 		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
@@ -449,7 +451,7 @@ public class UploadManager implements BandwidthTracker {
 		return true;
 	}
 	
-	private void removeAttemptedPush(String host, int index) {
+	private void removeAttemptingPush(String host, int index) {
 		PushedFile pf = new PushedFile(host, index);
 		PushedFile pfile;
 		Iterator iter = _attemptingPushes.iterator();
