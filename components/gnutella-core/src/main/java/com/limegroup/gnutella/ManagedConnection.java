@@ -285,9 +285,14 @@ public class ManagedConnection extends Connection
     private Map _guidMap = null;
 
     /**
-     * The max lifetime of the GUID.
+     * The max lifetime of the GUID (10 minutes).
      */
-    private static final long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
+    private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
+
+    /**
+     * The next time to schedule the _guidMap for clearing.
+     */
+    private long _nextClearTime = 0;
 
     /**
      * Whether or not horizon counting is enabled from this connection.
@@ -1025,11 +1030,17 @@ public class ManagedConnection extends Connection
         query = QueryRequest.createProxyQuery(query, oobGUID);
 
         // 2) set up mappings between the guids
-        if (_guidMap == null)
+        if (_guidMap == null) {
             _guidMap = new Hashtable();
+            _nextClearTime = System.currentTimeMillis() + TIMED_GUID_LIFETIME;
+        }
         GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
                                                   TIMED_GUID_LIFETIME);
         _guidMap.put(tGuid, new GUID(origGUID));
+        if (System.currentTimeMillis() >= _nextClearTime) {
+            GuidMapExpirer.addMapToExpire(_guidMap);
+            _nextClearTime = System.currentTimeMillis() + TIMED_GUID_LIFETIME;
+        }
 
         return query;
     }
@@ -1576,5 +1587,47 @@ public class ManagedConnection extends Connection
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}
+
+    /** Class-wide expiration mechanism for all ManagedConnections.
+     *  Only expires on-demand.
+     */
+    private static class GuidMapExpirer implements Runnable {
+        
+        private static List toExpire = new LinkedList();
+        private static boolean scheduled = false;
+
+        public GuidMapExpirer() {};
+
+        public static synchronized void addMapToExpire(Map expiree) {
+            // schedule it on demand
+            if (!scheduled) {
+                RouterService.schedule(new GuidMapExpirer(), 0,
+                                       TIMED_GUID_LIFETIME);
+                scheduled = true;
+            }
+            toExpire.add(expiree);
+        }
+
+        public void run() {
+            synchronized (this) {
+                // iterator through all the maps....
+                Iterator iter = toExpire.iterator();
+                while (iter.hasNext()) {
+                    Map currMap = (Map) iter.next();
+                    synchronized (currMap) {
+                        Iterator keySetIter = currMap.keySet().iterator();
+                        // and expire as many entries as possible....
+                        while (keySetIter.hasNext()) 
+                            if (((GUID.TimedGUID) iter.next()).shouldExpire()) 
+                                iter.remove();
+                    }
+                    // now that you've expired hosts, remove the reference
+                    // so as to free the memory (the connection will re-add
+                    // it later if needs be)
+                    iter.remove();
+                }
+            }
+        }
+    }
 
 }
