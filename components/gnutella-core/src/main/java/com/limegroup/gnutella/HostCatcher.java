@@ -251,7 +251,7 @@ public class HostCatcher {
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
-        //supernode.  TODO: if uptime set, use that instead of estimate.
+        //supernode.
         if (pr.isMarked())
             return add(e, GOOD_PRIORITY, uptime);
         else
@@ -376,13 +376,15 @@ public class HostCatcher {
     private static int expectedUptime(Endpoint e) {
         //By looking at version logs, we find that the average session uptime
         //for a host is about 8.1 minutes.  A study of connection uptimes
-        //(http://www.limewire.com/developer/lifetimes/) confirms this.  Why not
-        //use 0?  If you have to choose between a node with an unknown uptime
-        //and one with a confirmed low uptime, you'll gamble on the former; it's
-        //unlikely to be worse!
-        //TODO: multiple by the average sessions per day (typically <1) to 
-        //get average daily uptime.
-        return 486;   //8.1 minutes * 60 sec/minute
+        //(http://www.limewire.com/developer/lifetimes/) confirms this.
+        //Furthermore, we estimate that users connect to the network about 0.71
+        //times per day, for a total of 8.1*60*0.71=345 seconds of uptime per
+        //day.
+        //
+        //Why not use 0?  If you have to choose between a node with an unknown
+        //uptime and one with a confirmed low uptime, you'll gamble on the
+        //former; it's unlikely to be worse!
+        return 345;   //8.1 minutes * 60 sec/minute
     }
 
 

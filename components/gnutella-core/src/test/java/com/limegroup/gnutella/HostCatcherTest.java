@@ -184,7 +184,7 @@ public class HostCatcherTest extends TestCase {
         //System.out.println("-Testing write of permanent nodes to Gnutella.net");
         try {
             //1. Create HC, add entries, write to disk.
-            hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=486
+            hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                           0l, 0l, false, 1000),
