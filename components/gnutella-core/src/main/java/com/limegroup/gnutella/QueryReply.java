@@ -79,6 +79,9 @@ public class QueryReply extends Message implements Serializable{
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = new byte[0];
 
+	/** The raw ip address of the host returning the hit.*/
+	private byte[] _address = new byte[4];
+
 
     /** Creates a new query reply.  The number of responses is responses.length
      *  The Browse Host GGEP extension is ON by default.  
@@ -165,6 +168,7 @@ public class QueryReply extends Message implements Serializable{
               byte[] payload) {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
         this.payload=payload;
+		setAddress();
         //repOk();                               
     }
 
@@ -188,6 +192,7 @@ public class QueryReply extends Message implements Serializable{
 			  reply.getLength());
         //set the payload field
         this.payload = reply.payload;
+		setAddress();
     }
 
     /** 
@@ -293,7 +298,18 @@ public class QueryReply extends Message implements Serializable{
         for (int j=0; j<16; j++) {
             payload[i+j]=clientGUID[j];
         }
+		setAddress();
     }
+
+	/**
+	 * Sets the IP address bytes.
+	 */
+	private void setAddress() {
+		_address[0] = payload[3];
+        _address[1] = payload[4];
+        _address[2] = payload[5];
+        _address[3] = payload[6];		
+	}
 
     /**
      * Sets the guid for this message. Is needed, when we want to cache 
@@ -366,12 +382,7 @@ public class QueryReply extends Message implements Serializable{
     /** Returns the IP address of the responding host in standard
      *  dotted-decimal format, e.g., "192.168.0.1" */
     public String getIP() {
-        byte[] ip=new byte[4];
-        ip[0]=payload[3];
-        ip[1]=payload[4];
-        ip[2]=payload[5];
-        ip[3]=payload[6];
-        return ip2string(ip); //takes care of signs
+        return ip2string(_address); //takes care of signs
     }
 
     public long getSpeed() {
@@ -785,7 +796,10 @@ public class QueryReply extends Message implements Serializable{
     }
 
     public String toString() {
-        return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
+        return ("QueryReply::\r\n"+
+				getResultCount()+" hits\r\n"+
+				super.toString()+"\r\n"+
+				"ip: "+getIP()+"\r\n");				
     }
 
     /** Return all the responses in this QR as an array of
@@ -871,6 +885,7 @@ public class QueryReply extends Message implements Serializable{
 
         /* Is the remote host firewalled? */
 		int heFirewalled;
+		
 		if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
 			heFirewalled = YES;
 		else {
@@ -884,7 +899,9 @@ public class QueryReply extends Message implements Serializable{
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
          * this method, take a look at isFirewalledQuality! */
-        if (iFirewalled && heFirewalled==YES) {
+		if(Arrays.equals(_address, RouterService.instance().getIPAddress())) {
+			return 3;       // same address -- display it
+        } else if (iFirewalled && heFirewalled==YES) {
             return -1;      //     both firewalled; transfer impossible
         } else if (busy==MAYBE || heFirewalled==MAYBE) {
             return 0;       //*    older client; can't tell
