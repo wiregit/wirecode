@@ -28,6 +28,14 @@ public class HandshakeResponse {
      */
     public static final String OK_MESSAGE = "OK";
 
+    /** The error code that a shielded leaf node should give to incoming
+     *  connections.  */
+    public static final int SHIELDED = 503;
+    /** The error message that a shielded leaf node should give to incoming
+     *  connections.  */
+    public static final String SHIELDED_MESSAGE = "I am a shielded leaf node";
+
+
     /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
      */
