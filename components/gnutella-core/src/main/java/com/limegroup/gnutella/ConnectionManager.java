@@ -98,22 +98,19 @@ public class ConnectionManager {
     
     private MessageRouter _router;
     private HostCatcher _catcher;
-
-	/** Constant handle to the <tt>SettingsManager</tt>. */
-	private final SettingsManager _settings = SettingsManager.instance();
-	private ConnectionWatchdog _watchdog;
+	private final ConnectionWatchdog _watchdog;
 
 
     /** The number of connections to keep up.  */
     private volatile int _keepAlive=0;
     /** Threads trying to maintain the KEEP_ALIVE.  This is generally
      *  some multiple of _keepAlive.   LOCKING: obtain this. */
-    private List /* of ConnectionFetcher */ _fetchers =
+    private final List /* of ConnectionFetcher */ _fetchers =
         new ArrayList();
     /** Connections that have been fetched but not initialized.  I don't
      *  know the relation between _initializingFetchedConnections and
      *  _connections (see below).  LOCKING: obtain this. */
-    private List /* of ManagedConnection */ _initializingFetchedConnections =
+    private final List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
 
@@ -161,12 +158,20 @@ public class ConnectionManager {
 	 */
 	private volatile int _leafTries;
 
+	/**
+	 * The number of demotions to ignore before allowing ourselves to become 
+	 * a leaf -- this number depends on how good this potential Ultrapeer seems 
+	 * to be.
+	 */	
+	private volatile int _demotionLimit = 0;
+
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      * @param authenticator Authenticator instance for authenticating users
      */
     public ConnectionManager(Authenticator authenticator) {
         _authenticator = authenticator; 
+        _watchdog = new ConnectionWatchdog(this);
     }
 
     /**
@@ -174,22 +179,14 @@ public class ConnectionManager {
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
     public void initialize() {
-        _router = RouterService.getMessageRouter();//router;
-        _catcher = RouterService.getHostCatcher();//catcher;
+        _router = RouterService.getMessageRouter();
+        _catcher = RouterService.getHostCatcher();
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-        _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog = new Thread(_watchdog, "ConnectionWatchdog");
         watchdog.setDaemon(true);
   		watchdog.start();
-        
-        //We used to set the keep-alive to zero here, but that caused problems
-        //because connection fetchers could wait in HostCatcher.getAnEndpoint()
-        //before HostCatcher.expire() had been called.  As a result, LimeWire
-        //sometimes failed to connect on startup, esp. if the gnutella.net file
-        //was empty.  Turns out this code isn't needed, as
-        //RouterService.initialize() does the right thing.
     }
 
 
@@ -886,9 +883,6 @@ public class ConnectionManager {
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-        SettingsManager settings=SettingsManager.instance();
-        int oldKeepAlive=ConnectionSettings.KEEP_ALIVE.getValue();//settings.getKeepAlive();
-
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
         //   to ignore the fact that we have a client-supernode connection.
@@ -1263,10 +1257,15 @@ public class ConnectionManager {
 	/**
 	 * Notifies the connection manager that it should attempt to become an
 	 * Ultrapeer.  If we already are an Ultrapeer, this will be ignored.
+	 *
+	 * @param demotionLimit the number of attempts by other Ultrapeers to
+	 *  demote us to a leaf that we should allow before giving up in the
+	 *  attempt to become an Ultrapeer
 	 */
-	public void attemptToBecomeAnUltrapeer() {
+	public void tryToBecomeAnUltrapeer(int demotionLimit) {
 		if(isSupernode()) return;
-		_leafTries = 0;
+		_demotionLimit = demotionLimit;
+		_leafTries = 0;		
 		disconnect();
 		connect();
 	}
