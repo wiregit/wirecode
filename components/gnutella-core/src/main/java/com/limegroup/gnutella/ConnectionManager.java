@@ -366,7 +366,7 @@ public class ConnectionManager {
      * is enough hosts in the reserve cache (HostCatcher).  Otherwise, the ttl
      * of the PingRequest = max ttl for refreshing the PingReplyCache.
      */
-    private PingRequest sendInitialPingRequest(ManagedConnection connection) {
+    private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
         //based on the invariant: numConnections + numFetchers >= _keepAlive
         if (getNumConnections() + _fetchers.size() >= _keepAlive) 
@@ -749,14 +749,15 @@ public class ConnectionManager {
                         (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
                     pr = ((PingReplyCacheEntry)pongCache.getEntry(hops+1)).
                         getPingReply();
-                    //no problem, just wait until pong cache returns a Ping Reply
-                    if (pr == null)
-                        continue; 
-                    endpoint = new Endpoint(pr.getIPBytes(), pr.getPort());
-                } catch (InterruptedException exc2) {
-                    // Externally generated interrupt.
-                    // The interrupting thread has recorded the
-                    // death of the fetcher, so just return.
+                    //if nothing in the cache, then try from the reserve cache
+                    if (pr == null) 
+                        endpoint = _catcher.getAnEndpoint();
+                    else
+                        endpoint = new Endpoint(pr.getIPBytes(), pr.getPort());
+                } catch (NoSuchElementException exc2) {
+                    //If we get here, it means that even the reserve cache has
+                    //either no elements (or only private IPs), so just return
+                    //and record the death of the fetcher.
                     return;
                 }               
             } while ((endpoint == null) || (isConnected(endpoint)));

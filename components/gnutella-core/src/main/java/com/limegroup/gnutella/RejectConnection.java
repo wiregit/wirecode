@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.Iterator;
 import java.net.Socket;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * This class extends Connection and is invkoed when the Connection Manager has
@@ -64,26 +65,62 @@ class RejectConnection extends Connection {
                 return; //Its a bad packet, just return
             }
             if((m instanceof PingRequest) && (m.getHops()==0)) {
-                // this is the only kind of message we will deal with
-                // in Reject Connection
-                // If any other kind of message comes in we drop
-                Iterator iter = _hostCatcher.getBestHosts(10);
-                 // we are going to send rejected host the top ten
-                 // connections
-                while(iter.hasNext()) {
-                    Endpoint bestEndPoint =(Endpoint)iter.next();
-                    // make a pong with this host info
-                    PingReply pr = new PingReply(m.getGUID(),(byte)1,
-                        bestEndPoint.getPort(),
-                        bestEndPoint.getHostBytes(), 0, 0);
-                    // the ttl is 1; and for now the number of files
-                    // and kbytes is set to 0 until chris stores more
-                    // state in the hostcatcher
-                    send(pr);
-                }
+                //forward some pongs from the PingReplyCache back to this 
+                //rejected connection.
+                if (PingReplyCache.instance().size() <= 10)
+                    sendAllPongs(m);
+                else
+                    sendSomePongs(m);
                 flush();
                 return;
             }// end of (if m is PingRequest)
         } // End of while(true)
     }
+
+    /**
+     * Sends out all the PingReplies stored in the PingReply cache to the 
+     * rejected connection.  The new Ping Reply, however, only has a ttl = 1,
+     * since we don't want this pong to go any further than just the rejected
+     * connection.
+     *
+     * @requires - size of PingReplyCache <= 10
+     */
+    private void sendAllPongs(Message m) throws IOException {
+        PingReplyCache pongCache = PingReplyCache.instance();
+        PingReply cachedPingReply = null;
+
+        Iterator iter = pongCache.iterator();
+        while (iter.hasNext()) {
+            cachedPingReply = ((PingReplyCacheEntry)iter.next()).getPingReply();
+            PingReply newReply = new PingReply(m.getGUID(), (byte)1,
+                cachedPingReply.getPort(), cachedPingReply.getIPBytes(),
+                cachedPingReply.getFiles(), cachedPingReply.getKbytes());
+            send(newReply);
+        }
+    }
+
+    /**
+     * Sends out randomly selected PingReplies stored in the PingReply cache
+     * to the rejected connection.  The new Ping Reply, however, only has a 
+     * ttt = 1, since we don't want this pong to go any further than just the
+     * rejected connection.
+     */
+    private void sendSomePongs(Message m) throws IOException {
+        PingReplyCache pongCache = PingReplyCache.instance();
+        Random random = new Random();
+        PingReply cachedPingReply = null;
+        int hops;
+
+        for (int i = 0; i < 10; i++) {
+            hops = random.nextInt(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+            cachedPingReply = 
+                ((PingReplyCacheEntry)pongCache.getEntry(hops+1)).getPingReply();
+            PingReply newReply = new PingReply(m.getGUID(), (byte)1,
+                cachedPingReply.getPort(), cachedPingReply.getIPBytes(),
+                cachedPingReply.getFiles(), cachedPingReply.getKbytes());
+            send(newReply);
+        }
+    }
 }
+
+

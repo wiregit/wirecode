@@ -171,7 +171,7 @@ public class PingReplyCache
      */
     public String toString()
     {
-        StringBuffer st;
+        StringBuffer st = new StringBuffer();
 
         for (int i = 0; i < pingReplies.length; i++)
             st.append(pingReplies[i].toString());
@@ -305,7 +305,7 @@ class PingReplyCacheEntry
 
     public String toString()
     {
-        pingReply.toString();
+        return pingReply.toString();
     }
 }
 

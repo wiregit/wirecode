@@ -239,20 +239,21 @@ public class RouterService
      *  pong server as needed.
      */
     public void connect() {
-        //HACK. People used to complain to that the connect button wasn't
-        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
-        //This is not a bug; LimeWire isn't supposed to connect to the pong
-        //server in this case.  But this IS admittedly confusing.  So we force a
-        //connection to the pong server in this case by disconnecting and
-        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
-        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
-        //to give the connection fetchers time to do their thing.  Ugh.  A
-        //Thread.yield() may work here too, but that's less dependable.  And I
-        //do not want to bother with wait/notify's just for this obscure case.
+        //HACK. People used to complain that the connect button wasn't
+        //working when the Ping Reply Cache was empty and 
+        //USE_QUICK_CONNECT=false.  This is not a bug; LimeWire isn't supposed 
+        //to connect to the pong server in this case.  But this IS admittedly 
+        //confusing.  So we force a connection to the pong server in this case 
+        //by disconnecting and temporarily setting USE_QUICK_CONNECT to true.  
+        //But we have to sleep(..) a little bit before setting 
+        //USE_QUICK_CONNECT back to false to give the connection fetchers time 
+        //to do their thing.  Ugh.  A Thread.yield() may work here too, but 
+        //that's less dependable.  And I do not want to bother with 
+        //wait/notify's just for this obscure case.
         SettingsManager settings=SettingsManager.instance();
         boolean useHack=
             (!settings.getUseQuickConnect())
-                && catcher.getNumHosts()==0;
+                && PingReplyCache.instance().size()==0;
         if (useHack) {
             settings.setUseQuickConnect(true);
             disconnect();
@@ -292,6 +293,7 @@ public class RouterService
      * @modifies this
      * @effects removes all connections.
      * @effects deactivates extra connection watchdog check
+     * @effects clears the PingReplyCache.
      */
     public void disconnect() {
 		// Deactivate checking for Ultra Fast Shutdown
@@ -310,6 +312,10 @@ public class RouterService
             ManagedConnection c=(ManagedConnection)iter.next();
             removeConnection(c);
         }
+        
+        //to maintain consistency, since we're removing all our connections,
+        //we need to clear the PingReply cache.
+        PingReplyCache.instance().clear();
     }
 
     /**
@@ -327,12 +333,18 @@ public class RouterService
     }
 
     /**
-     * Get the real number of hosts from the host catcher
+     * Get the reserve number of hosts from the host catcher
      */
-    public int getRealNumHosts() {
-        return(catcher.getNumHosts());
+    public int getNumReserveHosts() {
+        return(catcher.getNumReserveHosts());
     }
 
+    /** 
+     * Get the number of hosts from the Ping Reply Cache
+     */
+    public int getRealNumHosts() {
+        return (PingReplyCache.instance().size());
+    }
 
     /**
      * Shut stuff down and write the gnutella.net file
@@ -561,8 +573,15 @@ public class RouterService
     /**
      *  Return an iterator on the hostcatcher hosts
      */
-    public Iterator getHosts() {
-        return catcher.getHosts();
+    public Iterator getReserveHosts() {
+        return catcher.getReserveHosts();
+    }
+
+    /**
+     * Return an iterator on the PingReplyCache hosts
+     */
+    public Iterator getCachedHosts() {
+        return PingReplyCache.instance().iterator();
     }
 
     /**

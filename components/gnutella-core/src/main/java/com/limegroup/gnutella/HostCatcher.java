@@ -7,18 +7,15 @@ import java.net.InetAddress;
 import java.util.Date;
 
 /**
- * The host catcher.  This peeks at pong messages coming on the
- * network and snatches IP addresses of other Gnutella peers.  IP
- * addresses may also be added to it from a file (usually
- * "gnutella.net").  The servent may then connect to these addresses
- * as necessary to maintain full connectivity.<p>
- *
- * Generally speaking, IP addresses from pong servers (e.g. router.limewire.com)
- * are preferred to other pongs.  For this reason, the HostCatcher may initiate
- * outgoing "router" connections.  Also, IP addresses from pongs are preferred to
- * those from the gnutella.net file, since they more likely to be live.  Hosts
- * we are connected to are not added to the host catcher, but they will be
- * written to disk.
+ * The host catcher.  In essence, this is a reserve cache to store endpoints
+ * which might be used for connections later.  It has four distinct rnakings of 
+ * endpoints added to it.  "New client" endpoints, (i.e., GNUTELLA Protocol
+ * Version 0.6 and higher) are stored with the best ranking, followed by
+ * endpoints from router pongs, followed by "older clients", and the worst
+ * ranking is for private IP endpoints.  This class is also used to intiate
+ * connections to "GNUTELLA routers" such as router.limewire.com, based on
+ * certain conditions, such as clearing out the reserve cache (expiring it) 
+ * and if the size of the cache is less than a certain amount, etc.
  */
 public class HostCatcher {
     /** 
@@ -27,7 +24,7 @@ public class HostCatcher {
      * connection.  Also, used when determing whether create a connection
      * to router or not.
      */
-    private static final int RESERVE_CACHE_SUFFICIENT_CAPACITY = 50;
+    private static final int  RESERVE_CACHE_SUFFICIENT_CAPACITY = 50;
 
     /** The number of router pongs to store in the reserve cache. */
     private static final int ROUTER_SIZE=30;
@@ -69,21 +66,13 @@ public class HostCatcher {
     private SettingsManager settings=SettingsManager.instance();
 
     private Thread routerConnectorThread;
-    /* True if the cache has expired and the host catcher has not yet tried
-     * (successfully or not) to connect to the pong cache.  It is also used to
-     * force the first connection fetchers to wait for the initial connection to
-     * the router.  LOCKING: obtain staleLock.
+    /* True if we've received a pong from a router. 
+     * LOCKING: obtain gotRouterPongLock
      */
-    private boolean stale=true;
-    private Object staleLock=new Object();
-    /* The number of threads waiting for stale to become false.  This is used as
-     * an optimization to avoid reconnecting to the server unless someone needs
-     * it. LOCKING: obtain staleWaitersLock.  
-     */
-    private int staleWaiters=0;
-    private Object staleWaitersLock=new Object();
+    private boolean gotRouterPong=false;
+    private Object gotRouterPongLock=new Object();
     /* True iff we need to connect to the router.
-     * LOCKING: obtain gotGoodPongLock.
+     * LOCKING: obtain needRouterConnectionLock.
      */
     private boolean needRouterConnection=true;
     private Object needRouterConnectionLock=new Object();
@@ -190,8 +179,8 @@ public class HostCatcher {
     public synchronized void write(String filename) throws IOException {
         FileWriter out=new FileWriter(filename);
         //1) Write connections we're connected to--in no particular order.
-        //   Also add the connections to a set for step (2 and 3).  Ignore incoming
-        //   connections, since the remote host's port is ephemeral.
+        //   Also add the connections to a set for step (2 and 3).  Ignore 
+        //   incoming connections, since the remote host's port is ephemeral.
         Set connections=new HashSet();
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
@@ -204,7 +193,7 @@ public class HostCatcher {
             writeInternal(out, e);
         }
 
-        //2.) Write out the connections in the cache.
+        //2.) Write out the connections in the Ping Reply cache.
         PingReplyCache pongCache = PingReplyCache.instance();
         for (Iterator iter=pongCache.iterator(); iter.hasNext(); ) {
             PingReply pr = ((PingReplyCacheEntry)iter.next()).getPingReply();
@@ -275,12 +264,20 @@ public class HostCatcher {
             }
         }
 
-        //notify router thread not to connect to router if not required.
-        if ( (e.getWeight() == BEST_PROIRITY) ||
+        //notify router thread not to connect to router if not required.  Also,
+        //notify router thread that a pong was received from the router (if 
+        //router connection)
+        if ( (e.getWeight() == BEST_PRIORITY) ||
              (e.getWeight() == GOOD_PRIORITY) ) {
             synchronized (needRouterConnectionLock) {
                 needRouterConnection = false;
                 needRouterConnectionLock.notify();
+            }
+            if (e.getWeight() == GOOD_PRIORITY) {
+                synchronized(gotRouterPongLock) {
+                    gotRouterPong = true;
+                    gotRouterPongLock.notify();
+                }
             }
         }
     }
@@ -290,13 +287,6 @@ public class HostCatcher {
      * the set and queue).
      */ 
     public void copyCacheContents() {
-        //first, let router thread know that it doesn't need to create a router
-        //connection while we're copying cache contents from the main cache.
-        synchronized(needRouterConnection) {
-            needRouterConnection = false;
-            needRouterConnectionLock.notify();
-        }
-                                          
         synchronized(this) {
             for (Iterator iter = PingReplyCache.instance().iterator(); 
                  iter.hasNext(); ) {
@@ -321,9 +311,10 @@ public class HostCatcher {
     }
 
     /**
-     * This thread loops forever, contacting the pong server about every 20
-     * minutes.  An earlier implementation created a new thread every time a
-     * reconnect was needed, but that proved somewhat complicated.
+     * This thread loops forever, contacting the pong server on startup, or
+     * everytime the reserve cache expires.  Once getting a router's pong
+     * it will sleep 30 minutes before waiting again to get connections from
+     * router.
      */
     private class RouterConnectorThread extends Thread {
         RouterConnectorThread() {
@@ -335,15 +326,19 @@ public class HostCatcher {
          *  milliseconds. */
         public void run() {
             while(true) {
-                //To avoid connecting to the server every STALE_TIME minutes,
-                //we check to make sure a connection to router is needed, if
-                //not, we wait until it is needed.
-                synchronized (needRouterConnectionLock) {
-                    while (!needRouterConnection) { 
-                        try {
-                            needRouterConnectionLock.wait();
-                        } catch (InterruptedException e) {
-                            continue;
+                //if not enough values in the reserve cache, then connect to 
+                //router right away, to fill up the reserve cache.
+                if (reserveCacheSufficient()) {
+                    //To avoid connecting to the server every STALE_TIME minutes,
+                    //we check to make sure a connection to router is needed, if
+                    //not, we wait until it is needed.
+                    synchronized (needRouterConnectionLock) {
+                        while (!needRouterConnection) { 
+                            try {
+                                needRouterConnectionLock.wait();
+                            } catch (InterruptedException e) {
+                                continue;
+                            }
                         }
                     }
                 }
@@ -365,11 +360,13 @@ public class HostCatcher {
             }
         }
 
-        /** Blocks until we get a good pong. Throws InterruptedException
-         *  if interrupted while waiting. */
-        private void connectUntilPong() throws InterruptedException {
-            gotGoodPong=false;
-            while (! gotGoodPong) {
+        /** 
+         * Blocks until we get a good pong. Throws InterruptedException if
+         * interrupted while waiting.
+         */ 
+         void connectUntilPong() throws InterruptedException {
+            gotRouterPong=false;
+            while (!gotRouterPong) {
                 //1) Try each quick-connect host until we connect
                 String[] hosts=settings.getQuickConnectHosts();
                 for (int i=0; i<hosts.length; i++) {
@@ -387,28 +384,18 @@ public class HostCatcher {
                         continue;
                     }
 
-                    //b) Wait CONNECT_TIME milliseconds for good pong.
+                    //b) Wait CONNECT_TIME milliseconds for router pong.
                     //Note the boolean check to avoid missing notify.
-                    synchronized (gotGoodPongLock) {
-                        if (! gotGoodPong) {
-                            gotGoodPongLock.wait(CONNECT_TIME);
+                    synchronized (gotRouterPongLock) {
+                        if (! gotRouterPong) {
+                            gotRouterPongLock.wait(CONNECT_TIME);
                         }                        
                     }
                 }
 
-                //2) Regardless of whether we connected or not, anyone waiting
-                //for the cache to be refreshed can continue.  The check for
-                //stale is just a mini optimization.
-                if (stale) {
-                    synchronized (staleLock) {
-                        stale=false;
-                        staleLock.notifyAll();
-                    }
-                }
-                    
-                //3) If we need to retry, sleep a little first.  Otherwise
+                //2) If we need to retry, sleep a little first.  Otherwise
                 //we'll immediately exit the loop.
-                if (! gotGoodPong) 
+                if (! gotRouterPong) 
                     Thread.sleep(RETRY_TIME);
             }
         }
@@ -417,43 +404,33 @@ public class HostCatcher {
     /**
      * @modifies this
      * @effects atomically removes and returns the highest priority host in
-     *  this.  If no host is available, blocks until one is.  If the calling
-     *  thread is interrupted during this process, throws InterruptedException.
+     *  this.  If no host is available, blocks until one is.  If no elements
+     * exist in the reserve cache (or if only private IPs exists in the
+     * reserve cache), throws InterrupedException.  Also, if there are no 
+     * "router" or "new client" pongs, then indicate to the router thread
+     * to create a connecion to router.
      */
-    public Endpoint getAnEndpoint() throws InterruptedException {
-        //If cache has expired, wait for reconnect to finish (normally or
-        //timeout).  See RouterConnectionThread.run().
-        if(settings.getUseQuickConnect() && stale) {
-            try {
-                synchronized (staleWaitersLock) {
-                    staleWaiters++;
-                    staleWaitersLock.notify();
-                }
-                synchronized(staleLock) {
-                    if (stale) {
-                        //When you exit the synchronized block, the host catcher
-                        //may still be stale.  Big deal.  This is better than
-                        //waiting for too long here because Java socket timeouts
-                        //are slow.
-                        staleLock.wait(CONNECT_TIME);
-                    }
-                }
-            } finally {
-                synchronized (staleWaitersLock) {
-                    staleWaiters--;
-                }
-            }
-        }
-
+    public Endpoint getAnEndpoint() throws NoSuchElementException {
         Endpoint endpoint = null; 
         synchronized (this) { 
 			while (true)  {
-				try { 
-					endpoint = getAnEndpointInternal(); 
-					break; 
-				} catch (NoSuchElementException e) {
-					wait(); //throws InterruptedException 
-				} 
+                endpoint = getAnEndpointInternal();
+                //if the endpoint we got is from an "old" client or is a 
+                //"private IP" address, then it means we should get fresher
+                //data from router.
+                if (endpoint.getWeight() < GOOD_PRIORITY) {
+                    synchronized(needRouterConnectionLock) {
+                        needRouterConnection = true;
+                        needRouterConnectionLock.notify();
+                    }
+                }
+                //if private IP is the top of the heap, then just return
+                //since a private IP is no good, if we're going to try
+                //and connect to it.
+                if (endpoint.getWeight() == BAD_PRIORITY) 
+                    throw new NoSuchElementException();
+                
+                break; 
 			} 
         } 
         return endpoint;
@@ -539,17 +516,8 @@ public class HostCatcher {
 
     /**
      * @modifies this
-     * @effects removes all entries from this
-     */
-    public synchronized void clear() {
-        reserveCacheQueue.clear();
-        reserveCacheSet.clear();
-        expire();
-    }
-
-    /**
-     * @modifies this
-     * @effects removes all entries from this.  Does not wake up fetcher.
+     * @effects removes all entries from this, but does not create a connection
+     * to a router.
      */
     public synchronized void silentClear() {
         reserveCacheQueue.clear();
@@ -557,12 +525,17 @@ public class HostCatcher {
     }
 
     /**
-     * @modifies this
-     * @effects ensures that the next call to getAnEndpoint will attempt to
-     *  contact the pong server.
+     * @modifies this 
+     * removes all entries from this and ensures that a connection to a router
+     * is made.
      */
     public synchronized void expire() {
-        routerConnectorThread.interrupt();
+        reserveCacheQueue.clear();
+        reserveCacheSet.clear();
+        synchronized(needRouterConnectionLock) {
+            needRouterConnection = true;
+            needRouterConnectionLock.notify();
+        }
     }
 
     /**

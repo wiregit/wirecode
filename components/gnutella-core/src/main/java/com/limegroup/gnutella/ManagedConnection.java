@@ -48,44 +48,14 @@ public class ManagedConnection
      *  empty. */
     private Object _flushLock=new Object();
 
-
     /**
-     * The number of messages received.  This messages that are eventually
-     * dropped.  This stat is synchronized by _outputQueueLock;
-     */
-    private int _numMessagesSent;
-    /**
-     * The number of messages received.  This includes messages that are
-     * eventually dropped.  This stat is not synchronized because receiving
-     * is not thread-safe; callers are expected to make sure only one thread
-     * at a time is calling receive on a given connection.
-     */
-    private int _numMessagesReceived;
-    /**
-     * The number of messages received on this connection either filtered out
-     * or dropped because we didn't know how to route them.
-     */
-    private int _numReceivedMessagesDropped;
-    /**
-     * The number of messages I dropped because the
-     * output queue overflowed.  This happens when the remote host
-     * cannot receive packets as quickly as I am trying to send them.
-     * No synchronization is necessary.
-     */
-    private int _numSentMessagesDropped;
-
-
-    /**
-     * _lastSent/_lastSentDropped and _lastReceived/_lastRecvDropped the values
-     * of _numMessagesSent/_numSentMessagesDropped and
-     * _numMessagesReceived/_numReceivedMessagesDropped at the last call to
-     * getPercentDropped.  LOCKING: These are synchronized by this;
-     * finer-grained schemes could be used. 
-     */
-    private int _lastReceived;
-    private int _lastRecvDropped;
-    private int _lastSent;
-    private int _lastSentDropped;
+     * Reference to Message Statistics for this connection.
+     * LOCKING: use _outputQueueLock for locking since only when writing
+     * to the output queue, we increment the number of messages sent
+     * or number of messages sent (that were dropped also).
+     */ 
+    private ManagedConnectionMessageStats _myMessageStats = 
+        new ManagedConnectionMessageStats(this);
 
     /***************************************************************************
      * Horizon statistics. We measure the horizon by looking at all ping replies
@@ -215,7 +185,7 @@ public class ManagedConnection
             _manager.remove(this);
             throw e;
         }
-        _numMessagesReceived++;
+        _myMessageStats.countReceivedMessage();
         _router.countMessage();
         return m;
     }
@@ -234,7 +204,7 @@ public class ManagedConnection
             _manager.remove(this);
             throw e;
         }
-        _numMessagesReceived++;
+        _myMessageStats.countReceivedMessage();
         _router.countMessage();
         return m;
     }
@@ -253,7 +223,7 @@ public class ManagedConnection
      */
     public void send(Message m) {
         synchronized (_outputQueueLock) {
-            _numMessagesSent++;
+            _myMessageStats.countSentMessage();
             _router.countMessage();
             if (_outputQueue.isFull()) {
                 //Drop case. Instead of using a FIFO replacement scheme, we
@@ -263,7 +233,7 @@ public class ManagedConnection
                 //  2) If that doesn't work, throw away the oldest message
                 //     message meeting above criteria.
                 //  3) If that doesn't work, throw away the oldest message.
-                _numSentMessagesDropped++;
+                _myMessageStats.countSentMessageDropped();
                 if (isDisposeable(m))
                     return;
 
@@ -426,7 +396,7 @@ public class ManagedConnection
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
                 _router.countFilteredMessage();
-                _numReceivedMessagesDropped++;
+                _myMessageStats.countDroppedMessage();
                 continue;
             }
 
@@ -509,10 +479,11 @@ public class ManagedConnection
     /**
      * A callback for the ConnectionManager to inform this connection that a
      * message was dropped.  This happens when a reply received from this
-     * connection has no routing path.
+     * connection has no routing path or a PingRequest or PingReply was throttled
+     * since it was from an older client.
      */
     public void countDroppedMessage() {
-        _numReceivedMessagesDropped++;
+        _myMessageStats.countDroppedMessage();
     }
 
     /**
@@ -596,64 +567,53 @@ public class ManagedConnection
 
 
     //
-    // Begin statistics accessors
+    // Begin statistics accessors via ManagedConnectionMessageStats instance.
     //
 
     /** Returns the number of messages sent on this connection */
     public int getNumMessagesSent() {
-        return _numMessagesSent;
+        return _myMessageStats.getNumMessagesSent();
     }
 
     /** Returns the number of messages received on this connection */
     public int getNumMessagesReceived() {
-        return _numMessagesReceived;
+        return _myMessageStats.getNumMessagesReceived();
     }
 
     /** Returns the number of messages I dropped while trying to send
      *  on this connection.  This happens when the remote host cannot
      *  keep up with me. */
     public int getNumSentMessagesDropped() {
-        return _numSentMessagesDropped;
+        return _myMessageStats.getNumSentMessagesDropped();
     }
 
     /**
      * The number of messages received on this connection either filtered out
-     * or dropped because we didn't know how to route them.
+     * or dropped because we didn't know how to route them or needed to throttle
+     * them since they were an older client.
      */
     public long getNumReceivedMessagesDropped() {
-        return _numReceivedMessagesDropped;
+        return _myMessageStats.getNumReceivedMessagesDropped();
     }
 
     /**
-     * @modifies this
      * @effects Returns the percentage of messages sent on this
      *  since the last call to getPercentReceivedDropped that were
-     *  dropped by this end of the connection.
+     *  dropped by this end of the connection.  Actual work is done by 
+     *  ManagedConnectionMessageStats.
      */
     public synchronized float getPercentReceivedDropped() {
-        int rdiff = _numMessagesReceived - _lastReceived;
-        int ddiff = _numReceivedMessagesDropped - _lastRecvDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
-
-        _lastReceived = _numMessagesReceived;
-        _lastRecvDropped = _numReceivedMessagesDropped;
-        return percent;
+        return _myMessageStats.getPercentReceivedDropped();
     }
 
     /**
-     * @modifies this
      * @effects Returns the percentage of messages sent on this
      *  since the last call to getPercentSentDropped that were
-     *  dropped by this end of the connection.
+     *  dropped by this end of the connection.  Actual work is done by
+     *  ManagedConnectionMessageStats.
      */
     public synchronized float getPercentSentDropped() {
-        int rdiff = _numMessagesSent - _lastSent;
-        int ddiff = _numSentMessagesDropped - _lastSentDropped;
-        float percent=(rdiff==0) ? 0.f : ((float)ddiff/(float)rdiff*100.f);
-
-        _lastSent = _numMessagesSent;
-        _lastSentDropped = _numSentMessagesDropped;
-        return percent;
+        return _myMessageStats.getPercentSentDropped();
     }
 
     /**
