@@ -65,12 +65,12 @@ public class BootstrapServerManagerTest extends TestCase {
         s1.shutdown();
         s2.shutdown();
         s3.shutdown();
-        sleep();
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
     }
 
     ///////////////////////////////////////////////////////////////////////
 
-    /** Checks urlfile=1 request.  Also checks that unreachable hosts are
+    /** Checks hostfile=1 request.  Also checks that unreachable hosts are
      *  visited as needed.  */
     public void testFetchEndpointsAsync() {
         //Make first server unreachable.  (Remember try s3, s2, then s1.)
@@ -323,11 +323,10 @@ public class BootstrapServerManagerTest extends TestCase {
     }
 
     private void sleep() {
-        //Wait 0.5 second--that should be long enough for request to happen.
-        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        //Must be long enough for socket connect timeouts.  On Linux
+        //it appears that a much shorter value will work.
+        try { Thread.sleep(5000); } catch (InterruptedException e) { }
     }
-
-    //TODO: handles 303 redirects properly
 }
 
 /** Overrides the add(Endpoint, boolean) method) */
