@@ -15,18 +15,16 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         super(name);
     }
     
+    public static void main(java.lang.String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+    
     public static Test suite() {
-        return new TestSuite(ManagedDownloaderTest.class);
+        return buildTestSuite(ManagedDownloaderTest.class);
     }
     
     public void setUp() {
-        //System.out.println(" setting up ManagedDownloader test. " );
-        try {
-            SettingsManager.instance().setSaveDirectory(new File("."));
-            ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        } catch (IOException e) {
-            fail("Couldn't set save directory");
-        }
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
     public void testLegacy() {
@@ -45,37 +43,29 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                    "urn:sha1:XXXXGIPQGXXXXS5FJUPAKPZWUGYQYPFB")   //ignored
         };
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
-        try {
-            QueryRequest qr=downloader.newRequery2();
-            assertEquals("daswani susheel",  //"susheel daswani" also ok
-                         qr.getQuery());
-            assertEquals(131, qr.getMinSpeed());
-            assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-            assertEquals("", qr.getRichQuery());
-            Set urns=qr.getQueryUrns();
-            assertEquals(2, urns.size());
-            assertTrue(urns.contains(URN.createSHA1Urn(
-                "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
-            assertTrue(urns.contains(URN.createSHA1Urn(
-                "urn:sha1:LSTHGIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
-        } catch (CantResumeException e) {
-            fail("Couldn't make requery", e);
-        } catch (IOException e) {
-            fail("Couldn't make hash", e);
-        }
+        QueryRequest qr=downloader.newRequery2();
+        assertNotNull("Couldn't make query", qr);
+        // We are no longer including query string when we have URN's 
+        //assertEquals("daswani susheel",  //"susheel daswani" also ok
+        //             qr.getQuery());
+        assertEquals(224, qr.getMinSpeed());
+        assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+        assertEquals("", qr.getRichQuery());
+        Set urns=qr.getQueryUrns();
+        assertEquals(1, urns.size());
+        assertTrue(urns.contains(URN.createSHA1Urn(
+            "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
+        //assertTrue(urns.contains(URN.createSHA1Urn(
+        //    "urn:sha1:LSTHGIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
     }
 
     /** Catches a bug with earlier keyword intersection code. */
-    public void testNewRequery2() {
+    public void testNewRequery2() throws Exception {
         RemoteFileDesc[] rfds={ newRFD("LimeWire again LimeWire the 34") };
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
-        try {
-            QueryRequest qr=downloader.newRequery2();
-            assertEquals("limewire again", qr.getQuery());
-            assertEquals(new HashSet(), qr.getQueryUrns());
-        } catch (CantResumeException e) {
-            fail("Couldn't make requery", e);
-        }
+        QueryRequest qr=downloader.newRequery2();
+        assertEquals("limewire again", qr.getQuery());
+        assertEquals(new HashSet(), qr.getQueryUrns());
     }
     
     /** Tests that the progress is retained for deserialized downloaders. */
@@ -128,7 +118,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     /** Tests that the progress is not 0% when resume button is hit while
      *  requerying.  This was caused by the call to cleanup() from
      *  tryAllDownloads3() and was reported by Sam Berlin. */
-    public void testRequeryProgress() {
+    public void testRequeryProgress() throws Exception {
         TestUploader uploader=null;
         ManagedDownloader downloader=null;
         try {
@@ -184,15 +174,15 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   name, 1024,
                                   new byte[16], 56, false, 4, true, null, urns);
     }
-}
 
-/** Provides access to protected methods. */
-class TestManagedDownloader extends ManagedDownloader {
-    public TestManagedDownloader(RemoteFileDesc[] files) {
-        super(files);
-    }
+    /** Provides access to protected methods. */
+    class TestManagedDownloader extends ManagedDownloader {
+        public TestManagedDownloader(RemoteFileDesc[] files) {
+            super(files);
+        }
 
-    public QueryRequest newRequery2() throws CantResumeException {
-        return super.newRequery(0);
+        public QueryRequest newRequery2() throws CantResumeException {
+            return super.newRequery(2);
+        }
     }
 }
