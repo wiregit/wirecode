@@ -49,6 +49,10 @@ public class NativeException extends RuntimeException {
         return errorCode;
     }
     
+    public String getMessage() {
+        return (super.getMessage() + " (" + errorCode + ")");
+    }
+    
     protected static String createMessage(int errorCode) {
         switch(errorCode) {
             case FILE_NOT_FOUND:
@@ -58,7 +62,7 @@ public class NativeException extends RuntimeException {
             case NOT_ENOUGH_MEMORY:
                 return "Not enough memory";
             default:
-                return Integer.toString(errorCode);
+                return "Unknown";
         }
     }
 }
