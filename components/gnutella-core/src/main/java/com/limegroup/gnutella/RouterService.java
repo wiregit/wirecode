@@ -1149,7 +1149,7 @@ public class RouterService {
      * @return the number of free leaf slots.
      */
     public static int getNumFreeLeafSlots() {
-            return manager.getNumFreeLeafSlots();
+        return manager.getNumFreeLeafSlots();
     }
 
     

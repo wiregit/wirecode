@@ -1079,7 +1079,8 @@ public class ConnectionManager {
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public synchronized void connect() {
-
+        _catcher.sendPings();
+        
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
         //within a week.)

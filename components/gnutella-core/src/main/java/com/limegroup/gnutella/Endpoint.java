@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.*;
  * of files, mainly for legacy reasons.
  */
 public class Endpoint implements Cloneable, Serializable,
-com.sun.java.util.collections.Comparable
+    com.sun.java.util.collections.Comparable, IpPort
 {
     /**
     * serial version (needed for serialization/deserialization)
@@ -431,6 +431,22 @@ com.sun.java.util.collections.Comparable
         //class C
         else
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
+    }
+
+    /**
+     * Implements the <tt>IpPort</tt> interface.  Returns the 
+     * <tt>InetAddress</tt> for this endpoint, or <tt>null</tt> if the address
+     * is malformed.
+     * 
+     * @return the <tt>InetAddress</tt> instance for this endpoint, or 
+     *  <tt>null</tt> if the address is malformed
+     */
+    public InetAddress getAddress() {
+        try {
+            return InetAddress.getByName(hostname);
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 }
 

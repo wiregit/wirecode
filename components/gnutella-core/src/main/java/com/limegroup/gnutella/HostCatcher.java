@@ -42,6 +42,11 @@ public class HostCatcher {
     //These constants are package-access for testing.  
     //That's ok as they're final.
 
+    /**
+     * Variable for the host ranker that quickly tests hosts for connectivity.
+     */
+    private UDPHostRanker _ranker;
+
     /** The number of milliseconds to wait after trying gnutella.net entries
      *  before resorting to GWebCache HOSTFILE requests. */
     public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
@@ -137,11 +142,14 @@ public class HostCatcher {
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize() {
+        System.out.println("HostCatcher::initialize");
         //Read gnutella.net
         try {
 			read(HOST_FILE);
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
         }
         
         //Register to send updates every hour (starting in one hour) if we're a
@@ -171,7 +179,7 @@ public class HostCatcher {
         
         RouterService.schedule(updater, 
 							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
-							   BootstrapServerManager.UPDATE_DELAY_MSEC);
+							   BootstrapServerManager.UPDATE_DELAY_MSEC);                                                     
     }
 
 
@@ -445,6 +453,13 @@ public class HostCatcher {
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
+            
+            if(_ranker.hasHosts()) {
+                IpPort host = _ranker.remove();
+                System.out.println("returning UDP endpoint");
+                return new Endpoint(host.getAddress().getHostName(), 
+                    host.getPort());
+            }
             //If we've completely run out of hosts, asynchronously contact a
             //GWebCache server to get more addresses.  Note, however, that this
             //will not do anything if we're currently connecting to a GWebCache.
@@ -477,6 +492,7 @@ public class HostCatcher {
                 // is added to the queue
                 //  (presumably from fetchEndpointsAsync working)               
                 
+                System.out.println("returning regular endpoint");
                 return getAnEndpointInternal();
             } catch (NoSuchElementException e) { }
             
@@ -662,6 +678,14 @@ public class HostCatcher {
                             +permanentHostsSet+" in "+permanentHosts);
             }
         }
+    }
+
+    /**
+     * 
+     */
+    public void sendPings() {
+        _ranker = UDPHostRanker.createRanker(getHosts());
+        
     }
 
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   

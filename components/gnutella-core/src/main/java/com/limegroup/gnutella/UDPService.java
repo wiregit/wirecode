@@ -1,10 +1,13 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.sun.java.util.collections.*;
 
 /**
@@ -25,7 +28,12 @@ public final class UDPService implements Runnable {
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
 	private final static UDPService INSTANCE = new UDPService();
-    
+
+    /**
+     * Log for logging.
+     */
+    private static final Log LOG = LogFactory.getLog(UDPService.class);
+        
 	/** 
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
      * before sending.  Moreover, only one thread should be wait()ing on one of
@@ -219,6 +227,14 @@ public final class UDPService implements Runnable {
                         else
                             _acceptedSolicitedIncoming = true;
                     }
+                    if(message instanceof PingReply) {
+                        PingReplyHandler prh = 
+                            (PingReplyHandler)PONG_HANDLERS.get(
+                                new GUID(message.getGUID()));
+                        if(prh != null) {
+                            prh.handlePingReply((PingReply)message);
+                        }
+                    }
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
@@ -234,6 +250,14 @@ public final class UDPService implements Runnable {
         }
 	}
 
+    private final Map PONG_HANDLERS = new HashMap();
+    
+    public void send(Message msg, InetAddress ip, int port, 
+        PingReplyHandler handler) {
+        PONG_HANDLERS.put(new GUID(msg.getGUID()), handler);
+        send(msg, ip, port);
+    }
+    
 	/**
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
      * This method should not be called if the client is not GUESS enabled.
@@ -337,6 +361,9 @@ public final class UDPService implements Runnable {
                     // tough luck
                     if (_socket == null) {
                         if (!hasReportedNullSocket) {
+                            if(LOG.isInfoEnabled()) {
+                                LOG.info(_socket);
+                            }
                             hasReportedNullSocket = true;
                             Exception npe = 
                                 new NullPointerException("Null UDP Socket!!");

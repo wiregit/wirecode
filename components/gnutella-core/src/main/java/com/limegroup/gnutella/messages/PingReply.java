@@ -5,13 +5,14 @@ import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.net.*;
+
 import com.limegroup.gnutella.util.*;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable {
+public class PingReply extends Message implements Serializable, IpPort {
 
     /**
      * Constant for the number of ultrapeer slots for this host.
@@ -934,6 +935,22 @@ public class PingReply extends Message implements Serializable {
     public String toString() {
         return "PingReply("+getIP()+":"+getPort()
             +", "+super.toString()+")";
+    }
+
+    /**
+     * Implements the <tt>IpPort</tt> interface.  Returns the 
+     * <tt>InetAddress</tt> for this host, or <tt>null</tt> if the host cannot
+     * be resolved to an <tt>InetAddress</tt>.
+     * 
+     * @return the <tt>InetAddress</tt> for this host, or <tt>null</tt> if the 
+     *  host cannot be resolved to an <tt>InetAddress</tt>
+     */
+    public InetAddress getAddress() {
+        try {
+            return InetAddress.getByName(IP);
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
