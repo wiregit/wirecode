@@ -64,8 +64,9 @@ public class QueryRequest extends Message implements Serializable{
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query, 
-						String richQuery) {
-        this(guid, ttl, minSpeed, query, richQuery, false, null, null, null);
+						String richQuery, boolean isFirewalled) {
+        this(guid, ttl, minSpeed, query, richQuery, false, null, null, null,
+             isFirewalled);
     }
 
     /**
@@ -73,16 +74,18 @@ public class QueryRequest extends Message implements Serializable{
      * Whether or not this is a repeat query is encoded in guid.  GUID must have
      * been created via newQueryGUID; this allows the caller to match up results
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query) {
-        this(guid, ttl, minSpeed, query, "");
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query
+                        boolean isFirewalled) {
+        this(guid, ttl, minSpeed, query, "", isFirewalled);
     }
 
     /**
      * Builds a new query from scratch, with no metadata, with a default GUID.
      */
-    public QueryRequest(byte ttl, int minSpeed, String query) {
+    public QueryRequest(byte ttl, int minSpeed, String query
+                        boolean isFirewalled) {
         this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null,
-             null);
+             null, isFirewalled);
     }
 
 
@@ -91,9 +94,9 @@ public class QueryRequest extends Message implements Serializable{
      * as a requery iff isRequery.
      */
     public QueryRequest(byte ttl, int minSpeed, 
-                        String query, boolean isRequery) {
+                        String query, boolean isRequery, boolean isFirewalled) {
         this(newQueryGUID(isRequery), ttl, minSpeed, query, "", isRequery, 
-			 null, null, null);
+			 null, null, null, isFirewalled);
     }
 
 
@@ -103,9 +106,9 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, String richQuery,
-                        boolean isRequery) {
-        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, isRequery, 
-			 null, null, null);
+                        boolean isRequery, boolean isFirewalled) {
+        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, 
+             isRequery, null, null, null, isFirewalled);
     }
 
     /**
@@ -121,9 +124,10 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
-                        Set requestedUrnTypes, Set queryUrns) {
+                        Set requestedUrnTypes, Set queryUrns, 
+                        boolean isFirewalled) {
         this(guid, ttl, minSpeed, query, richQuery, isRequery,
-             requestedUrnTypes, queryUrns, null);
+             requestedUrnTypes, queryUrns, null, isFirewalled);
     }
 
 
@@ -141,9 +145,23 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey) {
+                        QueryKey queryKey, boolean isFirewalled) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
+        if (minSpeed == 0) {
+            // user has not specified a Min Speed - go ahead and set it for
+            // them, as appropriate
+            
+            // the new Min Speed format - looks reversed but
+            // it isn't because of ByteOrder.short2leb
+            minSpeed = 0x00000080; 
+            // set the firewall bit if i'm firewalled
+            if (isFirewalled)
+                minSpeed |= 0x01;
+            // LimeWire's ALWAYS want rich results....
+            if (true)
+                 minSpeed |= 0x02;
+        }
         this.minSpeed=minSpeed;
 		if(query == null) {
 			this.query = "";
@@ -415,18 +433,40 @@ public class QueryRequest extends Message implements Serializable{
 		}
 	}
 
+    /**
+     * Returns true if the query source is a firewalled servent.
+     */
+    public boolean isFirewalledSource() {
+        if ((minSpeed & 0x0080) > 0) {
+            if ((minSpeed & 0x0001) > 0)
+                return true;
+        }
+        return false;
+    }
+    
+    
+    /**
+     * Returns true if the query source desires Lime meta-data in responses.
+     */
+    public boolean desiresXMLResponses() {
+        if ((minSpeed & 0x0080) > 0) {
+            if ((minSpeed & 0x0002) > 0)
+                return true;
+        }
+        return false;        
+    }
+    
+ 
     /** Returns this, because it's always safe to send big queries. */
     public Message stripExtendedPayload() {
         return this;
     }
 
     public String toString() {
-		return "QueryRequest:\r\n"+ 
-		       "query:             "+getQuery()+"\r\n"+
-		       "rich query:        "+getRichQuery()+"\r\n"+
-		       "requestedUrnTypes: "+getRequestedUrnTypes()+"\r\n"+
-		       "query urns:        "+getQueryUrns().size()+"\r\n"+
-		       "min speed:         "+getMinSpeed();
+ 		return "<query: \""+getQuery()+"\", "+
+        "meta: \""+getRichQuery()+"\", "+
+        "types: "+getRequestedUrnTypes().size()+","+
+        "urns: "+getQueryUrns().size()+">";
     }
 }
 
