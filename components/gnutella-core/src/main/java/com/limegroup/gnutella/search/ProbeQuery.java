@@ -103,7 +103,8 @@ final class ProbeQuery {
      * This list will vary in size depending on how popular the content appears
      * to be.
      */
-    private static LinkedList[] createProbeLists(List connections, QueryRequest query) {
+    private static LinkedList[] createProbeLists(List connections, 
+        QueryRequest query) {
         Iterator iter = connections.iterator();
         
         LinkedList missConnections = new LinkedList();
@@ -133,13 +134,15 @@ final class ProbeQuery {
         returnLists[0] = ttl1List;
         returnLists[1] = ttl2List;        
 
-        // do we have adequate data to determine some measure of the file's popularity?
+        // do we have adequate data to determine some measure of the file's 
+        // popularity?
         boolean adequateData = 
             (missConnections.size()+hitConnections.size()) > 8;
 
-        // if we don't have enough data from QRP tables, just send out a traditional probe
-        // also, if we don't have an adequate number of QRP tables to access the 
-        // popularity of the file, just send out an old-style probe at TTL=2
+        // if we don't have enough data from QRP tables, just send out a 
+        // traditional probe also, if we don't have an adequate number of QRP 
+        // tables to access the popularity of the file, just send out an 
+        // old-style probe at TTL=2
         if(hitConnections.size() == 0 || !adequateData) {
             return createAggressiveProbe(oldConnections, missConnections, 
                                          hitConnections, returnLists);
