@@ -209,26 +209,9 @@ public final class SupernodeAssigner {
 
 		// check if this node has such good values that we simply can't pass
 		// it up as an Ultrapeer -- it will just get forced to be one
-		_isTooGoodToPassUp = 
-			//are upstream and downstream high enough?
-			(_maxUpstreamBytesPerSec >= 
-			 MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND*2 &&
-			 _maxDownstreamBytesPerSec >= 
-			 MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND*2 &&
-			 //AND I'm not a modem (in case estimate wrong)
-			 (SETTINGS.getConnectionSpeed() > SpeedConstants.MODEM_SPEED_INT) &&
-			 //AND is my average uptime OR current uptime high enough?
-			 (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
-			  _currentUptime >= MINIMUM_CURRENT_UPTIME_FORCE) &&
-			 //AND am I not firewalled?
-			 ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
-			 //AND I have accepted incoming messages over UDP
-			 //RouterService.isGUESSCapable() &&
-			 //AND am I a capable OS?
-			 SUPERNODE_OS &&
-			 // and we haven't initiated a search in 5 minutes
-			 (curTime - RouterService.getLastQueryTime() > 5*60*1000)
-			 );
+		_isTooGoodToPassUp = isSupernodeCapable &&
+			(curTime - RouterService.getLastQueryTime() > 5*60*1000);
+
 
 		// TODO:: add HTTP upload bandwidth used as a factor
 		// TODO:: add a TEST for this class
