@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=Latvija
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Latn
-LOCALE_SCRIPT_NAME=Latin (Other)
+LOCALE_SCRIPT_NAME=Latin (Baltic Rim)
 LOCALE_ENGLISH_LANGUAGE_NAME=Latvian
 
 ################################################################################
