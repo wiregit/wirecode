@@ -1852,10 +1852,21 @@ public class Connection implements IpPort {
 		return _headers.supportsGGEP();
     }
 
+    /**
+     * Sends the StatisticVendorMessage down the connection
+     */
     public void handleStatisticVM(StatisticVendorMessage svm) 
                                                             throws IOException {
         send(svm);
     }
+
+    /**
+     * Sends the SimppVM down the connection
+     */
+    public void handleSimppVM(SimppVM simppVM) throws IOException {
+        send(simppVM);
+    }
+
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */

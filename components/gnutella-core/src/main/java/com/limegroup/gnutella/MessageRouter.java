@@ -402,13 +402,9 @@ public abstract class MessageRouter {
                             (StatisticVendorMessage)msg, receivingConnection);
         }
         else if(msg instanceof SimppRequestVM) {
-            if(RECORD_STATS)
-                ;
             handleSimppRequest((SimppRequestVM)msg, receivingConnection);
         }
         else if(msg instanceof SimppVM) {
-            if(RECORD_STATS)
-                ;
             handleSimppVM((SimppVM)msg);
         }
         //This may trigger propogation of query route tables.  We do this AFTER
@@ -2013,9 +2009,15 @@ public abstract class MessageRouter {
      */
     private void handleSimppRequest(final SimppRequestVM simppReq, 
                                                   final ReplyHandler handler ) {
+        if(simppReq.getVersion() > SimppRequestVM.VERSION)
+            return; //we are not going to deal with these types of requests. 
         byte[] simppBytes = SimppManager.instance().getSimppBytes();
         SimppVM simppVM = new SimppVM(simppBytes);
-        replyHandler.handleSimppVM(simppVM);
+        try {
+            handler.handleSimppVM(simppVM);
+        } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
+            return;
+        }
     }
     
 
@@ -2031,7 +2033,7 @@ public abstract class MessageRouter {
         //handle it otherwise not.
         if(false) //change this to check  if the SimppVM was solicited
             return;
-        SimppManager.instance().handleSimppMessage(simppVM.getPayload());
+        SimppManager.instance().checkAndUpdate(simppVM.getPayload());
     }
 
 

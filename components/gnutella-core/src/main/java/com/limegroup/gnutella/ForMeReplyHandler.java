@@ -347,6 +347,10 @@ public final class ForMeReplyHandler implements ReplyHandler {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
 
+    public void handleSimppVM(SimppVM simppVM) {
+        Assert.that(false, "ForMeReplyHandler asked to send vendor message");
+    }
+
     /**
      * Returns <tt>true</tt> to indicate that this node is always stable.
      * Simply the fact that this method is being called indicates that the

@@ -83,12 +83,12 @@ public class SimppManager {
     /**
      * Called when we receive a new SIMPPVendorMessage, 
      */
-    public void handleSimppMessage(final byte[] simppPayload) { 
+    public void checkAndUpdate(final byte[] simppPayload) { 
+        if(simppPayload == null)
+            return;
         final int myVersion = _latestVersion;
         Thread simppHandler = new ManagedThread("SimppFileHandler") {
             public void managedRun() {
-                if(simppPayload == null)
-                    return;
                 SimppFileVerifier verifier=new SimppFileVerifier(simppPayload);
                 boolean verified = false;
                 try {

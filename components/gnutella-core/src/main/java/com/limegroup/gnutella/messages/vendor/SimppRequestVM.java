@@ -31,5 +31,9 @@ public final class SimppRequestVM extends VendorMessage {
         //version of the SimppMessge we are expecting in response to this
         //message
     }
-   
+    
+    public int getVersion() {
+        return super.getVersion();
+    }
+
 }
