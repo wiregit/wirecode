@@ -498,11 +498,29 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected synchronized QueryRequest newRequery() throws CantResumeException { 
         if (allFiles.length<0)                  //TODO: what filename?
             throw new CantResumeException("");  //      maybe another exception?
-        //TODO: add URNs according to spec
-        return new QueryRequest(SettingsManager.instance().getTTL(),
+        return new QueryRequest(QueryRequest.newQueryGUID(true),
+                                SettingsManager.instance().getTTL(),
                                 0,              //minimum speed
                                 extractQueryString(), 
-                                true);          //mark as requery
+                                null,           //metadata query
+                                true,           //mark as requery
+                                null,           //requested URNs
+                                extractUrns()); //the hashes
+                                
+    }
+
+    /** Returns the URNs for requery, i.e., the union of all requeries 
+     *  (within reason).
+     *  @return a Set of URN */
+    private final Set /* of URN */ extractUrns() {
+        final int MAX_URNS=2;
+        Set ret=new HashSet(MAX_URNS);
+        for (int i=0; i<allFiles.length && ret.size()<MAX_URNS; i++) {
+            URN urn=allFiles[i].getSHA1Urn();
+            if (urn!=null)
+                ret.add(urn);
+        }
+        return ret;
     }
 
     /** Returns the keywords for a requery, i.e., the keywords found in all
