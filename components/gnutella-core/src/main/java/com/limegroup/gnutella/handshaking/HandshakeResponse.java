@@ -399,17 +399,14 @@ public final class HandshakeResponse {
      * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
      * potential connection.
      *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're rejecting
+     * @param response the <tt>HandshakeResponse</tt> containing the connection
+     *  headers of the connecting host
      */
-    static HandshakeResponse createRejectIncomingResponse() {
-        Properties headers = new Properties();
-        addXTryUltrapeers(
-            RouterService.getConnectionManager().getInitializedConnections().
-                iterator(), headers);
+    static HandshakeResponse 
+        createRejectIncomingResponse(HandshakeResponse hr) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
-                                     headers);        
+                                     createRejectXTryHeader(hr));        
     }
 
 
@@ -441,21 +438,10 @@ public final class HandshakeResponse {
      */
     static HandshakeResponse 
         createLeafRejectIncomingResponse(HandshakeResponse hr) {
-        Properties headers = new Properties();
-        if(hr.isLeaf()) {
-            addXTryUltrapeers(
-                RouterService.getHostCatcher().
-                    getUltrapeersWithFreeLeafSlots().iterator(), headers);
-        } else {
-            addXTryUltrapeers(
-                RouterService.getHostCatcher().getUltrapeerHosts(10), headers);
-        }
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
                                      HandshakeResponse.SHIELDED_MESSAGE,
-                                     headers);        
+                                     createRejectXTryHeader(hr));        
     }
-
-
 
     /**
      * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
@@ -526,7 +512,31 @@ public final class HandshakeResponse {
         return line.substring(statusMessageIndex).trim();
     }
 
-
+    /**
+     * Utility method for creating a set of headers with the X-Try-Ultrapeers
+     * header set according to the headers from the remote host.
+     * 
+     * @param hr the <tt>HandshakeResponse</tt> of the incoming request
+     * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
+     *  header set according to the incoming headers from the remote host
+     */
+    private static Properties createRejectXTryHeader(HandshakeResponse hr) {
+        Properties headers = new Properties();
+        Iterator xTryHosts = null;
+        if(hr.isUltrapeer()) {
+            xTryHosts = 
+                RouterService.getConnectionManager().getInitializedConnections().
+                    iterator();
+        } else {
+            xTryHosts = 
+                RouterService.getHostCatcher().getUltrapeersWithFreeLeafSlots().
+                    iterator();
+        }        
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS, 
+            createEndpointString(xTryHosts));
+        return headers;
+    }
+    
     /**
      * Adds the given <tt>Iterator</tt> of hosts to the X-Try-Ultrapeers 
      * headers and adds that header to the set of headers.
