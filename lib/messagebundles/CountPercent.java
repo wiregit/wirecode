@@ -32,13 +32,14 @@ public class CountPercent {
         rc.setMaximumIntegerDigits(4);
         
         df = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
-        
-        Set advanced = getAdvancedKeys();        
-        langs = new TreeMap();
-        loadLanguages(advanced, langs);
-        
+
         Properties english = getEnglish();
-        removeAdvanced(advanced, english);
+        english.keySet().removeAll(getAdvancedKeys());
+        
+        langs = new TreeMap();
+        loadLanguages(english.keySet(), langs);
+        
+
         total = english.size();
         
         if (args != null && args.length > 0 && args[0].equals("html")) {
@@ -71,7 +72,7 @@ public class CountPercent {
         return p.keySet();
     }
     
-    private void loadLanguages(Set advanced, Map langs) {
+    private void loadLanguages(Set valid, Map langs) {
         File lib = new File(".");
         if (!lib.isDirectory())
             return;
@@ -93,7 +94,11 @@ public class CountPercent {
             try {
                 InputStream in =
                     new FileInputStream(new File(lib, files[i]));
-                loadFile(langs, in, advanced, linkFileName);
+                LanguageInfo li = loadFile(langs, in, valid, linkFileName);
+                if(li.isVariant()) {
+                    Properties p = (Properties)langs.get(li);
+                    loadBaseLanguage(li, p, valid);
+                }
             } catch (FileNotFoundException fnfe) {
                 // oh well.
             }
@@ -101,14 +106,28 @@ public class CountPercent {
     }
     
     /**
+     * Loads the base language into the properties.  (NOTE THAT THE ACTUAL VALUES
+     * LOADED WILL BE WRONG, SINCE THE LOADING IS DONE IN REVERSE.  SINCE WE DON'T
+     * READ THE VALUES ANY MORE, THIS IS FINE).
+     */
+    private void loadBaseLanguage(LanguageInfo li, Properties p, Set valid) {
+        String base = li.getBaseCode();
+        File f = new File(BUNDLE_NAME + "_" + base + PROPS_EXT);
+        try {
+            p.load(new FileInputStream(f));
+            p.keySet().retainAll(valid);
+        } catch(IOException ignored) {}
+    }
+    
+    /**
      * Loads a single file into a List.
      */
-    private void loadFile(Map langs, InputStream in, Set advanced, String filename) {
+    private LanguageInfo loadFile(Map langs, InputStream in, Set valid, String filename) {
         try {
             in = new BufferedInputStream(in);
             final Properties p = new Properties();
             p.load(in);
-            removeAdvanced(advanced, p);
+            p.keySet().retainAll(valid); // keep only keys that are valid.
             
             String lc = p.getProperty("LOCALE_LANGUAGE_CODE", "");
             String cc = p.getProperty("LOCALE_COUNTRY_CODE", "");
@@ -120,15 +139,18 @@ public class CountPercent {
             String sn = p.getProperty("LOCALE_SCRIPT_NAME", sc);
             String dn = p.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
             
-            langs.put(new LanguageInfo(lc, cc, vc, sc,
-                                       ln, cn, vn, sn,
-                                       dn, filename), p);
+            LanguageInfo li =   new LanguageInfo(lc, cc, vc, sc,
+                                                 ln, cn, vn, sn,
+                                                 dn, filename);
+            langs.put(li, p);
+            return li;
         } catch (IOException e) {
             // ignore.
         } finally {
             if (in != null)
                 try { in.close(); } catch (IOException ioe) {}
         }
+        return null;
     }
     
     private Properties getEnglish() throws Exception {
@@ -137,11 +159,6 @@ public class CountPercent {
         p.load(in);
         in.close();
         return p;
-    }
-    
-    private void removeAdvanced(Set a, Properties p) {
-        for (Iterator i = a.iterator(); i.hasNext(); )
-            p.remove(i.next());
     }
     
     private void printStatistics() throws Exception {
@@ -632,5 +649,13 @@ class LanguageInfo implements Comparable {
     
     public double getPercentage() {
         return percentage;
+    }
+    
+    public boolean isVariant() {
+        return !"".equals(variantCode) || !"".equals(countryCode);
+    }
+    
+    public String getBaseCode() {
+        return languageCode;
     }
 }
