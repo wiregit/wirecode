@@ -40,6 +40,14 @@ public interface MessageWriter {
     void simpleWrite(Message msg) throws IOException;
     
     /**
+     * Flushes any data in the output stream.
+     * 
+     * @throws IOException if the connection is closed, or any other IO error
+     *  occurs
+     */
+    void flush() throws IOException;
+    
+    /**
      * Returns whether or not there are pending, unsent messages for this 
      * writer.
      * 
