@@ -16,6 +16,7 @@ import java.util.Enumeration;
 
 public class UrnCache {
     
+    private static final String URN_CACHE_FILE = "fileurns.cache";
     /**
      * UrnCache instance variable
      */
@@ -86,7 +87,7 @@ public class UrnCache {
      */
     private void initCache() {
         try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("fileurns.cache"));
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));
             theUrnCache = (Hashtable)ois.readObject();
             ois.close();
         } catch (Exception e) {
@@ -115,7 +116,7 @@ public class UrnCache {
      */
     public void persistCache() {
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("fileurns.cache"));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
             oos.writeObject(theUrnCache);
             oos.close();
         } catch (Exception e) {
