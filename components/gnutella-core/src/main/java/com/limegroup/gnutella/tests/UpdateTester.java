@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import com.limegroup.gnutella.update.*;
+import com.limegroup.gnutella.util.CommonUtils;
 
 public class UpdateTester extends JFrame {
 
@@ -23,7 +24,7 @@ public class UpdateTester extends JFrame {
 
 	public UpdateTester() {
 		super("Update Tester");
-		_manager = new UpdateManager();
+		_manager = UpdateManager.instance();
 		Dimension dim = new Dimension(400, 400);
 		setSize(dim);
 		JPanel mainPanel = new JPanel();
@@ -56,13 +57,20 @@ public class UpdateTester extends JFrame {
 		getContentPane().add(mainPanel);
 	}
 
-	public void startTest() {
+	/**
+	 * starts the test.
+	 */
+	private void startTest() {
 		String version = (String)_versionBox.getSelectedItem();
 		String os = (String)_osBox.getSelectedItem();
 		_manager.startTest(version,os);
 	}
 
+	/**
+	 * main method to kick off the test.
+	 */
 	public static void main(String args[]) {
+		CommonUtils.initialize();
 		UpdateTester tester = new UpdateTester();
 		tester.setVisible(true);
 	}
