@@ -4,11 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
@@ -21,19 +17,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * Obsoletes the old SocketOpener class.
  */
 public class Sockets {
-
-    private static Selector _selector;
-
-    private static final Object CONNECT_LOCK = new Object();
-
-    private static final Object SELECTOR_LOCK = new Object();
-
-    private static final LinkedList PENDING_SOCKETS = new LinkedList();
-
-    static {
-        start();
-    }
-
 
 	/**
 	 * Ensure this cannot be constructed.
@@ -142,50 +125,6 @@ public class Sockets {
             sc.connect(addr);
 
             return sc.socket();
-            /*
-            SocketData data = new SocketData(sc);
-            synchronized(PENDING_SOCKETS) {
-                PENDING_SOCKETS.add(data);
-            }
-            
-            if(_selector == null) {
-                // wait for the selector to be initialized
-                synchronized(SELECTOR_LOCK) {
-                    try {
-                        while(_selector == null) {
-                            SELECTOR_LOCK.wait();
-                        }
-                    } catch(InterruptedException e) {
-                        ErrorService.error(e);
-                    }
-                }
-            }
-            _selector.wakeup();
-            while(!sc.isConnected()) {
-                synchronized(CONNECT_LOCK) {
-                    try {
-                        if(timeout > 0) {
-                            CONNECT_LOCK.wait(timeout);
-                            if(data.errorConnecting()) {
-                                //data.getException().printStackTrace();
-                                throw data.getException();
-                            }
-                            if(!sc.isConnected()) {
-                                throw new IOException("could not connect socket");
-                            } 
-                            break;
-                        } else {
-                            CONNECT_LOCK.wait();
-                        }
-                    } catch(InterruptedException e) {
-                        // this should never happen
-                        ErrorService.error(e);
-                    }
-                }
-            }
-            System.out.println("Sockets::RETURNING SOCKET"); 
-            return sc.socket();
-            */
         }
      
         if (timeout!=0) {
@@ -194,163 +133,6 @@ public class Sockets {
         } else {
             //c) No timeouts
             return new Socket(host, port);
-        }
-    }
-
-    
-    private static void start() {
-        // don't do anything if we're not using NIO
-        if(!CommonUtils.isJava14OrLater() || !ConnectionSettings.USE_NIO.getValue()) {
-            return;
-        }
-                
-        Thread selectorThread = new Thread(new NIOSocketConnector(), "NIO socket connector");
-        selectorThread.setDaemon(true);
-        selectorThread.start();        
-    }
-
-    /**
-     * Utility class that stores whether or not any errors occurred connecting to the
-     * desired host.
-     */
-    private static class SocketData {
-
-        private final SocketChannel SOCKET_CHANNEL;
-
-        private IOException _errorConnecting;
-
-        SocketData(SocketChannel sc) {
-            SOCKET_CHANNEL = sc;
-        }
-
-        private void errorConnecting(IOException e) {
-            _errorConnecting = e;
-        }
-
-        private boolean errorConnecting() {
-            return _errorConnecting != null;
-        }
-
-        private IOException getException() {
-            return _errorConnecting;
-        }
-
-        SocketChannel channel() {
-            return SOCKET_CHANNEL;
-        }
-    }
-
-    /**
-     * Helper class for outgoing connections that registers new channels with a 
-     * selector and completes outgoing socket connections.
-     */
-    private static class NIOSocketConnector implements Runnable {
-        public void run() {
-            try {
-                _selector = Selector.open();
-                synchronized(SELECTOR_LOCK) {
-                    SELECTOR_LOCK.notify();
-                }
-            } catch(IOException e) {
-                // this hopefully should not happen, although we'll at least find 
-                // out if and why it could
-                ErrorService.error(e);
-                return;
-            }
-
-            
-            while(true) {
-                try {          
-                    int readyKeys = _selector.select();
-                    if(readyKeys > 0) {
-                        processSelectedKeys();
-                    }
-                    
-                    processPendingSockets();
-                } catch(IOException e) {
-                }
-            }                        
-        }
-
-        /**
-         * Processes any keys that are ready for an attempt at fully establishing
-         * their TCP connections.
-         */
-        private void processSelectedKeys() {
-            for (Iterator iter = _selector.selectedKeys().iterator(); iter.hasNext();) {
-
-                // Retrieve the next key and remove it from the set
-                SelectionKey key = (SelectionKey)iter.next();
-                iter.remove();
-
-                // if the key is not either done connecting or in the process of 
-                // connecting, then keep going -- this should never occur
-                if(!key.isConnectable()) {
-                    continue;
-                }
-                SocketChannel sc = (SocketChannel)key.channel();
-                
-                // Attempt to complete the connection sequence
-                try {
-                    if (sc.finishConnect()) {
-                        key.cancel();
-                        synchronized(CONNECT_LOCK) {
-                            CONNECT_LOCK.notify();
-                        }
-                    }
-                } catch (IOException e) {
-                    //e.printStackTrace();
-                    SocketData data = (SocketData)key.attachment();
-                    data.errorConnecting(e);
-                    //((SocketData)key.attachment()).errorConnecting(e);
-                    synchronized(CONNECT_LOCK) {
-                        CONNECT_LOCK.notify();
-                    }
-                    NetworkUtils.close(sc.socket());
-                    try {                        
-                        sc.close();
-                    } catch(IOException ioe) {
-                        // nothing to do
-                    }
-                }
-            }
-        }
-
-        /**
-         * Loops through any sockets that have yet to be connected and registers 
-         * them for connection events.
-         */
-        private void processPendingSockets() {
-            synchronized (PENDING_SOCKETS) {
-                while (PENDING_SOCKETS.size() > 0) {
-                    SocketData data = (SocketData)PENDING_SOCKETS.removeFirst(); 
-                    SocketChannel channel = data.channel();
-                    try {
-                        
-                        // Register the channel with the selector, indicating
-                        // interest in connection completion and attaching the
-                        // target object so that we can get the target back
-                        // after the key is added to the selector's
-                        // selected-key set
-                        channel.register(_selector, SelectionKey.OP_CONNECT, data);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        data.errorConnecting(e);
-                        synchronized(CONNECT_LOCK) {
-                            CONNECT_LOCK.notify();
-                        }
-                        NetworkUtils.close(channel.socket());
-                        
-                        try {
-                            channel.close();
-                        } catch(IOException ioe) {
-                            // nothing to do
-                        }
-                    }
-                    
-                }
-            }
         }
     }
 
@@ -369,8 +151,8 @@ public class Sockets {
 	 * This is basically just a hack to work around JDK bug 4110694.  It is
 	 * implemented in a similar way as Wayne Conrad's SocketOpener class, except
 	 * that it doesn't use Thread.stop() or interrupt().  Rather opening threads
-	 * hang around until the connection really times out.  That means frequent calls
-	 * to this may result in numerous threads waiting to die.<p>
+	 * hang around until the connection really times out.  That means frequent 
+	 * calls to this may result in numerous threads waiting to die.<p>
 	 *
 	 * This class is currently NOT thread safe.  Currently connect() can only be 
 	 * called once.
@@ -394,8 +176,8 @@ public class Sockets {
 		}
 		
 		/** 
-		 * Returns a new socket to the given host/port.  If the socket couldn't be
-		 * established withing timeout milliseconds, throws IOException.  If
+		 * Returns a new socket to the given host/port.  If the socket couldn't
+		 * be established withing timeout milliseconds, throws IOException.  If
 		 * timeout==0, no timeout occurs.  If this thread is interrupted while
 		 * making connection, throws IOException.
 		 *
