@@ -1,6 +1,8 @@
-import com.sun.java.util.collections.*;
-import java.io.*;
+package com.limegroup.gnutella;
 import java.net.*;
+import java.io.*;
+import com.sun.java.util.collections.*;
+
 /**
  * The list of all the uploads in progress.
  *
@@ -51,11 +53,6 @@ public class UploadManager {
     /** Used for get addresses in pushes. */
     private Acceptor _acceptor;
 
-	/** the DownloadManager does not seem to have a constructor,
-		which makes me wonder if this class should have one.  for
-		now i'll leave it in, and consult with chris later. */
-	public UploadManager() {}
-	
    //////////////////////// Main Public Interface /////////////////////////
 
     /** 
@@ -65,6 +62,8 @@ public class UploadManager {
      *     @param router the message router to use for sending push requests
      *     @param acceptor used to get my IP address and port for pushes
      */
+
+
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor) {
@@ -76,126 +75,193 @@ public class UploadManager {
                 
 
 	public void acceptUpload(Socket socket) {
+		System.out.println("acceptUpload called!");
+		HTTPUploader uploader;
+		GETLine line;
+		try {
+			line = parseGET(socket);
+		} catch (IOException e) {
+			// the GET line was wrong, just exit.
+			return;
+		}
+		// check if it complies with the restrictions.
+		// if no, send an error.  
+		// if yes, constroct the uploader
+		uploader = new HTTPUploader(line._file, socket, line._index);
 
+		String host = socket.getInetAddress().getHostAddress();
+
+		// add to the Map
+		insertIntoMap(host);
+		try {
+			testPerHostLimit(host); 
+			testTotalUploadLimit();
+		} catch (ExceededTotalUploadLimitException e) {
+			uploader.setState(Uploader.LIMIT_REACHED);
+		} catch (ExceededPerHostLimitException e) {
+			uploader.setState(Uploader.LIMIT_REACHED);
+		}
+		// 3) start the upload
+		_callback.addUpload(uploader);
+		uploader.start();
+		// remove from the map
+		removeFromMap(host);
+
+	}
+
+	public void acceptPushUpload(String file, String host, int port, 
+								 int index, String guid) { 
+		Uploader uploader;
+		uploader = new HTTPUploader(file, host, port, index, guid);
+		// check to see if the file is in the attempted pushes
+		// or if the upload limits have been reached for some 
+		// reason.
+		// add it to the uploads in progress
+		insertIntoMap(host);
+		try {
+			testFailedPush(host);
+			testPerHostLimit(host); 
+			testTotalUploadLimit();
+		} catch (ExceededTotalUploadLimitException e) {
+			uploader.setState(Uploader.LIMIT_REACHED);
+		} catch (FailedPushException e) {
+			uploader.setState(Uploader.PUSH_FAILED);
+		} catch (ExceededPerHostLimitException e) {
+			uploader.setState(Uploader.LIMIT_REACHED);
+		}
+		try {
+			// attempt to connect via push
+			uploader.connect();
+		} catch (IOException e) {
+			// if it fails, insert it into the push failed list
+			uploader.setState(Uploader.PUSH_FAILED);
+			insertFailedPush(host);
+		}
+
+		_callback.addUpload(uploader);		
+		uploader.start();
+
+		// remove it from the uploads in progress
+		removeFromMap(host);
+
+		
 	}
 
 	//////////////////////// Private Interface /////////////////////////
 
-	private static class GETLine(int index, String file) {
-		int _index;
-		String _file;
-		GETLine(int index, String file) {
-			_index = index;
-			_file = file;
+
+	private void insertIntoMap(String host) {
+		int numUploads = 1;
+		// check to see if the map aleady contains
+		// a reference to this host.  if so, get its
+		// value.
+		if ( _uploadsInProgress.containsKey(host) ) {
+			Integer myInteger = (Integer)_uploadsInProgress.get(host);
+			numUploads += myInteger.intValue();
 		}
-
+		_uploadsInProgress.put(host, new Integer(numUploads));
+		
+			
 	}
 
-	private static GETLine parseGET(Socket socket) throws IOException {
-		// Set the timeout so that we don't do block reading.
-		socket.setSoTimeout(SettingsManager.instance().getTimeout());
-		// open the stream from the socket for reading
-		InputStream istream = socket.getInputStream();
-		ByteReader br = new ByteReader(istream);
-		// read the first line. if null, throw an exception
-		String str = br.readLine();
-		if (str == null)
-			throw new IOException();
-		//Expecting "GET /get/0/sample.txt HTTP/1.0"
-		// parse this for the appropriate information
-		// find where the get is...
-		int g = str.indexOf("/get/");
-		// find the next "/" after the "/get/".  the number 
-		// between should be the index;
-		int d = str.indexOf( "/", (g + 5) ); 
-		// get the index
-		String str_index = str.subString( (g+5), d );
-		int index = java.lang.Integer.parseInt(str_index);
-		// get the filename, which should be right after
-		// the "/", and before the next " ".
-		int f = str.indexOf( " ", d );
-		String file - str.subString( (d+1), f);
-		
-		return new GETLine(index, file);
-	}
-
-	private void readHeader(Socket socket) throws IOException {
-        String str = " ";
-        int uploadBegin = 0;
-        int uploadEnd = 0;
-		String userAgent;
-		
-		InputStream istream = socket.getInputStream();
-		ByteReader br = new ByteReader(istream);
-        
-		while (true) {
-			// read the line in from the socket.
-            str = br.readLine();
-			// break out of the loop if it is null or blank
-            if ( (str==null) || (str.equals("")) )
-                break;
-			// Look for the Range: header
-			// it will be in one of three forms.  either
-			// ' - n ', ' m - n', or ' 0 - '
-            if (str.indexOf("Range: bytes=") != -1) {
-                String sub = str.substring(13);
-				// remove the white space
-                sub = sub.trim();   
-                char c;
-				// get the first character
-                c = sub.charAt(0);
-				// - n  
-                if (c == '-') {  
-                    String second = sub.substring(1);
-                    second = second.trim();
-                    uploadEnd = java.lang.Integer.parseInt(second);
-                }
-                else {                
-					// m - n or 0 -
-                    int dash = sub.indexOf("-");
-                    String first = sub.substring(0, dash);
-                    first = first.trim();
-                    uploadBegin = java.lang.Integer.parseInt(first);
-                    String second = sub.substring(dash+1);
-                    second = second.trim();
-                    if (!second.equals("")) 
-                        uploadEnd = java.lang.Integer.parseInt(second);
-                    
-                }
-            }
-
-			// check the User-Agent field of the header information
-			if (str.indexOf("User-Agent:") != -1) {
-				// check for netscape, internet explorer,
-				// or other free riding downoaders
-				if (SettingsManager.instance().getAllowBrowser() == false) {
-					// if we are not supposed to read from them
-					// throw an exception
-					if( (str.indexOf("Mozilla") != -1) ||
-						(str.indexOf("DA") != -1) ||
-						(str.indexOf("Download") != -1) ||
-						(str.indexOf("FlashGet") != -1) ||
-						(str.indexOf("GetRight") != -1) ||
-						(str.indexOf("Go!Zilla") != -1) ||
-						(str.indexOf("Inet") != -1) ||
-						(str.indexOf("MIIxpc") != -1) ||
-						(str.indexOf("MSProxy") != -1) ||
-						(str.indexOf("Mass") != -1) ||
-						(str.indexOf("MyGetRight") != -1) ||
-						(str.indexOf("NetAnts") != -1) ||
-						(str.indexOf("NetZip") != -1) ||
-						(str.indexOf("RealDownload") != -1) ||
-						(str.indexOf("SmartDownload") != -1) ||
-						(str.indexOf("Teleport") != -1) ||
-						(str.indexOf("WebDownloader") != -1) ) {
-							HTTPUploader.doFreeloaderResponse(_socket);
-						    throw new IOException("Web Browser");
-						}
-				}
-				userAgent = str.substring(11).trim();
+	private void removeFromMap(String host) {
+		if ( _uploadsInProgress.containsKey(host) ) {
+			Integer myInteger = (Integer)_uploadsInProgress.get(host);
+			int numUploads = myInteger.intValue();
+			if (numUploads == 1) 
+				_uploadsInProgress.remove(host);
+			else {
+				--numUploads;
+				_uploadsInProgress.put(host, new Integer(numUploads));
 			}
 		}
 	}
+
+	private void testPerHostLimit(String host) 
+		throws ExceededPerHostLimitException {
+		if ( _uploadsInProgress.containsKey(host) ) {
+			Integer value = (Integer)_uploadsInProgress.get(host);
+			int current = value.intValue();
+			int max = SettingsManager.instance().getUploadsPerPerson();
+			if (current >= max)
+				throw new ExceededPerHostLimitException();
+		}
+	}
+		
+	private void testTotalUploadLimit() 
+		throws ExceededTotalUploadLimitException {
+		int max = SettingsManager.instance().getMaxUploads();
+		int current = _uploadsInProgress.size();
+		if (current >= max)
+			throw new ExceededTotalUploadLimitException();
+	}
+
+	private void insertFailedPush(String host) {
+		_failedPushes.add(host);
+	}
+	
+	private void testFailedPush(String host) 
+		throws FailedPushException {
+		if ( _failedPushes.contains(host) )
+			throw new FailedPushException(); 
+	}
+
+	private void insertAttemptedPush(String host) {
+		// not really sure what this is for..
+	}
+
+
+
+	//////////////////////// Handle Parsing /////////////////////////
+
+	
+
+	private GETLine parseGET(Socket socket) throws IOException {
+
+		System.out.println("GETLINE PARSEGET");
+  		// Set the timeout so that we don't do block reading.
+  		socket.setSoTimeout(SettingsManager.instance().getTimeout());
+  		// open the stream from the socket for reading
+  		InputStream istream = socket.getInputStream();
+  		ByteReader br = new ByteReader(istream);
+  		// read the first line. if null, throw an exception
+  		String str = br.readLine();
+  		if (str == null)
+  			throw new IOException();
+  		//Expecting "GET /get/0/sample.txt HTTP/1.0"
+  		// parse this for the appropriate information
+  		// find where the get is...
+  		int g = str.indexOf("/get/");
+  		// find the next "/" after the "/get/".  the number 
+  		// between should be the index;
+  		int d = str.indexOf( "/", (g + 5) ); 
+  		// get the index
+  		String str_index = str.substring( (g+5), d );
+  		int index = java.lang.Integer.parseInt(str_index);
+  		// get the filename, which should be right after
+  		// the "/", and before the next " ".
+  		int f = str.indexOf( " ", d );
+  		String file = str.substring( (d+1), f);
+		
+
+
+		System.out.println("  >> THe file " + file);
+		System.out.println("  >>THe index " + index);
+
+  		return new GETLine(index, file);
+  	}
+
+
+	private class GETLine {
+  		public int _index;
+  		public String _file;
+  		public GETLine(int index, String file) {
+  			_index = index;
+  			_file = file;
+  		}
+
+  	}
+
 }
 
 
