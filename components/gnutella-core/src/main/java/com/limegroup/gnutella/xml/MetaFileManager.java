@@ -113,6 +113,34 @@ public class MetaFileManager extends FileManager {
         }
     }
 
+    /**
+     * Looks at the  LimeXMlReplyCollections other than the one passed as
+     * a parameter, and replaces the old hashValue with the new one.
+     * <p>
+     * package access, since this method is only called from 
+     * LimeXMLReplyCollection. Further the caller is always the 
+     * audio LimeXMLReplyCollectin and, even further, it is only called
+     * when the file being edited is an mp3 file
+     */
+    void handleChangedHash(String oldHash, String newHash, 
+                                      LimeXMLReplyCollection collection){
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        String[] schemas = rep.getAvailableSchemaURIs();
+        int l = schemas.length;
+        for(int i=0;i<l;i++){
+            LimeXMLReplyCollection coll = map.getReplyCollection(schemas[i]);
+            if(coll!=collection){//only look at other collections
+                LimeXMLDocument d=coll.getDocForHash(oldHash);
+                if(d!=null){//we have a value...must replace
+                    coll.removeDoc(oldHash);
+                    coll.addReply(newHash,d);
+                    coll.toDisk("");
+                }//affected collection done
+            }
+        }
+    }
+
 
     /**This method overrides FileManager.loadSettingsBlocking(), though
      * it calls the super method to load up the shared file DB.  Then, it

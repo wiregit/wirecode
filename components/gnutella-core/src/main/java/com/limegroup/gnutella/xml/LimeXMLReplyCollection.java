@@ -352,7 +352,7 @@ public class LimeXMLReplyCollection{
         boolean wrote2 = false;
         //remove nonID3 stuff and store in outMap...and write out to disk 
         //in the regular way
-        toDisk(mp3FileName);
+        toDisk(mp3FileName);//Thadani
 
         if (this.editor != null){//now outMap is populated            
             wrote2 = this.editor.writeID3DataToDisk(mp3FileName);//to mp3 file
@@ -368,12 +368,15 @@ public class LimeXMLReplyCollection{
                 Object mainValue = mainMap.remove(changedHash);
                 mainMap.put(newHash,mainValue);
             }
-            //MetaFileManager manager=(MetaFileManager)FileManager.instance();
-            //Object metaValue = manager.mp3HashToFiles.remove(changedHash);
             //replace the old hashValue
             metaFileManager.writeToMap(file,newHash,mp3);
+            //Since the hash of the file has changed, the metadata pertaiing 
+            //to other schemas will be lost unless we update those tables
+            //with the new hashValue. 
+            //NOTE:This is the only time the hash will change-(mp3 and audio)
+            metaFileManager.handleChangedHash(changedHash,newHash,this);
             Object outValue = outMap.remove(changedHash);
-            outMap.put(changedHash,outValue);
+            outMap.put(newHash,outValue);
         }
         else// there was no need to write out to mp3 assume it returned true
             wrote2 = true;
