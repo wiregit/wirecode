@@ -206,7 +206,13 @@ public class RouterService
 		// incoming = outgoing/2;
 		//  settings.setMaxIncomingConnections(incoming);
         //}
-        setKeepAlive(oldKeepAlive);
+
+		//  Adjust up keepAlive for initial ultrafast connect
+		if ( outgoing < 10 ) {
+			outgoing = 10;
+			manager.activateUltraFastConnectShutdown();
+		}
+        setKeepAlive(outgoing);
         settings.setUseQuickConnect(useQuickConnect);
     }
 
