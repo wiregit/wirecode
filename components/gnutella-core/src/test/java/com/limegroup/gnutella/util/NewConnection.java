@@ -30,7 +30,6 @@ public class NewConnection extends TestConnection {
                             QueryRouteTable qrt) {
         super(connections);
         QRT = qrt;
-        QUERY_INFO.lastReceived = qrt;
     }
 
     /**
@@ -66,9 +65,10 @@ public class NewConnection extends TestConnection {
         return true;
     }
     
-    public ManagedConnectionQueryInfo getQueryRouteState() {
-        return QUERY_INFO;
+    public QueryRouteTable getQueryRouteTableReceived() {
+        return QRT;
     }
+
 
     public String toString() {
         return "NEW TEST CONNECTION";
