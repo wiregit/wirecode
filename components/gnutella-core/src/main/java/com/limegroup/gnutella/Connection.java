@@ -1136,8 +1136,18 @@ public class Connection {
         return _host;
     }
 
-    /** Returns the port set at construction */
-    public int getOrigPort() {
+    /**
+     * Accessor for the port number this connection is listening on.  Note that this 
+     * is NOT the port of the socket itself.  For incoming connections, the getPort
+     * method of the java.net.Socket class returns the ephemeral port that the
+     * host connected with.  This port, however, is the port the remote host is
+     * listening on for new connections, which we set using Gnutella connection
+     * headers in the case of incoming connections.  For outgoing connections,
+     * this is the port we used to connect to them -- their listening port.
+     * 
+     * @return the listening port for the remote host
+     */
+    public int getListeningPort() {
         return _port;
     }
     
@@ -1145,7 +1155,7 @@ public class Connection {
      * Sets the port where the conected node listens at, not the one
      * got from socket
      */
-    void setOrigPort(int port){
+    void setListeningPort(int port){
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
         this._port = port;
@@ -1155,12 +1165,12 @@ public class Connection {
      * Returns the port of the foreign host this is connected to.
      * @exception IllegalStateException this is not initialized
      */
-    public int getPort() throws IllegalStateException {
-		if(_socket == null) {
-			throw new IllegalStateException("Not initialized");
-		}
-		return _socket.getPort();
-    }
+//    public int getPort() throws IllegalStateException {
+//		if(_socket == null) {
+//			throw new IllegalStateException("Not initialized");
+//		}
+//		return _socket.getPort();
+//    }
 
 
     /**
