@@ -23,7 +23,7 @@ public class CommonUtils {
 	// variable for whether or not we're on Windows
 	private static boolean _isWindows    = false;
     // true if NT or 2000.
-    private static boolean _isWindowsNT  = false;
+    private static boolean _supportsTray  = false;
 
 	// variable for whether or not we're on Mac 9.1 or below
 	private static boolean _isMacClassic = false;
@@ -54,7 +54,8 @@ public class CommonUtils {
 
 		// set the operating system variables
 		_isWindows = os.indexOf("Windows") != -1;
-        _isWindowsNT = os.indexOf("Windows NT") != -1;
+		if (os.indexOf("Windows NT")!=-1 || os.indexOf("Windows 2000")!=-1)
+			_supportsTray=true;
 		_isSolaris = os.indexOf("Solaris") != -1;
 		_isLinux   = os.indexOf("Linux")   != -1;
 		if(os.startsWith("Mac OS")) {
@@ -111,10 +112,11 @@ public class CommonUtils {
 	}
 
     /**
-     * Returns true iff this is Windows NT or Windows 2000.
+     * Returns true iff this is Windows NT or Windows 2000 and
+	 * hence can support a system tray feature.
      */
-    public static boolean isWindowsNT() {
-        return _isWindowsNT;
+    public static boolean supportsTray() {
+        return _supportsTray;
     }
 
 	/** 
