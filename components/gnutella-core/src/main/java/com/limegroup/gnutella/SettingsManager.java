@@ -1280,7 +1280,7 @@ public class SettingsManager implements SettingsInterface
 			c = "false";
 		forceIPAdress_ = force;
 		props_.put(SettingsInterface.FORCE_IP_ADDRESS, c);
-		writeProperties();
+		//writeProperties();
 	}
 
 	public void setForcedIPAddress(String address) {
@@ -1288,38 +1288,41 @@ public class SettingsManager implements SettingsInterface
 			throw new IllegalArgumentException();
 		forcedIPAdress_ = address;
 		props_.put(SettingsInterface.FORCED_IP_ADDRESS, address);
-		writeProperties();
+		//writeProperties();
 	}
 
-	public void setForcedPort(String int) {
+	public void setForcedPort(int port) {
 		//  if (port == null)
 //  			throw new IllegalArgumentException();
 		forcedPort_ = port;
 		String s = Integer.toString(forcedPort_);
 		props_.put(SettingsInterface.FORCED_PORT, s);
-		writeProperties();
+		//writeProperties();
 	}
 	
-	public void setLastVersionChecked(String last) {
-		lastVersionChecked_ = last;
-		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
-		writeProperties();
-	}
-	
-	public void setCheckAgain(boolean check) {
-		checkAgain_ = check;
-		String c;
-		if (check == true)
-			c = "true";
-		else 
-			c = "false";
-		props_.put(SettingsInterface.CHECK_AGAIN, c);
-        writeProperties();
 
-	}
     /******************************************************
      *********  END OF CONFIGURATION SETTINGS *************
      ******************************************************/
+
+	// IN HERE TWICE FOR SOME REASON
+//  	public void setLastVersionChecked(String last) {
+//  		lastVersionChecked_ = last;
+//  		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
+//  		writeProperties();
+//  	}
+	
+//  	public void setCheckAgain(boolean check) {
+//  		checkAgain_ = check;
+//  		String c;
+//  		if (check == true)
+//  			c = "true";
+//  		else 
+//  			c = "false";
+//  		props_.put(SettingsInterface.CHECK_AGAIN, c);
+//          writeProperties();
+
+//  	}
 
     public synchronized void setBannedIps(String[] bannedIps) {
         if(bannedIps == null)
