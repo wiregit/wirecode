@@ -1,12 +1,15 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import java.net.*;
 
 /**
@@ -22,10 +25,10 @@ public class LeafTester {
     static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    static Connection ultrapeer1;
-    static Connection ultrapeer2;
-    static Connection old1;
-    static Connection old2;
+    static SimpleConnection ultrapeer1;
+    static SimpleConnection ultrapeer2;
+    static SimpleConnection old1;
+    static SimpleConnection old2;
 
     public static void main(String args[]) {
         System.out.println(
@@ -57,29 +60,30 @@ public class LeafTester {
 
      private static void connect() throws IOException, BadPacketException {
          System.out.println("Please establish a connection to localhost:6350\n");
-         ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
+         ultrapeer1=new SimpleConnection(accept(6350), new UltrapeerResponder());
          ultrapeer1.initialize();
          replyToPing(ultrapeer1, true);
 
          System.out.println("Please establish a connection to localhost:6351\n");
-         ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
+         ultrapeer2=new SimpleConnection(accept(6351), new UltrapeerResponder());
          ultrapeer2.initialize();
          replyToPing(ultrapeer2, true);
 
          System.out.println("Please establish a connection to localhost:6352\n");
-         old1=new Connection(accept(6352), new OldResponder());
+         old1=new SimpleConnection(accept(6352), new OldResponder());
          old1.initialize();
          replyToPing(old1, false);
 
          System.out.println("Please establish a connection to localhost:6353\n");
-         old2=new Connection(accept(6353), new OldResponder());
+         old2=new SimpleConnection(accept(6353), new OldResponder());
          old2.initialize();
          replyToPing(old2, false);
      }
 
      private static Socket accept(int port) throws IOException { 
-         ServerSocket ss=new ServerSocket(port);
-         Socket s=ss.accept();
+         ServerSocketChannel channel=ServerSocketChannel.open();
+         channel.socket().bind(new InetSocketAddress(port));
+         Socket s=channel.accept().socket();
          InputStream in=s.getInputStream();
          String word=readWord(in);
          if (! word.equals("GNUTELLA"))
@@ -110,7 +114,7 @@ public class LeafTester {
          throw new IOException();
      }
 
-     private static void replyToPing(Connection c, boolean ultrapeer) 
+     private static void replyToPing(SimpleConnection c, boolean ultrapeer) 
              throws IOException, BadPacketException {
          Message m=c.receive(500);
          Assert.that(m instanceof PingRequest);
@@ -167,7 +171,7 @@ public class LeafTester {
 
     private static void testRedirect() {
         System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
-        Connection c=new Connection("127.0.0.1", PORT,
+        SimpleConnection c=new SimpleConnection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder(),
                                     false);
@@ -255,7 +259,7 @@ public class LeafTester {
 
     /** Tries to receive any outstanding messages on c 
      *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
+    private static boolean drain(SimpleConnection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {

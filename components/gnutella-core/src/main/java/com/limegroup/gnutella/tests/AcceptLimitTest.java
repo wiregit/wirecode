@@ -2,10 +2,11 @@ package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.gui.*;
 
 import java.util.Properties;
@@ -79,24 +80,30 @@ public class AcceptLimitTest {
             Assert.that(false); 
         }
 
-        System.out.println("\nTesting ultrapeer guidance:");
-        testGuidanceI(rs);
-        cleanup(rs);
-        testGuidanceII(rs);
-        cleanup(rs);
-        testGuidanceIII(rs);
-        cleanup(rs);
+        try {
+            System.out.println("\nTesting ultrapeer guidance:");
+            testGuidanceI(rs);
+            cleanup(rs);
+            testGuidanceII(rs);
+            cleanup(rs);
+            testGuidanceIII(rs);
+            cleanup(rs);
 
-        testFetchI(rs, router);
-        cleanup(rs);
+            testFetchI(rs, router);
+            cleanup(rs);
 
-        testAcceptI(rs, router, host, port);
-        cleanup(rs);
-        testAcceptII(rs, router, host, port);
-        cleanup(rs);
+            testAcceptI(rs, router, host, port);
+            cleanup(rs);
+            testAcceptII(rs, router, host, port);
+            cleanup(rs);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Mysterious error: "+e);
+        }
     }
 
-    private static void testFetchI(TestRouterService rs, TestMessageRouter router) {
+    private static void testFetchI(TestRouterService rs, 
+                                  TestMessageRouter router) throws IOException {
         System.out.println(
             "\nTesting fetching won't allow too many non-LimeWire connections:");
         try {
@@ -134,7 +141,8 @@ public class AcceptLimitTest {
             System.out.println("-Testing that 5th fetched non-LW is REJECTED");
             Connection c5a=testOneFetch(
                 rs, router, LOCALHOST, 6351, new EmptyResponder(), 503);
-            Assert.that(cm.getNumConnections()==4);
+            try { Thread.sleep(100); } catch (InterruptedException e) { }
+            Assert.that(cm.getNumConnections()==4);   //FAIL
 
             System.out.println("-Testing that 5th fetched LW is allowed");
             Connection c5b=testOneFetch(
@@ -168,7 +176,7 @@ public class AcceptLimitTest {
                                            TestMessageRouter router,
                                            String host, int port, 
                                            HandshakeResponder responder,
-                                           int code) {
+                                           int code) throws IOException {
         MiniAcceptor acceptor=new MiniAcceptor(responder, port);
         Thread.yield();
         rs.connectToHostAsynchronously(host, port);
@@ -198,7 +206,7 @@ public class AcceptLimitTest {
         for (int i=0; i<100; i++) 
             router.addHost("1.1.1."+i, 6340, true);
 
-        Connection c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);    
+        SimpleConnection c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);    
         Assert.that(rs.getConnectionManager().isConnected(
                                       new Endpoint("127.0.0.1", 17)));
         Assert.that(! rs.getConnectionManager().isConnected(
@@ -226,7 +234,7 @@ public class AcceptLimitTest {
         //ignores guidance
         Assert.that(! rs.getConnectionManager().isConnected(
                                       new Endpoint("127.0.0.1", 17)));
-        Connection c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); 
+        SimpleConnection c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); 
         Assert.that(rs.getConnectionManager().isConnected(
                                       new Endpoint("127.0.0.1", 17)));
         Assert.that(ConnectionHandshakeHeaders.isFalse(
@@ -252,8 +260,8 @@ public class AcceptLimitTest {
      * @param rejectType what sort of rejection to expect when over the limit:
      *  REJECT_503 (during handshaking) or REJECT_SILENT (during messaging)
      */
-    private static Connection testLimit(String host, int port, int type, 
-                                        int limit, int rejectType) {
+    private static SimpleConnection testLimit(String host, int port, int type, 
+                                              int limit, int rejectType) {
         String description=null;
         if (type==OLD_04)
             description="old/0.4";
@@ -268,7 +276,7 @@ public class AcceptLimitTest {
         System.out.println("-Testing limit of "+limit+" "+description+" connections");
 
         //Try to establish LIMIT connections
-        Connection ret=null;
+        SimpleConnection ret=null;
         for (int i=0; i<limit; i++) {
             try {
                 ret=connect(host, port, type);
@@ -284,7 +292,7 @@ public class AcceptLimitTest {
 
         //Check that next connection return 503.
         try {            
-            Connection tmp=connect(host, port, type);
+            SimpleConnection tmp=connect(host, port, type);
             Assert.that(false, "Extra connection allowed");
         } catch (NoGnutellaOkException e) {
             Assert.that(rejectType==REJECT_503 
@@ -297,7 +305,7 @@ public class AcceptLimitTest {
         return ret;
     }
 
-    private static void testGuidanceI(RouterService rs) {
+    private static void testGuidanceI(RouterService rs) throws IOException {
         System.out.println("-Testing normal leaf guidance");
 
         Assert.that(rs.isSupernode());
@@ -307,13 +315,14 @@ public class AcceptLimitTest {
         Thread.yield();
         rs.connectToHostAsynchronously("localhost", 6340);
         Connection in=acceptor.accept();
+        try { Thread.sleep(100); } catch (InterruptedException e) { } //wait for init
         Assert.that(in!=null, "No connection");
         Assert.that(! rs.isSupernode());
         Assert.that(rs.hasClientSupernodeConnection()); 
         in.close();
     }
 
-    private static void testGuidanceII(RouterService rs) {
+    private static void testGuidanceII(RouterService rs) throws IOException {
         System.out.println("-Testing ignored leaf guidance (because of leaf)");
         //Connect one leaf
         Assert.that(rs.getNumConnections()==0);
@@ -324,6 +333,9 @@ public class AcceptLimitTest {
         Thread.yield();
         rs.connectToHostAsynchronously("localhost", 6341);
         Connection in=acceptor.accept();
+        try { Thread.sleep(100); } catch (InterruptedException e) { } //wait for init
+        Assert.that(in.getProperty("X-Ultrapeer").toLowerCase().equals("true"));
+        Assert.that(in.getPropertyWritten("X-Ultrapeer").toLowerCase().equals("false"));
         Assert.that(in!=null);
         Assert.that(rs.isSupernode());
         Assert.that(rs.getNumConnections()==1);
@@ -346,7 +358,7 @@ public class AcceptLimitTest {
     }
 
 
-    private static void testGuidanceIII(RouterService rs) {
+    private static void testGuidanceIII(RouterService rs) throws IOException {
         System.out.println("-Testing ignored leaf guidance (because of ultrapeer)");
         //Connect one ultrapeer
         Assert.that(rs.getNumConnections()==0);
@@ -383,18 +395,18 @@ public class AcceptLimitTest {
      * or null if it failed.
      *   @param type one of t
      */
-    private static Connection connect(String host, int port, int type) 
+    private static SimpleConnection connect(String host, int port, int type) 
             throws IOException {
-        Connection ret=null;
+        SimpleConnection ret=null;
         if (type==OLD_04)
-            ret=new Connection(host, port);
+            ret=new SimpleConnection(host, port);
         else if (type==OLD_06)
-            ret=new Connection(host, port, 
+            ret=new SimpleConnection(host, port, 
                                new Properties(),
                                new EmptyResponder(),
                                false);
         else if (type==LEAF)
-            ret=new Connection(host, port, 
+            ret=new SimpleConnection(host, port, 
                                new LeafProperties(),
                                new EmptyResponder(),
                                false);
@@ -402,7 +414,7 @@ public class AcceptLimitTest {
             //Ultrapeer means LimeWire for these tests.
             Properties props=new UltrapeerProperties();
             props.put("User-Agent", "LimeWire/10.0");
-            ret=new Connection(host, port, 
+            ret=new SimpleConnection(host, port, 
                                props,
                                new EmptyResponder(),
                                false);
@@ -421,7 +433,7 @@ public class AcceptLimitTest {
     }
 
     /** Tests whether c responds or doesn't responds to a ping */
-    private static void testPong(Connection c, boolean expectPong) {
+    private static void testPong(SimpleConnection c, boolean expectPong) {
         System.out.println("-Testing that host "
                            +(expectPong? "sends" : "does NOT")
                            +" reply to ping");
@@ -455,7 +467,7 @@ public class AcceptLimitTest {
 
     /** Tries to receive any outstanding messages on c 
      *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
+    private static boolean drain(SimpleConnection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {

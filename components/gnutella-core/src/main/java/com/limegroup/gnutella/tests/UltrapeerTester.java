@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.connection.SimpleConnection;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import java.util.Properties;
@@ -14,9 +15,9 @@ import java.io.*;
 public class UltrapeerTester {
     static final int PORT=6347;
     static final int TIMEOUT=500;
-    static Connection leaf;
-    static Connection ultrapeer;
-    static Connection old;
+    static SimpleConnection leaf;
+    static SimpleConnection ultrapeer;
+    static SimpleConnection old;
 
     public static void main(String args[]) {
         System.out.println(
@@ -48,18 +49,18 @@ public class UltrapeerTester {
 
     private static void connect() throws IOException {
         //1. unrouted 0.4 connection
-        old=new Connection("localhost", PORT);
+        old=new SimpleConnection("localhost", PORT);
         old.initialize();
 
         //2. unrouted ultrapeer connection
-        ultrapeer=new Connection("localhost", PORT, 
+        ultrapeer=new SimpleConnection("localhost", PORT, 
                                             new UltrapeerProperties(),
                                             new EmptyResponder(),
                                             false);
         ultrapeer.initialize();
         
         //3. routed leaf, with route table for "test"
-        leaf=new Connection("localhost", PORT, 
+        leaf=new SimpleConnection("localhost", PORT, 
                                        new LeafProperties(),
                                        new EmptyResponder(),
                                        false);
@@ -193,8 +194,8 @@ public class UltrapeerTester {
     }
 
 
-    private static void urnTest(Connection sndr, Connection rcv1,
-                                Connection rcv2) 
+    private static void urnTest(SimpleConnection sndr, SimpleConnection rcv1,
+                                SimpleConnection rcv2) 
         throws IOException, BadPacketException {
         // make urns...
         Set currUrnSet = new HashSet();
@@ -507,7 +508,7 @@ public class UltrapeerTester {
 
     /** Tries to receive any outstanding messages on c 
      *  @return true if this got a message */
-    private static boolean drain(Connection c) throws IOException {
+    private static boolean drain(SimpleConnection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {
