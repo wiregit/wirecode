@@ -26,6 +26,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -213,14 +214,19 @@ public class RequeryDownloadTest
         Downloader downloader = null;
         downloader = _mgr.download(_incompleteFile);
         assertTrue(downloader instanceof ResumeDownloader);
+        assertEquals(Downloader.QUEUED,downloader.getState());
         
         int counts = 0;
 		// Make sure that you are through the QUEUED state.
         while (downloader.getState() == Downloader.QUEUED) {
-            Thread.sleep(200);
-            if(counts++ > 25)
+            Thread.sleep(100);
+            if(counts++ > 50)
                 fail("took too long, state: " + downloader.getState());
 		}
+        
+        //give the downloading thread time to change states
+        Thread.sleep(1000);
+        
         assertEquals("downloader isn't waiting for results", 
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
@@ -239,7 +245,8 @@ public class RequeryDownloadTest
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
         // since filename is the first thing ever submitted it should always
         // query for allFiles[0].getFileName()
-        assertEquals("should have queried for filename", _filename, 
+        String qString =StringUtils.createQueryString(_filename);
+        assertEquals("should have queried for filename", qString, 
                      qr.getQuery());
         assertNotNull("should have some requested urn types", 
             qr.getRequestedUrnTypes() );
