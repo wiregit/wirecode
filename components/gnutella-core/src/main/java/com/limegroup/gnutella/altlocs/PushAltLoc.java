@@ -183,4 +183,9 @@ public class PushAltLoc extends AlternateLocation {
 	public String toString() {
 		return _pushAddress+","+_count;
 	}
+	
+	public int hash() {
+	    byte [] guid = _pushAddress.getClientGUID();
+	    return ( guid[3] << 24 ) | (guid[2] << 16) | (guid[1] << 8) | guid[0];
+	}
 }

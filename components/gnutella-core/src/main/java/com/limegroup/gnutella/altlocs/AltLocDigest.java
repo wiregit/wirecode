@@ -88,7 +88,7 @@ public class AltLocDigest implements BloomFilter {
         if (_hasher != null)
             _values.set(_hasher.hash(loc) & _mask);
         else
-            _values.set(loc.hashCode() & _mask);
+            _values.set(loc.hash() & _mask);
     }
 
     /* (non-Javadoc)
@@ -110,7 +110,7 @@ public class AltLocDigest implements BloomFilter {
         if (_hasher != null)
             return _values.get(_hasher.hash(loc) & _mask);
         else
-            return _values.get(loc.hashCode() & _mask);
+            return _values.get(loc.hash() & _mask);
     }
 
     /* (non-Javadoc)

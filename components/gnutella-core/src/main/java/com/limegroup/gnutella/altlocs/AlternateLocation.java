@@ -473,6 +473,10 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         return 17*37+this.SHA1_URN.hashCode();        
 	}
 
+	/**
+	 * @return a hashcode that needs to be more unique, for use in bloom filters
+	 */
+	public abstract int hash();
 }
 
 

@@ -204,4 +204,9 @@ public class DirectAltLoc extends AlternateLocation {
 	public String toString() {
 		return _node+","+_count+","+_demoted;
 	}
+	
+	public int hash() {
+	    byte [] addr = _node.getInetAddress().getAddress();
+	    return (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
+	}
 }
