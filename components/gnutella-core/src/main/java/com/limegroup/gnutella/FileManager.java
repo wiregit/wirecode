@@ -1147,7 +1147,7 @@ public abstract class FileManager {
             Set urnsForCurrFile = files[i].getUrns();
             Iterator iter = urnsForCurrFile.iterator();
             while (iter.hasNext())
-                retList.add(((URN)iter.next()).toString());
+                retList.add(((URN)iter.next()).httpStringValue());
         }
         return retList;
     }
