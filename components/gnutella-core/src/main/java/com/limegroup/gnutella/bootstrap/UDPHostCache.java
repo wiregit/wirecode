@@ -4,6 +4,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.UDPHostRanker;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
@@ -144,7 +145,8 @@ public class UDPHostCache {
                 public boolean isCancelled() {
                     return RouterService.isConnected();
                 }
-            }
+            },
+            PingRequest.createUDPPing()
         );
         return true;
     }       

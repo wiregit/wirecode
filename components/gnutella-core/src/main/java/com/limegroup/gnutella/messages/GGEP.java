@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.COBSUtil;
 import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.NameValue;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -427,6 +428,29 @@ public class GGEP extends Object {
     }
 
     ////////////////////////// Key/Value Mutators and Accessors ////////////////
+    
+    /**
+     * Adds all the specified key/value pairs,
+     */
+    public void putAll(List /* of NameValue */ fields) throws IllegalArgumentException {
+        for(Iterator i = fields.iterator(); i.hasNext(); ) {
+            NameValue next = (NameValue)i.next();
+            String key = next.getName();
+            Object value = next.getValue();
+            if(value == null)
+                put(key);
+            else if(value instanceof byte[])
+                put(key, (byte[])value);
+            else if(value instanceof String)
+                put(key, (String)value);
+            else if(value instanceof Integer)
+                put(key, ((Integer)value).intValue());
+            else if(value instanceof Long)
+                put(key, ((Long)value).longValue());
+            else
+                throw new IllegalArgumentException("Unknown value: " + value);
+        }
+    }             
 
     /** 
      * Adds a key with raw byte value.

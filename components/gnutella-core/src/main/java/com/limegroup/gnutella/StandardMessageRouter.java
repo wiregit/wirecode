@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
+import java.util.Collection;
 
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.PingReply;
@@ -22,6 +24,7 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -100,8 +103,7 @@ public class StandardMessageRouter extends MessageRouter {
 	/**
 	 * Responds to a ping request received over a UDP port.  This is
 	 * handled differently from all other ping requests.  Instead of
-	 * responding with a pong from this node, we respond with a pong
-	 * from other UltraPeers supporting UDP from our cache.
+	 * responding with cached pongs, we respond with a pong from our node.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
      * @param datagram the <tt>DatagramPacket</tt> containing the IP
@@ -112,32 +114,33 @@ public class StandardMessageRouter extends MessageRouter {
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   DatagramPacket datagram,
                                            ReplyHandler handler) {
-        byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
+        if(!RouterService.isIpPortValid())
+            return;
         
-        QueryReply.IPPortCombo ipport =null;
-        if (request.requestsIP())
-            try{
-        	    
-                ipport = 
-                    new QueryReply.IPPortCombo(
-                        datagram.getAddress().getHostAddress(),
-                        datagram.getPort());
-            }catch(IOException tooBad) {}
+        IpPort ipport = null;
+        if (request.requestsIP()) {
+            try {
+                ipport = new QueryReply.IPPortCombo(
+                            datagram.getAddress().getHostAddress(),
+                            datagram.getPort());
+            } catch(IOException tooBad) {}
+        }
         
-        PingReply reply=null;
+        byte[] data = request.getSupportsCachedPongData();
+        Collection hosts = Collections.EMPTY_LIST;
+        if(data != null) {
+            boolean isUltrapeer = data.length >= 1 && (data[0] & 0x1) == 0x1;
+            hosts = RouterService.getPreferencedHosts(isUltrapeer, request.getLocale());
+        }        
         
-        if(NetworkUtils.isValidAddress(addr) &&
-           NetworkUtils.isValidPort(port)) 
-        	if (ipport != null)
-        	    reply = PingReply.create(request.getGUID(),
-        	            (byte)1,ipport);
-        	else
-        	    reply = PingReply.create(request.getGUID(),
-        	            (byte)1);
         
-        if (reply!=null)
-            sendPingReply(reply, handler);
+        PingReply reply;
+    	if (ipport != null)
+    	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, hosts);
+    	else
+    	    reply = PingReply.create(request.getGUID(), (byte)1, hosts);
+        
+        sendPingReply(reply, handler);
         
 	}
 

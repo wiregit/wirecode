@@ -16,6 +16,13 @@ public final class NameValue {
     private final String _name;
     private Object _value;
     
+    /**
+     * Creates a new NameValue with a null value.
+     */
+    public NameValue(String name) {
+        this(name, null);
+    }
+    
     /** Creates new NameValue */
     public NameValue(String name, Object value) {
         this._name = name;

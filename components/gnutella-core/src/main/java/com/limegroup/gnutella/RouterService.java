@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +49,7 @@ import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SimpleTimer;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
@@ -1012,6 +1014,52 @@ public class RouterService {
     public static boolean isMandragoreWorm(byte[] guid, Response response) {
         return verifier.isMandragoreWorm(guid, response);
     }
+    
+    /**
+     * Returns a collection of IpPorts, preferencing hosts with open slots.
+     * If isUltrapeer is true, this preferences hosts with open ultrapeer slots,
+     * otherwise it preferences hosts with open leaf slots.
+     *
+     * Preferences via locale, also.
+     */
+    public static Collection getPreferencedHosts(boolean isUltrapeer, String locale) {
+        // note that we need to use a TreeSet because the objects returned
+        // from the various adding calls below will be different types,
+        // and hashCode & equals won't be respected.
+        Set hosts = new TreeSet(IpPort.COMPARATOR);
+        
+        if(isUltrapeer)
+            hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale));
+        else
+            hosts.addAll(catcher.getUltrapeersWithFreeLeafSlots(locale));
+        
+        // If we don't have enough hosts, add more.
+        
+        if(hosts.size() < 10) {
+            //we first try to get the connections that match the locale.
+            List conns = manager.getInitializedConnectionsMatchLocale(locale);
+            for(Iterator i = conns.iterator(); i.hasNext();) {
+                hosts.add(i.next());
+                if(hosts.size() == 10)
+                    break;
+            }
+            
+            //if we still don't have enough hosts, get them from the list
+            //of all initialized connection
+            if(hosts.size() < 10) {
+                //list returned is unmmodifiable
+                conns = manager.getInitializedConnections();
+                for(Iterator i = conns.iterator(); i.hasNext();) {
+                    hosts.add(i.next());
+                    if(hosts.size() == 10)
+                        break;
+                }
+            }
+        }
+        
+        return hosts;
+    }
+
 
     /**
      *  Returns the number of messaging connections.

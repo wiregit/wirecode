@@ -23,6 +23,7 @@ import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.Cancellable;
@@ -272,23 +273,19 @@ public class HostCatcher {
         //Gnucleus says otherwise.
         Runnable updater=new Runnable() {
             public void run() {
-                try {
-                    if (RouterService.acceptedIncomingConnection() && 
-                        RouterService.isSupernode()) {
-                            byte[] addr = RouterService.getAddress();
-                            int port = RouterService.getPort();
-                            if(NetworkUtils.isValidAddress(addr) &&
-                               NetworkUtils.isValidPort(port) &&
-                               !NetworkUtils.isPrivateAddress(addr)) {
-                                Endpoint e=new Endpoint(addr, port);
-								// This spawns another thread, so blocking is  
-                                // not an issue.
-								gWebCache.sendUpdatesAsync(e);
-							}
-                        }
-                } catch(Throwable t) {
-                    ErrorService.error(t);
-                }
+                if (RouterService.acceptedIncomingConnection() && 
+                    RouterService.isSupernode()) {
+                        byte[] addr = RouterService.getAddress();
+                        int port = RouterService.getPort();
+                        if(NetworkUtils.isValidAddress(addr) &&
+                           NetworkUtils.isValidPort(port) &&
+                           !NetworkUtils.isPrivateAddress(addr)) {
+                            Endpoint e=new Endpoint(addr, port);
+							// This spawns another thread, so blocking is  
+                            // not an issue.
+							gWebCache.sendUpdatesAsync(e);
+						}
+                    }
             }
         };
         
@@ -298,19 +295,15 @@ public class HostCatcher {
         
         Runnable probationRestorer = new Runnable() {
             public void run() {
-                try {
-                    LOG.trace("restoring hosts on probation");
-                    synchronized(HostCatcher.this) {
-                        Iterator iter = PROBATION_HOSTS.iterator();
-                        while(iter.hasNext()) {
-                            Endpoint host = (Endpoint)iter.next();
-                            add(host, false);
-                        }
-                        
-                        PROBATION_HOSTS.clear();
+                LOG.trace("restoring hosts on probation");
+                synchronized(HostCatcher.this) {
+                    Iterator iter = PROBATION_HOSTS.iterator();
+                    while(iter.hasNext()) {
+                        Endpoint host = (Endpoint)iter.next();
+                        add(host, false);
                     }
-                } catch(Throwable t) {
-                    ErrorService.error(t);
+                    
+                    PROBATION_HOSTS.clear();
                 }
             } 
         };
@@ -339,7 +332,8 @@ public class HostCatcher {
                     public boolean isCancelled() {
                         return RouterService.isConnected();
                     }
-                }
+                },
+                PingRequest.createUDPPing()
             );
         }
     }

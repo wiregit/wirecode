@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Collections;
+import java.util.Collection;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -160,6 +161,59 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param ttl the time to live for this message
      */
     public static PingReply create(byte[] guid, byte ttl) {
+        return create(guid, ttl, Collections.EMPTY_LIST);
+    }
+    
+    /**
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, TTL & packed hosts.
+     */
+    public static PingReply create(byte[] guid, byte ttl, Collection hosts) {
+        return create(
+            guid,
+            ttl,
+            RouterService.getPort(),
+            RouterService.getAddress(),
+            (long)RouterService.getNumSharedFiles(),
+            (long)RouterService.getSharedFileSize()/1024,
+            RouterService.isSupernode(),
+            Statistics.instance().calculateDailyUptime(),
+            UDPService.instance().isGUESSCapable(),
+            ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                ApplicationSettings.LANGUAGE.getValue(),
+            RouterService.getConnectionManager()
+                .getNumLimeWireLocalePrefSlots(),
+            hosts);
+    }
+ 
+     /**
+     * Creates a new PingReply for this host with the specified
+     * GUID, TTL & return address.
+     */   
+    public static PingReply create(byte[] guid, byte ttl, IpPort addr) {
+        return create(guid, ttl, addr, Collections.EMPTY_LIST);
+    }
+    
+    
+    /**
+     * Creates a new PingReply for this host with the specified
+     * GUID, TTL, return address & packed hosts.
+     */
+    public static PingReply create(byte[] guid, byte ttl,
+                                   IpPort returnAddr, Collection hosts) {
+        GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
+                            RouterService.isSupernode(),
+                            UDPService.instance().isGUESSCapable());
+                            
+        String locale = ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                        ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                        ApplicationSettings.LANGUAGE.getValue();
+        addLocale(ggep, locale, RouterService.getConnectionManager()
+                                        .getNumLimeWireLocalePrefSlots());
+                                        
+        addAddress(ggep, returnAddr);
+        addPackedHosts(ggep, hosts);
         return create(guid,
                       ttl,
                       RouterService.getPort(),
@@ -167,39 +221,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                       (long)RouterService.getNumSharedFiles(),
                       (long)RouterService.getSharedFileSize()/1024,
                       RouterService.isSupernode(),
-                      newGGEPWithLocale
-                      (Statistics.instance().calculateDailyUptime(),
-                       RouterService.isSupernode(),
-                       UDPService.instance().isGUESSCapable(),
-                       (ApplicationSettings.LANGUAGE.getValue().equals("") ?
-                        ApplicationSettings.DEFAULT_LOCALE.getValue() :
-                        ApplicationSettings.LANGUAGE.getValue()),
-                       RouterService.getConnectionManager()
-                       .getNumLimeWireLocalePrefSlots()));
-    }
-    
-    /**
-     * creates a new PingReply for this host with the specified GUID, ttl and
-     * puts in the ggep extention indicating the remote host's return address.
-     */
-    public static PingReply create(byte [] guid, byte ttl,IpPort returnAddr) {
-        return create(guid,
-                ttl,
-                RouterService.getPort(),
-                RouterService.getAddress(),
-                (long)RouterService.getNumSharedFiles(),
-                (long)RouterService.getSharedFileSize()/1024,
-                RouterService.isSupernode(),
-                newGGEPWithLocaleAndAddress
-                (Statistics.instance().calculateDailyUptime(),
-                 RouterService.isSupernode(),
-                 UDPService.instance().isGUESSCapable(),
-                 (ApplicationSettings.LANGUAGE.getValue().equals("") ?
-                  ApplicationSettings.DEFAULT_LOCALE.getValue() :
-                  ApplicationSettings.LANGUAGE.getValue()),
-                 RouterService.getConnectionManager()
-                 .getNumLimeWireLocalePrefSlots(),
-                 returnAddr));
+                      ggep);
     }
 
     /**
@@ -389,6 +411,17 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
     
     /**
+     * Creates a new PingReply with the specified data.
+     */
+    public static PingReply create(byte[] guid, byte ttl,
+      int port, byte[] ip, long files, long kbytes,
+      boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
+      String locale, int slots) {    
+        return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
+                      dailyUptime, isGuessCapable, locale, slots, Collections.EMPTY_LIST);
+    }
+    
+    /**
      * creates a new PingReply with the specified locale
      *
      * @param guid the sixteen byte message GUID
@@ -409,12 +442,16 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param isGuessCapable guess capable
      * @param locale the locale 
      * @param slots the number of locale preferencing slots available
+     * @param hosts the hosts to pack into this PingReply
      */
     public static PingReply
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes,
                boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
-               String locale, int slots) {
+               String locale, int slots, Collection hosts) {
+        GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable);
+        addLocale(ggep, locale, slots);
+        addPackedHosts(ggep, hosts);
         return create(guid,
                       ttl,
                       port,
@@ -422,8 +459,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                       files,
                       kbytes,
                       isUltrapeer,
-                      newGGEPWithLocale(dailyUptime, isUltrapeer, 
-                                        isGuessCapable, locale, slots));
+                      ggep);
     }
 
     /**
@@ -823,10 +859,9 @@ public class PingReply extends Message implements Serializable, IpPort {
             ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
         }
         
-        if (isUltrapeer) { 
-            // indicate UP support
+        // indicate UP support
+        if (isUltrapeer)
             addUltrapeerExtension(ggep);
-        }
         
         // all pongs should have vendor info
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
@@ -854,40 +889,39 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
     }
 
-    /** creates a new GGEP with the parameters, including the locale */
-    private static GGEP 
-        newGGEPWithLocale(int dailyUptime, boolean isUltrapeer, 
-                          boolean isGuessCapable, String locale, int slots) {
-        
-        GGEP g = newGGEP(dailyUptime,
-                         isUltrapeer,
-                         isGuessCapable);
+    /**
+     * Adds the locale GGEP.
+     */
+    private static GGEP addLocale(GGEP ggep, String locale, int slots) {
         byte[] payload = new byte[3];
         byte[] s = locale.getBytes();
         payload[0] = s[0];
         payload[1] = s[1];
         payload[2] = (byte)slots;
-        g.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
-              payload);
-        
-        return g;
+        ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE, payload);
+        return ggep;
     }
     
-    private static GGEP
-    	newGGEPWithLocaleAndAddress(int dailyUptime,boolean isUltrapeer,
-    	        boolean isGuessCapable, String locale, int slots, IpPort address) {
-        
-        GGEP g = newGGEPWithLocale(dailyUptime,isUltrapeer,
-                isGuessCapable,locale,slots);
-        
-        byte []payload = new byte[6];
-        System.arraycopy(address.getInetAddress().getAddress(),
-                	0,payload,0,4);
-        ByteOrder.short2leb((short)address.getPort(),payload,4);
-        
-        g.put(GGEP.GGEP_HEADER_IPPORT,payload);
-        
-        return g;
+    /**
+     * Adds the address GGEP.
+     */
+    private static GGEP addAddress(GGEP ggep, IpPort address) {
+        byte[] payload = new byte[6];
+        System.arraycopy(address.getInetAddress().getAddress(), 0, payload, 0, 4);
+        ByteOrder.short2leb((short)address.getPort(), payload, 4);
+        ggep.put(GGEP.GGEP_HEADER_IPPORT,payload);
+        return ggep;
+    }
+    
+    /**
+     * Adds the packed hosts into this GGEP.
+     */
+    private static GGEP addPackedHosts(GGEP ggep, Collection hosts) {
+        if(hosts == null || hosts.isEmpty())
+            return ggep;
+            
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(hosts));
+        return ggep;
     }
 
     /**
