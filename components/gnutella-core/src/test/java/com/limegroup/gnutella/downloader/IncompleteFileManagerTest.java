@@ -276,7 +276,9 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         RemoteFileDesc rfd1b=newRFD("other file.txt", 1839, 
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         File file1=ifm.getFile(rfd1);
+        file1.delete(); // getFile will create it, we don't want it created.
         File file1b=ifm.getFile(rfd1b);
+        file1b.delete();
         assertEquals(file1, file1b);
 
         //These files have the same hash, but blocks have been written to disk.
@@ -285,7 +287,9 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         RemoteFileDesc rfd2b=newRFD("yet another file.txt", 1839, 
                                    "urn:sha1:LSTHIPQGSSZGTS5FJUPAKPZWUGYQYPFB");
         File file2=ifm.getFile(rfd2);
+        file2.delete();
         File file2b=ifm.getFile(rfd2b);
+        file2b.delete();
         assertEquals(file2, file2b);
         try {
             file2.createNewFile();
