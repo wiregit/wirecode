@@ -4,6 +4,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
 import org.xml.sax.*;
+import java.net.*;
 
 /**
  * A reference to a single file on a remote machine.  In this respect
@@ -112,7 +113,7 @@ public class RemoteFileDesc implements Serializable {
     }
     
 
-	/* Accessor Methods */
+	// Accessor Methods 
 	public final String getHost() {return _host;}
 	public final int getPort() {return _port;}
 	public final long getIndex() {return _index;}
@@ -122,6 +123,14 @@ public class RemoteFileDesc implements Serializable {
 	public final int getSpeed() {return _speed;}	
 	public final boolean chatEnabled() {return _chatEnabled;}
 	public final boolean browseHostEnabled() {return _browseHostEnabled;}
+
+	/**
+	 * Returns the "quality" of the remote file in terms of firewalled status,
+	 * whether or not the remote host has open slots, etc.
+	 * 
+	 * @return the current "quality" of the remote file in terms of the 
+	 *  determined likelihood of the request succeeding
+	 */
     public final int getQuality() {return _quality;}
 
 	/**
@@ -161,8 +170,27 @@ public class RemoteFileDesc implements Serializable {
 				return urn;
 			}
 		}
-
 		return null;
+	}
+
+	/**
+	 * Returns an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>.
+	 *
+	 * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
+	 */
+	public URL getUrl() {
+		try {
+			String fileName = "";
+			URN urn = getSHA1Urn();
+			if(urn == null) {
+				fileName = "/get/"+_index+"/"+_filename;
+			} else {
+				fileName = "/uri-res/N2R?"+urn.httpStringValue();
+			}
+			return new URL("http", _host, _port, fileName);
+		} catch(MalformedURLException e) {
+			return null;
+		}
 	}
 
 	public final boolean isPrivate() {
