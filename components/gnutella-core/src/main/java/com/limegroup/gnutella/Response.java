@@ -929,7 +929,7 @@ public class Response {
          * in one of the GGEP arrays.
          */
         static Set getLocations(GGEP[] ggeps) {
-            Set locations = new HashSet();
+            Set locations = null;
             
             for (int i = 0; (ggeps != null) && (i < ggeps.length); i++) {
                 Set headers = ggeps[i].getHeaders();
@@ -958,11 +958,13 @@ public class Response {
                             continue;
                         if(!IPFilter.instance().allow(host))
                             continue;
+                        if( locations == null )
+                            locations = new HashSet();
                         locations.add(new Endpoint(host, port));
                     }
                 }
             }
-            return locations;
+            return locations == null ? DataUtils.EMPTY_SET : locations;
         }
     }	
 }

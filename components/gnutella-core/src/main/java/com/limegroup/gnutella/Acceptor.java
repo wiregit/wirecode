@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import java.util.Arrays;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -10,6 +9,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
+import com.sun.java.util.collections.Arrays;
 
 
 /**

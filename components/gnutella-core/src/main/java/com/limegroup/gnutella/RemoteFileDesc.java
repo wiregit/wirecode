@@ -24,6 +24,8 @@ import java.net.*;
  */
 public class RemoteFileDesc implements Serializable {
     private static final long serialVersionUID = 6619479308616716538L;
+    
+    private static final int COPY_INDEX = 0;
 
 	private final String _host;
 	private final int _port;
@@ -108,7 +110,7 @@ public class RemoteFileDesc implements Serializable {
     public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
         this( ep.getHostname(),             // host
               ep.getPort(),                 // port
-              0,                            // index (unknown)
+              COPY_INDEX,                   // index (unknown)
               rfd.getFileName(),            // filename
               rfd.getSize(),                // filesize
               DataUtils.EMPTY_GUID,         // client GUID

@@ -557,13 +557,15 @@ public class DownloadManager implements BandwidthTracker {
             return; // bad packet, do nothing.
         }
         
-        handleNewResponses(responses, data);
+        addDownloadWithResponses(responses, data);
     }
 
     /**
-     * The implementation of the above method.
+     * Iterates through all responses seeing if they can be matched
+     * up to any existing downloaders, adding them as possible
+     * sources if they do.
      */
-    private void handleNewResponses(List responses, HostData data) {
+    private void addDownloadWithResponses(List responses, HostData data) {
         if(responses == null)
             throw new NullPointerException("null responses");
         if(data == null)
@@ -576,6 +578,10 @@ public class DownloadManager implements BandwidthTracker {
             downloaders.addAll(active);
             downloaders.addAll(waiting);
         }
+        
+        // short-circuit.
+        if(downloaders.isEmpty())
+            return;
 
         //For each response i, offer it to each downloader j.  Give a response
         // to at most one downloader.
