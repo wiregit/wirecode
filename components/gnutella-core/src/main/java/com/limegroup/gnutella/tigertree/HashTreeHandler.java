@@ -13,6 +13,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.EntityResolver;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Assert;
@@ -347,6 +348,7 @@ class HashTreeHandler {
 
             DOMParser parser = new DOMParser();
             InputSource is = new InputSource(new StringReader(data));
+            parser.setEntityResolver(new Resolver(is));
             is.setSystemId(SYSTEM_ID);
             is.setEncoding("UTF-8");
 
@@ -428,7 +430,20 @@ class HashTreeHandler {
 
         }
     }
-
+    
+    /**
+     * A custom EntityResolver so we don't hit a website for resolving.
+     */
+    private static final class Resolver implements EntityResolver {
+        private final InputSource schema;
+        public Resolver(InputSource s) {
+            schema = s;
+        }
+        public InputSource resolveEntity(String publicId, String systemId) {
+            return schema;
+        }
+    }
+    
     /**
      * @author Gregorio Roper
      * 
