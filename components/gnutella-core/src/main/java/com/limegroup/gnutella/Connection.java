@@ -30,7 +30,7 @@ import java.io.*;
 public class Connection implements Runnable { 
     private ConnectionManager manager=null; //may be null
     private RouteTable routeTable=null;     //may be null
-    private PushRouteTable pushRouteTable=null; 
+    private RouteTable pushRouteTable=null; 
     /** The underlying socket.  For thread synchronization reasons, it is important
      *  that this only be modified by the send(m) and receive() methods. 
      */
@@ -146,7 +146,7 @@ public class Connection implements Runnable {
 	    out.flush();
 	    sent++;
 	}
-	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -160,8 +160,8 @@ public class Connection implements Runnable {
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
-	    //if (m!=null)
-	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    if (m!=null)
+		System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
@@ -249,7 +249,8 @@ public class Connection implements Runnable {
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
 			//System.out.println("Sumeet:found connection");
-			pushRouteTable.put(this, m);//first store this in pushRouteTable
+			QueryReply qrep = (QueryReply)m;
+			pushRouteTable.put(qrep.getClientGUID(),this);//first store this in pushRouteTable
 			//System.out.println("Sumeet: stored reply in push route table");
 			if (outConnection.equals(this)){ //I am the destination
 			    //TODO1: This needs to be interfaced with Rob
@@ -271,9 +272,9 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof PushRequest){
 		    //System.out.println("Sumeet:We have a push request");
-		    Connection nextHost = pushRouteTable.get(m);//this is the problem
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
+		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
 		    //System.out.println("Sumeet: push request goes to"+nextHost.toString());
 		    //System.out.println("Sumeet: Destination ID" + DestinationId);
 		    if (nextHost!=null){//we have a place to route this message
@@ -281,13 +282,13 @@ public class Connection implements Runnable {
 			nextHost.send(m); //send the message to appropriate host
 		    }
 		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
-			System.out.println("Sumeet:I am the destination"); 
+			//System.out.println("Sumeet:I am the destination"); 
 			//unpack message
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
 		    }
 		    else{// the message has arrived in error
-			System.out.println("Sumeet: Message arrived in error");
+			//System.out.println("Sumeet: Message arrived in error");
 			//do nothing.....drop the message
 		    }
 		}// else if		
