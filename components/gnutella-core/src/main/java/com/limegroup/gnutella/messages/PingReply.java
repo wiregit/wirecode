@@ -714,7 +714,16 @@ public class PingReply extends Message implements Serializable, IpPort {
                 
                 try{
                     myIP = InetAddress.getByAddress(myip);
-                    myPort = ByteOrder.leb2short(data,4);
+                    myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
+
+
+                    if (NetworkUtils.isPrivateAddress(myIP) ||
+                            !NetworkUtils.isValidPort(myPort) ) {
+                        // liars!
+                        myIP=null;
+                        myPort=0;
+                    }
+                    
                 }catch(UnknownHostException bad) {
                     //keep the ip address null and the port 0
                 }
