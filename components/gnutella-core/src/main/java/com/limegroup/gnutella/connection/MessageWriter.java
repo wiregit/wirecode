@@ -63,7 +63,7 @@ public interface MessageWriter {
      * 
      * @param b registration status
      */
-    void setRegistered(boolean b);
+    void setWriteRegistered(boolean b);
 
     /**
      * This method is only used for testing.  This sets the closed status of

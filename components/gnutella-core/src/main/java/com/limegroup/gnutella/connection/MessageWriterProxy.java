@@ -79,8 +79,8 @@ public final class MessageWriterProxy implements MessageWriter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#setRegistered(boolean)
      */
-    public void setRegistered(boolean b) {
-        DELEGATE.setRegistered(b);
+    public void setWriteRegistered(boolean b) {
+        DELEGATE.setWriteRegistered(b);
     }
 
 }

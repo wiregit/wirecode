@@ -320,11 +320,16 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         QUEUE.resetPriority();
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#setRegistered(boolean)
+    /**
+     * Throws <tt>IllegalStateException</tt> because blocking writers should
+     * never be "registered".
+     *
+     * @param b doesn't matter since this always throws an exception in
+     *  blocking mode
+     * @throws <tt>IllegalStateException</tt> because blocking writers should
+     *  never be "registered".
      */
-    public void setRegistered(boolean b) {
-        // TODO Auto-generated method stub
-        
+    public void setWriteRegistered(boolean b) {
+        throw new IllegalStateException("blocking writer should never register");        
     }
 }

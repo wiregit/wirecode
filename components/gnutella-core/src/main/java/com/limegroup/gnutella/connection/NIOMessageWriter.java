@@ -197,7 +197,7 @@ public final class NIOMessageWriter implements MessageWriter {
      * 
      * @param b boolean specifying registration status
      */
-    public synchronized void setRegistered(boolean b) {
+    public synchronized void setWriteRegistered(boolean b) {
         _registered = b;
     }
 
