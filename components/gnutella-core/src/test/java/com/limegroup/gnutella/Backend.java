@@ -439,6 +439,9 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        // let the other side negotiate if they want it.
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(true);         
         settings.setBannedIps(new String[] {"*.*.*.*"});
         settings.setAllowedIps(new String[] {"127.*.*.*"});        
 	}

@@ -23,6 +23,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     public static final int PORT=6666;
     private ManagedConnection out = null;
     private Connection in = null;
+    MiniAcceptor acceptor = null;
 
 	public ManagedConnectionBufferTest(String name) {
 		super(name);
@@ -52,22 +53,102 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         RouterService rs = 
 			new RouterService(new ActivityCallbackStub());
 
-		MiniAcceptor acceptor = 
-			new MiniAcceptor(new DummyResponder("localhost"), PORT);
+		acceptor = new MiniAcceptor(new DummyResponder("localhost"), PORT);
 
 		ManagedConnection.QUEUE_TIME=1000;
 		out = new ManagedConnection("localhost", PORT);
-
-		out.initialize();
-		in = acceptor.accept();
     }
     
     public void tearDown() throws Exception {
 		in.close();
         out.close();
     }
+    
+    /**
+     * Sets up the out & in for compression
+     */    
+    private void setupCompressed() throws Exception {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+		
+		out.initialize();
+		in = acceptor.accept();
+		assertTrue("out.write should be deflated", out.isWriteDeflated());
+		assertTrue("out.read should be deflated", out.isReadDeflated());
+		assertTrue("in.write should be deflated", in.isWriteDeflated());
+		assertTrue("in.read should be deflated", in.isReadDeflated());
+		checkStreams();
+    }
+    
+    /**
+     * Sets up the out & in for not compression
+     */
+     private void setupNotCompressed() throws Exception {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+		
+		out.initialize();
+		in = acceptor.accept();
+		assertTrue("out.write should be !deflated",! out.isWriteDeflated());
+		assertTrue("out.read should be !deflated", !out.isReadDeflated());
+		assertTrue("in.write should be !deflated", !in.isWriteDeflated());
+		assertTrue("in.read should be !deflated", !in.isReadDeflated());
+		checkStreams();
+    }
+    
+    /**
+     * Checks the streams (in/out) of the connection to make sure they're
+     * using the correct streams.  If compressed, they will all be
+     * UncompressingOutputStream / CompressingInputStream.  If not,
+     * outOut will be ThrottledOutputStream, out's in will be
+     * BufferedInputStream, and in's will be BufferedXStreams.
+     */
+    private void checkStreams() throws Exception {
+        InputStream outIn, inIn;
+        OutputStream outOut, inOut;
+        outIn = (InputStream)PrivilegedAccessor.getValue(out, "_in");
+        outOut = (OutputStream)PrivilegedAccessor.getValue(out, "_out");
+        inIn = (InputStream)PrivilegedAccessor.getValue(in, "_in");
+        inOut = (OutputStream)PrivilegedAccessor.getValue(in, "_out");
+        
+        if( out.isReadDeflated() )
+            assertInstanceof(UncompressingInputStream.class, outIn);
+        else
+            assertInstanceof(BufferedInputStream.class, outIn);
+        
+        if( out.isWriteDeflated() )
+            assertInstanceof(CompressingOutputStream.class, outOut);
+        else
+            assertInstanceof(ThrottledOutputStream.class, outOut);
+        
+        if( in.isReadDeflated() )
+            assertInstanceof(UncompressingInputStream.class, inIn);
+        else
+            assertInstanceof(BufferedInputStream.class, inIn);
+        
+        if( in.isWriteDeflated() )
+            assertInstanceof(CompressingOutputStream.class, inOut);
+        else
+            assertInstanceof(BufferedOutputStream.class, inOut);
+    }        
+    
+    /**
+     * Tests that flushing works correctly while compressed.
+     */
+    public void testSendFlushCompressed() throws Exception {
+        setupCompressed();
+		tSendFlush();
+    }
+    
+    /**
+     * Tests that flushing works correctly while not compressed.
+     */
+    public void testSendFlushNotCompressed() throws Exception {
+        setupNotCompressed();
+		tSendFlush();       
+    }
 
-    public void testSendFlush() 
+    private void tSendFlush() 
 		throws IOException, BadPacketException {
         PingRequest pr=null;
         long start=0;
@@ -89,6 +170,22 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
     
     /**
+     * Tests the reordering the buffer works while compressed.
+     */
+    public void testReorderBufferCompressed() throws Exception {
+        setupCompressed();
+        tReorderBuffer();
+    }
+    
+    /**
+     * Tests that reordering the buffer works while not compressed.
+     */
+    public void testReorderBufferNotCompressed() throws Exception {
+        setupNotCompressed();
+        tReorderBuffer();
+    }
+    
+    /**
      * Perhaps the most important test in the suite, this checks to make
      * sure that messages in the outgoing queue are ordered and prioritized
      * correctly.
@@ -98,7 +195,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
      * hops will BOTH be stored in the queue, because each hop is a different
      * priority, and each priority is a different bucket.
      */
-    public void testReorderBuffer() 
+    private void tReorderBuffer() 
 		throws IOException, BadPacketException {
         //1. Buffer tons of messages.  By killing the old thread and restarting
         //later, we simulate a stall in the network.
@@ -367,12 +464,28 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("unexpected patchtablemessage sequencenumber",
             2, ((PatchTableMessage)m).getSequenceNumber());
     }
+    
+    /**
+     * Tests that the timeout works while compressed.
+     */
+    public void testBufferTimeoutCompressed() throws Exception {
+        setupCompressed();
+        tBufferTimeout();
+    }
+    
+    /**
+     * Tests that the timeout works while not compressed.
+     */
+    public void testBufferTimeoutNotCompressed() throws Exception {
+        setupNotCompressed();
+        tBufferTimeout();
+    }
 
     /**
      * Test to make sure that messages properly timeout in the message
      * queues and are dropped.
      */
-    public void testBufferTimeout() 
+    private void tBufferTimeout() 
             throws IOException, BadPacketException {
         assertEquals("unexected queue time",
             1000, ManagedConnection.QUEUE_TIME);
@@ -421,8 +534,23 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             1+3, out.getNumSentMessagesDropped());
     }
 
-
-    public void testPriorityHint() 
+    /**
+     * Tests that the priority hint works with compression
+     */
+    public void testPriorityHintCompressed() throws Exception {
+        setupCompressed();
+        tPriorityHint();
+    }
+    
+    /**
+     * Tests that the priority hint works without compression
+     */
+    public void testPriorityHintNotCompressed() throws Exception {
+        setupNotCompressed();
+        tPriorityHint();
+    }
+    
+    private void tPriorityHint() 
             throws IOException, BadPacketException {
         //Tests wrap-around loop of sendQueuedMessages
         Message m=null;
@@ -480,8 +608,25 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     private static void sleep(long msecs) {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
+    
+    /**
+     * Tests that the buffer drops when compressed.
+     */
+    public void testDropBufferCompressed() throws Exception {
+        setupCompressed();
+        tDropBuffer();
+    }
+    
+    /**
+     * Tests that the buffer drops when not compressed.
+     */
+    public void testDropBufferNotCompressed() throws Exception {
+        setupNotCompressed();
+        tDropBuffer();
+    }
+    
 
-    public void testDropBuffer() 
+    private void tDropBuffer() 
 		throws IOException, BadPacketException {
         //Send tons of messages...but don't read them
         int total=500;
@@ -531,7 +676,10 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 			                       boolean outgoing) 
 			throws IOException {
 			    Properties props = new Properties();
-			    props.put("Accept-Encoding", "deflate");
+			    if(ConnectionSettings.ACCEPT_DEFLATE.getValue())
+			        props.put("Accept-Encoding", "deflate");
+                if(response.isDeflateAccepted())
+                    props.put("Content-Encoding", "deflate");
 			return HandshakeResponse.createResponse(props);
 		}
 	}

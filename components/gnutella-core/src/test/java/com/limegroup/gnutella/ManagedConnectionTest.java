@@ -13,7 +13,12 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
-public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestCase {  
+
+/**
+ * Tests basic connection properties.  All tests are done once with compression
+ * and once without.
+ */
+public class ManagedConnectionTest extends BaseTestCase {  
     public static final int PORT=6666;
 
 
@@ -46,6 +51,8 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
 		ConnectionSettings.KEEP_ALIVE.setValue(1);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
 
         // we start a router service so that all classes have correct
         // access to the others -- ConnectionManager having a valid
@@ -62,7 +69,6 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     private static void sleep(long msecs) {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
-
     
     /**
      * Tests the method for checking whether or not a connection is stable.
@@ -78,9 +84,26 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     }
 
 	/**
-	 * Test to make sure that GGEP extensions are correctly returned in pongs.
+	 * Test to make sure that GGEP extensions are correctly returned in pongs
+	 * on a compressed connection.
 	 */
-    public void testForwardsGGEP() throws Exception {
+    public void testForwardsGGEPCompressed() throws Exception {
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+		tForwardsGGEP();
+    }
+    
+    /**
+     * Tests to make sure that GGEP extensions are correctly returned in pongs
+     * on a normal connection.
+     */
+    public void testForwardGGEPNotCompressed() throws Exception {
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+		tForwardsGGEP();
+    }
+    
+    private void tForwardsGGEP() throws Exception {
 		ManagedConnection out = 
             new ManagedConnection("localhost", Backend.PORT);
         out.initialize();
@@ -188,9 +211,26 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 	/**
 	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
 	 * in pongs if it thinks the connection on the other end does not 
-	 * support GGEP.
+	 * support GGEP on a compressed connection.
 	 */
-	public void testStripsGGEP() throws Exception {
+	public void testStripsGGEPCompressed() throws Exception {
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+		tStripsGGEP();
+    }
+
+	/**
+	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
+	 * in pongs if it thinks the connection on the other end does not 
+	 * support GGEP on an uncompressed connection.
+	 */
+	public void testStripsGGEPNotCompressed() throws Exception {
+		ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
+		ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+		tStripsGGEP();
+    }    
+    	    
+	private void tStripsGGEP() throws Exception {
         ManagedConnection out = 
 			ManagedConnection.createTestConnection("localhost", 
 												   Backend.PORT,
