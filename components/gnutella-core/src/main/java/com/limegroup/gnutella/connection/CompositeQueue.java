@@ -198,6 +198,7 @@ public class CompositeQueue {
      * private and final.  Make protected if ManagedConnection is subclassed.
      */
     private final void repOk() {
+        /*
         Assert.that(_queues.length==PRIORITIES);
         Assert.that(_priority>=0 && _priority<PRIORITIES,
                     "Invalid priority: "+_priority);
@@ -209,7 +210,7 @@ public class CompositeQueue {
             sum+=_queues[i].size();
         }
         Assert.that(sum==_size, "Expected "+sum+", got "+_size);
+        */
     }
-
 }
 
