@@ -38,7 +38,7 @@ import org.xml.sax.SAXException;
 /**
  * A concrete implementation of a License, for Creative Commons licenses.
  */
-/* package private */ class CCLicense implements License, Serializable, Cloneable {
+class CCLicense implements License, Serializable, Cloneable {
     
     private static final Log LOG = LogFactory.getLog(CCLicense.class);
     
@@ -205,10 +205,8 @@ import org.xml.sax.SAXException;
      * The listener is notified when verification is finished.
      */
     public void verify(VerificationListener listener) {
-        if(!isVerified() && !isVerifying()) {
-            verified = VERIFYING;
-            VQUEUE.add(new Verifier(listener));
-        }
+        verified = VERIFYING;
+        VQUEUE.add(new Verifier(listener));
     }
 
     /**
