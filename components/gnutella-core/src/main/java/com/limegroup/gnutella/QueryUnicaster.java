@@ -82,6 +82,8 @@ public class QueryUnicaster {
                                 InetAddress ip = 
                                 InetAddress.getByName(toQuery.getHostname());
                                 // send the query
+                                debug("QueryUnicaster.queryLoop(): sending" +
+                                      " query " + currQB._qr.getQuery());
                                 udpService.send(currQB._qr, ip, 
                                                 toQuery.getPort());
                                 currQB._hostsQueried.add(toQuery);
@@ -147,9 +149,11 @@ public class QueryUnicaster {
     /** May block if no hosts exist.
      */
     private ExtendedEndpoint getUnicastHost() throws InterruptedException {
+        debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
             if (_queryHosts.isEmpty())
                 _queryHosts.wait();
+            debug("QueryUnicaster.getUnicastHost(): got a host!");
             return (ExtendedEndpoint) _queryHosts.pop();
         }
     }
@@ -178,7 +182,7 @@ public class QueryUnicaster {
     }
 
 
-    private final static boolean debugOn = true;
+    private final static boolean debugOn = false;
     private final static void debug(String out) {
         if (debugOn)
             System.out.println(out);
