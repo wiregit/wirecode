@@ -19,7 +19,7 @@ import com.sun.java.util.collections.List;
  */
 public class RichQueryHandler{
     
-    static RichQueryHandler instance;// the instance
+    private static RichQueryHandler instance;// the instance
     
     /**
      * Call this method to get the singleton
