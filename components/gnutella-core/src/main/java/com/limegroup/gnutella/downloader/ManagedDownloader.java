@@ -577,6 +577,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // MD's never want to requery without user input.
         setState(WAITING_FOR_USER);
         waitForUserInput();
+        setState(WAITING_FOR_RESULTS);
     }
 
     /** Call this when you want to wait for user input.  Very handy for
@@ -883,8 +884,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Ignore request if already in the download cycle.
         synchronized (this) {
             if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
-                   state==ABORTED || state==WAITING_FOR_RESULTS) ||
-                   state==WAITING_FOR_USER)
+                   state==ABORTED || state==WAITING_FOR_RESULTS ||
+                   state==WAITING_FOR_USER))
                 return false;
         }
 
@@ -910,8 +911,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             } else if (state==WAITING_FOR_RESULTS) {
                 // wake up the requerier...
                 reqLock.release();
-            } else if (state==WAITING_FOR_USER) 
+            } else if (state==WAITING_FOR_USER) {
                 forceRequery();
+            }
             return true;
         }
     }
@@ -982,11 +984,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected void tryAllDownloads() {     
         // the number of requeries i've done...
         int numRequeries = 0;
-        // the time to next requery.  We don't want to send the first requery
-        // until a few minutes after the initial download attempt--after all,
-        // the user just started a query.  Hence initialize nextRequeryTime to
-        // System.currentTimeMillis() plus a few minutes.
-        long nextRequeryTime = nextRequeryTime(numRequeries);
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -1052,9 +1049,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
 
                 // should i send a requery?
-                final long currTime = System.currentTimeMillis();
-                if ((currTime >= nextRequeryTime) &&
-                    (numRequeries < REQUERY_ATTEMPTS)) {
+                if ((numRequeries < REQUERY_ATTEMPTS)) {
                     // pauseForRequery delegates to subclasses when necessary
                     pauseForRequery(numRequeries);
 					waitForStableConnections();
@@ -1064,7 +1059,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                             numRequeries++;
                     } catch (CantResumeException ignore) { }
                     // set time for next requery...
-                    nextRequeryTime = nextRequeryTime(numRequeries);
                 }
 
 
@@ -1097,12 +1091,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     reqLock.lock(time); 
                 } else {
                     if (numRequeries <= REQUERY_ATTEMPTS) {
-                        final long waitTime = 
-                        nextRequeryTime - System.currentTimeMillis();
-                        if (waitTime > 0) {
-                            setState(WAITING_FOR_RESULTS, waitTime);
-                            reqLock.lock(waitTime);
-                        }
+                        setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+                        reqLock.lock(TIME_BETWEEN_REQUERIES);
                     }
                     else {
                         setState(GAVE_UP);
