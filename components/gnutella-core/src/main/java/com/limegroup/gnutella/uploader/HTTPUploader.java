@@ -907,7 +907,7 @@ public final class HTTPUploader implements Uploader {
         _wantsFalts=true;
         
         if(_fileDesc != null) 
-            parseFAlternateLocations(str, _fileDesc, true);
+            parseAlternateLocations(str, _fileDesc, true);
         return true;
     }
 
@@ -919,7 +919,7 @@ public final class HTTPUploader implements Uploader {
         _wantsFalts=true;
         
         if(_fileDesc != null)
-            parseFAlternateLocations(str, _fileDesc, false);
+            parseAlternateLocations(str, _fileDesc, false);
         return true;
     }
     
@@ -1079,12 +1079,6 @@ public final class HTTPUploader implements Uploader {
                 continue;
             }
         }
-	}
-	
-	private void parseFAlternateLocations(final String altHeader,
-			final AlternateLocationCollector alc,
-			boolean isGood){
-		//TODO: parse firewalled altlocs and add to appropriate structure here.
 	}
 
 	public void measureBandwidth() {

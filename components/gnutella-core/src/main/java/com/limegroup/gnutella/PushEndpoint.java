@@ -7,6 +7,11 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.messages.*;
 
+import java.util.StringTokenizer;
+import java.io.IOException;
+import java.net.UnknownHostException;
+;
+
 /**
  * a class that represents an endpoint behind one or more PushProxies
  * everything is immutable including the contents of the set.
@@ -103,6 +108,64 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public PushEndpoint(byte [] guid) {
 		this(guid, DataUtils.EMPTY_SET);
+	}
+	
+	/**
+	 * creates a PushEndpoint from a String passed in http header exchange.
+	 */
+	public PushEndpoint(String httpString) throws IOException{
+		_httpString=httpString;
+		StringTokenizer tok = new StringTokenizer(httpString,";");
+		
+		String guidS=null;
+		try{
+			guidS = tok.nextToken();
+		}catch(NoSuchElementException bad) {
+			throw new IOException(bad.getMessage());
+		}
+		
+		_clientGUID = GUID.fromHexString(guidS);
+		_guid = new GUID(_clientGUID);
+		
+		
+		int hashcode = _guid.hashCode();
+		
+		HashSet proxies = new HashSet();
+		
+		while(tok.hasMoreTokens()) {
+			String current = tok.nextToken();
+			
+			int separator = current.indexOf(":");
+			
+			//see if this is a valid; skip gracefully invalid altlocs
+			if (separator == -1 || separator!= current.lastIndexOf(":"))
+				continue;
+				
+			String host = current.substring(0,separator);
+			String portS = current.substring(separator+1);
+			int port = Integer.parseInt(portS);
+			
+			try {
+				QueryReply.PushProxyContainer ppc = 
+					new QueryReply.PushProxyContainer(host, port);
+				
+				hashcode = 37* hashcode + ppc.hashCode();
+				
+				proxies.add(ppc);
+			}catch(UnknownHostException notBad) {
+				continue;
+			}
+		}
+		
+		if (proxies.size() == 0)
+			_proxies = DataUtils.EMPTY_SET;
+		else
+			_proxies = proxies;
+		
+		_hashcode=hashcode;
+		
+		_size = HEADER_SIZE+
+			Math.min(_proxies.size(),4) * PROXY_SIZE;
 	}
 	
 	/**

@@ -125,7 +125,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private AlternateLocationCollection _altLocsReceived;
+	private AlternateLocationCollection _altLocsReceived, _pushAltLocsReceived;
 
     /**
      *  The good locations to send the uploaders as in the alts list
@@ -932,33 +932,60 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		while(st.hasMoreTokens()) {
 			try {
-				DirectAltLoc al=(DirectAltLoc ) AlternateLocation.create(
-				    st.nextToken().trim(), _rfd.getSHA1Urn());
+				AlternateLocation al=(AlternateLocation ) 
+					AlternateLocation.create(
+							st.nextToken().trim(), _rfd.getSHA1Urn());
                 URN alSha1 = al.getSHA1Urn();
                 if(alSha1 == null) {
                     continue;
                 }
                 
-                // in general, most alternate locations will already
-                // be in ip format -- but we do the lookup anyway
-                // just incase they aren't.
-                String ipString = NetworkUtils.ip2string(
-                    al.getHost().getHostBytes());
-                if(!IPFilter.instance().allow(ipString))
-                    continue;
                 
-                if(_altLocsReceived == null)
-                    _altLocsReceived = 
-                    AlternateLocationCollection.create(alSha1);
+                //if this is a direct altloc, add it to the appropriate collection
                 
-                boolean added = false;
+                if (al instanceof DirectAltLoc) {
+                	DirectAltLoc dal = (DirectAltLoc)al;
+                 
+
+                	// in general, most alternate locations will already
+                	// be in ip format -- but we do the lookup anyway
+                	// just incase they aren't.
+                	String ipString = NetworkUtils.ip2string(
+                		dal.getHost().getHostBytes());
+                	if(!IPFilter.instance().allow(ipString))
+                		continue;
                 
-                if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
-                    synchronized(_altLocsReceived) {
-                        added = _altLocsReceived.add(al);
-                    }
-                    if(ManagedDownloader.RECORD_STATS && added) 
-                        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+                
+                	if(_altLocsReceived == null)
+                		_altLocsReceived = 
+                			AlternateLocationCollection.create(alSha1);
+                
+                	boolean added = false;
+                
+                	if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
+                		synchronized(_altLocsReceived) {
+                			added = _altLocsReceived.add(al);
+                		}
+                		if(ManagedDownloader.RECORD_STATS && added) 
+                			DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+                	}
+                }
+                
+                //this is a Push location.  add it to the other collection.
+                else {
+                	if(_pushAltLocsReceived == null)
+                		_pushAltLocsReceived = 
+                			AlternateLocationCollection.create(alSha1);
+                
+                	boolean added = false;
+                
+                	if(alSha1.equals(_pushAltLocsReceived.getSHA1Urn())) {
+                		synchronized(_pushAltLocsReceived) {
+                			added = _pushAltLocsReceived.add(al);
+                		}
+                		if(ManagedDownloader.RECORD_STATS && added); 
+                			//TODO: put in a different stat
+                	}
                 }
 			} catch(IOException e) {
 				// continue without adding it.
@@ -1379,7 +1406,8 @@ public class HTTPDownloader implements BandwidthTracker {
     	//in receiving firewalled locations.
     	_wantsFalts=true;
     	
-    	//TODO:parse stuff here
+    	//this just delegates to readAlternateLocationHeader
+    	readAlternateLocations(str);
     }
       
     /////////////////////////////// Download ////////////////////////////////

@@ -126,9 +126,17 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
             return al;
         }
         
-        // Case 2.
-		URL url = AlternateLocation.createUrlFromMini(location, urn);
-		return new DirectAltLoc(url, urn);
+        // Case 2. Direct Alt Loc
+        if (location.indexOf(";")==-1) {
+        	URL url = AlternateLocation.createUrlFromMini(location, urn);
+			return new DirectAltLoc(url, urn);
+        }
+        
+        //Case 3. Push Alt loc
+        //Note: the AlternateLocation object created this way does not know 
+        //the name of the file it is pointing to.  
+        PushEndpoint pe = new PushEndpoint(location);
+        return new PushAltLoc(pe,urn,"");
     }
 
 	/**
