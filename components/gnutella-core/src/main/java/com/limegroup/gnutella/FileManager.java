@@ -1323,10 +1323,10 @@ public class FileManager {
 
     public synchronized FileDesc file2index(String fullName) {  
         // TODO1: precompute and store in table.
-        for (int i=0; i<_files.size(); i++) {
-            FileDesc fd=(FileDesc)_files.get(i);
-            if (fd==null)  file://unshared
-            continue;
+        for (int i = 0; i < _files.size(); i++) {
+            FileDesc fd = (FileDesc)_files.get(i);
+            if (fd==null) //unshared
+                continue;
             else if (fd.getPath().equals(fullName))
                 return fd;
         }
