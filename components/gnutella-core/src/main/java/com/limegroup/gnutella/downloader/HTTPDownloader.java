@@ -36,6 +36,8 @@ public class HTTPDownloader {
 	private String _host;
 	
 	private boolean _chatEnabled = false; // for now
+    
+    private FileManager _fileManager;
 
 	/**
      * Creates a server-side push download.
@@ -47,15 +49,19 @@ public class HTTPDownloader {
      *  the host address and port in this is ignored.
      * @param incompleteFile the temp file to use while downloading.  No other 
      *  thread or process should be using this file.
-     *
-	 * @exception CantConnectException couldn't connect to the host.
+     * @param fm The fileManager reference, since FileManager does not
+     * have an instance method anymore.
+	 * 
+     * @exception CantConnectException couldn't connect to the host.
 	 */
 	public HTTPDownloader(Socket socket, 
                           RemoteFileDesc rfd,
-                          File incompleteFile) 
+                          File incompleteFile,
+                          FileManager fm) 
 		    throws IOException {
         initializeFile(rfd, incompleteFile);
         _socket=socket;
+        _fileManager = fm;
 		connect();		
 	}
 	
@@ -69,12 +75,15 @@ public class HTTPDownloader {
      *  timeout of 0 means no timeout.
      * @param incompleteFile the temp file to use while downloading.  No other 
      *  thread or process should be using this file.
-     *
+     * @param fm The fileManager reference, since FileManager does not
+     * have an instance method anymore.
+     * 
      * @exception CantConnectException couldn't connect to the host.
      */
 	public HTTPDownloader(RemoteFileDesc rfd,
                           int timeout,
-                          File incompleteFile) 
+                          File incompleteFile,
+                          FileManager fm) 
 		    throws IOException {
         initializeFile(rfd, incompleteFile);
         try {
@@ -84,6 +93,7 @@ public class HTTPDownloader {
         } catch (IOException e) {
             throw new CantConnectException();
         }
+        _fileManager = fm;
         connect();
 	}
 
@@ -436,7 +446,7 @@ public class HTTPDownloader {
                 if (! CommonUtils.copy(_incompleteFile, complete_file))
                     throw new FileCantBeMovedException();
             //Add file to library.
-			FileManager.instance().addFileIfShared(complete_file);
+			_fileManager.addFileIfShared(complete_file);
 		} else 
 			throw new FileIncompleteException();
 	}
