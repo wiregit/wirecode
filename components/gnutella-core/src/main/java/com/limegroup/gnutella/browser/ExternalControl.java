@@ -10,6 +10,8 @@ import java.util.StringTokenizer;
 import java.net.*;
 import java.io.*;
 
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 
 public class ExternalControl {
 
@@ -118,6 +120,7 @@ public class ExternalControl {
 			// Collect up http locations
 			String defaultURLs[] = null;
 			ArrayList urls = new ArrayList();
+            String errorMsg = null;
             if (!xtSHA1 && curOpt.xt != null && 
                 curOpt.xt.startsWith(HTTP)) 
                 urls.add(curOpt.xt);
@@ -128,6 +131,15 @@ public class ExternalControl {
                 curOpt.as.startsWith(HTTP)) 
 				urls.add(curOpt.as);
 			if (urls.size() > 0) {
+                // Verify each URL before adding it to the defaultURLs.
+                for(Iterator it = urls.iterator(); it.hasNext(); ) {
+                    try {
+                        new URI((String)it.next()); // is it a valid URI?
+                    } catch(URIException e) {
+                        errorMsg = e.getMessage();
+                        it.remove(); // if not, remove it from the list.
+                    }
+                }
 				defaultURLs = new String[urls.size()];
 		        defaultURLs = (String[]) urls.toArray(defaultURLs);
 			}
@@ -144,22 +156,29 @@ public class ExternalControl {
             if ( !( urls.size() > 0  || 
                     urn != null || 
                     (curOpt.kt != null && !"".equals(curOpt.kt)) ) ) {
-                MessageService.showError(
-                    curOpt.toString(),"ERROR_BAD_MAGNET_LINK");
+                if ( errorMsg != null )
+                    errorMsg = curOpt.toString() + " (" + errorMsg + ")";
+                else
+                    errorMsg = curOpt.toString();
+                MessageService.showError("ERROR_BAD_MAGNET_LINK", errorMsg);
                 return;
             }
+            
+            // Warn the user that the link was slightly invalid
+            if( errorMsg != null )
+                MessageService.showError("ERROR_INVALID_URLS_IN_MAGNET");
             
             try {
                 RouterService.download
                     (urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
             } catch ( AlreadyDownloadingException a ) {  
                 MessageService.showError(
-                    a.getFilename(),"ERROR_ALREADY_DOWNLOADING");
+                    "ERROR_ALREADY_DOWNLOADING", a.getFilename());
 			} catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
 			} catch (FileExistsException fex) {
                 MessageService.showError(
-                    fex.getFileName(), "ERROR_ALREADY_EXISTS");
+                    "ERROR_ALREADY_EXISTS", fex.getFileName());
             }
 		}
 	}

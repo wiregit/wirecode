@@ -126,10 +126,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         try {
             // Use the URL class to do a little parsing for us.
             URL url = new URL(defaultURL);
-
-            // Then create the URL-encoded URL based on the parsed values.
-            url = new URL(url.getProtocol(), url.getHost(), url.getPort(),
-                URLEncoder.encode(url.getFile()));
             int port = url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
