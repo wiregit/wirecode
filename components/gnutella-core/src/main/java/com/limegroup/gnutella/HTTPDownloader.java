@@ -10,6 +10,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class HTTPDownloader implements Runnable {
 
@@ -47,7 +48,8 @@ public class HTTPDownloader implements Runnable {
       
     /* The client side get */
     public HTTPDownloader(String protocal, String host, 
-			  int port, int index, String file, ConnectionManager m ) {
+			  int port, int index, String file, 
+			  ConnectionManager m, byte[] guid ) {
 			
 	_filename = file;
 	_amountRead = 0;
@@ -58,14 +60,15 @@ public class HTTPDownloader implements Runnable {
 
 	URLConnection conn;
 
-    String furl = "/get/" + String.valueOf(index) + "/" + file;
+	String furl = "/get/" + String.valueOf(index) + "/" + file;
 
 	try {
 	    URL url = new URL(protocal, host, port, furl);
-System.out.println("URL :"+url+":");
+	    System.out.println("URL :"+url+":");
 	    conn = url.openConnection();
 	}
 	catch (java.net.MalformedURLException e) {
+	    sendPushRequest(host, port, index, guid);
 	    _callback.error("Bad URL");
 	    return;
 	}
@@ -84,6 +87,40 @@ System.out.println("URL :"+url+":");
 
     }
     
+    public void sendPushRequest(String hostname, int index, 
+				int port, byte[] cguid) {
+
+	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
+	String a = tokenizer.nextToken();
+	String b = tokenizer.nextToken();
+	String c = tokenizer.nextToken();
+	String d = tokenizer.nextToken();
+	
+	int a1 = Integer.parseInt(a);
+	int b1 = Integer.parseInt(b);
+	int c1 = Integer.parseInt(c);
+	int d1 = Integer.parseInt(d);
+	byte[] ip = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
+
+	byte[] guid = _manager.ClientId.getBytes();                      
+
+	// last 16 bytes of the query reply message...
+	byte[] clientGUID = cguid;
+
+	byte ttl = SettingsManager.instance().getTTL();
+
+	PushRequest push = new PushRequest(guid, ttl, clientGUID, 
+					   index, ip, port);
+	try {
+	    _manager.sendToAll(push);
+	}
+	catch (IOException e) {
+	    _callback.error("Could not send push request");
+	    return;
+	}
+
+    }
+
     public String getFileName() {
 	return _filename;
     }
