@@ -445,10 +445,11 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
             return false;
 
         boolean ret=false;
-        while (true) {
+        for(int i = 0; i < 100; i++) {
             try {
                 Message m = c.receive(timeout);
                 ret = true;
+                i = 0;
             } catch (InterruptedIOException e) {
 				// we read a null message or received another 
 				// InterruptedIOException, which means a messages was not 
@@ -458,6 +459,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 // ignore...
             }
         }
+        return ret;
     }
     
     /**
@@ -483,7 +485,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
  	}
  	
  	public static boolean noUnexpectedMessages(Connection c, int timeout) {
-        while (true) {
+        for(int i = 0; i < 100; i++) {
             if(!c.isOpen())
                 return true;
             try {
@@ -494,6 +496,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                     ;
                 else // we should never get any other sort of message...
                     return false;
+                i = 0;
             } catch (InterruptedIOException ie) {
                 return true;
             } catch (BadPacketException e) {
@@ -502,6 +505,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 // ignore....
             }
         }
+        return true;
     }
     
     /**
@@ -515,7 +519,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     public static Message getFirstMessageOfType(Connection c,
                                                 Class type,
                                                 int timeout) {
-        while (true) {
+        for(int i = 0; i < 100; i++) {
             if(!c.isOpen())
                 return null;
 
@@ -529,6 +533,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                     return m;
                 else
                     return null;  // this is usually an error....
+                i = 0;
             } catch (InterruptedIOException ie) {
                 return null;
             } catch (BadPacketException e) {
@@ -537,6 +542,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 // ignore....
             }
         }
+        return null;
     }
     
     public static QueryRequest getFirstQueryRequest(Connection c) {
