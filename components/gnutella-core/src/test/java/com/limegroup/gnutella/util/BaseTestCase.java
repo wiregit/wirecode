@@ -28,6 +28,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.util.SystemUtils;
 
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.List;
@@ -264,6 +265,12 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         // then reading it and rewriting it, etc...
         if (!(this instanceof Backend) )
             Backend.setErrorCallback(this);
+            
+        // SystemUtils must pretend to not be loaded, so the idle
+        // time isn't counted.
+        // For tests that are testing SystemUtils specifically, they can
+        // set loaded to true.
+        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
     }
     
     /**

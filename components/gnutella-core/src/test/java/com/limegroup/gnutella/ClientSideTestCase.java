@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -106,8 +107,16 @@ public abstract class ClientSideTestCase
         if ((numUPs.intValue() < 1) || (numUPs.intValue() > 4))
             throw new IllegalArgumentException("Bad value for numUPs!!!");
         testUP = new Connection[numUPs.intValue()];
-        for (int i = 0; i < testUP.length; i++)
-            testUP[i] = connect(6355+i, true);        
+        for (int i = 0; i < testUP.length; i++) {
+            try {
+                testUP[i] = connect(6355+i, true);
+            } catch(NoGnutellaOkException ngoke) {
+                fail("couldn't connect ultrapeer: " + (i+1) +
+                     ", preferred is: " + 
+                     RouterService.getConnectionManager().getPreferredConnectionCount(),
+                     ngoke);
+            }
+        }
     }        
     
     public void setUp() throws Exception  {

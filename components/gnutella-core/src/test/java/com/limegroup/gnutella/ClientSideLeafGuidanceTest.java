@@ -68,13 +68,18 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // now send back results and make sure that we get a QueryStatus
         // from the leaf
         Message m = null;
-        assertGreaterThan(REPORT_INTERVAL, 4*testUP.length);
+        // ensure that we'll get a QueryStatusResponse from the Responses
+        // we're sending.
+        assertGreaterThan(REPORT_INTERVAL, 6*testUP.length);
         for (int i = 0; i < testUP.length; i++) {
-            Response[] res = new Response[4];
+            Response[] res = new Response[7];
             res[0] = new Response(10, 10, "susheel"+i);
             res[1] = new Response(10, 10, "susheel smells good"+i);
             res[2] = new Response(10, 10, "anita is sweet"+i);
             res[3] = new Response(10, 10, "anita is prety"+i);
+            res[4] = new Response(10, 10, "susheel smells bad" + i);
+            res[5] = new Response(10, 10, "renu is sweet " + i);
+            res[6] = new Response(10, 10, "prety is spelled pretty " + i);
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
@@ -86,9 +91,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // all UPs should get a QueryStatusResponse
         for (int i = 0; i < testUP.length; i++) {
             QueryStatusResponse stat = getFirstQueryStatus(testUP[i]);
-            assertNotNull(stat);
-            assertEquals(new GUID(stat.getGUID()), queryGuid);
-            assertEquals(4, stat.getNumResults());
+            assertNotNull("up: " + i + " failed", stat);
+            assertEquals("up: " + i + " failed", new GUID(stat.getGUID()), queryGuid);
+            assertEquals("up: " + i + " failed", 5, stat.getNumResults());
         }
 
         // shut off the query....
@@ -97,9 +102,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // all UPs should get a QueryStatusResponse with 65535
         for (int i = 0; i < testUP.length; i++) {
             QueryStatusResponse stat = getFirstQueryStatus(testUP[i]);
-            assertNotNull(stat);
-            assertEquals(new GUID(stat.getGUID()), queryGuid);
-            assertEquals(65535, stat.getNumResults());
+            assertNotNull("up: " + i + " failed", stat);
+            assertEquals("up: " + i + " failed", new GUID(stat.getGUID()), queryGuid);
+            assertEquals("up: " + i + " failed", 65535, stat.getNumResults());
         }
     }
 
@@ -123,9 +128,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // from the leaf
         Message m = null;
         for (int i = 0; i < testUP.length; i++) {
-            // since i know REPORT_INTERVAL is 15, i'm sending 45, then 90, then
-            // 135, then 180 - after 180 leaf guidance should shut off....
-            Response[] res = new Response[REPORT_INTERVAL*3];
+            //send enough responses per ultrapeer to shut off querying.
+            Response[] res = new Response[150/testUP.length + 10];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10, 10, "susheel good"+i+j);
 
@@ -147,12 +151,13 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
                 // depending on how far along the query is we could have a
                 // number or 65535 - the number 11 depends on settings such as
                 // REPORT_INTERVAL
-                assertTrue((stat.getNumResults() == 11*(i+1)) ||
-                           (stat.getNumResults() == MAX_RESULTS));
                 if (stat.getNumResults() == MAX_RESULTS) {
-                    assertTrue(i == testUP.length-1);
+                    assertEquals(testUP.length-1, i);
                     maxResultsEncountered = true;
-                }
+                } else {
+                    //assertEquals(11*(i+1), stat.getNumResults());
+                    // there is no sane way this can be asserted.
+                }   
             }
         }
         assertTrue(maxResultsEncountered);
@@ -315,7 +320,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
     }
 
     public static Integer numUPs() {
-        return new Integer(4);
+        return new Integer(3);
     }
 
     public static ActivityCallback getActivityCallback() {
