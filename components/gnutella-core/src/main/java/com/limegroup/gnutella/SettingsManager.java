@@ -23,10 +23,6 @@ public class SettingsManager {
 
 	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
 
-	/**
-	 * Constant string for the name of the windows library to load.
-	 */
-	//public final String WINDOWS_LIBRARY_NAME = "LimeWire18.dll";
 
 	/**
 	 * Default name of the shared directory.
@@ -165,12 +161,11 @@ public class SettingsManager {
 	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
 	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
 	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
-	private final String  DEFAULT_CLASSPATH           
+	public static final String  DEFAULT_CLASSPATH           
 		= "LimeWire.jar" + File.pathSeparator + 
 		"collections.jar" + File.pathSeparator + 
 		"xerces.jar" + File.pathSeparator + 
-		"media.jar" + File.pathSeparator + 
-		"sound.jar";
+		"jl011.jar";
 	private final String  DEFAULT_MAIN_CLASS           
 		= "com.limegroup.gnutella.gui.Main";
 
