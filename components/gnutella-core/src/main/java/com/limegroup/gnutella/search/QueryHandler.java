@@ -14,7 +14,12 @@ import com.sun.java.util.collections.*;
  * settings, such as the TTL.
  */
 public final class QueryHandler {
-	
+
+	/**
+	 * Constant for the number of results to look for.
+	 */
+	private final int RESULTS = 150;
+
 	/**
 	 * Constant for the query quid.
 	 */
@@ -52,7 +57,7 @@ public final class QueryHandler {
 	 * Constant handle to the <tt>ConnectionManager</tt> instance.
 	 */
 	private static final ConnectionManager CONNECTION_MANAGER =
-		RouterService.getConnectionManager();;
+		RouterService.getConnectionManager();
 
 	/**
 	 * Variable for the number of hosts that have been queried.
@@ -65,10 +70,28 @@ public final class QueryHandler {
 	private long _nextQueryTime = 0;
 
 	/**
+	 * The theoretical number of hosts that have been reached by this query.
+	 */
+	private int _theoreticalHostsQueried = 0;
+
+	/**
 	 * Variable for the <tt>RouteTableEntry</tt> for this query -- used
 	 * to access the number of replies returned.
 	 */
 	private RouteTable.RouteTableEntry _routeTableEntry;
+
+	/**
+	 * Constant set of <tt>ReplyHandler</tt>s that have already been queried.
+	 */
+	private final Set QUERIED_REPLY_HANDLERS = new HashSet();
+
+	/**
+	 * Variable for the number of times this query has attempted to go out
+	 * but did not because it did not see any new connections to query down.
+	 */
+	//private int _timesNoNewQuerySent = 0;
+
+	private long _queryStartTime = 0;
 
 	// statically initialize an unmodifiable set of urn types so that
 	// they'll be available for all instances
@@ -113,7 +136,7 @@ public final class QueryHandler {
 	 * @throw <tt>IllegalArgumentException</tt> if the ttl is not within
 	 *  what is considered reasonable bounds
 	 */
-	public QueryRequest createQuery(byte ttl) {
+	private QueryRequest createQuery(byte ttl) {
 		if(ttl < 1 || ttl > 8) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 		return new QueryRequest(GUID.bytes(), ttl, 0, QUERY, XML_QUERY, false, 
@@ -130,17 +153,6 @@ public final class QueryHandler {
 		return GUID;
 	}
 
-	/**
-	 * Returns whether or not this query should be executed given the current
-	 * system time.
-	 *
-	 * @param sysTime the "current" system time
-	 * @return <tt>true</tt> if the query should be executed, <tt>false</tt>
-	 *  otherwise
-	 */
-	//public boolean shouldQuery(long sysTime) {
-	//if(sysTime > _nextQueryTime) return true;
-	//}
 
 	/**
 	 * Sets the <tt>RouteTableEntry</tt> for this query.
@@ -162,22 +174,148 @@ public final class QueryHandler {
 	 *  is <tt>null</tt>
 	 */
 	public void sendQuery() {
+		//System.out.println("QueryHandler::sendQuery::enough results: "+
+		//			   hasEnoughResults()); 
+
 		// do not allow the route table entry to be null
 		if(_routeTableEntry == null) {
 			throw new NullPointerException("null route table entry");
 		}
 		if(hasEnoughResults()) return;
-		if(System.currentTimeMillis() < _nextQueryTime) return;
-		List list = CONNECTION_MANAGER.getInitializedConnections2();
+
+		int results = _routeTableEntry.getRepliesRouted();
+
+		long sysTime = System.currentTimeMillis();
+		if(sysTime < _nextQueryTime) return;
+
+		if(_queryStartTime == 0) {
+			_queryStartTime = sysTime;
+			sendProbeQuery();
+			return;
+		}
+
+		List list = CONNECTION_MANAGER.getInitializedConnections();
 		int length = list.size();
 		for(int i=0; i<length; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);			
-			QueryRequest query = createQuery(i, length-i);
+			
+			// if we've already queried this host, go to the next one
+			if(QUERIED_REPLY_HANDLERS.contains(mc)) continue;
+			
+			int hostsQueried = QUERIED_REPLY_HANDLERS.size();
+
+			byte ttl;
+			int delay;
+//  			if(hostsQueried < 3) {
+//  				ttl = 2;
+//  				if(hostsQueried == 2) {
+//  					if(results < 2) {
+//  						delay = 3000;
+//  					} else {
+//  						delay = 6000;
+//  					}
+//  				} else {
+//  					delay = 200;
+//  				}
+//  			} else {
+				// assume there's minimal overlap between the connections
+				// we queried before and the new ones
+				int remainingConnections = length - hostsQueried - 2;
+				remainingConnections = Math.max(remainingConnections, 1);
+				
+				double resultsPerHost = 
+					(double)results/(double)_theoreticalHostsQueried;
+			
+				int resultsNeeded = RESULTS - results;
+				
+				int hostsToQuery = 100000;
+				if(resultsPerHost != 0) {
+					hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
+				}
+				
+				int hostsToQueryPerConnection = 
+					hostsToQuery/remainingConnections;
+				ttl = calculateNewTTL(hostsToQueryPerConnection);
+				delay = 1500;//(ttl)*1000;
+				//} 
+			
+
+			System.out.println("QueryHandler::sendQuery::ttl: "+ttl+" "+this+
+							   " hostToQuery: "+hostsToQueryPerConnection); 
+			QueryRequest query = createQuery(ttl);
+
+
+			// send out the query on the network
 			MESSAGE_ROUTER.sendQueryRequest(query, mc, null);
-			_nextQueryTime = System.currentTimeMillis() + 6*1000;
-		}		
+
+			// add the reply handler to the list of queried hosts
+			QUERIED_REPLY_HANDLERS.add(mc);
+
+			// adjust the next query time according to the ttl of what we
+			// just sent
+			_nextQueryTime = System.currentTimeMillis()+delay;
+
+			adjustTheoreticalHostsQueried(ttl);
+
+			break;
+		}	
 	}
-	
+
+	/**
+	 * Send the initial "probe" query to get an idea of how widely di
+	 */.
+	private void sendProbeQuery() {
+		System.out.println("QueryHandler::sendProbeQuery"); 
+		List connections = CONNECTION_MANAGER.getInitializedConnections();
+
+		byte ttl = 2;
+		QueryRequest query = createQuery(ttl);
+		int length = connections.size();
+		for(int i=0; i<3; i++) {
+			ManagedConnection mc = (ManagedConnection)connections.get(i);
+
+			MESSAGE_ROUTER.sendQueryRequest(query, mc, null);
+
+			// add the reply handler to the list of queried hosts
+			QUERIED_REPLY_HANDLERS.add(mc);
+
+			adjustTheoreticalHostsQueried(ttl);
+		}
+		_nextQueryTime = System.currentTimeMillis() + 6000;
+	}
+
+	/**
+	 * Calculates the new TTL to use based on the number of hosts per connection
+	 * we still need to query.
+	 * 
+	 * @param hostsToQueryPerConnection the number of hosts we should reach on
+	 *  each remaining connections, to the best of our knowledge
+	 */
+	private byte calculateNewTTL(int hostsToQueryPerConnection) {
+		// the limits below are based on experimental, not theoretical 
+		// observations of results on the network
+		if(hostsToQueryPerConnection < 5)     return 1;
+		if(hostsToQueryPerConnection < 100)   return 2;
+		if(hostsToQueryPerConnection < 300)   return 3;
+		if(hostsToQueryPerConnection < 700)   return 4;
+		else return 5;
+	}
+
+	/**
+	 * Modifies the number of hosts theoretically reached by this query by
+	 * adding a query with the given TTL.
+	 *
+	 * @param ttl the TTL of the query to add
+	 */
+	private void adjustTheoreticalHostsQueried(int ttl) {
+		final int intraUltrapeerConnections = 10;
+		double newHosts = 0;
+		for(;ttl>0; ttl--) {
+			newHosts += Math.pow(intraUltrapeerConnections, ttl-1);
+		}
+		_theoreticalHostsQueried += (int)newHosts;
+	}
+
 	/**
 	 * Returns whether or not this query has received enough results.
 	 *
@@ -185,8 +323,24 @@ public final class QueryHandler {
 	 *  <tt>false</tt> otherwise
 	 */
 	public boolean hasEnoughResults() {
-		return _routeTableEntry.getRepliesRouted() >= 300;
+		//System.out.println("QueryHandler::hasEnoughResults::"+
+		//			   _routeTableEntry.getRepliesRouted());
+		
+		// return false if the query hasn't started yet
+		if(_queryStartTime == 0) return false;
+
+		if(_routeTableEntry.getRepliesRouted() >= RESULTS) return true;
+	 
+		if(_theoreticalHostsQueried > 160000) return true;
+
+		// return true if we've been querying for longer than the specified 
+		// maximum
+		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
+		if(queryLength > 80*1000) return true;
+
+		return false;
 	}
+
 
 	/**
 	 * Creates a new <tt>QueryRequest</tt> instsnce, dynamically setting the
@@ -200,19 +354,13 @@ public final class QueryHandler {
 	 *  to be queried
 	 * @param results the number of results received so far for this query
 	 */
-	private QueryRequest createQuery(int queriedConnections, 
-									 int remainingConnections) {
-		//System.out.println("MessageRouter::createQuery::results: "+results); 
-		//System.out.println("MessageRouter::createQuery::remaining connections: "+
-		//				   remainingConnections); 
-		//System.out.println(); 
-		//try {
-		//int sleepTime = 16000 - queriedConnections*1000;
-		//sleepTime = Math.max(sleepTime, 1000);
-		//Thread.sleep(sleepTime);
-		//} catch(InterruptedException e) {
-		//e.printStackTrace();
-		//}
-		return createQuery((byte)2);		
+	//private QueryRequest createQuery(int queriedConnections, 
+	//							 int remainingConnections) {
+	//return createQuery((byte)2);		
+	//}
+
+	// overrides Object.toString
+	public String toString() {
+		return "QueryHandler: QUERY: "+QUERY+" XML_QUERY: "+XML_QUERY;
 	}
 }

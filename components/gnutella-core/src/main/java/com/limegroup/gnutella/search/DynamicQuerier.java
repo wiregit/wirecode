@@ -13,10 +13,12 @@ public final class DynamicQuerier implements Runnable {
 	 */
 	private List _queries = new LinkedList();
 
+	private final Object QUERY_LOCK = new Object();
+
 	/**
 	 * List of unexpired queries -- continually swapped with <tt>_queries</tt>.
 	 */
-	private final List UNEXPIRED_QUERIES = new LinkedList();
+	private final Set EXPIRED_QUERIES = new HashSet();
 
 	/**
 	 * <tt>DynamicQuerier</tt> instance following singleton.
@@ -44,7 +46,7 @@ public final class DynamicQuerier implements Runnable {
 	 * Schudules the processing of queries for execution.
 	 */
 	public void start() {
-		RouterService.schedule(this, 1000*2, 1000);
+		RouterService.schedule(this, 0, 400);
 	}
 
 	/**
@@ -54,9 +56,10 @@ public final class DynamicQuerier implements Runnable {
 	 * @param handler the <tt>QueryHandler</tt> instance to add
 	 */
 	public void addQuery(QueryHandler handler) {
-		synchronized(_queries) {
+		synchronized(QUERY_LOCK) {
 			// this adds the query to the end of the list
-			_queries.add(handler);
+			_queries.add(handler);		   
+			System.out.println("DynamicQuerier::addQuery::size: "+_queries.size()); 
 		}
 	}
 
@@ -71,17 +74,21 @@ public final class DynamicQuerier implements Runnable {
 	 * Processes current queries.
 	 */
 	private void processQueries() {
-		synchronized(_queries) {
+		//System.out.println("DynamicQuerier::processQueries"); 
+		synchronized(QUERY_LOCK) {
+			//System.out.println("DynamicQuerier::processQueries::got lock"); 
 			Iterator iter = _queries.iterator();
 			while(iter.hasNext()) {
 				QueryHandler handler = (QueryHandler)iter.next();
 				handler.sendQuery();
-				if(!handler.hasEnoughResults()) {
-					UNEXPIRED_QUERIES.add(handler);
+				if(handler.hasEnoughResults()) {
+					EXPIRED_QUERIES.add(handler);
 				}
 			}
-			_queries = UNEXPIRED_QUERIES;
-			UNEXPIRED_QUERIES.clear();
+
+			// remove any expired queries
+			_queries.removeAll(EXPIRED_QUERIES);
+			EXPIRED_QUERIES.clear();
 		}
 	}
 }
