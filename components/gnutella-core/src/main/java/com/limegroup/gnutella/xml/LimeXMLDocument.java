@@ -174,7 +174,11 @@ public class LimeXMLDocument implements Serializable {
         //Element docElement = doc.getDocumentElement();
         if(docElement==null)
             throw new IOException("null doc element");
-        List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
+        NamedNodeMap nnm = docElement.getAttributes();
+        if( nnm == null )
+            throw new IOException("invalid doc element -- null namednodemap");
+
+        List attributes=LimeXMLUtils.getAttributes(nnm);
         int size = attributes.size();
         for(int i=0; i< size; i++){
             Node att = (Node)attributes.get(i);

@@ -130,6 +130,10 @@ public class DownloadManager implements BandwidthTracker {
        }
        return ret;
     }
+    
+    public synchronized int getNumActiveDownloads() {
+        return active.size();
+    }
    
     public synchronized int getNumWaitingDownloads() {
         return waiting.size();

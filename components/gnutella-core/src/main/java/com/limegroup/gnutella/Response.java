@@ -197,10 +197,10 @@ public class Response {
     public Response(long index, long size, String name,
 					 String metadata, Set urns, LimeXMLDocument doc, 
 					 byte[] rawMeta) {
-        Assert.that((index & 0xFFFFFFFF00000000l)==0,
-                "Response constructor: index too big!");
-        Assert.that((size &  0xFFFFFFFF00000000l)==0,
-                "Response constructor: size too big!");
+        if( (index & 0xFFFFFFFF00000000L)!=0 )
+            throw new IllegalArgumentException("invalid index: " + index);
+        if( (size &  0xFFFFFFFF00000000L)!=0 )
+            throw new IllegalArgumentException("invalid size: " + size);
         this.index=index;
         this.size=size;
 		if(name == null) {
@@ -258,6 +258,12 @@ public class Response {
         // extract file index & size
         long index=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
         long size=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
+        
+        if( (index & 0xFFFFFFFF00000000L)!=0 )
+            throw new IOException("invalid index: " + index);
+        if( (size &  0xFFFFFFFF00000000L)!=0 )
+            throw new IOException("invalid size: " + size);        
+        
 
         //The file name is terminated by a null terminator.  
         // A second null indicates the end of this response.

@@ -199,100 +199,109 @@ public class ID3Editor{
     public int writeID3DataToDisk(String fileName){
         File f= null;
         RandomAccessFile file = null;
-        try{
-            f = new File(fileName);
-            file = new RandomAccessFile(f,"rw");
-        }catch(IOException e){
-            return LimeXMLReplyCollection.FILE_DEFECTIVE;
-        }
-        long length=0;
-        try{
-            length = file.length();
-            if(length < 128)//could not write - file too small
-                return LimeXMLReplyCollection.FILE_DEFECTIVE;
-            file.seek(length - 128);
-        }catch(IOException ee){
-            return LimeXMLReplyCollection.RW_ERROR;
-        }
-        byte[] buffer = new byte[30];//max buffer length...drop/pickup vehicle
         
-        //see if there are ID3 Tags in the file
-        String tag="";
-        try{
-            file.readFully(buffer,0,3);
-            tag = new String(buffer,0,3);
-        } catch(EOFException e) {
-            return LimeXMLReplyCollection.RW_ERROR;
-        } catch(IOException e) {
-            return LimeXMLReplyCollection.RW_ERROR;
-        }
-        //We are sure this is an MP3 file.Otherwise this method would never be 
-        //called.
-        if(!tag.equals("TAG")){
-            //Write the TAG
-            try{
-                byte[] tagBytes = "TAG".getBytes();//has to be len 3
-                file.seek(length-128);//reset the file-pointer
-                file.write(tagBytes,0,3);//write these three bytes into the File
-            } catch(Exception eee) {
-                return LimeXMLReplyCollection.BAD_ID3;
-            }
-        }
-        debug("about to start writing to file");
-        boolean b;
-        b = toFile(title_,30,file,buffer);
-        if(!b)
-            return LimeXMLReplyCollection.FAILED_TITLE;
-        b = toFile(artist_,30,file,buffer);
-        if(!b)
-            return LimeXMLReplyCollection.FAILED_ARTIST;
-        b = toFile(album_,30,file,buffer);
-        if(!b)
-            return LimeXMLReplyCollection.FAILED_ALBUM;
-        b = toFile(year_,4,file,buffer);
-        if(!b)
-            return LimeXMLReplyCollection.FAILED_YEAR;
-        //comment and track (a little bit tricky)
-        b = toFile(comment_,28,file,buffer);//28 bytes for comment
-        if(!b)
-            return LimeXMLReplyCollection.FAILED_COMMENT;
-
-        byte trackByte = (byte)-1;//initialize
-        try{
-            if (track_ == null || track_.equals(""))
-                trackByte = (byte)0;
-            else
-                trackByte = Byte.parseByte(track_);
-        }catch(NumberFormatException nfe){
-            //nfe.printStackTrace();
-            return LimeXMLReplyCollection.FAILED_TRACK;
-        }
-                
-        try{
-            file.write(0);//separator b/w comment and track(track is optional)
-            file.write(trackByte);
-        } catch(IOException e){
-            return LimeXMLReplyCollection.RW_ERROR;
-        }
-        
-        //genre
-        byte genreByte= getGenreByte();
-        if(genreByte == -1) {
-            return LimeXMLReplyCollection.FAILED_GENRE;
-        } 
         try {
-            file.write(genreByte);
-        } catch(IOException e) {
-            return LimeXMLReplyCollection.FAILED_GENRE;
-        }
-
-        try{
-            file.close();
-        }catch(IOException ioe){
-            return LimeXMLReplyCollection.RW_ERROR;
-        }
-        //come this far means we are OK.
-        return LimeXMLReplyCollection.NORMAL;
+            try{
+                f = new File(fileName);
+                file = new RandomAccessFile(f,"rw");
+            }catch(IOException e){
+                return LimeXMLReplyCollection.FILE_DEFECTIVE;
+            }
+            long length=0;
+            try{
+                length = file.length();
+                if(length < 128)//could not write - file too small
+                    return LimeXMLReplyCollection.FILE_DEFECTIVE;
+                file.seek(length - 128);
+            }catch(IOException ee){
+                return LimeXMLReplyCollection.RW_ERROR;
+            }
+            byte[] buffer = new byte[30];//max buffer length...drop/pickup vehicle
+            
+            //see if there are ID3 Tags in the file
+            String tag="";
+            try{
+                file.readFully(buffer,0,3);
+                tag = new String(buffer,0,3);
+            } catch(EOFException e) {
+                return LimeXMLReplyCollection.RW_ERROR;
+            } catch(IOException e) {
+                return LimeXMLReplyCollection.RW_ERROR;
+            }
+            //We are sure this is an MP3 file.Otherwise this method would never be 
+            //called.
+            if(!tag.equals("TAG")){
+                //Write the TAG
+                try{
+                    byte[] tagBytes = "TAG".getBytes();//has to be len 3
+                    file.seek(length-128);//reset the file-pointer
+                    file.write(tagBytes,0,3);//write these three bytes into the File
+                } catch(Exception eee) {
+                    return LimeXMLReplyCollection.BAD_ID3;
+                }
+            }
+            debug("about to start writing to file");
+            boolean b;
+            b = toFile(title_,30,file,buffer);
+            if(!b)
+                return LimeXMLReplyCollection.FAILED_TITLE;
+            b = toFile(artist_,30,file,buffer);
+            if(!b)
+                return LimeXMLReplyCollection.FAILED_ARTIST;
+            b = toFile(album_,30,file,buffer);
+            if(!b)
+                return LimeXMLReplyCollection.FAILED_ALBUM;
+            b = toFile(year_,4,file,buffer);
+            if(!b)
+                return LimeXMLReplyCollection.FAILED_YEAR;
+            //comment and track (a little bit tricky)
+            b = toFile(comment_,28,file,buffer);//28 bytes for comment
+            if(!b)
+                return LimeXMLReplyCollection.FAILED_COMMENT;
+    
+            byte trackByte = (byte)-1;//initialize
+            try{
+                if (track_ == null || track_.equals(""))
+                    trackByte = (byte)0;
+                else
+                    trackByte = Byte.parseByte(track_);
+            }catch(NumberFormatException nfe){
+                //nfe.printStackTrace();
+                return LimeXMLReplyCollection.FAILED_TRACK;
+            }
+                    
+            try{
+                file.write(0);//separator b/w comment and track(track is optional)
+                file.write(trackByte);
+            } catch(IOException e){
+                return LimeXMLReplyCollection.RW_ERROR;
+            }
+            
+            //genre
+            byte genreByte= getGenreByte();
+            if(genreByte == -1) {
+                return LimeXMLReplyCollection.FAILED_GENRE;
+            } 
+            try {
+                file.write(genreByte);
+            } catch(IOException e) {
+                return LimeXMLReplyCollection.FAILED_GENRE;
+            }
+    
+            try{
+                file.close();
+            }catch(IOException ioe){
+                return LimeXMLReplyCollection.RW_ERROR;
+            }
+            //come this far means we are OK.
+            return LimeXMLReplyCollection.NORMAL;
+        } finally {
+            if( file != null ) {
+                try {
+                    file.close();
+                } catch(IOException ignored) {}
+            }
+        }        
     }
 
     private boolean toFile(String val,int maxLen, RandomAccessFile file,
@@ -317,7 +326,7 @@ public class ID3Editor{
         }catch (IOException e){
             return false;
         }
-        return true;
+    return true;
     }
 
     private String getInfo(String tag){

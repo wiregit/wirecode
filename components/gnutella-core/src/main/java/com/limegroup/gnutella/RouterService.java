@@ -462,6 +462,13 @@ public class RouterService {
     }
     
     /**
+     * Returns the number of active downloads.
+     */
+    public static int getNumActiveDownloads() {
+        return downloader.getNumActiveDownloads();
+    }
+    
+    /**
      * Returns the number of downloads waiting to be started.
      */
     public static int getNumWaitingDownloads() {
@@ -487,6 +494,13 @@ public class RouterService {
      */
     public static int getNumQueuedUploads() {
         return uploadManager.getNumQueuedUploads();
+    }
+    
+    /**
+     * Returns the current uptime.
+     */
+    public static long getCurrentUptime() {
+        return statistics.getUptime();
     }
 
 

@@ -226,9 +226,13 @@ public class QueryReply extends Message implements Serializable{
 		throws BadPacketException {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
         this.payload=payload;
+        
 		if(!NetworkUtils.isValidPort(getPort())) {
 			throw new BadPacketException("invalid port");
 		}
+		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
+			throw new BadPacketException("invalid speed: " + getSpeed());
+		} 		
 		
 		setAddress();
         //repOk();                               

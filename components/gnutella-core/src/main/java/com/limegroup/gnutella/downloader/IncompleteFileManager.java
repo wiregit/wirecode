@@ -187,10 +187,15 @@ public class IncompleteFileManager implements Serializable {
 		File incDir = null;
 		try {
 			incDir = SettingsManager.instance().getIncompleteDirectory();
+			//make sure its created.. (the user might have deleted it)
+			incDir.mkdirs();
 		} catch(java.io.FileNotFoundException fnfe) {
 			// this is fine, as this will just create a file in the current
 			// working directory.
 		}
+		
+		String convertedName =
+		    CommonUtils.convertFileName(rfd.getFileName());
 
         URN sha1=rfd.getSHA1Urn();
         if (sha1!=null) {
@@ -203,8 +208,7 @@ public class IncompleteFileManager implements Serializable {
                 //the value set of HASHES.  Because we allow risky resumes,
                 //there's no need to look at BLOCKS as well...
                 for (int i=1 ; ; i++) {
-                    file=new File(incDir, 
-                                  tempName(CommonUtils.convertFileName(rfd.getFileName()),rfd.getSize(),i));
+                    file=new File(incDir, tempName(convertedName, rfd.getSize(), i));
                     if (! hashes.values().contains(file))
                         break;
                 }
@@ -214,8 +218,7 @@ public class IncompleteFileManager implements Serializable {
             }
         } else {
             //No hash.
-            return new File(incDir, 
-                            tempName(rfd.getFileName(), rfd.getSize(), 0));
+            return new File(incDir, tempName(convertedName, rfd.getSize(), 0));
         }
     }    
 
