@@ -153,6 +153,12 @@ public abstract class MessageRouter {
     private QueryRouteTable _lastQueryRouteTable;
 
     /**
+     * The maximum number of response to send to a query that has
+     * a "high" number of hops.
+     */
+    private static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
+
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
@@ -1620,11 +1626,22 @@ public abstract class MessageRouter {
 
         int numHops = queryRequest.getHops();
 
-        if(REPLY_LIMIT > 1 && numHops > 2 && numResponses > 10) {
-            List randomizedResponses = Arrays.asList(responses);
-            Collections.shuffle(randomizedResponses);
-            responses = 
-                (Response[])randomizedResponses.subList(0, 10).toArray();
+        // limit the responses if we're not delivering this 
+        // out-of-band and we have a lot of responses
+        if(REPLY_LIMIT > 1 && 
+           numHops > 2 && 
+           numResponses > HIGH_HOPS_RESPONSE_LIMIT) {
+            int j = 
+                (int)(Math.random() * numResponses) % 
+                (numResponses - HIGH_HOPS_RESPONSE_LIMIT);
+            int limit = index + HIGH_HOPS_RESPONSE_LIMIT;
+
+            Response[] newResponses = 
+                new Response[HIGH_HOPS_RESPONSE_LIMIT];
+            for(int i=0; i<10; i++, j++) {
+                newResponses[i] = responses[j];
+            }
+            responses = newResponses;
             numResponses = responses.length;
         }
         while (numResponses > 0) {
