@@ -287,19 +287,19 @@ public class QueryRouteTable {
         for (int i=0; i<m; i++) {
             int low=(int)Math.floor(i*scale);
             int high=(int)Math.ceil((i+1)*scale);
-            Assert.that(low>=0 && low<m2,
-                        "Low value "+low+" for "+i+" incompatible with "+m2);
-            Assert.that(high>=0 && high<=m2,
-                        "High value "+high+" for "+i+" incompatible with "+m2);
+//              Assert.that(low<m2,
+//                          "Low value "+low+" for "+i+" incompatible with "+m2);
+//              Assert.that(high<=m2,
+//                          "High value "+high+" for "+i+" incompatible with "+m2);
+
+            boolean hit = this.bitTable.get(i);
+            if(!hit) continue;
             for (int i2=low; i2<high; i2++) {
                 // if the other is set
                 // we technically can check if this is set
                 // and only set if it isn't, but there's little-to-no
                 // optimization in that
-                if ( this.bitTable.get(i) ) {
-                    resizedQRT.bitTable.set(i2);
-//                  bitEntries++;
-                }
+                resizedQRT.bitTable.set(i2);
             }
         }
         return resizedQRT.bitTable;
