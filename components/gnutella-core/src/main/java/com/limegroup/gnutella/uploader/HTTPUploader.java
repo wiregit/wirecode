@@ -55,12 +55,6 @@ public class HTTPUploader implements Uploader {
 	private URN _requestedURN;
 
 	/**
-	 * <tt>Map</tt> instance for storing unique alternate locations sent in 
-	 * the upload header.
-	 */
-	private Map _alternateLocations = null;
-
-	/**
 	 * The descriptor for the file we're uploading.
 	 */
 	private FileDesc _fileDesc;
@@ -82,7 +76,7 @@ public class HTTPUploader implements Uploader {
 
 	/**
 	 * Consructor for a "normal" non-push upload.  Note that this can
-	 * still be a URN get request.
+	 * be a URN get request.
 	 *
 	 * @param fileName the name of the file
 	 * @param socket the <tt>Socket</tt> instance to serve the upload over
@@ -238,9 +232,17 @@ public class HTTPUploader implements Uploader {
 
     
 	/**
-	 * Is called by the thread.  makes the
-	 * actual call upload the file or appropriate
-	 * error information.
+	 * Starts "uploading" the requested file.  The behavior of the upload,
+	 * however, depends on the current upload state.  If the file was not
+	 * found, for example, the upload sends a 404 Not Found message, whereas
+	 * in the case of a normal upload, the file is transferred as expected.<p>
+	 *
+	 * This method also handles storing any newly discovered alternate 
+	 * locations for this file in the corresponding <tt>FileDesc</tt>.  The
+	 * new alternate locations are discovered through the requesting client's
+	 * HTTP headers.
+	 *
+	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void start() {
 		try {
@@ -264,8 +266,10 @@ public class HTTPUploader implements Uploader {
 	}
 
     /**
-	 * closes the outputstream, inputstream, and socket
-	 * if they are not null.
+	 * Closes the outputstream, inputstream, and socket for this upload 
+	 * connection if they are not null.
+	 *
+	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void stop() {
 		try {
@@ -286,7 +290,9 @@ public class HTTPUploader implements Uploader {
 	 * This method changes the appropriate state class based on
 	 * the integer representing the state.  I'm not sure if this
 	 * is a good idea, since it results in a case statement, that
-	 * i was trying to avoid with 
+	 * i was trying to avoid with.
+	 *
+	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void setState(int state) {
 		_stateNum = state;
@@ -314,33 +320,46 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 	
+	OutputStream getOutputStream() {return _ostream;}
+	InputStream getInputStream() {return _fis;}
+
+	void setAmountUploaded(int amount) {_amountRead = amount;}
+    /** The byte offset where we should start the upload. */
+	int getUploadBegin() {return _uploadBegin;}
+    /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
+    int getUploadEnd() {return _uploadEnd;}
+	
 	/**
-	 * Stores the alternate location for this upload in the associated 
-	 * <tt>FileDesc</tt> instance.
+	 * Accessor for the <tt>UploadManager</tt>.
+	 *
+	 * @return the <tt>UploadManager</tt>
 	 */
-	public void storeAlternateLocation() {
-		// ignore if this is a push upload
-		if(_socket == null) return;
-		try {
-			URL url = 
-			    new URL("http", _hostName, _port, 
-						URNFactory.createHttpUrnServiceRequest(_fileDesc.getSHA1Urn()));
-			AlternateLocation al = new AlternateLocation(url);
-			_fileDesc.addAlternateLocation(al);
-		} catch(MalformedURLException e) {
-			// if the url is invalid, it simply will not be added to the list
-			// of alternate locations
-		}		
-	}
+	UploadManager getManager() {return _manager;}
 
-	/****************** accessor methods *****************/
-
-
-	public OutputStream getOutputStream() {return _ostream;}
-	public int getIndex() {return _index;}
-	public String getFileName() {return _fileName;}
+	// implements the Uploader interface
 	public int getFileSize() {return _fileSize;}
-	public InputStream getInputStream() {return _fis;}
+
+	// implements the Uploader interface
+	public int getIndex() {return _index;}
+
+	// implements the Uploader interface
+	public String getFileName() {return _fileName;}
+
+	// implements the Uploader interface
+	public int getState() {return _stateNum;}
+
+	// implements the Uploader interface
+	public String getHost() {return _hostName;}
+
+	// implements the Uploader interface
+	public boolean chatEnabled() {return _chatEnabled;}
+
+	// implements the Uploader interface
+	public String getChatHost() {return _chatHost;}
+
+	// implements the Uploader interface
+	public int getChatPort() {return _chatPort;}
+
     /**The number of bytes read. The way we calculate the number of bytes 
      * read is a little wierd if the range header begins from the middle of 
      * the file (say from byte x). Then we consider that bytes 0-x have 
@@ -350,19 +369,10 @@ public class HTTPUploader implements Uploader {
      * a host requests the last 10% of a file, the GUI will display 90%
      * downloaded. Later if the same host requests from 20% to 30% the 
      * progress will reduce to 20% onwards. 
+	 * 
+	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {return _amountRead;}
-	public void setAmountUploaded(int amount) {_amountRead = amount;}
-    /** The byte offset where we should start the upload. */
-	public int getUploadBegin() {return _uploadBegin;}
-    /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
-    public int getUploadEnd() {return _uploadEnd;}
-	public int getState() {return _stateNum;}
-	public String getHost() {return _hostName;}
-	public UploadManager getManager() {return _manager;}
-	public boolean chatEnabled() {return _chatEnabled;}
-	public String getChatHost() {return _chatHost;}
-	public int getChatPort() {return _chatPort;}
 
 	/**
 	 * Returns the <tt>FileDesc</tt> instance for this uploader.
@@ -371,9 +381,9 @@ public class HTTPUploader implements Uploader {
 	 *  <tt>null</tt> if the <tt>FileDesc</tt> could not be assigned
 	 *  from the shared files
 	 */
-	public FileDesc getFileDesc() {return _fileDesc;}
+	FileDesc getFileDesc() {return _fileDesc;}
 
-    public boolean getClientAcceptsXGnutellaQueryreplies() {
+    boolean getClientAcceptsXGnutellaQueryreplies() {
         return _clientAcceptsXGnutellaQueryreplies;
     }    
 
