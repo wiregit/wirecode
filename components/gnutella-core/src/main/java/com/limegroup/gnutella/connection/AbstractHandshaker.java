@@ -110,9 +110,17 @@ public abstract class AbstractHandshaker implements Handshaker {
     protected boolean _writeComplete;
 
     /**
-     * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
+     * The <tt>HandshakeResponse</tt> wrapper for the connection headers read
+     * from the remote host.
      */
     protected HandshakeResponse _headers = 
+        HandshakeResponse.createEmptyResponse(); 
+        
+    /**
+     * The <tt>HandshakeResponse</tt> wrapper for the connection headers 
+     * written to the remote host.
+     */
+    protected HandshakeResponse _headersWritten = 
         HandshakeResponse.createEmptyResponse(); 
     
     /**
@@ -145,8 +153,8 @@ public abstract class AbstractHandshaker implements Handshaker {
     }
 
     // inherit doc comment
-    public Properties getHeadersRead() {
-        return HEADERS_READ;
+    public HandshakeResponse getHeadersRead() {
+        return _headers;
     }
 
     // inherit doc comment

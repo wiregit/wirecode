@@ -3,6 +3,7 @@ package com.limegroup.gnutella.connection;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 
 /**
@@ -44,10 +45,10 @@ public interface Handshaker {
     /**
      * Accessor for the headers that have been read from the remote host.
      * 
-     * @return a <tt>Properties</tt> instance containing the headers that have
-     *  been read from the remote host
+     * @return a <tt>HandshakeResponse</tt> instance containing the headers 
+     *  that have been read from the remote host
      */
-    public Properties getHeadersRead();
+    public HandshakeResponse getHeadersRead();
 
     /**
      * Accessor for the headers that we have written to the remote host.
