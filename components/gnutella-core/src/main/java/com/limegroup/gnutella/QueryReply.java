@@ -793,11 +793,14 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
-    /** Return all the responses in this QR as an array of
-     *    RemoteFileDescriptors.
+    /** Return all the responses in this as an array of RemoteFileDescriptor.
+     *   @param acceptedIncoming true if this has ever accepted an incoming
+     *    connection.  This is used to calculate the quality of service
+     *    (e.g., four stars) for RemoteFileDesc.
      *   @exception java.lang.Exception Thrown if attempt fails.
      */
-    public RemoteFileDesc[] toRemoteFileDescArray() throws BadPacketException {
+    public RemoteFileDesc[] toRemoteFileDescArray(boolean acceptedIncoming) 
+            throws BadPacketException {
         List responses = null;
         try { // get the responses, some data from them is needed...
             responses = getResultsAsList();
@@ -814,8 +817,7 @@ public class QueryReply extends Message implements Serializable{
         // these will be used over and over....
         final String ip = getIP();
         final int port = getPort();
-        final int qual = 
-        calculateQualityOfService(!RouterService.instance().acceptedIncomingConnection());
+        final int qual = calculateQualityOfService(!acceptedIncoming);
         final long speed = getSpeed();
         final byte[] clientGUID = getClientGUID();
         boolean supportsChat = false;

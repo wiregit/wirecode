@@ -17,6 +17,7 @@ public class AllTests {
         suite.addTest(IntervalTest.suite());
         suite.addTest(MiniRemoteFileDescTest.suite());
         suite.addTest(RequeryDownloaderTest.suite());
+        suite.addTest(RequeryDownloadTest.suite());
         suite.addTest(IncompleteFileManagerTest.suite());
         suite.addTest(AutoDownloaderDetailsTest.suite());
         return suite;

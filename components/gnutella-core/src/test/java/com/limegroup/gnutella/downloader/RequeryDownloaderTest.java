@@ -5,6 +5,10 @@ import com.limegroup.gnutella.stubs.*;
 import java.io.*;
 import junit.framework.*;
 
+/**
+ * Tests RequeryDownloader serialization.
+ * @see RequeryDownloadTest
+ */
 public class RequeryDownloaderTest extends TestCase {
 
     public RequeryDownloaderTest(String name) {

@@ -10,11 +10,6 @@ import com.limegroup.gnutella.util.FileComparator;
  * files, ensuring that two duplicate files always get the same name.  This
  * enables smart resumes across hosts.  Also keeps track of the blocks 
  * downloaded, for smart downloading purposes.  <b>Thread safe.</b><p>
- *
- * The original version of this class ensured that two IncompleteFileManager
- * never gave out the same temporary files.  That restriction has now been
- * relaxed, so this class is really somewhat overkill.  However, in the future
- * it may become smarter by looking at hashes, etc. 
  */
 public class IncompleteFileManager implements Serializable {
     /** Ensures backwards compatibility. */
@@ -27,34 +22,79 @@ public class IncompleteFileManager implements Serializable {
     /** The prefix added to preview copies of incomplete files. */
     public static final String PREVIEW_PREFIX="Preview-";
     
+    /*
+     * IMPORTANT SERIALIZATION NOTE
+     *
+     * The original version of IncompleteFileManager consisted solely of a
+     * mapping from File to List<Interval> and used default serialization.
+     * Starting with version 1.10 of this file, we started using VerifyingFile
+     * instead of List<Interval> internally.  But because we wanted forwards and
+     * backwards compatibility, we replaced each VerifyingFile with an
+     * equivalent List<Interval> when writing to downloads.dat.  We reversed
+     * this transformation when reading from downloads.dat.  All this was
+     * implemented with custom writeObject and readObject methods.  
+     *
+     * Starting with CVS version 1.15, IncompleteFileManager keeps track of
+     * hashes as well.  This makes it difficult to write a custom readObject
+     * method that maintains backwards compatibility--how do you know whether
+     * HASHES can be read from the input stream?  To get around this, we
+     * reverted back to default Java serialization with one twist; before
+     * delegating to defaultWriteObject, we temporarily transform BLOCKS to use
+     * List<Interval>.  Similary, we do the inverse transformation after calling
+     * defaultReadObject.  This is backwards compatible and will make versioning
+     * less difficult in the future.
+     *
+     * The moral of the story is this: be very careful when modifying this class
+     * in any way!  IncompleteFileManagerTest has some test case to check
+     * backwards compatibility, but you will want to do additional testing.  
+     */
+
     /**
-     * A mapping from temporary files (File) to the blocks of the file stored on
-     * disk (List of Interval).  Needed for resumptive smart downloads.
+     * A mapping from incomplete files (File) to the blocks of the file stored
+     * on disk (VerifyingFile).  Needed for resumptive smart downloads.
      * INVARIANT: all blocks disjoint, no two intervals can be coalesced into
      * one interval.  Note that blocks are no sorted; there are typically few
-     * blocks so performance isn't an issue.
-     * <p>
-     * Note: Older implementations mapped File -> List<Interval>. 
-     * The current version of the code converts the Intervals to a VerifyingFile
-     * and uses it for downloads. When the IncompleteFileManager needs to be 
-     * serialized, we convert the VerifyingFile back to a List of Intervals
-     * This is to reduce backwards compatibility and forwards compatibiliy 
-     * issues.
+     * blocks so performance isn't an issue.  
      */
     private Map /* File -> VerifyingFile */ blocks=
-        new TreeMap(new FileComparator());  
+        new TreeMap(new FileComparator());
+    /**
+     * Bijection between SHA1 hashes (URN) and incomplete files (File).  This is
+     * used to ensure that any two RemoteFileDesc with the same hash get the
+     * same incomplete file, regardless of name.  The inverse of this map is
+     * used to get the hash of an incomplete file for query-by-hash and
+     * resuming.  Note that the hash is that of the desired completed file, not
+     * that of the incomplete file.<p>
+     * 
+     * Entries are added to hashes before the temp file is actually created on
+     * disk.  For this reason, there can be files in the value set of hashes
+     * that are not in the key set of blocks.  These entries are not serialized
+     * to disk in the downloads.dat file.  Similarly there may be files in the
+     * key set of blocks that are not in the value set of hashes.  This happens
+     * if we received RemoteFileDesc's without hashes, or when loading old
+     * downloads.dat files without hash info.       
+     *
+     * INVARIANT: the range (value set) of hashes contains no duplicates.  
+     * INVARIANT: for all keys k in hashes, k.isSHA1() 
+     */
+    private Map /* URN -> File */ hashes=new HashMap();
     
 
     ///////////////////////////////////////////////////////////////////////////
 
     /** 
      * Deletes incomplete files more than INCOMPLETE_PURGE_TIME days old from
-     * disk.  Then removes any entries from this for which there is no file on
-     * disk.  
-     * @return true iff any entries were purged
+     * disk.  Then removes entries in this for which there is no file on disk.
+     * 
+     * @param initialPurge true iff this was just read from disk, i.e., if this
+     *  is being called from readSnapshot() instead of getFiles().  Hashes will
+     *  only be purged if initialPurge==true.
+     * @return true iff any entries were purged 
      */
-    public synchronized boolean purge() {
+    public synchronized boolean purge(boolean initialPurge) {
         boolean ret=false;
+        //Remove any files that are old.  
+        //Remove any blocks for which the file doesn't exist.
         for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
             File file=(File)iter.next();
             if (!file.exists() || isOld(file)) {
@@ -62,6 +102,20 @@ public class IncompleteFileManager implements Serializable {
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }                
+        }
+
+        //Remove any hashes for which the file doesn't exist.  Only do this once
+        //per session--that's critical to resume-by-hash.
+        if (initialPurge) {
+            for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+                Map.Entry entry=(Map.Entry)iter.next();
+                URN urn=(URN)entry.getKey();
+                File file=(File)entry.getValue();
+                if (!file.exists()) {
+                    iter.remove();
+                    ret=true;
+                }
+            }
         }
         return ret;
     }
@@ -77,28 +131,36 @@ public class IncompleteFileManager implements Serializable {
         return lastModified<purgeTime;            
     }
 
-    /** Returns the fully-qualified temporary download file for the given
-     *  file/location pair.  The location of the file is determined by the
-     *  INCOMPLETE_DIRECTORY property.  For example, getFile("test.txt", 1999) 
-     *  may return "C:\Program Files\LimeWire\Incomplete\T-1999-Test.txt". 
-     *  The disk is not modified.<p>
+    /** 
+     * Returns the fully-qualified temporary download file for the given
+     * file/location pair.  The location of the file is determined by the
+     * INCOMPLETE_DIRECTORY property.  For example, getFile("test.txt", 1999)
+     * may return "C:\Program Files\LimeWire\Incomplete\T-1999-Test.txt".  The
+     * disk is not modified.<p>
      *
-     *  This method gives duplicate files the same temporary file.  That is, for
-     *  all rfd_i and rfd_j
-     *
-     *       rfd_i~=rfd_j <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
-     * 
-     *  Currently rfd_i~=rfd_j if rfd_i.getName().equals(rfd_j) &&
-     *  rfd_i.getSize()==rfd_j.getSize().  In the future, this definition may be
-     *  strengthened to depend on hash values.
+     * This method gives duplicate files the same temporary file, which is
+     * critical for resume and swarmed downloads.  That is, for all rfd_i and 
+     * rfd_j
+     * <pre>
+     *      rfd_i~=rfd_j <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
+     * </pre>
+     * Where "~=" means "has the same content as".  Currently rfd_i~=rfd_j iff
+     * either of the following conditions hold: 
+     * <ul>
+     * <li>Both files have the same hash, i.e., 
+     *     rfd_i.getSHA1Urn().equals(rfd_j.getSHA1Urn().  Note that this (almost)
+     *     always means that rfd_i.getSize()==rfd_j.getSize(), though rfd_i and
+     *     rfd_j may have different names.
+     * <li>Both files have the same name and size and don't have conflicting
+     *     hashes, i.e., rfd_i.getName().equals(rfd_j.getName()) &&
+     *     rfd_i.getSize()==rfd_j.getSize() && (rfd_i.getSHA1Urn()==null ||
+     *     rfd_j.getSHA1Urn()==null || 
+     *     rfd_i.getSHA1Urn().equals(rfd_j.getSHA1Urn())).
+     * </ul>
+     * Note that the second condition allows risky resumes, i.e., resumes when 
+     * one (or both) of the files doesn't have a hash.
      */
-    public File getFile(RemoteFileDesc rfd) {
-        return getFile(rfd.getFileName(), rfd.getSize());
-    } 
-
-    /** Same thing as getFile(rfd), where rfd.getFile().equals(name) 
-     *  and rfd.getSize()==size. */ 
-    public File getFile(String name, int size) {
+    public synchronized File getFile(RemoteFileDesc rfd) {
 		File incDir = null;
 		try {
 			incDir = SettingsManager.instance().getIncompleteDirectory();
@@ -106,20 +168,81 @@ public class IncompleteFileManager implements Serializable {
 			// this is fine, as this will just create a file in the current
 			// working directory.
 		}
-        return new File(incDir,"T"+SEPARATOR+size+SEPARATOR+name);
+
+        URN sha1=rfd.getSHA1Urn();
+        if (sha1!=null) {
+            File file=(File)hashes.get(sha1);
+            if (file!=null) {
+                //File already allocated for hash
+                return file;
+            } else {
+                //Allocate unique file for hash.  By "unique" we mean not in
+                //the value set of HASHES.  Because we allow risky resumes,
+                //there's no need to look at BLOCKS as well...
+                for (int i=1 ; ; i++) {
+                    file=new File(incDir, 
+                                  tempName(rfd.getFileName(),rfd.getSize(),i));
+                    if (! hashes.values().contains(file))
+                        break;
+                }
+                //...and record the hash for later.
+                hashes.put(sha1, file);
+                return file;
+            }
+        } else {
+            //No hash.
+            return new File(incDir, 
+                            tempName(rfd.getFileName(), rfd.getSize(), 0));
+        }
     }
+
+    /** 
+     * Returns the unqualified file name for a file with the given name
+     * and size, with an optional suffix to make it unique.
+     * @param count a suffix to attach before the file extension in parens
+     *  before the file extension, or 1 for none. 
+     */
+    private static String tempName(String filename, int size, int suffix) {
+        if (suffix<=1) {
+            //a) No suffix
+            return "T-"+size+"-"+filename;
+        }
+        int i=filename.lastIndexOf('.');
+        if (i<0) {
+            //b) Suffix, no extension
+            return "T-"+size+"-"+filename+" ("+suffix+")";
+        } else {
+            //c) Suffix, file extension
+            String noExtension=filename.substring(0,i);
+            String extension=filename.substring(i); //e.g., ".txt"
+            return "T-"+size+"-"+noExtension+" ("+suffix+")"+extension;
+        }            
+    }   
 
     ///////////////////////////////////////////////////////////////////////////
     
     private synchronized void readObject(ObjectInputStream stream) 
                                    throws IOException, ClassNotFoundException {
-        blocks = transform(stream.readObject());
-
+        //Ensure hashes non-null if not present.
+        hashes=new HashMap();
+        //Read hashes and blocks.
+        stream.defaultReadObject();
+        //Convert blocks from interval lists to VerifyingFile.
+        //See serialization note above.
+        blocks=transform(blocks);
     }
 
     private synchronized void writeObject(ObjectOutputStream stream) 
                                 throws IOException, ClassNotFoundException {
-        stream.writeObject(invTransform());
+        //Temporarily change blocks from VerifyingFile to interval lists...
+        Map blocksSave=blocks;        
+        try {
+            blocks=invTransform();
+            stream.defaultWriteObject();
+        } finally {
+            //...and restore when done.  See serialization note above.
+            blocks=blocksSave;
+        }
     }
         
 
@@ -202,7 +325,77 @@ public class IncompleteFileManager implements Serializable {
             return vf.getBlockSize();
         }
     }
+   
 
+    /**
+     * Returns the name of the complete file associated with the given
+     * incomplete file, i.e., what incompleteFile will be renamed to
+     * when the download completes (without path information).
+     * @param incompleteFile a file returned by getFile
+     * @return the complete file name, without path
+     * @exception IllegalArgumentException incompleteFile was not the
+     *  return value from getFile
+     */
+    public static String getCompletedName(File incompleteFile) 
+            throws IllegalArgumentException {
+        //Given T-<size>-<name> return <name>.
+        //       i      j
+        //This is not as strict as it could be.  TODO: what about (x) suffix?
+        String name=incompleteFile.getName();
+        int i=name.indexOf(SEPARATOR);
+        if (i<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        int j=name.indexOf(SEPARATOR, i+1);
+        if (j<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        if (j==name.length()-1)
+            throw new IllegalArgumentException("No name after last separator");
+        return name.substring(j+1);
+    }
+
+    /**
+     * Returns the size of the complete file associated with the given
+     * incomplete file, i.e., the number of bytes in the file when the
+     * download completes.
+     * @param incompleteFile a file returned by getFile
+     * @return the complete file size
+     * @exception IllegalArgumentException incompleteFile was not
+     *  returned by getFile 
+     */
+    public static long getCompletedSize(File incompleteFile) 
+            throws IllegalArgumentException {
+        //Given T-<size>-<name>, return <size>.
+        //       i      j
+        String name=incompleteFile.getName();
+        int i=name.indexOf(SEPARATOR);
+        if (i<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        int j=name.indexOf(SEPARATOR, i+1);
+        if (j<0)
+            throw new IllegalArgumentException("Missing separator: "+name);
+        try {
+            return Long.parseLong(name.substring(i+1, j));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Bad number format: "+name);
+        }
+    }
+
+    /**
+     * Returns the hash of the complete file associated with the given
+     * incomplete file, i.e., the hash of incompleteFile when the 
+     * download is complete.
+     * @param incompleteFile a file returned by getFile
+     * @return a SHA1 hash, or null if unknown
+     */
+    public synchronized URN getCompletedHash(File incompleteFile) {
+        //Return a key k s.t., hashes.get(k)==incompleteFile...
+        for (Iterator iter=hashes.keySet().iterator(); iter.hasNext(); ) {
+            URN key=(URN)iter.next();
+            if (hashes.get(key).equals(incompleteFile))
+                return key;
+        }
+        return null; //...or null if no such k.
+    }
 
     public synchronized String toString() {
         StringBuffer buf=new StringBuffer();
@@ -213,7 +406,7 @@ public class IncompleteFileManager implements Serializable {
                 buf.append(", ");
 
             File key=(File)iter.next();
-            List intervals=(List)blocks.get(key);
+            List intervals=((VerifyingFile)blocks.get(key)).getBlocksAsList();
             buf.append(key);
             buf.append(":");
             buf.append(intervals.toString());            

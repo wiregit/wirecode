@@ -65,7 +65,8 @@ public class TestUploader {
 
     public void stopThread() {
         try {
-            server.close();
+            if (server!=null)
+                server.close();
         } catch (IOException e) {}
     }
 

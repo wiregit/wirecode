@@ -52,10 +52,9 @@ public class DownloadManager implements BandwidthTracker {
     private List /* of ManagedDownloader */ waiting=new LinkedList();
 
 
-    /** The amount of time between requeries: 
-     *  45 minutes
-     */
-    public final static long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
+    /** The global minimum time between any two requeries, in milliseconds.
+     *  @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES*/
+    public static long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
 
     /** The last time that a requery was sent.
      */
@@ -171,7 +170,7 @@ public class DownloadManager implements BandwidthTracker {
         //before starting downloads in the rare case that a downloader uses one
         //of these incomplete files.  Then commit changes to disk.  (This last
         //step isn't really needed.)
-        if (incompleteFileManager.purge())
+        if (incompleteFileManager.purge(true))
             writeSnapshot();
 
         //Initialize and start downloaders.  Must catch ClassCastException since
@@ -216,7 +215,7 @@ public class DownloadManager implements BandwidthTracker {
      * succeeds.
      *
      *     @modifies this, disk */
-    public synchronized Downloader getFiles(RemoteFileDesc[] files,
+    public synchronized Downloader download(RemoteFileDesc[] files,
                                             boolean overwrite) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
@@ -246,7 +245,7 @@ public class DownloadManager implements BandwidthTracker {
         //prompt or the library.  Note that you could optimize this by just
         //purging files corresponding to the current download, but it's not
         //worth it.
-        incompleteFileManager.purge();
+        incompleteFileManager.purge(false);
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
@@ -260,21 +259,71 @@ public class DownloadManager implements BandwidthTracker {
     }   
     
     /**
-     * Starts a "requery download".
-     * A "requery download" should be started when the user has not received any
-     * results for her query, and wants LimeWire to spawn a specialized
-     * Downloader that requeries the network until a 'appropriate' file is
-     * found.
+     * Starts a resume download for the given incomplete file.
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception CantResumeException incompleteFile is not a valid 
+     *  incomplete file
+     */ 
+    public synchronized Downloader download(File incompleteFile)
+            throws AlreadyDownloadingException, CantResumeException { 
+        //Check for conflicts.  TODO: refactor to make less like conflicts().
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            if (md.conflicts(incompleteFile))                   
+                throw new AlreadyDownloadingException(md.getFileName());
+        }
+        for (Iterator iter=waiting.iterator(); iter.hasNext(); ) { //queued
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            if (md.conflicts(incompleteFile))                   
+                throw new AlreadyDownloadingException(md.getFileName());
+        }
+
+        //Instantiate downloader, validating incompleteFile first.
+        ResumeDownloader downloader=null;
+        try {
+            String name=incompleteFileManager.getCompletedName(incompleteFile);
+            int size=ByteOrder.long2int(
+                incompleteFileManager.getCompletedSize(incompleteFile));
+            downloader = new ResumeDownloader(this,
+                                              fileManager,
+                                              incompleteFileManager,
+                                              callback,
+                                              incompleteFile,
+                                              name,
+                                              size);
+        } catch (IllegalArgumentException e) {
+            throw new CantResumeException(incompleteFile.getName());
+        }
+
+        //Add download to appropriate lists and write snapshot.  
+        //TODO: factor to make less like getFiles().
+        waiting.add(downloader);
+        callback.addDownload(downloader);
+        writeSnapshot();
+
+        //Start a requery immediately, bypassing the rate-limited requerying
+        //of sendQuery, as called from ManagedDownloader.tryAllDownloads.
+        router.broadcastQueryRequest(downloader.newRequery());
+        return downloader;
+    }
+
+
+    /**
+     * Starts a "requery download", aka, a "wishlist download".  A "requery
+     * download" should be started when the user has not received any results
+     * for her query, and wants LimeWire to spawn a specialized Downloader that
+     * requeries the network until a 'appropriate' file is found.
      * 
      * @param query The original query string.
      * @param richQuery The original richQuery string.
      * @param guid The guid associated with this query request.
-     * @param type The mediatype associated with this search.
+     * @param type The mediatype associated with this search.  
      */
-    public synchronized Downloader startRequeryDownload(String query,
-                                                        String richQuery,
-                                                        byte[] guid,
-                                                        MediaType type) 
+    public synchronized Downloader download(String query,
+                                            String richQuery,
+                                            byte[] guid,
+                                            MediaType type) 
     throws AlreadyDownloadingException {
         AutoDownloadDetails add = new AutoDownloadDetails(query,
                                                           richQuery,
@@ -359,7 +408,7 @@ public class DownloadManager implements BandwidthTracker {
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
         try { 
-            rfds = qr.toRemoteFileDescArray();
+            rfds = qr.toRemoteFileDescArray(acceptor.acceptedIncoming());
         }
         catch (BadPacketException bpe) {
             debug(bpe);
@@ -383,24 +432,16 @@ public class DownloadManager implements BandwidthTracker {
             downloaders.addAll(waiting);
         }        
 
-        // for each downloader, see if any RFD conflicts
-        //
-        // philosophical question - usually we don't allow ManagedDownloaders to
-        // be downloading the same file.  so once i find a match, should i be
-        // stopping my progress through the list of downloaders?  well, this
-        // code works, and doesn't seem to be practically inefficient, mainly
-        // cuz conflictsLAX is coded as speedily as possible.....
-        //
-        // non-philosphical answer - once you find conflictsLAX to be true,
-        // break out of the loop.  only one downloader needs be notified
-        for (int i = 0; i < rfds.length; i++) 
+        //For each rfd i, offer it to downloader j.  Give rfd i to at most one
+        //RFD.  TODO: it's possible that downloader x could accept rfds[i] but
+        //that would cause a conflict with downloader y.  Check for this.
+        for (int i = 0; i < rfds.length; i++) {
             for (int j = 0; j < downloaders.size(); j++) {
                 ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
-                if (currD.conflictsLAX(rfds[i])) {
-                    currD.addDownload(rfds[i]);
+                if (currD.addDownload(rfds[i]))
                     break;
-                }
             }
+        }
     }
 
 
@@ -502,163 +543,51 @@ public class DownloadManager implements BandwidthTracker {
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
             callback.downloadsComplete();
-    }
-
+    }    
     
-    private final String[] invalidWords = {"the", "an", "a"};
-    private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
-    /** Canonicalizes a file name - gets rid of articles, etc...
-     *  @param map Adds the canonicalized elements to this map.
-     */    
-    private final void canonicalize(String fileName,
-                                    Map map) {
-        // separate by whitespace and _ 
-        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
-        while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();
-            if (wordSet.contains(currToken))
-                continue;
-            try {
-                Double d = new Double(currToken);
-                continue;
-            }
-            catch (NumberFormatException ignored) {}
-            { // success
-                Integer occurrences = (Integer) map.get(currToken);
-                if (occurrences == null)
-                    occurrences = new Integer(1);
-                else
-                    occurrences = new Integer(occurrences.intValue()+1);
-                map.put(currToken, occurrences);
-            }
-        }
-    }
-
-    /** @return A String Array of size 1 that is a intersection of all the
-     *  canonicalized rfd filename values.
-     */
-    private final String[] extractQueryStrings(String[] names) {
-        String[] retStrings = new String[1];
-        // used for intersection
-        Map words = new HashMap();
-        
-        for (int i = 0; i < names.length; i++) 
-            canonicalize(ripExtension(names[i]), words);
-        
-        // create the query string....
-        StringBuffer sb = new StringBuffer();
-        Iterator keys = words.keySet().iterator();
-        while (keys.hasNext()) {
-            String currKey = (String) keys.next();
-            Integer count = (Integer) words.get(currKey);
-            // if the string 'intersected', add it....
-            if (count.intValue() == names.length)
-                sb.append(currKey + " ");
-        }
-        
-        retStrings[0] = sb.toString();
-        return retStrings;
-    }
-
-
-    void extractQueryStringUNITTEST() {
-        String[] queries = {"Susheel_Daswani_Neil_Daswani",
-                            "Susheel Ruchika Mahesh Kyle Daswani",
-                            "Susheel" + FileManager.DELIMETERS + "Daswani",
-                            "Sumeet (Susheel) Anurag (Daswani)Chris"};
-        String[] retStrings = extractQueryStrings(queries);
-        System.out.println(retStrings[0]);      
-    }
-
-
-
-    private final QueryRequest[] constructQueryRequests(String[] queryStrings) {
-        final int minSpeed = 0;  // minSpeed of 0 is used in StandardSearchView...
-        QueryRequest[] retQRs= new QueryRequest[queryStrings.length];
-        for (int i = 0; i < queryStrings.length; i++)
-            // mark the query as a requery...
-            retQRs[i] = new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, queryStrings[i], true);
-        return retQRs;
-    }
-
-    
-    /** Initiates a search for files similar to rfd.
-     *  PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc 
-     *  objects.
-     *  Now does sophisticated round-robin sending of queries to minimize
-     *  requery traffic seen on the network...
-     *  It is important to note that this methodology works because we KNOW
-     *  that requeries are always trying to requery....
+    /** 
+     * Attempts to send the given requery to provide the given downloader with 
+     * more sources to download.  May not actually send the requery if it doing
+     * so would exceed the maximum requery rate.
+     * 
+     * @param query the requery to send, which should have a marked GUID
+     * @param requerier the downloader requesting more sources.  Needed to 
+     *  ensure fair requery scheduling.  This MUST be in the waiting list,
+     *  i.e., it MUST NOT have a download slot.
+     * @return true iff the query was actually sent.  If false is returned,
+     *  the downloader should attempt to send the query later.
      */
     public synchronized boolean sendQuery(ManagedDownloader requerier, 
-                          RemoteFileDesc[] rfds) {
-
+                                          QueryRequest query) {
+        //NOTE: this algorithm provides global but not local fairness.  That is,
+        //if two requeries x and y are competing for a slot, patterns like
+        //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
         debug("DM.sendQuery(): entered.");
         Assert.that(waiting.contains(requerier),
                     "Unknown or non-waiting MD trying to send requery.");
-        boolean allowed = true;
-        
-        if ((System.currentTimeMillis() - lastRequeryTime) > 
-            TIME_BETWEEN_REQUERIES) {
-            debug("DM.sendQuery(): requery allowed!!");            
-            // ok, i can do a requery, but is it allowed for this MD?           
-            if (querySentMDs.size() < waiting.size()) {
-                // not all MDs have had a turn, see if this guy can go...
-                if (querySentMDs.contains(requerier)) {
-                    debug("DM.sendQuery(): sorry, wait your turn...");
-                    // nope, sorry, must lets others go first...
-                    allowed = false;
-                }
-                else {
-                    querySentMDs.add(requerier);
-                    debug("DM.sendQuery(): ok, you can go...");
-                }
-            }
-            else {
-                debug("DM.sendQuery(): no contention, just go....");
-                querySentMDs.clear();
-                querySentMDs.add(requerier);
-            }
-                
-            // note last requery time...
-            if (allowed)
-                lastRequeryTime = System.currentTimeMillis();
-        }
-        else 
-            allowed = false;
 
-        if (allowed) {
-            if (rfds.length > 0) { // requery based on filename...
-                // convert....
-                String[] names = new String[rfds.length];
-                for (int i = 0; i < rfds.length; i++)
-                    names[i] = rfds[i].getFileName();
-                
-                // construct QRs
-                String[] qStrings= extractQueryStrings(names);
-                QueryRequest[] qReqs = constructQueryRequests(qStrings);
-                
-                // send away....
-                for (int i = 0; i < qReqs.length; i++)
-                    router.broadcastQueryRequest(qReqs[i]);            
-            }
-            else if ((rfds.length == 0) && 
-                     (requerier instanceof RequeryDownloader)) {
-                // downloader without any files, get the query from the
-                // RequeryDownloader...
-                RequeryDownloader dlder = (RequeryDownloader) requerier;
-                QueryRequest qr = 
-                new QueryRequest(SettingsManager.instance().getTTL(),
-                                 0, dlder.getQuery(), true);
-                router.broadcastQueryRequest(qr);
-            }
-            else
-                Assert.that(false, 
-                            "Downloader has no files and is not a Requerier.");
+        //Disallow if global time limits exceeded.
+        if (System.currentTimeMillis()-lastRequeryTime
+                <= TIME_BETWEEN_REQUERIES) {
+            return false;
         }
-        debug("DM.sendQuery(): returning " + allowed);
-        return allowed;
+
+        //Has everyone had a chance to send a query?  If so, clear the slate.
+        if (querySentMDs.size() >= waiting.size())
+            querySentMDs.clear();
+
+        //If downloader has already sent a query, give someone else a turn.
+        if (querySentMDs.contains(requerier)) {
+            // nope, sorry, must lets others go first...
+            debug("DM.sendQuery(): sorry, wait your turn...");
+            return false;
+        }
+        
+        debug("DM.sendQuery(): requery allowed!!");  
+        querySentMDs.add(requerier);                  
+        lastRequeryTime = System.currentTimeMillis();
+        router.broadcastQueryRequest(query);
+        return true;
     }
 
 
@@ -785,18 +714,6 @@ public class DownloadManager implements BandwidthTracker {
         callback.error(ActivityCallback.ASSERT_ERROR, e);
     }
 
-    // take the extension off the filename...
-    private String ripExtension(String fileName) {
-        String retString = null;
-        int extStart = fileName.lastIndexOf('.');
-        if (extStart == -1)
-            retString = fileName;
-        else
-            retString = fileName.substring(0, extStart);
-        return retString;
-    }
-
-
     private final boolean debugOn = false;
     private final void debug(String out) {
         if (debugOn)
@@ -805,6 +722,11 @@ public class DownloadManager implements BandwidthTracker {
     private final void debug(Exception e) {
         if (debugOn)
             e.printStackTrace();
+    }
+
+    /** FOR TESTING ONLY: returns this' list of partially downloaded blocks. */
+    public IncompleteFileManager getIncompleteFileManager() {
+        return incompleteFileManager;
     }
 
 

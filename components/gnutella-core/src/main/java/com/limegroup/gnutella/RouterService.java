@@ -913,26 +913,36 @@ public class RouterService
 	public Downloader download(RemoteFileDesc[] files, boolean overwrite)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return downloader.getFiles(files, overwrite);
+		return downloader.download(files, overwrite);
 	}
 
+   /**
+     * Starts a resume download for the given incomplete file.
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception CantResumeException incompleteFile is not a valid 
+     *  incomplete file
+     */ 
+    public Downloader download(File incompleteFile)
+            throws AlreadyDownloadingException, CantResumeException {
+        return downloader.download(incompleteFile);
+    }
+
     /**
-     * Starts a "requery download".
-     * A "requery download" should be started when the user has not received any
-     * results for her query, and wants LimeWire to spawn a specialized
-     * Downloader that requeries the network until a 'appropriate' file is
-     * found.
+     * Starts a "requery download", aka, a "wishlist download".  A "requery
+     * download" should be started when the user has not received any results
+     * for her query, and wants LimeWire to spawn a specialized Downloader that
+     * requeries the network until a 'appropriate' file is found.
      * 
      * @param query The original query string.
      * @param richQuery The original richQuery string.
      * @param guid The guid associated with this query request.
      * @param type The mediatype associated with this search.
      */
-    public Downloader requeryDownload(String query, String richQuery,
-                                      byte[] guid, MediaType type) 
+    public Downloader download(String query, String richQuery,
+                               byte[] guid, MediaType type) 
         throws AlreadyDownloadingException {
-        return downloader.startRequeryDownload(query, richQuery,
-                                               guid, type);
+        return downloader.download(query, richQuery, guid, type);
     }
 
 	/**

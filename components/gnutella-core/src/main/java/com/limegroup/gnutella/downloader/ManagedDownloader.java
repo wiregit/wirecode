@@ -7,6 +7,7 @@ import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.StringTokenizer;
 import java.io.*;
 import java.net.*;
 
@@ -20,6 +21,9 @@ import java.net.*;
  * swarmed downloads, the ability to download copies of the same file from
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
+ * Subclasses may refine the requery behavior by overriding the
+ * newRequery(), allowAddition(..), and addDownload(..) methods.<p>
+ * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
  * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
@@ -196,6 +200,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  verify that different sources are serving the same content. */
     private static final int OVERLAP_BYTES=500;
 
+    /** The time to wait between requeries, in milliseconds.  This time can
+     *  safely be quite small because it is overridden by the global limit in
+     *  DownloadManager.  Package-access and non-final for testing.
+     *  @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
+    static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
     /** The number of times to requery the network. */
     private static final int REQUERY_ATTEMPTS = 60;
     /** The size of the approx matcher 2d buffer... */
@@ -441,6 +450,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //don't really try to recover at this point, but we do
                     //attempt to display the error in the GUI for debugging
                     //purposes.
+                    e.printStackTrace();
                     ManagedDownloader.this.manager.internalError(e);
                 }
             }
@@ -451,46 +461,124 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * Returns true if 'other' could conflict with one of the files in this. In
-     * other if this.conflicts(other)==true, no other ManagedDownloader should
-     * attempt to download other.
+     * other words, if this.conflicts(other)==true, no other ManagedDownloader
+     * should attempt to download other.  
      */
     public boolean conflicts(RemoteFileDesc other) {
+        File otherFile=incompleteFileManager.getFile(other);
+        return conflicts(otherFile);
+    }
+
+    /**
+     * Returns true if this is using (or could use) the given incomplete file.
+     * @param incompleteFile an incomplete file, which SHOULD be the return
+     *  value of IncompleteFileManager.getFile
+     */
+    public boolean conflicts(File incompleteFile) {
         synchronized (this) {
-            File otherFile=incompleteFileManager.getFile(other);
             //TODO3: this is stricter than necessary.  What if a location has
             //been removed?  Tricky without global variables.  At the least we
             //should return false if in COULDNT_DOWNLOAD state.
             for (int i=0; i<allFiles.length; i++) {
                 RemoteFileDesc rfd=(RemoteFileDesc)allFiles[i];
                 File thisFile=incompleteFileManager.getFile(rfd);
-                if (thisFile.equals(otherFile))
+                if (thisFile.equals(incompleteFile))
                     return true;
             }
         }
         return false;
     }
 
+    /////////////////////////////// Requery Code ///////////////////////////////
 
-    private final long SIXTY_KB = 60000;
-    private final boolean sizeClose(long one, long two) {
-        boolean retVal = false;
-		// if the sizes match exactly, we are good to go....
-		if (one == two)
-            retVal = true;
-        else {
-            //Similar file size (within 60k)?  This value was determined 
-            //empirically to optimize grouping aggressiveness with minimal 
-            //performance cost.
-            long sizeDiff = Math.abs(one - two);
-            if (sizeDiff <= SIXTY_KB) 
-                retVal = true;
-        }
-        return retVal;
+    /** 
+     * Returns a new QueryRequest for requery purposes.  Subclasses may wish to
+     * override this to be more or less specific.  Note that the requery will
+     * not be sent if global limits are exceeded.<p>
+     *
+     * The default implementation includes all non-trivial keywords found in all
+     * RemoteFileDesc's in this, i.e., the INTERSECTION of all file names.  A
+     * keyword is "non-trivial" if it is not a number of a common English
+     * article (e.g., "the"), a number (e.g., "2"), or the file extension.  The
+     * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
+     * of all hashes.
+     *
+     * @exception CantResumeException if this doesn't know what to search for 
+     */
+    protected synchronized QueryRequest newRequery() throws CantResumeException { 
+        if (allFiles.length<0)                  //TODO: what filename?
+            throw new CantResumeException("");  //      maybe another exception?
+        return new QueryRequest(QueryRequest.newQueryGUID(true),
+                                SettingsManager.instance().getTTL(),
+                                0,              //minimum speed
+                                extractQueryString(), 
+                                null,           //metadata query
+                                true,           //mark as requery
+                                null,           //requested URNs
+                                extractUrns()); //the hashes
+                                
     }
 
+    /** Returns the URNs for requery, i.e., the union of all requeries 
+     *  (within reason).
+     *  @return a Set of URN */
+    private final Set /* of URN */ extractUrns() {
+        final int MAX_URNS=2;
+        Set ret=new HashSet(MAX_URNS);
+        for (int i=0; i<allFiles.length && ret.size()<MAX_URNS; i++) {
+            URN urn=allFiles[i].getSHA1Urn();
+            if (urn!=null)
+                ret.add(urn);
+        }
+        return ret;
+    }
 
-    // take the extension off the filename...
-    private String ripExtension(String fileName) {
+    /** Returns the keywords for a requery, i.e., the keywords found in all
+     *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
+    private final String extractQueryString() {
+        //Intersect words(allFiles[i]), for all i.
+        Assert.that(allFiles.length>0, "Precondition violated");
+        Set intersection=keywords(allFiles[0].getFileName());
+        for (int i=1; i<allFiles.length; i++) {
+            intersection.retainAll(
+                keywords(allFiles[i].getFileName()));
+        }
+
+        //Put the keywords into a string.
+        StringBuffer sb = new StringBuffer();
+        for (Iterator keys=intersection.iterator(); keys.hasNext(); ) {
+            sb.append(keys.next());
+            if (keys.hasNext())
+                sb.append(" ");
+        }        
+        return sb.toString();
+    }
+
+    /** Returns the canonicalized non-trivial search keywords in fileName. */
+    private static final Set keywords(String fileName) {
+        //Remove extension
+        fileName=ripExtension(fileName);
+        
+        //Separate by whitespace and _, etc.
+        Set ret=new HashSet();
+        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
+        while (st.hasMoreTokens()) {
+            final String currToken = st.nextToken().toLowerCase();;
+            try {                
+                //Ignore if a number.
+                Double d = new Double(currToken);
+                continue;
+            } catch (NumberFormatException normalWord) {
+                //Add non-numeric words that are not an (in)definite article.
+                if (! TRIVIAL_WORDS.contains(currToken))
+                    ret.add(currToken);
+            }
+        }
+        return ret;
+    }
+
+    /** Returns fileName without any file extension. */
+    private static String ripExtension(String fileName) {
         String retString = null;
         int extStart = fileName.lastIndexOf('.');
         if (extStart == -1)
@@ -500,41 +588,18 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retString;
     }
 
-
-    private final boolean namesClose(final String one, 
-                                     final String two) {
-        boolean retVal = false;
-
-        // copied from TableLine...
-        //Filenames close?  This is the most expensive test, so it should go
-        //last.  Allow 10% edit difference in filenames or 6 characters,
-        //whichever is smaller.
-        int allowedDifferences=Math.round(Math.min(
-             0.10f*((float)(ripExtension(one)).length()),
-             0.10f*((float)(ripExtension(two)).length())));
-        allowedDifferences=Math.min(allowedDifferences, 6);
-
-        synchronized (matcher) {
-            retVal = matcher.matches(matcher.process(one),
-                                     matcher.process(two),
-                                     allowedDifferences);
-        }
-
-        debug("MD.namesClose(): one = " + one);
-        debug("MD.namesClose(): two = " + two);
-        debug("MD.namesClose(): retVal = " + retVal);
-            
-        return retVal;
+    private static final List TRIVIAL_WORDS=new ArrayList(3); {
+        TRIVIAL_WORDS.add("the");  //must be lower-case
+        TRIVIAL_WORDS.add("an");
+        TRIVIAL_WORDS.add("a");
     }
 
 
     private boolean initDone = false; // used to init
     /**
-     * Returns true if 'other' could conflict with one of the files in this. 
-     * This is a much less strict version compared to conflicts().
+     * Returns true if 'other' should be accepted as a new download location.
      */
-    public boolean conflictsLAX(RemoteFileDesc other) {
-
+    protected boolean allowAddition(RemoteFileDesc other) {
         if (!initDone) {
             synchronized (matcher) {
                 matcher.setIgnoreCase(true);
@@ -575,22 +640,71 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
+    private final long SIXTY_KB = 60000;
+    private final boolean sizeClose(long one, long two) {
+        boolean retVal = false;
+		// if the sizes match exactly, we are good to go....
+		if (one == two)
+            retVal = true;
+        else {
+            //Similar file size (within 60k)?  This value was determined 
+            //empirically to optimize grouping aggressiveness with minimal 
+            //performance cost.
+            long sizeDiff = Math.abs(one - two);
+            if (sizeDiff <= SIXTY_KB) 
+                retVal = true;
+        }
+        return retVal;
+    }
 
+    private final boolean namesClose(final String one, 
+                                     final String two) {
+        boolean retVal = false;
+
+        // copied from TableLine...
+        //Filenames close?  This is the most expensive test, so it should go
+        //last.  Allow 10% edit difference in filenames or 6 characters,
+        //whichever is smaller.
+        int allowedDifferences=Math.round(Math.min(
+             0.10f*((float)(ripExtension(one)).length()),
+             0.10f*((float)(ripExtension(two)).length())));
+        allowedDifferences=Math.min(allowedDifferences, 6);
+
+        synchronized (matcher) {
+            retVal = matcher.matches(matcher.process(one),
+                                     matcher.process(two),
+                                     allowedDifferences);
+        }
+
+        debug("MD.namesClose(): one = " + one);
+        debug("MD.namesClose(): two = " + two);
+        debug("MD.namesClose(): retVal = " + retVal);
+            
+        return retVal;
+    }
 
     /** 
-     * Adds the given location to this.  This will terminate after
-     * downloading rfd or any of the other locations in this.  This
-     * may swarm some file from rfd and other locations.
+     * Attempts to add the given location to this.  If rfd is accepted, this
+     * will terminate after downloading rfd or any of the other locations in
+     * this.  This may swarm some file from rfd and other locations.<p>
+     * 
+     * This method only adds rfd if allowAddition(rfd).  Subclasses may
+     * wish to override this protected method to control the behavior.
      * 
      * @param rfd a new download candidate.  Typically rfd will be similar or
      *  same to some entry in this, but that is not required.  
+     * @return true if rfd has been added.  In this case, the caller should
+     *  not offer rfd to another ManagedDownloaders.
      */
-    public synchronized void addDownload(RemoteFileDesc rfd) {
+    public synchronized boolean addDownload(RemoteFileDesc rfd) {
+        if (! allowAddition(rfd))
+            return false;
+
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
             if (rfd.equals(allFiles[i]))
-                return;          
+                return true;          
         }  
 
         //System.out.println("Adding "+rfd);
@@ -615,7 +729,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             reqLock.release();
         else
             this.notify();                      //see tryAllDownloads3
+        return true;
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Accepts a push download.  If this chooses to download the given file
@@ -710,8 +828,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //exclusive file locks.  If the download hasn't started, the
         //incomplete file may not even exist--not a problem.
         else if (state!=COMPLETE) {
-            File incomplete=incompleteFileManager.
-                               getFile(currentFileName, currentFileSize); 
+            RemoteFileDesc rfd=buckets.getRemoteFileDescForBucket(bucketNumber);
+            File incomplete=incompleteFileManager.getFile(rfd);
             File file=new File(incomplete.getParent(),
                                IncompleteFileManager.PREVIEW_PREFIX
                                    +incomplete.getName());
@@ -772,10 +890,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         int numRequeries = 0;
         // the time to next requery.  We don't want to send the first requery
         // until a few minutes after the initial download attempt--after all,
-        // the user just started a query.  Hence initialize initialize
-        // nextRequeryTime to System.currentTimeMillis() plus a few minutes.
+        // the user just started a query.  Hence initialize nextRequeryTime to
+        // System.currentTimeMillis() plus a few minutes.
         long nextRequeryTime = System.currentTimeMillis()
-            + getMinutesToWaitForRequery(numRequeries)*60*1000;
+                             + TIME_BETWEEN_REQUERIES;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -850,11 +968,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
-                    if (manager.sendQuery(this, allFiles))
-                        numRequeries++;
+                    try {
+                        if (manager.sendQuery(this, newRequery()))
+                            numRequeries++;
+                    } catch (CantResumeException ignore) { }
                     // set time for next requery...
-                    nextRequeryTime = currTime + 
-                    (getMinutesToWaitForRequery(numRequeries)*60*1000);
+                    nextRequeryTime = currTime + TIME_BETWEEN_REQUERIES;
                 }
 
 
@@ -1064,10 +1183,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         completeFile.delete();
         //Try moving file.  If we couldn't move the file, i.e., because
         //someone is previewing it or it's on a different volume, try copy
-        //instead.  If that failed, notify user.
+        //instead.  If that failed, notify user.  
+        //   If move is successful, we should remove the corresponding blocks
+        //from the IncompleteFileManager, though this is not strictly necessary
+        //because IFM.purge() is called frequently in DownloadManager.
         if (!incompleteFile.renameTo(completeFile))
             if (! CommonUtils.copy(incompleteFile, completeFile))
                 return COULDNT_MOVE_TO_LIBRARY;
+        incompleteFileManager.removeEntry(incompleteFile);
 
         //Add file to library.
         // first check if it conflicts with the saved dir....
@@ -2040,21 +2163,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
-    /**
-     * Returns the time to wait between the n'th and n+1'th automatic requery,
-     * where n=requeries.  Hence getMinutesToWaitForRequery(0) is the time to
-     * wait before the first requery. getMinutesToWaitForRequery(1) is the time
-     * to wait after that before requerying again.
-     *
-     * @param requeriesthe number of requeries sent, which must be non-negative
-     * @return minutes to wait
-     */
-    private int getMinutesToWaitForRequery(int requeries) {
-        return 5;
-    }
-
     /** Synchronization Primitive for auto-requerying....
-     *  Can be underst00d as follows:
+     *  Can be understood as follows:
      *  -- The tryAllDownloads thread does a lock(), which will cause it to
      *  wait() for up to waitTime.  it may be woken up earlier if it gets
      *  a requery result. moreover, it won't wait if it has a result already...
@@ -2184,8 +2294,20 @@ public class ManagedDownloader implements Downloader, Serializable {
 //          }
     }
     
-    //Stub constructor for above test.
+    /** Stub constructor for above test. */
     private ManagedDownloader() {
     }
 
+    /** Stub constructor for testing only.  Does not actually start downloads. */
+    protected ManagedDownloader(RemoteFileDesc[] allFiles) {
+        this.allFiles=allFiles;
+    }
+
+    //More tests:
+    //-test/com/limegroup/gnutella/downloader/ManagedDownloaderTest.java
+    // (simply calls above unit test)
+    //-test/com/limegroup/gnutella/downloader/DownloadTest.java
+    // (tests swarming)
+    //-test/com/limegroup/gnutella/downloader/RequeryDownloadTest.java
+    // (tests allowAddition/addDownload)
 }

@@ -128,21 +128,17 @@ public class AutoDownloadDetails implements Serializable {
             }
 
             // make sure the score for this file isn't too low....
-            if (RouterService.instance() != null) {
-                String[] queryWords = 
+            String[] queryWords = 
                 ResponseVerifier.getSearchTerms(query, richQuery);
-                Response resp = deriveResponse(toAdd);
-                boolean isXMLQuery = (resp.getDocument() != null);
-                int score = ResponseVerifier.calculateScore(queryWords,
-                                                            resp,
-                                                            isXMLQuery);
-                                                            
-                                                
-                if (score < LOW_SCORE) {
-                    retVal = false;
-                    debug("ADD.addDownload(): file " +
-                          inputFileName + " has low score of " + score);
-                }
+            Response resp = deriveResponse(toAdd);
+            boolean isXMLQuery = (resp.getDocument() != null);
+            int score = ResponseVerifier.calculateScore(queryWords,
+                                                        resp,
+                                                        isXMLQuery);
+            if (score < LOW_SCORE) {
+                retVal = false;
+                debug("ADD.addDownload(): file " +
+                      inputFileName + " has low score of " + score);
             }
 
             // check to see there is a high incidence of words here in stuff we
