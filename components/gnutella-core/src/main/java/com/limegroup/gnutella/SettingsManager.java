@@ -425,6 +425,7 @@ public class SettingsManager {
     private volatile long _supernodeProbationTime;
     private volatile boolean _supernodeMode;
     private volatile boolean _shieldedClientSupernodeConnection;
+    private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
     /** 
 	 * Constant member variable for the main <tt>Properties</tt> instance.
@@ -1666,6 +1667,16 @@ public class SettingsManager {
         return _shieldedClientSupernodeConnection;
     }
     
+    /**
+     * Tells whether the node's status has been forced,
+     * in which case SupernodeAssigner Thread wont try
+     * to change the status
+     */
+    public boolean hasSupernodeOrClientnodeStatusForced()
+    {
+        return _hasSupernodeOrClientnodeStatusForced;
+    }
+    
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
      ******************************************************/
@@ -2742,6 +2753,16 @@ public class SettingsManager {
     public void setShieldedClientSupernodeConnection(boolean flag)
     {
         _shieldedClientSupernodeConnection = flag;
+    }
+    
+    /**
+     * Sets the node's status flag. If the flag is true, it indicates that
+     * the  SupernodeAssigner Thread wont try
+     * to change the status
+     */
+    public void setSupernodeOrClientnodeStatusForced(boolean flag)
+    {
+        _hasSupernodeOrClientnodeStatusForced = flag;
     }
     
     /******************************************************
