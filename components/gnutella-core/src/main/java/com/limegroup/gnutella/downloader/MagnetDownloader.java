@@ -15,6 +15,9 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
  * MagnetDownloader need not have an initial RemoteFileDesc.  Instead it can be
@@ -38,6 +41,9 @@ import org.apache.commons.httpclient.URIException;
  * download.  
  */
 public class MagnetDownloader extends ManagedDownloader implements Serializable {
+
+    private static final Log LOG = LogFactory.getLog(MagnetDownloader.class);
+
     /** Prevent versioning problems. */
     static final long serialVersionUID = 9092913030585214105L;
     /** The string to prefix download files with in the rare case that we don't
@@ -107,7 +113,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 				//keywords.
 				boolean added=super.addDownloadForced(defaultRFD,true);
 				Assert.that(added, "Download rfd not accepted "+defaultRFD);
-			}
+			} else {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Ignoring magnet url: " + _defaultURLs[i]);
+            }
 		}
 
         //Start the downloads for real.
@@ -122,12 +131,15 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      */
     private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn) {
-        if (defaultURL==null)
+        if (defaultURL==null) {
+            LOG.debug("createRemoteFileDesc called with null URL");        
             return null;
+        }
 
+        URL url = null;
         try {
             // Use the URL class to do a little parsing for us.
-            URL url = new URL(defaultURL);
+            url = new URL(defaultURL);
             int port = url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
@@ -154,6 +166,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 url,            //url for GET request
                 null);          //no push proxies
         } catch (IOException e) {
+            if(LOG.isWarnEnabled())
+                LOG.warn("IOException while processing magnet URL: " + url, e);
             return null;
         }
 
@@ -190,7 +204,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     private static int contentLength(URL url) throws IOException {
         try {
             // Verify that the URL is valid.
-            new URI(url.toExternalForm());
+            new URI(url.toExternalForm().toCharArray());
         } catch(URIException e) {
             //invalid URI, don't allow this URL.
             throw new IOException("invalid url: " + url);
@@ -206,7 +220,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             //Generally speaking any 2xx response is ok, but in this situation
             //we expect only 200.
             if (head.getStatusCode() != HttpStatus.SC_OK)
-                throw new IOException("No 200 OK");
+                throw new IOException("Got " + head.getStatusCode() +
+                                      " instead of 200");
             
             int length = head.getResponseContentLength();
             if (length<0)

@@ -152,7 +152,8 @@ public class ExternalControl {
                 // Verify each URL before adding it to the defaultURLs.
                 for(Iterator it = urls.iterator(); it.hasNext(); ) {
                     try {
-                        new URI((String)it.next()); // is it a valid URI?
+                        String nextURL = (String)it.next();
+                        new URI(nextURL.toCharArray());  // is it a valid URI?
                     } catch(URIException e) {
                         LOG.warn("Invalid URI in magnet", e);
                         errorMsg = e.getMessage();
