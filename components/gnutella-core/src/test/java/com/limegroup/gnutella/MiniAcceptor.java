@@ -1,9 +1,11 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.handshaking.*;
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -37,6 +39,7 @@ public class MiniAcceptor implements Runnable {
 
     /** Starts the listen socket without blocking. */
     public MiniAcceptor(HandshakeResponder properties, int port) {
+		//ConnectionSettings.KEEP_ALIVE.setValue(3);
         this.properties=properties;
         this.port=port;
         Thread runner=new Thread(this);
@@ -99,3 +102,4 @@ public class MiniAcceptor implements Runnable {
         }
     }
 }
+

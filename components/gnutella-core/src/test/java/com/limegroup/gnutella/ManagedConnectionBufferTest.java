@@ -12,7 +12,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
-public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class ManagedConnectionBufferTest extends BaseTestCase {
 	
     public static final int PORT=6666;
     private ManagedConnection out = null;
@@ -31,17 +31,31 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
     }
 
 	public void setUp() throws Exception {
+		//setStandardSettings();
+		
+		//ConnectionSettings.KEEP_ALIVE.setValue(2);
+		//ConnectionSettings.WATCHDOG_ACTIVE.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 
         // required because ManagedConnection delegates
         // to RouterService to get the MessageRouter
-        new RouterService(new ActivityCallbackStub(), 
-                          new MessageRouterStub()
-                         );
+        RouterService rs = 
+			new RouterService(new ActivityCallbackStub(), 
+							  new MessageRouterStub());
+
+		//rs.start();
+		//rs.connect();
         PrivilegedAccessor.setValue(RouterService.class, "manager", new ConnectionManagerStub());
 
-		MiniAcceptor acceptor = new MiniAcceptor(null, PORT);
+
+
+		MiniAcceptor acceptor = 
+			new MiniAcceptor(new DummyResponder("localhost"), PORT);
+
+		//MiniAcceptor acceptor = 
+		//new MiniAcceptor(new HandshakeResponse(new Properties()), PORT);
+
 
 		ManagedConnection.QUEUE_TIME=1000;
 		out = new ManagedConnection("localhost", PORT);
@@ -51,7 +65,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
     }
     
     public void tearDown() throws Exception {
-        in.close();
+		in.close();
         out.close();
     }
 
@@ -361,5 +375,17 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         assertTrue("read cnt < total", read<total);
         assertEquals("drop + read == total", total, dropped+read);
     }
+
+	private static class DummyResponder extends AuthenticationHandshakeResponder {
+		DummyResponder(String host) {
+			super(null, host);
+		}
+
+		protected HandshakeResponse 
+			respondUnauthenticated(HandshakeResponse response, boolean outgoing) 
+			throws IOException {
+			return new HandshakeResponse(new Properties());
+		}
+	}
 
 }
