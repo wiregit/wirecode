@@ -99,8 +99,17 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     static HashTree createHashTree(FileDesc fd) throws IOException {
         if (LOG.isDebugEnabled())
             LOG.debug("creating hashtree for file " + fd);
-        return createHashTree(fd.getSize(), fd.createInputStream(),
-                              fd.getSHA1Urn());
+        InputStream in = null;
+        try {
+            in = fd.createInputStream();
+            return createHashTree(fd.getSize(), in, fd.getSHA1Urn());
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch(IOException ignored) {}
+            }
+        }
     }
     
     /**
@@ -233,6 +242,13 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     public boolean isGoodDepth() {
         return (DEPTH == calculateDepth(FILE_SIZE));
     }
+    
+    /**
+     * @return true if the DEPTH is ideal enough according to our own standards
+     */
+    public boolean isDepthGoodEnough() {
+        return DEPTH >= calculateDepth(FILE_SIZE);
+    }    
     
     /**
      * Determines if this tree is better than another.

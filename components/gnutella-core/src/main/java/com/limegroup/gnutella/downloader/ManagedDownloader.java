@@ -2354,7 +2354,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // request THEX from te dloader if the tree we have
                 // isn't good enough (or we don't have a tree)
                 if (dloader.hasHashTree() &&
-                  (hashTree == null || !hashTree.isGoodDepth())) {
+                  (hashTree == null || !hashTree.isDepthGoodEnough())) {
                     status = dloader.requestHashTree();
                     if(status.isThexResponse()) {
                         HashTree temp = status.getHashTree();
