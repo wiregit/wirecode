@@ -494,7 +494,7 @@ public class ConnectionManager {
      * Disconnects from the network.  Closes all connections and sets
      * the number of connections to zero.
      */
-    public void disconnect() {
+    public synchronized void disconnect() {
 		// Deactivate checking for Ultra Fast Shutdown
 		deactivateUltraFastConnectShutdown(); 
 
@@ -517,7 +517,7 @@ public class ConnectionManager {
      * Connects to the network.  Ensures the number of messaging connections
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
-    public void connect() {
+    public synchronized void connect() {
         //HACK. People used to complain to that the connect button wasn't
         //working when the host catcher was empty and USE_QUICK_CONNECT=false.
         //This is not a bug; LimeWire isn't supposed to connect to the pong
@@ -565,6 +565,17 @@ public class ConnectionManager {
             } catch (InterruptedException e) { }
             SettingsManager.instance().setUseQuickConnect(false);
         }
+    }
+    
+    /**
+     * Drops the current set of connections, and starts afresh based upon
+     * the supernode/client state
+     */
+    public synchronized void reconnect()
+    {
+        disconnect();
+        SettingsManager.instance().setKeepAlive(4);
+        connect();
     }
     
     /** 
@@ -816,11 +827,12 @@ public class ConnectionManager {
     private synchronized void gotShieldedClientSupernodeConnection(
         ManagedConnection supernodeConnection)
     {
-        //set keep alive to 1, so that we are not fetching any connections
+        // Deactivate checking for Ultra Fast Shutdown
+		deactivateUltraFastConnectShutdown(); 
+        //set keep alive to 0, so that we are not fetching any connections
         //Keep Alive is not set to zero, so that when this connection drops,
         //we automatically start fetching a new connection
         setKeepAlive(0);
-        SettingsManager.instance().setKeepAlive(0);
         
         //close all other connections
         Iterator iterator = _connections.iterator();
@@ -830,6 +842,8 @@ public class ConnectionManager {
             if(!connection.equals(supernodeConnection))
                 connection.close();
         }
+        //set the _hasShieldedClientSupernodeConnection flag to true
+        _hasShieldedClientSupernodeConnection = true;
         
         //reinitialize the lists
         List newConnections=new ArrayList();
@@ -842,10 +856,7 @@ public class ConnectionManager {
         
         _initializedClientConnections = new ArrayList();
         
-        //set the _hasShieldedClientSupernodeConnection flag to true
-        _hasShieldedClientSupernodeConnection = true;
-        
-         _incomingConnections = 0;
+        _incomingConnections = 0;
         _incomingClientConnections=0;
     }
     
@@ -855,12 +866,14 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        //set the _hasShieldedClientSupernodeConnection flag to false
-        _hasShieldedClientSupernodeConnection = false;
-        
-        //set keep alive to 4, so that we start fetching new connections
-        SettingsManager.instance().setKeepAlive(4);
-        setKeepAlive(4);
+        if(_connections.size() == 0)
+        {
+            //set the _hasShieldedClientSupernodeConnection flag to false
+            _hasShieldedClientSupernodeConnection = false;
+
+            //set keep alive to 4, so that we start fetching new connections
+            setKeepAlive(4);
+        }
     }
     
     /**
@@ -1102,8 +1115,7 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                if(_hasShieldedClientSupernodeConnection)
-                {
+                if(_hasShieldedClientSupernodeConnection){
                     lostShieldedClientSupernodeConnection();
                 }
             }
