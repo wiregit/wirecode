@@ -10,8 +10,9 @@ import java.io.*;
 import java.net.*;
 
 /** 
- * Provides the readLine method of a BufferedReader with no 
- * no automatic buffering.
+ * Provides the readLine method of a BufferedReader with no no automatic
+ * buffering.  All methods are like those in InputStream except they return
+ * -1 instead of throwing IOException.
  */
 public class ByteReader {
 
@@ -57,6 +58,22 @@ public class ByteReader {
 
         try {
             c = _istream.read(buf);
+        }
+        catch(IOException e) {
+
+        }
+        return c;
+    }
+
+    public int read(byte[] buf, int offset, int length) {
+        int c = -1;
+
+        if (_istream == null) {
+            return c;
+        }
+
+        try {
+            c = _istream.read(buf, offset, length);
         }
         catch(IOException e) {
 
