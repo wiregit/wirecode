@@ -1341,6 +1341,8 @@ public class QueryReply extends Message implements Serializable{
             
             String host = NetworkUtils.ip2string(fromNetwork, 0);
             int port = (int) ByteOrder.leb2short(fromNetwork, 4);
+            if (host.equals("0.0.0.0"))
+                throw new IllegalArgumentException("Host is bad: 0.0.0.0");
 
             try {
                 return new IPPortCombo(host, port);
@@ -1355,6 +1357,8 @@ public class QueryReply extends Message implements Serializable{
 
         public IPPortCombo(String hostAddress, int port) 
             throws UnknownHostException, IllegalArgumentException  {
+            if (hostAddress.equals("0.0.0.0"))
+                throw new IllegalArgumentException("Host is bad: 0.0.0.0");
             _addr = InetAddress.getByName(hostAddress);
             if (!NetworkUtils.isValidPort(port))
                 throw new IllegalArgumentException("Bad Port");
