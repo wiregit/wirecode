@@ -706,6 +706,14 @@ public class HostCatcher {
             iter.remove();
             return ee;
         } 
+        // Otherwise, might as well use the leaf slots hosts up as well
+        // since we added them to the size and they can give us other info
+        else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
+            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            iter.remove();
+            return ee;
+        } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
             ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
