@@ -171,7 +171,7 @@ com.sun.java.util.collections.Comparable
             {
                 throw new IllegalArgumentException();
             }
-			if(!CommonUtils.isValidPort(getPort())) {
+			if(!NetworkUtils.isValidPort(getPort())) {
 			    throw new IllegalArgumentException("invalid port");
 		    }	
         }
@@ -391,7 +391,7 @@ com.sun.java.util.collections.Comparable
      */
     public boolean isPrivateAddress() {
         try {
-            return CommonUtils.isPrivateAddress(getHostBytes());
+            return NetworkUtils.isPrivateAddress(getHostBytes());
         } catch (UnknownHostException e) {
             return false;
         }

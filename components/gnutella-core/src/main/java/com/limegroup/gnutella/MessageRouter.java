@@ -300,7 +300,7 @@ public abstract class MessageRouter {
 		InetAddress address = datagram.getAddress();
 		int port = datagram.getPort();
 		
-        if (CommonUtils.isLocalAddress(address))
+        if (NetworkUtils.isLocalAddress(address))
             return;
 		
 		ReplyHandler handler = new UDPReplyHandler(address, port);

@@ -30,7 +30,15 @@ public class Acceptor implements Runnable {
      * when done.
      */
     private volatile ServerSocket _socket=null;
-    private volatile int _port=-1;
+
+    /**
+     * The port of the server socket.
+     */
+    private volatile int _port = 6346;
+
+    /**
+     * The object to lock on while setting the listening socket
+     */
     private final Object SOCKET_LOCK = new Object();
 
     /**

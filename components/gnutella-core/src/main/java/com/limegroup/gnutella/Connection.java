@@ -9,8 +9,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 
 /**
@@ -159,7 +158,7 @@ public class Connection {
 		if(host == null) {
 			throw new NullPointerException("null host");
 		}
-		if(!CommonUtils.isValidPort(port)) {
+		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("illegal port: "+port);
 		}
 		if(requestHeaders == null) {
@@ -783,7 +782,7 @@ public class Connection {
      * got from socket
      */
     void setOrigPort(int port){
-        if (!CommonUtils.isValidPort(port))
+        if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
         this._port = port;
     }
@@ -908,7 +907,7 @@ public class Connection {
      *  otherwise <tt>false</tt>
      */
     protected boolean isLocal() {
-        return CommonUtils.isLocalAddress(_socket.getInetAddress());
+        return NetworkUtils.isLocalAddress(_socket.getInetAddress());
     }
 
     /**

@@ -161,12 +161,12 @@ public final class AlternateLocation
 			throw new IOException("no SHA1 in RFD");
 		}
 		int port = rfd.getPort();
-		if(!CommonUtils.isValidPort(port)) {
+		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		}	
 
         InetAddress address = InetAddress.getByName(rfd.getHost());
-        if(CommonUtils.isPrivateAddress(address.getAddress())) {
+        if(NetworkUtils.isPrivateAddress(address.getAddress())) {
             throw new IOException("cannot accept private addresses: "+
                                   address.getAddress());
         }
@@ -518,7 +518,7 @@ public final class AlternateLocation
             // format..
             if(Character.isDigit(host.charAt(0))) {
                 InetAddress address = InetAddress.getByName(host);
-                if(CommonUtils.isPrivateAddress(address.getAddress())) {
+                if(NetworkUtils.isPrivateAddress(address.getAddress())) {
                     throw new IOException("cannot include private address in "+
                                           "alt loc: "+host);
                 } 

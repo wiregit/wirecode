@@ -147,7 +147,7 @@ public class PingReply extends Message implements Serializable {
      */
     public static PingReply 
         create(byte[] guid, byte ttl, int port, byte[] address) {
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, false, -1, false); 
     }
@@ -168,7 +168,7 @@ public class PingReply extends Message implements Serializable {
     public static PingReply 
         createExternal(byte[] guid, byte ttl, int port, byte[] address,
                        boolean ultrapeer) {
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, ultrapeer, -1, false); 
     }
@@ -190,7 +190,7 @@ public class PingReply extends Message implements Serializable {
         createExternal(byte[] guid, byte ttl, int port, byte[] address,
                        int uptime,
                        boolean ultrapeer) {
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, ultrapeer, uptime, false); 
     }
@@ -210,7 +210,7 @@ public class PingReply extends Message implements Serializable {
         createGUESSReply(byte[] guid, byte ttl, Endpoint ep) 
         throws UnknownHostException {
         int port = ep.getPort();
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl,
                       port,
@@ -233,7 +233,7 @@ public class PingReply extends Message implements Serializable {
      */
     public static PingReply 
         createGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, address, 0, 0, true, -1, true); 
     }
@@ -256,7 +256,7 @@ public class PingReply extends Message implements Serializable {
     public static PingReply 
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes) {
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, ip, files, kbytes, 
                       false, -1, false); 
@@ -287,7 +287,7 @@ public class PingReply extends Message implements Serializable {
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes,
                boolean isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);     
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
                       newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
@@ -305,7 +305,7 @@ public class PingReply extends Message implements Serializable {
         create(byte[] guid, byte ttl, int port, byte[] ip, long files,
                long kbytes, boolean isUltrapeer, byte[] extensions) {
 
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);
         
         int length = STANDARD_PAYLOAD_SIZE + 
@@ -350,7 +350,7 @@ public class PingReply extends Message implements Serializable {
         if (payload.length<STANDARD_PAYLOAD_SIZE)
             throw new BadPacketException("invalid payload length");   
         int port = ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
- 		if(!CommonUtils.isValidPort(port))
+ 		if(!NetworkUtils.isValidPort(port))
 			throw new BadPacketException("invalid port: "+port);     
         return new PingReply(guid, ttl, hops, payload);
     }

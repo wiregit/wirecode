@@ -28,7 +28,7 @@ public class PushRequest extends Message implements Serializable {
         if (payload.length < STANDARD_PAYLOAD_SIZE)
             throw new BadPacketException("Payload too small: "+payload.length);
         this.payload=payload;
-		if(!CommonUtils.isValidPort(getPort())) {
+		if(!NetworkUtils.isValidPort(getPort())) {
 			throw new BadPacketException("invalid port");
 		}
     }

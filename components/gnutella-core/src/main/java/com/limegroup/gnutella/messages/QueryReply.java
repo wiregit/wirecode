@@ -179,7 +179,7 @@ public class QueryReply extends Message implements Serializable{
 		throws BadPacketException {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
         this.payload=payload;
-		if(!CommonUtils.isValidPort(getPort())) {
+		if(!NetworkUtils.isValidPort(getPort())) {
 			throw new BadPacketException("invalid port");
 		}
 		
