@@ -1501,7 +1501,8 @@ public class ConnectionManager {
 	 * @throws <tt>IOException</tt> if there is an excpetion while looping
 	 *  for messages
 	 */
-	private void startConnection(ManagedConnection conn) throws IOException {	
+	private void startConnection(ManagedConnection conn) throws IOException {
+	    Thread.currentThread().setName("MessageLoopingThread");
 		// Send ping...possibly group ping.
 		sendInitialPingRequest(conn);
 		if(conn.isGUESSUltrapeer()) {
