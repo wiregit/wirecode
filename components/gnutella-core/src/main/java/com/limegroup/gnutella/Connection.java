@@ -247,7 +247,8 @@ public class Connection {
             readHeaders();
             //3. Send "GNUTELLA/200 OK" with no headers.
             sendString(GNUTELLA_OK_06+CRLF);
-            sendHeaders(_propertiesWrittenR.respond(_propertiesRead));
+            sendHeaders(_propertiesWrittenR.respond(
+                _propertiesRead).getHeaders());
         }
     }
 
@@ -277,7 +278,8 @@ public class Connection {
             if (_propertiesWrittenR==null)
                 sendString(CRLF);  //no headers specified ==> blank line
             else
-                sendHeaders(_propertiesWrittenR.respond(_propertiesRead));
+                sendHeaders(_propertiesWrittenR.respond(_propertiesRead)
+                .getHeaders());
             //3. Read GNUTELLA/200 OK, and any private vendor headers.
             if (! readLine().equals(GNUTELLA_OK_06))
                 throw new IOException("Bad connect string");

@@ -32,11 +32,9 @@ import java.util.Properties;
  * }
  * </pre> 
  *
- * In the future, the respond method may be able to indicate non-standard
- * response codes (e.g., "401 Unauthorized") via exception or return value.
  */
 public interface HandshakeResponder {
     /** Returns the properties to be written to the remote host
      *  in response to the given set of properties just read. */
-    public Properties respond(Properties read);
+    public HandshakeResponseData respond(Properties read);
 }
