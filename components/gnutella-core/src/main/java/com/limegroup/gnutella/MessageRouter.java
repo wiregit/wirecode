@@ -1571,7 +1571,6 @@ public abstract class MessageRouter {
      */
     private void handleRouteTableMessage(RouteTableMessage m,
 										 ManagedConnection receivingConnection) {
-        //System.out.println("MessageRouter::handleRouteTableMessage: "+receivingConnection); 
         //if not a supernode-client, ignore
         if(! receivingConnection.isSupernodeClientConnection() &&
 		   ! receivingConnection.isUltrapeerQueryRoutingConnection())
