@@ -148,18 +148,18 @@ public class VerifyingFile {
     /**
      * Writes bytes to the underlying file.
      */
-    public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
+    public synchronized void writeBlock(long currPos,  byte[] buf)
                                                     throws DiskException{
         
         if (LOG.isDebugEnabled())
-            LOG.debug(" trying to write block at offset "+currPos+" with size "+numBytes);
+            LOG.debug(" trying to write block at offset "+currPos+" with size "+buf.length);
         
-        if(numBytes==0) //nothing to write? return
+        if(buf.length==0) //nothing to write? return
             return;
         if(fos == null)
             throw new DiskException("no file?");
 		
-		Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
+		Interval intvl = new Interval((int)currPos,(int)currPos+buf.length-1);
 		
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
@@ -178,7 +178,7 @@ public class VerifyingFile {
 		
 		////////////
 		
-        saveToDisk(currPos,numBytes,buf);
+        saveToDisk(currPos,buf);
 		
         // 4. if write went ok, add this interval to the partial blocks
         if (LOG.isDebugEnabled())
@@ -193,14 +193,14 @@ public class VerifyingFile {
 	/**
 	 * Saves the given interval to disk. 
 	 */
-	private void saveToDisk(long currPos, int numBytes, byte [] buf) 
+	private void saveToDisk(long currPos, byte [] buf) 
 	throws DiskException{
 		try {
             //2. get the fp back to the position we want to write to.
 			synchronized(fos) {
 				fos.seek(currPos);
 				//3. Write to disk.
-				fos.write(buf, 0, numBytes);
+				fos.write(buf, 0, buf.length);
 			}
         }catch(IOException diskIO) {
             throw new DiskException(diskIO);
@@ -242,11 +242,12 @@ public class VerifyingFile {
             LOG.debug("trying to find verifyable blocks out of "+partialBlocks);
         
         List verifyable = new ArrayList(2);
-        List pending = partialBlocks.getAllIntervalsAsList();
+        List partial = partialBlocks.getAllIntervalsAsList();
         int chunkSize = managedDownloader.getChunkSize();
+        int lastChunkOffset = completedSize - (completedSize % chunkSize);
         
-        for (int i = 0; i < pending.size() ; i++) {
-            Interval current = (Interval)pending.get(i);
+        for (int i = 0; i < partial.size() ; i++) {
+            Interval current = (Interval)partial.get(i);
             
             // find the beginning of the first chunk offset
             int lowChunkOffset = current.low - current.low % chunkSize;
@@ -260,12 +261,13 @@ public class VerifyingFile {
         }
         
         // special case for the last chunk
-        if (pending.size() > verifyable.size()) {
-            Interval last = (Interval)pending.get(pending.size() - 1);
-            if (last.low % chunkSize == 0 && last.high == completedSize-1) {
+        if (partial.size() > verifyable.size()) {
+            Interval last = (Interval) partial.get(partial.size() - 1);
+            if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("adding the last chunk for verification");
-                verifyable.add(last);
+                
+                verifyable.add(new Interval(lastChunkOffset, last.high));
             }
         }
         

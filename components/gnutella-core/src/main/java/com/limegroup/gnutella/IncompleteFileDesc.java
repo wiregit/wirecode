@@ -193,7 +193,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     
                 added = true;
                 // ( we subtract one because HTTP values are exclusive )
-                ret.append(" " + interval.low + "-" + (interval.high -1) + ",");
+                ret.append(" ").append(interval.low).append("-").append(interval.high -1).append(",");
             }
         }
         // truncate off the last ',' if atleast one was added.

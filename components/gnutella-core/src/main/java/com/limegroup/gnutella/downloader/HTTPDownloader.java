@@ -1613,7 +1613,7 @@ public class HTTPDownloader implements BandwidthTracker {
                             toWrite = buf;
                         
                         // write to disk
-				        commonOutFile.writeBlock(currPos,c, toWrite);
+				        commonOutFile.writeBlock(currPos,toWrite);
 				        
 				        currPos += c;//update the currPos for next iteration
 				        
