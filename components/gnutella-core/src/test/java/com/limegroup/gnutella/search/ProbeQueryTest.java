@@ -1,17 +1,21 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.*;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import java.lang.reflect.*;
-import junit.framework.*;
+import java.lang.reflect.Method;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.NewConnection;
+import com.limegroup.gnutella.util.OldConnection;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestConnection;
+import com.limegroup.gnutella.util.TestResultCounter;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 
 /**
@@ -51,8 +55,8 @@ public final class ProbeQueryTest extends BaseTestCase {
      * with the proper TTL.
      */
     public void testSendProbe() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", rs.getMessageRouter());
+        new RouterService(new ActivityCallbackStub());
+        assertNotNull("should have a message router", RouterService.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(ProbeQuery.class, 
                                          "sendProbe",
@@ -107,8 +111,6 @@ public final class ProbeQueryTest extends BaseTestCase {
             (List[])CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 
 
-        System.out.println("TTL=1: "+queryLists[0].size()); 
-        System.out.println("TTL=2: "+queryLists[1].size()); 
         assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
         assertTrue("should not be too many ttl=1", queryLists[0].size() < 15);
     }
@@ -163,9 +165,6 @@ public final class ProbeQueryTest extends BaseTestCase {
         Integer two   = new Integer(2);
         Integer three = new Integer(3);
         Integer four  = new Integer(4);
-        Integer five  = new Integer(5);
-        Integer six   = new Integer(6);
-        Integer seven = new Integer(7);
 
         List testList = new LinkedList();
         testList.add(one);
