@@ -79,7 +79,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Constant for the default query TTL.
      */
-    private static final byte DEFAULT_TTL = 5;
+    private static final byte DEFAULT_TTL = 6;
 
     /**
      * Cached illegal characters in search strings.
