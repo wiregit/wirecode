@@ -903,6 +903,9 @@ public class ConnectionManager {
      *  <tt>false</tt>
      */
     private static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+        if(hr.isLimeWire())
+            return true;
+        
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
             return false;
@@ -924,6 +927,9 @@ public class ConnectionManager {
      *  <tt>false</tt>
      */
     private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
+        if(hr.isLimeWire())
+            return true;
+        
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
             return false;
