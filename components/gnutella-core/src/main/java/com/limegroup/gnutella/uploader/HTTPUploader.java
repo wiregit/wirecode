@@ -306,7 +306,8 @@ public class HTTPUploader implements Uploader {
 		// ignore if this is a push upload
 		if(_socket == null) return;
 		try {
-			AlternateLocation al = new AlternateLocation(new URL(_hostName));
+			AlternateLocation al = 
+			    new AlternateLocation(_hostName, _fileDesc.getSHA1Urn());
 			_fileDesc.addAlternateLocation(al);
 		} catch(MalformedURLException e) {
 			// if the url is invalid, it simply will not be added to the list
