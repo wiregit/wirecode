@@ -132,6 +132,9 @@ public class FileDesc implements AlternateLocationCollector {
      * thread is interrupted while executing this, returns an empty set.  
      */
     public static Set /* of URN */ calculateAndCacheURN(File file) {
+        if(file == null) {
+            throw new NullPointerException("cannot accept null file argument");
+        }
 		Set urns = UrnCache.instance().getUrns(file);
 		if(urns.size() == 0) {			
 			// expensive the first time a new file is added
@@ -253,12 +256,18 @@ public class FileDesc implements AlternateLocationCollector {
 
 	// implements AlternateLocationCollector interface
 	public void addAlternateLocation(AlternateLocation al) {
+        if(al == null) {
+            throw new NullPointerException("cannot accept null alt locs");
+        }
 		createAlternateLocations();
 		_altLocs.addAlternateLocation(al);
 	}
 
 	// implements AlternateLocationCollector interface
 	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
+        if(alc == null) {
+            throw new NullPointerException("cannot accept null alt loc coll");
+        }
 		createAlternateLocations();
 		_altLocs.addAlternateLocationCollection(alc);
 	}
@@ -317,6 +326,9 @@ public class FileDesc implements AlternateLocationCollector {
 	 *  for this file, <tt>false</tt> otherwise
      */
     public boolean containsUrn(URN urn) {
+        if(urn == null) {
+            throw new NullPointerException("null URNS not allowed in containsUrn");
+        }
         // now check if given urn matches
         Iterator iter = URNS.iterator();
         while(iter.hasNext()){
