@@ -103,7 +103,7 @@ public class SettingsManager implements SettingsInterface
      *  Set up the manager instance to follow the
      *  singleton pattern.
      */
-    private static SettingsManager instance_ = new SettingsManager();
+    private static SettingsManager instance_;
 
     private String home_;
     private String fileName_;
@@ -119,6 +119,9 @@ public class SettingsManager implements SettingsInterface
      * accordance with the singleton pattern
      */
     public static SettingsManager instance() {
+		if(instance_ == null) {
+			instance_ = new SettingsManager();
+		}
         return instance_;
     }
 
@@ -142,12 +145,11 @@ public class SettingsManager implements SettingsInterface
         }
         catch(FileNotFoundException fne){}
         catch(SecurityException se) {}
-        initSettings();
     }
 
 
     /** Check the properties file and set the props */
-    private void initSettings() {
+    public void initialize() {
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
