@@ -65,6 +65,7 @@ public final class TestConnectionManager extends ConnectionManager {
         "wert", "erty", "rtyu", "tyui", "yuio",        
     };
 
+
     /**
      * Constant array for the keywords for leaves to use.
      */
@@ -78,11 +79,6 @@ public final class TestConnectionManager extends ConnectionManager {
         "hopefully", "in", "fact", "as", "well", 
         "but", "it's", "hard", "to", "know", 
     };
-    
-    /**
-     * Constant alternate keyword for use in testing.
-     */
-    public static final String ALT_LEAF_KEYWORD = "ALT_KEYWORD";
    
 
     /**
@@ -105,6 +101,13 @@ public final class TestConnectionManager extends ConnectionManager {
     }
 
     /**
+     * Creates a standard manager.
+     */
+    public static TestConnectionManager createManager() {
+        return new TestConnectionManager(20);
+    }
+
+    /**
      * Convenience constructor that creates a new 
      * <tt>TestConnectionManager</tt> with all of the default settings.
      */
@@ -113,7 +116,7 @@ public final class TestConnectionManager extends ConnectionManager {
     }
 
     public TestConnectionManager(String[] myKeywords) {
-        this(20, true, 20, 30, myKeywords, false);
+        this(20, true, 20, UltrapeerSettings.MAX_LEAVES.getValue(), myKeywords, false);
     }
     
     /**
@@ -137,7 +140,8 @@ public final class TestConnectionManager extends ConnectionManager {
      *  an ultrapeer
      */
     public TestConnectionManager(int numNewConnections, boolean ultrapeer) {
-        this(numNewConnections, ultrapeer, 20, 30, DEFAULT_MY_KEYWORDS, false);
+        this(numNewConnections, ultrapeer, 20, UltrapeerSettings.MAX_LEAVES.getValue(), 
+            DEFAULT_MY_KEYWORDS, false);
     }
 
     /**
@@ -172,11 +176,10 @@ public final class TestConnectionManager extends ConnectionManager {
         // now, give ourselves the desired number of leaves
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
             Connection conn;
-            if(useVaried && i > (NUM_LEAF_CONNECTIONS/2)) {
-                System.out.println("CREATING ALT LEAF..");
-                conn = new LeafConnection(new String[]{ALT_LEAF_KEYWORD});
+            if(useVaried && i >= (NUM_LEAF_CONNECTIONS/2)) {
+                conn = LeafConnection.createAltLeafConnection();
             } else {
-                conn = new LeafConnection(new String[]{LEAF_KEYWORDS[i]});
+                conn = LeafConnection.createWithKeywords(new String[]{LEAF_KEYWORDS[i]});
             }
             LEAF_CONNECTIONS.add(conn);
         }
