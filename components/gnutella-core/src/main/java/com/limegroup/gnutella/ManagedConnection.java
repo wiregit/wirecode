@@ -946,6 +946,7 @@ public class ManagedConnection extends Connection
      */
     void loopForMessages() throws IOException {
 		MessageRouter router = RouterService.getMessageRouter();
+        final boolean isSupernodeClientConnection=isSupernodeClientConnection();
         while (true) {
             Message m=null;
             try {
@@ -968,11 +969,41 @@ public class ManagedConnection extends Connection
                 continue;
             }
 
+            //special handling for proxying - note that for
+            //non-SupernodeClientConnections a good compiler will ignore this
+            //code
+            if (isSupernodeClientConnection && 
+                (m instanceof QueryRequest)) m = tryToProxy((QueryRequest) m);
+            if (isSupernodeClientConnection &&
+                (m instanceof QueryStatusResponse)) ; // clean up tables
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
         }
     }
     
+    private QueryRequest tryToProxy(QueryRequest query) {
+        // we must have the following qualifications:
+        // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
+        // 2) Leaf must support Leaf Guidance
+        // 3) Query must not be OOB.
+        // 4) We must be able to OOB and have great success rate.
+        if (remoteHostSupportsLeafGuidance() < 1) return query;
+        if (query.desiresOutOfBandReplies()) return query;
+        if (!RouterService.isOOBCapable() || 
+            !OutOfBandThroughputStat.isSuccessRateGreat()) return query;
+
+        // everything is a go - we need to do the following:
+        // 1) mutate the GUID of the query - you should maintain every param of
+        // the query except the new GUID and the OOB minspeed flag
+        // 2) set up mappings between the old guid and the new guid.
+        // after that, everything is set.  all you need to do is map the guids
+        // of the replies back to the original guid.  also, see if a you get a
+        // QueryStatus message that shuts off the query so you can clean up
+        // your tables.
+        // THIS IS SOME MAJOR HOKERY-POKERY!!!
+        return query;
+    }
+
     /**
      * Utility method for checking whether or not this message is considered
      * spam.
