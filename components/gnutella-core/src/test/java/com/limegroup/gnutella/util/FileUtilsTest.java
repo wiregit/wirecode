@@ -54,4 +54,22 @@ public final class FileUtilsTest extends BaseTestCase {
                 FileUtils.getFileExtension(nullFiles[i]));
         };
     }
+    
+    /**
+     * Tests the setWriteable method.
+     */
+    public void testSetWriteable() throws Exception {
+        File testFile = File.createTempFile("test", "file");
+        testFile.deleteOnExit();
+        testFile.setReadOnly();
+        assertTrue(!testFile.canWrite());
+        FileUtils.setWriteable(testFile);
+        assertTrue(testFile.canWrite());
+        File testDir = new File("directory");
+        testDir.mkdir();
+        testDir.setReadOnly();
+        assertTrue(!testDir.canWrite());
+        FileUtils.setWriteable(testDir);
+        assertTrue(testDir.canWrite());
+    }
 }
