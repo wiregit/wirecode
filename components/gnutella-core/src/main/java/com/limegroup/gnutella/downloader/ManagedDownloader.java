@@ -703,14 +703,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     public synchronized void startDownload() {
         Assert.that(dloaderManagerThread == null, "already started" );
-        
         dloaderManagerThread = new ManagedThread(new Runnable() {
             public void run() {
                 try {
                     receivedNewSources = false;
                     performDownload();
                     completeDownload();
-                } catch(Throwable t) {
+                } catch(Throwable t) {t.printStackTrace();
                     // if any unhandled errors occurred, remove this
                     // download completely and message the error.
                     ManagedDownloader.this.stop();
@@ -724,7 +723,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }, "ManagedDownload");
         dloaderManagerThread.setDaemon(true);
-        dloaderManagerThread.start();       
+        dloaderManagerThread.start(); 
     }
     
     /**
@@ -1774,33 +1773,33 @@ public class ManagedDownloader implements Downloader, Serializable {
             setState(GAVE_UP);
             return;
         }
-        
-        int status = GAVE_UP;
-        try {
-            
-            status = initializeDownload();
-            
-            if ( status == CONNECTING) {
+
+        // 1. initialize the download
+        int status = initializeDownload();
+        if ( status == CONNECTING) {
+            try {
+                //2. Do the download
                 try {
-                    //2. Do the download
                     status = fireDownloadWorkers();//Exception may be thrown here.
-                } catch (InterruptedException e) { }
+                }finally {
+                    //3. Close the file controlled by commonOutFile.
+                    commonOutFile.close();
+                }
                 
-                if (status == -1) //InterruptedException from fireDownloadWorkers
-                    throw new InterruptedException();
-                
-                if (status != COMPLETE) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("stopping early with status: " + status);
-                    
-                } else 
+                // 4. if all went well, save
+                if (status == COMPLETE) 
                     status = verifyAndSave();
-            }
-            
-        } catch (InterruptedException e) {
+                else if(LOG.isDebugEnabled())
+                    LOG.debug("stopping early with status: " + status); 
+                
+            } catch (InterruptedException e) {
+                
             // nothing should interrupt except for a stop
             if (!stopped && !paused)
                 ErrorService.error(e);
+            else
+                status = GAVE_UP;
+            }
         }
         
         if(LOG.isDebugEnabled())
@@ -1884,6 +1883,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         try {
             initializeFilesAndFolders(firstDesc);
+            initializeVerifyingFile();
         } catch (IOException iox) {
             return DISK_PROBLEM;
         }
@@ -1899,8 +1899,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     private int verifyAndSave() throws InterruptedException{
-//      Close the file controlled by commonOutFile.
-        commonOutFile.close();
         
         // if the user hasn't answered our corrupt question yet, wait.
         waitForCorruptResponse();
@@ -2006,9 +2004,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             ErrorService.error(e, "incomplete: " + incompleteFile);
             throw e;
         }
-
-        if(!initializeVerifyingFile())
-            throw new IOException();
     }
     
     /**
@@ -2190,7 +2185,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Initializes the verifiying file.
      */
-    private synchronized boolean initializeVerifyingFile() {
+    private synchronized void initializeVerifyingFile() throws IOException {
         Assert.that(incompleteFile != null);
 
         int completedSize = 
@@ -2204,7 +2199,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         if(commonOutFile==null) {//no entry in incompleteFM
-            LOG.trace("creating a verifying file");
             commonOutFile = new VerifyingFile(completedSize);
             try {
                 //we must add an entry in IncompleteFileManager
@@ -2212,7 +2206,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                            addEntry(incompleteFile,commonOutFile);
             } catch(IOException ioe) {
                 ErrorService.error(ioe, "file: " + incompleteFile);
-                return false;
+                throw ioe;
             }
         }
         //need to get the VerifyingFile ready to write
@@ -2221,10 +2215,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch(IOException e) {
             if(!IOUtils.handleException(e, "DOWNLOAD"))
                 ErrorService.error(e);
-            return false;
+            throw e;
         }
-        
-        return true;
     }
     
     /**
@@ -2754,10 +2746,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             else
                 return URN.getHashingProgress(incompleteFile);
         } else {
-            if ( commonOutFile == null )
+            if ( commonOutFile == null ){ 
                 return 0;
-            else
-                return commonOutFile.getBlockSize();
+            }else {
+                return commonOutFile.getBlockSize();}
         }
     }
      

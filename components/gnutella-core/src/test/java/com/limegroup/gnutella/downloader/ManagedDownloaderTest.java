@@ -87,7 +87,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     
     /**
      * tests if firewalled altlocs are added to the file descriptor
-     * but not sent to uploaders.
+     * but not sent to uploaders.  (i.e. the informMesh method)
      */
     public void testFirewalledLocs() throws Exception {
     	
@@ -133,9 +133,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	RemoteFileDesc other = new RemoteFileDesc(newRFD("incomplete"),e);
     	AltlocDownloaderStub fakeDownloader = new AltlocDownloaderStub(other);
     	
-    	List l = new LinkedList();l.add(fakeDownloader);
-    	
     	TestManagedDownloader md = new TestManagedDownloader(new RemoteFileDesc[]{rfd});
+        AltLocWorkerStub worker = new AltLocWorkerStub(md,rfd,fakeDownloader);
+        
+        List l = new LinkedList();l.add(worker);
     	md.initialize(manager,newFMStub,callback);
     	md.setDloaders(l);
     	md.setSHA1(partialURN);
@@ -253,7 +254,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		ManagedDownloader md = 
 			new ManagedDownloader(new RemoteFileDesc[]{rf1}, 
 								  new IncompleteFileManager(), null);
-        PrivilegedAccessor.setValue(md, "files",
+        PrivilegedAccessor.setValue(md, "rfds",
                                     list);
         
 		Method m = PrivilegedAccessor.getMethod(ManagedDownloader.class, "removeBest",
@@ -341,7 +342,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         RemoteFileDesc rfd=newRFD("some file.txt");
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
-        VerifyingFile vf=new VerifyingFile(false, 1024);
+        VerifyingFile vf=new VerifyingFile(1024);
         vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
 
@@ -374,11 +375,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         }
 
         //Check same state as before serialization.
-        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        try {Thread.sleep(500);}catch(InterruptedException ignroed){}
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
-        try { Thread.sleep(1000); } catch (InterruptedException e) { }
+        Thread.sleep(1000); 
     }
 
     /** Tests that the progress is not 0% when resume button is hit while
@@ -489,7 +490,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
          */
         public void setDloaders(List l) {
         	try {
-        		PrivilegedAccessor.setValue(this,"dloaders",l);
+        		PrivilegedAccessor.setValue(this,"_activeWorkers",l);
         	}catch(Exception e) {
         		ErrorService.error(e);
         	}
@@ -536,5 +537,17 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		public boolean wantsFalts(){
 			return _stubFalts;
 		}
+    }
+    
+    static class AltLocWorkerStub extends DownloadWorkerStub {
+        AltlocDownloaderStub alt;
+        public AltLocWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd, AltlocDownloaderStub alt) {
+            super(manager,rfd);
+            this.alt = alt;
+        }
+        
+        public HTTPDownloader getDownloader() {
+            return alt;
+        }
     }
 }

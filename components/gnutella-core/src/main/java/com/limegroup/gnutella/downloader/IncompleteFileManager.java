@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -38,6 +41,8 @@ public class IncompleteFileManager implements Serializable {
     static final String SEPARATOR="-";
     /** The prefix added to preview copies of incomplete files. */
     public static final String PREVIEW_PREFIX="Preview-";
+    
+    private static final Log LOG = LogFactory.getLog(IncompleteFileManager.class);
     
     /*
      * IMPORTANT SERIALIZATION NOTE
@@ -300,7 +305,11 @@ public class IncompleteFileManager implements Serializable {
         stream.defaultReadObject();
         //Convert blocks from interval lists to VerifyingFile.
         //See serialization note above.
+        if (LOG.isDebugEnabled())
+            LOG.debug("blocks before transform "+blocks);
         blocks=transform(blocks);
+        if (LOG.isDebugEnabled())
+            LOG.debug("blocks after transform "+blocks);
         //Ensure that all information in hashes is canonicalized.  This must be
         //done because older LimeWires did not canonicalize the files before
         //adding them.
@@ -314,7 +323,11 @@ public class IncompleteFileManager implements Serializable {
         //Temporarily change blocks from VerifyingFile to interval lists...
         Map blocksSave=blocks;        
         try {
+            if (LOG.isDebugEnabled())
+                LOG.debug("blocks before invtransform: "+blocks);
             blocks=invTransform();
+            if (LOG.isDebugEnabled())
+                LOG.debug("blocks after invtransform: "+blocks);
             stream.defaultWriteObject();
         } finally {
             //...and restore when done.  See serialization note above.

@@ -145,21 +145,25 @@ public class VerifyingFile {
         partialBlocks.add(interval);
     }
 
+    public void writeBlock(long pos,byte[] data) throws DiskException{
+        writeBlock(pos,data.length,data);
+    }
+    
     /**
      * Writes bytes to the underlying file.
      */
-    public synchronized void writeBlock(long currPos,  byte[] buf)
+    public synchronized void writeBlock(long currPos, int length, byte[] buf)
                                                     throws DiskException{
         
         if (LOG.isDebugEnabled())
-            LOG.debug(" trying to write block at offset "+currPos+" with size "+buf.length);
+            LOG.debug(" trying to write block at offset "+currPos+" with size "+length);
         
         if(buf.length==0) //nothing to write? return
             return;
         if(fos == null)
             throw new DiskException("no file?");
 		
-		Interval intvl = new Interval((int)currPos,(int)currPos+buf.length-1);
+		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
 		
 		/// some stuff to help debugging ///
 		if (!leasedBlocks.contains(intvl)) {
@@ -178,7 +182,7 @@ public class VerifyingFile {
 		
 		////////////
 		
-        saveToDisk(currPos,buf);
+        saveToDisk(currPos,length,buf);
 		
         // 4. if write went ok, add this interval to the partial blocks
         if (LOG.isDebugEnabled())
@@ -193,14 +197,14 @@ public class VerifyingFile {
 	/**
 	 * Saves the given interval to disk. 
 	 */
-	private void saveToDisk(long currPos, byte [] buf) 
+	private void saveToDisk(long currPos, int length, byte [] buf) 
 	throws DiskException{
 		try {
             //2. get the fp back to the position we want to write to.
 			synchronized(fos) {
 				fos.seek(currPos);
 				//3. Write to disk.
-				fos.write(buf, 0, buf.length);
+				fos.write(buf, 0, length);
 			}
         }catch(IOException diskIO) {
             throw new DiskException(diskIO);
@@ -357,6 +361,10 @@ public class VerifyingFile {
     
     public synchronized byte [] toBytes() {
     	return verifiedBlocks.toBytes();
+    }
+    
+    public String toString() {
+        return dumpState();
     }
 
     /**

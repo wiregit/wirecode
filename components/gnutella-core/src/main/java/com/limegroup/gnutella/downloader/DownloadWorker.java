@@ -134,7 +134,12 @@ public class DownloadWorker implements Runnable {
     /**
      * The thread Object of this worker
      */
-    private Thread _myThread;
+    private volatile Thread _myThread;
+    
+    /**
+     * Whether I was interrupted before starting
+     */
+    private volatile boolean _interrupted;
     
     /**
      * Reference to the stealLock all workers for a download will synchronize on
@@ -164,11 +169,17 @@ public class DownloadWorker implements Runnable {
      * @see java.lang.Runnable#run()
      */
     public void run() {
+        
         // first get a handle of our thread object
         _myThread = Thread.currentThread();
         
         boolean iterate = false;
+        
         try {
+            // if I was interrupted before being started, don't do anything.
+            if (_interrupted)
+                throw new InterruptedException();
+            
             iterate = connectAndDownload();
         } catch (Throwable e) {
             iterate = true;
@@ -1250,7 +1261,9 @@ public class DownloadWorker implements Runnable {
      * interrupts this downloader.
      */
     void interrupt() {
-        _myThread.interrupt();
+        _interrupted = true;
+        if (_myThread != null)
+            _myThread.interrupt();
     }
 
     
