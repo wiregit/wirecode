@@ -79,48 +79,6 @@ public class QueryReply extends Message implements Serializable{
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = new byte[0];
 
-	/**
-	 * State where the remote server is not firewalled and has available
-	 * slots.
-	 */
-	private static final int NOT_REMOTELY_FIREWALLED_NOT_BUSY = 3;
-
-	/**
-	 * State where the client is not firewalled, but the remote server is
-	 * firewalled, but has open slots.
-	 */
-	private static final int REMOTELY_FIREWALLED_NOT_BUSY = 2;
-
-	/**
-	 * State where the server is not firewalled, but does not have any
-	 * available upload slots.
-	 */
-	private static final int NOT_REMOTELY_FIREWALLED_BUSY = 1;
-
-	/**
-	 * State where the server is not firewalled, but their busy status
-	 * is unkown.
-	 */
-	private static final int NOT_REMOTELY_FIREWALLED_BUSY_UNKNOWN = 1;
-
-	/**
-	 * State where the client is not firewalled, but the remote server is
-	 * firewalled and does not have open slots.
-	 */
-	private static final int REMOTELY_FIREWALLED_BUSY = 0;
-
-	/**
-	 * State where the client is not firewalled, but the remote server is
-	 * firewalled and does not have open slots.
-	 */
-	private static final int REMOTELY_FIREWALLED_BUSY_UNKNOWN = 0;
-
-	/**
-	 * The one state where there is absolutely no hope, as both the server
-	 * and the client are behind firewalls.
-	 */
-	private static final int REMOTELY_FIREWALLED_LOCALLY_FIREWALLED = -1;
-
 
     /** Creates a new query reply.  The number of responses is responses.length
      *  The Browse Host GGEP extension is ON by default.  
@@ -884,143 +842,69 @@ public class QueryReply extends Message implements Serializable{
 
 
 	/**
-     * This method calculates the quality of service for
-     * a given host.  The calculation should be some function
-     * of whether or not the host is busy, whether or not
-     * the host has ever recieved an incoming connection,
-     * and... what else?
-     *   hops value
-     *   speed?
-     *   firewall? <- not as usefull as incoming/not incoming ?
+     * This method calculates the quality of service for a given host.  The
+     * calculation is some function of whether or not the host is busy, whether
+     * or not the host has ever received an incoming connection, etc.
+     * 
+     * Moved this code from SearchView to here permanently, so we avoid
+     * duplication.  It makes sense from a data point of view, but this method
+     * isn't really essential an essential method.
      *
-     * Moved this code from SearchView to here permanently, so we 
-     * avoid duplication.  It makes sense from a data point of view
-     * to plaster this bad boy here as a public instance method.
-     * SearchView used to have it, it went bye-bye....
-     * @return a int from 0 to 3.  0 is bad quality, 1 is OK quality, 2 is
-     * pretty good quality, 4 is 'quite the bomb' (aka GREAT) quality
+     * @return a int from -1 to 3, with -1 for "never work" and 3 for "always
+     * work".  Typically a return value of N means N+1 stars will be displayed
+     * in the GUI.
      * @param iFirewalled switch to indicate if the client is firewalled or
      * not.  See RouterService.acceptingIncomingConnection or Acceptor for
-     * details.
+     * details.  
      */
 	public int calculateQualityOfService(final boolean iFirewalled) {
-
-		int quality;
+        final int YES=1;
+        final int MAYBE=0;
+        final int NO=-1;
+        
+        /* Is the remote host busy? */
 		int busy;
-		int push;
-
-		Endpoint ep = new Endpoint(this.getIP(), this.getPort());
-
-		// check isPrivate
-
 		try {
-			if (this.getIsBusy())
-				busy = 1;
-			else busy = -1;// 1 == TRUE, -1 == FALSE
+			busy=this.getIsBusy() ? YES : NO;
 		} catch (BadPacketException e) {
-			busy = 0; // UNDECIDED
+			busy = MAYBE;
 		}
 
-		if ( ep.isPrivateAddress() )
-			push = 1;
+        /* Is the remote host firewalled? */
+		int heFirewalled;
+		if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
+			heFirewalled = YES;
 		else {
 			try {
-				if (this.getNeedsPush()) // 1 == TRUE, -1 == FALSE
-					push = 1;
-				else push = -1;
+				heFirewalled=this.getNeedsPush()? YES : NO;
 			} catch (BadPacketException e) {
-				push = 0; // UNDECIDED
+				heFirewalled = MAYBE;
 			}
 		}
 
-		/*********************************************************************
-         *  There are 9 possible QHD states, though only 7 can appear in the
-         *  wild.  Each state is shown below as (needsPush, isBusy), where -1
-         *  means FALSE, 0 means MAYBE, and 1 means TRUE.  A state (p1, b1) is
-         *  considered better than or equal to a state (p2, b2) if p1<=p2 and
-         *  b1<=b2.  This results in the partial order drawn below.
-         *
-		 *  The ranking function is a total order that rates a downloads
-         *  probability of success RIGHT NOW.  It does not account for speed.
-         *  This total order must be consistent with the partial order.  That
-         *  is, if a state s1 is less than s2 in the partial order, the
-         *  ranking for s1 must not be more than s2.
-         *
-         *          (push, busy)
-         *             -1,-1               5 stars (yes, it will work)
-         *               /\
-         *              /  \
-         *             /    \
-         *            /      \
-         *         -1,0       0,-1      
-         *   (early Bear)  (impossible)  
-         *           |  \    / |         
-         *           |   \  /  |         
-         *         -1,1  0,0  1,-1     
-         *           |   /  \  |         
-         *           |  /    \ |         
-         *          0,1       1,0      
-         *    (impossible)   /
-         *             \    /
-         *              \  /
-         *               \/
-         *              1,1               1 star  (no, it won't work)                    
-		 *
-         * The top and bottom points are easy.  What about the middle?  We use 
-         * the following rules:
-         *   a) anything busy is 1 star
-         *   c) a firewalled host is 1 star if I'm firewalled (push can't work)
-         *   b) a non-busy host is 3 stars if I'm not firewalled (push may work)
-         *   d) anything else is two stars
-         * 
-		 *  Note, however, that the returned value is 0-4, not 1-5.
-		 ********************************************************************/
-
-		/*
-        if (push==-1 && busy==-1)
-            return 3;
-        else if (busy==1)                   //Rule a
-            return 0;
-        else if (iFirewalled && push==1)    //Rule b
-            return 0;
-        else if (!iFirewalled && busy==-1)  //Rule c
-            return 2;
-        else
-            return 1;                       //Rule d
-		*/
-
-		if(iFirewalled && push == 1) {           // RULE A
-			// both client and server are firewalled -- impossible case
-			return REMOTELY_FIREWALLED_LOCALLY_FIREWALLED;
-		} else if(push == -1 && busy == -1) {    // RULE B
-			// client firewalled status does not matter since the server
-			// is firewalled
-            return NOT_REMOTELY_FIREWALLED_NOT_BUSY;
-		} else if(push == -1 && busy == 1) {     // RULE C
-			// client firewalled status does not matter since the server
-			// is firewalled
-            return NOT_REMOTELY_FIREWALLED_BUSY;
-		} else if(push == -1 && busy == 0) {     // RULE D
-			// client firewalled status does not matter since the server
-			// is firewalled
-            return NOT_REMOTELY_FIREWALLED_BUSY_UNKNOWN;
-		} else if(push == 1 && busy == -1) {     // RULE E
-			// not locally firewalled is implicit, as otherwise the
-			// download would be the impossible case
-            return REMOTELY_FIREWALLED_NOT_BUSY;
-		} else if(push == 1 && busy == 1) {      // RULE F 
-			// not locally firewalled is implicit, as otherwise the
-			// download would be the impossible case
-            return REMOTELY_FIREWALLED_BUSY;
-		} else if(push == 1 && busy == 0) {      // RULE G
-			// not locally firewalled is implicit, as otherwise the
-			// download would be the impossible case
-            return REMOTELY_FIREWALLED_BUSY_UNKNOWN;
-		} else { 
-			// this should never happen
-			Thread.dumpStack();
-			return 1;
-		}
+        /* In the old days, busy hosts were considered bad.  Now they're ok (but
+         * not great) because of alternate locations.  WARNING: before changing
+         * this method, take a look at isFirewalledQuality! */
+        if (iFirewalled && heFirewalled==YES) {
+            return -1;      //     both firewalled; transfer impossible
+        } else if (busy==MAYBE || heFirewalled==MAYBE) {
+            return 0;       //*    older client; can't tell
+        } else if (busy==YES) {
+            Assert.that(heFirewalled==NO || !iFirewalled);
+            if (heFirewalled==YES)
+                return 0;   //*    busy, push
+            else
+                return 1;   //**   busy, direct connect
+        } else if (busy==NO) {
+            Assert.that(heFirewalled==NO || !iFirewalled);
+            if (heFirewalled==YES)
+                return 2;   //***  not busy, push
+            else
+                return 3;   //**** not busy, direct connect
+        } else {
+            Assert.that(false, "Unexpected case!");
+            return -1;
+        }
 	}
 	
 	/**
@@ -1030,18 +914,9 @@ public class QueryReply extends Message implements Serializable{
 	 *
 	 * @param quality the quality, or score, in question
 	 * @return <tt>true</tt> if the quality denotes that the host is 
-	 *  firewalled, otherwise <tt>false</tt>
-	 */
+	 * firewalled, otherwise <tt>false</tt> */
 	public static boolean isFirewalledQuality(int quality) {
-		if(quality == NOT_REMOTELY_FIREWALLED_NOT_BUSY) {
-			return false;
-		} else if(quality == NOT_REMOTELY_FIREWALLED_BUSY) {
-			return false;
-		} else if(quality == NOT_REMOTELY_FIREWALLED_BUSY_UNKNOWN) {
-			return false;
-		} else {
-			return true;
-		}
+        return quality==0 || quality==2;
 	}
 
 

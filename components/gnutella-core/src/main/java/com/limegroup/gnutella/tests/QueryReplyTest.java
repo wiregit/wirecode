@@ -444,4 +444,38 @@ public final class QueryReplyTest extends TestCase {
             assertTrue(false);
         } catch (BadPacketException e) { }
 	}
+
+    public void testCalculateQualityOfService() {
+        final byte[] addr=new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
+        QueryReply reachableNonBusy=new QueryReply(
+            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
+            false, false,    //!needsPush, !isBusy
+            true, false, false);
+        QueryReply reachableBusy=new QueryReply(
+            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
+            false, true,     //!needsPush, isBusy
+            true, false, false);
+        QueryReply unreachableNonBusy=new QueryReply(
+            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
+            true, false,     //needsPush, !isBusy
+            true, false, false);
+        QueryReply unreachableBusy=new QueryReply(
+            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16],
+            true, true,      //needsPush, isBusy
+            true, false, false);
+        QueryReply oldStyle=new QueryReply(
+            new byte[16], (byte)5, 6346, addr, 0l, new Response[0], new byte[16]);
+        
+        //Remember that a return value of N corresponds to N+1 stars
+        assertEquals(3,  reachableNonBusy.calculateQualityOfService(false));
+        assertEquals(3,  reachableNonBusy.calculateQualityOfService(true));
+        assertEquals(1,  reachableBusy.calculateQualityOfService(false));
+        assertEquals(1,  reachableBusy.calculateQualityOfService(true));
+        assertEquals(2,  unreachableNonBusy.calculateQualityOfService(false));
+        assertEquals(-1, unreachableNonBusy.calculateQualityOfService(true));
+        assertEquals(0,  unreachableBusy.calculateQualityOfService(false));
+        assertEquals(-1, unreachableBusy.calculateQualityOfService(true));        
+        assertEquals(0,  oldStyle.calculateQualityOfService(false));
+        assertEquals(0,  oldStyle.calculateQualityOfService(true));
+    }
 }
