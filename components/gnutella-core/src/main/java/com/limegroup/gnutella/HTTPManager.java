@@ -20,6 +20,9 @@ public class HTTPManager {
     private ByteReader _br;
     private int _uploadBegin;
     private int _uploadEnd;
+	
+	private boolean readFromBrowser = false;
+	
 
     /**
      * @requires If isPush, "GIV " was just read from s.
@@ -92,6 +95,8 @@ public class HTTPManager {
 
             else /* isPush */ {
                 //Expect  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
+
+
                 String next=_br.readLine();
                 if (next==null || (! next.equals(""))) {
                     throw new IOException();
@@ -132,14 +137,23 @@ public class HTTPManager {
         }
     }
 
+	public void setReadFromBrowser(boolean b) {
+		readFromBrowser = b;
+	}
+	
+
     public void readRange() throws IOException {
         String str = " ";
 
         _uploadBegin = 0;
         _uploadEnd = 0;
 
+		System.out.println("in readRange");
+
         while (true) {
             str = _br.readLine();
+
+			System.out.println("mgr - Str: " + str);
 
             if ( (str==null) || (str.equals("")) ){
                 break;
@@ -171,6 +185,15 @@ public class HTTPManager {
                     }
                 }
             }
+
+			// check for netscape and internet explorer
+			if (str.indexOf("Mozilla") != -1) {
+				// if we are not supposed to read from them
+				// throw an exception
+				if (!readFromBrowser)
+					throw new IOException("Web Browser");
+			}
+
         }
     }
 
