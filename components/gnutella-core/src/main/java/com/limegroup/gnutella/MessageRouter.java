@@ -2572,6 +2572,65 @@ public abstract class MessageRouter {
             }
         }
     }
+    
+    /**
+     * sends out a vendor message to all UP connections containing our best candidates.
+     * ExtendedEndpoints are created from open ManagedConnection objects; the field dailyUptime in this 
+     * case means the lifetime of the connection.
+     */
+    private class CandidateAdvertiser implements Runnable {
+    	public void run() {
+    		//first update our best leaf, i.e. find the one with the longest uptime
+    		//that is also not firewalled, isGoodLeaf, etc.
+    		Candidate best = electBest();
+    		
+    		//if we don't have a candidate, do not advertise.
+    		if (best==null)
+    			return;
+    		
+    		BestCandidates.update(electBest());
+    		
+    		//create a vendor message with the new info
+    		BestCandidatesVendorMessage bcvm = new BestCandidatesVendorMessage(
+    				BestCandidates.getCandidates());
+    		
+    		//broadcast!
+    		//note: I didn't find a method which simply takes a Message and broadcasts it 
+    		//to all ultrapeer connections.  All existing methods take specific kinds of messages
+    		//as arguments, which makes extending the functionality somewhat tedious
+    		
+    		for (Iterator iter = _manager.getInitializedConnections().iterator();iter.hasNext();) {
+    			ManagedConnection current = (ManagedConnection)iter.next();
+    			if (current.isGoodUltrapeer() &&
+    					current.isLimeWire())
+						//add more criteria if necessary
+    				current.send(bcvm); 
+    		}
+    	}
+    	
+    	/**
+    	 * elects the best ultrapeer candidate amongst our leaf connections
+    	 */
+    	private Candidate electBest() {
+    		TreeSet possibleCandidates = new TreeSet(Candidate.priorityComparator());
+    		
+    		for (Iterator iter = _manager.getInitializedClientConnections().iterator();
+    			iter.hasNext();){
+    			ManagedConnection current = (ManagedConnection)iter.next();
+    			if (current.isGoodLeaf() &&
+    					current.isStable() &&
+						current.isLimeWire() &&
+						current.isGUESSCapable()) //unsolicited udp
+    				//add more criteria here
+    				possibleCandidates.add(new Candidate(current));
+    		}
+    		
+    		if (possibleCandidates.size()==0) 
+    			return null;
+    		
+    		return (Candidate) possibleCandidates.last();
+    	}
+    }
 
 
     /** This is run to clear out the registry of connect back attempts...
