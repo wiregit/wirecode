@@ -8,12 +8,12 @@
 
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.gui.Utilities;
+//import com.limegroup.gnutella.gui.Utilities;
 
 public class NativeLauncher {
 	static {
 		// load the native libary only if we're on Windows
-		if(Utilities.isWindows()) {
+		if(CommonUtils.isWindows()) {
 			try {
 				System.loadLibrary("NativeLauncher");
 			} catch(UnsatisfiedLinkError ule) {}

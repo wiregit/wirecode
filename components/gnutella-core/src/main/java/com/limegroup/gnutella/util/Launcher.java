@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
-import com.limegroup.gnutella.gui.Utilities;
+//import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may 
@@ -71,7 +71,7 @@ public class Launcher {
 	/** initialization block that determines the operating 
 	 *  system and loads the necessary runtime data. */
 	static {		
-		if(Utilities.isMacClassic()) {
+		if(CommonUtils.isMacClassic()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
 	}
@@ -92,20 +92,20 @@ public class Launcher {
 		   !path.endsWith(".bat") &&
 		   !path.endsWith(".sys") &&
 		   !path.endsWith(".com")) {
-			if(Utilities.isWindows()) {
+			if(CommonUtils.isWindows()) {
 				return launchFileWindows(path);
 			}	   
-			else if(Utilities.isMacClassic()) {
+			else if(CommonUtils.isMacClassic()) {
 				launchFileMacClassic(path);
 			}
-			else if(Utilities.isUnix()) {
+			else if(CommonUtils.isUnix()) {
 				launchFileUnix(path);
 			}
 		}
 		else {
-			String msg = "LimeWire will not launch the specified "+
-			"file for security reasons.";
-			Utilities.showError(msg);
+			//String msg = "LimeWire will not launch the specified "+
+			//"file for security reasons.";
+			//Utilities.showError(msg);
 		}
 		return -1;
 	}
