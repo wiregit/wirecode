@@ -33,8 +33,13 @@ import java.io.IOException;
  * Note that this test uses notifications -- there are no timeouts on a
  * successful test run.
  */
-public class ResponseTest
+public class MessageRouterTest
 {
+    /**
+     * This class is never instantiated.  It's just a holder for a main method.
+     */
+    private MessageRouterTest() {}
+
     /**
      * The IP address to use in various messages.
      */
