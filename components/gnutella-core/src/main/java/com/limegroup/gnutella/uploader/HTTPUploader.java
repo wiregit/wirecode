@@ -13,6 +13,12 @@ import java.net.*;
 
 public class HTTPUploader implements Runnable {
 
+
+    private int NOT_CONNECTED = 0;
+    private int CONNECTED = 1;
+    private int ERROR = 2;
+    private int COMPLETE = 3;
+
     private int BUFFSIZE = 1024;
 
     private OutputStream _ostream;
@@ -33,8 +39,13 @@ public class HTTPUploader implements Runnable {
 
     private boolean _okay;
 
+    private int _state;
+
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
+
+
+	_state = NOT_CONNECTED;
 
 	_okay = false;
 
@@ -56,11 +67,13 @@ public class HTTPUploader implements Runnable {
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
 	    doNoSuchFile();              /* send an HTTP error */
+	    _state = ERROR;
 	    return;
 	}
 	/* check to see if the index */
 	if (! (_fdesc._name.trim()).equals(_filename.trim())) { /* matches the name */
   	    doNoSuchFile();
+	    _state = ERROR;
     	    return;
     	}
 	
@@ -73,6 +86,7 @@ public class HTTPUploader implements Runnable {
 	    _ostream = _socket.getOutputStream();
 	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
 
@@ -85,16 +99,21 @@ public class HTTPUploader implements Runnable {
 	}
 
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
 
 	_okay = true;
+
+	_state = CONNECTED;
 
     }
 	
     
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
+
+	_state = NOT_CONNECTED;
 
 	_okay = false;
 
@@ -111,12 +130,14 @@ public class HTTPUploader implements Runnable {
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
 	    doNoSuchFile();              /* send an HTTP error */
+	    _state = ERROR;
 	    return;
 	}
 
 	/* check to see if the index */
 	if (! (_fdesc._name.trim()).equals(_filename.trim())) { /* matches the name */
 	    doNoSuchFile();
+	    _state = ERROR;
 	    return;
   	}
 	
@@ -131,6 +152,7 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
 
@@ -141,23 +163,30 @@ public class HTTPUploader implements Runnable {
 	    conn = url.openConnection();
 	}
 	catch (java.net.MalformedURLException e) {
+	    _state = ERROR;
 	    return;
 	}
 	catch (IOException e) {
+	    _state = ERROR;
 	    return;
 	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
 	try {
 	    _ostream = conn.getOutputStream();
 	}
 	catch (IOException e) {
+	    _state = ERROR;
 	    return;
 	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
+
+	_state = CONNECTED;
 
 	_okay = true;
 			
@@ -216,6 +245,7 @@ public class HTTPUploader implements Runnable {
 	}
 
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
     }
@@ -244,7 +274,7 @@ public class HTTPUploader implements Runnable {
 		c = _fis.read(buf);
 	    }
 	    catch (IOException e) {
-
+		_state = ERROR;
 	    }
 	    if (c == -1) 
 		break;
@@ -252,6 +282,7 @@ public class HTTPUploader implements Runnable {
 		_ostream.write(buf, 0, c);
 	    }
 	    catch (IOException e) {
+		_state = ERROR;
 	    }
 	    _amountRead += c;
 
@@ -260,7 +291,10 @@ public class HTTPUploader implements Runnable {
 	    _ostream.close();
 	}
 	catch (IOException e) {
+	    _state = ERROR;
 	}
+
+	_state = COMPLETE;
 
 
     }
@@ -284,6 +318,7 @@ public class HTTPUploader implements Runnable {
 	}
 	
 	catch (Exception e) {
+	    _state = ERROR;
 	}
     }
     
@@ -299,6 +334,10 @@ public class HTTPUploader implements Runnable {
     private void uploadError(String str)
     {
 
+    }
+
+    public int getState() {
+	return _state;
     }
 
 }
