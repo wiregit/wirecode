@@ -131,8 +131,10 @@ public class ConnectionManager {
 
 	/**
 	 * A list of listeners that listen for this node becoming an UltraPeer.
+	 * LOCKING: synchronize on ULTRAPEER_LISTENERS before modifying in
+	 * or iterating
 	 */
-	private List _ultraPeerListeners = new ArrayList();
+	private final List ULTRAPEER_LISTENERS = new ArrayList();
 
 
     /**
@@ -787,10 +789,12 @@ public class ConnectionManager {
 	 * listeners of the change.
 	 */
 	private void fireUltraPeerConnectionEstablished() {
-		Iterator iter = _ultraPeerListeners.iterator();
-		while(iter.hasNext()) {
-			UltraPeerListener listener = (UltraPeerListener)iter.next();
-			listener.ultraPeerConnectionEstablished();
+		synchronized(ULTRAPEER_LISTENERS) {
+			Iterator iter = ULTRAPEER_LISTENERS.iterator();
+			while(iter.hasNext()) {
+				UltraPeerListener listener = (UltraPeerListener)iter.next();
+				listener.ultraPeerConnectionEstablished();
+			}
 		}
 	}
 
@@ -801,7 +805,9 @@ public class ConnectionManager {
 	 * @param listener the <tt>UltraPeerListener</tt> to add
 	 */
 	public void addUltraPeerListener(UltraPeerListener listener) {
-		_ultraPeerListeners.add(listener);
+		synchronized(ULTRAPEER_LISTENERS) {
+			ULTRAPEER_LISTENERS.add(listener);
+		}
 	}
 
     /**
