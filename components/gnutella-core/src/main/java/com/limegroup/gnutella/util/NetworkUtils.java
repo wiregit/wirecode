@@ -91,7 +91,7 @@ public final class NetworkUtils {
      * @param offset the offset into the IP array to convert
      * @return the IP address as a dotted-quad string
      */
-    static final String ip2string(byte[] ip, int offset) {
+    public static final String ip2string(byte[] ip, int offset) {
         // xxx.xxx.xxx.xxx => 15 chars
         StringBuffer sbuf = new StringBuffer(16);   
         sbuf.append(ByteOrder.ubyte2int(ip[offset]));
