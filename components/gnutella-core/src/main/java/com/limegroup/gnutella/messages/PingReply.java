@@ -847,12 +847,12 @@ public class PingReply extends Message implements Serializable, IpPort {
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
-                byte[] data = null;
+                String data = null;
                 try {
-                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
+                    data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
                 } catch(BadGGEPPropertyException bad) {}
                 if(data != null)
-                    packedCaches = unzipAndListCaches(data);
+                    packedCaches = listCaches(data);
             }
         }
         
@@ -1228,56 +1228,39 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Unzips data about UDP host caches & returns a list of'm.
      */
-    private List unzipAndListCaches(byte[] data) {
-        GZIPInputStream in = null;
-        try {
-            in = new GZIPInputStream(new ByteArrayInputStream(data));
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[64];
-            while(true) {
-                int read = in.read(buf, 0, buf.length);
-                if(read == -1)
-                    break;
-                out.write(buf, 0, read);
-            }
-            String allCaches = new String(out.toByteArray(), "UTF-8");
-            List theCaches = new LinkedList();
-            StringTokenizer st = new StringTokenizer(allCaches, "\n");
-            while(st.hasMoreTokens()) {
-                String next = st.nextToken();
-                // look for possible features and ignore'm
-                int i = next.indexOf("&");
-                // basically ignore.
-                if(i != -1)
-                    next = next.substring(0, i);
-                i = next.indexOf(":");
-                int port = 6346;
-                if(i == 0 || i == next.length()) {
-                    continue;
-                } else if(i != -1) {
-                    try {
-                        port = Integer.valueOf(next.substring(i+1)).intValue();
-                    } catch(NumberFormatException invalid) {
-                        continue;
-                    }
-                } else {
-                    i = next.length(); // setup for i-1 below.
-                }
-                if(!NetworkUtils.isValidPort(port))
-                    continue;
-                String host = next.substring(0, i);
+    private List listCaches(String allCaches) {
+        List theCaches = new LinkedList();
+        StringTokenizer st = new StringTokenizer(allCaches, "\n");
+        while(st.hasMoreTokens()) {
+            String next = st.nextToken();
+            // look for possible features and ignore'm
+            int i = next.indexOf("&");
+            // basically ignore.
+            if(i != -1)
+                next = next.substring(0, i);
+            i = next.indexOf(":");
+            int port = 6346;
+            if(i == 0 || i == next.length()) {
+                continue;
+            } else if(i != -1) {
                 try {
-                    theCaches.add(new IpPortImpl(host, port));
-                } catch(UnknownHostException invalid) {
+                    port = Integer.valueOf(next.substring(i+1)).intValue();
+                } catch(NumberFormatException invalid) {
                     continue;
                 }
+            } else {
+                i = next.length(); // setup for i-1 below.
             }
-            return Collections.unmodifiableList(theCaches);
-        } catch(IOException ioe) {
-        } finally {
-            IOUtils.close(in);
+            if(!NetworkUtils.isValidPort(port))
+                continue;
+            String host = next.substring(0, i);
+            try {
+                theCaches.add(new IpPortImpl(host, port));
+            } catch(UnknownHostException invalid) {
+                continue;
+            }
         }
-        return Collections.EMPTY_LIST;
+        return Collections.unmodifiableList(theCaches);
     }
 
 

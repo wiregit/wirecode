@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.LinkedList;
 
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.util.IOUtils;
 
 import junit.framework.Test;
 
@@ -35,7 +36,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             GGEP two = new GGEP(oStream.toByteArray(), 0, null);
             assertTrue(two.hasKey("Susheel"));
             byte[] shouldBeNulls = two.getBytes("Susheel");
-            assertTrue(Arrays.equals(nulls, shouldBeNulls));
+            assertEquals(nulls, shouldBeNulls);
             assertEquals(someNulls, two.getString("Daswani"));
             assertEquals(10, two.getInt("Number"));
         }
@@ -82,8 +83,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         GGEP temp = new GGEP(true);
         temp.put("A", new byte[] { (byte)3 });
         assertTrue(temp.hasKey("A"));
-        assertTrue(Arrays.equals(temp.getBytes("A"),
-                                 new byte[] { (byte)3 }));
+        assertEquals(temp.getBytes("A"), new byte[] { (byte)3 });
     }
 
     public void testIntKeys() throws Exception {
@@ -91,8 +91,8 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         temp.put("A", 527);
         assertTrue(temp.hasKey("A"));
         assertEquals(527, temp.getInt("A"));
-        assertTrue(Arrays.equals(temp.getBytes("A"),
-                                 new byte[] { (byte)0x0F, (byte)0x02 }));
+        assertEquals(temp.getBytes("A"),
+                     new byte[] { (byte)0x0F, (byte)0x02 });
     }
     
     public void testLongKeys() throws Exception {
@@ -154,7 +154,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         GGEP reconstruct = new GGEP(ggepBytes, 0, null);
         for (int i = 0; i < keys.length; i++) {
             String currValue = reconstruct.getString(keys[i]);
-            assertTrue(currValue.equals(bigBoy.toString()));
+            assertEquals(currValue, bigBoy.toString());
         }
     }
 
@@ -192,12 +192,12 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         GGEP b2=new GGEP(true);
         b2.put("K1");
 
-        assertTrue(a1.equals(a1));
-        assertTrue(a1.equals(a2));
-        assertTrue(b1.equals(b1));
-        assertTrue(b1.equals(b2));
-        assertTrue(! a1.equals(b1));
-        assertTrue(! b1.equals(a1));
+        assertEquals(a1, a1);
+        assertEquals(a1, a2);
+        assertEquals(b1, b1);
+        assertEquals(b1, b2);
+        assertNotEquals(a1, b1);
+        assertNotEquals(b1, a1);
         
         GGEP c1=new GGEP(true);
         c1.put("K1", "V1");
@@ -206,12 +206,104 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         c2.put("K1", "V1");
         c2.put("K2", "V2");        
 
-        assertTrue(c1.equals(c1));
-        assertTrue(c1.equals(c2));
-        assertTrue(! a1.equals(c1));
-        assertTrue(! b1.equals(c1));
+        assertEquals(c1, c1);
+        assertEquals(c1, c2);
+        assertNotEquals(a1, c1);
+        assertNotEquals(b1, c1);
     }
-
+    
+    public void testPutCompressed() throws Exception {
+        byte[] middleValue = "middle".getBytes();
+        GGEP g = new GGEP();
+        g.put("1", "begin");
+        g.putCompressed("2", middleValue);
+        g.put("3", "end");
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        g.write(out);
+        
+        byte[] bytes = out.toByteArray();
+        int i = 0;
+        assertEquals(GGEP.GGEP_PREFIX_MAGIC_NUMBER, bytes[i++]);
+        assertEquals( (byte)0x01, bytes[i++] );
+        assertEquals( (byte)'1',  bytes[i++] );
+        assertEquals( (byte)0x45, bytes[i++] );
+        assertEquals( (byte)'b',  bytes[i++] );
+        assertEquals( (byte)'e',  bytes[i++] );
+        assertEquals( (byte)'g',  bytes[i++] );
+        assertEquals( (byte)'i',  bytes[i++] );
+        assertEquals( (byte)'n',  bytes[i++] );
+        assertEquals( (byte)0x21, bytes[i++] );
+        assertEquals( (byte)'2',  bytes[i++] );
+        
+        // now, we have to figure out how many bytes are used up in the
+        // compressed version of 'middle'.
+        byte[] compressed = IOUtils.deflate(middleValue);
+        assertNotEquals(middleValue, compressed);
+        int length = compressed.length;
+        if((length & 0x3F000) != 0)
+            assertEquals( (byte)0x80 | ((length & 0x3F000) >> 12), bytes[i++]);
+        if((length & 0xFC0) != 0)
+            assertEquals( (byte)0x80 | ((length & 0xFC0) >> 6), bytes[i++]);
+        assertEquals((byte)0x40 | (length & 0x3F), bytes[i++]);
+        
+        for(int j = 0; j < compressed.length; j++)
+            assertEquals(compressed[j], bytes[i++]);
+        // end of checking for the compressed data.
+            
+        assertEquals( (byte)0x81, bytes[i++] );
+        assertEquals( (byte)'3',  bytes[i++] );
+        assertEquals( (byte)0x43, bytes[i++] );
+        assertEquals( (byte)'e',  bytes[i++] );
+        assertEquals( (byte)'n',  bytes[i++] );
+        assertEquals( (byte)'d',  bytes[i++] );
+    }
+    
+    public void testReadCompressedAndWritesCompressed() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(GGEP.GGEP_PREFIX_MAGIC_NUMBER);
+        out.write(0x01);
+        out.write('1');
+        out.write(0x45);
+        out.write('b');
+        out.write('e');
+        out.write('g');
+        out.write('i');
+        out.write('n');
+        out.write(0x21);
+        out.write('2');
+        byte[] middleValue = "the middle value, compressed.".getBytes();
+        byte[] compressed = IOUtils.deflate(middleValue);
+        assertNotEquals(middleValue, compressed);
+        int length = compressed.length;
+        if((length & 0x3F000) != 0)
+            out.write( (byte)0x80 | ((length & 0x3F000) >> 12));
+        if((length & 0xFC0) != 0)
+            out.write( (byte)0x80 | ((length & 0xFC0) >> 6));
+        out.write((byte)0x40 | (length & 0x3F));
+        out.write(compressed);
+        out.write(0x81);
+        out.write('3');
+        out.write(0x43);
+        out.write('e');
+        out.write('n');
+        out.write('d');
+        
+        int offsets[] = new int[1];
+        byte[] bytes = out.toByteArray();
+        GGEP[] ggeps = GGEP.read(bytes, 0, offsets);
+        assertEquals(bytes.length, offsets[0]);
+        assertEquals(1, ggeps.length);
+        assertEquals(3, ggeps[0].getHeaders().size());
+        assertEquals("begin", ggeps[0].getString("1"));
+        assertEquals(new String(middleValue), ggeps[0].getString("2"));
+        assertEquals("end", ggeps[0].getString("3"));
+        
+        // Make sure that also write the data as compressed, if it was read that way.
+        ByteArrayOutputStream toWrite = new ByteArrayOutputStream();
+        ggeps[0].write(toWrite);
+        assertEquals(bytes, toWrite.toByteArray());
+    }
 
     public void testStaticReadMethod() throws Exception {
         byte[] bytes = new byte[24];
@@ -240,8 +332,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
         GGEP[] temp = GGEP.read(bytes,0);
-        assertTrue("read() test - WRONG SIZE: " + temp.length, 
-                          temp.length == 1);
+        assertEquals(1, temp.length);
                           
         bytes = new byte[32];
         bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
@@ -277,14 +368,9 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[30] = (byte)'N';
         bytes[31] = (byte)'I';        
         temp = GGEP.read(bytes,0);
-        assertTrue("read() test - WRONG SIZE: " + temp.length, 
-                          temp.length == 2);
-        assertTrue("read() test - first ggep wrong size: " +
-                          temp[0].getHeaders().size(),
-                          temp[0].getHeaders().size() == 1);
-        assertTrue("read() test - second ggep wrong size: " +
-                          temp[1].getHeaders().size(),
-                          temp[1].getHeaders().size() == 2);
+        assertEquals(2, temp.length);
+        assertEquals(1, temp[0].getHeaders().size());
+        assertEquals(2, temp[1].getHeaders().size());
 
         bytes = new byte[32];
         bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
@@ -406,9 +492,8 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         assertTrue("Test 5 - NO SUSH!", headers.contains("SUSHEEL"));
         Object shouldNotBeNull = temp.getString("SUSHEEL");
-        assertTrue("Test 5 - NULL!", shouldNotBeNull != null);
-        assertTrue("Test 5 - endOffset off: " + endOffset[0], 
-                          endOffset[0] == 24);
+        assertNotNull(shouldNotBeNull);
+        assertEquals(24, endOffset[0]);
     }
 
 
@@ -442,11 +527,12 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[22] = (byte)'N';
         bytes[23] = (byte)'I';        
 
-        bytes[8] = (byte)0xA5; // compressed
-        GGEP temp = new GGEP(bytes,0,null);
-        Set headers = temp.getHeaders();
-        assertTrue("Test 6 - COMPRESSED!", 
-                          !headers.contains("SUSHEEL"));
+        bytes[8] = (byte)0xA5; // compressed, without valid data.
+        GGEP temp;
+        try {
+            temp = new GGEP(bytes,0,null);
+            fail("shoulda failed");
+        } catch(BadGGEPBlockException bgbe) {}
 
 
         bytes[8] = (byte)0x80; // 0 len header
@@ -505,10 +591,9 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         ByteArrayOutputStream oStream = new ByteArrayOutputStream();
         one.write(oStream);
         two = new GGEP(oStream.toByteArray(), 0, null);
-                
-        assertTrue("Different headers",
-                   one.getHeaders().equals(two.getHeaders()));
-        assertTrue("One is not Two!!", one.equals(two));
+
+        assertEquals(one.getHeaders(), two.getHeaders());
+        assertEquals(one, two);
     }
 
 

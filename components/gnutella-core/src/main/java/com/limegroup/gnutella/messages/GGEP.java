@@ -12,8 +12,8 @@ import java.util.TreeMap;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.COBSUtil;
-import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.util.IOUtils;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -24,7 +24,7 @@ import com.limegroup.gnutella.util.NameValue;
  * null bytes.  The order of the extensions is immaterial.  Extensions supported
  * by LimeWire have keys specified in this class (prefixed by GGEP_HEADER...)  
  */
-public class GGEP extends Object {
+public class GGEP {
 
     /** The extension header (key) for Browse Host. */
     public static final String GGEP_HEADER_BROWSE_HOST = "BH";
@@ -87,8 +87,7 @@ public class GGEP extends Object {
      * strings.  But strings are conventient for keys since they define hashCode
      * and equals.
      */
-    private final Map /*String->byte[]*/ _props = 
-        new TreeMap(Comparators.stringComparator());
+    private final Map /*String->byte[]*/ _props = new TreeMap();
 
     /**
      * False iff this should COBS encode values to prevent null bytes.
@@ -154,8 +153,7 @@ public class GGEP extends Object {
             // bit order is interpreted as 76543210
             try {
                 sanityCheck(messageBytes[currIndex]);
-            }
-            catch (ArrayIndexOutOfBoundsException malformedInput) {
+            } catch (ArrayIndexOutOfBoundsException malformedInput) {
                 throw new BadGGEPBlockException();
             }
             onLastExtension = isLastExtension(messageBytes[currIndex]);
@@ -169,8 +167,7 @@ public class GGEP extends Object {
             try {
                 extensionHeader = new String(messageBytes, currIndex,
                                              headerLen);
-            }
-            catch (StringIndexOutOfBoundsException inputIsMalformed) {
+            } catch (StringIndexOutOfBoundsException inputIsMalformed) {
                 throw new BadGGEPBlockException();
             }
 
@@ -190,25 +187,25 @@ public class GGEP extends Object {
                 try {
                     System.arraycopy(messageBytes, currIndex, data, 0, 
                                      dataLength);
-                }
-                catch (ArrayIndexOutOfBoundsException malformedInput) {
+                } catch (ArrayIndexOutOfBoundsException malformedInput) {
                     throw new BadGGEPBlockException();
                 }
 
-                // cobs decode this bad boy....
                 if (encoded) {
                     try {
                         data = COBSUtil.cobsDecode(data);
-                    }
-                    catch (IOException badCobsEncoding) {
+                    } catch (IOException badCobsEncoding) {
                         throw new BadGGEPBlockException("Bad COBS Encoding");
                     }
                 }
 
-                // LimeWire currently does not support flate/default, so
-                // anything in this format is just disregarded...
-                if (compressed)
-                    continue;
+                if (compressed) {
+                    try {
+                        data = IOUtils.inflate(data);
+                    } catch(IOException badData) {
+                        throw new BadGGEPBlockException("Bad compressed data");
+                    }
+                }
 
                 extensionData = data;
 
@@ -216,7 +213,10 @@ public class GGEP extends Object {
             }
 
             // ok, everything checks out, just slap it in the hashmapper...
-            _props.put(extensionHeader, extensionData);
+            if(compressed)
+                _props.put(extensionHeader, new NeedsCompression(extensionData));
+            else
+                _props.put(extensionHeader, extensionData);
 
         }
         if ((endOffset != null) && (endOffset.length > 0))
@@ -306,17 +306,23 @@ public class GGEP extends Object {
             // for each header, write the GGEP header and data
             while (headers.hasNext()) {
                 String currHeader = (String) headers.next();
-                byte[] currData   = (byte[]) _props.get(currHeader);
+                byte[] currData   = get(currHeader);
                 int dataLen = 0;
                 boolean shouldEncode = shouldCOBSEncode(currData);
+                boolean shouldCompress = shouldCompress(currHeader);
                 if (currData != null) {
-                    if (shouldEncode)
+                    if (shouldCompress) {
+                        currData = IOUtils.deflate(currData);
+                        if(currData.length > MAX_VALUE_SIZE_IN_BYTES)
+                            throw new IllegalArgumentException("value for ["
+                              + currHeader + "] too large after compression");
+                    } if (shouldEncode)
                         currData = COBSUtil.cobsEncode(currData);
                     dataLen = currData.length;
                 }
                 writeHeader(currHeader, dataLen, 
                             !headers.hasNext(), out,
-                            shouldEncode);
+                            shouldEncode, shouldCompress);
                 if (dataLen > 0) 
                     out.write(currData);
             }
@@ -329,11 +335,14 @@ public class GGEP extends Object {
         // in the data...
         return (!notNeedCOBS && containsNull(data));
     }
-
+    
+    private final boolean shouldCompress(String header) {
+        return (_props.get(header) instanceof NeedsCompression);
+    }
     
     private void writeHeader(String header, final int dataLen, 
                              boolean isLast, OutputStream out, 
-                             boolean shouldEncode) 
+                             boolean isEncoded, boolean isCompressed) 
         throws IOException {
 
         // 1. WRITE THE HEADER FLAGS
@@ -344,12 +353,12 @@ public class GGEP extends Object {
 
         int flags = 0x00;
         if (isLast)
-            flags = flags | 0x80;
-        if (shouldEncode)
-            flags = flags | 0x40;
-        if (shouldCompress)
-            flags = flags | 0x20;
-        flags = flags | header.getBytes().length;
+            flags |= 0x80;
+        if (isEncoded)
+            flags |= 0x40;
+        if (isCompressed)
+            flags |= 0x20;
+        flags |= header.getBytes().length;
         out.write(flags);
 
         // 2. WRITE THE HEADER
@@ -433,7 +442,8 @@ public class GGEP extends Object {
     ////////////////////////// Key/Value Mutators and Accessors ////////////////
     
     /**
-     * Adds all the specified key/value pairs,
+     * Adds all the specified key/value pairs.
+     * TODO: Allow a value to be compressed.
      */
     public void putAll(List /* of NameValue */ fields) throws IllegalArgumentException {
         for(Iterator i = fields.iterator(); i.hasNext(); ) {
@@ -453,7 +463,16 @@ public class GGEP extends Object {
             else
                 throw new IllegalArgumentException("Unknown value: " + value);
         }
-    }             
+    }
+    
+    /**
+     * Adds a key with data that should be compressed.
+     */
+    public void putCompressed(String key, byte[] value) throws IllegalArgumentException {
+        validateKey(key);
+        //validateValue(value); // done when writing.  TODO: do here?
+        _props.put(key, new NeedsCompression(value));
+    }
 
     /** 
      * Adds a key with raw byte value.
@@ -533,7 +552,7 @@ public class GGEP extends Object {
      *  is always thrown for extensions with no data; use hasKey instead.
      */
     public byte[] getBytes(String key) throws BadGGEPPropertyException {
-        byte[] ret=(byte[])_props.get(key);
+        byte[] ret= get(key);
         if (ret==null)
             throw new BadGGEPPropertyException();
         return ret;
@@ -602,6 +621,17 @@ public class GGEP extends Object {
     public Set getHeaders() {
         return _props.keySet();
     }
+    
+    /**
+     * Gets the byte[] data from props.
+     */
+    public byte[] get(String key) {
+        Object value = _props.get(key);
+        if(value instanceof NeedsCompression)
+            return ((NeedsCompression)value).data;
+        else
+            return (byte[])value;
+    }
 
     private void validateKey(String key) throws IllegalArgumentException {
         byte[] bytes=key.getBytes();
@@ -627,7 +657,6 @@ public class GGEP extends Object {
         }
         return false;
     }
-
     
     //////////////////////////////// Miscellany ///////////////////////////////
 
@@ -649,8 +678,8 @@ public class GGEP extends Object {
     private boolean subset(GGEP other) {
         for (Iterator iter=this._props.keySet().iterator(); iter.hasNext(); ) {
             String key=(String)iter.next();
-            byte[] v1=(byte[])this._props.get(key);
-            byte[] v2=(byte[])other._props.get(key);
+            byte[] v1= this.get(key);
+            byte[] v2= other.get(key);
             //Remember that v1 and v2 can be null.
             if ((v1==null) != (v2==null))
                 return false;
@@ -666,6 +695,17 @@ public class GGEP extends Object {
 			hashCode = 37 * _props.hashCode();
 		}
 		return hashCode;
+	}
+	
+	/**
+	 * Marker class that wraps a byte[] value, if that value
+	 * is going to require compression upon write.
+	 */
+	private static class NeedsCompression {
+	    final byte[] data;
+	    NeedsCompression(byte[] data) {
+	        this.data = data;
+	    }
 	}
 }
 

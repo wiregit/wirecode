@@ -613,7 +613,7 @@ public class QueryRouteTable {
         //then attempt to compress it.  Reasons it is not safe include
         //the outgoing stream already being compressed.
         if( allowCompression ) {
-            byte[] patchCompressed=compress(data);
+            byte[] patchCompressed = IOUtils.deflate(data);
             if (patchCompressed.length<data.length) {
                 //...Hooray!  Compression was efficient.
                 data=patchCompressed;
@@ -639,23 +639,6 @@ public class QueryRouteTable {
 
 
     ///////////////// Helper Functions for Codec ////////////////////////
-
-    /** Returns a GZIP'ed version of data. */
-    private byte[] compress(byte[] data) {
-        OutputStream dos = null;
-        try {
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            dos = new DeflaterOutputStream(baos);
-            dos.write(data, 0, data.length);
-            dos.close();                      //flushes bytes
-            return baos.toByteArray();
-        } catch (IOException e) {
-            ErrorService.error(e);
-            return null;
-        } finally {
-            IOUtils.close(dos);
-        }
-    }
 
     /** Returns the uncompressed version of the given defalted bytes, using
      *  any dictionaries in uncompressor.  Throws IOException if the data is

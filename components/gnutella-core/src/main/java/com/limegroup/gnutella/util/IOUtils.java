@@ -4,8 +4,13 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import com.limegroup.gnutella.MessageService;
+import com.limegroup.gnutella.ErrorService;
 
 /**
  * Provides utility I/O methods, used by multiple classes
@@ -132,6 +137,46 @@ public class IOUtils {
             } catch(IOException ignored) {}
         }
     }
+    
+    /**
+     * Deflates (compresses) the data.
+     */
+    public static byte[] deflate(byte[] data) {
+        OutputStream dos = null;
+        try {
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            dos = new DeflaterOutputStream(baos);
+            dos.write(data, 0, data.length);
+            dos.close();                      //flushes bytes
+            return baos.toByteArray();
+        } catch(IOException impossible) {
+            ErrorService.error(impossible);
+            return null;
+        } finally {
+            IOUtils.close(dos);
+        }
+    }
+    
+    /**
+     * Inflates (uncompresses) the data.
+     */
+    public static byte[] inflate(byte[] data) throws IOException {
+        InputStream in = null;
+        try {
+            in = new InflaterInputStream(new ByteArrayInputStream(data));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[64];
+            while(true) {
+                int read = in.read(buf, 0, buf.length);
+                if(read == -1)
+                    break;
+                out.write(buf, 0, read);
+            }
+            return out.toByteArray();
+        } finally {
+            IOUtils.close(in);
+        }
+    }    
 
 
 }
