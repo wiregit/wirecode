@@ -229,8 +229,8 @@ public void run()
 
             int n = requests.length;
 
-            //send replies 20 times before consulting for new queries
-            for(int j=0; j < 200; j++)
+            //send replies 1000 times before consulting for new queries
+            for(int j=0; j < 1000; j++)
             {
                 for (int i=0; i < n ;i++) 
                 {    
