@@ -445,7 +445,6 @@ public class ManagedConnection
     }
 
     private void addDropped(int dropped) {
-        FlowControlStat.ALL_SENT_MESSAGES_DROPPED.addData(dropped);
         _numSentMessagesDropped+=dropped;
     }
  
