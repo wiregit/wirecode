@@ -8,9 +8,12 @@ package com.limegroup.gnutella;
 public final class ErrorService {	
 
 	/**
-	 * The <tt>ErrorCallback</tt> instance that callbacks are sent to.
+	 * The <tt>ErrorCallback</tt> instance that callbacks are sent to.  
+	 * We use the <tt>ShellErrorCallback</tt> as the default in case
+	 * no other callback is set.
 	 */
-	private static ErrorCallback _errorCallback;
+	private static ErrorCallback _errorCallback = 
+		new ShellErrorCallback();
 
 	/**
 	 * Private constructor to ensure this class cannot be instantiated.
@@ -30,5 +33,22 @@ public final class ErrorService {
 	 */
 	public static void error(Throwable problem) {
 		_errorCallback.error(problem);
+	}
+
+
+	/**
+	 * Helper class that simply outputs the stack trace to the shell.
+	 */
+	private static class ShellErrorCallback implements ErrorCallback {
+		
+		/**
+		 * Implements the <tt>ErrorCallback</tt> interface.  Simply prints
+		 * out the stack trace for the given <tt>Throwable</tt>.
+		 *
+		 * @param t the <tt>Throwable</tt> to display
+		 */
+		public void error(Throwable t) {
+			t.printStackTrace();
+		}
 	}
 }
