@@ -23,9 +23,10 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	private ReceivedMessageStatHandler(Statistic numberStat, 
 									   Statistic byteStat,
 									   Statistic limeNumberStat,
-									   Statistic limeByteStat) {
+									   Statistic limeByteStat,
+									   String fileName) {
 		super(numberStat, byteStat, limeNumberStat, limeByteStat,
-			  BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH);
+			  BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH, fileName);
 	}
 	
 
@@ -36,8 +37,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 		new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REQUESTS, 
 									   ReceivedMessageStatBytes.UDP_PING_REQUESTS,
 									   LimeReceivedMessageStat.UDP_PING_REQUESTS,
-									   LimeReceivedMessageStatBytes.UDP_PING_REQUESTS);
-
+									   LimeReceivedMessageStatBytes.UDP_PING_REQUESTS,
+									   "RECEIVED_UDP_PING_REQUESTS");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pings received over TCP.
 	 */
@@ -45,8 +46,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 		new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REQUESTS,
 									   ReceivedMessageStatBytes.TCP_PING_REQUESTS,
 									   LimeReceivedMessageStat.TCP_PING_REQUESTS,
-									   LimeReceivedMessageStatBytes.TCP_PING_REQUESTS);
-
+									   LimeReceivedMessageStatBytes.TCP_PING_REQUESTS,
+									   "RECEIVED_TCP_PING_REQUESTS");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over UDP.
 	 */
@@ -54,8 +55,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REPLIES, 
 									   ReceivedMessageStatBytes.UDP_PING_REPLIES,
 									   LimeReceivedMessageStat.UDP_PING_REPLIES, 
-									   LimeReceivedMessageStatBytes.UDP_PING_REPLIES);
-
+									   LimeReceivedMessageStatBytes.UDP_PING_REPLIES,
+									   "RECEIVED_UDP_PING_REPLIES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over TCP.
 	 */
@@ -63,8 +64,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REPLIES, 
 									   ReceivedMessageStatBytes.TCP_PING_REPLIES,
 									   LimeReceivedMessageStat.TCP_PING_REPLIES, 
-									   LimeReceivedMessageStatBytes.TCP_PING_REPLIES);
-
+									   LimeReceivedMessageStatBytes.TCP_PING_REPLIES,
+									   "RECEIVED_TCP_PING_REPLIES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
 	 * over UDP.
@@ -73,8 +74,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REQUESTS, 
 									   ReceivedMessageStatBytes.UDP_QUERY_REQUESTS,
 									   LimeReceivedMessageStat.UDP_QUERY_REQUESTS, 
-									   LimeReceivedMessageStatBytes.UDP_QUERY_REQUESTS);
-
+									   LimeReceivedMessageStatBytes.UDP_QUERY_REQUESTS,
+									   "RECEIVED_UDP_QUERY_REQUESTS");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
 	 * over TCP.
@@ -83,8 +84,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REQUESTS, 
 									   ReceivedMessageStatBytes.TCP_QUERY_REQUESTS,
 									   LimeReceivedMessageStat.TCP_QUERY_REQUESTS, 
-									   LimeReceivedMessageStatBytes.TCP_QUERY_REQUESTS);
-
+									   LimeReceivedMessageStatBytes.TCP_QUERY_REQUESTS,
+									   "RECEIVED_TCP_QUERY_REQUESTS");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
 	 * UDP.
@@ -93,8 +94,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REPLIES, 
 									   ReceivedMessageStatBytes.UDP_QUERY_REPLIES,
 									   LimeReceivedMessageStat.UDP_QUERY_REPLIES, 
-									   LimeReceivedMessageStatBytes.UDP_QUERY_REPLIES);
-
+									   LimeReceivedMessageStatBytes.UDP_QUERY_REPLIES,
+									   "RECEIVED_UDP_QUERY_REPLIES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
 	 * TCP.
@@ -103,8 +104,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REPLIES, 
 									   ReceivedMessageStatBytes.TCP_QUERY_REPLIES,
 									   LimeReceivedMessageStat.TCP_QUERY_REPLIES, 
-									   LimeReceivedMessageStatBytes.TCP_QUERY_REPLIES);
-
+									   LimeReceivedMessageStatBytes.TCP_QUERY_REPLIES,
+									   "RECEIVED_TCP_QUERY_REPLIES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
 	 * UDP.
@@ -113,8 +114,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PUSH_REQUESTS, 
 									   ReceivedMessageStatBytes.UDP_PUSH_REQUESTS,
 									   LimeReceivedMessageStat.UDP_PUSH_REQUESTS, 
-									   LimeReceivedMessageStatBytes.UDP_PUSH_REQUESTS);
-
+									   LimeReceivedMessageStatBytes.UDP_PUSH_REQUESTS,
+									   "RECEIVED_UDP_PUSH_REQUESTS");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
 	 * TCP.
@@ -123,8 +124,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PUSH_REQUESTS, 
 									   ReceivedMessageStatBytes.TCP_PUSH_REQUESTS,
 									   LimeReceivedMessageStat.TCP_PUSH_REQUESTS, 
-									   LimeReceivedMessageStatBytes.TCP_PUSH_REQUESTS);
-
+									   LimeReceivedMessageStatBytes.TCP_PUSH_REQUESTS,
+									   "RECEIVED_TCP_PUSH_REQUESTS");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
 	 * over UDP.
@@ -133,8 +134,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
 									   ReceivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
 									   LimeReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
-									   LimeReceivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES);
-
+									   LimeReceivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
+									   "RECEIVED_UDP_ROUTE_TABLE_MESSAGES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
 	 * over TCP.
@@ -143,8 +144,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
 									   ReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
 									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.UDP_FILTERED_MESSAGES);
-
+									   LimeReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
+									   "RECEIVED_TCP_ROUTE_TABLE_MESSAGES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
 	 * over UDP.
@@ -153,8 +154,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
 									   ReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
 									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.UDP_FILTERED_MESSAGES);
-
+									   LimeReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
+									   "RECEIVED_UDP_FILTERED_MESSAGES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
 	 * over TCP.
@@ -163,8 +164,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_FILTERED_MESSAGES,
 									   ReceivedMessageStatBytes.TCP_FILTERED_MESSAGES,
 									   LimeReceivedMessageStat.TCP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.TCP_FILTERED_MESSAGES);
-
+									   LimeReceivedMessageStatBytes.TCP_FILTERED_MESSAGES,
+									   "RECEIVED_TCP_FILTERED_MESSAGES");
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
@@ -174,8 +175,8 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_DUPLICATE_QUERIES,
 									   ReceivedMessageStatBytes.UDP_DUPLICATE_QUERIES,
 									   LimeReceivedMessageStat.UDP_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStatBytes.UDP_DUPLICATE_QUERIES);
-
+									   LimeReceivedMessageStatBytes.UDP_DUPLICATE_QUERIES,
+									   "RECEIVED_UDP_DUPLICATE_QUERIES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
 	 * over TCP.
@@ -184,7 +185,7 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_DUPLICATE_QUERIES,
 									   ReceivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
 									   LimeReceivedMessageStat.TCP_DUPLICATE_QUERIES,
-									   LimeReceivedMessageStatBytes.TCP_DUPLICATE_QUERIES);
-
+									   LimeReceivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
+									   "RECEIVED_TCP_DUPLICATE_QUERIES");
 	
 }
