@@ -59,6 +59,13 @@ public final class LicenseFactory {
     }
     
     /**
+     * Persists the cache.
+     */
+    public static void persistCache() {
+        LicenseCache.instance().persistCache();
+    }
+    
+    /**
      * Determines the URI to verify this license at from the license string.
      */
     private static URI getLicenseURI(String license) {

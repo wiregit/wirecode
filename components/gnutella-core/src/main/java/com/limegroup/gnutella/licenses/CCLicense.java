@@ -151,6 +151,7 @@ import org.xml.sax.SAXException;
         try {
             newL = (CCLicense)clone();
             newL.license = license;
+            newL.verified = VERIFIED;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }

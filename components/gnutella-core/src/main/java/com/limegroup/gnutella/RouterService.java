@@ -27,6 +27,7 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -782,6 +783,7 @@ public class RouterService {
             UrnCache.instance().persistCache();
             CreationTimeCache.instance().persistCache();
             TigerTreeCache.instance().persistCache();
+            LicenseFactory.persistCache();
             
         } catch(Throwable t) {
             ErrorService.error(t);
