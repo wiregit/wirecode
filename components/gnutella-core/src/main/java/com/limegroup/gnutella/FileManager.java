@@ -378,31 +378,6 @@ public abstract class FileManager {
 	}
 	
 	/**
-	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
-	 * one <tt>FileDesc</tt>, even though multiple indeces are possible with 
-	 * HUGE v. 0.93.  This may return an instance of a IncompleteFileDesc.
-	 *
-	 * @param urn the urn for the file
-	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
-	 * <tt>null</tt> if no matching <tt>FileDesc</tt> could be found.  the
-     * returned FileDesc may be an instance of IncompleteFileDesc
-	 */
-	public synchronized FileDesc getAnyFileDescForUrn(final URN urn) {
-		IntSet indeces = (IntSet)_urnIndex.get(urn);
-		if(indeces == null) return null;
-
-		IntSet.IntSetIterator iter = indeces.iterator();
-		
-        //Pick the first non-null non-Incomplete FileDesc.
-        FileDesc ret = null;
-		while ( iter.hasNext() && ( ret == null ) ) {
-			int index = iter.next();
-            ret = (FileDesc)_files.get(index);
-		}
-        return ret;
-	}
-	
-	/**
 	 * Returns a list of all shared incomplete file descriptors.
 	 */
 	public synchronized FileDesc[] getIncompleteFileDescriptors() {
