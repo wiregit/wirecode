@@ -44,6 +44,9 @@ public class UDPConnectionProcessor {
     /** Define the size of the data window */
     private static final int  DATA_WINDOW_SIZE        = 20;
 
+    /** The maximum number of times to try and send a data message */
+    private static final int  MAX_SEND_TRIES          = 8;
+
     // Handle to various singleton objects in our architecture
     private UDPService        _udpService;
     private UDPMultiplexor    _multiplexor;
@@ -67,6 +70,10 @@ public class UDPConnectionProcessor {
 
     /** Define the default time to check for an ack to a data message */
     private static final long DEFAULT_RTO_WAIT_TIME   = 400;
+
+    /** Define the maximum time that a connection will stay open without 
+		a message being received */
+    private static final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
 
     // Define Connection states
     //
@@ -176,6 +183,25 @@ public class UDPConnectionProcessor {
 	}
 
 	public void close() throws IOException {
+        // Shutdown keepalive event callbacks
+        if ( _keepaliveEvent  != null ) 
+        	_scheduler.unregister(_keepaliveEvent);
+
+        // Shutdown write event callbacks
+        if ( _writeDataEvent != null ) 
+            _scheduler.unregister(_writeDataEvent);
+
+        // Shutdown ack timeout event callbacks
+        if ( _ackTimeoutEvent != null ) 
+            _scheduler.unregister(_ackTimeoutEvent);
+
+		// Register that the connection is closed
+        _connectionState = FIN_STATE;
+
+		// Tell the receiver that we are shutting down
+    	safeSendFin();
+
+		// TODO: should I wait for ack. Communicate state to streams.
 	}
 
     /**
@@ -320,6 +346,9 @@ public class UDPConnectionProcessor {
 	 *  data window.
      */
 	public int getChunkLimit() {
+		// Just access the windowSpace for chunkLimit for now
+        _chunkLimit = _sendWindow.getWindowSpace();  // TODO: performance?
+
 		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
 
@@ -354,6 +383,7 @@ public class UDPConnectionProcessor {
             send(dm);
 			_sendWindow.addData(_sequenceNumber, dm);  
 
+
 			_sequenceNumber++;
 
             // If Acking check needs to be woken up then do it
@@ -374,7 +404,7 @@ public class UDPConnectionProcessor {
      *  the messages sequenceNumber, receive window start and 
      *  receive window space.
      */
-    private void safeSendAck(UDPConnectionMessage msg) {
+    private synchronized void safeSendAck(UDPConnectionMessage msg) {
         // Ack the message
         AckMessage ack = null;
         try {
@@ -387,6 +417,24 @@ public class UDPConnectionProcessor {
             send(ack);
         } catch (BadPacketException bpe) {
             // This would not be good.   TODO: ????
+            ErrorService.error(bpe);
+        } catch(IllegalArgumentException iae) {
+            // Report an error since this shouldn't ever happen
+            ErrorService.error(iae);
+        }
+    }
+
+    /**
+     *  Build and send a fin message with default error handling.
+     */
+    private synchronized void safeSendFin() {
+        // Ack the message
+        FinMessage fin = null;
+        try {
+            fin = new FinMessage(_theirConnectionID, _sequenceNumber);
+            send(fin);
+        } catch (BadPacketException bpe) {
+            // This would not be good.   
             ErrorService.error(bpe);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
@@ -471,6 +519,13 @@ System.out.println("Soft resend data:"+ start+ " rto:"+rto+
                 if ( drec == null ) break;
                 if ( drec.acks > 0 ) continue;
 
+				// If too many sends then abort connection
+				if ( drec.sends > MAX_SEND_TRIES+1 ) {
+System.out.println("Tried too many send on:"+drec.msg.getSequenceNumber());
+					closeAndCleanup();
+					return;
+				}
+
                 int currentWait = (int)(currTime - drec.sentTime);
 
                 // If it looks like we waited too long then speculatively resend
@@ -485,6 +540,17 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
         } 
         scheduleAckIfNeeded();
     }
+
+    /**
+     *  Close and cleanup by unregistering this connection and sending a Fin.
+     */
+    private synchronized void closeAndCleanup() {
+		try {
+			close();
+		} catch (IOException ioe) {
+			ErrorService.error(ioe);
+		}
+	}
 
 
     // ------------------  Connection Handling Logic -------------------
@@ -541,6 +607,9 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
      */
     public synchronized void handleMessage(UDPConnectionMessage msg) {
 
+		// Record when the last message was received
+		_lastReceivedTime = System.currentTimeMillis();
+
         if (msg instanceof SynMessage) {
             // First Message from other host - get his connectionID.
             SynMessage smsg        = (SynMessage) msg;
@@ -583,7 +652,8 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
         } else if (msg instanceof KeepAliveMessage) {
             KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
             int              seqNo  = kmsg.getSequenceNumber();
-            int              wStart = kmsg.getWindowStart();
+			// TODO: make use of this as a pseudo ack
+            int              wStart = kmsg.getWindowStart(); 
     		_receiverWindowSpace    = kmsg.getWindowSpace();
         } else if (msg instanceof FinMessage) {
             // Stop sending data
@@ -591,6 +661,9 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
 
             // Ack the Fin message
             safeSendAck(msg);
+
+			// If a fin message is received then close connection
+			closeAndCleanup();
         }
 
         // TODO: fill in
@@ -601,20 +674,28 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
      *  and schedule next write time.
      */
     public synchronized void writeData() {
-        long time = 0l;
-
 		// If the input has not been started then wait again
 		if ( _input == null ) {
 	        scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
 			return;
 		}
 
-		Chunk chunk = _input.getChunk();
-		sendData(chunk);
-		//time = _sendWindow.getWaitTime();
+		// If there is room to send something then send data if available
+		if ( getChunkLimit() > 0 ) {
+			// Get data and send it
+		    Chunk chunk = _input.getChunk();
+			if ( chunk != null )
+		    	sendData(chunk);
+		}
 
-        // TODO: fill in
+		// Compute how long to wait
+		// For now just leave it very simple  
+		// TODO: Simplify experimental algorithm and plug it in
+		long waitTime = (long)_sendWindow.getRTO() / 3l;
+		if (waitTime == 0) 
+			waitTime = DEFAULT_RTO_WAIT_TIME / 3l;
 
+        long time = System.currentTimeMillis() + waitTime;
         scheduleWriteDataEvent(time);
     }
 
@@ -628,6 +709,15 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
+		
+			// Make sure that some messages are received within timeframe
+			if ( isConnected() && 
+				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+				// If no incoming messages for very long time then 
+				// close connection
+				closeAndCleanup();
+				return;
+			}
             
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
@@ -652,6 +742,18 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
         }
 
         public void handleEvent() {
+            long time = System.currentTimeMillis();
+
+			// Make sure that some messages are received within timeframe
+			if ( isConnected() && 
+				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
+				// If no incoming messages for very long time then 
+				// close connection
+				closeAndCleanup();
+				return;
+			}
+
+			// If still connected then handle then try to write some data
             if ( isConnected() ) {
                 writeData();
             }
