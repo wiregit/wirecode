@@ -2557,7 +2557,6 @@ public abstract class MessageRouter {
 
     	//since this message can arrive through udp and is handled by 
     	//single thread, the access is not synchronized
-    	
     	InetAddress host = datagram.getAddress();
     	if (_udpHeadRequests.add(host)) {
     		int port = datagram.getPort();

@@ -330,7 +330,11 @@ public final class AlternateLocationCollection
     	
     	byte [] ret = new byte[6*number];
     	int index=0;
-    	for(Iterator iter = LOCATIONS.iterator();iter.hasNext() && number >0;) {
+	FixedSizeSortedSet clone=null;
+	synchronized(this) {
+		clone = (FixedSizeSortedSet) LOCATIONS.clone();
+	}
+    	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
     		AlternateLocation current = (AlternateLocation)iter.next();
     		byte [] addr = current.getHost().getInetAddress().getAddress();
     		System.arraycopy(addr,0,ret,index,4);
