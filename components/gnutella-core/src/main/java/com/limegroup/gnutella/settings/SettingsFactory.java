@@ -103,7 +103,10 @@ public final class SettingsFactory {
 		// loading limewire.props, but rather something like themes.txt,
 		// we also return, as attempting to load an invalid file will
 		// not do any good.
-		if(!SETTINGS_FILE.isFile()) return;
+		if(!SETTINGS_FILE.isFile()) {
+		    setExpireValue();
+		    return;
+        }
 		FileInputStream fis = null;
         try {
             fis = new FileInputStream(SETTINGS_FILE);
@@ -126,6 +129,13 @@ public final class SettingsFactory {
             set.reload();
         }
         
+        setExpireValue();
+	}
+	
+	/**
+	 * Sets the last expire time if not already set.
+	 */
+	private synchronized void setExpireValue() {
         // Note: this has only an impact on launch time when this
         // method is called by the constructor of this class!
         if (LAST_EXPIRE_TIME == null) {
@@ -137,11 +147,10 @@ public final class SettingsFactory {
                 (LAST_EXPIRE_TIME.getValue() + EXPIRY_INTERVAL <
                         System.currentTimeMillis());
             
-            if (expired) {
+            if (expired)
                 LAST_EXPIRE_TIME.setValue(System.currentTimeMillis());
-            }
         }
-	}
+    }	    
 	
 	/**
 	 * Changes the backing file to use for this factory.
@@ -166,25 +175,21 @@ public final class SettingsFactory {
     
     /**
      * Save setting information to property file
-     * We want to NOT save any properties which are the default value.
-     * To avoid having to manually encode the file, we copy the props,
-     * remove any values which are default, and then save it.
+     * We want to NOT save any properties which are the default value,
+     * as well as any older properties that are no longer in use.
+     * To avoid having to manually encode the file, we create a new
+     * properties object and add to it only the ones we want to save.
      * (Note that we cannot use 'store' since it's only available in 1.2)
-     * Do not call this often, it is expensive.
-     * (Perhaps a cheaper way would be to store all the keys that are removed,
-     *  remove them, save the properties, then re-add them?)
      */
     public synchronized void save() {
-        Properties tempProps = (Properties)PROPS.clone();
+        Properties toSave = new Properties();
 
-        // If any settings are default and don't want to always save,
-        // remove them from the properties that'll be written out.
+        //Add any settings which require saving or aren't default
         Iterator ii = settings.iterator();
         while( ii.hasNext() ) {
             Setting set = (Setting)ii.next();
-            if ( !set.shouldAlwaysSave() && set.isDefault() ) {
-                tempProps.remove( set.getKey() );
-            }
+            if( set.shouldAlwaysSave() || !set.isDefault() )
+                toSave.put( set.getKey(), set.getValueAsString() );
         }
         
         FileOutputStream out = null;
@@ -194,7 +199,7 @@ public final class SettingsFactory {
             if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
             out = new FileOutputStream(SETTINGS_FILE);
             out.write( PRE_HEADER );
-            tempProps.save( out, HEADING);            
+            toSave.save( out, HEADING);            
         } catch(FileNotFoundException e) {
 			ErrorService.error(e);
         } catch (IOException e) {
