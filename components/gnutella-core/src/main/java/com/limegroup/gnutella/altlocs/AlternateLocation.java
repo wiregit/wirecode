@@ -131,14 +131,14 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         //the name of the file it is pointing to.
         if (location.indexOf(";")==-1) {
         	IpPort addr = AlternateLocation.createUrlFromMini(location, urn);
-			return new DirectAltLoc(addr,"", urn);
+			return new DirectAltLoc(addr,"ALT", urn);
         }
         
         //Case 3. Push Alt loc
         //Note: the AlternateLocation object created this way does not know 
         //the name of the file it is pointing to.  
         PushEndpoint pe = new PushEndpoint(location);
-        return new PushAltLoc(pe,urn,"");
+        return new PushAltLoc(pe,urn,"ALT");
     }
 
 	/**
