@@ -117,7 +117,7 @@ public class UpdateManager {
                 //if we get host or port incorrectly, we will not be able to 
                 //establish a connection and just return, its fail safe. 
                 String ip = c.getOrigHost();
-                int port = c.getOrigPort();
+                int port = c.getListeningPort();
                 byte[] data = null;
                 try {
                     URL url = new URL("http",ip,port,UPDATE);
