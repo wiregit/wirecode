@@ -87,6 +87,17 @@ public class GiveStatsVendorMessage extends VendorMessage {
         }
     }
     
+    protected byte getStatControl() {
+        byte[] payload = getPayload();
+        return payload[0];
+    }
+
+    protected byte getStatType() {
+        byte[] payload = getPayload();
+        return payload[1];
+    }
+
+
     /**
      * Overriding abstract method, used for statistoics gathering. 
      */ 

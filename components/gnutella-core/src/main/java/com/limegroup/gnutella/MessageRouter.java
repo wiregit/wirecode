@@ -371,7 +371,7 @@ public abstract class MessageRouter {
         else if (msg instanceof GiveStatsVendorMessage) {
             if(RECORD_STATS)
                 ; //TODO: add the statistics recording code
-            //TODO: Add the code to handle this message
+            handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
         }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -454,6 +454,11 @@ public abstract class MessageRouter {
 			if(RECORD_STATS)
                 ;
             handleReplyNumberMessage((ReplyNumberVendorMessage) msg, datagram);
+        }
+        else if(msg instanceof GiveStatsVendorMessage) {
+            if(RECORD_STATS)
+                ;
+            handleGiveStats((GiveStatsVendorMessage) msg, handler);
         }
     }
     
@@ -1918,6 +1923,24 @@ public abstract class MessageRouter {
         // if none of the above conditions holds true, drop the reply
         return true;
     }
+
+    private void handleGiveStats(final GiveStatsVendorMessage gsm, 
+                                                              ReplyHandler rh) {
+        Thread statHandler = new Thread("Give Stat Handler ") {
+            public void run() {
+                try {
+                    //create the reply -- StatisticVendorMessage
+                    StatisticVendorMessage statVM = 
+                                             new StatisticVendorMessage(gsm);
+                } catch (BadPacketException bpx) {
+                    return;
+                }
+                //TODO1: do the handling here. 
+            }
+        };
+        statHandler.start();
+    }
+
 
     /**
      * The default handler for PushRequests received in
