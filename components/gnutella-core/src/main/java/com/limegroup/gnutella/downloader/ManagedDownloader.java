@@ -644,8 +644,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if (numRequeries <= REQUERY_ATTEMPTS) {
                         final long waitTime = 
                         nextRequeryTime - System.currentTimeMillis();
-                        setState(WAITING_FOR_RESULTS, waitTime);
-                        reqLock.lock(waitTime);
+                        if (waitTime > 0) {
+                            setState(WAITING_FOR_RESULTS, waitTime);
+                            reqLock.lock(waitTime);
+                        }
                     }
                     else {
                         setState(GAVE_UP);
