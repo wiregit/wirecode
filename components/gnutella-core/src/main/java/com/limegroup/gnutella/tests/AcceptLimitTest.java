@@ -225,6 +225,8 @@ public class AcceptLimitTest {
 
         //ignores guidance
         Connection c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); 
+        Assert.that(ConnectionHandshakeHeaders.isFalse(
+            c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED)));
         testPong(c, true);
         testLimit(host, port, OLD_06, 0, REJECT_503);  
         testPong(c, true);
@@ -303,6 +305,7 @@ public class AcceptLimitTest {
 
     private static void testGuidanceI(RouterService rs) {
         System.out.println("-Testing normal leaf guidance");
+
         Assert.that(rs.isSupernode());
         Assert.that(! rs.hasClientSupernodeConnection());
         MiniAcceptor acceptor=new MiniAcceptor(
@@ -310,6 +313,9 @@ public class AcceptLimitTest {
         Thread.yield();
         rs.connectToHostAsynchronously("localhost", 6340);
         Connection in=acceptor.accept();
+        try {
+            Thread.sleep(100); 
+        } catch (InterruptedException e) { }
         Assert.that(! rs.isSupernode());
         Assert.that(rs.hasClientSupernodeConnection()); 
         in.close();
@@ -329,7 +335,7 @@ public class AcceptLimitTest {
         Assert.that(in!=null);
         Assert.that(rs.isSupernode());
         Assert.that(rs.getNumConnections()==1);
-        //Assert.that(rs.hasSupernodeClientConnection());
+        Assert.that(rs.hasSupernodeClientConnection());
 
 
         //Now connect to ultrapeer, ignoring guidance
@@ -340,7 +346,7 @@ public class AcceptLimitTest {
         Connection in2=acceptor.accept();
         Assert.that(in2!=null);
         Assert.that(rs.isSupernode());
-        //Assert.that(rs.hasSupernodeClientConnection());
+        Assert.that(rs.hasSupernodeClientConnection());
         Assert.that(rs.getNumConnections()==2);
 
         in.close();
