@@ -194,6 +194,16 @@ public final class UDPReplyHandler implements ReplyHandler {
         return false;
     }
 
+    /**
+     * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
+     * Since this ping is over UDP, we'll always allow it.
+     *
+     * @return <tt>true</tt> since this ping is received over UDP
+     */
+    public boolean allowNewPings() {
+        return true;
+    }
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

@@ -202,6 +202,16 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public boolean isGoodLeaf() {
         return false;
     }
+
+    /**
+     * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
+     * Since this ping is from us, we'll always allow it.
+     *
+     * @return <tt>true</tt> since this ping is from us
+     */
+    public boolean allowNewPings() {
+        return true;
+    }
 }
 
 
