@@ -140,6 +140,9 @@ public final class FileDescTest extends TestCase {
 		} catch(MalformedURLException e) {
 			e.printStackTrace();
 			fail("unexpected exception: "+e);
+		} catch(IOException e) {
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
 		}
 	}
 
@@ -162,8 +165,8 @@ public final class FileDescTest extends TestCase {
 			fd.addAlternateLocation(loc);
 			fail("should not have accepted location: "+loc+"when our sha1 is: "+sha1);
 		} catch(IllegalArgumentException e) {
-		} catch(MalformedURLException e) {
-		}
+		} catch(IOException e) {
+        }
 	}
 
 	/**
