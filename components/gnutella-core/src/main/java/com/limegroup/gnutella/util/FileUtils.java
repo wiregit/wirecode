@@ -62,31 +62,14 @@ public class FileUtils
 
     /** Same as the f.listFiles() in JDK1.3. */
     public static File[] listFiles(File f) {
-        String[] children=f.list();
-        if (children==null)
-            return null;
-    
-        File[] ret = new File[children.length];
-        for (int i=0; i<children.length; i++) {
-            ret[i] = new File(f, children[i]);
-        }
-    
-        return ret;
+        return f.listFiles();
     }
 
     /**
      * Same as f.listFiles(FileNameFilter) in JDK1.2
      */
     public static File[] listFiles(File f, FilenameFilter filter) {
-        String[] children=f.list(filter);
-        if(children == null)
-            return null;
-        File[] ret = new File[children.length];
-        for (int i=0; i<children.length; i++) {
-            ret[i] = new File(f, children[i]);
-        }
-    
-        return ret;
+        return f.listFiles(filter);
     }
 
     /** 
@@ -95,20 +78,12 @@ public class FileUtils
      *  with the canonical path.
      */
     public static File getParentFile(File f) {
-    	// slight changes to get around getParent bug on Mac
-    	String name=f.getParent();
-    	if(name == null) return null;
-    	try {
-    		return FileUtils.getCanonicalFile(new File(name));
-    	} catch(IOException ioe) {
-    		//if the exception occurs, simply return null
-    		return null;
-    	}
+        return f.getParentFile();
     }
 
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
-        return new File(f.getCanonicalPath());
+        return f.getCanonicalFile();
     }
 
     /**
@@ -212,16 +187,7 @@ public class FileUtils
      * Touches a file, to ensure it exists.
      */
     public static void touch(File f) throws IOException {
-        OutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f);
-        } finally {
-            if(fos != null) {
-                try {
-                    fos.close();
-                } catch(IOException ignored) {}
-            }
-        }
+        f.createNewFile();
     }
     
     public static boolean forceRename(File a, File b) {
