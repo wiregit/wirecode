@@ -19,9 +19,36 @@ public interface Statistic {
 	long getTotal();
 
 	/**
+	 * Accessor for the average number of this statistic type received 
+	 * per recording time period.
+	 *
+	 * @return the average number of this statistic type received 
+	 *  per recording time period
+	 */
+	float getAverage();
+
+	/**
+	 * Accessor for the maximum recorded stat value over all recorded
+	 * time periods.
+	 *
+	 * @return the maximum recorded stat value over all recorded
+	 *  time periods
+	 */
+	int getMax();
+
+	/**
 	 * Increments this statistic by one.
 	 */
 	void incrementStat();
+
+	/**
+	 * Add the specified number to the current recording for this statistic.
+	 * This is the equivalent of calling incrementStat <tt>data</tt> 
+	 * times.
+	 *
+	 * @param data the number to increment the current statistic
+	 */
+	void addData(int data);
 
 	/**
 	 * Accessor for the <tt>Integer</tt> array of all statistics recorded

@@ -2,6 +2,12 @@ package com.limegroup.gnutella.statistics;
 
 import com.sun.java.util.collections.*;
 
+/**
+ * This class provides a default implementation of the <tt>Statistic</tt>
+ * interface, providing such functionality as keeping track of the
+ * history for the given statistic, providing access to the average
+ * value, the maximum value, etc.
+ */
 public abstract class AbstractStatistic implements Statistic {
 
 	/**
@@ -12,7 +18,7 @@ public abstract class AbstractStatistic implements Statistic {
 
 	/**
 	 * List of all statistics stored over intervals for this
-	 * specific <tt>MessageStat</tt> instance.
+	 * specific <tt>Statistic</tt> instance.
 	 */
 	private final List STAT_HISTORY = new LinkedList();
 
@@ -22,7 +28,7 @@ public abstract class AbstractStatistic implements Statistic {
 	protected int _current = 0;
 
 	/**
-	 * Variable for the array of <tt>Integer</tt> instance for the
+	 * Variable for the array of <tt>Integer</tt> instances for the
 	 * history of statistics for this message.  Each 
 	 * <tt>Integer</tt> stores the statistic for one time interval.
 	 */
@@ -35,8 +41,18 @@ public abstract class AbstractStatistic implements Statistic {
 	protected long _total = 0;
 
 	/**
-	 * Constructs a new <tt>MessageStat</tt> instance with 
-	 * 0 for all historical data fields.
+	 * The total number of stats recorded.
+	 */
+	protected int _totalStatsRecorded = 0;
+
+	/**
+	 * The maximum value ever recorded for any time period.
+	 */
+	protected int _max = 0;
+
+	/**
+	 * Constructs a new <tt>Statistic</tt> instance with 0 for all 
+	 * historical data fields.
 	 */
 	protected AbstractStatistic() {
 		for(int i=0; i<HISTORY_LENGTH; i++) {
@@ -45,44 +61,48 @@ public abstract class AbstractStatistic implements Statistic {
 		ALL_STATS.add(this);
 	}
 
-
-	/**
-	 * Accessor for the total number of this statistic type received so 
-	 * far.
-	 *
-	 * @return the total number of this message type received so far
-	 */
+	// inherit doc comment
 	public long getTotal() {
 		return _total;
 	}
 
-	/**
-	 * Increments the statistic by one.
-	 */
-	public void incrementStat() {
-		_current++;
-		_total++;
+	// inherit doc comment
+	public float getAverage() {
+		return _total/_totalStatsRecorded;
 	}
 
-	/**
-	 * Accessor for the array of stored data for this message.
-	 *
-	 * @return an array of <tt>Integer</tt> instances containing
-	 *  the data for the stored history of this message
-	 */
+	// inherit doc comment
+	public int getMax() {
+		return _max;
+	}
+
+	// inherit doc comment
+	public void incrementStat() {
+		_current++;
+		_total++;		
+	}
+
+	// inherit doc comment
+	public void addData(int data) {
+		_current += data;
+		_total += data;
+	}
+		
+	// inherit doc comment
 	public Integer[] getStatHistory() {
 		_statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
 		return _statHistory;
 	}
 
-	/**
-	 * Stores the accumulated statistics for the current time period
-	 * into the accumulated historical data.
-	 */
+	// inherit doc comment
 	public void storeCurrentStat() {
 		STAT_HISTORY.remove(0);
 		STAT_HISTORY.add(new Integer(_current));
+		if(_current > _max) {
+			_max = _current;
+		}
 		_current = 0;
+		_totalStatsRecorded++;
 	}
 
 

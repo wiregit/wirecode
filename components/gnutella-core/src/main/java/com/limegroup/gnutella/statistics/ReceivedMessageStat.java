@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
+import com.limegroup.gnutella.*;
+
 /**
  * This class contains a type-safe enumeration of statistics for
  * individual Gnutella messages that have been received from other 
@@ -16,19 +18,10 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	private ReceivedMessageStat() {}
 
 	/**
-	 * Private class for keeping track of routing error statistics.
+	 * Private class for keeping track of filtered messages.
 	 */
-//  	private static class RouteErrorReceivedMessageStat extends ReceivedMessageStat {
-//  		public void incrementStat() {
-//  			super.incrementStat();
-//  			ALL_ROUTE_ERRORS.incrementStat();
-//  		}
-//  	}
-
-	/**
-	 * Private class for keeping track of routing error statistics.
-	 */
-	private static class FilteredReceivedMessageStat extends ReceivedMessageStat {
+	private static class FilteredReceivedMessageStat 
+		extends ReceivedMessageStat {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_FILTERED_MESSAGES.incrementStat();
@@ -36,7 +29,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	}
 
 	/**
-	 * Private class for UDP messages.
+	 * Private class for keeping track of the number of UDP messages.
 	 */
 	private static class UDPReceivedMessageStat extends ReceivedMessageStat {
 		public void incrementStat() {
@@ -47,13 +40,50 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	}
 
 	/**
-	 * Private class for TCP messages.
+	 * Private class for keeping track of the number of TCP messages.
 	 */
 	private static class TCPReceivedMessageStat extends ReceivedMessageStat {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_MESSAGES.incrementStat();
 			ALL_TCP_MESSAGES.incrementStat();
+		}
+	}
+
+	/**
+	 * Private class for keeping track of filtered messages, in bytes.
+	 */
+	private static class FilteredReceivedMessageStatBytes
+		extends ReceivedMessageStat {
+		public void incrementStat() {
+			super.incrementStat();
+			ALL_FILTERED_MESSAGES.incrementStat();
+		}
+	}
+
+	/**
+	 * Private class for the total number of bytes in received 
+	 * UDP messages.
+	 */
+	private static class UDPReceivedMessageStatBytes 
+		extends ReceivedMessageStat {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			ALL_UDP_MESSAGES.addData(data);
+		}
+	}
+
+	/**
+	 * Private class for the total number of bytes in received 
+	 * TCP messages.
+	 */
+	private static class TCPReceivedMessageStatBytes 
+		extends ReceivedMessageStat {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			ALL_TCP_MESSAGES.addData(data);
 		}
 	}
 
@@ -74,12 +104,6 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	 */
 	public static final Statistic ALL_TCP_MESSAGES =
 		new ReceivedMessageStat();
-
-	/**
-	 * <tt>Statistic</tt> for all route errors.
-	 */
-//  	public static final Statistic ALL_ROUTE_ERRORS =
-//  		new ReceivedMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
@@ -181,22 +205,124 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	public static final Statistic TCP_FILTERED_MESSAGES = 
 	    new FilteredReceivedMessageStat();
 
-	/**
-	 * <tt>Statistic</tt> for Gnutella ping routing errors.
-	 */
-//  	public static final Statistic PING_REPLY_ROUTE_ERRORS = 
-//  	    new RouteErrorReceivedMessageStat();
+
+	////////////// START OF BYTE STATISTICS //////////////////
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella query reply routing errors.
+	 * <tt>Statistic</tt> for all messages received.
 	 */
-//  	public static final Statistic QUERY_REPLY_ROUTE_ERRORS = 
-//  	    new RouteErrorReceivedMessageStat();
+	public static final Statistic ALL_MESSAGES_BYTES =
+		new ReceivedMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella push routing errors.
+	 * <tt>Statistic</tt> for all UPD messages received.
 	 */
-//  	public static final Statistic PUSH_REQUEST_ROUTE_ERRORS = 
-//  	    new RouteErrorReceivedMessageStat();
+	public static final Statistic ALL_UDP_MESSAGES_BYTES =
+		new ReceivedMessageStat();
 
+	/**
+	 * <tt>Statistic</tt> for all TCP messages received.
+	 */
+	public static final Statistic ALL_TCP_MESSAGES_BYTES =
+		new ReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for all filtered messages.
+	 */
+	public static final Statistic ALL_FILTERED_MESSAGES_BYTES =
+		new ReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella pings received over UDP.
+	 */
+	public static final Statistic UDP_PING_REQUESTS_BYTES = 
+	    new UDPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella pings received over TCP.
+	 */
+	public static final Statistic TCP_PING_REQUESTS_BYTES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella pongs received over UDP.
+	 */
+	public static final Statistic UDP_PING_REPLIES_BYTES = 
+	    new UDPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella pongs received over TCP.
+	 */
+	public static final Statistic TCP_PING_REPLIES_BYTES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query requests received over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_QUERY_REQUESTS_BYTES = 
+	    new UDPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query requests received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_QUERY_REQUESTS_BYTES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query replies received over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_QUERY_REPLIES_BYTES = 
+	    new UDPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query replies received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_QUERY_REPLIES_BYTES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella push requests received over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_PUSH_REQUESTS_BYTES = 
+	    new UDPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella push requests received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_PUSH_REQUESTS_BYTES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella route table messages received 
+	 * over UDP.
+	 */
+	public static final Statistic UDP_ROUTE_TABLE_MESSAGES_BYTES = 
+	    new UDPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella route table messages received 
+	 * over TCP.
+	 */
+	public static final Statistic TCP_ROUTE_TABLE_MESSAGES_BYTES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella filtered messages received 
+	 * over UDP.
+	 */
+	public static final Statistic UDP_FILTERED_MESSAGES_BYTES = 
+	    new FilteredReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella filtered messages received 
+	 * over TCP.
+	 */
+	public static final Statistic TCP_FILTERED_MESSAGES_BYTES = 
+	    new FilteredReceivedMessageStatBytes();
 }
