@@ -84,10 +84,9 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
     private static Connection ULTRAPEER_2;
 
     /**
-     * the client guid of the LEAF
+     * the client guid of the LEAF - please set in the first test.
      */
-    private final byte[] clientGUID = GUID.makeGuid();
-    
+    private static byte[] clientGUID = null;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -195,6 +194,9 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
  			drain(ULTRAPEER_1);
  		}
  		if(ULTRAPEER_2.isOpen()) {
+ 			drain(ULTRAPEER_2);
+ 		}
+ 		if((LEAF != null) && LEAF.isOpen()) {
  			drain(ULTRAPEER_2);
  		}
  	}
@@ -354,6 +356,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
     public void testEstablishPushProxy() throws Exception {
         drainAll();
         Message m = null;
+        clientGUID = GUID.makeGuid();
 
         LEAF = new Connection("localhost", PORT, new LeafHeaders("localhost"),
                               new EmptyResponder());
@@ -387,8 +390,79 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         assertTrue(((PushProxyAcknowledgement)m).getListeningPort() == PORT);
 
         // ultrapeer supports push proxy setup A-OK
-
     }
+
+
+    public void testGoodPushProxyRequest() throws Exception {
+        Message m = null;
+        String result = null;
+
+        Socket s = new Socket("localhost", PORT);
+        BufferedReader in = 
+            new BufferedReader(new InputStreamReader(s.getInputStream()));
+        BufferedWriter out = 
+            new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+
+        // first test a GET
+        out.write("GET /gnutella/pushproxy?ServerID=");
+        out.write((new GUID(clientGUID)).toHexString());
+        out.write(" HTTP/1.1\r\n");
+        out.write("X-Node:127.0.0.1:6346\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        // check opcode - less important, but might as well
+        result = in.readLine();
+        assertTrue(result, (result.indexOf("202") > -1));
+        // clear out other responses
+        while (in.readLine() != null) ;
+
+        // leaf should get PushRequest
+        do {
+            m = LEAF.receive(TIMEOUT);
+        } while (!(m instanceof PushRequest)) ;
+        PushRequest pr = (PushRequest) m;
+        assertEquals(0, pr.getIndex());
+        assertEquals(new GUID(clientGUID), new GUID(pr.getClientGUID()));
+        assertEquals(6346, pr.getPort());
+        assertTrue(pr.getIP()[0] == 127);
+        assertTrue(pr.getIP()[1] == 0);
+        assertTrue(pr.getIP()[2] == 0);
+        assertTrue(pr.getIP()[3] == 1);
+
+        // test a HEAD
+        s = new Socket("localhost", PORT);
+        in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+
+        out.write("HEAD /gnutella/pushproxy?ServerID=");
+        out.write((new GUID(clientGUID)).toHexString());
+        out.write(" HTTP/1.1\r\n");
+        out.write("X-Node:10.238.1.87:6350\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        // check opcode - less important, but might as well
+        result = in.readLine();
+        assertTrue(result, (result.indexOf("202") > -1));
+        // clear out other responses
+        while (in.readLine() != null) ;
+        
+        // leaf should get PushRequest
+        do {
+            m = LEAF.receive(TIMEOUT);
+        } while (!(m instanceof PushRequest)) ;
+        pr = (PushRequest) m;
+        assertEquals(0, pr.getIndex());
+        assertEquals(new GUID(clientGUID), new GUID(pr.getClientGUID()));
+        assertEquals(6350, pr.getPort());
+        assertEquals(pr.getIP()[0], 10);
+        assertEquals(ByteOrder.ubyte2int(pr.getIP()[1]), 238);
+        assertEquals(pr.getIP()[2], 1);
+        assertEquals(pr.getIP()[3], 87);
+        
+    }
+    
     
 
 }
