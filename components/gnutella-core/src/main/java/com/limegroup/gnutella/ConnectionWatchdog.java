@@ -70,19 +70,10 @@ public class ConnectionWatchdog implements Runnable {
      * work.
      */
     private List findDuds() {
-        //Take a snapshot of all connections.  Different data
+        //Take a snapshot of all connections, including leaves.  Different data
         //structures could be used here.
         HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            if (! c.isKillable())
-                continue; //e.g., Clip2 reflector
-            snapshot.put(c, new ConnectionState(c));
-        }
-        //iterate over initialized client connections too
-        for (Iterator iter=manager.getInitializedClientConnections().iterator();
-             iter.hasNext(); ) {
+        for (Iterator iter=allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             if (! c.isKillable())
                 continue; //e.g., Clip2 reflector
@@ -97,8 +88,7 @@ public class ConnectionWatchdog implements Runnable {
         //Loop through all connections, trying to find ones that
         //have not made sufficient progress. 
         List ret=new ArrayList();
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext(); ) {
+        for (Iterator iter=allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
             if (! c.isKillable())
                 continue; //e.g., Clip2 reflector
@@ -181,5 +171,17 @@ public class ConnectionWatchdog implements Runnable {
                 killIfStillDud(duds);
             }
         }
+    }
+
+    /** Returns an iterator of all initialized connections in this, including
+     *  leaf connecions. */
+    private Iterator allConnections() {
+        List normal=manager.getInitializedConnections();
+        List leaves=manager.getInitializedClientConnections();
+
+        List buf=new ArrayList(normal.size()+leaves.size());
+        buf.addAll(normal);
+        buf.addAll(leaves);
+        return buf.iterator();
     }
 }
