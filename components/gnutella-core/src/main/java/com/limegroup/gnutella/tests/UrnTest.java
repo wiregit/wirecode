@@ -12,18 +12,19 @@ public class UrnTest extends TestCase {
 	
 	private static final String [] VALID_URNS = {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
-		"urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
+		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:bitprint:XLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+		             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
+		"urn:Bitprint:RLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+		             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
 	};
 	
 	private static final String [] INVALID_URNS = {
@@ -47,6 +48,22 @@ public class UrnTest extends TestCase {
 		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
 	};
 
+	private static final String [] VALID_SHA1_URNS = {
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
+		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
+	};
+
+	private static URN[] urns;
+	private static URN[] sha1Urns;
+
 	public UrnTest(String name) {
 		super(name);
 	}
@@ -60,6 +77,24 @@ public class UrnTest extends TestCase {
 	}
 
 	protected void setUp() {
+		urns = new URN[VALID_URNS.length];
+		for(int i=0; i<urns.length; i++) {
+			try {
+				urns[i] = URNFactory.createUrn(VALID_URNS[i]);
+				assertTrue(urns[i] != null);
+			} catch(IOException e) {
+				assertTrue(false);
+			}		
+		}
+		sha1Urns = new URN[VALID_SHA1_URNS.length];
+		for(int i=0; i<sha1Urns.length; i++) {
+			try {
+				sha1Urns[i] = URNFactory.createUrn(VALID_SHA1_URNS[i]);
+				assertTrue(sha1Urns[i] != null);
+			} catch(IOException e) {
+				assertTrue(false);
+			}		
+		}
 	}
 
 	public void testValidUrns() {
@@ -135,6 +170,53 @@ public class UrnTest extends TestCase {
 
 		for(int i=0; i<invalidURNTypes.length; i++) {
 			assertTrue(!URN.isUrnType(invalidURNTypes[i]));
+		}
+	}
+
+
+	public void testHashCode() {
+		int[] hashCodes = new int[VALID_URNS.length];
+		for(int i=0; i<VALID_URNS.length; i++) {
+			try {
+				hashCodes[i] = URNFactory.createUrn(VALID_URNS[i]).hashCode();
+			} catch(IOException e) {
+				assertTrue(false);
+			}
+		}
+
+		for(int i=0; i<hashCodes.length; i++) {
+			int curCode = hashCodes[i];
+			for(int j=0; j<hashCodes.length; j++) {
+				if(i == j) continue;
+				assertTrue(curCode != hashCodes[j]);
+			}
+		}
+	}
+
+	public void testEquals() {
+		URN curUrn;
+		for(int i=0; i<urns.length; i++) {
+			curUrn = urns[i];
+			assertTrue(curUrn != null);
+			for(int j=0; j<urns.length; j++) {
+				if(i == j) {
+					try {
+						URN tempUrn = URNFactory.createUrn(urns[j].stringValue());
+						assertTrue(curUrn.equals(tempUrn));
+					} catch(IOException e) {
+						assertTrue(false);
+					}
+					continue;
+				}
+				assertTrue(urns[j] != null);
+				assertTrue(!curUrn.equals(urns[j]));
+			}
+		}
+	}
+
+	public void testIsSHA1Method() {
+		for(int i=0; i<sha1Urns.length; i++) {
+			assertTrue(sha1Urns[i].isSHA1());
 		}
 	}
 	
