@@ -206,12 +206,10 @@ public final class UploadManager implements BandwidthTracker {
             //We are going to notify the gui about the new upload, and let it 
             //decide what to do with it - will act depending on it's state
             _callback.addUpload(uploader);
-            try {
-                FileDesc fd = _fileManager.get(uploader.getIndex());
-                fd.incrementAttemptedUploads();
-                _callback.handleSharedFileUpdate(fd.getFile());
-			} catch (IndexOutOfBoundsException e) {
-                // well, the file doesn't exist anyway -- so no need to update
+			FileDesc fd = uploader.getFileDesc();
+			if(fd != null) {
+				fd.incrementAttemptedUploads();
+				_callback.handleSharedFileUpdate(fd.getFile());
 			}
         }
 
@@ -230,18 +228,20 @@ public final class UploadManager implements BandwidthTracker {
         // start doesn't throw an exception.  rather, it
         // handles it internally.  is this the correct
         // way to handle it?
-        startTime=System.currentTimeMillis();
+        startTime=System.currentTimeMillis();		
         uploader.writeResponse();
         // check the state of the upload once the
-        // start method has finished.  if it is complete...
+        // writeResponse method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE) {
             // then set a flag in the upload manager...
             _hadSuccesfulUpload = true;
             // is this necessary? -- i'm pretty sure it is.
             if ( !isBHUploader ) {
-                FileDesc fd = _fileManager.get(uploader.getIndex());
-                fd.incrementCompletedUploads();
-                _callback.handleSharedFileUpdate(fd.getFile());            
+                FileDesc fd = uploader.getFileDesc();
+				if(fd != null) {
+					fd.incrementCompletedUploads();
+					_callback.handleSharedFileUpdate(fd.getFile());            
+				}
             }
         }
 
@@ -734,7 +734,11 @@ public final class UploadManager implements BandwidthTracker {
                 // get the filename, which should be right after
                 // the "/", and before the next " ".
                 int f = requestLine.indexOf( " HTTP/", d );
-                fileName = URLDecoder.decode(requestLine.substring( (d+1), f));
+				try {
+					fileName = URLDecoder.decode(requestLine.substring( (d+1), f));
+				} catch(IllegalArgumentException e) {
+					fileName = requestLine.substring( (d+1), f);
+				}
             }
             //check if the protocol is HTTP1.1. Note that this is not a very 
             //strict check.
