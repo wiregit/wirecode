@@ -1404,29 +1404,33 @@ public class QueryRequest extends Message implements Serializable{
         public static final int IMAGE_MASK  = 0x0020;
         public static final int WIN_PROG_MASK  = 0x0040;
         public static final int LIN_PROG_MASK  = 0x0080;
+
+        private static int extend(byte b) {
+            return ByteOrder.ubyte2int(b);
+        }
        
         public static boolean desiresAudio(byte b) {
-            return (b & AUDIO_MASK) > 0;
+            return (extend(b) & AUDIO_MASK) > 0;
         }
         
         public static boolean desiresVideo(byte b) {
-            return (b & VIDEO_MASK) > 0;
+            return (extend(b) & VIDEO_MASK) > 0;
         }
         
         public static boolean desiresDocuments(byte b) {
-            return (b & DOC_MASK) > 0;
+            return (extend(b) & DOC_MASK) > 0;
         }
         
         public static boolean desiresImages(byte b) {
-            return (b & IMAGE_MASK) > 0;
+            return (extend(b) & IMAGE_MASK) > 0;
         }
         
         public static boolean desiresWindowsPrograms(byte b) {
-            return (b & WIN_PROG_MASK) > 0;
+            return (extend(b) & WIN_PROG_MASK) > 0;
         }
         
         public static boolean desiresLinuxOSXPrograms(byte b) {
-            return (b & LIN_PROG_MASK) > 0;
+            return (extend(b) & LIN_PROG_MASK) > 0;
         }
         
 
