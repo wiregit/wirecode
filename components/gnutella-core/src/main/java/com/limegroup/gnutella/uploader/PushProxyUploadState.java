@@ -39,7 +39,7 @@ public final class PushProxyUploadState implements HTTPMessage {
              !NetworkUtils.isValidPort(hostPort) ||
              !NetworkUtils.isValidAddress(hostAddress)) {
             // send back a 400
-            String str = "HTTP/1.1 400 Push Proxy: Bad Request\r\n";
+            String str = "HTTP/1.1 400 Push Proxy: Bad Request\r\n\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
             debug("PPUS.doUpload(): unknown host.");
@@ -63,7 +63,7 @@ public final class PushProxyUploadState implements HTTPMessage {
         }
         catch (IOException ioe) {
             // send back a 410
-            String str = "HTTP/1.1 410 Push Proxy: Servent not connected\r\n";
+            String str="HTTP/1.1 410 Push Proxy: Servent not connected\r\n\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
             debug("PPUS.doUpload(): push failed.");
