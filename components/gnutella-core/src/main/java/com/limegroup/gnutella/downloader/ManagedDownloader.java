@@ -2583,8 +2583,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(stealLock) {
             RemoteFileDesc rfd = dloader.getRemoteFileDesc();
             boolean updateNeeded = true;
+            boolean shouldAssignWhite = false;
+            synchronized(this) {
+                shouldAssignWhite = !needed.isEmpty();
+            }
             try {
-                if (!needed.isEmpty()) {
+                if (shouldAssignWhite) {
                     assignWhite(dloader,http11);
                 } else {
                     updateNeeded = false;      //1. See comment in finally
@@ -2763,8 +2767,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             if (stopped) {
                 LOG.trace("Stopped in assignAndRequest");
-                updateNeeded(dloader); //give back a white area
                 synchronized(this) {
+                    updateNeeded(dloader); //give back a white area
                     files.add(rfd);
                 }
                 return 0;//throw new InterruptedException();
