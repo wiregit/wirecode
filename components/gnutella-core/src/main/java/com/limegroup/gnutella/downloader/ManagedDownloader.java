@@ -218,7 +218,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  We are getting rid of ALL requeries, so the new value is one such that
      *  a Requery can never happen.
      */
-    private static final int REQUERY_ATTEMPTS = -1;
+    private static final int REQUERY_ATTEMPTS = 1;
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
 
@@ -615,8 +615,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(allFiles[0].getSHA1Urn() == null) {
 			return QueryRequest.createQuery(extractQueryString());
 		}
-		return QueryRequest.createQuery(allFiles[0].getSHA1Urn(),
-                                        extractQueryString());
+		return QueryRequest.createQuery(extractQueryString());
     }
 
     /** We need to offer this to subclasses to override because they might
@@ -645,6 +644,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     protected boolean pauseForRequery(int numRequeries, 
                                       boolean deserializedFromDisk) 
         throws InterruptedException {
+        // if you've sent too many requeries jump out immediately....
+        if (numRequeries >= REQUERY_ATTEMPTS)
+            return false;
         // MD's never want to requery without user input.
         boolean retVal = false;
         synchronized (reqLock) {
@@ -691,8 +693,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //Put the keywords into a string.
         StringBuffer sb = new StringBuffer();
-        for (Iterator keys=intersection.iterator(); keys.hasNext(); ) {
-            sb.append(keys.next());
+        int numWritten = 0;
+        for (Iterator keys=intersection.iterator(); 
+             keys.hasNext() && (numWritten < 30); ) {
+            String currKey = (String) keys.next();
+            numWritten += currKey.length() + 1;
+            sb.append(currKey);
             if (keys.hasNext())
                 sb.append(" ");
         }        
@@ -913,6 +919,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( added ) {
             if ((state==Downloader.WAITING_FOR_RETRY) ||
                 (state==Downloader.WAITING_FOR_RESULTS) || 
+                (state==Downloader.GAVE_UP) || 
                 (state==Downloader.WAITING_FOR_USER))
                 reqLock.releaseDueToNewResults();
             else
@@ -1220,6 +1227,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     return;
                 }
 
+                final long currTime = System.currentTimeMillis();
+
                 // FLOW:
                 // 1.  If there is a retry to try (at least 1), then sleep for
                 // the time you should sleep to wait for busy hosts.  Also do
@@ -1279,36 +1288,39 @@ public class ManagedDownloader implements Downloader, Serializable {
                         // query
                         if (pauseForRequery(numQueries, deserializedFromDisk)) 
                             continue;
-                        waitForStableConnections();
-                        // yeah, it is about time and i've not sent too many...
-                        try {
-                            if (manager.sendQuery(this, 
-                                                  newRequery(numQueries)))
-                                numQueries++;
-                            // reset wait time for results
-                            timeQuerySent = System.currentTimeMillis();
-                        } catch (CantResumeException ignore) { }
-                    }
-                    else {
-                        // first delegate to subclass - see if we should set
-                        // the state and or wait for a certain amount of time
-                        long[] instructions = getFailedState(deserializedFromDisk, 
-                                                             timeSpentWaiting);
-                        // if the subclass has told me to do some special waiting
-                        if (instructions[1] > 0) {
-                            setState((int) instructions[0], instructions[1]);
-                            reqLock.lock(instructions[1]);
-                            timeSpentWaiting += 
-                                System.currentTimeMillis();
+                        if (numQueries < REQUERY_ATTEMPTS) {
+                            waitForStableConnections();
+                            // yeah, it is about time and i've not sent too many...
+                            try {
+                                if (manager.sendQuery(this, 
+                                                      newRequery(numQueries)))
+                                    numQueries++;
+                                // reset wait time for results
+                                timeQuerySent = System.currentTimeMillis();
+                            } catch (CantResumeException ignore) { }
                         }
                         else {
-                            // now just give up and hope for matching results
-                            setState(GAVE_UP);
-                            // wait indefn. for matching results
-                            reqLock.lock(0);
+                            // first delegate to subclass - see if we should set
+                            // the state and or wait for a certain amount of time
+                            long[] instructions = 
+                                getFailedState(deserializedFromDisk, 
+                                               timeSpentWaiting);
+                            // if the subclass has told me to do some special
+                            // waiting
+                            if (instructions[1] > 0) {
+                                setState((int) instructions[0], instructions[1]);
+                                reqLock.lock(instructions[1]);
+                                timeSpentWaiting += 
+                                    System.currentTimeMillis() - currTime;
+                            }
+                            else {
+                                // now just give up and hope for matching results
+                                setState(GAVE_UP);
+                                // wait indefn. for matching results
+                                reqLock.lock(0);
+                            }
                         }
                     }
-
                 }
             } catch (InterruptedException e) {
                 if (stopped) {
