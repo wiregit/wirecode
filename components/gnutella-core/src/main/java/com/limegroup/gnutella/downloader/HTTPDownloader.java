@@ -11,7 +11,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 
-class HTTPDownloader {
+public class HTTPDownloader {
 
     private InputStream _istream;
     private BufferedReader _in;

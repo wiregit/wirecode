@@ -11,7 +11,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 
-class HTTPUploader {
+public class HTTPUploader {
 
     private OutputStream _ostream;
     private BufferedWriter _out;
