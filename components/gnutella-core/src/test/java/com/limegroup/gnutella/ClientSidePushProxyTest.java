@@ -201,7 +201,7 @@ public class ClientSidePushProxyTest
         // client side seems to follow the setup process A-OK
     }
 
-    public void testQueryReplyHasProxies() throws Exception {
+    public void testQueryReplyHasProxiesAndCanGIV() throws Exception {
 
         drain(testUP);
 
@@ -231,7 +231,40 @@ public class ClientSidePushProxyTest
         assertEquals(proxies[0].getPushProxyPort(), 6355);
         assertTrue(proxies[0].getPushProxyAddress().getHostAddress().startsWith("127"));
 
+        // set up a ServerSocket to get give on
+        ServerSocket ss = new ServerSocket(9000);
+        ss.setSoTimeout(TIMEOUT);
+
+        // test that the client responds to a PushRequest
+        PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
+                                         rs.getMessageRouter()._clientGUID,
+                                         0, 
+                                         InetAddress.getLocalHost().getAddress(),
+                                         9000);
+        
+        // send the PR off
+        testUP.send(pr);
+        testUP.flush();
+
+        // we should get a incoming GIV
+        Socket givSock = ss.accept();
+        assertNotNull(givSock);
+
+        // start reading and confirming the HTTP request
+        String currLine = null;
+        BufferedReader reader = 
+            new BufferedReader(new
+                               InputStreamReader(givSock.getInputStream()));
+
+        // confirm a GIV
+        currLine = reader.readLine();
+        String givLine = "GIV 0:" + 
+        (new GUID(rs.getMessageRouter()._clientGUID)).toHexString();
+        assertTrue(currLine.startsWith(givLine));
+
         // everything checks out!
+        givSock.close();
+        ss.close();
     }
 
     
