@@ -541,23 +541,19 @@ public class ManagedDownloader implements Downloader, Serializable {
      *
      * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
+	 * @return a new <tt>QueryRequest</tt> for making the requery
      */
     protected synchronized QueryRequest newRequery(int numRequeries) 
-                                                   throws CantResumeException {
+		throws CantResumeException {
         if (allFiles.length<0)                  //TODO: what filename?
             throw new CantResumeException("");  //      maybe another exception?
-        return new QueryRequest(QueryRequest.newQueryGUID(true),
-								(byte)4,
-                                0,              //minimum speed
-                                extractQueryString(), 
-                                null,           //metadata query
-                                true,           //mark as requery
-                                null,           //requested URNs
-                                extractUrns(),  //the hashes
-                                // firewall status....
-                                !RouterService.acceptedIncomingConnection());
-                                
+
+		if(allFiles[0].getSHA1Urn() == null) {
+			return QueryRequest.createRequery(extractQueryString());
+		}
+		return QueryRequest.createRequery(allFiles[0].getSHA1Urn());
     }
+
 
     /** Returns the URNs for requery, i.e., the union of all requeries 
      *  (within reason).
