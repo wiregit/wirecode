@@ -130,10 +130,10 @@ public class FileManager {
      * IndexOutOfBoundsException if the index is not valid, either because the
      * file was never shared or was "unshared".<p>
      *
-     * Design note: this is slightly unusual use of NoSuchElementException.  For
-     * example, get(0) and get(2) may throw an exception but get(1) may not.
+     * Design note: this is slightly unusual use of IndexOutOfBoundsException.
+     * For example, get(0) and get(2) may throw an exception but get(1) may not.
      * NoSuchElementException was considered as an alernative, but this can
-     * create ambiguity problems between java.util and com.sun.java.util.
+     * create ambiguity problems between java.util and com.sun.java.util.  
      */
     public FileDesc get(int i) throws IndexOutOfBoundsException {
         FileDesc ret=(FileDesc)_files.get(i);
