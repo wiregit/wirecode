@@ -33,7 +33,6 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-
    
     /**
      * Tests the methods for getting the leaf and ultrapeer slots from the 
@@ -42,33 +41,24 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
      * @throws Exception if an error occurs
      */
     public void testHasFreeSlots() throws Exception {
+        
         byte[] guid = GUID.makeGuid();
         byte[] ip = {1,1,1,1};
         PingReply pr = PingReply.create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    
-            
-        assertTrue("slots unexpectedly full", pr.hasFreeSlots());
-        
-        // Leaves are determined based partly on our connected status.  We're
-        // not connected for this test, so leaf slots should be 0.
+
+        //All values are determined based on connection status, and because
+        // we haven't set up connections yet, we don't have free anything.
+        assertTrue("slots unexpectedly empty", !pr.hasFreeSlots());
         assertEquals("unexpected number leaf slots", 0, pr.getNumLeafSlots());
-        
-        assertTrue("slots unexpectedly not full", !pr.hasFreeLeafSlots());
-        
-        assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
-        
-        // Connection status doesn't matter for ultrapeer slots -- we just 
-        // subtract the number of connections we have from the desired number
-        assertEquals("unexpected number ultrapeer slots", 
-            ConnectionSettings.NUM_CONNECTIONS.getValue() -
-            ConnectionManager.RESERVED_NON_LIMEWIRE_PEERS -
-            ConnectionSettings.NUM_LOCALE_PREF.getValue(), 
-            pr.getNumUltrapeerSlots());
+        assertTrue("slots unexpectedly not empty", !pr.hasFreeLeafSlots());
+        assertTrue("slots unexpectedly empty", !pr.hasFreeUltrapeerSlots());
+        assertEquals("slots unexpectedly empty", 0, pr.getNumUltrapeerSlots());
         
         // Switch ConnectionManager to report different values for free leaf
         // and ultrapeer slots.
         PrivilegedAccessor.setValue(RouterService.class, "manager",
-            new TestConnectionManager(0,10));
+            new TestConnectionManager(7,10));
         
         pr = PingReply.create(guid, (byte)3, 6346, ip, 
             (long)10, (long)10, true, 100, true);    
@@ -77,16 +67,16 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         assertTrue("slots unexpectedly full", pr.hasFreeLeafSlots());
         
-        assertTrue("slots unexpectedly not full", !pr.hasFreeUltrapeerSlots());
+        assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
         
         // Should now have leaf slots
         assertEquals("unexpected number leaf slots", 
                      10 - ConnectionManager.RESERVED_NON_LIMEWIRE_LEAVES, 
                      pr.getNumLeafSlots());
         
-        // Connection status doesn't matter for ultrapeer slots -- we just 
-        // subtract the number of connections we have from the desired number
-        assertEquals("unexpected number ultrapeer slots",0, 
+        assertEquals("unexpected number ultrapeer slots", 
+            7 - ConnectionManager.RESERVED_NON_LIMEWIRE_PEERS -
+            ConnectionSettings.NUM_LOCALE_PREF.getValue(), 
             pr.getNumUltrapeerSlots());
     }
    

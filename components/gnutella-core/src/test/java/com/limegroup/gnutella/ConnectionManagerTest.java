@@ -61,7 +61,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);	
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
     }
 
     public void tearDown() {
