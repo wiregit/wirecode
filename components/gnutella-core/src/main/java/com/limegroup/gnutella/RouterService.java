@@ -8,7 +8,40 @@ import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
 
 /**
- * The External interface into the router world.
+ * A facade for the entire LimeWire backend.  This is the GUI's primary way of
+ * communicating with the backend.  RouterService plays a key role in
+ * constructing the backend components.  Typical use is as follows:
+ *
+ * <pre>
+ * RouterService rs=new RouterService(callback, router);
+ * rs.initialize();
+ * ... //construct GUI
+ * rs.postGuiInit();
+ * rs.triggerQuery(...);
+ * rs.download(...);
+ * rs.shutdown();
+ * </pre>
+ *
+ * The methods of this class are numerous, but they tend to fall into one of the
+ * following categories:
+ *
+ * <ul> 
+ * <li><b>Connecting and disconnecting</b>: connect, disconnect,
+ *     connectToHostBlocking, connectToHostAsynchronously, 
+ *     connectToGroup, reduceConnections, removeConnection,
+ *     getNumConnections
+ * <li><b>Searching and downloading</b>: query, browse, score, matchesType,
+ *     isMandragoreWorm, download
+ * <li><b>Notification of SettingsManager changes</b>:
+ *     setKeepAlive, setListeningPort, adjustSpamFilters, refreshBannedIPs
+ * <li><b>HostCatcher and horizon</b>: clearHostCatcher, getHosts, removeHost,
+ *     getNumHosts, getNumFiles, getTotalFileSize, setAlwaysNotifyKnownHost,
+ *     updateHorizon.  <i>(HostCatcher has changed dramatically on
+ *     pong-caching-branch and query-routing3-branch of CVS, so these methods
+ *     will probably be obsolete in the future.)</i>
+ * <li><b>Statistics</b>: getNumLocalSearches, getNumSharedFiles, 
+ *      getTotalMessages, getTotalDroppedMessages, getTotalRouteErrors
+ * </ul> 
  */
 public class RouterService
 {
@@ -22,8 +55,10 @@ public class RouterService
     private UploadManager uploadManager;
 
 	/**
-	 * Simple constructor to allocate memory to this object
-	 * and to set several of the member variables.
+	 * Creates a unitialized RouterService.  No work is done until
+     * initialize() is called.
+     * @param activityCallback the object to be notified of backend changes
+     * @param router the algorithm to use for routing messages.  
 	 */
   	public RouterService(ActivityCallback activityCallback,
   						 MessageRouter router) {
@@ -33,8 +68,8 @@ public class RouterService
   	}
 
 	/**
-	 * Initialization method that constructs and initializes many 
-	 * of the objects in the backend.
+     * Initializes the key backend components.  Some tasks are postponed
+     * until postGuiInit().
 	 */
   	public void initialize() {
 		SettingsManager settings = SettingsManager.instance();
@@ -51,7 +86,8 @@ public class RouterService
 		this.manager.initialize(router, catcher);		
 		this.uploadManager.initialize(callback, router, acceptor);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
-		this.downloader.initialize(callback, router, acceptor, FileManager.instance());
+		this.downloader.initialize(callback, router, acceptor,
+                                   FileManager.instance());
 		
   		// Make sure connections come up ultra-fast (beyond default keepAlive)
 		int outgoing = settings.getKeepAlive();
@@ -70,36 +106,15 @@ public class RouterService
         downloader.readSnapshot();
     }
 
-    /**
-     * Dump the ping and query routing tables
-     */
-    public void dumpRouteTable() {
-        System.out.println(router.getPingRouteTableDump());
-        System.out.println(router.getQueryRouteTableDump());
-    }
-
-    /**
-     * Dump the push routing table
-     */
-    public void dumpPushRouteTable() {
-        System.out.println(router.getPushRouteTableDump());
-    }
-
-    /**
-     * Dump the list of connections
-     */
-    public void dumpConnections() {
-        Iterator iter=manager.getConnections().iterator();
-        while (iter.hasNext())
-            System.out.println(iter.next().toString());
-    }
-
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
 
     /**
-     * Connect to remote host (establish outgoing connection).
-     * Blocks until connection established.
+     * Creates a new outgoing messaging connection to the given host and port.
+     * Blocks until the connection established.  Throws IOException if
+     * the connection failed.
+     * @return a connection to the request host
+     * @exception IOException the connection failed
      */
     public ManagedConnection connectToHostBlocking(String hostname, int portnum)
             throws IOException {
@@ -107,10 +122,9 @@ public class RouterService
     }
 
     /**
-     * Connect to remote host (establish outgoing connection) on a separate
-     * thread.
-     * If establishing c would connect us to the listening socket,
-     * the connection is not established.
+     * Creates a new outgoing messaging connection to the given host and port. 
+     * Returns immediately without blocking.  If hostname would connect
+     * us to ourselves, returns immediately.
      */
     public void connectToHostAsynchronously(String hostname, int portnum) {
         //Don't allow connections to yourself.  We have to special
@@ -229,9 +243,8 @@ public class RouterService
     }
 
     /**
-     * @modifies this
-     * @effects ensures the keep-alive is non-zero and recontacts the
-     *  pong server as needed.
+     * Connects to the network.  Ensures the number of messaging connections
+     * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public void connect() {
         //HACK. People used to complain to that the connect button wasn't
@@ -284,9 +297,8 @@ public class RouterService
     }
 
     /**
-     * @modifies this
-     * @effects removes all connections.
-     * @effects deactivates extra connection watchdog check
+     * Disconnects from the network.  Closes all connections and sets
+     * the number of connections to zero.
      */
     public void disconnect() {
 		// Deactivate checking for Ultra Fast Shutdown
@@ -308,28 +320,29 @@ public class RouterService
     }
 
 	/**
-	 * lower the number of connections for "low-power" mode.
+	 * Lowers the number of connections for "low-power" mode.
 	 */
 	public void reduceConnections() {
 		manager.reduceConnections();
 	}
 
     /**
-     * Remove a connection based on the host/port
+     * Closes and removes the given connection.
      */
     public void removeConnection(ManagedConnection c) {
         manager.remove(c);
     }
 
     /**
-     * Clear the hostcatcher if requested
+     * Clears the hostcatcher.
      */
     public void clearHostCatcher() {
         catcher.silentClear();
     }
 
     /**
-     * Get the real number of hosts from the host catcher
+     * Returns the number of pongs in the host catcher.  <i>This method is
+     * poorly named, but it's obsolescent, so I won't bother to rename it.</i>
      */
     public int getRealNumHosts() {
         return(catcher.getNumHosts());
@@ -337,7 +350,7 @@ public class RouterService
 
 
     /**
-     * Shut stuff down and write the gnutella.net file
+     * Shuts down the backend and writes the gnutella.net file.
      */
     public void shutdown() {
         //Write gnutella.net
@@ -370,8 +383,11 @@ public class RouterService
     }
 
     /**
-     *  Reset how many connections you want and start kicking more off
-     *  if required.  Does not affect the KEEP_ALIVE property.
+     * Forces the backend to try to establish newKeep connections by kicking
+     * off connection fetchers as needed.  Does not affect the KEEP_ALIVE
+     * property.
+     *
+     * @param newKeep the desired total number of messaging connections
      */
     public void setKeepAlive(int newKeep) {
         manager.setKeepAlive(newKeep);
@@ -387,7 +403,7 @@ public class RouterService
     //}
 
     /**
-     * Notify the backend that spam filters settings have changed, and that
+     * Notifies the backend that spam filters settings have changed, and that
      * extra work must be done.
      */
     public void adjustSpamFilters() {
@@ -402,10 +418,9 @@ public class RouterService
     }
 
     /**
-     * @modifies this
-     * @effects sets the port on which to listen for incoming connections.
-     *  If that fails, this is <i>not</i> modified and IOException is thrown.
-     *  If port==0, tells this to stop listening to incoming connections.
+     * Sets the port on which to listen for incoming connections.
+     * If that fails, this is <i>not</i> modified and IOException is thrown.
+     * If port==0, tells this to stop listening to incoming connections.
      */
     public void setListeningPort(int port) throws IOException {
         acceptor.setListeningPort(port);
@@ -421,7 +436,8 @@ public class RouterService
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence
-     * probably isn't firewalled.  
+     * probably isn't firewalled.  (This is useful for colorizing search
+     * results in the GUI.)
      */
     public boolean acceptedIncomingConnection() {
         return acceptor.acceptedIncoming();
@@ -429,28 +445,28 @@ public class RouterService
 
 
     /**
-     *  Return the total number of messages sent and received
+     *  Returns the total number of messages sent and received.
      */
     public int getTotalMessages() {
         return( router.getNumMessages() );
     }
 
     /**
-     *  Return the total number of dropped messages
+     *  Returns the total number of dropped messages.
      */
     public int getTotalDroppedMessages() {
         return( router.getNumDroppedMessages() );
     }
 
     /**
-     *  Return the total number of misrouted messages
+     *  Returns the total number of misrouted messages.
      */
     public int getTotalRouteErrors() {
         return( router.getNumRouteErrors() );
     }
 
     /**
-     *  Return the number of good hosts in my horizon.
+     *  Returns the number of good hosts in my horizon.
      */
     public long getNumHosts() {
         long ret=0;
@@ -461,7 +477,7 @@ public class RouterService
     }
 
     /**
-     * Return the number of files in my horizon.
+     * Returns the number of files in my horizon.
      */
     public long getNumFiles() {
         long ret=0;
@@ -472,7 +488,7 @@ public class RouterService
     }
 
     /**
-     * Return the size of all files in my horizon, in kilobytes.
+     * Returns the size of all files in my horizon, in kilobytes.
      */
     public long getTotalFileSize() {
         long ret=0;
@@ -499,14 +515,23 @@ public class RouterService
 
 
     /**
-     * Searches Gnutellanet files of the given type with the given
+     * Searches the network for files of the given type with the given
      * query string and minimum speed.  If type is null, any file type
      * is acceptable.  Returns the GUID of the query request sent as a
-     * 16 byte array, or null if there was a network error.
+     * 16 byte array.<p>
+     *
      * ActivityCallback is notified asynchronously of responses.
      * These responses can be matched with requests by looking at
      * their GUIDs.  (You may want to wrap the bytes with a GUID
-     * object for simplicity.)  */
+     * object for simplicity.) 
+     * 
+     * @param query the query string to use
+     * @param minSpeed the minimum desired result speed
+     * @param type the desired type of result (e.g., audio, video), or
+     *  null if you don't care
+     * @return the guid of the underlying search.  Used to match up
+     *  query results.  Guaranteed to be 16 bytes long.
+     */
     public byte[] query(String query, int minSpeed, MediaType type) {
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query);
@@ -515,32 +540,63 @@ public class RouterService
         return qr.getGUID();
     }
 
-    /** Same as query(query, minSpeed, null), i.e.,
-      * searches for files of any type. */
+    /** 
+     * Searches the network for files with the given query string and 
+     * minimum speed, i.e., same as query(query, minSpeed, null). 
+     *
+     * @see query(String, int, MediaType)
+     */
     public byte[] query(String query, int minSpeed) {
         return query(query, minSpeed, null);
     }
 
-    /** Same as ResponseVerifier.score. */
-    public int score(byte[] Guid, Response resp){
-        return verifier.score(Guid,resp);
+    /** 
+     * Returns the percentage of keywords in the query with the given guid that
+     * match the given response.  Returns 100 if guid is not recognized.
+     *
+     * @param guid the value returned by query(..)  MUST be 16 bytes long.
+     * @param resp a response delivered by ActivityCallback.handleQueryReply
+     * @see ResponseVerifier#score(byte[], Response) 
+     */
+    public int score(byte[] guid, Response resp){
+        return verifier.score(guid,resp);
     }
 
-    /** Same as ResponseVerifier.matchesType. */
+    /** 
+     * Returns true if the given response is of the same type as the the query
+     * with the given guid.  Returns 100 if guid is not recognized.
+     *
+     * @param guid the value returned by query(..).  MUST be 16 bytes long.
+     * @param resp a response delivered by ActivityCallback.handleQueryReply
+     * @see ResponseVerifier#matchesType(byte[], Response) 
+     */
     public boolean matchesType(byte[] guid, Response response) {
         return verifier.matchesType(guid, response);
     }
 
-    /** Same as ResponseVerifier.isMandragoreWorm. */
+    /** 
+     * Returns true if the given response for the query with the given guid is a
+     * result of the Madragore worm (8KB files of form "x.exe").  Returns false
+     * if guid is not recognized.  <i>Ideally this would be done by the normal
+     * filtering mechanism, but it is not powerful enough without the query
+     * string.</i>
+     *
+     * @param guid the value returned by query(..).  MUST be 16 byts long.
+     * @param resp a response delivered by ActivityCallback.handleQueryReply
+     * @see ResponseVerifier#isMandragoreWorm(byte[], Response) 
+     */
     public boolean isMandragoreWorm(byte[] guid, Response response) {
         return verifier.isMandragoreWorm(guid, response);
     }
 
     /**
-     * Searches the given host for all its files.  Results are given
-     * to the GUI via handleQuery.  Returns null if the host couldn't
-     * be reached.  Blocks until the connection is established and
-     * the query is sent.
+     * Searches the given host for all its files.  Results are given to the GUI
+     * via handleQuery.  Returns the guid of the query, or null if the host
+     * couldn't be reached.  Blocks until the connection is established and the
+     * query is sent.  
+     *
+     * @return the guid of the underlying search.  Used to match up
+     *  query results.  Guaranteed to be 16 bytes long.
      */
     public byte[] browse(String host, int port) {
         ManagedConnection c=null;
@@ -607,50 +663,36 @@ public class RouterService
     }
 
     /**
-     *  Return an iterator on the hostcatcher hosts
+     * Returns an iterator of the hosts in the host catcher, each
+     * an Endpoint.
      */
     public Iterator getHosts() {
         return catcher.getHosts();
     }
 
     /**
-     *  Return the number of good hosts
+     *  Returns the number of messaging connections.
      */
     public int getNumConnections() {
         return manager.getNumConnections();
     }
 
     /**
-     *  Return the number of connections to maintain
-     */
-    public int getKeepAlive() {
-        return manager.getKeepAlive();
-    }
-
-    /**
-     *  Return the number searches made locally ( QReq )
+     *  Returns the number searches made to the local database.
      */
     public int getNumLocalSearches() {
         return router.getNumQueryRequests();
     }
 
     /**
-     *  Remove unwanted or used entries from host catcher
+     *  Ensures that the given host:port pair is not in the host catcher.
      */
     public void removeHost(String host, int port) {
         catcher.removeHost(host, port);
     }
 
     /**
-     * Returns an instance of a SettingsManager.
-     */
-    public SettingsManager getSettings() {
-        return SettingsManager.instance();
-    }
-
-
-    /**
-     * Return how many files are being shared
+     * Returns the number of files being shared locally.
      */
     public int getNumSharedFiles( ) {
         return( FileManager.instance().getNumFiles() );
@@ -671,7 +713,12 @@ public class RouterService
     
 
     /** 
-     * Tries to "smart download" any of the given files.<p>  
+     * Tries to "smart download" <b>any</b> [sic] of the given files.<p>  
+     *
+     * If any of the files already being downloaded (or queued for downloaded)
+     * has the same temporary name as any of the files in 'files', throws
+     * AlreadyDownloadingException.  Note, however, that this doesn't guarantee
+     * that a successfully downloaded file can be moved to the library.<p>
      *
      * If overwrite==false, then if any of the files already exists in the
      * download directory, FileExistsException is thrown and no files are
@@ -681,9 +728,16 @@ public class RouterService
      * download.  The ActivityCallback will also be notified of this download,
      * so the return value can usually be ignored.  The download begins
      * immediately, unless it is queued.  It stops after any of the files
-     * succeeds.
+     * succeeds.  
      *
-     *     @modifies this, disk 
+     * @param files a group of "similar" files to smart download
+     * @param overwrite true iff the download should proceded without
+     *  checking if it's on disk
+     * @return the download object you can use to start and resume the download
+     * @exception AlreadyDownloadingException the file is already being 
+     *  downloaded.
+     * @exception FileExistsException the file already exists in the library
+     * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
     public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
         throws FileExistsException, AlreadyDownloadingException, 
@@ -692,19 +746,18 @@ public class RouterService
     }
 
 
-    /** Added to fix bug where banned IP added is not effective until restart
-     *  (Bug 62001).
-     *  Simply allows a new host to be added to the Banned IPs list.  Just
-     *  routes to the acceptor, who reloads from SettingsManager.
-     *  @author Susheel M. Daswani
-     */
+    /** 
+      * Notifies the backend that the BLACKLISTED_IP property has changed,
+      * forcing the acceptor to reload the property. This method was added
+      * to solve bug 62001.  
+      */
     public void refreshBannedIPs() {
         acceptor.refreshBannedIPs();
     }
 
 
 	/**
-	 * create a new chat
+	 * Creates and returns a new chat to the given host and port.
 	 */
 	public Chatter createChat(String host, int port) {
 		Chatter chatter = ChatManager.instance().request(host, port);
