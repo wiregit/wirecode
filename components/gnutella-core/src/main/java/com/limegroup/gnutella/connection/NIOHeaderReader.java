@@ -51,7 +51,6 @@ public final class NIOHeaderReader implements HeaderReader {
     private NIOHeaderReader(Connection conn) {
         CONNECTION = conn;
         CHANNEL = conn.getSocket().getChannel();
-        //_header = new HttpHeader();  
     }
 
     /**
@@ -90,6 +89,11 @@ public final class NIOHeaderReader implements HeaderReader {
     public String readConnect(int timeout) throws IOException {
         return readConnect();
         // TODO enable timeouts
+    }
+    
+    // inherit doc comment
+    public boolean hasRemainingData() {
+        return _headerByteBuffer.hasRemaining();
     }
     
     /**
