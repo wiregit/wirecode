@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -831,6 +832,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         // before doing expensive stuff, see if connection is even possible...
         if (other.getQuality() < 1) // I only want 2,3,4 star guys....
             return false;
+            
+        // If this host is banned, don't add.
+        if ( !IPFilter.instance().allow(other.getHost()) )
+            return false;            
             
         // See if we have already tried and failed with this location
         // This is only done if the location we're trying is an alternate..
