@@ -38,7 +38,7 @@ public final class ConnectionSettings extends AbstractSettings {
 	 * Setting for whether or not to connect using GWebCache.
 	 */
 	public static final BooleanSetting USE_GWEBCACHE =
-		CFG_FACTORY.createBooleanSetting("USE_GWEBCACHE", false);
+		CFG_FACTORY.createBooleanSetting("USE_GWEBCACHE", true);
 
 }
 
