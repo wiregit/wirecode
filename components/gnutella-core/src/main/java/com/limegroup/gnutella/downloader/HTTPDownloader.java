@@ -716,12 +716,17 @@ public class HTTPDownloader implements BandwidthTracker {
 				throw new NotSharingException();
             else if (code == 416) {//requested range not available
                 //See if the uploader is up to mischief
-                Iterator iter = _rfd.getAvailableRanges().getAllIntervals();
-                while(iter.hasNext()) {
-                    Interval next = (Interval)iter.next();
-                    if(_requestedInterval.isSubrange(next))
-                        throw new 
-                             ProblemReadingHeaderException("Bad ranges sent");
+                if(_rfd.isPartialSource()) {
+                    Iterator iter = _rfd.getAvailableRanges().getAllIntervals();
+                    while(iter.hasNext()) {
+                        Interval next = (Interval)iter.next();
+                        if(_requestedInterval.isSubrange(next))
+                            throw new 
+                            ProblemReadingHeaderException("Bad ranges sent");
+                    }
+                }
+                else {//Uploader sent 416 and no ranges
+                    throw new ProblemReadingHeaderException("no ranges sent");
                 }
                 //OK. The uploader is not messing with us.
                 throw new RangeNotAvailableException();

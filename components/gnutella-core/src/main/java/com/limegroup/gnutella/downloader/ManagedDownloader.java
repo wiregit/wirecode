@@ -1238,8 +1238,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
 
-        if(good) {
-            synchronized(altLock) {
+
+        synchronized(altLock) {
+            if(good) {
                 //check if validAlts contains loc to avoid duplicate stats, and
                 //spurious count increments in the local
                 //AlternateLocationCollections
@@ -1249,15 +1250,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                     validAlts.add(loc);
                     if( ifd != null )
                         ifd.addVerified(forFD);
-                }  else {
-                    if( RECORD_STATS && rfd.isFromAlternateLocation() )
-                        DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-                    validAlts.remove(loc);
-                    if( ifd != null )
-                        ifd.remove(forFD);
-                    invalidAlts.add(rfd.getRemoteHostData());
-                    recentInvalidAlts.add(loc);
                 }
+            } else {
+                if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                    DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                validAlts.remove(loc);
+                if( ifd != null )
+                    ifd.remove(forFD);
+                invalidAlts.add(rfd.getRemoteHostData());
+                recentInvalidAlts.add(loc);
             }
         }
     }
