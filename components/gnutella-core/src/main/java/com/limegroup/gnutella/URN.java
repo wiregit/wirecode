@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.SystemUtils;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.http.*; 
 import com.bitzi.util.*;
@@ -32,6 +33,13 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * A constant invalid URN that classes can use to represent an invalid URN.
 	 */
 	public static final URN INVALID = new URN("bad:bad", UrnType.INVALID);
+	
+	/**
+	 * The amount of time we must be idle before we start
+	 * devoting all processing time to hashing.
+	 * (Currently 5 minutes).
+	 */
+	private static final int MIN_IDLE_TIME = 5 * 60 * 1000;
 
 	/**
 	 * Cached constant to avoid making unnecessary string allocations
@@ -524,28 +532,29 @@ public final class URN implements HTTPHeaderValue, Serializable {
      *  execute.)
 	 */
 	private static String createSHA1String(final File file) 
-		    throws IOException, InterruptedException {
-		FileInputStream fis = new FileInputStream(file);   		
-		// we can only calculate SHA1 for now
-		MessageDigest md = null;
-		try {
-			md = MessageDigest.getInstance("SHA");
-		} catch(NoSuchAlgorithmException e) {
-			throw new IOException("NO SUCH ALGORITHM");
-		}
+      throws IOException, InterruptedException {
+        
+		MessageDigest md = new SHA1();
+        byte[] buffer = new byte[65536];
+        int read;
+        IntWrapper progress = new IntWrapper(0);
+        progressMap.put( file, progress );
+        FileInputStream fis = null;        
         
         try {
-            byte[] buffer = new byte[16384];
-            int read;
-            IntWrapper progress = new IntWrapper(0);
-            progressMap.put( file, progress );
+		    fis = new FileInputStream(file);
             while ((read=fis.read(buffer))!=-1) {
                 long start = System.currentTimeMillis();
                 md.update(buffer,0,read);
                 progress.addInt( read );
-                long end = System.currentTimeMillis();
-                long interval = Math.max(0, end-start);   //ensure non-negative
-                Thread.sleep(interval*2);                 //throws InterruptedException 
+                if(SystemUtils.getIdleTime() < MIN_IDLE_TIME) {
+                    long end = System.currentTimeMillis();
+                    long interval = end - start;
+                    if(interval > 0)
+                        Thread.sleep(interval * 3);
+                    else
+                        Thread.yield();
+                }
             }
         } finally {		
             progressMap.remove(file);
