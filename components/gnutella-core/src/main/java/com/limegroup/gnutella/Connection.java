@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
-import com.jcraft.jzlib.*;
+//import com.jcraft.jzlib.*;
 import java.util.zip.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
@@ -71,7 +71,8 @@ public class Connection {
      *   Deflater.getTotalOut -- The number of COMPRESSED bytes
      *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
-    private ZOutputStream _deflater;
+    //private ZOutputStream _deflater;
+    private Deflater _deflater;
     
     /**
      * The number of bytes sent to the output stream.
@@ -379,10 +380,12 @@ public class Connection {
             
             //wrap the streams with inflater/deflater
             if(isWriteDeflated()) {
-                ZOutputStream zout = new ZOutputStream(_out, JZlib.Z_DEFAULT_COMPRESSION);
-                zout.setFlushMode(JZlib.Z_SYNC_FLUSH);
-                _out = zout;
-                _deflater = zout;
+//                ZOutputStream zout = new ZOutputStream(_out, JZlib.Z_DEFAULT_COMPRESSION);
+//                zout.setFlushMode(JZlib.Z_SYNC_FLUSH);
+//                _out = zout;
+//                _deflater = zout;
+                _deflater = new Deflater();
+                _out = new CompressingOutputStream(_out, _deflater);
             }            
             if(isReadDeflated()) {
                 _inflater = new Inflater();
@@ -802,10 +805,7 @@ public class Connection {
         while (m == null) {
             m = Message.read(_in, HEADER_BUF, _softMax);
             if ( m != null ) {
-                if( isReadDeflated() )
-                    _bytesReceived = _inflater.getTotalIn();
-                else
-                    _bytesReceived += m.getTotalLength();
+                _bytesReceived += m.getTotalLength();
             }
         }
         return m;
@@ -837,10 +837,7 @@ public class Connection {
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             } else {
-                if( isReadDeflated() )
-                    _bytesReceived = _inflater.getTotalIn();
-                else
-                    _bytesReceived += m.getTotalLength();
+                _bytesReceived += m.getTotalLength();
             }            
             return m;
         } finally {
@@ -862,10 +859,7 @@ public class Connection {
     public void send(Message m) throws IOException {
         m.write(_out);
         
-        if( isWriteDeflated() )
-            _bytesSent = _deflater.getTotalOut();
-        else
-            _bytesSent += m.getTotalLength();
+        _bytesSent += m.getTotalLength();
     }
 
     /**
@@ -877,11 +871,35 @@ public class Connection {
     
     /** Returns the number of bytes sent on this connection. */
     public long getBytesSent() {
+        if(isWriteDeflated())
+            return _deflater.getTotalOut();
+        else            
+            return _bytesSent;
+    }
+    
+    /**
+     * Returns the number of uncompressed bytes sent on this connection.
+     * If the writing is not compressed, this is effectively the same
+     * as calling getBytesSent()
+     */
+    public long getUncompressedBytesSent() {
         return _bytesSent;
     }
     
     /** Returns the number of bytes received on this connection. */
     public long getBytesReceived() {
+        if(isReadDeflated())
+            return _inflater.getTotalIn();
+        else
+            return _bytesReceived;
+    }
+    
+    /**
+     * Returns the number of uncompressed bytes read on this connection.
+     * If the reading is not compressed, this is effectively the same
+     * as calling getBytesReceived()
+     */
+    public long getUncompressedBytesReceived() {
         return _bytesReceived;
     }
     
@@ -1079,6 +1097,12 @@ public class Connection {
                 _socket.close();
             } catch(IOException e) {}
         }
+        
+        // tell the inflater & deflater that we're done with them.
+        if( _deflater != null )
+            _deflater.end();
+        if( _inflater != null )
+            _inflater.end();
         
        // closing _in (and possibly _out too) can cause NPE's
        // in Message.read (and possibly other places),
