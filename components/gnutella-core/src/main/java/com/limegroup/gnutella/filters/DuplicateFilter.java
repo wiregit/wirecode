@@ -3,7 +3,6 @@ package com.limegroup.gnutella.filters;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
-import java.util.Date;
 
 /**
  * A spam filter that tries to eliminate duplicate packets from
@@ -15,7 +14,7 @@ import java.util.Date;
  * GUIDs differing by no more than K bytes, arrived within N
  * seconds, and have the same hops counts.
  * <li>Two queries are considered duplicates if they have 
- * the same query string, arrived within N seconds of each other,
+ * the same query string, arrived within ~N seconds of each other,
  * and have the same hops counts.
  * </ul>
  *
@@ -23,16 +22,14 @@ import java.util.Date;
  */
 public class DuplicateFilter extends SpamFilter {  
     /**
-     * The number of old pings and queries to keep in memory.
-     * If this is too small, we won't be filtering properly.
-     * Assuming 10 messages arrive per second, this allows for
-     * a whopping 10 seconds worth of history.  Luckily we don't
+     * The number of old pings to keep in memory.  If this is too small, we
+     * won't be filtering properly.  Assuming 10 messages arrive per second,
+     * this allows for a whopping 10 seconds worth of history.  Luckily we don't
      * need to search all that history, except in rare cases.
      *
      * INVARIANT: BUF_SIZE>1 
      */
     private static final int BUF_SIZE=100;
-
     /** a list of the GUIDs of the last pings we saw and
      * their timestamps. 
      *
@@ -45,18 +42,51 @@ public class DuplicateFilter extends SpamFilter {
      * assume they came from the same host. */
     private static final int GUID_SIMILAR=6;
 
-    /** a list of the last query strings we saw and their
-     * timestamps. 
-     *    Note that a different representation for queries
-     * could make allowQuery run in O(1) time, instead
-     * of O(BUF_SIZE).  However, profiling suggests this is not 
-     * necessary. 
+
+
+    /**
+     * To efficiently look up queries, we maintain a hash set of query/hops
+     * pairs.  (A balanced tree didn't work as well.)  The only problem is that
+     * we must expire entries from this set that are more than a few seconds
+     * old.  We approximate this FIFO behavior by maintaining two sets of
+     * queries and swapping them around.<p>
      *
-     * INVARIANT: the youngest entries have largest timestamps
+     * For the moment assume a constant stream of queries.  Every Q=QUERY_LAG
+     * milliseconds, a query triggers the "promotion" of newQueries" to
+     * oldQueries.  Hence youngQueries consists of queries that are up to Q
+     * seconds old, and oldQueries consists of queries that are up to 2*Q
+     * seconds old.  At the time of the promotion, entries in youngQueries have
+     * an average age of Q/2.  So the time-averaged filter window time N
+     * described above is (Q/2+(Q+Q/2))/2=Q.  But for any given query, N may be
+     * as large as 2*Q and as small as Q.
+     *
+     * Things get more complicated if we don't have a steady stream of queries.
+     * One error would be two simply promote youngQueries when receiving the
+     * first query after the last promotion.  This would mean, for example, that
+     * very slow queries exclusively for "X" would always be blocked.  Hence if
+     * more than 2*Q seconds has elapsed since the last promotion, we simply
+     * clear both sets.  This means that the maximum window size N can actually
+     * be as high as 3*Q if there is little traffic.  
      */
-    private Buffer /* of QueryPair */ queries=new Buffer(BUF_SIZE);
-    /** The time, in milliseconds, allowed between similar queries. */
-    private static final int QUERY_LAG=2000;
+    private static final int QUERY_LAG=1500;
+    /** The system time when we will promote youngQueries. */
+    private long querySwapTime=0;
+    /** The system time when we will clear both sets. 
+     *  INVARIANT: queryClearTime=querySwapTime+QUERY_LAG. */
+    private long queryClearTime=QUERY_LAG;
+    /** INVARIANT: youngQueries and oldQueries are disjoint. */
+    private Set /* of QueryPair */ youngQueries=new HashSet();
+    private Set /* of QueryPair */ oldQueries=new HashSet();
+    
+
+    /** Returns the approximate system time in milliseconds. */
+    private static long getTime() {
+        //TODO3: avoid a system call by looking at the backend heartbeat timer.
+        return System.currentTimeMillis();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+
 
     public boolean allow(Message m) {
         if (m instanceof PingRequest)
@@ -69,7 +99,7 @@ public class DuplicateFilter extends SpamFilter {
 
     public boolean allowPing(PingRequest pr) {
         PingPair me=new PingPair(pr.getGUID(),
-                                 (new Date()).getTime(),
+                                 getTime(),
                                  pr.getHops());
 
         //Consider all pings that came in within PING_LAG milliseconds 
@@ -101,32 +131,35 @@ public class DuplicateFilter extends SpamFilter {
         pings.add(me);
         return true;        
     }
+       
 
     public boolean allowQuery(QueryRequest qr) {
-        QueryPair me=new QueryPair(qr.getQuery(),
-                                   (new Date()).getTime(),
-                                   qr.getHops());
-    
-        //Consider all queries that came in within QUERY_LAG milliseconds 
-        //of this...
-        for (Iterator iter=queries.iterator(); iter.hasNext(); ) {
-            QueryPair other=(QueryPair)iter.next();
-            // The following assertion need not hold.  See allowPing.
-            //   Assert.that(me.time>=other.time,"Unexpected clock behavior");
-            if ((me.time-other.time) > QUERY_LAG)
-                //All remaining queries have smaller timestamps.
-                break;
-            //If different hops, keep looking
-            if (other.hops != me.hops)
-                continue;
-            //Are the queries the same?
-            if (me.query.equals(other.query)) {
-                queries.add(me);
-                return false;
+        //Update sets as needed.
+        long time=getTime();
+        if (time > querySwapTime) {
+            if (time <= queryClearTime) {
+                //A little time has passed.  Promote youngQueries.
+                Set tmp=oldQueries;
+                oldQueries=youngQueries;
+                youngQueries=tmp;
+                youngQueries.clear();
+            } else {          
+                //A lot of time has passed.  Clear both.
+                youngQueries.clear();
+                oldQueries.clear();
             }
+            querySwapTime=time+QUERY_LAG;
+            queryClearTime=querySwapTime+QUERY_LAG;
         }
-        queries.add(me);
-        return true;
+
+        //Look up query in both sets.  Add it to new set if not already there.
+        QueryPair qp=new QueryPair(qr.getQuery(), qr.getHops());
+        if (oldQueries.contains(qp)) {
+            return false;
+        } else {
+            boolean added=youngQueries.add(qp);
+            return added;     //allow if wasn't already in young set
+        }
     }
 
 
@@ -167,7 +200,7 @@ public class DuplicateFilter extends SpamFilter {
         //Now, if I wait a few seconds, it should be allowed.
         synchronized (filter) {
             try {
-                filter.wait(QUERY_LAG*2);
+                filter.wait(QUERY_LAG*4);
             } catch (InterruptedException e) { }
         }
 
@@ -197,18 +230,41 @@ class PingPair {
     }
 }
 
-class QueryPair {
+class QueryPair implements Comparable {
     String query;
-    long time;
     int hops;
     
-    QueryPair(String query, long time, int hops) {
-        this.time=time;
+    QueryPair(String query, int hops) {
         this.query=query;
         this.hops=hops;
     }
 
+    public int compareTo(Object o) {
+        QueryPair other=(QueryPair)o;
+        //Primary key: hops
+        //Secondary key: query
+        //(This may make the tree less balanced, but it results in fewer string
+        //comparisons.)
+        
+        int ret=this.hops-other.hops;
+        if (ret==0)
+            return this.query.compareTo(other.query);
+        else
+            return ret;
+    }
+
+    public boolean equals(Object o) {
+        if (! (o instanceof QueryPair))
+            return false;
+        QueryPair other=(QueryPair)o;
+        return (this.hops==other.hops) && this.query.equals(other.query);
+    }                
+
+    public int hashCode() {
+        return query.hashCode()+hops;
+    }
+    
     public String toString() {
-        return "[\""+query+"\", "+time+"]";
+        return "[\""+query+"\", "+hops+"]";
     }
 }
