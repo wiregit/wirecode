@@ -270,9 +270,11 @@ public final class QueryHandler {
 			int hostsQueried = handler.QUERIED_HANDLERS.size();
 			
 			// assume there's minimal overlap between the connections
-			// we queried before and the new ones -- pretend we have
-			// fewer connections than we do
-			int remainingConnections = length - hostsQueried - 2;
+			// we queried before and the new ones 
+            
+            // also, pretend we have fewer connections than we do
+            // in case they go away
+			int remainingConnections = length - hostsQueried - 4;
 			remainingConnections = Math.max(remainingConnections, 1);
 			
 			int results = handler._resultCounter.getNumResults();
@@ -287,20 +289,20 @@ public final class QueryHandler {
 			}
 			
 			int hostsToQueryPerConnection = 
-				hostsToQuery/remainingConnections;
-			byte ttl = calculateNewTTL(hostsToQueryPerConnection, 
-                                       mc.getNumIntraUltrapeerConnections());
-			
+				hostsToQuery/remainingConnections;			
             byte maxTTL = mc.headers().getMaxTTL();
-            if(ttl > maxTTL) {
-                ttl = maxTTL;
-            }
+
+			byte ttl = 
+                calculateNewTTL(hostsToQueryPerConnection, 
+                                mc.getNumIntraUltrapeerConnections(),
+                                mc.headers().getMaxTTL());
 
 			QueryRequest query = createQuery(handler.QUERY, ttl);
 
  
 			// send out the query on the network
-			_messageRouter.sendQueryRequest(query, mc, handler.REPLY_HANDLER);
+			RouterService.getMessageRouter().sendQueryRequest(query, mc, 
+                                                              handler.REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
 			handler.QUERIED_HANDLERS.add(mc);
@@ -325,7 +327,7 @@ public final class QueryHandler {
         int newHosts = 0;
 		for(int i=0; i<limit; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);
-			_messageRouter.sendQueryRequest(query, mc, 
+			RouterService.getMessageRouter().sendQueryRequest(query, mc, 
                                                               handler.REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
@@ -343,20 +345,23 @@ public final class QueryHandler {
 	 * @param hostsToQueryPerConnection the number of hosts we should reach on
 	 *  each remaining connections, to the best of our knowledge
      * @param degree the out-degree of the next connection
+     * @param maxTTL the maximum TTL the connection will allow
 	 */
-	private static byte calculateNewTTL(int hostsToQueryPerConnection, int degree) {
+	private static byte 
+        calculateNewTTL(int hostsToQueryPerConnection, int degree, byte maxTTL) {
 
-        // we'll give a rough estimate, based on the nodes reached at the
-        // last hop
-        
+        // not the most efficient algorithm -- should use Math.log, but
+        // that's ok
+        for(byte i=1; i<6; i++) {
 
-		// the limits below are based on experimental, not theoretical 
-		// observations of results on the network
-		if(hostsToQueryPerConnection < 30)    return 1;
-		if(hostsToQueryPerConnection < 100)   return 2;
-		if(hostsToQueryPerConnection < 1000)  return 3;
-		if(hostsToQueryPerConnection < 2500)  return 4;
-		else return 5;
+            // biased towards lower TTLs since the horizon expands so
+            // quickly
+            int hosts = (int)(1.5*calculateNewHosts(degree, i));
+            if(hosts >= hostsToQueryPerConnection) {
+                return i;
+            }
+        }
+        return maxTTL;
 	}
 
 	/**
@@ -367,7 +372,7 @@ public final class QueryHandler {
      * @param conn the <tt>Connection</tt> that will received the query
 	 * @param ttl the TTL of the query to add
 	 */
-	private static int calculateNewHosts(Connection conn, int ttl) {
+	private static int calculateNewHosts(Connection conn, byte ttl) {
         return calculateNewHosts(conn.getNumIntraUltrapeerConnections(), ttl);
 	}
 
@@ -381,7 +386,7 @@ public final class QueryHandler {
      * @param degree the degree of the node that will received the query
 	 * @param ttl the TTL of the query to add
 	 */    
-	private static int calculateNewHosts(int degree, int ttl) {
+	private static int calculateNewHosts(int degree, byte ttl) {
 		double newHosts = 0;
 		for(;ttl>0; ttl--) {
 			newHosts += Math.pow((degree-1), ttl-1);
