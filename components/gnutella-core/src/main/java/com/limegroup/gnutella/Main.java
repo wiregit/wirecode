@@ -10,16 +10,12 @@ public class Main {
     public static void main(String args[]) {
 	//Start thread to accept connections.  Optional first arg is the 
 	//listening port number.
-	ConnectionManager manager=null;
+	RouterService service;
 	if (args.length==1) {
-	    manager=new ConnectionManager(Integer.parseInt(args[0]));
+	    service=new RouterService(Integer.parseInt(args[0]));
 	} else {
-	    manager=new ConnectionManager();
+	    service=new RouterService();
 	}
-	manager.setKeepAlive(Const.KEEP_ALIVE);
-	Thread t=new Thread(manager);
-	t.setDaemon(true);
-	t.start();	
 
 	BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 	for ( ; ;) {
@@ -32,12 +28,10 @@ public class Main {
 		    break;
 		//Print routing tables
 		else if (command.equals("route"))
-		    System.out.println(manager.routeTable.toString());
+		    service.dumpRouteTable();
 		//Print connections
 		else if (command.equals("stat")) {
-		    Iterator iter=manager.connections();
-		    while (iter.hasNext())
-			System.out.println(iter.next().toString());
+		    service.dumpConnections();
 		}
 		String[] commands=split(command);
 		//Connect to remote host (establish outgoing connection)
@@ -46,11 +40,7 @@ public class Main {
 			int port=6346;
 			if (commands.length>=3)
 			    port=Integer.parseInt(commands[2]);
-			Connection c=new Connection(manager, commands[1], port);
-			//System.out.println("Connection established.");
-			Thread tc=new Thread(c);
-			tc.setDaemon(true);
-			tc.start();
+			service.connectToHost(commands[1], port);
 		    } catch (IOException e) {
 			System.out.println("Couldn't establish connection.");
 		    }
@@ -60,7 +50,7 @@ public class Main {
 	    }	    
 	}
 	System.out.println("Good bye.");
-	manager.shutdown(); //write gnutella.net
+	service.shutdown(); //write gnutella.net
     }
 
     /** Returns an array of strings containing the words of s, where
