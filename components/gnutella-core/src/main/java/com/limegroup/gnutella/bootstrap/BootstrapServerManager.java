@@ -8,6 +8,10 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
@@ -52,6 +56,19 @@ public class BootstrapServerManager {
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
     private boolean _hostFetchInProgress=false;
+    
+    /**
+     * The amount of time to wait while trying to connect to a specified
+     * host.  If we exceed this value, an IOException is thrown
+     * while trying to connect.
+     */
+    private static final int CONNECTION_TIMEOUT = 3000;
+    
+    /**
+     * The amount of time to wait while receiving data from a specified
+     * host.  Used as an SO_TIMEOUT.
+     */
+    private static final int TIMEOUT = 2000;
 
 
     /////////////////////////// Public Interface //////////////////////
@@ -323,41 +340,24 @@ public class BootstrapServerManager {
 			throw new NullPointerException("null server in request to one host");
 		}
         BufferedReader in = null;
-        HttpURLConnection connection = null;
+        String connectTo = server.getURL().toString()
+                 +"?client="+CommonUtils.QHD_VENDOR_NAME
+                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
+                 +"&"+request.parameters();
+        HttpMethod get = new GetMethod(connectTo);
+        get.addRequestHeader("Cache-Control", "no-cache");
+        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
+                             "close");
+        get.setFollowRedirects(false);
+        HttpClient client = HttpClientManager.getNewClient();
+        client.setConnectionTimeout(CONNECTION_TIMEOUT);
+        client.setTimeout(TIMEOUT);
         try {
-            //Prepare the request.  TODO: it would be great to add connection
-            //timeouts, but URLConnection doesn't give us control over that.
-            //One option on Java 1.4 is to set some system properties, e.g.,
-            //http.defaultSocketTimeout.  See for example
-            //   developer.java.sun.com/developer/bugParade/bugs/4143518.html
-            URL url = new URL(server.getURL().toString()
-                +"?client="+CommonUtils.QHD_VENDOR_NAME
-                +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
-                +"&"+request.parameters());
-            connection = (HttpURLConnection)url.openConnection();
-            connection.setUseCaches(false);
-            connection.setRequestProperty(
-                "User-Agent",
-                CommonUtils.getHttpServer());
-            connection.setRequestProperty(                    //no persistence
-                HTTPHeaderName.CONNECTION.httpStringValue(),
-                "close");
-            //Always use ISO-8859-1 encoding to avoid misinterpreting bytes as
-            //weird characters on international systems.
-            try {
-                in = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), 
-                                        "ISO-8859-1"));
-            } catch(NullPointerException e) {
-                // This can happen because of JDK bug 4218806
-                // See http://developer.java.sun.com/developer/bugParade/bugs/4218806.html
-                throw new IOException("null .getInputStream()");
-            } catch(ArrayIndexOutOfBoundsException e) {
-                // There is a bug in java's implementation that can cause this
-                // error to happen.  It has been reported mostly on macs,
-                // on OS9 (with 1.1.8) and OSX (with 1.3.1).
-                throw new IOException("aiioe");
-            }
+            client.executeMethod(get);
+            in = new BufferedReader(
+                    new InputStreamReader(
+                        get.getResponseBodyAsStream()));
 
             //For each line of data (excludes HTTP headers)...
             boolean firstLine = true;
@@ -384,12 +384,11 @@ public class BootstrapServerManager {
         } catch (IOException ioe) {
             request.handleError(server);
         } finally {
-            //Close the connection.  TODO: is this really the preferred way?
+            //Close the connection.
             if (in!=null)
                 try { in.close(); } catch (IOException e) { }
-            if(connection != null) {
-                connection.disconnect(); 
-            }
+            if (get != null)
+                get.releaseConnection();
         }
     }
 
