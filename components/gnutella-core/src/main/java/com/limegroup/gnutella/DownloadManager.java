@@ -933,8 +933,10 @@ public class DownloadManager implements BandwidthTracker {
             return false;
         
         // If it wasn't multicast, try sending to the proxies if it had them.
+        // and cannot accept udp push or the udp push was already sent.
         Set proxies = file.getPushProxies();
-        if (!proxies.isEmpty() && !file.canPushUDP()) {
+        if (!proxies.isEmpty() && 
+        		(!file.canPushUDP() || failOver)) {
             //TODO: investigate not sending a HTTP request to a proxy
             //you are directly connected to.  How much of a problem is this?
             //Probably not much of one at all.  Classic example of code
@@ -994,7 +996,7 @@ public class DownloadManager implements BandwidthTracker {
         
         PushRequest pr;
         
-        if (!proxies.isEmpty() && file.canPushUDP() && !failOver) 
+        if (file.canPushUDP() && !failOver) 
         	pr = 
                 new PushRequest(GUID.makeGuid(),
                                 ConnectionSettings.TTL.getValue(),
