@@ -167,7 +167,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         //             qr.getQuery());
         assertEquals(224, qr.getMinSpeed());
         assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("", qr.getRichQuery());
+        assertNull(qr.getRichQuery());
         Set urns=qr.getQueryUrns();
         assertEquals(1, urns.size());
         assertTrue(urns.contains(URN.createSHA1Urn(
