@@ -30,19 +30,12 @@ public class PushEndpointForSelf extends PushEndpoint {
         return _instance;
     }
     
+    
     /**
      * delegate the call to connection manager
      */
     public Set getProxies() {
         return RouterService.getConnectionManager().getPushProxies();
-    }
-    
-    /**
-     * override to not cache the size
-     */
-    public int getSizeBytes() {
-        return HEADER_SIZE+
-			Math.min(getProxies().size(),4) * PROXY_SIZE;
     }
     
     /**

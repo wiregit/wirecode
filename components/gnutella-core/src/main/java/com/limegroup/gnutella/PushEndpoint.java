@@ -244,8 +244,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return a byte-packed representation of this
 	 */
 	public byte [] toBytes() {
-		byte [] ret = new byte[getSizeBytes()];
-		toBytes(ret,0);
+	    Set proxies = getProxies();
+		byte [] ret = new byte[getSizeBytes(getProxies())];
+		toBytes(ret,0,proxies);
 		return ret;
 	}
 	
@@ -255,8 +256,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @param offset the offset within that byte [] to serialize
 	 */
 	public void toBytes(byte [] where, int offset) {
-		
-		if (where.length-offset < getSizeBytes())
+		toBytes(where, offset, getProxies());
+	}
+	
+	private void toBytes(byte []where, int offset, Set proxies) {
+	    
+	    if (where.length-offset < getSizeBytes(proxies))
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
@@ -267,7 +272,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		//store the push proxies
 		int i=0;
-		for (Iterator iter = getProxies().iterator();iter.hasNext() && i < 4;) {
+		for (Iterator iter = proxies.iterator();iter.hasNext() && i < 4;) {
 			PushProxyInterface ppi = (PushProxyInterface) iter.next();
 			
 			byte [] addr = ppi.getPushProxyAddress().getAddress();
@@ -278,7 +283,6 @@ public class PushEndpoint implements HTTPHeaderValue{
 			i++;
 		}
 	}
-	
 	/**
 	 * 
 	 * @param data data read from network 
@@ -327,15 +331,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	/**
-	 * 
-	 * @return how many bytes this PE will use when serialized.
+	 * @param the set of proxies for this PE
+	 * @return how many bytes a PE will use when serialized.
 	 */
-	public int getSizeBytes() {
-	    if (_size==-1) {
-			_size = HEADER_SIZE+
-			Math.min(getProxies().size(),4) * PROXY_SIZE;
-	    }
-		return _size;
+	public static int getSizeBytes(Set proxies) {
+			return HEADER_SIZE+
+				Math.min(proxies.size(),4) * PROXY_SIZE;
 	}
 	
 	/**

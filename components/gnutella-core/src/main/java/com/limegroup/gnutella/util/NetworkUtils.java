@@ -314,7 +314,7 @@ public final class NetworkUtils {
     	int i=0;
     	while (i < data.length ) {
     		PushEndpoint current = PushEndpoint.fromBytes(data,i);
-    		i+=current.getSizeBytes();
+    		i+=PushEndpoint.getSizeBytes(current.getProxies());
     		ret.add(current);
     	}
     	
