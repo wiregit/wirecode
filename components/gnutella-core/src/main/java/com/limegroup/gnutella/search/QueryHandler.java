@@ -359,7 +359,7 @@ public final class QueryHandler {
 			// if the connection hasn't been up for long, don't use it,
             // as the replies will never make it back to us if the
             // connection is dropped, wasting bandwidth
-            if(!mc.isStable(_curTime)) continue;
+            if(!curConnection.isStable(_curTime)) continue;
             mc = curConnection;
         }
 
