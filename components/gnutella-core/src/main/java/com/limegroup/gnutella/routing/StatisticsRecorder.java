@@ -2,7 +2,7 @@ package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
 
-import java.util.*;
+import com.sun.java.util.collections.*;
 import java.net.*; 
 import java.io.*;
 import java.text.NumberFormat;
