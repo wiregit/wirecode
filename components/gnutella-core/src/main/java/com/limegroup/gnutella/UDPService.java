@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -74,6 +75,14 @@ public final class UDPService implements Runnable {
      */
     private boolean _acceptedUnsolicitedIncoming = false;
     
+    /** The last time the _acceptedUnsolicitedIncoming was set.
+     */
+    private long _lastUnsolicitedIncomingTime = 0;
+
+    /** The last time we sent a UDP Connect Back.
+     */
+    private long _lastConnectBackTime = System.currentTimeMillis();
+
 	/**
 	 * The thread for listening of incoming messages.
 	 */
@@ -101,11 +110,6 @@ public final class UDPService implements Runnable {
      */
     private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
 
-    /**
-     * <tt>Map</tt> of GUIDs to <tt>HostListeners</tt>.
-     */
-    private final Map HOST_LISTENERS = new HashMap();
-    
 	/**
 	 * Instance accessor.
 	 */
@@ -122,6 +126,9 @@ public final class UDPService implements Runnable {
         UDP_RECEIVE_THREAD.setDaemon(true);
         UDP_SEND_THREAD = new ManagedThread(new Sender(), "UDPService-Sender");
         UDP_SEND_THREAD.setDaemon(true);
+        RouterService.schedule(new IncomingValidator(), 
+                               Acceptor.TIME_BETWEEN_VALIDATES,
+                               Acceptor.TIME_BETWEEN_VALIDATES);
     }
 	
 	/**
@@ -250,19 +257,22 @@ public final class UDPService implements Runnable {
                             if(isValidForIncoming(CONNECT_BACK_GUID, guid,
                                                   datagram))
                                 _acceptedUnsolicitedIncoming = true;
+                            _lastUnsolicitedIncomingTime =
+                                System.currentTimeMillis();
                         }
                         else if (message instanceof PingReply) {
                             GUID guid = new GUID(message.getGUID());
                             if(isValidForIncoming(SOLICITED_PING_GUID, guid,
                                                   datagram))
                                 _acceptedSolicitedIncoming = true;
-                            HostListener hl = 
-                                (HostListener)HOST_LISTENERS.get(guid);
-                            if(hl != null) {
-                                hl.addHost((PingReply)message);
-                            }
                         }
                     }
+                    // ReplyNumberVMs are always sent in an unsolicited manner,
+                    // so we can use this fact to keep the last unsolicited up
+                    // to date
+                    if (message instanceof ReplyNumberVendorMessage)
+                        _lastUnsolicitedIncomingTime = 
+                            System.currentTimeMillis();
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
@@ -579,28 +589,62 @@ public final class UDPService implements Runnable {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
 
-    /**
-     * Expires the mapping of <tt>GUID</tt>s to <tt>HostListener</tt>s for the
-     * specified <tt>GUID</tt>.  This is done to avoid holding this mapping in
-     * memory forever when, for example, UDP pings are sent to a bunch of hosts
-     * while connecting.
-     * 
-     * @param guid the <tt>GUID</tt> whose mapping should be removed
-     */
-    public void removeListener(GUID guid) {
-        HOST_LISTENERS.remove(guid);
+    private static class MLImpl implements MessageListener {
+        public boolean _gotIncoming = false;
+        private final GUID _guid;
+        public MLImpl(GUID guid) {
+            _guid = guid;
+        }
+
+        public void processMessage(Message m) {
+            if ((m instanceof PingRequest) &&
+                (_guid.equals(new GUID(m.getGUID()))))
+                _gotIncoming = true;
+        }
     }
 
-    /**
-     * Adds the specified <tt>GUID</tt>-><tt>HostListener</tt> pair to the 
-     * mapping of <tt>GUID</tt>s to <tt>HostListener</tt>s.  This is used, for
-     * example, for associated pongs received with their appropriate listeners.
-     *  
-     * @param guid the <tt>GUID</tt> to add 
-     * @param listener the <tt>HostListener</tt> that should listen for pongs
-     *  with the specified <tt>GUID</tt>
-     */
-    public void addListener(GUID guid, HostListener listener) {
-        HOST_LISTENERS.put(guid, listener);       
+    private class IncomingValidator implements Runnable {
+        public IncomingValidator() {}
+        public void run() {
+            // clear and revalidate if 1) we haven't had in incoming in an hour
+            // or 2) we've never had incoming and we haven't checked in an hour
+            final long currTime = System.currentTimeMillis();
+            final MessageRouter mr = RouterService.getMessageRouter();
+            final ConnectionManager cm = RouterService.getConnectionManager();
+            if (
+                (_acceptedUnsolicitedIncoming && //1)
+                 ((currTime - _lastUnsolicitedIncomingTime) > 
+                  Acceptor.INCOMING_EXPIRE_TIME)) 
+                || 
+                (!_acceptedUnsolicitedIncoming && //2)
+                 ((currTime - _lastConnectBackTime) > 
+                  Acceptor.INCOMING_EXPIRE_TIME))
+                ) {
+                
+                final GUID cbGuid = new GUID(GUID.makeGuid());
+                final MLImpl ml = new MLImpl(cbGuid);
+                mr.registerMessageListener(cbGuid, ml);
+                // send a connectback request to a few peers and clear
+                if(cm.sendUDPConnectBackRequests(cbGuid))  {
+                    _lastConnectBackTime = System.currentTimeMillis();
+                    Runnable checkThread = new Runnable() {
+                            public void run() {
+                                if ((_acceptedUnsolicitedIncoming && 
+                                     (_lastUnsolicitedIncomingTime < currTime))
+                                    || (!_acceptedUnsolicitedIncoming))
+                                    // we set according to the message listener
+                                    _acceptedUnsolicitedIncoming = 
+                                        ml._gotIncoming;
+                                mr.unregisterMessageListener(cbGuid);
+                            }
+                        };
+                    RouterService.schedule(checkThread, 
+                                           Acceptor.WAIT_TIME_AFTER_REQUESTS,
+                                           0);
+                }
+                else
+                    mr.unregisterMessageListener(cbGuid);
+            }
+        }
     }
 }
