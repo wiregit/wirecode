@@ -1079,11 +1079,14 @@ public class ConnectionManager {
         // table, resulting in dangling references.
         conn.close();
 
-        // 3) Clean up route tables.
-        RouterService.getMessageRouter().removeConnection(conn);
-
-        // 4) Notify the listener
-        RouterService.getCallback().connectionClosed(conn); 
+        // If we're running tests, it's possible that not everything is started 
+        if(RouterService.isStarted()) {
+            // 3) Clean up route tables.
+            RouterService.getMessageRouter().removeConnection(conn);
+    
+            // 4) Notify the listener
+            RouterService.getCallback().connectionClosed(conn); 
+        }
 
         // 5) Clean up Unicaster
         QueryUnicaster.instance().purgeQuery(conn);
@@ -1224,7 +1227,11 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        RouterService.getCallback().connectionInitializing(conn);
+        
+        // Might not be started for tests
+        if(RouterService.isStarted()) {
+            RouterService.getCallback().connectionInitializing(conn);
+        }
 
         try {
             conn.initialize();
@@ -1435,7 +1442,11 @@ public class ConnectionManager {
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(conn);
+
+            // Callback can be null in tests
+            if(RouterService.isStarted()) {
+                RouterService.getCallback().connectionInitializing(conn);
+            }
         }
             
         try {
@@ -1484,23 +1495,22 @@ public class ConnectionManager {
     // TODO: threading issues????
     public void handleConnectionInitialization(Connection conn) 
         throws IOException  {
-            
-        System.out.println("ConnectionManager::handleConnectionInitialization");
+
         // if the connection received headers, process the headers to
         // take steps based on the headers
-        //processConnectionHeaders(conn);     
+        // processConnectionHeaders(conn);     
         
-        //If there's not space for the connection, reject it.  This mechanism
-        //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
-        //connections.  Sometimes Connections are handled by headers
-        //directly.
+        // If there's not space for the connection, reject it.  This mechanism
+        // works for Gnutella 0.4 connections, as well as some odd cases for 0.6
+        // connections.  Sometimes Connections are handled by headers
+        // directly.
         if (!conn.isOutgoing() && !allowConnection(conn)) {
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
 
-        //For incoming connections, add it to the GUI.  For outgoing connections
-        //this was done at the top of the method.  See note there.
+        // For incoming connections, add it to the GUI.  For outgoing 
+        // connections this was done at the top of the method.  See note there.
         if (!conn.isOutgoing()) {
             synchronized(this) {
                 connectionInitializingIncoming(conn);
@@ -1508,7 +1518,11 @@ public class ConnectionManager {
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(conn);
+            
+            // The ActivityCallback can be null if we're testing.
+            if(RouterService.isStarted()) {
+                RouterService.getCallback().connectionInitializing(conn);
+            }
         }
 
         completeConnectionInitialization(conn);   
@@ -1522,7 +1536,6 @@ public class ConnectionManager {
      * @param conn the <tt>Connection</tt> to finish initializing
      */
     private void completeConnectionInitialization(Connection conn) {
-        System.out.println("ConnectionManager::completeConnectionInitialization");
         boolean connectionOpen = false;
         synchronized(this) {
             if(conn.isOutgoing()) {
@@ -1542,7 +1555,10 @@ public class ConnectionManager {
             }
 
             if(connectionOpen) {
-                RouterService.getCallback().connectionInitialized(conn);
+                // The ActivityCallback can be null if we're testing.
+                if(RouterService.isStarted()) {
+                    RouterService.getCallback().connectionInitialized(conn);
+                }
             }
         }
     }
@@ -1605,7 +1621,6 @@ public class ConnectionManager {
 	 *  for messages
 	 */
 	private void startConnection(Connection conn) throws IOException {
-        System.out.println("ConnectionManager::startConnection");
 	    Thread.currentThread().setName("MessageLoopingThread");
 
 		if(conn.isGUESSUltrapeer()) {
