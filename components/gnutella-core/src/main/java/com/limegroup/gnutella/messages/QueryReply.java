@@ -1264,9 +1264,7 @@ public class QueryReply extends Message implements Serializable{
                             combo.length) {
                             try {
                                 proxies.add(new PushProxyContainer(combo));
-                            }
-                            catch (IllegalArgumentException malformedPair) {
-                            }
+                            } catch (BadPacketException malformedPair) {}
                         }                        
                     }
                 }
@@ -1286,7 +1284,7 @@ public class QueryReply extends Message implements Serializable{
         }
 
         public PushProxyContainer(byte[] fromNetwork)
-            throws IllegalArgumentException {
+            throws BadPacketException {
             _combo = IPPortCombo.getCombo(fromNetwork);
         }
 
@@ -1325,24 +1323,42 @@ public class QueryReply extends Message implements Serializable{
         
         public static final String DELIM = ":";
 
-        /** @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
+        /**
+         * Used for reading data from the network.  Throws BadPacketException
+         * if the data is invalid.
+         * @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
          */
-        public static IPPortCombo getCombo(byte[] fromNetwork) 
-            throws IllegalArgumentException {
-            if (fromNetwork.length != 6)
-                throw new IllegalArgumentException("Weird Input");
-            
-            String host = NetworkUtils.ip2string(fromNetwork, 0);
-            int port = ByteOrder.ubytes2int(ByteOrder.leb2short(fromNetwork, 4));
+        public static IPPortCombo getCombo(byte[] fromNetwork)
+          throws BadPacketException {
+            return new IPPortCombo(fromNetwork);
+        }
+        
+        /**
+         * Constructor used for data read from the network.
+         * Throws BadPacketException on errors.
+         */
+        private IPPortCombo(byte[] networkData) throws BadPacketException {
+            if (networkData.length != 6)
+                throw new BadPacketException("Weird Input");
 
+            String host = NetworkUtils.ip2string(networkData, 0);
+            int port = ByteOrder.ubytes2int(ByteOrder.leb2short(networkData, 4));
+            if (!NetworkUtils.isValidPort(port))
+                throw new BadPacketException("Bad Port: " + port);
+            _port = port;
             try {
-                return new IPPortCombo(host, port);
+                _addr = InetAddress.getByName(host);
+            } catch(UnknownHostException uhe) {
+                throw new BadPacketException("bad host.");
             }
-            catch (UnknownHostException uhe) {
-                throw new IllegalArgumentException("Unknown Host");
-            }
+            if (!NetworkUtils.isValidAddress(_addr))
+                throw new BadPacketException("invalid addr: " + _addr);
         }
 
+        /**
+         * Constructor used for local data.
+         * Throws IllegalArgumentException on errors.
+         */
         public IPPortCombo(String hostAddress, int port) 
             throws UnknownHostException, IllegalArgumentException  {
             if (!NetworkUtils.isValidPort(port))
