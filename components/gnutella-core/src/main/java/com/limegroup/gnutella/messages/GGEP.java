@@ -32,6 +32,13 @@ public class GGEP extends Object {
     /** The collection of key/value pairs this GGEP instance represents.
      */
     private Map _props = null;
+
+	/**
+	 * Cached hash code value to avoid calculating the hash code from the
+	 * map each time.
+	 */
+	private volatile int hashCode = 0;
+
     Map getProps() {
         return _props;
     }
@@ -374,10 +381,19 @@ public class GGEP extends Object {
      *  equivalent.
      */
     public boolean equals(Object o) {
+		if(o == this) return true;
         if (o instanceof GGEP) 
             return _props.equals(((GGEP)o).getProps());
         return false;
     }
+
+	// overrides Object.hashCode to be consistent with equals
+	public int hashCode() {
+		if(hashCode == 0) {
+			hashCode = 37 * _props.hashCode();
+		}
+		return hashCode;
+	}
 
 
     private String toHexString(byte[] bytes) {
