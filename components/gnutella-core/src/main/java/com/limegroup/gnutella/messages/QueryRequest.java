@@ -973,7 +973,7 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
 
-    /*    
+    /**
      * Returns true if the query source is a firewalled servent.
      */
     public boolean isFirewalledSource() {
