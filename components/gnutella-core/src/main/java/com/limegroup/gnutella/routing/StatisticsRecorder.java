@@ -195,7 +195,8 @@ public class StatisticsRecorder
                     String statValue = null;
                     if (value instanceof PercentageStatisticValue) 
                     {
-                        percentValue = (PercentageStatisticValue)value;
+                        PercentageStatisticValue percentValue = 
+                            (PercentageStatisticValue)value;
                         statValue = new String(value.calculatePercent() + " " +
                             value.getMetric());
                     }
@@ -328,8 +329,16 @@ class PercentageStatisticValue extends StatisticValue
         return 0;
     }
 
+    /**
+     * Calculate the percentage statistic.  If total count is 0, then 
+     * return 0, avoiding the divide by zero error.
+     */
     double calculatePercent()
     {
+        //check for possible divide by zero error
+        if (count == 0) 
+            return 0;
+        
         double percent = (double)percentCount / (double)count;
         return percent * 100;
     }
