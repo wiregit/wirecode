@@ -23,6 +23,7 @@ public final class HugeTestSuite {
 		suite.addTest(FileDescTester.suite());
 		suite.addTest(AlternateLocationCollectionTest.suite());
 		suite.addTest(UrnCacheTest.suite());
+		suite.addTest(QueryRequestTest.suite());
 		return suite;
 	}
 }
