@@ -31,7 +31,8 @@ import com.sun.java.util.collections.*;
  * So the chances of a false positive RequeryGuid are (1/65000) * (1/65000)
  * This still leaves 10 bytes for randomness, which is PLENTY of GUIDs. 
  */
-public class GUID /* implements Comparable */ {
+public class GUID implements java.lang.Comparable, 
+                             com.sun.java.util.collections.Comparable {
     /** The size of a GUID. */
     private static final int SZ=16;
     /** Used to generated new GUID's. */
@@ -173,6 +174,18 @@ public class GUID /* implements Comparable */ {
         return bytes[8]==(byte)0xFF;
     }
 
+    /** Compares this GUID to o, lexically.  Throws ClassCastException if o not
+     *  a GUID. */
+    public int compareTo(Object o) {
+        byte[] bytes2=((GUID)o).bytes;
+        for (int i=0; i<SZ; i++) {
+            int diff=bytes[i]-bytes2[i];
+            if (diff!=0)
+                return diff;
+        }
+        return 0;
+    }
+
     public boolean equals(Object o) {
         //The following assertions are to try to track down bug X96.
         if (! (o instanceof GUID))
@@ -188,11 +201,19 @@ public class GUID /* implements Comparable */ {
     }
 
     public int hashCode() {
-    //Just add them up
-        int sum=0;
-        for (int i=0; i<SZ; i++)
-            sum+=bytes[i];
-        return sum;
+        //Glum bytes 0..3, 4..7, etc. together into 32-bit numbers.
+        byte[] ba=bytes;
+        final int M1=0x000000FF;
+        final int M2=0x0000FF00;
+        final int M3=0x00FF0000;
+
+        int a=(M1&ba[0])|(M2&ba[1]<<8)|(M3&ba[2]<<16)|(ba[3]<<24);
+        int b=(M1&ba[4])|(M2&ba[5]<<8)|(M3&ba[6]<<16)|(ba[7]<<24);
+        int c=(M1&ba[8])|(M2&ba[9]<<8)|(M3&ba[10]<<16)|(ba[11]<<24);
+        int d=(M1&ba[12])|(M2&ba[13]<<8)|(M3&ba[14]<<16)|(ba[15]<<24);
+
+        //XOR together to yield new 32-bit number.
+        return a^b^c^d;
     }
 
     /** Warning: this exposes the rep!  Do not modify returned value. */
@@ -376,6 +397,26 @@ public class GUID /* implements Comparable */ {
         GUID gReq = new GUID(bytes);
         System.out.println(gReq);
         Assert.that(gReq.isLimeGUID() && gReq.isLimeRequeryGUID());
+
+        //Test hashcode, compareTo for same
+        java.util.Random r=new java.util.Random();       
+        b1=new byte[16];
+        r.nextBytes(b1);
+        b2=new byte[16];
+        System.arraycopy(b1,0,b2,0,16);
+        g1=new GUID(b1);
+        g2=new GUID(b2);
+        Assert.that(g1.compareTo(g2)==0);
+        Assert.that(g2.compareTo(g1)==0);
+        Assert.that(g1.hashCode()==g2.hashCode());
+        System.out.println("Hash: "+Integer.toHexString(g1.hashCode()));
+
+        b2[7]+=1;
+        g2=new GUID(b2);
+        Assert.that(g1.compareTo(g2)<0);
+        Assert.that(g2.compareTo(g1)>0);
+        Assert.that(g1.hashCode()!=g2.hashCode());  //not strictly REQUIRED
+        System.out.println("Hash: "+Integer.toHexString(g2.hashCode()));
     }
     */
 }
