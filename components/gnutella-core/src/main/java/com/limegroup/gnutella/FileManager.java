@@ -33,7 +33,7 @@ public class FileManager {
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in a shared directory with a shareable extension. */
-    protected ArrayList /* of FileDesc */ _files;
+    private ArrayList /* of FileDesc */ _files;
     /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  INVARIANT: For all keys k in
