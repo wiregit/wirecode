@@ -58,43 +58,42 @@ public class SettingsManager implements SettingsInterface
     /** Check the properties file and set props */
     private void initSettings()
     {
+	Properties tempProps = new Properties();
 	fileName_ = System.getProperty("user.home");
 	fileName_ = fileName_ + System.getProperty("file.separator");
 	fileName_ = fileName_ + SettingsInterface.FILE_NAME;
         try {
 	    FileInputStream fis = new FileInputStream(fileName_);
 	    try {
-		props_.load(fis);
+		tempProps.load(fis);
+		loadDefaults();
 		try {
 		    fis.close();
-		    loadDefaults();
-		    validateFile();
+		    validateFile(tempProps);
 		}
-		catch (IOException e){}
+		catch (IOException e){loadDefaults();}
 	    }
-	    catch (IOException e){
-		System.out.println("Loading defaults");
-		loadDefaults();
-	    }
-	}	
-	catch(Exception e){loadDefaults();}
-    } 
+	    catch (IOException e){loadDefaults();}
+	}
+	catch(FileNotFoundException e){loadDefaults();}
+	catch(SecurityException se){loadDefaults();}
+    }
 
     /** Makes sure that each property in the file 
      *  is valid.  If not, it sets that property
      *  to the default value.
      */
-    private void validateFile() throws IOException
+    private void validateFile(Properties tempProps) throws IOException
     {
 	String p;
 	byte b;
 	int i;
-	Enumeration enum = props_.propertyNames();
+	Enumeration enum = tempProps.propertyNames();
 	while(enum.hasMoreElements()){
 	    String key;
 	    try {
 		key = (String)enum.nextElement();
-		p = props_.getProperty(key);
+		p = tempProps.getProperty(key);
 		if(key.equals(SettingsInterface.TTL))
 		    {
 			try {
@@ -165,7 +164,7 @@ public class SettingsManager implements SettingsInterface
 			}
 		    }
 		else if(key.equals(SettingsInterface.KEEP_ALIVE))
-		    {			
+		    {	
 			try {
 			    i = Integer.parseInt(p);
 			    try {

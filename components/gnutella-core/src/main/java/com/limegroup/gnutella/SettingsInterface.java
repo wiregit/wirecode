@@ -82,7 +82,7 @@ public interface SettingsInterface
     public static String STATS                = "STATS";
 
     /** Default name for the properties file */
-    public static String FILE_NAME            = "limetella.props";
+    public static String FILE_NAME            = "limewire.props";
 }
 
 
