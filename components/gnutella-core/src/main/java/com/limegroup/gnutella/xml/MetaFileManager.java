@@ -97,7 +97,6 @@ public class MetaFileManager extends FileManager {
         // *----
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
-        if (cTime == null) Assert.that(isInstallerFile(f), "File is " + f);
         // ----*
         List xmlDocs = new LinkedList();
         if( LimeXMLUtils.isMP3File(f) ) {

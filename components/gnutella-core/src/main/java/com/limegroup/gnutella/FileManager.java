@@ -1048,7 +1048,6 @@ public abstract class FileManager {
         URN oldURN = getURNForFile(f);
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(oldURN);
-        if (cTime == null) Assert.that(isInstallerFile(f), "File is " + f);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
