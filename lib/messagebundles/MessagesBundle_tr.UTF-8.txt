@@ -1626,38 +1626,18 @@ SUPPORT_LIMEWIRE_11=Bağımsız ortam içeriğinin paylaşımını desteklemeye 
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
-#### UPDATE_DIALOG_CAPTION=Update LimeWire
+#### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=LimeWire'ı güncelle
-#### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-UPDATE_MESSAGE=Ağda daha yeni bir LimeWire sürümü saptandı. Lütfen şu sürüme güncelleyiniz:
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 #? UPDATE_MESSAGE_SMALL=
-#### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-UPDATE_SUCCEEDED_MESSAGE=LimeWire güncellemeniz başarıyla tamamlandı. Yeni sürümünüzü kullanmak için lütfen LimeWire'ı yeniden başlatın.
-#### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-UPDATE_WEB_PAGE_ERROR_MESSAGE=Güncelleme için LimeWire web sayfasının açılmasında bir hata oluştu. Güncellemeyi tamamlamak için lütfen internet tarayıcınızla http://www.limewire.com adresini açınız.
-#### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-UPDATE_ERROR_MESSAGE_START=LimeWire güncellemenizde aşağıdaki hatayla karşılaşıldı:
-#### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-UPDATE_ERROR_MESSAGE_END=Lütfen "support@limewire.com"'daki LimeWire desteğe bu hatayı bildiren e-posta gönderiniz. LimeWire'ın yeni sürümünü www.limewire.com'dan indirebilirsiniz.
-#### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-UPDATE_ERROR_ACCESSING_FILE=Sunucudaki zorunlu dosyalara erişimde hata.
-#### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Sunucuyla iletişimde hata.
-#### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-UPDATE_ERROR_LAX_FILE_NOT_FOUND=Yapılandırma dosyanızı konumlandırmada hata.
-#### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-UPDATE_ERROR_LAX_SECURITY=Dosya sisteminize erişim izinlerinde hata.
-#### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-UPDATE_ERROR_LAX_IO=Dosya sisteminize erişimde hata.
-#### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-UPDATE_CANCEL_BUTTON_LABEL=İptal
-#### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-UPDATE_CANCEL_BUTTON_TIP=Güncellemeyi iptal eder.
-#### UPDATE_NOW_TIP=Update LimeWire Now
-UPDATE_NOW_TIP=LimeWire'ı Şimdi günceller.
-#### UPDATE_LATER_TIP=Update LimeWire Later
-UPDATE_LATER_TIP=LimeWire'ı daha sonra günceller.
+#### UPDATE_TITLE=A new version of LimeWire is available.
+#? UPDATE_TITLE=
+#### UPDATE_LATER_LABEL=Update Later
+#? UPDATE_LATER_LABEL=
+#### UPDATE_NOW_LABEL=Update Now
+#? UPDATE_NOW_LABEL=
+#### UPDATE_TIP=Visit http://www.limewire.com to update!
+#? UPDATE_TIP=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user

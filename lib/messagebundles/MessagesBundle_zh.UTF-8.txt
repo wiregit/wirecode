@@ -1626,38 +1626,18 @@ SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=加载 secure settings...
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
-#### UPDATE_DIALOG_CAPTION=Update LimeWire
+#### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=升级 LimeWire
-#### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-#? UPDATE_MESSAGE=
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 #? UPDATE_MESSAGE_SMALL=
-#### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-UPDATE_SUCCEEDED_MESSAGE=LimeWire 升级 完成. 请重启 LimeWire, 使用 新的 版本.
-#### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-UPDATE_WEB_PAGE_ERROR_MESSAGE=打开 LimeWire 主页, 执行 升级 时出现错误. 要完成升级, 请打开 你的 浏览器 浏览 http://www.limewire.com.
-#### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-UPDATE_ERROR_MESSAGE_START=你的 LimeWire 升级中 遇到 下列 错误:
-#### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-UPDATE_ERROR_MESSAGE_END=请把 这个错误 mail 给 LimeWire 的 技术支持 “support@limewire.com”. 你 可以 从 www.limewire.com 下在 新的 版本.
-#### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-UPDATE_ERROR_ACCESSING_FILE=在服务器 上存取必须的 文件 出错.
-#### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-UPDATE_ERROR_COMMUNICATING_WITH_SERVER=服务器 通信 出错.
-#### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-UPDATE_ERROR_LAX_FILE_NOT_FOUND=定位 你的 配置 文件 出错.
-#### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-UPDATE_ERROR_LAX_SECURITY=存取 你的 文件 系统的 权限错误.
-#### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-UPDATE_ERROR_LAX_IO=存取 你的 文件 系 统错误.
-#### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-UPDATE_CANCEL_BUTTON_LABEL=取消
-#### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-UPDATE_CANCEL_BUTTON_TIP=取消 升级.
-#### UPDATE_NOW_TIP=Update LimeWire Now
-UPDATE_NOW_TIP=现在就 升级 LimeWire
-#### UPDATE_LATER_TIP=Update LimeWire Later
-UPDATE_LATER_TIP=以后再 升级 LimeWire.
+#### UPDATE_TITLE=A new version of LimeWire is available.
+#? UPDATE_TITLE=
+#### UPDATE_LATER_LABEL=Update Later
+#? UPDATE_LATER_LABEL=
+#### UPDATE_NOW_LABEL=Update Now
+#? UPDATE_NOW_LABEL=
+#### UPDATE_TIP=Visit http://www.limewire.com to update!
+#? UPDATE_TIP=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user

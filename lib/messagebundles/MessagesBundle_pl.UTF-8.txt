@@ -1626,38 +1626,18 @@ SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Ładowanie secure-settings...
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
-#### UPDATE_DIALOG_CAPTION=Update LimeWire
+#### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Instalowanie poprawek dla LimeWire
-#### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-#? UPDATE_MESSAGE=
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 #? UPDATE_MESSAGE_SMALL=
-#### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-UPDATE_SUCCEEDED_MESSAGE=Instalacja poprawek dla Twojej kopii LimeWire zakończyła się pomyślnie. Nowa wersja zacznie działać w momencie ponownego uruchomienia programu.
-#### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-UPDATE_WEB_PAGE_ERROR_MESSAGE=Podczas próby połączenia ze stroną domową LimeWire celem pobrania nowszej wersji programu wystąpił błąd. Instalację poprawki dokończ poprzez otwarcie w swojej przeglądarce adresu http://www.limewire.com.
-#### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-UPDATE_ERROR_MESSAGE_START=Podczas instalowania poprawek dla Twojej kopii LimeWire wystąpił następujący błąd: 
-#### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-UPDATE_ERROR_MESSAGE_END=Prosimy skontaktować się z działem pomocy technicznej LimeWire, i przesłać informację o tym błędzie na adres "support@limewire.com". W tej sytuacji nowszą wersję programu możesz ściągnąć bezpośrednio ze strony http://www.limewire.com.
-#### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-UPDATE_ERROR_ACCESSING_FILE=Błąd podczas próby dostępu do plików z serwera.
-#### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Błąd podczas próby połączenia z serwerem.
-#### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-UPDATE_ERROR_LAX_FILE_NOT_FOUND=Błąd związany z próbą odnalezienia pliku konfiguracyjnego.
-#### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-UPDATE_ERROR_LAX_SECURITY=Błąd związany z prawami dostępu w Twoim systemie plików.
-#### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-UPDATE_ERROR_LAX_IO=Błąd podczas próby dostępu do Twojego systemu plików.
-#### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-UPDATE_CANCEL_BUTTON_LABEL=Anuluj
-#### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-UPDATE_CANCEL_BUTTON_TIP=Anulowanie instalacji poprawek.
-#### UPDATE_NOW_TIP=Update LimeWire Now
-UPDATE_NOW_TIP=Zainstaluj poprawki do LimeWire
-#### UPDATE_LATER_TIP=Update LimeWire Later
-UPDATE_LATER_TIP=Zainstaluj poprawki do LimeWire później.
+#### UPDATE_TITLE=A new version of LimeWire is available.
+#? UPDATE_TITLE=
+#### UPDATE_LATER_LABEL=Update Later
+#? UPDATE_LATER_LABEL=
+#### UPDATE_NOW_LABEL=Update Now
+#? UPDATE_NOW_LABEL=
+#### UPDATE_TIP=Visit http://www.limewire.com to update!
+#? UPDATE_TIP=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user

@@ -1626,38 +1626,18 @@ SUPPORT_LIMEWIRE_11=Bοηθήστε την υποστήριξη του μοιρ�
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
-#### UPDATE_DIALOG_CAPTION=Update LimeWire
+#### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Aναβάθμιση LimeWire
-#### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-UPDATE_MESSAGE=Mια νέα έκδοση του LimeWire εντοπίστηκε στο δίκτυο. Παρακαλώ αναβαθμιστείτε στην έκδοση
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 UPDATE_MESSAGE_SMALL=Mια νέα έκδοση είναι διαθέσιμη, αναβάθμιση;
-#### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-UPDATE_SUCCEEDED_MESSAGE=H αναβάθμιση του LimeWire σας ολοκληρώθηκε επιτυχώς. Παρακαλώ επανεκκινήστε το LimeWire για να χρησιμοποιήσετε την νέα έκδοση.
-#### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-UPDATE_WEB_PAGE_ERROR_MESSAGE=Yπήρξε ένα σφάλμα κατά το άνοιγμα της ιστοσελίδας του LimeWire για την πραγματοποίηση της αναβάθμισης. Για να ολοκληρώσετε την αναβάθμιση, παρακαλώ ανοίξτε τον browser  σας στο http://www.limewire.com.
-#### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-UPDATE_ERROR_MESSAGE_START=H αναβάθμιση του LimeWire σας εντόπισε το ακόλουθο σφάλμα:
-#### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-UPDATE_ERROR_MESSAGE_END=Παρακαλώ στείλτε e-mail στην υποστήριξη του LimeWire στο "support@limewire.com" με αυτό το σφάλμα. Mπορείτε να κατεβάσετε την νέα έκδοση του LimeWire από το www.limewire.com.
-#### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-UPDATE_ERROR_ACCESSING_FILE=Σφάλμα πρόσβασης στα αναγκαία αρχεία στον server.
-#### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Σφάλμα  επικοινωνίας  με τον server.
-#### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-UPDATE_ERROR_LAX_FILE_NOT_FOUND=Σφάλμα εντόπισης των 
-#### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-UPDATE_ERROR_LAX_SECURITY=Σφάλμα με τα δικαιώματα πρόσβασης στο αρχείο συστήματος.
-#### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-UPDATE_ERROR_LAX_IO=Σφάλμα πρόσβασης στο αρχείο συστήματος.
-#### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-UPDATE_CANCEL_BUTTON_LABEL=Άκυρο
-#### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-UPDATE_CANCEL_BUTTON_TIP=Aκύρωση Aναβάθμισης
-#### UPDATE_NOW_TIP=Update LimeWire Now
-UPDATE_NOW_TIP=Aναβάθμιση του LimeWire Tώρα
-#### UPDATE_LATER_TIP=Update LimeWire Later
-UPDATE_LATER_TIP=Aναβάθμιση του LimeWire Aργότερα
+#### UPDATE_TITLE=A new version of LimeWire is available.
+#? UPDATE_TITLE=
+#### UPDATE_LATER_LABEL=Update Later
+#? UPDATE_LATER_LABEL=
+#### UPDATE_NOW_LABEL=Update Now
+#? UPDATE_NOW_LABEL=
+#### UPDATE_TIP=Visit http://www.limewire.com to update!
+#? UPDATE_TIP=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user

@@ -1626,38 +1626,18 @@ SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Secure-settings töltése...
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
-#### UPDATE_DIALOG_CAPTION=Update LimeWire
+#### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Update LimeWire
-#### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-#? UPDATE_MESSAGE=
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
 #? UPDATE_MESSAGE_SMALL=
-#### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-UPDATE_SUCCEEDED_MESSAGE=LimeWire update sikeresen befejeződött. Kérem indítsa újra a LimeWire programot, hogy az új verziót használhassa.
-#### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-UPDATE_WEB_PAGE_ERROR_MESSAGE=Nem lehetett megnyitni a LimeWire honlap oldalát az update végrehajtásához. Az update befejezéséhez kérem nyissa meg böngészőjével a http://www.limewire.com címet.
-#### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-UPDATE_ERROR_MESSAGE_START=A LimeWire update a következő hibát találta:
-#### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-UPDATE_ERROR_MESSAGE_END=Kérem küldje el a hiba leírást a "support@limewire.com" email címre. Az új verziót letöltheti a www.limewire.com címről.
-#### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-UPDATE_ERROR_ACCESSING_FILE=Hiba a szükséges fileok szerveren való elérésekor.
-#### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Hiba a szerverrel való kommunikációnál.
-#### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-UPDATE_ERROR_LAX_FILE_NOT_FOUND=Hiba a konfigurációs file keresésekor.
-#### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-UPDATE_ERROR_LAX_SECURITY=Hiba az Ön filerendszerén a hozzáféréssel.
-#### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-UPDATE_ERROR_LAX_IO=Hiba az Ön filerendszerének elérésekor.
-#### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-UPDATE_CANCEL_BUTTON_LABEL=Mégsem
-#### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-UPDATE_CANCEL_BUTTON_TIP=Update megszakítása.
-#### UPDATE_NOW_TIP=Update LimeWire Now
-UPDATE_NOW_TIP=LimeWire update most.
-#### UPDATE_LATER_TIP=Update LimeWire Later
-UPDATE_LATER_TIP=LimeWire update később.
+#### UPDATE_TITLE=A new version of LimeWire is available.
+#? UPDATE_TITLE=
+#### UPDATE_LATER_LABEL=Update Later
+#? UPDATE_LATER_LABEL=
+#### UPDATE_NOW_LABEL=Update Now
+#? UPDATE_NOW_LABEL=
+#### UPDATE_TIP=Visit http://www.limewire.com to update!
+#? UPDATE_TIP=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
