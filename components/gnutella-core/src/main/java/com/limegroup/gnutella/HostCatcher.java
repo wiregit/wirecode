@@ -823,7 +823,7 @@ public class HostCatcher {
      * 
      * @return the total number of hosts stored 
      */
-    public int getNumHosts() {
+    public synchronized int getNumHosts() {
         return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
             FREE_ULTRAPEER_SLOTS_SET.size();
     }
@@ -831,7 +831,7 @@ public class HostCatcher {
     /**
      * Returns the number of marked ultrapeer hosts.
      */
-    public int getNumUltrapeerHosts() {
+    public synchronized int getNumUltrapeerHosts() {
         return ENDPOINT_QUEUE.size(GOOD_PRIORITY)+FREE_LEAF_SLOTS_SET.size()+
             FREE_ULTRAPEER_SLOTS_SET.size();
     }
@@ -1093,17 +1093,17 @@ public class HostCatcher {
          * connection to the internet, we can fetch from gWebCaches
          * if needed.
          */
-        synchronized void resetFetchTime() {
+        void resetFetchTime() {
             nextAllowedFetchTime = 0;
         }
         
         /**
          * Determines whether or not we need more hosts.
          */
-        synchronized boolean needsHosts(long now) {
+        private synchronized boolean needsHosts(long now) {
             synchronized(HostCatcher.this) {
                 return getNumHosts() == 0 ||
-                       (!RouterService.isConnected() && _failures > 200);
+                    (!RouterService.isConnected() && _failures > 200);
             }
         }
         
