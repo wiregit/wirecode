@@ -50,7 +50,8 @@ public class GUESSStatistics {
         while (numAttempted < 20) {
             QueryRequest qr = new QueryRequest((byte)1, 0, 
                                                searchKey.substring(0,
-                                                                   size-chop));
+                                                                   size-chop),
+                                               false);
             if (++chop > 3)
                 chop = 0;
             try {

@@ -242,7 +242,7 @@ public class LeafRoutingTest extends TestCase {
         drain(old1);
         drain(old2);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
         ultrapeer1.send(qr);
         ultrapeer1.flush();
 
@@ -258,7 +258,7 @@ public class LeafRoutingTest extends TestCase {
         drain(ultrapeer2);
         drain(old2);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
         old1.send(qr);
         old1.flush();
 

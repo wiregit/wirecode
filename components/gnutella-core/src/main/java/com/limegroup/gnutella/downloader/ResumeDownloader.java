@@ -114,6 +114,8 @@ public class ResumeDownloader extends ManagedDownloader
                                 null,              //metadata
                                 true,              //is requery
                                 null,              //requested types
-                                queryUrns);        //requested urns (if any)
+                                queryUrns,         //requested urns (if any)
+                                // firewalled status....
+                                !RouterService.acceptedIncomingConnection());
     }
 }

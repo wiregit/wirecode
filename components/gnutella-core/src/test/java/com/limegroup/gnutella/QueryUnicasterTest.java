@@ -72,7 +72,7 @@ public class QueryUnicasterTest extends TestCase {
             QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
 
         // add a Query
-        QueryRequest qr = new QueryRequest((byte)2, 0, "Susheel");
+        QueryRequest qr = new QueryRequest((byte)2, 0, "Susheel", false);
         assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
         QueryUnicaster.instance().addQuery(qr, null);
         assertTrue(QueryUnicaster.instance().getQueryNumber() == 1);
@@ -147,7 +147,7 @@ public class QueryUnicasterTest extends TestCase {
         }
 
         // add a Query
-        QueryRequest qr = new QueryRequest((byte)2, 0, "Daswani");
+        QueryRequest qr = new QueryRequest((byte)2, 0, "Daswani", false);
         QueryUnicaster.instance().addQuery(qr, null);
 
         // add these endpoints....

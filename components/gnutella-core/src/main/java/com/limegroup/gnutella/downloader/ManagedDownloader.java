@@ -543,7 +543,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 null,           //metadata query
                                 true,           //mark as requery
                                 null,           //requested URNs
-                                extractUrns()); //the hashes
+                                extractUrns(),  //the hashes
+                                // firewall status....
+                                !RouterService.acceptedIncomingConnection());
                                 
     }
 

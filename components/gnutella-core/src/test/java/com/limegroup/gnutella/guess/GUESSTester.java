@@ -106,7 +106,7 @@ public class GUESSTester extends TestCase {
             assertTrue(testAck("10.254.0.19", 6346) > 0);
             assertTrue(testQuery("10.254.0.19", 6346,
                                  new QueryRequest((byte) 1, 0, 
-                                                  "morrissey")) != null);
+                                                  "morrissey", false)) != null);
         }
         catch (Exception whatever) {
             assertTrue(false);
@@ -121,7 +121,7 @@ public class GUESSTester extends TestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-        QueryRequest qr = new QueryRequest((byte)1, 0, "susheel");
+        QueryRequest qr = new QueryRequest((byte)1, 0, "susheel", false);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);

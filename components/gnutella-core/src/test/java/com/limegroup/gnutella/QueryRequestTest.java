@@ -36,12 +36,12 @@ public final class QueryRequestTest extends TestCase {
 	 */
 	public void testLegacyUnitTest() {
         int u2=0x0000FFFF;
-        QueryRequest qr=new QueryRequest((byte)3,u2,"");
+        QueryRequest qr=new QueryRequest((byte)3,u2,"", false);
        
 		assertEquals("min speeds should be equal", u2, qr.getMinSpeed());
 		assertEquals("queries should be equal", "", qr.getQuery());
 
-        qr=new QueryRequest((byte)3, 1,"ZZZ");		
+        qr=new QueryRequest((byte)3, 1,"ZZZ", false);		
 		assertEquals("min speeds should be equal", (byte)1, qr.getMinSpeed());
 		assertEquals("queries should be equal", "ZZZ", qr.getQuery());
 
@@ -122,7 +122,7 @@ public final class QueryRequestTest extends TestCase {
 	 */
 	public void testQueryRequestThreeArgumentConstructor() {
 		String query = "file";
-		QueryRequest qr = new QueryRequest((byte)7, 0, query);
+		QueryRequest qr = new QueryRequest((byte)7, 0, query, false);
 		String storedQuery = qr.getQuery();
 		assertEquals("query strings should be equal", query, storedQuery);
 		assertEquals("rich query should be the empty string", "", qr.getRichQuery());
@@ -130,7 +130,8 @@ public final class QueryRequestTest extends TestCase {
 					 qr.getRequestedUrnTypes(), Collections.EMPTY_SET);
 		assertEquals("URN Set should be the empty set", 
 					 qr.getQueryUrns(), Collections.EMPTY_SET);
-		assertEquals("min speeds don't match", 0, qr.getMinSpeed());
+        // the min speed should be 128 cuz we convert 0s to such....
+		assertEquals("min speeds don't match", 128, qr.getMinSpeed());
 
 		try {
 			Set queryUrns = qr.getQueryUrns();
@@ -165,8 +166,10 @@ public final class QueryRequestTest extends TestCase {
 		queryUrns.add(HugeTestUtils.URNS[4]);
 
 		byte[] guid = QueryRequest.newQueryGUID(isRequery);
-		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, richQuery, 
-										   isRequery, requestedUrnTypes, queryUrns);
+		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
+                                           richQuery, isRequery, 
+                                           requestedUrnTypes, queryUrns,
+                                           false);
 		
 		assertEquals("ttls should be equal", ttl, qr.getTTL());
 		assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
@@ -224,4 +227,74 @@ public final class QueryRequestTest extends TestCase {
 		}
 		return sb.toString();
 	}
+
+
+    public void testNewMinSpeedUse() {
+        // test simple use
+        QueryRequest qr = new QueryRequest((byte)3, 0, "susheel", false);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+        qr = new QueryRequest((byte)3, 0, "susheel", true);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
+
+        { // test rich use....
+            byte ttl = 5;
+            int minSpeed = 0;
+            String query = "file i really want";
+            
+            // ideally this would be a real rich query
+            String richQuery = "something";
+            boolean isRequery = false;
+            Set requestedUrnTypes = new HashSet();
+            requestedUrnTypes.add(UrnType.SHA1);
+            Set queryUrns = new HashSet();
+            queryUrns.add(HugeTestUtils.URNS[4]);
+            
+            byte[] guid = QueryRequest.newQueryGUID(isRequery);
+            qr = new QueryRequest(guid, ttl, minSpeed, query, 
+                                  richQuery, isRequery, 
+                                  requestedUrnTypes, queryUrns,
+                                  false);
+            assertTrue(qr.desiresXMLResponses());
+            assertTrue(!qr.isFirewalledSource());
+            qr = new QueryRequest(guid, ttl, minSpeed, query, 
+                                  richQuery, isRequery, 
+                                  requestedUrnTypes, queryUrns,
+                                  true);
+            assertTrue(qr.desiresXMLResponses());
+            assertTrue(qr.isFirewalledSource());
+        }
+
+        //String is empty.
+        byte[] payload = new byte[2+1];
+        // these two don't matter....
+        payload[2] = (byte) 0;
+        payload[1] = (byte) 0;
+
+        // first test....
+        payload[0] = (byte) 0x80;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+
+        // first test....
+        payload[0] = (byte) 0x81;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
+
+        // first test....
+        payload[0] = (byte) 0x82;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+
+        // first test....
+        payload[0] = (byte) 0x83;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.isFirewalledSource());
+    }
+
 }

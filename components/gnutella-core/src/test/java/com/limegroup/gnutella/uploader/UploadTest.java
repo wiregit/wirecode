@@ -310,7 +310,7 @@ public class UploadTest extends TestCase {
         //Establish push route
         Connection c=new Connection(address, port);
         c.initialize();
-        QueryRequest query=new QueryRequest((byte)5, 0, "txt");
+        QueryRequest query=new QueryRequest((byte)5, 0, "txt", false);
         c.send(query);
         c.flush();
         QueryReply reply=null;
@@ -369,7 +369,7 @@ public class UploadTest extends TestCase {
         //Establish push route
         Connection c=new Connection(address, port);
         c.initialize();
-        QueryRequest query=new QueryRequest((byte)5, 0, "txt");
+        QueryRequest query=new QueryRequest((byte)5, 0, "txt", false);
         c.send(query);
         c.flush();
         QueryReply reply=null;
@@ -587,7 +587,7 @@ public class UploadTest extends TestCase {
         //Establish push route
         Connection c=new Connection(address, port);
         c.initialize();
-        QueryRequest query=new QueryRequest((byte)5, 0, "txt");
+        QueryRequest query=new QueryRequest((byte)5, 0, "txt", false);
         c.send(query);
         c.flush();
         QueryReply reply=null;
