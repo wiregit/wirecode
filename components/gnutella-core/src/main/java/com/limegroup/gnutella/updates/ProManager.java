@@ -92,6 +92,7 @@ public class ProManager {
     throws IOException, UnsupportedEncodingException {
         FileOutputStream fos =null;
         SSLSocket socket = null;
+        File file = null;
         try {
             Assert.that(canBuyPro());
             //1. open a secure socket to LimeWire server.
@@ -119,22 +120,32 @@ public class ProManager {
             os.write(info);
             os.flush();
             //4. Server will send back a signed file, save it.
-            File file=new File(CommonUtils.getUserSettingsDir(),"ProFile");
-            fos = new FileOutputStream(file);
             int a = 0;
             while(a!=-1) {
                 a = is.read();
-                if(a!=-1)
+                if(a!=-1) {
+                    if(file==null) { //create file the first time we have data
+                        file=
+                        new File(CommonUtils.getUserSettingsDir(),"ProFile");
+                        fos = new FileOutputStream(file);
+                    }
                     fos.write(a);
+                }
             }
-            return true;
-        } catch (Exception e) {           
+            //Now if the server could not authenticate credit card, it will
+            //simply close the connection.
+            if(fos==null && file==null)
+                return false;
+            return true;//we have written the file.
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         } finally {
             //always close the file and the socket
-            fos.close();//this will flush it automatically
-            socket.close();
+            if(fos!=null)
+                fos.close();//this will flush it automatically
+            if(socket!=null)
+                socket.close();
         }
     }
     
