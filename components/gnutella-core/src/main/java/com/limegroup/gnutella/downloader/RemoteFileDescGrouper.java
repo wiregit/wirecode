@@ -167,7 +167,7 @@ class RemoteFileDescGrouper implements Serializable {
         //Convert rfd to a RemoteFileDesc2 so we can store auxilliary
         //information in ManagedDownloader.
         repOk();
-        RemoteFileDesc rfd2=new RemoteFileDesc2(rfd, false);
+        RemoteFileDesc rfd2 = new RemoteFileDesc2(rfd);
         File incompleteFile=incompleteFileManager.getFile(rfd2);
 
         //Compare the incomplete file for rfd with the incomplete file for each
