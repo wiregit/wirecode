@@ -3,7 +3,7 @@ package com.limegroup.gnutella.util;
 import com.limegroup.gnutella.Assert;
 import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.NoSuchElementException;
-
+import com.sun.java.util.collections.Iterator;
 
 /** 
  * A class for maintaining the objects in a binary heap form. Its a MAX heap,
@@ -213,6 +213,31 @@ public class BinaryHeap
         return max;
     }
 
+    /** 
+     * @requires this not modified while iterator in use 
+     * @effects returns an iterator that yields the max element first, then the
+     *   rest of the elements in any order.  
+     */
+    public Iterator iterator() {
+        //TODO1: test me!
+        return new BinaryHeapIterator();
+    }
+
+    class BinaryHeapIterator extends UnmodifiableIterator {
+        int next=1;
+
+        public boolean hasNext() {
+            return next<=currentSize;
+        }
+
+        public Object next() throws NoSuchElementException {
+            if (! hasNext())
+                throw new NoSuchElementException();
+            
+            return array[next++];
+        }
+    }
+
     /** Returns the number of elements in this. */
     public int size() {
         return currentSize;
@@ -271,7 +296,28 @@ public class BinaryHeap
             Assert.that(false);
         } catch (NoSuchElementException e) { }
 
+        //Iterator
+        q=new BinaryHeap(2);
+        Assert.that(! q.iterator().hasNext());
+        q.insert(one);
+        q.insert(two);
+        Iterator iter=q.iterator();
+        Assert.that(iter.hasNext());
+        //first element is max
+        Assert.that(iter.next().equals(two));
+        Assert.that(iter.hasNext());
+        Assert.that(iter.next().equals(one));
+        Assert.that(! iter.hasNext());
+        try {
+            iter.next();
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+        } catch (Exception e) {
+            Assert.that(false);
+        }        
+
         //try inserting when overfilled
+        q=new BinaryHeap(4);
         Assert.that(q.insert(one)==null);
         Assert.that(q.insert(four)==null);
         Assert.that(q.insert(three)==null);
@@ -281,10 +327,11 @@ public class BinaryHeap
         System.out.println("(The spec does not say that the smallest"
                            +" element is removed on overflow.)");
         Assert.that(q.insert(five)!=null);
+        Assert.that(q.insert(five)!=null);
+        Assert.that(q.extractMax().equals(five));      
         Assert.that(q.extractMax().equals(five));      
         Assert.that(q.extractMax().equals(four));
         Assert.that(q.extractMax().equals(three));
-        Assert.that(q.extractMax().equals(two));
         Assert.that(q.isEmpty());
     }
 
