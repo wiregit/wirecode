@@ -27,24 +27,40 @@ public class Sockets {
 	 * Cached <tt>SocketAddress</tt> class.
 	 */
 	private static Class _socketAddressClass;
+	
+	/**
+	 * Cached <tt>setKeepAlive</tt> method.
+	 */
+	private static Method _setKeepAliveMethod;
+	
+	/**
+	 * Cached <tt>connect</tt> method.
+	 */
+	private static Method _connectMethod;
 
 	// statically initialize the socket classes we can so that
 	// we don't have it inefficiently look them up each time
 	static {
-		if(CommonUtils.isJava14OrLater()) {
-			try {
+	    try {
+	        if(CommonUtils.isJava13OrLater()) {
+				_socketClass = Class.forName("java.net.Socket");
+				_setKeepAliveMethod = _socketClass.getMethod("setKeepAlive",
+				    new Class[] { Boolean.TYPE } );
+            }
+    		if(CommonUtils.isJava14OrLater()) {
 				Class socketAddress = 
 					Class.forName("java.net.InetSocketAddress");
 				_inetAddressConstructor = 
 					socketAddress.getConstructor(new Class[] { 
 						String.class, Integer.TYPE 
 					});
-				_socketClass = Class.forName("java.net.Socket");
 				_socketAddressClass = Class.forName("java.net.SocketAddress");
-			} catch(Exception e) {
-				// should never happen on 1.4, so display error if it does
-				ErrorService.error(e);
-			}
+				_connectMethod = _socketClass.getMethod("connect", 
+                    new Class[] { _socketAddressClass, Integer.TYPE });
+            }
+		} catch(Exception e) {
+			// should never happen on 1.4, so display error if it does
+			ErrorService.error(e);
 		} 
 	}
 
@@ -66,10 +82,8 @@ public class Sockets {
             //Call socket.setKeepAlive(on) using reflection.  See below for
             //any explanation of why reflection must be used.
             try {
-                Class socketClass=socket.getClass();
-                Method m=socketClass.getMethod("setKeepAlive",
-                    new Class[] { Boolean.TYPE });
-                m.invoke(socket, new Object[] { new Boolean(on) });
+                _setKeepAliveMethod.invoke(socket, 
+                    new Object[] { on ? Boolean.TRUE : Boolean.FALSE });
                 return true;
             } catch (Exception ignored) { 
                 //I don't like generic "catch Exception"'s, but I think it's
@@ -115,9 +129,7 @@ public class Sockets {
 				Object addr = _inetAddressConstructor.newInstance(
                     new Object[] { host, new Integer(port) });
 
-                Method connect = _socketClass.getMethod("connect", 
-                    new Class[] { _socketAddressClass, Integer.TYPE });
-                connect.invoke(ret, 
+                _connectMethod.invoke(ret, 
                     new Object[] { addr, new Integer(timeout) });
                 return (Socket)ret;
             } catch (InvocationTargetException e) {
