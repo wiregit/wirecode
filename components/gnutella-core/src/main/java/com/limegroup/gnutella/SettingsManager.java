@@ -1308,14 +1308,6 @@ public final class SettingsManager {
         setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
 		setAdVersion(DEFAULT_AD_VERSION);
-		
-		try {
-		    setSaveDirectory(DEFAULT_SAVE_DIRECTORY);
-		} catch(IOException e) {
-		    e.printStackTrace();
-		    // this should not happen with the default directory
-		}
-
 		setJarName(DEFAULT_JAR_NAME);
     }
 
