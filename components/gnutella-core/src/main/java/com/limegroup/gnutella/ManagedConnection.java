@@ -459,6 +459,10 @@ public class ManagedConnection extends Connection
         
         try {
             m = super.receive(timeout);
+        } catch(InterruptedIOException ioe) {
+            //we read nothing in this timeframe,
+            //do not remove, just rethrow.
+            throw ioe;
         } catch(IOException e) {
             if( _manager != null )
                 _manager.remove(this);
