@@ -52,14 +52,14 @@ public class RoutingTester {
             System.out.println("  +sharing at least one file");
             System.out.println("This may take a few seconds...");
         } else {
-            c1.shutdown();
-            c2.shutdown();
+            c1.close();
+            c2.close();
         }
 
         c1=new Connection(host, port);
-        c1.connect();
+        c1.initialize();
         c2=new Connection(host, port);
-        c2.connect();
+        c2.initialize();
 
         //Need to give host a bit of time to add c1 and c2, or they may not
         //broadcast properly right away.  (This took me a while to figure out!)
