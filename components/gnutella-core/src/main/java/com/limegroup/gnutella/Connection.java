@@ -74,12 +74,29 @@ public class Connection {
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
     public static final String _200_OK     = " 200 OK";
+    public static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
     public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
     /** End of line for Gnutella 0.4 */
     public static final String LF="\n";
     
+    /**
+     * Time to wait for inut from user at the remote end. (in milliseconds)
+     */
+    public static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
+    
+    /**
+     * The number of times we will respond to a given challenge 
+     * from the other side, or otherwise, during connection handshaking
+     */
+    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;
+    
+    /**
+	 * Constant handle to the <tt>SettingsManager</tt> for accessing
+	 * various properties.
+	 */
+	private final SettingsManager SETTINGS = SettingsManager.instance();
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.4 connection.
@@ -186,8 +203,37 @@ public class Connection {
         }
     }
     
-    private static class BadHandshakeException extends IOException { }
-    private static class NoGnutellaOkException extends IOException { }
+    private static class BadHandshakeException extends IOException { 
+        /** Root cause for BadHandshakeException */
+        private IOException _originalCause;
+        
+        public BadHandshakeException(IOException originalCause) {
+            _originalCause = originalCause;
+        }
+        
+        /**
+         * prints its own stack trace, plus the stack trace for the
+         * original exception that caused this exception
+         */
+        public void printStackTrace() {
+            super.printStackTrace();
+            System.err.println("Parent Cause:");
+            _originalCause.printStackTrace();
+        }
+    }
+
+    /**
+     * Exception thrown when the other side understands the Gnutella
+     * Handshaking Protocol, but doesnt want to keep the connection up
+     */
+    private static class NoGnutellaOkException extends IOException { 
+        
+        public NoGnutellaOkException() {}
+        
+        public NoGnutellaOkException(String message) {
+            super(message);
+        }
+    }
 
     /*
      * Exactly like initialize, but without the re-connection.
@@ -243,7 +289,7 @@ public class Connection {
             throw e;
         } catch (IOException e) {
             _socket.close();
-            throw new BadHandshakeException();
+            throw new BadHandshakeException(e);
         }
     }
 
@@ -270,11 +316,32 @@ public class Connection {
             //1. Send "GNUTELLA CONNECT" and headers
             sendString(GNUTELLA_CONNECT_06+CRLF);
             sendHeaders(_propertiesWrittenP);   
-            //2. Read "GNUTELLA/0.6 200 OK" and headers.  We require that the
-            //response be at the same protocol level as we sent out.  This is
-            //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
-            //respond with "GNUTELLA OK", only to be confused by the headers
-            //later.
+            
+            //conclude the handshake (This may involve exchange of 
+            //information multiple times with the host at the other end).
+            concludeOutgoingHandshake();
+        }
+    }
+    
+    /**
+     * Responds to the responses/challenges from the host on the other
+     * end of the connection, till a conclusion reaches. Handshaking may
+     * involve multiple steps.
+     * @exception IOException Thrown for variety of reasons, including 
+     * I/O error reading/writing
+     * over the connection, bad response from the other side, and
+     * unreachable conclusion
+     */
+    private void concludeOutgoingHandshake() throws IOException
+    {
+        //2. Read "GNUTELLA /0.6 200 OK" and headers.  We require that the
+        //response be at the same protocol level as we sent out.  This is
+        //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
+        //respond with "GNUTELLA OK", only to be confused by the headers
+        //later.
+        //2.a) This step may involve handshaking multiple times so as
+        //to support challenge/response kind of behaviour
+        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
             String connectLine = readLine();
             //check if the protocol is fine. We dont worry here about the 
             //status code (which dictates whether the connection will 
@@ -284,26 +351,41 @@ public class Connection {
             //read the headers
             _propertiesRead=new Properties();
             readHeaders();
-            
-            //if the connection was accepted (with 200 OK), we should go to the
-            //third step and send back our headers
-            if (! connectLine.equals(GNUTELLA_OK_06))
+
+            //Make up our response and headers
+            HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+                new HandshakeResponse(
+                    connectLine.substring(GNUTELLA_06.length()).trim(), 
+                    _propertiesRead), true);
+
+            //send the response and headers
+            sendString(GNUTELLA_06 + " " 
+                + ourResponse.getStatusLine() + CRLF);
+            sendHeaders(ourResponse.getHeaders());
+
+            //if our response was 200 OK, (or an error code) 
+            //return from the method, we are
+            //done with the handshaking. 
+            //Continue in case response was 200 xxxxx (where xxxxx != OK)
+            if(ourResponse.getStatusCode() == HandshakeResponse.OK){
+                if(ourResponse.getStatusMessage().equals(
+                    HandshakeResponse.OK_MESSAGE)){
+                    //done with handshaking. Return    
+                    return;
+                }
+            }
+            else{
+                //our response was non-OK, return with exception
                 throw new NoGnutellaOkException();
-            else {
-                //3. Send our response and headers
-                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
-                    new HandshakeResponse(_propertiesRead), true);
-                //TODO: should we throw NoGnutellaOkException if we send something
-                //other than "200 OK".  (See line 350 below.)
-                
-                sendString(GNUTELLA_06 + " " 
-                    + ourResponse.getStatusLine() + CRLF);
-                sendHeaders(ourResponse.getHeaders());
             }
         }
-    }  
+            
+        //if we didnt successfully return out of the method, throw an 
+        //I/O Exception to indicate that handshaking didnt reach any
+        //conclusion
+        throw new NoGnutellaOkException("Too much handshaking, no conclusion");
+    }
     
-
     /** 
      * Sends and receives handshake strings for incoming connections,
      * throwing exception if any problems. 
@@ -318,7 +400,8 @@ public class Connection {
         //or "CONNECT/0.6".  As a dirty hack, we use String.endsWith.  This
         //means we will accidentally allow crazy things like "0.4".  Oh well!
         String line=readLine();  
-        if (GNUTELLA_CONNECT_04.endsWith(line)) {
+        if ( !SETTINGS.acceptAuthenticatedConnectionsOnly()
+            && GNUTELLA_CONNECT_04.endsWith(line)) {
             //a) Old style
             if (! readLine().equals(""))  //Get second \n
                 throw new IOException("Bad connect string"); 
@@ -329,12 +412,38 @@ public class Connection {
         } else if (notLessThan06(line)) {
             //b) New style
             _propertiesRead=new Properties();
-            //1. Read GNUTELLA CONNECT
+            //1. Read headers (connect line has already been read)
             readHeaders();
-            //2. Send our response and headers
+            //2. conclude the handshake (This may involve exchange of 
+            //information multiple times with the host at the other end).
+            concludeIncomingHandshake();
+        } else {
+            throw new IOException("Unexpected connect string");
+        }
+    }
+
+    
+    /**
+     * Responds to the handshake from the host on the other
+     * end of the connection, till a conclusion reaches. Handshaking may
+     * involve multiple steps.
+     * @exception IOException Thrown for variety of reasons, including 
+     * I/O error reading/writing
+     * over the connection, bad response from the other side, and
+     * unreachable conclusion
+     */
+    private void concludeIncomingHandshake() throws IOException
+    {
+        //respond to the handshake
+        //This step may involve handshaking multiple times so as
+        //to support challenge/response kind of behaviour
+        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
+            //Send our response and headers
             if (_propertiesWrittenR==null){
                 sendString(GNUTELLA_OK_06+CRLF);
                 sendString(CRLF);  //no headers specified ==> blank line
+                //Thats the end of handshaking in old fashion way
+                return;
             }
             else{
                 HandshakeResponse ourResponse = _propertiesWrittenR.respond(
@@ -343,26 +452,57 @@ public class Connection {
                     + ourResponse.getStatusLine() + CRLF);
                 sendHeaders(ourResponse.getHeaders());   
                 
-                //if our response was not OK, throw an exception so as to
-                //signal the caller to close the connection--without retry.
-                //(Needed to accomodate bad clients, who may not close the
-                //connection, even if they dont receive 200 OK
-                if(ourResponse.notOKStatusCode())
-                    throw new NoGnutellaOkException();
+                //our response should be either OK or UNAUTHORIZED for the
+                //handshake to proceed
+                if((ourResponse.getStatusCode() != HandshakeResponse.OK)
+                    && (ourResponse.getStatusCode() !=
+                    HandshakeResponse.UNAUTHORIZED_CODE)) {
+                    throw new NoGnutellaOkException("Our response: " 
+                        + ourResponse.getStatusLine());
+                }
+                    
+                //read the response from the other side
+                String connectLine;
+                //if we asked the other side to authenticate, give more time
+                //so as to receive user input
+                if(ourResponse.getStatusCode() 
+                    == HandshakeResponse.UNAUTHORIZED_CODE){
+                    connectLine = readLine(USER_INPUT_WAIT_TIME);  
+                    readHeaders(USER_INPUT_WAIT_TIME); 
+                }else{
+                    connectLine = readLine();  
+                    readHeaders();
+                }
+                
+                //if our response was full OK
+                if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
+                    //In this case, we must have received full OK from 
+                    //other side, else drop the connection
+                    if(!connectLine.startsWith(GNUTELLA_OK_06)){
+                        throw new NoGnutellaOkException(
+                            "Response from other side: " + connectLine);
+                    }else{
+                        //else we are done with a successful handshake, 
+                        //and therefore, return
+                        return;
+                    }
+                }
+                else{
+                    //if the connectLine doesnt start with GNUTELLA_06_200,
+                    //thats an unexpected response, and so drop the conection
+                    if(!connectLine.startsWith(GNUTELLA_06_200))
+                        throw new NoGnutellaOkException(
+                            "Response from other side: " + connectLine);
+                }
             }
-            //3. Read GNUTELLA/200 OK, and any private vendor headers.
-            line=readLine();
-            if (! line.startsWith(GNUTELLA_06))
-                throw new IOException("Unexpected response");
-            if (! line.equals(GNUTELLA_OK_06))
-                //e.g., "GNUTELLA/0.6 503 Unavailable"
-                throw new NoGnutellaOkException(); 
-            readHeaders();
-        } else {
-            throw new IOException("Unexpected connect string");
         }
+            
+        //if we didnt successfully return out of the method, throw an 
+        //I/O Exception to indicate that handshaking didnt reach any
+        //conclusion
+        throw new NoGnutellaOkException("Too much handshaking, no conclusion");
     }
-
+    
     /** Returns true iff line ends with "CONNECT/N", where N
      *  is a number greater than or equal "0.6". */
     private static boolean notLessThan06(String line) {
@@ -381,18 +521,24 @@ public class Connection {
     /**
      * Writes the properties in props to network, including the blank line at
      * the end.  Throws IOException if there are any problems.
-     *    @modifies network 
+     * @param props The headers to be sent. Note: null argument is 
+     * acceptable, if no headers need to be sent (still the trailer will
+     * be sent
+     * @modifies network 
      */
     private void sendHeaders(Properties props) throws IOException {
-        Enumeration enum=props.propertyNames();
-        while (enum.hasMoreElements()) {
-            String key=(String)enum.nextElement();
-            String value=props.getProperty(key);
-            if (value==null)
-                value="";
-            sendString(key+": "+value+CRLF);            
-            _propertiesWrittenTotal.put(key, value);
+        if(props != null) {
+            Enumeration enum=props.propertyNames();
+            while (enum.hasMoreElements()) {
+                String key=(String)enum.nextElement();
+                String value=props.getProperty(key);
+                if (value==null)
+                    value="";
+                sendString(key+": "+value+CRLF);   
+                _propertiesWrittenTotal.put(key, value);
+            }
         }
+        //send the trailer
         sendString(CRLF);
     }
 
@@ -403,10 +549,24 @@ public class Connection {
      *     @modifies network 
      */
     private void readHeaders() throws IOException {
+        readHeaders(SETTINGS.getTimeout());
+    }
+    
+    /**
+     * Reads the properties from the network into _propertiesRead, throwing
+     * IOException if there are any problems. 
+     * @param timeout The time to wait on the socket to read data before 
+     * IOException is thrown
+     * @return The line of characters read
+     * @modifies network
+     * @exception IOException if the characters cannot be read within 
+     * the specified timeout
+     */
+    private void readHeaders(int timeout) throws IOException {
         //TODO: limit number of headers read
         while (true) {
             //This doesn't distinguish between \r and \n.  That's fine.
-            String line=readLine();
+            String line=readLine(timeout);
             if (line==null)
                 throw new IOException();   //unexpected EOF
             if (line.equals(""))
@@ -430,20 +590,39 @@ public class Connection {
         _out.write(bytes);
         _out.flush();
     }
-
+    
     /**
      * Reads and returns one line from the network.  A line is defined as a
      * maximal sequence of characters without '\n', with '\r''s removed.  If the
      * characters cannot be read within TIMEOUT milliseconds (as defined by the
      * property manager), throws IOException.  This includes EOF.
-     *
+     * @return The line of characters read
      * @requires _socket is properly set up
      * @modifies network
+     * @exception IOException if the characters cannot be read within 
+     * the specified timeout
      */
     private String readLine() throws IOException {
+        return readLine(SETTINGS.getTimeout());
+    }
+
+    /**
+     * Reads and returns one line from the network.  A line is defined as a
+     * maximal sequence of characters without '\n', with '\r''s removed.  If the
+     * characters cannot be read within the specified timeout milliseconds,
+     * throws IOException.  This includes EOF.
+     * @param timeout The time to wait on the socket to read data before 
+     * IOException is thrown
+     * @return The line of characters read
+     * @requires _socket is properly set up
+     * @modifies network
+     * @exception IOException if the characters cannot be read within 
+     * the specified timeout
+     */
+    private String readLine(int timeout) throws IOException {
         int oldTimeout=_socket.getSoTimeout();
         try {
-            _socket.setSoTimeout(SettingsManager.instance().getTimeout());
+            _socket.setSoTimeout(timeout);
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException();

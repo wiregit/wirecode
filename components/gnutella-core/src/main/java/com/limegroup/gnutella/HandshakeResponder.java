@@ -62,8 +62,10 @@ public interface HandshakeResponder {
      * responding to the connection handshake response just received.  
      * Implementations should respond differently to incoming vs. outgoing 
      * connections.   
+     * @param response The response received from the host on the
+     * other side of teh connection.
      * @param outgoing whether the connection to the remote host is an outgoing
-     *                 connection.
+     * connection.
      */
     public HandshakeResponse respond(HandshakeResponse response, 
          boolean outgoing) throws IOException;

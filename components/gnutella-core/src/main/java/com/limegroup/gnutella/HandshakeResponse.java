@@ -21,8 +21,8 @@ public class HandshakeResponse {
      * the handshake was successful and the connection can be established.
      */
     public static final int OK = 200;
-
-    /**
+    
+     /**
      * The "default" status message in a connection handshake indicating that
      * the handshake was successful and the connection can be established.
      */
@@ -41,7 +41,38 @@ public class HandshakeResponse {
     /** The error message that a node with no slots should give to incoming
      *  connections.  */
     public static final String SLOTS_FULL_MESSAGE = "Service unavailable";
-
+    
+    /**
+     * Default bad status code to be used while rejecting connections
+     */
+    public static final int DEFAULT_BAD_STATUS_CODE = 503;
+    
+    /**
+     * Default bad status message to be used while rejecting connections
+     */
+    public static final String DEFAULT_BAD_STATUS_MESSAGE 
+        = "Service Not Available";
+    
+    /**
+     * status code for unauthorized attempt
+     */
+    public static final int UNAUTHORIZED_CODE = 401;
+    
+    /**
+     * status message for unauthorized attempt
+     */
+    public static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
+    
+    /**
+     * Message indicating that we are unable to authenticate
+     */
+    public static final String UNABLE_TO_AUTHENTICATE 
+        = "Unable To Authenticate";
+    
+    /**
+     * Message indicating that we are trying to authenticate
+     */
+    public static final String AUTHENTICATING = "AUTHENTICATING";
 
     /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
@@ -94,12 +125,45 @@ public class HandshakeResponse {
         this.statusMessage = message;
         this.headers = headers;
     }
-
+    
+    /**
+     * Creates a HandshakeResponse with the desired status line, 
+     * and headers
+     * @param statusLine the status code and status message together used in the
+     * HTTP status line. (e.g., "200 OK", "503 Service Not Available")
+     * @param headers the headers to use in the response.
+     */
+    public HandshakeResponse(String statusLine, Properties headers) { 
+        try{
+            //get the status code and message out of the status line
+            int statusMessageIndex = statusLine.indexOf(" ");
+            this.statusCode = Integer.parseInt(statusLine.substring(0, 
+                statusMessageIndex).trim());
+            this.statusMessage = statusLine.substring(
+                statusMessageIndex).trim();
+        }
+        catch(Exception e){
+            //in case of any exception, use default bad codes
+            this.statusCode = DEFAULT_BAD_STATUS_CODE;
+            this.statusMessage = DEFAULT_BAD_STATUS_MESSAGE;
+        }
+        
+        this.headers = headers;
+    }
+    
     /** 
      * Returns the response code.
      */
     public int getStatusCode() {
         return statusCode;
+    }
+    
+    /**
+     * Returns the status message. 
+     * @return the status message (e.g. "OK" , "Service Not Available" etc.)
+     */
+    public String getStatusMessage(){
+        return statusMessage;
     }
     
     /**
@@ -130,3 +194,4 @@ public class HandshakeResponse {
         return headers;
     }
 }
+

@@ -157,7 +157,6 @@ public class XMLStringUtils
             startIndex = endIndex;
         }
         
-        System.out.println("finished tokenizing");
         //return the list of chopped/tokenized elements    
         return choppedElements;
     }
@@ -204,5 +203,39 @@ public class XMLStringUtils
         }
     }
     
+    /**
+     * The separator used in URIs to separate different parts
+     */
+    private static final char URI_PATH_SEPARATOR = '/';
+    
+    /**
+     * Returns the domain name part from the passed schemaURI
+     * @param schemaURI The schema URI whose corresponding domain name
+     * to be returned
+     * @return the domain name part from the passed schemaURI. e.g.
+     * if passed schemaURI is "http://www.limewire.com/schemas/book.xsd",
+     * the return value is "book". If the passed string is "book.xsd",
+     * the return value is "book"
+     */
+    public static String getDomainName(String schemaURI)
+    {
+        //get the last index of url path separator
+        int lastSeparatorIndex = schemaURI.lastIndexOf(URI_PATH_SEPARATOR);
+        
+        //get the last part after separators
+        String lastPart;
+        if(lastSeparatorIndex != -1)
+            lastPart = schemaURI.substring(lastSeparatorIndex + 1);
+        else
+            lastPart = schemaURI;
+        
+        //if there's an extension, remove it
+        int extensionIndex = lastPart.lastIndexOf('.');
+        if(extensionIndex != -1)
+            return lastPart.substring(0, extensionIndex);
+        else
+            return lastPart;
+        
+    }
     
 }

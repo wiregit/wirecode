@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.security.Authenticator;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -94,12 +95,19 @@ public class ConnectionManager {
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
 
+    /**
+     * For authenticating users
+     */
+    private Authenticator _authenticator;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
+     * @param authenticator Authenticator instance for authenticating users
      */
-    public ConnectionManager(ActivityCallback callback) {
+    public ConnectionManager(ActivityCallback callback, 
+        Authenticator authenticator) {
         _callback = callback;		
+        this._authenticator = authenticator; 
 		_settings = SettingsManager.instance(); 
     }
 
@@ -205,13 +213,10 @@ public class ConnectionManager {
          
          //update the connection count
          try {   
-             synchronized (_incomingConnectionsLock) {
-                 if(connection.isSupernodeClientConnection())
-                     _incomingClientConnections++;
-                 else
-                     _incomingConnections++;
-             }                  
-             
+             //increment the appropriate connection count to reflect the
+             //addition of this new connection
+             incrementConnectionCount(connection, false);    
+             //keep handling the messages on the connection
              sendInitialPingRequest(connection);
              connection.loopForMessages();
          } catch(IOException e) {
@@ -219,17 +224,57 @@ public class ConnectionManager {
              //Internal error!
              _callback.error(ActivityCallback.INTERNAL_ERROR, e);
          } finally {
-             synchronized (_incomingConnectionsLock) {
+            //increment the appropriate connection count to reflect the
+            //addition of this new connection
+            decrementConnectionCount(connection, false);  
+            //if we were leaf to a supernode, reconnect to network 
+            if (connection.isClientSupernodeConnection())
+                lostShieldedClientSupernodeConnection();
+         }
+     }
+
+     /**
+      * Increments the appropriate connection count, based upon the 
+      * type of the new connection opened
+      * (e.g. incoming supernode, outgoing supernode, outgoing leaf etc.)
+      * @param connection The new connection we received that led to
+      * incrementing the count
+      * @param outgoing Flag indicating if the connection is outgoing 
+      * or incoming. True means outgoing, False means incoming
+      */
+     protected void incrementConnectionCount(ManagedConnection connection,
+        boolean outgoing) {
+        if(!outgoing) {
+            synchronized (_incomingConnectionsLock) {
+                 if(connection.isSupernodeClientConnection())
+                     _incomingClientConnections++;
+                 else
+                     _incomingConnections++;
+             }                 
+        }
+     }
+
+     /**
+      * Decrements the appropriate connection count, based upon the 
+      * type of the connection closed
+      * (e.g. incoming supernode, outgoing supernode, outgoing leaf etc.)
+      * @param connection The connection closed that led to
+      * decrementing the count
+      * @param outgoing Flag indicating if the connection was outgoing 
+      * or incoming. True means outgoing, False means incoming
+      */
+     protected void decrementConnectionCount(ManagedConnection connection,
+        boolean outgoing) {
+        if(!outgoing) {
+            synchronized (_incomingConnectionsLock) {
                  if(connection.isSupernodeClientConnection())
                      _incomingClientConnections--;
                  else
                      _incomingConnections--;
-                if (connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-             }
-         }
+            }
+        }
      }
-
+     
     /**
      * @modifies this, route table
      * @effects closes c and removes it from this' connection list and
@@ -378,12 +423,37 @@ public class ConnectionManager {
     }
 
     /**
+     * Checks if the connection received can be accepted,
+     * based upon the type of connection (e.g. client, supernode, 
+     * temporary etc). 
+     * @param receivedConnection The connection we received, for which to 
+     * test if we have incoming slot.
+     * @return true, if we have incoming slot for the connection received,
+     * false otherwise
+     */
+    public boolean hasAvailableIncoming(ManagedConnection receivedConnection) {
+        return hasAvailableIncoming(
+            receivedConnection.isSupernodeClientConnection());
+    }
+    
+    /**
+     * Checks if there is any available slot of any kind.
+     * @return true, if we have incoming slot of some kind,
+     * false otherwise
+     */
+    public boolean hasAnyAvailableIncoming() {
+        //return true, if there's an available Ultrapeer OR leaf slot
+        return (hasAvailableIncoming(false) || 
+            (isSupernode() && hasAvailableIncoming(true)));
+    }
+    
+    /**
      * If leaf==true, returns true if this has slots for incoming leaf
      * connections.  If leaf==false, returns false if this has slots 
      * for incoming supernode or 0.4 connections.  Does not account for
      * supernode capabilities in this decision.
      */
-    public boolean hasAvailableIncoming(boolean leaf) {
+    private boolean hasAvailableIncoming(boolean leaf) {
         SettingsManager settings=SettingsManager.instance();
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
@@ -399,6 +469,15 @@ public class ConnectionManager {
         } else {
             return _incomingConnections < _keepAlive;
         }
+    }
+    
+    
+    /**
+     * Provides handle to the activity callback
+     * @return Handle to the activity callback
+     */
+    ActivityCallback getCallback(){
+        return _callback;
     }
 
     /**
@@ -419,6 +498,14 @@ public class ConnectionManager {
             //else return false
             return false;
         }
+    }
+    
+    /**
+     * Provides handle to the authenticator instance
+     * @return Handle to the authenticator
+     */
+    Authenticator getAuthenticator(){
+        return _authenticator;
     }
     
     /**
@@ -463,7 +550,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    List getInitializedClientConnections2() {
+    public List getInitializedClientConnections2() {
         return _initializedClientConnections;
     }
 
@@ -1030,7 +1117,7 @@ public class ConnectionManager {
          
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
-            Constants.HTTP_ENTRY_SEPARATOR);
+            Constants.ENTRY_SEPARATOR);
         //iterate over the tokens
         while(st.hasMoreTokens()){
             //get an address
@@ -1087,7 +1174,7 @@ public class ConnectionManager {
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
         if (!c.isOutgoing() && 
-                !hasAvailableIncoming(c.isSupernodeClientConnection())) {
+                !hasAvailableIncoming(c)) {
             c.loopToReject(_catcher);     
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");

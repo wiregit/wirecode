@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.security.User;
 
 /**
  *  Callback to notify the GUI of asynchronous backend events.
@@ -143,6 +144,16 @@ public interface ActivityCallback
      */
     public void error(Throwable t);
 
+    //authentication callbacks
+    /**
+     * Asks user to authenticate, and returns the information received from
+     * user
+     * @param host The host who is requesting authentication
+     * @return The authentication information input by user
+     */
+    public User getUserAuthenticationInfo(String host);
+    
+    
 
     /** Could not establish a listening port. */
 	public static final int PORT_ERROR = 0;

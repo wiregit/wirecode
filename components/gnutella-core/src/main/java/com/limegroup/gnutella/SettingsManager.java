@@ -292,9 +292,17 @@ public final class SettingsManager {
     
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
-    private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
+    private final int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
     
-	
+    //authentication settings
+    private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY 
+        = false;
+    private final String DEFAULT_COOKIES_FILE 
+        = "lib" + File.separator + "Cookies.dat";
+    
+    /** Specifies if the node is acting as server */
+    private final boolean DEFAULT_SERVER = false;  
+
 	/**
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
@@ -471,6 +479,20 @@ public final class SettingsManager {
     private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
        = "MIN_SHIELDED_CLIENT_CONNECTIONS";
 
+    
+    //authentication settings
+    private final String ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY
+        = "ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY";
+    
+    /**
+     * The property that denotes the file that stores the 
+     * Schema Transformation DataMap
+     */
+    private final String COOKIES_FILE = "COOKIES_FILE";
+    
+    /** Specifies if the node is acting as server */
+    private final String SERVER = "SERVER";
+    
 	/**
 	 * Constant key for the minimum quality to allow in search results.
 	 */
@@ -618,6 +640,10 @@ public final class SettingsManager {
     private volatile int _maxShieldedClientConnections;
     private volatile int _minShieldedClientConnections;
 
+
+    /** Specifies if the node is acting as server */
+    private volatile boolean _server;
+   
     /** 
 	 * Constant member variable for the main <tt>Properties</tt> instance.
 	 */
@@ -1113,6 +1139,16 @@ public final class SettingsManager {
                 else if(key.equals(LAST_EXPIRE_TIME)){
                     setLastExpireTime((new Long(p)).longValue());
                 }
+                else if(key.equals(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)){
+                    setAcceptAuthenticatedConnectionsOnly(
+                        (new Boolean(p)).booleanValue());
+                }
+                else if(key.equals(COOKIES_FILE)){
+                   setCookiesFile(p);
+                }
+                else if(key.equals(SERVER)){
+                    setServer((new Boolean(p)).booleanValue());
+                }
 				else if(key.equals(CYDOOR_INSTALLER_CALLED)) {
 					setCydoorInstalled((new Boolean(p)).booleanValue());
 				}
@@ -1229,6 +1265,14 @@ public final class SettingsManager {
             DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
         setMinShieldedClientConnections(
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
+
+        //authentication settings
+        setAcceptAuthenticatedConnectionsOnly(
+            DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY);
+        setCookiesFile(DEFAULT_COOKIES_FILE);
+        
+        setServer(DEFAULT_SERVER);
+
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
@@ -1981,6 +2025,33 @@ public final class SettingsManager {
      */
     public long getLastExpireTime(){
         return getLongValue(LAST_EXPIRE_TIME);
+    }
+
+    /**
+     * Tells whether this node should accept authenticated connections only
+     * @return true, if this node should accept authenticated connections
+     * only, false otherwise
+     */
+    public boolean acceptAuthenticatedConnectionsOnly() {
+        return Boolean.valueOf(PROPS.getProperty(
+            ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)).booleanValue();
+    }
+    
+    /**
+     * Returns the name of the file that stores cookies
+     * @return The name of the cookies file
+     */
+    public String getCookiesFile() {
+        return PROPS.getProperty(COOKIES_FILE);
+    }
+    
+    /**
+     * Tells whether the node is gonna be a supernode or not
+     * @return true, if supernode, false otherwise
+     */
+    public boolean isServer()
+    {
+        return _server;
     }
     
 	/**
@@ -3250,6 +3321,39 @@ public final class SettingsManager {
 		return Integer.parseInt(PROPS.getProperty(KEY));
 	}
 
+    /**
+     * Sets the flag indicating whether this node should accept
+     * only authenticated connections
+     * @param flag the flag value to be set
+     */
+    public void setAcceptAuthenticatedConnectionsOnly(
+        final boolean flag) {
+        PROPS.put(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY, 
+            (new Boolean(flag)).toString());
+    }
+    
+    /**
+     * Sets the name of the file that stores cookies
+     * @param filename The file name to be set
+     */
+    public void setCookiesFile(final String filename) {
+        PROPS.put(COOKIES_FILE, filename);
+    }
+    
+    /**
+     * Sets whether the node is a server or not
+     * @param isServer true, if the node is server, false otherwise
+     */
+    public void setServer(boolean isServer){
+        this._server = isServer;
+        PROPS.put(SERVER, 
+            (new Boolean(isServer)).toString());
+    }
+    
+    
+    /******************************************************
+     ***************  END OF MUTATOR METHODS **************
+     ******************************************************/
 
     /** 
 	 * Writes out the properties file to with the specified

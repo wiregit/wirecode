@@ -47,8 +47,7 @@ public class StandardMessageRouter
         int hops = (int)pingRequest.getHops();
         int ttl = (int)pingRequest.getTTL();
         if (   (hops+ttl > 2) 
-            && !_manager.hasAvailableIncoming(false) 
-            && !(_manager.isSupernode() && _manager.hasAvailableIncoming(true)))
+            && !_manager.hasAnyAvailableIncoming())
             return;
 
         //for crawler pings we shouldn't send the pong with hops+1 as TTL.

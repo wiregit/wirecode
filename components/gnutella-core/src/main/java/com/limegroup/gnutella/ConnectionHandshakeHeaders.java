@@ -20,4 +20,9 @@ public class ConnectionHandshakeHeaders
     public static final String X_PONG_CACHING       = "X-Pong-Caching";
     public static final String X_SUPERNODE_NEEDED   = "X-Ultrapeer-Needed";
     public static final String USER_AGENT           = "User-Agent";
+    public static final String X_USERNAME         = "X-Username";
+    public static final String X_PASSWORD         = "X-Password";
+    public static final String X_DOMAINS_AUTHENTICATED = 
+        "X-Domains-Authenticated";
+    public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
 }

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
@@ -218,13 +219,30 @@ public class ManagedConnection
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
+    
+    /**
+     * The host to which are opening connection
+     */
+    private String _host = null;
 
+    /**
+     * The domain to which this connection is authenticated
+     */
+    private Set _domains = null;
+    
+    /**
+	 * Constant handle to the <tt>SettingsManager</tt> for accessing
+	 * various properties.
+	 */
+	private final SettingsManager SETTINGS = SettingsManager.instance();
+    
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
                       int port,
                       MessageRouter router,
                       ConnectionManager manager) {
         this(host, port, router, manager, false);
+        this._host = host;
     }
 
     /**
@@ -251,9 +269,9 @@ public class ManagedConnection
                   null : 
                   (manager.isSupernode() ?
                       (HandshakeResponder)
-                          (new SupernodeHandshakeResponder(manager)) :
+                      (new SupernodeHandshakeResponder(manager, router, host)) :
                       (HandshakeResponder)
-                          (new ClientHandshakeResponder(manager))),
+                      (new ClientHandshakeResponder(manager, router, host))),
               !isRouter);
         
         _router = router;
@@ -276,8 +294,10 @@ public class ManagedConnection
                       ConnectionManager manager) {
         super(socket, 
             manager.isSupernode() ? 
-            (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) : 
-            (HandshakeResponder)(new ClientHandshakeResponder(manager)));
+            (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
+                router, socket.getInetAddress().getHostAddress())) : 
+            (HandshakeResponder)(new ClientHandshakeResponder(manager,
+                router, socket.getInetAddress().getHostAddress())));
         _router = router;
         _manager = manager;
 
@@ -638,16 +658,59 @@ public class ManagedConnection
     public void setPersonalFilter(SpamFilter filter) {
         _personalFilter = filter;
     }
+    
+    /**
+     * Returns the domain to which this connection is authenticated
+     * @return the set (of String) of domains to which this connection 
+     * is authenticated. Returns
+     * null, in case of unauthenticated connection
+     */
+    public Set getDomains(){
+        //Note that this method is not synchronized, and so _domains may 
+        //get initialized multiple times (in case multiple threads invoke this
+        //method, before domains is initialized). But thats not a problem as
+        //all the instances will have same values, and all but 1 of them 
+        //will get garbage collected
+        
+        if(_domains == null){
+            //initialize domains
+            _domains = createDomainSet();
+        }
+        //return the initialized domains
+        return _domains;
+//        return (String[])_domains.toArray(new String[0]);
+    }
 
-    //
-    // Begin Message dropping and filtering calls
-    //
+    /**
+     * creates the set (of String) of domains from the properties sent/received
+     * @return the set (of String) of domains
+     */
+    private Set createDomainSet(){
+        Set domainSet;
+        //get the domain property
+        //In case of outgoing connection, we received the domains from the
+        //remote host to whom we authenticated, viceversa for incoming
+        //connection
+        String domainsAuthenticated;
+        if(this.isOutgoing())
+            domainsAuthenticated = getProperty(
+                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+        else
+            domainsAuthenticated = getPropertyWritten(
+                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
 
-
-    //
-    // Begin reply forwarding calls
-    //
-
+        //for unauthenticated connections
+        if(domainsAuthenticated == null){
+            //if no authentication done, initialize to a default domain set
+            domainSet = User.createDefaultDomainSet();
+        }else{
+            domainSet = StringUtils.getSetofValues(domainsAuthenticated);
+        }
+        
+        //return the domain set
+        return domainSet;
+    }
+    
     /**
      * This method is called when a reply is received for a PingRequest
      * originating on this Connection.  So, just send it back.
@@ -912,6 +975,24 @@ public class ManagedConnection
             return !Boolean.valueOf(value).booleanValue();
     }
 
+    /** Returns true iff this connection is a temporary connection as per
+     the headers. */
+    public boolean isTempConnection() {
+        //get the X-Temp-Connection from either the headers received or written.
+        //Preference is given to the received headers
+        String value=getProperty(ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
+        if (value==null)
+            value = getPropertyWritten(
+                ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
+        
+        //if X-Temp-Connection header is not received, return false, else
+        //return the value received
+        if(value == null)
+            return false;
+        else
+            return Boolean.valueOf(value).booleanValue();
+    }
+    
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
      *  if I wrote "Supernode: true" and this connection wrote "Supernode:
      *  false, and <b>both support query routing</b>. */
@@ -976,15 +1057,16 @@ public class ManagedConnection
     }
     
     /**
-     * Returns string representing addresses of other hosts that may
-     * be connected thru gnutella.
+     * Adds string representing addresses of other hosts that may
+     * be connected thru gnutella, 
+     * (to corresponding header keys) in the passed properties. 
+     * Also includes the addresses of the
+     * supernodes it is connected to
      * @param properties The properties instance to which to add host addresses
      * @param manager Reference to the connection manager from whom 
      * to retrieve the addressses
-     * @return Returns string representing addresses of other hosts that may
-     * be connected thru gnutella. Also includes the addresses of the
-     * supernodes it is connected to
-     * <p> Host address string returned is in the form:
+     * <p> Host address string added (to corresponding header keys)
+     * is in the form:
      * <p> IP Address:Port [,IPAddress:Port]* 
      * <p> e.g. 123.4.5.67:6346,234.5.6.78:6347
      */
@@ -999,7 +1081,7 @@ public class ManagedConnection
             //if the first endpoint that we are adding
             if(!isFirstHost){
                 //append separator to separate the entries
-                hostString.append(Constants.HTTP_ENTRY_SEPARATOR);
+                hostString.append(Constants.ENTRY_SEPARATOR);
             }else{
                 //unset the flag
                 isFirstHost = false;
@@ -1030,7 +1112,7 @@ public class ManagedConnection
             //if the first endpoint that we are adding
             if(!isFirstHost){
                 //append separator to separate the entries
-                hostString.append(Constants.HTTP_ENTRY_SEPARATOR);
+                hostString.append(Constants.ENTRY_SEPARATOR);
             }else{
                 //unset the flag
                 isFirstHost = false;
@@ -1120,21 +1202,32 @@ public class ManagedConnection
      * connection handshake while accepting incoming connections
      */
     private static class SupernodeHandshakeResponder 
-        implements HandshakeResponder{
+        extends AuthenticationHandshakeResponder{
         ConnectionManager _manager;
+        MessageRouter _router;
         
-        public SupernodeHandshakeResponder(ConnectionManager manager){
+        /**
+         * Creates a new instance of ClientHandshakeResponder
+         * @param manager Instance of connection manager, managing this 
+         * connection
+         * @param router Instance of message router, to get correct local 
+         * address at runtime.
+         * @param host The host with whom we are handshaking
+         */
+        public SupernodeHandshakeResponder(ConnectionManager manager,
+            MessageRouter router, String host) {
+            super(manager, host);    
             this._manager = manager;
+            this._router = router;
         }
         
-        public HandshakeResponse respond(HandshakeResponse response, 
-            boolean outgoing) {
+        //inherit doc comment
+        protected HandshakeResponse respondUnauthenticated(
+            HandshakeResponse response, boolean outgoing) throws IOException {
             
             if(!outgoing) {
                 //Incoming connection....
-                Properties ret=new Properties();
-                ret.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
-                addCommonProperties(ret);
+                Properties ret=new SupernodeProperties(_router);
                 
                 //guide the incoming connection to be a supernode/clientnode
                 ret.put(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
@@ -1151,15 +1244,14 @@ public class ManagedConnection
                 //Under some circumstances, we can decide to reject a connection
                 //during handshaking because no slots are available.  You might
                 //think you could reject the connection if
-                //_manager.hasAvailableIncoming(Q) is false, where Q is the
-                //value of Query-Routing written by the remote host.
-                //Unfortunately this fails when Q==true because of supernode
+                //_manager.hasAvailableIncoming(S) is false, where S is the
+                //value of Supernode property written by the remote host.
+                //Unfortunately this fails when S==true because of supernode
                 //guidance; we don't know whether they'll become a leaf node or
-                //not.  So we use the following conservative test, and depend on
+                //not. So we use the following conservative test, and depend on
                 //the old-fashioned reject connection mechanism in
                 //ConnectionManager for the other cases.
-                if (!_manager.hasAvailableIncoming(false)
-                        && !_manager.hasAvailableIncoming(true))
+                if (!_manager.hasAnyAvailableIncoming())
                     return new HandshakeResponse(
                                    HandshakeResponse.SLOTS_FULL,
                                    HandshakeResponse.SLOTS_FULL_MESSAGE,
@@ -1187,23 +1279,34 @@ public class ManagedConnection
      * A very simple responder to be used by client-nodes during the
      * connection handshake while accepting incoming connections
      */
-    private static class ClientHandshakeResponder implements HandshakeResponder{
+    private static class ClientHandshakeResponder
+        extends AuthenticationHandshakeResponder{
         ConnectionManager _manager;
+        MessageRouter _router;
         
-        public ClientHandshakeResponder(ConnectionManager manager){
+        /**
+         * Creates a new instance of ClientHandshakeResponder
+         * @param manager Instance of connection manager, managing this 
+         * connection
+         * @param router Instance of message router, to get correct local 
+         * address at runtime.
+         * @param host The host with whom we are handshaking
+         */
+        public ClientHandshakeResponder(ConnectionManager manager, 
+            MessageRouter router, String host) {
+            super(manager, host);
             this._manager = manager;
+            this._router = router;
         }
         
-        public HandshakeResponse respond(HandshakeResponse response, 
-                                         boolean outgoing) throws IOException {
+        //inherit doc comment
+        protected HandshakeResponse respondUnauthenticated(
+            HandshakeResponse response, boolean outgoing) throws IOException {
             if (outgoing) {
                 //a) Outgoing: nothing more to say
                 return new HandshakeResponse(new Properties());
             } else {
-                Properties props=new Properties();
-                props.put(ConnectionHandshakeHeaders.X_SUPERNODE, 
-                                  "False");
-                addCommonProperties(props);                
+                Properties props=new ClientProperties(_router);
                 addHostAddresses(props, _manager);
 
                 if (_manager.hasClientSupernodeConnection()) {
@@ -1218,6 +1321,18 @@ public class ManagedConnection
                 }
             }
         }
+        
+//        //inherit doc comment
+//        protected Properties getFirstResponsePropertiesForOutgoingConnection() {
+//            return new LazyProperties();
+//        }
+//        
+//        //inherit doc comment
+//        protected HandshakeResponse respondUnAuthenticated(
+//            HandshakeResponse response, boolean outgoing) throws IOException
+//        {
+//        }
+        
     }
     
     /** Returns the query route state associated with this, or null if no
@@ -1225,6 +1340,251 @@ public class ManagedConnection
      */
     public ManagedConnectionQueryInfo getQueryRouteState() {
         return queryInfo;
+    }
+    
+    /**
+     * An authentication-capable responder to be used during handshake.
+     * This is an abstract class, and provides only authentication 
+     * capablities.
+     *<p> Concrete subclasses should implement the respondUnAuthenticated()
+     * method for the actual handshake (apart from authentication).
+     *<p> The public respond(response, outgoing) method should not be 
+     * overwritten before taking this statement out.
+     */
+    private abstract static class AuthenticationHandshakeResponder 
+        implements HandshakeResponder{
+            
+        /**
+         * Constant handle to the <tt>Cookies</tt> for authentication
+         * purposes
+         */
+        private final Cookies COOKIES = Cookies.instance();    
+        
+        /**
+         * Constant handle to the <tt>SettingsManager</tt> for accessing
+         * various properties.
+         */
+        private final SettingsManager SETTINGS = SettingsManager.instance();
+        
+        /**
+         * An instance of connection manager (to reference other stuff
+         * held by connection manager)
+         */
+        private ConnectionManager _manager;
+        
+        /**
+         * The host to which are opening connection
+         */
+        private String _host = null;
+        
+        /**
+         * Flag indicating whether we have used the cookie for authentication
+         */
+        private boolean _cookieUsed = false;
+        
+        /**
+         * Flag indicating whether he user connecting to us, has authenticated
+         */
+        private boolean _authenticated = false;
+        
+        /**
+         * The request received before we asked other node to authenticate
+         */
+        private HandshakeResponse _beforeAuthenticationRequest = null;
+        
+        /**
+         * Creates a new instance
+         * @param manager Instance of connection manager, managing this 
+         * connection
+         * @param host The host with whom we are handshaking
+         */
+        public AuthenticationHandshakeResponder(ConnectionManager manager,
+            String host){
+            this._manager = manager;
+            this._host = host;
+        }
+        
+        //inherit doc comment
+        public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException{
+            //save the first request    
+            if(_beforeAuthenticationRequest == null)
+                _beforeAuthenticationRequest = response;
+            //do stuff specific to connection direction
+            if(outgoing){
+                return respondOutgoing(response);
+            }else{
+                return respondIncoming(response);
+            }
+        }
+        
+        /** 
+         * Returns the corresponding handshake to be written to the remote host
+         * when responding to the connection handshake response just received,
+         * for outgoing connection.  
+         * @param response The handshake response received from the remote end
+         */
+        private HandshakeResponse respondIncoming(HandshakeResponse response)
+            throws IOException {
+            //if authentication is not required, return normal response
+            //else authenticate
+            if(_authenticated || 
+                !SETTINGS.acceptAuthenticatedConnectionsOnly())
+                return respondUnauthenticated(response, false);
+            else
+                return respondIncomingAuthenticate(response);
+        }
+        
+        /** 
+         * Asks the connecting host for authentication, if authentication
+         * headers not already received in the response from the connecting
+         * host. If authenticated, lets the concrete class handle the 
+         * original request, and returns the response returned by 
+         * the concrete class, augmented with authentication information.
+         * @param response The handshake response received from the remote end
+         * @return response Our response
+         */
+        private HandshakeResponse respondIncomingAuthenticate(
+            HandshakeResponse response) throws IOException {
+                
+            //get the domains, user has successfully authenticated
+            Set domains = getDomainsAuthenticated(response.getHeaders());
+
+            //if couldnt authenticate
+            if(domains == null) {
+                return new HandshakeResponse(
+                    HandshakeResponse.UNAUTHORIZED_CODE, 
+                    HandshakeResponse.UNAUTHORIZED_MESSAGE, null);
+            }else {
+                _authenticated = true;
+                //handle the original request
+                HandshakeResponse ourResponse = respondUnauthenticated(
+                    _beforeAuthenticationRequest, false);
+                //add the property in the response letting the 
+                //remote host know of the domains successfully authenticated
+                ourResponse.getHeaders().put(
+                    ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED,
+                    StringUtils.getEntriesAsString(domains));
+                //return our response
+                return ourResponse;
+            }
+        }
+        
+        /**
+         * Returns the domains to which the user has successfully 
+         * authenticated to
+         * @param headersReceived The headers we received. These will be
+         * used for authentication
+         * @return the domains to which the user has successfully 
+         * authenticated to
+         */
+        private Set getDomainsAuthenticated(Properties headersReceived) {
+            //pass the username and password to authenticator
+            return _manager.getAuthenticator().authenticate(
+                headersReceived.getProperty(
+                ConnectionHandshakeHeaders.X_USERNAME),
+                headersReceived.getProperty(
+                ConnectionHandshakeHeaders.X_PASSWORD), null);
+        }
+        
+        /** 
+         * Returns the corresponding handshake to be written to the remote host
+         * when responding to the connection handshake response just received,
+         * for outgoing connection.  
+         * @param response The handshake response received from the remote end
+         */
+        private HandshakeResponse respondOutgoing(HandshakeResponse response)
+            throws IOException{
+            //check the code we received from the other side
+            //if authentication is not needed, respond normally, else
+            //authenticate    
+            if(response.getStatusCode() != HandshakeResponse.UNAUTHORIZED_CODE)
+                return respondUnauthenticated(response, true);
+            else
+                return respondOutgoingWithAuthentication(response);
+        }
+        
+        /** 
+         * Returns the corresponding handshake to be written to the remote host
+         * on an outgoing connection, when authentication challenge received
+         * @param response The handshake response received from the remote end
+         * @return response Our response
+         */
+        private HandshakeResponse respondOutgoingWithAuthentication(
+            HandshakeResponse response) throws IOException {
+            int code = HandshakeResponse.OK;
+            String message = HandshakeResponse.OK_MESSAGE;
+            Properties ret = new Properties();
+            
+            //Authenticate
+            //get user information
+            User user = getUserInfo();
+
+            //if user is unable to authenticate
+            if((user == null) || user.getUsername().trim().equals("")){
+                //set the error codes in the response
+                code = HandshakeResponse.DEFAULT_BAD_STATUS_CODE;
+                message = HandshakeResponse.UNABLE_TO_AUTHENTICATE;
+            }
+            else{
+                //set the user properties as well as response headers
+                code = HandshakeResponse.OK;
+                message = HandshakeResponse.AUTHENTICATING;
+                //add user authentication headers
+                ret.put(ConnectionHandshakeHeaders.X_USERNAME,
+                    user.getUsername());
+                ret.put(ConnectionHandshakeHeaders.X_PASSWORD,
+                    user.getPassword());
+
+                //also store the authentication information in a 
+                //cookie, for next-time use
+                COOKIES.putCookie(_host, user);
+            }
+            return new HandshakeResponse(code, message, ret);
+        }
+
+        /**
+         * Gets the user's authentication information for the host we are
+         * handshaking with
+         * @return User's authentication information for the host we are
+         * handshaking with
+         */
+        private User getUserInfo() {
+            User user = null;
+            //first try the information stored in cookie
+            if(!_cookieUsed) {
+                _cookieUsed = true;
+                if(_host != null)
+                    user = COOKIES.getUserInfo(_host);
+            }
+
+            //if we dont have cookie, or we have already used the
+            //cookie, then get the information interactively from user
+            if(user == null){
+                user = _manager.getCallback()
+                    .getUserAuthenticationInfo(_host);
+            }
+            
+            //return the user information
+            return user;
+        }
+        
+        /** 
+         * Returns the corresponding handshake to be sent
+         * to the remote host when
+         * responding to the connection handshake response received.  
+         * @param response The response received from the host on the
+         * other side of the connection.
+         * @param outgoing whether the connection to the remote host 
+         * is an outgoing connection.
+         * @param includeProperties The properties that should be included
+         * in the returned response
+         * @return the response to be sent to the remote host
+         */
+        protected abstract HandshakeResponse respondUnauthenticated(
+            HandshakeResponse response, 
+            boolean outgoing) throws IOException;
+        
     }
 
     /** Associates the given query route state with this.  Typically this method

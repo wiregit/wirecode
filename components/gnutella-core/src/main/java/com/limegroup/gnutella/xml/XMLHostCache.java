@@ -31,7 +31,7 @@ public class XMLHostCache {
      */
     public XMLHostCache() throws Exception {
         // setup file to load props from.....
-        String limeHome = LimeXMLProperties.getPath();
+        String limeHome = LimeXMLProperties.instance().getPath();
         _dbFile = limeHome + File.separator + XML_HOSTS_DIR +
         File.separator + XML_HOSTS_FILE;        
         InputStream toLoadProps = new FileInputStream(_dbFile);

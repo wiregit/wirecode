@@ -1,7 +1,11 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.security.User;
+
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 import java.io.IOException;
 
 import com.limegroup.gnutella.routing.*;
@@ -377,9 +381,8 @@ public abstract class MessageRouter
         List list=_manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++){
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if (c != receivingConnection) {
-                c.send(queryRequest);
-            }
+            if(c != receivingConnection)
+                sendQueryRequest(queryRequest, c, receivingConnection);
         }
         
         //use query routing to route queries to client connections
@@ -400,12 +403,60 @@ public abstract class MessageRouter
                 {
                     //A new client with routing entry, or one that hasn't started
                     //sending the patch.
-                    c.send(queryRequest);      
+                    sendQueryRequest(queryRequest, c, receivingConnection);
                 }
             }
         }
     }
+    
+    /**
+     * Sends the passed query request, received on receivingConnection, 
+     * to the passed sendConnection, only if the receivingConnection and
+     * the sendConnection are authenticated to a common domain
+     * @param queryRequest Query Request to send
+     * @param sendConnection The connection on which to send out the query
+     * @param receivingConnection The connection on which we originally
+     * received the query
+     */
+    protected void sendQueryRequest(QueryRequest queryRequest, ManagedConnection
+        sendConnection, ManagedConnection receivingConnection)
+    {
+        //send the query over this connection only if any of the following
+        //is true:
+        //1. The query originated from our node (receiving connection 
+        //is null)
+        //2. The connection under  consideration is an unauthenticated 
+        //connection (normal gnutella connection)
+        //3. It is an authenticated connection, and the connection on 
+        //which we received query and this connection, are both 
+        //authenticated to a common domain
+        if((receivingConnection == null)
+            || containsDefaultUnauthenticatedDomainOnly(
+                sendConnection.getDomains())
+            || Utilities.hasIntersection(
+            receivingConnection.getDomains(), sendConnection.getDomains()))
+            sendConnection.send(queryRequest);
+    }
+    
 
+    /**
+     * Checks if the passed set of domains contains only
+     * default unauthenticated domain 
+     * @param domains Set (of String) of domains to be tested
+     * @return true if the passed set of domains contains only
+     * default unauthenticated domain, false otherwise
+     */
+    private static boolean containsDefaultUnauthenticatedDomainOnly(Set domains)
+    {
+        //check if the set contains only one entry, and that entry is the
+        //default unauthenticated domain 
+        if((domains.size() == 1) && domains.contains(
+            User.DEFAULT_UNAUTHENTICATED_DOMAIN))
+            return true;
+        else
+            return false;
+    }
+    
     /**
      * Respond to the ping request.  Implementations typically will either
      * do nothing (if they don't think a response is appropriate) or call

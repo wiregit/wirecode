@@ -212,6 +212,17 @@ public class LimeXMLProperties
      */
     private static final int NUM_QUERY_DISPATCHER_THREADS_DEF = 50;
     
+    /**
+     * The property that denotes the name of the file that stores the 
+     * user information map
+     */
+    private static final String USER_MAP_FILE = "USER_MAP_FILE";
+
+    /**
+     * The name of the file that stores the user information map
+     */
+    private static final String USER_MAP_FILE_DEF = "UserMap.dat";
+    
     
     /**
      * Constructor: Initializes various default values, and loads the settings
@@ -299,128 +310,6 @@ public class LimeXMLProperties
                            (XML_DISPLAY_PROPS_DIR,XML_DISPLAY_PROPS_DIR_DEF);
         return getPath() + xmlDisplayPropsDirRel;
     }
-
-
-    /**
-     * Returns the name of the file that stores the SchemaTransformationDataMap
-     */
-    public String getSchemaTransformationDataMapFile()
-    {
-        String schemaTransformationDataMapFile = _properties.getProperty(
-            SCHEMA_TRANSFORMATION_DATA_MAP_FILE, 
-            SCHEMA_TRANSFORMATION_DATA_MAP_FILE_DEF);
-
-        return getPath() + schemaTransformationDataMapFile;                   
-    }
-    
-    /**
-     * Returns the name of the file that contains basic mapping information
-     * regarding the schemas which need to be mapped to http requests
-     */
-    public String getHTTPMappingFile()
-    {
-        String httpMappingFile = _properties.getProperty(
-            HTTP_MAPPING_FILE, 
-            HTTP_MAPPING_FILE_DEF);
-
-        return getPath() + httpMappingFile;   
-    }
-    
-    /**
-     * Returns the name of the file that contains basic mapping information
-     * regarding the schemas which need to be mapped to jdbc database 
-     * requests
-     */
-    public String getDatabaseMappingFile()
-    {
-        String databaseMappingFile = _properties.getProperty(
-            DATABASE_MAPPING_FILE, 
-            DATABASE_MAPPING_FILE_DEF);
-
-        return getPath() + databaseMappingFile;   
-    }
-    
-    /**
-     * Returns the name of the file that contains configuration information
-     * for various feeds from providers (like news feed etc)
-     */
-    public String getFeedPropsFile()
-    {
-        String feedPropsFile = _properties.getProperty(
-            FEED_PROPS_FILE, 
-            FEED_PROPS_FILE_DEF);
-
-        return getPath() + feedPropsFile; 
-    }
-    
-    /**
-     * Returns the number of query dispatcher threads to be created
-     */
-    public int getNumQueryDispatcherThreads()
-    {
-        try
-        {
-            return Integer.parseInt(_properties.getProperty(
-                NUM_QUERY_DISPATCHER_THREADS, 
-                NUM_QUERY_DISPATCHER_THREADS_DEF + ""));
-        }
-        catch(Exception e)
-        {
-            return NUM_QUERY_DISPATCHER_THREADS_DEF;
-        }
-        
-    }
-    
-    /**
-     * Returns the name of the file that 
-     * contains schema => QueryHandler mappings for 
-     * the schemas that are to be handled directly without any transformation
-     */
-    public String getDirectMappingFile()
-    {
-        String directMappingFile = _properties.getProperty(
-            DIRECT_MAPPING_FILE, 
-            DIRECT_MAPPING_FILE_DEF);
-
-        return getPath() + directMappingFile;   
-    }
-    
-    /**
-     * Returns name of the file that contains the keywords we are interested in 
-     * answering queries for
-     */
-    public String getKeywordListFile()
-    {
-        String keywordListFile = _properties.getProperty(
-            KEYWORD_LIST_FILE, 
-            KEYWORD_LIST_FILE_DEF);
-
-        return getPath() + keywordListFile;   
-    }
-    
-    /**
-     * Returns the max number of xml results
-     * to be returned by direct querying of a database
-     */
-    public int getMaxJDBCXMLResults()
-    {
-        //get the property value
-        String maxJDBCXMLResults = _properties.getProperty(
-            MAX_JDBC_XML_RESULTS, 
-            MAX_JDBC_XML_RESULTS_DEF + " ");
-
-        try
-        {
-            //return in integer form
-            return Integer.parseInt(maxJDBCXMLResults);
-        }
-        catch(Exception e)
-        {
-            //if property not set properly, return the default value
-            return MAX_JDBC_XML_RESULTS_DEF;
-        }
-    }
-    
     
     /**
      * Returns the files pertaining to the XML Schemas used for 
@@ -453,12 +342,22 @@ public class LimeXMLProperties
     }
     
     /**
+     * Returns the name of the file that stores user information map
+     */
+    public String getUserMapFile()
+    {
+        String userMapFile = _properties.getProperty(
+            USER_MAP_FILE, USER_MAP_FILE_DEF);
+
+        return getPath() + userMapFile;                   
+    }
+    
+    /**
      * Returns the base path for properties
      */
-    static String getPath()
+    public String getPath()
     {
-        //a hack. I guess, adam will provide some way so that installation
-        //directory can be accesed in some other way than user.dir
+        //Use LIME_HOME property, if available
         String limeHome = System.getProperty("LIME_HOME"); 
         if(limeHome == null || limeHome.trim().equals(""))
         {
@@ -467,6 +366,8 @@ public class LimeXMLProperties
         }
         else
         {
+            if(!limeHome.endsWith("/") && !limeHome.endsWith("\\"))
+                limeHome = limeHome + File.separator;
             return limeHome + "lib" + File.separator;
         }
 //        return "e:/work/lib/";
