@@ -79,6 +79,14 @@ public class GGEP extends Object {
         this.notNeedCOBS=notNeedCOBS;
     }    
 
+    /** 
+     * Creates a new empty GGEP block.  Typically this is used for outgoing
+     * messages and mutated before encoding.  This does do COBS encoding.
+     */
+    public GGEP() {
+        this(false);
+    }    
+
     /** Constructs a GGEP instance based on the GGEP block beginning at
      *  messageBytes[beginOffset].  If you are unsure of whether or not there is
      *  one GGEP Block, use the read method.
