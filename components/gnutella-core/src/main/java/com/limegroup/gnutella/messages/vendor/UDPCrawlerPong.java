@@ -204,7 +204,7 @@ public class UDPCrawlerPong extends VendorMessage {
 	/**
 	 * create message with data from network.
 	 */
-	public UDPCrawlerPong(byte[] guid, byte ttl, byte hops,
+	protected UDPCrawlerPong(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ULTRAPEER_LIST, version, payload);
@@ -213,6 +213,9 @@ public class UDPCrawlerPong extends VendorMessage {
 		_ultrapeers = new LinkedList();
 		_leaves = new LinkedList();
 		
+		if (getVersion() == VERSION && 
+				(payload==null || payload.length < 3))
+			throw new BadPacketException();
 		
 		int numberUP = payload[0];
 		int numberLeaves = payload[1];
@@ -236,7 +239,8 @@ public class UDPCrawlerPong extends VendorMessage {
 			bytesPerResult+=2;
 		
 		//check if the payload is legal length
-		if (payload.length!= (numberUP+numberLeaves)*bytesPerResult+3) 
+		if (getVersion() == VERSION && 
+				payload.length!= (numberUP+numberLeaves)*bytesPerResult+3) 
 			throw new BadPacketException("size is "+payload.length+ 
 					" but should have been "+ (numberUP+numberLeaves)*bytesPerResult+3);
 		

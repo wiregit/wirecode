@@ -38,6 +38,9 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PROMOTION_REQUEST, version, payload);
 		
+		if (getVersion() > VERSION)
+			throw new BadPacketException("cannot read messages with version more than "+ 
+					VERSION);
 		//check if the payload is valid length
 		if (payload.length!=13)
 			throw new BadPacketException("invalid length payload");

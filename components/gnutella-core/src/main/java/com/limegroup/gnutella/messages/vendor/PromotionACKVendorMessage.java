@@ -22,8 +22,10 @@ public class PromotionACKVendorMessage extends VendorMessage {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_PROMOTION_ACK, VERSION, payload);
 		
 		//there should be no payload.
-		if (payload.length!=0)
+		if (getVersion()==VERSION && payload.length!=0)
 			throw new BadPacketException("payload in promotion ACK");
+		
+		//if a new version introduces payload..well.. ignore it.
 	}
 	
 	/**

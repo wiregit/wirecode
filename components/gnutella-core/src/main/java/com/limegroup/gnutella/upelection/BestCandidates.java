@@ -47,12 +47,13 @@ public class BestCandidates {
 	 * @return the absolutely best candidate at all hops
 	 */
 	public static Candidate getBest() {
-		SortedSet s = new TreeSet(Candidate.priorityComparator());
-		synchronized(instance) {
-			s.addAll(Arrays.asList(instance._best));
-		}
-		return (Candidate) s.last();  //higher = better
-		
+		Comparator comparator = Candidate.priorityComparator();
+		Candidate best = instance._best[0];
+		if (comparator.compare(instance._best[1],best) > 1)
+			best = instance._best[1];
+		if (comparator.compare(instance._best[2],best) > 1)
+			best = instance._best[2];
+		return best;
 	}
 	
 	/**

@@ -109,9 +109,10 @@ public class UDPCrawlerPing extends VendorMessage {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_ULTRAPEER, version, payload);
 		
 		//see if the payload is valid
-		if (payload == null || payload.length != 3)
+		if (getVersion() == VERSION && (payload == null || payload.length != 3))
 			throw new BadPacketException();
 		
+		//a new version would ideally keep the first 3 bytes the same.
 		_numberUP = ByteOrder.ubyte2int(payload[0]);
 		_numberLeaves = ByteOrder.ubyte2int(payload[1]);
 		_format = payload[2];

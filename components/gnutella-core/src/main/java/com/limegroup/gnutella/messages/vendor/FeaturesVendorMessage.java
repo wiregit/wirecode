@@ -43,6 +43,9 @@ public class FeaturesVendorMessage extends VendorMessage {
                    int version, byte[] payload) throws BadPacketException {
 		super(guid,ttl,hops,F_LIME_VENDOR_ID, F_FEATURES,version, payload);
 		
+		if (getVersion() > VERSION)
+			throw new BadPacketException("cannot parse messages version more than "+VERSION);
+		
 		_properties = new Properties();
 		String serialized = new String(payload);
 		
