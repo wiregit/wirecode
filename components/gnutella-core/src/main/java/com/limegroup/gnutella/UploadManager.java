@@ -20,8 +20,6 @@ public class UploadManager implements BandwidthTracker {
     private ActivityCallback _callback;
     /** The message router to use for pushes. */
     private MessageRouter _router;
-    /** Used for get addresses in pushes. */
-    private Acceptor _acceptor;
 
 	/**
 	 * LOCKING: obtain this' monitor before modifying any 
@@ -133,24 +131,22 @@ public class UploadManager implements BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
     public void acceptUpload(Socket socket) {
-
-		HTTPUploader uploader;
-		GETLine line;
 		try {
             //increment the download count
             
             //do uploads
             while(true) {
-                try {
                 //parse the get line
-                line = parseGET(socket);
-                } catch (IOException e) {
-                    // the GET line was wrong, just exit.
-                    return;
-                }
+                GETLine line;
+				try {
+					line = parseGET(socket);
+				} catch(IOException e) {
+					return;
+				}
+
                 //create an uploader
-                uploader = new HTTPUploader(line._fileName, socket, line._index, 
-                    this, _fileManager, _router);
+                HTTPUploader uploader = new HTTPUploader(line._fileName, socket,
+                    line._index, this, _fileManager, _router);
 
                 //do the upload
                 doSingleUpload(uploader, 
@@ -174,6 +170,7 @@ public class UploadManager implements BandwidthTracker {
                     if(!word.equalsIgnoreCase("GET"))
                         return;
                 } catch (IOException ioe) {
+					// should the socket really not be closed here?
                     return;
                 }
             }//end of while
@@ -634,11 +631,12 @@ public class UploadManager implements BandwidthTracker {
 		str.trim();
 
 		// handle the get request depending on what type of request it is
-        if (this.isURNGet(str)) 
-            // handle the URN get request
-            return this.parseURNGet(str);
-        // handle the standard get request
-        return this.parseTraditionalGet(str);
+		if(this.isURNGet(str)) {
+			// handle the URN get request
+			return this.parseURNGet(str);
+		}
+		// handle the standard get request
+		return this.parseTraditionalGet(str);
   	}
 
 	/**
