@@ -31,8 +31,6 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
-	 *
-	 * TODO:: MAKE BIGGER??
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
 
@@ -150,18 +148,20 @@ public final class UDPService implements Runnable {
 									  host.getHostBytes(),
 									  (long)0, (long)0, true);
 			} catch(UnknownHostException e) {
-				reply = getPingReply(guid);
+				reply = createPingReply(guid);
 			}
 		} else {
-			reply = getPingReply(guid);
+			reply = createPingReply(guid);
 		}
 		send(reply, datagram.getAddress(), datagram.getPort());
 	}
 
 	/**
-	 * Returns a <tt>PingReply</tt> for localhost.
+	 * Creates a new <tt>PingReply</tt> from the set of cached
+	 * GUESS endpoints, or a <tt>PingReply</tt> for localhost
+	 * if no GUESS endpoints are available.
 	 */
-	private PingReply getPingReply(byte[] guid) {
+	private PingReply createPingReply(byte[] guid) {
 		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
 		if(endpoint == null) {
 			return new PingReply(guid, (byte)1,
@@ -183,7 +183,7 @@ public final class UDPService implements Runnable {
 	 * Notifies the UDP socket that the port has been changed, requiring
 	 * the UDP socket to be recreated.
 	 */
-	public void resetPort() {
+	public synchronized void resetPort() {
 		if(_udpThread.isAlive()) _udpThread.interrupt();
 	}
 
@@ -228,6 +228,17 @@ public final class UDPService implements Runnable {
 	 */	
 	public boolean isGUESSCapable() {
 		return _isGUESSCapable;
+	}
+
+	/**
+	 * Returns whether or not the UDP socket is listening for incoming
+	 * messsages.
+	 *
+	 * @return <tt>true</tt> if the UDP socket is listening for incoming
+	 *  UDP messages, <tt>false</tt> otherwise
+	 */
+	public synchronized boolean isListening() {
+		return (_socket.getPort() != -1);
 	}
 
 	/** 
