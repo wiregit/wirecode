@@ -95,7 +95,7 @@ public abstract class FileManager {
      * An index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  IncompleteFile keywords
-     * are NOT stored in this index.  Retrieval is of IncompleteFiles are only
+     * are NOT stored in this index.  Retrieval of IncompleteFiles are only
      * allowed by hash.
      *
      * INVARIANT: For all keys k in _index, for all i in _index.get(k), 
