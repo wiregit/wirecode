@@ -77,8 +77,11 @@
 
   <!-- tests individual class -->
   <target name="test class" if="class" depends="build tests">
-    <junit printsummary="withOutAndErr" haltonfailure="yes"
-	       showoutput="true">
+    <junit printsummary="withOutAndErr" 
+	       haltonfailure="yes"
+	       showoutput="true"
+		   fork="true"
+    >
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.${class}" />
 	  <classpath>
@@ -106,10 +109,11 @@
 	          <pathelement location="${lib}"/>
 	        </classpath>	  
 	  </java>  
+
       <sequential>
         <sleep seconds="5"/>
 		<junit printsummary="withOutAndErr" 
-		       haltonfailure="on"
+		       haltonfailure="yes"
 		       showoutput="true"
 			   fork="true"
         >
