@@ -90,36 +90,4 @@ public class Utilities
             if      (num <      0x20000000) return 28; else return 29;
         else/*if(num <          0x80000000)*/return 30;/*else return 31;*/
     }
-
-    /*
-    public static void main(String args[]) {
-        //Test fill
-        int[] in=null;
-        int[] out=null;
-        in= new int[] {0, 0, 0, 0, 0, 0, 0};
-        out=new int[] {1, 1, 1, 1, 0, 0, 0};
-        fill(in, 0, 4, 1);
-        Assert.that(Arrays.equals(in, out));
-
-        in= new int[] {0, 0, 0, 0, 0, 0, 0};
-        out=new int[] {1, 1, 1, 1, 1, 0, 0};
-        fill(in, 0, 5, 1);
-        Assert.that(Arrays.equals(in, out));
-
-        in= new int[] {0, 0, 0, 0, 0, 0, 0};
-        out=new int[] {0, 0, 1, 1, 1, 1, 0};
-        fill(in, 2, 6, 1);
-        Assert.that(Arrays.equals(in, out));
-
-        in= new int[] {0, 0, 0, 0, 0, 0, 0};
-        out=new int[] {0, 0, 1, 1, 1, 0, 0};
-        fill(in, 2, 5, 1);
-        Assert.that(Arrays.equals(in, out));
-
-        //Test log2
-        for (int i=0; i<31; i++) {
-            Assert.that(log2(1<<i)==i);
-        }
-    } 
-    */
 }
