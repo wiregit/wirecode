@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
+import com.sun.java.util.collections.*;
 
 /**
  * This class handles common utility functions that many classes
@@ -15,6 +16,14 @@ public final class CommonUtils {
 	 * Constant for the current version of LimeWire.
 	 */
 	private static final String LIMEWIRE_VERSION = "@version@";
+
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections 
+	 * 1.1 implementation.
+	 */
+	public static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
 
     /**
      * The cached value of the major revision number.
