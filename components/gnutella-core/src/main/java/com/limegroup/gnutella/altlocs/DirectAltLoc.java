@@ -64,7 +64,7 @@ public class DirectAltLoc extends AlternateLocation {
 		this(new Endpoint(
 				NetworkUtils.ip2string(RouterService.getAddress()),
 				RouterService.getPort()),
-			 "",
+			 "ALT",
 			 sha1);
 	}
 	
