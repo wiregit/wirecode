@@ -11,7 +11,7 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	SettingsInterface.class SettingsManager.class \
 	HTTPManager.class HTTPUploader.class HTTPDownloader.class HTTPUtil.class \
 	SpamFilter.class \
-	RouterService.class
+	RouterService.class ResponseVerifier.class
 
 subpackages = util gui filters networkdiscoverer
 
@@ -33,9 +33,6 @@ util:
 filters:
 	$(MAKE) -C filters
 
-.PHONY: networkdiscoverer
-filters:
-	$(MAKE) -C networkdiscoverer
 
 # .PHONY: doc
 # doc:
