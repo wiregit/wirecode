@@ -111,27 +111,22 @@ public class BIOMessageReader extends AbstractMessageReader {
      *  results in InterruptedIOException.
      */
     public Message read() throws IOException, BadPacketException {
-        try {
-            //On the Macintosh, sockets *appear* to return the same ping reply
-            //repeatedly if the connection has been closed remotely.  This 
-            //prevents connections from dying.  The following works around the 
-            //problem.  Note that Message.read may still throw IOException 
-            //below.  See note on _closed for more information.
-            if (!CONNECTION.isOpen()) {
-                throw CONNECTION_CLOSED;
-            }
-    
-            Message msg = null;
-            while (msg == null) {
-                msg = readAndUpdateStatistics();
-            }
-            // record received message in stats
-            CONNECTION.stats().addReceived();
-            return msg;
-        } catch(IOException e) {
-            RouterService.removeConnection(CONNECTION);
-            throw e;
+        //On the Macintosh, sockets *appear* to return the same ping reply
+        //repeatedly if the connection has been closed remotely.  This 
+        //prevents connections from dying.  The following works around the 
+        //problem.  Note that Message.read may still throw IOException 
+        //below.  See note on _closed for more information.
+        if (!CONNECTION.isOpen()) {
+            throw CONNECTION_CLOSED;
         }
+        
+        Message msg = null;
+        while (msg == null) {
+            msg = readAndUpdateStatistics();
+        }
+        // record received message in stats
+        CONNECTION.stats().addReceived();
+        return msg;
     }
 
     /**
