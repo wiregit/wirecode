@@ -672,7 +672,12 @@ public class ManagedConnection extends Connection
                 while (true) {
                     Message m=null;
                     synchronized (_outputQueueLock) {
-                        m=(Message)queue.removeNext(); 
+                        m=(Message)queue.removeNext();
+                        if(m != null &&
+                           i == PRIORITY_OUR_QUERY && 
+                           m.getHops() == 0) {
+                            System.out.println("ManagedConnection::sendQueued: "+m); 
+                        }
                         int dropped=queue.resetDropped();
                         addDropped(dropped);
                         _queued-=(m==null?0:1)+dropped;  //maintain invariant
