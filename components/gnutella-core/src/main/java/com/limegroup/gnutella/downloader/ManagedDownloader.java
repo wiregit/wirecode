@@ -710,8 +710,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
-                    manager.sendQuery(this, allFiles);
-                    numRequeries++;
+                    if (manager.sendQuery(this, allFiles))
+                        numRequeries++;
                     // set time for next requery...
                     nextRequeryTime = currTime + 
                     (getMinutesToWaitForRequery(numRequeries)*60*1000);

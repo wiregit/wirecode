@@ -596,7 +596,7 @@ public class DownloadManager implements BandwidthTracker {
      *  It is important to note that this methodology works because we KNOW
      *  that requeries are always trying to requery....
      */
-    public synchronized void sendQuery(ManagedDownloader requerier, 
+    public synchronized boolean sendQuery(ManagedDownloader requerier, 
                           RemoteFileDesc[] rfds) {
 
         debug("DM.sendQuery(): entered.");
@@ -662,7 +662,8 @@ public class DownloadManager implements BandwidthTracker {
                 Assert.that(false, 
                             "Downloader has no files and is not a Requerier.");
         }
-        debug("DM.sendQuery(): returning.");
+        debug("DM.sendQuery(): returning " + allowed);
+        return allowed;
     }
 
 
