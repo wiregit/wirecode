@@ -272,12 +272,22 @@ public class StringUtils {
                     c1 = Character.toLowerCase(c1);
                     c2 = Character.toLowerCase(c2);
                     if (c1 != c2) {
-                        return _col.compare(s1, s2);
+                        return c1 - c2;
                     }
                 }
             }
         }
         return n1 - n2;
+    }
+
+    /**
+     * This method will compare the two strings using 
+     * full decomposition and only look at primary differences
+     * The comparision will ignore case as well as  
+     * differences like FULLWIDTH vs HALFWIDTH
+     */
+    public static int compareFullPrimary(String s1, String s2) {
+        return _col.compare(s1, s2);
     }
 
     /** 
