@@ -2,14 +2,22 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Collection;
-import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.*;
+
+
 
 /**
  * Unit tests for FixedsizeForgetfulHashMap
  */
-public class FixedSizeExpiringSetTest extends BaseTestCase {
+public class FixedSizeExpiringSetTest extends com.limegroup.gnutella.util.BaseTestCase {
+	
+	Collection empty1,empty2,nullColl;
+	FixedSizeExpiringSet set, fastSet;
+	Object nullObj;
 
+	final int MAX_SIZE = 8;
+    final long EXPIRE_TIME = 10 * 1000; // 10 seconds
+	
     public FixedSizeExpiringSetTest(String name) {
         super(name);
     }
@@ -22,12 +30,39 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public void testSet() throws Exception {
-        final int MAX_SIZE = 8;
-        final long EXPIRE_TIME = 10 * 1000; // 10 seconds
-
-        FixedSizeExpiringSet set =
+    protected void setUp() {
+    	//    	test all constructors
+        empty1 = new FixedSizeExpiringSet();
+        empty2 = new FixedSizeExpiringSet(MAX_SIZE);
+        set =
             new FixedSizeExpiringSet(MAX_SIZE, EXPIRE_TIME);
+        fastSet = new FixedSizeExpiringSet(MAX_SIZE, 50);
+    	
+    }
+    public void testSet() throws Exception {
+        
+        
+        
+
+        
+        
+        empty1.add(nullObj);
+        assertTrue(empty1.isEmpty());
+        
+        try{
+        	empty1.addAll(nullColl);
+        	fail("expected NullPointerException");
+        }
+        catch(NullPointerException e){}
+        
+        //add another empty set
+        empty1.addAll(empty2);
+        assertTrue(empty1.isEmpty());
+        
+        //test a fast-expiring set
+        fastSet.add(empty1);
+        Thread.sleep(60);
+        assertFalse(fastSet.contains(empty1));
 
         // initialize a couple of objects
         String[] obj = new String[10];
@@ -113,20 +148,45 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         assertEquals(set.size(), 0);
         
         // test retainAll
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             set.add(obj[i]);
+            Thread.sleep(20);  //<--read the note in the implementation
+        }
+        
+        
+        for(int i = 2;i<10;i++)
+        	assertTrue(set.contains(obj[i]));
         
         //set contains 2-9 col contains 6-9
 
         set.retainAll(col);
-
-        System.out.println("Sumeet:"+set.size());
-
+        
+        
         for (int i = 0; i < 6; i++)
             assertFalse(set.contains(obj[i]));
+        
 
         for (int i = 6; i < 9; i++)
             assertTrue(set.contains(obj[i]));
+        
+        assertEquals(set.size(),col.size());
+        
+        //as well as containsAll
+        assertTrue(set.containsAll(col));
+        
+        //removeall
+        set.removeAll(empty1);
+        assertEquals(set.size(),col.size());
+        set.removeAll(col);
+        assertTrue(set.isEmpty());
+        
+        //test toArray methods
+        Object[] array1 = set.toArray();
+        assertEquals(array1.length,set.size());
+        
+        Object[] array2 = set.toArray(array1);
+        assertEquals(array1.length,array2.length);
+        
 
     }
 }
