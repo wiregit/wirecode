@@ -629,6 +629,12 @@ public class LimeXMLReplyCollection {
                                                         boolean checkBetter) {
         
         MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
+        
+        //if this call returned null, we should store the data in our
+        //xml repository only.
+        if (newValues == null)
+        	return null;
+        
         String newXML = null;
 
         try {
