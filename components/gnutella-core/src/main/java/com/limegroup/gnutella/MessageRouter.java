@@ -1085,8 +1085,7 @@ public abstract class MessageRouter {
         RoutedQueryStat.LEAF_DROP.addData(notSent);
         
         for(int i=0; i<hitConnections.size(); i++) {
-            ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(mc == handler) continue;
+            ManagedConnection mc = (ManagedConnection)hitConnections.get(i);
             
             // sendRoutedQueryToHost is not called because 
             // we have already ensured it hits the routing table
@@ -1383,7 +1382,7 @@ public abstract class MessageRouter {
      * sendQueryReply(QueryReply).
      * This method is called from the default handleQueryRequest.
      */
-    protected abstract void respondToQueryRequest(QueryRequest queryRequest,
+    protected abstract boolean respondToQueryRequest(QueryRequest queryRequest,
                                                   byte[] clientGUID);
     /**
      * The default handler for PingRequests received in

@@ -1373,11 +1373,11 @@ public class ManagedConnection extends Connection
         */
     }
 
-	// overrides Object.toString
-	public String toString() {
-		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
-			" Leaf: "+isLeafConnection();
-	}
+//	// overrides Object.toString
+//	public String toString() {
+//		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
+//			" Leaf: "+isLeafConnection();
+//	}
     
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest

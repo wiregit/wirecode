@@ -179,7 +179,7 @@ public class StandardMessageRouter extends MessageRouter {
     }
 
 
-    protected void respondToQueryRequest(QueryRequest queryRequest,
+    protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                          byte[] clientGUID) {
         // Run the local query
         Response[] responses = _fileManager.query(queryRequest);
@@ -191,19 +191,19 @@ public class StandardMessageRouter extends MessageRouter {
                 RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
         }
 
-        sendResponses(responses, queryRequest, clientGUID);
+        return sendResponses(responses, queryRequest, clientGUID);
         
     }
 
     //This method needs to be public because the Peer-Server code uses it.
-    public void sendResponses(Response[] responses, 
+    public boolean sendResponses(Response[] responses, 
                                QueryRequest query,
                                byte[] clientGUID) {
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
         if ( (responses == null) || ((responses.length < 1)) )
-            return;
+            return false;
 
         
         // Here we can do a couple of things - if the query wants
@@ -229,7 +229,7 @@ public class StandardMessageRouter extends MessageRouter {
                 }
                 catch (UnknownHostException uhe) {
                     // weird - just forget about it.....
-                    return;
+                    return false;
                 }
                 int port = query.getReplyPort();
                 
@@ -247,11 +247,12 @@ public class StandardMessageRouter extends MessageRouter {
                     // should NEVER happen
                     ErrorService.error(bpe);
                 }
+                return true;
             }
             // else i couldn't buffer the responses due to busy-ness, oh, scrap
             // them.....
 
-            return;
+            return false;
         }
 
         // send the replies in-band
@@ -271,6 +272,8 @@ public class StandardMessageRouter extends MessageRouter {
             // if there is an error, do nothing..
         }
         // -----------------------------
+        
+        return true;
 
     }
 
