@@ -518,7 +518,6 @@ public class HTTPDownloader implements BandwidthTracker {
         		AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
         		if (me != null)
         			addSuccessfulAltLoc(me);
-        	
         }
 
         URN sha1 = _rfd.getSHA1Urn();
@@ -1061,18 +1060,15 @@ public class HTTPDownloader implements BandwidthTracker {
 	 *  - RFD has a SHA1.
 	 *  - We are allowing partial sharing
 	 *  - The VerifyingFile is not corrupted
-	 *  - We've accepted an incoming connection this session
-	 *  - Our port and IP address are valid and not private.
+	 *  - Our port and IP address are valid 
 	 */
 	private boolean isPartialFileValid() {
 	    return _rfd.getSHA1Urn() != null && 
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                !_outIsCorrupted &&
-               RouterService.acceptedIncomingConnection() &&
                _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES &&
                NetworkUtils.isValidPort(RouterService.getPort()) &&
-               NetworkUtils.isValidAddress(RouterService.getAddress()) &&
-               !NetworkUtils.isPrivateAddress(RouterService.getAddress());
+               NetworkUtils.isValidAddress(RouterService.getAddress()); 
     }
 	
 	/**
