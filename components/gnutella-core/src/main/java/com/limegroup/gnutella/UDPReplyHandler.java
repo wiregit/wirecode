@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.io.*;
@@ -54,6 +55,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
+		SentMessageStat.UDP_PING_REPLIES.incrementStat();
 		UDP_SERVICE.send(pong, IP, PORT);
 	}
 
@@ -67,6 +69,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
+		SentMessageStat.UDP_QUERY_REPLIES.incrementStat();
 		UDP_SERVICE.send(hit, IP, PORT);
 	}
 
@@ -80,6 +83,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
+		SentMessageStat.UDP_PUSH_REQUESTS.incrementStat();
 		UDP_SERVICE.send(request, IP, PORT);
 	}
 

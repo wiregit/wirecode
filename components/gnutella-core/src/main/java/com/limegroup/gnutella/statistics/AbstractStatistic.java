@@ -71,6 +71,7 @@ public abstract class AbstractStatistic implements Statistic {
 	 *  the data for the stored history of this message
 	 */
 	public Integer[] getStatHistory() {
+		_statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
 		return _statHistory;
 	}
 
@@ -81,7 +82,6 @@ public abstract class AbstractStatistic implements Statistic {
 	public void storeCurrentStat() {
 		STAT_HISTORY.remove(0);
 		STAT_HISTORY.add(new Integer(_current));
-		_statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
 		_current = 0;
 	}
 

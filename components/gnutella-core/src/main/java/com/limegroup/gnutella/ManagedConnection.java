@@ -775,7 +775,7 @@ public class ManagedConnection
 
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
-				MessageStat.ALL_FILTERED_MESSAGES.incrementStat();
+				ReceivedMessageStat.ALL_FILTERED_MESSAGES.incrementStat();
 				//MessageStatistics.addFilteredTCPMessage();
                 //_router.countFilteredMessage();
                 _numReceivedMessagesDropped++;
@@ -893,6 +893,7 @@ public class ManagedConnection
      */
     public void handlePingReply(PingReply pingReply,
                                 ReplyHandler receivingConnection) {
+		SentMessageStat.TCP_PING_REQUESTS.incrementStat();
         send(pingReply);
     }
 
@@ -904,6 +905,7 @@ public class ManagedConnection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
+		SentMessageStat.TCP_QUERY_REPLIES.incrementStat();
         send(queryReply);
     }
 
@@ -915,6 +917,7 @@ public class ManagedConnection
      */
     public void handlePushRequest(PushRequest pushRequest,
                                   ReplyHandler receivingConnection) {
+		SentMessageStat.TCP_PUSH_REQUESTS.incrementStat();
         send(pushRequest);
     }
 
