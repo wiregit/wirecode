@@ -167,6 +167,11 @@ public abstract class MessageRouter {
     private static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
 
     /**
+     * The lifetime of OOBs guids.
+     */
+    private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
+
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
@@ -910,7 +915,8 @@ public abstract class MessageRouter {
     protected void handleLimeACKMessage(LimeACKVendorMessage ack,
                                         DatagramPacket datagram) {
 
-        TimedGUID refGUID = new TimedGUID(new GUID(ack.getGUID()));
+        GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
+                                                    TIMED_GUID_LIFETIME);
         QueryResponseBundle bundle = 
             (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
 
@@ -1005,8 +1011,11 @@ public abstract class MessageRouter {
         // store responses by guid for later retrieval
         synchronized (_outOfBandReplies) {
             if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
-                _outOfBandReplies.put(new TimedGUID(new GUID(query.getGUID())), 
-                                      new QueryResponseBundle(query, resps));
+                GUID.TimedGUID tGUID = 
+                    new GUID.TimedGUID(new GUID(query.getGUID()),
+                                       TIMED_GUID_LIFETIME);
+                _outOfBandReplies.put(tGUID, new QueryResponseBundle(query, 
+                                                                     resps));
                 return true;
             }
             return false;
@@ -2500,47 +2509,6 @@ public abstract class MessageRouter {
 		}
 	}
 
-    /** Simply couples a GUID with a timestamp.  Needed for expiration of
-     *  QueryReplies waiting for out-of-band delivery.
-     */
-    private static class TimedGUID {
-        public static final long MAX_LIFE = 25 * 1000; // 25 seconds
-        private final GUID _guid;
-        private final long _creationTime;
-
-        public TimedGUID(GUID guid) {
-            _guid = guid;
-            _creationTime = System.currentTimeMillis();
-        }
-
-        /** @return true if other is a GUID that is the same as the GUID
-         *  in this bundle.
-         */
-        public boolean equals(Object other) {
-            if (other == this) return true;
-            if (other instanceof TimedGUID) 
-                return _guid.equals(((TimedGUID) other)._guid);
-            return false;
-        }
-
-        /** Since guids will be all we have when we do a lookup in a hashtable,
-         *  we want the hash code to be the same as the GUID. 
-         */
-        public int hashCode() {
-            return _guid.hashCode();
-        }
-
-        /** @return true if this bundle is greater than MAX_LIFE seconds old.
-         */
-        public boolean shouldExpire() {
-            long currTime = System.currentTimeMillis();
-            if (currTime - _creationTime >= MAX_LIFE)
-                return true;
-            return false;
-        }
-    }
-
-
     private static class QueryResponseBundle {
         public final QueryRequest _query;
         public final Response[] _responses;
@@ -2561,7 +2529,7 @@ public abstract class MessageRouter {
                 synchronized (_outOfBandReplies) {
                     Iterator keys = _outOfBandReplies.keySet().iterator();
                     while (keys.hasNext()) {
-                        TimedGUID currQB = (TimedGUID) keys.next();
+                        GUID.TimedGUID currQB = (GUID.TimedGUID) keys.next();
                         if ((currQB != null) && (currQB.shouldExpire()))
                             toRemove.add(currQB);
                     }
