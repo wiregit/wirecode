@@ -239,7 +239,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		String str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
 			return;
-        int code=parseHTTPCode(str);		
+        int code=parseHTTPCode(str);	
 
 		//Accept any 2xx's, but reject other codes.
 		if ( (code < 200) || (code >= 300) ) {
@@ -373,19 +373,20 @@ public class HTTPDownloader implements BandwidthTracker {
         int position = -1;
         int minPollTime = -1;
         int maxPollTime = -1;
-        boolean done = false;
-        String str = "";
-        while(!done && !str.equals("\n\r")) {//still need info & headers exist
-            str = _byteReader.readLine();//could throw exception
+        //        boolean done = false;
+        String str = _byteReader.readLine();
+        while(!str.equals("")) {//still need info & headers exist
             StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
-            if(!tokenizer.hasMoreTokens())
-                throw new IOException();// this is equivalent to not queued
+            if(!tokenizer.hasMoreTokens()) { //no tokens on new line??
+                str = _byteReader.readLine();//could throw exception
+                continue; //TODO: Is this correct or should we throw IOX here??
+            }
             
             String token = tokenizer.nextToken();
             if(!token.equals("X-Queue")) {
+                str = _byteReader.readLine();//could throw exception
                 continue;
-                //throw new IOException();//Upload limit reached -- not queued
-            }            
+            }
 
             while(tokenizer.hasMoreTokens()) {
                 token = tokenizer.nextToken();
@@ -403,8 +404,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     position = Integer.parseInt(value);
                 }
             } //end of inner while - done parsing this line.
-            if(minPollTime>-1 && maxPollTime>-1 && position>-1)//done?
-                done = true;
+            str = _byteReader.readLine();//could throw exception
         }//end of outer while - we have all the info we need.
         //OK. now we have all the info we need.
         if(minPollTime==-1 && maxPollTime==-1 && position==-1)

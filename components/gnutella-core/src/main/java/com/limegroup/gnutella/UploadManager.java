@@ -223,7 +223,7 @@ public final class UploadManager implements BandwidthTracker {
         }
         else if(queued == 2) { // we have been given a slot
             synchronized (this) {
-                uploader.setState(Uploader.UPLOADING);
+                uploader.setState(Uploader.CONNECTING);
                 _activeUploadList.add(uploader);
             }
         }

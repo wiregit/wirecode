@@ -52,7 +52,7 @@ public class QueuedUploadState implements HTTPMessage {
     }
 
     public void writeMessageBody(OutputStream ostream) throws IOException {
-        ostream.write(ERROR_MESSAGE);
+        //this method should MUST NOT do anything.
     }
     
     public boolean getCloseConnection() {
