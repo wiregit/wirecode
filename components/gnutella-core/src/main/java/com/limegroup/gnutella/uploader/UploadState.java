@@ -77,6 +77,10 @@ public abstract class UploadState implements HTTPMessage {
 	 * section 4.2 of the Push Proxy proposal, v. 0.7
 	 */
 	protected void writeProxies(OutputStream os) throws IOException {
+	    
+	    if (RouterService.acceptedIncomingConnection())
+	        return;
+	    
 	    Set proxies = RouterService.getConnectionManager().getPushProxies();
 	    
 	    StringBuffer buf = new StringBuffer();

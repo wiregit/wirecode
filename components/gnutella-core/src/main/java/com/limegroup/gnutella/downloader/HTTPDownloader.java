@@ -16,6 +16,7 @@ import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CountingInputStream;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import java.io.*;
 import java.net.*;
@@ -1478,7 +1479,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         // cheat - replace the proxies part in the current 
         // http representation 
-        str.replace(",",";");
+        str = StringUtils.replace(str,",",";");
         
         PushEndpoint current = _rfd.getPushAddr();
         PushEndpoint stripped = 
