@@ -68,7 +68,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query, 
 						String richQuery, boolean isFirewalled) {
-        this(guid, ttl, minSpeed, query, richQuery, false, null, null, null,
+        this(guid, ttl, minSpeed, query, richQuery, false, null, null,
              isFirewalled);
     }
 
@@ -87,7 +87,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte ttl, int minSpeed, String query, 
                         boolean isFirewalled) {
-        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null,
+        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null,
              null, isFirewalled);
     }
 
@@ -99,7 +99,7 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, boolean isRequery, boolean isFirewalled) {
         this(newQueryGUID(isRequery), ttl, minSpeed, query, "", isRequery, 
-			 null, null, null, isFirewalled);
+			 null, null, isFirewalled);
     }
 
 
@@ -111,7 +111,7 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery,
                         boolean isRequery, boolean isFirewalled) {
         this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, 
-             isRequery, null, null, null, isFirewalled);
+             isRequery, null, null, isFirewalled);
     }
 
     /**
@@ -130,7 +130,28 @@ public class QueryRequest extends Message implements Serializable{
                         Set requestedUrnTypes, Set queryUrns,
                         boolean isFirewalled) {
         this(guid, ttl, minSpeed, query, richQuery, isRequery,
-             requestedUrnTypes, queryUrns, null, isFirewalled);
+             requestedUrnTypes, queryUrns, null, isFirewalled,
+			 false);
+    }
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+     */
+    private QueryRequest(byte[] guid, byte ttl, int minSpeed, 
+                        String query, String richQuery, boolean isRequery,
+                        Set requestedUrnTypes, Set queryUrns,
+                        boolean isFirewalled, boolean multicast) {
+        this(guid, ttl, minSpeed, query, richQuery, isRequery,
+             requestedUrnTypes, queryUrns, null, isFirewalled,
+			 multicast);
     }
 
 	/**
@@ -315,7 +336,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		return new QueryRequest(guid, (byte)6, 0, query, xmlQuery, false,
 								UrnType.ANY_TYPE_SET, EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection()); 
+								!RouterService.acceptedIncomingConnection());
 	}
 
     /**
@@ -348,12 +369,23 @@ public class QueryRequest extends Message implements Serializable{
     }
 
 	/**
+	 * Creates a new <tt>QueryRequest</tt> instance for multicast queries.	 
+	 * This is necessary due to the unique properties of multicast queries,
+	 * such as the firewalled bit not being set regardless of whether or
+	 * not the node is truly firewalled/NATted to the world outside the
+	 * subnet.
+	 * 
+	 * @param guid the message GUID for the query
+	 * @param query the query string
+	 * @param xmlQuery the xml query string
+	 * @param sha1s the <tt>Set</tt> of SHA1s for the query
 	 */
 	public static QueryRequest 
-		createMulticastQuery(byte[] guid, String query, String xmlQuery, Set sha1s) {
+		createMulticastQuery(byte[] guid, String query, String xmlQuery, 
+							 Set sha1s) {
 		return new QueryRequest(guid, (byte)1, 0, query, xmlQuery,
 								false, UrnType.ANY_TYPE_SET, sha1s,
-								false);
+								false, true);
 	}
 
     /**
@@ -372,7 +404,8 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey, boolean isFirewalled) {
+                        QueryKey queryKey, boolean isFirewalled, 
+						boolean multicast) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
 		if((query == null || query.length() == 0) &&
@@ -394,6 +427,10 @@ public class QueryRequest extends Message implements Serializable{
             // LimeWire's ALWAYS want rich results....
             if (true)
                 minSpeed |= 0x20;
+
+			// set the multicast bit
+			if (multicast) 
+				minSpeed |= 0x10;
         }
         this.MIN_SPEED=minSpeed;
 		if(query == null) {
@@ -707,6 +744,21 @@ public class QueryRequest extends Message implements Serializable{
         return false;        
     }
     
+	/**
+	 * Accessor for whether or not this query was sent via IP multicast,
+	 * and so is on the same subnet, and should follow different firewall 
+	 * rules.
+	 *
+	 * @return <tt>true</tt> if the query was sent via multicast,
+	 *  otherwise <tt>false</tt>
+	 */
+	public boolean isMulticast() {
+        if ((MIN_SPEED & 0x0080) > 0) {
+            if ((MIN_SPEED & 0x0010) > 0)
+                return true;
+        }
+        return false;		
+	}
         
     /**
      * Returns the QueryKey associated with this Request.  May very well be
