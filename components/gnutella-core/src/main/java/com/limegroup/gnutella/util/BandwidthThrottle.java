@@ -78,7 +78,7 @@ public class BandwidthThrottle {
      */    
     public BandwidthThrottle(float bytesPerSecond, boolean switching) {
         setRate(bytesPerSecond);
-        _switching = switching;
+        setSwitching(switching);
     }    
 
     /**
@@ -90,6 +90,33 @@ public class BandwidthThrottle {
      */
     public void setRate(float bytesPerSecond) {
         _bytesPerTick = (int)((float)bytesPerSecond / TICKS_PER_SECOND);
+        if(_switching)
+            fixBytesPerTick(true);
+    }
+    
+    /**
+     * Sets whether or not this throttle is switching bandwidth on/off.
+     */
+    public void setSwitching(boolean switching) {
+        if(_switching != switching)
+            fixBytesPerTick(switching);
+        _switching = switching;
+    }
+    
+    /**
+     * Modifies bytesPerTick to either be double or half of what it was.
+     * This is necessary because of the 'switching', which can effectively
+     * reduce or raise the amount of data transferred.
+     */
+    private void fixBytesPerTick(boolean raise) {
+        int newBytesPerTick = _bytesPerTick;
+        if(raise)
+            newBytesPerTick *= 2;
+        else
+            newBytesPerTick /= 2;
+        if(newBytesPerTick < 0) // overflowed?
+            newBytesPerTick = Integer.MAX_VALUE;
+        _bytesPerTick = newBytesPerTick;
     }
 
     /**
