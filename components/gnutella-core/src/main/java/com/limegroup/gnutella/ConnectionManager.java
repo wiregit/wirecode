@@ -721,12 +721,29 @@ public class ConnectionManager {
         }
         return retSet;
     }
+
+	/**
+	 * Returns the <tt>Endpoint</tt> for an Ultrapeer connected via TCP, 
+	 * if available.
+	 *
+	 * @return the <tt>Endpoint</tt> for an Ultrapeer connected via TCP if
+	 *  there is one, otherwise returns <tt>null</tt>
+	 */
+	public Endpoint getConnectedUltrapeer() {
+		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
+			ManagedConnection connection = (ManagedConnection)iter.next();
+			if(connection.isSupernodeConnection()) {
+				return new Endpoint(connection.getInetAddress().getAddress(),
+									connection.getOrigPort());
+			}
+		}
+		return null;
+	}
     
     /**
      * @return Returns endpoint representing its own address and port
      */
-    public Endpoint getSelfAddress()
-    {
+    public Endpoint getSelfAddress() {
        return new Endpoint(RouterService.getAddress(), 
 						   RouterService.getPort()); 
     }
