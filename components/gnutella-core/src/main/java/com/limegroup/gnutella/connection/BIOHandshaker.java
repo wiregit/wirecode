@@ -13,7 +13,9 @@ import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.http.HTTPHeader;
 
 /**
- * 
+ * Handles a blocking Gnutella connection handshake.  This performs all steps
+ * of the handshake, exiting appropriately if the handshake is rejected or if
+ * an error occurs.
  */
 public final class BIOHandshaker extends AbstractHandshaker {
 
@@ -377,27 +379,20 @@ public final class BIOHandshaker extends AbstractHandshaker {
         _headerWriter.closeHeaderWriting();
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#setWriteRegistered(boolean)
-     */
-    public void setWriteRegistered(boolean registered) {
-        // TODO Auto-generated method stub
-        
-    }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#write()
+    /** 
+     * Throws IllegalStateException since write events should never occur when
+     * we're in blocking mode.
      */
     public boolean write() {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalStateException("in blocking mode");
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#read()
+    /** 
+     * Throws IllegalStateException since read events should never occur when
+     * we're in blocking mode.
      */
     public void read() {
-        // TODO Auto-generated method stub
-        
+        throw new IllegalStateException("in blocking mode");
     }
 }
