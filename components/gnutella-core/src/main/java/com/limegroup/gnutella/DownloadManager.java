@@ -92,7 +92,6 @@ public class DownloadManager {
                     SettingsManager.instance().getDownloadSnapshotFile()));
             buf=(List)in.readObject();
         } catch (IOException e) {
-            System.out.println("IOException: "+e);
             return false;
         } catch (ClassCastException e) {
             return false;
