@@ -522,6 +522,7 @@ public class Acceptor implements Runnable {
         String host = addr.getHostAddress();
         byte[] bytes = addr.getAddress();
         return !RouterService.getConnectionManager().isConnectedTo(host) &&
+               !RouterService.getUDPConnectionManager().isConnectedTo(addr) && 
                !NetworkUtils.isCloseIP(bytes, getAddress(false)) &&
                !NetworkUtils.isLocalAddress(addr);
 	}

@@ -16,7 +16,7 @@ public class UDPMultiplexor {
       LogFactory.getLog(UDPMultiplexor.class);
 
 	/** Keep track of a singleton instance */
-    private static UDPMultiplexor     _instance    = null;
+    private static UDPMultiplexor     _instance    = new UDPMultiplexor();
 
 	/** The 0 slot is for incoming new connections so it is not assigned */
 	public static final byte          UNASSIGNED_SLOT   = 0;
@@ -32,13 +32,9 @@ public class UDPMultiplexor {
     /**
      *  Return the UDPMultiplexor singleton.
      */
-    public static synchronized UDPMultiplexor instance() {
-		// Create the singleton if it doesn't yet exist
-		if ( _instance == null ) {
-			_instance = new UDPMultiplexor();
-		}
+    public static UDPMultiplexor instance() {
 		return _instance;
-    }
+    }      
 
     /**
      *  Initialize the UDPMultiplexor.
@@ -46,6 +42,26 @@ public class UDPMultiplexor {
     private UDPMultiplexor() {
 		_connections       = new WeakReference[256];
 		_lastConnectionID  = 0;
+    }
+    
+    /**
+     * Determines if we're connected to the given host.
+     */
+    public boolean isConnectedTo(InetAddress host) {
+        WeakReference[] array = _connections;
+        
+        if(_lastConnectionID == 0)
+            return false;
+        for(int i = 0; i < array.length; i++) {
+            WeakReference conRef = array[i];
+            if(conRef != null) {
+                UDPConnectionProcessor con = (UDPConnectionProcessor)conRef.get();
+                if(con != null && host.equals(con.getInetAddress())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -55,7 +71,7 @@ public class UDPMultiplexor {
 	public synchronized byte register(UDPConnectionProcessor con) {
 		int connID;
 		
-		WeakReference []copy = new WeakReference[_connections.length];
+		WeakReference[] copy = new WeakReference[_connections.length];
 		for (int i= 0 ; i< _connections.length;i++) 
 		    copy[i] = _connections[i];
 		
@@ -67,9 +83,8 @@ public class UDPMultiplexor {
 				continue;
 
 			// If the slot is open, take it.
-			if (copy[connID] == null ||
-					copy[connID].get()==null) {
-				_lastConnectionID     = connID;
+			if (copy[connID] == null || copy[connID].get()==null) {
+				_lastConnectionID = connID;
 				copy[connID] = new WeakReference(con);
 				_connections=copy;
 				return (byte) connID;
@@ -85,12 +100,11 @@ public class UDPMultiplexor {
 	public synchronized void unregister(UDPConnectionProcessor con) {
 		int connID = (int) con.getConnectionID() & 0xff;
 		
-		WeakReference []copy = new WeakReference[_connections.length];
+		WeakReference[] copy = new WeakReference[_connections.length];
 		for (int i= 0 ; i< _connections.length;i++) 
 		    copy[i] = _connections[i];
 		
-		if ( copy[connID]!=null &&
-				copy[connID].get() == con ) {
+		if ( copy[connID]!=null && copy[connID].get() == con ) {
 		    copy[connID].clear();
 		    copy[connID]=null;
 		}
@@ -105,7 +119,7 @@ public class UDPMultiplexor {
 	  InetAddress senderIP, int senderPort) {
 
 		UDPConnectionProcessor con;
-		WeakReference []array = _connections;
+		WeakReference[] array = _connections;
 		
 		int connID = (int) msg.getConnectionID() & 0xff;
 
@@ -137,11 +151,11 @@ public class UDPMultiplexor {
 
 		} else {  // If valid connID then send on to connection
 			if (array[connID]==null)
-				con=null;
+				con = null;
 			else
 				con = (UDPConnectionProcessor)array[connID].get();
-			if ( con != null &&
-                 con.matchAddress(senderIP, senderPort) ) {
+
+			if ( con != null && con.matchAddress(senderIP, senderPort) ) {
 				con.handleMessage(msg);
 			}
 		}

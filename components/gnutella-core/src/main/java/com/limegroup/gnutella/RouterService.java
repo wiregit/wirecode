@@ -43,6 +43,7 @@ import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.upelection.PromotionManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
@@ -461,6 +462,13 @@ public class RouterService {
 	 */
 	public static UDPService getUdpService() {
 		return udpService;
+	}
+	
+	/**
+	 * Gets the UDPMultiplexor.
+	 */
+	public static UDPMultiplexor getUDPConnectionManager() {
+	    return UDPMultiplexor.instance();
 	}
 
 	/**
