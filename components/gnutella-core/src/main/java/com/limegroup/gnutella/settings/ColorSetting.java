@@ -2,6 +2,8 @@ package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 import java.awt.Color;
+import java.text.NumberFormat;
+
 
 /**
  * Class for an <tt>Color</tt> setting.
@@ -15,17 +17,23 @@ public final class ColorSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultColor the default value to use for the setting
 	 */
-	ColorSetting(Properties defaultProps, Properties props, String key, Color defaultColor) {
-		//super(defaultProps, props, key, String.valueOf(defaultColor.getRGB()));
-		super(defaultProps, props, key, 
-			  Integer.toHexString(defaultColor.getRed()) +
-			  Integer.toHexString(defaultColor.getGreen()) +
-			  Integer.toHexString(defaultColor.getBlue()));
-		System.out.println("ColorSetting: "+defaultColor.getRGB()); 
-		System.out.println("hex red:    "+Integer.toHexString(defaultColor.getRed())); 
-		System.out.println("hex greeen: "+Integer.toHexString(defaultColor.getGreen())); 
-		System.out.println("hex blue:   "+Integer.toHexString(defaultColor.getBlue())); 
+	static ColorSetting createColorSetting(Properties defaultProps, Properties props, 
+										   String key, Color defaultColor) {	  
+		String red   = Integer.toHexString(defaultColor.getRed());
+		String green = Integer.toHexString(defaultColor.getGreen());
+		String blue  = Integer.toHexString(defaultColor.getBlue());	
+		if(red.length() == 1)   red   = "0" + red;
+		if(green.length() == 1) green = "0" + green;
+		if(blue.length() == 1)  blue  = "0" + blue;
+		return new ColorSetting(defaultProps, props, key, red+green+blue);
 	}
+
+	
+	private ColorSetting(Properties defaultProps, Properties props, 
+						 String key, String value) {
+		super(defaultProps, props, key, value);
+	}
+
         
 	/**
 	 * Accessor for the value of this setting.
@@ -34,9 +42,9 @@ public final class ColorSetting extends Setting {
 	 */
 	public Color getValue() {
 		String hexColor = PROPS.getProperty(KEY);
-		int r = Integer.parseInt(hexColor.substring(0, 2));
-		int g = Integer.parseInt(hexColor.substring(2, 4));
-		int b = Integer.parseInt(hexColor.substring(4, 6));
+		int r = Integer.parseInt(hexColor.substring(0, 2), 16);
+		int g = Integer.parseInt(hexColor.substring(2, 4), 16);
+		int b = Integer.parseInt(hexColor.substring(4, 6), 16);
 		return new Color(r,g,b);
 	}
 
@@ -46,6 +54,12 @@ public final class ColorSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(Color value) {
-		PROPS.put(KEY, String.valueOf(value.getRGB()));
+		String red   = Integer.toHexString(value.getRed());
+		String green = Integer.toHexString(value.getGreen());
+		String blue  = Integer.toHexString(value.getBlue());	
+		if(red.length() == 1)   red   = "0" + red;
+		if(green.length() == 1) green = "0" + green;
+		if(blue.length() == 1)  blue  = "0" + blue;
+		PROPS.put(KEY, red+green+blue);
 	}
 }
