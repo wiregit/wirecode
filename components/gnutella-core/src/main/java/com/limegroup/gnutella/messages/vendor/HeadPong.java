@@ -25,6 +25,7 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -61,8 +62,14 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * 2 byte - response code
  * 4 bytes - vendor id
  * 1 byte - queue status
+ * 
+ * Legacy format: 
  * n*8 bytes - n intervals (if requested && file partial && fits in packet)
- * the rest - altlocs (if requested) 
+ * the rest - altlocs and pushlocs (if requested)
+ * 
+ * Curent format:
+ * one big GGEP block.  We do not reply to pings that do not support GGEP, and only existing
+ * LimeWire clients will send pongs in the old format.
  */
 public class HeadPong extends VendorMessage {
 	
@@ -245,7 +252,6 @@ public class HeadPong extends VendorMessage {
 		
 		try {
     		byte features = ping.getFeatures();
-    		features &= ~HeadPing.GGEP_PING; 
     		daos.write(features);
     		if (LOG.isDebugEnabled())
     			LOG.debug("writing features "+features);
@@ -300,6 +306,12 @@ public class HeadPong extends VendorMessage {
     		
     		if (LOG.isDebugEnabled())
     			LOG.debug("our queue status is "+queueStatus);
+    		
+    		// if the remote contained a GGEP field with the properties entry,
+    		// respond with our properties entry.
+    		if ((features & HeadPing.GGEP_PING) == HeadPing.GGEP_PING) {
+    		    addGGEPProperties(daos,features,desc,null);
+    		}
     		
     		//if we sent partial file and the remote asked for ranges, send them 
     		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
@@ -431,6 +443,27 @@ public class HeadPong extends VendorMessage {
 	
 	public boolean isDownloading() {
 		return _isDownloading;
+	}
+	
+	/**
+	 * @return how many direct or push altlocs collided on the filter the host is replying to
+	 */
+	public int getSkippedLocs(boolean direct) {
+	    return -1;
+	}
+	
+	/**
+	 * @return how many direct or push altlocs total the other host knows about
+	 */
+	public int getLeftLocs(boolean direct) {
+	    return -1;
+	}
+	
+	/**
+	 * @return whether the host will understand an altloc digest sent to it. 
+	 */
+	public boolean supportsDigests() {
+	    return true;
 	}
 	
 	//*************************************
@@ -573,12 +606,35 @@ public class HeadPong extends VendorMessage {
 			
 		} else { 
 			LOG.debug("adding altlocs");
+			//TODO: write how many we have total, and how many collided with the digest
+			// they should both be shorts
 			daos.writeShort((short)altbytes.length);
 			caos.write(altbytes);
 			return true;
 		}
-			
 	}
+	
+	/**
+	 * writes a ggep field to the given stream with values depending on the features
+	 * byte.
+	 */
+	private static void addGGEPProperties(DataOutputStream stream, 
+	        byte features, FileDesc desc, GGEP pinger) {
+	    GGEP ggep = new GGEP(true);
+	    
+	    // add the features we understand
+	    byte [] supportedFeatures = new byte[] {(byte)
+	            (GGEPHeadConstants.GGEP_BLOOM |
+	            GGEPHeadConstants.GGEP_PUSH_BLOOM |
+	            GGEPHeadConstants.GGEP_MYPE)};
+	    ggep.put(GGEPHeadConstants.GGEP_PROPS,supportedFeatures);
+	    
+	    // if the pinger asked for altlocs, and included a digest, say that we will include
+	    // the total number of altlocs we have and the number of skipped altlocs with our
+	    // altloc block.
+	    
+	    }
+	
 	
 }
 	

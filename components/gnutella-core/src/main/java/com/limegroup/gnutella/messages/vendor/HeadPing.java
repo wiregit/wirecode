@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocDigest;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
@@ -74,17 +75,6 @@ public class HeadPing extends VendorMessage {
 	 */
 	private static final String GGEP_PUSH = "PUSH";
 	
-	/**
-	 * the ggep field name containing the various ggep features supported by the headping
-	 */
-	static final String GGEP_PROPS = "P";
-	
-	/**
-	 * a flag whose presence in the GGEP_PROPS value indicates the sender supports bloom filters.
-	 * if the key has a value, than that value is the serialized filter.
-	 */
-	static final int GGEP_BLOOM = 0x1;
-	static final int GGEP_PUSH_BLOOM = 0x1 << 1;
 	
 	//////////
 
@@ -168,11 +158,11 @@ public class HeadPing extends VendorMessage {
 			
 			// see if there is a properties field
 			try {
-			    byte [] props = _ggep.getBytes(GGEP_PROPS);
+			    byte [] props = _ggep.getBytes(GGEPHeadConstants.GGEP_PROPS);
 			    int propSet = (int)props[props.length-1];
-			    if ((propSet & GGEP_BLOOM) == GGEP_BLOOM)
+			    if ((propSet & GGEPHeadConstants.GGEP_BLOOM) == GGEPHeadConstants.GGEP_BLOOM)
 			        supportsBloom = true;
-			    if ((propSet & GGEP_PUSH_BLOOM) == GGEP_PUSH_BLOOM)
+			    if ((propSet & GGEPHeadConstants.GGEP_PUSH_BLOOM) == GGEPHeadConstants.GGEP_PUSH_BLOOM)
 			        supportsPushBloom = true;
 			} catch (BadGGEPPropertyException bloomNotSupported) {}
         } 
@@ -236,14 +226,15 @@ public class HeadPing extends VendorMessage {
 		features |= GGEP_PING;
 		
 		// we always support bloom filters, even if we don't carry one
-		ggep.put(GGEP_PROPS, new byte[]{(byte)(GGEP_BLOOM | GGEP_PUSH_BLOOM)});
+		ggep.put(GGEPHeadConstants.GGEP_PROPS, 
+		        new byte[]{(byte)(GGEPHeadConstants.GGEP_BLOOM | GGEPHeadConstants.GGEP_PUSH_BLOOM)});
 		
 		// if we have any filters, serialize them
 		if (filter != null && filter.length > 1) {
 		    if (filter[0] != null)
-		        ggep.put(new String((char)GGEP_BLOOM+"d"), filter[0].toBytes());
+		        ggep.put(new String((char)GGEPHeadConstants.GGEP_BLOOM+"d"), filter[0].toBytes());
 		    if (filter[1] != null)
-		        ggep.put(new String((char)GGEP_PUSH_BLOOM+"d"), filter[1].toBytes());
+		        ggep.put(new String((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+"d"), filter[1].toBytes());
 		}
 		
 		// is this a push ping?
@@ -330,7 +321,7 @@ public class HeadPing extends VendorMessage {
 	    if (_ggep != null) {
 	        //see if there is an altloc digest
 	        try {
-	            byte [] data = _ggep.getBytes((char)GGEP_BLOOM+"d");
+	            byte [] data = _ggep.getBytes((char)GGEPHeadConstants.GGEP_BLOOM+"d");
 	            _digest = AltLocDigest.parseDigest(data,0,data.length);
 	        } catch (BadGGEPPropertyException noBloom){}
 	        catch(IOException badBloom) {} //ignore it?
@@ -341,11 +332,68 @@ public class HeadPing extends VendorMessage {
 	    if (_ggep != null) {
 	        // see if there is a pushloc digest
 	        try {
-	            byte [] data = _ggep.getBytes((char)GGEP_PUSH_BLOOM+"d");
+	            byte [] data = _ggep.getBytes((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+"d");
 	            _pushDigest = AltLocDigest.parseDigest(data,0,data.length);
 	        } catch (BadGGEPPropertyException noBloom){}
 	        catch(IOException badBloom) {} //ignore it?
 	    }
 	}
+	
+	/**
+	 * @return a location to which we can get back at the host, if it is firewalled.
+	 * null if not firewalled.
+	 */
+	public PushEndpoint getPushAddress() {
+	    return null;
+	}
 
+}
+
+/**
+ * A class listing some GGEP constants shared between HeadPings and HeadPongs. 
+ */
+final class GGEPHeadConstants {
+    
+	/**
+	 * the ggep field name containing the various ggep features supported by 
+	 * headpings and headpongs
+	 */
+	static final String GGEP_PROPS = "P";
+	
+	/**
+	 * a flag whose presence in the GGEP_PROPS value indicates the sender supports bloom filters.
+	 * The value of this key would be the serialized bloom filter in pings. 
+	 */
+	static final int GGEP_BLOOM = 0x1;
+	static final int GGEP_PUSH_BLOOM = 0x1 << 1;
+	
+	/**
+	 * a flag whose presence in the GGEP_PROPS value indicates the sender understands the
+	 * field carrying the PushEndpoint address of the pinger.  If such key exists, it would
+	 * contain an updated PE for the sender.  Pings should contain this in order to allow the
+	 * remote host to ping them back, and pongs may contain it if they want to update the pinger
+	 * about their current set of proxies.  
+	 */
+	static final int GGEP_MYPE = 0x1 << 2;
+	
+	/**
+	 * a flag whose presence indicates support for including available ranges of the file.
+	 * the metadata field can indicate whether the ranges are in BitSet or
+	 * IntervalSet format, or whether 64 bit values are supported.
+	 */
+	static final int RANGES = 0x1 << 3;
+	
+	/**
+	 * a flag whose presence indicates support for including altlocs in the response.
+	 */
+	static final int ALTLOCS = 0x1 << 4;
+	static final int PUSHLOCS = 0x1 << 5;
+	
+	/**
+	 * a flag whose presence indicates support for reading statistics about the variable-sized
+	 * digests.  Without any future metadata modifying it, its value would contain the number 
+	 * of altlocs filtered and the total number of altlocs available. 
+	 */
+	static final int ALT_MESH_STAT = 0x1 << 6;
+	static final int PUSH_MESH_STAT = 0x1 << 6;
 }
