@@ -64,11 +64,6 @@ public interface SettingsInterface
 	public String getLastVersionChecked();
 	public boolean getCheckAgain();
 
-	/* For Forced IP and Port */
-	public boolean getForceIPAddress();
-	public String getForcedIPAddress();
-	public int getForcedPort();
-
     public int getFreeloaderFiles();
     public int getFreeloaderAllowed();
 
@@ -194,12 +189,6 @@ public interface SettingsInterface
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
 	
-	public void setForceIPAddress(boolean force)
-		throws IllegalArgumentException;
-	public void setForcedIPAddress(String address)
-		throws IllegalArgumentException;
-	public void setForcedPort(int port)
-		throws IllegalArgumentException;
 	public void setLastVersionChecked(String last);
 	public void setCheckAgain(boolean check);
 
@@ -285,10 +274,11 @@ public interface SettingsInterface
     public static final String  DEFAULT_LAST_VERSION_CHECKED = "0.5";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
 	public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
-	public static final String DEFAULT_FORCED_IP_ADDRESS = "";
-	public static final int DEFAULT_FORCED_PORT = 6346;
-    public static final int DEFAULT_FREELOADER_FILES = 1;
-    public static final int DEFAULT_FREELOADER_ALLOWED = 100;
+	public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
+	public static final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
+	public static final int     DEFAULT_FORCED_PORT = 6346;
+    public static final int     DEFAULT_FREELOADER_FILES = 1;
+    public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
 
     // The property key name constants
     public static final String TTL            = "TTL";
@@ -334,6 +324,8 @@ public interface SettingsInterface
 	public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
 	public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
 	public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
+	public static final String FORCED_IP_ADDRESS_STRING 
+		= "FORCED_IP_ADDRESS_STRING";
 	public static final String FORCED_PORT = "FORCED_PORT";
     public static final String FREELOADER_FILES = "FREELOADER_FILES";
     public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
