@@ -14,8 +14,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
-import com.oroinc.text.regex.*;
-// import java.util.*;
+import com.limegroup.gnutella.util.StringUtils;
 import java.util.Enumeration;
 
 public class FileManager{
@@ -30,14 +29,6 @@ public class FileManager{
      *  f[i]._path is in the shared folder with the shareable extension. */
     private ArrayList /* of FileDesc */ _files;             
     private String[] _extensions;
-
-    // Regular Expressions Stuff.
-    private PatternMatcher matcher = new Perl5Matcher();
-    private PatternCompiler compiler = new Perl5Compiler();
-    private Pattern pattern;
-    private PatternMatcherInput input;
-    // For our enhancements of RegEx.
-    private static final String EscapeChars = "./(){}\"\\";
 
     private static FileManager _myFileManager;
 
@@ -316,102 +307,23 @@ public class FileManager{
 
     ////////////////////////////////// Queries ///////////////////////////////
 
-
-    /** Returns true if s is lowercase and without regular expressions. */
-    private static boolean isSimpleQuery(String s) {
-        for (int i=0; i<s.length(); i++) {
-            char c=s.charAt(i);
-            if (Character.isUpperCase(c))
-                return false;
-            switch (c) {
-                case '*':
-                case '+':
-                case ' ':
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Translates the given wildcard search into a Perl5 regular
-     * expression.  For example, "*.mp3" gets translated into the
-     * regexp ".*\.mp3".
-     */
-    static String wildcard2regexp(String q) {
-        StringBuffer sb = new StringBuffer();
-        for(int i=0; i<q.length();i++){
-            if (EscapeChars.indexOf(q.charAt(i)) < 0){
-                //the particular char is an normal except for *
-                if(q.charAt(i)=='*'||q.charAt(i)=='+'||q.charAt(i)==' '){ //special cases
-                    sb = sb.append(".");
-                    sb = sb.append("*"); //+ and * replaced with .*
-                }
-                else //normal character
-                    sb = sb.append(q.charAt(i));
-            }
-            else{//escape character
-                sb = sb.append("\\");
-                sb = sb.append(q.charAt(i));
-            }
-        }//for
-        return sb.toString();
-    }
-
-
     /** 
      * Returns a list of FileDesc matching q, or null if there are no matches.
      * Subclasses may override to provide different notions of matching.  
      */
-    protected ArrayList search(String q) {
-        //Assumption: most queries will pass this test, and
-        //the cost of the test is negligible.  Alternatively,
-        //we could integrate the test with searchFast, but that's
-        //more complicated and requires writing our own string
-        //matching algorithm--potentially tricky to do right.
-        if (isSimpleQuery(q))
-            return searchFast(q);
-
-        //Can't use simple query.  Fancy query follows.
-        q=q.toLowerCase();
-        String query = wildcard2regexp(q);
-        try {
-            pattern = compiler.compile(query);
-        } catch(MalformedPatternException e) {
-            return searchFast(q);
-        }
-
-        ArrayList response_list = null;  //Don't allocate until needed.
-        for(int i=0; i < _files.size(); i++) {
-            FileDesc desc = (FileDesc)_files.get(i);
-            if (desc==null)
-                continue;
-            String file_name = desc._nameLowerCase;            
-            input = new PatternMatcherInput(file_name);
-            if (matcher.contains(input,pattern)) {
-                if (response_list==null)
-                    response_list=new ArrayList();
-                response_list.add(_files.get(i));
-            }
-        }
-        return response_list;
-    }
-
-    /**
-     * @requires q is a lower-case string without regular expressions.
-     * @effects exactly likely like search(query), but optimized for the
-     *  common case.  (See precondition!)  This is called from search(query).
-     */
-    protected ArrayList searchFast(String query) {
+    protected ArrayList search(String query) {
         //Don't allocate until needed
         ArrayList response_list=null;
 
+        //TODO2: instead of doing this each time, modify StringUtils.matches
+        //TODO2: make "a b" match "a*b" AND "b*a"
+        query=query.toLowerCase();
         for(int i=0; i < _files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
             if (desc==null)
                 continue;
             String file_name = desc._nameLowerCase;
-            if (file_name.indexOf(query) != -1) {
+            if (StringUtils.contains(file_name, query)) {
                 if (response_list==null)
                     response_list=new ArrayList();
                 response_list.add(_files.get(i));
