@@ -147,8 +147,8 @@ ABOUT_TITLE=LimeWire についての情報
 ABOUT_LABEL_START=LimeWire クライアント
 #### ABOUT_LABEL_ADDRESS=http://www.limewire.com
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-#### ABOUT_LABEL_END=Copyright (c)2000-2004 Lime Wire LLC
-ABOUT_LABEL_END=Copyright (c)2000-2004 Lime Wire LLC
+#### ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
+ABOUT_LABEL_END=Copyright (c)2000-2005 Lime Wire LLC
 #### ABOUT_LABEL_TITLE=About LimeWire
 ABOUT_LABEL_TITLE=LimeWire について
 #### ABOUT_CREDITS_LABEL=Credits
@@ -688,6 +688,8 @@ RESULT_PANEL_COUNT=数
 RESULT_PANEL_VENDOR=開発元
 #### RESULT_PANEL_ADDED=Created
 RESULT_PANEL_ADDED=作成
+#### RESULT_PANEL_LICENSE=License
+#? RESULT_PANEL_LICENSE=
 
 #Filter labels.
 #### SEARCH_FILTER_ALL=All
@@ -1164,6 +1166,8 @@ LIBRARY_TABLE_PATH=パス
 LIBRARY_TABLE_HITCOUNT=ヒット
 #### LIBRARY_TABLE_NUMALTLOC=Locations
 LIBRARY_TABLE_NUMALTLOC=位置
+#### LIBRARY_TABLE_LICENSE=License
+#? LIBRARY_TABLE_LICENSE=
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 LIBRARY_TABLE_UPLOAD_COUNT=アップロード
 #### LIBRARY_TREE_NEW_FOLDER_LABEL=New Folder
@@ -1411,6 +1415,8 @@ META_EDITOR_LINK_LABEL=リンク：
 META_EDITOR_ACTION_LABEL=アクション：
 #### META_EDITOR_STARS_LABEL=Stars:
 META_EDITOR_STARS_LABEL=星：
+#### META_EDITOR_LICENSE_LABEL=License:
+#? META_EDITOR_LICENSE_LABEL=
 
 #### META_EDITOR_SIZE_LABEL=Size:
 META_EDITOR_SIZE_LABEL=容量：
@@ -1805,18 +1811,8 @@ NO_PREVIEW_END=
 ERROR_CANT_RESUME_START=このファイルは正しい不完全ファイルではないのでレジュームできません。
 #### ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
 ERROR_CANT_RESUME_END=
-#### ERROR_LOCATING_BROWSER_THEMES=LimeWire could not locate your browser. The LimeWire skins address is:\n"http://www.limewire.com/skins".
-ERROR_LOCATING_BROWSER_THEMES=お使いのブラウザを特定できません。 LimeWire スキンアドレスは：\n"http://www.limewire.com/skins" です。
-#### ERROR_LOCATING_BROWSER_SUPPORT=LimeWire could not locate your browser. The LimeWire support address is:\n"http://www.limewire.com/support".
-ERROR_LOCATING_BROWSER_SUPPORT=お使いのブラウザを特定できません。 LimeWire サポートアドレスは：\n"http://www.limewire.com/support" です。
-#### ERROR_LOCATING_BROWSER_FAQ=LimeWire could not locate your browser. The LimeWire FAQ address is:\n"http://www.limewire.com/support/faq.htm".
-ERROR_LOCATING_BROWSER_FAQ=お使いのブラウザを特定できません。 LimeWire FAQ アドレスは：\n"http://www.limewire.com/support/faq.htm" です。
-#### ERROR_LOCATING_BROWSER_FORUM=LimeWire could not locate your browser. The LimeWire forum address is:\n"http://www.limewire.com/forum.htm".
-ERROR_LOCATING_BROWSER_FORUM=お使いのブラウザを特定できません。 LimeWire 掲示板アドレスは：\n"http://www.limewire.com/forum.htm" です。
-#### ERROR_LOCATING_BROWSER_FRIEND=LimeWire could not locate your browser. The LimeWire "Tell a friend" form address is:\n"http://www.limewire.com/index.jsp/tell_friend".
-ERROR_LOCATING_BROWSER_FRIEND=お使いのブラウザを特定できません。 "友人に知らせる" フォームアドレスは：\n"http://www.limewire.com/index.jsp/tell_friend" です。
-#### ERROR_LOCATING_BROWSER_GENERAL=LimeWire could not locate your default browser.
-ERROR_LOCATING_BROWSER_GENERAL=お使いの標準ブラウザを特定できません。
+#### ERROR_OPEN_URL=LimeWire could not locate your web browser to display the following webpage:
+#? ERROR_OPEN_URL=
 #### ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save directory. Please select a new save directory in the Options menu and try again.
 ERROR_ACCESSING_SAVE_DIRECTORY=保存先フォルダにアクセスできません。 オプションメニューから新規フォルダを選択してもう一度試して下さい。
 #### ERROR_DEL_META_USER=Cannot remove unsaved info.
@@ -1871,6 +1867,33 @@ ERROR_PROPS_CORRUPTED=環境設定を保存するファイルが破損してい�
 ERROR_SEARCH_TOO_LARGE=検索が長すぎます。検索をもっと小さくして再試行して下さい。
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 ERROR_XML_SEARCH_TOO_LARGE=検索が長すぎます。検索をもっと小さくして再試行して下さい。
+
+################################################################################
+# Messages for Creative Commons Licensing
+################################################################################
+#### LICENSE_CC_VIEW_LICENSE=View License
+#? LICENSE_CC_VIEW_LICENSE=
+#### LICENSE_CC_TITLE=License Details
+#? LICENSE_CC_TITLE=
+#### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
+#? LICENSE_CC_LOCATING=
+#### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license.  Click 'verify' to locate the details of this Creative Commons license.
+#? LICENSE_CC_UNVERIFIED=
+#### LICENSE_CC_VERIFY=Verify
+#? LICENSE_CC_VERIFY=
+#### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
+#? LICENSE_CC_INVALID=
+#### LICENSE_CC_RETRY=You can try validating this license again by clicking 'Verify'.
+#? LICENSE_CC_RETRY=
+#### LICENSE_CC_DETAILS=License Details:
+#? LICENSE_CC_DETAILS=
+#### LICENSE_CC_CLAIMED_DEED=View Claimed License Deed
+#? LICENSE_CC_CLAIMED_DEED=
+#### LICENSE_CC_DEED=View License Deed
+#? LICENSE_CC_DEED=
+#### LICENSE_CC_VERIFICATION=View Verification Page
+#? LICENSE_CC_VERIFICATION=
+
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
