@@ -13,6 +13,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.*;
 
+import com.bitzi.util.*;
+
 /**
  * Manages, buying of PRO from within LimeWire. Also, tells the rest of the code
  * if the instance of LimeWire has been upgraded to pro on this machine
@@ -35,52 +37,81 @@ public class ProManager {
     
     public boolean buyPro(String ccNumber, String expDate)  {
         try {
-        Assert.that(canBuyPro());
-		Security.addProvider(
-			new com.sun.net.ssl.internal.ssl.Provider());
+            Assert.that(canBuyPro());
+            //1. open a secure socket to LimeWire server.
+            SSLSocket socket = (SSLSocket)createConnectionToPayServer();
+            //Force the socket to do the SSL handshake now.
+            socket.startHandshake();
+            OutputStream os = socket.getOutputStream();
+            InputStream is = socket.getInputStream();
+            //2. Authenticate the server again!
+            boolean serverAuthenticated = verifyConnection(os,is);
+            System.out.println("Sumeet: verified "+serverAuthenticated);
+
+            //3. Send the Credit card info as well as macAddress.
+            //4. Server will send back a signed file, save it.
+            //5. close the socket.
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    /**
+     * Establishes a connection with the payment server using SSL. For the 
+     * server to be authenticated, we distribute a certificate with LimeWire.
+     */
+    private Socket createConnectionToPayServer() throws 
+                                       IOException, GeneralSecurityException {
+        //For working with java 1.2 and java 1.3
+        Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+        //get the certificate disctibuted with LimeWire. 
         CertificateFactory certFact = CertificateFactory.getInstance("X.509");
         FileInputStream fis = new FileInputStream("core/lib/limecert.cert");
         Certificate cert = certFact.generateCertificate(fis);
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null,null);
         store.setCertificateEntry("lime",cert);        
-        TrustManagerFactory tf = TrustManagerFactory.getInstance("SunX509","SunJSSE");
+        TrustManagerFactory tf = 
+                          TrustManagerFactory.getInstance("SunX509","SunJSSE");
         tf.init(store);
+        //create a SSLContext 
         SSLContext context = SSLContext.getInstance("SSLv3");
         com.sun.net.ssl.TrustManager[] mans = 
                           (com.sun.net.ssl.TrustManager[])tf.getTrustManagers();
+        //initialize the SSLContext with a TrustManager loaded with our cert
         context.init(null,mans,null);
+        //Get SSLSocketFactory from the context
         SSLSocketFactory factory = context.getSocketFactory();
-        SSLSocket socket = (SSLSocket)factory.createSocket(
-                             InetAddress.getByName("127.0.0.1"),7000);
-        //Force the socket to do the SSL handshake now.
-        socket.startHandshake();
-        OutputStream os = socket.getOutputStream();
-        while(true) {
-            String a = "Sumeet\r\n";
-            System.out.println("\t\t\t"+a);
-            os.write(a.getBytes());
-            os.flush();
-            Thread.sleep(10000);
-        }
-        //Limewires will ship with the certificate that we use at the client
-        //end to authenticate the server. This is however not fool proof - what
-        //happens if someone manages to replace that certificate?
-        //We will use the other key pair that ships with limewire to have
-        //the server sign something unique from the client. 
-        //Lets send out client GUID, and have the server sign it.
-        
-        
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //1. open a secure socket to LimeWire server.
-        //2. Send the Credit card info as well as macAddress.
-        //3. Server will send back a signed file, save it.
-        //4. close the socket.
-        return true;
+        //connect to the server
+        return factory.createSocket(InetAddress.getByName("127.0.0.1"),7000);
     }
-    
+
+    /**
+     * Although we have authenticated our server with the certificate shipped 
+     * with LimeWire, this method does another layer of server authentication
+     * using the key pair we use for updates.
+     * The Client sends the server it's clientGUID and the server signs
+     * it with it's private key. The client verifies the signature.
+     * Now we know we are actually talking to the LimeWire Server.
+     */
+    private boolean verifyConnection(OutputStream os, InputStream is) 
+                                                         throws IOException {
+        //Send the server my client guid
+        String guid = SettingsManager.instance().getClientID();
+        byte[] gBytes = GUID.fromHexString(guid);
+        os.write(gBytes);
+        os.flush();
+        //read the signed guid.
+        byte read = -2;
+        int size = is.read();
+        byte[] bytes = new byte[size];
+        is.read(bytes,0,size); 
+        //verify the signature
+        UpdateMessageVerifier verifier=new UpdateMessageVerifier(bytes,gBytes);
+        return  verifier.verifySource();
+    }
+
     public boolean isPro() {
         MacAddressFinder maf = new MacAddressFinder();
         this.macAddress = maf.getMacAddress();

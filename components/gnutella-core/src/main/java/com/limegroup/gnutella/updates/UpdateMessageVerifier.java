@@ -15,17 +15,25 @@ public class UpdateMessageVerifier {
     private byte[] data;
     private byte[] signature;
     private byte[] xmlMessage;
+    private boolean parseXML;
     
     public UpdateMessageVerifier(byte[] fromStream) {
         if(fromStream == null)
             throw new IllegalArgumentException();
         this.data = fromStream;
+        this.parseXML = true;
     }
     
+    public UpdateMessageVerifier(byte[] signature, byte[] data) {
+        this.data = data;
+        this.signature = signature;;
+        this.parseXML=false;
+    }
     
     public boolean verifySource() {        
         //read the input stream and parse it into signature and xmlMessage
-        parse();        
+        if(parseXML)
+            parse();        
         //get the public key
         PublicKey pubKey = null;
         try {
@@ -42,7 +50,10 @@ public class UpdateMessageVerifier {
             //initialize the verifier
             Signature verifier = Signature.getInstance("DSA");
             verifier.initVerify(pubKey);//initialize the signaure
-            verifier.update(xmlMessage,0,xmlMessage.length);
+            if(parseXML)
+                verifier.update(xmlMessage,0,xmlMessage.length);
+            else
+                verifier.update(data);
             //verify
             return verifier.verify(signature);
         } catch (NoSuchAlgorithmException nsax) {
