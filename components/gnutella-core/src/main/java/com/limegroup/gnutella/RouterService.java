@@ -224,10 +224,6 @@ public class RouterService {
     		LOG.trace("STOP Acceptor");
     		
     		// Now, link all the pieces together, starting the various threads.
-    		LOG.trace("START ResultHandler");
-    		RESULT_HANDLER.start();
-    		LOG.trace("STOP ResultHandler");
-    
             LOG.trace("START MessageRouter");
     		router.initialize();
     		LOG.trace("STOPMessageRouter");
