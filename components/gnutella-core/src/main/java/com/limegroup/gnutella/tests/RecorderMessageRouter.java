@@ -4,19 +4,16 @@ import com.limegroup.gnutella.*;
 import java.util.*;
 import java.io.*;
 
-/**
- * @Author Anurag Singla
- */
 
 /**
  * Extends the StandardMessageRouter class to implement caching of query
  * results. It caches the results for most frequently used queries, and in case
- * sufficient number of results are available for a query, it returns those,
- * and doesnt forward the query,
- * else behaves the same as RouterMessageRouter for all other purposes
+ * sufficient number of results are available for a query, it returns those, and
+ * doesnt forward the query, else behaves the same as RouterMessageRouter for
+ * all other purposes
+ *
+ * @author Anurag Singla 
  */
-
-
 public class RecorderMessageRouter extends StandardMessageRouter
 {
     
@@ -30,17 +27,32 @@ public class RecorderMessageRouter extends StandardMessageRouter
 /**
 * Vector of messages that we receive along with time stamps
 */
-private Vector messages = new Vector(100000); //100,000 messages 
-
+private Vector messages = new Vector(SIZE); //10,000 messages 
+private static final int SIZE=5000;
 private int mCount = 0;
     
 private synchronized void addMessage(Message m)
 {
-    messages.add(new TimeAndMessage(System.currentTimeMillis(), m));
-    
-    if((mCount++ % 1000) == 0)
-    {
-        dumpMessages();
+    //1) Already dumped.
+    if (messages==null)
+        return;
+    //2) Still adding messages.
+    else if (messages.size()<SIZE) {
+        if ((messages.size()%200)==0) {
+            System.out.print("Added "+messages.size()+"'th message.  ");
+            System.out.println("("+(SIZE-messages.size())+
+                               " more messages to go...)");
+        }
+        messages.addElement(
+            new TimeAndMessage(System.currentTimeMillis(), m));
+    }
+    //3) Dumping
+    else {
+        System.out.println("**********************************");
+        System.out.print("Dumping messages...");
+        dumpMessages(); 
+        messages=null;
+        System.out.println("done.");
     }
 }
 
@@ -74,7 +86,8 @@ public RecorderMessageRouter(ActivityCallback callback)
 /** 
 * Handles ping requests
 */
-protected void handlePingRequest(PingRequest pingRequest,ManagedConnection receivingConnection) 
+protected void handlePingRequest(PingRequest pingRequest,
+                                 ManagedConnection receivingConnection) 
 {
     addMessage(pingRequest);
     
@@ -120,3 +133,8 @@ public void handlePushRequest(PushRequest pushRequest,
 
 
 }//end of class
+
+
+
+
+

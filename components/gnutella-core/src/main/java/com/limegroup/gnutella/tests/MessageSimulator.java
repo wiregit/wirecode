@@ -26,11 +26,6 @@ public static void main(String[] args)
         
         //initialize it
         connection.initialize();
-
-        //start a thread to read messages
-        Thread receiveMessageThread = new Thread(new ReceiveMessageThread(connection));
-        receiveMessageThread.setDaemon(true);
-        receiveMessageThread.start();
         
         Message m = null;
         
@@ -40,6 +35,12 @@ public static void main(String[] args)
         Vector messages = (Vector)in.readObject();
 
         in.close();
+
+        //start a thread to read messages
+        Thread receiveMessageThread = 
+            new Thread(new ReceiveMessageThread(connection));
+        receiveMessageThread.setDaemon(true);
+        receiveMessageThread.start();
         
         //get the enum
         Enumeration enum = messages.elements();
@@ -61,7 +62,8 @@ public static void main(String[] args)
             
             try
             {
-                long sleepTime = mt.getTime() + timeLag - System.currentTimeMillis();
+                long sleepTime = mt.getTime() 
+                    + timeLag - System.currentTimeMillis();
                 if(sleepTime > 0)
                 {
                     Thread.sleep(sleepTime);
@@ -90,8 +92,9 @@ public static void main(String[] args)
 
 private static void syntaxError() 
 {
-    System.err.println("Syntax: java com.limegroup.gnutella.tests.MessageSimulator "
-                       +"<host> <port>");
+    System.err.println(
+        "Syntax: java com.limegroup.gnutella.tests.MessageSimulator "+
+        "<host> <port>");
     System.exit(1);
 }
 
