@@ -600,7 +600,7 @@ public class IncompleteFileManager implements Serializable {
                 buf.append(", ");
 
             File key=(File)iter.next();
-            List intervals=((VerifyingFile)blocks.get(key)).getBlocksAsList();
+            List intervals=((VerifyingFile)blocks.get(key)).getVerifiedBlocksAsList();
             buf.append(key);
             buf.append(":");
             buf.append(intervals.toString());            

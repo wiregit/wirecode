@@ -187,7 +187,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
                 Interval interval = (Interval) iter.next();
     	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
     	        // ( we add one because HTTP values are exclusive )
@@ -218,7 +218,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
                 Interval interval = (Interval) iter.next();
                 if (low >= interval.low && high <= interval.high)
                     return true;

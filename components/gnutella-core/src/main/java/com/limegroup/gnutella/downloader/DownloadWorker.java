@@ -67,9 +67,10 @@ public class DownloadWorker implements Runnable {
     
     ///////////////////////// Policy Controls ///////////////////////////
     /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=100000;      //100 KB
+    private static final int MIN_SPLIT_SIZE=16*1024;      //16 KB
     /** The default chunk size - if we don't have a tree we request chunks this big */
     static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
+    
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
     private static final float MIN_ACCEPTABLE_SPEED = 
@@ -733,124 +734,94 @@ public class DownloadWorker implements Runnable {
      */
     private ConnectionStatus assignAndRequest(boolean http11) {
         if(LOG.isTraceEnabled())
-            LOG.trace(Thread.currentThread().hashCode()+" assignAndRequest for: " + _rfd);
+            LOG.trace("assignAndRequest for: " + _rfd);
         
         try {
-            if (_commonOutFile.hasFreeBlocksToAssign()) {
+            if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
                 assignWhite(http11);
             } else {
                 assignGrey(http11); 
             }
+            
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())            
                 LOG.debug(Thread.currentThread().hashCode()+" nsex thrown in assingAndRequest "+_downloader,nsex);
-            _manager.addRFD(_rfd);
-            return ConnectionStatus.getNoData();
-        } catch (NoSuchRangeException nsrx) { 
+            
+            return handleNoMoreDownloaders();
+            
+        } catch (NoSuchRangeException nsrx) {
             DownloadStat.NSR_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("nsrx thrown in assignAndRequest "+_downloader,nsrx);
-            //forget the ranges we are preteding uploader is busy.
-            _rfd.setAvailableRanges(null);
-            //if this RFD did not already give us a retry-after header
-            //then set one for it.
-            if(!_rfd.isBusy())
-                _rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
-            _manager.addRFD(_rfd);
-            _rfd.resetFailedCount();                
-            return ConnectionStatus.getNoFile();
+
+            return handleNoRanges();
+            
         } catch(TryAgainLaterException talx) {
             DownloadStat.TAL_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("talx thrown in assignAndRequest "+_downloader,talx);
-                
-            //if this RFD did not already give us a retry-after header
-            //then set one for it.
-            if ( !_rfd.isBusy() ) {
-                _rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
-            }
             
-            synchronized(_manager) {
-                 //if we already have downloads going, then raise the
-                 //retry-after if it was less than the appropriate amount
-                if(!_manager.getActiveWorkers().isEmpty() &&
-                   _rfd.getWaitTime() < RETRY_AFTER_SOME_ACTIVE)
-                   _rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
-
-                _manager.addRFD(_rfd);//try this rfd later
-            }
+            return handleTryAgainLater();
             
-            _rfd.resetFailedCount();                
-            return ConnectionStatus.getNoFile();
         } catch(RangeNotAvailableException rnae) {
             DownloadStat.RNA_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("rnae thrown in assignAndRequest "+_downloader,rnae);
-            _rfd.resetFailedCount();                
-            _manager.informMesh(_rfd, true);
-            //no need to add to files or busy we keep iterating
-            return ConnectionStatus.getPartialData();
+            
+            return handleRangeNotAvailable();
+            
         } catch (FileNotFoundException fnfx) {
             DownloadStat.FNF_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("fnfx thrown in assignAndRequest"+_downloader, fnfx);
-            _manager.informMesh(_rfd, false);
-            return ConnectionStatus.getNoFile();
+            
+            return handleFileNotFound();
+            
         } catch (NotSharingException nsx) {
             DownloadStat.NS_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("nsx thrown in assignAndRequest "+_downloader, nsx);
-            _manager.informMesh(_rfd, false);
-            return ConnectionStatus.getNoFile();
+            
+            return handleNotSharing();
+            
         } catch (QueuedException qx) { 
             DownloadStat.Q_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("qx thrown in assignAndRequest "+_downloader, qx);
-            if(_manager.getActiveWorkers().isEmpty()) {
-                if(_manager.isCancelled() || _manager.isPaused() ||  Thread.currentThread().isInterrupted())
-                    return ConnectionStatus.getNoData(); // we were signalled to stop.
-                _manager.setState(ManagedDownloader.REMOTE_QUEUED);
-            }
-            _manager.workerQueued(this,qx.getQueuePosition());
-            _rfd.resetFailedCount();                
-            return ConnectionStatus.getQueued(qx.getQueuePosition(),
-                                              qx.getMinPollTime());
+            
+            return handleQueued(qx.getQueuePosition(),qx.getMinPollTime());
+            
         } catch(ProblemReadingHeaderException prhe) {
             DownloadStat.PRH_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("prhe thrown in assignAndRequest "+_downloader,prhe);
-            _manager.informMesh(_rfd, false);
-            return ConnectionStatus.getNoFile();
+            
+            return handleProblemReadingHeader();
+            
         } catch(UnknownCodeException uce) {
             DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("uce (" + uce.getCode() +
                           ") thrown in assignAndRequest " +
                           _downloader, uce);
-            _manager.informMesh(_rfd, false);
-            return ConnectionStatus.getNoFile();
+            
+            return handleUnknownCode();
+            
         } catch (ContentUrnMismatchException cume) {
         	DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
         	if(LOG.isDebugEnabled())
         		LOG.debug("cume thrown in assignAndRequest " + _downloader, cume);
+        	
 			return ConnectionStatus.getNoFile();
+			
         } catch (IOException iox) {
             DownloadStat.IO_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("iox thrown in assignAndRequest "+_downloader, iox);
             
-            _rfd.incrementFailedCount();
+            return handleIO();
             
-            // if this RFD had an IOX while reading headers/downloading
-            // less than twice in succession, try it again.
-            if( _rfd.getFailedCount() < 2 ) {
-                //set retry after, wait a little before retrying this RFD
-                _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-                _manager.addRFD(_rfd);
-            } else //tried the location twice -- it really is bad
-                _manager.informMesh(_rfd, false);         
-            return ConnectionStatus.getNoFile();
         } finally {
             _manager.addLocationsToDownload(_downloader.getAltLocsReceived(),
                                    _downloader.getPushLocsReceived(),
@@ -858,6 +829,7 @@ public class DownloadWorker implements Runnable {
         }
         
         //did not throw exception? OK. we are downloading
+        DownloadStat.RESPONSE_OK.incrementStat();
         if(_rfd.getFailedCount() > 0)
             DownloadStat.RETRIED_SUCCESS.incrementStat();    
         
@@ -873,7 +845,6 @@ public class DownloadWorker implements Runnable {
             _manager.workerStarted(this);
         }
         
-        DownloadStat.RESPONSE_OK.incrementStat();            
         return ConnectionStatus.getConnected();
     }
     
@@ -893,11 +864,17 @@ public class DownloadWorker implements Runnable {
         // If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
-            if(http11)
-                interval = _commonOutFile.leaseWhite(_manager.getChunkSize());
-            else
+            if(http11) {
+                int chunkSize = _manager.getChunkSize();
+                int free = _commonOutFile.hasFreeBlocksToAssign(); 
+                if (free <= chunkSize && _manager.getPossibleHostCount() > 1) 
+                    chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
+                LOG.debug("free: "+free+" vs chunksize: "+chunkSize);
+                interval = _commonOutFile.leaseWhite(chunkSize);
+            }else
                 interval = _commonOutFile.leaseWhite();
         }
+        
         // If it is a partial source, extract the first needed/available range
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
@@ -909,6 +886,7 @@ public class DownloadWorker implements Runnable {
                         _commonOutFile.leaseWhite(availableRanges, _manager.getChunkSize());
                 else
                     interval = _commonOutFile.leaseWhite(availableRanges);
+                
             } catch(NoSuchElementException nsee) {
                 // if nothing satisfied this partial source, don't throw NSEE
                 // because that means there's nothing left to download.
@@ -916,13 +894,14 @@ public class DownloadWorker implements Runnable {
                 throw new NoSuchRangeException();
             }
         }
-        
+
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
         //code below.  Note connectHTTP can throw several exceptions.
         int low = interval.low;
         int high = interval.high; // INCLUSIVE
         _downloader.connectHTTP(getOverlapOffset(low), high + 1, true);
+        
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
         //note the confusion caused by downloading overlap
@@ -1044,27 +1023,31 @@ public class DownloadWorker implements Runnable {
             // OR
             // If the new guy is of an acceptable speed and his average
             // bandwidth is faster than the existing one, let him steal.
-            if((bandwidthVictim != -1 &&
-                bandwidthVictim < MIN_ACCEPTABLE_SPEED) ||
-               (bandwidthStealer > MIN_ACCEPTABLE_SPEED &&
-                bandwidthStealer > bandwidthVictim)) {
+            if (bandwidthStealer > bandwidthVictim ||
+                    (bandwidthVictim != -1 &&
+                            bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
+                            bandwidthStealer == -1))
+                 {
                 //replace (bad boy) biggest if possible
                 int start = biggest.getInitialReadingPoint() + amountRead;
                 int stop = biggest.getInitialReadingPoint() + 
                            biggest.getAmountToRead();
+                
                 // If we happened to finish off the download, throw NSEX
                 // and so we don't download any more.
                 if(stop <= start)
                     throw new NoSuchElementException();
+                
                 //Note: we are not interested in being queued at this point this
                 //line could throw a bunch of exceptions (not queuedException)
                 _downloader.connectHTTP(getOverlapOffset(start), stop, false);
                 int newLow = _downloader.getInitialReadingPoint();
                 int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
+                
                 // If the stealer isn't going to give us everything we need,
                 // there's no point in stealing, so throw an exception and
                 // don't steal.
-                if( newLow > start || newHigh < stop ) {
+                if( newHigh < stop ) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("WORKER: not stealing because stealer " +
                                   "gave a subrange.  Expected low: " + start +
@@ -1122,6 +1105,109 @@ public class DownloadWorker implements Runnable {
             biggest.stopAt(start);//we know that biggest must be http1.0
         }
     }
+    
+    ////// various handlers for failure states of the assign process /////
+    
+    /**
+     * no more ranges to download or no more people to steal from - finish download 
+     */
+    private ConnectionStatus handleNoMoreDownloaders() {
+        _manager.addRFD(_rfd);
+        
+        return ConnectionStatus.getNoData();
+    }
+    
+    /**
+     * The file does not have such ranges 
+     */
+    private ConnectionStatus handleNoRanges() {
+        //forget the ranges we are preteding uploader is busy.
+        _rfd.setAvailableRanges(null);
+        
+        //if this RFD did not already give us a retry-after header
+        //then set one for it.
+        if(!_rfd.isBusy())
+            _rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
+        
+        _rfd.resetFailedCount();                
+        _manager.addRFD(_rfd);
+        
+        return ConnectionStatus.getNoFile();
+    }
+    
+    private ConnectionStatus handleTryAgainLater() {
+        //if this RFD did not already give us a retry-after header
+        //then set one for it.
+        if ( !_rfd.isBusy() ) {
+            _rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
+        }
+        
+        //if we already have downloads going, then raise the
+        //retry-after if it was less than the appropriate amount
+        if(!_manager.getActiveWorkers().isEmpty() &&
+                _rfd.getWaitTime() < RETRY_AFTER_SOME_ACTIVE)
+            _rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
+        
+        _manager.addRFD(_rfd);//try this rfd later
+        
+        _rfd.resetFailedCount();                
+        return ConnectionStatus.getNoFile();
+    }
+    
+    /**
+     * The ranges exist in the file, but the remote host does not have them
+     */
+    private ConnectionStatus handleRangeNotAvailable() {
+        _rfd.resetFailedCount();                
+        _manager.informMesh(_rfd, true);
+        //no need to add to files or busy we keep iterating
+        return ConnectionStatus.getPartialData();
+    }
+    
+    private ConnectionStatus handleFileNotFound() {
+        _manager.informMesh(_rfd, false);
+        return ConnectionStatus.getNoFile();
+    }
+    
+    private ConnectionStatus handleNotSharing() {
+        return handleFileNotFound();
+    }
+    
+    private ConnectionStatus handleQueued(int position, int pollTime) {
+        if(_manager.getActiveWorkers().isEmpty()) {
+            if(_manager.isCancelled() || _manager.isPaused() ||  Thread.currentThread().isInterrupted())
+                return ConnectionStatus.getNoData(); // we were signalled to stop.
+            _manager.setState(ManagedDownloader.REMOTE_QUEUED);
+        }
+        _manager.workerQueued(this,position);
+        _rfd.resetFailedCount();                
+        return ConnectionStatus.getQueued(position, pollTime);
+    }
+    
+    private ConnectionStatus handleProblemReadingHeader() {
+        return handleFileNotFound();
+    }
+    
+    private ConnectionStatus handleUnknownCode() {
+        return handleFileNotFound();
+    }
+    
+    private ConnectionStatus handleIO(){
+        _rfd.incrementFailedCount();
+        
+        // if this RFD had an IOX while reading headers/downloading
+        // less than twice in succession, try it again.
+        if( _rfd.getFailedCount() < 2 ) {
+            //set retry after, wait a little before retrying this RFD
+            _rfd.setRetryAfter(FAILED_RETRY_AFTER);
+            _manager.addRFD(_rfd);
+        } else //tried the location twice -- it really is bad
+            _manager.informMesh(_rfd, false);
+        
+        return ConnectionStatus.getNoFile();
+    }
+    
+    //////// end handlers of various failure states ///////
     
     /**
      * Offsets i by OVERLAP_BYTES.  Used when requesting the start-range

@@ -141,14 +141,12 @@ public class VerifyingFile {
         checkOverlap = yes;
     }
     /**
-     * used to add blocks direcly. WARNING: the intervals added using this 
-     * method are not checked for overlaps, incorrect use of this method, may 
-     * break integrity constrains.
+     * used to add blocks direcly. Blocks added this way are marked
+     * partial.
      */
     public synchronized void addInterval(Interval interval) {
         //delegates to underlying IntervalSet
-        writtenBlocks.add(interval);
-        releaseBlock(interval);
+        partialBlocks.add(interval);
     }
 
     /**
@@ -207,6 +205,7 @@ public class VerifyingFile {
         if (LOG.isDebugEnabled())
             LOG.debug("adding chunk "+intvl+" to partialBlocks");
         partialBlocks.add(intvl);
+        leasedBlocks.delete(intvl);
         
         //5. if we have a tree, see if there is a complete chunk in the partial list
         HashTree tree = managedDownloader.getHashTree(); 
@@ -219,6 +218,14 @@ public class VerifyingFile {
                 CHUNK_VERIFIER.add(new ChunkVerifier(i,tree));
             }
             
+        } else {
+            // if we couldn't get a tree during the entire download, 
+            // we have to bite the bullet and rely on SHA1 alone
+            if (partialBlocks.getSize() == completedSize) {
+                Interval all = partialBlocks.removeFirst();
+                writtenBlocks.add(all);
+            }
+                
         }
     }
 
@@ -346,6 +353,10 @@ public class VerifyingFile {
      * Returns all verified blocks with an Iterator.
      */
     public synchronized Iterator getBlocks() {
+        return getBlocksAsList().iterator();
+    }
+    
+    public synchronized Iterator getVerifiedBlocks() {
         return writtenBlocks.getAllIntervals();
     }
     
@@ -353,10 +364,20 @@ public class VerifyingFile {
     	return writtenBlocks.toBytes();
     }
 
+    public synchronized List getBlocksAsList() {
+        List l = new ArrayList();
+        l.addAll(writtenBlocks.getAllIntervalsAsList());
+        l.addAll(partialBlocks.getAllIntervalsAsList());
+        l.addAll(pendingBlocks.getAllIntervalsAsList());
+        IntervalSet ret = new IntervalSet();
+        for (Iterator iter = l.iterator();iter.hasNext();)
+            ret.add((Interval)iter.next());
+        return ret.getAllIntervalsAsList();
+    }
     /**
      * Returns all written blocks as a List.
      */ 
-    public synchronized List getBlocksAsList() {
+    public synchronized List getVerifiedBlocksAsList() {
         return writtenBlocks.getAllIntervalsAsList();
     }
 
@@ -378,11 +399,11 @@ public class VerifyingFile {
      * Determines if there are any blocks that are not assigned
      * or written.
      */
-    public synchronized boolean hasFreeBlocksToAssign() {
-        return ( writtenBlocks.getSize() + 
+    public synchronized int hasFreeBlocksToAssign() {
+        return  completedSize - (writtenBlocks.getSize() + 
                 leasedBlocks.getSize() +
                 partialBlocks.getSize() +
-                pendingBlocks.getSize() < completedSize); 
+                pendingBlocks.getSize()); 
     }
     
     /**
@@ -500,7 +521,7 @@ public class VerifyingFile {
             synchronized(VerifyingFile.this) {
                 pendingBlocks.delete(_interval);
                 if (good) 
-                    addInterval(_interval);
+                    writtenBlocks.add(_interval);
             }
         }
         
