@@ -168,6 +168,11 @@ public final class HandshakeResponse {
     private final boolean PROBE_QUERIES;
 
     /**
+     * Constant for whether or not this connection wants to be proxied.
+     */
+    private final boolean DESIRES_PROXY_SERVICES;
+
+    /**
      * Creates a HandshakeResponse which defaults the status code and status
      * message to be "200 Ok" and uses the desired headers in the response. 
      * @param headers the headers to use in the response. 
@@ -212,6 +217,9 @@ public final class HandshakeResponse {
         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
         DEFLATE_ENCODED = isStringValue(HEADERS,
             HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+
+        DESIRES_PROXY_SERVICES = 
+            (headers.getProperty(HeaderNames.X_SERVENT_ID) != null);
     }
     
     /**
@@ -748,6 +756,17 @@ public final class HandshakeResponse {
      */
     public boolean supportsProbeQueries() {
         return PROBE_QUERIES;
+    }
+
+    /**
+     * Accessor for whether or not this connection desires proxy services
+     * (i.e. PushProxy).
+     *
+     * @return <tt>true</tt> if this connection desires proxy services,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean desiresProxyServices() {
+        return DESIRES_PROXY_SERVICES;
     }
 
     /**
