@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.security.DummyAuthenticator;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -23,7 +24,8 @@ public class Main implements ActivityCallback {
     
     FileManager fm = new FileManager();
     service=new RouterService(callback,
-                              (new StandardMessageRouter(callback,fm)),fm);
+        (new StandardMessageRouter(callback,fm)),fm,
+        new DummyAuthenticator());
     
     service.initialize();
         
