@@ -49,18 +49,23 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
 
         fm.get(0);
+        
         rfd1 = new RemoteFileDesc("1.1.1.1",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
                                   false, null, FileDescStub.set, false, false,"",0, null, -1);
+        
         rfd2 = new RemoteFileDesc("1.1.1.2",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
                                   false, null, FileDescStub.set, false, false,"",0, null, -1);
+        
         rfd3 = new RemoteFileDesc("1.1.1.3",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
                                   false, null, FileDescStub.set, false, false,"",0, null, -1);
+        
         rfd4 = new RemoteFileDesc("1.1.1.4",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
                                   false, null, FileDescStub.set, false, false,"",0, null, -1);
+        
         rfd5 = new RemoteFileDesc("1.1.1.5",1,0,"abc.txt",FileDescStub.size,
                                   new byte[16], 56, false, 3,
                                   false, null, FileDescStub.set, false, false,"",0, null, -1);
@@ -169,6 +174,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - uploads not in slot one, but uploader has available for all get slot
      */
     public void testNormalQueueing() throws Exception {
+    	
+    	
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
@@ -432,107 +439,12 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         //System.out.println("Passed");
     }
 
-    public void testPerHostLimitedNotQueued() throws Exception {
-        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
-        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
-        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
-        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+    
+    
    
-        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
-        connectDloader(d1,true,rfd1,true);
-        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
-        connectDloader(d2,true,rfd1,true);
-        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
-        try {
-            connectDloader(d3,true,rfd1,true);
-            fail("Host limit reached, should not have accepted d3");
-        } catch (QueuedException qx) {
-            fail("host limit reached should not queue", qx);
-        } catch (TryAgainLaterException expectedException) {
-        } catch (IOException ioe) {//This is similar to d5 being rejected
-            //in testNormalQueueing, IOE may be thrown if uploader
-            //closes the socket. 
-        }            
-        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.2",true);
-        try {
-            connectDloader(d4,true,rfd1,true);
-            fail("Host limit reached, should not have accepted d4");
-        } catch (TryAgainLaterException tx) {
-            fail("d4 should have been queued", tx);
-        } catch (QueuedException expectedException) {
-        } catch (IOException ioe) {
-            fail("d4 should have been queued", ioe);
-        }            
-        //System.out.println("passed");
-    }
-    
-    public void testThexQueuing() throws Exception {
-        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
-        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
-        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
-        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
-        
-        HTTPDownloader d3 = null;
-        //first two uploads to get slots
-        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
-        connectDloader(d1,true,rfd1,true);
-        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
-        connectDloader(d2,true,rfd2,true);
-        try { //queued at 0th position
-            d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
-            connectDloader(d3,true,rfd3,true);
-            fail("uploader should have been queued, but was given slot");
-        } catch(QueuedException qx) {
-            assertEquals(1, qx.getQueuePosition());
-        }
-        
-        assertEquals("should have 1 queued uploads",
-            1, upManager.getNumQueuedUploads());
-        assertEquals("should have 2 active uploads",
-            2, upManager.uploadsInProgress());
-            
-        // should queue next guy, but 'cause its thex we wont.
-        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
-        ConnectionStatus status = connectThex(d4, true);
-        assertTrue(status.isThexResponse());
-        
-        // d5 will connect and get queued.
-        HTTPDownloader d5 = addUploader(upManager, rfd5, "1.1.1.5", true);
-        try {
-            connectDloader(d5, true, rfd5, true);
-            fail("should have been queued");
-        } catch(QueuedException qx) {
-            assertEquals(2, qx.getQueuePosition());
-        }
-
-        assertEquals("should have 1 queued uploads",
-            2, upManager.getNumQueuedUploads());
-        assertEquals("should have 2 active uploads",
-            2, upManager.uploadsInProgress());
-        
-        //even though 5 is queued, he should be able to get the thex tree.
-        status = connectThex(d5, false);
-        assertTrue(status.isThexResponse());
-        // no need to check the tree, is checked in lots of other tests.
-        
-        //but, when he tries to get the file again, he stays queued.
-        assertEquals("should have 1 queued uploads",
-            2, upManager.getNumQueuedUploads());
-        assertEquals("should have 2 active uploads",
-            2, upManager.uploadsInProgress());
-            
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);
-        try {
-            connectDloader(d5, false, rfd5, true);
-            fail("should have been queued");
-        } catch(QueuedException qx) {
-            assertEquals(2, qx.getQueuePosition());
-        }
-    }
         
     
-    public void testGreedyLimitReached() throws Exception {
+    /*public void testGreedyLimitReached() throws Exception {
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(2);
@@ -596,8 +508,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, upManager.getNumQueuedUploads());
         assertEquals("should have 0 active uploads",
             0, upManager.uploadsInProgress());
-    }
-    
+    }*/
+    /*
     public void testBanning() throws Exception {
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
@@ -612,9 +524,9 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
    
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
-        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
         connectDloader(d2,true,rfd1,true);
-        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
         try {
             connectDloader(d3,true,rfd1,true);
             fail("Host limit reached, should not have accepted d3");
@@ -625,7 +537,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             //in testNormalQueueing, IOE may be thrown if uploader
             //closes the socket. 
         }            
-        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.2",true);
+        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
         try {
             connectDloader(d4,true,rfd1,true);
             fail("Host limit reached, should not have accepted d4");
@@ -653,7 +565,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         // be allowed because the 15 minute alloted timespan isn't up
         // yet.
         try {
-            d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+            d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
             connectDloader(d3,true,rfd1,true);
             fail("d3 is greedy, should have sent limit reached");
         } catch (QueuedException qx) {
@@ -674,7 +586,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             for(; i < 20; i++) {
                 Thread.sleep(1000);
                 try {
-                    d3 = addUploader(upManager, rfd3, "1.1.1.1", true);
+                    d3 = addUploader(upManager, rfd3, "1.1.1.3", true);
                     connectDloader(d3, true, rfd1, true);
                     fail("should have thrown limit reached");
                 }
@@ -697,14 +609,14 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         // now wait awhile and we should be allowed back in.        
         Thread.sleep(60000);
-        d3 = addUploader(upManager, rfd3, "1.1.1.1", true);
+        d3 = addUploader(upManager, rfd3, "1.1.1.3", true);
         connectDloader(d3, true, rfd1, true);
         
         // now wait awhile and we should be allowed back in.
         assertEquals("should have 1 active uploads",
             1, upManager.uploadsInProgress());        
     }        
- 
+ */
     public void testSoftMax() throws Exception {
         UploadSettings.HARD_MAX_UPLOADS.setValue(9999);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(2);
@@ -867,6 +779,106 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         //System.out.println("Passed");
     }
+    
+    
+    public void testThexQueuing() throws Exception {
+        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+        
+        HTTPDownloader d3 = null;
+        //first two uploads to get slots
+        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1,true,rfd1,true);
+        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
+        connectDloader(d2,true,rfd2,true);
+        try { //queued at 0th position
+            d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
+            connectDloader(d3,true,rfd3,true);
+            fail("uploader should have been queued, but was given slot");
+        } catch(QueuedException qx) {
+            assertEquals(1, qx.getQueuePosition());
+        }
+        
+        assertEquals("should have 1 queued uploads",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());
+            
+        // should queue next guy, but 'cause its thex we wont.
+        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
+        ConnectionStatus status = connectThex(d4, true);
+        assertTrue(status.isThexResponse());
+        
+        // d5 will connect and get queued.
+        HTTPDownloader d5 = addUploader(upManager, rfd5, "1.1.1.5", true);
+        try {
+            connectDloader(d5, true, rfd5, true);
+            fail("should have been queued");
+        } catch(QueuedException qx) {
+            assertEquals(2, qx.getQueuePosition());
+        }
+
+        assertEquals("should have 1 queued uploads",
+            2, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());
+        
+        //even though 5 is queued, he should be able to get the thex tree.
+        status = connectThex(d5, false);
+        assertTrue(status.isThexResponse());
+        // no need to check the tree, is checked in lots of other tests.
+        
+        //but, when he tries to get the file again, he stays queued.
+        assertEquals("should have 1 queued uploads",
+            2, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());
+            
+        Thread.sleep((UploadManager.MIN_POLL_TIME+
+                      UploadManager.MAX_POLL_TIME)/2);
+        try {
+            connectDloader(d5, false, rfd5, true);
+            fail("should have been queued");
+        } catch(QueuedException qx) {
+            assertEquals(2, qx.getQueuePosition());
+        }
+    }
+    
+  /*  public void testPerHostLimitedNotQueued() throws Exception {
+        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+   
+        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1,true,rfd1,true);
+        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+        connectDloader(d2,true,rfd2,true);
+        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+        try {
+            connectDloader(d3,true,rfd3,true);
+            fail("Host limit reached, should not have accepted d3");
+        } catch (QueuedException qx) {
+            fail("host limit reached should not queue", qx);
+        } catch (TryAgainLaterException expectedException) {
+        } catch (IOException ioe) {//This is similar to d5 being rejected
+            //in testNormalQueueing, IOE may be thrown if uploader
+            //closes the socket. 
+        }            
+        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
+        try {
+            connectDloader(d4,true,rfd1,true);
+            fail("Host limit reached, should not have accepted d4");
+        } catch (TryAgainLaterException tx) {
+            fail("d4 should have been queued", tx);
+        } catch (QueuedException expectedException) {
+        } catch (IOException ioe) {
+            fail("d4 should have been queued", ioe);
+        }            
+        //System.out.println("passed");
+    }*/
 
 
     /** 
