@@ -65,8 +65,7 @@ public class HTTPManager {
 	    if (!parse[0].equals("get"))
 		throw new IOException();	    
 
-	    _filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP"));
-
+	    _filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP")-1);
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 
