@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="i18nData"/>
+	<classpathentry kind="src" path="messagebundles"/>
+	<classpathentry kind="lib" path="jars/cocoaFoundation.jar"/>
+	<classpathentry kind="lib" path="jars/commons-httpclient.jar"/>
+	<classpathentry kind="lib" path="jars/commons-logging.jar"/>
+	<classpathentry kind="lib" path="jars/cryptix.jar"/>
+	<classpathentry kind="lib" path="jars/daap.jar"/>
+	<classpathentry kind="lib" path="jars/i18n.jar"/>
+	<classpathentry kind="lib" path="jars/icu4j.jar"/>
+	<classpathentry kind="lib" path="jars/id3v2.jar"/>
+	<classpathentry kind="lib" path="jars/jcraft.jar"/>
+	<classpathentry kind="lib" path="jars/jl011.jar"/>
+	<classpathentry kind="lib" path="jars/jmdns.jar"/>
+	<classpathentry kind="lib" path="jars/log4j.jar"/>
+	<classpathentry kind="lib" path="jars/logicrypto.jar"/>
+	<classpathentry kind="lib" path="jars/looks.jar"/>
+	<classpathentry kind="lib" path="jars/MacStubs.jar"/>
+	<classpathentry kind="lib" path="jars/mp3sp14.jar"/>
+	<classpathentry kind="lib" path="jars/MRJ141Stubs.jar"/>
+	<classpathentry kind="lib" path="jars/MRJAdapter.jar"/>
+	<classpathentry kind="lib" path="jars/MRJToolkitStubs.jar"/>
+	<classpathentry kind="lib" path="jars/ProgressTabs.jar"/>
+	<classpathentry kind="lib" path="jars/themes.jar"/>
+	<classpathentry kind="lib" path="jars/tritonus.jar"/>
+	<classpathentry kind="lib" path="jars/vorbis.jar"/>
+	<classpathentry kind="lib" path="jars/xerces.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="/core"/>
+	<classpathentry kind="output" path="messagebundles"/>
+</classpath>
