@@ -50,8 +50,8 @@ public class XMLProperties
      * The name of the directory in which XML Schemas will be 
      * kept for querying and responding.
      */
-    private static final String XML_SCHEMA_DIR_DEF = "xmlschemas" + 
-                                                        File.separator;
+    private static final String XML_SCHEMA_DIR_DEF = "etc" + File.separator + 
+                                                "schemas" + File.separator;
 
 
     /**
