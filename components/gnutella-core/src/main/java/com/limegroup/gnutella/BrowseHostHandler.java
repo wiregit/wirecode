@@ -414,9 +414,13 @@ public class BrowseHostHandler {
                         try {
                             finalPRD.bhh.browseExchange(socket);
                         }
-                        catch (IOException ohWell) {}
+                        catch (IOException ohWell) {
+                            finalPRD.bhh.failed();
+                        }
                     }
                 };
+            runLater.setName("BrowseHost");
+            runLater.setDaemon(true);
             runLater.start();
             retVal = true;
         }
