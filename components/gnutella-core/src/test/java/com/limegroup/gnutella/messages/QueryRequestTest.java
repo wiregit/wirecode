@@ -863,12 +863,41 @@ public final class QueryRequestTest extends BaseTestCase {
 
     }
 
-    private void testMetaFlag(int flag) {
+    private void testMetaFlag(int flag) throws Exception {
         try {
         QueryRequest query = 
             new QueryRequest(GUID.makeGuid(), (byte)3, "whatever", "", null,
-                             null, null, true, Message.N_TCP, false, 0, 
-                             flag);
+                             null, null, true, Message.N_TCP, false, 0, flag);
+        if (flag == 0) assertTrue(query.desiresAll());
+        if ((flag & QueryRequest.AUDIO_MASK) > 0)
+            assertTrue(query.desiresAudio());
+        if ((flag & QueryRequest.VIDEO_MASK) > 0)
+            assertTrue(query.desiresVideo());
+        if ((flag & QueryRequest.DOC_MASK) > 0)
+            assertTrue(query.desiresDocuments());
+        if ((flag & QueryRequest.IMAGE_MASK) > 0)
+            assertTrue(query.desiresImages());
+        if ((flag & QueryRequest.WIN_PROG_MASK) > 0)
+            assertTrue(query.desiresWindowsPrograms());
+        if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
+            assertTrue(query.desiresLinuxOSXPrograms());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        query.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        QueryRequest qr = (QueryRequest) Message.read(bais);
+        if (flag == 0) assertTrue(query.desiresAll());
+        if ((flag & QueryRequest.AUDIO_MASK) > 0)
+            assertTrue(qr.desiresAudio());
+        if ((flag & QueryRequest.VIDEO_MASK) > 0)
+            assertTrue(qr.desiresVideo());
+        if ((flag & QueryRequest.DOC_MASK) > 0)
+            assertTrue(qr.desiresDocuments());
+        if ((flag & QueryRequest.IMAGE_MASK) > 0)
+            assertTrue(qr.desiresImages());
+        if ((flag & QueryRequest.WIN_PROG_MASK) > 0)
+            assertTrue(qr.desiresWindowsPrograms());
+        if ((flag & QueryRequest.LIN_PROG_MASK) > 0)
+            assertTrue(qr.desiresLinuxOSXPrograms());
         }
         catch (IllegalArgumentException no) {
             assertTrue(false);
