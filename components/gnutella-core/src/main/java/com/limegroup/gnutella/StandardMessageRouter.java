@@ -327,9 +327,9 @@ public class StandardMessageRouter extends MessageRouter {
             //therefore we won't throw a IllegalArgumentException but we will
             //show it so the error will be sent to Bug servlet
             ErrorService.error
-                (new IllegalArgumentException
-                 ("encountered UnsupportedEncodingException in creation of QueryReply : xmlCollectionString : " 
-                  + xmlCollectionString));
+                (ueex,
+                 "encountered UnsupportedEncodingException in creation of QueryReply : xmlCollectionString : " 
+                  + xmlCollectionString);
         }
         
         // get the *latest* push proxies if we have not accepted an incoming
@@ -359,9 +359,9 @@ public class StandardMessageRouter extends MessageRouter {
                     //we will show the error but treat as if the currXML was
                     //empty (see the try catch for uee earlier)
                     ErrorService.error
-                        (new IllegalArgumentException
-                         ("encountered UnsupportedEncodingException : currXML " 
-                          + currXML));
+                        (ueex,
+                         "encountered UnsupportedEncodingException : currXML " 
+                          + currXML);
                     currXMLBytes = "".getBytes();
                 }
                 if ((currXMLBytes.length > QueryReply.XML_MAX_SIZE) &&

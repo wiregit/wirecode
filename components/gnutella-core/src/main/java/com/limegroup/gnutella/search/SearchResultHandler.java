@@ -268,7 +268,7 @@ public final class SearchResultHandler {
             //the uee will effect the xml part of the reply but we could
             //still show the reply so there shouldn't be any ill effect if
             //xmlCollectionString is ""
-            ErrorService.error(new BadPacketException("UnsupportedEncodingException thrown whil trying to create xmlCollectionString"));
+            ErrorService.error(use);
         }
         catch (IOException ignored) {}
 
