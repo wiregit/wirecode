@@ -43,9 +43,10 @@ public class BrowseHostHandler {
 
     /** Expires pushes that we are waiting for.
      */
-    private static Expirer expirer = new Expirer();
+    private static Expirer expirer = null;
     static {
-        RouterService.instance().schedule(expirer, 0, EXPIRE_TIME);
+        expirer = new Expirer();
+        RouterService.instance().schedule(expirer, 0, 5000);// every 5 seconds
     }
 
     /**
@@ -93,7 +94,6 @@ public class BrowseHostHandler {
             if (!shouldTryPush) 
                 break;
         case 1: // true
-            debug("BHH.browseHost(): trying push.");
             PushRequest pr = new PushRequest(GUID.makeGuid(),
                                              SettingsManager.instance().getTTL(),
                                              _serventID.bytes(), 
@@ -111,6 +111,7 @@ public class BrowseHostHandler {
                 _router.sendPushRequest(pr);
             }
             catch (IOException ioe) {
+                debug(ioe);
                 // didn't work, unregister yourself...
                 synchronized (_pushedHosts) {
                     _pushedHosts.remove(_serventID);
@@ -300,6 +301,7 @@ public class BrowseHostHandler {
      */
     private static class Expirer implements Runnable {
         public void run() {
+            debug("Expirer.run(): entered, _pushedHosts = " + _pushedHosts);
             Iterator keys = null;
             synchronized (_pushedHosts) {
                 keys = _pushedHosts.keySet().iterator();
@@ -310,6 +312,7 @@ public class BrowseHostHandler {
                 synchronized (_pushedHosts) {
                     currPRD = (PushRequestDetails) _pushedHosts.get(currKey);
                     if ((currPRD != null) && (currPRD.isExpired())) {
+                        debug("Expirer.run(): expiring a badboy.");
                         _pushedHosts.remove(currKey);
                         currPRD.bhh._callback.browseHostFailed(currPRD.bhh._guid);
                     }
