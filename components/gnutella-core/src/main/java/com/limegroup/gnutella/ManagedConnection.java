@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
-import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
@@ -953,6 +953,15 @@ public class ManagedConnection
         }
     }
 
+    /** Sets the common properties in props, like Query-Routing and
+     *  User-Agent. Typically this method is only called once per connection. */
+    private static void addCommonProperties(Properties props) {
+        props.setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING,
+                          "0.1");
+        props.setProperty(ConnectionHandshakeHeaders.USER_AGENT,
+                          CommonUtils.getVendor());                
+    }
+
     /**
      * Properties for connection handshake, if the node is a supernode
      */
@@ -962,7 +971,7 @@ public class ManagedConnection
             super(router);
             //set supernode property
             setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
-            setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+            addCommonProperties(this);
         }
     }
     
@@ -975,7 +984,7 @@ public class ManagedConnection
             super(router);
             //set supernode property
             setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
-            setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+            addCommonProperties(this);
         }
     }
 
@@ -998,8 +1007,7 @@ public class ManagedConnection
             if(!outgoing) {
                 //Incoming connection....
                 ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
-                ret.setProperty(
-                    ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+                addCommonProperties(ret);
                 
                 //guide the incoming connection to be a supernode/clientnode
                 ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
@@ -1048,10 +1056,11 @@ public class ManagedConnection
             //set common properties
             Properties ret=new Properties();
             ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
-            ret.setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
-            
+
             //do stuff specific to connection direction
             if(!outgoing){
+                addCommonProperties(ret);
+
                 //client should never accept the connection. Therefore, set the
                 //appropriate status
                 code = 503;
