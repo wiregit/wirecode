@@ -109,6 +109,11 @@ public class QueryRequest extends Message implements Serializable{
     private static final int MAX_XML_QUERY_LENGTH =
         SearchSettings.MAX_XML_QUERY_LENGTH.getValue();
 
+    /**
+     * The meaningless query string we put in URN queries.  Needed because
+     * LimeWire's drop empty queries....
+     */
+    private static final String DEFAULT_URN_QUERY = "\\";
 
 	/**
 	 * Creates a new requery for the specified SHA1 value.
@@ -124,7 +129,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, "\\", "", 
+        return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false);
@@ -145,7 +150,7 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "", 
+        return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false);
@@ -168,7 +173,7 @@ public class QueryRequest extends Message implements Serializable{
             throw new NullPointerException("null query");
         }
 		if(filename.length() == 0) {
-			filename = "\\";
+			filename = DEFAULT_URN_QUERY;
 		}
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
@@ -196,7 +201,7 @@ public class QueryRequest extends Message implements Serializable{
             throw new NullPointerException("null query");
         }
 		if(filename.length() == 0) {
-			filename = "\\";
+			filename = DEFAULT_URN_QUERY;
 		}
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
@@ -228,7 +233,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-        return new QueryRequest(newQueryGUID(true), ttl, "\\", "", 
+        return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								Message.N_UNKNOWN, false);
@@ -247,7 +252,7 @@ public class QueryRequest extends Message implements Serializable{
 	        throw new NullPointerException("null urnSet");
 	    if(urnTypeSet == null)
 	        throw new NullPointerException("null urnTypeSet");
-	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "",
+	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
 	                            Message.N_UNKNOWN, false);
@@ -985,7 +990,8 @@ public class QueryRequest extends Message implements Serializable{
             throw BadPacketException.XML_QUERY_TOO_BIG;
         }
 
-        if(hasIllegalChars(QUERY)) {
+        if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
+           && hasIllegalChars(QUERY)) {
             if( RECORD_STATS )
                 ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
             throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;

@@ -319,6 +319,16 @@ public final class QueryRequestTest extends BaseTestCase {
     }
 
 
+    public void testQueriesWithOnlyURNsAreAccepted() throws Exception {
+        QueryRequest qr = QueryRequest.createQuery(HugeTestUtils.SHA1);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        qr.write(baos);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        QueryRequest qrRead = (QueryRequest) Message.read(bais);
+    }
+
+
     /**
      * Test that network queries without URNs are accepted.
      */
