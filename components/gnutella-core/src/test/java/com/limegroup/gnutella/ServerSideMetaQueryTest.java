@@ -66,7 +66,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        CommonUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
     }   
     
     //////////////////////////////////////////////////////////////////
@@ -168,6 +168,75 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
                       ((flag & QueryRequest.LIN_PROG_MASK) > 0)),
                      (filter.allow("susheel.exe") || 
                       filter.allow("susheel.bin")));
+    }
+
+    
+    public void testMetaFlagQuery() throws Exception {
+
+        {
+        // first test a normal query with no meta flag info
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "berkeley", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 0);
+        
+        testUP[0].send(query);
+        testUP[0].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 2 responses
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(2, results.size());
+        }
+
+        {
+        // test a query for audio
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "berkeley", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | QueryRequest.AUDIO_MASK);
+        
+        testUP[1].send(query);
+        testUP[1].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 1 response
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(1, results.size());
+        Response resp = (Response) results.get(0);
+        assertEquals("berkeley.mp3", resp.getName());
+        }
+        {
+        // test a query for documents
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "berkeley", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | QueryRequest.DOC_MASK);
+        
+        testUP[2].send(query);
+        testUP[2].flush();
+
+        Thread.sleep(250);
+
+        // we should get a reply with 1 response
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[2],
+                                                      QueryReply.class);
+        assertNotNull(reply);
+        List results = reply.getResultsAsList();
+        assertEquals(1, results.size());
+        Response resp = (Response) results.get(0);
+        assertEquals("berkeley.txt", resp.getName());
+        }
     }
 
 }
