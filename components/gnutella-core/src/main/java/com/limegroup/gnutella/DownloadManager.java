@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -102,7 +103,17 @@ public class DownloadManager implements BandwidthTracker {
      * snapshots and scheduling snapshot checkpointing.
      */
     public void postGuiInit() {
-        readSnapshot(SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue());
+        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
+        // Try once with the real file, then with the backup file.
+        if( !readSnapshot(real) ) {
+            // if backup succeeded, copy into real.
+            if( readSnapshot(backup) ) {
+                real.delete();
+                CommonUtils.copy(backup, real);
+            }       
+        }
+        
         Runnable checkpointer=new Runnable() {
             public void run() {
                 try {
@@ -155,6 +166,10 @@ public class DownloadManager implements BandwidthTracker {
         List buf=new ArrayList();
         buf.addAll(active);
         buf.addAll(waiting);
+        
+        File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        outFile.renameTo(
+            SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue());
         
         // Write list of active and waiting downloaders, then block list in
         //   IncompleteFileManager.

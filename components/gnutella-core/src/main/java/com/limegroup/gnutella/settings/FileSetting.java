@@ -9,6 +9,7 @@ import java.io.*;
 public final class FileSetting extends Setting {
     
     private File value;
+    private String absolutePath;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -23,11 +24,12 @@ public final class FileSetting extends Setting {
         
 	/**
 	 * Accessor for the value of this setting.
+	 * Duplicates the setting so it cannot be changed outside of this package.
 	 * 
 	 * @return the value of this setting
 	 */
 	public File getValue() {
-        return value;
+        return new File(absolutePath);
 	}
 
 	/**
@@ -45,5 +47,6 @@ public final class FileSetting extends Setting {
      */
     protected void loadValue(String sValue) {
         value = new File(sValue);
+        absolutePath = value.getAbsolutePath();
     }
 }
