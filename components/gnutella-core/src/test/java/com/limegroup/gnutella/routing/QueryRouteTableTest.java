@@ -186,6 +186,16 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                                                     "good bad bok", (byte)3)));
         assertTrue(qrt.contains(
                 QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1)));
+        
+        //TODO: find how to create an XML query and then test 2/3 matching
+        //words from the metadata
+    }
+    
+    public void testBrowniePoints() throws Exception {
+    	QueryRouteTable qrt = new QueryRouteTable(100);
+    	String str = qrt.toString();
+    	assertTrue(qrt.equals(qrt));
+    	assertFalse(qrt.equals(new String()));
     }
     
     public void testAddAll() throws Exception {
@@ -432,6 +442,23 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt2.addAll(qrt);
         assertTrue(qrt2.contains(QueryRequest.createQuery("bad", (byte)4)));
         assertTrue(qrt2.contains(QueryRequest.createQuery("good", (byte)4)));
+    }
+    
+    public void testGetPercentFull() throws Exception {
+    	Random r = new Random();
+    	QueryRouteTable qrt=new QueryRouteTable(128);
+    	for (int i =0;i<64;i++)
+    		qrt.add(new String("asdf"+i));
+    	assertGreaterThanOrEquals((int)qrt.getPercentFull(),50);
+    	//this actually results in 39 unique entries
+    	
+    	QueryRouteTable qrt2=new QueryRouteTable(128);
+    	assertEquals((int)qrt2.getPercentFull(),0);
+    	
+    	
+    	for (int i =0;i<512;i++)  //5xCapacity to make sure we fill it
+    		qrt2.add(new String("asdf"+i+r.nextInt()));
+    	assertGreaterThanOrEquals(95,(int)qrt2.getPercentFull());
     }
     
     public void testBadPackets() throws Exception {

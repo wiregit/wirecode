@@ -39,5 +39,17 @@ public class RouteTableMessageTest extends BaseTestCase {
             fail("exception should have been thrown");
         } catch (BadPacketException e) {
         }
+        
+        //bad payload length
+        message[16]=Message.F_ROUTE_TABLE_UPDATE;            //function code
+        message[17]=(byte)3;                                 //TTL
+        message[19]=(byte)0;                                 //payload length <-error
+        message[23+0]=(byte)0xFF;                            //bogus variant
+        in=new ByteArrayInputStream(message);
+        try {
+            Message m=(ResetTableMessage)Message.read(in);
+            fail("exception should have been thrown");
+        } catch (BadPacketException e) {
+        }
     }
 }    

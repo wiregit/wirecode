@@ -27,6 +27,14 @@ public class ResetTableMessageTest extends BaseTestCase {
 	}
 
     public void testLegacy() throws Exception {
+    	
+    	//check constructor
+    	try {
+    		ResetTableMessage m = new ResetTableMessage(0,(byte)0);
+    		fail("expected IllegalArgumentException");
+    	} catch (IllegalArgumentException iax) {}
+    	
+    	
         //From scratch.  Check encode/decode.
         ResetTableMessage m=new ResetTableMessage(1024, (byte)10);
         assertEquals(ResetTableMessage.RESET_VARIANT, m.getVariant());
@@ -55,6 +63,9 @@ public class ResetTableMessageTest extends BaseTestCase {
         assertEquals(RouteTableMessage.RESET_VARIANT, m.getVariant());
         assertEquals((byte)10, m.getInfinity());
         assertEquals(256, m.getTableSize());
+        
+        //won't really do much, just get some % points
+        m.recordDrop();
     }
 
     static ResetTableMessage read(byte[] bytes) throws Exception {
