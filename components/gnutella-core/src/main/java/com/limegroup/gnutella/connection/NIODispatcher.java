@@ -209,12 +209,6 @@ public final class NIODispatcher implements Runnable {
                     handleConnector(key);
                 }
             }
-            
-            // and read from any existing readers
-			//handleReaders();
-            
-            // and write to any existing writers
-			//handleWriters();
 		}
     }
     
@@ -253,9 +247,10 @@ public final class NIODispatcher implements Runnable {
                 // now that we're fully connected, finish the connection 
                 // handshaking
                 Connection conn = (Connection)key.attachment();
-                System.out.println("NIODispatcher::about to handshake");
                 addReader(conn);
-                //conn.handshake();
+                if(!conn.handshaker().handshake())  {
+                    addWriter(conn);
+                }
             }
         } catch (IOException e) {
             // TODO: we need to notify ConnectionManager to remove this from
@@ -410,6 +405,14 @@ public final class NIODispatcher implements Runnable {
 		}			
 	}
     
+    /**
+     * Writes any new data to the network.  Writers are only registered for
+     * write events when the TCP buffers have filled up, causing messages 
+     * to not be fully written in previous calls to Channel.write(...).
+     * 
+     * @param key the <tt>SelectionKey</tt> for the channel that's ready to
+     *  write
+     */
     private void handleWriter(SelectionKey key)  {
         if(!key.isValid()) return;
 
