@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 
@@ -61,6 +62,11 @@ public final class QueryHandler {
 	private static ConnectionManager _connectionManager =
 		RouterService.getConnectionManager();
 
+    /**
+     * TTL of the probe query.
+     */
+    private static byte PROBE_TTL = SearchSettings.PROBE_TTL.getValue();
+
 	/**
 	 * Variable for the number of hosts that have been queried.
 	 */
@@ -106,6 +112,13 @@ public final class QueryHandler {
 	 * Constant for the <tt>QueryRequest</tt> used to build new queries.
 	 */
 	private final QueryRequest QUERY;
+
+    
+    /**
+     * Boolean for whether or not the probe query has been sent to the
+     * desired number of hosts.
+     */
+    private boolean _probeCompleted = false;
 
 
 	/**
@@ -238,10 +251,18 @@ public final class QueryHandler {
 
 		if(_queryStartTime == 0) {
 			_queryStartTime = _curTime;
+        }
+            
+        if(!_probeCompleted) {
             _theoreticalHostsQueried += 
                 sendProbeQuery(this, 
                                _connectionManager.getInitializedConnections2()); 
-            _nextQueryTime = System.currentTimeMillis() + 6000;
+            if(_probeCompleted) {
+                _nextQueryTime = System.currentTimeMillis() + 6000;
+            } else {
+                // allow time for connections to become established
+                _nextQueryTime = System.currentTimeMillis() + 2000;
+            }
             return;
 		}
 
@@ -331,8 +352,7 @@ public final class QueryHandler {
      *  not be sent before this
 	 */
 	private static int sendProbeQuery(QueryHandler handler, List list) {
-		byte ttl = 2;
-		QueryRequest query = createQuery(handler.QUERY, ttl);
+		QueryRequest query = createQuery(handler.QUERY, PROBE_TTL);
         int newHosts = 0;
 
         int hostsQueried = 0;
@@ -350,11 +370,14 @@ public final class QueryHandler {
 			// add the reply handler to the list of queried hosts
 			handler.QUERIED_HANDLERS.add(mc);
 
-			newHosts += calculateNewHosts(mc, ttl);
+			newHosts += calculateNewHosts(mc, PROBE_TTL);
 
             hostsQueried++;
             i++;
 		}
+        if(hostsQueried == 3) {
+            handler._probeCompleted = true;
+        }
         return newHosts;
 	}
 
@@ -440,6 +463,17 @@ public final class QueryHandler {
 
 		return false;
 	}
+
+    /**
+     * Accessor for the <tt>ReplyHandler</tt> instance for the connection
+     * issuing this request.
+     *
+     * @return the <tt>ReplyHandler</tt> for the connection issuing this 
+     *  request
+     */
+    public ReplyHandler getReplyHandler() {
+        return REPLY_HANDLER;
+    }
 
 	// overrides Object.toString
 	public String toString() {
