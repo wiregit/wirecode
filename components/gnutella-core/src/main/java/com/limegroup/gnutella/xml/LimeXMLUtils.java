@@ -384,7 +384,7 @@ public class LimeXMLUtils
             try {
                 responseString = 
                 ((LimeXMLDocument)iterator.next()).getXMLString();            
-                System.out.println("response = " + responseString);
+//                System.out.println("response = " + responseString);
             }
             catch (SchemaNotFoundException snfe) {
                 System.out.println("LimeXMLUtils.getResponseArray():" +
