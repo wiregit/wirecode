@@ -172,7 +172,9 @@ public class UDPScheduler extends ManagedThread {
          */
         private void updateSchedule(UDPTimerEvent evt) {
             synchronized(UDPScheduler.this) {
-                if ( evt.getEventTime() < _scheduledEvent.getEventTime() ) {
+                // If the event is sooner and still active, make it current
+                if ( evt.getEventTime() < _scheduledEvent.getEventTime() &&
+                     _connectionEvents.contains(evt) ) {
                     _scheduledEvent      = evt;
                     
                     // Interrupt the main event processing thread 
