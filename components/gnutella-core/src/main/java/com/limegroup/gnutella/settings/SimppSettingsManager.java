@@ -101,6 +101,7 @@ public class SimppSettingsManager {
                 //not loaded this setting yet. We need to force it's hand. 
                 if(simppSetting == null) {//remember it for later
                     _remainderSimppSettings.put(settingKey, simppValue);
+                    continue;
                 }
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("setting:"+simppSetting);
