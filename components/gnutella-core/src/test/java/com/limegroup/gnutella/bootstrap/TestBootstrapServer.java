@@ -2,18 +2,32 @@ package com.limegroup.gnutella.bootstrap;
 
 import java.io.*;
 import java.net.*;
+import com.sun.java.util.collections.*;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * Simulates a GWebCache HTTP server.  Listens on a port, accepts a single
  * connection, records request and writes result.
  */
 public class TestBootstrapServer {
+    
+    
+    private static final Log LOG =
+        LogFactory.getLog(TestBootstrapServer.class);
+    
     ServerSocket _ss;
-    Socket _socket;
+    List _sockets = new LinkedList();
 
     String _request;
     String _response;
     String _responseData="";
+    
+    boolean _allowConnectionReuse = false;
+    
+    int _numConnections = 0;
+    int _numRequests = 0;
 
     /** Starts a single bootstrap server listening on the given port
      *  Call setResponse() to set abnormal HTTP responses.
@@ -26,6 +40,28 @@ public class TestBootstrapServer {
         _ss.bind(new InetSocketAddress(port));
         Thread runner=new RunnerThread();
         runner.start();
+    }
+    
+    /**
+     * Returns the number of connection attempts this simple server received.
+     */
+    public int getConnectionAttempts() {
+        return _numConnections;
+    }
+    
+    /**
+     * Returns the number of requests this simple server recieved.
+     */
+    public int getRequestAttempts() {
+        return _numRequests;
+    }
+    
+    /**
+     * Sets whether or not this simple server should allow the connection
+     * to be reused for multiple requests.
+     */
+    public void setAllowConnectionReuse(boolean reuse) {
+        _allowConnectionReuse = reuse;
     }
     
     /** Sets what this should send for any HTTP response, without any newline
@@ -52,10 +88,12 @@ public class TestBootstrapServer {
         } catch (IOException e) {
         }
 
-        try {
-            if (_socket!=null)
-                _socket.close();
-        } catch (IOException e) {
+        for(Iterator i = _sockets.iterator(); i.hasNext(); ) {
+            try {
+                Socket s = (Socket)i.next();
+                if(s != null )
+                    s.close();
+            } catch (IOException e) {}
         }
     }
 
@@ -67,16 +105,39 @@ public class TestBootstrapServer {
         }
         
         public void run2() throws IOException {
-            _socket=_ss.accept();
-            BufferedReader in=
-                new BufferedReader(
-                    new InputStreamReader(_socket.getInputStream()));
-            _request=in.readLine();
-            OutputStream out=_socket.getOutputStream();
-            out.write(_response.getBytes());
-            out.write(_responseData.getBytes());
-            out.flush();
-            out.close();
+            while(true) {
+                LOG.debug("waiting to accept new connection");
+                Socket s = _ss.accept();
+                LOG.debug("accepted new connection");
+                _numConnections++;
+                _sockets.add(s);
+                BufferedReader in=
+                    new BufferedReader(
+                        new InputStreamReader(s.getInputStream()));
+                OutputStream out = s.getOutputStream();
+                while(true) {
+                    LOG.debug("reading new request");
+                    _request=in.readLine();
+                    LOG.debug("read: " + _request);
+                    // gobble up headers.
+                    while(!_request.equals("")) {
+                        _request = in.readLine();
+                        if(_request == null)
+                            break;
+                        LOG.debug("continued read: " + _request);
+                    }
+                    LOG.debug("finished reading request.");
+                    _numRequests++;
+                    out.write(_response.getBytes());
+                    out.write(_responseData.getBytes());
+                    out.flush();
+                    if(!_allowConnectionReuse)
+                        break;
+                }
+                out.close();
+                if(!_allowConnectionReuse)
+                    break;
+            }
         }
     }
 }
