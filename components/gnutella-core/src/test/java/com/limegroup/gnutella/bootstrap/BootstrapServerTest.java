@@ -19,13 +19,13 @@ public class BootstrapServerTest extends com.limegroup.gnutella.util.BaseTestCas
     public void testConstructorSimple() throws Exception {        
         String s1="HTTP://server.com/dir/script.php";
         BootstrapServer e1=new BootstrapServer(s1);
-        assertEquals(s1.toLowerCase(), e1.getURL().toString());
+        assertEquals(s1.toLowerCase(), e1.getURLString());
     }
 
     public void testConstructorExtended() throws Exception {
         String s1="http://server.com/dir/script.php";
         BootstrapServer e2=new BootstrapServer(s1+",2343,1232;233,2343;3434");
-        assertEquals(s1, e2.getURL().toString());
+        assertEquals(s1, e2.getURLString());
     }
 
     public void testConstructorFailure() {

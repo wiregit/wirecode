@@ -391,7 +391,7 @@ public class BootstrapServerManager {
             String urlPart = null;
             if (_lastConnectable != null)
                 urlPart = "url=" +
-					URLEncoder.encode(_lastConnectable.getURL().toString());
+					URLEncoder.encode(_lastConnectable.getURLString());
 
             //My ip address as a parameter.
             String ipPart = null;
@@ -485,7 +485,7 @@ public class BootstrapServerManager {
             LOG.trace("requesting: " + request + " from " + server);
 		
         BufferedReader in = null;
-        String urlString = server.getURL().toString();
+        String urlString = server.getURLString();
         String connectTo = urlString
                  +"?client="+CommonUtils.QHD_VENDOR_NAME
                  +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
