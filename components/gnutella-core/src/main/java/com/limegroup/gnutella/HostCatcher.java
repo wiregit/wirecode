@@ -46,14 +46,6 @@ public class HostCatcher implements HostListener {
      * Log for logging this class.
      */
     private static final Log LOG = LogFactory.getLog(HostCatcher.class);
-        
-    //These constants are package-access for testing.  
-    //That's ok as they're final.
-
-    /** The number of milliseconds to wait after trying gnutella.net entries
-     *  before resorting to GWebCache HOSTFILE requests. */
-    public static int GWEBCACHE_DELAY=20000;  //20 seconds    
-    // TODO: Is this okay?
     
     /**
      * Size of the queue for hosts returned from the GWebCaches.
@@ -148,11 +140,6 @@ public class HostCatcher implements HostListener {
     private BootstrapServerManager gWebCache = 
         BootstrapServerManager.instance();
     
-    /** The time we're next allowed to send a HOSTFILE request because of no
-     *  fresh ultrapeer pongs.  The default value of MAX_VALUE means we're not
-     *  initially allowed to. */
-    private long nextAllowedFetchTime=Long.MAX_VALUE;
-
 	/**
 	 * Constant for the host file to read from and write to.
 	 */
@@ -181,11 +168,6 @@ public class HostCatcher implements HostListener {
      * LOCKING: obtain this' monitor before modifying/iterating
      */    
     private final Set PROBATION_HOSTS = new HashSet();
-
-    /**
-     * Flag for whether or not we've already hit the GWebCaches.
-     */
-    private boolean _hitCaches;
     
     /**
      * Constant for the number of milliseconds to wait before periodically
@@ -211,6 +193,16 @@ public class HostCatcher implements HostListener {
      * testing.  
      */
     public static final int EXPIRED_HOSTS_SIZE = 500;
+    
+    /**
+     * The scheduled runnable that fetches GWebCache entries if we need them.
+     */
+    public final GWebCacheFetcher FETCHER = new GWebCacheFetcher();
+    
+    /**
+     * The number of threads waiting to get an endpoint.
+     */
+    private volatile int _catchersWaiting = 0;
     
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
@@ -283,10 +275,14 @@ public class HostCatcher implements HostListener {
                 }
             } 
         };
-        
         // Recover hosts on probation every minute.
         RouterService.schedule(probationRestorer, 
             PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
+            
+        // Try to fetch GWebCache's whenever we need them.
+        // Start it immediately, so that if we have no hosts
+        // (because of a fresh installation) we will connect.
+        RouterService.schedule(FETCHER, 0, 2*1000);
     }
 
     /**
@@ -333,6 +329,7 @@ public class HostCatcher implements HostListener {
                 }
             }
         } finally {
+            gWebCache.bootstrapServersAdded();
             try {
                 if( in != null )
                     in.close();
@@ -480,7 +477,7 @@ public class HostCatcher implements HostListener {
      * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
      */
     public boolean add(Endpoint host, int priority) {
-        LOG.trace("adding host");
+        //LOG.trace("adding host");
         return add(new ExtendedEndpoint(host.getAddress(), host.getPort()), 
             priority);
     }
@@ -622,49 +619,6 @@ public class HostCatcher implements HostListener {
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
-            
-            //If we've completely run out of hosts, asynchronously contact a
-            //GWebCache server to get more addresses.  Note, however, that this
-            //will not do anything if we're currently connecting to a GWebCache.
-            //TODO: do we need rate-limiting code?
-            if(getNumHosts()==0 || 
-               (!RouterService.isConnected() && _failures>200 && !_hitCaches)) {
-                LOG.debug("getNumHosts() == 0, fetching endpoints");
-                _hitCaches = true;
-                gWebCache.fetchEndpointsAsync();
-            }
-            //If there are no good, fresh ultrapeer pongs--these exclude
-            //gnutella.net entries--schedule a fetch in GWEBCACHE_DELAY
-            //milliseconds if it's still needed then.
-            else if (getNumUltrapeerHosts()==0) {
-                LOG.debug("getNumUltrapeerHosts() == 0");
-                long now=System.currentTimeMillis();
-                //Be patient; maybe some gnutella.net entries will work.
-                if (now < nextAllowedFetchTime) {
-
-                    //  Determine if a reschedule will occur
-                    boolean rescheduled =
-                      (nextAllowedFetchTime==Long.MAX_VALUE);
-
-                    nextAllowedFetchTime=Math.min(
-                        nextAllowedFetchTime, now+GWEBCACHE_DELAY);
-
-                    // Exponential backoff
-                    if ( rescheduled ) 
-                        GWEBCACHE_DELAY *= 5;
-                    
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("delaying fetch time till " + 
-                                  nextAllowedFetchTime);
-                } 
-                //Give up and use GWebCache.
-                else {
-                    LOG.debug("fetching more endpoints");
-                    gWebCache.fetchEndpointsAsync();
-                    nextAllowedFetchTime=Long.MAX_VALUE;
-                }
-            }
-
             try { 
                 // note : if this succeeds with an endpoint, it
                 // will return it.  otherwise, it will throw
@@ -677,7 +631,12 @@ public class HostCatcher implements HostListener {
             } catch (NoSuchElementException e) { }
             
             //No luck?  Wait and try again.
-            wait(GWEBCACHE_DELAY/5);  //throws InterruptedException          
+            try {
+                _catchersWaiting++;
+                wait();  //throws InterruptedException
+            } finally {
+                _catchersWaiting--;
+            }
         } 
     }
   
@@ -743,6 +702,14 @@ public class HostCatcher implements HostListener {
         // we want to fill any remaining leaf slots if we can.
         else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
             Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            iter.remove();
+            return ee;
+        } 
+        // Otherwise, might as well use the leaf slots hosts up as well
+        // since we added them to the size and they can give us other info
+        else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
+            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
@@ -906,6 +873,7 @@ public class HostCatcher implements HostListener {
      * Reads the gnutella.net file.
      */
     private void readHostsFile() {
+        LOG.trace("Reading Hosts File");
         // Just gnutella.net
         try {
             read(HOST_FILE);
@@ -920,18 +888,21 @@ public class HostCatcher implements HostListener {
      * Recovers any hosts that we have put in the set of hosts "pending" 
      * removal from our hosts list.
      */
-    public synchronized void recoverHosts() {
+        public synchronized void recoverHosts() {
         LOG.debug("recovering hosts file");
         
         PROBATION_HOSTS.clear();
         EXPIRED_HOSTS.clear();
-        // TODO: Is this okay?
-        //_hitCaches = false;
         _failures = 0;
+        FETCHER.resetFetchTime();
+        gWebCache.resetData();
         
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.
         readHostsFile();
+        
+        // Send our pings again.
+        sendUDPPings();        
     }
 
     /**
@@ -959,14 +930,14 @@ public class HostCatcher implements HostListener {
         EXPIRED_HOSTS.add(host);
         if(EXPIRED_HOSTS.size() > EXPIRED_HOSTS_SIZE) {
             EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
-        }       
+        }
     }
-
-    /**
+    
+     /**
      * Adds the specified host to the group of hosts to try.
-     * 
+     *
      * @param host the <tt>IpPort</tt> for the new host
-     * @throws NullPointerException if the <tt>host</tt> argument is 
+     * @throws NullPointerException if the <tt>host</tt> argument is
      *  <tt>null</tt>
      */
     public void addHost(IpPort host) {
@@ -978,6 +949,95 @@ public class HostCatcher implements HostListener {
         }
     }
     
+    /**
+     * Runnable that looks for GWebCache entries.
+     */
+    private class GWebCacheFetcher implements Runnable {
+        /**
+         * The next time we're allowed to fetch.  Incremented
+         * after each succesful fetch.
+         */
+        private long nextAllowedFetchTime = 0;
+        
+        /**
+         * The delay to wait before the next time we contact a GWebCache.
+         * Upped after each attempt at fetching.
+         */
+        private int delay = 20 * 1000;
+
+        /**
+         * Determines whether or not it is time to get more hosts,
+         * and if we need them, gets them.
+         */
+        public synchronized void run() {
+            // If no one's waiting for an endpoint, don't get any.
+            if(_catchersWaiting == 0)
+                return;
+            
+            long now = System.currentTimeMillis();
+            // if it isn't time yet, wait till it is.
+            if(now < nextAllowedFetchTime)
+                return;
+                
+            //if we don't need hosts, exit.
+            if(!needsHosts(now))
+                return;
+                
+            getHosts(now);
+        }
+        
+        /**
+         * Resets the nextAllowedFetchTime, so that after we regain a
+         * connection to the internet, we can fetch from gWebCaches
+         * if needed.
+         */
+        synchronized void resetFetchTime() {
+            nextAllowedFetchTime = 0;
+        }
+        
+        /**
+         * Determines whether or not we need more hosts.
+         */
+        synchronized boolean needsHosts(long now) {
+            synchronized(HostCatcher.this) {
+                return getNumHosts() == 0 ||
+                       (!RouterService.isConnected() && _failures > 200);
+            }
+        }
+        
+        /**
+         * Fetches more hosts, updating the next allowed time to fetch.
+         */
+        synchronized void getHosts(long now) {
+            int ret = gWebCache.fetchEndpointsAsync();
+            switch(ret) {
+            case BootstrapServerManager.FETCH_SCHEDULED:
+                delay *= 5;
+                nextAllowedFetchTime = now + delay;
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Fetching hosts.  Next allowed time: " +
+                              nextAllowedFetchTime);
+                break;
+            case BootstrapServerManager.FETCH_IN_PROGRESS:
+                LOG.debug("Tried to fetch, but was already fetching.");
+                break;
+            case BootstrapServerManager.CACHE_OFF:
+                LOG.debug("Didn't fetch, gWebCache's turned off.");
+                break;
+            case BootstrapServerManager.FETCHED_TOO_MANY:
+                LOG.debug("We've received a bunch of endpoints already, didn't fetch.");
+                MessageService.showError("GWEBCACHE_FETCHED_TOO_MANY");
+                break;
+            case BootstrapServerManager.NO_CACHES_LEFT:
+                LOG.debug("Already contacted each gWebCache, didn't fetch.");
+                MessageService.showError("GWEBCACHE_NO_CACHES_LEFT");
+                break;
+            default:
+                throw new IllegalArgumentException("invalid value: " + ret);
+            }
+        }
+    }
+
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
     //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
     //           
