@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.limegroup.gnutella.util.NameValue;
+
 /**
  * Stores information pertaining to fields (elements) in xml documents
  */
@@ -17,7 +19,12 @@ public class SchemaFieldInfo
     private String _type;
     
     /**
-     * List (of Strings) to store enumerated values, if associated with this
+     * Whether or not this field is editable.
+     */
+    private boolean _editable = true;
+    
+    /**
+     * List (of NameValue) to store enumerated values, if associated with this
      *field
      */
     private List _enumerationList = null;
@@ -59,14 +66,14 @@ public class SchemaFieldInfo
     /**
      * Adds the passed value to the list of enumeration values
      */
-    void addEnumerationValue(String value)
+    void addEnumerationNameValue(String name, String value)
     {
         //create a new list, if doesnt exist
         if(_enumerationList == null)
             _enumerationList = new LinkedList();
         
         //add the value
-        _enumerationList.add(value);
+        _enumerationList.add(new NameValue(name, value));
         
         //also set the field type to be OPTIONS
         _fieldType = OPTIONS;
@@ -80,6 +87,19 @@ public class SchemaFieldInfo
         return _fieldType;
     }
     
+    /**
+     * Sets whether or not this field is editable.
+     */
+    void setEditable(boolean editable) {
+        this._editable = editable;
+    }
+    
+    /**
+     * Gets whether or not this is editable.
+     */
+    public boolean isEditable() {
+        return _editable;
+    }
     
      /**
      * sets the canonicalized field name for which this object stores the
@@ -100,40 +120,12 @@ public class SchemaFieldInfo
     }
     
     /**
-     * Returns the List (of Strings) to store enumerated values, 
+     * Returns the List (of NameValue) to store enumerated values, 
      * if associated with this field
      */
     public List getEnumerationList()
     {
         return _enumerationList;
-    }
-    
-    /**
-     * Returns Mapping from EnumerativeValue => Mapped Value
-     * (String => String). Returns null, if no enumerative values exist
-     */
-    public Map getDefaultEnumerativeValueMap()
-    {
-        //return null, if there are no enumerative values
-        if(_enumerationList == null)
-            return null;
-        
-        //else create a new Map
-        Map enumerativeValueMap = new HashMap(
-            (int)(_enumerationList.size() * 4.0/3.0 + 1),0.75f);
-        
-        //add the default mappings to the map
-        Iterator iterator = _enumerationList.iterator();
-        while(iterator.hasNext())
-        {
-            //get the next value
-            String value = (String)iterator.next();
-            //add the mapping
-            enumerativeValueMap.put(value,value);
-        }
-        
-        //return the mappings
-        return enumerativeValueMap;
     }
     
     

@@ -39,7 +39,7 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_ACTION_ATTRIBUTE = "action__";
     public static final String XML_INDEX_ATTRIBUTE = "index__";
     public static final String XML_LICENSE_ATTRIBUTE = "license__";
-    public static final String XML_LICENSE_TYPE_ATTRIBUTE = "license type__";
+    public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
     
     /**
      * The current version of LimeXMLDocuments.
@@ -575,9 +575,8 @@ public class LimeXMLDocument implements Serializable {
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
             hasCCLicense = true;
         // if the license type was 'creative commons', store it as the URI instead.
-        } else if(licenseType != null && licenseType.equalsIgnoreCase("creative commons")) {
+        } else if(licenseType != null && licenseType.equals(CCConstants.CC_URI_PREFIX)) {
             hasCCLicense = true;
-            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
         // no license type we know about, remove it.
         } else {
             fieldToValue.remove(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
