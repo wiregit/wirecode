@@ -1934,7 +1934,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
-                    DownloadStat.RNAE_EXCEPTION.incrementStat();
+                    DownloadStat.RNA_EXCEPTION.incrementStat();
                 debug("rnae thrown in assignAndRequest"+dloader);
                 synchronized(this) {
                     busy.add(dloader.getRemoteFileDesc());//try this rfd later

@@ -490,11 +490,14 @@ public final class UploadManager implements BandwidthTracker {
             // if we have the correct range.  If not, change
             // state appropriately.
             if (fd instanceof IncompleteFileDesc) {
+                System.out.println(uploader + " uploading incomplete file: " + fd);
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
                 int upStart = uploader.getUploadBegin();
                 int upEnd = uploader.getUploadEnd();
-                if ( !ifd.isRangeSatisfiable(upStart, upEnd) )
+                if ( !ifd.isRangeSatisfiable(upStart, upEnd) ) {
+                    System.out.println(uploader + " bad range.");
                     uploader.setState(Uploader.UNAVAILABLE_RANGE);
+                }
                 return;
             }
         }

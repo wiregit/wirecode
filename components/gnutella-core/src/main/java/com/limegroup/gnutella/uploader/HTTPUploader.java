@@ -283,6 +283,7 @@ public final class HTTPUploader implements Uploader {
             break;
         case UNAVAILABLE_RANGE:
             _state = new UnavailableRangeUploadState(_fileDesc);
+            break;
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:

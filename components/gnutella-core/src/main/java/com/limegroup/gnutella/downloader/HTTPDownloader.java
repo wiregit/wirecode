@@ -264,12 +264,11 @@ public class HTTPDownloader implements BandwidthTracker {
         // portion of the file AND we have accepted an incoming connection
         // during this session.
         if (RouterService.acceptedIncomingConnection() &&
-            _incompleteFile.length() > _minPartialFileSize)
-            alts.addAlternateLocation(
-                AlternateLocation.createAlternateLocation(
-                    alts.getSHA1Urn()
-                )
-            );
+          _incompleteFile.length() > _minPartialFileSize) {
+            AlternateLocation al =
+                AlternateLocation.createAlternateLocation(alts.getSHA1Urn());
+            alts.addAlternateLocation(al);
+        }
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )

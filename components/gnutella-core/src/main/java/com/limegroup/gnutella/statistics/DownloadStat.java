@@ -82,7 +82,7 @@ public class DownloadStat extends AdvancedStatistic {
     /**
      * Statistic for the number of range not available download responses.
      */
-    public static final Statistic RNAE_EXCEPTION =
+    public static final Statistic RNA_EXCEPTION =
         new DownloadStat();
 
     /**
