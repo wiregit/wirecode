@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.uploader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.http.*;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.util.CommonUtils;
-import java.io.*;
 
 /**
  * This class handles the case where the requested file was not
