@@ -1218,6 +1218,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     setState(CONNECTING, 
                         needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
             }
+            debug("MANAGER: attempting connect to "
+                  +rfd.getHost()+":"+rfd.getPort());
             if (needsPush) {
                 //System.out.println("MANAGER: trying push to "+rfd);
                 //Send push message, wait for response with timeout.
