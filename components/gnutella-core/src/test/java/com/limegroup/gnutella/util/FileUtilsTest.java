@@ -59,6 +59,8 @@ public final class FileUtilsTest extends BaseTestCase {
      * Tests the setWriteable method.
      */
     public void testSetWriteable() throws Exception {
+        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.TRUE);
+        
         File testFile = File.createTempFile("test", "file");
         testFile.deleteOnExit();
         testFile.setReadOnly();
