@@ -9,7 +9,7 @@ import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * This class handles the blocking
+ * This class handles reading Gnutella message headers using blocking sockets.
  */
 public final class BIOHeaderReader implements HeaderReader {
 
