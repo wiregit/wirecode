@@ -21,12 +21,14 @@ public final class CommonUtils {
     /**
      * The cached value of the major revision number.
      */
-    private static Integer _majorVersionNumber = null;
+    private static final int _majorVersionNumber = 
+        getMajorVersionNumberInternal(LIMEWIRE_VERSION);
 
     /**
      * The cached value of the minor revision number.
      */
-    private static Integer _minorVersionNumber = null;
+    private static final int _minorVersionNumber = 
+        getMinorVersionNumberInternal(LIMEWIRE_VERSION);
 
     /**
      * The vendor code for QHD and GWebCache.  WARNING: to avoid character
@@ -162,19 +164,13 @@ public final class CommonUtils {
     /** Gets the major version of LimeWire.
      */
     public static int getMajorVersionNumber() {    
-        if (_majorVersionNumber == null) 
-            _majorVersionNumber =
-            new Integer(getMajorVersionNumberInternal(LIMEWIRE_VERSION));
-        return _majorVersionNumber.intValue();
+        return _majorVersionNumber;
     }
     
     /** Gets the minor version of LimeWire.
      */
     public static int getMinorVersionNumber() {
-        if (_minorVersionNumber == null) 
-            _minorVersionNumber =
-            new Integer(getMinorVersionNumberInternal(LIMEWIRE_VERSION));
-        return _minorVersionNumber.intValue();
+        return _minorVersionNumber;
     }
 
     static int getMajorVersionNumberInternal(String version) {
@@ -182,8 +178,7 @@ public final class CommonUtils {
             try {
                 int firstDot = version.indexOf(".");
                 String majorStr = version.substring(0, firstDot);
-                _majorVersionNumber = new Integer(majorStr);
-                return _majorVersionNumber.intValue();
+                return new Integer(majorStr).intValue();
             }
             catch (NumberFormatException nfe) {
             }
@@ -200,8 +195,7 @@ public final class CommonUtils {
                 String minusMajor = version.substring(firstDot+1);
                 int secondDot = minusMajor.indexOf(".");
                 String minorStr = minusMajor.substring(0, secondDot);
-                _minorVersionNumber = new Integer(minorStr);
-                return _minorVersionNumber.intValue();
+                return new Integer(minorStr).intValue();
             }
             catch (NumberFormatException nfe) {
             }
