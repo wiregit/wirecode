@@ -716,6 +716,7 @@ public final class CommonUtils {
 		// return quickly if the dll is already there, no copy necessary
 		if( newFile.exists() ) return;
 		String parentString = newFile.getParent();
+        if(parentString == null) return;
 		File parentFile = new File(parentString);
 		if(!parentFile.isDirectory()) {
 			parentFile.mkdirs();
