@@ -48,31 +48,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=100000;      //100 KB
-    /** Returns the amount of time to wait in milliseconds before retrying,
-     *  based on tries.  This is also the time to wait for * incoming pushes to
-     *  arrive, so it must not be too small.  A value of * tries==0 represents
-     *  the first try.  */
-    private long calculateWaitTime() {
-        //60 seconds: same as BearShare.
-        return 60*1000;
-    }
-    /** Returns true if another downloader is allowed. */
-    private synchronized boolean allowAnotherDownload() {
-        //TODO1: this should really be done dynamically by observing capacity
-        //and load, but that's hard to do.
-        int downloads=dloaders.size();
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        if (capacity<=SpeedConstants.MODEM_SPEED_INT)
-            //Modems can't swarm.
-            return downloads<1;
-        else if (capacity<=SpeedConstants.T1_SPEED_INT)
-            //DSL, Cable, and "T1" can swarm from up to 4 locations.
-            return downloads<4;
-        else 
-            return downloads<6;
-    }
-        
+    private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The minimum quality considered likely to work.  Value of two corresponds
      *  to a THREE-star result. */
     private static final int DECENT_QUALITY=2;
@@ -255,19 +231,19 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public synchronized boolean resume() throws AlreadyDownloadingException {
         //Ignore request if already in the download cycle.
-        if (! (state==WAITING_FOR_RETRY || state==GAVE_UP))
+        if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || state==ABORTED))
             return false;
         //Sometimes a resume can cause a conflict.  So we check.
         String conflict=this.manager.conflicts(allFiles, this);
         if (conflict!=null)
             throw new AlreadyDownloadingException(conflict);
 
-        if (stopped) {
+        if (state==GAVE_UP || state==ABORTED) {
             //This stopped because all hosts were tried.  (Note that this
             //couldn't have been user aborted.)  Therefore no threads are
             //running in this and it may be safely resumed.
             initialize(this.manager);
-        } else {
+        } else if (state==WAITING_FOR_RETRY) {
             //Interrupt any waits.
             if (dloaderManagerThread!=null)
                 dloaderManagerThread.interrupt();
@@ -362,10 +338,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     ///////////////////////////// Core Downloading Logic ///////////////////////
 
-    private static final int SUCCESS=0;
-    private static final int WAIT_FOR_RETRY=-1;
-    private static final int NO_MORE_LOCATIONS=-2;      
-
     /** 
      * Actually does the download, finding duplicate files, trying all
      * locations, resuming, waiting, and retrying as necessary.  Also takes care
@@ -379,7 +351,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //While not success and still busy...
         while (true) {
             try {
-                //Try each group, returning on success.
+                //Try each group, returning on success.  The children of
+                //tryAllDownloads call setState(CONNECTING) and
+                //setState(DOWNLOADING) as appropriate.
                 setState(QUEUED);
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
@@ -391,13 +365,21 @@ public class ManagedDownloader implements Downloader, Serializable {
                         currentFileSize=rfd.getSize();
                     }
                     int status=tryAllDownloads2(buckets[i]);
-                    if (status==SUCCESS) {
-                        //Success!  State (COULDNT_MOVE_TO_LIBRARY or COMPLETED)
-                        //is set by caller.
+                    if (status==COMPLETE) {
+                        //Success! 
+                        setState(COMPLETE);
+                        manager.remove(this, true);
                         return;
-                    } else if (status==WAIT_FOR_RETRY) {
+                    } else if (status==COULDNT_MOVE_TO_LIBRARY) {
+                        setState(COULDNT_MOVE_TO_LIBRARY);
+                        manager.remove(this, false);
+                        return;
+                    } else if (status==WAITING_FOR_RETRY) {
                         waitForRetry=true;
-                    }
+                    } else {
+                        Assert.that(status==GAVE_UP,
+                                    "Bad status from tad2: "+status);
+                    }                    
                 }
                 manager.yieldSlot(this);
 
@@ -425,6 +407,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         }                 
     }
 
+    /** Returns the amount of time to wait in milliseconds before retrying,
+     *  based on tries.  This is also the time to wait for * incoming pushes to
+     *  arrive, so it must not be too small.  A value of * tries==0 represents
+     *  the first try.  */
+    private long calculateWaitTime() {
+        //60 seconds: same as BearShare.
+        return 60*1000;
+    }
+
 
     /**
      * Tries one round of downloading of the given files.  Downloads from all
@@ -434,11 +425,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param files a list of files to pick from, all of which MUST be
      *  "identical" instances of RemoteFileDesc.  Unreachable locations
      *  are removed from files.
-     * @return SUCCESS if a file was successfully downloaded
-     *         WAIT_FOR_RETRY if no file was downloaded, but it makes sense 
+     * @return COMPLETE if a file was successfully downloaded
+     *         COULDNT_MOVE_TO_LIBRARY the download completed but the
+     *             temporary file couldn't be moved to the library
+     *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
      *             to try again later because some hosts reported busy.
      *             The caller should usually wait before retrying.
-     *         NO_MORE_LOCATIONS the download attempt failed, and there are 
+     *         GAVE_UP the download attempt failed, and there are 
      *             no more locations to try.
      * @exception InterruptedException if the user stop()'ed this download. 
      *  (Calls to resume() do not result in InterruptedException.)
@@ -446,7 +439,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int tryAllDownloads2(final List /* of RemoteFileDesc */ files)
             throws InterruptedException {
         if (files.size()==0)
-            return NO_MORE_LOCATIONS;
+            return GAVE_UP;
 
         //1. Verify it's safe to download.  Filename must not have "..", "/",
         //   etc.  We check this by looking where the downloaded file will
@@ -466,14 +459,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (!sharedPath.equals(completeFileParentPath))
                 throw new InvalidPathException();  
         } catch (IOException e) {
-            setState(COULDNT_MOVE_TO_LIBRARY);
-            manager.remove(this, false);
-            return SUCCESS;  //TODO: this works, but it's not clean
+            return COULDNT_MOVE_TO_LIBRARY;
         }           
 
         //2. Do the download
         int status=tryAllDownloads3(files);
-        if (status!=SUCCESS)
+        if (status!=COMPLETE)
             return status;
                 
         //3. Move to library.  
@@ -485,17 +476,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         //instead.  If that failed, notify user.
         if (!incompleteFile.renameTo(completeFile))
             if (! CommonUtils.copy(incompleteFile, completeFile))
-                //TODO: this works, but it's not clean
-                setState(COULDNT_MOVE_TO_LIBRARY);        
+                return COULDNT_MOVE_TO_LIBRARY;
         //Add file to library.
         FileManager.instance().addFileIfShared(completeFile);  
-        setState(COMPLETE);  
-        manager.remove(this, true);   
-        return SUCCESS;
+        return COMPLETE;
     }   
 
 
-    /** Like tryDownloads2, but does not deal with the library. */
+    /** Like tryDownloads2, but does not deal with the library and hence
+     *  cannot return COULDNT_MOVE_TO_LIBRARY. */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
         //The parts of the file we still need to download.
@@ -520,16 +509,16 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized (this) {
                 if (dloaders.size()==0 && needed.size()==0) {
                     //Finished.
-                    return SUCCESS;
+                    return COMPLETE;
                 } else if (dloaders.size()==0 
                         && files.size()==0 
                         && terminated.size()==0) {
                     //No downloaders worth living for.
                     if (busy.size()>0) {
                         files.addAll(busy);
-                        return WAIT_FOR_RETRY;
+                        return WAITING_FOR_RETRY;
                     } else {
-                        return NO_MORE_LOCATIONS;
+                        return GAVE_UP;
                     }
                 }
             }                        
@@ -571,6 +560,22 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (stopped) throw new InterruptedException();
             }
         }
+    }
+
+    /** Returns true if another downloader is allowed. */
+    private synchronized boolean allowAnotherDownload() {
+        //TODO1: this should really be done dynamically by observing capacity
+        //and load, but that's hard to do.
+        int downloads=dloaders.size();
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        if (capacity<=SpeedConstants.MODEM_SPEED_INT)
+            //Modems can't swarm.
+            return downloads<1;
+        else if (capacity<=SpeedConstants.T1_SPEED_INT)
+            //DSL, Cable, and "T1" can swarm from up to 4 locations.
+            return downloads<4;
+        else 
+            return downloads<6;
     }
 
     /** 
