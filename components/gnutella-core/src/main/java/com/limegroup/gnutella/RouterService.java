@@ -192,6 +192,7 @@ public final class RouterService {
 	    if ( _started ) return;
         _started = true;
 
+		acceptor.start();			   
 		// Now, link all the pieces together, starting the various threads.
 		RESULT_HANDLER.start();
 
@@ -210,7 +211,6 @@ public final class RouterService {
 				connect();
 		}
 		catcher.initialize();
-		acceptor.start();			   
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         fileManager.initialize();
