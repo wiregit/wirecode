@@ -203,24 +203,10 @@ public class HTTPDownloader {
 		if (str==null || str.equals(""))
 			return;
 		
-		// TODO:  Now that we are no longer truncating the
-		// str, we need to correct the possible errors
-		// that we are looking for
-
-  		//  if ( str.indexOf("503") > 0 ) 
-//      			throw new TryAgainLaterException();
-//  		else if ( str.indexOf("404") > 0 ) 
-//  			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
-//          else if ( str.indexOf("410") > 0 )
-//              throw new com.limegroup.gnutella.downloader.NotSharingException();
-//  		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
-//  			throw new NoHTTPOKException();
-
-
 		// str should be some sort of HTTP connect string.
 		// The string should look like:	
 		// str = "HTTP 200 OK \r\n";
-		// We will accept and 2xx's, but reject other codes.
+		// We will accept any 2xx's, but reject other codes.
 		
 		// create a new String tokenizer with the space as the 
 		// delimeter.
@@ -444,7 +430,7 @@ public class HTTPDownloader {
 
 	/****************** UNIT TEST *********************/
 	
-//  	private HTTPDownloader(String str) {
+	//  private HTTPDownloader(String str) {
 //  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 //  		_byteReader = new ByteReader(stream);
 //  	}
@@ -456,7 +442,7 @@ public class HTTPDownloader {
 
 //  		System.out.println("Starting Test...");
 
-//  		str = "HTTP 200 OK \r\n";
+//  		str = "HTTP 200 OK\r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeader();
@@ -516,6 +502,37 @@ public class HTTPDownloader {
 //  			down.readHeader();
 //  			down.stop();
 //  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+//  		str = "HTTP 204 Partial Content\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+
+//  		str = "HTTP 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			Assert.that((char)down._byteReader.read()=='x');
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+		
+//  		str = "200 OK\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (NoHTTPOKException e) {
+//  		}catch (IOException e) {
 //  			Assert.that(false);
 //  		}
 
