@@ -279,8 +279,12 @@ public class ID3Editor{
         byte genreByte= getGenreByte();
         if(genreByte == -1) {
             return LimeXMLReplyCollection.FAILED_GENRE;
+        } 
+        try {
+            file.write(genreByte);
+        } catch(IOException e) {
+            return LimeXMLReplyCollection.FAILED_GENRE;
         }
-        file.write(genreByte);
 
         try{
             file.close();
