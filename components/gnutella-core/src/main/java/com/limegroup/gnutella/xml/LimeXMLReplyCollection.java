@@ -408,6 +408,8 @@ public class LimeXMLReplyCollection{
 
     
     private boolean ripMP3XML(String modifiedFile) {
+        if (!LimeXMLUtils.isMP3File(modifiedFile))
+            return false;
         try {
             String hash = 
             new String(LimeXMLUtils.hashFile(new File(modifiedFile)));
