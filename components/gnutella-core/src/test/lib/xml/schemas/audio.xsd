@@ -12,7 +12,7 @@
       <attribute name="title" type="string"/>
       <attribute name="artist" type="string"/>
       <attribute name="album" type="string"/>
-      <attrinbute name="track" type="short"/>
+      <attribute name="track" type="short"/>
       <attribute name="genre">
         <simpleType base="string">
           <enumeration value="Blues"/>

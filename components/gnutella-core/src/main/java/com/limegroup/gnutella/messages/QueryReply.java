@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.util.Locale;
+import java.net.InetAddress;
 import com.sun.java.util.collections.*;
 
 /**
@@ -105,7 +106,8 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID, boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
-             false, false, false, false, false, false, true, isMulticastReply);
+             false, false, false, false, false, false, true, isMulticastReply,
+             null, null);
     }
 
 
@@ -133,7 +135,7 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply);
+             true, isMulticastReply, null, null);
     }
 
 
@@ -168,7 +170,8 @@ public class QueryReply extends Message implements Serializable{
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
-             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply);
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
+             null, null);
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException();
         _xmlBytes = xmlBytes;        
@@ -219,7 +222,8 @@ public class QueryReply extends Message implements Serializable{
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
-             boolean isMulticastReply) {
+             boolean isMulticastReply, InetAddress[] pushProxyAddrs,
+             int[] pushProxyPorts) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -270,7 +274,7 @@ public class QueryReply extends Message implements Serializable{
                 baos.write(COMMON_PAYLOAD_LEN);
                 
                 // size of standard, no options, ggep block...
-                int ggepLen=_ggepUtil.getQRGGEP(false, false).length;
+                int ggepLen=_ggepUtil.getQRGGEP(false, false, null, null).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
@@ -301,7 +305,9 @@ public class QueryReply extends Message implements Serializable{
                 
                 //f) the GGEP block
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
-                                                       isMulticastReply);
+                                                       isMulticastReply,
+                                                       pushProxyAddrs,
+                                                       pushProxyPorts);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
                 //g) actual xml.
@@ -354,33 +360,6 @@ public class QueryReply extends Message implements Serializable{
             ret += responses[i].getLength();
         }
         return ret;
-    }
-
-    /** Returns the number of bytes necessary to represent the QHD in the
-     *  payload.  Needs to take account of size of XML and whether or not to
-     *  even include a QHD.
-     */
-    private static int qhdLength(boolean includeQHD, 
-                                 byte[] xmlBytes, 
-                                 boolean supportsBH,
-                                 boolean isMulticastReply) {
-        int retInt = 0;
-        if (includeQHD) {
-            retInt += 4; // 'LIME'
-            retInt += 1; // 1 byte for size of public area
-            retInt += COMMON_PAYLOAD_LEN; 
-            // the size of the GGEP block for Query Replies with optional Browse
-            // Host flag...
-            retInt += _ggepUtil.getQRGGEP(supportsBH, isMulticastReply).length;
-            retInt += 1;//One byte in the private area for chat
-            // size of xml string, max XML_MAX_SIZE            
-            int numBytes = xmlBytes.length;
-            if ((numBytes + 1) > XML_MAX_SIZE)
-                retInt += XML_MAX_SIZE;
-            else
-                retInt += (numBytes + 1);
-        }
-        return retInt;
     }
 
 	// inherit doc comment
@@ -1034,12 +1013,12 @@ public class QueryReply extends Message implements Serializable{
 		}
 	}
 
-    public final static boolean debugOn = false;
-    public static void debug(String out) {
+    private final static boolean debugOn = false;
+    private static void debug(String out) {
         if (debugOn) 
             System.out.println(out);
     }
-    public static void debug(Exception e) {
+    private static void debug(Exception e) {
         if (debugOn) 
             e.printStackTrace();
     }
@@ -1120,9 +1099,43 @@ public class QueryReply extends Message implements Serializable{
          * desire. 
          */
         public byte[] getQRGGEP(boolean supportsBH,
-                                boolean isMulticastResponse) {
+                                boolean isMulticastResponse,
+                                InetAddress[] pushProxyAddrs,
+                                int[] pushProxyPorts) {
             byte[] retGGEPBlock = _standardGGEP;
-            if (supportsBH && isMulticastResponse)
+            if ((pushProxyPorts != null) && (pushProxyPorts.length > 0) &&
+                (pushProxyAddrs != null) && (pushProxyAddrs.length > 0) &&
+                (pushProxyAddrs.length == pushProxyPorts.length)) {
+                // we have cached all other possibilities.  for push proxy
+                // stuff, we need to build a new GGEP block
+                GGEP newGGEP = new GGEP(false);
+                if (supportsBH)
+                    newGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
+                if (isMulticastResponse)
+                    newGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+
+                StringBuffer proxies = new StringBuffer();
+                for (int i = 0; i < pushProxyPorts.length; i++) {
+                    // the format is this:
+                    // "Addr=a.b.c.d:e;Type=Push;Ver=0.1,....
+                    proxies.append("Addr");
+                    proxies.append(pushProxyAddrs[i].getHostAddress());
+                    proxies.append(":" + pushProxyPorts[i]);
+                    proxies.append(";Type=Push;Ver-0.1,");
+                }
+                newGGEP.put(GGEP.GGEP_HEADER_PROXY_ANNOUNCE,
+                            proxies.toString());
+                
+                try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    newGGEP.write(baos);
+                    retGGEPBlock = baos.toByteArray();
+                }
+                catch (IOException reallybad) {
+                    reallybad.printStackTrace();
+                }
+            }
+            else if (supportsBH && isMulticastResponse)
                 retGGEPBlock = _comboGGEP;
             else if (supportsBH)
                 retGGEPBlock = _bhGGEP;
