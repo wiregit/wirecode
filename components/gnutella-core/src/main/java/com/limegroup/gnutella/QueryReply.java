@@ -208,7 +208,9 @@ public class QueryReply extends Message implements Serializable{
         //Write QHD if desired
         if (includeQHD) {
             //a) vendor code.  This is hardcoded here for simplicity,
-            //efficiency, and to prevent character decoding problems.
+            //efficiency, and to prevent character decoding problems.  If you
+            //change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
+            //well.
             payload[i++]=(byte)76; //'L'
             payload[i++]=(byte)73; //'I'
             payload[i++]=(byte)77; //'M'

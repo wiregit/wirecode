@@ -178,8 +178,6 @@ public final class SettingsManager {
     private final boolean DEFAULT_FILTER_HTML    = false;
     private final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
     private final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
-    /** Use quick connect hosts instead of gnutella.net? */
-    private final boolean DEFAULT_USE_QUICK_CONNECT = true;
 	/** This is limewire's public pong cache */
     public static final String  DEFAULT_LIMEWIRE_ROUTER =
 	  "router.limewire.com";
@@ -187,13 +185,6 @@ public final class SettingsManager {
     public static final String DEDICATED_LIMEWIRE_ROUTER =
 	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
     /** List of hosts to try on quick connect */
-    private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
-		DEFAULT_LIMEWIRE_ROUTER+":6346",
-		"connect1.gnutellanet.com:6346",
-		"connect2.gnutellanet.com:6346",
-		"connect3.gnutellanet.com:6346",
-		"connect4.gnutellanet.com:6346",
-    };
 
     private final int     DEFAULT_PARALLEL_SEARCH  = 5;
     private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
@@ -431,8 +422,6 @@ public final class SettingsManager {
     private final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
     private final String FILTER_BEARSHARE_QUERIES
 		= "FILTER_HIGHBIT_QUERIES";
-    private final String USE_QUICK_CONNECT     = "USE_QUICK_CONNECT";
-    private final String QUICK_CONNECT_HOSTS   = "QUICK_CONNECT_HOSTS";
     private final String PARALLEL_SEARCH       = "PARALLEL_SEARCH";
     private final String MAX_SIM_DOWNLOAD      = "MAX_SIM_DOWNLOAD";
     private final String PROMPT_EXE_DOWNLOAD   = "PROMPT_EXE_DOWNLOAD";
@@ -1068,20 +1057,6 @@ public final class SettingsManager {
                     setFilterBearShareQueries(bs);
                 }
 
-                else if(key.equals(QUICK_CONNECT_HOSTS)) {
-                    setQuickConnectHosts(decode(p));
-                }
-
-                else if(key.equals(USE_QUICK_CONNECT)) {
-                    boolean bs;
-                    if (p.equals("true"))
-                        bs=true;
-                    else if (p.equals("false"))
-                        bs=false;
-                    else
-                        break;
-                    setUseQuickConnect(bs);
-                }
                 else if(key.equals(CONNECT_STRING)) {
                     setConnectString(p);
                 }
@@ -1283,8 +1258,6 @@ public final class SettingsManager {
         setFilterHtml(DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
         setFilterBearShareQueries(DEFAULT_FILTER_BEARSHARE_QUERIES);
-        setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
-        setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(DEFAULT_PARALLEL_SEARCH);
         setClearCompletedUpload(DEFAULT_CLEAR_UPLOAD);
         setClearCompletedDownload(DEFAULT_CLEAR_DOWNLOAD);
@@ -2999,33 +2972,6 @@ public final class SettingsManager {
         Boolean b = new Boolean(yes);
         String s = b.toString();
         PROPS.put(FILTER_BEARSHARE_QUERIES, s);
-    }
-
-	/**
-	 * Specifies whether or not quick connect hosts should be used for
-	 * connecting to the network on startup.
-	 *
-	 * @param useQuickConnect specifies whether or not quick connect hosts
-	 *                        should be used on startup
-	 */
-    public void setUseQuickConnect(boolean useQuickConnect) {
-		_useQuickConnect = useQuickConnect;
-		Boolean b = new Boolean(useQuickConnect);
-		PROPS.put(USE_QUICK_CONNECT, b.toString());
-    }
-
-	/**
-	 * Sets the array of hosts to use as quick connect hosts on startup.
-	 *
-	 * @param hosts the array of hosts to use for quick connect hosts
-	 */
-    public void setQuickConnectHosts(String[] hosts) {
-        if(hosts == null)
-            throw new IllegalArgumentException();
-        else {
-            _quickConnectHosts = hosts;
-            PROPS.put(QUICK_CONNECT_HOSTS, encode(hosts));
-        }
     }
 
     /**

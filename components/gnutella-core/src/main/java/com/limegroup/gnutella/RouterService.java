@@ -116,7 +116,7 @@ public class RouterService
         this.chatManager = ChatManager.instance();
 
 		// Now, link all the pieces together, starting the various threads.
-		this.catcher.initialize(acceptor, manager,
+		this.catcher.initialize(acceptor, manager, this,
 								SettingsManager.instance().getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
 		this.manager.initialize(router, catcher);		
