@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.net.*;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -37,8 +37,8 @@ public class ConnectionManager implements Runnable {
     private int   activeAttempts = 0;
     public boolean stats;
 
-    /** Variables for stastical purpouses */
-    /*NOTE: THESE VARIABLES ARE NOT SYNCHRONISED...SO THE STATISTICS MAY NOT BE 100% ACCURATE.
+    /** Variables for statistical purposes */
+    /*NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT BE 100% ACCURATE. */
     public int total; //total number of messages sent and received
     public  int PReqCount; //Ping Request count
     public int PRepCount; //Ping Reply count
@@ -181,11 +181,21 @@ public class ConnectionManager implements Runnable {
 		//object, handshake, and give it a thread to service it.
 		Socket client=sock.accept();
 		try {
+		    InputStream in=client.getInputStream();
+		    //Is it a Gnutella connection?.  
+		    //TODO1: handle HTTP GET and PUT, and timeouts.
+		    byte[] word=new byte[8];		    
+		    in.read(word);
+		    if (! (new String(word)).equals("GNUTELLA"))
+			throw new IOException();
 		    tryingToConnect(
                       getHostName(client.getInetAddress()), 
                       client.getPort(), 
                       true);
-		    Connection c=new Connection(this, client, true);		   
+
+		    Connection c=new Connection(client); 
+		    c.setManager(this);
+		    add(c);		 
 		    Thread t=new Thread(c);
 		    t.setDaemon(true);
 		    t.start();
@@ -328,7 +338,7 @@ public class ConnectionManager implements Runnable {
      *The host then needs to check if it is the final destination. 
      *If this method returns true, then it is the final destination.
      */
-    public synchronized boolean isClient(byte[] ClientId){
+    public boolean isClient(byte[] ClientId){
 	//get the client ID from the gnutella.ini file.
 	String packetId = new String (ClientId);
 	if ( this.ClientId.equals(packetId) )
@@ -429,14 +439,23 @@ class ConnectionFetcher extends Thread {
     }
 
     public void run() {
-	for ( ; n>0 ; n--) {
+	while (n>0) {
 	    try {
-		//Note: this add c to manager if successful */
 		Connection c=manager.catcher.choose();
+		try {
+		    c.send(new PingRequest(Const.TTL)); 
+		} catch (IOException e) {
+		    //Try again!
+		    c.shutdown();
+		    continue;
+		}
+		c.setManager(manager);
+		manager.add(c);
 		Thread t=new Thread(c);
 		t.setDaemon(true);
 		t.start();
 		//Manager.error("Asynchronously established outgoing connection.");
+		n--;
 	    } catch (NoSuchElementException e) {
 		//give up
 		//Manager.error("Host catcher is empty");
@@ -445,4 +464,5 @@ class ConnectionFetcher extends Thread {
 	    }
 	}
     }		
+
 }
