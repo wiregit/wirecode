@@ -35,14 +35,21 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
     
     /** Port that the reject backend will listen on */
     public static final int REJECT_PORT = 6301;
+
+    /** Port used by the leaf */
+    private static final int LEAF_PORT = 6302;
     
-    /* Port that will shutdown the normal backend process */
+    /** Port that will shutdown the normal backend process */
     private static final int SHUTDOWN_PORT = 6310;
     
-    /* Port that will shutdown the reject backend process */
+    /** Port that will shutdown the reject backend process */
     private static final int SHUTDOWN_REJECT_PORT = 6311;
+
+    /** Port that will shutdown the leaf backend process */
+    private static final int SHUTDOWN_LEAF_PORT = 6312;
     
-    /* Port used to pass error reports to reporting JVM */
+
+    /** Port used to pass error reports to reporting JVM */
     private static final int ERROR_PORT = 6399;
 
 
@@ -58,6 +65,17 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
     private static ErrorMonitor errorMonitor = null;
 
     /**
+     * Standard arguments to pass to new backends.
+     */
+    private static final String[] ARGS = {
+        "java", 
+        "-classpath", 
+        System.getProperty("java.class.path", "."),
+        Backend.class.getName(),
+    };
+
+
+    /**
      * Return the linstening port number
      */
     public static int getPort() {
@@ -71,17 +89,50 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
         return REJECT_PORT;
     }
     
+
+    /**
+     * Launches a standard backend on port 6300.
+     */
+    public synchronized static boolean launch() 
+        throws IOException {
+        return launch(PORT);
+    }    
+
+
     /**
      * Launch normal backend process if it isn't already running
      * @return true if we have launched a new backend process
      * false if one was already running
      * @throws IOException if backend launch was unsucessful
      */
-    public synchronized static boolean launch() 
-    throws IOException {
-        return launch(false);
+    public synchronized static boolean launchReject() 
+        throws IOException {
+        return launch(REJECT_PORT);
+    }    
+
+    /**
+     * Creates a new leaf that connects to the "primary" backend,
+     * running on 6300.
+     */
+    public synchronized static boolean launchLeaf() 
+        throws IOException {
+        return launch(LEAF_PORT);
     }
-    
+
+    /**
+     * Utility method for creating the array of arguments to pass
+     * to the backend's main method.
+     *
+     * @param type the type of backend to create
+     * @return the array of arguments to pass to the backend
+     */
+    private static String[] createArgs(String type) {
+        String[] args = new String[5];
+        System.arraycopy(ARGS, 0, args, 0, ARGS.length);
+        args[4] = type;
+        return args;
+    }
+
     /**
      * Launch backend process if it isn't already running
      * @param reject true to launch the reject backend server,
@@ -90,20 +141,19 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
      * false if one was already running
      * @throws IOException if backend launch was unsucessful
      */
-    public synchronized static boolean launch(boolean reject) 
+    public synchronized static boolean launch(int port) 
         throws IOException {
         
         // Try to open a connection to our listening port.  If it works, we 
         // will assume the backend is up and running
-        int port = (reject ? REJECT_PORT : PORT);
         if (isPortInUse(port)) return false;
 
-        String[] args = new String[reject ? 5 : 4];
+        String[] args = new String[5]; 
         args[0] = "java";
         args[1] = "-classpath";
         args[2] = System.getProperty("java.class.path", ".");
         args[3] = Backend.class.getName();
-        if (reject) args[4] = "reject";
+        args[4] = Integer.toString(port);
         Process proc = Runtime.getRuntime().exec(args);
         new CopyThread(proc.getErrorStream(), System.err);
         new CopyThread(proc.getInputStream(), System.out);
@@ -114,6 +164,8 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
         }
         return true;
     }
+
+
     
     /** Simple thread to copy backend stdout and stderr */
     private static class CopyThread extends Thread {
@@ -269,17 +321,13 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	 * run off of.
 	 */
 	public static void main(String[] args) throws IOException {
-        boolean reject = false;
         boolean shutdown = false;
-        for (int ii = 0; ii < args.length; ii++) {
-            if (args[ii].equalsIgnoreCase("REJECT")) reject = true;
-            if (args[ii].equalsIgnoreCase("SHUTDOWN")) shutdown = true;
-        }
-        
+
+        int port = Integer.parseInt(args[args.length-1]);
         if (shutdown) {
-            shutdown(reject);
+            shutdown(port == REJECT_PORT);
         } else {
-            new Backend(reject);
+            new Backend(port);
         }
     }
 
@@ -288,15 +336,21 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	 * Constructs and launches a new <tt>Backend</tt>.
      * @param reject true to launch a reject server
 	 */
-	private Backend(boolean reject) throws IOException {
+	//private Backend(boolean reject) throws IOException {
+	private Backend(int port) throws IOException {
         super("Backend");
-		System.out.println(reject ? "STARTING REJECT BACKEND" 
-                                  : "STARTING NORMAL BACKEND"); 
+		System.out.println(port == REJECT_PORT ? "STARTING REJECT BACKEND" :
+                           port == LEAF_PORT ? "STARTING LEAF BACKEND" :
+                           port == PORT ? "STARTING NORMAL BACKEND" :
+                           "STARTING UNKNOWN BACKEND");
         
-        int port = (reject ? REJECT_PORT : PORT);
-        int shutdownPort = (reject ? SHUTDOWN_REJECT_PORT : SHUTDOWN_PORT);
+        int shutdownPort = (port == PORT ? SHUTDOWN_PORT : 
+                            port == REJECT_PORT ? SHUTDOWN_REJECT_PORT :
+                            port == LEAF_PORT ? SHUTDOWN_LEAF_PORT :
+                            -1);
 
         ServerSocket shutdownSocket = null;
+        boolean reject = (port == REJECT_PORT);
         try {
             shutdownSocket = new ServerSocket(shutdownPort);
             
