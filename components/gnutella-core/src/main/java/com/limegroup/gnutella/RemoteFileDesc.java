@@ -186,31 +186,16 @@ public class RemoteFileDesc implements Comparable {
 	
 	public static class RemoteFileDescComparator 
 		implements Comparator {
-		
-		public RemoteFileDescComparator() {}
 
+        /**
+         * Primary key: connection speed
+         * (Private/public addresses are dealt with through other means.)
+         */
 		public int compare(Object obj1, Object obj2) {
 
-			RemoteFileDesc rdf1;
-			RemoteFileDesc rdf2;
-			try {
-				rdf1 = (RemoteFileDesc)obj1;
-				rdf2 = (RemoteFileDesc)obj2;
-			}
-			catch (ClassCastException e) {
-				// System.out.println("Class cast exception");
-			return 0;  // probably want to go ahead and throw this?
-			}
-			
-			if ( rdf1.calculatePriority() > rdf2.calculatePriority() ) {
-				return -1;
-			}
-			else if ( rdf1.calculatePriority() < rdf2.calculatePriority() ) {
-				return 1;
-			}
-			
-			return 0;  // they are the same
-
+			RemoteFileDesc rdf1=(RemoteFileDesc)obj1;;
+			RemoteFileDesc rdf2=(RemoteFileDesc)obj2;;
+            return rdf1.getSpeed()-rdf2.getSpeed();
 		}
 	}
 
@@ -231,6 +216,8 @@ public class RemoteFileDesc implements Comparable {
     }
 
     public String toString() {
-        return  "<"+getHost()+", "+getSpeed()+">";
+        return  "<"+getHost()+":"+getPort()+", "
+               +getFileName()+"/"+getSize()+", "
+               +getSpeed()+">";
     }
 }
