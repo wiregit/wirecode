@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
-
+//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 /**
  * A Gnutella connection. A connection is either INCOMING or OUTGOING;
@@ -371,10 +371,12 @@ public class Connection implements Runnable {
                             int kilobytes = fm.getSize()/1024;
                             int num_files = fm.getNumFiles();
 
-                            Message pingReply = new PingReply(m.getGUID(),(byte)(m.getHops()+1),
-                                                              manager.getListeningPort(),
-                                                              ip, num_files, kilobytes);
-
+                            Message pingReply = 
+							new PingReply(m.getGUID(),
+										  (byte)(m.getHops()+1),
+										  manager.getListeningPort(),
+										  ip, num_files, kilobytes);
+							
                             send(pingReply);
                             if (manager.stats==true)
                                 manager.PRepCount++;//keep stats if stats is turned on
