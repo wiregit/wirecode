@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -386,6 +387,129 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
             assertEquals(((Response)queryRep.getResults().next()).getName(),
                          "stanford0");
+            assertEquals(2, queryRep.getTTL());
+            assertEquals(1, queryRep.getHops());
+        }
+
+        // 2) participate in a OOB exchange and make sure results are mapped
+        // back to the leaf
+        {
+            Response[] res = new Response[1];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10, 10, "stanford1");
+            Message m = 
+                new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            
+            // send a ReplyNumberVM
+            ReplyNumberVendorMessage replyNum = 
+                new ReplyNumberVendorMessage(new GUID(proxiedGuid), 1);
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            replyNum.write(baos);
+            DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
+                                                     baos.toByteArray().length,
+                                                     InetAddress.getLocalHost(),
+                                                     PORT);
+            UDP_ACCESS.send(pack);
+
+            // we expect an ACK
+            LimeACKVendorMessage ack = null;
+            while (ack == null) {
+                pack = new DatagramPacket(new byte[1000], 1000);
+                try {
+                    UDP_ACCESS.receive(pack);
+                }
+                catch (IOException bad) {
+                    fail("Did not get ack", bad);
+                }
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                Message mTemp = Message.read(in);
+                if (mTemp instanceof LimeACKVendorMessage)
+                    ack = (LimeACKVendorMessage) mTemp;
+            }
+            assertEquals(new GUID(proxiedGuid), new GUID(ack.getGUID()));
+            assertEquals(1, ack.getNumResults());
+            
+            // send off the reply
+            baos = new ByteArrayOutputStream();
+            m.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      InetAddress.getLocalHost(),
+                                      PORT);
+            UDP_ACCESS.send(pack);
+
+            // now we should get a reply at the leaf
+            QueryReply queryRep = 
+            (QueryReply) getFirstInstanceOfMessageType(LEAF[0],
+                                                       QueryReply.class);
+            assertNotNull(queryRep);
+            assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
+            assertEquals(((Response)queryRep.getResults().next()).getName(),
+                         "stanford1");
+            assertEquals(2, queryRep.getTTL());
+            assertEquals(1, queryRep.getHops());
+        }
+
+        // 3) shut off the query, make sure the OOB is bypassed but TCP is still
+        // sent
+        {
+            // shut off query
+            QueryStatusResponse resp = 
+                new QueryStatusResponse(new GUID(queryRec.getGUID()), 
+                                        MAX_RESULTS);
+            sendF(LEAF[0], resp);
+
+            Response[] res = new Response[1];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10, 10, "stanford2");
+            Message m = 
+                new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            
+            // send a ReplyNumberVM
+            ReplyNumberVendorMessage replyNum = 
+                new ReplyNumberVendorMessage(new GUID(proxiedGuid), 1);
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            replyNum.write(baos);
+            DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
+                                                     baos.toByteArray().length,
+                                                     InetAddress.getLocalHost(),
+                                                     PORT);
+            UDP_ACCESS.send(pack);
+
+            // we better not get an ACK
+            try {
+                while (true) {
+                    pack = new DatagramPacket(new byte[1000], 1000);
+                    UDP_ACCESS.receive(pack);
+                    InputStream in = new ByteArrayInputStream(pack.getData());
+                    Message mTemp = Message.read(in);
+                    if (mTemp instanceof LimeACKVendorMessage)
+                        fail("Should not get ACK!!!");
+                }
+            }
+            catch (InterruptedIOException expected) {}
+
+            // send via TCP, we better get it...                
+            sendF(ULTRAPEER[0], m);
+            
+            Thread.sleep(1000); // processing wait
+            
+            // leaf should get a reply with the correct guid
+            QueryReply queryRep = 
+            (QueryReply) getFirstInstanceOfMessageType(LEAF[0],
+                                                       QueryReply.class);
+            assertNotNull(queryRep);
+            assertEquals(new GUID(query.getGUID()),new GUID(queryRep.getGUID()));
+            assertEquals(((Response)queryRep.getResults().next()).getName(),
+                         "stanford2");
+            assertEquals(2, queryRep.getTTL());
+            assertEquals(1, queryRep.getHops());
         }
     }
 
