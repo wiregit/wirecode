@@ -5,11 +5,11 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size
- * of files.
+ * of files, mainly for legacy reasons.
  */
 public class Endpoint implements Cloneable, Serializable,
 com.sun.java.util.collections.Comparable
@@ -112,16 +112,39 @@ com.sun.java.util.collections.Comparable
     }
 
     /**
-     * Extracts a hostname and port from a string:
+     * Returns a new Endpoint from a Gnutella-style host/port pair:
      * <ul>
-     * <li>If hostAndPort is of the format "host:port", returns new
-     *   Endpoint(host, port).
+     * <li>If hostAndPort is of the format "host:port", where port
+     *   is a number, returns new Endpoint(host, port).
      * <li>If hostAndPort contains no ":" or a ":" at the end of the string,
      *   returns new Endpoint(hostAndPort, 6346).
      * <li>Otherwise throws IllegalArgumentException.
      * </ul>
      */
-    public Endpoint(String hostAndPort) throws IllegalArgumentException
+    public Endpoint(String hostAndPort) throws IllegalArgumentException 
+    {
+        this(hostAndPort, false);
+    }
+
+    /**
+     * Same as new Endpoint(hostAndPort) but with additional restrictions on
+     * hostAndPart; if requireNumeric==true and the host part of hostAndPort is
+     * not as a numeric dotted-quad IP address, throws IllegalArgumentException.
+     * Examples:
+     * <pre>
+     * new Endpoint("www.limewire.org:6346", false) ==> ok
+     * new Endpoint("not a url:6346", false) ==> ok
+     * new Endpoint("www.limewire.org:6346", true) ==> IllegalArgumentException
+     * new Endpoint("64.61.25.172:6346", true) ==> ok
+     * new Endpoint("64.61.25.172", true) ==> ok
+     * new Endpoint("127.0.0.1:ABC", false) ==> IllegalArgumentException     
+     * </pre> 
+     * No DNS lookups are ever involved, so this constructor won't block.
+     *
+     * @see Endpoint (String))
+     */
+    public Endpoint(String hostAndPort, boolean requireNumeric) 
+        throws IllegalArgumentException
     {
         final int DEFAULT=6346;
         int j=hostAndPort.indexOf(":");
@@ -145,6 +168,24 @@ com.sun.java.util.collections.Comparable
             } catch (NumberFormatException e)
             {
                 throw new IllegalArgumentException();
+            }
+        }
+
+        if (requireNumeric) 
+        {
+            //TODO3: implement with fewer allocations
+            String[] numbers=StringUtils.split(hostname, '.');
+            if (numbers.length!=4)
+                throw new IllegalArgumentException();
+            for (int i=0; i<numbers.length; i++) 
+            {
+                try {
+                    int x=Integer.parseInt(numbers[i]);
+                    if (x<0 || x>255)
+                        throw new IllegalArgumentException();
+                } catch (NumberFormatException fail) {
+                    throw new IllegalArgumentException();
+                }
             }
         }
     }
@@ -400,82 +441,5 @@ com.sun.java.util.collections.Comparable
         else
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
-
-    /*
-    // Unit tester
-    public static void main(String args[]){
-        //          Endpoint e = new Endpoint(args[0], 8001);
-        //          byte[] b = e.getHostBytes();
-        //          byte[] b1 = {(byte)255,(byte)255,(byte)255,(byte)255}; // fence post
-        //          byte[] b2 = {(byte)127,(byte)0,(byte)0,(byte)1}; // normal case
-        //          System.out.println("Sumeet: testing 255 case " + Arrays.equals(b,b1) );
-        //          System.out.println("Sumeet: testing normal case " + Arrays.equals(b,b2) );
-        Endpoint e;
-        try {
-            e=new Endpoint(":6347");
-            Assert.that(false);
-        } catch (IllegalArgumentException exc) {
-            Assert.that(true);
-        }
-        try {
-            e=new Endpoint("abc:cas");
-            Assert.that(false);
-        } catch (IllegalArgumentException exc) {
-            Assert.that(true);
-        }
-        try {
-            e=new Endpoint("abc");
-            Assert.that(e.getHostname().equals("abc"));
-            Assert.that(e.getPort()==6346);
-        } catch (IllegalArgumentException exc) {
-            Assert.that(false);
-        }
-        try {
-            e=new Endpoint("abc:");
-            Assert.that(e.getHostname().equals("abc"));
-            Assert.that(e.getPort()==6346);
-        } catch (IllegalArgumentException exc) {
-            Assert.that(false);
-        }
-        try {
-            e=new Endpoint("abc:7");
-            Assert.that(e.getHostname().equals("abc"));
-            Assert.that(e.getPort()==7);
-        } catch (IllegalArgumentException exc) {
-            Assert.that(false);
-        }
-
-        ////////////////////////// Private IP and Subnet Tests ////////////////
-        //These tests are incomplete since the methods are somewhat trivial.
-        e=new Endpoint("18.239.0.1",0);
-        Assert.that(! e.isPrivateAddress());
-        e=new Endpoint("10.0.0.0",0);
-        Assert.that(e.isPrivateAddress());
-        e=new Endpoint("10.255.255.255",0);
-        Assert.that(e.isPrivateAddress());
-        e=new Endpoint("11.0.0.0",0);
-        Assert.that(! e.isPrivateAddress());
-        e=new Endpoint("172.16.0.0",0);
-        Assert.that(e.isPrivateAddress());
-        e=new Endpoint("0.0.0.0");
-        Assert.that(e.isPrivateAddress());
-
-        Endpoint e1;
-        Endpoint e2;
-        e1=new Endpoint("172.16.0.0",0);    e2=new Endpoint("172.16.0.1",0);
-        Assert.that(e1.isSameSubnet(e2));
-        Assert.that(e2.isSameSubnet(e1));
-        e2=new Endpoint("18.239.0.1",0);
-        Assert.that(! e2.isSameSubnet(e1));
-        Assert.that(! e1.isSameSubnet(e2));
-
-        e1=new Endpoint("192.168.0.1",0);    e2=new Endpoint("192.168.0.2",0);
-        Assert.that(e1.isSameSubnet(e2));
-        Assert.that(e2.isSameSubnet(e1));
-        e2=new Endpoint("192.168.1.1",0);
-        Assert.that(! e2.isSameSubnet(e1));
-        Assert.that(! e1.isSameSubnet(e2));
-    }
-    */
 }
 

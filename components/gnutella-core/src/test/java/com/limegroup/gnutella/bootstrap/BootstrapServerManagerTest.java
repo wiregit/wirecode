@@ -182,6 +182,26 @@ public class BootstrapServerManagerTest extends TestCase {
         assertTrue(! iter.hasNext());
     }
 
+    /** Test servers that send HTML for HOSTFILE requestss. */
+    public void testRemoveBadIPHosts2() {
+        //Make first server error.
+        s3.setResponseData("<html>This\r\nis bad\r\ndata>\r\n");
+
+        bman.fetchEndpointsAsync();
+        sleep();
+
+        Iterator iter=bman.getBootstrapServers();
+        assertEquals(url1, iter.next());
+        assertEquals(url2, iter.next());
+        assertTrue(! iter.hasNext());
+
+        assertEquals(RESPONSES_PER_SERVER, catcher.list.size());
+        for (int i=0; i<RESPONSES_PER_SERVER; i++) 
+            assertEquals(new Endpoint("1.2.3."+i+":6346"),
+                         catcher.list.get(i));
+
+    }
+
     public void testRemoveBadURLHosts() {
         //Make first server unreachable.
         s3.setResponseData("improper.url\r\n");

@@ -291,6 +291,8 @@ public class HostCatcherTest extends TestCase {
             out.write("\n");                              //blank line
             out.write("18.239.0.144:A\n");                //bad port
             out.write("18.239.0.141:6347 A\n");           //bad uptime
+            out.write("<html>total crap\n");              //not even close!
+            out.write("  some garbage,1000,a,b,c,d,e,f,g\n");   //bad address
             out.write("18.239.0.142:6342,1000,a,b,c,d,e,f,g\n");//GOOD: ignore extra
             out.flush();
             out.close();
