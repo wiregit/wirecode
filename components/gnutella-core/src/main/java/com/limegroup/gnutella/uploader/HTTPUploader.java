@@ -501,7 +501,13 @@ public class HTTPUploader implements Uploader {
     }
 
     public float getMeasuredBandwidth() {
-        return bandwidthTracker.getMeasuredBandwidth();
+        float retVal = 0;
+        try {
+            retVal = bandwidthTracker.getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            retVal = 0;
+        }
+        return retVal;
     }
     
     //inherit doc comment

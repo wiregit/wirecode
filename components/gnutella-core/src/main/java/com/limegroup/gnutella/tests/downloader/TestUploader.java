@@ -151,7 +151,7 @@ public class TestUploader {
                 stop=p.b;;
             }
         }        
-        System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
+        //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
         //Send the data.
         send(output, start, stop);

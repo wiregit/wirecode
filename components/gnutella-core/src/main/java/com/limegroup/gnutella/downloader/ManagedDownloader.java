@@ -997,7 +997,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //addDownload.
                 if (dloaders.size()>0) {
                     try {
-                        this.wait();
+                        this.wait(2000);
                     } catch (InterruptedException e) {
                         if (stopped) throw e;
                     }
@@ -1105,20 +1105,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             int amountRead=biggest.getAmountRead();
             int left=biggest.getAmountToRead()-amountRead;
             if (left < MIN_SPLIT_SIZE) { 
-                //If the overbandwidth is less than acceptable, then the last
-                //downloader is going too slow
-                float bandwidth = biggest.getMeasuredBandwidth();
-                while(bandwidth < 0) {
-                    //Note while we are waiting the downloader may have
-                    //finished and been removed from dloaders. Then it
-                    //will not be clicked and so its b/w will never increase
-                    if(!dloaders.contains(biggest))
-                       return;
-                    try{
-                        Thread.sleep(2000);
-                    }catch(InterruptedException ie) {}
+                float bandwidth = -1;//initialize
+                try{
                     bandwidth = biggest.getMeasuredBandwidth();
-                }       
+                } catch (InsufficientDataException ide) {
+                    throw new NoSuchElementException();
+                }
                 if(bandwidth < MIN_ACCEPTABLE_SPEED) {
                     //replace (bad boy) biggest if possible
                     int start=
@@ -1545,7 +1537,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         Iterator iter = dloaders.iterator();
         while(iter.hasNext()) {
             BandwidthTracker dloader = (BandwidthTracker)iter.next();
-            retVal += dloader.getMeasuredBandwidth();
+            float curr = 0;
+            try {
+                curr = dloader.getMeasuredBandwidth();
+            } catch (InsufficientDataException ide) {
+                curr = 0;
+            }
+            retVal += curr;
         }
         return retVal;
     }

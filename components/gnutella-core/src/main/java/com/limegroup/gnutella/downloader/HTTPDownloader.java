@@ -484,8 +484,12 @@ public class HTTPDownloader implements BandwidthTracker {
         bandwidthTracker.measureBandwidth(getAmountRead());
     }
 
-    public float getMeasuredBandwidth() {
-        return bandwidthTracker.getMeasuredBandwidth();
+    public float getMeasuredBandwidth() throws InsufficientDataException {
+        try {
+            return bandwidthTracker.getMeasuredBandwidth();
+        } catch(InsufficientDataException ide) {
+            throw ide;
+        }
     }
 	
 	////////////////////////////// Unit Test ////////////////////////////////

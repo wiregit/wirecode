@@ -51,29 +51,25 @@ public class DownloadTester {
 //         testOverlapCheckSpeed(125);
 //         cleanup();
 
-
+        testSimpleDownload();
+        cleanup();
+        testSimpleSwarm();
+        cleanup();
+        testUnbalancedSwarm();
+        cleanup();
+        testSwarmWithInterrupt();
+        cleanup();
+        testStealerInterrupted();
+        cleanup();
+        testAddDownload();
+        cleanup();
         testStallingUploaderReplaced();
         cleanup();
-
-//         testSimpleDownload();
-//         cleanup();
-//         testSimpleSwarm();
-//         cleanup();
-//         testUnbalancedSwarm();
-//         cleanup();
-//         testSwarmWithInterrupt();
-//         cleanup();
-//         testStealerInterrupted();
-//         cleanup();
-//         testAddDownload();
-//         cleanup();
-//         testStallingUploaderReplaced();
-//         cleanup();
-
-//         testOverlapCheckWhite();
-//         cleanup();
-//         testOverlapCheckGrey();
-//         cleanup();
+        
+        testOverlapCheckGrey();
+        cleanup();
+        testOverlapCheckWhite();
+        cleanup();
     }
 
 

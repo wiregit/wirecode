@@ -444,7 +444,13 @@ public class UploadManager implements BandwidthTracker {
             float fastest=0.0f;
             for (Iterator iter=_activeUploadList.iterator(); iter.hasNext(); ) {
                 BandwidthTracker upload=(BandwidthTracker)iter.next();
-                fastest=Math.max(fastest, upload.getMeasuredBandwidth());
+                float speed = 0;
+                try {
+                    speed=upload.getMeasuredBandwidth();
+                } catch (InsufficientDataException ide) {
+                    speed = 0;
+                }
+                fastest=Math.max(fastest,speed);
             }
             return fastest>MINIMUM_UPLOAD_SPEED;
         }
@@ -706,7 +712,13 @@ public class UploadManager implements BandwidthTracker {
         float sum=0;
         for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
 			BandwidthTracker bt = (BandwidthTracker)iter.next();
-			sum+=bt.getMeasuredBandwidth();
+            float curr = 0;
+            try {
+                curr = bt.getMeasuredBandwidth();
+            } catch(InsufficientDataException ide) {
+                curr = 0;
+            }
+			sum+= curr;
 		}
         return sum;
 	}

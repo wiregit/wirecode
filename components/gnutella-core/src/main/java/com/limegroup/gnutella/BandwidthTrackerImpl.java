@@ -49,11 +49,12 @@ public class BandwidthTrackerImpl implements Serializable {
     }
 
     /** @see BandwidthTracker#getMeasuredBandwidth */
-    public synchronized float getMeasuredBandwidth() {
+    public synchronized float getMeasuredBandwidth() 
+        throws InsufficientDataException {
         //TODO - make it throw and exception if not enough data
         int size = snapShots.getSize();
-        if(size  < 3 )
-            return -1;
+        if (size  < 3 )
+            throw new InsufficientDataException();
         Iterator iter = snapShots.iterator();
         float total = 0;
         while(iter.hasNext()) {
