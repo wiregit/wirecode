@@ -73,8 +73,7 @@ public class Connection {
      *  read. */
     private Properties _propertiesWrittenTotal=new Properties();
     /** True iff this should try to reconnect at a lower protocol level on
-     *  outgoing connections. */    
-    
+     *  outgoing connections. */        
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
@@ -108,12 +107,13 @@ public class Connection {
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.4 connection.
+	 * This is only used for testing purposes.
      *
      * @param host the name of the host to connect to
      * @param port the port of the remote host 
      */
     public Connection(String host, int port) {
-        this(host, port, null, null, false);
+		this(host, port, null, null);
     }
 
 
@@ -137,12 +137,12 @@ public class Connection {
      */
     public Connection(String host, int port,
                       Properties properties1,
-                      HandshakeResponder properties2,
-                      boolean negotiate) {
+                      HandshakeResponder properties2) {
+		//boolean negotiate) {
         _host = host;
         _port = port;
         _outgoing = true;
-        _negotiate = negotiate;
+        _negotiate = true;
         _propertiesWrittenP=properties1;
         _propertiesWrittenR=properties2;            
     }
@@ -155,9 +155,9 @@ public class Connection {
      * @param socket the socket accepted by a ServerSocket.  The word
      *  "GNUTELLA " and nothing else must have been read from the socket.
      */
-    public Connection(Socket socket) {
-        this(socket, null);
-    }
+    //public Connection(Socket socket) {
+	//this(socket, null);
+    //}
 
     /**
      * Creates an uninitialized incoming 0.6/0.4 Gnutella connection.  Connects
@@ -219,9 +219,9 @@ public class Connection {
             //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
             if (_negotiate 
-                    && isOutgoing() 
-                    && _propertiesWrittenP!=null
-                    && _propertiesWrittenR!=null) {
+				&& isOutgoing() 
+				&& _propertiesWrittenP!=null
+				&& _propertiesWrittenR!=null) {
                 //reset the flags
                 _propertiesRead = null;
                 _propertiesWrittenP=null;
@@ -357,9 +357,9 @@ public class Connection {
             HandshakeResponse theirResponse=new HandshakeResponse(
                 connectLine.substring(GNUTELLA_06.length()).trim(), 
                 _propertiesRead);
-            int theirCode=theirResponse.getStatusCode();
-            if (theirCode!=HandshakeResponse.OK 
-                    &&  theirCode!=HandshakeResponse.UNAUTHORIZED_CODE)
+            int theirCode = theirResponse.getStatusCode();
+            if (theirCode != HandshakeResponse.OK 
+				&&  theirCode != HandshakeResponse.UNAUTHORIZED_CODE)
                 throw new NoGnutellaOkException(false, 
                                                 theirResponse.getStatusCode(),
                                                 "Server sent fatal response");
@@ -644,7 +644,7 @@ public class Connection {
             _socket.setSoTimeout(timeout);
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
-                throw new IOException();
+                throw new IOException("read null line");
             return line;
         } finally {
             //Restore socket timeout.
