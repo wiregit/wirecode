@@ -652,10 +652,6 @@ public class UDPConnectionProcessor {
      */
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
-        if (msg instanceof FinMessage) {
-            Thread.dumpStack();
-        }
-
 		_lastSendTime = System.currentTimeMillis();
         if(LOG.isDebugEnabled())  
             LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
@@ -904,7 +900,7 @@ public class UDPConnectionProcessor {
                 DataRecord drec = _receiveWindow.addData(dmsg);  
             	drec.ackTime = System.currentTimeMillis();
 				drec.acks++;
-System.out.println("** MORE DATA seq: "+seqNo+" start: "+baseSeqNo);
+
 				// Notify InputStream that data is available for reading
 				if ( _outputToInputStream != null )
 					_outputToInputStream.wakeup();
