@@ -204,12 +204,15 @@ public final class SupernodeAssigner {
 		// check if this node has such good values that we simply can't pass
 		// it up as an Ultrapeer -- it will just get forced to be one
 		_isTooGoodToPassUp = isUltrapeerCapable &&
+            RouterService.acceptedIncomingConnection() &&
 			(curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
 			(BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
 
-        // if this is ultrapeer capable, make sure we record it
-        if(isUltrapeerCapable) {
-			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        // record new ultrapeer capable value unless we are already
+        // acting as an ultrapeer
+        if(!RouterService.isSupernode()) {
+			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(
+                isUltrapeerCapable);
 		}
 
 		if(_isTooGoodToPassUp && shouldTryToBecomeAnUltrapeer(curTime)) {

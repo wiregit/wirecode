@@ -498,7 +498,7 @@ public class RouterService {
         try {
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
-            
+
             //Write gnutella.net
             try {
                 catcher.write();
