@@ -42,6 +42,20 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 			TCP_ALL_MESSAGES.addData(data);
 		}
 	}
+	
+	/**
+	 * Private class for the total number of bytes in sent 
+	 * Multicast messages.
+	 */
+	private static class MulticastDroppedLimeSentMessageStatBytes 
+		extends DroppedLimeSentMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			MULTICAST_ALL_MESSAGES.addData(data);
+		}
+	}
+	
 
 
 	/**
@@ -61,6 +75,12 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_ALL_MESSAGES =
 		new DroppedLimeSentMessageStatBytes();
+		
+	/**
+	 * <tt>Statistic</tt> for all MULTICAST messages sent.
+	 */
+	public static final Statistic MULTICAST_ALL_MESSAGES =
+		new DroppedLimeSentMessageStatBytes();		
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
@@ -79,6 +99,12 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_PING_REQUESTS = 
 	    new TCPDroppedLimeSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella pings sent over Multicast.
+	 */
+	public static final Statistic MULTICAST_PING_REQUESTS = 
+	    new MulticastDroppedLimeSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
@@ -91,6 +117,13 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_PING_REPLIES = 
 	    new TCPDroppedLimeSentMessageStatBytes();
+	    
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella pongs sent over Multicast.
+	 */
+	public static final Statistic MULTICAST_PING_REPLIES = 
+	    new MulticastDroppedLimeSentMessageStatBytes();   	       
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query requests sent over 
@@ -105,6 +138,13 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPDroppedLimeSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REQUESTS = 
+	    new MulticastDroppedLimeSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query replies sent over 
@@ -119,6 +159,13 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_QUERY_REPLIES = 
 	    new TCPDroppedLimeSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REPLIES = 
+	    new MulticastDroppedLimeSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella push requests sent over 
@@ -133,6 +180,13 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_PUSH_REQUESTS = 
 	    new TCPDroppedLimeSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_PUSH_REQUESTS = 
+	    new MulticastDroppedLimeSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella route table messages sent 
@@ -147,4 +201,11 @@ public class DroppedLimeSentMessageStatBytes extends AdvancedKilobytesStatistic 
 	 */
 	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
 	    new TCPDroppedLimeSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * over Multicast.
+	 */
+	public static final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new MulticastDroppedLimeSentMessageStatBytes();	    
 }

@@ -49,6 +49,17 @@ public class SentMessageStat extends AdvancedStatistic {
 			TCP_ALL_MESSAGES.incrementStat();
 		}
 	}
+	
+	/**
+	 * Private class for keeping track of the number of MULTICAST messages.
+	 */
+	private static class MulticastSentMessageStat extends SentMessageStat {
+		public void incrementStat() {
+			super.incrementStat();
+			ALL_MESSAGES.incrementStat();
+			MULTICAST_ALL_MESSAGES.incrementStat();
+		}
+	}	
 
 	/**
 	 * <tt>Statistic</tt> for all messages sent.
@@ -69,6 +80,12 @@ public class SentMessageStat extends AdvancedStatistic {
 		new SentMessageStat();
 
 	/**
+	 * <tt>Statistic</tt> for all MULTICAST messages sent.
+	 */
+	public static final Statistic MULTICAST_ALL_MESSAGES =
+		new SentMessageStat();
+
+	/**
 	 * <tt>Statistic</tt> for all filtered messages.
 	 */
 	public static final Statistic ALL_FILTERED_MESSAGES =
@@ -85,6 +102,12 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_PING_REQUESTS = 
 	    new TCPSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella pings sent over MULTICAST.
+	 */
+	public static final Statistic MULTICAST_PING_REQUESTS = 
+	    new MulticastSentMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
@@ -97,6 +120,12 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_PING_REPLIES = 
 	    new TCPSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella pongs sent over MULTICAST.
+	 */
+	public static final Statistic MULTICAST_PING_REPLIES = 
+	    new MulticastSentMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query requests sent over 
@@ -111,6 +140,13 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REQUESTS = 
+	    new MulticastSentMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query replies sent over 
@@ -125,6 +161,13 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REPLIES = 
 	    new TCPSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REPLIES = 
+	    new MulticastSentMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella push requests sent over 
@@ -139,6 +182,13 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_PUSH_REQUESTS = 
 	    new TCPSentMessageStat();
+	    
+    /**
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_PUSH_REQUESTS = 
+	    new MulticastSentMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella route table messages sent 
@@ -153,6 +203,14 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
 	    new TCPSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * over Multicast.
+	 */
+	public static final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new MulticastSentMessageStat();
+	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
@@ -167,4 +225,11 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_FILTERED_MESSAGES = 
 	    new FilteredSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
+	 * over Multicast.
+	 */
+	public static final Statistic MULTICAST_FILTERED_MESSAGES = 
+	    new FilteredSentMessageStat();	    
 }

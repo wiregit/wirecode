@@ -48,6 +48,17 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_PING_REQUESTS,
 									   LimeReceivedMessageStatBytes.TCP_PING_REQUESTS,
 									   "RECEIVED_TCP_PING_REQUESTS");
+
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pings received over Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_PING_REQUESTS = 
+		new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PING_REQUESTS,
+									   ReceivedMessageStatBytes.MULTICAST_PING_REQUESTS,
+									   LimeReceivedMessageStat.MULTICAST_PING_REQUESTS,
+									   LimeReceivedMessageStatBytes.MULTICAST_PING_REQUESTS,
+									   "RECEIVED_MULTICAST_PING_REQUESTS");
+									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over UDP.
 	 */
@@ -66,6 +77,17 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_PING_REPLIES, 
 									   LimeReceivedMessageStatBytes.TCP_PING_REPLIES,
 									   "RECEIVED_TCP_PING_REPLIES");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_PING_REPLIES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PING_REPLIES, 
+									   ReceivedMessageStatBytes.MULTICAST_PING_REPLIES,
+									   LimeReceivedMessageStat.MULTICAST_PING_REPLIES, 
+									   LimeReceivedMessageStatBytes.MULTICAST_PING_REPLIES,
+									   "RECEIVED_MULTICAST_PING_REPLIES");
+									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
 	 * over UDP.
@@ -86,6 +108,18 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_QUERY_REQUESTS, 
 									   LimeReceivedMessageStatBytes.TCP_QUERY_REQUESTS,
 									   "RECEIVED_TCP_QUERY_REQUESTS");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
+	 * over Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_QUERY_REQUESTS = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_QUERY_REQUESTS, 
+									   ReceivedMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+									   LimeReceivedMessageStat.MULTICAST_QUERY_REQUESTS, 
+									   LimeReceivedMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+									   "RECEIVED_MULTICAST_QUERY_REQUESTS");
+									   									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
 	 * UDP.
@@ -106,6 +140,18 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_QUERY_REPLIES, 
 									   LimeReceivedMessageStatBytes.TCP_QUERY_REPLIES,
 									   "RECEIVED_TCP_QUERY_REPLIES");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
+	 * Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_QUERY_REPLIES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_QUERY_REPLIES, 
+									   ReceivedMessageStatBytes.MULTICAST_QUERY_REPLIES,
+									   LimeReceivedMessageStat.MULTICAST_QUERY_REPLIES, 
+									   LimeReceivedMessageStatBytes.MULTICAST_QUERY_REPLIES,
+									   "RECEIVED_MULTICAST_QUERY_REPLIES");
+									   									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
 	 * UDP.
@@ -126,6 +172,18 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_PUSH_REQUESTS, 
 									   LimeReceivedMessageStatBytes.TCP_PUSH_REQUESTS,
 									   "RECEIVED_TCP_PUSH_REQUESTS");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
+	 * Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_PUSH_REQUESTS = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_PUSH_REQUESTS, 
+									   ReceivedMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+									   LimeReceivedMessageStat.MULTICAST_PUSH_REQUESTS, 
+									   LimeReceivedMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+									   "RECEIVED_MULTICAST_PUSH_REQUESTS");
+									   									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
 	 * over UDP.
@@ -146,6 +204,18 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_ROUTE_TABLE_MESSAGES, 
 									   LimeReceivedMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_TCP_ROUTE_TABLE_MESSAGES");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
+	 * over Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES, 
+									   ReceivedMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+									   LimeReceivedMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES, 
+									   LimeReceivedMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+									   "RECEIVED_MULTICAST_ROUTE_TABLE_MESSAGES");
+									   									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
 	 * over UDP.
@@ -166,6 +236,18 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_FILTERED_MESSAGES,
 									   LimeReceivedMessageStatBytes.TCP_FILTERED_MESSAGES,
 									   "RECEIVED_TCP_FILTERED_MESSAGES");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
+	 * over Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_FILTERED_MESSAGES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_FILTERED_MESSAGES,
+									   ReceivedMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
+									   LimeReceivedMessageStat.MULTICAST_FILTERED_MESSAGES,
+									   LimeReceivedMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
+									   "RECEIVED_MULTICAST_FILTERED_MESSAGES");	
+									   								   
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
@@ -187,5 +269,16 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.TCP_DUPLICATE_QUERIES,
 									   LimeReceivedMessageStatBytes.TCP_DUPLICATE_QUERIES,
 									   "RECEIVED_TCP_DUPLICATE_QUERIES");
+									   
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
+	 * over Multicast.
+	 */
+	public static final ReceivedMessageStatHandler MULTICAST_DUPLICATE_QUERIES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
+									   ReceivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
+									   LimeReceivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
+									   LimeReceivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
+									   "RECEIVED_MULTICAST_DUPLICATE_QUERIES");									   
 	
 }

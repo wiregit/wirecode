@@ -260,8 +260,10 @@ public abstract class MessageRouter {
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
-                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
-                                                       handler);
+                if (!handleUDPQueryRequestPossibleDuplicate(
+                  (QueryRequest)msg, handler) ) {
+                    ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
+                }  
             }
             if(RECORD_STATS)
                 ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
@@ -294,7 +296,6 @@ public abstract class MessageRouter {
      *  port of the client node.
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
-		//System.out.println("MessageRouter::handleMulticastMessage: "+msg); 
         // Increment hops and decrement TTL.
         msg.hop();
 
@@ -303,8 +304,6 @@ public abstract class MessageRouter {
 		
         if (CommonUtils.isLocalAddress(address))
             return;
-
-		//System.out.println("MessageRouter::handleMulticastMessage"); 
 		
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
@@ -316,18 +315,20 @@ public abstract class MessageRouter {
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
-                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
-                                                       handler);
+                if(!handleUDPQueryRequestPossibleDuplicate(
+                  (QueryRequest)msg, handler) ) {
+                    ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
+                }
            // }
             if(RECORD_STATS)
-                ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+                ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
 	//	} else if (msg instanceof QueryReply) {			
 	//		if(RECORD_STATS)
 	//			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
     //        handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
+				ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
 												  handler, datagram);
 	//	} else if(msg instanceof PingReply) {
@@ -463,8 +464,9 @@ public abstract class MessageRouter {
 	 *
 	 * @param query the UDP <tt>QueryRequest</tt> 
 	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
+	 * @return false if it was a duplicate, true if it was not.
 	 */
-	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
+	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
 		//System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
 		ResultCounter counter = 
@@ -472,12 +474,10 @@ public abstract class MessageRouter {
 											 handler);
 		if(counter != null) {
             handleQueryRequest(request, handler, counter);
-		} else {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(request);
+            return true;
 		}
+		return false;
 	}
-
 
     /**
      * The default handler for PingRequests received in
@@ -914,6 +914,9 @@ public abstract class MessageRouter {
         
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
+		// record the stat
+		if (RECORD_STATS)
+		    SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
 				
 		MulticastService.instance().send(query);
 	}	

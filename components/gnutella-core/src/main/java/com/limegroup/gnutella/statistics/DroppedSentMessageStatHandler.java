@@ -45,6 +45,15 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedSentMessageStatBytes.TCP_PING_REQUESTS,
 								   DroppedLimeSentMessageStat.TCP_PING_REQUESTS,
 								   DroppedLimeSentMessageStatBytes.TCP_PING_REQUESTS);
+								   
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pings sent over MULTICAST.
+	 */
+	public static final DroppedSentMessageStatHandler MULTICAST_PING_REQUESTS = 
+		new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_PING_REQUESTS,
+								   DroppedSentMessageStatBytes.MULTICAST_PING_REQUESTS,
+								   DroppedLimeSentMessageStat.MULTICAST_PING_REQUESTS,
+								   DroppedLimeSentMessageStatBytes.MULTICAST_PING_REQUESTS);								   
 
 	/**
 	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pongs sent over UDP.
@@ -63,6 +72,15 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedSentMessageStatBytes.TCP_PING_REPLIES,
 								   DroppedLimeSentMessageStat.TCP_PING_REPLIES, 
 								   DroppedLimeSentMessageStatBytes.TCP_PING_REPLIES);
+								   
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella pongs sent over MULTICAST.
+	 */
+	public static final DroppedSentMessageStatHandler MULTICAST_PING_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_PING_REPLIES, 
+								   DroppedSentMessageStatBytes.MULTICAST_PING_REPLIES,
+								   DroppedLimeSentMessageStat.MULTICAST_PING_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_PING_REPLIES);								   
 
 	/**
 	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query requests sent 
@@ -83,6 +101,17 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedSentMessageStatBytes.TCP_QUERY_REQUESTS,
 								   DroppedLimeSentMessageStat.TCP_QUERY_REQUESTS, 
 								   DroppedLimeSentMessageStatBytes.TCP_QUERY_REQUESTS);
+								   
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query requests sent 
+	 * over MULTICAST.
+	 */
+	public static final DroppedSentMessageStatHandler MULTICAST_QUERY_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_QUERY_REQUESTS, 
+								   DroppedSentMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+								   DroppedLimeSentMessageStat.MULTICAST_QUERY_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_QUERY_REQUESTS);
+								   
 
 	/**
 	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query replies sent over 
@@ -103,6 +132,16 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedSentMessageStatBytes.TCP_QUERY_REPLIES,
 								   DroppedLimeSentMessageStat.TCP_QUERY_REPLIES, 
 								   DroppedLimeSentMessageStatBytes.TCP_QUERY_REPLIES);
+								   
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella query replies sent over 
+	 * MULTICAST.
+	 */
+	public static final DroppedSentMessageStatHandler MULTICAST_QUERY_REPLIES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_QUERY_REPLIES, 
+								   DroppedSentMessageStatBytes.MULTICAST_QUERY_REPLIES,
+								   DroppedLimeSentMessageStat.MULTICAST_QUERY_REPLIES, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_QUERY_REPLIES);								   
 
 	/**
 	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella push requests sent over 
@@ -123,6 +162,16 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedSentMessageStatBytes.TCP_PUSH_REQUESTS,
 								   DroppedLimeSentMessageStat.TCP_PUSH_REQUESTS, 
 								   DroppedLimeSentMessageStatBytes.TCP_PUSH_REQUESTS);
+								   
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella push requests sent over 
+	 * MULTICAST.
+	 */
+	public static final DroppedSentMessageStatHandler MULTICAST_PUSH_REQUESTS = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_PUSH_REQUESTS, 
+								   DroppedSentMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+								   DroppedLimeSentMessageStat.MULTICAST_PUSH_REQUESTS, 
+								   DroppedLimeSentMessageStatBytes.MULTICAST_PUSH_REQUESTS);								   
 
 	/**
 	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella route table messages sent 
@@ -143,4 +192,14 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
 								   DroppedLimeSentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
 								   DroppedLimeSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES);
+								   
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella route table messages sent 
+	 * over MULTICAST.
+	 */
+	public static final DroppedSentMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   DroppedSentMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES);								   
 }

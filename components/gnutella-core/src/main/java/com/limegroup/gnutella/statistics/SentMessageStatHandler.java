@@ -47,6 +47,15 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_PING_REQUESTS,
 								   LimeSentMessageStat.TCP_PING_REQUESTS,
 								   LimeSentMessageStatBytes.TCP_PING_REQUESTS);
+								   
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella pings sent over MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_PING_REQUESTS = 
+		new SentMessageStatHandler(SentMessageStat.MULTICAST_PING_REQUESTS,
+								   SentMessageStatBytes.MULTICAST_PING_REQUESTS,
+								   LimeSentMessageStat.MULTICAST_PING_REQUESTS,
+								   LimeSentMessageStatBytes.MULTICAST_PING_REQUESTS);								   
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella pongs sent over UDP.
@@ -65,6 +74,16 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_PING_REPLIES,
 								   LimeSentMessageStat.TCP_PING_REPLIES, 
 								   LimeSentMessageStatBytes.TCP_PING_REPLIES);
+								   
+
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella pongs sent over MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_PING_REPLIES = 
+	    new SentMessageStatHandler(SentMessageStat.MULTICAST_PING_REPLIES, 
+								   SentMessageStatBytes.MULTICAST_PING_REPLIES,
+								   LimeSentMessageStat.MULTICAST_PING_REPLIES, 
+								   LimeSentMessageStatBytes.MULTICAST_PING_REPLIES);								   
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella query requests sent 
@@ -85,6 +104,16 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_QUERY_REQUESTS,
 								   LimeSentMessageStat.TCP_QUERY_REQUESTS, 
 								   LimeSentMessageStatBytes.TCP_QUERY_REQUESTS);
+								   
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella query requests sent 
+	 * over MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_QUERY_REQUESTS = 
+	    new SentMessageStatHandler(SentMessageStat.MULTICAST_QUERY_REQUESTS, 
+								   SentMessageStatBytes.MULTICAST_QUERY_REQUESTS,
+								   LimeSentMessageStat.MULTICAST_QUERY_REQUESTS, 
+								   LimeSentMessageStatBytes.MULTICAST_QUERY_REQUESTS);								   
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella query replies sent over 
@@ -105,6 +134,16 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_QUERY_REPLIES,
 								   LimeSentMessageStat.TCP_QUERY_REPLIES, 
 								   LimeSentMessageStatBytes.TCP_QUERY_REPLIES);
+								   
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella query replies sent over 
+	 * MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_QUERY_REPLIES = 
+	    new SentMessageStatHandler(SentMessageStat.MULTICAST_QUERY_REPLIES, 
+								   SentMessageStatBytes.MULTICAST_QUERY_REPLIES,
+								   LimeSentMessageStat.MULTICAST_QUERY_REPLIES, 
+								   LimeSentMessageStatBytes.TCP_QUERY_REPLIES);								   
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella push requests sent over 
@@ -125,6 +164,16 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_PUSH_REQUESTS,
 								   LimeSentMessageStat.TCP_PUSH_REQUESTS, 
 								   LimeSentMessageStatBytes.TCP_PUSH_REQUESTS);
+								   
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella push requests sent over 
+	 * MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_PUSH_REQUESTS = 
+	    new SentMessageStatHandler(SentMessageStat.MULTICAST_PUSH_REQUESTS, 
+								   SentMessageStatBytes.MULTICAST_PUSH_REQUESTS,
+								   LimeSentMessageStat.MULTICAST_PUSH_REQUESTS, 
+								   LimeSentMessageStatBytes.MULTICAST_PUSH_REQUESTS);								   
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella route table messages sent 
@@ -145,6 +194,16 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
 								   LimeSentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
 								   LimeSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES);
+								   
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella route table messages sent 
+	 * over MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new SentMessageStatHandler(SentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   SentMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStat.MULTICAST_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStatBytes.MULTICAST_ROUTE_TABLE_MESSAGES);								   
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella filtered messages sent 
@@ -165,4 +224,14 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.TCP_FILTERED_MESSAGES,
 								   LimeSentMessageStat.TCP_FILTERED_MESSAGES,
 								   LimeSentMessageStatBytes.TCP_FILTERED_MESSAGES);
+								   
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella filtered messages sent 
+	 * over MULTICAST.
+	 */
+	public static final SentMessageStatHandler MULTICAST_FILTERED_MESSAGES = 
+	    new SentMessageStatHandler(SentMessageStat.MULTICAST_FILTERED_MESSAGES,
+								   SentMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
+								   LimeSentMessageStat.MULTICAST_FILTERED_MESSAGES,
+								   LimeSentMessageStatBytes.MULTICAST_FILTERED_MESSAGES);								   
 }

@@ -192,8 +192,7 @@ public final class MulticastService implements Runnable {
                     // need to set router because this might have started
                     // before RouterService was instantiated.
                     // but we can cache the value for speed
-                    if(router == null) router = RouterService.getMessageRouter();                    
-                    debug("recieved " + message + " from multicast group.");
+                    if(router == null) router = RouterService.getMessageRouter();
                     router.handleMulticastMessage(message, datagram);
                 }
                 catch (IOException e) {
@@ -216,8 +215,6 @@ public final class MulticastService implements Runnable {
 	 * @param msg  the <tt>Message</tt> to send
 	 */
     public synchronized void send(Message msg) {
-        debug("Sending " + msg + " to multicast group: "
-              + _group + " port: " + _port +".");
         UDPService.instance().send(msg, _group, _port);
         /*
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

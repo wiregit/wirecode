@@ -42,6 +42,19 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 		}
 	}
 
+	/**
+	 * Private class for the total number of bytes in sent 
+	 * Multicast messages.
+	 */
+	private static class MulticastDroppedSentMessageStatBytes 
+		extends DroppedSentMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			MULTICAST_ALL_MESSAGES.addData(data);
+		}
+	}
+
 
 	/**
 	 * <tt>Statistic</tt> for all messages sent.
@@ -60,6 +73,12 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_ALL_MESSAGES =
 		new DroppedSentMessageStatBytes();
+		
+	/**
+	 * <tt>Statistic</tt> for all MULTICAST messages sent.
+	 */
+	public static final Statistic MULTICAST_ALL_MESSAGES =
+		new DroppedSentMessageStatBytes();		
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
@@ -78,6 +97,12 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PING_REQUESTS = 
 	    new TCPDroppedSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella pings sent over MULTICAST.
+	 */
+	public static final Statistic MULTICAST_PING_REQUESTS = 
+	    new MulticastDroppedSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
@@ -90,6 +115,12 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PING_REPLIES = 
 	    new TCPDroppedSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella pongs sent over MULTICAST.
+	 */
+	public static final Statistic MULTICAST_PING_REPLIES = 
+	    new MulticastDroppedSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query requests sent over 
@@ -104,6 +135,14 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPDroppedSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REQUESTS = 
+	    new MulticastDroppedSentMessageStatBytes();
+	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query replies sent over 
@@ -117,7 +156,14 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 * TCP.
 	 */
 	public static final Statistic TCP_QUERY_REPLIES = 
-	    new TCPDroppedSentMessageStatBytes();
+	    new TCPDroppedSentMessageStatBytes();	    
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REPLIES = 
+	    new MulticastDroppedSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella push requests sent over 
@@ -132,6 +178,13 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PUSH_REQUESTS = 
 	    new TCPDroppedSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_PUSH_REQUESTS = 
+	    new MulticastDroppedSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella route table messages sent 
@@ -146,4 +199,11 @@ public class DroppedSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
 	    new TCPDroppedSentMessageStatBytes();
+	    
+    /**
+	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * over Multicast.
+	 */
+	public static final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new MulticastDroppedSentMessageStatBytes();	    
 }

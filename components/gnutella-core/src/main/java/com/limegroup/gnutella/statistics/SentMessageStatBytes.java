@@ -52,6 +52,19 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 			TCP_ALL_MESSAGES.addData(data);
 		}
 	}
+	
+	/**
+	 * Private class for the total number of bytes in sent 
+	 * Multicast messages.
+	 */
+	private static class MulticastSentMessageStatBytes 
+		extends SentMessageStatBytes {
+		public void addData(int data) {
+			super.addData(data);
+			ALL_MESSAGES.addData(data);
+			MULTICAST_ALL_MESSAGES.addData(data);
+		}
+	}	
 
 
 	/**
@@ -71,6 +84,12 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_ALL_MESSAGES =
 		new SentMessageStatBytes();
+		
+	/**
+	 * <tt>Statistic</tt> for all MULTICAST messages sent.
+	 */
+	public static final Statistic MULTICAST_ALL_MESSAGES =
+		new SentMessageStatBytes();		
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
@@ -88,7 +107,13 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 * <tt>Statistic</tt> for Gnutella pings sent over TCP.
 	 */
 	public static final Statistic TCP_PING_REQUESTS = 
-	    new TCPSentMessageStatBytes();
+	    new TCPSentMessageStatBytes();	    
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella pings sent over MULTICAST.
+	 */
+	public static final Statistic MULTICAST_PING_REQUESTS = 
+	    new MulticastSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pongs sent over UDP.
@@ -101,6 +126,12 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PING_REPLIES = 
 	    new TCPSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella pongs sent over MULTICAST.
+	 */
+	public static final Statistic MULTICAST_PING_REPLIES = 
+	    new MulticastSentMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query requests sent over 
@@ -115,6 +146,13 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REQUESTS = 
+	    new MulticastSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query replies sent over 
@@ -129,6 +167,13 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REPLIES = 
 	    new TCPSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella query replies sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_QUERY_REPLIES = 
+	    new MulticastSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella push requests sent over 
@@ -143,6 +188,13 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PUSH_REQUESTS = 
 	    new TCPSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella push requests sent over 
+	 * Multicast.
+	 */
+	public static final Statistic MULTICAST_PUSH_REQUESTS = 
+	    new MulticastSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella route table messages sent 
@@ -157,6 +209,13 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
 	    new TCPSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * over Multicast.
+	 */
+	public static final Statistic MULTICAST_ROUTE_TABLE_MESSAGES = 
+	    new MulticastSentMessageStatBytes();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
@@ -171,4 +230,11 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_FILTERED_MESSAGES = 
 	    new FilteredSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella filtered messages sent 
+	 * over Multicast.
+	 */
+	public static final Statistic MULTICAST_FILTERED_MESSAGES = 
+	    new FilteredSentMessageStatBytes();	    
 }

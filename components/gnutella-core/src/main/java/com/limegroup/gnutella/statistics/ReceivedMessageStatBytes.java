@@ -60,6 +60,19 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 			TCP_ALL_MESSAGES.addData(data);
 		}
 	}
+	
+	/**
+	 * Private class for the total number of bytes in recieved
+	 * multicast messages.
+	 */
+	private static class MulticastReceivedMessageStat
+	    extends ReceivedMessageStatBytes {
+        public void addData(int data) {
+            super.addData(data);
+            ALL_MESSAGES.addData(data);
+            MULTICAST_ALL_MESSAGES.addData(data);
+        }
+    }
 
 
 	/**
@@ -79,6 +92,12 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_ALL_MESSAGES =
 		new ReceivedMessageStatBytes();
+		
+    /**
+     * <tt>Statistic</tt> for all Multicast messages recieved.
+     */
+    public static final Statistic MULTICAST_ALL_MESSAGES =
+        new ReceivedMessageStatBytes();		
 
 	/**
 	 * <tt>Statistic</tt> for all filtered messages.
@@ -103,6 +122,12 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PING_REQUESTS = 
 	    new TCPReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella pings recieved over Multicast.
+     */
+    public static final Statistic MULTICAST_PING_REQUESTS =
+        new MulticastReceivedMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella pongs received over UDP.
@@ -115,6 +140,12 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PING_REPLIES = 
 	    new TCPReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella pongs recieved over Multicast.
+     */
+    public static final Statistic MULTICAST_PING_REPLIES =
+        new MulticastReceivedMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query requests received over 
@@ -129,6 +160,13 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REQUESTS = 
 	    new TCPReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella query requests recieved over
+     * Multicast.
+     */
+    public static final Statistic MULTICAST_QUERY_REQUESTS =
+        new MulticastReceivedMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella query replies received over 
@@ -143,6 +181,13 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_QUERY_REPLIES = 
 	    new TCPReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella query replies recieved over
+     * Multicast.
+     */
+    public static final Statistic MULTICAST_QUERY_REPLIES =
+        new MulticastReceivedMessageStat();	    
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella push requests received over 
@@ -157,6 +202,13 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_PUSH_REQUESTS = 
 	    new TCPReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella push requests received over
+     * Multicast
+     */
+    public static final Statistic MULTICAST_PUSH_REQUESTS =
+        new MulticastReceivedMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella route table messages received 
@@ -171,6 +223,13 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
 	    new TCPReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella route table messages received
+     * over Multicast.
+     */
+    public static final Statistic MULTICAST_ROUTE_TABLE_MESSAGES =
+        new MulticastReceivedMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella filtered messages received 
@@ -185,6 +244,13 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic TCP_FILTERED_MESSAGES = 
 	    new FilteredReceivedMessageStat();
+	    
+    /**
+     * <tt>Statistic</tt> for Gnutella filter messages recieved
+     * over Multicast.
+     */
+    public static final Statistic MULTICAST_FILTERED_MESSAGES =
+        new FilteredReceivedMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for duplicate Gnutella queries received 
@@ -199,5 +265,12 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */	
 	public static final Statistic TCP_DUPLICATE_QUERIES =
 		new DuplicateQueriesReceivedMessageStat();
+		
+    /**
+     * <tt>Statistic</tt> for duplicate Gnutella queries received
+     * over Multicast
+     */
+    public static final Statistic MULTICAST_DUPLICATE_QUERIES =
+        new DuplicateQueriesReceivedMessageStat();
 
 }
