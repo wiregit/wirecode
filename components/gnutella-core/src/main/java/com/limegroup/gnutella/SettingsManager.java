@@ -178,7 +178,7 @@ public class SettingsManager {
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
     private volatile long DEFAULT_SUPERNODE_PROBATION_TIME = 300000; //5 min
-    private volatile boolean DEFAULT_SUPERNODE_MODE = true;
+    private volatile boolean DEFAULT_SUPERNODE_MODE = false;
     
 
 	/**
@@ -423,7 +423,11 @@ public class SettingsManager {
     private volatile int _maxShieldedClientConnections;
     private volatile int _minShieldedClientConnections;
     private volatile long _supernodeProbationTime;
-    private volatile boolean _supernodeMode;
+    /** This is the forced supernode mode */
+    private volatile boolean _supernodeModeForced;
+    /** This is the transitional supernode mode, set automatically during
+     * the execution of program */
+    private volatile boolean _supernodeModeTransit = false;
     private volatile boolean _shieldedClientSupernodeConnection;
     private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
@@ -853,12 +857,15 @@ public class SettingsManager {
                 }
                 else if(key.equals(SUPERNODE_MODE))
                 {
-                    setSupernodeMode((new Boolean(p)).booleanValue());
+                    setForcedSupernodeMode((new Boolean(p)).booleanValue());
                 }
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
 			catch(ClassCastException cce){ /* continue */ }
+            
+            //set properties whose starting value depends upon other properties
+            setDependentProperties();
 		}
 	
 		//Special case: if this is a modem, ensure that KEEP_ALIVE and
@@ -869,6 +876,13 @@ public class SettingsManager {
 		}
 	}
 
+    /**
+     * Sets properties whose starting value depends upon other properties
+     */
+    private void setDependentProperties(){
+        setSupernodeMode(getForcedSupernodeMode());
+    }
+    
 
     /** 
 	 * Load in the default values.  Any properties
@@ -958,7 +972,7 @@ public class SettingsManager {
         setMinShieldedClientConnections(
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
         setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
-        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
+        setForcedSupernodeMode(DEFAULT_SUPERNODE_MODE);
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
@@ -1652,7 +1666,12 @@ public class SettingsManager {
      */
     public boolean isSupernode()
     {
-        return _supernodeMode;
+        return _supernodeModeTransit;
+    }
+    
+    public boolean getForcedSupernodeMode()
+    {
+        return _supernodeModeForced;
     }
 
     /**
@@ -2737,9 +2756,17 @@ public class SettingsManager {
     /**
      * Sets whether the node is gonna be a supernode or not
      */
-    public void setSupernodeMode(boolean supernodeMode)
+    public void setSupernodeMode(boolean supernodeModeTransit)
     {
-        this._supernodeMode = supernodeMode;
+        this._supernodeModeTransit = supernodeModeTransit;
+    }
+    
+    /**
+     * Sets forced supernode mode
+     */
+    public void setForcedSupernodeMode(boolean supernodeMode)
+    {
+        this._supernodeModeForced = supernodeMode;
         PROPS.put(SUPERNODE_MODE, 
             (new Boolean(supernodeMode)).toString());
     }
