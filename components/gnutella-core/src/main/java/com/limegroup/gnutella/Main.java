@@ -187,9 +187,9 @@ public class Main implements ActivityCallback {
 
     public boolean overwriteFile(String file) {return false;};
 
-    public void addDownload(HTTPDownloader mgr) {}
+    public void addDownload(Downloader mgr) {}
 
-    public void removeDownload(HTTPDownloader mgr) {}
+    public void removeDownload(Downloader mgr) {}
 
     public void addUpload(HTTPUploader mgr) {}
 

@@ -551,24 +551,16 @@ public class RouterService
     /**
      * Initialize a download request
      */
-    private HTTPDownloader initDownload(String ip, int port, int index,
+    private Downloader initDownload(String ip, int port, int index,
           String fname, byte[] bguid, int size) {
-		return new HTTPDownloader("http", ip, port, index, fname, router,
+		return new Downloader("http", ip, port, index, fname, router,
 								  acceptor, callback, bguid, size);
-
-
-//  		RemoteFileDesc f = new RemoteFileDesc(ip, port, 
-//  											  index, fname, size, bguid, 1);
-//  		RemoteFileDesc files[] = new RemoteFileDesc[1];
-//  		files[0] = f;
-//  		return new SmartDownloader(router, files, acceptor, callback);
-
     }
 
     /**
      * Kickoff a download request
      */
-    public void kickoffDownload(HTTPDownloader down) {
+    public void kickoffDownload(Downloader down) {
 
         down.ensureDequeued();
 
@@ -585,7 +577,7 @@ public class RouterService
     public void tryDownload(String ip, int port, int index, String fname,
       byte[] bguid, int size) {
 
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
+        Downloader down = initDownload(ip, port, index, fname, bguid, size);
 
         kickoffDownload(down);
     }
@@ -609,7 +601,7 @@ public class RouterService
     public void queueDownload(String ip, int port, int index, String fname,
             byte[] bguid, int size) {
 
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
+        Downloader down = initDownload(ip, port, index, fname, bguid, size);
 
         down.setQueued();
         callback.addDownload( down );
@@ -618,7 +610,7 @@ public class RouterService
     /**
      * Try to resume a download request
      */
-    public void resumeDownload( HTTPDownloader mgr ) {
+    public void resumeDownload( Downloader mgr ) {
         mgr.resume();
 
         kickoffDownload(mgr);
