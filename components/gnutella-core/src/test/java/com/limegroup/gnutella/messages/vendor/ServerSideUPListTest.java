@@ -125,6 +125,16 @@ public class ServerSideUPListTest extends BaseTestCase {
 	}
 	
 	public static void setSettings() {
+		
+		//set the timeout on the pingflood table to something smaller
+		try {
+			PrivilegedAccessor.setValue(RouterService.getMessageRouter(),
+					"_UDPListRequestors",
+					new FixedSizeExpiringSet(200,200));
+		}catch (Exception yeahRight) {
+			fail("couldn't change the UDP pingflood protection table", yeahRight);
+		}
+		
 		String localIP = null;
         try {
             localIP = InetAddress.getLocalHost().getHostAddress();
@@ -246,6 +256,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		//test whether we got proper # of results
  		assertEquals(3,reply.getLeaves().size());
  		assertEquals(3,reply.getUltrapeers().size());
+ 		sleep();
  		
  	}
  	
@@ -257,6 +268,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		
  		assertEquals(0,reply.getLeaves().size());
  		assertEquals(0,reply.getUltrapeers().size());
+ 		sleep();
  	}
  	
  	/**
@@ -269,7 +281,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  			fail("ioex expected");
  		}
  		catch(IOException iox) {}
-
+ 		sleep();
  	}
  	
  	/**
@@ -280,6 +292,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		
  		assertEquals(2,reply.getLeaves().size());
  		assertEquals(0,reply.getUltrapeers().size());
+ 		sleep();
  	}
  	
  	/**
@@ -290,6 +303,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		
  		assertEquals(1,reply.getLeaves().size());
  		assertEquals(2,reply.getUltrapeers().size());
+ 		sleep();
  	}
  	
  	/**
@@ -301,6 +315,7 @@ public class ServerSideUPListTest extends BaseTestCase {
  		//we should get the number we have connected.
  		assertEquals(3,reply.getLeaves().size());
  		assertEquals(3,reply.getUltrapeers().size());
+ 		sleep();
  	}
  	
  	
@@ -318,6 +333,29 @@ public class ServerSideUPListTest extends BaseTestCase {
  		
  		assertEquals(2,reply.getUltrapeers().size());
  		assertEquals(1,reply.getLeaves().size());
+ 		sleep();
+ 	}
+ 	
+ 	/**
+ 	 * tests whether requesting too often will give us a reply
+ 	 */
+ 	public void testHammering() throws Exception {
+ 		UDP_ACCESS.setSoTimeout(500);
+ 		
+ 		//first message should go through
+ 		UPListVendorMessage reply = tryMessage(msgAll);
+ 		
+ 		//second shouldn't
+ 		try {
+ 			reply = tryMessage(msgAll);
+ 			fail("ioex expected");
+ 		}catch (IOException iox) {}
+ 		sleep();
+ 		
+ 		//third should
+ 		reply = tryMessage(msgAll);
+ 		assertNotEquals(0,reply.getLeaves().size());
+ 		assertNotEquals(0,reply.getUltrapeers().size());
  	}
  	
  	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
