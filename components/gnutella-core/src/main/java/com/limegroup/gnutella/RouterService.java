@@ -688,13 +688,13 @@ public class RouterService
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
      */
-    public void query(byte[] guid, String query, int minSpeed, MediaType type) {         
+    public void query(byte[] guid, String query, int minSpeed, MediaType type) {  
 		// as specified in HUGE v0.93, ask for any available URNs on responses
-		HashSet reqUrns = new HashSet();
-		reqUrns.add("urn:");
+		Set reqUrns = new HashSet();
+		reqUrns.add(UrnType.ANY_TYPE);
 
 		QueryRequest qr=new QueryRequest(guid,SettingsManager.instance().getTTL(),
-										 minSpeed, query, null, false, reqUrns, null);
+										 minSpeed, query, "", false, reqUrns, null);
 		verifier.record(qr, type);
 		router.broadcastQueryRequest(qr);
 	}
@@ -707,7 +707,7 @@ public class RouterService
 	 * @see query(byte[], String, int, MediaType)
 	 */
 	public void query(byte[] guid, String query, String richQuery, 
-                        int minSpeed, MediaType type) {
+					  int minSpeed, MediaType type) {
                             
 		// per HUGE v0.93, ask for URNs on responses
 		Set reqUrns = new HashSet();
