@@ -26,6 +26,7 @@ public final class HugeTestSuite {
 		suite.addTest(QueryRequestTest.suite());
 		suite.addTest(QueryReplyTest.suite());
 		suite.addTest(ResponseTest.suite());
+		suite.addTest(UrnHttpRequestTest.suite());
 		return suite;
 	}
 }
