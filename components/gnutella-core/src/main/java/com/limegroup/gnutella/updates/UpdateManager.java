@@ -73,6 +73,7 @@ public class UpdateManager {
             latestVersion = parser.getVersion();
             message = parser.getMessage();
             usesLocale = parser.usesLocale();
+            isValid = true;
         } catch(SAXException sax) {
             latestVersion = CommonUtils.getLimeWireVersion();
             isValid = false;
