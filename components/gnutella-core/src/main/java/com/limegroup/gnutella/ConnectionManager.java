@@ -313,7 +313,23 @@ public class ConnectionManager {
     public boolean hasAvailableIncoming() {
         return (_incomingConnections < _keepAlive);
     }
+    
+    /**
+     * Provides handle to the activity callback
+     * @return Handle to the activity callback
+     */
+    ActivityCallback getCallback(){
+        return _callback;
+    }
 
+    /**
+     * Provides handle to the authenticator instance
+     * @return Handle to the authenticator
+     */
+    Authenticator getAuthenticator(){
+        return _authenticator;
+    }
+    
     /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
