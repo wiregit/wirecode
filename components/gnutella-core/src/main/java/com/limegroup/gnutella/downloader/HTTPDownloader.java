@@ -127,7 +127,7 @@ public class HTTPDownloader {
 			BufferedWriter out=new BufferedWriter(osw);
 			String startRange = java.lang.String.valueOf(_initialReadingPoint);
 			out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
-			out.write("User-Agent: Gnutella\r\n");
+			out.write("User-Agent: LimeWire\r\n");
 			out.write("Range: bytes=" + startRange + "-\r\n");
 			out.write("\r\n");
 			out.flush();
@@ -203,6 +203,8 @@ public class HTTPDownloader {
     			throw new TryAgainLaterException();
 		else if ( str.indexOf("404") > 0 ) 
 			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
+        else if ( str.indexOf("410") > 0 )
+            throw new com.limegroup.gnutella.downloader.NotSharingException();
 		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
 			throw new NoHTTPOKException();
 
