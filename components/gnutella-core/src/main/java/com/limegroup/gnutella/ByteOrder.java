@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.Arrays;
 
 /**
  * Various static routines for solving endian problems.
