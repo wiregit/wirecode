@@ -39,7 +39,7 @@ public class HTTPDownloader {
 
 	private ByteReader _byteReader;
 	private FileOutputStream _fos;
-	private Socket _socket;
+	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
 	private int _port;
@@ -79,6 +79,7 @@ public class HTTPDownloader {
 	public HTTPDownloader(Socket socket,
                           RemoteFileDesc rfd,
                           File incompleteFile) {
+        _socket=socket;
         _incompleteFile=incompleteFile;
 		_filename = rfd.getFileName();
 		_index = rfd.getIndex();
