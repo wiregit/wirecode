@@ -158,6 +158,16 @@ public class ConnectionManager {
 			if(_isWindows) {
 				new RejectConnection(socket, _catcher);
 			}
+
+			// Otherwise, we're not on windows.  We did this 
+			// because we know that RejectConnection was causing
+			// problems on the Mac (periodically freezing the
+			// system and leading to a 40% approval rating on
+			// download.com), and we have not been able to test
+			// it on other systems.  Since we know that not using
+			// a reject connection will not cause a problem, then
+			// we might as well just be safe and not use one on 
+			// non-windows systems.
 			else {
 				try {
 					socket.close();
