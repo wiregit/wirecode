@@ -53,6 +53,19 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     /** The contents of the GUID.  INVARIANT: bytes.length==SZ */
     private byte[] bytes;
 
+    /**
+     * Creates a new Globally Unique Identifier (GUID).
+     */
+    public GUID() {
+        this(makeGuid());
+    }
+
+    /**
+     * Creates a new <tt>GUID</tt> instance with the specified array
+     * of unique bytes.
+     *
+     * @param bytes the array of unique bytes
+     */
     public GUID(byte[] bytes) {
         Assert.that(bytes.length==SZ);
         this.bytes=bytes;
