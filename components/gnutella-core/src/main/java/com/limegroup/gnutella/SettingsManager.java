@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.net.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.lang.IllegalArgumentException;
@@ -128,8 +129,7 @@ public class SettingsManager {
 
     private final boolean DEFAULT_CHECK_AGAIN        = true;
     private final boolean DEFAULT_FORCE_IP_ADDRESS   = false;
-    private final byte[]  DEFAULT_FORCED_IP_ADDRESS  = {};
-    private final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
+    private final String  DEFAULT_FORCED_IP_ADDRESS_STRING  = "0.0.0.0";
     private final int     DEFAULT_FORCED_PORT         = 6346;
     private final int     DEFAULT_FREELOADER_FILES    = 1;
     private final int     DEFAULT_FREELOADER_ALLOWED  = 100;
@@ -213,7 +213,6 @@ public class SettingsManager {
     private final String BASIC_QUERY_INFO      = "BASIC_QUERY_INFO";
     private final String ADVANCED_QUERY_INFO   = "ADVANCED_QUERY_INFO";
     private final String FORCE_IP_ADDRESS      = "FORCE_IP_ADDRESS";
-    private final String FORCED_IP_ADDRESS     = "FORCED_IP_ADDRESS";
     private final String FORCED_IP_ADDRESS_STRING
         = "FORCED_IP_ADDRESS_STRING";
     private final String FORCED_PORT           = "FORCED_PORT";
@@ -258,7 +257,6 @@ public class SettingsManager {
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
     private volatile byte[]   _forcedIPAddress;
-    private volatile String   _forcedIPAddressString;
     private volatile int      _forcedPort;
 	private volatile boolean  _allowBroswer;
     private volatile byte     _ttl;
@@ -651,9 +649,6 @@ public class SettingsManager {
                         break;
                     setForceIPAddress(bs);
                 }
-                else if(key.equals(FORCED_IP_ADDRESS)){
-                    setForcedIPAddress(p.getBytes());
-                }
                 else if(key.equals(FORCED_IP_ADDRESS_STRING)){
                     setForcedIPAddressString(p);
                 }
@@ -801,7 +796,6 @@ public class SettingsManager {
         setBasicInfoForQuery(DEFAULT_BASIC_INFO_FOR_QUERY);
         setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
         setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
-        setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
         setForcedIPAddressString(DEFAULT_FORCED_IP_ADDRESS_STRING);
         setForcedPort(DEFAULT_FORCED_PORT);
         setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
@@ -1032,16 +1026,19 @@ public class SettingsManager {
 
     public int getAdvancedInfoSizeForQuery() {return _advancedQueryInfo;}
 
+    /** Returns true iff this should force its IP address. */
     public boolean getForceIPAddress() {
         return _forceIPAddress;
     }
 
+    /** Returns the forced IP address as an array of bytes. */
     public byte[] getForcedIPAddress() {
         return _forcedIPAddress;
     }
 
+    /** Returns the forced IP address in dotted-quad format. */
     public String getForcedIPAddressString() {
-        return _forcedIPAddressString;
+        return Message.ip2string(_forcedIPAddress);
     }
 
     public int getForcedPort() {
@@ -1866,14 +1863,25 @@ public class SettingsManager {
         _props.put(ALLOW_BROWSER, c);
     }
 
-    public void setForcedIPAddress(byte[] address) {
-        _forcedIPAddress = address;
-        _props.put(FORCED_IP_ADDRESS, new String(address));
-    }
-
-    public void setForcedIPAddressString(String address) {
-        _forcedIPAddressString = address;
-        _props.put(FORCED_IP_ADDRESS_STRING, address);
+    /** 
+     * Sets the force IP address to the given address.
+     * If address is in symbolic form, blocks while 
+     * resolving it.
+     *
+     * @param address an IP address in dotted quad (e.g., 1.2.3.4)
+     *  or symbolic form (e.g., sparky.limewire.com)
+     * @exception IllegalArgumentException address wasn't
+     *   in a valid format.
+     */
+    public void setForcedIPAddressString(String address) 
+            throws IllegalArgumentException {
+        try {
+            InetAddress ia = InetAddress.getByName(address); 
+            _forcedIPAddress = ia.getAddress();
+            _props.put(FORCED_IP_ADDRESS_STRING, address);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     public void setForcedPort(int port) {
