@@ -71,6 +71,11 @@ public class Trie {
      * If true, keys will be canonicalized to lowercase.
      */
     private boolean ignoreCase;
+    
+    /**
+     * The constant EmptyIterator to return when nothing matches.
+     */
+    private final static Iterator EMPTY_ITERATOR = new EmptyIterator();
 
     /**
      * Constructs a new, empty tree.
@@ -319,7 +324,7 @@ public class Trie {
             // Find the edge whose label starts with prefix[i].
             TrieEdge edge = node.get(prefix.charAt(i));
             if (edge == null) {
-                return new EmptyIterator();
+                return EMPTY_ITERATOR;
             }
             // Now check that rest of label matches
             node = edge.getChild();
@@ -341,7 +346,7 @@ public class Trie {
         }
         // Yield all children of node, including node itself.
         if (node == null)
-            return new EmptyIterator();
+            return EMPTY_ITERATOR;
         else
             return new ValueIterator(node);
     }
