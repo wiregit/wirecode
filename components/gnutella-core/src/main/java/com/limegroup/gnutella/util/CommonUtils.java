@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
+import java.util.Locale;
 import com.sun.java.util.collections.*;
 
 /**
@@ -180,7 +181,7 @@ public final class CommonUtils {
 	 */
 	static {
 		// get the operating system
-		String os = System.getProperty("os.name").toLowerCase();
+		String os = System.getProperty("os.name").toLowerCase(Locale.US);
 
 		// set the operating system variables
 		_isWindows = os.indexOf("windows") != -1;
@@ -748,7 +749,7 @@ public final class CommonUtils {
 		int i = fileName.lastIndexOf(".");
 		if(i == -1 || i==fileName.length()) return false;
 		
-		String ext = fileName.substring(i+1).toLowerCase();
+		String ext = fileName.substring(i+1).toLowerCase(Locale.US);
 		String[] supportedFormats = {
 		    "mp3", "wav", "au", "aif", "aiff"};
 		
