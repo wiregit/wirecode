@@ -30,13 +30,17 @@ class LimeXMLReplyCollection{
     //Constructor
     public LimeXMLReplyCollection(String URI) {
         schemaURI = URI;
+        int start = URI.lastIndexOf("/");
+        //TODO3: Are we sure that / is the correct delimiter???
+        int end = URI.lastIndexOf(".");
+        String schemaName= schemaURI.substring(start+1,end) + ".xml";
         replyDocs = new ArrayList();
         //Load up the docs from the file.
         LimeXMLProperties props = LimeXMLProperties.instance();
         String path = props.getXMLDocsDir();
         String content="";
         try{
-            File file = new File(path,URI);
+            File file = new File(path,schemaName);
             RandomAccessFile f = new RandomAccessFile(file,"r");
             int len = (int)f.length();
             byte[] con = new byte[len];
@@ -49,11 +53,21 @@ class LimeXMLReplyCollection{
             done= false;
             return;
         }
-        StringTokenizer tokenizer = new StringTokenizer(content,"<?xml");
+        int startIndex = content.indexOf("<?xml");
+        int endIndex = startIndex;
         String xmlDoc = "";
-        while(tokenizer.hasMoreTokens()){
-            xmlDoc = tokenizer.nextToken();
-            xmlDoc = "<?xml" + xmlDoc;//bring back the string
+        boolean finished= false;
+        while(!finished){
+            startIndex = endIndex;//nextRound
+            if (startIndex == -1){
+                finished = true;
+                continue;
+            }
+            endIndex=content.indexOf("<?xml",startIndex+1);
+            if (endIndex > 0)
+                xmlDoc = content.substring(startIndex, endIndex);
+            else
+                xmlDoc = content.substring(startIndex);
             String xmlString = "";
             StringTokenizer tok = new StringTokenizer(xmlDoc,"\n\t");
             while (tok.hasMoreTokens()){
@@ -63,6 +77,7 @@ class LimeXMLReplyCollection{
             try{
                 doc = new LimeXMLDocument(xmlString);
             }catch(Exception e){//the xml is malformed
+                e.printStackTrace();
                 continue;//just ignore this document. do not add or set done
             }
             addReply(doc);
@@ -73,7 +88,7 @@ class LimeXMLReplyCollection{
     
     public boolean getDone(){
         return done;
-    }    
+    }
 
     public String getSchemaURI(){
         return schemaURI;

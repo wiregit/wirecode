@@ -8,6 +8,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 
+//imports to make the test code work
+import java.util.List;
+import com.limegroup.gnutella.util.NameValue;
+
 public class MetaFileManager extends FileManager {
     
     Object metaLocker = new Object();
@@ -74,6 +78,7 @@ public class MetaFileManager extends FileManager {
                 String[] schemas = schemaRepository.getAvailableSchemaURIs();
                 //we have a list of schemas
                 int len = schemas.length;
+                //System.out.println("Sumeet: There are "+len+" schemas");
                 for(int i=0;i<len;i++){
                     LimeXMLReplyCollection collection =  
                        new LimeXMLReplyCollection(schemas[i]);
@@ -85,6 +90,8 @@ public class MetaFileManager extends FileManager {
                 }
             }//end of if
             initialized = true;
+            //System.out.println("Sumeet: Printing current xml data");
+            //showXMLData();
         }//end of synchronized block
     }//end of loadSettings.
 
@@ -111,5 +118,45 @@ public class MetaFileManager extends FileManager {
         return retArray;
     }
 
+    /**
+     * Used only for showing the current XML data in the system. This method
+     * is used only for the purpose of testing. It is not used for anything 
+     * else.
+     */
+    private void showXMLData(){
+        //get all the schemas
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        String[] schemas = rep.getAvailableSchemaURIs();
+        SchemaReplyCollectionMapper mapper = 
+                SchemaReplyCollectionMapper.instance();
+        int len = schemas.length;
+        LimeXMLReplyCollection collection;
+        for(int i=0; i<len; i++){
+            System.out.println("Schema : " + schemas[i]);
+            System.out.println("-----------------------");
+            collection = mapper.getReplyCollection(schemas[i]);
+            if (collection == null){
+                System.out.println("No docs corresponding to this schema ");
+                continue;
+            }
+            List replies = collection.getCollectionList();
+            int size = replies.size();
+            for(int j=0; j< size; j++){
+                System.out.println("Doc number "+j);
+                System.out.println("-----------------------");
+                LimeXMLDocument doc = (LimeXMLDocument)replies.get(j);
+                List elements = doc.getNameValueList();
+                int t = elements.size();
+                for(int k=0; k<t; k++){
+                    NameValue nameValue = (NameValue)elements.get(k);
+                    System.out.println("Name " + nameValue.getName());
+                    System.out.println("Value " + nameValue.getValue());
+                
+                }
+            }
+        }
+    }
+
 }
+
         
