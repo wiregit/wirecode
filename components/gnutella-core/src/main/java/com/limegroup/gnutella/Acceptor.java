@@ -43,11 +43,21 @@ public class Acceptor extends Thread {
 	}
 
 	/**
-	 *  For proper IP Adress, we need to set this from a real socket connection
-	 *  This is to get around bug #4073539 from sun.
+     * @modifes this
+     * @effects sets the IP address to use in pongs and query replies.  If addr
+     *  is localhost (127.0.0.1), this is not modified.  This method must be
+	 *  to get around JDK bug #4073539, as well as to try to handle the case of a
+     *  computer whose IP address keeps changing.
 	 */
 	public static synchronized void setAddress(byte [] addr) {
-	    _address = addr;
+        //Ignore localhost.
+        if (addr[0]==(byte)127
+                && addr[1]==(byte)0
+                && addr[2]==(byte)0
+                && addr[3]==(byte)1)
+            return;
+
+	    _address = addr; 
 	}
 
     
