@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.statistics.*;
 import java.awt.event.*;
 
 /**
@@ -45,15 +46,15 @@ public final class SupernodeAssigner {
 
 	/**
 	 * Constant for the minimum current uptime in seconds that a node must 
-	 * have to qualify for supernode status.
+	 * have to qualify for Ultrapeer status.
 	 */
-	private static final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hr
+	private static final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hrs
 
 	/**
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have for us to attempt to switch them from a leaf to an Ultrapeer
 	 */
-	private static final int MINIMUM_CURRENT_UPTIME_FORCE = 150 * 60; //2.5 hr
+	private static final int MINIMUM_CURRENT_UPTIME_FORCE = 240 * 60; //4 hrs
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
@@ -210,11 +211,8 @@ public final class SupernodeAssigner {
 		// check if this node has such good values that we simply can't pass
 		// it up as an Ultrapeer -- it will just get forced to be one
 		_isTooGoodToPassUp = isSupernodeCapable &&
-			(curTime - RouterService.getLastQueryTime() > 5*60*1000);
-
-
-		// TODO:: add HTTP upload bandwidth used as a factor
-		// TODO:: add a TEST for this class
+			(curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
+			(BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 2);
 
         // if this is supernode capable, make sure we record it
         if(isSupernodeCapable) {
