@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
@@ -34,6 +38,8 @@ public class THEXUploadState implements HTTPMessage {
     private final HashTree TREE;
     private final StalledUploadWatchdog WATCHDOG;
 
+    private static final Log LOG = LogFactory.getLog(THEXUploadState.class);
+    
     /**
      * Throttle for the speed of THEX uploads, allow up to 0.5K/s
      */
@@ -47,6 +53,7 @@ public class THEXUploadState implements HTTPMessage {
      *            the <tt>HTTPUploader</tt> that sends this message
      */
     public THEXUploadState(HTTPUploader uploader, StalledUploadWatchdog dog) {
+    	LOG.debug("creating thex upload state");
         UPLOADER = uploader;
         FILE_DESC = uploader.getFileDesc();
         TREE = FILE_DESC.getHashTree();
@@ -64,6 +71,7 @@ public class THEXUploadState implements HTTPMessage {
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
     public void writeMessageHeaders(OutputStream network) throws IOException {
+    	LOG.debug("writing thex headers");
         StringWriter os = new StringWriter();
         
         os.write("HTTP/1.1 200 OK\r\n");
@@ -108,6 +116,7 @@ public class THEXUploadState implements HTTPMessage {
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
     public void writeMessageBody(OutputStream os) throws IOException {
+    	LOG.debug("writing message body");
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
         // the tree might be large, but the watchdogs allows two minutes,
         // so this is okay, since if an entire tree wasn't written in two

@@ -3,6 +3,9 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -14,6 +17,8 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class FileNotFoundUploadState implements HTTPMessage {
 
+    private static final Log LOG = LogFactory.getLog(FileNotFoundUploadState.class);
+	
 	/**
 	 * Constant for the error message to send.
 	 */
@@ -21,6 +26,7 @@ public final class FileNotFoundUploadState implements HTTPMessage {
 		"File not found on server.".getBytes();
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+		LOG.debug("writing message headers");
 		String str;
 		str = "HTTP/1.1 404 Not Found\r\n";
 		ostream.write(str.getBytes());
@@ -35,6 +41,7 @@ public final class FileNotFoundUploadState implements HTTPMessage {
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
+		LOG.debug("writing message body");
 		ostream.write(ERROR_MESSAGE);
 	}
 	

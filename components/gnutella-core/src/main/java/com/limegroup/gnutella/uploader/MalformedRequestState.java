@@ -4,6 +4,9 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.io.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This class handles the case where the request was malformed.
  * Rather than abruptly disconnecting, 
@@ -13,6 +16,8 @@ import java.io.*;
  */
 public final class MalformedRequestState implements HTTPMessage {
 
+    private static final Log LOG = LogFactory.getLog(MalformedRequestState.class);
+	
 	/**
 	 * Constant for the error message to send.
 	 */
@@ -20,6 +25,7 @@ public final class MalformedRequestState implements HTTPMessage {
 		"Malformed Request".getBytes();
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+		LOG.debug("writing headers");
 		String str;
 		str = "HTTP/1.1 400 Malformed Request\r\n";
 		ostream.write(str.getBytes());
@@ -38,6 +44,7 @@ public final class MalformedRequestState implements HTTPMessage {
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
+		LOG.debug("writing body");
 		ostream.write(ERROR_MESSAGE);
 	}
 	
