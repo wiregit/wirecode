@@ -29,6 +29,17 @@ public abstract class AbstractHandshaker implements Handshaker {
     protected static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
     protected static final String CONNECT         = "CONNECT/";
     
+    /**
+     * The number of times we will respond to a given challenge 
+     * from the other side, or otherwise, during connection handshaking
+     */
+    protected static final int MAX_HANDSHAKE_ATTEMPTS = 5;  
+    
+    /**
+     * Constant for the maximum number of handshake headers to read.
+     */
+    protected static final int MAX_HEADERS_TO_READ = 30;
+    
     /** 
      * End of line for Gnutella 0.6 handshakes.
      */
