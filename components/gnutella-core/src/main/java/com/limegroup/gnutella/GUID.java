@@ -58,14 +58,15 @@ public class GUID /* implements Comparable */ {
     }
 
     public String toString() {
-	StringBuffer buf=new StringBuffer();
-	for (int i=0; i<2; i++)
-	    buf.append(bytes[i]+".");	  
-	buf.append("..");
-	for (int i=14; i<SZ-1; i++) 
-	    buf.append(bytes[0]+".");
-	buf.append(bytes[SZ-1]+"");
-	return buf.toString();
+	return toHexString();
+//  	StringBuffer buf=new StringBuffer();
+//  	for (int i=0; i<2; i++)
+//  	    buf.append(bytes[i]+".");	  
+//  	buf.append("..");
+//  	for (int i=14; i<SZ-1; i++) 
+//  	    buf.append(bytes[0]+".");
+//  	buf.append(bytes[SZ-1]+"");
+//  	return buf.toString();
     }
 
     /** 
