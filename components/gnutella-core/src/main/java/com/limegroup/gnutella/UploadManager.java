@@ -288,9 +288,9 @@ public class UploadManager {
 	 *         we want to upload as quickly as possible.
 	 */
 	public int calculateBurstSize() {
-		int totalBandwith = getTotalBandwith();
-		int burstSize = totalBandwith/uploadsInProgress();
-		return burstSize;
+		float totalBandwith = getTotalBandwith();
+		float burstSize = totalBandwith/uploadsInProgress();
+		return (int)burstSize;
 	}
 
 	////////////////// Private Bandwith Calculation //////////////////
@@ -298,7 +298,7 @@ public class UploadManager {
 	/**
 	 * @return the total bandwith available for uploads
 	 */
-	private int getTotalBandwith() {
+	private float getTotalBandwith() {
 
 		SettingsManager manager = SettingsManager.instance();
 		// To calculate the total bandwith available for
@@ -306,17 +306,15 @@ public class UploadManager {
 		// is what the user *thinks* their connection
 		// speed is.  Note, that they may have set this
 		// wrong, but we have no way to tell.
-		int connectionSpeed  
-		= (int)(((float)manager.getConnectionSpeed())/8.f);
-   
+		float connectionSpeed  
+		= ((float)manager.getConnectionSpeed())/8.f;
 		// the second number is the speed that they have 
 		// allocated to uploads.  This is really a percentage
 		// that the user is willing to allocate.
-		int speed = manager.getUploadSpeed();
-		
+		float speed = manager.getUploadSpeed();
 		// the total bandwith available then, is the percentage
 		// allocated of the total bandwith.
-		int totalBandwith = (int)((connectionSpeed*((float)speed/100)));
+		float totalBandwith = ((connectionSpeed*((float)speed/100)));
 		return totalBandwith;
 	}
 
