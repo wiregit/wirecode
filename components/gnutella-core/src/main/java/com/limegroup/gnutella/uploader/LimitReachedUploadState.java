@@ -34,6 +34,8 @@ public class LimitReachedUploadState implements UploadState {
 		ostream.write(str.getBytes());
 		FileDesc fileDesc = uploader.getFileDesc();
 		if(fileDesc != null) {
+			// write the URN in case the caller wants it
+			fileDesc.writeUrnTo(ostream);
 			fileDesc.writeAlternateLocationsTo(ostream);
 		}
 		str = "\r\n";
