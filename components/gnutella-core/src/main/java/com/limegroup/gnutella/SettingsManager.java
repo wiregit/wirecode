@@ -1528,7 +1528,7 @@ public class SettingsManager implements SettingsInterface
      *  name in the user's install directory.  This should only
 	 *  get called once when the program shuts down.
      */
-    public void writeProperties() {
+    public synchronized void writeProperties() {
 		FileOutputStream ostream = null;
 		try {
 			ostream = new FileOutputStream(fileName_);
