@@ -276,7 +276,6 @@ public class VersionUpdate implements Runnable
 		newFileBuf.append(".jar");	   
 		String newFileName = newFileBuf.toString();
 		String fullPath = _currentDirectory + newFileName;	
-		System.out.println("file to download: "+newFileName);
 		try {
 			// open the http connection, and grab 
 			// the file with the version number in it.
@@ -297,10 +296,8 @@ public class VersionUpdate implements Runnable
 			int newBytes = -1;
 			byte[] buf = new byte[1024];
 			while(true) {
-				System.out.println("amountRead: "+_amountRead);
 				window.setAmountRead(_amountRead);
 				SwingUtilities.invokeLater(window);
-				//window.updatePercentRead(_amountRead);
 				if(_amountRead == _updateSize)
 					break;
 				if(_amountRead > _updateSize) {
@@ -361,56 +358,37 @@ public class VersionUpdate implements Runnable
 				}
 				catch(IOException ioe) {
 					showErrorMessage("updateLAXFile::IOException from FileWriter");
-					System.out.println("exception caught");
 				}
 				BufferedReader br = new BufferedReader(fr);
 				BufferedWriter bw = new BufferedWriter(fw);
 				String line = br.readLine();
-				//char[] lineChars = new char[line.length()];
 				while(line != null) {
-					//line.getChars(0,line.length(),lineCh`ars,0);					
 					if(line.startsWith(newClasspaths)) {
-						System.out.println("lax line1: "+line);
 						line = line.substring(15);
-						System.out.println("lax line2: "+line);
 						StringBuffer sb = new StringBuffer(newClasspaths);
 						StringTokenizer st = new StringTokenizer(line, ";");
 						String curTok = st.nextToken()+";";
 						while(st.hasMoreTokens()) {							
-							System.out.println("current token: "+curTok);
 							if(curTok.startsWith("LimeWire")) {
 								if(!curTok.endsWith("update.jar;")) {
 									curTok = newFileName+";";
-									System.out.println("found it");
 								}
 							}
 							sb.append(curTok);
 							curTok = st.nextToken()+";";
 						}
 						line = sb.toString();
-						System.out.println("new classpath string: "+line);
-						//bw.write(newClasspaths, 0, newClasspaths.length());
 					}
 					bw.write(line, 0, line.length());						
 					bw.newLine();
 					line = br.readLine();
 				}
-				System.out.println("got outside of the loop");
 				br.close();
-				System.out.println("closed br");
 				fr.close();
-				System.out.println("closed fr");
-
 				fw.flush();
-				System.out.println("flushed fw");
-
 				bw.flush();
-				System.out.println("flushed bw");
-
 				fw.close();
-				System.out.println("closed fw");
 				bw.close();
-				System.out.println("closed bw");
 			} catch(java.io.FileNotFoundException fnfe) {
 				showErrorMessage("updateLAXFile::FileNotFoundException");
 			} catch(IOException ioe) {
@@ -441,8 +419,8 @@ public class VersionUpdate implements Runnable
 		Utilities.showMessage(error);
 	}
 
-	public static void main(String args[]) {
-		VersionUpdate vu = VersionUpdate.instance();
-		vu.updateLAXFile("LimeWire12.jar");
-	}
+//  	public static void main(String args[]) {
+//  		VersionUpdate vu = VersionUpdate.instance();
+//  		vu.updateLAXFile("LimeWire12.jar");
+//  	}
 }
