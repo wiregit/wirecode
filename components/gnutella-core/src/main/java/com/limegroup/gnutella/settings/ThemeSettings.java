@@ -95,7 +95,6 @@ public final class ThemeSettings extends LimeProps {
         DEFAULT_OSX_THEME_NAME,
         WINDOWS_LAF_THEME_NAME,
         "black_theme."+EXTENSION,
-        "classic_theme."+EXTENSION,
     };
     
     /**
