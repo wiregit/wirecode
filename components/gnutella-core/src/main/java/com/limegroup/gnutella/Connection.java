@@ -316,7 +316,7 @@ public class Connection {
             else
                 initializeIncoming();
 
-            _headers = HandshakeResponse.createServerResponse(HEADERS_READ);            
+            _headers = HandshakeResponse.createResponse(HEADERS_READ);            
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
@@ -383,7 +383,7 @@ public class Connection {
 
             //Terminate abnormally if we read something other than 200 or 401.
             HandshakeResponse theirResponse = 
-                HandshakeResponse.createServerResponse(
+                HandshakeResponse.createResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
 
@@ -500,7 +500,7 @@ public class Connection {
                == HandshakeResponse.UNAUTHORIZED_CODE){
                 connectLine = readLine(USER_INPUT_WAIT_TIME);  
                 readHeaders(USER_INPUT_WAIT_TIME); 
-                _headers = HandshakeResponse.createServerResponse(HEADERS_READ);
+                _headers = HandshakeResponse.createResponse(HEADERS_READ);
             }else{
                 connectLine = readLine();  
                 readHeaders();
@@ -510,7 +510,7 @@ public class Connection {
                 throw new IOException("Bad connect string");
 
             HandshakeResponse theirResponse = 
-                HandshakeResponse.createServerResponse(
+                HandshakeResponse.createResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(),
                     HEADERS_READ);
 
@@ -593,7 +593,7 @@ public class Connection {
      */
     private void readHeaders() throws IOException {
         readHeaders(Constants.TIMEOUT);
-        _headers = HandshakeResponse.createServerResponse(HEADERS_READ);
+        _headers = HandshakeResponse.createResponse(HEADERS_READ);
     }
     
     /**
