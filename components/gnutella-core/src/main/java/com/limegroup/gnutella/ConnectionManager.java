@@ -390,6 +390,24 @@ public class ConnectionManager {
     }
 
     /**
+     * Returns the endpoints it is connected to
+     * @return Returns the endpoints it is connected to. 
+     */ 
+    public Set getConnectedSupernodeEndpoints(){
+        Set retSet = new HashSet();
+        //get an iterator over _initialized connections, and iterate to
+        //fill the retSet with supernode endpoints
+        for(Iterator iterator = _initializedConnections.iterator();
+            iterator.hasNext();)
+        {
+            Connection connection = (Connection)iterator.next();
+            retSet.add(new Endpoint(connection.getInetAddress().getAddress(),
+                connection.getPort()));
+        }
+        return retSet;
+    }
+    
+    /**
      * Adds an initializing connection.
      * Should only be called from a thread that has this' monitor.
      * This is called from initializeExternallyGeneratedConnection
@@ -704,12 +722,8 @@ public class ConnectionManager {
         //set keep alive to 1, so that we are not fetching any connections
         //Keep Alive is not set to zero, so that when this connection drops,
         //we automatically start fetching a new connection
-        setKeepAlive(1);
-        
-        //anu NOTE: set _incomingConnections=1. This is a hack but it will 
-        //prevent accepting any other connection, since the KeepAlive is 1.
-        _incomingConnections=1;
-        _incomingClientConnections=0;
+        setKeepAlive(0);
+        SettingsManager.instance().setKeepAlive(0);
         
         //close all other connections
         Iterator iterator = _connections.iterator();
@@ -733,6 +747,9 @@ public class ConnectionManager {
         
         //set the _hasShieldedClientSupernodeConnection flag to true
         _hasShieldedClientSupernodeConnection = true;
+        
+         _incomingConnections = 0;
+        _incomingClientConnections=0;
     }
     
     /** 
@@ -744,7 +761,8 @@ public class ConnectionManager {
         //set the _hasShieldedClientSupernodeConnection flag to false
         _hasShieldedClientSupernodeConnection = false;
         
-        //set keep alive to 1, so that we start fetching new connections
+        //set keep alive to 4, so that we start fetching new connections
+        SettingsManager.instance().setKeepAlive(4);
         setKeepAlive(4);
     }
     
@@ -902,9 +920,7 @@ public class ConnectionManager {
                         _router.createGroupPingRequest(group);
                     _connection.send(pingRequest);
                     //Ensure that the initial ping request is written in a timely fashion.
-                    try {
-                        _connection.flush();
-                    } catch (IOException e) { /* close it later */ }
+                    _connection.flush();
 				}
 				else
                 {

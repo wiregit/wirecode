@@ -793,6 +793,62 @@ public class ManagedConnection
         return _isKillable;
     }
     
+    /**
+     * Returns string representing addresses of other hosts that may
+     * be connected thru gnutella.
+     * @param manager Reference to the connection manager from whom 
+     * to retrieve the addressses
+     * @return Returns string representing addresses of other hosts that may
+     * be connected thru gnutella. Also includes the addresses of the
+     * supernodes it is connected to
+     * <p> Host address string returned is in the form:
+     * <p> IP Address:Port [; IPAddress:Port]* 
+     * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347
+     */
+    private static String getHostAddresses(ConnectionManager manager){
+        StringBuffer hostString = new StringBuffer();
+        boolean isFirstHost = true;
+        //get the connected supernodes and pass them
+        for(Iterator iter = manager.getBestHosts(10);iter.hasNext();){
+            //get the next endpoint
+            Endpoint endpoint =(Endpoint)iter.next();
+            //if the first endpoint that we are adding
+            if(!isFirstHost){
+                //append semicolon to separate the entries
+                hostString.append(";");
+            }else{
+                //unset the flag
+                isFirstHost = false;
+            }
+            //append the host information
+            hostString.append(endpoint.getHostname());
+            hostString.append(":");
+            hostString.append(endpoint.getPort());
+        }
+
+        //get hosts from the connection manager (in turn hostcatcher)
+        for(Iterator iter = 
+            manager.getConnectedSupernodeEndpoints().iterator();
+            iter.hasNext();){
+            //get the next endpoint
+            Endpoint endpoint =(Endpoint)iter.next();
+            //if the first endpoint that we are adding
+            if(!isFirstHost){
+                //append semicolon to separate the entries
+                hostString.append(";");
+            }else{
+                //unset the flag
+                isFirstHost = false;
+            }
+            //append the host information
+            hostString.append(endpoint.getHostname());
+            hostString.append(":");
+            hostString.append(endpoint.getPort());
+        }
+        //return the hosts in string representation
+        return hostString.toString();
+    }
+    
     private static class LazyProperties extends Properties {
         private MessageRouter router;
         
@@ -838,7 +894,6 @@ public class ManagedConnection
             //set supernode property
             setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
             setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
-            setProperty(ConnectionHandshakeHeaders.PONG_CACHING,  "0.1");
         }
     }
     
@@ -851,6 +906,7 @@ public class ManagedConnection
             super(router);
             //set supernode property
             setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
+            setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
         }
     }
 
@@ -877,6 +933,12 @@ public class ManagedConnection
                 ret.setProperty(
                     ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
                 ret.setProperty(ConnectionHandshakeHeaders.PONG_CACHING, "0.1");
+                
+                //also add some host addresses in the response 
+                String hostAddresses = getHostAddresses(_manager);
+                //set the property
+                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+                    hostAddresses);
             }
             return new HandshakeResponse(ret);
         }
@@ -912,7 +974,7 @@ public class ManagedConnection
                 message = "I am a shielded client";
                 
                 //also add some host addresses in the response
-                String hostAddresses = getHostAddresses();
+                String hostAddresses = getHostAddresses(_manager);
                 //set the property
                 ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
                     hostAddresses);
@@ -925,40 +987,6 @@ public class ManagedConnection
             
             return new HandshakeResponse(code, message, ret);
         }
-        
-        /**
-         * Returns string representing addresses of other hosts that may
-         * be connected thru gnutella.
-         * <p> Host address string returned is in the form:
-         * <p> IP Address:Port [; IPAddress:Port]* 
-         * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347
-         */
-        private String getHostAddresses(){
-            StringBuffer hostString = new StringBuffer();
-            boolean isFirstHost = true;
-            //get hosts from the connection manager (in turn hostcatcher)
-            Iterator iter = _manager.getBestHosts(10);
-            //iterate
-            while(iter.hasNext()) {
-                //get the next endpoint
-                Endpoint endpoint =(Endpoint)iter.next();
-                //if the first endpoint that we are adding
-                if(!isFirstHost){
-                    //append semicolon to separate the entries
-                    hostString.append(";");
-                }else{
-                    //unset the flag
-                    isFirstHost = false;
-                }
-                //append the host information
-                hostString.append(endpoint.getHostname());
-                hostString.append(":");
-                hostString.append(endpoint.getPort());
-            }
-            //return the hosts in string representation
-            return hostString.toString();
-        }
-        
     }
     
     /** Returns the query route state associated with this, or null if no
