@@ -104,7 +104,6 @@ public class ConnectionManager {
      */
     private volatile boolean _supernodeModeTransit 
         = SettingsManager.instance().getForcedSupernodeMode();
-    private volatile boolean _shieldedClientSupernodeConnection;
     private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
     /**
@@ -329,7 +328,7 @@ public class ConnectionManager {
      * false otherwise
      */
     public boolean hasShieldedClientSupernodeConnection() {
-        return _shieldedClientSupernodeConnection;
+        return _hasShieldedClientSupernodeConnection;
     }
     
     /**
@@ -340,16 +339,6 @@ public class ConnectionManager {
     public boolean hasSupernodeOrClientnodeStatusForced()
     {
         return _hasSupernodeOrClientnodeStatusForced;
-    }
-    
-    /**
-     * Sets the flag indicating whether this node has a connection to
-     * a supernode, being itself a client node. This flag has importance
-     * for client nodes only
-     * @param flag the flag value to be set
-     */
-    public void setShieldedClientSupernodeConnection(boolean flag) {
-        _shieldedClientSupernodeConnection = flag;
     }
     
     /**
@@ -882,7 +871,7 @@ public class ConnectionManager {
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(isSupernode() && 
+            if(!isSupernode() && 
                 c.isSupernodeConnection()){
             gotShieldedClientSupernodeConnection(c);
             }
@@ -1173,7 +1162,7 @@ public class ConnectionManager {
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(isSupernode() && c.isSupernodeConnection()){
+            if(!isSupernode() && c.isSupernodeConnection()){
                 gotShieldedClientSupernodeConnection(c);
             }
         }
