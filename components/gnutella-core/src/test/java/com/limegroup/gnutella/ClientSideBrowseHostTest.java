@@ -467,6 +467,7 @@ public class ClientSideBrowseHostTest
             }
         };
         browseThread.start();
+        Thread.yield();
 
         // nothing works for the guy, we should get a PushRequest
         do {
