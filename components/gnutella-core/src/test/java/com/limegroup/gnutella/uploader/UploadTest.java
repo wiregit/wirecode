@@ -544,7 +544,7 @@ public class UploadTest extends TestCase {
 
     /** 
      * Does an arbitrary push download. 
-     * @param request an HTTP request such as "GET" or "HEAD"
+     * @param request an HTTP request such as "GET" or "HEAD
      * @param file the full filename, e.g., "/get/0/file.txt"    
      */
     private static boolean downloadPush1(String request,
@@ -552,9 +552,9 @@ public class UploadTest extends TestCase {
 										 String expResp) 
         throws IOException, BadPacketException {
             //Establish push route
-            Connection c=new Connection("localhost", PORT);
-            c.initialize();
-            QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
+		Connection c = createConnection();
+		c.initialize();
+		QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
             c.send(query);
             c.flush();
             QueryReply reply=null;
@@ -612,11 +612,7 @@ public class UploadTest extends TestCase {
 										String expResp) 
             throws IOException, BadPacketException {
         //Establish push route
-        Connection c=new Connection("localhost", PORT,
-                                    new UltrapeerProperties(),
-                                    new EmptyResponder(),
-                                    false);
-        System.out.println("initializing connection on: "+PORT); 
+		Connection c = createConnection();
         c.initialize();
         QueryRequest query = new QueryRequest((byte)3, 0, "txt", false);
         c.send(query);
@@ -834,7 +830,7 @@ public class UploadTest extends TestCase {
         throws IOException , BadPacketException {
         boolean ret = true;
         //Establish push route
-        Connection c=new Connection("localhost", PORT);
+		Connection c = createConnection();
         c.initialize();
         QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
         c.send(query);
@@ -958,6 +954,14 @@ public class UploadTest extends TestCase {
                 try { s.close(); } catch (IOException ignore) { }
         }
     }
+
+	/**
+	 * Creates an Ultrapeer connection.
+	 */
+	private static Connection createConnection() {
+		return new Connection("localhost", PORT, new UltrapeerProperties(),
+							  new EmptyResponder(), false);
+	}
 
     private static class UltrapeerProperties extends Properties {
         public UltrapeerProperties() {
