@@ -78,6 +78,10 @@ public abstract class SpamFilter {
 	if (settings.getFilterDuplicates())
 	    buf.add(new DuplicateFilter());
 
+    //3. Greedy queries.  Yes, this is a route filter issue.
+    if (settings.getFilterGreedyQueries())
+        buf.add(new GreedyQueryFilter());
+
 	//As a minor optimization, we avoid a few method calls in
 	//special cases.
 	if (buf.size()==0)
