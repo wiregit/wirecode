@@ -199,11 +199,11 @@ public final class MP3Info {
 
 		try {
 			fis = new FileInputStream(_file);
-			if( c < 4 )
-			    throw new IOException("early EOF, tiny file?");
 			
 			//initially check the first few bytes
 			c = fis.read(buf, 0, buf.length); 
+			if( c < 4 )
+			    throw new IOException("early EOF, tiny file?");
 
 			//check for ID3 tag
 			//officially ID3, some tags incorrectly contain lowercase
