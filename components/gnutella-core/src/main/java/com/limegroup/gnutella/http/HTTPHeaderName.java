@@ -105,7 +105,12 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName AVAILABLE_RANGES =
 		new HTTPHeaderName("X-Available-Ranges");
 
-
+    /**
+     * Header for queued downloads.
+     */
+    public static final HTTPHeaderName QUEUE =
+        new HTTPHeaderName("X-Queue");
+    
 
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
