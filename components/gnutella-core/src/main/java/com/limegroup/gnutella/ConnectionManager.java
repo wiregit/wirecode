@@ -53,7 +53,7 @@ public class ConnectionManager implements Runnable {
     /** List of all connection fetchers.  This is synchronized. */
     List /* of ConnectionFetcher */ fetchers=
 	Collections.synchronizedList(new ArrayList());
-    public  HostCatcher catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
+    public HostCatcher catcher;
     
     /** Queued up entries to send to each */
     static class MessagePair {
@@ -88,10 +88,18 @@ public class ConnectionManager implements Runnable {
      * of 0 means do not accept incoming connections. 
      */
     public ConnectionManager(int port) {
+	//If we're using quick-connect by default, don't load gnutella.net file.
+	//(In this case, RouterService will call quick connect.)
+	boolean quickConnect=SettingsManager.instance().getUseQuickConnect();
+	if (quickConnect)
+	    catcher=new HostCatcher(this);
+	else
+	    catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
+
 	this.port=port;
 	Thread t=new Thread(new MessageBroadcaster());
 	t.setDaemon(true);
-	t.start();
+	t.start();    
     }
     
     /** Creates a manager that listens on the default port. Equivalent to

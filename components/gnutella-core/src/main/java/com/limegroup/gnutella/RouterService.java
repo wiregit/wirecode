@@ -43,6 +43,16 @@ public class RouterService
         //new LimeProperties("Neutella.props",true);
 
         manager.propertyManager();
+	//Now if quick connecting, try hosts.
+	if (SettingsManager.instance().getUseQuickConnect()) {
+	    Thread t2=new Thread() {
+		public void run() {
+		    quickConnect();
+		}
+	    };
+	    t2.setDaemon(true);
+	    t2.start();
+	}	
     }
 
     /**
@@ -74,7 +84,8 @@ public class RouterService
     }
 
     /**
-     * Connect to remote host (establish outgoing connection)
+     * Connect to remote host (establish outgoing connection).
+     * Blocks until connection established.
      */
     public void connectToHost( Connection c ) throws IOException
     {
@@ -93,6 +104,69 @@ public class RouterService
 	    manager.failedToConnect(c);
 	    throw e;
 	}
+    }
+
+    /**
+     * Connects to hosts using the quick connect list. 
+     * Blocks until connected.
+     */
+    public void quickConnect() {
+	SettingsManager settings=SettingsManager.instance();
+	//Ensure the keep alive is at least 1.
+	if (settings.getKeepAlive()<1)
+	    settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
+	adjustKeepAlive(settings.getKeepAlive());
+	//Clear host catcher.  Note that if we already have outgoing
+	//connections the host catcher will fill up after clearing it.
+	//This means we won't really be trying those hosts.
+	clearHostCatcher();
+
+	//Try the quick connect hosts one by one.
+	String[] hosts=SettingsManager.instance().getQuickConnectHosts();       
+	for (int i=0; i<hosts.length; i++) {
+	    //Extract hostname+port
+	    Endpoint e;
+	    try {
+		e=new Endpoint(hosts[i]);
+	    } catch (IllegalArgumentException exc) {
+		continue;
+	    }
+
+	    //Connect...or try to.
+	    Connection c=new Connection(e.getHostname(), e.getPort());
+	    try {
+		connectToHost(c);
+	    } catch (IOException exc) {
+		continue;
+	    }
+	    
+	    //Wait some time.  If we still need more, try others.
+	    synchronized(this) {
+		try {
+		    wait(4000);
+		} catch (InterruptedException exc) { }		
+	    }
+	    if (manager.catcher.getNumHosts()>=settings.getKeepAlive()) {
+		break;
+	    }
+	}
+    }
+
+    /** 
+     * @modifies this
+     * @effects removes all connections.
+     */
+    public void disconnect() {
+	SettingsManager settings=SettingsManager.instance();	
+	int oldKeepAlive=settings.getKeepAlive();
+
+	//1. Prevent any new threads from starting.       
+	adjustKeepAlive(0);
+	//2. Remove all connections.
+	for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+	    Connection c=(Connection)iter.next();
+	    removeConnection(c);
+	}	
     }
 
     /**
@@ -190,7 +264,7 @@ public class RouterService
     }
 
     /**
-     * Return the size of all files in my horizon. 
+     * Return the size of all files in my horizon, in kilobytes.
      */
     public long getTotalFileSize() {
 	long ret=0;
