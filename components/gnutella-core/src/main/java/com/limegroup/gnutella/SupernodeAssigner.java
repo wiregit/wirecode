@@ -136,7 +136,7 @@ public final class SupernodeAssigner {
 	 * Constant for the amount of time to wait between attempts to become an 
 	 * Ultrapeer.
 	 */
-	private static final int RETRY_TIME = 90*60*1000; // 90 minutes
+	private static final int RETRY_TIME = 180*60*1000; // 3 hours
 
     /** 
 	 * Creates a new <tt>UltrapeerAssigner</tt>. 
