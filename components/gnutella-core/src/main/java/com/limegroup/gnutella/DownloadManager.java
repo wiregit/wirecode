@@ -10,19 +10,20 @@ import com.limegroup.gnutella.util.URLDecoder;
 
 
 /** 
- * The list of all downloads in progress.  DownloadManager has a fixed number of
- * download slots given by the MAX_SIM_DOWNLOADS property.  It is responsible
- * for starting downloads and scheduling and queing them as needed.  This
- * class is thread safe.<p>
+ * The list of all downloads in progress.  DownloadManager has a fixed number 
+ * of download slots given by the MAX_SIM_DOWNLOADS property.  It is
+ * responsible for starting downloads and scheduling and queing them as 
+ * needed.  This class is thread safe.<p>
  *
  * As with other classes in this package, a DownloadManager instance may not be
  * used until initialize(..) is called.  The arguments to this are not passed
  * in to the constructor in case there are circular dependencies.<p>
  *
- * DownloadManager provides ways to serialize download state to disk.  Reads are
- * initiated by RouterService, since we have to wait until the GUI is initiated.
- * Writes are initiated by this, since we need to be notified of completed
- * downloads.  Downloads in the COULDNT_DOWNLOAD state are not serialized.  
+ * DownloadManager provides ways to serialize download state to disk.  Reads 
+ * are initiated by RouterService, since we have to wait until the GUI is
+ * initiated.  Writes are initiated by this, since we need to be notified of
+ * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
+ * serialized.  
  */
 public class DownloadManager implements BandwidthTracker {
     /** The time in milliseconds between checkpointing downloads.dat.  The more
@@ -225,7 +226,7 @@ public class DownloadManager implements BandwidthTracker {
      *
      *     @modifies this, disk 
      */
-    public synchronized Downloader download(RemoteFileDesc[] files,
+    public synchronized Downloader download(String name, RemoteFileDesc[] files,
                                             boolean overwrite) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
@@ -259,8 +260,8 @@ public class DownloadManager implements BandwidthTracker {
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
-        ManagedDownloader downloader=new ManagedDownloader(
-            files, incompleteFileManager);
+        ManagedDownloader downloader =
+			new ManagedDownloader(name, files, incompleteFileManager);
         downloader.initialize(this, fileManager, callback);
         waiting.add(downloader);
         callback.addDownload(downloader);
