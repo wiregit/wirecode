@@ -41,7 +41,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum average uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_AVERAGE_UPTIME = 180 * 60;
+	private final int MINIMUM_AVERAGE_UPTIME = 30 * 60; //1/2 hr
 
 	/**
 	 * Constant for the minimum current uptime in seconds that a node must 
