@@ -49,7 +49,17 @@ public class ResumeDownloaderTest extends TestCase {
 
     ////////////////////////////////////////////////////////////////////////////
 
-    /** Tests serialization of version 1.3. of ResumeDownloader */
+    /** Tests serialization of version 1.2 of ResumeDownloader.
+     *  (LimeWire 2.7.0/2.7.1 beta.)
+     */
+    public void testSerialization12()
+            throws IOException, ClassNotFoundException {
+        tSerialization(
+            "com/limegroup/gnutella/downloader/ResumeDownloader.1_2.dat", false);
+    }
+
+    /** Tests serialization of version 1.3 of ResumeDownloader.
+     *  (LimeWire 2.7.3) */
     public void testSerialization13()
             throws IOException, ClassNotFoundException {
         tSerialization(
