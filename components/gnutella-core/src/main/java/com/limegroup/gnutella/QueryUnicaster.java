@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.Stack;
@@ -173,6 +174,7 @@ public final class QueryUnicaster {
 							InetAddress ip = toQuery.getAddress();
 							debug("QueryUnicaster.queryLoop(): sending" +
 								  " query " + currQB._qr.getQuery());
+							SentMessageStat.UDP_QUERY_REQUESTS.incrementStat();
 							udpService.send(currQB._qr, ip, 
 											toQuery.getPort());
 							currQB._hostsQueried.add(toQuery);
@@ -267,6 +269,7 @@ public final class QueryUnicaster {
 				if(UDPService.instance().isListening() &&
 				   !RouterService.isGUESSCapable() &&
 				   _testUDPPingsSent < 5) {
+					SentMessageStat.UDP_PING_REQUESTS.incrementStat();
 					UDPService.instance().send(new PingRequest((byte)1), 
 											   address, port);
 					_testUDPPingsSent++;
@@ -373,6 +376,7 @@ public final class QueryUnicaster {
                 PingRequest pr = new PingRequest((byte)1);
                 UDPService udpService = UDPService.instance();
 				InetAddress ip = toReturn.getAddress();
+				SentMessageStat.UDP_PING_REQUESTS.incrementStat();
 				UDPService.instance().send(pr, ip, toReturn.getPort());
             }
             return toReturn;
