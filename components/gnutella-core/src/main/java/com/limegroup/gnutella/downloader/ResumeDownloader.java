@@ -104,6 +104,14 @@ public class ResumeDownloader extends ManagedDownloader
             return super.nextRequeryTime(requeries);        
     }
 
+    /**
+     * Overrides ManagedDownloader to display a reasonable file name even
+     * when no locations have been found.
+     */
+    public synchronized String getFileName() {
+        return _name;
+    }
+
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
