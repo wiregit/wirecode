@@ -131,17 +131,26 @@ public final class QueryHandler {
 	 *  it's a query for a specific hash, in which case we try to get
 	 *  far fewer matches, ignoring this parameter
 	 * @param handler the <tt>ReplyHandler</tt> for routing replies
+     * @param counter the <tt>ResultCounter</tt> for counting replies
+     * @exception NullPointerException thrown if query or counter is null
 	 */
-	private QueryHandler(QueryRequest query, int results, ReplyHandler handler) {
-		boolean isHashQuery = !query.getQueryUrns().isEmpty();
-		QUERY = query;
-		if(isHashQuery) {
-			RESULTS = HASH_QUERY_RESULTS;
-		} else {
-			RESULTS = results;
-		}
+	private QueryHandler(QueryRequest query, int results, ReplyHandler handler,
+                         ResultCounter counter) {
+		if (counter == null) 
+			throw new NullPointerException("ResultCounter is null!!");
+        if (query == null)
+            throw new NullPointerException("Query is null!!");
+        if (handler == null)
+            throw new NullPointerException("Handler is null!!");
 
+		final boolean isHashQuery = !query.getQueryUrns().isEmpty();
+		QUERY = query;
 		REPLY_HANDLER = handler;
+		_resultCounter = counter;
+		if (isHashQuery) 
+			RESULTS = HASH_QUERY_RESULTS;
+        else 
+			RESULTS = results;
 	}
 
 
@@ -155,8 +164,9 @@ public final class QueryHandler {
 	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
 	public static QueryHandler createHandler(QueryRequest query, 
-											 ReplyHandler handler) {	
-		return new QueryHandler(query, ULTRAPEER_RESULTS, handler);
+											 ReplyHandler handler, 
+                                             ResultCounter counter) {	
+		return new QueryHandler(query, ULTRAPEER_RESULTS, handler, counter);
 	}
 
 	/**
@@ -169,8 +179,9 @@ public final class QueryHandler {
 	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
 	public static QueryHandler createHandlerForOldLeaf(QueryRequest query, 
-													   ReplyHandler handler) {	
-		return new QueryHandler(query, OLD_LEAF_RESULTS, handler);
+													   ReplyHandler handler,
+                                                       ResultCounter counter) {	
+		return new QueryHandler(query, OLD_LEAF_RESULTS, handler, counter);
 	}
 
 	/**
@@ -183,8 +194,9 @@ public final class QueryHandler {
 	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
 	public static QueryHandler createHandlerForNewLeaf(QueryRequest query, 
-													   ReplyHandler handler) {		
-		return new QueryHandler(query, NEW_LEAF_RESULTS, handler);
+													   ReplyHandler handler,
+                                                       ResultCounter counter) {
+        return new QueryHandler(query, NEW_LEAF_RESULTS, handler, counter);
 	}
 
 	/**
@@ -221,18 +233,6 @@ public final class QueryHandler {
 
 
 	/**
-	 * Sets the <tt>ResultCounter</tt> for this query.
-	 *
-	 * @param entry the <tt>ResultCounter</tt> to add
-	 */
-	public void setResultCounter(ResultCounter entry) {
-		if(entry == null) {
-			throw new NullPointerException("null route table entry");
-		}
-		_resultCounter = entry;
-	}
-	
-	/**
 	 * Sends the query to the current connections.  If the query is not
 	 * yet ready to be processed, this returns immediately.
 	 *
@@ -240,10 +240,6 @@ public final class QueryHandler {
 	 *  is <tt>null</tt>
 	 */
 	public void sendQuery() {
-		// do not allow the route table entry to be null
-		if(_resultCounter == null) {
-			throw new NullPointerException("null route table entry");
-		}
 		if(hasEnoughResults()) return;
 
 		_curTime = System.currentTimeMillis();

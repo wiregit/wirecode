@@ -661,15 +661,15 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
-			if(handler.isGoodConnection()) {
+			if (handler.isGoodConnection()) 
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
-																	  handler), 
-								 handler, counter);
-			} else {
+																	  handler,
+                                                                      counter)); 
+            else
 				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request,
-																	  handler), 
-								 handler, counter);
-			}
+																	  handler,
+                                                                      counter)); 
+
 		} else if(request.getTTL() > 0) {
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
@@ -806,8 +806,8 @@ public abstract class MessageRouter {
 			forwardQueryRequestToLeaves(query, 
 										FOR_ME_REPLY_HANDLER);
 			sendDynamicQuery(QueryHandler.createHandler(query, 
-														FOR_ME_REPLY_HANDLER), 
-							 FOR_ME_REPLY_HANDLER, counter);
+														FOR_ME_REPLY_HANDLER,
+                                                        counter));
 		} else {
 			broadcastQueryRequest(query, FOR_ME_REPLY_HANDLER);
 		} 
@@ -828,17 +828,7 @@ public abstract class MessageRouter {
 	 *  for the guid cannot be found -- this should never happen, or if any
 	 *  of the arguments is <tt>null</tt>
 	 */
-	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler,
-								  ResultCounter counter) {
-		if(qh == null) {
-			throw new NullPointerException("null QueryHandler");
-		} else if(handler == null) {
-			throw new NullPointerException("null ReplyHandler");
-		} else if(counter == null) {
-			throw new NullPointerException("null ResultCounter");
-		}
-
-		qh.setResultCounter(counter);
+	private void sendDynamicQuery(QueryHandler qh) {
 		DYNAMIC_QUERIER.addQuery(qh);
 	}
 

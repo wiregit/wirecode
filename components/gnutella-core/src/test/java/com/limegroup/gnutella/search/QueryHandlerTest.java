@@ -81,16 +81,18 @@ public final class QueryHandlerTest extends BaseTestCase {
             connections.add(new TestConnection(10));
         }   
 
+        try {
+            QueryHandler handler = 
+                QueryHandler.createHandler(QueryRequest.createQuery("test"),
+                                           new TestConnection(8),
+                                           null);
+            fail("should have failed due to null result counter");
+        } 
+        catch(NullPointerException expected) {}
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
-        try {
-            handler.sendQuery();
-            fail("should have failed due to null result counter");
-        } catch(NullPointerException e) {
-            // this is expected before the result counter is set
-        }
-        handler.setResultCounter(new TestResultCounter(0));
+                                       new TestConnection(8),
+                                       new TestResultCounter(0));
 
         TestConnectionManager tcm = new TestConnectionManager();
 
@@ -246,7 +248,8 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
+                                       new TestConnection(8),
+                                       new TestResultCounter(0));
         
         m.invoke(null, new Object[]{handler, connections});
 
@@ -284,11 +287,9 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
+                                       new TestConnection(8),
+                                       new TestResultCounter(0));
 
-        handler.setResultCounter(new TestResultCounter(0));
-        
-        
         Iterator iter = connections.iterator();
         //int results = 0;
         while(iter.hasNext()) {
