@@ -13,7 +13,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 //com.limegroup.gnutella.gui.....
 public class DisplayManagerTest extends BaseTestCase {
 
-    private final String vxsd = "http://www.limewire.com/schemas/video.xsd";
+    private final String vxsd = "video";
 
     public DisplayManagerTest(String name) {
         super(name);
