@@ -42,7 +42,11 @@ public final class LeafHandshakeResponder
 
         // leaves should never accept connections to other leaves
         if(response.isLeaf()) {
-            return HandshakeResponse.createRejectOutgoingResponse(new Properties());
+            return HandshakeResponse.createLeafRejectOutgoingResponse();
+        }
+        
+        if(!response.isGoodUltrapeer()) {
+            return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
         
         Properties ret = new Properties();
