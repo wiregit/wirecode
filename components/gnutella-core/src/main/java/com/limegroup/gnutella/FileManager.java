@@ -321,39 +321,39 @@ public class FileManager {
     }
 
 	/**
-	 *  same as addFileIfShared(File file). This method is
-	 *  obsolescent.
-	 */
-    public synchronized void addFileIfShared(String path) {
-		addFileIfShared(new File(path));
+	 * Same as addFileIfShared(new File(path)). This method is obsolescent * and
+	 * exists only for backwards compatibility.  
+     */
+    public synchronized boolean addFileIfShared(String path) {
+		return addFileIfShared(new File(path));
     }
 
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists in a shared 
-     *  directory and has a shared extension.  <b>WARNING: this is a potential
-     *  security hazard.</b> 
-     *
-     * Design note: this method takes a String as an argument for compatibility
-     * with HTTPDownloader.  For consistency, it should take a File.  
+     *  directory and has a shared extension.  Returns true iff the file
+     *  was actually added.  <b>WARNING: this is a potential security 
+     *  hazard.</b> 
      */
-	public synchronized void addFileIfShared(File file) {
+	public synchronized boolean addFileIfShared(File file) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
             f=getCanonicalFile(file);
             if (!f.exists())
-                return;
+                return false;
         } catch (IOException e) {
-            return;
+            return false;
         }
         File dir = getParentFile(file);
         if (dir==null)
-            return;
+            return false;
 
         //TODO: if overwriting an existing, take special care.
         if (_sharedDirectories.containsKey(dir))
-            addFile(file);
+            return addFile(file);
+        else
+            return false;
 	}
 
 
@@ -361,10 +361,11 @@ public class FileManager {
      * @requires the given file exists and is in a shared directory
      * @modifies this
      * @effects adds the given file to this if it is of the proper 
-     *  extension.  <b>WARNING: this is a potential security hazard; 
-     *  caller must ensure the file is in the shared directory.</b>
+     *  extension.  Returns true iff the file was actually added.
+     *  <b>WARNING: this is a potential security hazard; caller must
+     *  ensure the file is in the shared directory.</b>
      */
-    private synchronized void addFile(File file) {
+    private synchronized boolean addFile(File file) {
         String path = file.getAbsolutePath();   //TODO: right method?
         String name = file.getName();    
         if (hasExtension(name)) {
@@ -399,16 +400,19 @@ public class FileManager {
                 //Add j to the set.
                 indices.add(j);
             }
+            return true;
         }
+        return false;
     }
 
 
     /**
      * @modifies this
-     * @effects ensures the given file is not shared.  Returns
-     *  true iff the file was previously shared.  In this case,
-     *  the file's index will not be assigned to any other files.
-     *  Note that the file is not actually removed from disk.
+     * @effects ensures the first instance of the given file is not
+     *  shared.  Returns true iff the file was previously shared.  
+     *  In this case, the file's index will not be assigned to any 
+     *  other files.  Note that the file is not actually removed from
+     *  disk.
      */
     public synchronized boolean removeFileIfShared(File f) {
         //Take care of case, etc.
@@ -455,6 +459,37 @@ public class FileManager {
             }
         }
         return false;
+    }
+
+
+    /** 
+     * If oldName isn't shared, returns false.  Otherwise removes "oldName",
+     * adds "newName", and returns true iff newName is actually shared.  The new
+     * file may or may not have the same index as the original.<p>
+     * 
+     * This method does not call the addSharedFile callback method.  It exists
+     * to make it easier for the GUI to rename a file without getting a
+     * confusing callback.  Note that this doesn't affect the disk.
+     *
+     * @modifies this 
+     */
+    public synchronized boolean renameFileIfShared(File oldName,
+                                                   File newName) {
+        //As a temporary hack, we just disable callbacks, remove old,
+        //re-add new, and restore callback.
+        ActivityCallback savedCallback=_callback;
+        _callback=null;
+        try {
+            boolean removed=removeFileIfShared(oldName);
+            if (! removed)
+                return false;
+            boolean added=addFileIfShared(newName);
+            if (! added)
+                return false;
+            return true;
+        } finally {
+            _callback=savedCallback;
+        }
     }
 
 
@@ -707,7 +742,9 @@ public class FileManager {
     }
     */
 
-    /** Unit test.  REQUIRES JAVA2 FOR createTempFile */
+    /** Unit test.  REQUIRES JAVA2 FOR createTempFile Note that many tests are
+     *  STRONGER than required by the specifications for simplicity.  For
+     *  example, we assume an order on the values returned by getSharedFiles. */
     /*
     public static void main(String args[]) {
         //Test some of add/remove capability
@@ -752,7 +789,8 @@ public class FileManager {
             Assert.that(files==null);
 
             //Two files
-            fman.addFileIfShared(f2.getAbsolutePath());
+            Assert.that(fman.addFileIfShared(new File("C:\\bad.ABCDEF"))==false);
+            Assert.that(fman.addFileIfShared(f2.getAbsolutePath())==true);
             Assert.that(fman.getNumFiles()==2, fman.getNumFiles()+"");
             Assert.that(fman.getSize()==4, fman.getSize()+"");
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
@@ -764,9 +802,10 @@ public class FileManager {
             files=fman.getSharedFiles(directory);
             Assert.that(files.length==2);
             Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
-            Assert.that(files[1].equals(f2), files[0]+" differs from "+f2);
+            Assert.that(files[1].equals(f2), files[1]+" differs from "+f2);
 
-            //Remove file that's shared.  Back to 1 file.
+            //Remove file that's shared.  Back to 1 file.                        
+            Assert.that(fman.removeFileIfShared(f3)==false);
             Assert.that(fman.removeFileIfShared(f2)==true);
             Assert.that(fman.getSize()==1);
             Assert.that(fman.getNumFiles()==1);
@@ -777,7 +816,7 @@ public class FileManager {
             Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
 
             //Add a new second file, with new index.
-            fman.addFileIfShared(f3.getAbsolutePath());
+            Assert.that(fman.addFileIfShared(f3.getAbsolutePath())==true);
             Assert.that(fman.getSize()==12, "size of files: "+fman.getSize());
             Assert.that(fman.getNumFiles()==2, "# files: "+fman.getNumFiles());
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
@@ -797,8 +836,21 @@ public class FileManager {
             files=fman.getSharedFiles(directory);
             Assert.that(files.length==2);
             Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
-            Assert.that(files[1].equals(f3), files[0]+" differs from "+f3);
+            Assert.that(files[1].equals(f3), files[1]+" differs from "+f3);
 
+            //Rename files
+            Assert.that(fman.renameFileIfShared(f2, f2)==false);
+            Assert.that(fman.renameFileIfShared(f1, f2)==true);
+            files=fman.getSharedFiles(directory);
+            Assert.that(files.length==2);
+            Assert.that(files[0].equals(f3));
+            Assert.that(files[1].equals(f2));
+            Assert.that(
+                fman.renameFileIfShared(f2,
+                                        new File("C\\garbage.XSADF"))==false);
+            files=fman.getSharedFiles(directory);
+            Assert.that(files.length==1);
+            Assert.that(files[0].equals(f3));
         } finally {
             if (f1!=null) f1.delete();
             if (f2!=null) f2.delete();
@@ -824,8 +876,3 @@ public class FileManager {
     }
     */
 }
-
-
-
-
-
