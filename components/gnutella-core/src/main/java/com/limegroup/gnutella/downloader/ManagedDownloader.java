@@ -3274,7 +3274,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         while (iter.hasNext()) {
             RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
             
-            // 1.
+            // 1.            
+            if (rfd.isBusy())
+            	continue;
+
             if (ret.isBusy())
                 ret=rfd;
             // 2.
