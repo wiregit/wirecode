@@ -19,6 +19,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 		ActivityCallback callback = new Main();
 		//RouterService.setCallback(callback);
 		RouterService service = new RouterService(callback);
+		service.preGuiInit();
 		service.start();    
 
 

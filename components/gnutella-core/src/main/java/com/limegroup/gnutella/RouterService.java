@@ -255,17 +255,26 @@ public class RouterService {
   	 * Performs startup tasks that should happen while the GUI loads
   	 */
   	public void asyncGuiInit() {
-  	    Runnable r = new Runnable() {
-  	        public void run() {
-  	            // add more while-gui init tasks here
-  	            acceptor.init();
-  	        }
-  	    };
   	    
-  	    Thread t = new ManagedThread(r);
+  	    Thread t = new ManagedThread(new Initializer());
   	    t.setName("async gui initializer");
   	    t.setDaemon(true);
   	    t.start();
+  	}
+  	
+  	/**
+  	 * performs the tasks usually run while the gui is initializing synchronously
+  	 * to be used for tests and when running only the core
+  	 */
+  	public void preGuiInit() {
+  	    (new Initializer()).run();
+  	}
+  	
+  	private static class Initializer implements Runnable {
+  	    public void run() {
+  	        //add more while-gui init tasks here
+  	        RouterService.getAcceptor().init();
+  	    }
   	}
   	
 	/**

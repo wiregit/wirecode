@@ -123,6 +123,7 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE = new RouterService(callback);
+		ROUTER_SERVICE.preGuiInit();
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
 		ROUTER_SERVICE.connect();	
