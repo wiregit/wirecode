@@ -1,7 +1,8 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.messages;
 
 import com.sun.java.util.collections.*;
 import java.io.*;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -27,7 +28,7 @@ public abstract class Message
     private final static boolean PARSE_GROUP_PINGS = false;
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
-    static byte[] makeGuid() {
+    public static byte[] makeGuid() {
         return GUID.makeGuid();
     }
 
@@ -129,7 +130,7 @@ public abstract class Message
      *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
      *  but the contents are not guaranteed to contain any useful data.  
      */
-    static Message read(InputStream in, byte[] buf)
+    public static Message read(InputStream in, byte[] buf)
 		throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an

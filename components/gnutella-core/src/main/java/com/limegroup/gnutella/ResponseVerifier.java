@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import com.sun.java.util.collections.*;
 import org.xml.sax.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;

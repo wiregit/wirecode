@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.statistics;
 
-
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * This class is a convenient wrapper for any class that keeps track of

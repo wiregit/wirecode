@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import java.util.*;
 import com.sun.java.util.collections.Arrays;
 import java.io.*;

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;

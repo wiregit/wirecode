@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;

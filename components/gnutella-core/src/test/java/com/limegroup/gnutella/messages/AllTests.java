@@ -8,6 +8,9 @@ import junit.framework.*;
 public class AllTests {
     public static Test suite() {
         TestSuite suite=new TestSuite("All LimeWire messaging tests");
+		suite.addTest(QueryReplyTest.suite());
+		suite.addTest(QueryRequestTest.suite());
+        suite.addTest(MessageTest.suite());
         suite.addTest(GGEPTest.suite());
         suite.addTest(PingReplyTest.suite());
         suite.addTest(PingRequestTest.suite());

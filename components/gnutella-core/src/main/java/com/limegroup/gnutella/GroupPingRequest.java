@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * A Gnutella special case group ping message used for getting information about

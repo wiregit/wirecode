@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.guess.*;

@@ -4,6 +4,7 @@ import junit.framework.*;
 import java.io.*;
 import java.net.URL;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 

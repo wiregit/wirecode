@@ -6,6 +6,7 @@ import java.net.*;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.util.URLDecoder;
 

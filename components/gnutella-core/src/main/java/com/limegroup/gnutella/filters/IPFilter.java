@@ -2,6 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * Blocks messages and hosts based on IP address.  Formerly know as

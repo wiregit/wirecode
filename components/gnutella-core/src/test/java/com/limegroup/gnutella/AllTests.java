@@ -12,6 +12,7 @@ public class AllTests {
 
         //Unit tests
         suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
+        suite.addTest(com.limegroup.gnutella.routing.QueryRouteTableTest.suite());
         suite.addTest(com.limegroup.gnutella.util.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.filters.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.http.AllTests.suite());
@@ -23,12 +24,9 @@ public class AllTests {
         //suite.addTest(ManagedConnectionTest.suite());
         //suite.addTest(ManagedConnectionBufferTest.suite());
         suite.addTest(GUIDTest.suite());
-        suite.addTest(MessageTest.suite());
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
-		suite.addTest(QueryReplyTest.suite());
-		suite.addTest(QueryRequestTest.suite());
 		suite.addTest(FileDescTest.suite());
 		suite.addTest(RemoteFileDescTest.suite());
 		suite.addTest(AlternateLocationTest.suite());
@@ -37,8 +35,6 @@ public class AllTests {
 		suite.addTest(UrnCacheTest.suite());
 		//suite.addTest(UrnHttpRequestTest.suite());
 		suite.addTest(UrnTest.suite());
-
-        suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
 
         //End-to-end integration tests (includes some unit tests too)
         //suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());

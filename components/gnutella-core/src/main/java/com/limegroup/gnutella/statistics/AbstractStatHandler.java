@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * Abstract class that is a general implementation of a message statistics

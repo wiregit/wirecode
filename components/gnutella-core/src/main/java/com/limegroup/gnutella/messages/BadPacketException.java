@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.messages;
 
 /** 
  * An exception for reading bad data from the network. 

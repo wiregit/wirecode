@@ -1,8 +1,8 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.messages;
 
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.guess.*; 
-import com.limegroup.gnutella.messages.*; 
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.StringTokenizer;

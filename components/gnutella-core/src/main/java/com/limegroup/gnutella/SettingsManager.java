@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.*;
