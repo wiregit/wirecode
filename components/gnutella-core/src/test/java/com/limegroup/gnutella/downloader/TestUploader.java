@@ -83,7 +83,8 @@ public class TestUploader {
 
     public void stopThread() {
         try {
-            server.close();
+            if ( server != null )
+                server.close();
         } catch (IOException e) {}
     }
 
@@ -329,7 +330,10 @@ public class TestUploader {
 
         if(queue) {
             DownloadTest.debug("UPLOAD QUEUED");
-            String s = "X-Queue: position=1, pollMin=45, pollMax=120\r\n";
+            String s = "X-Queue: position=1" +
+                ", pollMin=" + MIN_POLL/1000 + 
+                ", pollMax=" + MAX_POLL/1000 +
+                "\r\n";
             out.write(s.getBytes());
             s = "\r\n";
             out.write(s.getBytes());
