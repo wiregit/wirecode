@@ -34,7 +34,9 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         junit.textui.TestRunner.run(suite());
     }
 
-    public void setUp() {
+    public void setUp() throws Exception {
+        if(ROUTER_SERVICE.isStarted()) return;
+        launchAllBackends();
         SettingsManager.instance().setPort(6346);
 		ConnectionSettings.KEEP_ALIVE.setValue(1);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -44,19 +46,6 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);	
 
-        String serversRunning = System.getProperty("servers"); 
-        int maxPortRunning = 0;
-        if(serversRunning != null) {
-            try {
-                maxPortRunning = Integer.parseInt(serversRunning);
-            } catch(NumberFormatException e) {
-                failWithServerMessage(e);                
-            }
-        }
-        if(serversRunning == null || maxPortRunning < Backend.DEFAULT_REJECT_PORT) {      
-            failWithServerMessage(null);
-        }
-        if(ROUTER_SERVICE.isStarted()) return;
 
         try {
             PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);
@@ -121,7 +110,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
      * Test to make sure that a good host is successfully connected to.
      */
     public void testGoodHost() {
-        CATCHER.endpoint = new Endpoint("localhost", Backend.DEFAULT_PORT);
+        CATCHER.endpoint = new Endpoint("localhost", Backend.PORT);
         
         RouterService.connect();
         sleep();
@@ -137,7 +126,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
      */
     public void testRejectHost() {
         CATCHER.endpoint = 
-            new Endpoint("localhost", Backend.DEFAULT_REJECT_PORT);
+            new Endpoint("localhost", Backend.REJECT_PORT);
         RouterService.connect();
         sleep();
         assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
@@ -161,9 +150,9 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
      * to.
      */
     private static class TestHostCatcher extends HostCatcher {
-        volatile Endpoint endpoint;
-        volatile int connectSuccess=0;
-        volatile int connectFailures=0;
+        private volatile Endpoint endpoint;
+        private volatile int connectSuccess=0;
+        private volatile int connectFailures=0;
         
         TestHostCatcher() {
             super();
