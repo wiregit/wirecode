@@ -212,12 +212,10 @@ public class BestCandidates {
 	}
 	
 	/**
-	 * resets the table and initializes it with our best candidate.
-	 *
+	 * initializes the table with our best candidate.
 	 */
 	public static void initialize() {
 		synchronized(instance) {
-			instance._best=new Candidate[3];  //do we want to lose our already known candidates?
 			instance._best[0]=electBest(0);
 			propagateChange();
 		}

@@ -85,6 +85,8 @@ public class CandidateHandler {
     		FeaturesVendorMessage fvm = (FeaturesVendorMessage)vm;
     		
     		_features.putAll(fvm.getProperties());
+    		
+    		BestCandidates.initialize();
     	} 
     	
     	else if (vm instanceof BestCandidatesVendorMessage) {

@@ -39,9 +39,9 @@ public class LeafComparator implements Comparator {
 		Connection conn1 = (Connection)a;
 		Connection conn2 = (Connection)b;
 			
-		int score1 = conn1.getUptime() - conn1.getFileShared()/4;
+		int score1 = conn1.getUptime() - conn1.getCandidateHandler().getFileShared()/4;
 		
-		int score2 = conn2.getUptime() - conn2.getFileShared()/4;
+		int score2 = conn2.getUptime() - conn2.getCandidateHandler().getFileShared()/4;
 		
 		return score1-score2;
 			

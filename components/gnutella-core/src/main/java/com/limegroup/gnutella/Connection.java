@@ -349,6 +349,7 @@ public class Connection implements Candidate {
 			}
         } catch (IOException ioe) {
         }
+        _candidateHandler=new CandidateHandler(this);
     }
 
     /**
@@ -2124,6 +2125,13 @@ public class Connection implements Candidate {
 		
 		_candidateHandler.handleBestCandidatesMessage(m);
 		
+	}
+	
+	/**
+	 * @return the <tt>CandidateHandler</tt> object for this connection
+	 */
+	public CandidateHandler getCandidateHandler() {
+		return _candidateHandler;
 	}
 	
 	
