@@ -378,13 +378,8 @@ public class Response {
 
 			GGEPContainer ggep = null;
             Set ggepSet = huge.getGGEPBlocks();
-            if (ggepSet != null) {
-                GGEP[] ggeps = new GGEP[ggepSet.size()];
-                Iterator iter = ggepSet.iterator();
-                for (int i = 0; i < ggeps.length; i++)
-                    ggeps[i] = (GGEP) iter.next();
-                ggep = GGEPUtil.getGGEP(ggeps);
-            }
+            if (ggepSet != null)
+                ggep = GGEPUtil.getGGEP(ggepSet);
 
 			return new Response(index, size, name, metaString, 
 			                    urns, null, ggep, rawMeta);
@@ -916,20 +911,22 @@ public class Response {
          * Returns a <tt>Set</tt> of other endpoints described
          * in one of the GGEP arrays.
          */
-        static GGEPContainer getGGEP(GGEP[] ggeps) {
+        static GGEPContainer getGGEP(Set ggeps) {
             if (ggeps == null)
                 return GGEPContainer.EMPTY;
             Set locations = null;
             long createTime = -1;
             final byte[] ip = new byte[4];
             IPFilter ipFilter = IPFilter.instance();
-            for (int i = 0; i < ggeps.length; i++) {
+            Iterator iter = ggeps.iterator();
+            while (iter.hasNext()) {
+                GGEP currGGEP = (GGEP) iter.next();
                 // if the block has a ALTS value, get it, parse it,
                 // and move to the next.
-                if (ggeps[i].hasKey(GGEP.GGEP_HEADER_ALTS)) {
+                if (currGGEP.hasKey(GGEP.GGEP_HEADER_ALTS)) {
                     byte[] locBytes;
                     try {
-                        locBytes = ggeps[i].getBytes(GGEP.GGEP_HEADER_ALTS);
+                        locBytes = currGGEP.getBytes(GGEP.GGEP_HEADER_ALTS);
                         // must be a multiple of 6
                         if (locBytes.length % 6 != 0)
                             continue;
@@ -958,10 +955,10 @@ public class Response {
                     }
                 }
                 
-                if(ggeps[i].hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
+                if(currGGEP.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
                     try {
                         createTime =
-                            ggeps[i].getLong(GGEP.GGEP_HEADER_CREATE_TIME) *
+                            currGGEP.getLong(GGEP.GGEP_HEADER_CREATE_TIME) *
                             1000;
                     } catch(BadGGEPPropertyException bad) {
                         continue;
