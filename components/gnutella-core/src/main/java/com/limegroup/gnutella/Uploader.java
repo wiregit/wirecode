@@ -8,17 +8,7 @@ import java.io.IOException;
  * 
  */
 
-public interface Uploader {
-
-
-  //  	public static final int NOT_CONNECTED    = 0;
-//  	public static final int CONNECTED        = 1;
-//  	public static final int COMPLETE         = 2;
-//  	public static final int LIMIT_REACHED    = 3;
-//  	public static final int PUSH_FAILED      = 4;
-//  	public static final int FREELOADER       = 5;
-//  	public static final int UPLOADING        = 6;
-//  	public static final int INTERRUPTED      = 7;
+public interface Uploader extends BandwidthTracker {
 
 	public static final int CONNECTING       = 0;
 	public static final int FREELOADER       = 1;
@@ -89,6 +79,16 @@ public interface Uploader {
 	 * return the port of the host to chat with
 	 */
 	public int getChatPort();
+
+	/**
+	 * Inherited from the <tt>BandwidthTracker</tt> interface.
+	 * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
+	 * component since the last time this method was called.
+	 *
+	 * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
+	 *         component since the last time this method was called
+	 */
+	public int getNewBytesTransferred();
 	
 }
 

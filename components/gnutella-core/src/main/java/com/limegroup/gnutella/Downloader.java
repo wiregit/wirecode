@@ -9,7 +9,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * its methods to stop and resume downloads.  Note that there is no start method;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
-public interface Downloader {
+public interface Downloader extends BandwidthTracker {
+
     public static final int QUEUED            = 0;
     public static final int CONNECTING        = 1;
     public static final int DOWNLOADING       = 2;
@@ -106,5 +107,15 @@ public interface Downloader {
      * file.
      */
     public LimeXMLDocument[] getXMLDocs();
+
+	/**
+	 * Inherited from the <tt>BandwidthTracker</tt> interface.
+	 * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
+	 * component since the last time this method was called.
+	 *
+	 * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
+	 *         component since the last time this method was called
+	 */
+	public int getNewBytesTransferred();
     
 }
