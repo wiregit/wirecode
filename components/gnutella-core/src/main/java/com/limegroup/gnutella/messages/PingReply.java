@@ -639,7 +639,29 @@ public class PingReply extends Message implements Serializable, IpPort {
      *  slots, otherwise <tt>false</tt>
      */
     public boolean hasFreeSlots() {
-        return FREE_LEAF_SLOTS > 0 || FREE_ULTRAPEER_SLOTS > 0;    
+        return hasFreeLeafSlots() && hasFreeUltrapeerSlots();   
+    }
+    
+    /**
+     * Returns whether or not this pong is reporting any free ultrapeer 
+     * connection slots on the remote host.
+     * 
+     * @return <tt>true</tt> if the remote host has any free ultrapeer
+     *  slots, otherwise <tt>false</tt>
+     */    
+    public boolean hasFreeUltrapeerSlots() {
+        return FREE_ULTRAPEER_SLOTS > 0;
+    }
+    
+    /**
+     * Returns whether or not this pong is reporting any free leaf 
+     * connection slots on the remote host.
+     * 
+     * @return <tt>true</tt> if the remote host has any free leaf
+     *  slots, otherwise <tt>false</tt>
+     */    
+    public boolean hasFreeLeafSlots() {
+        return FREE_LEAF_SLOTS > 0;
     }
     
     /**
