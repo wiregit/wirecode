@@ -366,6 +366,18 @@ public class RouterService
 	t.start();
 	
     }
+
+    /**
+     * Try to resume a download request
+     */
+    public void resumeDownload( HTTPDownloader mgr )
+    {
+	mgr.resume();
+
+	Thread t = new Thread(mgr);
+	t.setDaemon(true);
+	t.start();
+    }
 	
 }
 
