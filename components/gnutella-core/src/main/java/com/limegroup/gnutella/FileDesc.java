@@ -21,7 +21,7 @@ public final class FileDesc {
     public final String _name;
     public final int _size;
     public long _modTime;
-    public HashSet /* of Strings */ _urns; // one or more "urn:" names for this file
+    public HashSet /* of URNS */ _urns; // one or more "urn:" names for this file
 		
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -64,7 +64,7 @@ public final class FileDesc {
         /** Popular approach: return all URNs **/
         Iterator allUrns = _urns.iterator();
         while(allUrns.hasNext()) {
-            r.addUrn((String)allUrns.next());
+            r.addUrn(((URN)allUrns.next()).getURNString());
         }
         
         /** 
@@ -100,7 +100,7 @@ public final class FileDesc {
         if (_urns==null) return true; 
         Iterator iter = _urns.iterator();
         while(iter.hasNext()) {
-            if(((String)iter.next()).startsWith("urn:sha1:")) {
+            if(((URN)iter.next()).isSHA1()) {
                 return false; // we already have all the values we can calculate
             }
         }
@@ -112,31 +112,12 @@ public final class FileDesc {
 	 * complete on large files.
      */
     public void calculateUrns() {
-        try {
-            // update modTime
-            _modTime = _file.lastModified();
-            
-            FileInputStream fis = new FileInputStream(_path);   
-            // we can only calculate SHA1 for now
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            byte[] buffer = new byte[16384];
-            int read;
-            while ((read=fis.read(buffer))!=-1) {
-                md.update(buffer,0,read);
-            }
-            fis.close();
-            byte[] sha1 = md.digest();
-            if(_urns==null) _urns = new HashSet();
-            // preferred casing: lowercase "urn:sha1:", uppercase encoded value
-            // note that all URNs are case-insensitive for the "urn:<type>:" part,
-            // but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
-			//insensitive)
-            _urns.add("urn:sha1:"+Base32.encode(sha1));
-        } catch (IOException e) {
-            // relatively harmless to not have URN
-        } catch (NoSuchAlgorithmException e) {
-            // relatively harmless to not have URN    
-        }
+		URN urn = new URN(_file);
+		String urnStr = urn.getURNString();
+		if(urnStr == null) return;
+
+		if(_urns==null) _urns = new HashSet();		
+		_urns.add(urnStr);
     }
     
     /**
@@ -148,7 +129,7 @@ public final class FileDesc {
             // recently modified; throw out SHA1 values
             Iterator iter = _urns.iterator();
             while(iter.hasNext()){
-                if (((String)iter.next()).startsWith("urn:sha1:")) {
+                if (((URN)iter.next()).isSHA1()) {
                     iter.remove();
                 }
             }
@@ -156,7 +137,7 @@ public final class FileDesc {
         // now check if given urn matches
         Iterator iter = _urns.iterator();
         while(iter.hasNext()){
-            if (urn.equals((String)iter.next())) {
+            if (urn.equals((URN)iter.next())) {
                 return true;
             }
         }
@@ -167,12 +148,12 @@ public final class FileDesc {
     /**
      * Return SHA1 URN, if available
      */
-    public String getSHA1() {
+    public URN getSHA1URN() {
         if (_urns==null) return null;
         Iterator iter = _urns.iterator(); 
         while(iter.hasNext()) {
-            String urn = (String)iter.next();
-            if(urn.startsWith("urn:sha1:")) {
+            URN urn = (URN)iter.next();
+            if(urn.isSHA1()) {
                 return urn;
             }
         }
