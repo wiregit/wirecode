@@ -21,7 +21,7 @@ public class MiniRemoteFileDescTest extends com.limegroup.gnutella.util.BaseTest
         MiniRemoteFileDesc m2 = new MiniRemoteFileDesc("b.txt", 13, guid2);
         MiniRemoteFileDesc m3 = new MiniRemoteFileDesc("b.txt", 12, guid2);
         assertTrue("different MFDs equal",!m1.equals(m2));
-        assertTrue("equals ignoring index",!m2.equals(m3));
+        assertTrue("equals looking at index",m2.equals(m3));
         assertTrue("hashcode broken",m2.hashCode()== m3.hashCode());
         assertTrue("hashcode broken",m1.hashCode()!= m3.hashCode());
         m3 = new MiniRemoteFileDesc("a.txt",12,guid1);
