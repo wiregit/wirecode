@@ -1906,14 +1906,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         if(dloader == null)//any exceptions in the method internally?
             return true;//no work was done, try to get another thread
-    
-        //Note: http11 is true or false depending on what we think thevalue
-        //should be for rfd is at the start, before connecting. We may later
-        //find that the we are wrong, in which case we update the rfd's http11
-        //value. But while we are in connectAndDownload we continue to use this
-        //local variable because the code is incapable of handling a change in
-        //http11 status while inside connectAndDownload.
-        boolean http11 = true;//must enter the loop
 
         //initilaize the newly created HTTPDownloader with whatever AltLocs we
         //have discovered so far. These will be cleared out after the first
@@ -1927,6 +1919,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
         
+        //Note: http11 is true or false depending on what we think thevalue
+        //should be for rfd is at the start, before connecting. We may later
+        //find that the we are wrong, in which case we update the rfd's http11
+        //value. But while we are in connectAndDownload we continue to use this
+        //local variable because the code is incapable of handling a change in
+        //http11 status while inside connectAndDownload.
+        boolean http11 = true;//must enter the loop
+
         while(http11) {
             //Step 2. OK. Wr have established TCP Connection. This 
             //downloader should choose a part of the file to download
