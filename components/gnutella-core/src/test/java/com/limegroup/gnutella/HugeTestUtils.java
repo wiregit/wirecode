@@ -98,14 +98,14 @@ public final class HugeTestUtils {
 		"www.natprior.org",
 		"www.census.gov",
 		"www.cmpbs.org",
-		"www.lc.gov",
+		"www.lc.org",
 		"www.news.com",
 		"www.oreilly.com",
 		"www.apple.com",
 		"www.gnutella.com",
 		"www.gnutellanews.com",
 		"java.sun.com",
-		"www.jakarta.org",
+		"jakarta.apache.org",
 	};
 
 	/**
