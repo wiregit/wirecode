@@ -280,4 +280,17 @@ public final class UDPReplyHandler implements ReplyHandler {
 	public void handleUPListVM(UPListVendorMessage m) {
 		UDPService.instance().send(m, IP, PORT);
 	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#isUDPCapable()
+	 */
+	public boolean isUDPCapable() {
+		// Auto-generated method stub
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#setUDPCapable(boolean)
+	 */
+	public void setUDPCapable(boolean status) {
+		//  Auto-generated method stub
+	}
 }

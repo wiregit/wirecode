@@ -564,9 +564,6 @@ public class ManagedConnection extends Connection
      * @param query the <tt>QueryRequest</tt> to send
      */
     public void originateQuery(QueryRequest query) {
-    	//since these are queries that come from our leafs, it is ok
-    	//to check the condition every time
-    	_UDPCapable= query.desiresOutOfBandReplies();
         send(query, PRIORITY_OUR_QUERY);
     }
 
@@ -1549,6 +1546,13 @@ public class ManagedConnection extends Connection
      */
     public boolean isUDPCapable() {
     	return isSupernodeConnection() ? true : _UDPCapable;
+    }
+    
+    /**
+     * marks this connection as capable of receiving unsolicited UDP
+     */
+    public void setUDPCapable(boolean status) {
+    	_UDPCapable=status;  
     }
     
     /** 

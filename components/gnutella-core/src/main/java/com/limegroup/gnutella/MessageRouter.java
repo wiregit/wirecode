@@ -920,6 +920,8 @@ public abstract class MessageRouter {
                     // whatever...
                     ; 
                 else return;
+                //mark the other node as OOB capable
+                handler.setUDPCapable(true);
             }
 
             // don't send it to leaves here -- the dynamic querier will 

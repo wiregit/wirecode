@@ -284,8 +284,21 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
 	 */
 	public void handleUPListVM(UPListVendorMessage m) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#isUDPCapable()
+	 */
+	public boolean isUDPCapable() {
+		// of course I am! :)
+		return true;
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#setUDPCapable(boolean)
+	 */
+	public void setUDPCapable(boolean status) {
+		//stub
 	}
 }
 
