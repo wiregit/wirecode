@@ -86,9 +86,20 @@ public class FileManager{
         return ret;
     }
 
+
+    /**
+     * Returns an array of all responses matching the given request, or null if
+     * there are no responses.<p>
+     * 
+     * Design note: this method returns null instead of an empty array to avoid
+     * allocations in the common case of no matches.)  
+     */
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
         ArrayList list = search(str);
+        if (list==null)
+            return null;
+
         int size = list.size();
         Response[] response = new Response[size];
         FileDesc desc;
@@ -303,6 +314,25 @@ public class FileManager{
         }
     }
 
+    ////////////////////////////////// Queries ///////////////////////////////
+
+
+    /** Returns true if s is lowercase and without regular expressions. */
+    private static boolean isSimpleQuery(String s) {
+        for (int i=0; i<s.length(); i++) {
+            char c=s.charAt(i);
+            if (Character.isUpperCase(c))
+                return false;
+            switch (c) {
+                case '*':
+                case '+':
+                case ' ':
+                    return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Translates the given wildcard search into a Perl5 regular
      * expression.  For example, "*.mp3" gets translated into the
@@ -329,40 +359,65 @@ public class FileManager{
     }
 
 
-    /** subclasses must override this method */
+    /** 
+     * Returns a list of FileDesc matching q, or null if there are no matches.
+     * Subclasses may override to provide different notions of matching.  
+     */
     protected ArrayList search(String q) {
-        ArrayList response_list = new ArrayList();
+        //Assumption: most queries will pass this test, and
+        //the cost of the test is negligible.  Alternatively,
+        //we could integrate the test with searchFast, but that's
+        //more complicated and requires writing our own string
+        //matching algorithm--potentially tricky to do right.
+        if (isSimpleQuery(q))
+            return searchFast(q);
 
-        String query = wildcard2regexp(q).toLowerCase();
-        try{
-            pattern = compiler.compile(query);}
-        catch(MalformedPatternException e){
-            // use search w/o regEx in this case
-            for(int i=0; i < _files.size(); i++) {
-                FileDesc desc = (FileDesc)_files.get(i);                
-                if (desc==null)
-                    continue;
-                //System.out.println("Rob:"+query);
-                String fileName = desc._name;
-                String file_name = fileName.toLowerCase();
-                if (file_name.indexOf(query) != -1)
-                    response_list.add(_files.get(i));
-            }
-            return response_list;
+        //Can't use simple query.  Fancy query follows.
+        q=q.toLowerCase();
+        String query = wildcard2regexp(q);
+        try {
+            pattern = compiler.compile(query);
+        } catch(MalformedPatternException e) {
+            return searchFast(q);
         }
-        for(int i=0; i < _files.size(); i++){
-            //Adam will populate the list before calling query.
+
+        ArrayList response_list = null;  //Don't allocate until needed.
+        for(int i=0; i < _files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
             if (desc==null)
                 continue;
-            //System.out.println("Sumeet: "+query);
-            String fileName = desc._name;
-            String file_name = fileName.toLowerCase();
+            String file_name = desc._nameLowerCase;            
             input = new PatternMatcherInput(file_name);
-            if (matcher.contains(input,pattern))
+            if (matcher.contains(input,pattern)) {
+                if (response_list==null)
+                    response_list=new ArrayList();
                 response_list.add(_files.get(i));
+            }
         }
         return response_list;
+    }
+
+    /**
+     * @requires q is a lower-case string without regular expressions.
+     * @effects exactly likely like search(query), but optimized for the
+     *  common case.  (See precondition!)  This is called from search(query).
+     */
+    protected ArrayList searchFast(String query) {
+        //Don't allocate until needed
+        ArrayList response_list=null;
+
+        for(int i=0; i < _files.size(); i++) {
+            FileDesc desc = (FileDesc)_files.get(i);
+            if (desc==null)
+                continue;
+            String file_name = desc._nameLowerCase;
+            if (file_name.indexOf(query) != -1) {
+                if (response_list==null)
+                    response_list=new ArrayList();
+                response_list.add(_files.get(i));
+            }
+        }
+        return response_list;               
     }
 
     /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
@@ -424,6 +479,9 @@ public class FileManager{
                 fman.get(1);
                 Assert.that(false);
             } catch (IndexOutOfBoundsException e) { }
+          
+            responses=fman.query(new QueryRequest((byte)3,0,"*unit*"));
+            Assert.that(responses.length==2, "response: "+responses.length);     
 
         } finally {        
             if (f1!=null) f1.delete();
