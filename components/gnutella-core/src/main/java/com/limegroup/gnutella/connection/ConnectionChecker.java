@@ -50,10 +50,8 @@ public final class ConnectionChecker implements Runnable {
      * so a minimum number is hit on each check.  NON-FINAL FOR TESTING.
      */
     private static String[] STANDARD_HOSTS = {
-        "http://www.rcn.com",
         "http://www.microsoft.com",
         "http://www.sco.com",
-        "http://www.rcn.com",
         "http://www.google.com",
         "http://www.cnn.com",
         "http://www.amazon.com",
@@ -73,6 +71,8 @@ public final class ConnectionChecker implements Runnable {
         "http://www.sony.com",
         "http://www.ford.com",
         "http://www.gm.com",
+        "http://www.aol.com",
+        "http://www.verizon.com",
     };
     
     /**
@@ -162,7 +162,7 @@ public final class ConnectionChecker implements Runnable {
         head.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
             "close");
         head.setFollowRedirects(true);
-        HttpClient client = HttpClientManager.getNewClient();
+        HttpClient client = HttpClientManager.getNewClient(20000, 3000);
         try {
             client.executeMethod(head);
             _connected = true;
