@@ -383,7 +383,7 @@ public class DownloadManager implements BandwidthTracker {
     private final String canonicalize(String fileName) {
         final StringBuffer retString = new StringBuffer();
         // separate by whitespace and _ 
-        StringTokenizer st = new StringTokenizer(fileName, " _-");
+        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
         while (st.hasMoreTokens()) {
             final String currToken = st.nextToken().toLowerCase();
             if (wordSet.contains(currToken))
