@@ -602,14 +602,6 @@ public class Connection implements Runnable {
     public void shutdown() {
         doShutdown = true;
         try {
-            try
-            {
-                throw new Exception();
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-            }
             sock.close();
         } catch(Exception e) {}
     }
