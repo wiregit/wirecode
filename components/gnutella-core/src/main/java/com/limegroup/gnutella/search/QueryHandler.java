@@ -382,14 +382,22 @@ public final class QueryHandler {
 
         boolean probeConnection = false;
         if(mc == null) {
+            if(QUERY.getHops() == 0) {
+                System.out.println("QueryHandler::sendQuery::"+
+                                   QUERY.getQuery()+"using probe"); 
+            }
             // if we have no connections to query, simply return for now
             if(QUERIED_PROBE_CONNECTIONS.isEmpty()) return 0;
-
+            
             // we actually remove this from the list to make sure that
             // QUERIED_CONNECTIONS and QUERIED_PROBE_CONNECTIONS do
             // not have any of the same entries, as this connection
             // will be added to QUERIED_CONNECTIONS
             mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
+            if(QUERY.getHops() == 0) {
+                System.out.println("QueryHandler::sendQuery::"+
+                                   QUERY.getQuery()+"got probe"); 
+            }
             probeConnection = true;
         }
                            
@@ -416,7 +424,8 @@ public final class QueryHandler {
                                "hosts to query: "+
                                QUERY.getQuery()+" "+
                                hostsToQuery+" remaining connections: "+
-                               remainingConnections); 
+                               remainingConnections+" "+
+                               "probes: "+QUERIED_PROBE_CONNECTIONS.size()); 
         }
         
         
