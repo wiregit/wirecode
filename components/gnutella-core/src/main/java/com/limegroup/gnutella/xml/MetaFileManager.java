@@ -45,6 +45,8 @@ public class MetaFileManager extends FileManager {
         String audioURI = "http://www.limewire.com/schemas/audios.xsd";
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLReplyCollection coll = map.getReplyCollection(audioURI);
+        if(coll == null)//if there schemas are not loaded
+            return;
         int z = responses.length;
         for(int i=0;i<z;i++){
             FileDesc f = get((int)responses[i].getIndex());
