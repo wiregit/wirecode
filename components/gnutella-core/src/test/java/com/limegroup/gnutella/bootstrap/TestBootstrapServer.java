@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.bootstrap;
 
+import com.limegroup.gnutella.ErrorService;
+
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
@@ -101,7 +103,10 @@ public class TestBootstrapServer {
         public void run() {
             try {
                 run2();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+            } catch(Throwable e) {
+                ErrorService.error(e);
+            }
         }
         
         public void run2() throws IOException {
@@ -119,6 +124,9 @@ public class TestBootstrapServer {
                     LOG.debug("reading new request");
                     _request=in.readLine();
                     LOG.debug("read: " + _request);
+                    if(_request == null)
+                        break;
+                    
                     // gobble up headers.
                     String restOfLine = _request;
                     while(!restOfLine.equals("")) {

@@ -48,17 +48,25 @@ public class HttpClientManager {
     private static final int MAXIMUM_REDIRECTS = 10;
     
     /**
+     * The time to allow a connection to sit idle, waiting for something
+     * to reuse it.
+     */
+    private static final long IDLE_TIME = 30 * 1000; // 30 seconds.
+    
+    /**
      * The manager which all client connections use.
      */
-    private static final HttpConnectionManager MANAGER = 
-       CommonUtils.isJava118() ?
-            (HttpConnectionManager)new SimpleHttpConnectionManager() :
-            (HttpConnectionManager)new MultiThreadedHttpConnectionManager();
-        // note: the cast is required because of a strange compiler bug that
-        // seems to spits out:
-        //     "incompatible types for ?: neither is a subtype of the other"
-        // even though all logic would dictate that they don't have to
-        // to be subtypes of each other
+    private static final HttpConnectionManager MANAGER;
+    
+    static {
+        if(CommonUtils.isJava118()) {
+            MANAGER = new SimpleHttpConnectionManager();
+        } else {
+            MANAGER = new MultiThreadedHttpConnectionManager();
+            ((MultiThreadedHttpConnectionManager)MANAGER).
+                setIdleConnectionTime(IDLE_TIME);
+        }
+    }
             
     /**
      * Returns a new HttpClient with the appropriate manager.

@@ -176,5 +176,38 @@ public class HttpClientManagerTest extends BaseTestCase {
         assertEquals("wrong connection attempts", 1, s1.getConnectionAttempts());
         assertEquals("wrong request attempts", 2, s1.getRequestAttempts());
     }
-
+    
+    /**
+     * Tests that a connection correctly times out after a period idleness.
+     */
+    public void testConnectionCloses() throws Exception {
+        String responseData = "this is response data";
+        int length = responseData.length();
+        s1.setResponseData(responseData);
+        s1.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + length);
+        s1.setAllowConnectionReuse(true);
+        HttpMethod get;
+        HttpClient client;
+        
+        get = new GetMethod(url1);
+        client = HttpClientManager.getNewClient();
+        try {
+            client.executeMethod(get);
+        } finally {
+            get.releaseConnection();
+        }
+        
+        Thread.sleep(1000 * 70);
+        
+        get = new GetMethod(url1);
+        client = HttpClientManager.getNewClient();
+        try {
+            client.executeMethod(get);
+        } finally {
+            get.releaseConnection();
+        }
+        
+        assertEquals("wrong connection attempts", 2, s1.getConnectionAttempts());
+        assertEquals("wrong request attempts", 2, s1.getRequestAttempts());
+    }        
 }        
