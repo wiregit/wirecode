@@ -115,14 +115,15 @@ public final class AlternateLocationTest extends TestCase {
 	 * timestamps.
 	 */
 	public void testStringConstructorForNotTimestampedLocs() {
-		try {
-			for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
+		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
+			try {
 				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
-			}
-		} catch(IOException e) {
-			fail("test failed with exception: "+e); 
-		}		
+					AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
+			} catch(IOException e) {
+				fail("test failed with exception: "+e+"\r\n"+
+					 "on loc: "+HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]); 
+			}		
+		}
 	}
 
 	/**
