@@ -930,7 +930,9 @@ public class ManagedConnection
      * @modifies this
      * @effects Returns the percentage of messages sent on this
      *  since the last call to getPercentSentDropped that were
-     *  dropped by this end of the connection.
+     *  dropped by this end of the connection.  This value may be
+     *  greater than 100%, e.g., if only one message is sent but
+     *  four are dropped during a given time period.
      */
     public synchronized float getPercentSentDropped() {
         int rdiff = _numMessagesSent - _lastSent;
