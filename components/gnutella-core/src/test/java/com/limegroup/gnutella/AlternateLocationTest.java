@@ -147,8 +147,33 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 								   HugeTestUtils.URNS[i].httpStringValue(), 10, 
 								   GUID.makeGuid(), 10, true, 2, true, null, 
 								   HugeTestUtils.URN_SETS[i]);
+
+            // just make sure this doesn't throw an exception
 			AlternateLocation.createAlternateLocation(rfd);
 		}
+
+        try {
+            RemoteFileDesc rfd = 
+                new RemoteFileDesc("127.0.2.1", 6346, 10, HTTPConstants.URI_RES_N2R+
+                                   HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                                   GUID.makeGuid(), 10, true, 2, true, null, 
+                                   HugeTestUtils.URN_SETS[0]);
+
+            // this should throw an exception, since it's a private address.
+            AlternateLocation.createAlternateLocation(rfd);        
+
+            fail("should have rejected the location because the address is private");
+        } catch(IOException e) {
+            // expected for private addresses
+        }
+
+        try {
+            AlternateLocation.createAlternateLocation((RemoteFileDesc)null);
+            fail("should have thrown a null pointer");
+        } catch(NullPointerException e) {
+            // this is expected
+        }                
+        
 	}
 
 	/**
