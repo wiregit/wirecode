@@ -7,7 +7,6 @@ package com.limegroup.gnutella;
 public class HTTPPage {
 
     public static String responsePage =
-
 "<html>\r\n"+
 "\r\n"+
 "<head>\r\n"+
@@ -32,20 +31,28 @@ public class HTTPPage {
 "\r\n"+
 "	<table border=\"0\" cellpadding=\"5\" cellspacing=\"0\" width=\"580\" height=\"\">\r\n"+
 "	<tr>\r\n"+
-"		<td colspan=\"2\">\r\n"+
-"		<a href=\"http://www.limewire.com\">\r\n"+
-"		<img src=\"http://www.limewire.com/images/logo01.gif\" width=\"57\" height=\"57\" border=\"0\" alt=\"limewire\"\r\n"+
-"		><img src=\"http://www.limewire.com/images/logo02.gif\" width=\"94\" height=\"57\" border=\"0\" alt=\"limewire\"></a\r\n"+
-"		><img src=\"http://www.limewire.com/images/grey.gif\" width=\"418\" height=\"1\"></td>\r\n"+
+"		<td><img src=\"http://www.limewire.com/images/white.gif\" width=\"151\" height=\"1\"></td>\r\n"+
+"		<td><img src=\"http://www.limewire.com/images/white.gif\" width=\"215\" height=\"1\"></td>\r\n"+
+"		<td><img src=\"http://www.limewire.com/images/white.gif\" width=\"193\" height=\"1\"></td>\r\n"+
 "	</tr>\r\n"+
 "	<tr>\r\n"+
 "		<td>\r\n"+
+"		<a href=\"http://www.limewire.com\">\r\n"+
+"		<img src=\"http://www.limewire.com/images/logo01.gif\" width=\"57\" height=\"57\" border=\"0\" alt=\"limewire\"\r\n"+
+"		><img src=\"http://www.limewire.com/images/logo02.gif\" width=\"94\" height=\"57\" border=\"0\" alt=\"limewire\"></a></td>\r\n"+
+"		<td colspan=\"2\">\r\n"+
+"		<font face=\"arial, Helvetica\" size=\"5\"><b>HTTP 402 Browser Request Denied</b></font\r\n"+
+"		><br><img src=\"http://www.limewire.com/images/grey.gif\" width=\"418\" height=\"1\"></div></td>\r\n"+
+"	</tr>\r\n"+
+"	<tr>\r\n"+
+"		<td colspan=\"2\">\r\n"+
 "		<p align=\"justify\">\r\n"+
 "		<font face=\"Arial, Helvetica\" size=\"3\">\r\n"+
-"		As part of our effort to promote the health and stability of the Gnutella network the \r\n"+
+"		As part of our effort to promote the health and stability of the Gnutella network, the \r\n"+
 "		<a href=\"http://www.limewire.com/download\">LimeWire</a> client does not allow direct \r\n"+
-"		downloads from web browsers. If you would like to be a part of the Gnutella network \r\n"+
-"		please download <a href=\"http://www.limewire.com/download\">LimeWire</a>.\r\n"+
+"		downloads from web browsers. If you would like to be a part of the Gnutella network, \r\n"+
+"		please download <a href=\"http://www.limewire.com/download\">LimeWire</a><br><br> For more \r\n"+
+"		information on Gnutella network, health go <a href=\"http://www.limewire.com/health.htm\">here</a>.\r\n"+
 "		</font>\r\n"+
 "		</p>\r\n"+
 "\r\n"+
