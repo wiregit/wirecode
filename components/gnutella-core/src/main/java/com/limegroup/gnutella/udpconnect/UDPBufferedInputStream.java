@@ -79,6 +79,7 @@ public class UDPBufferedInputStream extends InputStream {
     public int read(byte b[], int off, int len)
       throws IOException  {
         int origLen = len;
+        int origOff = off;
         int wlength;
 
         synchronized(_processor) {  // Lock on the ConnectionProcessor
@@ -93,8 +94,11 @@ public class UDPBufferedInputStream extends InputStream {
                     System.arraycopy(b, off, 
                       _activeChunk.data, _activeChunk.start, wlength);
                     len                 -= wlength;
+                    off                 += wlength;
                     _activeChunk.start  += wlength;
                     _activeChunk.length -= wlength;
+if ( (off - origOff) > 2 )
+System.out.println("-- is0: "+b[origOff]+" is1:"+b[origOff+1]+" is2:"+b[origOff+2]);
                     if ( len <= 0 ) 
                         return origLen;
 
