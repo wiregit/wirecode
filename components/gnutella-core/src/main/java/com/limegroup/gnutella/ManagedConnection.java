@@ -266,14 +266,7 @@ public class ManagedConnection extends Connection
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
-    
-    /** if I am a supernode shielding the given connection */
-    private Boolean _isSupernodeClientConnection=null;
-    /** if I am a leaf connected to a supernode  */
-    private Boolean _isClientSupernodeConnection=null;
-    /** is the GGEP header set?  (null if not yet known) */
-    private Boolean _supportsGGEP=null;
-
+   
     /**
      * The domain to which this connection is authenticated
      */
@@ -520,6 +513,7 @@ public class ManagedConnection extends Connection
                         waitForQueued();
                         sendQueued();
                     } catch (IOException e) {
+						//e.printStackTrace();
                         if (_manager!=null) //may be null for testing
                             _manager.remove(ManagedConnection.this);
                         _runnerDied=true;
@@ -550,7 +544,7 @@ public class ManagedConnection extends Connection
             }
             
             if (! isOpen())
-                throw new IOException();
+                throw new IOException("connection closed");
         }
         
         /** Send several queued message of each type. */
@@ -883,8 +877,9 @@ public class ManagedConnection extends Connection
         //connection
         String domainsAuthenticated;
         if(this.isOutgoing())
-            domainsAuthenticated = getProperty(
-                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+			domainsAuthenticated = getDomainsAuthenticated();
+				//domainsAuthenticated = getProperty(
+                //ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
         else
             domainsAuthenticated = getPropertyWritten(
                 ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
@@ -1193,226 +1188,6 @@ public class ManagedConnection extends Connection
     // End statistics accessors
     //
 
-    /** Returns the vendor string reported by this connection, i.e., 
-     *  the USER_AGENT property, or null if it wasn't set.
-     *  @return the vendor string, or null if unknown */
-    public String getUserAgent() {
-        return getProperty(
-            com.limegroup.gnutella.handshaking.
-                ConnectionHandshakeHeaders.USER_AGENT);
-    }
-
-	/**
-	 * Returns the number of intra-Ultrapeer connections this node maintains.
-	 * 
-	 * @return the number of intra-Ultrapeer connections this node maintains
-	 */
-	public int getNumIntraUltrapeerConnections() {
-		String connections = getProperty(ConnectionHandshakeHeaders.X_DEGREE);
-		if(connections == null) {
-			if(isSupernodeConnection()) return 6;
-			return 0;
-		}
-		
-		// TODO: use something else here!!!
-		try {
-			return Integer.valueOf(connections).intValue();
-		} catch(NumberFormatException e) {
-			return 0;
-		}
-	}
-
-	// implements ReplyHandler interface -- inherit doc comment
-	public boolean isHighDegreeConnection() {
-		return getNumIntraUltrapeerConnections() > 15;
-	}
-
-	/**
-	 * Returns whether or not this connection is to an Ultrapeer that 
-	 * supports query routing between Ultrapeers at 1 hop.
-	 *
-	 * @return <tt>true</tt> if this is an Ultrapeer connection that
-	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
-	 *  otherwise <tt>false</tt>
-	 */
-	public boolean isUltrapeerQueryRoutingConnection() {
-		if(!isSupernodeConnection()) return false;
-        String value = 
-            getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
-        if(value == null) return false;
-		
-        return value.equals(ConnectionManager.QUERY_ROUTING_VERSION);
-    }
-
-
-    /** Returns true iff this connection wrote "Ultrapeer: false".
-     *  This does NOT necessarily mean the connection is shielded. */
-    public boolean isLeafConnection() {
-        String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
-        if (value==null)
-            return false;
-        else
-            //X-Ultrapeer: true  ==> false
-            //X-Ultrapeer: false ==> true
-            return !Boolean.valueOf(value).booleanValue();
-    }
-
-    /** Returns true iff this connection wrote "Supernode: true". */
-    public boolean isSupernodeConnection() {
-        String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
-        if (value==null)
-            return false;
-        else
-            return Boolean.valueOf(value).booleanValue();
-    }
-
-    /** Returns true iff the connection is a supernode and I am a leaf, i.e., if
-     *  I wrote "X-Ultrapeer: false", this connection wrote "X-Ultrapeer: true" 
-	 *  (not necessarily in that order).  <b>Does NOT require that QRP is 
-	 *  enabled</b> between the two; the supernode could be using reflector 
-	 *  indexing, for example. */
-    public boolean isClientSupernodeConnection() {
-        if(_isClientSupernodeConnection == null) {
-            _isClientSupernodeConnection = 
-                new Boolean(isClientSupernodeConnection2());
-        }
-        return _isClientSupernodeConnection.booleanValue();
-    }
-
-    private boolean isClientSupernodeConnection2() {
-        //Is remote host a supernode...
-        if (! isSupernodeConnection())
-            return false;
-
-        //...and am I a leaf node?
-        String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
-        if (value==null)
-            return false;
-        else 
-            return !Boolean.valueOf(value).booleanValue();
-    }
-
-
-	/**
-	 * Returns whether or not this connection is to a client supporting
-	 * GUESS.
-	 *
-	 * @return <tt>true</tt> if the node on the other end of this 
-	 *  connection supports GUESS, <tt>false</tt> otherwise
-	 */
-	public boolean isGUESSCapable() {
-		int version = getGUESSVersion();
-		if(version == -1) return false;
-		else if(version < 20 && version > 0) return true;
-		return false;
-	}
-
-	/**
-	 * Returns whether or not this connection is to a ultrapeer supporting
-	 * GUESS.
-	 *
-	 * @return <tt>true</tt> if the node on the other end of this 
-	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
-	 */
-	public boolean isGUESSUltrapeer() {
-		return isGUESSCapable() && isSupernodeConnection();
-	}
-
-	/**
-	 * Returns the version of the GUESS search scheme supported by the node
-	 * at the other end of the connection.  This returns the version in
-	 * whole numbers.  So, if the supported GUESS version is 0.1, this 
-	 * will return 1.  If the other client has not sent an X-Guess header
-	 * this returns -1.
-	 *
-	 * @return the version of GUESS supported, reported as a whole number,
-	 *  or -1 if GUESS is not supported
-	 */
-	public int getGUESSVersion() {
-		String value = super.getProperty(ConnectionHandshakeHeaders.X_GUESS);
-		if(value == null) return -1;
-		else {
-			float version = Float.valueOf(value).floatValue();
-			version *= 10;
-			return (int)version;
-		}
-	}
-
-    /** Returns true iff this connection is a temporary connection as per
-     the headers. */
-    public boolean isTempConnection() {
-        //get the X-Temp-Connection from either the headers received
-        String value=getProperty(ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
-        //if X-Temp-Connection header is not received, return false, else
-        //return the value received
-        if(value == null)
-            return false;
-        else
-            return Boolean.valueOf(value).booleanValue();
-    }
-    
-    /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
-	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
-    public boolean isSupernodeClientConnection() {
-        if(_isSupernodeClientConnection == null) {
-            _isSupernodeClientConnection = 
-                new Boolean(isSupernodeClientConnection2());
-        }
-        return _isSupernodeClientConnection.booleanValue();
-    }
-    
-    /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
-	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
-    private boolean isSupernodeClientConnection2() {
-        //Is remote host a supernode...
-        if (! isLeafConnection())
-            return false;
-
-        //...and am I a supernode?
-        String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
-        if (value==null)
-            return false;
-        else if (!Boolean.valueOf(value).booleanValue())
-            return false;
-
-        //...and do both support QRP?
-        return isQueryRoutingEnabled();
-    }
-
-    /** Returns true if this supports GGEP'ed messages.  GGEP'ed messages (e.g.,
-     *  big pongs) should only be sent along connections for which
-     *  supportsGGEP()==true. */
-    public boolean supportsGGEP() {
-        if (_supportsGGEP==null)
-            _supportsGGEP=new Boolean(supportsGGEP2());
-        return _supportsGGEP.booleanValue();
-    }
-
-    private boolean supportsGGEP2() {
-        String value=getProperty(ConnectionHandshakeHeaders.GGEP);
-        //Currently we don't care about the version number.
-        return value!=null;
-    }
-
-    /** True if the remote host supports query routing (QRP).  This is only 
-     *  meaningful in the context of leaf-supernode relationships. */
-    boolean isQueryRoutingEnabled() {
-        //We are ALWAYS QRP-enabled, so we only need to look at what the remote
-        //host wrote.
-        String value=getProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING);
-        if (value==null)
-            return false;
-        try {            
-            Float f=new Float(value);
-            return f.floatValue() >= 0.1f;   //TODO: factor into constant!
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 
     /** Returns the system time that we should next forward a query route table
      *  along this connection.  Only valid if isClientSupernodeConnection() is
