@@ -826,9 +826,8 @@ public class RouterService {
                 // delivery of results.  bad things may happen in this case but 
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = QueryRequest.createOutOfBandQuery(guid, 
-                                                       query, 
-                                                       richQuery);
+                qr = QueryRequest.createOutOfBandQuery(guid, query, richQuery,
+                                                       type);
                 OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
             }
             else

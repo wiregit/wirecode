@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.guess.*;
@@ -381,6 +382,40 @@ public class QueryRequest extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid XML");
 		}
         return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true);
+    }                                
+
+	/**
+	 * Creates a new query for the specified file name and the designated XML.
+	 *
+	 * @param query the file name to search for
+     * @param guid I trust that this is a address encoded guid.  Your loss if
+     * it isn't....
+     * @param type can be null - the type of results you want.
+	 * @return a new <tt>QueryRequest</tt> for the specified query that has
+	 * encoded the input ip and port into the GUID and appropriate marked the
+	 * query to signify out of band support AND specifies a file type category.
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 */
+    public static QueryRequest createOutOfBandQuery(byte[] guid, String query, 
+                                                    String xmlQuery,
+                                                    MediaType type) {
+        query = I18NConvert.instance().getNorm(query);
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+		if(xmlQuery == null) {
+			throw new NullPointerException("null xml query");
+		}
+		if(query.length() == 0 && xmlQuery.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
+		}
+        return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, true, type);
     }                                
 
 	/**
@@ -793,8 +828,44 @@ public class QueryRequest extends Message implements Serializable{
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
              canReceiveOutOfBandReplies, 0, false, 0);
     }
-
+ 
     /**
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up
+     * results.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
+     */
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
+                         boolean canReceiveOutOfBandReplies, MediaType type) {
+        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
+             canReceiveOutOfBandReplies, 0, false, getMetaFlag(type));
+    }
+ 
+    private static int getMetaFlag(MediaType type) {
+        int metaFlag = 0;
+        if (type == null)
+            ;
+        else if (type.getDescription() == MediaType.AUDIO)
+            metaFlag |= AUDIO_MASK;
+        else if (type.getDescription() == MediaType.VIDEO)
+            metaFlag |= VIDEO_MASK;
+        else if (type.getDescription() == MediaType.IMAGES)
+            metaFlag |= IMAGE_MASK;
+        else if (type.getDescription() == MediaType.DOCUMENTS)
+            metaFlag |= DOC_MASK;
+        else if (type.getDescription() == MediaType.PROGRAMS) {
+            if (CommonUtils.isLinux() || CommonUtils.isAnyMac())
+                metaFlag |= LIN_PROG_MASK;
+            else if (CommonUtils.isWindows())
+                metaFlag |= WIN_PROG_MASK;
+        }
+        return metaFlag;
+    }
+
+   /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
      * needed.  If you need to make a query that accepts out-of-band results, 
      * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 

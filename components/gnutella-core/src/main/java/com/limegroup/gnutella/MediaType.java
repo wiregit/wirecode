@@ -29,12 +29,12 @@ public class MediaType implements Serializable {
     private static final String SCHEMA_IMAGES = "image";
     
     // These are used as resource keys to retreive descriptions in the GUI
-    private static final String ANY_TYPE = "MEDIA_ANY_TYPE";
-    private static final String DOCUMENTS = "MEDIA_DOCUMENTS";
-    private static final String PROGRAMS = "MEDIA_PROGRAMS";
-    private static final String AUDIO = "MEDIA_AUDIO";
-    private static final String VIDEO = "MEDIA_VIDEO";
-    private static final String IMAGES = "MEDIA_IMAGES";
+    public static final String ANY_TYPE = "MEDIA_ANY_TYPE";
+    public static final String DOCUMENTS = "MEDIA_DOCUMENTS";
+    public static final String PROGRAMS = "MEDIA_PROGRAMS";
+    public static final String AUDIO = "MEDIA_AUDIO";
+    public static final String VIDEO = "MEDIA_VIDEO";
+    public static final String IMAGES = "MEDIA_IMAGES";
     
     /**
      * @param schema a MIME compliant non-localizable identifier,
