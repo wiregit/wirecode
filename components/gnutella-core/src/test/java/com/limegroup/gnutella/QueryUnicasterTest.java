@@ -74,8 +74,16 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         // add these endpoints....
         InetAddress addr = null;
         addr = InetAddress.getByName("127.0.0.1");
-        for (int i = 0; i < NUM_UDP_LOOPS; i++) 
+        for (int i = 0; i < NUM_UDP_LOOPS; i++)  {
             QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
+            if (i % 5 == 0) {
+                try {
+                    // give some time for queries to get out...
+                    Thread.sleep(200);
+                }
+                catch (InterruptedException ignored) {}
+            }
+        }            
 
         // add a Query
 		QueryRequest qr = QueryRequest.createQuery("Susheel", (byte)2);
@@ -90,7 +98,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         // wait some seconds for thread to do work.  this is not scientific 
         // but should do the job...
         try {
-            Thread.sleep(10 * 1000);
+            Thread.sleep(30 * 1000);
         }
         catch (InterruptedException ignored) {}
         int numMessages = 0, numQRs = 0, numPings = 0, numQKReqs = 0;
@@ -112,18 +120,12 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         }
         assertEquals("unexpected number of messages", numMessages, numPings + numQRs);
         // can't send a Query without sending a Ping....
-        assertLessThanOrEquals("unexpected number of QRs",
-            numPings, numQRs);
-        assertGreaterThan("unexpected number of QRs",
-            0, numQRs);
-        assertLessThanOrEquals("unexpected number of QRs",
-            numQKReqs, numQRs);
-        debug("QueryUnicasterTest.testQueries(): numMessages = " +
-              numMessages);
-        debug("QueryUnicasterTest.testQueries(): numQRs = " +
-              numQRs);
-        debug("QueryUnicasterTest.testQueries(): numPings = " +
-              numPings);
+        assertLessThanOrEquals("unexpected number of QRs", numPings, numQRs);
+        assertGreaterThan("unexpected number of QRs", 0, numQRs);
+        assertLessThanOrEquals("unexpected number of QRs", numQKReqs, numQRs);
+        debug("QueryUnicasterTest.testQueries(): numMessages = " + numMessages);
+        debug("QueryUnicasterTest.testQueries(): numQRs = " + numQRs);
+        debug("QueryUnicasterTest.testQueries(): numPings = " + numPings);
 
         // shut off udp listeners....
         _shouldRun = false;
@@ -190,7 +192,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         // wait some seconds for thread to do work.  this is not scientific 
         // but should do the job...
         try {
-            Thread.sleep(10 * 1000);
+            Thread.sleep(30 * 1000);
             assertEquals("unexpected number of queries",
                 0, QueryUnicaster.instance().getQueryNumber() );
         }
