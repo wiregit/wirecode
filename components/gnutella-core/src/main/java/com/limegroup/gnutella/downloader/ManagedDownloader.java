@@ -188,7 +188,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
-    private static final float MIN_ACCEPTABLE_SPEED = 0.1f;
+    private static final float MIN_ACCEPTABLE_SPEED = 
+		SettingsManager.instance().getMaxDownstreamBytesPerSec() < 8 ? 
+		0.1f:
+		0.5f;
     /** The number of bytes to overlap when swarming and resuming, used to help
      *  verify that different sources are serving the same content. */
     private static final int OVERLAP_BYTES=500;
