@@ -90,6 +90,13 @@ public class ConnectionManager {
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
+    
+    /** 
+     * Is true, if we are a client node, and are currently maintaining
+     * connection to a supernode, and that is the only connection we 
+     * are maintaining. Is false, otherwise.
+     */
+    private volatile boolean _hasShieldedClientSupernodeConnection = false;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -198,36 +205,33 @@ public class ConnectionManager {
              connection = new ManagedConnection(socket, _router, this);
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
+             if(connection != null){
+                    connection.close();
+             }
              return;
          }
          
-         //2. Check if it is a client connection, and decide whether to keep.
-         Properties headers = connection.getHeaders();
-         boolean isClientConnection = false;
-         if(headers != null){
-            isClientConnection = (new Boolean(
-                connection.getHeaders().getProperty(
-                ConnectionHandshakeHeaders.SUPERNODE, "False"))).booleanValue();
+         //dont keep the connection, if we are not a supernode
+         if(!SettingsManager.instance().isSupernode()){
+            synchronized(this){
+                remove(connection);
+            }
          }
-            
-         //set the flag in the connection, so that we can know from the 
-         //connection itself whether the connection is to a shielded client
-         connection.setClientConnectionFlag(isClientConnection);
          
          //update the connection count
          try {   
              synchronized (_incomingConnectionsLock) {
-                 if(isClientConnection)
+                 if(connection.isClientConnection())
                      _incomingClientConnections++;
                  else
                      _incomingConnections++;
              }                  
 
              //a) Not needed: kill.  TODO: reject as described above.
-             if((isClientConnection &&
+             if((connection.isClientConnection() &&
                 (_incomingClientConnections > 
                 SettingsManager.instance().getMaxShieldedClientConnections()))
-                || (!isClientConnection && 
+                || (!connection.isClientConnection() && 
                 (_incomingConnections > _keepAlive))) {
                     synchronized(this){
                         remove(connection);
@@ -242,7 +246,7 @@ public class ConnectionManager {
              _callback.error(ActivityCallback.INTERNAL_ERROR, e);
          } finally {
              synchronized (_incomingConnectionsLock) {
-                 if(isClientConnection)
+                 if(connection.isClientConnection())
                      _incomingClientConnections--;
                  else
                      _incomingConnections--;
@@ -413,11 +417,7 @@ public class ConnectionManager {
                 List newConnections=new ArrayList(_initializedConnections);
                 newConnections.add(c);
                 _initializedConnections=newConnections;
-                System.out.println(
-                    "connection added to initialized connections");
             }else{
-                System.out.println(
-                    "connection added to initialized CLIENT connections");
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
                 List newConnections
@@ -703,8 +703,13 @@ public class ConnectionManager {
         ManagedConnection supernodeConnection)
     {
         //set keep alive to 1, so that we are not fetching any connections
+        //Keep Alive is not set to zero, so that when this connection drops,
+        //we automatically start fetching a new connection
         setKeepAlive(1);
-        _incomingConnections=0;
+        
+        //anu NOTE: set _incomingConnections=1. This is a hack but it will 
+        //prevent accepting any other connection, since the KeepAlive is 1.
+        _incomingConnections=1;
         _incomingClientConnections=0;
         
         //close all other connections
@@ -726,6 +731,9 @@ public class ConnectionManager {
         _initializedConnections = newConnections;
         
         _initializedClientConnections = new ArrayList();
+        
+        //set the _hasShieldedClientSupernodeConnection flag to true
+        _hasShieldedClientSupernodeConnection = true;
     }
     
     /**
@@ -822,7 +830,17 @@ public class ConnectionManager {
             }
         }
         if(connectionOpen)
+        {
             _callback.connectionInitialized(c);
+            //check if we are a client node, and now opened a connection 
+            //to supernode. In this case, we will drop all other connections
+            //and just keep this one
+            //check for shieldedclient-supernode connection
+            if(!SettingsManager.instance().isSupernode() && 
+                c.isSupernodeConnection()){
+            gotShieldedClientSupernodeConnection(c);
+            }
+        }
     }
 
     //
@@ -888,6 +906,10 @@ public class ConnectionManager {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
+            finally{
+                //unset the _hasShieldedClientSupernodeConnection flag
+                _hasShieldedClientSupernodeConnection = false;
+            }
         }
     }
 
@@ -951,6 +973,10 @@ public class ConnectionManager {
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+            }
+            finally{
+                //unset the _hasShieldedClientSupernodeConnection flag
+                _hasShieldedClientSupernodeConnection = false;
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -1017,6 +1043,10 @@ public class ConnectionManager {
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+            }
+            finally{
+                //unset the _hasShieldedClientSupernodeConnection flag
+                _hasShieldedClientSupernodeConnection = false;
             }
         }
     }
