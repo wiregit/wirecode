@@ -359,7 +359,7 @@ public class Acceptor extends Thread {
 				if ( !word.equals("MAGNET") ) {
 					InetAddress address = _socket.getInetAddress();
 					byte[] addressBytes = address.getAddress();
-					if (SettingsManager.instance().getLocalIsPrivate() && 
+					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
 					    (addressBytes[0] == 127)) {
 						_socket.close();
 						return;

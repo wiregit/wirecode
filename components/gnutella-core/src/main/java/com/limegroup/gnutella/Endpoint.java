@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.MessageUtils;
 
 /**
@@ -405,7 +406,7 @@ com.sun.java.util.collections.Comparable
         if (address[0]==(byte)10)
             return true;  //10.0.0.0 - 10.255.255.255
         else if (address[0]==(byte)127 && 
-                 SettingsManager.instance().getLocalIsPrivate())
+                 ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;  //127.x.x.x
         else if (address[0]==(byte)172 &&
                  address[1]>=(byte)16 &&
