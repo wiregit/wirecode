@@ -11,7 +11,8 @@ public final class SearchSettings extends AbstractSettings {
      * strings.
      */
     private static final char[] BAD_CHARS = {
-        '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', ':', ';', '/', '\\', 
+        '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', 
+        ':', ';', '/', '\\', '[', ']', '{', '}', 
     };
 
 	/**
