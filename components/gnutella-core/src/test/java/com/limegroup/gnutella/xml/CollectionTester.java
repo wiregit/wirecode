@@ -15,6 +15,7 @@ public class CollectionTester extends TestCase {
     final File vader = new File("vader.mp3");
     final File swing = new File("swing.mp3");
     final String schemaURI =  "http://www.limewire.com/schemas/audio.xsd";
+    final String schemaURIVideo =  "http://www.limewire.com/schemas/video.xsd";
     final MetaFileManager mfm = new MFMStub();
     final boolean audio = true;
 
@@ -49,6 +50,7 @@ public class CollectionTester extends TestCase {
     }
 
     public void testAudio() {
+        clearDirectory();
         // test construction
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
@@ -83,9 +85,10 @@ public class CollectionTester extends TestCase {
 
 
     public void testVideo() {
+        clearDirectory();
         // test construction
         LimeXMLReplyCollection collection = 
-        new LimeXMLReplyCollection(files, schemaURI, mfm, !audio);
+        new LimeXMLReplyCollection(files, schemaURIVideo, mfm, !audio);
         Assert.assertTrue("LimeXMLCollection count wrong!  Count is " + 
                           collection.getCount(),
                           (collection.getCount() == 0));
@@ -111,13 +114,14 @@ public class CollectionTester extends TestCase {
 
     
     public void testMatching() {
+        clearDirectory();
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
 
         // make sure that a simple match works....
         List nameVals = new ArrayList();
         nameVals.add(new NameValue(TITLE_KEY, "vade"));
-        LimeXMLDocument searchDoc = new LimeXMLDocument(nameVals,
+        LimeXMLDocument searchDoc = new LimeXMLDocument(nameVals, 
                                                         schemaURI);
         List results = collection.getMatchingReplies(searchDoc);
         Assert.assertTrue("Not the correct amount of results, # = " +
@@ -187,6 +191,91 @@ public class CollectionTester extends TestCase {
         Assert.assertTrue("Not the correct amount of results, # = " +
                           results.size(), (results.size() == 0));        
 
+    }
+
+
+    public void testSerialized() {
+        populateDirectory();
+
+        LimeXMLReplyCollection audioCollection = 
+        new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
+        LimeXMLReplyCollection videoCollection = 
+        new LimeXMLReplyCollection(files, schemaURIVideo, mfm, !audio);
+
+        // test it got the count right....        
+        Assert.assertTrue("LimeXMLCollection count wrong!  Count is " + 
+                          audioCollection.getCount(),
+                          (audioCollection.getCount() == 2));
+        Assert.assertTrue("LimeXMLCollection count wrong!  Count is " + 
+                          videoCollection.getCount(),
+                          (videoCollection.getCount() == 2));
+
+        // test assocation
+        LimeXMLDocument doc = null;
+        doc = audioCollection.getDocForHash(mfm.readFromMap(mason));
+        Assert.assertTrue("Mason should not have a doc!",
+                          doc == null);
+        doc = audioCollection.getDocForHash(mfm.readFromMap(vader));
+        Assert.assertTrue("Vader should have a doc!",
+                          doc != null);
+        doc = audioCollection.getDocForHash(mfm.readFromMap(swing));
+        Assert.assertTrue("Swing should have a doc!",
+                          doc != null);
+        doc = videoCollection.getDocForHash(mfm.readFromMap(mason));
+        Assert.assertTrue("Mason should have a doc!",
+                          doc != null);
+        doc = videoCollection.getDocForHash(mfm.readFromMap(vader));
+        Assert.assertTrue("Vader should not have a doc!",
+                          doc == null);
+        doc = videoCollection.getDocForHash(mfm.readFromMap(swing));
+        Assert.assertTrue("Swing should have a doc!",
+                          doc != null);
+
+
+        // test keyword generation
+        List keywords = audioCollection.getKeyWords();
+        Assert.assertTrue("Keywords should have 4, instead " + keywords.size(),
+                          (keywords.size() == 4));
+        Assert.assertTrue("Correct keywords not in map!", 
+                          (keywords.contains("ferris") && 
+                           keywords.contains("swing")  &&
+                           keywords.contains("darth")  &&
+                           keywords.contains("vader") )
+                          );
+        keywords = videoCollection.getKeyWords();
+        Assert.assertTrue("Keywords should have 4, instead " + keywords.size(),
+                          (keywords.size() == 4));
+        Assert.assertTrue("Correct keywords not in map!", 
+                          (keywords.contains("null") && 
+                           keywords.contains("file")  &&
+                           keywords.contains("susheel")  &&
+                           keywords.contains("daswani") )
+                          );
+
+        
+
+        clearDirectory();
+    }
+
+
+    private void clearDirectory() {
+        File dir = new File(LimeXMLProperties.instance().getXMLDocsDir());
+        if (dir.exists() && dir.isDirectory()) {
+            // clear the files in the directory....
+            File[] files = dir.listFiles();
+            for (int i = 0; i < files.length; i++)
+                files[i].delete();
+        }
+    }
+
+
+    private void populateDirectory() {
+        File audioFile = new File("audio.collection");
+        File videoFile = new File("video.collection");
+        File newAudio  = new File("lib/xml/data/audio.sxml");
+        File newVideo  = new File("lib/xml/data/video.sxml");
+        audioFile.renameTo(newAudio);
+        videoFile.renameTo(newVideo);
     }
 
 
