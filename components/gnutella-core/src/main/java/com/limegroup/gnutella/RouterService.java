@@ -525,7 +525,7 @@ public class RouterService {
                 return;
         }
 
-        if (!acceptor.isBannedIP(addr.getHostAddress())) {
+        if (!acceptor.isBannedIP(cIP)) {
             manager.createConnectionAsynchronously(hostname, portnum);
 		}
     }

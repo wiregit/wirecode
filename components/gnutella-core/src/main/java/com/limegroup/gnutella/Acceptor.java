@@ -456,7 +456,7 @@ public class Acceptor implements Runnable {
                 //Check if IP address of the incoming socket is in _badHosts
 				
 				InetAddress address = client.getInetAddress();
-                if (isBannedIP(address.getHostAddress())) {
+                if (isBannedIP(address.getAddress())) {
                     HTTPStat.BANNED_REQUESTS.incrementStat();
                     client.close();
                     continue;
@@ -636,8 +636,8 @@ public class Acceptor implements Runnable {
      * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
      * @return true iff ip is a banned address.
      */
-    public boolean isBannedIP(String ip) {        
-        return !IPFilter.instance().allow(ip);
+    public boolean isBannedIP(byte[] addr) {        
+        return !IPFilter.instance().allow(addr);
     }
 
     private class IncomingValidator implements Runnable {

@@ -43,19 +43,8 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("endpoint should not have been created");
         } catch(IllegalArgumentException exc) {}
 
-        ////////////////////////// Private IP and Subnet Tests ////////////////
+        ////////////////////////// Subnet Tests ////////////////
         //These tests are incomplete since the methods are somewhat trivial.
-        e=new Endpoint("18.239.0.1",1);
-        assertTrue(! e.isPrivateAddress());
-        e=new Endpoint("10.0.0.0",1);
-        assertTrue(e.isPrivateAddress());
-        e=new Endpoint("10.255.255.255",1);
-        assertTrue(e.isPrivateAddress());
-        e=new Endpoint("11.0.0.0",1);
-        assertTrue(! e.isPrivateAddress());
-        e=new Endpoint("172.16.0.0",1);
-        assertTrue(e.isPrivateAddress());
-
         Endpoint e1;
         Endpoint e2;
         e1=new Endpoint("172.16.0.0",1);    e2=new Endpoint("172.16.0.1",1);

@@ -189,7 +189,8 @@ public final class ForMeReplyHandler implements ReplyHandler {
         if (handler.isPersonalSpam(pushRequest))
             return;
             
-        String h = NetworkUtils.ip2string(pushRequest.getIP());
+        byte[] ip = pushRequest.getIP();
+        String h = NetworkUtils.ip2string(ip);
         
        // make sure the guy isn't hammering us
         IntWrapper i = (IntWrapper)PUSH_REQUESTS.get(h);
@@ -204,7 +205,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
         }
         
         // if the IP is banned, don't accept it
-        if (RouterService.getAcceptor().isBannedIP(h))
+        if (RouterService.getAcceptor().isBannedIP(ip))
             return;
 
         int port = pushRequest.getPort();

@@ -4,18 +4,15 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.limegroup.gnutella.util.*;
+import java.lang.ref.WeakReference;
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, Serializable, IpPort,
-com.sun.java.util.collections.Comparable
+public class Endpoint implements Cloneable, IpPort,
+                                 com.sun.java.util.collections.Comparable
 {
-    /**
-    * serial version (needed for serialization/deserialization)
-    */
-    static final long serialVersionUID = 4686711693494625070L;
     
     private String hostname = null;
     int port = 0;
@@ -23,18 +20,6 @@ com.sun.java.util.collections.Comparable
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
     private long kbytes=-1;
-    
-    /**
-     * IP Address of form '144.145.146.147' will be stored as:
-     * ip[0] = 144
-     * ip[1] = 145
-     * ip[2] = 146
-     * ip[3] = 147
-     * Note: Lazy initialization may be done for this field.
-     * Therefore, apart from
-     * constructors, it should be accessed using only getter/setter methods
-     */
-    private byte[] hostBytes = null;
 
     /**
      * Needed for Network Discovery. Records information regarding
@@ -213,10 +198,8 @@ com.sun.java.util.collections.Comparable
             throw new IllegalArgumentException("invalid port: "+port);
         if(!NetworkUtils.isValidAddress(hostBytes))
             throw new IllegalArgumentException("invalid address");
-        this.hostBytes = hostBytes;
+
         this.port = port;
-        
-        //initialize hostname also
         this.hostname = NetworkUtils.ip2string(hostBytes);
     }
     
@@ -259,7 +242,6 @@ com.sun.java.util.collections.Comparable
         this.connectivity = ep.connectivity;
         this.files = ep.files;
         this.hostname = ep.hostname;
-        this.hostBytes = ep.hostBytes;
         this.kbytes = ep.kbytes;
         this.port = ep.port;
         this.processed = ep.processed;
@@ -391,30 +373,8 @@ com.sun.java.util.collections.Comparable
     /**
      *This method  returns the IP of the end point as an array of bytes
      */
-    public byte[] getHostBytes() throws UnknownHostException
-    {
-        if(hostBytes == null)
-        {
-            hostBytes = InetAddress.getByName(hostname).getAddress();
-            //the above fn call might throw UnknownHostException, but thats what
-            //we want in case of DNS failure
-        }
-        return hostBytes;
-    }
-
-    /**
-     * @requires this has a dotted-quad address or a name that can be
-     *  resolved.
-     * @effects Returns true iff this is a private IP address as defined by
-     *  RFC 1918.  In the case that this has a symbolic name that
-     *  cannot be resolved, returns true;
-     */
-    public boolean isPrivateAddress() {
-        try {
-            return NetworkUtils.isPrivateAddress(getHostBytes());
-        } catch (UnknownHostException e) {
-            return false;
-        }
+    public byte[] getHostBytes() throws UnknownHostException {
+        return InetAddress.getByName(hostname).getAddress();
     }
 
     /**

@@ -228,14 +228,17 @@ public class BootstrapServerManager {
 	 * @throws <tt>NullPointerException</tt> if the ip param is <tt>null</tt>
      */
     public synchronized void sendUpdatesAsync(Endpoint myIP) {
-		if(myIP == null) {
+		if(myIP == null)
 			throw new NullPointerException("cannot accept null update IP");
-		}
+
         addDefaultsIfNeeded();
+
         //For now we only send updates if the "ip=" parameter is null,
         //regardless of whether we have a url.
-        if (!myIP.isPrivateAddress())
-            requestAsync(new UpdateRequest(myIP), "GWebCache update");
+        try {
+            if (!NetworkUtils.isPrivateAddress(myIP.getHostBytes()))
+                requestAsync(new UpdateRequest(myIP), "GWebCache update");
+        } catch(UnknownHostException ignored) {}
     }
 
     /**

@@ -5,7 +5,8 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
- 
+
+import java.net.UnknownHostException; 
 import java.io.*;
 import java.text.ParseException;
 
@@ -431,7 +432,8 @@ public class HostCatcher {
         if(!pr.getClientLocale().equals(""))
             endpoint.setClientLocale(pr.getClientLocale());
         
-        if(!isValidHost(endpoint)) return false;
+        if(!isValidHost(endpoint))
+            return false;
         
         if(pr.supportsUnicast()) {
             QueryUnicaster.instance().
@@ -520,6 +522,9 @@ public class HostCatcher {
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
+        if(!isValidHost(e))
+            return false;
+        
         if (forceHighPriority)
             return add(e, GOOD_PRIORITY);
         else
@@ -533,6 +538,9 @@ public class HostCatcher {
      * (used by ConnectionManager.disconnect())
      */
     public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
+        if(!isValidHost(e))
+            return false;        
+        
         //need ExtendedEndpoint for the locale
         if (forceHighPriority)
             return add(new ExtendedEndpoint(e.getAddress(), 
@@ -554,8 +562,11 @@ public class HostCatcher {
      * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
      */
     public boolean add(Endpoint host, int priority) {
-        //need ExtendedEndpoint for the locale
         LOG.trace("adding host");
+        if(host instanceof ExtendedEndpoint)
+            return add((ExtendedEndpoint)host, priority);
+        
+        //need ExtendedEndpoint for the locale
         return add(new ExtendedEndpoint(host.getAddress(), 
                                         host.getPort()), 
                    priority);
@@ -577,7 +588,6 @@ public class HostCatcher {
      */
     private boolean add(ExtendedEndpoint e, int priority) {
         repOk();
-        if(!isValidHost(e)) return false;
         
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
@@ -657,18 +667,27 @@ public class HostCatcher {
      * @return <tt>true</tt> if the host is valid and can be added, otherwise
      *  <tt>false</tt>
      */
-    private boolean isValidHost(ExtendedEndpoint host) {
-        if(host.isPrivateAddress()) return false;
+    private boolean isValidHost(Endpoint host) {
+        byte[] addr;
+        try {
+            addr = host.getHostBytes();
+        } catch(UnknownHostException uhe) {
+            return false;
+        }
+        
+        if(NetworkUtils.isPrivateAddress(addr))
+            return false;
+
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
-        if (NetworkUtils.isMe(host.getAddress(), host.getPort()))
+        if (NetworkUtils.isMe(addr, host.getPort()))
             return false;
 
         //Skip if this host is banned.
-        if (RouterService.getAcceptor().isBannedIP(host.getAddress()))
+        if (RouterService.getAcceptor().isBannedIP(addr))
             return false;  
         
         synchronized(this) {
