@@ -1242,7 +1242,16 @@ public abstract class FileManager {
         //Special case: return up to 3 of your 'youngest' files.
         if (request.isWhatIsNewRequest()) {
             // see if there are any files to send....
-            Iterator iter = CreationTimeCache.instance().getFiles();
+            // NOTE: we only request up to 25 urns.  since these may all be
+            // partial files, we may not return any responses.  this is a
+            // calculated risk - the chance that the 25 youngest of my files are
+            // all incomplete downloads is not zero, but it is a risk we are
+            // willing to take, and definitely better than the alternative of
+            // getting ALL the files we could possibly be sharing.  we could
+            // probably do something smarter to always get the appropriate
+            // files, but the cost in code complexity isn't worth it, especially
+            // in the face of dynamic querying....
+            Iterator iter = CreationTimeCache.instance().getFiles(25);
             if (!iter.hasNext())
                 return EMPTY_RESPONSES;
             

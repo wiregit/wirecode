@@ -121,23 +121,36 @@ public final class CreationTimeCache {
 
     /**
      * Returns an iterator of URNs, from 'youngest' to 'oldest'.
+     * @param max the maximum number of URNs you want returned.  if you
+     * want all, give Integer.MAX_VALUE.
      * @return the iterator returns younger URNs first.
      */
-    public synchronized Iterator getFiles() {
+    public synchronized Iterator getFiles(final int max) {
         List urnList = new ArrayList();
         Iterator iter = URN_MAP.entrySet().iterator();
 
         // we bank on the fact that the URN_MAP iterator returns the entries
         // in descending order....
-        while (iter.hasNext()) {
+        while (iter.hasNext() && (urnList.size() < max)) {
             Map.Entry currEntry = (Map.Entry) iter.next();
             Set urns = (Set) currEntry.getValue();
-            urnList.addAll(urns);
+
+            // only put as many as desired
+            Iterator innerIter = urns.iterator();
+            while ((urnList.size() < max) && innerIter.hasNext())
+                urnList.add(innerIter.next());
         }
 
         return urnList.listIterator();
     }
 
+
+    /** Returns all of the files URNs, from youngest to oldest.
+     */
+    public synchronized Iterator getFiles() {
+        return getFiles(Integer.MAX_VALUE);
+    }
+    
         
     /**
      * Write cache so that we only have to calculate them once.
