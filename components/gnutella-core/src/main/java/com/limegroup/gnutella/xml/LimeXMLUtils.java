@@ -712,8 +712,8 @@ public class LimeXMLUtils
     }
 
     /** @return The SHA hash bytes of hte input bytes.
-     *  @exception java.lang.Exception This should never really happen. 
-     *  Thrown if hashing encountered serious flaw.
+     *  @exception java.lang.Exception Thrown if hashing encountered serious 
+     *  flaw, such as size of file changed while executing this method....
      */
     public static byte[] hashFile(File toHash) throws Exception {
         byte[] retBytes = null;
@@ -722,31 +722,41 @@ public class LimeXMLUtils
             // setup
             FileInputStream fis = new FileInputStream(toHash);           
             MessageDigest md = MessageDigest.getInstance("SHA");
-            
-            if (toHash.length() < (NUM_TOTAL_HASH)) {
+
+            long fileLength = toHash.length();            
+            if (fileLength < NUM_TOTAL_HASH) {
                 int numRead = 0;
                 do {
                     clearHashBytes();
                     numRead = fis.read(hashBytes);
                     md.update(hashBytes);
+                    // if the file changed underneath me, throw away...
+                    if (toHash.length() != fileLength)
+                        throw new Exception();
                 } while (numRead == NUM_BYTES_TO_HASH);
             }
             else { // need to do some mathy stuff.......
 
-                long thirds = toHash.length() / (long) 3;
+                long thirds = fileLength / (long) 3;
 
                 // beginning input....
                 clearHashBytes();
                 int numRead = fis.read(hashBytes);
                 md.update(hashBytes);
-                Assert.that(numRead == NUM_BYTES_TO_HASH);
+
+                // if the file changed underneath me, throw away...
+                if (toHash.length() != fileLength)
+                    throw new Exception();
 
                 // middle input...
                 clearHashBytes();
                 fis.skip(thirds - NUM_BYTES_TO_HASH);
                 numRead = fis.read(hashBytes);
                 md.update(hashBytes);
-                Assert.that(numRead == NUM_BYTES_TO_HASH);
+
+                // if the file changed underneath me, throw away...
+                if (toHash.length() != fileLength)
+                    throw new Exception();
                 
                 // ending input....
                 clearHashBytes();
@@ -755,7 +765,11 @@ public class LimeXMLUtils
                          NUM_BYTES_TO_HASH);
                 numRead = fis.read(hashBytes);
                 md.update(hashBytes);
-                Assert.that(numRead == NUM_BYTES_TO_HASH);
+
+                // if the file changed underneath me, throw away...
+                if (toHash.length() != fileLength)
+                    throw new Exception();
+
             }
                 
             retBytes = md.digest();
