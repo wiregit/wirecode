@@ -37,7 +37,7 @@ public final class NIODispatcher implements Runnable {
 	/**
 	 * Constant <tt>Selector</tt> for demultiplexing incoming traffic.
 	 */
-	private Selector _selector;
+	private final Selector SELECTOR;
 	
 	/**
 	 * Synchronized <tt>List</tt> of new readers that need to be registered for
@@ -68,6 +68,14 @@ public final class NIODispatcher implements Runnable {
      * thread.
 	 */
 	private NIODispatcher() {
+        Selector selector = null;
+        try {
+            selector = Selector.open();
+        } catch (IOException e) {
+            // this should hopefully never happen
+            ErrorService.error(e);
+        }
+        SELECTOR = selector;
 		Thread nioThread = new Thread(this, "nio thread");
 		nioThread.setDaemon(true);
 		nioThread.start();
@@ -88,7 +96,7 @@ public final class NIODispatcher implements Runnable {
             throw new NullPointerException("adding null connection");
         }
 		READERS.add(conn);
-		_selector.wakeup();
+		SELECTOR.wakeup();
 	}
 	
 	/**
@@ -114,7 +122,7 @@ public final class NIODispatcher implements Runnable {
         // made from a separate thread, so we need to wake up the selector so 
         // that it doesn't keep blocking in select() and instead registers the 
         // new Channel for write events
-		_selector.wakeup();
+		SELECTOR.wakeup();
 	}
 
     /* (non-Javadoc)
@@ -135,15 +143,12 @@ public final class NIODispatcher implements Runnable {
 	 * @throws IOException if the <tt>Selector</tt> is not opened successfully
 	 */
     private void loopForMessages() throws IOException {
-		if(_selector == null) {
-			_selector = Selector.open();
-		}
 		while(true) {
             
 			int n = -1;
             
             try {
-                n = _selector.select();
+                n = SELECTOR.select();
             } catch(NullPointerException e) {
                 // windows bug -- need to catch it
                 continue;
@@ -183,7 +188,7 @@ public final class NIODispatcher implements Runnable {
 				// more efficient and cleaner
 				if(channel.isOpen()) {
 					try {
-                        channel.register(_selector, SelectionKey.OP_READ, conn);
+                        channel.register(SELECTOR, SelectionKey.OP_READ, conn);
                     } catch (ClosedChannelException e) {
                     	// keep registering the other connections
                         continue;
@@ -217,7 +222,7 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
-		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
+		java.util.Iterator keyIter = SELECTOR.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
 			SelectionKey key = (SelectionKey)keyIter.next();
 			keyIter.remove();
@@ -270,7 +275,7 @@ public final class NIODispatcher implements Runnable {
 	 */
 	private void handleWriters() {
 		
-		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
+		java.util.Iterator keyIter = SELECTOR.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
 			SelectionKey key = (SelectionKey)keyIter.next();
 			keyIter.remove();
@@ -306,7 +311,7 @@ public final class NIODispatcher implements Runnable {
 		// more efficient and cleaner
 		if(channel.isOpen()) {
 			try {
-                channel.register(_selector, ops, conn);
+                channel.register(SELECTOR, ops, conn);
             } catch (ClosedChannelException e) {
                 // no problem -- just don't register it
             }
