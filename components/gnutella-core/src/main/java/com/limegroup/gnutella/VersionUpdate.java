@@ -40,13 +40,6 @@ public class VersionUpdate
 	public void initialize() {
 		_settings = SettingsManager.instance();
 		_latest = _settings.getLastVersionChecked();
-	}
-		
-	/** Checks for available updates.  If one is found, prompts the user
-	 *  if they'd like to update.  If they say yes, actually does the update.
-     *  If it is successful, exits the JVM via System.exit(0).  Otherwise
-     *  just returns. */
-	public void doVersionCheckingAndHandling() {
   		_currentDirectory = System.getProperty("user.dir");
   		if(!_currentDirectory.endsWith(File.separator))
   			_currentDirectory += File.separator;	
@@ -58,12 +51,17 @@ public class VersionUpdate
   				_settings.setDeleteOldJAR(false);
   				_settings.setOldJARName("");
   			}
-  		}
+  		}	   
+	}
 		
-		if (!_settings.getCheckAgain())
+	/** Checks for available updates.  If one is found, prompts the user
+	 *  if they'd like to update.  If they say yes, actually does the update.
+     *  If it is successful, exits the JVM via System.exit(0).  Otherwise
+     *  just returns. */
+	public void doVersionCheckingAndHandling() {
+		if(!_settings.getCheckAgain()) {
 			return;
-
-		if(CommonUtils.isWindows()) {
+		} else if(CommonUtils.isWindows()) {
 			handleWindowsUpdate();
 		} else if(CommonUtils.isMacClassic()) {
 			handleMacClassicUpdate();
@@ -77,189 +75,29 @@ public class VersionUpdate
 	}
 
 	private void handleWindowsUpdate() {
-		if(newVersionAvailable("/WindowsVersion.txt")) {
-		}
+		//if(newVersionAvailable("/WindowsVersion.txt")) {
+		//}
 	}
 
 	private void handleMacClassicUpdate() {
-		if(newVersionAvailable("/MacClassicVersion.txt")) {
-		}
+		//if(newVersionAvailable("/MacClassicVersion.txt")) {
+		//}
 	}
 
 	private void handleMacOSXUpdate() {
-		if(newVersionAvailable("/MacOSXVersion.txt")) {
-		}
+		//if(newVersionAvailable("/MacOSXVersion.txt")) {
+		//}
 	}
 
 	private void handleLinuxUpdate() {
-		if(newVersionAvailable("/LinuxVersion.txt")) {
-		}
+		//if(newVersionAvailable("/LinuxVersion.txt")) {
+		//}
 	}
 
 	private void handleSolarisUpdate() {
-		if(newVersionAvailable("/SolarisVersion.txt")) {
-		}
+		//if(newVersionAvailable("/SolarisVersion.txt")) {
+		//}
 	}
-
-	private boolean newVersionAvailable(String fileName) {
-		String latest = "";
-		ByteReader br = null;
-		try {
-			// open the http connection, and grab 
-			// the file with the version number in it.
-			URL url = new URL("http", "www.limewire.com", fileName);
-			URLConnection conn = (new URLOpener(url)).connect(CONNECT_TIMEOUT);
-            //The try-catch below works around JDK bug 4091706.
-			InputStream input = conn.getInputStream();
-			br = new ByteReader(input);
-		} catch(MalformedURLException mue) {
-			return false;
-		} catch(IOException ioe) {
-			return false;
-		}
-
-        // read in the version number
-        while (true) {
-            String str = " ";
-            try {
-                str = br.readLine();
-                // this should get us the version number
-                if (str != null) {
-                    latest = str;
-                }
-            } catch (IOException ioe) {
-                br.close();
-                return false;
-            }			
-            //EOF?
-            if(str == null || str.equals("")) {
-				break;
-			}
-        }
-		br.close();
-
-        String current = _settings.getCurrentVersion(); 
-        int version = compare(current, latest);
-			
-        if (version == -1) {
-            // the current version is not the newest
-				
-            String lastChecked;
-            lastChecked = _settings.getLastVersionChecked();				
-            if((compare(lastChecked, latest) != 0)) {
-                _newVersion = latest;
-				return true;
-            }
-        }		
-		return false;
-	}
-
-	// This methos will compare two strings representing a 
-	// version number.  if old is greater than, it returns
-	// 1, if they are equal, it returns 0, and if old is 
-	// less than it returns -1.  If there is a problem, it
-	// will just return 0, altough it might be better to 
-	// throw an exception.
-	private int compare(String old_version, String new_version) {
-
-		// first check to see if the values are null or blank
-		// and return 0 if there is an error.
-		if ( (old_version == null) || (old_version.equals("")) ||
-			 (new_version == null) || (new_version.equals("")) ) {
-			return 0;
-		}	
-
-		// the version number should be some combination
-		// of period-delimeted numbers concatonated with 
-		// a letter.  Ex. 1.2a
-		// However, we don't really care about the letter
-		// for determining whether or not to update.
-
-		// the tokenizer, period-delimited
-		StringTokenizer tokenizer_old = new StringTokenizer(old_version, ".");
-		StringTokenizer tokenizer_new = new StringTokenizer(new_version, ".");
-
-		// there are two numbers (with possibly more than one digit)
-		// for each of the the version numbers
-
-		String strOld;  // first number in string representation, old
-		String strNew;  // first number in string representation, new
-
-		int numOld;  // first number, old
-		int numNew;  // first number, new
-		
-		// start with the left-most characters...
-		strOld = tokenizer_old.nextToken();
-		strNew = tokenizer_new.nextToken();
-		
-		// convert to int's...
-		try {
-			numOld = java.lang.Integer.parseInt(strOld);
-			numNew = java.lang.Integer.parseInt(strNew);
-		} catch (NumberFormatException e) {
-			return 0;
-		}
-	   
-		if  (numOld < numNew) {
-			// old version is less than the new, so return -1
-			return -1;
-		}   
-		else if  (numOld > numNew) {
-			// old version is greater than the new, so return 1
-			return 1;
-		}
-		// we really only need to continue if the values are equal
-
-		// the next token should be a cobination of a number 
-		// and a letter
-		// start with the left-most characters...
-		strOld = tokenizer_old.nextToken();
-		strNew = tokenizer_new.nextToken();
-
-		// i don't really like too do this, but i guess
-		// the easiest thing to do is expect that there
-		// will only be two charcters, that the first is
-		// a number, and the second is a letter, and
-		// that i can use the index to get them.
-		
-		String subNew; 
-		String subOld; 
-		
-		char endOld = strOld.charAt(strOld.length()-1);
-		char endNew = strNew.charAt(strNew.length()-1);
-
-		if(!( (endOld >= '0') && (endOld <= '9') )) {
-			// there is a letter at the end...
-			// so i need to remove it to do the comparison
-			subNew = strNew.substring(0,strNew.length() -1);
-			subOld = strOld.substring(0,strOld.length() -1);
-		} else {
-			subOld = strOld;
-			subNew = strNew;
-		}
-		
-		// convert to int's...
-		try {
-			numNew = java.lang.Integer.parseInt(subNew);
-			numOld = java.lang.Integer.parseInt(subOld);
-
-		} catch (Exception e) {
-			return 0;
-		}
-
-		if  (numOld < numNew) {
-			// old version is less than the new, so return -1
-			return -1;
-		}
-		else if  (numOld > numNew) {
-			// old version is greater than the new, so return 1
-			return 1;
-		}
-
-		// they are the same.. 
-		return 0;  
-
-	} 
 
 	/** If the CHECK_AGAIN property is false, returns.  Otherwise asks the user
      *  if they want to update from version oldV to newV.  If the user chooses
@@ -466,5 +304,180 @@ public class VersionUpdate
 	private void resetSettings() {
 		_settings.setDeleteOldJAR(false);
 		_settings.setOldJARName("");
+	}
+
+	private class ServerHandler {
+		private String _versionUpdateFileName;
+
+		private ServerHandler(String file) {
+			_versionUpdateFileName = file;
+		}		
+
+		private boolean newVersionAvailable(String fileName) {
+			String latest = "";
+			ByteReader br = null;
+			try {
+				// open the http connection, and grab 
+				// the file with the version number in it.
+				URL url = new URL("http", "www.limewire.com", fileName);
+				URLConnection conn = (new URLOpener(url)).connect(CONNECT_TIMEOUT);
+				//The try-catch below works around JDK bug 4091706.
+				InputStream input = conn.getInputStream();
+				br = new ByteReader(input);
+			} catch(MalformedURLException mue) {
+				return false;
+			} catch(IOException ioe) {
+				return false;
+			}
+
+			String temp1 = "";
+			String temp2 = "";
+			//String temp1 = br.readLine();
+			//String temp2 = br.readLine();
+			if(temp1 == null || temp2 == null ||
+			   temp1.equals("") || temp2.equals("")) {
+				return false;
+			} else {
+				br.close();
+			}
+			// read in the version number
+			while (true) {
+				String str = " ";
+				try {
+					str = br.readLine();
+					// this should get us the version number
+					if (str != null) {
+						latest = str;
+					}
+				} catch (IOException ioe) {
+					br.close();
+					return false;
+				}			
+				//EOF?
+				if(str == null || str.equals("")) {
+					break;
+				}
+			}
+			br.close();
+			
+			String current = _settings.getCurrentVersion(); 
+			int version = compare(current, latest);
+			
+			if (version == -1) {
+				// the current version is not the newest
+				
+				String lastChecked = _settings.getLastVersionChecked();				
+				if((compare(lastChecked, latest) != 0)) {
+					_newVersion = latest;
+					return true;
+				}
+			}		
+			return false;
+		}
+
+		// This methos will compare two strings representing a 
+		// version number.  if old is greater than, it returns
+		// 1, if they are equal, it returns 0, and if old is 
+		// less than it returns -1.  If there is a problem, it
+		// will just return 0, altough it might be better to 
+		// throw an exception.
+		private int compare(String old_version, String new_version) {
+			
+			// first check to see if the values are null or blank
+			// and return 0 if there is an error.
+			if ( (old_version == null) || (old_version.equals("")) ||
+				 (new_version == null) || (new_version.equals("")) ) {
+				return 0;
+			}	
+			
+			// the version number should be some combination
+			// of period-delimeted numbers concatonated with 
+			// a letter.  Ex. 1.2a
+			// However, we don't really care about the letter
+			// for determining whether or not to update.
+			
+			// the tokenizer, period-delimited
+			StringTokenizer tokenizer_old = new StringTokenizer(old_version, ".");
+			StringTokenizer tokenizer_new = new StringTokenizer(new_version, ".");
+			
+			// there are two numbers (with possibly more than one digit)
+			// for each of the the version numbers
+			
+			String strOld;  // first number in string representation, old
+			String strNew;  // first number in string representation, new
+			
+			int numOld;  // first number, old
+			int numNew;  // first number, new
+			
+			// start with the left-most characters...
+			strOld = tokenizer_old.nextToken();
+			strNew = tokenizer_new.nextToken();
+			
+			// convert to int's...
+			try {
+				numOld = java.lang.Integer.parseInt(strOld);
+				numNew = java.lang.Integer.parseInt(strNew);
+			} catch (NumberFormatException e) {
+				return 0;
+			}
+			
+			if  (numOld < numNew) {
+				// old version is less than the new, so return -1
+				return -1;
+			}   
+			else if  (numOld > numNew) {
+				// old version is greater than the new, so return 1
+				return 1;
+			}
+			// we really only need to continue if the values are equal
+			
+			// the next token should be a cobination of a number 
+			// and a letter
+			// start with the left-most characters...
+			strOld = tokenizer_old.nextToken();
+			strNew = tokenizer_new.nextToken();
+			
+			// i don't really like too do this, but i guess
+			// the easiest thing to do is expect that there
+			// will only be two charcters, that the first is
+			// a number, and the second is a letter, and
+			// that i can use the index to get them.
+			
+			String subNew; 
+			String subOld; 
+			
+			char endOld = strOld.charAt(strOld.length()-1);
+			char endNew = strNew.charAt(strNew.length()-1);
+			
+			if(!( (endOld >= '0') && (endOld <= '9') )) {
+				// there is a letter at the end...
+				// so i need to remove it to do the comparison
+				subNew = strNew.substring(0,strNew.length() -1);
+				subOld = strOld.substring(0,strOld.length() -1);
+			} else {
+				subOld = strOld;
+				subNew = strNew;
+			}
+			
+			// convert to int's...
+			try {
+				numNew = java.lang.Integer.parseInt(subNew);
+				numOld = java.lang.Integer.parseInt(subOld);
+				
+			} catch (Exception e) {
+				return 0;
+			}
+			
+			if(numOld < numNew) {
+				// old version is less than the new, so return -1
+				return -1;
+			}
+			else if(numOld > numNew) {
+				// old version is greater than the new, so return 1
+				return 1;
+			}
+			// they are the same.. 
+			return 0;  
+		} 
 	}
 }
