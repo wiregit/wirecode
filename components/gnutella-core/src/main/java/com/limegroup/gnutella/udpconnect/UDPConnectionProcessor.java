@@ -342,6 +342,7 @@ public class UDPConnectionProcessor {
         // Register for a full cleanup after a slight delay
         _closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
            System.currentTimeMillis() + SHUTDOWN_DELAY_TIME);
+        _scheduler.register(_closedCleanupEvent);
 	}
 
     private synchronized void finalClose() {
