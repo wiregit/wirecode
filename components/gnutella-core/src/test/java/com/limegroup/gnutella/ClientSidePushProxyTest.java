@@ -339,7 +339,114 @@ public class ClientSidePushProxyTest
         assertEquals("GET /get/10/boalt.org HTTP/1.1", currLine);
 
         // awesome - everything checks out!
+        push.close();
+        ss.close();
     }
+
+
+    public void testNoProxiesSendsPushNormal() throws Exception {
+        drain(testUP);
+        // some setup
+        byte[] clientGUID = GUID.makeGuid();
+
+        // construct and send a query        
+        byte[] guid = GUID.makeGuid();
+        rs.query(guid, "golf is awesome");
+
+        // the testUP should get it
+        Message m = null;
+        do {
+            m = testUP.receive(TIMEOUT);
+        } while (!(m instanceof QueryRequest)) ;
+
+        // send a reply with some PushProxy info
+        Response[] res = new Response[1];
+        res[0] = new Response(10, 10, "golf is awesome");
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
+                           clientGUID, new byte[0], false, false, true,
+                           true, false, false, null);
+        testUP.send(m);
+        testUP.flush();
+
+        // wait a while for Leaf to process result
+        Thread.sleep(1000);
+        assertTrue(callback.getRFD() != null);
+
+        // tell the leaf to download the file, should result in push proxy
+        // request
+        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+
+        // await a PushRequest
+        do {
+            m = testUP.receive(TIMEOUT);
+        } while (!(m instanceof PushRequest)) ;
+    }
+
+
+    public void testCanReactToBadPushProxy() throws Exception {
+        drain(testUP);
+        // some setup
+        byte[] clientGUID = GUID.makeGuid();
+
+        // construct and send a query        
+        byte[] guid = GUID.makeGuid();
+        rs.query(guid, "berkeley.edu");
+
+        // the testUP should get it
+        Message m = null;
+        do {
+            m = testUP.receive(TIMEOUT);
+        } while (!(m instanceof QueryRequest)) ;
+
+        // set up a server socket
+        ServerSocket ss = new ServerSocket(7000);
+        ss.setSoTimeout(TIMEOUT);
+
+        // send a reply with some PushProxy info
+        PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
+        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
+        proxies[1] = new QueryReply.PushProxyContainer("127.0.0.1", 8000);
+        Response[] res = new Response[1];
+        res[0] = new Response(10, 10, "berkeley.edu");
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
+                           clientGUID, new byte[0], false, false, true,
+                           true, false, false, proxies);
+        testUP.send(m);
+        testUP.flush();
+
+        // wait a while for Leaf to process result
+        Thread.sleep(1000);
+        assertTrue(callback.getRFD() != null);
+
+        // tell the leaf to download the file, should result in push proxy
+        // request
+        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+
+        // wait for the incoming HTTP request
+        Socket httpSock = ss.accept();
+        assertNotNull(httpSock);
+
+        // send back a error and make sure the PushRequest is sent via the normal
+        // way
+        BufferedWriter writer = 
+            new BufferedWriter(new
+                               OutputStreamWriter(httpSock.getOutputStream()));
+        
+        writer.write("HTTP/1.1 410 gobbledygook");
+        writer.flush();
+        Thread.sleep(300);
+        httpSock.close();
+
+        // await a PushRequest
+        do {
+            m = testUP.receive(TIMEOUT*4);
+        } while (!(m instanceof PushRequest)) ;
+
+        // everything checks out
+        ss.close();
+    }
+
+
 
 
     //////////////////////////////////////////////////////////////////
@@ -402,10 +509,9 @@ public class ClientSidePushProxyTest
             return rfd;
         }
 
-        public synchronized void handleQueryResult(HostData data, 
+        public void handleQueryResult(HostData data, 
                                                    Response response, 
                                                    List docs) {
-            assertNotNull(data.getPushProxies());
             rfd = new RemoteFileDesc(data.getIP(), data.getPort(),
                                      response.getIndex(), 
                                      response.getName(),
@@ -414,7 +520,6 @@ public class ClientSidePushProxyTest
                                      0, data.isChatEnabled(), 3, false,
                                      null, null, false, 
                                      data.getPushProxies());
-            assertNotNull(rfd.getPushProxies());
         }
     }
 
