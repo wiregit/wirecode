@@ -561,9 +561,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             throw new CantResumeException("");  //      maybe another exception?
 
 		if(allFiles[0].getSHA1Urn() == null) {
-			return QueryRequest.createRequery(extractQueryString());
+			return QueryRequest.createQuery(extractQueryString());
 		}
-		return QueryRequest.createRequery(allFiles[0].getSHA1Urn());
+		return QueryRequest.createQuery(allFiles[0].getSHA1Urn());
     }
 
 
@@ -884,8 +884,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Ignore request if already in the download cycle.
         synchronized (this) {
             if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
-                   state==ABORTED || state==WAITING_FOR_RESULTS ||
-                   state==WAITING_FOR_USER))
+                   state==ABORTED || state==WAITING_FOR_USER))
                 return false;
         }
 
@@ -908,9 +907,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //Interrupt any waits.
                 if (dloaderManagerThread!=null)
                     dloaderManagerThread.interrupt();
-            } else if (state==WAITING_FOR_RESULTS) {
-                // wake up the requerier...
-                reqLock.release();
             } else if (state==WAITING_FOR_USER) {
                 forceRequery();
             }
@@ -1139,15 +1135,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
     }
 
-
-    /** Returns the next system time that we can requery.  Subclasses may
-     *  override to customize this behavior.  Note that this is still 
-     *  subject to global requery limits in DownloadManager.
-     *  @param requeries the number of requeries that have happened so far
-     *  @return an absolute system time of the next allowed requery */
-    protected long nextRequeryTime(int requeries) {
-        return System.currentTimeMillis()+TIME_BETWEEN_REQUERIES;
-    }
 
     /** Returns the amount of time to wait in milliseconds before retrying,
      *  based on tries.  This is also the time to wait for * incoming pushes to

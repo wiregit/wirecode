@@ -95,15 +95,15 @@ public class ResumeDownloader extends ManagedDownloader
         return _size;
     }
 
-    /** 
-     * Overrides ManagedDownloader to ensure that the first requery happens as
-     * soon as necessary.
+    /**
+     * @param numRequeries The number of requeries sent so far.
      */
-    protected long nextRequeryTime(int requeries) {
-        if (requeries==0)
-            return System.currentTimeMillis();   //now!
+    protected void pauseForRequery(int numRequeries) {
+        if (numRequeries > 0) {
+            super.pauseForRequery(numRequeries);
+        }
         else
-            return super.nextRequeryTime(requeries);        
+            ; // don't wait the first time!!
     }
 
     /**
