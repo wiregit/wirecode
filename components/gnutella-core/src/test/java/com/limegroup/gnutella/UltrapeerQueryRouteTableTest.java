@@ -139,7 +139,6 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
     private static void sendQuery(QueryRequest qr) {
         MessageRouter mr = RouterService.getMessageRouter();
         mr.sendDynamicQuery(qr);
-        //mr.broadcastQueryRequest(qr, REPLY_HANDLER);
     }
     
     private static class TestMessageRouter extends StandardMessageRouter {
@@ -149,7 +148,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
         
         public void originateQuery(QueryRequest r, ManagedConnection c) {
             SENT.add(r);
-            super.sendQueryRequest(r, c);
+            super.sendQueryRequest(r, c, ForMeReplyHandler.instance());
         }
 	}
 
