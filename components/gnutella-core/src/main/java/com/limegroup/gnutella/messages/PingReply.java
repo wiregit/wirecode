@@ -143,8 +143,6 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     private static final byte[] CACHED_VENDOR = new byte[5];
     
-    private static final String BOGUS_UHC_ADDR = "0.0.0.0";
-
     // performs any necessary static initialization of fields,
     // such as the vendor GGEP extension
     static {
@@ -587,20 +585,13 @@ public class PingReply extends Message implements Serializable, IpPort {
  		    ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port: "+port); 
         }
+ 		
+ 		// this address may get updated if we have the UDPHC extention
+ 		// therefore it is checked after checking for that extention.
         String ipString = NetworkUtils.ip2string(payload, 2);
         
-        if(!NetworkUtils.isValidAddress(ipString) && 
-                !ipString.equals(BOGUS_UHC_ADDR)) {
-            ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
-            throw new BadPacketException("invalid address: " + ipString);
-        }
-        InetAddress ip,myIp;
-        int myPort;
-        try {
-            ip = InetAddress.getByName(NetworkUtils.ip2string(payload, 2));
-        } catch (UnknownHostException e) {
-            throw new BadPacketException("bad IP:"+ipString+" "+e.getMessage());
-        }
+        InetAddress ip = null;
+        
         GGEP ggep = parseGGEP(payload);
         
         if(ggep != null) {
@@ -631,30 +622,6 @@ public class PingReply extends Message implements Serializable, IpPort {
                 }
             }
             
-            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
-                byte []data=null;
-                try{
-                    data = 
-                        ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
-                }catch(BadGGEPPropertyException bad) {
-                    throw new BadPacketException(bad.getMessage());
-                }
-                
-                if (data==null || data.length!=6) 
-                    throw new BadPacketException("Pong had IPPORT header but bad data");
-                
-                byte [] myip = new byte[4];
-                System.arraycopy(data,0,myip,0,4);
-                
-                try{
-                    myIp = NetworkUtils.getByAddress(myip);
-                }catch(UnknownHostException bad) {
-                    throw new BadPacketException(bad.getMessage());
-                }
-                
-                myPort = ByteOrder.leb2short(data,4);
-            }
-            
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
                 byte[] data = null;
                 try {
@@ -679,9 +646,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                     String dns = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
                     ip = InetAddress.getByName(dns);
                     ipString = ip.getHostAddress();
-                }catch(BadGGEPPropertyException maybeBad) {
-                    if (ipString.equals(BOGUS_UHC_ADDR))
-                        throw new BadPacketException(maybeBad.getMessage());
+                }catch(BadGGEPPropertyException ignored) {
                 }catch(UnknownHostException bad) {
                     throw new BadPacketException(bad.getMessage());
                 }
@@ -689,10 +654,18 @@ public class PingReply extends Message implements Serializable, IpPort {
                 
         }
 
-        // we received a pong from 0.0.0.0 that wasn't an UHC? bad.
-        if (ipString.equals(BOGUS_UHC_ADDR))
-            throw new BadPacketException("invalid address "+ipString);
+        if(!NetworkUtils.isValidAddress(ipString)) {
+            ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
+            throw new BadPacketException("invalid address: " + ipString);
+        }
         
+        if (ip==null) {
+            try {
+                ip = InetAddress.getByName(NetworkUtils.ip2string(payload, 2));
+            } catch (UnknownHostException e) {
+                throw new BadPacketException("bad IP:"+ipString+" "+e.getMessage());
+            }
+        }
         return new PingReply(guid, ttl, hops, payload, ggep, ip);
     }
      
@@ -789,40 +762,35 @@ public class PingReply extends Message implements Serializable, IpPort {
             }
             
             if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
-                byte[] data=null;
                 try{
-                    data = ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
-                }catch(BadGGEPPropertyException bad) {
-                    Assert.that(false,"creating a PingReply with invalid GGEP field");
-                    //this should have been checked earlier
-                }
-                
-                
-                byte [] myip = new byte[4];
-                // only copy the addr if the data is atleast 6
-                // bytes (ip + port).  that way isValidAddress
-                // will fail & we don't need to recheck the length
-                // when getting the port.
-                if(data.length >= 6)
-                    System.arraycopy(data,0,myip,0,4);
-                
-                if (NetworkUtils.isValidAddress(myip)) {
-                    try{
-                        myIP = NetworkUtils.getByAddress(myip);
-                        myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
+                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
 
-                        if (NetworkUtils.isPrivateAddress(myIP) ||
-                            !NetworkUtils.isValidPort(myPort) ) {
-                            // liars, or we are behind a NAT and there is LAN outside
-                            // either way we can't use it
-                            myIP=null;
-                            myPort=0;
-                        }
+                    byte [] myip = new byte[4];
+                    // only copy the addr if the data is atleast 6
+                    // bytes (ip + port).  that way isValidAddress
+                    // will fail & we don't need to recheck the length
+                    // when getting the port.
+                    if(data.length >= 6)
+                        System.arraycopy(data,0,myip,0,4);
                     
-                    }catch(UnknownHostException bad) {
-                        //keep the ip address null and the port 0
+                    if (NetworkUtils.isValidAddress(myip)) {
+                        try{
+                            myIP = NetworkUtils.getByAddress(myip);
+                            myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
+                            
+                            if (NetworkUtils.isPrivateAddress(myIP) ||
+                                    !NetworkUtils.isValidPort(myPort) ) {
+                                // liars, or we are behind a NAT and there is LAN outside
+                                // either way we can't use it
+                                myIP=null;
+                                myPort=0;
+                            }
+                            
+                        }catch(UnknownHostException bad) {
+                            //keep the ip address null and the port 0
+                        }
                     }
-                }
+                }catch(BadGGEPPropertyException ignored) {}
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
