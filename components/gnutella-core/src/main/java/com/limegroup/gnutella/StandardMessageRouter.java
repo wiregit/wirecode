@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -215,6 +216,7 @@ public class StandardMessageRouter extends MessageRouter {
                 }
                 catch (BadPacketException bpe) {
                     // should NEVER happen
+                    ErrorService.error(bpe);
                     bpe.printStackTrace();
                 }
             }
@@ -243,4 +245,127 @@ public class StandardMessageRouter extends MessageRouter {
         // -----------------------------
 
     }
+
+    /** 
+     * Creates a <tt>List</tt> of <tt>QueryReply</tt> instances with
+     * compressed XML data, if requested.
+     *
+     * @return a new <tt>List</tt> of <tt>QueryReply</tt> instances
+     */
+    protected List createQueryReply(byte[] guid, byte ttl, int port, 
+                                    byte[] ip , long speed, Response[] res,
+                                    byte[] clientGUID, boolean notIncoming,
+                                    boolean busy, boolean uploaded, 
+                                    boolean measuredSpeed, 
+                                    boolean supportsChat,
+                                    boolean isFromMcast) {
+        
+        List queryReplies = new ArrayList();
+        QueryReply queryReply = null;
+
+        // get the xml collection string...
+        String xmlCollectionString = 
+        LimeXMLDocumentHelper.getAggregateString(res);
+        if (xmlCollectionString == null)
+            xmlCollectionString = "";
+
+        byte[] xmlBytes = null;
+        try {
+            xmlBytes = xmlCollectionString.getBytes("UTF-8");
+        } catch(UnsupportedEncodingException ueex) {//no support for utf-8??
+            xmlCollectionString = "";
+            xmlBytes = xmlCollectionString.getBytes();
+        }
+        
+        // it may be too big....
+        if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
+            // ok, need to partition responses up once again and send out
+            // multiple query replies.....
+            List splitResps = new LinkedList();
+            splitAndAddResponses(splitResps, res);
+
+            while (!splitResps.isEmpty()) {
+                Response[] currResps = (Response[]) splitResps.remove(0);
+                String currXML = 
+                LimeXMLDocumentHelper.getAggregateString(currResps);
+                byte[] currXMLBytes = null;
+                try {
+                    currXMLBytes = currXML.getBytes("UTF-8");
+                } catch(UnsupportedEncodingException ueex) {
+                    currXMLBytes = "".getBytes();
+                }
+                if ((currXMLBytes.length > QueryReply.XML_MAX_SIZE) &&
+                                                        (currResps.length > 1)) 
+                    splitAndAddResponses(splitResps, currResps);
+                else {
+                    // create xml bytes if possible...
+                    byte[] xmlCompressed = null;
+                    if ((currXML != null) && (!currXML.equals("")))
+                        xmlCompressed = LimeXMLUtils.compress(currXMLBytes);
+                    else //there is no XML
+                        xmlCompressed = new byte[0];
+                    
+                    try {
+                        // create the new queryReply
+                        queryReply = new QueryReply(guid, ttl, port, ip, speed, 
+                                                    currResps, _clientGUID, 
+                                                    xmlCompressed, notIncoming, 
+                                                    busy, uploaded, 
+                                                    measuredSpeed, supportsChat,
+                                                    isFromMcast);
+                        queryReplies.add(queryReply);
+                    }
+                    catch (IllegalArgumentException ignored) {
+                    }
+                }
+            }
+
+        }
+        else {  // xml is small enough, no problem.....
+            // get xml bytes if possible....
+            byte[] xmlCompressed = null;
+            if (xmlCollectionString!=null && !xmlCollectionString.equals(""))
+                xmlCompressed = 
+                LimeXMLUtils.compress(xmlBytes);
+            else //there is no XML
+                xmlCompressed = new byte[0];
+            
+            try {
+                // create the new queryReply
+                queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
+                                            _clientGUID, xmlCompressed,
+                                            notIncoming, busy, uploaded, 
+                                            measuredSpeed,supportsChat, false);
+                queryReplies.add(queryReply);
+            }
+            catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return queryReplies;
+    }
+
+    
+    /** @return Simply splits the input array into two (almost) equally sized
+     *  arrays.
+     */
+    private Response[][] splitResponses(Response[] in) {
+        int middle = in.length/2;
+        Response[][] retResps = new Response[2][];
+        retResps[0] = new Response[middle];
+        retResps[1] = new Response[in.length-middle];
+        for (int i = 0; i < middle; i++)
+            retResps[0][i] = in[i];
+        for (int i = 0; i < (in.length-middle); i++)
+            retResps[1][i] = in[i+middle];
+        return retResps;
+    }
+
+    private void splitAndAddResponses(List addTo, Response[] toSplit) {
+        Response[][] splits = splitResponses(toSplit);
+        addTo.add(splits[0]);
+        addTo.add(splits[1]);
+    }
+
+    
 }
