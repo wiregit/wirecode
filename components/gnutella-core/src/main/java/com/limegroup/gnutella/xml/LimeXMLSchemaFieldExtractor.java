@@ -126,26 +126,21 @@ class LimeXMLSchemaFieldExtractor
             //now get the root element below <xsd:schema>
             String rootElementName = getRootElementName();
             
-            Set fieldNames = new HashSet(); 
+            List fieldNames = new LinkedList(); 
             fillWithFieldNames(fieldNames, 
                 (FieldTypeSet)_nameFieldTypeSetMap.get(rootElementName),
                 rootElementName);
             
-            System.out.println("fieldNames = " + fieldNames);
+            return (String[])fieldNames.toArray(new String[0]);
         }
         catch(NullPointerException npe)
         {
             return new String[0];
         }
-        finally
-        {
-            System.out.println("Map = " + _nameFieldTypeSetMap);
-        }
-        return null;
     }
     
     
-    private static void  fillWithFieldNames(Set fieldNames,
+    private static void  fillWithFieldNames(List fieldNames,
         FieldTypeSet fieldTypeSet,
         final String prefix)
     {
