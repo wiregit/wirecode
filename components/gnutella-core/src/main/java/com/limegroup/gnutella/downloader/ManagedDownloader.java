@@ -289,6 +289,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	private DownloadChatList chatList;
 
+	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
+	 *  instance.
+	 */
+	private DownloadBrowseHostList browseList;
+
+
     /** The various states of the ManagedDownloade with respect to the 
      * corruption state of this download. 
      */
@@ -304,12 +310,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int corruptState = NOT_CORRUPT_STATE;
     private Object corruptStateLock = new Object();
     
-	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
-	 *  instance.
-	 */
-	private DownloadBrowseHostList browseList;
-
-
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * attempts to begin immediately; there is no need to call initialize.
@@ -385,8 +385,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 		this.fileManager=fileManager;
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
-        stealLock = new Object();
         browseList=new DownloadBrowseHostList();
+        stealLock = new Object();
         stopped=false;
         corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
@@ -1330,6 +1330,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized(this) {
                 dloaders.add(dloader);
                 chatList.addHost(dloader);
+                browseList.addHost(dloader);
             }
             return true;
         }
@@ -1450,9 +1451,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch (IOException e) {
             problem = true;
 			chatList.removeHost(downloader);
+            browseList.removeHost(downloader);
         }
         finally {
-            browseList.removeHost(downloader);
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop+ 
