@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=ישראל
 LOCALE_VARIANT_CODE =
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Hebr
-LOCALE_SCRIPT_NAME=עברית
+LOCALE_SCRIPT_NAME=Hebrew
 LOCALE_ENGLISH_LANGUAGE_NAME=Hebrew
 
 ################################################################################
