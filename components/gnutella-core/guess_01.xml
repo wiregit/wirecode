@@ -232,7 +232,7 @@
 		it possible to search Ultrapeers that do not implement GUESS.  To 
 		make sure queries do not flood the network with too
 		much traffic, the client MUST pause for a reasonable amount
-		of time between each query, perhaps about 200 milliseconds.  This 
+		of time between each query.  This 
 		pause accounts for network latency, as it takes a variable 
 		amount of time to receive results from an Ultrapeer
 		and its leaves.  The interval allocates time to receive these
@@ -620,11 +620,11 @@
 			significantly under this limit if possible.  Moreover,
 			IP headers are at least 20 bytes, and UDP headers are 
 			8 bytes.  In addition, there are many other 
-			protocols, such as PPP, that can add bytes of their 
-			own.  As a result, developers should stay significantly under 
-			the 1,500 byte limit for Gnutella message data.  A limit 
-			of 1K should suffice in all cases, with a hard upper limit 
-			of 1,400 bytes.
+			protocols, such as PPPoE, that can add bytes of their 
+			own.<xref target="RFC2516"/>  As a result, developers 
+			should stay significantly under the 1,500 byte limit for 
+			Gnutella message data.  A limit of 1K should suffice 
+			in all cases, with a hard upper limit of 1,400 bytes.
 			
 			<vspace/>
 			<vspace/>	
@@ -960,6 +960,7 @@
 	  </reference>
 
       <?rfc include="reference.RFC.1191" ?>
+      <?rfc include="reference.RFC.2516" ?>
 
 	  <reference target="http://groups.yahoo.com/group/the_gdf/files/Proposals/GGEP/GnutellaGenericExtensionProtocol.0.51.html"
 	             anchor="refs.GGEP">
