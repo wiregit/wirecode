@@ -56,7 +56,7 @@
  <target name="build tests">
    <mkdir dir="build"/>
    <javac debug="on" optimize="off" deprecation="on"
-	      srcdir="${coredir}"
+	      srcdir="${coredir}:${guidir}:${basedir}"
 		  destdir="${builddir}"
 		  excludes="${tests}**, ${settings}, **.gif,**.class,**.bat,**.sh,**.jar, **.xml">
      <classpath refid="default.classpath" />
