@@ -1176,9 +1176,13 @@ public final class UploadManager implements BandwidthTracker {
                 fileName = "Update-File Request";
                 if( RECORD_STATS )
                     UploadStat.UPDATE_FILE.incrementStat();
-            } else if (fileInfoPart.startsWith("/gnutella/push-proxy")) {
-                // cut off the /gnutella/push-proxy (21 = above + ?)..
-                fileInfoPart = fileInfoPart.substring(21);
+            } else if (fileInfoPart.startsWith("/gnutella/push-proxy") ||
+                       fileInfoPart.startsWith("/gnet/push-proxy")) {
+                // start after the '?'
+                int question = fileInfoPart.indexOf('?');
+                if( question == -1 )
+                    throw new IOException("Malformed PushProxy Req");
+                fileInfoPart = fileInfoPart.substring(question + 1);
                 index = PUSH_PROXY_FILE_INDEX;
                 // set the filename as the servent ID
                 StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=&");
