@@ -555,6 +555,9 @@ public class HTTPDownloader implements Runnable {
 			FileManager.getFileManager().addFileIfShared(path_to_complete);
 
 		}			
+		
+		else 
+			throw new IOException("File Incomplete");
 
 	}
 
