@@ -653,9 +653,12 @@ public class UDPConnectionProcessor {
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
-        if(LOG.isDebugEnabled())  
+        if(LOG.isDebugEnabled())  {
             LOG.debug("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+
               _lastSendTime);
+            if ( msg instanceof FinMessage ) 
+                Thread.dumpStack();
+        }
 		_udpService.send(msg, _ip, _port);  
 	}
 

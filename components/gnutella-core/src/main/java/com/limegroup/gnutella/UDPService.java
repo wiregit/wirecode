@@ -270,6 +270,7 @@ public class UDPService implements Runnable {
                             GUID guid = new GUID(message.getGUID());
                             if(isValidForIncoming(SOLICITED_PING_GUID, guid,
                                                   datagram))
+System.out.println("Accepting solicited");
                                 _acceptedSolicitedIncoming = true;
                         }
                     }
@@ -544,7 +545,8 @@ public class UDPService implements Runnable {
 	 * @return <tt>true</tt> if this node has accepted a SOLICITED UDP packet.
 	 */	
 	public boolean canReceiveSolicited() {
-		return _acceptedSolicitedIncoming;
+System.out.println("return Accepting solicited: "+ _acceptedSolicitedIncoming);
+        return _acceptedSolicitedIncoming;
 	}
 
 	/**
