@@ -170,6 +170,108 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         catch (InterruptedIOException expected) {}
     }
 
+
+    public void testHTTPRequest() throws Exception {
+        drain(testUP[0]);
+        // some setup
+        byte[] clientGUID = GUID.makeGuid();
+
+        // construct and send a query        
+        byte[] guid = GUID.makeGuid();
+        RouterService.query(guid, "boalt.org");
+
+        // the testUP[0] should get it
+        Message m = null;
+        do {
+            m = testUP[0].receive(TIMEOUT);
+        } while (!(m instanceof QueryRequest)) ;
+
+        // set up a server socket
+        ServerSocket ss = new ServerSocket(7000);
+        ss.setReuseAddress(true);        
+        ss.setSoTimeout(15*TIMEOUT);
+
+        // send a reply with some PushProxy info
+        Set proxies = new HashSet();
+        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        Response[] res = new Response[1];
+        res[0] = new Response(10, 10, "boalt.org");
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
+                           clientGUID, new byte[0], false, false, true,
+                           true, false, false, true, proxies);
+        testUP[0].send(m);
+        testUP[0].flush();
+
+        // wait a while for Leaf to process result
+        Thread.sleep(1000);
+        assertTrue(((MyActivityCallback)getCallback()).getRFD() != null);
+
+        // tell the leaf to download the file, should result in push proxy
+        // request
+        RouterService.download((new RemoteFileDesc[] 
+            { ((MyActivityCallback)getCallback()).getRFD() }), true, 
+                new GUID(m.getGUID()));
+
+        // wait for the incoming HTTP request
+        Socket httpSock = ss.accept();
+        assertNotNull(httpSock);
+
+        // start reading and confirming the HTTP request
+        String currLine = null;
+        BufferedReader reader = 
+            new BufferedReader(new
+                               InputStreamReader(httpSock.getInputStream()));
+
+        // confirm a GET/HEAD pushproxy request
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("GET /gnutella/push-proxy") ||
+                   currLine.startsWith("HEAD /gnutella/push-proxy"));
+        
+        // make sure it sends the correct client GUID
+        int beginIndex = currLine.indexOf("ID=") + 3;
+        String guidString = currLine.substring(beginIndex, beginIndex+26);
+        GUID guidFromBackend = new GUID(clientGUID);
+        GUID guidFromNetwork = new GUID(Base32.decode(guidString));
+        assertEquals(guidFromNetwork, guidFromBackend);
+
+        // make sure it sends back the correct index
+        beginIndex = currLine.indexOf("index=") + 6;
+        String longString = currLine.substring(beginIndex, beginIndex+10);
+        long index = Long.parseLong(longString);
+        assertEquals(index, Integer.MAX_VALUE);
+
+        // make sure the node sends the correct X-Node
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("X-Node:"));
+        StringTokenizer st = new StringTokenizer(currLine, ":");
+        assertEquals(st.nextToken(), "X-Node");
+        InetAddress addr = InetAddress.getByName(st.nextToken().trim());
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+
+        // send back a 202 and make sure no PushRequest is sent via the normal
+        // way
+        BufferedWriter writer = 
+            new BufferedWriter(new
+                               OutputStreamWriter(httpSock.getOutputStream()));
+        
+        writer.write("HTTP/1.1 202 gobbledygook");
+        writer.flush();
+        httpSock.close();
+
+        try {
+            do {
+                m = testUP[0].receive(TIMEOUT);
+                assertTrue(!(m instanceof PushRequest));
+            } while (true) ;
+        }
+        catch (InterruptedIOException expected) {}
+
+        // awesome - everything checks out!
+        ss.close();
+    }
+
+
     //////////////////////////////////////////////////////////////////
     public static Integer numUPs() {
         return new Integer(1);

@@ -921,8 +921,16 @@ public class DownloadManager implements BandwidthTracker {
             boolean requestSuccessful = false;
 
             // set up request
+            final boolean shouldDoFWTransfer = 
+                file.supportsFWTransfer() &&
+                UDPService.instance().canReceiveSolicited() &&
+                !RouterService.acceptedIncomingConnection();
             final String requestString = "/gnutella/push-proxy?ServerID=" + 
-                Base32.encode(file.getClientGUID());
+                Base32.encode(file.getClientGUID()) +
+                // if this will result in a firewalled transfer, send the
+                // appropriate control index
+                (shouldDoFWTransfer ? ("?index=" + PushRequest.FW_TRANS_INDEX) :
+                 "");
             final String nodeString = "X-Node:";
             final String nodeValue = NetworkUtils.ip2string(addr) + ":" + port;
 
@@ -936,7 +944,7 @@ public class DownloadManager implements BandwidthTracker {
                     "http://" + ppIp + ":" + ppPort + requestString;
                 HeadMethod head = new HeadMethod(connectTo);
                 head.addRequestHeader(nodeString, nodeValue);
-                head.addRequestHeader("Cache-Control", "no-cache");                
+                head.addRequestHeader("Cache-Control", "no-cache");
                 HttpClient client = HttpClientManager.getNewClient();
                 if(LOG.isTraceEnabled())
                     LOG.trace("Push Proxy Requesting with: " + connectTo);
