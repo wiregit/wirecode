@@ -461,7 +461,7 @@ class LimeXMLSchemaFieldExtractor
         String typeName = typeAttribute.getNodeValue();
        
         //add mapping to fieldTypeMap
-        fieldTypeSet.add(new FieldTypePair(name, removeNameSpace(typeName)));   
+        fieldTypeSet.addFirst(new FieldTypePair(name, removeNameSpace(typeName)));   
     }
     
     private static void traverseChildren(Node n)
@@ -579,13 +579,14 @@ class LimeXMLSchemaFieldExtractor
     
 /**
  * A Set <FieldTypePair> of fields and corresponding types
+ * Note: The implementation now uses List (instead of Set)
  */   
 private static class FieldTypeSet
 {
-    private Set /* of FieldTypePair */ _elements = new HashSet();
+    private LinkedList /* of FieldTypePair */ _elements = new LinkedList();
    
     /**
-     * Add the given fieldType pair to the set of elements
+     * Adds the given fieldType pair to the list of elements
      * @param fieldTypePair the field-type pair to be added
      */
     public void add(FieldTypePair fieldTypePair)
@@ -594,6 +595,16 @@ private static class FieldTypeSet
         _elements.add(fieldTypePair);
     }
 
+    /**
+     * Adds the given fieldType pair in front of other elements in the list
+     * @param fieldTypePair the field-type pair to be added
+     */
+    public void addFirst(FieldTypePair fieldTypePair)
+    {
+        //add to the _elements
+        _elements.addFirst(fieldTypePair);
+    }
+    
     /**
      * Returns an iterator over the elements
      */

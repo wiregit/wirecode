@@ -214,7 +214,14 @@ public class LimeXMLSchema
             LimeXMLSchema schema = new LimeXMLSchema(new File(
                 LimeXMLProperties.instance().getXMLSchemaDir() 
                 + File.separator
-                + "gen_books.xsd"));
+                + "personal.xsd"));
+            
+            //get the fields and print those
+            String[] fields = schema.getCanonicalizedFieldNames();
+            for(int i=0; i < fields.length; i++)
+            {
+                System.out.println(fields[i]);
+            }
         }
         catch(Exception e)
         {
