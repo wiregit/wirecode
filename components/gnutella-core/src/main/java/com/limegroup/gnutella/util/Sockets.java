@@ -109,9 +109,9 @@ public class Sockets {
      */
     public static Socket connect(String host, int port, int timeout) 
 		throws IOException {
-		if((port & 0xFFFF0000) != 0) {
-			throw new IllegalArgumentException("port out of range: "+port);
-		} 
+        if(!NetworkUtils.isValidPort(port)) {
+            throw new IllegalArgumentException("port out of range: "+port);
+        }
         if (CommonUtils.isJava14OrLater()) {
             //a) Non-blocking IO using Java 1.4. Conceptually, this code
             //   does the following:
