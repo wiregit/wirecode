@@ -263,13 +263,13 @@ public class MetaFileManager extends FileManager {
 
         int k=0;
         while(k<dirs.size() && !loadThreadInterrupted()) {
-            //String dir = (String)dirs.get(k);
-            //File currDir = new File(dir);
             File currDir = (File)dirs.get(k);
             k++;
             //add all subdirectories to dirs
             String[] subFiles = currDir.list();
-            int z = subFiles.length;
+            int z = 0;
+            if (subFiles != null) 
+                z = subFiles.length;
             for(int j=0;j<z;j++){
                 File f = new File(currDir,subFiles[j]);
                 if(f.isDirectory())
