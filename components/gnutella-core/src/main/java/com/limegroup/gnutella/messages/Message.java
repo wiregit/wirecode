@@ -206,8 +206,6 @@ public abstract class Message
     }
 
 
-static int maxlength = 0;
-
     /**
      * @param network the network this was received from.
      * @requires buf.length==23
