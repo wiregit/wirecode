@@ -124,31 +124,4 @@ public class KeywordFilter extends SpamFilter {
         }
         return false;
     }
-
-    //      public static void main(String args[]) {
-    //      KeywordFilter filter=new KeywordFilter();
-    //      QueryRequest qr=null;
-
-    //      qr=new QueryRequest((byte)1,0,"Britney");
-    //      Assert.that(filter.allow(qr));
-    //      filter.disallow("britney spears");
-    //      Assert.that(filter.allow(qr));
-    
-    //      qr=new QueryRequest((byte)1,0,"pie with rhubarb");
-    //      Assert.that(filter.allow(qr));
-    //      filter.disallow("rhuBarb");
-    //      Assert.that(!filter.allow(qr));
-    //      qr=new QueryRequest((byte)1,0,"rhubarb.txt");
-    //      Assert.that(!filter.allow(qr));
-    //      qr=new QueryRequest((byte)1,0,"Rhubarb*");
-    //      Assert.that(!filter.allow(qr));
-
-    //      filter.disallowVbs();
-    //      qr=new QueryRequest((byte)1,0,"test.vbs");
-    //      Assert.that(!filter.allow(qr));
-
-    //      filter.disallowHtml();
-    //      qr=new QueryRequest((byte)1,0,"test.htm");
-    //      Assert.that(!filter.allow(qr));
-    //      }
 }
