@@ -64,6 +64,8 @@ public class SettingsManager implements SettingsInterface
      */
     private static SettingsManager instance_;
 
+    /** a string for the file separator */
+    private String fileSep_;
     private String home_;
     private String fileName_;
     private String ndFileName_;
@@ -87,8 +89,9 @@ public class SettingsManager implements SettingsInterface
     {
 	props_      = new Properties();
 	ndProps_    = new Properties();
+	fileSep_    = System.getProperty("file.separator");
 	home_       = System.getProperty("user.home");
-	home_       += System.getProperty("file.separator");
+	home_       += fileSep_;
 	fileName_   = home_;
 	ndFileName_ = home_;
 	fileName_   += SettingsInterface.DEFAULT_FILE_NAME;
@@ -661,6 +664,9 @@ public class SettingsManager implements SettingsInterface
     /** set the directory for saving files */
     public synchronized void setSaveDirectory(String dir)
     {
+	boolean fb = dir.endsWith(fileSep_);
+	if(fb == false)
+	    dir = dir.concat(fileSep_);
 	File f = new File(dir);
 	boolean b = f.isDirectory();
 	if(b == false)
