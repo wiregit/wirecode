@@ -7,7 +7,7 @@ import java.net.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.stubs.*;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file

@@ -5,7 +5,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import junit.extensions.*;
