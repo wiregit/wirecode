@@ -94,6 +94,10 @@ public class ManagedConnection
     private volatile long _numHorizonFiles;
     private volatile long _numHorizonHosts;
 
+    /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
+     *  because this is a connection to a Clip2 reflector. */
+    private boolean _isKillable=true;
+
     /**
      * Creates an outgoing connection.
      * ManagedConnections should only be constructed within ConnectionManager.
@@ -576,4 +580,17 @@ public class ManagedConnection
     //
     // End statistics accessors
     //
+
+    public void setKillable(boolean killable) {
+        this._isKillable=killable;
+    }
+
+    /** 
+     * Returns true if this should not be policed by the ConnectionWatchdog,
+     * e.g., because this is a connection to a Clip2 reflector. Default value:
+     * true.
+     */
+    public boolean isKillable() {
+        return _isKillable;
+    }
 }
