@@ -164,7 +164,7 @@ public final class RouterService {
 		// Now, link all the pieces together, starting the various threads.
 		router.initialize();
 		manager.initialize();	   
-		this.downloader.initialize(); 
+		downloader.initialize(); 
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
 													 manager);
