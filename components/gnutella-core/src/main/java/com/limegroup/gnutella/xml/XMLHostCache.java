@@ -55,20 +55,6 @@ public class XMLHostCache {
         return retString;
     }
 
-    private boolean setHostsForSchema(String schemaURI, String hosts) 
-    throws IOException {
-        boolean success = false;
-        // use sumeet's stuff to get the key....
-        String displayString = LimeXMLSchema.getDisplayString(schemaURI);
-        if (displayString != null) {
-            // get the values and make a string[] out of them....
-            _props.put(displayString, hosts);
-            success = true;
-        }
-        return success;
-    }
-
-
     /** @return A array of Strings which are addresses of category specific
      *  gnutella servents (the assumed port is 6346).  May return null.
      */
