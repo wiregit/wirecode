@@ -284,8 +284,8 @@ public class UTest implements ActivityCallback, ErrorCallback {
 					if ( ((i+j) % 1024) == 0 ) 
 						log2("Echo status: "+i);
 				}
+                ostream.write(bdata, 0, len);
 			}
-			ostream.write(bdata, 0, len);
 			success = true;
 		} catch (IOException e) {
 			e.printStackTrace();
