@@ -2617,6 +2617,10 @@ public abstract class MessageRouter {
     }
     
     
+    public byte [] getOurGUID() {
+    	return _clientGUID;
+    }
+    
     private static class QueryResponseBundle {
         public final QueryRequest _query;
         public final Response[] _responses;

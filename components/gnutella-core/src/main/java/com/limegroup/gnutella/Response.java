@@ -806,7 +806,7 @@ public class Response {
                  System.currentTimeMillis(),
                  data.getPushProxies(),
                  getCreateTime(),
-                 data.supportsFWTransfer()
+                 data.getFWTVersionSupported()
                 );
             cachedRFD = rfd;
             return rfd;

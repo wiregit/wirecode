@@ -88,6 +88,11 @@ public final class HostData {
      * Constant for the Firewalled Transfer status of this badboy.
      */
     private final boolean CAN_DO_FWTRANSFER;
+    
+    /**
+     * the version of the Firewall Transfer supported. 0 if not supported
+     */
+    private final int FWT_VERSION;
 
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
@@ -158,6 +163,7 @@ public final class HostData {
         QUALITY = reply.calculateQualityOfService(ifirewalled);
         PROXIES = reply.getPushProxies();
         CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
+        FWT_VERSION = reply.getFWTransferVersion();
 
         if ( multicast )
             SPEED = Integer.MAX_VALUE;
@@ -306,6 +312,14 @@ public final class HostData {
      */
     public boolean supportsFWTransfer() {
         return CAN_DO_FWTRANSFER;
+    }
+    
+    /**
+     * 
+     * @return the version of FWT protocol this host supports. 0 if none
+     */
+    public int getFWTVersionSupported() {
+    	return FWT_VERSION;
     }
 
 }

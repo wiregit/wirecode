@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -160,8 +161,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public PushEndpoint(byte [] guid, Set proxies) {
-		//TODO: make this constructor check which version of fwt we support
-		this(guid,proxies,PLAIN,0);
+		//if we are creating a PushEndpoint for ourselves, check which version
+		//of firewall transfer we support
+		this(guid,proxies,PLAIN,
+				Arrays.equals(guid,RouterService.getMessageRouter().getOurGUID()) ?
+						1 : 0);
+		//TODO: get right number here
 	}
 	
 	/**

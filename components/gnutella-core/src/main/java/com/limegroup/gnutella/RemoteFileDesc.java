@@ -89,12 +89,6 @@ public class RemoteFileDesc implements Serializable {
      */
     private transient PushEndpoint _pushAddr;
 		
-    /**
-     * Whether or not the guy can do Firewalled Transfers.  This is transient
-     * since _proxies is transient - we can't do Firewalled Transfers without
-     * PushProxies
-     */
-    private transient boolean _supportsFirewalledTransfers = false;
 
     /**
      * The list of available ranges.
@@ -164,7 +158,7 @@ public class RemoteFileDesc implements Serializable {
               System.currentTimeMillis(),   // timestamp
               DataUtils.EMPTY_SET,          // push proxies
               rfd.getCreationTime(),       // creation time
-              false);                       // firewalled transfer
+              0);                       // firewalled transfer
     }
     
     /**
@@ -190,7 +184,8 @@ public class RemoteFileDesc implements Serializable {
                 AlternateLocation.ALT_VENDOR, // vendor
                 System.currentTimeMillis(),   // timestamp
                 pe.getProxies(),          // push proxies
-                rfd.getCreationTime());       // creation time
+                rfd.getCreationTime(),	// creation time
+				pe.supportsFWTVersion());       //firewall transfer
     }
 
 	/** 
@@ -231,7 +226,7 @@ public class RemoteFileDesc implements Serializable {
                           Set proxies, long createTime) {
         this(host, port, index, filename, size, clientGUID, speed, chat,
              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-             vendor, timestamp, proxies, createTime, false);
+             vendor, timestamp, proxies, createTime, 0);
     }
 
 	/** 
@@ -266,7 +261,7 @@ public class RemoteFileDesc implements Serializable {
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, long timestamp,
                           Set proxies, long createTime, 
-                          boolean canDoFWTransfer) {
+                          int FWTVersion) {
 		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -294,8 +289,13 @@ public class RemoteFileDesc implements Serializable {
 		_index = index;
 		_filename = filename;
 		_size = size;
+		
 		if (clientGUID!=null)
-			_pushAddr = new PushEndpoint(clientGUID,proxies);
+			_pushAddr = new PushEndpoint(clientGUID,
+					proxies,
+					PushEndpoint.PLAIN,
+					FWTVersion);
+		
 		_clientGUID = clientGUID;
 		_chatEnabled = chat;
         _quality = quality;
@@ -317,7 +317,7 @@ public class RemoteFileDesc implements Serializable {
 			_urns = Collections.unmodifiableSet(urns);
 		}
         _http11 = ( !_urns.isEmpty() );
-        _supportsFirewalledTransfers = canDoFWTransfer;
+        
 	}
 
     private void readObject(ObjectInputStream stream) 
@@ -659,7 +659,7 @@ public class RemoteFileDesc implements Serializable {
     }
 
     public final boolean supportsFWTransfer() {
-        return _supportsFirewalledTransfers;
+        return _pushAddr.supportsFWTVersion() > 0;
     }
 
     /**
