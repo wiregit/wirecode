@@ -54,6 +54,8 @@ public class HTTPDownloader implements Runnable {
     private HTTPDownloader _replacement = null;
     private PushRequestedFile savedPRF  = null;
 
+	protected boolean _smartDownload;
+
     /** Time count of some requesting operation */
     private int timeCount;
 
@@ -188,6 +190,7 @@ public class HTTPDownloader implements Runnable {
         _acceptor = acceptor;
         _callback = callback;
         _downloadDir = "";
+		_smartDownload = false;
     }
 
     /**
@@ -471,6 +474,8 @@ public class HTTPDownloader implements Runnable {
 	
 	public void doDownload() throws IOException {
 
+		readHeader();
+
 		SettingsManager settings = SettingsManager.instance();
 		
 		String download_dir = settings.getSaveDirectory();
@@ -488,7 +493,7 @@ public class HTTPDownloader implements Runnable {
 		File shared = new File(download_dir);
 		String shared_path = shared.getCanonicalPath();
 		
-		File parent_of_shared = new File(incomplete_file.getParent());
+		File parent_of_shared = new File(complete_file.getParent());
 		String path_to_parent = parent_of_shared.getCanonicalPath();
 		
 		if (!path_to_parent.equals(shared_path)) {
@@ -496,7 +501,7 @@ public class HTTPDownloader implements Runnable {
 			throw new IOException("Invalid path");  
 		}
 
-		if ( complete_file.exists() ) {
+		if ( ( complete_file.exists() ) && (!_smartDownload ) ){
 			// ask the user if the file should be overwritten
 			if ( ! _callback.overwriteFile(_filename) ) 
 				throw new IOException("File Already Exists");
@@ -507,7 +512,6 @@ public class HTTPDownloader implements Runnable {
 		int c = -1;
 		
 		byte[] buf = new byte[1024];
-
 
 		while (true) {
 			
@@ -624,32 +628,39 @@ public class HTTPDownloader implements Runnable {
 
             if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
 
-				String sub;
-				String sub_two;
 				int dash;
 				int slash;
-				int resumeInit;
+
+				String beforeDash;
+				int numBeforeDash;
+
+				String afterSlash;
+				int numAfterSlash;
 
 				String beforeSlash;
 				int numBeforeSlash;
 
                 try {
 					str = str.substring(21);
+
 					dash=str.indexOf('-');
 					slash = str.indexOf('/');
-					sub_two = str.substring(slash+1);
-                    sub=str.substring(0, dash);
-					sub = sub.trim();
-					sub_two = sub_two.trim();
+
+					afterSlash = str.substring(slash+1);
+					afterSlash = afterSlash.trim();
+
+                    beforeDash = str.substring(0, dash);
+					beforeDash = beforeDash.trim();
 
 					beforeSlash = str.substring(dash+1, slash);
+					beforeSlash = beforeSlash.trim();
 
                 } catch (IndexOutOfBoundsException e) {
 					throw new IOException("Problem Reading Header");
                 }
 				try {
-					tempSize = java.lang.Integer.parseInt(sub_two);
-                    resumeInit = java.lang.Integer.parseInt(sub);
+					numAfterSlash = java.lang.Integer.parseInt(afterSlash);
+					numBeforeDash = java.lang.Integer.parseInt(beforeDash);
                     numBeforeSlash = java.lang.Integer.parseInt(beforeSlash);
                 }
                 catch (NumberFormatException e) {
@@ -665,15 +676,17 @@ public class HTTPDownloader implements Runnable {
 				// to the number after the '/', then we want
 				// to decrement the first number and the number
 				// before the '/'.
-				if (numBeforeSlash == tempSize) {
-					resumeInit--;
+				if (numBeforeSlash == numAfterSlash) {
+					numBeforeDash--;
 					numBeforeSlash--;
 				}
 				
 
-				_amountRead = resumeInit;
+				_amountRead = numBeforeDash;
+				tempSize = numAfterSlash;
                 _resume = true;
 				foundLength = true;
+				
             }
         }
 
