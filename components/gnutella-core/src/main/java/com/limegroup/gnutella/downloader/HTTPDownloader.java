@@ -366,7 +366,16 @@ public class HTTPDownloader implements BandwidthTracker {
 			throw new ProblemReadingHeaderException();
 		}
     }
-    
+
+    /** 
+     * Reads the X-Queue headers from str, storing fields in refQueueInfo.
+     * @param str a header value of form 
+     *  "X-Queue: position=2,length=5,limit=4,pollMin=45,pollMax=120"
+     * @param refQueueInfo an array of 3 elements to store results.
+     *  refQueueInfo[0] is set to the value of pollMin, or -1 if problems;
+     *  refQueueInfo[1] is set to the value of pollMax, or -1 if problems;
+     *  refQueueInfo[2] is set to the value of position, or -1 if problems; 
+     */
     private void parseQueueHeaders(String str, int[] refQueueInfo)  {
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.        
@@ -397,8 +406,10 @@ public class HTTPDownloader implements BandwidthTracker {
                     refQueueInfo[2] = Integer.parseInt(value);
                 }
             } catch(NumberFormatException nfx) {//bad headers drop connection
+                //We could return at this point--basically does the same things.
                 Arrays.fill(refQueueInfo,-1);
             } catch(NoSuchElementException nsex) {//bad headers drop connection
+                //We could return at this point--basically does the same things.
                 Arrays.fill(refQueueInfo,-1);
             }
         } //end of while - done parsing this line.
