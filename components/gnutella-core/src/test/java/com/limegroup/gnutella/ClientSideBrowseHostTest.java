@@ -281,8 +281,6 @@ public class ClientSideBrowseHostTest
 
 
     public void testPushProxyRequest() throws Exception {
-        testUP = connect(rs, 6355, true);
-
         drain(testUP);
         // some setup
         final byte[] clientGUID = GUID.makeGuid();
@@ -412,6 +410,59 @@ public class ClientSideBrowseHostTest
         // awesome - everything checks out!
         ss.close();
     }
+
+
+    public void testSendsPushRequest() throws Exception {
+        drain(testUP);
+        // some setup
+        final byte[] clientGUID = GUID.makeGuid();
+
+        // construct and send a query        
+        byte[] guid = GUID.makeGuid();
+        rs.query(guid, "anita");
+
+        // the testUP should get it
+        Message m = null;
+        do {
+            m = testUP.receive(TIMEOUT);
+        } while (!(m instanceof QueryRequest)) ;
+
+        // send a reply with some BAD PushProxy info
+        final PushProxyInterface[] proxies = 
+            new QueryReply.PushProxyContainer[1];
+        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7001);
+        Response[] res = new Response[1];
+        res[0] = new Response(10, 10, "anita");
+        m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
+                           InetAddress.getLocalHost().getAddress(), 0, res, 
+                           clientGUID, new byte[0], false, false, true,
+                           true, false, false, proxies);
+        testUP.send(m);
+        testUP.flush();
+
+        // wait a while for Leaf to process result
+        Thread.sleep(1000);
+        assertTrue(callback.getRFD() != null);
+
+        // tell the leaf to browse host the file,
+        Thread browseThread = new Thread() {
+            public void run() {
+                rs.doBrowseHost(callback.getRFD().getHost(),
+                                callback.getRFD().getPort(),
+                                new GUID(GUID.makeGuid()), new GUID(clientGUID),
+                                proxies);
+            }
+        };
+        browseThread.start();
+
+        // nothing works for the guy, we should get a PushRequest
+        do {
+            m = testUP.receive(TIMEOUT*2);
+        } while (!(m instanceof PushRequest)) ;
+
+        // awesome - everything checks out!
+    }
+
 
 
 
