@@ -66,6 +66,110 @@ public final class AlternateLocation
 	}
 
 	/**
+	 * This constructor creates a new <tt>AlternateLocation</tt> instance for 
+	 * the specified URL.  This automatically gives this alternate location
+	 * the current date and time for its timestamp.
+	 *
+	 * @param URL the <tt>URL</tt> instance for the alternate location
+	 */
+	public AlternateLocation(final URL URL) {
+		this.URL = URL;
+
+		// make the date the current time
+		this.DATE = new Date();
+		this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(this.DATE);
+	}
+
+	/**
+	 * Converts the specified <tt>Date</tt> instance to a <tt>String</tt> 
+	 * that fits the syntax specified in the ISO 8601 subset we're using,
+	 * discussed at: http://www.w3.org/TR/NOTE-datetime.
+	 *
+	 * @param date the <tt>Date</tt> instance to convert
+	 * @return a new <tt>String</tt> instance that matches the standard
+	 *  syntax
+	 */
+	private static String convertDateToString(Date date) {
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		cal.setTime(date);
+		int[]    dateInts = new int[6];
+		String[] dateStrs = new String[6];
+		dateInts[0] = cal.get(Calendar.YEAR);
+		dateInts[1] = cal.get(Calendar.MONTH);
+		dateInts[2] = cal.get(Calendar.DAY_OF_MONTH);
+		dateInts[3] = cal.get(Calendar.HOUR);
+		dateInts[4] = cal.get(Calendar.MINUTE);
+		dateInts[5] = cal.get(Calendar.SECOND);
+
+		// loop through the ints to convert them to strings with leading 
+		// zeros if they're less than 10
+		for(int i=0; i<dateInts.length; i++) {
+			if(dateInts[i] < 10) {
+				dateStrs[i] = "0"+String.valueOf(dateInts[i]);
+			}
+			else {
+				dateStrs[i] = String.valueOf(dateInts[i]);
+			}
+		}
+		final String DASH  = "-";
+		final String COLON = ":";
+		return new String(dateStrs[0]+DASH+
+						  dateStrs[1]+DASH+
+						  dateStrs[2]+"T"+
+						  dateStrs[3]+COLON+
+						  dateStrs[4]+COLON+
+						  dateStrs[5]+"Z");
+	}
+
+	/**
+	 * Checks to see if the specified date string is valid, according to
+	 * our interpretation.  First, we are requiring date formats of the 
+	 * form specified at: http://www.w3.org/TR/NOTE-datetime, a subset of 
+	 * ISO 8601.  In addition to this, we require that the date at least
+	 * specify the day of the month.  If it does not do this, it is so 
+	 * general that it is useless for our purposes.
+	 *
+	 * @param date the date string to validate
+	 * @return <tt>true</tt> if the string represents a valid date 
+	 *  according to our critetia, <tt>false</tt> otherwise
+	 */
+	private static boolean isValidDate(final String DATE) {
+		int length = DATE.length();
+		final String DASH = "-";
+		final String COLON = ":";
+		// if the date length is less than ten, then the date does not contain
+		// information for the day, as defined in the subset of ISO 8601, as 
+	    // defined at: http://www.w3.org/TR/NOTE-datetime, and we consider it
+		// itvalid
+		if(length < 10) return false;
+
+		// if the date is not one of our valid lengths, return false
+		// this requires that the date use UTC time, as designated by the
+		// trailing "Z"
+		if((length != 10) && (length != 17) && (length != 20) && (length != 22)) {
+			return false;
+		}
+		// the date must be in this millenium
+		if(!DATE.startsWith("2")) {
+			return false;
+		}
+		int firstDashIndex  = DATE.indexOf(DASH);
+		int secondDashIndex = DATE.indexOf(DASH, firstDashIndex+1);
+		if((firstDashIndex == -1) || (secondDashIndex == -1)) {
+			return false;
+		}
+
+		if(length == 10) return true;
+ 
+		int firstColonIndex  = DATE.indexOf(COLON);
+		int secondColonIndex = DATE.indexOf(COLON, firstColonIndex+1);
+		if((firstColonIndex != 13) || (secondColonIndex != 16)) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Returns the <tt>URL</tt> instance for this alternate location.
 	 *
 	 * @return the <tt>URL</tt> instance for this alternate location, which
@@ -95,7 +199,7 @@ public final class AlternateLocation
 	 *  as specified in HUGE v0.93
 	 * @return the date/time string from the the alternate location
 	 *  header, or <tt>null</tt> if the date/time string could not
-	 *  be extracted or does not exist
+	 *  be extracted, is invalid, or does not exist
 	 */
 	private static String extractDateTimeString(final String LOCATION) {
 		if(!AlternateLocation.isTimestamped(LOCATION)) {
@@ -106,7 +210,12 @@ public final class AlternateLocation
 		   ((dateIndex+1) >= LOCATION.length())) {
 			return null;
 		}
-		return LOCATION.substring(dateIndex+1).trim(); 
+		String dateTimeString = LOCATION.substring(dateIndex+1).trim(); 
+		if(AlternateLocation.isValidDate(dateTimeString)) {
+			return dateTimeString; 
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -161,7 +270,6 @@ public final class AlternateLocation
 		int ss = Integer.parseInt(ssStr);		
 
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		cal.clear();
 		cal.set(YYYY, MM, DD, hh, mm, ss);
 		return cal.getTime();
 	}
@@ -283,13 +391,10 @@ public final class AlternateLocation
 	 * @see java.lang.Comparable
 	 */
 	public int compareTo(Object obj) {
-		System.out.println("AlternateLocation::compareTo"); 
 		if(this.equals(obj)) return 0;
 		AlternateLocation al = (AlternateLocation)obj;		
 		long thisTime    = DATE.getTime();
 		long anotherTime = al.getTimestamp().getTime();
-		System.out.println("compareTo returning: "+
-						   (thisTime<anotherTime ? 1 : (thisTime==anotherTime ? 0 : -1)));
 		return (thisTime<anotherTime ? 1 : (thisTime==anotherTime ? 0 : -1));
 	}
 
@@ -308,8 +413,6 @@ public final class AlternateLocation
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;
-		System.out.println("timestamp1: "+al.isTimestamped()); 
-		System.out.println("timestamp2: "+this.isTimestamped()); 
 		Date date = al.getTimestamp();
 		URL url = al.getUrl();
 		if(al.isTimestamped() && this.isTimestamped()) {
@@ -449,13 +552,26 @@ public final class AlternateLocation
 			failureEncountered = true;
 		}		
 
+		// TEST DATE METHODS
+		failureEncountered = false;
+		System.out.println(); 
+		System.out.println("TESTING CONVERT DATE TO STRING METHOD...");
+		
+		Date date = new Date();
+		String dateStr = AlternateLocation.convertDateToString(date);
+		if(!isValidDate(dateStr)) {
+			failureEncountered = true;
+			System.out.println("TEST FAILED: VALID DATE NOT CONSIDERED VALID");
+			System.out.println("DATE: "+date);
+			System.out.println("DATE STRING: "+dateStr); 
+		}
+		
+
 		if(!failureEncountered) {
 			System.out.println("ALL TESTS PASSED"); 
 		}
 	}
-	*/
-	
-	
+	*/		
 }
 
 
