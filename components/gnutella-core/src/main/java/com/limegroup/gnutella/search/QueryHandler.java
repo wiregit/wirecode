@@ -426,7 +426,7 @@ public final class QueryHandler {
 		// return true if we've been querying for longer than the specified 
 		// maximum
 		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
-		if(queryLength > 80*1000) return true;
+		if(queryLength > 60*1000) return true;
 
 		return false;
 	}
