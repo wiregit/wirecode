@@ -336,7 +336,7 @@ public class IncompleteFileManager implements Serializable {
      * @exception IllegalArgumentException incompleteFile was not the
      *  return value from getFile
      */
-    public String getCompletedName(File incompleteFile) 
+    public static String getCompletedName(File incompleteFile) 
             throws IllegalArgumentException {
         //Given T-<size>-<name> return <name>.
         //       i      j
@@ -362,7 +362,7 @@ public class IncompleteFileManager implements Serializable {
      * @exception IllegalArgumentException incompleteFile was not
      *  returned by getFile 
      */
-    public long getCompletedSize(File incompleteFile) 
+    public static long getCompletedSize(File incompleteFile) 
             throws IllegalArgumentException {
         //Given T-<size>-<name>, return <size>.
         //       i      j
