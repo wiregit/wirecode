@@ -48,6 +48,19 @@ public class HostCatcher {
      *  before resorting to GWebCache HOSTFILE requests. */
     public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
 
+    /** 
+     * The number of hosts to store that are fresh from the network and
+     * have free slots.
+     */
+    static final int FRESH_FREE_SLOTS_SIZE = 1000;
+
+    /** 
+     * The number of hosts to store that are fresh from the network and
+     * either don't have free slots, or we don't know whether they have
+     * free slots.
+     */
+    static final int FRESH_SIZE = 1000;
+
     /** The number of ultrapeer pongs to store. 
      *  This should be large enough to store all permanent addresses. */
     static final int GOOD_SIZE=1000;
@@ -58,15 +71,27 @@ public class HostCatcher {
     static final int PERMANENT_SIZE=GOOD_SIZE;
 
     /**
-     * Constant for the index of good priority hosts (Ultrapeers)
-     */
-    static final int GOOD_PRIORITY=1;
-
-    /**
      * Constant for the index of non-Ultrapeer hosts.
      */
-    static final int NORMAL_PRIORITY=0;
+    static final int NORMAL_PRIORITY = 0;
 
+    /**
+     * Constant for the index of good priority hosts (Ultrapeers)
+     */
+    static final int GOOD_PRIORITY = 1;
+
+    /**
+     * Constant for the index of hosts received live from the network
+     * that have not reported free slots, although some of them may
+     * simply not include the data.
+     */
+    static final int FRESH_PRIORITY = 2;
+
+    /**
+     * Constant for the index of hosts from pongs received live from
+     * the network with free slots.
+     */
+    static final int FRESH_FREE_SLOTS_PRIORITY = 3;
 
     /** The list of hosts to try.  These are sorted by priority: ultrapeers,
      * normal, then private addresses.  Within each priority level, recent hosts
@@ -79,7 +104,8 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
     private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = //queue =
-        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE});
+        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, FRESH_SIZE, 
+                                   FRESH_FREE_SLOTS_SIZE});
     private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
 
 
@@ -260,11 +286,9 @@ public class HostCatcher {
      * cache.  This method used to be called "spy".
      *
      * @param pr the pong containing the address/port to add
-     * @param receivingConnection the connection on which we received
-     *  the pong.
      * @return true iff pr was actually added 
      */
-    public boolean add(PingReply pr, ReplyHandler receivingConnection) {
+    public boolean add(PingReply pr) {
         //Convert to endpoint
         ExtendedEndpoint endpoint;
         
@@ -291,10 +315,11 @@ public class HostCatcher {
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
             
-        if (pr.isUltrapeer())
-            return add(endpoint, GOOD_PRIORITY);
-        else
-            return add(endpoint, NORMAL_PRIORITY);
+        if (pr.hasFreeUltrapeerSlots()) {
+            System.out.println("ADDING PONG WITH FREE SLOTS"); 
+            return add(endpoint, FRESH_FREE_SLOTS_PRIORITY);
+        } 
+        return add(endpoint, FRESH_PRIORITY);
     }
 
     /**
@@ -331,7 +356,6 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private boolean add(ExtendedEndpoint e, int priority) {
-        System.out.println("HostCatcher::add"); 
         if(e.isPrivateAddress()) return false;
         repOk();
         //We used to check that we're not connected to e, but now we do that in
@@ -455,7 +479,7 @@ public class HostCatcher {
             //If there are no good, fresh ultrapeer pongs--these exclude
             //gnutella.net entries--schedule a fetch in GWEBCACHE_DELAY
             //milliseconds if it's still needed then.
-            else if (getNumUltrapeerHosts()==0) {
+            else if (getNumUltrapeerHosts()==0 && getNumLiveHosts()==0) {
                 long now=System.currentTimeMillis();
                 //Be patient; maybe some gnutella.net entries will work.
                 if (now < nextAllowedFetchTime) {
@@ -545,6 +569,16 @@ public class HostCatcher {
      */
     public int getNumUltrapeerHosts() {
         return ENDPOINT_QUEUE.size(GOOD_PRIORITY);
+    }
+
+    /**
+     * Accessor for the number of live hosts received from the network.
+     *
+     * @return the number of live hosts received from the network
+     */
+    private int getNumLiveHosts() {
+        return ENDPOINT_QUEUE.size(FRESH_FREE_SLOTS_PRIORITY) +
+            ENDPOINT_QUEUE.size(FRESH_PRIORITY);
     }
 
     /**
