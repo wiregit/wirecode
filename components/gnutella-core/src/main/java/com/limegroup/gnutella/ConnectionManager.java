@@ -73,11 +73,6 @@ public class ConnectionManager {
      * Flag for whether or not the auto-connection process is in effect.
      */
     private volatile boolean _automaticallyConnecting;
-
-    /**
-     * Flag for whether or not the user has an internet connection.
-     */
-    private volatile boolean _noInternetConnection;
     
     /**
      * Timestamp of our last successful connection.
@@ -1086,10 +1081,14 @@ public class ConnectionManager {
         if(isConnected()) {
             return;
         }
+        
+        // Read hosts from disk again if we're running out.
+        recoverHosts();
+        
         _connectionAttempts = 0;
-        _noInternetConnection = false;
         _lastConnectionCheck = 0;
         _lastSuccessfulConnect = 0;
+        
 
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
@@ -1347,7 +1346,6 @@ public class ConnectionManager {
         RouterService.getCallback().connectionInitializing(mc);
 
         try {
-            _connectionAttempts++;
             mc.initialize();
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
@@ -1723,10 +1721,6 @@ public class ConnectionManager {
         // Try a single connection
         public void run() {
             try {
-                // If the user has no Internet connection, simply return.
-                if(_noInternetConnection) {
-                    return;
-                }
                 // Wait for an endpoint.
                 Endpoint endpoint = null;
                 do {
@@ -1743,17 +1737,21 @@ public class ConnectionManager {
     
                 Assert.that(endpoint != null);
     
+                _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(
                     endpoint.getAddress(), endpoint.getPort());
 
-                // If we've been trying to connect for awhile and have not 
-                // already checked our connection, check to make sure the
-                // user's internet connection is live.
+                // If we've been trying to connect for awhile, check to make 
+                // sure the user's internet connection is live.  We only do 
+                // this if we're not already connected, have not made any 
+                // successful connections recently, and have not checked the
+                // user's connection in the last little while or have very
+                // few hosts left to try.
                 long curTime = System.currentTimeMillis();
                 if(!isConnected() &&
                    _connectionAttempts > 40 && 
-                   ((curTime - _lastSuccessfulConnect)>2000) &&
-                   ((curTime - _lastConnectionCheck)>120000)) {
+                   ((curTime-_lastSuccessfulConnect)>4000) &&
+                   ((curTime-_lastConnectionCheck)>60*60*1000)) {
                     _connectionAttempts = 0;
                     _lastConnectionCheck = curTime;
                     LOG.debug("checking for live connection");
@@ -1801,16 +1799,8 @@ public class ConnectionManager {
     public void noInternetConnection() {
         
         if(_automaticallyConnecting) {
-            // Notify the HostCatcher that it should keep any hosts it has 
-            // already used instead of discarding them only if we're down to
-            // a small number of hosts to try. 
-            // The HostCatcher can be null in testing.
-            if(_catcher != null && (_catcher.getNumHosts() < 50)) {
-                _catcher.recoverHosts();
-            }      
-            
             // We've already notified the user about their connection and we're
-            // alread retrying, so just return.    
+            // alread retrying automatically, so just return.    
             return;  
         }
         
@@ -1830,6 +1820,9 @@ public class ConnectionManager {
             MessageService.showError("NO_INTERNET_RETRYING",
                 QuestionsHandler.NO_INTERNET_RETRYING);
             
+            // Kill all of the ConnectionFetchers.
+            disconnect();
+            
             // Try to reconnect in 10 seconds, and then every minute after
             // that.
             RouterService.schedule(new Runnable() {
@@ -1841,9 +1834,10 @@ public class ConnectionManager {
                     if(_automaticConnectTime < _disconnectTime) {
                         return;
                     }
-                    ConnectionManager cm = RouterService.getConnectionManager();
-                    if(!cm.isConnected()) {
-                        cm.connect();
+                    
+                    if(!RouterService.isConnected()) {
+                        recoverHosts();
+                        connect();
                     }
                 }
             }, 10*1000, 60*1000);   
@@ -1851,15 +1845,18 @@ public class ConnectionManager {
             _automaticallyConnecting = true;         
         }
         
-        _noInternetConnection = true;
-        
-        // Kill all of the ConnectionFetchers.
-        disconnect();
-        
+        recoverHosts();
+    }
+    
+    /**
+     * Utility method that tells the host catcher to recover hosts from disk
+     * if it doesn't have enough hosts.
+     */
+    private void recoverHosts() {
         // Notify the HostCatcher that it should keep any hosts it has already
         // used instead of discarding them.  
         // The HostCatcher can be null in testing.
-        if(_catcher != null) {
+        if(_catcher != null && _catcher.getNumHosts() < 100) {
             _catcher.recoverHosts();
         }
     }
