@@ -297,7 +297,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Otherwise null. */
     private Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
-    private boolean stopped;
+    private volatile boolean stopped;
 
     
     /** The connections we're using for the current attempts. */    
@@ -744,6 +744,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Tries iterative GUESSing of sources.
      */
     private boolean tryGUESSing() {
+        LOG.trace("origGUID: " + originalQueryGUID + ", tried: " + triedLocatingSources + ", sha1: " + sha1);
+        
         if(originalQueryGUID == null || triedLocatingSources || sha1 == null)
             return false;
             
@@ -751,8 +753,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
         if(guessLocs == null || guessLocs.isEmpty())
             return false;
+            
+        LOG.trace("guessLocs: " + guessLocs);
 
-        setState(ITERATIVE_GUESSING, 750);
+        setState(ITERATIVE_GUESSING, 5000);
         triedLocatingSources = true;
 
         //TODO: should we increment a stat to get a sense of
@@ -761,6 +765,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // send a guess query
             GUESSEndpoint ep = (GUESSEndpoint) i.next();
             OnDemandUnicaster.query(ep, sha1);
+            LOG.trace("sent to: " + ep);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)
@@ -812,6 +817,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         case WAITING_FOR_USER:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
+        case WAITING_FOR_RETRY:
             return true;
         }
         return false;
@@ -1243,11 +1249,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( added ) {
             if(LOG.isTraceEnabled())
                 LOG.trace("added rfd: " + rfd);
-            if (!isInactive())
-                this.notify();                      //see tryAllDownloads3
-            else {
+            if(isInactive() || dloaderManagerThread == null) {
                 LOG.trace("inactive, marking as new source");
                 receivedNewSources = true;
+            } else {
+                this.notify();                      //see tryAllDownloads3
             }
             // we could manager.requestStart, but that is synchronized on
             // manager and we can't grab that lock if we're synchronized on
@@ -1300,7 +1306,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         return true;
     }
 
-    public synchronized void stop() {
+    public void stop() {
         // make redundant calls to stop() fast
         // this change is pretty safe because stopped is only set in two
         // places - initialized and here.  so long as this is true, we know
@@ -1312,18 +1318,29 @@ public class ManagedDownloader implements Downloader, Serializable {
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;
-        //This guarantees any downloads in progress will be killed.  New
-        //downloads will not start because of the flag above. Note that this
-        //does not kill downloaders that are queued...
-        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
-            ((HTTPDownloader)iter.next()).stop();			
-
-        //...so we interrupt all threads - see connectAndDownload.
-        //This is safe because worker threads can be waiting for a push 
-        //or to requeury, or sleeping while queued. In every case its OK to 
-        //interrupt the thread
-        for(Iterator iter=threads.iterator(); iter.hasNext(); )
-            ((Thread)iter.next()).interrupt();
+        
+        // Tell the manager to remove us if we're inactive.
+        // The "if waiting" part may be an optimization, since I don't think
+        // anything bad will occur if a download is removed multiple times,
+        // but it is safest to only remove if we know it's not going to
+        // remove shortly.
+        // This call MUST be outside this' lock, else deadlock could occur.
+        manager.removeIfWaiting(this);
+        
+        synchronized(this) {
+            //This guarantees any downloads in progress will be killed.  New
+            //downloads will not start because of the flag above. Note that this
+            //does not kill downloaders that are queued...
+            for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
+                ((HTTPDownloader)iter.next()).stop();			
+    
+            //...so we interrupt all threads - see connectAndDownload.
+            //This is safe because worker threads can be waiting for a push 
+            //or to requeury, or sleeping while queued. In every case its OK to 
+            //interrupt the thread
+            for(Iterator iter=threads.iterator(); iter.hasNext(); )
+                ((Thread)iter.next()).interrupt();
+        }
     }
 
     /**

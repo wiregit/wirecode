@@ -90,6 +90,11 @@ public class DownloadManager implements BandwidthTracker {
      * The average bandwidth over all downloads
      */
     private float averageBandwidth = 0;
+    
+    /**
+     * The runnable that pumps inactive downloads to the correct state.
+     */
+    private Runnable _waitingPump;
 
     //////////////////////// Creation and Saving /////////////////////////
 
@@ -116,6 +121,7 @@ public class DownloadManager implements BandwidthTracker {
         this.callback = callback;
         this.router = router;
         this.fileManager = fileManager;
+        scheduleWaitingPump();
     }
 
     /**
@@ -153,15 +159,16 @@ public class DownloadManager implements BandwidthTracker {
         RouterService.schedule(checkpointer, 
 							   SNAPSHOT_CHECKPOINT_TIME, 
 							   SNAPSHOT_CHECKPOINT_TIME);
-
-        scheduleWaitingPump();
     }
     
     /**
      * Schedules the runnable that pumps through waiting downloads.
      */
     public void scheduleWaitingPump() {
-        Runnable waitingReader = new Runnable() {
+        if(_waitingPump != null)
+            return;
+            
+        _waitingPump = new Runnable() {
             public void run() {
                 synchronized(this) {
                     for(Iterator i = waiting.iterator(); i.hasNext(); ) {
@@ -177,7 +184,7 @@ public class DownloadManager implements BandwidthTracker {
                 }
             }
         };
-        RouterService.schedule(waitingReader,
+        RouterService.schedule(_waitingPump,
                                1000,
                                1000);
     }
@@ -783,7 +790,15 @@ public class DownloadManager implements BandwidthTracker {
         } else {
             waiting.add(downloader);
         }
-    } 
+    }
+    
+    /**
+     * Removes the download if it was present in the inactive list.
+     */
+    public synchronized void removeIfWaiting(ManagedDownloader downloader) {
+        if(waiting.contains(downloader))
+            remove(downloader, true);
+    }
     
     /** 
      * Attempts to send the given requery to provide the given downloader with 
