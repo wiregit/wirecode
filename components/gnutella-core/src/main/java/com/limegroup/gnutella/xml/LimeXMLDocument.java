@@ -36,27 +36,23 @@ public class LimeXMLDocument{
     protected String schemaUri;
     
     //constructor
-    public LimeXMLDocument(String XMLString) {
+    public LimeXMLDocument(String XMLString)
+        throws SAXException, IOException{
         DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
         InputSource doc = new InputSource(new StringReader(XMLString));
         Document document = null;
-        try{
-            parser.parse(doc);
-        }catch(SAXException e){
-            e.printStackTrace();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+        parser.parse(doc);
         document = parser.getDocument();
         makeSchemaURI(document);
         createMap(document);
     }
     
     private void makeSchemaURI(Document doc){
-        List attributes = DOMUtils.getAttributes(doc.getAttributes());
+        Element docElement = doc.getDocumentElement();
+        List attributes = DOMUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
         for(int i=0; i< size; i++){
             Node att = (Node)attributes.get(i);
@@ -80,25 +76,16 @@ public class LimeXMLDocument{
     }
     
     
-    public LimeXMLDocument(File f) {
+    public LimeXMLDocument(File f)
+        throws FileNotFoundException, SAXException, IOException{
         DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
         InputSource doc = null;
-        try{
-            doc = new InputSource(new FileInputStream(f));
-        }catch (FileNotFoundException ee){
-            ee.printStackTrace();
-        }
+        doc = new InputSource(new FileInputStream(f));
         Document document = null;
-        try{
-            parser.parse(doc);
-        }catch (SAXException e){
-            e.printStackTrace();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+        parser.parse(doc);
         document=parser.getDocument();
         createMap(document);
     }
