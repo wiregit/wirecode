@@ -19,6 +19,9 @@ import junit.framework.*;
  */
 public final class QueryHandlerTest extends BaseTestCase {
 
+    /**
+     * Cached method for creating the probe lists.
+     */
     private static Method CREATE_PROBE_LISTS;
 
 	public QueryHandlerTest(String name) {
@@ -41,76 +44,35 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          params);        
     }
 
-    public void testAddToList() throws Exception {
-        Class[] paramTypes = 
-            new Class[]{List.class, List.class, List.class, Integer.TYPE};
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "addToList",
-                                         paramTypes);                
 
-        List listToAddTo = new LinkedList();
-        List list1 = new LinkedList();
-        List list2 = new LinkedList();
-        Integer numElements = new Integer(3);
+    /**
+     * Test to make sure that the utility method for creating
+     * our probe query lists is working as we expect it to.
+     */
+    public void testCreateProbeListsForSomewhatPopular() throws Exception {
+        List connections = new LinkedList();
+        connections.clear();
+        for(int i=0; i<20; i++) {
+            connections.add(NewConnection.createHitConnection());
+        }           
 
-        Object[] params = 
-            new Object[] {listToAddTo, list1, list2, numElements};
+        for(int i=0; i<5; i++) {
+            connections.add(NewConnection.createConnection());
+        }           
         
-        Integer one   = new Integer(1);
-        Integer two   = new Integer(2);
-        Integer three = new Integer(3);
-        Integer four  = new Integer(4);
-        Integer five  = new Integer(5);
-        Integer six   = new Integer(6);
-        Integer seven = new Integer(7);
+        for(int i=0; i<5; i++) {
+            connections.add(new OldConnection(5));
+        }                   
 
-        List testList = new LinkedList();
-        testList.add(one);
-        testList.add(two);
-        testList.add(three);        
+        QueryRequest query = QueryRequest.createQuery("test");
+        List[] queryLists = 
+            (List[])CREATE_PROBE_LISTS.invoke(null, 
+                                              new Object[]{connections, query}); 
 
-        list1.add(one);
-        list1.add(two);
-        list1.add(three);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
-
-        list1.clear();
-        list2.clear();
-        listToAddTo.clear();
-
-        
-        list2.add(one);
-        list2.add(two);
-        list2.add(three);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
-
-        list1.clear();
-        list2.clear();
-        listToAddTo.clear();
-        
-        list1.add(one);
-        list2.add(two);
-        list2.add(three);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
-
-        list1.clear();
-        list2.clear();
-        listToAddTo.clear();
-        
-        list1.add(one);
-        list1.add(two);
-        list2.add(three);
-        list2.add(four);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
+        System.out.println("TTL=1: "+queryLists[0].size()); 
+        System.out.println("TTL=2: "+queryLists[1].size()); 
+        assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
+        assertTrue("should not be too many ttl=1", queryLists[0].size() < 15);
     }
 
     /**
@@ -137,36 +99,6 @@ public final class QueryHandlerTest extends BaseTestCase {
         assertEquals("should not be only 1 ttl=1 query", queryLists[0].size(), 1);
     }
 
-    /**
-     * Test to make sure that the utility method for creating
-     * our probe query lists is working as we expect it to.
-     */
-    public void testCreateProbeListsForSomewhatPopular() throws Exception {
-        List connections = new LinkedList();
-        connections.clear();
-        for(int i=0; i<20; i++) {
-            connections.add(NewConnection.createHitConnection());
-        }           
-
-        for(int i=0; i<5; i++) {
-            connections.add(NewConnection.createConnection());
-        }           
-        
-        for(int i=0; i<5; i++) {
-            connections.add(new OldConnection(5));
-        }                   
-
-        QueryRequest query = QueryRequest.createQuery("test");
-        List[] queryLists = 
-            (List[])CREATE_PROBE_LISTS.invoke(null, 
-                                              new Object[]{connections, query}); 
-
-        //assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
-        //assertEquals("should not be only 1 ttl=1 query", queryLists[0].size(), 1);
-
-    }
-
-
 
     /**
      * Tests the method for calculating the next TTL.
@@ -186,6 +118,9 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         ttl = getTTL(m, 200000, 15, (byte)4);
         assertEquals("unexpected ttl", 4, ttl);
+
+        ttl = getTTL(m, 20000, 5, (byte)2);
+        assertEquals("unexpected ttl", 2, ttl);
     }
 
     /**
@@ -394,6 +329,84 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         
         //m.invoke(null, new Object[]{handler, connections});        
+    }
+
+    /**
+     * Tests the <tt>QueryHandler</tt> utility method that takes
+     * two lists and puts the desired number of elements in a
+     * third list, prioritizing elements from one list over the
+     * other.
+     */
+    public void testAddToList() throws Exception {
+        Class[] paramTypes = 
+            new Class[]{List.class, List.class, List.class, Integer.TYPE};
+		Method m = 
+            PrivilegedAccessor.getMethod(QueryHandler.class, 
+                                         "addToList",
+                                         paramTypes);                
+
+        List listToAddTo = new LinkedList();
+        List list1 = new LinkedList();
+        List list2 = new LinkedList();
+        Integer numElements = new Integer(3);
+
+        Object[] params = 
+            new Object[] {listToAddTo, list1, list2, numElements};
+        
+        Integer one   = new Integer(1);
+        Integer two   = new Integer(2);
+        Integer three = new Integer(3);
+        Integer four  = new Integer(4);
+        Integer five  = new Integer(5);
+        Integer six   = new Integer(6);
+        Integer seven = new Integer(7);
+
+        List testList = new LinkedList();
+        testList.add(one);
+        testList.add(two);
+        testList.add(three);        
+
+        list1.add(one);
+        list1.add(two);
+        list1.add(three);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+
+        list1.clear();
+        list2.clear();
+        listToAddTo.clear();
+
+        
+        list2.add(one);
+        list2.add(two);
+        list2.add(three);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+
+        list1.clear();
+        list2.clear();
+        listToAddTo.clear();
+        
+        list1.add(one);
+        list2.add(two);
+        list2.add(three);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+
+        list1.clear();
+        list2.clear();
+        listToAddTo.clear();
+        
+        list1.add(one);
+        list1.add(two);
+        list2.add(three);
+        list2.add(four);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
     }
 
 
