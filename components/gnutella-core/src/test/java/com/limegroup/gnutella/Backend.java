@@ -21,13 +21,13 @@ public class Backend {
     /**
      * The default port that backend instances run on.
      */
-    public static final int DEFAULT_PORT = 6000;
+    public static final int DEFAULT_PORT = 6300;
 
     /**
      * The default port that backend instances run on if they are
      * a backend that rejects all connections.
      */
-    public static final int DEFAULT_REJECT_PORT = 6001;
+    public static final int DEFAULT_REJECT_PORT = 6301;
 
     private final int PORT;
 
@@ -163,7 +163,7 @@ public class Backend {
 	 */
 	protected Backend(ActivityCallback callback, MessageRouter router,
 					  int timeout, int port) {
-		System.out.println("STARTING BACKEND"); 
+		System.out.println("STARTING BACKEND ON PORT "+port); 
         PORT = port;
 		makeSharedDirectory();
 		copySettingsFiles();
@@ -228,17 +228,16 @@ public class Backend {
 	protected void setStandardSettings() {
 		SettingsManager settings = SettingsManager.instance();
 		settings.setPort(PORT);
-		//settings.setKeepAlive(1);
 		settings.setDirectories(new File[] {TEMP_DIR});
 		settings.setExtensions("tmp");
-		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.KEEP_ALIVE.setValue(10);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        //ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        ConnectionSettings.USE_GWEBCACHE.setValue(false);
 	}
 
 	
