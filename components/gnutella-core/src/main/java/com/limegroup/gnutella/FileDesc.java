@@ -208,11 +208,7 @@ public class FileDesc implements AlternateLocationCollector {
 		return _modTime;
 	}
 
-    /**
-     * Return SHA1 <tt>URN</tt> instance, if available.
-	 *
-	 * @return the SHA1 <tt>URN</tt> instance
-     */
+    // inherit doc comment
     public URN getSHA1Urn() {
 		return SHA1_URN;
 	}
