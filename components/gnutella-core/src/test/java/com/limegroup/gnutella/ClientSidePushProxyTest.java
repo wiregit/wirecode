@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
@@ -31,12 +32,10 @@ public class ClientSidePushProxyTest
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    private static Connection ultrapeer1;
-    private static Connection ultrapeer2;
-    private static Connection old1;
-    private static Connection old2;
     private static Connection testUP;
     private static RouterService rs;
+
+    private static MyActivityCallback callback;
 
     public ClientSidePushProxyTest(String name) {
         super(name);
@@ -72,13 +71,15 @@ public class ClientSidePushProxyTest
         // now move them to the share dir
         CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        // make sure results get through
+        settings.setMinimumSearchQuality(-2);
     }        
     
     public static void globalSetUp() throws Exception {
         doSettings();
 
         SettingsManager settings=SettingsManager.instance();
-        ActivityCallback callback=new ActivityCallbackStub();
+        callback=new MyActivityCallback();
         rs=new RouterService(callback);
         assertEquals("unexpected port", PORT, settings.getPort());
         rs.start();
@@ -107,10 +108,6 @@ public class ClientSidePushProxyTest
          //created, the test will fail.
 
          //System.out.println("Please establish a connection to localhost:6350\n");
-         ultrapeer1 = connect(rs, 6350, true);
-         ultrapeer2 = connect(rs, 6351, true);
-         old1 = connect(rs, 6352, true);
-         old2 = connect(rs, 6353, true);
      }
      
      private static Connection connect(RouterService rs, int port, 
@@ -237,6 +234,50 @@ public class ClientSidePushProxyTest
         // everything checks out!
     }
 
+    
+    public void testHTTPRequest() throws Exception {
+        drain(testUP);
+        // some setup
+        byte[] clientGUID = GUID.makeGuid();
+
+        // construct and send a query        
+        byte[] guid = GUID.makeGuid();
+        rs.query(guid, "boalt.org");
+
+        // the testUP should get it
+        Message m = null;
+        do {
+            m = testUP.receive(TIMEOUT);
+        } while (!(m instanceof QueryRequest)) ;
+
+        // set up a server socket
+        ServerSocket ss = new ServerSocket(7000);
+        ss.setSoTimeout(TIMEOUT);
+
+        // send a reply with some PushProxy info
+        PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
+        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
+        Response[] res = new Response[1];
+        res[0] = new Response(10, 10, "boalt.org");
+        m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
+                           clientGUID, new byte[0], false, false, true,
+                           true, false, false, proxies);
+        testUP.send(m);
+        testUP.flush();
+
+        // wait a while for Leaf to process result
+        Thread.sleep(1000);
+        assertTrue(callback.getRFD() != null);
+
+        // tell the leaf to download the file, should result in push proxy
+        // request
+        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+
+        // wait for the incoming HTTP request
+        Socket httpSock = ss.accept();
+        assertNotNull(httpSock);
+    }
+
 
     //////////////////////////////////////////////////////////////////
 
@@ -262,10 +303,6 @@ public class ClientSidePushProxyTest
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
-        ultrapeer1.close();
-        ultrapeer2.close();
-        old1.close();
-        old2.close();
     }
 
     private static final boolean DEBUG = false;
@@ -295,4 +332,29 @@ public class ClientSidePushProxyTest
             return HandshakeResponse.createResponse(props);
         }
     }
+
+    public static class MyActivityCallback extends ActivityCallbackStub {
+        private RemoteFileDesc rfd = null;
+        public RemoteFileDesc getRFD() {
+            return rfd;
+        }
+
+        public synchronized void handleQueryResult(HostData data, 
+                                                   Response response, 
+                                                   List docs) {
+            assertNotNull(data.getPushProxies());
+            rfd = new RemoteFileDesc(data.getIP(), data.getPort(),
+                                     response.getIndex(), 
+                                     response.getName(),
+                                     (int) response.getSize(), 
+                                     data.getClientGUID(),
+                                     0, data.isChatEnabled(), 3, false,
+                                     null, null, false, 
+                                     data.getPushProxies());
+            assertNotNull(rfd.getPushProxies());
+        }
+    }
+
+
 }
+
