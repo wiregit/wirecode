@@ -112,7 +112,7 @@ public class M4AMetaData extends AudioMetaData {
 		//for some reason the atom is much larger than a scalar type, 
 		//and the actual value is held at the end... oh well.
 		current = (byte []) _metaData.get(new Integer(GENRE_ATOM));
-		short genreShort = (short) (ByteOrder.leb2short(current, current.length-2) -1);
+		short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
 		setGenre(MP3MetaData.getGenreString(genreShort));
 		
 		//TODO: add more fields as we discover their meaning.

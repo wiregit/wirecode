@@ -392,7 +392,7 @@ public class LimeXMLUtils
         boolean retVal = false;
 
         in = in.toLowerCase(Locale.US);
-        if (in.endsWith(".m4a")|| in.endsWith("mp4"))
+        if (in.endsWith(".m4a")|| in.endsWith(".m4p"))
             retVal = true;
         
         return retVal;
