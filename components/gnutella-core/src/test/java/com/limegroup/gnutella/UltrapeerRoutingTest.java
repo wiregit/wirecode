@@ -199,7 +199,9 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         }
 
         // for Ultrapeer 1
-        qrt.add("susheel is a cool dude"); 
+        qrt = new QueryRouteTable();
+        qrt.add("leehsus");
+        qrt.add("awesome");
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             ULTRAPEER_1.send((RouteTableMessage)iter.next());
 			ULTRAPEER_1.flush();
@@ -335,6 +337,21 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		ULTRAPEER_2.flush();
 
         assertTrue(!drain(ULTRAPEER_1));
+
+        // ok, now make sure a query DOES get through on the last hop
+        qr = QueryRequest.createQuery("leehsu", (byte)2);
+        
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+
+		qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+        
+        
     }
 
 
