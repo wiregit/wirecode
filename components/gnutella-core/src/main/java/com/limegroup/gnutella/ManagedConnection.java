@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
@@ -201,6 +202,11 @@ public class ManagedConnection
      */
     private String _host = null;
 
+    /**
+     * The domain to which this connection is authenticated
+     */
+    private Set _domains = null;
+    
     /**
 	 * Constant handle to the <tt>SettingsManager</tt> for accessing
 	 * various properties.
@@ -545,16 +551,59 @@ public class ManagedConnection
     public void setPersonalFilter(SpamFilter filter) {
         _personalFilter = filter;
     }
+    
+    /**
+     * Returns the domain to which this connection is authenticated
+     * @return the set (of String) of domains to which this connection 
+     * is authenticated. Returns
+     * null, in case of unauthenticated connection
+     */
+    public Set getDomains(){
+        //Note that this method is not synchronized, and so _domains may 
+        //get initialized multiple times (in case multiple threads invoke this
+        //method, before domains is initialized). But thats not a problem as
+        //all the instances will have same values, and all but 1 of them 
+        //will get garbage collected
+        
+        if(_domains == null){
+            //initialize domains
+            _domains = createDomainSet();
+        }
+        //return the initialized domains
+        return _domains;
+//        return (String[])_domains.toArray(new String[0]);
+    }
 
-    //
-    // Begin Message dropping and filtering calls
-    //
+    /**
+     * creates the set (of String) of domains from the properties sent/received
+     * @return the set (of String) of domains
+     */
+    private Set createDomainSet(){
+        Set domainSet;
+        //get the domain property
+        //In case of outgoing connection, we received the domains from the
+        //remote host to whom we authenticated, viceversa for incoming
+        //connection
+        String domainsAuthenticated;
+        if(this.isOutgoing())
+            domainsAuthenticated = getProperty(
+                ConnectionHandshakeHeaders.DOMAINS_AUTHENTICATED);
+        else
+            domainsAuthenticated = getPropertyWritten(
+                ConnectionHandshakeHeaders.DOMAINS_AUTHENTICATED);
 
-
-    //
-    // Begin reply forwarding calls
-    //
-
+        //for unauthenticated connections
+        if(domainsAuthenticated == null){
+            //if no authentication done, initialize to a default domain set
+            domainSet = User.createDefaultDomainSet();
+        }else{
+            domainSet = StringUtils.getSetofValues(domainsAuthenticated);
+        }
+        
+        //return the domain set
+        return domainSet;
+    }
+    
     /**
      * This method is called when a reply is received for a PingRequest
      * originating on this Connection.  So, just send it back.
@@ -877,75 +926,111 @@ public class ManagedConnection
             
             //do stuff specific to connection direction
             if(outgoing){
-                //check the code we received from the other side
-                //if authentication needed
-                if(response.getStatusCode() 
-                    == HandshakeResponse.UNAUTHORIZED_CODE){
-                    //Authenticate
-                    User user = null;
-                    //first try with cookie
-                    if(_firstResponse && _host != null){
-                        //try using the cookie if we have
-                        user = COOKIES.getUserInfo(_host);
-                    }
-                    
-                    //if we dont have cookie, of we have already used the
-                    //cookie, then get the information interactively from user
-                    if(user == null){
-                        user = _manager.getCallback()
-                            .getUserAuthenticationInfo(_host);
-                    }
-                    
-                    //if user cancelled authentication, or didnt fill anything
-                    if(user.getUsername().trim().equals("")){
-                        code = HandshakeResponse.DEFAULT_BAD_STATUS_CODE;
-                        message = HandshakeResponse.UNABLE_TO_AUTHENTICATE;
-                    }
-                    else{
-                        code = HandshakeResponse.OK;
-                        message = HandshakeResponse.AUTHENTICATING;
-                        //add user authentication headers
-                        ret.setProperty(ConnectionHandshakeHeaders.USERNAME,
-                            user.getUsername());
-                        ret.setProperty(ConnectionHandshakeHeaders.PASSWORD,
-                            user.getPassword());
-                        
-                        //also store the authentication information in a 
-                        //cookie, for next-time use
-                        COOKIES.putCookie(_host, user);
-                    }
-                }
-                
+                return respondOutgoing(response);
+            }else{
+                return respondIncoming(response);
             }
-            else{
-                //incoming connection
-                if(SETTINGS.acceptAuthenticatedConnectionsOnly()){
-                    //see if we received username and password
-                    Properties headersReceived = response.getHeaders();
-                    //authenticate
-                    boolean authenticated 
-                        = _manager.getAuthenticator().authenticate(
-                        headersReceived.getProperty(
-                        ConnectionHandshakeHeaders.USERNAME),
-                        headersReceived.getProperty(
-                        ConnectionHandshakeHeaders.PASSWORD), null);
-                    
-                    if(!authenticated){
-                        code = HandshakeResponse.UNAUTHORIZED_CODE;
-                        message = HandshakeResponse.UNAUTHORIZED_MESSAGE;
-                    }
+        }
+        
+        /** 
+         * Returns the corresponding handshake to be written to the remote host
+         * when responding to the connection handshake response just received,
+         * for outgoing connection.  
+         * @param response The handshake response received from the remote end
+         */
+        private HandshakeResponse respondIncoming(HandshakeResponse response)
+            throws IOException{
+            Properties ret = new Properties();
+            int code = HandshakeResponse.OK;
+            String message = HandshakeResponse.OK_MESSAGE;
+            
+            if(SETTINGS.acceptAuthenticatedConnectionsOnly()){
+                //see if we received username and password
+                Properties headersReceived = response.getHeaders();
+                //authenticate
+                Set domains = _manager.getAuthenticator().authenticate(
+                    headersReceived.getProperty(
+                    ConnectionHandshakeHeaders.USERNAME),
+                    headersReceived.getProperty(
+                    ConnectionHandshakeHeaders.PASSWORD), null);
+
+                if(domains == null){
+                    code = HandshakeResponse.UNAUTHORIZED_CODE;
+                    message = HandshakeResponse.UNAUTHORIZED_MESSAGE;
                 }
-                //else no need to do anything
+                else{
+                    //let the other side know of the domains successfully
+                    //authenticated
+                    ret.setProperty(
+                        ConnectionHandshakeHeaders.DOMAINS_AUTHENTICATED,
+                        StringUtils.getEntriesAsString(domains));
+                }
             }
             
             //if first response, unset the flag
-                if(_firstResponse){
-                    //turn the flag off
-                    _firstResponse = false;
+            if(_firstResponse){
+                //turn the flag off
+                _firstResponse = false;
+                //Note: Also add any other property we want to send out in 
+                //the first response
+            }
+
+            return new HandshakeResponse(code, message, ret);
+        }
+        
+        /** 
+         * Returns the corresponding handshake to be written to the remote host
+         * when responding to the connection handshake response just received,
+         * for outgoing connection.  
+         * @param response The handshake response received from the remote end
+         */
+        private HandshakeResponse respondOutgoing(HandshakeResponse response)
+            throws IOException{
+            Properties ret = new Properties();
+            int code = HandshakeResponse.OK;
+            String message = HandshakeResponse.OK_MESSAGE;
+            
+            //check the code we received from the other side
+            //if authentication needed
+            if(response.getStatusCode() == HandshakeResponse.UNAUTHORIZED_CODE){
+                //Authenticate
+                User user = null;
+                //first try with cookie
+                if(_firstResponse && _host != null){
+                    //try using the cookie if we have
+                    user = COOKIES.getUserInfo(_host);
                 }
+
+                //if we dont have cookie, of we have already used the
+                //cookie, then get the information interactively from user
+                if(user == null){
+                    user = _manager.getCallback()
+                        .getUserAuthenticationInfo(_host);
+                }
+
+                //if user cancelled authentication, or didnt fill anything
+                if(user.getUsername().trim().equals("")){
+                    code = HandshakeResponse.DEFAULT_BAD_STATUS_CODE;
+                    message = HandshakeResponse.UNABLE_TO_AUTHENTICATE;
+                }
+                else{
+                    code = HandshakeResponse.OK;
+                    message = HandshakeResponse.AUTHENTICATING;
+                    //add user authentication headers
+                    ret.setProperty(ConnectionHandshakeHeaders.USERNAME,
+                        user.getUsername());
+                    ret.setProperty(ConnectionHandshakeHeaders.PASSWORD,
+                        user.getPassword());
+
+                    //also store the authentication information in a 
+                    //cookie, for next-time use
+                    COOKIES.putCookie(_host, user);
+                }
+            }
             
             return new HandshakeResponse(code, message, ret);
         }
+        
     }
 
     /** Unit test.  Only tests statistics methods. */
