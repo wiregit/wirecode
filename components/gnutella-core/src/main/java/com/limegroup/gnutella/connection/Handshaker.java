@@ -29,17 +29,22 @@ public interface Handshaker {
     public boolean handshake() throws IOException, NoGnutellaOkException;
     
     /**
-     * Checks whether or not the handshaking process is complete.
+     * Determines whether or not header reading is complete for this handshaker.
+     * This is primarily used for non-blocking handshakes to determine 
+     * whether to read handshake headers or Gnutella messages.
      * 
-     * @return <tt>true</tt> if the handshaking process has completed, 
-     *  otherwise <tt>false</tt>
+     * @return <tt>true</tt> if handshake reading is complete, otherwise 
+     *  <tt>false</tt>
      */
-    //public boolean handshakeComplete();
-    
     public boolean readComplete();
     
     /**
-     * @return
+     * Determines whether or not handshake writing is complete.  This is 
+     * used particularly for non-blocking IO when determining whether we 
+     * should write handshake headers or Gnutella message data.
+     * 
+     * @return <tt>true</tt> if all handshake data has been written, otherwise
+     *  <tt>false</tt>
      */
     public boolean writeComplete();
 
@@ -60,23 +65,42 @@ public interface Handshaker {
     public Properties getHeadersWritten();
 
     /**
-     * @param string
-     * @return
+     * Accessor for the specified header written to the remote host.
+     * 
+     * @param name the name for the handshake header to access
+     * @return the value associated with the specified header name
      */
-    public String getHeaderWritten(String string);
+    public String getHeaderWritten(String name);
 
     /**
-     * @return
+     * Writes handshake data to the remote host.
+     * 
+     * @return <tt>true</tt> if all available data was successfully written,
+     *  otherwise <tt>false</tt>
+     * @throws IOException if an IO error occurs during writing
      */
     public boolean write() throws IOException;
 
     /**
+     * Reads any available handshake data from the remote host.
      * 
+     * @throws IOException if an IO error occurs during reading
      */
     public void read() throws IOException;
 
     /**
-     * @return
+     * Accessor for any leftover Gnutella message data that was read at the 
+     * end of handshaking.  This is particularly relevant to non-blocking
+     * handshakes where we simply fill a buffer with available data on reads.
+     * For INCOMING connections, we can also read some Gnutella message data
+     * when we read the end of the handshake.  This method provides access to
+     * that extra data so that we can properly create Gnutella messages out of
+     * it.
+     * 
+     * @return the <tt>ByteBuffer</tt> containing any remaining Gnutella message
+     *  data from the connection handshake.  The returned <tt>ByteBuffer</tt>
+     *  is guaranteed to be non-null, although it will often not contain any
+     *  extra data
      */
     public ByteBuffer getRemainingData();
 }
