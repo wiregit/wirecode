@@ -24,21 +24,23 @@ public class FileManager{
     private int _numFiles;
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in the shared folder with the shareable extension.
+     *  f[i]._path is in the shared folder with a shareable extension.
      *  LOCKING: obtain this before modifying. */
     private ArrayList /* of FileDesc */ _files;
-    /** an index mapping keywords in file names to the index in _files.
-     *  A keyword of a filename f is defined to be a maximal sequence of 
-     *  characters without a character from DELIMETERS.  INVARIANT: TODO..
-     */
+    /** an index mapping keywords in file names to the index in _files.  A
+     * keyword of a filename f is defined to be a maximal sequence of characters
+     * without a character from DELIMETERS.  INVARIANT: For all keys k in
+     * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
+     * Likewise for all i, for all k in _files[i]._path, _index.get(k)
+     * contains i. */
     private Trie /* String -> List<Integer> */ _index;
 
     private String[] _extensions;
+    private Set _sharedDirectories;
 
     private static FileManager _instance = new FileManager();
 
-    private Set _sharedDirectories;
-
+    /** Characters used to tokenize queries and file names. */
     static final String DELIMETERS=" -.+/*()\\";
     private static final boolean isDelimeter(char c) {
         switch (c) {
