@@ -19,7 +19,7 @@ public abstract class NumericalStatistic extends AbstractStatistic {
      */
     public void addData(int data) {
         super.addData(data);
-        synchronized(BUFFER_LOCK) {
+        synchronized(_buffer) {
             initializeBuffer();
             _buffer.addLast(data);
         }

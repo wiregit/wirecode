@@ -21,9 +21,10 @@ public abstract class AbstractStatistic implements Statistic {
 		StatisticsManager.instance();
 
 	/**
-	 * <tt>IntBuffer</tt> for recording stats data.
+	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
+     * an empty buffer until stats are actually recorded.
 	 */
-	protected IntBuffer _buffer;
+	protected IntBuffer _buffer = new IntBuffer(0);
 
 	/**
 	 * Long for the statistic currently being added to.
@@ -52,10 +53,6 @@ public abstract class AbstractStatistic implements Statistic {
 	
 	private int _numWriters = 0;
 
-	/**
-	 * Lock for accessing the <tt>IntBuffer</tt>.
-	 */
-	protected final Object BUFFER_LOCK = new Object(); 
 
 	/**
 	 * The file name to write stat data to.  If this is null or the empty
@@ -99,7 +96,7 @@ public abstract class AbstractStatistic implements Statistic {
 		
 	// inherit doc comment
 	public IntBuffer getStatHistory() {
-		synchronized(BUFFER_LOCK) {
+		synchronized(_buffer) {
 			initializeBuffer();
 			return _buffer;
 		}
@@ -107,7 +104,7 @@ public abstract class AbstractStatistic implements Statistic {
 
 	// inherit doc comment
 	public void storeCurrentStat() {
- 		synchronized(BUFFER_LOCK) {
+ 		synchronized(_buffer) {
 			initializeBuffer();
  			_buffer.addLast(_current);
  		}
