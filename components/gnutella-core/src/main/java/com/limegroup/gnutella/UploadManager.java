@@ -20,6 +20,7 @@ import com.limegroup.gnutella.downloader.*; //for testing
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
+
     /** An enumeration of return values for queue checking. */
     private final int REJECTED = 0;    
     private final int QUEUED = 1;
@@ -465,11 +466,12 @@ public final class UploadManager implements BandwidthTracker {
 	}
 
 	/** 
-     * This method was added to adopt BearShare's busy bit
-     * in the Query Hit Descriptor.  It takes no parameters
-	 * and returns 'true' if there are no slots available
-	 * for uploading.  It returns 'false' if there are slots
-	 * available.  
+     * Returns whether or not there are currently upload slots available,
+     * not taking the queue into account.  In particular, if there are 
+     * no upload slots, but there are queue slots, this will still
+     * return <tt>true</tt>.
+     *
+     * @return <tt>true</tt> if there are no upload slots available
      */
 	public synchronized boolean isBusy() {
 		// return true if Limewire is shutting down
@@ -478,8 +480,26 @@ public final class UploadManager implements BandwidthTracker {
 		
 		// testTotalUploadLimit returns true is there are
 		// slots available, false otherwise.
-		return (! testTotalUploadLimit());
+		return !testTotalUploadLimit();
 	}
+
+    /**
+     * Returns whether or not the upload queue is full.
+     *
+     * @return <tt>true</tt> if the upload queue is full, otherwise
+     *  <tt>false</tt>
+     */
+    public synchronized boolean isQueueFull() {
+		// return true if Limewire is shutting down
+		if (RouterService.getIsShuttingDown())
+		    return true;
+		
+		// testTotalUploadLimit returns true is there are
+		// slots available, false otherwise.
+		return 
+            (_queuedUploads.size() >=
+             UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+    }
 
 	public synchronized int uploadsInProgress() {
 		return _activeUploadList.size();
