@@ -935,7 +935,7 @@ public class Connection {
     private Message readAndUpdateStatistics()
       throws IOException, BadPacketException {
         int pCompressed = 0, pUncompressed = 0;
-        if(isReadDeflated()) {
+        if(!_closed && isReadDeflated()) {
             pCompressed = _inflater.getTotalIn();
             pUncompressed = _inflater.getTotalOut();
         }
@@ -948,7 +948,7 @@ public class Connection {
         // read more input than a single message,
         // making it appear as if the deflated input
         // was actually larger.
-        if( isReadDeflated() ) {
+        if( !_closed && isReadDeflated() ) {
             _compressedBytesReceived = _inflater.getTotalIn();
             _bytesReceived = _inflater.getTotalOut();
             if(!CommonUtils.isJava118()) {
@@ -978,7 +978,7 @@ public class Connection {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
-        if ( isWriteDeflated() ) {
+        if ( !_closed && isWriteDeflated() ) {
             priorUncompressed = _deflater.getTotalIn();
             priorCompressed = _deflater.getTotalOut();
         }
@@ -994,7 +994,7 @@ public class Connection {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
         long priorCompressed = 0, priorUncompressed = 0;
-        if ( isWriteDeflated() ) {
+        if ( !_closed && isWriteDeflated() ) {
             priorUncompressed = _deflater.getTotalIn();
             priorCompressed = _deflater.getTotalOut();
         }        
@@ -1254,10 +1254,10 @@ public class Connection {
         // Fortunately, the calls aren't explicitly necessary because
         // when the deflater/inflaters are garbage-collected they will call
         // end for us.
-        //if( _deflater != null )
-        //    _deflater.end();
-        //if( _inflater != null )
-        //    _inflater.end();
+        if( _deflater != null )
+            _deflater.end();
+        if( _inflater != null )
+            _inflater.end();
         
        // closing _in (and possibly _out too) can cause NPE's
        // in Message.read (and possibly other places),
