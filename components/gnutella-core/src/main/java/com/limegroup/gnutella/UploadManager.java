@@ -179,6 +179,9 @@ public final class UploadManager implements BandwidthTracker {
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
             debug("IOE thrown, closing socket");
+
+        } catch(ArrayIndexOutOfBoundsException ae) {
+            debug("AIOOBE thrown, closing socket");
         } finally {
             synchronized(this) {
                 boolean found = false;
