@@ -117,7 +117,7 @@ public final class NIOHeaderReader implements HeaderReader {
      * buffer for later reading.
      */
     private String read(ByteBuffer buf) throws IOException   {
-        while(buf.hasRemaining())  {
+        while(buf.hasRemaining() && _buffer.length() < 1024)  {
             char curChar = (char)buf.get();
             if(curChar == '\r' || curChar == '\n') {
                 char nextChar = (char)buf.get();
@@ -150,7 +150,7 @@ public final class NIOHeaderReader implements HeaderReader {
         }
         
         // keep reading in this case without worrying about clearing the
-        // ByteBuffer
+        // ByteBuffer -- we've only read a partial header
         return null;         
     }
 
