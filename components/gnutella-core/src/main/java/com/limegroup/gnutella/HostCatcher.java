@@ -106,8 +106,6 @@ public class HostCatcher {
     private Endpoint bootstrapHostInProgress=null;
 
     private Acceptor acceptor;
-    private ConnectionManager manager;
-    private ActivityCallback callback;
     private SettingsManager settings=SettingsManager.instance();
 
     /**
@@ -122,20 +120,6 @@ public class HostCatcher {
 
 
     /**
-     * Creates an empty host catcher.  Must call initialize before using.
-     */
-    public HostCatcher(ActivityCallback callback) {
-        this.callback=callback;
-    }
-
-    /**
-     * Links the HostCatcher up with the other back end pieces
-     */
-    public void initialize(Acceptor acceptor, ConnectionManager manager) {
-        initialize(acceptor, manager, null);
-    }
-
-    /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
      * connect is not specified in the SettingsManager, loads the hosts in the
      * host list into the maybe set.  (The likelys set is empty.)  If filename
@@ -143,10 +127,9 @@ public class HostCatcher {
      * empty.  The file is expected to contain a sequence of lines in the format
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
-    public void initialize(Acceptor acceptor, ConnectionManager manager,
-                           String filename) {
-        this.acceptor = acceptor;
-        this.manager = manager;
+    public void start() {
+		String filename = SettingsManager.instance().getHostList();
+        this.acceptor = RouterService.instance().getAcceptor();
 
         //Read gnutella.net
         try {
@@ -347,8 +330,10 @@ public class HostCatcher {
         //view and use.  The second situation occurs the majority of times and
         //only in special cases such as a SimplePongCacheServer would the first 
         //situation occur.
-        if (alwaysNotifyKnownHost || notifyGUI) 
-            callback.knownHost(e);
+        if (alwaysNotifyKnownHost || notifyGUI) {
+			
+            RouterService.instance().getCallback().knownHost(e);
+		}
         repOk();
         return ret;
     }
