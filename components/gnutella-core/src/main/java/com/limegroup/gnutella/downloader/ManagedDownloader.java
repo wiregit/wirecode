@@ -561,6 +561,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * stores a HashTree that will be requested if we find it.
+     * LOCKING: this
      */
     private HashTree hashTree = null;
     
@@ -1957,7 +1958,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         // initialize the HashTree
 		if( downloadSHA1 != null ) {
 		    validAlts = AlternateLocationCollection.create(downloadSHA1);
-            hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);  
+		    synchronized(this) {
+		    	hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
+		    }
         }
         
         URN fileHash;
@@ -2509,21 +2512,29 @@ public class ManagedDownloader implements Downloader, Serializable {
             while(true) { //while queued, connect and sleep if we queued
                 status = null;
                 
+                HashTree ourTree;
+                synchronized(this) {
+                	ourTree = hashTree;
+                }
                 // request THEX from te dloader if the tree we have
                 // isn't good enough (or we don't have a tree)
                 if (dloader.hasHashTree() &&
-                  (hashTree == null || !hashTree.isDepthGoodEnough())) {
+                  (ourTree == null || !ourTree.isDepthGoodEnough())) {
                     status = dloader.requestHashTree();
                     if(status.isThexResponse()) {
-                        HashTree temp = status.getHashTree();
-                        if (temp.isBetterTree(hashTree)) {
-                            hashTree = temp;
-                            // persist the hashTree in the TigerTreeCache
-                            // because we won't save it in ManagedDownloader
-                            TigerTreeCache.instance().addHashTree(
-                                    rfd.getSHA1Urn(),
-                                    hashTree);
-                        }
+                    	// if we need to read from disk do it before locking
+                    	TigerTreeCache.instance(); 
+                    	synchronized(this) {
+                    		HashTree temp = status.getHashTree();
+                    		if (temp.isBetterTree(hashTree)) {
+                    			hashTree = temp;
+                    			// persist the hashTree in the TigerTreeCache
+                    			// because we won't save it in ManagedDownloader
+                    			TigerTreeCache.addHashTree(
+                                        rfd.getSHA1Urn(),
+                                        hashTree);
+                    		}
+                    	}
                     }
                 }
                 
