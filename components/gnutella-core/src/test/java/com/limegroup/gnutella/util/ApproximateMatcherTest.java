@@ -5,10 +5,6 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.sun.java.util.collections.*;
 
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.Expand;
-import java.io.*;
-
 /**
  * Unit tests for ApproximateMatcher
  */
