@@ -78,6 +78,26 @@ public class QueryReply extends Message implements Serializable{
             payload[i+j]=clientGUID[j];
         }
     }
+    
+    /** 
+    * Creates a new query reply from the passed query Reply. The new one is
+    * same as the passed one, but with different specified GUID
+    * @param guid The new GUID for the reply
+    * @param reply The query reply from where to copy the fields into the
+    * new constructed query reply
+    * Note: The payload is not really copied, but the reference in the newly
+    * constructed query reply, points to the one in the passed reply.
+    * but since the payload is not meant to be 
+    * mutated, it shouldnt make difference if different query replies
+    * maintain reference to same payload
+    */
+    public QueryReply(byte[] guid, QueryReply reply){
+        //call the super constructor with new GUID
+        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(), 
+                                                            reply.getLength()); 
+        //set the payload field
+        this.payload = reply.payload;
+    }
 
     /** Returns the number of bytes necessary to represent responses
      * in the payload */
