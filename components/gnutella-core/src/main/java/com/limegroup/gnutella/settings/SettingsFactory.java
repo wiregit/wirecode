@@ -166,6 +166,8 @@ public final class SettingsFactory {
             out = new FileOutputStream(SETTINGS_FILE);
             out.write( PRE_HEADER );
             tempProps.save( out, HEADING);            
+        } catch(FileNotFoundException e) {
+			ErrorService.error(e);
         } catch (IOException e) {
 			ErrorService.error(e);
         } finally {
