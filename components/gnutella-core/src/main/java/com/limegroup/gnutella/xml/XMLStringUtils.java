@@ -27,7 +27,7 @@ import java.util.*;
  * @author  asingla
  * @version
  */
-public class XMLStringUtils extends Object
+public class XMLStringUtils
 {
     
     /**
@@ -61,11 +61,12 @@ public class XMLStringUtils extends Object
         int lastIndex = 0;
         int index = 0;
         //break into parts
-        while((index = canonicalizedField.indexOf(DELIMITER)) != -1)
+        while((index = canonicalizedField.indexOf(DELIMITER, lastIndex)) != -1)
         {
             //add the structural part
             returnList.add(canonicalizedField.substring(lastIndex, index));
-            lastIndex = index;
+            lastIndex = index + DELIMITER.length();
+            //index = index + DELIMITER.length();
         }
         
         //if the last part is element (and not attribute that ends with the
