@@ -259,6 +259,15 @@ public class HTTPDownloader implements BandwidthTracker {
                 alts.addAlternateLocationCollection(_alternateLocationsToSend);
             }
         }
+        
+        // Add ourselves to the mesh if we have downloaded a large enough
+        // portion of the file.
+        if (_incompleteFile.length() > _minPartialFileSize)
+            alts.addAlternateLocation(
+                AlternateLocation.createAlternateLocation(
+                    alts.getSHA1Urn()
+                )
+            );
 
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
