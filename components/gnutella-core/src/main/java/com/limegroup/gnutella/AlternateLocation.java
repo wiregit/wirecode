@@ -19,7 +19,7 @@ import java.io.*;
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class AlternateLocation 
-	implements com.sun.java.util.collections.Comparable {
+	implements com.sun.java.util.collections.Comparable, HTTPHeaderValue  {
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
@@ -383,8 +383,26 @@ public final class AlternateLocation
 	 * @see java.lang.Comparable
 	 */
 	public int compareTo(Object obj) {
+		if(equals(obj)) return 0;
+		if(obj == this) return 0;
+		if(!(obj instanceof AlternateLocation)) return -1;				
 		AlternateLocation al = (AlternateLocation)obj;		
-		return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
+		if(URL.equals(al.URL)) {
+			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
+		}
+		if(isTimestamped() && al.isTimestamped()) {
+			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
+		}
+		if(isTimestamped()) {
+			return -1;
+		}
+		if(al.isTimestamped()) {
+			return 1;
+		}
+
+		// otherwise, niether location is timestamped and their URLs are 
+		// not equal, so just return -1
+		return -1;
 	}
 
 	/**
@@ -405,7 +423,7 @@ public final class AlternateLocation
 		return ((OUTPUT_DATE_TIME == null ? al.OUTPUT_DATE_TIME == null :
 				 OUTPUT_DATE_TIME.equals(al.OUTPUT_DATE_TIME)) && 
 				(URL == null ? al.URL == null :
-				 al.URL.equals(this.URL)));
+				 URL.equals(al.URL)));
 	}
 
 	/**
@@ -420,7 +438,7 @@ public final class AlternateLocation
 	public int hashCode() {
 		if(hashCode == 0) {
 			int result = 17;
-			result = (37*result) + (int)(TIME ^ (TIME >>> 32));
+			result = (37*result) + (int)(TIME^(TIME >>> 32));
 			result = (37*result) + this.URL.hashCode();
 			hashCode = result;
 		}
@@ -441,6 +459,14 @@ public final class AlternateLocation
 		}
 	}
 
+	public String httpStringValue() {
+		if(this.isTimestamped()) {
+			return (this.URL.toExternalForm()+" "+OUTPUT_DATE_TIME);
+		} else {
+			return this.URL.toExternalForm();
+		}		
+	}
+
 	/**
 	 * A factory method for creating new <tt>Comparator</tt> instances 
 	 * for comparing alternate locations.
@@ -448,13 +474,17 @@ public final class AlternateLocation
 	 * @return a new <tt>Comparator</tt> instance for comparing
 	 * alternate locations
 	 */
+	/*
 	public static com.sun.java.util.collections.Comparator createComparator() {
 		return new AlternateLocationsComparator();
 	}
+	*/
+	
 
 	/**
 	 * Private class for comparing <tt>AlternateLocation</tt> instances.
 	 */
+	/*
 	private static class AlternateLocationsComparator 
 		implements com.sun.java.util.collections.Comparator {
 		public int compare(Object obj1, Object obj2) {
@@ -464,7 +494,8 @@ public final class AlternateLocation
 		public boolean equals(Object obj) {
 			return this.equals(obj);
 		}
-	}   
+	} 
+	*/
 }
 
 
