@@ -570,6 +570,12 @@ public class QueryRequest extends Message implements Serializable{
     }
 
 
+	public static QueryRequest 
+		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload) 
+	    throws BadPacketException {
+		return new QueryRequest(guid, ttl, hops, payload);
+	}
+
     /**
      * Build a new query with data snatched from network
      *
@@ -811,6 +817,16 @@ public class QueryRequest extends Message implements Serializable{
         }
         return false;		
 	}
+
+	/**
+	 * Accessor for whether or not this is a requery from a LimeWire.
+	 *
+	 * @return <tt>true</tt> if it is an automated requery from a LimeWire,
+	 *  otherwise <tt>false</tt>
+	 */
+	public boolean isLimeRequery() {
+		return GUID.isLimeRequeryGUID(getGUID());
+	}
         
     /**
      * Returns the QueryKey associated with this Request.  May very well be
@@ -831,6 +847,7 @@ public class QueryRequest extends Message implements Serializable{
     public Message stripExtendedPayload() {
         return this;
     }
+
 
     public String toString() {
  		return "<query: \""+getQuery()+"\", "+
