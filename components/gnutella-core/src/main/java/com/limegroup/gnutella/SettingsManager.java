@@ -41,7 +41,6 @@ public class SettingsManager implements SettingsInterface {
     private volatile String   _clientID;
     private volatile int      _maxIncomingConn;
     private volatile String   _saveDirectory;
-    private volatile String   _incompleteDirectory;
     private volatile String   _directories;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
@@ -621,8 +620,7 @@ public class SettingsManager implements SettingsInterface {
 		if(parentDir == null) parentDir = CURRENT_DIRECTORY;
 		File incFile = new File(parentDir, "Incomplete");
 		incFile.mkdirs();
-		_incompleteDirectory = incFile.getAbsolutePath();		
-        return _incompleteDirectory;
+		return incFile.getAbsolutePath();		
     }
 
     /** 
@@ -664,7 +662,7 @@ public class SettingsManager implements SettingsInterface {
      *  property. */
     public String getDownloadSnapshotFile() {
         return 
-            (new File(_incompleteDirectory, "downloads.dat")).getAbsolutePath();
+            (new File(getIncompleteDirectory(), "downloads.dat")).getAbsolutePath();
     }
 
 
