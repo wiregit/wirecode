@@ -17,6 +17,8 @@ public class GUESSTester extends TestCase {
 	 */
 	private final int BUFFER_SIZE = 8192;
 
+    private final int WAIT_TIME   = 500; // 1/2 a second...
+
     private DatagramSocket _socket = null;
 
     private QueryReply _qr = null;
@@ -130,7 +132,7 @@ public class GUESSTester extends TestCase {
             _socket.send(toSend);
             try {
                 // wait up to 2.5 seconds for an ack....
-                _pongLock.wait(2500);
+                _pongLock.wait(WAIT_TIME);
             }
             catch (InterruptedException ignored) {}
         }
@@ -159,7 +161,7 @@ public class GUESSTester extends TestCase {
             _socket.send(toSend);
             try {
                 // wait up to 2.5 seconds for an ack....
-                _qrLock.wait(2500);
+                _qrLock.wait(WAIT_TIME);
             }
             catch (InterruptedException ignored) {}
         }
