@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.security.User;
 
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
@@ -330,15 +331,41 @@ public abstract class MessageRouter
         List list=manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++)
         {
+            //get the next connection
             ManagedConnection c = (ManagedConnection)list.get(i);
+            //send the query over this connection only if:
+            //1. It is an unauthenticated connection (normal 
+            //gnutella connection)
+            //2. It is an authenticated connection, and the connection on 
+            //which we received query and this connection, are both 
+            //authenticated to a common domain
             if(c != receivingConnection){
-                if(Utilities.hasIntersection(
+                if(containsDefaultUnauthenticatedDomainOnly(c.getDomains())
+                 || Utilities.hasIntersection(
                     authenticatedDomains,c.getDomains()))
                     c.send(queryRequest);
             }
         }
     }
 
+    /**
+     * Checks if the passed set of domains contains only
+     * default unauthenticated domain 
+     * @param domains Set (of String) of domains to be tested
+     * @return true if the passed set of domains contains only
+     * default unauthenticated domain, false otherwise
+     */
+    private static boolean containsDefaultUnauthenticatedDomainOnly(Set domains)
+    {
+        //check if the set contains only one entry, and that entry is the
+        //default unauthenticated domain 
+        if((domains.size() == 1) && domains.contains(
+            User.DEFAULT_UNAUTHENTICATED_DOMAIN))
+            return true;
+        else
+            return false;
+    }
+    
     /**
      * Respond to the ping request.  Implementations typically will either
      * do nothing (if they don't think a response is appropriate) or call
