@@ -1,9 +1,7 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.*;
 import java.io.IOException;
-import java.util.*;
 
 /**
  * One of the three classes that make up the core of the backend.  This

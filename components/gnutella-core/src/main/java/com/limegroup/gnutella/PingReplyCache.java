@@ -1,8 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
 import com.limegroup.gnutella.util.UnmodifiableIterator;
-import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.*;
 
 /**
  * Singleton cache used to store all the Ping Replies (i.e., Pongs) sent to us.
