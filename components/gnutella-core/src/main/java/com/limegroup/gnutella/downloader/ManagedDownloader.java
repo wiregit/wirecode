@@ -193,17 +193,17 @@ public class ManagedDownloader implements Downloader, Serializable {
      * any downloader yet. The set of these intervals represents the "white"
      * region of the file we are downloading
      */
-    List /* of Interval */ needed;
+    private List /* of Interval */ needed;
 
     /**List of RemoteFileDesc which were busy when we tried to connect to them.
      * To be used when we have run out of other options.
      */
-    List /* of RemoteFileDesc2 */ busy;
+    private List /* of RemoteFileDesc2 */ busy;
        
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.
      */
-    List /*of RemoteFileDesc */ files;
+    private List /*of RemoteFileDesc */ files;
 
     //TODO1: These dataStructures need to be synchronized.
 
@@ -1039,7 +1039,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch(TryAgainLaterException tale) {
             debug("connectAndStartDownload: TALException thrown ");
             resetNeeded(dloader);
-            files.add(rfd);//we can try this rfd again later
+            busy.add(rfd);//we can try this rfd again later
             return;
         } catch (InterruptedException ie) {
             debug("connectAndStartDownload: InterruptdException thrown ");
