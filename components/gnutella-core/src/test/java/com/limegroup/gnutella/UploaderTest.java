@@ -9,6 +9,7 @@ import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import java.net.*;
 
@@ -88,7 +89,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
-        SettingsManager.instance().setUploadQueueSize(1);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
        
         HTTPDownloader d1, d2, d3, d4;
         d1 = addUploader(upManager, rfd1, "1.1.1.1", true);
@@ -137,7 +138,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
-        SettingsManager.instance().setUploadQueueSize(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -219,7 +220,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
-        SettingsManager.instance().setUploadQueueSize(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -282,7 +283,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(99999);
-        SettingsManager.instance().setUploadQueueSize(1);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
         //take the only available slto
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
@@ -314,7 +315,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         SettingsManager.instance().setUploadsPerPerson(2);
-        SettingsManager.instance().setUploadQueueSize(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
    
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
@@ -348,7 +349,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(9999);
         SettingsManager.instance().setSoftMaxUploads(2);
         SettingsManager.instance().setUploadsPerPerson(99999);
-        SettingsManager.instance().setUploadQueueSize(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
@@ -386,7 +387,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
         SettingsManager.instance().setUploadsPerPerson(1);
-        SettingsManager.instance().setUploadQueueSize(10);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
         //first two uploads to get slots
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
@@ -422,7 +423,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setMaxUploads(1);
         SettingsManager.instance().setSoftMaxUploads(1);
         SettingsManager.instance().setUploadsPerPerson(99999);
-        SettingsManager.instance().setUploadQueueSize(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         //connect the first downloader.
         PipedSocketFactory psf = null;
         try {
