@@ -17,10 +17,18 @@ public class ResumeDownloader extends ManagedDownloader
     /** Ensures backwards compatibility of the downloads.dat file. */
     static final long serialVersionUID = -4535935715006098724L;
 
-    private final IncompleteFileManager _incompleteFileManager;
+    /** The temporary file to resume to. */
     private final File _incompleteFile;
+    /** The name and size of the completed file, extracted from
+     *  _incompleteFile. */
     private final String _name;
     private final int _size;
+    /** The hash of the completed file.  This field was not included in the LW
+     *  2.7.0/2.7.1 beta, so it may be null when reading downloads.dat files
+     *  from these rare versions.  That's no big deal; its like not having the
+     *  hash in the first place.  */
+    private final URN _hash;
+    
 
     /** 
      * Creates a RequeryDownloader to finish downloading incompleteFile.  This
@@ -33,8 +41,7 @@ public class ResumeDownloader extends ManagedDownloader
      * @param name the name of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
-     *  IncompleteFileManager.getCompletedSize(incompleteFile) 
-     */
+     *  IncompleteFileManager.getCompletedSize(incompleteFile) */
     public ResumeDownloader(DownloadManager manager,
                             FileManager fileManager,
                             IncompleteFileManager incompleteFileManager,
@@ -44,10 +51,10 @@ public class ResumeDownloader extends ManagedDownloader
                             int size) {
         super(manager, new RemoteFileDesc[0], fileManager,
               incompleteFileManager,callback);
-        this._incompleteFileManager=incompleteFileManager;
         this._incompleteFile=incompleteFile;
         this._name=name;
         this._size=size;
+        this._hash=incompleteFileManager.getCompletedHash(incompleteFile);
     }
 
     /**
@@ -63,8 +70,12 @@ public class ResumeDownloader extends ManagedDownloader
      * Overrides ManagedDownloader to allow any RemoteFileDesc that would
      * resume from _incompleteFile.
      */
-    protected boolean allowAddition(RemoteFileDesc other) {        
-        return _incompleteFile.equals(_incompleteFileManager.getFile(other));
+    protected boolean allowAddition(RemoteFileDesc other) { 
+        //Like "_incompleteFile.equals(_incompleteFileManager.getFile(other))"
+        //but more efficient since no allocations in IncompleteFileManager.
+        return IncompleteFileManager.same(
+            _name, _size, _hash,     
+            other.getFileName(), other.getSize(), other.getSHA1Urn());
     }
 
     /**
@@ -84,11 +95,10 @@ public class ResumeDownloader extends ManagedDownloader
     }
 
     public QueryRequest newRequery() {
-        URN hash=_incompleteFileManager.getCompletedHash(_incompleteFile);
         Set queryUrns=null;
-        if (hash!=null) {
+        if (_hash!=null) {
             queryUrns=new HashSet(1);
-            queryUrns.add(hash);
+            queryUrns.add(_hash);
         }
         //TODO: we always include the file name since HUGE specifies that
         //results should be sent if the name OR the hashes match.  But

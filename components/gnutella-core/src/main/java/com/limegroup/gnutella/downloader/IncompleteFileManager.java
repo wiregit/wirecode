@@ -131,6 +131,43 @@ public class IncompleteFileManager implements Serializable {
         return lastModified<purgeTime;            
     }
 
+
+    /*
+     * Returns true if both rfd "have the same content".  Currently
+     * rfd1~=rfd2 iff either of the following conditions hold:
+     * 
+     * <ul>
+     * <li>Both files have the same hash, i.e., 
+     *     rfd1.getSHA1Urn().equals(rfd2.getSHA1Urn().  Note that this (almost)
+     *     always means that rfd1.getSize()==rfd2.getSize(), though rfd1 and
+     *     rfd2 may have different names.
+     * <li>Both files have the same name and size and don't have conflicting
+     *     hashes, i.e., rfd1.getName().equals(rfd2.getName()) &&
+     *     rfd1.getSize()==rfd2.getSize() && (rfd1.getSHA1Urn()==null ||
+     *     rfd2.getSHA1Urn()==null || 
+     *     rfd1.getSHA1Urn().equals(rfd2.getSHA1Urn())).
+     * </ul>
+     * Note that the second condition allows risky resumes, i.e., resumes when 
+     * one (or both) of the files doesn't have a hash.  
+     *
+     * @see getFile
+     */
+    static boolean same(RemoteFileDesc rfd1, RemoteFileDesc rfd2) {
+        return same(rfd1.getFileName(), rfd1.getSize(), rfd1.getSHA1Urn(),
+                       rfd2.getFileName(), rfd2.getSize(), rfd2.getSHA1Urn());
+    }
+    
+    /** @see similar(RemoteFileDesc, RemoteFileDesc) */
+    static boolean same(String name1, int size1, URN hash1,
+                        String name2, int size2, URN hash2) {
+        //Either they have the same hashes...
+        if (hash1!=null && hash2!=null)
+            return hash1.equals(hash2);
+        //..or same name and size and no conflicting hashes.
+        else
+            return size1==size2 && name1.equals(name2);
+    }
+
     /** 
      * Returns the fully-qualified temporary download file for the given
      * file/location pair.  The location of the file is determined by the
@@ -142,23 +179,8 @@ public class IncompleteFileManager implements Serializable {
      * critical for resume and swarmed downloads.  That is, for all rfd_i and 
      * rfd_j
      * <pre>
-     *      rfd_i~=rfd_j <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
+     *      similar(rfd_i, rfd_j) <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
      * </pre>
-     * Where "~=" means "has the same content as".  Currently rfd_i~=rfd_j iff
-     * either of the following conditions hold: 
-     * <ul>
-     * <li>Both files have the same hash, i.e., 
-     *     rfd_i.getSHA1Urn().equals(rfd_j.getSHA1Urn().  Note that this (almost)
-     *     always means that rfd_i.getSize()==rfd_j.getSize(), though rfd_i and
-     *     rfd_j may have different names.
-     * <li>Both files have the same name and size and don't have conflicting
-     *     hashes, i.e., rfd_i.getName().equals(rfd_j.getName()) &&
-     *     rfd_i.getSize()==rfd_j.getSize() && (rfd_i.getSHA1Urn()==null ||
-     *     rfd_j.getSHA1Urn()==null || 
-     *     rfd_i.getSHA1Urn().equals(rfd_j.getSHA1Urn())).
-     * </ul>
-     * Note that the second condition allows risky resumes, i.e., resumes when 
-     * one (or both) of the files doesn't have a hash.
      */
     public synchronized File getFile(RemoteFileDesc rfd) {
 		File incDir = null;
@@ -194,7 +216,7 @@ public class IncompleteFileManager implements Serializable {
             return new File(incDir, 
                             tempName(rfd.getFileName(), rfd.getSize(), 0));
         }
-    }
+    }    
 
     /** 
      * Returns the unqualified file name for a file with the given name
@@ -341,7 +363,8 @@ public class IncompleteFileManager implements Serializable {
     /**
      * Returns the name of the complete file associated with the given
      * incomplete file, i.e., what incompleteFile will be renamed to
-     * when the download completes (without path information).
+     * when the download completes (without path information).  Slow; runs
+     * in linear time with respect to the number of hashes in this.
      * @param incompleteFile a file returned by getFile
      * @return the complete file name, without path
      * @exception IllegalArgumentException incompleteFile was not the

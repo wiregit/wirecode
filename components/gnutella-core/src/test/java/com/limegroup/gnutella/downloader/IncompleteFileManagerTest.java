@@ -68,6 +68,7 @@ public class IncompleteFileManagerTest extends TestCase {
     public void testGetFile_DifferentSize() {
         rfd1=newRFD("some file name", 1839, null);
         rfd2=newRFD("some file name", 1223, null);
+        assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
         File tmp1=ifm.getFile(rfd1);
         File tmp2=ifm.getFile(rfd2);
         assertTrue(! tmp2.equals(tmp1));
@@ -81,6 +82,7 @@ public class IncompleteFileManagerTest extends TestCase {
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         rfd2=newRFD("another file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        assertTrue(IncompleteFileManager.same(rfd1, rfd2));
         File tmp1=ifm.getFile(rfd1);
         File tmp2=ifm.getFile(rfd2);
         assertEquals(tmp1, tmp2);
@@ -94,6 +96,7 @@ public class IncompleteFileManagerTest extends TestCase {
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         rfd2=newRFD("some file name", 1839, 
                     "urn:sha1:LSTHIPQGSGSZTS5FJPAKPZWUGYQYPFBU");
+        assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
         File tmp1=ifm.getFile(rfd1);
         File tmp2=ifm.getFile(rfd2);
         assertTrue(! tmp2.equals(tmp1));
@@ -104,6 +107,7 @@ public class IncompleteFileManagerTest extends TestCase {
         rfd1=newRFD("some file name", 1839, null);
         rfd2=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        assertTrue(IncompleteFileManager.same(rfd1, rfd2));
         File tmp1=ifm.getFile(rfd1);
         File tmp2=ifm.getFile(rfd2);
         assertEquals(tmp1, tmp2);
