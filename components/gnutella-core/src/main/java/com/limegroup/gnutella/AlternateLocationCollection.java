@@ -26,6 +26,12 @@ public final class AlternateLocationCollection
 	 */
 	private SortedMap _alternateLocations;
 
+	private final URN SHA1;
+
+	public static AlternateLocationCollection createCollection(URN sha1) {
+		return new AlternateLocationCollection(sha1);
+	}
+
 	/**
 	 * Creates a new <tt>AlternateLocationCollection</tt> with all alternate
 	 * locations contained in the given comma-delimited HTTP header value
@@ -33,7 +39,8 @@ public final class AlternateLocationCollection
 	 *
 	 * @param value the HTTP header value containing alternate locations
 	 * @return a new <tt>AlternateLocationCollection</tt> with any valid
-	 *  <tt>AlternateLocation</tt>s from the HTTP string
+	 *  <tt>AlternateLocation</tt>s from the HTTP string, or <tt>null</tt>
+	 *  if no valid locations could be found
 	 * @throws <tt>NullPointerException</tt> if <tt>value</tt> is <tt>null</tt>
 	 */
 	public static AlternateLocationCollection 
@@ -43,17 +50,47 @@ public final class AlternateLocationCollection
 										   "from a null value");
 		}
 		StringTokenizer st = new StringTokenizer(value, ",");
-		AlternateLocationCollection alc = new AlternateLocationCollection();
+		AlternateLocationCollection alc = null;
 		while(st.hasMoreTokens()) {
 			String curTok = st.nextToken();
 			try {
 				AlternateLocation al = AlternateLocation.createAlternateLocation(curTok);
-				alc.addAlternateLocation(al);
+				if(alc == null && al.hasSHA1Urn()) {
+					alc = new AlternateLocationCollection(al.getSHA1Urn());
+				}
+				if(alc != null) {
+					alc.addAlternateLocation(al);
+				}
 			} catch(IOException e) {
 				continue;
 			}
 		}
 		return alc;
+	}
+
+	/**
+	 * Creates a new <tt>AlternateLocationCollection</tt> for the specified
+	 * <tt>URN</tt>.
+	 *
+	 * @param sha1 the SHA1 <tt>URN</tt> for this alternate location collection
+	 */
+	private AlternateLocationCollection(URN sha1) {
+		if(sha1 == null) {
+			throw new NullPointerException("null URN");
+		}
+		if(!sha1.isSHA1()) {
+			throw new IllegalArgumentException("URN must be a SHA1");
+		}
+		SHA1 = sha1;
+	}
+
+	/**
+	 * Accessor for the SHA1 <tt>URN</tt> instance for this collection.
+	 *
+	 * @return the SHA1 <tt>URN</tt> for this collection
+	 */
+	public URN getSHA1Urn() {
+		return SHA1;
 	}
 
 	/**
@@ -66,9 +103,20 @@ public final class AlternateLocationCollection
 	 * Implements the <tt>AlternateLocationCollector</tt> interface.
 	 *
 	 * @param al the <tt>AlternateLocation</tt> to add	 
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>AlternateLocation</tt>
+	 *  being added does not have a SHA1 urn or if the SHA1 urn does not match
+	 *  the urn for this collection
 	 */
 	public synchronized void addAlternateLocation(AlternateLocation al) {
+		if(!al.hasSHA1Urn()) {
+			throw new IllegalArgumentException("locations must have SHA1s");
+		}
+		URN sha1 = al.getSHA1Urn();
+		if(!sha1.equals(SHA1)) {
+			throw new IllegalArgumentException("SHA1 does not match");
+		}
 		createMap();
+
 
 		URL url = al.getUrl();
 		Set keySet = _alternateLocations.keySet();
@@ -126,11 +174,15 @@ public final class AlternateLocationCollection
 	}
 
 	/**
-	 * Return the new Alternate Locations in alc but not in this
+	 * Creates a new <tt>AlternateLocationCollection</tt> of the alternate
+	 * locations that are in <tt>alc</tt> but not in <tt>this</tt>.
+	 * 
+	 * @return a new <tt>AlternateLocationCollection</tt> with the alternate 
+	 *  locations in alc but not in this
 	 */
 	public synchronized AlternateLocationCollection 
 		diffAlternateLocationCollection(AlternateLocationCollection alc) {
-		AlternateLocationCollection nalc = new AlternateLocationCollection();
+		AlternateLocationCollection nalc = new AlternateLocationCollection(SHA1);
 		Iterator iter = alc.values().iterator();
 		AlternateLocation value;
 		Iterator iter2;
