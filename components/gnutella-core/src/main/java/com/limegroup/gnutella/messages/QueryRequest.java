@@ -58,101 +58,6 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    /**
-     * Builds a new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up
-     * results.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query, 
-						String richQuery, boolean isFirewalled) {
-        this(guid, ttl, minSpeed, query, richQuery, EMPTY_SET, EMPTY_SET, null,
-             isFirewalled);
-    }
-
-    /**
-     * Builds a new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up results
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query,
-                        boolean isFirewalled) {
-        this(guid, ttl, minSpeed, query, "", isFirewalled);
-    }
-
-    /**
-     * Builds a new query from scratch, with no metadata, with a default GUID.
-     */
-    public QueryRequest(byte ttl, int minSpeed, String query, 
-                        boolean isFirewalled) {
-        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null,
-             null, isFirewalled);
-    }
-
-
-    /**
-     * Builds a new query from scratch, with no metadata, marking the GUID
-     * as a requery iff isRequery.
-     */
-    public QueryRequest(byte ttl, int minSpeed, 
-                        String query, boolean isRequery, boolean isFirewalled) {
-        this(newQueryGUID(isRequery), ttl, minSpeed, query, "", 
-			 EMPTY_SET, EMPTY_SET, null, isFirewalled);
-    }
-
-
-    /**
-     * Builds a new query from scratch, with metadata, marking the GUID
-     * as a requery iff isRequery.
-     */
-    public QueryRequest(byte ttl, int minSpeed, 
-                        String query, String richQuery,
-                        boolean isRequery, boolean isFirewalled) {
-        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, 
-             EMPTY_SET, EMPTY_SET, null, isFirewalled);
-    }
-
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
-                        String query, String richQuery, boolean isRequery,
-                        Set requestedUrnTypes, Set queryUrns,
-                        boolean isFirewalled) {
-        this(guid, ttl, minSpeed, query, richQuery, 
-             requestedUrnTypes, queryUrns, null, isFirewalled,
-			 false);
-    }
-
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-     */
-    private QueryRequest(byte[] guid, byte ttl, int minSpeed, 
-                        String query, String richQuery, boolean isRequery,
-                        Set requestedUrnTypes, Set queryUrns,
-                        boolean isFirewalled, boolean multicast) {
-        this(guid, ttl, minSpeed, query, richQuery,
-             requestedUrnTypes, queryUrns, null, isFirewalled,
-			 multicast);
-    }
 
 	/**
 	 * Creates a new requery for the specified SHA1 value and the specified
@@ -169,9 +74,11 @@ public class QueryRequest extends Message implements Serializable{
         }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-		return new QueryRequest(newQueryGUID(true), (byte)6, 0, "\\", "", 
-								UrnType.SHA1_SET, sha1Set, 
-								!RouterService.acceptedIncomingConnection());
+        return new QueryRequest(newQueryGUID(true), (byte)6, "\\", "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								false);
+
 	}
 
 	/**
@@ -195,9 +102,10 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
-		return new QueryRequest(newQueryGUID(true), ttl, 0, "\\", "", 
-								UrnType.SHA1_SET, sha1Set, 
-								!RouterService.acceptedIncomingConnection());
+        return new QueryRequest(newQueryGUID(true), ttl, "\\", "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								false);
 	}
 	
 	/**
@@ -218,9 +126,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(query.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-		return new QueryRequest(newQueryGUID(true), (byte)6, 0, query, "",
-								UrnType.ANY_TYPE_SET, EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection());
+		return new QueryRequest(newQueryGUID(true), query);
 	}
 
 
@@ -241,9 +147,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(query.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, "", 
-                                UrnType.ANY_TYPE_SET, EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection());
+		return new QueryRequest(newQueryGUID(false), query);
 	}
 
 	/**
@@ -267,10 +171,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(query.length() == 0 && xmlQuery.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, 
-								xmlQuery, UrnType.ANY_TYPE_SET, 
-								EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection());
+		return new QueryRequest(newQueryGUID(false), query, xmlQuery);
 	}
 
 
@@ -297,9 +198,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(ttl <= 0 || ttl > 7) {
 			throw new IllegalArgumentException("invalid TTL: "+ttl);
 		}
-		return new QueryRequest(newQueryGUID(false), ttl, 0, query, "",
-								UrnType.ANY_TYPE_SET, EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection());
+		return new QueryRequest(newQueryGUID(false), ttl, query);
 	}
 
 	/**
@@ -334,9 +233,24 @@ public class QueryRequest extends Message implements Serializable{
 		if(query.length() == 0 && xmlQuery.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-		return new QueryRequest(guid, (byte)6, 0, query, xmlQuery,
-								UrnType.ANY_TYPE_SET, EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection());
+		return new QueryRequest(guid, query, xmlQuery);
+	}
+
+	/**
+	 * Creates a new query from the existing query with the specified
+	 * ttl.
+	 *
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @param ttl the new ttl
+	 * @return a new <tt>QueryRequest</tt> with the specified ttl
+	 */
+	public static QueryRequest createQuery(QueryRequest qr, byte ttl) {
+		return new QueryRequest(qr.getGUID(), ttl, qr.getQuery(),
+								qr.getRichQuery(), 
+								qr.getRequestedUrnTypes(),
+								qr.getQueryUrns(), qr.getQueryKey(),
+								qr.isFirewalledSource(),
+								qr.isMulticast());
 	}
 
     /**
@@ -363,7 +277,7 @@ public class QueryRequest extends Message implements Serializable{
         if(key == null) {
             throw new NullPointerException("null query key");
         }
-        return new QueryRequest(newQueryGUID(false), (byte)1, 0, query, "", 
+        return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
 								false);
@@ -389,34 +303,98 @@ public class QueryRequest extends Message implements Serializable{
 		if(qr == null) {
 			throw new NullPointerException("null query");
 		}
-		return new QueryRequest(qr.getGUID(), (byte)1, 0, qr.getQuery(),
+		return new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
 								qr.getRichQuery(), 
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								false, true);
 	}
 
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
-	 *  query string, and the urns are all empty
+    /** 
+	 * Creates a new <tt>QueryRequest</tt> that is a copy of the input 
+	 * query, except that it includes the specified query key.
+	 *
+	 * @param qr the <tt>QueryRequest</tt> to use
+	 * @param key the <tt>QueryKey</tt> to add
+	 * @return a new <tt>QueryRequest</tt> from the specified query and
+	 *  key
      */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
-                        String query, String richQuery,
-                        Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey, boolean isFirewalled) { 
-		this(guid, ttl, minSpeed, query, richQuery, 
-			 requestedUrnTypes, queryUrns, queryKey, isFirewalled,
-			 false);
+	public static QueryRequest 
+		createQueryKeyQuery(QueryRequest qr, QueryKey key) {
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
+                                qr.getQuery(), qr.getRichQuery(), 
+                                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                                key, qr.isFirewalledSource(), false);
 	}
+
+	/**
+	 * Creates a new specialized <tt>QueryRequest</tt> instance for 
+	 * browse host queries so that <tt>FileManager</tt> can understand them.
+	 *
+	 * @return a new <tt>QueryRequest</tt> for browse host queries
+	 */
+	public static QueryRequest createBrowseHostQuery() {
+        return new QueryRequest(newQueryGUID(false), (byte)1, 
+								FileManager.INDEXING_QUERY, "", 
+                                UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+                                false, false);
+	}
+
+	/**
+	 * Creates a new query from the network.
+	 *
+	 * @param guid the GUID of the query
+	 * @param ttl the time to live of the query
+	 * @param hops the hops of the query
+	 * @param payload the query payload
+	 *
+	 * @return a new <tt>QueryRequest</tt> instance from the specified data
+	 */
+	public static QueryRequest 
+		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload) 
+	    throws BadPacketException {
+		return new QueryRequest(guid, ttl, hops, payload);
+	}
+
+    /**
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up results
+     */
+    private QueryRequest(byte[] guid, String query) {
+        this(guid, (byte)6, query, "");
+    }
+
+    /**
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up results
+     */
+    private QueryRequest(byte[] guid, byte ttl, String query) {
+        this(guid, ttl, query, "");
+    }
+
+    /**
+     * Builds a new query from scratch, with no metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up results
+     */
+    private QueryRequest(byte[] guid, String query, String xmlQuery) {
+        this(guid, (byte)6, query, xmlQuery);
+    }
+
+    /**
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up
+     * results.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
+     */
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
+        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+			 !RouterService.acceptedIncomingConnection(), false);
+    }
 
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
@@ -431,33 +409,11 @@ public class QueryRequest extends Message implements Serializable{
 	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
 	 *  query string, and the urns are all empty
      */
-    private QueryRequest(byte[] guid, byte ttl, int minSpeed, 
-						 String query, String richQuery,
+    private QueryRequest(byte[] guid, byte ttl,  
+						 String query, String richQuery, 
 						 Set requestedUrnTypes, Set queryUrns,
-						 boolean isFirewalled) { 
-		this(guid, ttl, minSpeed, query, richQuery, 
-			 requestedUrnTypes, queryUrns, null, isFirewalled,
-			 false);
-	}
-
-    /**
-     * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
-     *  requested for this query, which may be empty or null if no types were
-     *  requested
-	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
-     *  this query, which may be empty or null if no URNs were requested
-	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
-	 *  query string, and the urns are all empty
-     */
-    private QueryRequest(byte[] guid, byte ttl, int minSpeed, 
-                        String query, String richQuery, 
-                        Set requestedUrnTypes, Set queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
-						boolean isMulticast) {
+						 QueryKey queryKey, boolean isFirewalled, 
+						 boolean isMulticast) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
 		if((query == null || query.length() == 0) &&
@@ -466,24 +422,21 @@ public class QueryRequest extends Message implements Serializable{
 			throw new IllegalArgumentException("cannot create empty query");
 		}		
 
-        if (minSpeed == 0) {
-            // user has not specified a Min Speed - go ahead and set it for
-            // them, as appropriate
             
-            // the new Min Speed format - looks reversed but
-            // it isn't because of ByteOrder.short2leb
-            minSpeed = 0x00000080; 
-            // set the firewall bit if i'm firewalled
-            if (isFirewalled && !isMulticast)
-                minSpeed |= 0x40;
-            // LimeWire's ALWAYS want rich results....
-            if (true)
-                minSpeed |= 0x20;
+		// the new Min Speed format - looks reversed but
+		// it isn't because of ByteOrder.short2leb
+		int minSpeed = 0x00000080; 
+		// set the firewall bit if i'm firewalled
+		if (isFirewalled && !isMulticast)
+			minSpeed |= 0x40;
+		// LimeWire's ALWAYS want rich results....
+		if (true)
+			minSpeed |= 0x20;
+		
+		// set the multicast bit
+		if (isMulticast) 
+			minSpeed |= 0x10;
 
-			// set the multicast bit
-			if (isMulticast) 
-				minSpeed |= 0x10;
-        }
         this.MIN_SPEED=minSpeed;
 		if(query == null) {
 			this.QUERY = "";
@@ -570,12 +523,6 @@ public class QueryRequest extends Message implements Serializable{
     }
 
 
-	public static QueryRequest 
-		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload) 
-	    throws BadPacketException {
-		return new QueryRequest(guid, ttl, hops, payload);
-	}
-
     /**
      * Build a new query with data snatched from network
      *
@@ -586,7 +533,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *  extension strings
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
-    public QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload) 
+    private QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload) 
 		throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
 		if(payload == null) {
