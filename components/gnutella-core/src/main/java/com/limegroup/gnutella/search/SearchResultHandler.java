@@ -7,10 +7,9 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.*;
 
 /**
- * The search panel.  Initiates search, displays search results, and provides
- * controls for the user to start downloads.<p>
- *
- * This provides the primary external interface to the search package.
+ * Handles incoming search results from the network.  This class parses the 
+ * results from <tt>QueryReply</tt> instances and performs the logic 
+ * necessary to pass those results up to the UI.
  */
 public final class SearchResultHandler {
 
