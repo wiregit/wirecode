@@ -765,10 +765,7 @@ public class RouterService {
      * queries.
      */
     public static byte[] newQueryGUID() {
-        if (isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood() &&
-            acceptedIncomingConnection() && !NetworkUtils.isPrivate() &&
-            SearchSettings.OOB_ENABLED.getValue() &&
-            acceptor.isAddressExternal())
+        if (isOOBCapable())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
@@ -1291,6 +1288,17 @@ public class RouterService {
 	public static boolean isGUESSCapable() {
 		return udpService.isGUESSCapable();
 	}
+
+
+    /** 
+     * Returns whether or not this node is capable of performing OOB queries.
+     */
+    public static boolean isOOBCapable() {
+        return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
+               acceptedIncomingConnection() && !NetworkUtils.isPrivate() &&
+               SearchSettings.OOB_ENABLED.getValue() &&
+               acceptor.isAddressExternal();
+    }
 
 
     public static GUID getUDPConnectBackGUID() {
