@@ -12,7 +12,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
-import java.util.StringTokenizer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
@@ -709,9 +708,9 @@ public abstract class MessageRouter {
      */
     final private void handlePingRequest(PingRequest ping,
                                          ReplyHandler handler) {
-        // if it's a TTL=1 ping, such as a heartbeat ping, or if we should
-        // allow new pings on this connection, allow it.
-        if((ping.getHops() == 1) || handler.allowNewPings()) {
+        // Send it along if it's a heartbeat ping or if we should allow new 
+        // pings on this connection.
+        if(ping.isHeartbeat() || handler.allowNewPings()) {
             respondToPingRequest(ping, handler);
         } 
     }
