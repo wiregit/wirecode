@@ -11,17 +11,18 @@ import org.apache.commons.logging.*;
 /**
  * Manages writing data to the network from a piped blocking OutputStream.
  *
- * This implements ReadHandler because it uses Pipes to write in blocking mode,
- * and read in non-blocking mode.
+ * This uses a BufferOutputStream that waits on a lock when no data is available.
+ * The stream exposes a BufferLock that should be notified when data is available
+ * to be written.
  */
-class NIOOutputStream implements ReadHandler {
+class NIOOutputStream {
     
     private static final Log LOG = LogFactory.getLog(NIOOutputStream.class);
     
     private final NIOSocket handler;
     private final SocketChannel channel;
-    private OutputStream sink;
-    private Pipe.SourceChannel source;
+    private BufferOutputStream sink;
+    private Object bufferLock;
     private ByteBuffer buffer;
     private boolean shutdown;
     
@@ -43,16 +44,10 @@ class NIOOutputStream implements ReadHandler {
             
         if(shutdown)
             throw new IOException("already closed!");
-        
-        Pipe pipe = Pipe.open();
-        pipe.sink().configureBlocking(true);
-        sink = Channels.newOutputStream(pipe.sink());
-        source = pipe.source();
-        source.configureBlocking(false);
 
         this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
-        NIODispatcher.instance().registerRead(source, this);
-        NIODispatcher.instance().interestWrite(channel);
+        sink = new BufferOutputStream(buffer, handler, channel);
+        bufferLock = sink.getBufferLock();
     }
     
     /**
@@ -66,40 +61,22 @@ class NIOOutputStream implements ReadHandler {
     }
     
     /**
-     * Notification that a read can happen on the SourceChannel.
-     */
-    public boolean handleRead() throws IOException {
-        int read = 0;
-        
-        // read everything we can.
-        while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
-        if(read == -1)
-            throw new IOException("closed pipe.");
-        
-        // If there's data in the buffer, we're interested in writing.
-        if(buffer.position() > 0)
-            NIODispatcher.instance().interestWrite(channel);
-        
-        // if there's room in the buffer, we're interested in more reading ...
-        // if not, we're not interested in more reading.
-        return buffer.hasRemaining();
-    }
-    
-    /**
      * Notification that a write can happen on the SocketChannel.
      */
     boolean writeChannel() throws IOException {// write everything we can.
-        buffer.flip();
-        while(buffer.hasRemaining() && channel.write(buffer) > 0);
-        buffer.compact();
-        
-        // If there's room in the buffer, we're interested in reading.
-        if(buffer.hasRemaining())
-            NIODispatcher.instance().interestRead(source);
+        synchronized(bufferLock) {
+            buffer.flip();
+            while(buffer.hasRemaining() && channel.write(buffer) > 0);
+            buffer.compact();
             
-        // if we were able to write everything, we're not interested in more writing.
-        // otherwise, we are interested.
-        return buffer.position() > 0;
+            // If there's room in the buffer, we're interested in reading.
+            if(buffer.hasRemaining())
+                bufferLock.notify();
+                
+            // if we were able to write everything, we're not interested in more writing.
+            // otherwise, we are interested.
+            return buffer.position() > 0;
+        }
     }
     
     /**
@@ -118,17 +95,8 @@ class NIOOutputStream implements ReadHandler {
         if(shutdown)
             return;
 
-        if(sink != null) {
-            try {
-                sink.close();
-            } catch(IOException ignored) {}
-        }
-         
-        if(source != null) {   
-            try {
-                source.close();
-            } catch(IOException ignored) {}
-        }
+        if(sink != null)
+            sink.shutdown();
             
         shutdown = true;
     }

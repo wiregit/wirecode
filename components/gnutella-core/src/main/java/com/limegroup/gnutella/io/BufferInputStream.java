@@ -95,9 +95,6 @@ import com.limegroup.gnutella.RouterService;
     
     /** Waits the soTimeout amount of time. */
     private void waitImpl() throws IOException {
-        if(shutdown)
-            throw new IOException("socket closed");
-            
         int timeout = handler.getSoTimeout();
         boolean looped = false;
         while(buffer.position() == 0) {
@@ -115,6 +112,9 @@ import com.limegroup.gnutella.RouterService;
 
             looped = true;
         }
+
+        if(shutdown)
+            throw new IOException("socket closed");
     }
     
     /** Closes this InputStream & the Socket that it's associated with */
