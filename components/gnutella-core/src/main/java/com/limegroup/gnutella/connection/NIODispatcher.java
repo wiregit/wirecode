@@ -328,8 +328,13 @@ public final class NIODispatcher implements Runnable {
 			// do nothing if there are no new writers
 			if(WRITERS.isEmpty()) return;
 			for(Iterator iter = WRITERS.iterator(); iter.hasNext();) {
-                register((Connection)iter.next(), 
-                    SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+                Connection conn = (Connection)iter.next();
+                try {
+                    register(conn, 
+                        SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+                } catch (ClosedChannelException e) {
+                    RouterService.removeConnection(conn);
+                }
 			}
 			WRITERS.clear();
 		}
@@ -411,7 +416,8 @@ public final class NIODispatcher implements Runnable {
      * @param conn the <tt>Connection</tt> whose channel should be registered
      *  for write events
      */
-    private void register(Connection conn, int ops) {
+    private void register(Connection conn, int ops) 
+        throws ClosedChannelException {
 		SelectableChannel channel = conn.getSocket().getChannel();
 
 		// try to make sure the channel's open instead of just
@@ -419,16 +425,11 @@ public final class NIODispatcher implements Runnable {
 		// more efficient and cleaner
 		if(!channel.isOpen()) return;
         
-		try {
-            channel.register(SELECTOR, ops, conn);
-            if((ops & SelectionKey.OP_WRITE) != 0)  {
-                conn.setWriteRegistered(true);
-            } else  {
-                conn.setWriteRegistered(false);
-            }
-        } catch (ClosedChannelException e) {
-            // no problem -- just don't register it
-        }
-
+        channel.register(SELECTOR, ops, conn);
+        if((ops & SelectionKey.OP_WRITE) != 0)  {
+            conn.setWriteRegistered(true);
+        } else  {
+            conn.setWriteRegistered(false);
+        } 
 	}
 }
