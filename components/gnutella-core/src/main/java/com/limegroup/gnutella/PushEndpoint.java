@@ -197,7 +197,11 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		String guidS=httpString.substring(0,32);
 		httpString = httpString.substring(32);
 		
-		_clientGUID = GUID.fromHexString(guidS);
+		try {
+		    _clientGUID = GUID.fromHexString(guidS);
+        } catch(IllegalArgumentException iae) {
+            throw new IOException(iae.getMessage());
+        }
 		_guid = new GUID(_clientGUID);
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");

@@ -3232,8 +3232,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //      I think it's ok, though it could result in >100% in the GUI
         HTTPDownloader biggest = null;
         synchronized (this) {
-	    if (!commonOutFile.isComplete())
-            	Assert.silent(!dloaders.isEmpty());
+	        //if (!commonOutFile.isComplete())
+            	//Assert.silent(!dloaders.isEmpty());
             for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
                 HTTPDownloader h = (HTTPDownloader)iter.next();
                 // If this guy isn't downloading, don't steal from him.

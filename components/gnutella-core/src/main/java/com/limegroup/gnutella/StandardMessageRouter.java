@@ -257,7 +257,8 @@ public class StandardMessageRouter extends MessageRouter {
         if (query.desiresOutOfBandReplies() &&
             !isConnectedTo(query, handler) && 
 			RouterService.canReceiveSolicited() &&
-            RouterService.getUploadManager().isServiceable()) {
+            RouterService.getUploadManager().isServiceable() &&
+            NetworkUtils.isValidAddressAndPort(query.getReplyAddress(), query.getReplyPort())) {
             
             // send the replies out-of-band - we need to
             // 1) buffer the responses
@@ -270,8 +271,7 @@ public class StandardMessageRouter extends MessageRouter {
                 } catch (UnknownHostException uhe) {}
                 int port = query.getReplyPort();
                 
-                if(addr != null && NetworkUtils.isValidAddress(addr) &&
-                   NetworkUtils.isValidPort(port)) { 
+                if(addr != null) { 
                     // send a ReplyNumberVM to the host - he'll ACK you if he
                     // wants the whole shebang
                     int resultCount = 
