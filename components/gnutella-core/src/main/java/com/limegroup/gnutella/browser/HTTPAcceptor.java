@@ -15,6 +15,7 @@ import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
@@ -225,15 +226,16 @@ public class HTTPAcceptor implements Runnable {
                 //("GNUTELLA" is the longest word we know at this time)
                 String word=IOUtils.readWord(in,8);
                 _socket.setSoTimeout(0);
-
-
-                // Incoming upload via HTTP
-                if (word.equals("GET")) {
-					handleHTTPRequest(_socket);
+                
+                if(NetworkUtils.isLocalHost(_socket)) {
+                    // Incoming upload via HTTP
+                    if (word.equals("GET")) {
+    					handleHTTPRequest(_socket);
+                    }
+    			    else if (word.equals("MAGNET")) {
+                        ExternalControl.fireMagnet(_socket);
+                    }	
                 }
-			    else if (word.equals("MAGNET")) {
-                    ExternalControl.fireMagnet(_socket);
-                }	
             } catch (IOException e) {
             } catch(Throwable e) {
 				ErrorService.error(e);
@@ -251,13 +253,6 @@ public class HTTPAcceptor implements Runnable {
 	 * @param socket the <tt>Socket</tt> instance over which we're reading
 	 */
 	private void handleHTTPRequest(Socket socket) throws IOException {
-
-		// Only respond to localhost
-		String hostAddress =
-		    socket.getInetAddress().getHostAddress().toLowerCase();
-		if ( !LOCALHOST.equals(hostAddress) &&
-			 "localhost".equals(hostAddress) )
-			return;
 
 		// Set the timeout so that we don't do block reading.
         socket.setSoTimeout(Constants.TIMEOUT);

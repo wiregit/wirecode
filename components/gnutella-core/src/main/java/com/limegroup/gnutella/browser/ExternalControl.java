@@ -217,12 +217,9 @@ public class ExternalControl {
         Thread.currentThread().setName("IncomingMagnetThread");
 		try {
 			// Only allow control from localhost
-			if ( !LOCALHOST.equals(
-				  socket.getInetAddress().getHostAddress()) ) {
-                if(LOG.isWarnEnabled()) {
-				    LOG.warn("Invalid magnet request from: " + 
-				              socket.getInetAddress().getHostAddress());
-                }
+			if (!NetworkUtils.isLocalHost(socket)) {
+                if(LOG.isWarnEnabled())
+				    LOG.warn("Invalid magnet request from: " + socket.getInetAddress().getHostAddress());
 				return;
             }
 

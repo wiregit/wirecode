@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -308,6 +309,15 @@ public final class NetworkUtils {
                    Arrays.equals(cIP, managerIP);
         }
     }
+
+    /**
+     * Determines if the given socket is from a local host.
+     */
+    public static boolean isLocalHost(Socket s) {
+        String hostAddress = s.getInetAddress().getHostAddress();
+        return "127.0.0.1".equals(hostAddress);
+    }
+
     
     /**
      * Packs a Collection of IpPorts into a byte array.

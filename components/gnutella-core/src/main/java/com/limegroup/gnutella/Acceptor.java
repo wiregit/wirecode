@@ -654,16 +654,19 @@ public class Acceptor implements Runnable {
                 String word = IOUtils.readLargestWord(in,8);
                 _socket.setSoTimeout(0);
                 
+                
+                boolean localHost = NetworkUtils.isLocalHost(_socket);
 				// Only selectively allow localhost connections
 				if ( !word.equals("MAGNET") ) {
-					InetAddress address = _socket.getInetAddress();
-					byte[] addressBytes = address.getAddress();
-					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-					  (addressBytes[0] == 127)) {
+					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && localHost) {
 					    LOG.trace("Killing localhost connection with non-magnet.");
 						_socket.close();
 						return;
 					}
+				} else if(!localHost) { // && word.equals(MAGNET)
+				    LOG.trace("Killing non-local ExternalControl request.");
+				    _socket.close();
+				    return;
 				}
 
                 //1. Gnutella connection.  If the user hasn't changed the
