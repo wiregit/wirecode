@@ -343,7 +343,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         InetAddress ip = null;
         try {
-            ip = InetAddress.getByAddress(ipBytes);
+            ip = InetAddress.getByName(NetworkUtils.ip2string(ipBytes));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
