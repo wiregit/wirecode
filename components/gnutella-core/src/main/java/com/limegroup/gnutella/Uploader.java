@@ -36,6 +36,16 @@ public interface Uploader extends BandwidthTracker {
 	public int getFileSize();
 
 	/**
+	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
+	 * is being uploaded.
+	 *
+	 * @return the <tt>FileDesc</tt> for this uploader -- the file that
+	 *  is being uploaded, which can be <tt>null</tt> in cases such as when
+	 *  the file can't be found
+	 */
+	public FileDesc getFileDesc();
+
+	/**
 	 * returns the index of the file being uploaded.
 	 */ 
 	public int getIndex();
