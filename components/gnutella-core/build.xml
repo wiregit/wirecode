@@ -1,0 +1,51 @@
+<project name="Gnutella" default="core" basedir=".">
+
+<!-- set global properties for this basedir -->
+<property name="basedir" value="."/>
+<property name="downloader" value="com/limegroup/gnutella/downloader"/>
+<property name="filters" value="com/limegroup/gnutella/filters"/>
+<property name="tests" value="com/limegroup/gnutella/tests"/>
+<property name="uploader" value="com/limegroup/gnutella/uploader"/>
+<property name="util" value="com/limegroup/gnutella/util"/>
+<property name="xml" value="com/limegroup/gnutella/xml"/>
+<property name="gnutella" value="com/limegroup/gnutella"/>
+
+
+<!-- constants -->
+<property name="DEBUG" value="yes"/>  
+<property name="OPTIMIZE" value="no"/>  
+
+
+<!-- Initialization stuff -->
+<target name="init">
+<!-- we dont do much here right now, but may do later -->
+	<tstamp/>
+</target>
+
+
+<!-- everything -->
+<target name="all" depends="init">
+	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
+		srcdir="${basedir}" destdir="${basedir}"
+		excludes="${unused}/**"
+	/>
+</target>
+
+<!-- Core -->
+<target name="core" depends="init">
+	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
+		srcdir="${basedir}" destdir="${basedir}"
+		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*"
+	/>
+</target>
+
+	
+
+<!-- CLEAN -->
+<target name="clean">
+	<delete>
+		<fileset dir="${basedir}/com" includes="**/*.class"/>
+	</delete>
+</target>		
+
+</project>

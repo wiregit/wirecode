@@ -1,0 +1,9 @@
+#!/bin/sh
+
+
+# NOTE:  If you are using cygwin on Windows, the colon below 
+#        should be a semi-colon
+CLASSPATH=".:lib/collections.jar"
+export CLASSPATH
+
+ant
