@@ -812,7 +812,11 @@ public final class UploadManager implements BandwidthTracker {
 		if(this.isURNGet(str)) {
 			// handle the URN get request
 			return this.parseURNGet(str);
+		} else if (this.isMalformedURNGet(str)) {
+		    // handle the malforned URN get request
+		    return this.parseMalformedURNGet(str);
 		}
+		
 		// handle the standard get request
 		return this.parseTraditionalGet(str);
   	}
@@ -846,6 +850,26 @@ public final class UploadManager implements BandwidthTracker {
 		String idString = requestLine.substring(slash1Index+1, slash2Index);
 		return idString.equalsIgnoreCase("uri-res");
 	}
+	
+	/**
+	 * Returns whether or not the get request for the specified line is
+	 * a malformed URN request coming from LimeWire 2.8.6.
+	 *
+	 * @param requestLine the <tt>String</tt> to parse to check whether it's
+	 *  following the URN request syntax as specified in HUGE v. 0.93
+	 * @return <tt>true</tt> if the request is a valid URN request, 
+	 *  <tt>false</tt> otherwise
+	 */
+	private boolean isMalformedURNGet(final String requestLine) {
+	    int ignoreSlashIndex = requestLine.indexOf("/");
+		int slash1Index = requestLine.indexOf("/", ignoreSlashIndex+1);
+		int slash2Index = requestLine.indexOf("/", slash1Index+1);
+		if((slash1Index==-1) || (slash2Index==-1)) {
+			return false;
+		}
+		String idString = requestLine.substring(slash1Index+1, slash2Index);
+		return idString.equalsIgnoreCase("uri-res");
+	}	
 
 	/**
 	 * Performs the parsing for a traditional HTTP Gnutella get request,
@@ -933,6 +957,22 @@ public final class UploadManager implements BandwidthTracker {
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
 								   isHTTP11Request(requestLine));
 	}
+	
+	/**
+	 * Parses the get line for a malformed URN request, throwing an exception 
+	 * if there are any errors in parsing.
+	 *
+	 * @param requestLine the <tt>String</tt> instance containing the get
+	 *        request
+	 * @return a new <tt>RequestLine</tt> instance containing all of the data
+	 *  for the get request
+	 */
+	private HttpRequestLine parseMalformedURNGet(final String requestLine) 
+		throws IOException {
+		final String realRequest = requestLine.substring(1);
+		return parseURNGet(realRequest);
+	}
+	
 
 
 	/**

@@ -115,6 +115,19 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, request, fd);
 		}
 	}
+	
+	/**
+	 * Test requests by URN that came from LimeWire 2.8.6.
+	 */
+	public void testMalformedHttpUrnRequest() throws Exception {
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
+			String request = "//uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
+			" HTTP/1.1\r\n\r\n";
+			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
+			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, request, fd);
+		}
+	}	
 
 	/**
 	 * Tests requests that follow the traditional "get" syntax to make sure that 
