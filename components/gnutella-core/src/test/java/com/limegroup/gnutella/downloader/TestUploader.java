@@ -65,6 +65,15 @@ public class TestUploader {
     boolean unqueue = true;
     int queuePos = 1;
 
+    boolean killedByDownloader = false;
+    
+    /**
+     * The sum of the number of bytes we need to upload across all requests.  If
+     * this value is less than totalUploaded and the uploader encountered an
+     * IOException in handle request it means the downloader killed the
+     * connection.
+     */
+    int totalAmountToUpload;
 
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
@@ -142,6 +151,8 @@ public class TestUploader {
         maxPollTime = -1;
         unqueue = true;
         queuePos=1;
+        killedByDownloader = false;
+        totalAmountToUpload = 0;
     }
 
     public int amountUploaded() {
@@ -274,6 +285,8 @@ public class TestUploader {
                                 mySocket.setSoTimeout(8000);
                             }
                         } catch (IOException e) {
+                            if(totalUploaded < totalAmountToUpload)
+                                killedByDownloader = true;
                             LOG.debug("Exception in uploader", e);
                         } catch(Throwable t) {
                             ErrorService.error(t);
@@ -383,6 +396,7 @@ public class TestUploader {
 
     private void send(OutputStream out, int start, int stop) 
         throws IOException {
+        totalAmountToUpload += stop - start;
         //Write header, stolen from NormalUploadState.writeHeader()
         long t0 = System.currentTimeMillis();
         if(minPollTime > 0) 

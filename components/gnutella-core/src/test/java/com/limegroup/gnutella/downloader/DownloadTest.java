@@ -444,6 +444,8 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("u2 not used", 0, u2);
         assertEquals("extra connection attempts", 1, c1);
         assertEquals("extra connection attempts", 1, c2);
+        assertTrue("slower uploader not replaced",uploader1.killedByDownloader);
+        assertFalse("faster uploader killed",uploader2.killedByDownloader);
     }   
     
     public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
