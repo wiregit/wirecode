@@ -66,8 +66,7 @@ public abstract class AudioMetaData extends MetaData {
         XMLStringUtils.DELIMITER;
     public static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
-    public static final String LICENSE_KEY =  KEY_PREFIX + 
-        CCConstants.AUDIO_LICENSE_NAME + XMLStringUtils.DELIMITER;
+    public static final String LICENSE_KEY =  CCConstants.LICENSE_KEY;
 
     public AudioMetaData(File f) throws IOException{
     	parseFile(f);

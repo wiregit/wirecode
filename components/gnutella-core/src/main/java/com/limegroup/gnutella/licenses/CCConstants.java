@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.licenses;
 
+import com.limegroup.gnutella.xml.XMLStringUtils;
+import com.limegroup.gnutella.metadata.AudioMetaData;
+
 public class CCConstants {
 
     /** At verification URLs, this is where the license for the file (verified
@@ -17,6 +20,9 @@ public class CCConstants {
      */
     public static final String
         AUDIO_LICENSE_NAME = "license";
+
+    public static final String LICENSE_KEY = AudioMetaData.KEY_PREFIX + 
+        AUDIO_LICENSE_NAME + XMLStringUtils.DELIMITER;
 
     /** This is the shortened version of AUDIO_LICENSE_NAME.
      */

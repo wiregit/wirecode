@@ -337,7 +337,7 @@ public class LimeXMLDocument implements Serializable {
             String val = (String) fieldToValue.get(currKey);
             // unfortunately, parsing of CC stuff requires special casing
             if (isAudioSchemaURI && 
-                currKey.equals(CCConstants.AUDIO_LICENSE_NAME)) {
+                currKey.equals(CCConstants.LICENSE_KEY)) {
                 if ((val != null) && 
                     (val.startsWith(CCConstants.CC_URI_PREFIX)))
                     hasCCLicense = true;
