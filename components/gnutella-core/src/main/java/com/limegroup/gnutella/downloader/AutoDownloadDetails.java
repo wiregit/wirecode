@@ -4,10 +4,15 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
+import java.io.*;
 
-/** Encapsulates important details about a auto download....
+/** 
+ * Encapsulates important details about a auto download.  Serializable for 
+ * downloads.dat file; be careful when modifying!
  */
-public class AutoDownloadDetails {
+public class AutoDownloadDetails implements Serializable {
+    static final long serialVersionUID = 3400666689236195243L;
+
     // the query associated with this search
     private String query = null;
     // the rich query associated with this search
@@ -18,7 +23,7 @@ public class AutoDownloadDetails {
     private byte[] guid = null;
     // the list of downloads made so far - should not exceed size
     // MAX_DOWNLOADS
-    private List dlList = null;
+    private List /* of RemoteFileDesc */ dlList = null;
     
     /** the size of the approx matcher 2d buffer...
      */
@@ -291,6 +296,25 @@ public class AutoDownloadDetails {
             rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
                                          i, GUID.makeGuid(),
                                          3, false, 3);
+
+        //Test serialization by writing to disk and rereading.  All the methods
+        //should still work afterwards.
+        try {
+            File tmp=File.createTempFile("AutoDownloadDetails_test", "dat");
+            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
+            out.writeObject(add);
+            out.close();
+            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
+            add=(AutoDownloadDetails)in.readObject();
+            in.close();
+            tmp.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false, "Unexpected IO problem.");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Assert.that(false, "Unexpected class cast problem.");
+        }
         
         Assert.that(add.addDownload(rfds[0]));
         add.commitDownload(rfds[0]);

@@ -1,11 +1,16 @@
 package com.limegroup.gnutella;
 
+import java.io.Serializable;
+
 /**
  * A generic type of media, i.e., "video" or "audio".
  * Many different file formats can be of the same media type.
- * MediaType's are immutable.
+ * MediaType's are immutable.   Serializable for 
+ * downloads.dat file; be careful when modifying!
  */
-public class MediaType {
+public class MediaType implements Serializable {
+    static final long serialVersionUID = 3999062781289258389L;
+
     private String schema;
     private String description;
     private String[] extensions;

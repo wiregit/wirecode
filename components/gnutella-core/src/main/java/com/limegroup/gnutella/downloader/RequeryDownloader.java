@@ -1,13 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import java.io.*;
 
 /** This is essentially a ManagedDownloader with a few hitches.  First of all,
  *  the conflictsLAX method does different things depending on the state.
  *  Secondly, this downloader will requery the network until it has a file to
- *  download.
+ *  download.  Since ManagedDownloader is serializable, this too is 
+ *  serializable; be careful when modifying!
  */
-public class RequeryDownloader extends ManagedDownloader {
+public class RequeryDownloader extends ManagedDownloader 
+        implements Serializable {
 
     /** Contains the specifics of the search that spawned me.  Important for
      *  requerying....
@@ -114,5 +117,32 @@ public class RequeryDownloader extends ManagedDownloader {
             return -1;
     }
 
-
+    /*
+    public static void main(String args[]) {
+        //Test serialization.
+        AutoDownloadDetails details=new AutoDownloadDetails(
+            "test", "", new byte[16], new MediaType("", "", new String[0]));
+        IncompleteFileManager ifm=new IncompleteFileManager();
+        ifm.addBlock(new File("T-10-test.txt"), 10, 20);
+        RequeryDownloader downloader=new RequeryDownloader(
+            new DownloadManager(), new FileManager(), ifm, details);
+        try {
+            File tmp=File.createTempFile("RequeryDownloader_test", "dat");
+            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
+            out.writeObject(downloader);
+            out.close();
+            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
+            RequeryDownloader downloader2=(RequeryDownloader)in.readObject();
+            in.close();
+            Assert.that(downloader._hasFile==downloader2._hasFile);   //weak test
+            tmp.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false, "Unexpected IO problem.");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Assert.that(false, "Unexpected class cast problem.");
+        }
+    }
+    */
 }
