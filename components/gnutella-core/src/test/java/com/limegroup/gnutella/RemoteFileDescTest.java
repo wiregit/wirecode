@@ -4,6 +4,7 @@ import java.net.URL;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
 
@@ -95,5 +96,32 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		    urlString.indexOf(colonPort+"//"), -1);
 		assertNotEquals("unexpected double slash",
 		    -1, urlString.indexOf(":3000/"));
+	}
+	
+	/**
+	 * Tests whether we correctly determine if we can send an UDP packet.
+	 */
+	public void testCanPushUDP() throws Exception {
+		RemoteFileDesc rfd = 
+			new RemoteFileDesc("www.limewire.org", 5000, 
+							   10, "test",
+							   10, TEST_GUID, 10, false, 3,
+							   false, null, null, false, false,"",
+                               0, null, -1);
+		
+		ConnectionSettings.SOLICITED_GRACE_PERIOD.setValue(100l);
+		
+		Endpoint e= new Endpoint("1.2.3.4",2000);
+		rfd.setOOBStatus(System.currentTimeMillis(),null);
+		
+		assertFalse(rfd.canPushUDP());
+		
+		rfd.setOOBStatus(System.currentTimeMillis(),e);
+		
+		assertTrue(rfd.canPushUDP());
+		
+		Thread.sleep(120);
+		
+		assertFalse(rfd.canPushUDP());
 	}
 }
