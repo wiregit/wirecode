@@ -34,7 +34,7 @@ public class UpdateManagerTest extends BaseTestCase {
     
     private static int updateVersion; 
 
-    private static final int PORT = 6347;
+    static final int PORT = 6347;
 
 	public UpdateManagerTest(String name) {
 		super(name);
@@ -49,8 +49,35 @@ public class UpdateManagerTest extends BaseTestCase {
 	}
     
     public static void globalSetUp() throws Exception {
-        PrivilegedAccessor.setValue(CommonUtils.class, "SETTINGS_DIRECTORY",
-                                    getTestDirectory());
+        setSettings();
+    }
+    
+    private static void setSettings() throws Exception {
+        //Get access to all the test files we need.
+        String updateDir = "com/limegroup/gnutella/updates/";
+        OLD_VERSION_FILE =
+                CommonUtils.getResourceFile(updateDir + "old_verFile.xml"); 
+        NEW_VERSION_FILE = 
+                CommonUtils.getResourceFile(updateDir + "new_verFile.xml");
+        DEF_SIG_FILE = 
+                CommonUtils.getResourceFile(updateDir + "def_verFile.xml");
+        DEF_MESSAGE_FILE = 
+                CommonUtils.getResourceFile(updateDir + "def_messageFile.xml");
+        assertTrue(OLD_VERSION_FILE.exists());
+        assertTrue(NEW_VERSION_FILE.exists());
+        assertTrue(DEF_SIG_FILE.exists());
+        assertTrue(DEF_MESSAGE_FILE.exists());
+
+        File pub = CommonUtils.getResourceFile(updateDir+"public.key");
+        File pub2 = new File(_settingsDir, "public.key");
+        CommonUtils.copy(pub, pub2);
+        assertTrue("test could not be set up", pub2.exists());
+        updateXMLFile = new File(_settingsDir,"update.xml");
+        //set the version file to be the old one. 
+        updateVersion = OLD;
+        changeUpdateFile();
+
+        updateXMLFile = new File(_settingsDir,"update.xml");
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
                                                    new String[] {"*.*.*.*"} );
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
@@ -60,43 +87,25 @@ public class UpdateManagerTest extends BaseTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(1);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(1);
+		UltrapeerSettings.MAX_LEAVES.setValue(5);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(2);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-
         //Set the version to a lower version
         PrivilegedAccessor.setValue(CommonUtils.class, "testVersion", "3.2.2");
-        //Get access to all the test files we need.
-        File updateDir = new File("com/limegroup/gnutella/updates");
-        OLD_VERSION_FILE = new File(updateDir, "old_verFile.xml"); 
-        NEW_VERSION_FILE = new File(updateDir,"new_verFile.xml");
-        DEF_SIG_FILE = new File(updateDir, "def_verFile.xml");        
-        DEF_MESSAGE_FILE = new File(updateDir, "def_messageFile.xml");
-        File pub = new File(updateDir,"public.key");
-        File pub2 = new File(CommonUtils.getUserSettingsDir(),"public.key");
-        CommonUtils.copy(pub, pub2);
-        updateXMLFile = new File(CommonUtils.getUserSettingsDir(),"update.xml");
-        //set the version file to be the old one. 
-        updateVersion = OLD;
-        changeUpdateFile();
+
         RouterService rs = new RouterService(new ActivityCallbackStub());
         rs.start();
         rs.clearHostCatcher();
         rs.connect();
     }
-    
 
-    public void setUp() {
-        try {
-            PrivilegedAccessor.setValue(CommonUtils.class, "SETTINGS_DIRECTORY",
-                                        getTestDirectory());
-        } catch(Exception e) {
-            fail("problem setting up test");
-        }
+    public void setUp() throws Exception {
+        setSettings();
     }
-    
+
+
     /**
      * Tests that UpdateManager thinks the version it knows about is the one on
      * disk so long as it is verified correctly
@@ -106,6 +115,14 @@ public class UpdateManagerTest extends BaseTestCase {
         assertEquals("Problem with old update file", "2.9.3", man.getVersion());
     }
 
+    
+    public void testNewerVersionAccepted() {
+        updateVersion = NEW;
+        changeUpdateFile();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Problem with new update file", "3.6.3", man.getVersion());
+    }
+    
     public void testBadSignatureFails() {
         //First test bad signaute with the file.
         updateVersion = DEF_SIGNATURE;
@@ -114,12 +131,6 @@ public class UpdateManagerTest extends BaseTestCase {
         assertEquals("Accepted defective signature", "3.2.2", man.getVersion());
     }
 
-    public void testNewerVersionAccepted() {
-        updateVersion = NEW;
-        changeUpdateFile();
-        UpdateManager man = UpdateManager.instance();
-        assertEquals("Problem with new update file", "3.6.3", man.getVersion());
-    }
 
     public void testBadMessageFails() {
         updateVersion = DEF_MESSAGE;
@@ -127,6 +138,10 @@ public class UpdateManagerTest extends BaseTestCase {
         UpdateManager man = UpdateManager.instance();
         assertEquals("Problem with new update file", "3.2.2", man.getVersion());
     }
+
+//      public void testHandshaking() {
+//          TestConnection conn = new TestConnection(6666,"3.2.2");        
+//      }
 
 
 //      public void testNoMessageOnAtVersion() {
@@ -202,6 +217,7 @@ public class UpdateManagerTest extends BaseTestCase {
             CommonUtils.copy(DEF_SIG_FILE, updateXMLFile);
         else
             fail("updateVersion set to wrong value");
+        
         //Set UpdateManager.INSTANCE to null
         try {
             PrivilegedAccessor.setValue(UpdateManager.class, "INSTANCE", null);
