@@ -56,6 +56,13 @@ public class LimeXMLProperties
     private static final String XML_SCHEMA_DIR = "XML_SCHEMA_DIR";
 
     /**
+     * The property that denotes the directory in which XML Images will be 
+     * kept (for query display).
+     */
+    private static final String XML_IMAGES_DIR = "XML_IMAGES_DIR";
+
+
+    /**
      * The property that denotes the directory in which XML Documents will be 
      * kept for querying and responding.
      */
@@ -75,6 +82,15 @@ public class LimeXMLProperties
      */
     private static final String XML_SCHEMA_DIR_DEF = "xml" + File.separator + 
                                                 "schemas" + File.separator;
+
+
+    /**
+     * The name of the directory in which XML Images will be 
+     * kept (for query display).
+     */
+    private static final String XML_IMAGES_DIR_DEF = "xml" + File.separator + 
+                                                "misc" + File.separator;
+
     
     /**
      * The name of the directory in which XML Documents will be 
@@ -253,6 +269,19 @@ public class LimeXMLProperties
 
         return getPath() + xmlSchemaDirRel ;                   
     }
+
+
+    /**
+     * Returns the name of the directory in which XML Images are located.
+     */
+    public String getXMLImagesDir()
+    {
+        String xmlImagesDirRel = _properties.getProperty(XML_IMAGES_DIR, 
+                                                         XML_IMAGES_DIR_DEF);
+
+        return getPath() + xmlImagesDirRel ;                   
+    }
+
         
     /**
      * Returns the name of the directory where the XML Documents are located
