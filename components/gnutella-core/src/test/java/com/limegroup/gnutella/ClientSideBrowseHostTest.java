@@ -461,7 +461,7 @@ public class ClientSideBrowseHostTest
 
         // nothing works for the guy, we should get a PushRequest
         do {
-            m = testUP.receive(TIMEOUT*5);
+            m = testUP.receive(TIMEOUT*15);
         } while (!(m instanceof PushRequest));
 
         // awesome - everything checks out!

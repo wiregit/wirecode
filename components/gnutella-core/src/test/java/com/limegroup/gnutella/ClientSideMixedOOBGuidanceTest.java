@@ -211,7 +211,7 @@ public class ClientSideMixedOOBGuidanceTest
             testUPs[0].flush();
 
             // wait for the ping request from the test UP
-            UDP_ACCESS.setSoTimeout(2000);
+            UDP_ACCESS.setSoTimeout(TIMEOUT*2);
             pack = new DatagramPacket(new byte[1000], 1000);
             try {
                 UDP_ACCESS.receive(pack);

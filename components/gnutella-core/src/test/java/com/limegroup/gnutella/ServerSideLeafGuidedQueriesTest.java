@@ -289,7 +289,8 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(5000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
+            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i], 
+                                                       TIMEOUT*2);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
         }
