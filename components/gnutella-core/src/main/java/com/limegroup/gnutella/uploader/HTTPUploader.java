@@ -719,7 +719,8 @@ public final class HTTPUploader implements Uploader {
    			_alternateLocationCollection = 
 				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
         if(_alternateLocationCollection != null)
-            HTTPUploader.parseAlternateLocations(str, _alternateLocationCollection);
+            HTTPUploader.parseAlternateLocations(
+                str, _alternateLocationCollection, _fileDesc);
 
         return true;
     }
@@ -806,16 +807,16 @@ public final class HTTPUploader implements Uploader {
 	/**
 	 * Parses the alternate location header.  The header can contain only one
 	 * alternate location, or it can contain many in the same header.
-	 * This method adds them all to the <tt>FileDesc</tt> for this
-	 * uploader.  This will not allow more than 20 alternate locations
-	 * for a single file.
+	 * This method will notify DownloadManager of new alternate locations
+	 * if the FileDesc is an IncompleteFileDesc.
 	 *
 	 * @param altHeader the full alternate locations header
 	 * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
 	 *  locations should be added to
 	 */
 	private static void parseAlternateLocations(final String altHeader,
-												final AlternateLocationCollector alc) {
+												final AlternateLocationCollector alc,
+												final FileDesc fd) {
 		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
@@ -832,7 +833,11 @@ public final class HTTPUploader implements Uploader {
 				
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {
-                    alc.addAlternateLocation(al);
+                    boolean added = alc.addAlternateLocation(al);
+                    if( added && fd instanceof IncompleteFileDesc ) {
+                       RouterService.getDownloadManager().handleAlternateLocation(
+                            al, (int)fd.getSize() );
+                    }
                 }
 			} catch(IOException e) {
 				// just return without adding it.

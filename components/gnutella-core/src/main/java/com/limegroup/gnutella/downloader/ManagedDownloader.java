@@ -652,6 +652,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
     private boolean initDone = false; // used to init
+
     /**
      * Returns true if 'other' should be accepted as a new download location.
      */
@@ -737,6 +738,42 @@ public class ManagedDownloader implements Downloader, Serializable {
         debug("MD.namesClose(): retVal = " + retVal);
             
         return retVal;
+    }
+    
+
+    
+    /**
+     * Attempts to add the given location to this.  If the location
+     * is accepted for future swarming, this returns true.  Otherwise,
+     * this returns false.
+     */
+    public synchronized boolean addAlternateLocation(AlternateLocation alt,
+                                                     int fileSize) {
+        if( alt == null )
+            throw new NullPointerException("null alt");
+            
+        // if the alternate location collection hasn't been created yet,
+        // exit.
+        if( totalAlternateLocations == null )
+            return false;
+            
+        // if this rfd doesn't match ours.
+        RemoteFileDesc rfd = alt.createRemoteFileDesc(fileSize);
+        if (!allowAddition(rfd) )
+            return false;
+                
+        boolean added = totalAlternateLocations.addAlternateLocation(alt);
+        
+        // if the location didn't accept the new one.
+        if(!added) {
+            DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+            return false;
+        }            
+        
+        // everything worked, add it (without caching)
+        if( RECORD_STATS )
+            DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+        return addDownload(rfd, false);
     }
 
     /** 
@@ -2018,7 +2055,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 DownloadStat.RESPONSE_OK.incrementStat();            
             return 2;
         }
-    }
+    }        
 
     /**
      * Record new alternate locations and schedule them for use 
