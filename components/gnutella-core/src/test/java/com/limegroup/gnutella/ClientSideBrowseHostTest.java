@@ -264,6 +264,141 @@ public class ClientSideBrowseHostTest
         writer.flush();
         writer.write("\r\n");
         writer.flush();
+        //TODO: should i send some Query Hits?  Might be a good test.
+        httpSock.close();
+
+        try {
+            do {
+                m = testUP.receive(TIMEOUT);
+                assertTrue(!(m instanceof PushRequest));
+            } while (true) ;
+        }
+        catch (InterruptedIOException expected) {}
+
+        // awesome - everything checks out!
+        ss.close();
+    }
+
+
+    public void testPushProxyRequest() throws Exception {
+        testUP = connect(rs, 6355, true);
+
+        drain(testUP);
+        // some setup
+        final byte[] clientGUID = GUID.makeGuid();
+
+        // construct and send a query        
+        byte[] guid = GUID.makeGuid();
+        rs.query(guid, "nyu.edu");
+
+        // the testUP should get it
+        Message m = null;
+        do {
+            m = testUP.receive(TIMEOUT);
+        } while (!(m instanceof QueryRequest)) ;
+
+        // set up a server socket to wait for proxy request
+        ServerSocket ss = new ServerSocket(7000);
+        ss.setSoTimeout(TIMEOUT);
+
+        // send a reply with some PushProxy info
+        final PushProxyInterface[] proxies = 
+            new QueryReply.PushProxyContainer[1];
+        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
+        Response[] res = new Response[1];
+        res[0] = new Response(10, 10, "nyu.edu");
+        m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
+                           InetAddress.getLocalHost().getAddress(), 0, res, 
+                           clientGUID, new byte[0], false, false, true,
+                           true, false, false, proxies);
+        testUP.send(m);
+        testUP.flush();
+
+        // wait a while for Leaf to process result
+        Thread.sleep(1000);
+        assertTrue(callback.getRFD() != null);
+
+        // tell the leaf to browse host the file, should result in PushProxy
+        // request
+        Thread browseThread = new Thread() {
+            public void run() {
+                rs.doBrowseHost(callback.getRFD().getHost(),
+                                callback.getRFD().getPort(),
+                                new GUID(GUID.makeGuid()), new GUID(clientGUID),
+                                proxies);
+            }
+        };
+        browseThread.start();
+
+        // wait for the incoming PushProxy request
+        Socket httpSock = ss.accept();
+        assertNotNull(httpSock);
+
+        // start reading and confirming the HTTP request
+        String currLine = null;
+        BufferedReader reader = 
+            new BufferedReader(new
+                               InputStreamReader(httpSock.getInputStream()));
+
+        // confirm a GET/HEAD pushproxy request
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("GET /gnutella/pushproxy") ||
+                   currLine.startsWith("HEAD /gnutella/pushproxy"));
+        
+        // make sure it sends the correct client GUID
+        int beginIndex = currLine.indexOf("ID=") + 3;
+        String guidString = currLine.substring(beginIndex, beginIndex+32);
+        GUID guidFromBackend = new GUID(clientGUID);
+        GUID guidFromNetwork = new GUID(GUID.fromHexString(guidString));
+        assertEquals(guidFromNetwork, guidFromBackend);
+
+        // make sure the node sends the correct X-Node
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("X-Node:"));
+        StringTokenizer st = new StringTokenizer(currLine, ":");
+        assertEquals(st.nextToken(), "X-Node");
+        InetAddress addr = InetAddress.getByName(st.nextToken().trim());
+        Arrays.equals(addr.getAddress(), rs.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+
+        // now we need to GIV
+        Socket push = new Socket(InetAddress.getLocalHost(), PORT);
+        BufferedWriter writer = 
+            new BufferedWriter(new
+                               OutputStreamWriter(push.getOutputStream()));
+        writer.write("GIV 0:" + new GUID(clientGUID).toHexString() + "/\r\n");
+        writer.write("\r\n");
+        writer.flush();
+
+        // confirm a BrowseHost request
+        reader = 
+            new BufferedReader(new
+                               InputStreamReader(push.getInputStream()));
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("GET / HTTP/1.1"));
+        
+        // make sure the node sends the correct Host val
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("Host:"));
+        st = new StringTokenizer(currLine, ":");
+        assertEquals(st.nextToken(), "Host");
+        addr = InetAddress.getByName(st.nextToken().trim());
+        Arrays.equals(addr.getAddress(), rs.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+
+        // let the other side do its thing
+        Thread.sleep(500);
+
+        // send back a 200 and make sure no PushRequest is sent via the normal
+        // way
+        writer = 
+            new BufferedWriter(new
+                               OutputStreamWriter(push.getOutputStream()));
+
+        writer.write("HTTP/1.1 200 OK\r\n");
+        writer.flush();
+        writer.write("\r\n");
+        writer.flush();
         httpSock.close();
 
         try {
