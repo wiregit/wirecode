@@ -698,26 +698,35 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Returns the keywords for a requery, i.e., the keywords found in all
      *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
     private final synchronized String extractQueryString() {
-        //Intersect words(allFiles[i]), for all i.
         Assert.that(allFiles.length>0, "Precondition violated");
-        Set intersection=keywords(allFiles[0].getFileName());
-//          for (int i=1; i<allFiles.length; i++) {
-//              intersection.retainAll(
-//                  keywords(allFiles[i].getFileName()));
-//          }
 
-        //Put the keywords into a string.
+        final int MAX_LEN = 30;
+
+        // Put the keywords into a string, up to MAX_LEN
+        Set intersection=keywords(allFiles[0].getFileName());
         StringBuffer sb = new StringBuffer();
         int numWritten = 0;
         for (Iterator keys=intersection.iterator(); 
-             keys.hasNext() && (numWritten < 30); ) {
+             keys.hasNext() && (numWritten < MAX_LEN); 
+             ) {
             String currKey = (String) keys.next();
-            numWritten += currKey.length() + 1;
-            sb.append(currKey);
-            if (keys.hasNext())
-                sb.append(" ");
-        }        
-        return sb.toString();
+
+            // if we have space to add the keyword
+            if ((numWritten + currKey.length()) < MAX_LEN) {
+                if (numWritten > 0) // add a space if we've written before
+                    sb.append(" ");
+                sb.append(currKey); // add the new keyword
+                numWritten += currKey.length() + (numWritten == 0 ? 0 : 1);
+            }
+        }
+        
+        //TODO: one small problem - if every keyword in the filename is greater
+        //than MAX_LEN, then the string returned will be empty.  we won't
+        //handle this case as it is HIGHLY improbable.
+        
+        String retString = sb.toString();
+        Assert.that(retString.length() <= MAX_LEN);
+        return retString;
     }
 
     /** Returns the canonicalized non-trivial search keywords in fileName. */
@@ -727,7 +736,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         //Separate by whitespace and _, etc.
         Set ret=new HashSet();
-        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
+        StringTokenizer st = new StringTokenizer(fileName, 
+                                                 FileManager.DELIMETERS);
         while (st.hasMoreTokens()) {
             final String currToken = st.nextToken().toLowerCase();
             try {                
