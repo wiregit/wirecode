@@ -687,8 +687,8 @@ public class RouterService
         //System.out.println("Sumeet rich query coming...");
                             
         // per HUGE v0.93, ask for URNs on responses
-        HashSet reqUrns = new HashSet();
-        reqUrns.add("urn:");
+        Set reqUrns = new HashSet();
+        reqUrns.add(URN.URN_NAMESPACE_ID);
 
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery, false, reqUrns, null);
