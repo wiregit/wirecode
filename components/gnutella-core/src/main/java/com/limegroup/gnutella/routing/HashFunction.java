@@ -3,6 +3,7 @@ package com.limegroup.gnutella.routing;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ByteOrder;
+import com.sun.java.util.collections.*;
 
 /** 
  * The official platform-independent hashing function for query-routing.  The
@@ -86,6 +87,28 @@ public class HashFunction {
         //our own files, since the assumption is that queries have already been
         //canonicalized.
         return StringUtils.split(query.toLowerCase(), FileManager.DELIMETERS);
+    }
+
+    /**
+     * @return an array of strings with the original strings and prefixes
+     */
+    public static String[]  getPrefixes(String[] words){
+        ArrayList l = new ArrayList();
+        for(int i=0;i<words.length;i++){
+            //add the string itself
+            l.add(words[i]);
+            int len = words[i].length();
+            if(len>4){//if we can have prefixes add them to the list
+                l.add(words[i].substring(0,len-1));
+                l.add(words[i].substring(0,len-2));
+            }
+        }//done!
+        //convert to a String[]...could not do this directly...since
+        //we did not know now many of the words are longer than 4 chars
+        String[] retArray = new String[l.size()];
+        for(int i=0;i<l.size();i++)
+            retArray[i]=(String)l.get(i);
+        return retArray;
     }
 
     public static void main(String args[]) {

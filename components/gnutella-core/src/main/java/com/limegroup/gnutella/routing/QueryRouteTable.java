@@ -141,7 +141,8 @@ public class QueryRouteTable {
      * <b>For testing purposes only.</b>
      */
     public void add(String filename, int ttl) {
-        String[] keywords=HashFunction.keywords(filename);
+        String[] words=HashFunction.keywords(filename);
+        String[] keywords=HashFunction.getPrefixes(words);
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], log2(table.length));
             if (ttl<table[hash]) {
