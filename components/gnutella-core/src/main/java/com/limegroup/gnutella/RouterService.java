@@ -941,6 +941,10 @@ public class RouterService {
             }
             else
                 qr = QueryRequest.createWhatIsNewQuery(guid, (byte)2, type);
+
+            if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
+                MutableGUIDFilter.instance().addGUID(guid);
+    
             recordAndSendQuery(qr, type);
 		} catch(Throwable t) {
 			ErrorService.error(t);
@@ -977,6 +981,7 @@ public class RouterService {
         router.queryKilled(guid);
         if(RouterService.isSupernode())
             QueryDispatcher.instance().addToRemove(guid);
+        MutableGUIDFilter.instance().removeGUID(guid.bytes());
     }
 
     /** 

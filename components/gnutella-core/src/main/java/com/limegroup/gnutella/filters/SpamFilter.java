@@ -59,6 +59,10 @@ public abstract class SpamFilter {
         //3. Spammy Replies
         SpamReplyFilter spf=new SpamReplyFilter();
         buf.add(spf);
+        
+        //4. Mutable GUID-based filters.
+        MutableGUIDFilter mgf = MutableGUIDFilter.instance();
+        buf.add(mgf);
 
         return compose(buf);
     }

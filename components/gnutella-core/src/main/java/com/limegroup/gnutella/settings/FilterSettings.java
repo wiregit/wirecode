@@ -7,6 +7,13 @@ package com.limegroup.gnutella.settings;
 public class FilterSettings extends LimeProps {
     
     private FilterSettings() {}
+
+    /**
+	 * Sets whether or not search results including "adult content" are
+	 * banned in What's New queries.
+	 */
+    public static final BooleanSetting FILTER_WHATS_NEW_ADULT =
+        FACTORY.createBooleanSetting("FILTER_WHATS_NEW_ADULT", true);
     
     /**
 	 * Sets whether or not search results including "adult content" are

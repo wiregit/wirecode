@@ -92,7 +92,7 @@ public class KeywordFilter extends SpamFilter {
         return ! matches(query);
     }
 
-    protected boolean allow(QueryReply qr) {
+    boolean allow(QueryReply qr) {
         //if any of the file names in qr contain bad words, the whole
         //thing is disallowed
         try {
