@@ -1196,84 +1196,44 @@ public class QueryRequest extends Message implements Serializable{
             tempQuery = new String(super.readNullTerminatedBytes(bais), "UTF-8");
             // handle extensions, which include rich query and URN stuff
             byte[] extsBytes = super.readNullTerminatedBytes(bais);
-            int currIndex = 0;
-            // while we don't encounter a null....
-            while ((currIndex < extsBytes.length) && 
-                   (extsBytes[currIndex] != (byte)0x00)) {
+            HUGEExtension huge = new HUGEExtension(extsBytes);
 
-                // HANDLE GGEP STUFF
-                if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
-                    int[] endIndex = new int[1];
-                    endIndex[0] = currIndex+1;
-                    final String QK_SUPP = GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT;
-                    try {
-                        GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
-                        if (ggep.hasKey(QK_SUPP)) {
-                            byte[] qkBytes = ggep.getBytes(QK_SUPP);
-                            tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
-                        }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
-                            _capabilitySelector = 
-                                ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
-                            _doNotProxy = true;
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                            _metaMask = 
-                                new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
-                            // if the value is something we can't handle, don't
-                            // even set it
-                            if ((_metaMask.intValue() < 4) ||
-                                (_metaMask.intValue() > 248))
-                                _metaMask = null;
-                        }
+            Iterator ggeps = huge.getGGEPBlocks().iterator();
+            final String QK_SUPP = GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT;
+            while (ggeps.hasNext()) {
+                GGEP ggep = (GGEP) ggeps.next();
+                try {
+                    if (ggep.hasKey(QK_SUPP)) {
+                        byte[] qkBytes = ggep.getBytes(QK_SUPP);
+                        tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                     }
-                    catch (BadGGEPBlockException ignored) {}
-                    catch (BadGGEPPropertyException ignored) {}
-                    
-                    currIndex = endIndex[0];
-                }
-                else { // HANDLE HUGE STUFF
-                    int delimIndex = currIndex;
-                    while ((delimIndex < extsBytes.length) 
-                           && (extsBytes[delimIndex] != (byte)0x1c))
-                        delimIndex++;
-                    if (delimIndex > extsBytes.length) 
-                        ; // we've overflown and not encounted a 0x1c - discard
-                    else {
-                        // another GEM extension
-                        String curExtStr = new String(extsBytes, currIndex,
-                                                      delimIndex - currIndex, "UTF-8");
-                        if (URN.isUrn(curExtStr)) {
-                            // it's an URN to match, of form "urn:namespace:etc"
-                            URN urn = null;
-                            try {
-                                urn = URN.createSHA1Urn(curExtStr);
-                            } 
-                            catch(IOException e) {
-                                // the urn string is invalid -- so continue
-                                continue;
-                            }
-                            if(tempQueryUrns == null) 
-                                tempQueryUrns = new HashSet();
-                            tempQueryUrns.add(urn);
-                        } 
-                        else if (UrnType.isSupportedUrnType(curExtStr)) {
-                            // it's an URN type to return, of form "urn" or 
-                            // "urn:namespace"
-                            if(tempRequestedUrnTypes == null) 
-                                tempRequestedUrnTypes = new HashSet();
-                            if(UrnType.isSupportedUrnType(curExtStr)) 
-                                tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
-                        } 
-                        else if (curExtStr.startsWith("<?xml")) {
-                            // rich query
-                            tempRichQuery = curExtStr;
-						}
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
+                        _capabilitySelector = 
+                        ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
+                        _doNotProxy = true;
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
+                        _metaMask = 
+                        new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                        // if the value is something we can't handle, don't
+                        // even set it
+                        if ((_metaMask.intValue() < 4) ||
+                            (_metaMask.intValue() > 248))
+                            _metaMask = null;
                     }
-                    currIndex = delimIndex+1;
                 }
+                catch (BadGGEPPropertyException ignored) {}
             }
-        } 
+
+            tempQueryUrns = huge.getURNS();
+            tempRequestedUrnTypes = huge.getURNTypes();
+            for (Iterator iter = huge.getMiscBlocks().iterator();
+                 iter.hasNext() && tempRichQuery.equals(""); ) {
+                String currMiscBlock = (String) iter.next();
+                if (currMiscBlock.startsWith("<?xml"))
+                    tempRichQuery = currMiscBlock;                
+            }
+        }
         catch(UnsupportedEncodingException uee) {
             //couldn't build query from network due to unsupportedencodingexception
             //so throw a BadPacketException 
