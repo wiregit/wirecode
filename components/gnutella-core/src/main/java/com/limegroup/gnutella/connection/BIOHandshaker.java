@@ -191,23 +191,6 @@ public final class BIOHandshaker extends AbstractHandshaker {
             throw new IOException("Unexpected connect string: "+connectString);
         }
     }
-
-    /** 
-     * Returns true iff line ends with "CONNECT/N", where N
-     * is a number greater than or equal "0.6". 
-     */
-    private static boolean notLessThan06(String line) {
-        int i = line.indexOf(CONNECT);
-        if (i<0)
-            return false;
-        try {
-            Float F = new Float(line.substring(i+CONNECT.length()));
-            float f = F.floatValue();
-            return f >= 0.6f;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
     
     /**
      * Responds to the handshake from the host on the other
