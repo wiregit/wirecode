@@ -1014,6 +1014,18 @@ public class Connection {
 		return _headers.isUltrapeerQueryRoutingConnection();
     }
 
+    /**
+     * Returns whether or not this connections supports "probe" queries,
+     * or queries sent at TTL=1 that should not block the send path
+     * of subsequent, higher TTL queries.
+     *
+     * @return <tt>true</tt> if this connection supports probe queries,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean supportsProbeQueries() {
+        return _headers.supportsProbeQueries();
+    }
+
 	/**
 	 * Returns the authenticated domains listed in the connection headers
 	 * for this connection.

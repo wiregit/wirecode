@@ -147,6 +147,12 @@ public final class HandshakeResponse {
      */
     private final boolean LEAF;
 
+    /**
+     * Constant for whether or not this connection supports probe
+     * queries.
+     */
+    private final boolean PROBE_QUERIES;
+
 
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -174,7 +180,10 @@ public final class HandshakeResponse {
              isVersionOrHigher(HEADERS, 
                                HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
          MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
-         DYNAMIC_QUERY = isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+         DYNAMIC_QUERY = 
+             isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+         PROBE_QUERIES = 
+             isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
          GOOD = isHighDegreeConnection() &&
              isUltrapeerQueryRoutingConnection() &&
              (getMaxTTL() < 5) &&
@@ -673,6 +682,19 @@ public final class HandshakeResponse {
      */
     public boolean isDynamicQueryConnection() {
         return DYNAMIC_QUERY;
+    }
+
+    /**
+     * Accessor for whether or not this connection supports TTL=1 probe
+     * queries.  These queries are treated separately from other queries.
+     * In particular, if a second query with the same GUID is received,
+     * it is not considered a duplicate.
+     *
+     * @return <tt>true</tt> if this connection supports probe queries,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean supportsProbeQueries() {
+        return PROBE_QUERIES;
     }
 
     /**
