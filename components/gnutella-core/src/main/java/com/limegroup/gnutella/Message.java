@@ -262,23 +262,23 @@ public abstract class Message implements Serializable{
 
     /** Returns the ip (given in BIG-endian) format as standard
      *  dotted-decimal, e.g., 192.168.0.1<p> */
-     static String ip2string(byte[] ip) {
-        /*
-          WARNING: There is some debate over whether the IP address is
-          little endian or big endian.  Reverse engineering the Gnutella
-          client suggests it is big endian, but Gene Kan says otherwise.
-          In any case, I'm using BIG-ENDIAN here.  See:
-
-          http://gnutelladev.wego.com/go/wego.discussion.message
-                ?groupId=139406&view=message&curMsgId=153525&discId=140845&
-                index=5&action=view
-        */
-        StringBuffer buf=new StringBuffer();
-        buf.append(ByteOrder.ubyte2int(ip[0])+".");
-        buf.append(ByteOrder.ubyte2int(ip[1])+".");
-        buf.append(ByteOrder.ubyte2int(ip[2])+".");
-        buf.append(ByteOrder.ubyte2int(ip[3])+"");
-        return buf.toString();
+     static final String ip2string(byte[] ip) {
+         return ip2string(ip, 0);
+     }
+         
+    /** Returns the ip (given in BIG-endian) format of
+     *  buf[offset]...buf[offset+3] as standard dotted-decimal, e.g.,
+     *  192.168.0.1<p> */
+    static final String ip2string(byte[] buf, int offset) {
+        StringBuffer sbuf=new StringBuffer(16);   //xxx.xxx.xxx.xxx => 15 chars
+        sbuf.append(ByteOrder.ubyte2int(buf[offset]));
+        sbuf.append('.');
+        sbuf.append(ByteOrder.ubyte2int(buf[offset+1]));
+        sbuf.append('.');
+        sbuf.append(ByteOrder.ubyte2int(buf[offset+2]));
+        sbuf.append('.');
+        sbuf.append(ByteOrder.ubyte2int(buf[offset+3]));
+        return sbuf.toString();
     }
 
     /** @modifies this
@@ -296,4 +296,30 @@ public abstract class Message implements Serializable{
     public String toString() {
         return "{guid="+(new GUID(guid)).toString()+", ttl="+ttl+"}";
     }
+
+    /** Unit test. */
+    /*
+    public static void main(String args[]) {
+        byte[] buf=new byte[10];
+        buf[3]=(byte)192;
+        buf[4]=(byte)168;
+        buf[5]=(byte)0;
+        buf[6]=(byte)1;       
+        Assert.that(ip2string(buf, 3).equals("192.168.0.1"));
+        
+        buf=new byte[4];
+        buf[0]=(byte)0;
+        buf[1]=(byte)1;
+        buf[2]=(byte)2;
+        buf[3]=(byte)3;
+        Assert.that(ip2string(buf).equals("0.1.2.3"));
+
+        buf=new byte[4];
+        buf[0]=(byte)252;
+        buf[1]=(byte)253;
+        buf[2]=(byte)254;
+        buf[3]=(byte)255;
+        Assert.that(ip2string(buf).equals("252.253.254.255"));
+    }
+    */
 }

@@ -12,6 +12,9 @@ public class PingReply extends Message implements Serializable{
     /** All the data.  We extract the port, ip address, number of files,
      *  and number of kilobytes lazily. */
     private byte[] payload;
+    /** The IP string as extracted from payload[2..5].  Cached to avoid
+     *  allocations.  LOCKING: obtain this' monitor. */
+    private String ip;
 
     /**
      * Create a new unmarked PingReply from scratch
@@ -75,14 +78,12 @@ public class PingReply extends Message implements Serializable{
      * Returns the ip field in standard dotted decimal format, e.g.,
      * "127.0.0.1".  The most significant byte is written first.
      */
-    public String getIP() {
-        byte[] ip=new byte[4];
-        ip[0]=payload[2];
-        ip[1]=payload[3];
-        ip[2]=payload[4];
-        ip[3]=payload[5];
-        String ret=ip2string(ip); //takes care of signs
-        return ret;
+    public synchronized String getIP() {        
+        //Despite some incorrect early documentation, payload really is
+        //big-endian.
+        if (ip==null)
+            ip=ip2string(payload, 2);
+        return ip;
     }
 
      /**
@@ -234,6 +235,9 @@ public class PingReply extends Message implements Serializable{
 //          long kbytes=pr.getKbytes();
 //          Assert.that(kbytes==u4, Long.toHexString(kbytes));
 //          String ip2=pr.getIP();
+//          Assert.that(ip2.equals("255.0.0.1"), ip2);
+//          Assert.that(pr.ip!=null);  //Looking at private data
+//          ip2=pr.getIP();
 //          Assert.that(ip2.equals("255.0.0.1"), ip2);
 //          Assert.that(! pr.isMarked());
         
