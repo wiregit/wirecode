@@ -1603,23 +1603,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         //those locations that we download from?  How about only those in this
         //bucket?
         LimeXMLDocument[] retArray = null;
-        ArrayList allDocs = new ArrayList();
+        List allDocs = new ArrayList();
 
         // get all docs possible
         for (int i = 0; i < this.allFiles.length; i++) {
             if (this.allFiles[i] != null) {
-                retArray = this.allFiles[i].getXMLDocs();
-                for (int j = 0;
-                     (retArray != null) && (j < retArray.length);
-                     j++)
-                    allDocs.add(retArray[j]);
+				LimeXMLDocument doc = this.allFiles[i].getXMLDoc();
+				if(doc != null) {
+					allDocs.add(doc);
+				}
             }
         }
 
         if (allDocs.size() > 0) {
-            retArray = new LimeXMLDocument[allDocs.size()];
-            for (int i = 0; i < retArray.length; i++)
-                retArray[i] = (LimeXMLDocument) allDocs.get(i);
+			retArray = (LimeXMLDocument[])allDocs.toArray();
         }
         else
             retArray = null;
