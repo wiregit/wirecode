@@ -856,7 +856,8 @@ public class RouterService
                                String queryString, String richQueryString) 
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return downloader.getFiles(files, overwrite);
+		return downloader.getFiles(files, overwrite, queryString, 
+                                   richQueryString);
 	}
 
     /** 

@@ -134,8 +134,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Lock used to communicate between addDownload and tryAllDownloads.
      */
     private RequeryLock reqLock = new RequeryLock();
-
-
+    /** The query which launched this download*/
+    private String query = "";
+    /** The rich query which launched this download*/
+    private String richQuery = "";
 
 	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
 	 *  instance.
@@ -156,9 +158,15 @@ public class ManagedDownloader implements Downloader, Serializable {
     public ManagedDownloader(DownloadManager manager,
                              RemoteFileDesc[] files,
                              FileManager fileManager,
-                             IncompleteFileManager incompleteFileManager) {
+                             IncompleteFileManager incompleteFileManager,
+                             String queryString,
+                             String richQueryString) {
         this.allFiles=files;
         this.incompleteFileManager=incompleteFileManager;
+        if (queryString != null)
+            this.query = queryString;
+        if (richQueryString != null)
+            this.richQuery = richQueryString;
         initialize(manager, fileManager);
     }
 
@@ -172,6 +180,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             stream.writeObject(incompleteFileManager);
         }
 		stream.writeObject(bandwidthTracker);
+        stream.writeObject(query);
+        stream.writeObject(richQuery);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -181,6 +191,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
 		bandwidthTracker=(BandwidthTrackerImpl)stream.readObject();
+        query = (String)stream.readObject();
+        richQuery = (String)stream.readObject();
 
         //The following is needed to prevent NullPointerException when reading
         //serialized object from disk.  This can't be done in the constructor or

@@ -169,7 +169,9 @@ public class DownloadManager implements BandwidthTracker {
      *
      *     @modifies this, disk */
     public synchronized Downloader getFiles(RemoteFileDesc[] files,
-                                            boolean overwrite) 
+                                            boolean overwrite, 
+                                            String query,
+                                            String richQuery) 
             throws FileExistsException, AlreadyDownloadingException, 
 				   java.io.FileNotFoundException {
         //Check if file would conflict with any other downloads in progress.
@@ -203,7 +205,7 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader=new ManagedDownloader(
-            this, files, fileManager, incompleteFileManager);
+            this, files, fileManager, incompleteFileManager, query, richQuery);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.
