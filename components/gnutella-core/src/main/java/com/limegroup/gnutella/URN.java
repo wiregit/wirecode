@@ -108,7 +108,7 @@ public final class URN {
 	public static boolean isURNType(String urnString) {
 		final String URN_STRING = urnString.toLowerCase();
 		if(URN_STRING.equals(URN.URN_STRING) || 
-		   URN_STRING.equals(URN.URN_SHA1 + ";")) {
+		   URN_STRING.equals(URN.URN_SHA1 + ":")) {
 			return true;
 		}
 		return false;
@@ -294,6 +294,7 @@ public final class URN {
 		return _urnString;
 	}
 
+	
 	/*
 	public static void main(String[] args) {
 		String [] validURNS = {
@@ -374,13 +375,13 @@ public final class URN {
 		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
 		encounteredFailure = false;
 		System.out.println(); 
-		System.out.println("TESTING SHA1 URN CONSTRUCTION"); 
+		System.out.println("TESTING SHA1 URN CONSTRUCTION AND ASSOCIATED METHODS"); 
 		
 
 		File[] testFiles = new File("C:\\My Music").listFiles();
 		File curFile = null;
 		try {
-			for(int i=0; i<testFiles.length; i++) {
+			for(int i=0; i<10; i++) {
 				curFile = testFiles[i];
 				if(!curFile.isFile()) {
 					System.out.println("FILE NOT A FILE: "+curFile); 
@@ -389,9 +390,23 @@ public final class URN {
 				if(!urn.isSHA1()) {
 					System.out.println("SHA1 TEST FAILED ON FILE: "+curFile); 
 				}
-				if(!urn.isValidURN(urn.getURNString())) {
+				if(!urn.isURN(urn.getURNString())) {
 					System.out.println("VALID URN TEST FAILED ON FILE: "+curFile); 
 				}
+				if(!urn.getTypeString().equals(URN.URN_SHA1 +":")) {
+					System.out.println("GET TYPE STRING FAILED: "+urn); 
+				}
+				try {
+					URN newURN = new URN(urn.toString());
+					if(!newURN.equals(urn)) {
+						System.out.println("ERROR IN EQUALS OR URN CONSTRUCTION FOR: "+
+										   urn); 
+					}
+				} catch(IOException e) {
+						System.out.println("ERROR IN EQUALS OR URN CONSTRUCTION FOR: "+
+										   urn); 
+				}
+				System.out.println("type string: "+urn.getTypeString()); 
 				System.out.println("urn: "+urn); 
 			}
 		} catch(IOException e) {
@@ -400,16 +415,55 @@ public final class URN {
 		}
 
 		if(!encounteredFailure) {
-			System.out.println("SHA1 URN CONSTRUCTION TEST PASSED"); 
+			System.out.println("SHA1 URN CONSTRUCTION AND ASSOCIATED METHODS TEST PASSED"); 
 		}
 
+		// TEST FOR isURNType method
+		encounteredFailure = false;
+		System.out.println(); 
+		System.out.println("TESTING isURNType METHOD");
+		String[] validURNTypes = {
+			"urn:",
+			"urn:sha1:",
+			"Urn:",
+			"urn:Sha1:"
+		};
+
+		String[] invalidURNTypes = {
+			"urn: ",
+			"urn: sha1:",
+			"urn::",
+			"urn:sha2:",
+			" urn:sha1",
+			"rn:sha1",
+			" "
+		};
+		
+		for(int i=0; i<validURNTypes.length; i++) {
+			if(!URN.isURNType(validURNTypes[i])) {
+				System.out.println("isURNType failed for valid type: "+i+
+								   " "+validURNTypes[i]); 
+			}
+		}
+
+		for(int i=0; i<invalidURNTypes.length; i++) {
+			if(URN.isURNType(invalidURNTypes[i])) {
+				encounteredFailure = true;
+				System.out.println("isURNType failed for invalid type: "+i+
+								   " "+invalidURNTypes[i]); 
+			}
+		}
+
+		if(!encounteredFailure) {
+			System.out.println("isURNType METHOD TEST PASSED"); 
+		}
 
 		// ALL TESTS HAVE PASSED
 		System.out.println(); 
 		if(!encounteredFailure) {
 			System.out.println("ALL TESTS PASSED"); 
 		}
-		
 	}
 	*/
+	
 }
