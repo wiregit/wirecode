@@ -724,8 +724,8 @@ public abstract class FileManager {
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
-        File[] dir_list = listFiles(directory, DIRECTORY_FILTER);
-        File[] file_list = listFiles(directory, SHAREABLE_FILE_FILTER);
+        File[] dir_list = FileUtils.listFiles(directory, DIRECTORY_FILTER);
+        File[] file_list = FileUtils.listFiles(directory, SHAREABLE_FILE_FILTER);
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
@@ -1204,21 +1204,6 @@ public abstract class FileManager {
   			return null;
   		}
     }
-    
-    /**
-     * Same as f.listFiles(FileNameFilter) in JDK1.2
-     */
-    public static File[] listFiles(File f, FilenameFilter filter) {
-        String[] children=f.list(filter);
-        if(children == null)
-            return null;
-        File[] ret = new File[children.length];
-        for (int i=0; i<children.length; i++) {
-            ret[i] = new File(f, children[i]);
-        }
-
-        return ret;
-    }    
     
     /**
      * called when a query route table has to be made. The current 
