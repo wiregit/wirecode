@@ -2706,6 +2706,128 @@ public abstract class MessageRouter {
     	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
     	handler.handleUPListVM(newMsg);
     }
+    
+    /**
+     * handles a PromotionRequest received from the network.
+     * 
+     * There are two possible scenarios:
+     * A. We are the target leaf - initiate the promotion process
+     * B. We are a forwarding UP - check for validity and forward
+     *  
+     * @param msg the received message
+     * @param handler the connection we received the message on.
+     */
+    private void handlePromotionRequestVM(PromotionRequestVendorMessage msg, ReplyHandler handler) {
+    	
+    	//first make sure the other side is an ultrapeer, since only UPs should send these messages
+    	if (!handler.isGoodUltrapeer())
+    		return;
+    	
+    	//then check the distance field, and if it is 0 verify the sender
+    	if (msg.getDistance() == 0 &&
+    			! msg.getRequestor().getInetAddress().equals(handler.getInetAddress()))
+				return;
+    	
+    	//if we are a leaf and we are the target, start the promotion process.
+    	//(not yet implemented, just a stub)
+    	if(!RouterService.isSupernode()) {
+    		//make sure the promotion request was intended for us
+    		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
+    				RouterService.getExternalAddress()))
+    			initiatePromotion();	
+    		return; 
+    	}
+    	
+    	//*********************
+    	//we are an ultrapeer that needs to forward this query.
+    	//*********************
+    	
+    	//first make sure the request hasn't been travelling for too long.
+    	if (msg.getDistance() > 2)
+    		return;
+    	
+    	//then see if the specified candidate is still on our lists
+    	//it should be either in the ttl 0 or ttl 1 slot.
+    	//also, if it is in the ttl 1 slot is should not have traveled more than 1 hop.
+    	Candidate [] ourCandidates = BestCandidates.getCandidates();
+    	InetAddress candidateAddress = msg.getCandidate().getInetAddress();
+    	
+    	if (ourCandidates[0].getInetAddress().equals(candidateAddress) ||
+    			 (ourCandidates[1].getInetAddress().equals(candidateAddress) &&
+    			 		msg.getDistance()<2))
+    		forwardPromotionRequest(msg);
+    	
+    }
+    
+    private void initiatePromotion() {
+    	//TODO:implement ;-)
+    }
+    
+    /**
+     * forwards a promotion request to a candidate.  This method will create a new
+     * PromotionRequestVendorMessage and route it to the appropriate destination.
+     * If the route to the target is no longer open, the message is dropped.
+     * 
+     * Note: if we decide that every routing UP needs to ACK the message, this method 
+     * will need to add a listener on the udp port with the GUID of the message.
+     *  
+     * @param msg the original message received from the network.
+     */
+    private void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
+    	
+    	//get the address of the candidate
+    	InetAddress address = msg.getCandidate().getInetAddress();
+    	
+    	//create a new promotion message
+    	PromotionRequestVendorMessage newMsg = new PromotionRequestVendorMessage(msg);
+    	
+    	//see if the target is at ttl 0 from us
+    	//if so, send the message to the leaf directly.
+    	if (BestCandidates.getCandidates()[0].getInetAddress().equals(address)) {
+    		//see if such leaf is still connected.
+    		Connection leaf=null;
+    		Iterator iter = RouterService.getConnectionManager().
+				getInitializedClientConnections().iterator();
+    		
+    		while(iter.hasNext()) {
+    			Connection handler = (Connection)iter.next();
+    			if (handler.getInetAddress().equals(address)) {
+    				leaf = handler;
+    				break;
+    			}
+    		}
+    		
+    		//if we have found the leaf, forward the new request to it.
+    		if (leaf !=null)
+    			try {
+    				leaf.send(newMsg);
+    			}catch(IOException ohWell) {
+    				//sending failed.  not much we can do.
+    			}
+    			
+    		return;
+    	}
+    	
+    	//the target is ttl 1 from us.  Forward the query to its advertiser.
+    	Connection up = null;
+    	Iterator iter = RouterService.getConnectionManager().getConnectedGUESSUltrapeers().iterator();
+    	while (iter.hasNext()) {
+    		Connection current = (Connection)iter.next();
+    		if (current.getInetAddress().equals(
+    				BestCandidates.getCandidates()[1].getAdvertiser().getInetAddress())) {
+    			up = current;
+    			break;
+    		}
+    	}
+    	
+    	//forward the message to the ultrapeer.
+    	if (up!=null)
+    		try {
+				up.send(newMsg);
+			}catch(IOException ohWell) {
+				//sending failed.  not much we can do.
+			}
+    }
 
 
 }

@@ -134,19 +134,19 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 	/**
 	 * @return Returns the _candidate.
 	 */
-	protected QueryReply.IPPortCombo getCandidate() {
+	public QueryReply.IPPortCombo getCandidate() {
 		return _candidate;
 	}
 	/**
 	 * @return Returns the _distance.
 	 */
-	protected int getDistance() {
+	public int getDistance() {
 		return _distance;
 	}
 	/**
 	 * @return Returns the _requestor.
 	 */
-	protected QueryReply.IPPortCombo getRequestor() {
+	public QueryReply.IPPortCombo getRequestor() {
 		return _requestor;
 	}
 }

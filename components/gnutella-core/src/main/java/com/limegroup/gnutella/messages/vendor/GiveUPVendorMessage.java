@@ -56,14 +56,18 @@ public class GiveUPVendorMessage extends VendorMessage {
 	private static byte [] derivePayload(int numberUP, int numberLeaves) {
 		//we don't expect to have more than 255 connections soon
 
-		if (numberUP > 127)
-			numberUP=127;
-		if (numberLeaves > 127)
-			numberLeaves=127;
+		if (numberUP > 255)
+			numberUP=255;
+		if (numberLeaves > 255)
+			numberLeaves=255;
 		
+		byte [] temp = new byte [2];
 		byte [] payload = new byte[2];
-		payload[0] = (byte)numberUP;
-		payload[1] = (byte)numberLeaves;
+		
+		ByteOrder.short2leb((short)numberUP,temp,0);
+		payload[0]=temp[0];
+		ByteOrder.short2leb((short)numberLeaves,temp,0);
+		payload[1] = temp[0];
 		return payload;
 	}
 	
@@ -82,8 +86,8 @@ public class GiveUPVendorMessage extends VendorMessage {
 		if (payload == null || payload.length != 2)
 			throw new BadPacketException();
 		
-		_numberUP = payload[0];
-		_numberLeaves = payload[1];
+		_numberUP = ByteOrder.ubyte2int(payload[0]);
+		_numberLeaves = ByteOrder.ubyte2int(payload[1]);
 		
 		if (_numberUP < ALL || _numberLeaves < ALL) //corrupted packet
 			throw new BadPacketException();
