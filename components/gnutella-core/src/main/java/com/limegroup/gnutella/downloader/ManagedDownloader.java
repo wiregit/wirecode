@@ -985,18 +985,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 }
                 
-                //also adds any existing firewalled locations if 
-                //I am not firewalled.
-                if (RouterService.acceptedIncomingConnection()) {
-                	coll = fd.getPushAlternateLocationCollection();
-                	synchronized(coll) {
-                		Iterator iter = coll.iterator();
-                		while(iter.hasNext()) {
-                			AlternateLocation loc = (AlternateLocation)iter.next();
-                			addDownload(loc.createRemoteFileDesc((int)size),false);
-                		}
+                //also adds any existing firewalled locations.
+                //If I'm firewalled, only those that support FWT are added.
+                //this assumes that FWT will always be backwards compatible
+                boolean open = RouterService.acceptedIncomingConnection();
+                coll = fd.getPushAlternateLocationCollection();
+                synchronized(coll) {
+                	Iterator iter = coll.iterator();
+                	while(iter.hasNext()) {
+                		PushAltLoc loc = (PushAltLoc)iter.next();
+                		if (open || loc.supportsFWTVersion()>0)
+                		    addDownload(loc.createRemoteFileDesc((int)size),false);
                 	}
                 }
+                
             }
         }
     }
@@ -2647,7 +2649,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         File incFile = incompleteFile;
         HTTPDownloader ret;
-        boolean needsPush = rfd.needsPush();//needsPush(rfd);
+        boolean needsPush = rfd.needsPush();
         
         
         synchronized (this) {
@@ -2956,16 +2958,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }
             
-            //if we are not firewalled, we also want to try the firewalled push locs
+            //we also want to try the firewalled push locs
+            //if we are firewalled, try only those that support FWT 
             c = dloader.getPushLocsReceived();
-            if(c!=null && RouterService.acceptedIncomingConnection()) {
+            boolean open = RouterService.acceptedIncomingConnection();
+            if(c!=null ) {
                 synchronized(c) { 
                     Iterator iter = c.iterator();
                     while(iter.hasNext()) {
-                        AlternateLocation al=(AlternateLocation)iter.next();
-                        RemoteFileDesc rfd1 =
-                            al.createRemoteFileDesc(rfd.getSize());
-                        addDownload(rfd1, false);//don't cache
+                        PushAltLoc al=(PushAltLoc)iter.next();
+                        if (open || al.supportsFWTVersion() > 0) {
+                            RemoteFileDesc rfd1 =
+                                al.createRemoteFileDesc(rfd.getSize());
+                            addDownload(rfd1, false);//don't cache
+                        }
                     }
                 }
             }
@@ -3456,27 +3462,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean removed = files.remove(ret);
         Assert.that(removed == true, "unable to remove RFD.");
         return ret;
-    }
-
-    /** Returns true iff rfd should be attempted by push download, either 
-     *  because it is a private address or was unreachable in the past. */
-    private static boolean needsPush(RemoteFileDesc rfd) {
-        // if replying to multicast, do a push.
-        if ( rfd.isReplyToMulticast() )
-            return true;
-        //Return true if rfd is private or unreachable
-        if (rfd.isPrivate()) {
-            // Don't do a push for magnets in case you are in a private network.
-            // Note to Sam: This doesn't mean that isPrivate should be true.
-            if (rfd instanceof URLRemoteFileDesc) 
-                return false;
-            else  // Otherwise obey push rule for private rfds.
-                return true;
-        }
-        else if (!NetworkUtils.isValidPort(rfd.getPort()))
-            return true;
-        else
-            return false;
     }
 
     /**

@@ -469,6 +469,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         //say that I want firewalled altlocs.
         //if I am firewalled, send the version of the FWT protocol I support.
+        // (which implies that I want only altlocs that support FWT)
         features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
         if (!RouterService.acceptedIncomingConnection())
         	features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
@@ -530,6 +531,8 @@ public class HTTPDownloader implements BandwidthTracker {
                                 new HTTPHeaderValueCollection(writeClone),out);
         
         //if the other side indicated they want firewalled altlocs, send some
+        //we send both types of firewalled altlocs to the uploader since even if
+        //it can't support FWT it can still spread them to other downloaders.
         if (_wantsFalts) {
         	writeClone = null;
         	synchronized(_goodPushLocs) {
@@ -1419,9 +1422,8 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      * 
      * Method for parsing the header containing firewalled alternate
-     * locations.  The format is described at the Push Proxy spec at the_gdf,
-     * except that an empty header just indicates the other side is interested
-     * in receiving them.
+     * locations.  The format is a modified version of the one described
+     * in the push proxy spec at the_gdf
      * 
      */
     private void parseFALTHeader(String str) {

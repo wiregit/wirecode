@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -698,7 +699,24 @@ public class RemoteFileDesc implements Serializable {
      * @return whether a push should be sent tho this rfd.
      */
     public boolean needsPush() {
-    	return _firewalled && _pushAddr!=null &&
+        
+        //if replying to multicast, do a push.
+        if ( isReplyToMulticast() )
+            return true;
+        //Return true if rfd is private or unreachable
+        if (isPrivate()) {
+            // Don't do a push for magnets in case you are in a private network.
+            // Note to Sam: This doesn't mean that isPrivate should be true.
+            if (this instanceof URLRemoteFileDesc) 
+                return false;
+            else  // Otherwise obey push rule for private rfds.
+                return true;
+        }
+        else if (!NetworkUtils.isValidPort(getPort()))
+            return true;
+        
+        // make sure we have some push proxies.
+        else return _firewalled && _pushAddr!=null &&
 			_pushAddr.getProxies().size()>0;
     }
     
