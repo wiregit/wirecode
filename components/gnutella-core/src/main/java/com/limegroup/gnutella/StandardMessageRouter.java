@@ -5,12 +5,10 @@ import java.net.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.sun.java.util.collections.*;
 
-public class StandardMessageRouter
-    extends MessageRouter
+public class StandardMessageRouter extends MessageRouter
 {
     private ActivityCallback _callback;
     private FileManager _fileManager;
-    private DownloadManager _downloader;
 
     public StandardMessageRouter(ActivityCallback callback, FileManager fm)
     {
@@ -191,68 +189,6 @@ public class StandardMessageRouter
         return( pingRequest );
     }
 
-    
-
-
-    /**
-     * Handles the PingReply by updating horizon stats.
-     */
-	/*
-    protected void handlePingReplyForMe(
-        PingReply pingReply,
-        ReplyHandler handler)
-    {
-        SettingsManager settings=SettingsManager.instance();
-        //Kill incoming connections that don't share.  Note that we randomly
-        //allow some freeloaders.  (Hopefully they'll get some stuff and then
-        //share!)  Note that we only consider killing them on the first ping.
-        //(Message 1 is their ping, message 2 is their reply to our ping.)
-        if ((pingReply.getHops()<=1)
-			&& (handler.getNumMessagesReceived()<=2)
-			&& (! handler.isOutgoing())
-			&& (handler.isKillable())
-			&& (pingReply.getFiles()<settings.getFreeloaderFiles())
-			&& ((int)(Math.random()*100.f) >
-				settings.getFreeloaderAllowed())
-			&& (handler instanceof ManagedConnection)) {
-            _manager.remove((ManagedConnection)handler);
-        }
-    }
-	*/
-
-    /**
-     * Responds to the QueryRequest by calling FileManager.query()
-     */
-  //    protected void respondToQueryRequest(QueryRequest queryRequest,
-//                                           Acceptor acceptor,
-//                                           byte[] clientGUID)
-//      {
-//          // Run the local query
-//          Response[] responses = FileManager.instance().query(queryRequest);
-//          // If we have responses, send back a QueryReply
-//          if (responses!=null && (responses.length>0))
-//          {
-//              byte[] guid = queryRequest.getGUID();
-//              byte ttl = (byte)(queryRequest.getHops() + 1);
-//              int port = acceptor.getPort();
-//              byte[] ip = acceptor.getAddress();
-//              long speed = SettingsManager.instance().getConnectionSpeed();
-//              if (responses.length > 255)
-//              {
-//                  Response[] res = new Response[255];
-//                  for(int i=0; i<255;i++)
-//                      res[i] = responses[i];
-//                  responses = res;
-//              }
-//              QueryReply queryReply = new QueryReply(guid, ttl, port, ip, speed,
-//                                                     responses, clientGUID);
-//              try
-//              {
-//                  sendQueryReply(queryReply);
-//              }
-//              catch(IOException e) {}
-//          }
-//      }
     protected void respondToQueryRequest(QueryRequest queryRequest,
                                          Acceptor acceptor,
                                          byte[] clientGUID)
@@ -318,69 +254,4 @@ public class StandardMessageRouter
             qrt.add(files[i].getAbsolutePath());
         */
     }
-
-    /**
-     * Handles the QueryReply by starting applying the personal filter and then
-     * displaying the result.
-     */
-	/*
-    protected void handleQueryReplyForMe(
-        QueryReply queryReply,
-        ReplyHandler receivingConnection)
-    {
-        if (_downloader == null) 
-            if (RouterService.instance() != null)
-                _downloader = RouterService.instance().getDownloadManager();
-
-        if (!receivingConnection.isPersonalSpam(queryReply)) {
-            _callback.handleQueryReply(queryReply);
-            _downloader.handleQueryReply(queryReply);
-        }
-    }
-	*/
-
-    /**
-     * Handles the PushRequest by starting an HTTPUploader
-     */
-	/*
-    protected void handlePushRequestForMe(
-        PushRequest pushRequest,
-        ReplyHandler receivingConnection)
-    {
-        //Ignore push request from banned hosts.
-        if (receivingConnection.isPersonalSpam(pushRequest))
-            return;
-		
-        // Unpack the message
-        byte[] ip = pushRequest.getIP();
-        StringBuffer buf = new StringBuffer();
-        buf.append(ByteOrder.ubyte2int(ip[0])+".");
-        buf.append(ByteOrder.ubyte2int(ip[1])+".");
-        buf.append(ByteOrder.ubyte2int(ip[2])+".");
-        buf.append(ByteOrder.ubyte2int(ip[3])+"");
-        String h = buf.toString();
-        int port = pushRequest.getPort();
-        int index = (int)pushRequest.getIndex();
-        String req_guid_hexstring =
-            (new GUID(pushRequest.getClientGUID())).toString();
-
-        FileDesc desc;
-        try
-        {
-            desc = _fileManager.get(index);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            //You could connect and send 404 file
-            //not found....but why bother?
-            return;
-        }
-
-        String file = desc.getName();
-
-        if (!_acceptor.isBannedIP(h))	
-            _uploadManager.acceptPushUpload(file, h, port, 
-                                            index, req_guid_hexstring);
-    }
-	*/
 }
