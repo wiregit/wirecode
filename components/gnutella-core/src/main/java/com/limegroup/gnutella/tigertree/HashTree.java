@@ -203,7 +203,8 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         // 2^n
         int nodeSize = 1 << n;
         List fileHashes = createTTNodes(nodeSize, FILE_SIZE, is);
-        for (int i = 0; i < fileHashes.size(); i++) {
+        int minSize = Math.min(fileHashes.size(), NODES.size());
+        for (int i = 0; i < minSize; i++) {
             byte[] aHash = (byte[]) fileHashes.get(i);
             byte[] bHash = (byte[]) NODES.get(i);
             for (int j = 0; j < aHash.length; j++) {
