@@ -11,7 +11,7 @@ import com.sun.java.util.collections.Iterator;
  * Sends Gnutella pings via UPD to a set of hosts and calls back to a listener
  * whenever responses are returned.
  */
-public class UDPHostRanker implements PingReplyHandler {
+public class UDPHostRanker implements HostListener {
 
     private final HostListener LISTENER;
 
@@ -64,18 +64,18 @@ public class UDPHostRanker implements PingReplyHandler {
         }
     }
 
-    /**
-     * Adds the specified <tt>PingReply</tt> to this ranker.
-     * 
-     * @param reply the <tt>PingReply</tt> to add
-     */
-    public void handlePingReply(PingReply reply) {
-        if(NetworkUtils.isPrivateAddress(reply.getIP())) {
+    // inherit doc comment
+    public void addHost(IpPort host) {
+        if(NetworkUtils.isPrivateAddress(host.getAddress())) {
             return;
         }
-        if(reply.hasFreeUltrapeerSlots()) {
-            LISTENER.addHost(reply);
+        if(host instanceof PingReply) {
+            PingReply pr = (PingReply)host;
+            if(pr.hasFreeUltrapeerSlots()) {
+                LISTENER.addHost(pr);
+            }            
         }
+        
     }
 
 }
