@@ -155,6 +155,4 @@ public interface SettingsInterface
     public static final String AVERAGE_UPTIME     = "AVERAGE_UPTIME";
     public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
     public static final String SESSIONS           = "SESSIONS";
-	public static final String DELETE_OLD_JAR     = "DELETE_OLD_JAR";
-	public static final String OLD_JAR_NAME       = "OLD_JAR_NAME";
 }
