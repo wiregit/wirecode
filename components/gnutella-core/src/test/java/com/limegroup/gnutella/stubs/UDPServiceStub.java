@@ -1,5 +1,6 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.stubs;
 
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
@@ -103,7 +104,7 @@ public final class UDPServiceStub extends UDPService {
 		}
 	}
 
-    private class Receiver extends Thread {
+    private class Receiver extends ManagedThread {
         private final ArrayList _messages;
         private final int       _toPort;
         private final int       _fromPort;
@@ -136,7 +137,7 @@ public final class UDPServiceStub extends UDPService {
 			}
 		}
         
-        public void run() {
+        public void managedRun() {
             // forward on message when the time is right
             // ------
             MessageWrapper msg      = null;

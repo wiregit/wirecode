@@ -5,7 +5,7 @@ import java.io.*;
 import java.net.*;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.UDPServiceStub;
+import com.limegroup.gnutella.stubs.UDPServiceStub;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ErrorService;
