@@ -237,7 +237,7 @@ public final class QueryHandler {
 		// build it from scratch if it's from us
 		if(HOPS == 0) {
 			return new QueryRequest(GUID, ttl, HOPS, QUERY, XML_QUERY, false, 
-									URN_TYPES, QUERY_URNS, null,
+									URN_TYPES, QUERY_URNS,
 									!RouterService.acceptedIncomingConnection());
 		} else {
 			try {
