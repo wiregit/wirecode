@@ -66,6 +66,7 @@ public class SettingsManager implements SettingsInterface
     private boolean  clearCompletedUpload_;
     private boolean  clearCompletedDownload_;
     private int      maxSimDownload_;
+    private boolean  promptExeDownload_;
     private int      maxUploads_;
 
     private int      searchAnimationTime_;
@@ -209,6 +210,16 @@ public class SettingsManager implements SettingsInterface
                 }
                 else if(key.equals(MAX_SIM_DOWNLOAD)) {
                     setMaxSimDownload(Integer.parseInt(p));
+                } 
+                else if(key.equals(PROMPT_EXE_DOWNLOAD)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    setPromptExeDownload(bs);
                 }
                 else if(key.equals(MAX_UPLOADS)) {
                     setMaxUploads(Integer.parseInt(p));
@@ -490,6 +501,7 @@ public class SettingsManager implements SettingsInterface
         setClearCompletedUpload(DEFAULT_CLEAR_UPLOAD);
         setClearCompletedDownload(DEFAULT_CLEAR_DOWNLOAD);
         setMaxSimDownload(DEFAULT_MAX_SIM_DOWNLOAD);
+        setPromptExeDownload(DEFAULT_PROMPT_EXE_DOWNLOAD);
         setMaxUploads(DEFAULT_MAX_UPLOADS);
         setSearchAnimationTime(DEFAULT_SEARCH_ANIMATION_TIME);
         setConnectString(DEFAULT_CONNECT_STRING);
@@ -635,6 +647,7 @@ public class SettingsManager implements SettingsInterface
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}
     public int getParallelSearchMax(){return parallelSearchMax_;}
     public int getMaxSimDownload(){return maxSimDownload_;}
+    public boolean getPromptExeDownload(){return promptExeDownload_;}
     public int getMaxUploads(){return maxUploads_;}
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;}
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;}
@@ -1251,6 +1264,14 @@ public class SettingsManager implements SettingsInterface
             props_.put(MAX_SIM_DOWNLOAD, s);
         }
     }
+
+
+    public void setPromptExeDownload(boolean prompt) {        
+        promptExeDownload_ = prompt;
+        String s = String.valueOf(prompt);
+        props_.put(PROMPT_EXE_DOWNLOAD, s);
+    }
+
 
     public void setMaxUploads(int max) {
         if(false)

@@ -40,8 +40,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_UPLOAD_SPEED   = 50;
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
-    /** Default client/gu id */
-    //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
+    /** Default client guid */
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
     public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
@@ -79,6 +78,8 @@ public interface SettingsInterface
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
+    /** Default for whether user should be prompted before downloading exe's. */
+    public static final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
     public static final int     DEFAULT_MAX_UPLOADS      = 8;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
@@ -131,6 +132,7 @@ public interface SettingsInterface
     public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
     public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
     public static final String MAX_SIM_DOWNLOAD="MAX_SIM_DOWNLOAD";
+    public static final String PROMPT_EXE_DOWNLOAD="PROMPT_EXE_DOWNLOAD";
     public static final String MAX_UPLOADS     ="MAX_UPLOADS";
     public static final String CLEAR_UPLOAD   = "CLEAR_UPLOAD";
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
