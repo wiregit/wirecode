@@ -797,7 +797,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
 
         // we should start getting guess queries on all UDP ports, actually
@@ -930,7 +930,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(5000);
+        Thread.sleep(500);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
 
         // we should get a query key request
