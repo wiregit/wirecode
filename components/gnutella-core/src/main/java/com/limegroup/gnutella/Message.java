@@ -226,6 +226,18 @@ public abstract class Message implements Serializable{
         return ttl;
     }
 
+    /**
+     * If ttl is less than one, throws IllegalArgumentException.  Otherwise sets
+     * this TTL to the given value.  This is useful when you want certain messages
+     * to travel less than others.
+     *    @modifies this' TTL
+     */
+    public void setTTL(byte ttl) throws IllegalArgumentException {
+        if (ttl < 1)
+            throw new IllegalArgumentException();
+        this.ttl = ttl;
+    }
+
     public byte getHops() {
         return hops;
     }
