@@ -13,10 +13,10 @@ public class UDPServiceTest extends TestCase {
 	//private static final Backend BACKEND_0 = Backend.instance();
 
 	private final ActivityCallback CALLBACK = new ActivityCallbackTest();
-	private final Backend BACKEND_0 = 
+	private final Backend BACKEND = 
 		Backend.createBackend(CALLBACK);
 
-	private final RouterService ROUTER_SERVICE = BACKEND_0.getRouterService();
+	private final RouterService ROUTER_SERVICE = BACKEND.getRouterService();
 	
 	private final int BUFFER_SIZE = 1024;
 	
@@ -47,12 +47,11 @@ public class UDPServiceTest extends TestCase {
 	 * Tests sending query requests to the UDP port.
 	 */
 	public void testQueryRequests() {
-		System.out.println("TESTING UDP QUERY REQUESTS"); 
-		System.out.println("CALLBACK: "+CALLBACK); 
+		//System.out.println("TESTING UDP QUERY REQUESTS"); 
 		FileManager fm = ROUTER_SERVICE.getFileManager();
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
-		System.out.println("NUM FILE DESCS: "+fds.length); 
+
 
 		byte[] ipBytes = ROUTER_SERVICE.getAddress();
 		String address = Message.ip2string(ipBytes);
@@ -62,11 +61,11 @@ public class UDPServiceTest extends TestCase {
 			Thread.sleep(1000);
 		} catch(InterruptedException e) {
 		}
-		System.out.println("GUESS ENABLED: "+
-						   SettingsManager.instance().getGuessEnabled()); 
+		//System.out.println("GUESS ENABLED: "+
+		//			   SettingsManager.instance().getGuessEnabled()); 
 		for(int i=0; i<fds.length; i++) {
 			String curName = fds[i].getName(); 
-			System.out.println("TESTING FILE: "+curName); 
+			//System.out.println("TESTING FILE: "+curName); 
 			QueryRequest qr = new QueryRequest((byte)1, (byte)0, 
 											   curName); 
 			PingRequest ping = new PingRequest((byte)1);
@@ -111,16 +110,16 @@ public class UDPServiceTest extends TestCase {
 			}		
 		}
 
-		System.out.println("ABOUT TO SHUTDOWN ROUTER SERVICE"); 
-		ROUTER_SERVICE.shutdown();
+		//System.out.println("ABOUT TO SHUTDOWN ROUTER SERVICE"); 
+		//BACKEND.shutdown();
 	}
 
 
 	private class ActivityCallbackTest extends ActivityCallbackStub {
 		public void handleQueryReply(QueryReply reply) {
-			System.out.println(""); 
-			System.out.println(""); 
-			System.out.println("RECEIVED REPLY: "+reply); 
+			//System.out.println(""); 
+			//System.out.println(""); 
+			//System.out.println("RECEIVED REPLY: "+reply); 
 			_reply = reply;
 		}
 	}
