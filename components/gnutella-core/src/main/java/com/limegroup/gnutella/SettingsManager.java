@@ -174,9 +174,6 @@ public final class SettingsManager {
     private final int DEFAULT_UPLOADS_PER_PERSON=3;
 
     private final int DEFAULT_UPLOAD_QUEUE_SIZE = 10;
-    
-    /** Always consider 127.*.*.* is private in production*/
-    private final boolean DEFAULT_LOCAL_IS_PRIVATE = true;
 
     /** default banned ip addresses */
     private final String[] DEFAULT_BANNED_IPS     = {};
@@ -429,7 +426,6 @@ public final class SettingsManager {
 
     private final String UPLOADS_PER_PERSON    = "UPLOADS_PER_PERSON";
     private final String UPLOAD_QUEUE_SIZE     = "UPLOAD_QUEUE_SIZE";
-    private final String LOCAL_IS_PRIVATE      = "LOCAL_IS_PRIVATE";
     private final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
     private final String TOTAL_UPTIME          = "TOTAL_UPTIME";
     private final String SESSIONS              = "SESSIONS";
@@ -602,7 +598,6 @@ public final class SettingsManager {
     private volatile int      _softMaxUploads;
     private volatile int      _uploadsPerPerson;
     private volatile int      _uploadQueueSize;
-    private volatile boolean  _localIsPrivate;
 
 	private volatile boolean  _chatEnabled;
 	private volatile boolean  _playerEnabled;
@@ -822,9 +817,6 @@ public final class SettingsManager {
 				}
                 else if(key.equals(UPLOAD_QUEUE_SIZE)) {
                     setUploadQueueSize(Integer.parseInt(p));
-                }
-                else if(key.equals(LOCAL_IS_PRIVATE)) {
-                    setLocalIsPrivate(Boolean.valueOf(p).booleanValue());
                 }
                 else if(key.equals(PORT)) {
                     setPort(Integer.parseInt(p));
@@ -1208,7 +1200,6 @@ public final class SettingsManager {
 
 		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
         setUploadQueueSize(DEFAULT_UPLOAD_QUEUE_SIZE);
-        setLocalIsPrivate(DEFAULT_LOCAL_IS_PRIVATE);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
         setLastShutdownTime(DEFAULT_LAST_SHUTDOWN_TIME);
@@ -1317,8 +1308,6 @@ public final class SettingsManager {
     
     /** Returns the size of the upload queue */
     public int getUploadQueueSize() {return  _uploadQueueSize;}
-
-    public boolean getLocalIsPrivate() { return _localIsPrivate;}
 
     /**
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
@@ -2188,17 +2177,6 @@ public final class SettingsManager {
 		String s = Integer.toString(size);
         PROPS.put(UPLOAD_QUEUE_SIZE , s);
 	}
-
-    /**
-     * Sets the _checkPrivateIp, if true, ManagedDownloader tries to connect
-     * directly
-     */
-    public void setLocalIsPrivate(boolean isPrivate) {
-        _localIsPrivate = isPrivate;
-        String s = (new Boolean(isPrivate)).toString();
-        PROPS.put(LOCAL_IS_PRIVATE, s);
-    }
-    
 
     public void setAdvancedInfoForQuery(int advancedInfo) {
         _advancedQueryInfo = advancedInfo;
