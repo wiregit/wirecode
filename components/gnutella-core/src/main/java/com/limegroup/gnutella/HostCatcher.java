@@ -508,7 +508,15 @@ public class HostCatcher {
     public synchronized void clear() {
         queue.clear();
         set.clear();
-        //TODO1: this is only for testing.  I'm not sure if it's safe.
+        expire();
+    }
+
+    /**
+     * @modifies this
+     * @effects ensures that the next call to getAnEndpoint will attempt to
+     *  contact the pong server.
+     */
+    public synchronized void expire() {
         routerConnectorThread.interrupt();
     }
 

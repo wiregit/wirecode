@@ -116,6 +116,32 @@ public class RouterService
 
     /**
      * @modifies this
+     * @effects ensures the keep-alive is non-zero and recontacts the
+     *  pong server as needed.
+     */
+    public void connect() {
+        //Force reconnect to pong server.
+        catcher.expire();
+
+        //Ensure settings are positive
+        SettingsManager settings=SettingsManager.instance();
+        int outgoing=settings.getKeepAlive();
+        if (outgoing<1) {
+            outgoing = settings.DEFAULT_KEEP_ALIVE;
+            settings.setKeepAlive(outgoing);                    
+        }
+        int incoming=settings.getMaxIncomingConnections();
+        if (incoming<1) {
+            incoming = outgoing;
+            settings.setMaxIncomingConnections(incoming);
+        }
+        
+        //Special action needed if KEEP_ALIVE changed.
+        setKeepAlive(outgoing);
+    }
+
+    /**
+     * @modifies this
      * @effects removes all connections.
      */
     public void disconnect() {
