@@ -46,8 +46,11 @@ import java.util.*;
  * this.  For that you must call connect().  While this is awkward,
  * it is intentional, as it makes interfacing with the GUI easier.<p>
  *
- * All connections have an underlying spam filter.  You can modify 
- * this with setSpamFilter.
+ * All connections have two underlying spam filters: a personal filter
+ * (controls what I see) and a route filter (also controls what I pass
+ * along to others).  See SpamFilter for a description.  These 
+ * filters are configured by the properties in the SettingsManager, but
+ * you can change them with setPersonalFilter and setRouteFilter.
  */
 public class Connection implements Runnable { 
     /** These are only needed for the run method.
@@ -58,7 +61,8 @@ public class Connection implements Runnable {
     protected ConnectionManager manager=null;
     protected RouteTable routeTable=null;    
     protected RouteTable pushRouteTable=null;
-    protected volatile SpamFilter spamFilter=SpamFilter.newInstance();
+    protected volatile SpamFilter routeFilter=SpamFilter.newRouteFilter();
+    protected volatile SpamFilter personalFilter=SpamFilter.newPersonalFilter();
 
     /** The underlying socket.  sock, in, and out are null iff this is in
      *  the unconnected state.
@@ -332,7 +336,7 @@ public class Connection implements Runnable {
 		if(m instanceof PingRequest){
 		    Connection inConnection = routeTable.get(m.getGUID()); 
 		    //connection has never been encountered before...
-		    if (inConnection==null && spamFilter.allow(m)){
+		    if (inConnection==null && routeFilter.allow(m)){
 			//reduce TTL, increment hops. If old val of TTL was 0 drop message
 			if (manager.stats==true)
 			    manager.PReqCount++;//keep track of statistics if stats is turned on.
@@ -368,7 +372,7 @@ public class Connection implements Runnable {
 		    // System.out.println("Sumeet: Getting ping reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    manager.catcher.spy(m);//update hostcatcher (even if this isn't for me)
-		    if(outConnection!=null && spamFilter.allow(m)){ //we have a place to route it
+		    if(outConnection!=null && routeFilter.allow(m)){ //we have a place to route it
 			if (manager.stats==true)
 			    manager.PRepCount++; //keep stats if stats is turned on
 			//HACK: is the reply for me?
@@ -393,11 +397,11 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryRequest){
 		    Connection inConnection = routeTable.get(m.getGUID());
-		    if (inConnection==null && spamFilter.allow(m)){
+		    if (inConnection==null && routeFilter.allow(m)){
 
 			// Feed to the UI Monitor
 			ActivityCallback ui=manager.getCallback();
-			if (ui!=null) 
+			if (ui!=null && personalFilter.allow(m)) 
 			    ui.handleQueryString(((QueryRequest)m).getQuery());
 
 			//reduce TTL,increment hops, If old val of TTL was 0 drop message
@@ -439,17 +443,19 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(outConnection!=null && spamFilter.allow(m)){ //we have a place to route it
+		    if(outConnection!=null && routeFilter.allow(m)){ //we have a place to route it
 			if (manager.stats==true)
 			    manager.QRepCount++;
 			//System.out.println("Sumeet:found connection");
 			QueryReply qrep = (QueryReply)m;
 			pushRouteTable.put(qrep.getClientGUID(),this);//first store this in pushRouteTable
 			//HACK: is the reply for me?
-			if (outConnection.equals(manager.ME_CONNECTION)) { 
-			    //Unpack message and present it to user via ActivityCallback.
+			if (outConnection.equals(manager.ME_CONNECTION)) {
+			    //Unpack message and present it to user via ActivityCallback,
+			    //if it is not spam.
 			    ActivityCallback ui=manager.getCallback();
-			    if (ui!=null) ui.handleQueryReply((QueryReply)m);
+			    if (ui!=null && personalFilter.allow(m)) 
+				ui.handleQueryReply((QueryReply)m);
 			}
 			else {//message needs to be routed.
 			    m.hop(); // It's Ok to route even if TTL is zero since this is a reply
@@ -467,7 +473,7 @@ public class Connection implements Runnable {
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
 		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
-		    if (nextHost!=null && spamFilter.allow(m)){//we have a place to route this message
+		    if (nextHost!=null && routeFilter.allow(m)){//we have a place to route this message
 			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
 			nextHost.send(m); //send the message to appropriate host
 		    }
@@ -578,12 +584,22 @@ public class Connection implements Runnable {
 
     /** 	
      * @modifies this
-     * @effects sets the underlying spam filter.   Note that
+     * @effects sets the underlying routing filter.   Note that
      *  most filters are not thread-safe, so they should not be shared
      *  among multiple connections.
      */
-    public void setSpamFilter(SpamFilter filter) {
-	this.spamFilter=filter;
+    public void setRouteFilter(SpamFilter filter) {
+	this.routeFilter=filter;
+    }
+
+    /** 	
+     * @modifies this
+     * @effects sets the underlying personal filter.   Note that
+     *  most filters are not thread-safe, so they should not be shared
+     *  among multiple connections.
+     */
+    public void setPersonalFilter(SpamFilter filter) {
+	this.personalFilter=filter;
     }
 
 }
