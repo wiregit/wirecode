@@ -1,19 +1,15 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
 
 import junit.framework.*;
-import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
-import java.net.*;
 
 /**
  *  Tests that a Ultrapeer correctly sends XML Replies.  
@@ -33,7 +29,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT = 6667;
+    private static final int ULTRAPEER_PORT = 6667;
 
 	/**
 	 * The timeout value for sockets -- how much time we wait to accept 
@@ -41,22 +37,6 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 	 */
     private static final int TIMEOUT = 2000;
 
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 4;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
 
     /**
      * Leaf connection to the Ultrapeer.
@@ -93,19 +73,19 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 	
 	private static void buildConnections() throws Exception {
 	    LEAF =
-			new Connection("localhost", PORT, 
+			new Connection("localhost", ULTRAPEER_PORT, 
 						   new LeafHeaders("localhost"),
 						   new EmptyResponder()
 						   );
         
         ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
+			new Connection("localhost", ULTRAPEER_PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
 
         ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
+			new Connection("localhost", ULTRAPEER_PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
@@ -123,7 +103,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(ULTRAPEER_PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
@@ -145,14 +125,14 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 	public static void globalSetUp() throws Exception {
         setSettings();
 
-        assertEquals("unexpected port", PORT, 
+        assertEquals("unexpected port", ULTRAPEER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+		RouterService.clearHostCatcher();
+		RouterService.connect();	
 		connect();
-        assertEquals("unexpected port", PORT, 
+        assertEquals("unexpected port", ULTRAPEER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 	}
 
@@ -163,7 +143,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+		RouterService.disconnect();
 		sleep();
 		LEAF.close();
 		ULTRAPEER_1.close();
@@ -197,12 +177,15 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
+        ULTRAPEER_2.buildAndStartQueues();
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
+        ULTRAPEER_1.buildAndStartQueues();
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
+        LEAF.buildAndStartQueues();
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
@@ -242,7 +225,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                c.receive(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -251,61 +234,6 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
 				// received
                 return ret;
             } catch (BadPacketException e) {
-            }
-        }
-    }
-
-    /** @return <tt>true<tt> if no messages (besides expected ones, such as 
-     *  QRP stuff) were recieved.
-     */
-    private static boolean noUnexpectedMessages(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else // we should never get any other sort of message...
-                    return false;
-            }
-            catch (InterruptedIOException ie) {
-                return true;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
-
-    /** @return The first QueyrRequest received from this connection.  If null
-     *  is returned then it was never recieved (in a timely fashion).
-     */
-    private static QueryRequest getFirstQueryRequest(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryRequest) 
-                    return (QueryRequest)m;
-                else
-                    return null;  // this is usually an error....
-            }
-            catch (InterruptedIOException ie) {
-                return null;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
             }
         }
     }
@@ -338,21 +266,6 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
             }
         }
     }
-
-
-	/**
-	 * Asserts that the given message is a query, printing out the 
-	 * message and failing if it's not.
-	 *
-	 * @param m the <tt>Message</tt> to check
-	 */
-	private static void assertQuery(Message m) {
-		if(m instanceof QueryRequest) return;
-
-		System.out.println(m); 
-		assertInstanceof("message not a QueryRequest",
-		    QueryRequest.class, m);
-	}
 
 
     // BEGIN TESTS
