@@ -252,8 +252,6 @@ public class HTTPDownloader {
 		} catch (NumberFormatException e) {
 			throw new ProblemReadingHeaderException();
 		}
-
-		System.out.println("The Code is: '" + code + "'");
 		
 		// accept anything that is 2xx
 		if ( (code < 200) || (code > 300) ) {
@@ -446,7 +444,7 @@ public class HTTPDownloader {
 
 	/****************** UNIT TEST *********************/
 	
-	//  private HTTPDownloader(String str) {
+//  	private HTTPDownloader(String str) {
 //  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 //  		_byteReader = new ByteReader(stream);
 //  	}
@@ -456,16 +454,17 @@ public class HTTPDownloader {
 //  		HTTPDownloader down;
 //  		boolean ok = true;
 
+//  		System.out.println("Starting Test...");
+
 //  		str = "HTTP 200 OK \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeader();
 //  			down.stop();
 //  		} catch (IOException e) {
-//  			System.out.println("TEST FAILED.");
-//  			System.exit(1);
+//  			// should not throw an error
+//  			Assert.that(false);
 //  		}
-//  		System.out.println("Test OK: " + str);
 		
 //  		str = "HTTP 404 File Not Found \r\n";
 //  		down = new HTTPDownloader(str);
@@ -473,68 +472,54 @@ public class HTTPDownloader {
 //  		try {
 //  			down.readHeader();
 //  			down.stop();
-//  			ok = false; // should not reach this
+//  			Assert.that(false);
 //  		} catch (FileNotFoundException e) {
-//  			System.out.println("Test OK: " + str);
-//  			System.out.println(e.getMessage() );
+
 //  		} catch (IOException e) {
-//  			System.out.println("IOException");
+//  			Assert.that(false);
 //  		}
-	   
-//  		if (!ok)
-//  			System.out.println("TEST FAILED.");
 
 //  		str = "HTTP 410 Not Sharing \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeader();
 //  			down.stop();
-//  			ok = false; // should not reach this.
-//  		} catch (IOException e) {
-//  			System.out.println("Test OK: " + str);
-//  			System.out.println(e.getMessage() );
+//  			Assert.that(false);
+//  		} catch (NotSharingException e) {
+//  		}catch (IOException e) {
+//  			Assert.that(false);
 //  		}
-//  		if (!ok)
-//  			System.out.println("TEST FAILED.");
-
-
 
 //  		str = "HTTP 412 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeader();
 //  			down.stop();
-//  			ok = false; // should not reach.
-//  		} catch (IOException e) {
-//  			System.out.println("Test OK: " + str);
-//  			System.out.println(e.getMessage() );
+//  			Assert.that(false);
+//  		} catch (IOException e) { 
 //  		}
-//  		if (!ok)
-//  			System.out.println("TEST FAILED.");
 
 //  		str = "HTTP 503 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeader();
 //  			down.stop();
-//  			ok = false; // should not reach;
+//  			Assert.that(false);
+//  		} catch (TryAgainLaterException e) {
 //  		} catch (IOException e) {
-//  			System.out.println("Test OK: " + str);
+//  			Assert.that(false);
 //  		}
-//  		if (!ok)
-//  			System.out.println("TEST FAILED.");
 
 //  		str = "HTTP 210 \r\n";
 //  		down = new HTTPDownloader(str);
 //  		try {
 //  			down.readHeader();
 //  			down.stop();
-
 //  		} catch (IOException e) {
-//  			System.out.println("TEST FAILED.");
+//  			Assert.that(false);
 //  		}
-//  		System.out.println("Test OK: " + str);
 
+//  		System.out.println("Test SUCCEEDED!");
 
 //  	}
 
