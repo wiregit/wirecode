@@ -1,16 +1,13 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
 
 import junit.framework.*;
-import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -30,7 +27,7 @@ public final class PongCachingTest extends BaseTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT = 6667;
+    private static final int SERVER_PORT = 6667;
 
 	/**
 	 * The timeout value for sockets -- how much time we wait to accept 
@@ -38,28 +35,6 @@ public final class PongCachingTest extends BaseTestCase {
 	 */
     private static final int TIMEOUT = 1800;
 
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced.
-     *
-     * NOTE: This is now based on the X-Max-TTL header for these tests, 
-     * since our connectin pass this headers, and this is what the
-     * per-connection soft max is based on.
-	 */    
-    private static final byte SOFT_MAX = (byte)4; // X-Max-TTL+1
-
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
 
     /**
      * Leaf connection to the Ultrapeer.
@@ -96,19 +71,19 @@ public final class PongCachingTest extends BaseTestCase {
 	
 	private void buildConnections() {
 	    LEAF =
-			new Connection("localhost", PORT, 
+			new Connection("localhost", SERVER_PORT, 
 						   new LeafHeaders("localhost"),
 						   new EmptyResponder()
 						   );
         
         ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
+			new Connection("localhost", SERVER_PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
 
         ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
+			new Connection("localhost", SERVER_PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
@@ -126,7 +101,7 @@ public final class PongCachingTest extends BaseTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*", "18.239.0.*"});
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(SERVER_PORT);
         SharingSettings.setDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
@@ -139,14 +114,14 @@ public final class PongCachingTest extends BaseTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 
 
-        assertEquals("unexpected port", PORT, 
+        assertEquals("unexpected port", SERVER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+		RouterService.clearHostCatcher();
+		RouterService.connect();	
 		connect();
-        assertEquals("unexpected port", PORT, 
+        assertEquals("unexpected port", SERVER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 	}
 
@@ -156,7 +131,7 @@ public final class PongCachingTest extends BaseTestCase {
 		LEAF.close();
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
-		ROUTER_SERVICE.disconnect();
+		RouterService.disconnect();
 		sleep();
 	}
 
