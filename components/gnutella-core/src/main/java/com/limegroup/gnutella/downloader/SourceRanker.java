@@ -15,11 +15,6 @@ import com.limegroup.gnutella.settings.DownloadSettings;
  */
 public abstract class SourceRanker {
 
-    /**
-     * a null object
-     */
-    public static final SourceRanker EMPTY_RANKER = new EmptyRanker();
-    
     public void addToPool(Collection hosts) {
         for (Iterator iter = hosts.iterator(); iter.hasNext();) {
             RemoteFileDesc host = (RemoteFileDesc) iter.next();
@@ -27,11 +22,25 @@ public abstract class SourceRanker {
         }
     }
     
+    /**
+     * @param host the host that the ranker should consider
+     */
     public abstract void addToPool(RemoteFileDesc host);
 	
+    /**
+     * @return whether the ranker has any more potential sources
+     */
 	public abstract boolean hasMore();
     
+    /**
+     * @return the source that should be tried next
+     */
     public abstract RemoteFileDesc getBest();
+    
+    /**
+     * @return the collection of hosts that can be shared with other rankers
+     */
+    protected abstract Collection getShareableHosts();
     
     /**
      * @return a ranker appropriate for our system's capabilities.
@@ -44,12 +53,25 @@ public abstract class SourceRanker {
             return new LegacyRanker();
     }
     
-    private static class EmptyRanker extends SourceRanker {
-        public void addToPool(RemoteFileDesc host){}
-        public RemoteFileDesc getBest() {
-            return null;
+    /**
+     * @param original the current ranker that we use
+     * @return the ranker that should be used
+     */
+    public static SourceRanker getAppropriateRanker(SourceRanker original) {
+        SourceRanker better;
+        if (RouterService.canReceiveSolicited() && 
+                DownloadSettings.USE_HEADPINGS.getValue()) {
+            if (original instanceof PingRanker)
+                return original;
+            better = new PingRanker();
+            better.addToPool(original.getShareableHosts());
+        }else {
+            if (original instanceof LegacyRanker)
+                return original;
+            better = new LegacyRanker();
+            better.addToPool(original.getShareableHosts());
         }
-		public boolean hasMore(){return false;}
+        
+        return better;
     }
-
 }

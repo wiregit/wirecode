@@ -58,4 +58,10 @@ public class DownloadSettings extends LimeProps {
     public static final BooleanSetting DROP_HEADPINGS =
         FACTORY.createSettableBooleanSetting("DROP_HEADPINGS",false,"drop_headpings");
     
+    /**
+     * We should stop issuing HeadPings when we have this many verified sources
+     */
+    public static final IntSetting MAX_VERIFIED_HOSTS = 
+        FACTORY.createSettableIntSetting("MAX_VERIFYABLE_HOSTS",20,"max_verifyable_hosts",50,0);
+    
 }

@@ -93,7 +93,6 @@ public class PingRankerTest extends BaseTestCase {
      * source as long as we are not firewalled or can do FWT
      */
     public void testPingsFirewalledHosts() throws Exception {
-        RouterService rs;
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         assertTrue(RouterService.acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
@@ -120,7 +119,6 @@ public class PingRankerTest extends BaseTestCase {
     
     /**
      * We should drop unsolicited pongs.
-     * address we do not know.
      */
     public void testIgnoresUnsolicitedPongs() throws Exception {
         // add a host
@@ -135,6 +133,33 @@ public class PingRankerTest extends BaseTestCase {
         ranker.getBest();
         
         // we shouldn't have any more hosts available
+        assertFalse(ranker.hasMore());
+    }
+    
+    /**
+     * When sending a ping to several push proxies, we may get replies
+     * from more than one - only one should be processed. 
+     */
+    public void testMultipleProxyReplies() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+        assertTrue(RouterService.acceptedIncomingConnection());
+        GUID g = new GUID(GUID.makeGuid());
+        ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3;1.3.3.3:4","2.2.2.3:5"));
+        Thread.sleep(100);
+        
+        // two pings should be sent out
+        assertEquals(2,pinger.hosts.size());
+        assertTrue(pinger.hosts.contains(new IpPortImpl("1.2.2.2",3)));
+        assertTrue(pinger.hosts.contains(new IpPortImpl("1.3.3.3",4)));
+        
+        // receive one pong from each proxy
+        MockPong pong = new MockPong(true,true,-1,false,false,true,null,null,null);
+        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.3.3.3"),4));
+        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.2.2"),3));
+        
+        // there should be only one host available to try
+        assertTrue(ranker.hasMore());
+        ranker.getBest();
         assertFalse(ranker.hasMore());
     }
     

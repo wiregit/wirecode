@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.Collection;
+
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
@@ -37,5 +39,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public boolean isCancelled(){return false;}
+    
+    protected Collection getShareableHosts(){return null;}
 
 }

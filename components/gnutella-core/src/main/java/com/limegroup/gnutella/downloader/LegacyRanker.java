@@ -1,6 +1,7 @@
 
 package com.limegroup.gnutella.downloader;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -84,4 +85,7 @@ public class LegacyRanker extends SourceRanker {
 		return !rfds.isEmpty();
 	}
 
+    protected Collection getShareableHosts() {
+        return rfds;
+    }
 }

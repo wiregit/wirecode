@@ -2340,7 +2340,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             //remote queue.
             if (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen()) {
                 while (_workers.size() < getSwarmCapacity() && ranker.hasMore()){
+                    
+                    // see if we need to update our ranker
+                    ranker = SourceRanker.getAppropriateRanker(ranker);
+                    
+                    // get the best host
                     RemoteFileDesc rfd = ranker.getBest();
+                    
                     // If the rfd was busy, that means all possible RFDs
                     // are busy
                     if( rfd.isBusy() ) {
