@@ -38,7 +38,7 @@ public class GGEP extends Object {
      *  assumed to be not-present (extension data is optional).
      *  @param props The collection of GGEP headers/keys and data/values.
      *  @exception BadGGEPPropertyException Thrown if any of the input
-     *  properties are too large).
+     *  properties are too large or if your data contains nulls (0x0)).
      */
     public GGEP(Map props) throws BadGGEPPropertyException {
         _props = new HashMap();
@@ -77,11 +77,20 @@ public class GGEP extends Object {
 
     private void validateValue(String value) throws BadGGEPPropertyException {
         if ((value != null) && 
-            (value.getBytes().length > MAX_VALUE_SIZE_IN_BYTES)
+            ((value.getBytes().length > MAX_VALUE_SIZE_IN_BYTES) ||
+             (containsNull(value)))
             )
             throw new BadGGEPPropertyException();
     }
 
+    private boolean containsNull(String value) {
+        byte[] bytes = value.getBytes();
+        for (int i = 0; i < bytes.length; i++)
+            if (bytes[i] == 0x0)
+                return true;
+        return false;
+    }
+    
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
      *  messageBytes[beginOffset].  If you are unsure of whether or not there is
@@ -93,6 +102,8 @@ public class GGEP extends Object {
      */
     public GGEP(byte[] messageBytes, final int beginOffset) 
         throws BadGGEPBlockException {
+
+        _props = new HashMap();
 
         // all GGEP blocks start with this prefix....
         if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
@@ -109,10 +120,54 @@ public class GGEP extends Object {
             boolean encoded = isEncoded(messageBytes[currIndex]);
             boolean compressed = isCompressed(messageBytes[currIndex]);
             int headerLen = deriveHeaderLength(messageBytes[currIndex]);
+
+            // get the extension header
+            currIndex++;
+            String extensionHeader = new String(messageBytes,
+                                                currIndex,
+                                                headerLen);
+
+            // get the data length
+            currIndex += headerLen;
+            final int dataLength = deriveDataLength(messageBytes, currIndex);
+
+            String extensionData = null;
+
+            currIndex++;
+            if (dataLength > 0) {
+                // ok, data is present, get it....
+
+                byte[] data = new byte[dataLength];
+                System.arraycopy(messageBytes, currIndex, data, 0, dataLength);
+
+                // LimeWire currently does not support COBS, so anything COBS
+                // encoded is just disregarded...
+                if (encoded) 
+                    continue;
+
+                // LimeWire currently does not support flate/default, so
+                // anything in this format is just disregarded...
+                if (compressed)
+                    continue;
+
+                extensionData = new String(data);
+
+                currIndex += dataLength;
+            }
+
+            debug("");
+            debug("GGEP(): --------- block info ---------");
             debug("GGEP(): onLastExtension = " + onLastExtension);
             debug("GGEP(): encoded = " + encoded);
             debug("GGEP(): compressed = " + compressed);
             debug("GGEP(): headerLen = " + headerLen);
+            debug("GGEP(): extension header = " + extensionHeader);
+            debug("GGEP(): dataLength = " + dataLength);
+            debug("GGEP(): extension data = " + extensionData);
+
+            // ok, everything checks out, just slap it in the hashmapper...
+            _props.put(extensionHeader, extensionData);
+
         }
     }
 
@@ -161,6 +216,22 @@ public class GGEP extends Object {
             throw new BadGGEPBlockException();
         return retInt;
     }
+
+    private int deriveDataLength(byte[] buff, int beginOffset) 
+        throws BadGGEPBlockException {
+        int length = 0, iterations = 0;
+        // the length is stored in at most 3 bytes....
+        final int MAX_ITERATIONS = 3;
+        byte currByte;
+        do {
+            currByte = buff[beginOffset++];
+            length = (length << 6) | (currByte & 0x3f);
+            if (++iterations > MAX_ITERATIONS)
+                throw new BadGGEPBlockException();
+        } while (0x40 != (currByte & 0x40));
+        return length;
+    }
+
     /** Provides access to the extension headers represented by this GGEP
      *  instance.
      *  @return An Set (Strings) of all the keys/headers in this GGEP 
@@ -172,10 +243,11 @@ public class GGEP extends Object {
 
     /** Accesses the specific String-based extension data representation for a
      *  given extension header.
-     *  @return The extension data (value) for the given extension header (key).
+     *  @return The extension data (value) for the given extension header
+     *  (key). Can very well return null, headers don't HAVE to have data.
      */
     public String getData(String header) {
-        return _props.get(header).toString();
+        return (String) _props.get(header);
     }
 
     /** Writes this GGEP instance as a properly formatted GGEP Block.
