@@ -38,10 +38,12 @@ public class DownloadManager implements BandwidthTracker {
         =new IncompleteFileManager();
 
     /** The list of all ManagedDownloader's attempting to download.
-     *  INVARIANT: active.size()<=slots() && active contains no duplicates */
+     *  INVARIANT: active.size()<=slots() && active contains no duplicates 
+     *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ active=new LinkedList();
     /** The list of all queued ManagedDownloader. 
-     *  INVARIANT: waiting contains no duplicates */
+     *  INVARIANT: waiting contains no duplicates 
+     *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ waiting=new LinkedList();
 
 
@@ -65,18 +67,27 @@ public class DownloadManager implements BandwidthTracker {
         this.fileManager=fileManager;
     }
 
-    public int downloadsInProgress() {
+    public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
     }
 
-    /** Writes a snapshot of all downloaders in this to the file named
-     *  DOWNLOAD_SNAPSHOT_FILE.  Returns true iff the file was successfully
-     *  written. */
-    private synchronized boolean writeSnapshot() {
+    /** Writes a snapshot of all downloaders in this and all incomplete files to
+     *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
+     *  at any time for checkpointing purposes.  Returns true iff the file was
+     *  successfully written. */
+    public synchronized boolean writeSnapshot() {
         List buf=new ArrayList();
         buf.addAll(active);
         buf.addAll(waiting);
+        
+        //1. Update block list in IncompleteFileManager
+        for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
+            ManagedDownloader downloader=(ManagedDownloader)iter.next();
+            downloader.updateIncompleteFileManager();
+        }
 
+        //2. Write list of active and waiting downloaders, then block list in
+        //   IncompleteFileManager.
         try {
             ObjectOutputStream out=new ObjectOutputStream(
                 new FileOutputStream(
@@ -332,6 +343,7 @@ public class DownloadManager implements BandwidthTracker {
 
     ////////////// Callback Methods for ManagedDownloaders ///////////////////
 
+    /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
         SettingsManager settings=SettingsManager.instance();
         return active.size() < settings.getMaxSimDownload();

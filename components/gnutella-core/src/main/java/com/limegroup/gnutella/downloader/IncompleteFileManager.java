@@ -17,6 +17,9 @@ import com.limegroup.gnutella.util.FileComparator;
  * it may become smarter by looking at hashes, etc. 
  */
 public class IncompleteFileManager implements Serializable {
+    /** Ensures backwards compatibility. */
+    static final long serialVersionUID = -7658285233614679878L;
+
     /** The delimiter to use between the size and a real name of a temporary
      * file.  To make it easier to break the temporary name into its constituent
      * parts, this should not contain a number. */
@@ -150,6 +153,7 @@ public class IncompleteFileManager implements Serializable {
      */
     public synchronized void addBlock(File incompleteFile, int low, int high) 
             throws IllegalArgumentException {
+        repOk();
         if (low>high)
             throw new IllegalArgumentException();
         if (low==high)
@@ -200,7 +204,8 @@ public class IncompleteFileManager implements Serializable {
             //d) Join with lower
             intervals.remove(lower);
             intervals.add(new Interval(lower.low, high));
-        }        
+        }   
+        repOk();
     }
 
     /**
@@ -259,6 +264,28 @@ public class IncompleteFileManager implements Serializable {
         }
     }
 
+    /** Tests all invariants.  Slow if actually enabled. */
+    private void repOk() {
+        /*
+        //For each block list
+        for (Iterator values=blocks.values().iterator(); values.hasNext(); ) {
+            List blockList=(List)values.next();
+            //Make sure blocks are disjoint (quadratic time)
+            for (Iterator iter1=blockList.iterator(); iter1.hasNext(); ) {
+                Interval a=(Interval)iter1.next();
+                for (Iterator iter2=blockList.iterator(); iter2.hasNext(); ) {
+                    Interval b=(Interval)iter2.next();
+                    if (a!=b) {
+                        Assert.that(! a.overlaps(b), 
+                                    "Intervals "+a+" and "+b+" overlap!");
+                        Assert.that(! a.adjacent(b), 
+                                    "Intervals "+a+" and "+b+" are adjacent!");
+                    }
+                }
+            }
+        }
+        */
+    }
 
     public synchronized String toString() {
         StringBuffer buf=new StringBuffer();

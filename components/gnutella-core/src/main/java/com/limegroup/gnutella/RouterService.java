@@ -430,6 +430,9 @@ public class RouterService
             }
         }
         
+        //Write download state
+        downloader.writeSnapshot();
+
         //save cookies
         Cookies.instance().save();
     }

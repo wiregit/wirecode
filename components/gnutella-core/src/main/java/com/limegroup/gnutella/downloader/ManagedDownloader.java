@@ -98,6 +98,8 @@ public class ManagedDownloader implements Downloader, Serializable {
       is called from the Acceptor instance.  This thread simply passes the
       Socket to findConnectable, which waits appropriately with timeout.  */
     
+    /** Ensures backwards compatibility. */
+    static final long serialVersionUID = 2772570805975885257L;
 
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
@@ -374,14 +376,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-
+    private boolean initDone = false; // used to init
     /**
      * Returns true if 'other' could conflict with one of the files in this. 
      * This is a much less strict version compared to conflicts().
      * WARNING - THIS SHOULD NOT BE USED WHEN THE Downloader IS IN A DOWNLOADING
      * STATE!!!  Ideally used when WAITING_FOR_RESULTS....
      */
-    private boolean initDone = false; // used to init
     public boolean conflictsLAX(RemoteFileDesc other) {
 
         if (!initDone) {
@@ -583,28 +584,20 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  the current download.
      */
     private synchronized int amountForPreview(File incompleteFile) {
-        int last=0;
-        //This is tricky. First we search if a previous downloader wrote a block
-        //starting at byte zero.   
+        //Add completed regions from HTTPDownloader to IncompleteFileManager.
+        updateIncompleteFileManager();
+        //And find the first block.
         synchronized (incompleteFileManager) {
             for (Iterator iter=incompleteFileManager.getBlocks(incompleteFile);
                      iter.hasNext() ; ) {
                 Interval interval=(Interval)iter.next();
                 if (interval.low==0) {
-                    last=interval.high;
-                    break;
+                    return interval.high;
                 }
             }
         }
-
-        //Now we search for a downloader starting at the ending place of the
-        //block we found above (which may be zero).
-        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
-            HTTPDownloader dloader=(HTTPDownloader)iter.next();
-            if (dloader.getInitialReadingPoint()==last)
-                return last+dloader.getAmountRead();
-        }
-        return last;
+        //Nothing to preview!
+        return 0;
     }
 
 
@@ -1284,6 +1277,24 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
+    /**
+     * Ensures that any blocks downloaded by this is recorded in
+     * IncompleteFileManager.  Useful for checkpointing incomplete state.  
+     */
+    public synchronized void updateIncompleteFileManager() {
+        //See tryOneDownload.
+        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
+            HTTPDownloader downloader=(HTTPDownloader)iter.next();
+            File file=incompleteFileManager.getFile(
+                          downloader.getRemoteFileDesc());
+            int init=downloader.getInitialReadingPoint();
+            int stop=init+downloader.getAmountRead();
+            
+            incompleteFileManager.addBlock(file, init, stop);
+        }
+    }
+
+
     /////////////////////////////   Display Variables ////////////////////////////
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
@@ -1362,15 +1373,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (dloaders.size()==0)
             return 0;
         else {
+            //Add all blocks from HTTPDownloaders to IncompleteFileManager.
+            updateIncompleteFileManager();
             RemoteFileDesc rfd=((HTTPDownloader)dloaders.get(0))
                                     .getRemoteFileDesc();
             File incompleteFile=incompleteFileManager.getFile(rfd);
-            //Add up all stuff already on disk...
-            int sum=incompleteFileManager.getBlockSize(incompleteFile);
-            //...and all downloads in progress.
-            for (Iterator iter=dloaders.iterator(); iter.hasNext(); )
-                sum+=((HTTPDownloader)iter.next()).getAmountRead();
-            return sum;
+            return incompleteFileManager.getBlockSize(incompleteFile);
         }
     }
      

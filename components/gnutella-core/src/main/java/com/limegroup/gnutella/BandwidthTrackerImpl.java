@@ -8,6 +8,8 @@ import java.io.Serializable;
  * interface itself.
  */
 public class BandwidthTrackerImpl implements Serializable {
+    static final long serialVersionUID = 7694080781117787305L;
+
     long lastTime;
     int lastAmountRead;
 

@@ -12,6 +12,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * specific data as well, such as the server's 16-byte GUID.
  */
 public class RemoteFileDesc implements Serializable {
+    static final long serialVersionUID = 6619479308616716538L;
 
 	private String _host;
 	private int _port;

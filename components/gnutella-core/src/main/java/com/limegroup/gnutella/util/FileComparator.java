@@ -9,6 +9,8 @@ import com.sun.java.util.collections.Comparator;
  * in 1.1.8 do not implement the Comparable interface, unlike Strings in 1.2+.
  */
 public class FileComparator implements Comparator, Serializable {
+    static final long serialVersionUID = 879961226428880051L;
+
     /** Returns (((File)a).getAbsolutePath()).compareTo(
      *              ((File)b).getAbsolutePath()) 
      *  Typically you'll want to make sure a and b are canonical files,

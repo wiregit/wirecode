@@ -3,7 +3,7 @@ package com.limegroup.gnutella.xml;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
-import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.util.*;
 import org.apache.xerces.parsers.DOMParser;
 import org.xml.sax.*;
 import org.w3c.dom.*;
@@ -14,27 +14,14 @@ import org.w3c.dom.*;
  * A LimeXMLDocument is basically a hashmap that maps a
  * Names of fields to the values as per a XML document.
  */
-public class LimeXMLDocument{
+public class LimeXMLDocument implements Serializable {
+    /** For backwards compatibility with downloads.dat. */
+    static final long serialVersionUID = 7396170507085078485L;
 
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    private Map fieldToValue = new TreeMap(new Comparator(){
-        public int compare(Object o1, Object o2){
-            //This treemap will be comparing only strings and so we can 
-            //get away with this. The regular Comparable interface was 
-            //introduced in 1.2 and the Macs still use 1.1
-            String a = (String)o1;
-            String b = (String)o2;
-            return a.compareTo(b);            
-        }
-        public boolean equals(Object o){
-            //String other = (String)o;
-            //String me = (String)this;
-            return this.equals(o);
-        }
-    }
-    );
+    private Map fieldToValue = new TreeMap(new StringComparator());
     protected String schemaUri;
     //protected String XMLString;//this is what is sent back on the wire.
     /** 
@@ -561,5 +548,4 @@ public class LimeXMLDocument{
     }
     
 }
-
 
