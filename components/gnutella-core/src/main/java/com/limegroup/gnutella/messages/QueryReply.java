@@ -1429,11 +1429,9 @@ public class QueryReply extends Message implements Serializable{
         public boolean isSame(IpPort other) {
         	if (other== null)
         		return false;
-        	try{
-        		return getInetAddress().equals(other.getInetAddress()) && getPort()==other.getPort();
-        	}catch(IllegalStateException ConnectionNotInitialized) {
-        		return getAddress().equals(other.getAddress()) && getPort()==other.getPort();
-        	}
+        	
+        	return getInetAddress().equals(other.getInetAddress()) && getPort()==other.getPort();
+        	
         }
 
         // overridden to fulfill contract with equals for hash-based

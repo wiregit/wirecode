@@ -2143,15 +2143,7 @@ public class Connection implements Candidate {
 		if (o==null)
 			return false;
 		
-		//try to use InetAddresses; however they throw if the connection
-		// is not initialized.
-		
-		try {
-			return getInetAddress().equals(o.getInetAddress()) && getPort() == o.getPort();
-		} catch(IllegalStateException notInitialized) {
-			return getAddress().equals(o.getAddress()) && getPort() == o.getPort();
-		}
-			
-		
+		return getInetAddress().equals(o.getInetAddress()) && getPort() == o.getPort();
+
 	}
 }
