@@ -19,6 +19,8 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.licenses.CCConstants;
+import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -38,6 +40,14 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_INDEX_ATTRIBUTE = "index__";
     public static final String XML_LICENSE_ATTRIBUTE = "license__";
     public static final String XML_LICENSE_TYPE_ATTRIBUTE = "license type__";
+    
+    /**
+     * The current version of LimeXMLDocuments.
+     *
+     * Increment this number as features are added which require
+     * reparsing documents on disk.
+     */
+    private static final int CURRENT_VERSION = 1;
 
 	/**
 	 * Cached hash code for this instance.
@@ -76,14 +86,11 @@ public class LimeXMLDocument implements Serializable {
     private transient String action;
     
     /**
-     * Indicator that the LimeXMLDocument was created after
-     * LimeWire began to understand id3v2 data.
-     * Older LimeXMLDocuments are deserialized with this as false.
-     *
-     * MUST NOT BE FINAL, or else readObject won't mark it as false.
+     * The version of this LimeXMLDocument.
      */
-    private boolean supportsID3v2 = true;
-    public boolean supportsID3v2() { return supportsID3v2; }
+    private int version = CURRENT_VERSION;
+    boolean isCurrent() { return version == CURRENT_VERSION; }
+    void setCurrent() { version = CURRENT_VERSION; }
     
     /**
      * Cached list of keywords.  Because keywords are only filled up
@@ -369,13 +376,13 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
-     * Returns the license string.
+     * Returns the license.
      */
-    public String getLicenseString() {
+    public License getLicense() {
         for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry next = (Map.Entry)i.next();
             if(((String)next.getKey()).endsWith(XML_LICENSE_ATTRIBUTE))
-                return (String)next.getValue();
+                return LicenseFactory.create((String)next.getValue());
         }
         return null;
     }

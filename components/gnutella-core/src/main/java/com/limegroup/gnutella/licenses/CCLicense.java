@@ -2,6 +2,7 @@ package com.limegroup.gnutella.licenses;
 
 import java.io.StringReader;
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -35,28 +36,38 @@ import org.xml.sax.SAXException;
 
 
 /**
- * A concrete implementation of a verifier, for Creative Commons licenses.
+ * A concrete implementation of a License, for Creative Commons licenses.
  */
-/* package private */ class CCVerifier implements Verifier {
+/* package private */ class CCLicense implements License, Serializable, Cloneable {
     
-    private static final Log LOG = LogFactory.getLog(CCVerifier.class);
+    private static final Log LOG = LogFactory.getLog(CCLicense.class);
     
-    private static final ProcessingQueue VQUEUE = new ProcessingQueue("CCVerifier");
+    private static final ProcessingQueue VQUEUE = new ProcessingQueue("CCLicense");
     
     /**
-     * The current state of this verifier.
+     * Whether or not this license has been verified.
      */
-    private int state = NOTHING;
+    private transient boolean verified;
+    
+    /**
+     * Whether or not this license is valid.
+     */
+    private boolean valid;
+    
+    /**
+     * The last time this license was verified.
+     */
+    private long lastVerifiedTime;
     
     /**
      * The URI where verification will be performed.
      */
-    private final URI uri;
+    private URI licenseLocation;
     
     /**
      * The license string.
      */
-    private final String license;
+    private transient String license;
     
     /**
      * The URL for the license.
@@ -64,7 +75,7 @@ import org.xml.sax.SAXException;
     private URL licenseURL;
     
     /**
-     * The URN of this verifier.
+     * The URN of this License.
      */
     private URN expectedURN;
     
@@ -84,35 +95,37 @@ import org.xml.sax.SAXException;
     private List required;
     
     /**
-     * Constructs a new CCVerifier.
+     * Constructs a new CCLicense.
      */
-    CCVerifier(String license, URI uri) {
+    CCLicense(String license, URI uri) {
         this.license = license;
-        this.uri = uri;
+        this.licenseLocation = uri;
     }
     
-    public boolean isVerified() { return state == VERIFIED; }
-    public boolean isVerifying() { return state == VERIFYING; }
-    public boolean isVerificationDone() { return state > VERIFYING; }
+    public boolean isVerified() { return verified; }
+    public boolean isValid() { return valid; }
     public String getLicense() { return license; }
-    public URL getLicenseURL() { return licenseURL; }
+    public URL getLicenseDeed() { return licenseURL; }
     public URN getExpectedURN() { return expectedURN; }
+    public long getLastVerifiedTime() { return lastVerifiedTime; }
+    public URI getLicenseURI() { return licenseLocation; }
     
-    public URL getURL() {
+    public License copy(String license) {
+        CCLicense newL = null;
         try {
-            return new URL(uri.toString());
-        } catch(MalformedURLException murl) {
-            // should not happen, because the URI was checked prior to construction.
-            ErrorService.error(murl);
-            return null;
+            newL = (CCLicense)clone();
+            newL.license = license;
+        } catch(CloneNotSupportedException error) {
+            ErrorService.error(error);
         }
+        return newL;
     }
     
     /**
      * Builds a description of this license based on what is permitted,
      * probibited, and required.
      */
-    public String getVerifiedDescription() {
+    public String getLicenseDescription() {
         StringBuffer sb = new StringBuffer();
         if(permitted != null && !permitted.isEmpty()) {
             sb.append("Permitted: ");
@@ -145,11 +158,9 @@ import org.xml.sax.SAXException;
      *
      * The listener is notified when verification is finished.
      */
-    public void verify(VerificationCallback listener) {
-        if(!isVerifying() && !isVerificationDone()) {
-            state = VERIFYING;
-            VQUEUE.add(new VImpl(listener));
-        }
+    public void verify(VerificationListener listener) {
+        if(!isVerified())
+            VQUEUE.add(new Verifier(listener));
     }
 
     /**
@@ -159,7 +170,7 @@ import org.xml.sax.SAXException;
      */
     protected String getBody() {
         HttpClient client = HttpClientManager.getNewClient();
-        GetMethod get = new GetMethod(uri.toString());
+        GetMethod get = new GetMethod(licenseLocation.toString());
         get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
         try {
             HttpClientManager.executeMethodRedirecting(client, get);
@@ -170,6 +181,9 @@ import org.xml.sax.SAXException;
             get.releaseConnection();
         }
     }
+    
+    
+    ///// VERIFICATION CODE ///
     
     /**
      * Verifies the body of the verification page.
@@ -332,22 +346,20 @@ import org.xml.sax.SAXException;
     /**
      * Runnable that actually does the verification.
      */
-    private class VImpl implements Runnable {
-        private final VerificationCallback vc;
+    private class Verifier implements Runnable {
+        private final VerificationListener vc;
         
-        VImpl(VerificationCallback listener) {
+        Verifier(VerificationListener listener) {
             vc = listener;
         }
         
         public void run() {
-            String body = getBody();
-            if(!doVerification(body))
-                state = VERIFY_FAILED;
-            else
-                state = VERIFIED;
-            
+            valid = doVerification(getBody());
+            lastVerifiedTime = System.currentTimeMillis();
+            verified = true;
+            LicenseCache.instance().addVerifiedLicense(CCLicense.this);
             if(vc != null)
-                vc.verificationCompleted(CCVerifier.this);
+                vc.licenseVerified(CCLicense.this);
         }
     }
 }

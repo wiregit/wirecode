@@ -3,8 +3,8 @@ package com.limegroup.gnutella.licenses;
 /**
  * A callback for verifying licenses.
  */
-public interface VerificationCallback {
+public interface VerificationListener {
     
-    public void verificationCompleted(Verifier verifier);
+    public void licenseVerified(License license);
     
 }

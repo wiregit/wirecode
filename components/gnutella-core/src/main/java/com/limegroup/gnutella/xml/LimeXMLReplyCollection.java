@@ -214,12 +214,14 @@ public class LimeXMLReplyCollection {
             if( doc == null ) // no document, ignore.
                 continue;
                 
-            if(!doc.supportsID3v2() && LimeXMLUtils.isMP3File(file)) {
+            if(!doc.isCurrent()) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("reconstructing document for id3v2: " + file);
+                    LOG.debug("reconstructing old document: " + file);
                 LimeXMLDocument tempDoc = constructDocument(file);
                 if (tempDoc != null)
                     doc = tempDoc;
+                else
+                    doc.setCurrent();
             }
                 
             // Verify the doc has information in it.
