@@ -41,6 +41,8 @@ public class SettingsManager implements SettingsInterface
     private static String[] bannedWords_;
     private static boolean  filterDuplicates_;
     private static boolean  filterAdult_;
+    private static boolean  filterVbs_;
+    private static boolean  filterHtml_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -287,6 +289,30 @@ public class SettingsManager implements SettingsInterface
 			try {setFilterDuplicates(bs);}
 			catch (IllegalArgumentException ie){}
 		    }
+		else if(key.equals(SettingsInterface.FILTER_HTML))
+		    {
+			boolean bs;
+			if (p.equals("true"))
+			    bs=true;
+			else if (p.equals("false"))
+			    bs=false;
+			else
+			    return;
+			try {setFilterHtml(bs);}
+			catch (IllegalArgumentException ie){}
+		    }
+		else if(key.equals(SettingsInterface.FILTER_VBS))
+		    {
+			boolean bs;
+			if (p.equals("true"))
+			    bs=true;
+			else if (p.equals("false"))
+			    bs=false;
+			else
+			    return;
+			try {setFilterVbs(bs);}
+			catch (IllegalArgumentException ie){}
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -316,6 +342,8 @@ public class SettingsManager implements SettingsInterface
 	setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
 	setFilterAdult(SettingsInterface.DEFAULT_FILTER_ADULT);
 	setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
+	setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
+	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){
 	    setSaveDirectory(System.getProperty("user.home"));
@@ -377,6 +405,8 @@ public class SettingsManager implements SettingsInterface
     public String[] getBannedWords(){return bannedWords_;}
     public boolean getFilterAdult(){return filterAdult_;}
     public boolean getFilterDuplicates(){return filterDuplicates_;}
+    public boolean getFilterHtml(){return filterHtml_;}
+    public boolean getFilterVbs(){return filterVbs_;}
 
     /** specialized method for getting the number 
      *  of files scanned */
@@ -676,6 +706,34 @@ public class SettingsManager implements SettingsInterface
 		writeProperties();
 	    }
     }
+    public void setFilterHtml(boolean filterHtml)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		filterHtml_ = filterHtml;
+		Boolean b = new Boolean(filterHtml);
+		String s = b.toString();
+		props_.setProperty(SettingsInterface.FILTER_HTML, s);
+		writeProperties();
+	
+	    }
+    }
+    public void setFilterVbs(boolean filterVbs)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		filterVbs_ = filterVbs;
+		Boolean b = new Boolean(filterVbs);
+		String s = b.toString();
+		props_.setProperty(SettingsInterface.FILTER_VBS, s);
+		writeProperties();	
+	    }
+    }
+    
 
     /**
      *  Sets the pathname String for the file that 

@@ -37,7 +37,9 @@ public interface SettingsInterface
     public String[]   getBannedIps();
     public String[]   getBannedWords();
     public boolean    getFilterDuplicates();
-    public boolean    getFilterAdult();    
+    public boolean    getFilterAdult();
+    public boolean    getFilterVbs();
+    public boolean    getFilterHtml();
 
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
@@ -126,6 +128,8 @@ public interface SettingsInterface
     /** Sets whether queries that are not 
      *  family-friendly should be ignored. */
     public void setFilterAdult(boolean b);
+    public void setFilterVbs(boolean b);
+    public void setFilterHtml(boolean b);
 
     /** specialized method for writing the 
      *  properties file for the network discoverer
@@ -173,7 +177,11 @@ public interface SettingsInterface
     public static final String[] DEFAULT_BANNED_WORDS   = {};
     public static final boolean DEFAULT_FILTER_ADULT   = false;
     public static final boolean DEFAULT_FILTER_DUPLICATES = true;
-
+    /** Filter .vbs files? */
+    public static final boolean DEFAULT_FILTER_VBS     = true;
+    /** Filter .htm[l] files? */
+    public static final boolean DEFAULT_FILTER_HTML    = false;
+    
     // The property key name constants 
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
@@ -194,7 +202,8 @@ public interface SettingsInterface
     public static final String BANNED_WORDS   = "BANNED_WORDS";
     public static final String FILTER_DUPLICATES = "FILTER_DUPLICATES";
     public static final String FILTER_ADULT   = "FILTER_ADULT";
-
+    public static final String FILTER_HTML    = "FILTER_HTML";
+    public static final String FILTER_VBS     = "FILTER_VBS";   
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }
