@@ -84,6 +84,8 @@ class LimeXMLSchemaFieldExtractor
         PRIMITIVE_TYPES.add("IDREF");
         PRIMITIVE_TYPES.add("xsi:ENTITY");
         PRIMITIVE_TYPES.add("ENTITY");
+        PRIMITIVE_TYPES.add("xsi:NUMTOKEN");
+        PRIMITIVE_TYPES.add("NUMTOKEN");
         PRIMITIVE_TYPES.add("xsi:Qname");
         PRIMITIVE_TYPES.add("Qname");
     }
@@ -174,27 +176,41 @@ class LimeXMLSchemaFieldExtractor
         for(int i=0;i<numChildren; i++)
         {
             Node child = children.item(i);
-            
-            //get the name of the node
-            String childNodeName = child.getNodeName();
-            
-            System.out.println("childNode = " + childNodeName);
-            
-            
-            //if element
-            if(isElementTag(childNodeName))
-            {
-                processChildElementTag(child,fieldTypeSet);
-            }
-            else if(isAttributeTag(childNodeName))
-            {
-                processChildAttributeTag(child,fieldTypeSet);
-            }
+            processChildOfComplexType(child,fieldTypeSet);
         }
         
         //add mapping to _nameFieldTypeSetMap
         _nameFieldTypeSetMap.put(name, fieldTypeSet);        
     }
+    
+    private static void processChildOfComplexType(Node n, 
+        FieldTypeSet fieldTypeSet)
+    {
+            //get the name of the node
+            String nodeName = n.getNodeName();
+            
+            //if element
+            if(isElementTag(nodeName))
+            {
+                processChildElementTag(n,fieldTypeSet);
+            }
+            else if(isAttributeTag(nodeName))
+            {
+                processChildAttributeTag(n,fieldTypeSet);
+            }
+            else
+            {
+                //get the child nodes of this node, and process them
+                NodeList children = n.getChildNodes();
+                int numChildren = children.getLength();
+                for(int i=0;i<numChildren; i++)
+                {
+                    Node child = children.item(i);
+                    processChildOfComplexType(child,fieldTypeSet);
+                }
+            }
+    }
+    
     
     private static void processChildElementTag(Node n, FieldTypeSet fieldTypeSet)
     {
@@ -254,58 +270,24 @@ class LimeXMLSchemaFieldExtractor
     
     private static void processChildAttributeTag(Node n, FieldTypeSet fieldTypeSet)
     {
-         //get attributes
-        NamedNodeMap  attributes = n.getAttributes();
+        //get attributes
+        NamedNodeMap attributes = n.getAttributes();
         
         //get name attribute
         Node nameAttribute = attributes.getNamedItem("name");
-        if(nameAttribute == null)
+        Node typeAttribute = attributes.getNamedItem("type");
+        if(nameAttribute == null || typeAttribute == null)
         {
-            //get ref attribute
-            Node refAttribute = attributes.getNamedItem("ref");
-        
-            if(refAttribute == null)
-            {
-                //return, cant do anything
-                //anu check if something else can be done
-                return;
-            }
-
-            //get the ref name
-            String refName = refAttribute.getNodeValue();
-            
-            System.out.println("refName = " + refName);
-
-            //TODO anu think
-            //add mapping to fieldTypeSet
-            fieldTypeSet.add(new FieldTypePair(refName, refName));
+            //cant do much, return
+            return;
         }
-        else
-        {
-            String name = nameAttribute.getNodeValue();
-
-            //get type attribute
-            Node typeAttribute = attributes.getNamedItem("type");
-            String typeName;
-            if(typeAttribute != null)
-            {
-                typeName = typeAttribute.getNodeValue();
-            }
-            else
-            {
-                typeName = getUniqueComplexTypeName();
-
-                //also store it in _lastUniqueComplexTypeName for future use
-                _lastUniqueComplexTypeName = typeName;
-                
-                //traverse children
-                traverseChildren(n);
-            }
-
-           //add mapping to fieldTypeMap
-           fieldTypeSet.add(new FieldTypePair(name, typeName));   
-        }
-
+       
+        //get field and type names
+        String name = nameAttribute.getNodeValue();
+        String typeName = typeAttribute.getNodeValue();
+       
+        //add mapping to fieldTypeMap
+        fieldTypeSet.add(new FieldTypePair(name, typeName));   
     }
     
     private static void traverseChildren(Node n)
