@@ -281,6 +281,12 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final BooleanSetting DO_NOT_BOOTSTRAP = 
         FACTORY.createBooleanSetting("DO_NOT_BOOTSTRAP",false);
+        
+    /**
+     * Setting to not send a multicast bootstrap ping.
+     */
+    public static final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP =
+        FACTORY.createBooleanSetting("DO_NOT_MULTICAST_BOOTSTRAP", false);
     
     /**
      * Helper method left from Settings Manager

@@ -1252,6 +1252,7 @@ public class HostCatcher {
         public synchronized void run() {
             if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue())
                 return;
+
             // If no one's waiting for an endpoint, don't get any.
             if(_catchersWaiting == 0)
                 return;
@@ -1313,7 +1314,8 @@ public class HostCatcher {
          * if it was able to.
          */
         private boolean multicastFetch(long now) {
-            if(nextAllowedMulticastTime < now) {
+            if(nextAllowedMulticastTime < now && 
+               !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
                 LOG.trace("Fetching via multicast");
                 PingRequest pr = PingRequest.createMulticastPing();
                 MulticastService.instance().send(pr);
