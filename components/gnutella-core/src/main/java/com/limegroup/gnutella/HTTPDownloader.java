@@ -91,7 +91,7 @@ public class HTTPDownloader {
 			// check to see if we actually get a directory
 			
 			if (incompleteDir == "") 
-				throw new IOException("Incomplete Directory Is Null");
+				throw new NullIncompleteDirectoryException();
 			
 			// now, check to see if a file of that name alread
 			// exists in the temporary directory.
@@ -121,10 +121,10 @@ public class HTTPDownloader {
             conn.connect();
 		}
 		catch (ConnectException e) {
-			throw new IOException("Can't connect");
+			throw new CantConnectException();
 		}
 		catch (java.net.MalformedURLException e) {
-			throw e;
+			throw new BadURLException();
 		}
 		try {
             istream = conn.getInputStream();
@@ -133,9 +133,9 @@ public class HTTPDownloader {
 			String str = conn.getHeaderField(0);
 			if (str != null) {
 				if ( str.indexOf(" 404 ") > 0 )
-					throw new IOException("File Not Found");
+					throw new FileNotFoundException();
 				if  ( str.indexOf(" 503 ") > 0 )
-					throw new IOException("Try Again Later");
+					throw new TryAgainLaterException();
 			}
 			throw e;
 		} 
@@ -192,7 +192,7 @@ public class HTTPDownloader {
 		String str = " ";
 
 		if (_byteReader == null) 
-			throw new IOException("Reader is Null");
+			throw new ReaderIsNullException();
 		
 		// Read the first line and then check for any possible errors
 		str = _byteReader.readLine();  
@@ -204,17 +204,17 @@ public class HTTPDownloader {
 		// Handle a 503 error from Gnotella/Gnutella
 		if ( str.equals("3") || 
 			 str.startsWith("3 Upload limit reached") )
-			throw new IOException("Try Again Later");
+			throw new TryAgainLaterException();
 		
 		// Handle a 404 error from Gnotella/Gnutella
 		else if ( str.equals("4") || str.startsWith("4 File Not Found") ) 
-			throw new IOException("File Not Found");
+			throw new FileNotFoundException();
 		
 		// Look for the HTTP OK (0 OK)
 		else if ( ! str.equals("0 OK") ) {			
 			System.out.println("The str is:");
 			System.out.println(str);
-			throw new IOException("No HTTP OK");
+			throw new NoHTTPOKException();
 		}
 		while (true) {
 				
@@ -224,7 +224,7 @@ public class HTTPDownloader {
                 try {
                     sub=str.substring(15);
                 } catch (IndexOutOfBoundsException e) {
-					throw new IOException("Problem Reading Header");
+					throw new ProblemReadingHeaderException();
                 }
                 sub = sub.trim();
 				int tempSize;
@@ -233,7 +233,7 @@ public class HTTPDownloader {
                     tempSize = java.lang.Integer.parseInt(sub);
                 }
                 catch (NumberFormatException e) {
-					throw new IOException("Problem Reading Header");
+					throw new ProblemReadingHeaderException();
                 }
 
 				_fileSize = tempSize;
@@ -269,7 +269,7 @@ public class HTTPDownloader {
 					beforeSlash = str.substring(dash+1, slash);
 					beforeSlash = beforeSlash.trim();
                 } catch (IndexOutOfBoundsException e) {
-					throw new IOException("Problem Reading Header");
+					throw new ProblemReadingHeaderException();
                 }
 				try {
 					numAfterSlash = java.lang.Integer.parseInt(afterSlash);
@@ -277,7 +277,7 @@ public class HTTPDownloader {
                     numBeforeSlash = java.lang.Integer.parseInt(beforeSlash);
                 }
                 catch (NumberFormatException e) {
-					throw new IOException("Problem Reading Header");
+					throw new ProblemReadingHeaderException();
                 }
 
 				// In order to be backwards compatible with
@@ -332,14 +332,14 @@ public class HTTPDownloader {
 		
 		if (!path_to_parent.equals(shared_path)) {
 			// need to add an error message here
-			throw new IOException("Invalid path");  
+			throw new InvalidPathException();  
 		}
 
 		if ( complete_file.exists() ){
 			// ask the user if the file should be overwritten
 			// if ( ! _callback.overwriteFile(_filename) ) 
 			// TODO: Need to ask the user - but how?
-			throw new IOException("File Already Exists");
+			throw new FileExistsException();
 		}
 		
 
@@ -355,11 +355,6 @@ public class HTTPDownloader {
 		
 		byte[] buf = new byte[1024];
 
-
-		
-		
-
-
 		while (true) {
 			
   			if (_amountRead == _fileSize) 
@@ -369,7 +364,7 @@ public class HTTPDownloader {
   			// happen, but if it does, need a way to exit 
   			// gracefully...
   			if (_amountRead > _fileSize) 
-				throw new IOException("File Size To Large");
+				throw new FileTooLargeException();
 			
 			c = _byteReader.read(buf);
 
@@ -394,13 +389,152 @@ public class HTTPDownloader {
 			complete_file.delete();
 			boolean ok = incomplete_file.renameTo(complete_file);
 			if (! ok) 
-				throw new IOException("Couldn't Move to Library");
+				throw new FileCantBeMovedException();
 			//renameTo is not guaranteed to work, esp. when the
 			//file is being moved across file systems.  
 
 			FileManager.instance().addFileIfShared(path_to_complete);
 
 		} else 
-			throw new IOException("File Incomplete");
+			throw new FileIncompleteException();
 	}
+
+
+	private void shutdown() throws IOException {
+		
+		if (_byteReader != null)
+			_byteReader.close();
+
+		if (_fos != null)
+			_fos.close();
+
+		if (_socket != null)
+			_socket.close();
+
+
+	}
+
+	// }
+
+/******************* EXCEPTIONS *************************/
+/**
+ * These should maybe be moved into their own files?
+ */
+
+/**
+ *  Basically just a renamed ConnectException
+ */
+private class CantConnectException extends IOException {
+	public CantConnectException() { super("Can't Connect"); }
+	public CantConnectException(String msg) { super(msg); }
 }
+
+/**
+ *  Thrown when the Incomplete Directory is null
+ */
+private class NullIncompleteDirectoryException extends IOException {
+	public NullIncompleteDirectoryException() {
+		super("Incomplete Directory Is Null"); }
+	public NullIncompleteDirectoryException(String msg) {
+		super(msg); }
+}
+
+/**
+ * Basically just a renamed MalformedURLException
+ */
+private class BadURLException extends IOException {
+	public BadURLException() { super("Bad URL"); }
+	public BadURLException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown when a file is not found, ie an HTTP 404 
+ */
+private class FileNotFoundException extends IOException {
+	public FileNotFoundException() { super("File Not Found"); }
+	public FileNotFoundException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown when the slots are filled, and the client should
+ * try again later, ie an HTTP 503
+ */
+private class TryAgainLaterException extends IOException {
+	public TryAgainLaterException() { super("Try Again Later"); }
+	public TryAgainLaterException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown when the ByteReader is null
+ */
+
+private class ReaderIsNullException extends IOException {
+	public ReaderIsNullException() { super("Reader is Null"); }
+	public ReaderIsNullException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown when no 'HTTP OK' or the equivalent is not recieved
+ */
+private class NoHTTPOKException extends IOException {
+	public NoHTTPOKException() { super("No HTTP OK"); }
+	public NoHTTPOKException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown in replace of IndexOutOfBoundsException or NumberFormatException
+ */
+private class ProblemReadingHeaderException extends IOException {
+	public ProblemReadingHeaderException() { super("Problem Reading Header"); }
+	public ProblemReadingHeaderException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown if the file already exists in the download directory
+ */
+private class FileExistsException extends IOException {
+	public FileExistsException() { super("File Already Exists"); }
+	public FileExistsException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown when the download path is invalid
+ */
+private class InvalidPathException extends IOException {
+	public InvalidPathException() { super("Invalid Path"); }
+	public InvalidPathException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown if too much has been downloaded, and the file is too big
+ */
+private class FileTooLargeException extends IOException {
+	public FileTooLargeException() { super("File Too Large"); }
+	public FileTooLargeException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown if the file couldn't be moved to the Library
+ */
+private class FileCantBeMovedException extends IOException {
+	public FileCantBeMovedException() { super("File Couldn't Be Moved"); }
+	public FileCantBeMovedException(String msg) { super(msg); }
+}
+
+/**
+ * Thrown id the downloaded file is incomplete
+ */
+private class FileIncompleteException extends IOException {
+	public FileIncompleteException() { super("File Incomplete"); }
+	public FileIncompleteException(String msg) { super(msg); }
+}
+
+
+
+}
+
+
+
+
+
+
