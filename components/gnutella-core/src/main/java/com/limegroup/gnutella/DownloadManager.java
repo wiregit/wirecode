@@ -20,7 +20,7 @@ import java.net.*;
  * Writes are initiated by this, since we need to be notified of completed
  * downloads.  Downloads in the COULDNT_DOWNLOAD state are not serialized.  
  */
-public class DownloadManager {
+public class DownloadManager implements BandwidthTracker {
     /** The callback for notifying the GUI of major changes. */
     private ActivityCallback callback;
     /** The message router to use for pushes. */
@@ -391,5 +391,22 @@ public class DownloadManager {
         } catch (IllegalArgumentException e) {
             throw new IOException();
         }          
-    }   
+    }
+
+	/**
+	 * Implements the <tt>BandwidthTracker</tt> interface.
+	 * 
+	 * Returns that bandwidth transferred in kilobytes per second since
+	 * the last time this call was made.
+	 */
+	public synchronized int getNewBytesTransferred() {
+        System.out.println("DownloadManager::getNewBytesTransferred");
+		int newBytes = 0;
+		Iterator iter = active.iterator();
+		while(iter.hasNext()) {
+			BandwidthTracker bt = (BandwidthTracker)iter.next();
+			newBytes += bt.getNewBytesTransferred();
+		}
+		return newBytes;
+	}
 }
