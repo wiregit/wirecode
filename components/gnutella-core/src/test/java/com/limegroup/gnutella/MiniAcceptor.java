@@ -44,6 +44,11 @@ public class MiniAcceptor implements Runnable {
         Thread.yield();  //hack to make sure runner creates socket
     }
 
+    /** Starts the listen socket without blocking. */
+    public MiniAcceptor(int port) {
+		this(new SupernodeHandshakeResponder("localhost"), port);
+    }
+
     /** Blocks until a connection is available, and returns it. 
      *  Returns null if something went awry.  In this case, you 
      *  can get the exception via getError.  Bad design, but 
