@@ -79,8 +79,11 @@ public class UDPMultiplexor {
      */
 	public synchronized void unregister(UDPConnectionProcessor con) {
 		int connID = (int) con.getConnectionID() & 0xff;
-		if ( _connections[connID].get() == con )
-		    _connections[connID] = null;
+		if ( _connections[connID]!=null &&
+				_connections[connID].get() == con ) {
+		    _connections[connID].clear();
+		    _connections[connID]=null;
+		}
 	}
 
     /**
@@ -101,7 +104,10 @@ public class UDPMultiplexor {
                 LOG.debug("Receiving SynMessage :"+msg);
             }
 			for (int i = 1; i < _connections.length; i++) {
-				con = (UDPConnectionProcessor)_connections[i].get();
+				if (_connections[i]==null)
+					con=null;
+				else
+					con = (UDPConnectionProcessor)_connections[i].get();
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
@@ -118,7 +124,10 @@ public class UDPMultiplexor {
 			// so it is safe to throw away premature ones
 
 		} else {  // If valid connID then send on to connection
-			con = (UDPConnectionProcessor)_connections[connID].get();
+			if (_connections[connID]==null)
+				con=null;
+			else
+				con = (UDPConnectionProcessor)_connections[connID].get();
 			if ( con != null &&
                  con.matchAddress(senderIP, senderPort) ) {
 				con.handleMessage(msg);
