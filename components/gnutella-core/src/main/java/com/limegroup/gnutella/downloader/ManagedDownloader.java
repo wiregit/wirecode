@@ -1923,9 +1923,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  (Calls to resume() do not result in InterruptedException.)
      */
     private int tryAllDownloads2() throws InterruptedException {
+	RemoteFileDesc firstDesc;
         synchronized (this) {
             if (files.size()==0)
                 return GAVE_UP;
+	    firstDesc = (RemoteFileDesc)files.get(0);
         }
 
         //1. Verify it's safe to download.  Filename must not have "..", "/",
@@ -1940,8 +1942,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         File saveDir;
         String fileName = getFileName();
         try {
-            incompleteFile = incompleteFileManager.getFile(
-                                         (RemoteFileDesc)files.get(0));
+            incompleteFile = incompleteFileManager.getFile(firstDesc);
             saveDir = SharingSettings.getSaveDirectory();
             completeFile = new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();
