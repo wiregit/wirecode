@@ -1,13 +1,12 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.statistics.CompressionStat;
-import com.limegroup.gnutella.util.CommonUtils;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
-import java.nio.*;
-import java.nio.channels.*;
-import java.io.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * Writes Gnutella messages to SocketChannel.  Used by Connnection to send
