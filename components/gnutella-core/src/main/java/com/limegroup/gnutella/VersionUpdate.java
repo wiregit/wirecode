@@ -302,11 +302,12 @@ public class VersionUpdate
 			// update the lax file and notify the user. 
 			if(_amountRead == _updateSize) {
 				_updateHandler.hideProgressWindow();
-				updateLAXFile(newFileName);
-				String message = "Your LimeWire update has successfully "+
-				"completed.  Please restart LimeWire to use your new version.";
-				Utilities.showMessage(message);
-				_settings.setLastVersionChecked(_newVersion);
+				if(updateLAXFile(newFileName)) {
+					String message = "Your LimeWire update has successfully "+
+					"completed.  Please restart LimeWire to use your new version.";
+					Utilities.showMessage(message);
+					_settings.setLastVersionChecked(_newVersion);
+				}
 				_settings.writeProperties();
 				System.exit(0);
 			}
@@ -318,7 +319,7 @@ public class VersionUpdate
 
 	// updates the LimeWire.LAX file that is used by
 	// InstallAnywhere to set the classpath
-	private void updateLAXFile(final String newFileName) {
+	private boolean updateLAXFile(final String newFileName) {
 		File laxFile = new File(_currentDirectory, "LimeWire.lax");
 		File tempLaxFile = new File(_currentDirectory, "LimeWireTemp.lax");
 		String laxPath = "";
@@ -327,7 +328,7 @@ public class VersionUpdate
 		}
 		catch(IOException ioe) {
 			cancelUpdate("finding the full path name of your configuration file.");
-			return;
+			return false;
 		}
 		if(laxFile.exists()) {
 			String newClasspaths = "lax.class.path=";
@@ -340,6 +341,7 @@ public class VersionUpdate
 				}
 				catch(IOException ioe) {
 					cancelUpdate("writing to a temporary file.");
+					return false;
 				}
 				BufferedReader br = new BufferedReader(fr);
 				BufferedWriter bw = new BufferedWriter(fw);
@@ -376,8 +378,10 @@ public class VersionUpdate
 				bw.close();
 			} catch(java.io.FileNotFoundException fnfe) {
 				cancelUpdate("finding your configuration file.");
+				return false;
 			} catch(IOException ioe) {
 				cancelUpdate("accessing your file system.");
+				return false;
 			}
 			String str = "";
 			try {
@@ -387,13 +391,16 @@ public class VersionUpdate
 			laxFile.delete();
 			if(!tempLaxFile.renameTo(laxFile)) {
 				cancelUpdate("renaming your configuration file.");
+				return false;
 			}
 			else
 				_settings.setDeleteOldJAR(true);
 		}
 		else {
 			cancelUpdate("locating your configuration file.");
+			return false;
 		}
+		return true;
 	}
 
 	/** cancels the udpate and prompts the user 
