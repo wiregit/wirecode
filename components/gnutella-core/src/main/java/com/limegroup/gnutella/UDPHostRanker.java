@@ -77,15 +77,17 @@ public class UDPHostRanker {
             }
             waits++;
         }
-        final PingRequest ping = new PingRequest((byte)1);
+        final GUID pingGUID = listener == null ?
+                    UDPService.instance().getSolicitedGUID() :
+                        new GUID(GUID.makeGuid());
+                
+        final PingRequest ping = new PingRequest(pingGUID.bytes(),(byte)1);
         
         // request an ip test if we are firewalled.  Since this code usually
         // executes before we establish our first connection, check if
         // we have received incoming in the past.
         if (!ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue())
             ping.addIPRequest();
-        
-        final GUID pingGUID = new GUID(ping.getGUID());
         
         if (listener != null)
             ROUTER.registerMessageListener(pingGUID, listener);

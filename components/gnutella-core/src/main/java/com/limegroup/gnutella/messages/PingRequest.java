@@ -58,6 +58,17 @@ public class PingRequest extends Message {
     }
     
     /**
+     * Creates a normal ping with a specified GUID
+     *
+     * @param ttl the ttl of the new Ping
+     */
+    public PingRequest(byte [] guid,byte ttl) {
+        super(guid,(byte)0x0, ttl, (byte)0,0);
+        _ggeps=new GGEP[1];
+        addLocale();
+    }
+    
+    /**
      * Creates an outgoing group ping. Used only by boot-strap server
      *
      * @param length is length of the payload of the GroupPing = 
