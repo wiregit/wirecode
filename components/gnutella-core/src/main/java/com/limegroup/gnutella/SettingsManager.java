@@ -432,7 +432,7 @@ public class SettingsManager implements SettingsInterface
         //MAX_INCOMING_CONNECTIONS are sufficiently low.
         if ( getConnectionSpeed()<=56 ) { //modem
             setKeepAlive(Math.min(2, getKeepAlive()));
-            setMaxIncomingConnections(0);
+            setMaxIncomingConnections(2);
         }
     }
 
