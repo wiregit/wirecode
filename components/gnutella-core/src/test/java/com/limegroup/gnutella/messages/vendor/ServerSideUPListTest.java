@@ -62,10 +62,13 @@ public class ServerSideUPListTest extends BaseTestCase {
      * the different kinds of queries
      */
     private static final GiveUPVendorMessage msgAll = new GiveUPVendorMessage(new GUID(GUID.makeGuid()));
-    private static final GiveUPVendorMessage msgSome = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 2, 1);
-    private static final GiveUPVendorMessage msgLeafsOnly = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 2);
-    private static final GiveUPVendorMessage msgNone = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 0);
-    private static final GiveUPVendorMessage msgMore = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 20, 30);
+    private static final GiveUPVendorMessage msgSome = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 2, 1,(byte)0);
+    private static final GiveUPVendorMessage msgLeafsOnly = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 2,(byte)0);
+    private static final GiveUPVendorMessage msgNone = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 0,(byte)0);
+    private static final GiveUPVendorMessage msgMore = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 20, 30,(byte)0);
+    private static final GiveUPVendorMessage msgTimes = new GiveUPVendorMessage(new GUID(GUID.makeGuid()),3,3,(byte)1);
+    //TODO:add locale tests
+    private static final GiveUPVendorMessage msgBadMask = new GiveUPVendorMessage(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
 	
     
     /**
@@ -341,6 +344,34 @@ public class ServerSideUPListTest extends BaseTestCase {
  		reply = tryMessage(msgAll);
  		assertNotEquals(0,reply.getLeaves().size());
  		assertNotEquals(0,reply.getUltrapeers().size());
+ 	}
+ 	
+ 	/**
+ 	 * tests a udp ping message requesting the connection lifetimes
+ 	 */
+ 	public void testConnectionTime() throws Exception{
+ 		PrivilegedAccessor.setValue(UPListVendorMessage.class,"MINUTE",new Long(1));
+ 		UPListVendorMessage reply = tryMessage(msgTimes);
+ 		assertTrue(reply.hasConnectionTime());
+ 		assertFalse(reply.hasLocaleInfo());
+ 		
+ 		//see if the result we got had any uptime (it should!)
+ 		ExtendedEndpoint result = (ExtendedEndpoint)reply.getUltrapeers().get(0);
+ 		assertGreaterThan(0,result.getDailyUptime());
+ 	}
+ 	
+ 	/**
+ 	 * tests a message send from a newer peer that supports more options.
+ 	 */
+ 	public void testBadMask() throws Exception {
+ 		PrivilegedAccessor.setValue(UPListVendorMessage.class,"MINUTE",new Long(1));
+ 		UPListVendorMessage reply = tryMessage(msgBadMask);
+ 		assertTrue(reply.hasConnectionTime());
+ 		assertTrue(reply.hasLocaleInfo());
+ 		
+ 		//see if the result we got had any uptime (it should!)
+ 		ExtendedEndpoint result = (ExtendedEndpoint)reply.getUltrapeers().get(0);
+ 		assertGreaterThan(0,result.getDailyUptime());
  	}
  	
  	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {

@@ -391,11 +391,19 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     
     public void testGiveUPVendorMessage() throws Exception {
     	GUID guid = new GUID(GUID.makeGuid());
-    	GiveUPVendorMessage req = new GiveUPVendorMessage(guid, 1,2);
+    	GiveUPVendorMessage req = new GiveUPVendorMessage(guid, 1,2,GiveUPVendorMessage.PLAIN);
     	assertEquals(1, req.getNumberUP());
     	assertEquals(2, req.getNumberLeaves());
+    	assertFalse(req.asks4ConnectionTime());
+    	assertFalse(req.asks4LocaleInfo());
+    	assertTrue(req.asks4Feature(GiveUPVendorMessage.PLAIN));
     	testWrite(req);
     	testRead(req);
+    	
+    	//also test one with newer mask - should be trimmed to our mask
+    	req = new GiveUPVendorMessage(guid, 1,2,(byte)0xFF);
+    	assertTrue(req.asks4Feature(GiveUPVendorMessage.FEATURE_MASK));
+    	assertEquals(0,req.getFormat() & 0xF0);
     }
     
     public void testBestCandidatesVendorMessage() throws Exception {
