@@ -67,13 +67,13 @@ public class VerifyingFile {
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
      * to disk and find out which blocks to check before writing to disk
      */
-    private final IntervalSet writtenBlocks;
+    private final IntervalSet verifiedBlocks;
     
     /**
      * Ranges that are currently being written by the ManagedDownloader. 
      * 
      * Replaces the IntervalSet of needed ranges previously stored in the 
-     * ManagedDownloader but which could get out of sync with the writtenBlocks
+     * ManagedDownloader but which could get out of sync with the verifiedBlocks
      * IntervalSet and is therefore replaced by a more failsafe implementation.
      */
     private IntervalSet leasedBlocks;
@@ -105,7 +105,7 @@ public class VerifyingFile {
     public VerifyingFile(boolean checkOverlap, int completedSize) {
         this.completedSize = completedSize;
         this.checkOverlap = checkOverlap;
-        writtenBlocks = new IntervalSet();
+        verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
@@ -163,37 +163,14 @@ public class VerifyingFile {
         if(fos == null)
             throw new IOException();
         
-        boolean checkBeforeWrite = false;
-        List overlapBlocks = null;
+        // remove from leased blocks before writing to disk.  
+        // In case any of the disk io (checking overlap, saving) throws,
+        // the chunk will get re-downloaded.
         Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
+        leasedBlocks.delete(intvl);
         
-        if(checkOverlap) {
-            overlapBlocks = writtenBlocks.getOverlapIntervals(intvl);
-            if(overlapBlocks.size()>0)
-                checkBeforeWrite = true;
-        }
-        //OK now we know whether or not to check before writing to disk.
-        //1. If there are overlaps, check those parts of the buffer we are about
-        // to write.
-        if(checkBeforeWrite) { //we found overlaps
-            LOG.debug("will check overlaps");
-            
-            for(Iterator iter = overlapBlocks.iterator(); iter.hasNext();) {
-                Interval overlapInterval = (Interval)iter.next();
-                int amountToCheck=(overlapInterval.high-overlapInterval.low)+1;
-                byte[] fileBuf = new byte[amountToCheck];
-                fos.seek(overlapInterval.low);//seek to begining of overlap part
-                fos.readFully(fileBuf,0,amountToCheck);
-                int j = findInitialPoint(overlapInterval,currPos);
-                for(int i=0;i<amountToCheck;i++,j++) {
-                    if (buf[j]!=fileBuf[i]) { //corrupt bytes
-                        isCorrupted = true; // flag as corrupted.
-                        if(managedDownloader!=null)//md may be null for testing
-                            managedDownloader.promptAboutCorruptDownload();
-                    }
-                }
-            }
-        } 
+        if(checkOverlap) 
+            checkOverlap(intvl, buf);
         
         //Got this far? Either no need to check, or it checks out OK. 
         //2. get the fp back to the position we want to write to.
@@ -201,11 +178,10 @@ public class VerifyingFile {
         //3. Write to disk.
         fos.write(buf, 0, numBytes);
         
-        //4. add this interval to the partial blocks
+        //4. if write went ok, add this interval to the partial blocks
         if (LOG.isDebugEnabled())
             LOG.debug("adding chunk "+intvl+" to partialBlocks");
         partialBlocks.add(intvl);
-        leasedBlocks.delete(intvl);
         
         //5. if we have a tree, see if there is a complete chunk in the partial list
         HashTree tree = managedDownloader.getHashTree(); 
@@ -217,18 +193,50 @@ public class VerifyingFile {
                     LOG.debug("will schedule for verification "+i);
                 CHUNK_VERIFIER.add(new ChunkVerifier(i,tree));
             }
-            
-        } else {
-            // if we couldn't get a tree during the entire download, 
+        } else
+            // if we couldn't find a tree during the entire download, 
             // we have to bite the bullet and rely on SHA1 alone
             if (partialBlocks.getSize() == completedSize) {
                 Interval all = partialBlocks.removeFirst();
-                writtenBlocks.add(all);
-            }
-                
+                verifiedBlocks.add(all);
         }
     }
 
+    private void checkOverlap(Interval intvl, byte [] data) throws IOException {
+        
+        // get all written blocks
+        IntervalSet onDisk = new IntervalSet();
+        for (Iterator iter = getBlocks();iter.hasNext();)
+            onDisk.add((Interval)iter.next());
+        
+        // do any them overlap with our interval?
+        List overlapBlocks = onDisk.getOverlapIntervals(intvl);
+        if(overlapBlocks.isEmpty())
+            return;
+        
+        //OK now we know whether or not to check before writing to disk.
+        //1. If there are overlaps, check those parts of the buffer we are about
+        // to write.
+        LOG.debug("will check overlaps");
+        
+        for(Iterator iter = overlapBlocks.iterator(); iter.hasNext();) {
+            Interval overlapInterval = (Interval)iter.next();
+            int amountToCheck=(overlapInterval.high-overlapInterval.low)+1;
+            
+            byte[] fileBuf = new byte[amountToCheck];
+            fos.seek(overlapInterval.low);//seek to begining of overlap part
+            fos.readFully(fileBuf,0,amountToCheck);
+            
+            int j = findInitialPoint(overlapInterval,intvl.low);
+            for(int i=0;i<amountToCheck;i++,j++) {
+                if (data[j]!=fileBuf[i]) { //corrupt bytes
+                    isCorrupted = true; // flag as corrupted.
+                    if(managedDownloader!=null)//md may be null for testing
+                        managedDownloader.promptAboutCorruptDownload();
+                }
+            }
+        }
+    }
     /**
      * iterates through the pending blocks and checks if the recent write has created
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
@@ -278,7 +286,7 @@ public class VerifyingFile {
      * Returns the first full block of data that needs to be written.
      */
     public synchronized Interval leaseWhite() throws NoSuchElementException {
-        IntervalSet freeBlocks = writtenBlocks.invert(completedSize);
+        IntervalSet freeBlocks = verifiedBlocks.invert(completedSize);
         freeBlocks.delete(leasedBlocks);
         freeBlocks.delete(partialBlocks);
         freeBlocks.delete(pendingBlocks);
@@ -303,7 +311,7 @@ public class VerifyingFile {
      */
     public synchronized Interval leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
-        ranges.delete(writtenBlocks);
+        ranges.delete(verifiedBlocks);
         ranges.delete(leasedBlocks);
         ranges.delete(partialBlocks);
         ranges.delete(pendingBlocks);
@@ -346,23 +354,29 @@ public class VerifyingFile {
     }
     
     /**
-     * Returns all verified blocks with an Iterator.
+     * Returns all downloaded blocks with an Iterator.
      */
     public synchronized Iterator getBlocks() {
         return getBlocksAsList().iterator();
     }
     
+    /**
+     * Returns all verified blocks with an Iterator.
+     */
     public synchronized Iterator getVerifiedBlocks() {
-        return writtenBlocks.getAllIntervals();
+        return verifiedBlocks.getAllIntervals();
     }
     
     public synchronized byte [] toBytes() {
-    	return writtenBlocks.toBytes();
+    	return verifiedBlocks.toBytes();
     }
 
+    /**
+     * @return all downloaded blocks as list
+     */
     public synchronized List getBlocksAsList() {
         List l = new ArrayList();
-        l.addAll(writtenBlocks.getAllIntervalsAsList());
+        l.addAll(verifiedBlocks.getAllIntervalsAsList());
         l.addAll(partialBlocks.getAllIntervalsAsList());
         l.addAll(pendingBlocks.getAllIntervalsAsList());
         IntervalSet ret = new IntervalSet();
@@ -370,25 +384,26 @@ public class VerifyingFile {
             ret.add((Interval)iter.next());
         return ret.getAllIntervalsAsList();
     }
+    
     /**
-     * Returns all written blocks as a List.
+     * Returns all verified blocks as a List.
      */ 
     public synchronized List getVerifiedBlocksAsList() {
-        return writtenBlocks.getAllIntervalsAsList();
+        return verifiedBlocks.getAllIntervalsAsList();
     }
 
     /**
-     * Returns the total number of bytes written to disk.
+     * Returns the total number of verified bytes written to disk.
      */
     public synchronized int getBlockSize() {
-        return writtenBlocks.getSize();
+        return verifiedBlocks.getSize();
     }
   
     /**
-     * Determines if all blocks have been written to disk.
+     * Determines if all blocks have been written to disk and verified
      */
     public synchronized boolean isComplete() {
-        return (writtenBlocks.getSize() == completedSize);
+        return (verifiedBlocks.getSize() == completedSize);
     }
     
     /**
@@ -396,7 +411,7 @@ public class VerifyingFile {
      * or written.
      */
     public synchronized int hasFreeBlocksToAssign() {
-        return  completedSize - (writtenBlocks.getSize() + 
+        return  completedSize - (verifiedBlocks.getSize() + 
                 leasedBlocks.getSize() +
                 partialBlocks.getSize() +
                 pendingBlocks.getSize()); 
@@ -517,7 +532,7 @@ public class VerifyingFile {
             synchronized(VerifyingFile.this) {
                 pendingBlocks.delete(_interval);
                 if (good) 
-                    writtenBlocks.add(_interval);
+                    verifiedBlocks.add(_interval);
             }
         }
         
