@@ -8,28 +8,34 @@ import com.sun.java.util.collections.*;
  * Let the bytes of a GUID G be labelled G[0]..G[15].  All bytes are unsigned.
  * Let a "short" be a 2 byte little-endian** unsigned number.  Let AB be the
  * short formed by concatenating bytes A and B, with B being the most
- * significant byte.  Then LimeWire GUID's have the following properties.
+ * significant byte.  LimeWire GUID's have the following properties:
  *
  * <ol>
  * <li>G[8]==0xFF.  This serves to identify "new GUIDs", e.g. from BearShare.
  * <li>G[15]=0x00.  This is reserved for future use.
- * <li>G[9][10]= 0xFFFF & ((G[4]G[5]+2)*(G[6][7]+3) >> 8).  This is LimeWire's
- *   proprietary marking.  In other words, the result is obtained by first taking
- *   the two byte values before the 0xFF and adding "secret" constants.  These
- *   two byte values are then multiplied together to form a 4 byte product.  The
- *   middle two bytes of this product are then stored after the 0xFF.  <b>Sign
- *   IS considered during this process, since Java does that by default.</b>
+ * <li>G[9][10]= tag(G[4][5], G[6][7]).  This is LimeWire's "secret" 
+ *  proprietary marking. 
  * </ol>
  *
- * Note that this still leaves 12 bytes for randomness.  That's plenty of
+ * Here tag(A, B)=OxFFFF & ((A+2)*(B+3) >> 8).  In other words, the result is
+ * obtained by first taking pair of two byte values and adding "secret"
+ * constants.  These two byte values are then multiplied together to form a 4
+ * byte product.  The middle two bytes of this product are the tag.  <b>Sign IS
+ * considered during this process, since Java does that by default.</b><p>
+ *
+ * In addition, LimeWire GUIDs may be marked as follows:
+ * <ol>
+ * <li>G[13][14]=tag(G[0]G[1], G[9][10]).  This was used by LimeWire 2.2.0-2.2.3
+ *  to mark automatic requeries.  Unfortunately these versions inadvertently sent
+ *  requeries when cancelling uploads or when sometimes encountering a group of
+ *  busy hosts.
+ * <li>G[13][14]=tag(G[0][1], G[2][3]).  This marks requeries from versions of
+ *  LimeWire that have fixed the requery bug, e.g., 2.2.4 and later.
+ * </ol>
+ *
+ * Note that this still leaves 10-12 bytes for randomness.  That's plenty of
  * distinct GUID's.  And there's only a 1 in 65000 chance of mistakenly
  * identifying a LimeWire.
- *
- * ADDITION: added makeRequeryGuid() method.
- * A Requery GUID has the extra property that:
- * G[13][14]= 0xFFFF & ((G[0]G[1]+2)*(G[9][10]+3) >> 8).
- * So the chances of a false positive RequeryGuid are (1/65000) * (1/65000)
- * This still leaves 10 bytes for randomness, which is PLENTY of GUIDs. 
  */
 public class GUID implements  com.sun.java.util.collections.Comparable {
     /** The size of a GUID. */
@@ -86,7 +92,7 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         byte[] ret = makeGuid();
 
         //Apply LimeWire's marking.
-        tagGuid(ret, 0, 9, 13);
+        tagGuid(ret, 0, 2, 13);
 
         return ret;
     }
@@ -105,13 +111,18 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     public boolean isLimeGUID() {    
         return isLimeGUID(this.bytes);
     }
+    
 
+    /** Same as isLimeRequeryGUID(this.bytes, isOld) */
+    public boolean isLimeRequeryGUID(boolean isOld) {
+        return isLimeRequeryGUID(this.bytes, isOld);
+    }
+    
 
     /** Same is isLimeRequeryGUID(this.bytes) */
     public boolean isLimeRequeryGUID() {
         return isLimeRequeryGUID(this.bytes);
     }
-
 
     private static boolean checkMatching(byte[] bytes, 
                                          int first,
@@ -132,12 +143,27 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         return checkMatching(bytes, 4, 6, 9);
     }    
 
+    /** Returns true if this is a specially marked Requery GUID from any version
+     *  of LimeWire.  This does NOT mean that it's a new GUID as well; the
+     *  caller will probably want to check that.
+     */
+    public static boolean isLimeRequeryGUID(byte[] bytes) {    
+        return isLimeRequeryGUID(bytes, false)
+            || isLimeRequeryGUID(bytes, true);
+    }    
 
     /** Returns true if this is a specially marked LimeWire Requery GUID.
      *  This does NOT mean that it's a new GUID as well; the caller
-     *  will probably want to check that. */
-    public static boolean isLimeRequeryGUID(byte[] bytes) {    
-        return checkMatching(bytes, 0, 9, 13);
+     *  will probably want to check that. 
+     *
+     *  @param isOld true if the caller is interested in LW 2.2.0-2.2.3
+     *   requery GUIDs, false if the caller is interested 2.2.4+ GUIDs.
+     */
+    public static boolean isLimeRequeryGUID(byte[] bytes, boolean isOld) {    
+        if (isOld)
+            return checkMatching(bytes, 0, 9, 13);
+        else
+            return checkMatching(bytes, 0, 2, 13);
     }    
     
     
@@ -294,7 +320,6 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         }
     }
 
-    /*
     public static void main(String args[]) {
         byte[] b1=new byte[16];
         byte[] b2=new byte[16];
@@ -391,31 +416,58 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         Assert.that(g1.isLimeGUID());
         System.out.println(g1);
 
-        // Test isLimeRequeryGUID
-        bytes[0]=(byte)0x02;
-        bytes[1]=(byte)0x01;
-        // bytes[9]=(byte)0x17;
-        // bytes[10]=(byte)0x05;
+        // Test old requery marking
         //Note everything is LITTLE endian.
         //(0x0102+2)*(0x0517+3)=0x0104*0x051A=0x52E68 ==> 0x052E
+        bytes=new byte[16];
+        bytes[0]=(byte)0x02;
+        bytes[1]=(byte)0x01;
+        bytes[9]=(byte)0x17;
+        bytes[10]=(byte)0x05;
         bytes[13]=(byte)0x2E;
         bytes[14]=(byte)0x05;
-        g1 = new GUID(bytes);
         s1=ByteOrder.leb2short(bytes, 0);
         s2=ByteOrder.leb2short(bytes, 9);
         tag=tag(s1,s2);
-        System.out.println(g1);
         Assert.that(s1==(short)0x0102, Integer.toHexString(s1));
         Assert.that(s2==(short)0x0517, Integer.toHexString(s2));
         Assert.that(tag==(short)0x052E, Integer.toHexString(tag));
-        Assert.that(g1.isLimeRequeryGUID() && g1.isLimeGUID());
+        g1 = new GUID(bytes);
+        Assert.that(g1.isLimeRequeryGUID());
+        Assert.that(g1.isLimeRequeryGUID(true));
+        Assert.that(! g1.isLimeRequeryGUID(false));
+
+        // Test new requery marking
+        //Note everything is LITTLE endian.
+        //(0x0102+2)*(0x0517+3)=0x0104*0x051A=0x52E68 ==> 0x052E
+        bytes=new byte[16];
+        bytes[0]=(byte)0x02;
+        bytes[1]=(byte)0x01;
+        bytes[2]=(byte)0x17;
+        bytes[3]=(byte)0x05;
+        bytes[13]=(byte)0x2E;
+        bytes[14]=(byte)0x05;
+        s1=ByteOrder.leb2short(bytes, 0);
+        s2=ByteOrder.leb2short(bytes, 2);
+        tag=tag(s1,s2);
+        Assert.that(s1==(short)0x0102, Integer.toHexString(s1));
+        Assert.that(s2==(short)0x0517, Integer.toHexString(s2));
+        Assert.that(tag==(short)0x052E, Integer.toHexString(tag));
+        g1 = new GUID(bytes);
+        Assert.that(g1.isLimeRequeryGUID());
+        Assert.that(! g1.isLimeRequeryGUID(true));
+        Assert.that(g1.isLimeRequeryGUID(false));
+
 
 
         // Test LimeRequeryGUID construction....
         bytes = makeGuidRequery();
         GUID gReq = new GUID(bytes);
         System.out.println(gReq);
-        Assert.that(gReq.isLimeGUID() && gReq.isLimeRequeryGUID());
+        Assert.that(gReq.isLimeGUID());
+        Assert.that(gReq.isLimeRequeryGUID());
+        Assert.that(gReq.isLimeRequeryGUID(false));
+        Assert.that(! gReq.isLimeRequeryGUID(true));
 
         //Test hashcode, compareTo for same
         java.util.Random r=new java.util.Random();       
@@ -441,5 +493,4 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         Assert.that(g1.hashCode()!=g2.hashCode());  //not strictly REQUIRED
         System.out.println("Hash: "+Integer.toHexString(g2.hashCode()));
     }
-    */
 }
