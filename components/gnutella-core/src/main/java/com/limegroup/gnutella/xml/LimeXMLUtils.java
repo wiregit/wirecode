@@ -356,4 +356,54 @@ public class LimeXMLUtils
         return responseArray;
     }
     
+    /**
+     * Parses the passed string, and encodes the special characters (used in
+     * xml for special purposes) with the appropriate codes.
+     * e.g. '<' is changed to '&lt;'
+     * @return the encoded string
+     */
+    public static String encodeXML(String inData)
+    {
+        //get the length of input String
+        int length = inData.length();
+        //create a StringBuffer of double the size (size is just for guidance
+        //so as to reduce increase-capacity operations)
+        StringBuffer buffer = new StringBuffer(2 * length);
+        
+        //iterate over the input String
+        for(int i=0; i < length; i++)
+        {
+            //if the ith character is special character, replace by code
+            if(inData.charAt(i) == '&')
+            {
+                buffer.append("&amp;");
+            }
+            else if(inData.charAt(i) == '<')
+            {
+                buffer.append("&lt;");
+            }
+            else if(inData.charAt(i) == '>')
+            {
+                buffer.append("&gt;");
+            }
+            else if(inData.charAt(i) == '\"')
+            {
+                buffer.append("&quot;");
+            }
+            else if(inData.charAt(i) == '\'')
+            {
+                buffer.append("&apos;");
+            }
+            else
+            {
+                buffer.append(inData.charAt(i));
+            }
+        }
+        
+    //return the encoded string
+    return buffer.toString();
+}
+
+    
+    
 }
