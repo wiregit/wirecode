@@ -442,7 +442,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
     
     public void testHeadPingMessage() throws Exception {
-    	URN urn = URN.createSHA1Urn(FileDescStub.urn);
+    	URN urn = FileDescStub.DEFAULT_SHA1;
     	
     	HeadPing ping = new HeadPing(urn);
     	

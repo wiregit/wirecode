@@ -12,23 +12,24 @@ import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
 
 public class FileDescStub extends FileDesc {
-    public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
-    public static final Set set;
-    private static Set localSet2,globalSet;
-    public Set localSet;
-    public static final int size = 1126400;
+    public static final String DEFAULT_URN =
+        "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+    public static final URN DEFAULT_SHA1;
+    public static final Set DEFAULT_SET;
+    public static final int DEFAULT_SIZE = 1126400;
     
-    private AlternateLocationCollection _altlocCollection;
+    private AlternateLocationCollection _altLocCollection;
     
     static {
-        set = new HashSet();
-        globalSet=new HashSet();
+        DEFAULT_SET = new HashSet();
+        URN sha1 = null;
         try {
-            set.add(URN.createSHA1Urn(urn));
-            globalSet.addAll(set);
+            sha1 = URN.createSHA1Urn(DEFAULT_URN);
         } catch(IOException ioe) {
             ErrorService.error(ioe);
         }
+        DEFAULT_SHA1 = sha1;
+        DEFAULT_SET.add(DEFAULT_SHA1);
     }
     
     public FileDescStub() {
@@ -36,26 +37,17 @@ public class FileDescStub extends FileDesc {
     }
     
     public FileDescStub(String name) {
-        super(new File(name), set, 0);
-        localSet=new HashSet();
+        this(name, DEFAULT_SHA1, 0);
     }
     
     public FileDescStub(String name, URN urn, int index) {
-    	super(new File(name), createUrnSet(urn),index);
-    	localSet=localSet2;
+    	super(new File(name), createUrnSet(urn), index);
     }
     
     private static Set createUrnSet(URN urn) {
-    	localSet2 = new HashSet();
-    	localSet2.add(urn);
-    	globalSet.add(urn);
-    	return localSet2;
-    }
-    
-    public boolean containsUrn(URN urn) {
-    	if (globalSet.contains(urn))
-    		return true;
-    	else return super.containsUrn(urn);
+        Set s = new HashSet();
+        s.add(urn);
+        return s;
     }
 
     public InputStream createInputStream() {
@@ -71,26 +63,17 @@ public class FileDescStub extends FileDesc {
         };
     }
     
-    public long getSize() {
-        return size;
-    }
-    
-    public URN getSHA1Urn() {
-    	if (localSet.isEmpty())
-    		return super.getSHA1Urn();
-    	else return
-			(URN)localSet.toArray()[0];
-    }
-    
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.FileDesc#getAlternateLocationCollection()
 	 */
 	public AlternateLocationCollection getAlternateLocationCollection() {
-
-		return _altlocCollection;
+        if(_altLocCollection == null)
+            return super.getAlternateLocationCollection();
+        else
+		    return _altLocCollection;
 	}
 	
 	public void setAlternateLocationCollection(AlternateLocationCollection what) {
-		_altlocCollection=what;
+		_altLocCollection=what;
 	}
 }
