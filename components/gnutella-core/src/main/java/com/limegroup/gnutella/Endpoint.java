@@ -6,7 +6,7 @@ import java.io.*;
 
 
 /** Immutable IP/port pair.  Also contains an optional number and size of files. */
-public class Endpoint implements Cloneable, Serializable{
+public class Endpoint implements Cloneable, Serializable, Comparable{
     String hostname;
     int port;
     /** Number of files at the host, or -1 if unknown */
@@ -20,6 +20,33 @@ public class Endpoint implements Cloneable, Serializable{
 */
 public boolean processed = false;
     
+/**
+* The number of other nodes that this node is connected to
+*/
+public int connectivity = 0;	
+
+
+/**
+* The comparison function (It uses the connectivity as the measure for comparison
+* ie if a.connectivity > b.connectivity then a.compareTo(b) > 0
+* @param o the other object to be compared to
+*/
+public int compareTo(Object o)
+{
+	//Check for the class of the passed object
+	if(o == null)
+		throw new ClassCastException();
+
+	Endpoint other = (Endpoint) o;	
+
+	if(connectivity > other.connectivity)	
+		return 1;
+	if(connectivity < other.connectivity)
+		return -1;
+	return 0;		
+}
+
+   
 public Endpoint(String hostname, int port) {
 	this.hostname=hostname;
 	this.port=port;
