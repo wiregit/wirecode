@@ -131,17 +131,11 @@ public class RouterService
 	  String hostname, int portnum, String group)
             throws IOException {
 
-        FileManager fm = FileManager.getFileManager();
-        int num_files = fm.getNumFiles();
-        int kilobytes = fm.getSize()/1024;
-
         SettingsManager settings=SettingsManager.instance();
         group += ":"+settings.getConnectionSpeed();
 
         GroupPingRequest pingRequest = 
-		  new GroupPingRequest(SettingsManager.instance().getTTL(),
-            acceptor.getPort(), acceptor.getAddress(),
-            num_files, kilobytes, group);
+		  router.createGroupPingRequest(group);
 
         return manager.createGroupConnectionBlocking(hostname, portnum, 
 		  pingRequest);

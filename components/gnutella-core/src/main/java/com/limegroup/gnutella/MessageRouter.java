@@ -504,6 +504,23 @@ public abstract class MessageRouter
     }
 
     /**
+     * Allow the controlled creation of a GroupPingRequest
+     */
+	public GroupPingRequest createGroupPingRequest(String group)
+	{ 
+        FileManager fm = FileManager.getFileManager();
+        int num_files = fm.getNumFiles();
+        int kilobytes = fm.getSize()/1024;
+
+        GroupPingRequest pingRequest = 
+		  new GroupPingRequest(SettingsManager.instance().getTTL(),
+            _acceptor.getPort(), _acceptor.getAddress(),
+            num_files, kilobytes, group);
+		return( pingRequest );
+	}
+
+
+    /**
      * Handle a reply to a PingRequest that originated here.
      * Implementations typically process that various statistics in the reply.
      * This method is called from the default handlePingReply.
@@ -529,6 +546,9 @@ public abstract class MessageRouter
     protected abstract void handlePushRequestForMe(
         PushRequest pushRequest,
         ManagedConnection receivingConnection);
+
+
+
 
     //
     // Begin Statistics Accessors

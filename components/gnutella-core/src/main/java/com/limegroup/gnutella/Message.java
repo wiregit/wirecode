@@ -169,10 +169,11 @@ public abstract class Message implements Serializable{
         //Dispatch based on opcode.
         switch (func) {
             case F_PING:
-                if (length>6) {
+                if (length>=15) {
 				    // Build a GroupPingRequest
                     return new GroupPingRequest(guid,ttl,hops,payload);
 				}
+				else if (length>0) break;
                 return new PingRequest(guid,ttl,hops);
             case F_PING_REPLY:
                 if (length!=14) break;

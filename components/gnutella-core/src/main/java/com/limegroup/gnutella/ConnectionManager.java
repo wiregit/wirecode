@@ -504,9 +504,18 @@ public class ConnectionManager {
             try {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
-                _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
-                    _connection);
+
+				PingRequest pingRequest;
+
+				// Send GroupPingRequest to router
+				String origHost = _connection.getOrigHost();
+				if (origHost != null && origHost.equals("router.limewire.com"))
+				    pingRequest = _router.createGroupPingRequest("none");
+				else
+				    pingRequest = 
+				      new PingRequest(SettingsManager.instance().getTTL());
+
+                _router.sendPingRequest(pingRequest, _connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {

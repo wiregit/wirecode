@@ -17,6 +17,8 @@ public class GroupPingRequest extends PingRequest {
 	 *  Generic Message Header        <br>
 	 *  Port  (2 bytes)               <br>
 	 *  IP    (4 bytes)               <br>
+	 *  files (4 bytes, unsigned little endian)               <br>
+	 *  kbytes(4 bytes, unsigned little endian)               <br>
 	 *  Group (string length bytes)   <br>
 	 *  null terminator               <br>
 	 */
@@ -51,11 +53,12 @@ public class GroupPingRequest extends PingRequest {
     /*
      * Build a reconstituted GroupPingRequest with data snatched from network
      *
-     * @requires payload similar to defined structure
+     * @requires payload.length >= 15
      */
     public GroupPingRequest(byte[] guid, byte ttl, byte hops,
             byte[] payload) {
         super(guid, ttl, hops, (byte)payload.length);
+		Assert.that(payload.length>=15);	
         this.payload=payload;
     }
 
@@ -101,6 +104,7 @@ public class GroupPingRequest extends PingRequest {
     }
 
     public String getGroup() {
+		// Note: We don't check the last byte to ensure null terminator
         return new String(payload,14,payload.length-15);
     }
 
