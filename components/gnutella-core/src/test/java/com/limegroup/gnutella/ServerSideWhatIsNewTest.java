@@ -360,7 +360,8 @@ public class ServerSideWhatIsNewTest
         {
             Map longToUrns =
                 (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
-            assertTrue((longToUrns.size() == 2) || (longToUrns.size() == 3) ||
+            assertTrue(""+longToUrns, 
+                       (longToUrns.size() == 2) || (longToUrns.size() == 3) ||
                        (longToUrns.size() == 4));
         }
     }
@@ -516,7 +517,7 @@ public class ServerSideWhatIsNewTest
 
     }
 
-    
+    // test that the FileManager.removeFileIfShared method works    
     public void testRemoveSharedFile() throws Exception {
         FileManager fm = rs.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();        
@@ -562,6 +563,37 @@ public class ServerSideWhatIsNewTest
             assertEquals(longToUrns.size(), (size-1));
         }
     }
+
+
+    // manually delete a file, make sure it isn't shared and that the CTC has
+    // the correct sizes, etc...
+    public void testManualFileDeleteLoadSettings() throws Exception {
+        FileManager fm = rs.getFileManager();
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+
+        tempFile1.delete(); tempFile1 = null;
+        tempFile2.delete(); tempFile2 = null;
+        berkeley.delete(); berkeley = null;
+
+        fm.loadSettings(false);
+        Thread.sleep(2000);
+        assertEquals("num shared files? " + rs.getNumSharedFiles(), 1,
+                     rs.getNumSharedFiles());
+
+        URN susheelURN = fm.getURNForFile(susheel);
+        {
+            Map urnToLong = 
+                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            assertEquals(""+urnToLong, 1, urnToLong.size());
+            assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
+        }
+        {
+            Map longToUrns =
+                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            assertEquals(""+longToUrns, 1, longToUrns.size());
+        }
+    }
+    
         
 
     private static void shutdown() throws IOException {

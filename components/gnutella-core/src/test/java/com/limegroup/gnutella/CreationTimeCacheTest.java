@@ -47,6 +47,16 @@ public class CreationTimeCacheTest
     private static URN hash3;
     private static URN hash4;
 
+    static {
+        try {
+        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
+        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
+        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
+        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
+        }
+        catch (Exception terrible) {}
+    }
+
     /**
      * Ultrapeer 1 UDP connection.
      */
@@ -118,10 +128,6 @@ public class CreationTimeCacheTest
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
 
-        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
-        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
-        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
     }        
     
     public void setUp() throws Exception  {
