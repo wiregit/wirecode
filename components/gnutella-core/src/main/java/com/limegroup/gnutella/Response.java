@@ -143,7 +143,7 @@ public class Response {
 	 */
 	private static String createXmlString(String name, String ext) {
 		StringTokenizer tok = new StringTokenizer(ext);
-		if(tok.countTokens() < 3) {
+		if(tok.countTokens() < 2) {
 			// if there aren't the expected number of tokens, simply
 			// return the empty string
 			return "";
@@ -220,7 +220,7 @@ public class Response {
     }
     
 	/**
-	 * Static zero-length array that can be used for any <tt>Response</tt>
+	 * Staticc zero-length array that can be used for any <tt>Response</tt>
 	 * instance that doesn't have urns.
 	 */
 	private final static byte[] NULL_EXT_ARRAY = new byte[0];
