@@ -118,7 +118,6 @@ public final class FileDesc {
 		Iterator iter = _alternateLocations.values().iterator();	   
 		StringBuffer writeBuffer = new StringBuffer();
 		writeBuffer.append(HTTPConstants.ALTERNATE_LOCATION_HEADER+" ");
-		//os.write(writeStr.getBytes());
 		while(iter.hasNext()) {
 			writeBuffer.append(((AlternateLocation)iter.next()).toString());
 			if(iter.hasNext()) {
