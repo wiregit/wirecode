@@ -65,7 +65,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
+            CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
         mp3 = 
