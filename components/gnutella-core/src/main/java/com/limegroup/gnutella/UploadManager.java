@@ -1170,9 +1170,11 @@ public final class UploadManager implements BandwidthTracker {
 		// open the stream from the socket for reading
 		ByteReader br = new ByteReader(iStream);
 		
+        LOG.trace("trying to read request.");
         // read the first line. if null, throw an exception
         String str = br.readLine();
-        
+        if (LOG.isTraceEnabled()) LOG.trace("request is: " + str);
+
         try {
 
             if (str == null) {
