@@ -49,7 +49,6 @@ public class RemoteFileDesc implements Serializable {
     private PushProxyInterface[] _proxies;
     private boolean _firewalled;
     private String _vendor;
-    private int _score;
     private long _timestamp;
     //TODO: Try to see if we can solve serialization issues without
     //having to create all these different variables.
@@ -69,7 +68,7 @@ public class RemoteFileDesc implements Serializable {
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns) {
         this(host, port, index, filename, size, clientGUID, speed,
-             chat, quality, browseHost, xmlDoc, urns, false,false,0,"",0l, null);
+             chat, quality, browseHost, xmlDoc, urns, false,false,"",0l, null);
     }
 	
 	/** 
@@ -100,7 +99,7 @@ public class RemoteFileDesc implements Serializable {
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns,
 						  boolean replyToMulticast, boolean firewalled, 
-                          int score, String vendor, long timestamp,
+                          String vendor, long timestamp,
                           PushProxyInterface[] proxies) {
 		if((port & 0xFFFF0000) != 0) {
 			throw new IllegalArgumentException("invalid port: "+port);
@@ -133,7 +132,6 @@ public class RemoteFileDesc implements Serializable {
 		_replyToMulticast = replyToMulticast;
         _proxies = proxies;
         _firewalled = firewalled;
-        _score = score;
         _vendor = vendor;
         _timestamp = timestamp;
         if(xmlDoc!=null) //not strictly needed
@@ -218,8 +216,6 @@ public class RemoteFileDesc implements Serializable {
 	public final int getSpeed() {return _speed;}	
     
     public final String getVendor() {return _vendor;}
-
-    public final int getScore() {return _score;}
 
 	public final boolean chatEnabled() {return _chatEnabled;}
 	public final boolean browseHostEnabled() {return _browseHostEnabled;}

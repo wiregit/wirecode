@@ -272,7 +272,7 @@ public final class SearchResultHandler {
                                                  doc,
                                                  response.getUrns(),
                                                  data.isReplyToMulticastQuery(),
-                                                 data.isFirewalled(), score, 
+                                                 data.isFirewalled(), 
                                                  data.getVendorCode(),
                                                  System.currentTimeMillis(),
                                                  data.getPushProxies());

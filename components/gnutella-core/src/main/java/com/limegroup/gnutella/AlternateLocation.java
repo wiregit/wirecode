@@ -699,7 +699,6 @@ public final class AlternateLocation
 								  EMPTY_GUID, 1000,
 								  true, 3, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
-                                  0,//TODO: get rid of this.
                                   "ALT",//Never displayed, and we don't know
                                   getTime(),//not accurate, best we can do
                                   null);
