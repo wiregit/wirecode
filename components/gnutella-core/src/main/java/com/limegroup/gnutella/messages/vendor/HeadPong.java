@@ -109,16 +109,6 @@ public class HeadPong extends VendorMessage {
 	private static final float RANGE_COMPRESSION = 0.6f;
 	
 	/**
-	 * how well do we think altlocs will compress
-	 */
-	private static final float ALTLOC_COMPRESSION = 0.7f;
-	
-	/**
-	 * how well do we think pushlocs will compress
-	 */
-	private static final float PUSHLOC_COMPRESSION = 0.8f;
-	
-	/**
 	 * instead of using the HTTP codes, use bit values.  The first three 
 	 * possible values are mutually exclusive though.  DOWNLOADING is
 	 * possible only if PARTIAL_FILE is set as well.
@@ -656,7 +646,7 @@ public class HeadPong extends VendorMessage {
 	    short filtered = 0;
 	    
 	    // estimate up to how many altlocs we can fit.
-	    int toPack = (int)((PACKET_SIZE - dest.getEstimatedSize() ) / (ALTLOC_COMPRESSION * 6));
+	    int toPack = (int)((PACKET_SIZE - dest.getEstimatedSize() ) / 6);
 	    
 	    // nothing will fit - too bad.
 	    if (toPack == 0)
@@ -695,7 +685,7 @@ public class HeadPong extends VendorMessage {
 	    byte [] tmp = new byte[alts.length+2];
 	    ByteOrder.short2beb((short)alts.length,tmp,0);
 	    System.arraycopy(alts,0,tmp,2,alts.length);
-	    dest.putAndCompress((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA,tmp);
+	    dest.put((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA,tmp);
 	    
 	    // if the other side indicated support for statistics, add those too
 	    byte [] pingFeatures = ping._ggep.get(GGEPHeadConstants.GGEP_PROPS);
@@ -722,7 +712,7 @@ public class HeadPong extends VendorMessage {
 	    short filtered = 0;
 	    
 	    // estimate up to how many altlocs we can fit.
-	    int toPack = (int)((PACKET_SIZE - dest.getEstimatedSize() ) / (PUSHLOC_COMPRESSION * 47));
+	    int toPack = (int)((PACKET_SIZE - dest.getEstimatedSize() ) / 47);
 	    
 	    // nothing will fit - too bad.
 	    if (toPack == 0)
@@ -768,7 +758,7 @@ public class HeadPong extends VendorMessage {
 	    byte [] tmp = new byte[alts.length+2];
 	    ByteOrder.short2beb((short)alts.length,tmp,0);
 	    System.arraycopy(alts,0,tmp,2,alts.length);
-	    dest.putAndCompress((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA,tmp);
+	    dest.put((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA,tmp);
 	    
 	    // if the other side indicated support for statistics, add those too
 	    byte [] pingFeatures = ping._ggep.get(GGEPHeadConstants.GGEP_PROPS);
