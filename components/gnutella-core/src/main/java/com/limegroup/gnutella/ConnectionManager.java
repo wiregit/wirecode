@@ -1426,6 +1426,15 @@ public class ConnectionManager {
             ManagedConnection newest = null;
             for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
                 ManagedConnection c = (ManagedConnection)i.next();
+                
+                // first see if this is a non-limewire connection and cut it off
+                // unless it is our only connection left
+                
+                if (!c.isLimeWire()) {
+                    newest = c;
+                    break;
+                }
+                
                 if(newest == null || 
                    c.getConnectionTime() > newest.getConnectionTime())
                     newest = c;
