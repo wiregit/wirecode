@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import com.limegroup.gnutella.ErrorService;
@@ -32,18 +33,19 @@ final class I18NConvertICU extends AbstractI18NConverter {
         java.util.BitSet bs2 = null;
     	Map hm = null;
     	try {
-    	    ClassLoader cl = getClass().getClassLoader();
-    	    
+    	    InputStream fi = CommonUtils.getResourceStream("excluded.dat");
     	    //read in the explusion bitset
     	    ObjectInputStream ois = 
-                new ObjectInputStream(cl.getResource("excluded.dat").openStream());
+                new ObjectInputStream(fi);
     	    bs = (java.util.BitSet)ois.readObject();
-                
+            
+            fi = CommonUtils.getResourceStream("caseMap.dat");
     	    //read in the case map
-            ois = new ObjectInputStream(cl.getResource("caseMap.dat").openStream());
+            ois = new ObjectInputStream(fi);
             hm = (HashMap)ois.readObject();
 
-            ois = new  ObjectInputStream(cl.getResource("replaceSpace.dat").openStream());
+            fi = CommonUtils.getResourceStream("replaceSpace.dat");
+            ois = new  ObjectInputStream(fi);
             bs2 = (java.util.BitSet)ois.readObject();
             
     	}
