@@ -11,4 +11,8 @@ public class ErrorCallbackStub implements ErrorCallback {
     public void error(Throwable t) {
         exceptions++;
     }
+    
+    public void error(Throwable t, String detail) {
+        exceptions++;
+    }
 }   

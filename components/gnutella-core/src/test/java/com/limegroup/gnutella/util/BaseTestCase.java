@@ -375,7 +375,14 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     }
             
     
-    /* 
+    /**
+     * Stub for error(Throwable, String)
+     */
+    public void error(Throwable ex) {
+        error(ex, null);
+    }
+    
+    /** 
      * This is the callback from ErrorService, and why we implement
      * ErrorCallback.
      *
@@ -393,7 +400,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * of the test, and will also only write the last one as the
      * message/stacktrace.
      */
-    public void error(Throwable ex) {
+    public void error(Throwable ex, String detail) {
         if ( _testThread != Thread.currentThread() ) {
             _testResult.addError(this, ex);
             _testThread.interrupt();

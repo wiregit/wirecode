@@ -99,6 +99,13 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
         
     
     /**
+     * Stub for error(Throwable, String)
+     */
+    public void error(Throwable ex) {
+        error(ex, null);
+    }    
+    
+    /**
      * The error service callback.
      *
      * This does a somewhat unusual thing to report the error.
@@ -107,8 +114,8 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
      * This has the advantage of reporting the error in a different
      * 'test', ensuring that people aren't confused as to how the error
      * was caused.
-     */
-    public void error(Throwable ex) {
+     */    
+    public void error(Throwable ex, String detail) {
         if ( _testResult != null )
             runTest(reportError(ex, _testResult), _testResult);
         else
