@@ -814,6 +814,7 @@ public class HostCatcher {
         PROBATION_HOSTS.clear();
         EXPIRED_HOSTS.clear();
         _hitCaches = false;
+        _failures = 0;
     }
 
     /**
