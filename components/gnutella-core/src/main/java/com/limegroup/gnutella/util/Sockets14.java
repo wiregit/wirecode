@@ -1,0 +1,25 @@
+package com.limegroup.gnutella.util;
+
+import java.net.SocketAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.io.IOException;
+
+/**
+ * Simple class that constructs a Socket
+ * using Java 1.4 classes.
+ *
+ * This is not done in Sockets because it will have ClassLoading
+ * errors if called on Java 1.3.
+ */
+class Sockets14 {
+    
+    private Sockets14() {}
+    
+    static final Socket getSocket(String host, int port, int timeout) throws IOException {
+        SocketAddress addr = new InetSocketAddress(host, port);
+        Socket ret = new Socket();
+        ret.connect(addr, timeout);
+        return ret;
+    }
+}

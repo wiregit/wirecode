@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -22,42 +19,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * Obsoletes the old SocketOpener class.
  */
 public class Sockets {
-
-	/**
-	 * Cached <tt>Constructor</tt> for <tt>InetSocketAddress</tt>s.
-	 */
-	private static Constructor _inetAddressConstructor;
-
-	/**
-	 * Cached <tt>SocketAddress</tt> class.
-	 */
-	private static Class _socketAddressClass;
-	
-	/**
-	 * Cached <tt>connect</tt> method.
-	 */
-	private static Method _connectMethod;
-
-	// statically initialize the socket classes we can so that
-	// we don't have it inefficiently look them up each time
-	static {
-	    try {
-    		if(CommonUtils.isJava14OrLater()) {
-				Class socketAddress = 
-					Class.forName("java.net.InetSocketAddress");
-				_inetAddressConstructor = 
-					socketAddress.getConstructor(new Class[] { 
-						String.class, Integer.TYPE 
-					});
-				_socketAddressClass = Class.forName("java.net.SocketAddress");
-				_connectMethod = Socket.class.getMethod("connect", 
-                    new Class[] { _socketAddressClass, Integer.TYPE });
-            }
-		} catch(Exception e) {
-			// should never happen on 1.4, so display error if it does
-			ErrorService.error(e);
-		} 
-	}
 
 	/**
 	 * Ensure this cannot be constructed.
@@ -130,45 +91,15 @@ public class Sockets {
 	 */
 	private static Socket connectPlain(String host, int port, int timeout)
 		throws IOException {
-        if (CommonUtils.isJava14OrLater()) {
-            //a) Non-blocking IO using Java 1.4. Conceptually, this code
-            //   does the following:
-            //      SocketAddress addr=new InetSocketAddress(host, port);
-            //      Socket ret=new Socket();
-            //      ret.connect(addr, timeout);
-            //      return ret;
-            //   Unfortunately that causes compile errors on older versions
-            //   of Java.  Worse, it may cause runtime errors if class loading
-            //   is not done lazily.  (See chapter 12.3.4 of the Java Language
-            //   Specification.)  So we use reflection.
-            try {
-                Socket ret = (Socket)Socket.class.newInstance();
-                Object addr = _inetAddressConstructor.newInstance(
-                    new Object[] { host, new Integer(port) });
-
-                _connectMethod.invoke(ret, 
-                    new Object[] { addr, new Integer(timeout) });
-                return ret;
-            } catch (InvocationTargetException e) {
-                Throwable e2 = e.getTargetException();
-                throw (IOException)e2;
-            } catch(InstantiationException e) {
-                // this should never happen -- display the error
-                ErrorService.error(e);
-            } catch(IllegalAccessException e) {
-                // should almost never happen -- we want to know if it 
-                // does
-                ErrorService.error(e);
-            }
-        }
-     
-        if (timeout!=0) {
+        if (CommonUtils.isJava14OrLater())
+            //a) 1.4-style sockets
+            return Sockets14.getSocket(host, port, timeout);
+        else if (timeout!=0)
             //b) Emulation using threads
             return (new SocketOpener(host, port)).connect(timeout);
-        } else {
+        else
             //c) No timeouts
             return new Socket(host, port);
-        }
     }
 
 	/** 
