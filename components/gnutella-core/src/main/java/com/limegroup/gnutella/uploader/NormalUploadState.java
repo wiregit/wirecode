@@ -12,13 +12,13 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
  * i.e., the real uploader.  It should send the appropriate header information,
  * followed by the actual file.  
  */
-public final class NormalUploadState implements HTTPMessage {
+public final class NormalUploadState extends UploadState {
     /** The amount of time that a send/wait cycle should take for throttled
      *  uploads.  This should be short enough to not be noticeable in the GUI,
      *  but long enough so that waits are not called so often as to be
      *  inefficient. */
     private static final int BLOCK_SIZE=1024;
-	private final HTTPUploader _uploader;
+	
 	private final int _index;
 	private final String _fileName;
 	private final int _fileSize;
@@ -42,10 +42,6 @@ public final class NormalUploadState implements HTTPMessage {
     private static final BandwidthThrottle THROTTLE = 
         new BandwidthThrottle(getUploadSpeed(), false);
 
-	/**
-	 * <tt>FileDesc</tt> instance for the file being uploaded.
-	 */
-	private final FileDesc FILE_DESC;
 
 	/**
 	 * Constructs a new <tt>NormalUploadState</tt>, establishing all 
@@ -55,11 +51,11 @@ public final class NormalUploadState implements HTTPMessage {
 	 */
 	public NormalUploadState(HTTPUploader uploader, 
                                     StalledUploadWatchdog watchdog) {
-		_uploader = uploader;
-		FILE_DESC = _uploader.getFileDesc();
-		_index = _uploader.getIndex();	
-		_fileName = _uploader.getFileName();
-		_fileSize = _uploader.getFileSize();
+		super(uploader);
+		
+		_index = UPLOADER.getIndex();	
+		_fileName = UPLOADER.getFileName();
+		_fileSize = UPLOADER.getFileSize();
 		_amountWritten = 0;
 		_stalledChecker = watchdog; //new StalledUploadWatchdog();
  	}
@@ -71,10 +67,10 @@ public final class NormalUploadState implements HTTPMessage {
 	public void writeMessageHeaders(OutputStream network) throws IOException {
 		try {
 		    Writer ostream = new StringWriter();
-			_fis =  _uploader.getInputStream();
-			_uploadBegin =  _uploader.getUploadBegin();
-			_uploadEnd =  _uploader.getUploadEnd();
-			_amountRequested = _uploader.getAmountRequested();
+			_fis =  UPLOADER.getInputStream();
+			_uploadBegin =  UPLOADER.getUploadBegin();
+			_uploadEnd =  UPLOADER.getUploadEnd();
+			_amountRequested = UPLOADER.getAmountRequested();
 			//guard clause
 			if(_fileSize < _uploadBegin)
 				throw new IOException("Invalid Range");
@@ -116,34 +112,12 @@ public final class NormalUploadState implements HTTPMessage {
 			    ostream.write("Content-Range: bytes " + _uploadBegin  +
 				    "-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n");
 			}
+			writeAlts(network);
+			writeRanges(network);
 			if(FILE_DESC != null) {
 				URN urn = FILE_DESC.getSHA1Urn();
-				if(urn != null) {
-					HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, 
-										                          urn, ostream);
-				}
-                Set alts = _uploader.getNextSetOfAltsToSend();
-				if(alts.size() > 0) {
-					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
-                                          ostream);
-				}
 				
-				if (_uploader.wantsFAlts()) {
-					alts = _uploader.getNextSetOfPushAltsToSend();
-					if(alts.size() > 0) {
-						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-	                                          new HTTPHeaderValueCollection(alts),
-	                                          ostream);
-					}
-					
-				}
-                if (FILE_DESC instanceof IncompleteFileDesc) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
-                                          ((IncompleteFileDesc)FILE_DESC),
-                                          ostream);
-                }
-                if (_uploader.isFirstReply()) {
+                if (UPLOADER.isFirstReply()) {
                     // write the creation time if this is the first reply.
                     // if this is just a continuation, we don't need to send
                     // this information again.
@@ -160,7 +134,7 @@ public final class NormalUploadState implements HTTPMessage {
             
             // write x-features header once because the downloader is
             // supposed to cache that information anyway
-            if (_uploader.isFirstReply())
+            if (UPLOADER.isFirstReply())
                 HTTPUtils.writeFeatures(ostream);
 
             // write X-Thex-URI header with root hash if we have already 
@@ -223,7 +197,7 @@ public final class NormalUploadState implements HTTPMessage {
 			_stalledChecker.deactivate();
             
             _amountWritten += c;
-            _uploader.setAmountUploaded(_amountWritten);
+            UPLOADER.setAmountUploaded(_amountWritten);
             burstSent += c;           
             //finish uploading if the desired amount 
             //has been uploaded

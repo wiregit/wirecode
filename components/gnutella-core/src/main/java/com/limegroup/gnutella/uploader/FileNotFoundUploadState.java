@@ -12,8 +12,11 @@ import com.limegroup.gnutella.util.CommonUtils;
  * error codes to the requesting client indicating that this is the 
  * case.
  */
-public final class FileNotFoundUploadState implements HTTPMessage {
+public final class FileNotFoundUploadState extends UploadState {
 
+	public FileNotFoundUploadState(){
+		super(null);
+	}
 	/**
 	 * Constant for the error message to send.
 	 */

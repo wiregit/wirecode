@@ -11,8 +11,11 @@ import java.io.*;
  * error codes to the requesting client indicating that this is the 
  * case.
  */
-public final class MalformedRequestState implements HTTPMessage {
+public final class MalformedRequestState extends UploadState {
 
+	public MalformedRequestState() {
+		super(null);
+	}
 	/**
 	 * Constant for the error message to send.
 	 */

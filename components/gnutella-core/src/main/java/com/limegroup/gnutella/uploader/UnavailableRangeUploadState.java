@@ -12,14 +12,8 @@ import com.sun.java.util.collections.Set;
  * for an unavailable range that has been requested. This is an
  * HTTP 416 error.
  */
-public class UnavailableRangeUploadState implements HTTPMessage {
+public class UnavailableRangeUploadState extends UploadState {
     
-	/**
-	 * Constant for the <tt>FileDesc</tt> instance that was requested.
-	 */
-	private final FileDesc FILE_DESC;
-
-    private final HTTPUploader UPLOADER;
     
     /**
      * Constant for the amount of time to wait before retrying if we are
@@ -38,8 +32,7 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
 	public UnavailableRangeUploadState(HTTPUploader uploader) {
-        UPLOADER = uploader;
-		FILE_DESC = UPLOADER.getFileDesc();
+        super(uploader);
 	}
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -52,44 +45,21 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 		ostream.write(str.getBytes());
 		str = "Content-Length: 0\r\n";
 		ostream.write(str.getBytes());
-		if(FILE_DESC != null) {
-			// write the URN in case the caller wants it
-			URN sha1 = FILE_DESC.getSHA1Urn();
-			if(sha1 != null) {
-				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
-									  sha1,
-									  ostream);
-                Set alts = UPLOADER.getNextSetOfAltsToSend();
-				if(alts.size() > 0) {
-					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
-                                          ostream);
-				}
-				
-				if (UPLOADER.wantsFAlts()) {
-					alts = UPLOADER.getNextSetOfPushAltsToSend();
-					if(alts.size() > 0) {
-						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
-	                                          new HTTPHeaderValueCollection(alts),
-	                                          ostream);
-					}
-					
-				}
-			}
-            if (FILE_DESC instanceof IncompleteFileDesc) {
-                IncompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;
-                HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
-                                      ifd, ostream);
-                if(!ifd.isActivelyDownloading()) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-                                          INACTIVE_RETRY_AFTER,
-                                          ostream);    
-                }                                  
-            }
-		}
+		
         
 		str = "\r\n";
 		ostream.write(str.getBytes());
+		writeAlts(ostream);
+		writeRanges(ostream);
+		
+        if (FILE_DESC!=null && FILE_DESC instanceof IncompleteFileDesc) {
+        	IncompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;
+            if(!ifd.isActivelyDownloading()) {
+                HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
+                                      INACTIVE_RETRY_AFTER,
+                                      ostream);    
+            }                                  
+        }
 	}
     
 	public void writeMessageBody(OutputStream ostream) throws IOException {

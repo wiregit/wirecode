@@ -9,8 +9,12 @@ import com.limegroup.gnutella.util.CommonUtils;
 /**
  * Sends a 403 Banned For Hammering reply to a greedy client
  */
-public class BannedUploadState implements HTTPMessage {
+public class BannedUploadState extends UploadState {
 
+
+	public BannedUploadState() {
+		super(null);
+	}
 	/**
 	 * Constant for the error message to send.
 	 */

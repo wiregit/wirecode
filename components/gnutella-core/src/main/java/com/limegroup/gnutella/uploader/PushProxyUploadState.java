@@ -13,26 +13,26 @@ import com.limegroup.gnutella.statistics.*;
  * An implementaiton of the UploadState interface
  * when the request is to PushProxy
  */
-public final class PushProxyUploadState implements HTTPMessage {
+public final class PushProxyUploadState extends UploadState {
     
     public static final String P_SERVER_ID = "ServerId";
     public static final String P_GUID = "guid";
     public static final String P_FILE = "file";
     
-    private final HTTPUploader _uploader;
+    
 
 	private final ByteArrayOutputStream BAOS = 
 		new ByteArrayOutputStream();
     
     public PushProxyUploadState(HTTPUploader uploader) {
-		this._uploader = uploader;
+		super(uploader);
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 
-        byte[] clientGUID  = GUID.fromHexString(_uploader.getFileName());
-        InetAddress hostAddress = _uploader.getNodeAddress();
-        int    hostPort    = _uploader.getNodePort();
+        byte[] clientGUID  = GUID.fromHexString(UPLOADER.getFileName());
+        InetAddress hostAddress = UPLOADER.getNodeAddress();
+        int    hostPort    = UPLOADER.getNodePort();
         
         if ( clientGUID.length != 16 ||
              hostAddress == null ||
@@ -47,7 +47,7 @@ public final class PushProxyUploadState implements HTTPMessage {
             return;
         }
         
-        Map params = _uploader.getParameters();
+        Map params = UPLOADER.getParameters();
         int fileIndex = 0; // default to 0.
         Object index = params.get(P_FILE);
         // set the file index if we know it...
@@ -89,7 +89,7 @@ public final class PushProxyUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
-        _uploader.setAmountUploaded(BAOS.size());
+        UPLOADER.setAmountUploaded(BAOS.size());
         debug("PPUS.doUpload(): returning.");
 	}
 	
