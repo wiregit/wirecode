@@ -235,9 +235,11 @@ public class HostCatcher {
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
-        //supernode.
-        if (pr.isMarked())
+        //supernode.  Also feed to unicaster....
+        if (pr.isMarked()) {
+            QueryUnicaster.instance().addUnicastEndpoint(e);
             return add(e, GOOD_PRIORITY);
+        }
         else
             return add(e, priority(e));
     }
