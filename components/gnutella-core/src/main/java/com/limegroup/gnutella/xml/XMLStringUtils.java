@@ -9,6 +9,7 @@ package com.limegroup.gnutella.xml;
 import java.util.*;
 import java.io.File;
 import com.limegroup.gnutella.SettingsManager;
+import com.limegroup.gnutella.*;
 
 /**
  * Provides utility methods to process the canonicalized strings we use to
@@ -154,36 +155,39 @@ public class XMLStringUtils
         return choppedElements;
     }
 
-
+    
     public static void saveMetaInfo(LimeXMLDocument doc, 
                                     String fileName) {
-
+        
         // file needs to be properly located...
-        fileName = SettingsManager.instance().getSaveDirectory() +
-        File.separator + fileName;
-
+        String path = SettingsManager.instance().getSaveDirectory();
+        String fName = path + File.separator + fileName;
+        
         // get all needed info
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         String uri = doc.getSchemaURI();
         LimeXMLReplyCollection collection = map.getReplyCollection(uri);
-        doc.setIdentifier(fileName);
-
-        if (collection == null){ //there is no reply collection yet
-            collection = new LimeXMLReplyCollection(uri,doc);
-            map.add(uri,collection);
+        Assert.that(collection!=null,"Cant add doc to nonexistent collection");
+        doc.setIdentifier(fName);
+        File f = new File(path,fileName);
+        //we are adding new data
+        String hash=null;
+        try{
+            hash = new String(LimeXMLUtils.hashFile(f));
+        }catch(Exception e){//very bad case! Could not hash file.
+            return;//fail silently
         }
-        else 
-            //we are adding new data
-            collection.addReply(doc);
+        collection.addReply(hash,doc);
         
         boolean committed;
         if (collection.audio)
-           committed  = collection.mp3ToDisk(fileName);
+            committed  = collection.mp3ToDisk(fileName);
         else
             committed = collection.toDisk("");
         if (!committed){
             // this is bad            
         }
     }
+    
     
 }

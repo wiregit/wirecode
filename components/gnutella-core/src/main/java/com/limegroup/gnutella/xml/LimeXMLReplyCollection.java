@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.mp3.*;
+import com.limegroup.gnutella.*;
 import java.io.*;
 import java.util.*;
 
@@ -20,207 +21,171 @@ public class LimeXMLReplyCollection{
     private String schemaURI;
     //a list of reply docs in the client machine that correspond to the Schema
     //Note: Each ReplyCollection is written out to 1 physical file on shutdown.
-    private ArrayList replyDocs;
-    private boolean done= false;
+    private HashMap mainMap;
     public boolean audio = false;//package access
     private ID3Editor editor = null;
+    private List replyDocs=null;
+    private File dataFile = null;//flat file where all data is stored.
+    private int count;
+    private HashMap outMap = null;
+    private String changedHash = null;
 
-
-    //Constructor for audio Schema
-    public LimeXMLReplyCollection(Map nameToFile, String URI){
-        schemaURI = URI;
+    /**
+     * Special audio constructor. The signature is the same as the other
+     * constructor, except the boolean. This is a hack. The order is different
+     * for non audio stuff. TODO2: This is BAD! Users may reverse the order
+     * by mistake and they would die.
+     */
+    public LimeXMLReplyCollection(String URI, Map hashToFile ){
         audio = true;
-        replyDocs = new ArrayList();
+        MapSerializer ms = initialize(URI);//contains strings now 
+        Map hashToXMLStr = ms.getMap();
         ID3Reader id3Reader = new ID3Reader();
-        String content = getContent();
-        if(content!= null && !content.equals("")){
-            int startIndex = content.indexOf(
-                            XMLStringUtils.XML_DOC_START_IDENTIFIER);
-            int endIndex = startIndex;
-            String xmlDoc = "";
-            boolean finished= false;
-            while(!finished){
-                startIndex = endIndex;//nextRound
-                if (startIndex == -1){
-                    finished = true;
-                    continue;
-                }
-                endIndex=content.indexOf
-                     (XMLStringUtils.XML_DOC_START_IDENTIFIER,startIndex+1);
-                if (endIndex > 0)
-                    xmlDoc = content.substring(startIndex, endIndex);
-                else
-                    xmlDoc = content.substring(startIndex);
-                String xmlString = "";
-                StringTokenizer tok = new StringTokenizer(xmlDoc,"\n\t");
-                while (tok.hasMoreTokens()){
-                    xmlString = xmlString+tok.nextToken();
-                }
-                String identifier = getIdentifierFromXMLStr(xmlString);
-                if(identifier==null || identifier.equals(""))
-                    continue;
-                File f = (File)nameToFile.remove(identifier);
-                String str;
-                try{
-                    str = id3Reader.readDocument(f,false);//its mixed
-                }catch (Exception e){
-                    str = "";
-                }
-                String xmlStr = joinAudioXMLStrings(str,xmlString);
-                LimeXMLDocument doc = null;
-                try{
-                    doc = new LimeXMLDocument(xmlStr);
-                }catch(Exception e){//the xml is malformed
-                    //e.printStackTrace();
-                    continue;//just ignore this document. dont add or set done
-                }
-                if(doc != null){
-                    addReply(doc);
-                    if(done == false)
-                        done = true;//set it to true coz now we have some data
-                }
-            }
-        }//end of if that checks if we have to deal with file data as well
-        Iterator names = nameToFile.keySet().iterator();
-        while(names.hasNext()){
-            File file = (File)nameToFile.get(names.next());
-            LimeXMLDocument d = null;
+        Iterator hashIter = hashToFile.keySet().iterator();
+        LimeXMLDocument doc;
+        while(hashIter.hasNext()) {
+            boolean solo=false;
+            String hash = (String)hashIter.next();
+            String fileXMLString=(String)hashToXMLStr.get(hash);
+            if(fileXMLString==null || fileXMLString.equals(""))
+                solo = true;//rich data only from ID3
+            File file = (File)hashToFile.get(hash);//this cannot be null
             try{
-                String s = id3Reader.readDocument(file,true);//its not mixed
-                d = new LimeXMLDocument(s);
+                String XMLString = id3Reader.readDocument(file,solo);
+                if(!solo){
+                    XMLString = joinAudioXMLStrings(XMLString,fileXMLString);
+                    System.out.println("Sumeet joined string=\n"+XMLString);
+                }
+                doc = new LimeXMLDocument(XMLString);
             }catch(Exception e){
                 continue;
             }
-            if(d!=null){
-                addReply(d);
-                if(done == false)
-                    done = true;
+            if(doc!=null)
+                addReply(hash,doc);
+        }
+        //ensure that the files are documents are consistent with the files.
+        checkDocuments(hashToFile);
+    }
+    
+    /**
+     * @param hashToFile contains all hashes for all the non-mp3 files found
+     * by the MetaFileManager
+     */
+    public LimeXMLReplyCollection(Map hashToFile, String URI) {
+        audio = false;
+        MapSerializer ms = initialize(URI);
+        Map hashToXMLStr = ms.getMap();
+        Iterator iter = hashToXMLStr.keySet().iterator();
+        while(iter.hasNext()){
+            boolean valid = true;
+            String hash = (String)iter.next();
+            String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
+            File file = (File)hashToFile.get(hash);
+            LimeXMLDocument doc=null;
+            if (file == null)//file no longer in library - discard xml
+                valid = false;
+            else{
+                try{
+                    doc = new LimeXMLDocument(xmlStr);
+                }catch(Exception e){
+                    valid = false;
+                }
             }
+            if(valid)
+                addReply(hash,doc);
+        }
+        checkDocuments(hashToFile);
+    }
+
+    private void checkDocuments (Map hashToFile){
+        //compare fileNames  from documents in mainMap to 
+        //actual filenames as per the map
+        Iterator iter = mainMap.keySet().iterator();
+        while(iter.hasNext()){
+            String hash = (String)iter.next();
+            File file = (File)hashToFile.get(hash);
+            LimeXMLDocument doc = (LimeXMLDocument)mainMap.get(hash);
+            String actualName = null;
+            try {
+                actualName = file.getCanonicalPath();
+            }catch (IOException ioe) {
+                mainMap.remove(hash);
+                Assert.that(false,"Cannot find actual file name.");
+            }
+            String identifier = doc.getIdentifier();
+            if(!actualName.equalsIgnoreCase(identifier))
+                doc.setIdentifier(actualName);
+            //TODO: Commit this to disk if any of the docs was dirty!
         }
     }
 
-    //Original Constructor
-    public LimeXMLReplyCollection(String URI) {
-        schemaURI = URI;//store it away
-        replyDocs = new ArrayList();
-        String content = getContent();
-        if(content==null || content.equals("")){
-            done = false;
-            return;
-        }
-        int startIndex = content.indexOf(
-                              XMLStringUtils.XML_DOC_START_IDENTIFIER);
-        int endIndex = startIndex;
-        String xmlDoc = "";
-        boolean finished= false;
-        while(!finished){
-            startIndex = endIndex;//nextRound
-            if (startIndex == -1){
-                finished = true;
-                continue;
-            }
-            endIndex=content.indexOf(XMLStringUtils.XML_DOC_START_IDENTIFIER,
-                                     startIndex+1);
-            if (endIndex > 0)
-                xmlDoc = content.substring(startIndex, endIndex);
-            else
-                xmlDoc = content.substring(startIndex);
-            String xmlString = "";
-            StringTokenizer tok = new StringTokenizer(xmlDoc,"\n\t");
-            while (tok.hasMoreTokens()){
-                xmlString = xmlString+tok.nextToken();
-            }
-            LimeXMLDocument doc= null;
-            try{
-                doc = new LimeXMLDocument(xmlString);
-            }catch(Exception e){//the xml is malformed
-                //e.printStackTrace();
-                continue;//just ignore this document. do not add or set done
-            }
-            if(doc!=null){
-                addReply(doc);
-                if(done == false)
-                    done = true;//set it to true coz now we have some data
-            }
-        }
-    }
-
-    private String getIdentifierFromXMLStr(String xmlStr){
-        int i = xmlStr.indexOf("identifier");
-        i = xmlStr.indexOf("\"",i);
-        int j = xmlStr.indexOf("\"",i+1);
-        if(i<0 || j<0)
-            return "";
-        return xmlStr.substring(i+1,j);
+    /**
+     * returns null if there was an exception while creating the
+     * MapSerializer
+     */
+    private MapSerializer initialize(String URI){
+        String fname = LimeXMLSchema.getDisplayString(URI)+".sxml";
+        LimeXMLProperties props = LimeXMLProperties.instance();
+        String path = props.getXMLDocsDir();
+        dataFile = new File(path,fname);
+        mainMap = new HashMap();
+        MapSerializer ret = null;
+        try{
+            ret = new MapSerializer(dataFile);
+        }catch(Exception e){}
+        return ret;
     }
         
     private String joinAudioXMLStrings(String mp3Str, String fileStr){
-        int p = fileStr.lastIndexOf("></audio>");//the one closing the root element
+        int p = fileStr.lastIndexOf("></audio>");
+        //above line is the one closing the root element
         String a = fileStr.substring(0,p);//all but the closing part
         String b = fileStr.substring(p);//closing part
         //phew, thank god this schema has depth 1.
         return(a+mp3Str+b);
     }
 
-    private String getContent(){
-        String schemaStr = LimeXMLSchema.getDisplayString(schemaURI);
-        String schemaName= schemaStr+".xml";
-        //Load up the docs from the file.
-        LimeXMLProperties props = LimeXMLProperties.instance();
-        String path = props.getXMLDocsDir();
-        String content="";
-        try{
-            File file = new File(path,schemaName);
-            RandomAccessFile f = new RandomAccessFile(file,"r");
-            int len = (int)f.length();
-            byte[] con = new byte[len];
-            f.readFully(con,0,len);
-            f.close();
-            content = new String(con);
-            con=null;//free the memory
-        }catch (IOException e){//file had a problem. 
-            //Do not put this collection in mapper
-            done= false;
-            return "";
-        }
-        return content;
-    }
-
-
-
-    /** 
-     * Secondary constructor: used when the user adds meta-data, fot
-     * a particular schema - for which there are no previously existing
-     * LimeXMlReplyCollection. In that case this constructor is called
-     * <p>
-     * This constructor must be created with at least one LimeXMLDocument in
-     * hand. 
-     */
-    public LimeXMLReplyCollection(String uri, LimeXMLDocument doc){
-        schemaURI = uri;
-        replyDocs = new ArrayList();
-        addReply(doc);
-        done = true;
-    }
-
-    public boolean getDone(){
-        return done;
-    }
-
     public String getSchemaURI(){
         return schemaURI;
     }
 
-    public List getCollectionList(){
-        return replyDocs;
+    public void addReply(String hash,LimeXMLDocument replyDoc){
+        mainMap.put(hash,replyDoc);
+        if(replyDocs!=null)//add to this list only if it exists
+            replyDocs.add(replyDoc);
+        count++;
+    }
+   
+    public int getCount(){
+        return count;
+    }
+    
+    /**
+     * may return null if the hash is not found
+     */
+    public LimeXMLDocument getDocForHash(String hash){
+        return (LimeXMLDocument)mainMap.get(hash);
     }
 
-    
+    public List getCollectionList(){
+        if (replyDocs !=null)
+            return replyDocs;
+        replyDocs = new ArrayList();
+        Iterator iter = mainMap.keySet().iterator();
+        while(iter.hasNext()){
+            Object hash = iter.next();
+            Object doc = mainMap.get(hash);
+            replyDocs.add(doc);
+        }
+        return replyDocs;
+    }
+        
     /**
      * Returns and empty list if there are not matching documents with
      * that correspond to the same schema as the query.
      */    
     public List getMatchingReplies(LimeXMLDocument queryDoc){
+        List replyDocs = getCollectionList();
         int size = replyDocs.size();
         List matchingReplyDocs = new ArrayList();
         for(int i=0;i<size;i++){            
@@ -236,39 +201,19 @@ public class LimeXMLReplyCollection{
         return matchingReplyDocs;
     }
 
-    public void addReply(LimeXMLDocument replyDoc){
-        replyDocs.add(replyDoc);
-    }
     
-    public void replaceDoc(LimeXMLDocument oldDoc, LimeXMLDocument newDoc){
-        int size = replyDocs.size();
-        for(int i=0;i<size;i++){
-            Object o = replyDocs.get(i);
-            if(o==oldDoc){
-                replyDocs.remove(i);
-                replyDocs.add(newDoc);
-                break;
-            }
-        }
+    public void replaceDoc(Object hash, LimeXMLDocument newDoc){
+        mainMap.put(hash,newDoc);
     }
 
-    public boolean removeDoc(LimeXMLDocument doc){
-        int size = replyDocs.size();
-        boolean found = false;
-        for(int i=0;i<size;i++){
-            Object o = replyDocs.get(i);
-            if(o==doc){
-                found = true;
-                replyDocs.remove(i);
-                size--;//size of replyDocs is down
-                i--;//we want to remain at the same index for next round.
-                if(replyDocs.size() == 0){//if there are no more replies.
-                    removeFromRepository();//remove this collection from map
-                    //Note: this follows the convention of the MetaFileManager
-                    //of not adding a ReplyCollection to the map if there are
-                    //no docs in it.
-                }
-            }
+    public boolean removeDoc(String hash){
+        Object val = mainMap.remove(hash);
+        boolean found = val==null?false:true;
+        if(mainMap.size() == 0){//if there are no more replies.
+            removeFromRepository();//remove this collection from map
+            //Note: this follows the convention of the MetaFileManager
+            //of not adding a ReplyCollection to the map if there are
+            //no docs in it.
         }
         boolean written = false;
         if(found){
@@ -276,7 +221,7 @@ public class LimeXMLReplyCollection{
             written = toDisk("");//no file modified...just del meta
         }
         if(!written && found)//put it back to maintin consistency
-            replyDocs.add(doc);
+            mainMap.put(hash,val);
         else if(found && written)
             return true;
         return false;
@@ -286,50 +231,58 @@ public class LimeXMLReplyCollection{
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         map.removeReplyCollection(this.schemaURI);
     }
-
-
+    
+    /**
+     * @param modifiedFile is should be "" for non audio data. It is only used
+     * if this.audio==true. When it is an audio collection, we use this
+     * modified file to commit data to it. 
+     */
     public boolean toDisk(String modifiedFile){
-        String schemaStr = LimeXMLSchema.getDisplayString(schemaURI);
-        String schemaName= schemaStr+".xml";
-        //Load up the docs from the file.
-        LimeXMLProperties props = LimeXMLProperties.instance();
-        String path = props.getXMLDocsDir();
-        String content = "";
-        int size = replyDocs.size();
-        for(int i=0; i<size;i++){
-            LimeXMLDocument currDoc = (LimeXMLDocument)replyDocs.get(i);
+        Iterator iter = mainMap.keySet().iterator();
+        this.outMap = new HashMap();        
+        while(iter.hasNext()){
+            String hash = (String)iter.next();            
+            LimeXMLDocument currDoc=(LimeXMLDocument)mainMap.get(hash);
             String xml = "";
             try {
                 xml = currDoc.getXMLStringWithIdentifier();
             }
-            catch (SchemaNotFoundException snfe) {};
+            catch (SchemaNotFoundException snfe) {
+                continue;
+            }
             if(audio){
                 String fName = currDoc.getIdentifier();
                 ID3Editor e = new ID3Editor();
                 xml = e.removeID3Tags(xml);
                 if(fName.equals(modifiedFile)){
                     this.editor = e;
+                    this.changedHash = hash;
                 }
             }
-            content = content+xml+"\n";
-        }
+            outMap.put(hash,xml);
+            //System.out.println("Sumeet: outging XML String=\n"+xml);
+        }//OK...all the docs have been converted to XML strings
+        if(!audio)
+            return write();
+        else//go back to mp3ToDisk()
+            return true;
+    }
+     
+    private boolean write(){
+        if(dataFile==null){//calculate it
+            String fname = LimeXMLSchema.getDisplayString(schemaURI)+".sxml";
+            LimeXMLProperties props = LimeXMLProperties.instance();
+            String path = props.getXMLDocsDir();
+            dataFile = new File(path,fname);
+        }        
         try{
-            String fileName = path+File.separator+schemaName;            
-            FileWriter writer = new FileWriter(fileName,false);//overwrite
-            writer.write(content,0,content.length());
-            writer.close();
-        }catch(IOException e){
+            MapSerializer ms = new MapSerializer(dataFile,outMap);
+            this.outMap=null;//reset.
+            ms.commit();
+        }catch (Exception e){
             return false;
         }
         return true;
-        
-        //TODO3: For later - the proposed technique is highly wasteful
-        //to re-write all docs to file when only 1 has been modified or 
-        //added. Replace this method. 
-        //Note : A good way of doing this would be to store the 
-        //start index and the end index of the file within the 
-        //LimeXMLDocument...and use this info to change just that part of the
-        //file...
     }
     
     public boolean mp3ToDisk(String mp3FileName){
@@ -339,20 +292,41 @@ public class LimeXMLReplyCollection{
         boolean wrote=false;
         boolean wrote2 = false;
         //write out to disk in the regular way
-        wrote = toDisk(mp3FileName);//write the flat file stuff
-        if (this.editor != null)
-            wrote2 = this.editor.writeID3DataToDisk(mp3FileName);
-        this.editor= null; //reset the value
+        toDisk(mp3FileName);//remove nonID3 stuff and store in outMap
+        if (this.editor != null){//now outMap is populated            
+            wrote2 = this.editor.writeID3DataToDisk(mp3FileName);//to mp3 file
+            //Note: above operation has changed the hash of the file.
+            File file = new File(mp3FileName);
+            String newHash= null;
+            try{
+                newHash = new String(LimeXMLUtils.hashFile(file));
+            }catch (Exception e){
+                return false;
+            }
+            Object mainValue = mainMap.remove(changedHash);
+            mainMap.put(newHash,mainValue);
+            MetaFileManager manager = (MetaFileManager)FileManager.instance();
+            Object metaValue = manager.mp3HashToFiles.remove(changedHash);
+            manager.mp3HashToFiles.put(newHash,metaValue);
+            Object outValue = outMap.remove(changedHash);
+            outMap.put(changedHash,outValue);
+            wrote = write();
+            this.outMap=null;
+            this.changedHash = null;
+            this.editor= null; //reset the value
+        }
         return (wrote && wrote2);
-    }    
-
-
-    public void appendCollectionList(List newReplyCollection){
-        replyDocs.addAll(newReplyCollection);
     }
 
 
-    public class MapSerializer {
+    /*
+      public void appendCollectionList(List newReplyCollection){
+      replyDocs.addAll(newReplyCollection);
+      }
+    */
+
+
+    public static class MapSerializer {
 
         /** Where to serialize/deserialize from.
          */
@@ -423,16 +397,16 @@ public class LimeXMLReplyCollection{
     }
 
 
-    /*
+    
     public static void testMapSerializer(String argv[]) throws Exception {   
         LimeXMLReplyCollection.MapSerializer hms =
-        new LimeXMLReplyCollection.MapSerializer(new File("test.txt"));
+        new LimeXMLReplyCollection.MapSerializer(new File(argv[0]));
         
         Map hm = hms.getMap();
         
         System.out.println(""+hm);
         
-        for (int i = 0; i < argv.length; i+=2) {
+        for (int i = 1; i < argv.length; i+=2) {
             try{
                 hm.put(argv[i],argv[i+1]);
             }
@@ -445,6 +419,6 @@ public class LimeXMLReplyCollection{
     public static void main(String argv[]) throws Exception {
         testMapSerializer(argv);
     }
-    */
+    
 
 }

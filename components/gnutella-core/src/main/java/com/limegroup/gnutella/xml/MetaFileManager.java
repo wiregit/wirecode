@@ -4,8 +4,6 @@ import com.limegroup.gnutella.*;
 import java.io.*;
 import java.util.*;
 
-
-
 //imports to make the test code work
 import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
@@ -15,11 +13,19 @@ public class MetaFileManager extends FileManager {
     Object metaLocker = new Object();
     boolean initialized = false;
     
+    /**
+     * keeps a hash of Hashes of files to files, for all .mp3 files
+     */
+    HashMap mp3HashToFiles;
+    /**
+     * keeps a hash of Hashes of files to files, for all non-mp3 file
+     */
+    HashMap nonMP3HashToFile;
+
     //constructor
     public MetaFileManager(){
         super();
     }
-
 
     public synchronized Response[] query(QueryRequest request) {        
         String rich = request.getRichQuery();
@@ -49,6 +55,7 @@ public class MetaFileManager extends FileManager {
             return;
         synchronized(metaLocker){
             if (!initialized){//do this only on startup
+                createHashToFileMaps();
                 SchemaReplyCollectionMapper mapper = 
                       SchemaReplyCollectionMapper.instance();
                 //created maper schemaURI --> ReplyCollection
@@ -69,23 +76,22 @@ public class MetaFileManager extends FileManager {
                     //One ReplyCollection per schema
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
                     if (s.equalsIgnoreCase("audios")){
-                        Map nameToFile = getAllMP3FilesRecursive();
+                        //Map nameToFile = getAllMP3FilesRecursive();
                         collection=new LimeXMLReplyCollection
-                        (nameToFile,schemas[i]);
+                        (schemas[i],mp3HashToFiles);
                     }
                     else
-                        collection = new LimeXMLReplyCollection(schemas[i]);
-                    //Note: we only want to add a XMLReplyCollection to the 
-                    //mapper if there is some valid data in the ReplyCollection
-                    if(collection.getDone())//if we have some valid data
-                        mapper.add(schemas[i],collection);
+                        collection = new LimeXMLReplyCollection
+                                           (nonMP3HashToFile,schemas[i]);
+                    //Note: the collection may have size==0!
+                    mapper.add(schemas[i],collection);
                 }
             }//end of if, we may be initialized, may have been interrupted 
             // fell through...
             if (!Thread.currentThread().isInterrupted())
                 initialized = true;
-            //System.out.println("Sumeet: Printing current xml data");
-            //showXMLData();
+            System.out.println("Sumeet: Printing current xml data");
+            showXMLData();
         }//end of synchronized block
     }//end of loadSettings.
 
@@ -119,14 +125,18 @@ public class MetaFileManager extends FileManager {
 
     /**
      * Scans all the shared directories recursively and finds files that
-     * have .mp3 extension. and returns a List of files.
+     * have .mp3 extension, and adds them to a hashmap keyed by hashes.
+     * <p> 
+     * Also creates another map that stores the hash to File of non mp3 files
      */
-    public Map getAllMP3FilesRecursive(){
+    public void createHashToFileMaps(){
         SettingsManager man = SettingsManager.instance();
-        ArrayList dirs = new ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
-        Map map  = new HashMap();
+        ArrayList dirs = new 
+                      ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
+        mp3HashToFiles = new HashMap();
+        nonMP3HashToFile = new HashMap();
         int k=0;
-        while(k < dirs.size()){
+        while(k < dirs.size()) {
             String dir = (String)dirs.get(k);
             k++;
             File currDir = new File(dir);
@@ -149,9 +159,11 @@ public class MetaFileManager extends FileManager {
             int size = files.length;
             for(int i=0;i<size;i++){
                     String name="";
+                    String hash="";
                     try{
                         name = files[i].getCanonicalPath();
-                    }catch(IOException e){
+                        hash = new String(LimeXMLUtils.hashFile(files[i]));
+                    }catch(Exception e){
                         continue;
                     }
                     int j = name.lastIndexOf(".");
@@ -159,10 +171,11 @@ public class MetaFileManager extends FileManager {
                     if(j>0)
                         ext = name.substring(j);
                     if(ext.equalsIgnoreCase(".mp3"))
-                        map.put(name,files[i]);
+                        mp3HashToFiles.put(hash,files[i]);
+                    else
+                        nonMP3HashToFile.put(hash,files[i]);
             }
         }
-        return map;
     }
 
 
@@ -183,7 +196,7 @@ public class MetaFileManager extends FileManager {
             System.out.println("Schema : " + schemas[i]);
             System.out.println("-----------------------");
             collection = mapper.getReplyCollection(schemas[i]);
-            if (collection == null){
+            if (collection == null || collection.getCount()<1){
                 System.out.println("No docs corresponding to this schema ");
                 continue;
             }

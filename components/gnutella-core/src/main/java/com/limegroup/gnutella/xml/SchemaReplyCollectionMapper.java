@@ -34,19 +34,18 @@ public class SchemaReplyCollectionMapper{
         }
     }
     
+
     /**
      * Adds the SchemaURI to a HashMap with the replyCollection.
-     * If the schemaURI already corresponds to a ReplyCollection, we just 
-     * append the list of the new replyCollection to the existing schemaURI
+     * <p>
+     * Warning/Note:If the schemaURI already corresponds to a ReplyCollection
+     * this method will replace thet old reply collection with the new one. 
+     * The old collection will be lost!
+     * 
      */
     public void add(String schemaURI, LimeXMLReplyCollection replyCollection){
         LimeXMLReplyCollection l=(LimeXMLReplyCollection)mapper.get(schemaURI);
-        if(l==null)
-            mapper.put(schemaURI,replyCollection);
-        else{//meaning the schemaURI already corresponds to a ReplyCollection
-            List newCollectionList = replyCollection.getCollectionList();
-            l.appendCollectionList(newCollectionList);
-        }
+        mapper.put(schemaURI,replyCollection);        
     }
     
     /**
