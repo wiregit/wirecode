@@ -1,18 +1,15 @@
 package com.limegroup.gnutella;
 
-/**
- * This is a wrapper class for information pertaining to a specific
- * file on a remote host.
- *
- * @author rsoule
- * @file RemoteFileDesc.java
- */
-
 import java.io.Serializable;
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.Arrays;
 
+/**
+ * A reference to a single file on a remote machine.  In this respect
+ * RemoteFileDesc is similar to a URL, but it contains Gnutella-
+ * specific data as well, such as the server's 16-byte GUID.
+ */
 public class RemoteFileDesc implements Comparable, Serializable {
 
 	/**
