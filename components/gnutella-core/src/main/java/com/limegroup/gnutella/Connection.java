@@ -26,6 +26,10 @@ public class Connection implements Runnable {
     Socket sock;
     private boolean incoming;
 
+    /** The number of packets I sent and received.  This includes bad packets. */
+    private int sent;
+    private int received;
+
     /** A stub for testing only! */
     Connection() { }
 
@@ -70,8 +74,8 @@ public class Connection implements Runnable {
 	}
 
 	router.add(this);
-//  	System.out.println("Established "+(incoming?"incoming":"outgoing")
-//  			   +" connection on "+sock.toString());
+  	System.out.println("Established "+(incoming?"incoming":"outgoing")
+  			   +" connection on "+sock.toString());
     }
     
     private synchronized void sendString(String s) throws IOException {
@@ -103,10 +107,11 @@ public class Connection implements Runnable {
      *   arise.
      */
     public synchronized void send(Message m) throws IOException {
-	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
 	OutputStream out=sock.getOutputStream();
 	m.write(out);
 	out.flush();
+	sent++;
     }
 
     /** 
@@ -116,8 +121,9 @@ public class Connection implements Runnable {
      */
     public Message receive() throws IOException, BadPacketException {
 	Message m=Message.read(sock.getInputStream());
-	if (m!=null)
-	    System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	received++;  //keep statistics.
+	//if (m!=null)
+	//  System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	return m;
     }
 
@@ -136,12 +142,15 @@ public class Connection implements Runnable {
 		    if (m==null)
 			continue;
 		} catch (BadPacketException e) {
-		    System.out.println("Discarding bad packet ("
-				       +e.getMessage()+")");
+//  		    System.out.println("Discarding bad packet ("
+//  				       +e.getMessage()+")");
 		    continue;
 		}
+		//0. Look up the message in the routing table, 
+		//   Pass it to the hostcatcher for inspection.
 		byte[] guid=m.getGUID();
 		Connection originator=routeTable.get(guid);
+		router.catcher.spy(m);
 
 		//1. Reply to request I haven't seen yet.
 		//TODO: optimize with SWITCH statement or instance methods.
@@ -168,14 +177,14 @@ public class Connection implements Runnable {
 			    router.sendToAllExcept(m, this);
 			}
 		    }
-		    //b) Otherwise, route to the original machine based
+		    //b) Replies: route to the original machine based
 		    //   on the GUID.
 		    else {			
 			if (originator==this) //Hack or necessary?? 
 			    ; //do nothing
 			else if (originator!=null)
 			    originator.send(m);
-			else if (originator != this)
+			else // originator==null
 			    Router.error("Possible routing error on message "
 					 +m.toString()
 					 +",\n   or was intended for me.");
@@ -184,7 +193,7 @@ public class Connection implements Runnable {
 	    }
 	} catch (IOException e) {
 	    router.remove(this);
-	    //Router.error("Connection closed.");
+	    Router.error("Connection closed: "+sock.toString());
 	} catch (Exception e) {
 	    Router.error("Unexpected exception.  Terminating.");
 	    router.remove(this);
@@ -194,6 +203,10 @@ public class Connection implements Runnable {
 
     public String toString() {
 	return "Connection("+(incoming?"incoming":"outgoing")
-	    +", "+sock.toString()+")";
+	    +", "+sock.toString()+", "+sent+", "+received+")";
+    }
+
+    public boolean isOutgoing() {
+	return !incoming;
     }
 }
