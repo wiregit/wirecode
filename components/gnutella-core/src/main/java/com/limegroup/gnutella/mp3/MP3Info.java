@@ -964,6 +964,7 @@ i 0
 	 *
 	 * @deprecated
 	 */
+	 /*
 	private void loadLAMETag (byte buf[], int offset) {
 	
 		try {
@@ -971,7 +972,7 @@ i 0
 							 
 		}	
 		catch (Throwable t) {} //bombed trying to build LAME tag
-	}
+	} */
 
 	/** 
 	 * MPEG files frame bitrates may change in a variable bitrate (VBR). Each
@@ -1012,7 +1013,6 @@ i 0
 	
 		try {	        
 			_vbrHeader = new MP3Info.VBRHeader();
-			byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);
 			
 			 _vbrHeader.scale = ByteOrder.ubyte2int(buf[pos+=2]);
 				
@@ -1026,6 +1026,7 @@ i 0
 			    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
 
 			/* TOC ignored  [format is sketchy]
+			byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
 			if((b & (byte)(1 << 2 )) != 0 ) {
 				_vbrHeader.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
 			    			    + (ByteOrder.ubyte2int(buf[++pos])     ))
