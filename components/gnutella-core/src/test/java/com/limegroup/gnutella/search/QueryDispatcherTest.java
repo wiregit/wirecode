@@ -35,7 +35,7 @@ public class QueryDispatcherTest extends BaseTestCase {
         QueryDispatcher qd = QueryDispatcher.instance();
         qd.start();
         
-        List queries = (List)PrivilegedAccessor.getValue(qd, "QUERIES");
+        Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
 
         assertEquals("should not be any queries", 0, queries.size());
 
@@ -50,7 +50,7 @@ public class QueryDispatcherTest extends BaseTestCase {
         qd.addQuery(handler);
         Thread.sleep(3000);
         
-        assertEquals("unexpected queries size", 2, queries.size());
+        assertEquals("unexpected queries size", 1, queries.size());
         qd.removeReplyHandler(rh);
         assertEquals("should not be any queries", 0, queries.size());
         
