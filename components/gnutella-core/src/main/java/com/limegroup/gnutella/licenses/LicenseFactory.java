@@ -41,7 +41,10 @@ public final class LicenseFactory {
         // no verification location?  no license.
         if(licenseURI == null) {
             LOG.warn("Unable to locate licenseURI, bailing");
-            return null;
+            if(licenseString != null)
+                return new BadLicense(licenseString);
+            else
+                return null;
         }
         
         // See if we have a cached license before we create a new one.
