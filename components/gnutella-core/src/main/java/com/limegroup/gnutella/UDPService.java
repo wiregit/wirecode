@@ -2,8 +2,10 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import java.net.*;
@@ -110,6 +112,13 @@ public final class UDPService implements Runnable {
      */
     private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
 
+
+    /**
+     * The time between UDP pings.  Used by the PeriodicPinger.  This is
+     * useful for nodes behind certain firewalls (notably the MS firewall).
+     */
+    private static final long PING_PERIOD = 85 * 1000;  // 85 seconds
+
 	/**
 	 * Instance accessor.
 	 */
@@ -129,6 +138,8 @@ public final class UDPService implements Runnable {
         RouterService.schedule(new IncomingValidator(), 
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
+        if (CommonUtils.isWindowsXP())
+            RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
     }
 	
 	/**
@@ -647,4 +658,20 @@ public final class UDPService implements Runnable {
             }
         }
     }
+
+    private class PeriodicPinger implements Runnable {
+        public void run() {
+            // straightforward - send a UDP ping to a host.  it doesn't really
+            // matter who the guy is - we are just sending to open up any
+            // potential firewall to UDP traffic
+            GUESSEndpoint ep = QueryUnicaster.instance().getUnicastEndpoint();
+            if (ep == null) return;
+
+            // good to use the solicited guid
+            PingRequest pr = new PingRequest(getSolicitedGUID().bytes(),
+                                             (byte)1, (byte)0);
+            send(pr, ep.getAddress(), ep.getPort());
+        }
+    }
+
 }

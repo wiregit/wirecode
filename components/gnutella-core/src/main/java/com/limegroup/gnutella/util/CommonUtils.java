@@ -84,6 +84,11 @@ public final class CommonUtils {
 	private static boolean _isWindowsNT = false;
 
 	/** 
+	 * Variable for whether or not we're on Windows XP.
+	 */
+	private static boolean _isWindowsXP = false;
+
+	/** 
 	 * Variable for whether or not we're on Windows NT, 2000, or XP.
 	 */
 	private static boolean _isWindowsNTor2000orXP = false;
@@ -197,6 +202,8 @@ public final class CommonUtils {
 			_isWindows2000orXP = true;
 		if (os.indexOf("windows nt") != -1) 
 			_isWindowsNT = true;
+		if (os.indexOf("windows xp") != -1) 
+			_isWindowsXP = true;
 		if(os.indexOf("windows 95") != -1)
 		   _isWindows95 = true;
 		if(os.indexOf("windows 98") != -1)
@@ -458,6 +465,17 @@ public final class CommonUtils {
 	 */
 	public static boolean isWindows2000orXP() {
 		return _isWindows2000orXP;
+	}
+
+
+	/**
+	 * Returns whether or not the os is WinXP.
+	 *
+	 * @return <tt>true</tt> if the application is running on WinXP,
+	 *  <tt>false</tt> otherwise
+	 */
+	public static boolean isWindowsXP() {
+		return _isWindowsXP;
 	}
 
 
