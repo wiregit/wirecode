@@ -76,4 +76,23 @@ public final class RemoteFileDescTest extends TestCase {
 			}
 		}
 	}
+
+	/**
+	 * Tests the getUrl method to make sure it's correctly constructing URLs.
+	 */
+	public void testRemoteFileDescGetUrl() {
+		Set urns = new HashSet();
+		urns.add(HugeTestUtils.URNS[0]);
+		RemoteFileDesc rfd =
+			new RemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID,
+							   10, true, 3, true, null, urns);
+		URL rfdUrl = rfd.getUrl();
+		String urlString = rfdUrl.toString();
+		String host = rfd.getHost();
+		String colonPort = ":"+rfd.getPort();
+		assertTrue("unexpected beginning of url", 
+				   urlString.startsWith("http://"+host+colonPort));
+		assertEquals("unexpected double slash", urlString.indexOf(colonPort+"//"), -1);
+		assertTrue("unexpected double slash", urlString.indexOf(":3000/") != -1);		
+	}
 }
