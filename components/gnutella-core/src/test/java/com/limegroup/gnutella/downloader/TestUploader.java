@@ -290,10 +290,10 @@ public class TestUploader {
 			}
             
             if(HTTPHeaderName.NALTS.matchesStartOfString(line))
-               readAlternateLocations(line,badLocs);
+                badLocs = readAlternateLocations(line);
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line))
-				readAlternateLocations(line, goodLocs);
-            
+				goodLocs = readAlternateLocations(line);
+
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
             if (i==0) {
@@ -317,19 +317,21 @@ public class TestUploader {
             if(badLocs!=null) {
                 synchronized(badLocs) {
                     Iterator iter = badLocs.iterator();
-                    incomingAltLocs.remove((AlternateLocation)iter.next());
+                    while(iter.hasNext()) 
+                        incomingAltLocs.remove((AlternateLocation)iter.next());
                 }
             }
             if(goodLocs!=null) {
                 synchronized(goodLocs) {
                     Iterator iter = goodLocs.iterator();
-                    incomingAltLocs.add((AlternateLocation)iter.next());
+                    while(iter.hasNext()) 
+                        incomingAltLocs.add((AlternateLocation)iter.next());
                 }        
             }
         }
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
-        //Send the data.
+    //Send the data.
         send(output, start, stop);
     }
 
@@ -542,15 +544,18 @@ public class TestUploader {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
 	 *  locations should be added to
 	 */
-	private void readAlternateLocations(final String altHeader,
-                                               AlternateLocationCollector alc) {
+	private AlternateLocationCollection readAlternateLocations
+                                                     (final String altHeader) {
+        AlternateLocationCollection alc=null;
 		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
-		if(alternateLocations == null) return;
+		if(alternateLocations == null) return null;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-        if(alc == null && _sha1!=null)
+        if(_sha1!=null)
             alc = AlternateLocationCollection.create(_sha1);
+        if (alc==null)
+            return null;
 		while(st.hasMoreTokens()) {
 			try {
 				// note that the trim method removes any CRLF character
@@ -560,10 +565,12 @@ public class TestUploader {
 				    AlternateLocation.create(st.nextToken().trim());
 				alc.add(al);
 			} catch(IOException e) {
+                e.printStackTrace();
 				// just return without adding it.
 				continue;
 			}
 		}
+        return alc;
 	}
 
 	/**

@@ -20,7 +20,7 @@ import junit.framework.*;
  * LimeWire.
  */
 public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
-
+    
     /**
      * Port for the first uploader.
      */
@@ -89,8 +89,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         super(name);
     }
 
-    public static Test suite() {
-        return buildTestSuite(DownloadTest.class);
+    public static Test suite() { 
+        return buildTestSuite(DownloadTest.class);//,"testSimpleAlternateLocations");
     }
 
     public static void main(String[] args) {
@@ -516,6 +516,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testTwoAlternateLocations() throws Exception {  
         debug("-Testing Two AlternateLocations...");
         
+        final int RATE = 50;
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        
         RemoteFileDesc rfd1=
                          newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
         RemoteFileDesc rfd2=
@@ -554,8 +558,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        RemoteFileDesc rfd1=
+                          newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd2=
+                          newRFDWithURN(PORT_2,100,TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
