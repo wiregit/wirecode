@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
 import com.sun.java.util.collections.*;
@@ -103,9 +104,6 @@ public class HostCatcher {
      *  initially allowed to. */
     private long nextAllowedFetchTime=Long.MAX_VALUE;
 
-    private Acceptor acceptor;
-    private ConnectionManager manager;
-    private ActivityCallback callback;
     private SettingsManager settings=SettingsManager.instance();
 
     /**
@@ -503,7 +501,6 @@ public class HostCatcher {
     private ExtendedEndpoint getAnEndpointInternal()
             throws NoSuchElementException {
         if (! ENDPOINT_QUEUE.isEmpty()) {
-            //            System.out.println("    GAEI: From "+set+",");
             //pop e from queue and remove from set.
             ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
             boolean ok=ENDPOINT_SET.remove(e);
