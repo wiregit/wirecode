@@ -48,16 +48,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * The smallest possible file to be shared with partial file sharing.
      * Non final for testing purposes.
      */
-    private static int MIN_PARTIAL_FILE_BYTES = 5*1024*1024; // 5MB
-    
-    /**
-     * The current minimum size allowed for partial file sharing.
-     * Initialized to either MIN_PARTIAL_FILE_BYTES or 1/4 of the
-     * incomplete file's expected total size.
-     * Used to enforce the policy that partial files are only shared
-     * if atleast 25% of the file has been downloaded.
-     */
-    private int _minPartialFileSize = MIN_PARTIAL_FILE_BYTES;
+    private static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
     
     private RemoteFileDesc _rfd;
     private boolean _isPush;
@@ -169,10 +160,6 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		_amountRead = 0;
 		_totalAmountRead = 0;
-		// if we have not downloaded at least 25% of the file, 
-		// don't share it.
-		_minPartialFileSize = Math.max(MIN_PARTIAL_FILE_BYTES,
-		    (int)(rfd.getSize() * .25 )); 
     }
 
     /**
@@ -288,7 +275,7 @@ public class HTTPDownloader implements BandwidthTracker {
           UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
           !_outIsCorrupted &&
           RouterService.acceptedIncomingConnection() &&
-          _incompleteFile.length() > _minPartialFileSize) {
+          _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES) {
             if( alts == null ) // will be null if altsToSend is null.
                 alts = AlternateLocationCollection.createCollection(
                     _rfd.getSHA1Urn() );
