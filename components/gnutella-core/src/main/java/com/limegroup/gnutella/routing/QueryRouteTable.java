@@ -106,14 +106,14 @@ public class QueryRouteTable {
                 richQueryWords=richQueryWords+" "+str;
             }
         }
-        String allwords = richQueryWords+" "+qr.getQuery();
+        String allWords = richQueryWords+" "+qr.getQuery();
         //there are bound to be some blank spaces on either left side
-        allwords = allwords.trim();
+        allWords = allWords.trim();
         //Check that all hashed keywords are reachable with given TTL.
         String[] keywords=HashFunction.keywords(allWords);
         int ttl=qr.getTTL();
         for (int i=0; i<keywords.length; i++) {
-            String keyword=allWords[i];
+            String keyword=keywords[i];
             int hash=HashFunction.hash(keyword, log2(table.length));
             if (table[hash]>ttl || table[hash]>=infinity)
                 return false;
