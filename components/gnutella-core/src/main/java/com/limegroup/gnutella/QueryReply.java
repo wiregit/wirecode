@@ -71,7 +71,7 @@ public class QueryReply extends Message implements Serializable{
     private static final byte SPEED_MASK=(byte)0x10;
 
     /** The xml chunk that contains metadata about xml responses*/
-    private String xmlCollectionString = "";
+    private String _xmlCollectionString = "";
 
 
     /** Creates a new query reply.  The number of responses is responses.length
@@ -138,6 +138,7 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlCollectionString, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed);
+        _xmlCollectionString = xmlCollectionString;
     }
 
 
@@ -309,7 +310,7 @@ public class QueryReply extends Message implements Serializable{
      *  contained one.
      */
     public String getXMLCollectionString() {
-        return xmlCollectionString;
+        return _xmlCollectionString;
     }
 
 
@@ -601,6 +602,8 @@ public class QueryReply extends Message implements Serializable{
             if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
             i++;
+            if ((i + length) > (payload.length-16)) // 16 is trailing GUID size
+                throw new BadPacketException("Common payload length imprecise!");
 
             //c) extract push and busy bits from common payload
             //Note: technically, you should look at the second byte [sic] to
@@ -618,23 +621,26 @@ public class QueryReply extends Message implements Serializable{
                     uploadedFlagT = (flags&UPLOADED_MASK)!=0 ? TRUE : FALSE;
                 if ((control & SPEED_MASK)!=0)
                     measuredSpeedFlagT = (flags&SPEED_MASK)!=0 ? TRUE : FALSE;
+                i+=2; // increment used bytes appropriately...
             }
-            i+=2; // need to get xml size, so don't go past it....
 
-            if (i>payload.length-16)
-                throw new BadPacketException("Incomplete QHD.");
-
-            // d) we need to get the xml stuff.  first we should get its size,
-            // then we have to look backwards and get the actual xml...
-            int a, b, temp;
-            temp = ByteOrder.ubyte2int(payload[i++]);
-            a = temp;
-            temp = ByteOrder.ubyte2int(payload[i++]);
-            b = temp << 8;
-            int xmlSize = a | b;
-            xmlCollectionString = new String(payload, 
-                                             payload.length-16-xmlSize, 
-                                             xmlSize-1);
+            if (length > 2) { // expecting XML.
+                //d) we need to get the xml stuff.  
+                //first we should get its size, then we have to look 
+                //backwards and get the actual xml...
+                int a, b, temp;
+                temp = ByteOrder.ubyte2int(payload[i++]);
+                a = temp;
+                temp = ByteOrder.ubyte2int(payload[i++]);
+                b = temp << 8;
+                int xmlSize = a | b;
+                if (xmlSize > 1)
+                    _xmlCollectionString = new String(payload, 
+                                                      payload.length-16-xmlSize, 
+                                                      xmlSize-1);
+                else
+                    _xmlCollectionString = "";
+            }
             
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
@@ -965,14 +971,14 @@ public class QueryReply extends Message implements Serializable{
 
           
         //Normal case: busy and push bits defined and unset
-        payload=new byte[11+11+(4+3+0)+16];
+        payload=new byte[11+11+(4+1+4+0)+16];
         payload[0]=1;                //Number of results
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
-        payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;    //common payload size
+        payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
         payload[11+11+4+1]=(byte)0x1c;  //111X1 
         payload[11+11+4+1+1]=(byte)0x0;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
