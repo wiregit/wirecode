@@ -48,7 +48,8 @@ public class LazyProperties extends Properties
     /** Sets the common properties in props, like Query-Routing and
      *  User-Agent.*/
     protected void addCommonProperties(Properties props) {
-        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, 
+				  ConnectionManager.QUERY_ROUTING_VERSION);
         props.put(ConnectionHandshakeHeaders.USER_AGENT,
 				  CommonUtils.getHttpServer());       
         props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
