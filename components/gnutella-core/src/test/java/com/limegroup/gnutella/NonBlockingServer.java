@@ -17,7 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 
+ * NIO server used to test blocking vs. non-blocking performance.
  */
 public class NonBlockingServer implements Runnable {
 
@@ -151,9 +151,7 @@ public class NonBlockingServer implements Runnable {
                     }
                     
                 } catch(CancelledKeyException e) {
-                    // the channel was closed since the key became selected,
-                    // so just keep going.
-                    continue;
+                    e.printStackTrace();
                 }
             }
         }
@@ -169,6 +167,7 @@ public class NonBlockingServer implements Runnable {
         try {
             handler.read();
             if(!handler.write(true)) {
+                System.out.println("adding writer");
                 addWriter(handler);
             }
         } catch (IOException e) {
@@ -241,7 +240,9 @@ public class NonBlockingServer implements Runnable {
      * Takes care of reads and writes to a specific connection.
      */
     private final class SocketHandler {
-        final Socket CLIENT;
+        //final Socket CLIENT;
+        
+        final SocketChannel CHANNEL;
         
         final ByteBuffer READ_BUFFER = ByteBuffer.allocate(20);
 
@@ -250,13 +251,13 @@ public class NonBlockingServer implements Runnable {
         int _numberOfWrites = 0;
 
         SocketHandler(Socket client) {
-            CLIENT = client;
+            CHANNEL = client.getChannel();
             WRITE_BUFFER.put("hello client".getBytes());
             WRITE_BUFFER.flip();
         }
         
         SocketChannel getChannel() {
-            return CLIENT.getChannel();
+            return CHANNEL;
         }
 
         /**
@@ -266,9 +267,8 @@ public class NonBlockingServer implements Runnable {
             if(newWrite) {
                 _numberOfWrites++;
             }
-            SocketChannel channel = CLIENT.getChannel();
             while(_numberOfWrites > 0) {
-                channel.write(WRITE_BUFFER);
+                CHANNEL.write(WRITE_BUFFER);
                 if(WRITE_BUFFER.hasRemaining()) {
                     NonBlockingServer.this.addWriter(this);
                     return false;
@@ -282,7 +282,7 @@ public class NonBlockingServer implements Runnable {
         }
 
         void read() throws IOException {
-            CLIENT.getChannel().read(READ_BUFFER);
+            CHANNEL.read(READ_BUFFER);
             READ_BUFFER.clear();
         }
     }
