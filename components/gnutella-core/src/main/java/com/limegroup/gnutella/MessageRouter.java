@@ -229,20 +229,8 @@ public abstract class MessageRouter
 			// messages queries should not be sent with TTL above 1.
 			if(request.getTTL() > 0) return;
 
-			if(!request.supportsUnicast()) return;
-			InetAddress udpAddress = request.getUDPAddress();
-			int udpPort = request.getUDPPort().intValue();
-			if(_manager.isSupernode()) {
-				InetAddress datagramAddress = datagram.getAddress();
-				int datagramPort = datagram.getPort();
-				if(udpAddress != datagramAddress) {
-					// this signifies a possible attack -- unicast udp 
-					// requests to UltraPeers should have the same
-					// udp reply address as the address they were
-					// sent from
-					return;
-				}
-			}
+			InetAddress udpAddress = datagram.getAddress();
+			int udpPort = datagram.getPort();
 			UDPReplyHandler handler = 
 			    new UDPReplyHandler(udpAddress, udpPort);
             handleUDPQueryRequestPossibleDuplicate(request, handler);
@@ -480,6 +468,7 @@ public abstract class MessageRouter
      * see QueryUnicaster for more details.
      */
     protected void unicastQueryRequest(QueryRequest queryRequest) {
+        QueryUnicaster.instance().addQuery(queryRequest);
     }
 
 
