@@ -117,9 +117,18 @@ public class DownloadManager implements BandwidthTracker {
         File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();
         // Try once with the real file, then with the backup file.
         if( !readSnapshot(real) ) {
+            LOG.debug("Reading real downloads.dat failed");
             // if backup succeeded, copy into real.
-            if( readSnapshot(backup) )
+            if( readSnapshot(backup) ) {
+                LOG.debug("Reading backup downloads.bak succeeded.");
                 copyBackupToReal();
+            // only show the error if the files existed but couldn't be read.
+            } else if(backup.exists() || real.exists()) {
+                LOG.debug("Reading both downloads files failed.");
+                MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
+            }   
+        } else {
+            LOG.debug("Reading downloads.dat worked!");
         }
         
         Runnable checkpointer=new Runnable() {
@@ -249,17 +258,26 @@ public class DownloadManager implements BandwidthTracker {
             buf=(List)in.readObject();
             incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch (IOException e) {
+            LOG.debug(e);
             return false;
         } catch (ClassCastException e) {
+            LOG.debug(e);
             return false;
         } catch (ClassNotFoundException e) {
+            LOG.debug(e);
             return false;
         } catch(ArrayStoreException e) {
-            file.delete();
-            MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
+            LOG.debug(e);
+            return false;
         } catch(IndexOutOfBoundsException e) {
-            file.delete();
-            MessageService.showError("DOWNLOAD_COULD_NOT_READ_SNAPSHOT");
+            LOG.debug(e);
+            return false;
+        } catch(NegativeArraySizeException e) {
+            LOG.debug(e);
+            return false;
+        } catch(IllegalStateException e) {
+            LOG.debug(e);
+            return false;
         }
         
         //Remove entries that are too old or no longer existent.  This is done
