@@ -263,9 +263,9 @@ public class BootstrapServerManager {
             public void run() {
                 try {
                     requestBlocking(request);
-                } catch (Exception e) {
-                    e.printStackTrace();  //TODO: this will never be seen
-                    Assert.that(false, "Uncaught exception: "+e);         
+                } catch (Throwable e) {
+                    //Internal error!  Display to GUI for debugging.
+                    RouterService.instance().getActivityCallback().error(e);
                 } finally {
                     request.done();
                 }
