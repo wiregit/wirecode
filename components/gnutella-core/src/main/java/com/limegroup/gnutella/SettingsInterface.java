@@ -81,7 +81,7 @@ public interface SettingsInterface
     /** Default for whether user should be prompted before downloading exe's. */
     public static final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
     public static final int     DEFAULT_MAX_UPLOADS      = 8;
-    public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
+    public static final boolean DEFAULT_CLEAR_UPLOAD     = true;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
