@@ -284,59 +284,50 @@ public class ID3Editor {
                                                    IOException, ID3v2Exception {
         ID3v2 id3Handler = new ID3v2(file);        
         Vector frames = null;
-        boolean updateAllv2Tags = false;
+        boolean framesPresent = false;
         try {
             frames = id3Handler.getFrames();
+            framesPresent = true;
         } catch (NoID3v2TagException ex) {//there are no ID3v2 tags in the file
-            updateAllv2Tags = true;
+            framesPresent = false;
         }
-        if(updateAllv2Tags) {
-            List updateFrames = new ArrayList();
-            addAllNeededFrames(updateFrames);
-            if(updateFrames.size() > 0) {
-                for(Iterator iter=updateFrames.iterator(); iter.hasNext() ; ) {
-                    ID3v2Frame frame = (ID3v2Frame)iter.next();
-                    id3Handler.addFrame(frame);
+        
+        List framesToUpdate = new ArrayList();
+        addAllNeededFrames(framesToUpdate);
+        if(framesToUpdate.size() == 0) //we have nothing to update
+            return LimeXMLReplyCollection.NORMAL;
+        if(framesPresent) { //old frames present, update the differnt ones 
+            for(Iterator iter=frames.iterator(); iter.hasNext(); ) {
+                ID3v2Frame oldFrame = (ID3v2Frame)iter.next();
+                //note: equality of ID3v2Frame based on value of id
+                int index = framesToUpdate.indexOf(oldFrame);
+                ID3v2Frame newFrame = null;
+                if(index >=0) {
+                    newFrame = (ID3v2Frame)framesToUpdate.remove(index);
+                    if(Arrays.equals(oldFrame.getContent(), 
+                                                        newFrame.getContent()))
+                        continue;//no need to update, skip this frame
                 }
-                id3Handler.update();               
+                //we are either going to replace it if it was changed, or remove
+                //it since there is no equivalent frame in the ones we need to
+                //update, this means the user probably removed it
+                id3Handler.removeFrame(oldFrame);
+                if(newFrame != null) 
+                    id3Handler.addFrame(newFrame);
             }
-            //no exception? we are home
-           return LimeXMLReplyCollection.NORMAL;
         }
-
-        //OK. Not all tags are new some need to be updated.
-        Map updateFrames = new HashMap();
-        for(Iterator iter = frames.iterator(); iter.hasNext() ;) {
+        //now we are left with the ones we need to add only, if there were no
+        //old tags this will be all the frames that need to get updated
+        for(Iterator iter = framesToUpdate.iterator(); iter.hasNext() ; ) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
-            checkFrameForUpdates(frame, updateFrames);
+            id3Handler.addFrame(frame);
         }
         
-        //now updates the frames we need
-        for(Iterator iter = updateFrames.keySet().iterator(); iter.hasNext();) {
-            ID3v2Frame frame = (ID3v2Frame)iter.next();
-            String val = (String)updateFrames.get(frame);
-            val = val==null?"":val;
-            ID3v2Frame repFrame = new ID3v2Frame(frame.getID(),
-                                             val.getBytes(),
-                                             frame.getTagAlterPreservation(),
-                                             frame.getFileAlterPreservation(),
-                                             frame.getReadOnly(),
-                                             ID3v2Frame.NO_COMPRESSION,
-                                             frame.getEncryptionID(),
-                                             frame.getGroup());
-                                                 
-            id3Handler.removeFrame(frame);
-            id3Handler.addFrame(repFrame);
-        }
-        
-        //update the file if necessary
-        if(updateFrames.size() > 0)
-            id3Handler.update();//actually commit the file
-
-        //No exceptions? We are home
+        id3Handler.update();
+        //No Exceptions? We are home
         return LimeXMLReplyCollection.NORMAL;
     }
-    
+
 
     private void addAllNeededFrames(List updateList) {
         ID3v2Frame frame = null; 
@@ -351,35 +342,35 @@ public class ID3Editor {
             frame = makeFrame("TPE1",artist_);
             if(frame != null) 
                 updateList.add(frame);
-
         }
         if(album_ != null && !album_.equals("")) {
             frame = null;
-            frame = makeFrame("TABL",title_);
-            if(frame != null) 
+            frame = makeFrame("TABL", album_);
+            if(frame != null) {
                 updateList.add(frame);
+            }
         }
         if (year_!=null && !year_.equals("")) { 
             frame = null;
-            frame = makeFrame("TYER",artist_);
+            frame = makeFrame("TYER", year_);
             if(frame != null) 
                 updateList.add(frame);
         }
         if(track_ != null && !track_.equals("")) {
             frame = null;
-            frame = makeFrame("TRCK",title_);
+            frame = makeFrame("TRCK", track_);
             if(frame !=  null)
                 updateList.add(frame);
         }
         if (comment_!=null && !comment_.equals("")) {
             frame = null;
-            frame = makeFrame("COMM",artist_);
+            frame = makeFrame("COMM", comment_);
             if(frame != null) 
                 updateList.add(frame);
         }
         if(genre_ != null && !genre_.equals("")) {
             frame = null;
-            frame = makeFrame("TCON",title_);
+            frame = makeFrame("TCON", genre_);
             if(frame != null) 
                 updateList.add(frame);
         }
@@ -400,55 +391,6 @@ public class ID3Editor {
             return null;
         }
     }
-
-
-    /**
-     *  Checks if the current frame needs to be updated, and if it does, the
-     *  frams is added to the given updateList parameter
-     */
-    private void checkFrameForUpdates(ID3v2Frame frame, Map updateMap) {
-        boolean add = false;
-        String newValue = null;
-
-        String value = new String(frame.getContent());
-        if(value == null)
-            value = "";
-        String tag = frame.getID();
-        if("TIT2".equals(tag)) {
-            add = !value.equals(title_);
-            newValue = title_;
-        }
-        else if ("TPE1".equals(tag)) {
-            add = !value.equals(artist_);
-            newValue = artist_;
-        }
-        else if ("TALB".equals(tag)) {
-            add = !value.equals(album_);
-            newValue = album_;
-        }
-        else if ("TYER".equals(tag)) {
-            add = !value.equals(year_);
-            newValue = year_;
-        }
-        else if ("TRCK".equals(tag)) {
-            add = !value.equals(track_);
-            newValue = track_;
-        }
-        else if ("COMM".equals(tag)) {
-            add = !value.equals(comment_);
-            newValue = comment_;
-        }
-        else if ("TCON".equals(tag)) {
-            add = !value.equals(genre_);
-            newValue = genre_;
-        }
-        else
-            add = false;
-        
-        if(add)
-            updateMap.put(frame, newValue);
-    }
-
 
     /**
      * Actually writes the ID3 tags out to the ID3V1 section of mp3 file.
