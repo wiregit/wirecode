@@ -70,7 +70,7 @@ public class MacOSXUtils {
         boolean found = false;
         // Iterate through each item in the array,
         // looking for one whose 'Path' key has a value
-        // containing LimeWire.app.
+        // containing the stub startup app LimeWire uses.
         while(items.hasMoreElements()) {
             temp = items.nextElement();
             // If it isn't an NSMutableDictionary, ignore it
@@ -82,7 +82,6 @@ public class MacOSXUtils {
             try {
                 itemInfo = (NSMutableDictionary)createMutableClone(temp);
             } catch(CloneNotSupportedException cnse) {
-                cnse.printStackTrace();
                 continue; // can't do anything, continue.
             }
             
@@ -123,15 +122,6 @@ public class MacOSXUtils {
         defaults.setPersistentDomainForName(logins, "loginwindow");
         // Synchronize it to disk immediately
         defaults.synchronize();
-    }
-    
-    /**
-     * Retrieves the loginwindow path as a domain (suitable for the 'defaults'
-     * command).
-     */
-    public static String getLoginWindow() {
-        return CommonUtils.getUserHomeDir().getPath() + 
-            "/Library/Preferences/loginwindow";
     }
     
     /**
