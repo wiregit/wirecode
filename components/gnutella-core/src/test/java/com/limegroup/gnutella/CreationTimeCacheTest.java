@@ -211,6 +211,13 @@ public class CreationTimeCacheTest
 
     ///////////////////////// Actual Tests ////////////////////////////
 
+    private CreationTimeCache getCTC() throws Exception {
+        final Class clazz = 
+            Class.forName("com.limegroup.gnutella.CreationTimeCache");
+        return (CreationTimeCache) PrivilegedAccessor.invokeConstructor(clazz,
+                                                                        null);
+    }
+
     /** Tests that the URN_MAP is derived correctly from the URN_TO_TIME_MAP
      */
     public void testMapCreation() throws Exception {
@@ -231,7 +238,7 @@ public class CreationTimeCacheTest
         oos.close();
         
         // now have the CreationTimeCache read it in
-        CreationTimeCache ctCache = new CreationTimeCache();
+        CreationTimeCache ctCache = getCTC();
         Map TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, 
                                                         "URN_TO_TIME_MAP");
         assertEquals(toSerialize, TIME_MAP);
@@ -258,7 +265,7 @@ public class CreationTimeCacheTest
         oos.close();
         
         // now have the CreationTimeCache read it in
-        CreationTimeCache ctCache = new CreationTimeCache();
+        CreationTimeCache ctCache = getCTC();
         // is everything mapped correctly from URN to Long?
         assertEquals(ctCache.getCreationTime(hash1), middle);
         assertEquals(ctCache.getCreationTime(hash2), young);
@@ -334,7 +341,7 @@ public class CreationTimeCacheTest
         
         // should be a empty cache
         // ---------------------------
-        ctCache = new CreationTimeCache();
+        ctCache = getCTC();
         assertFalse(ctCache.getFiles().hasNext());
 
         TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
@@ -351,7 +358,7 @@ public class CreationTimeCacheTest
 
         // should have one value
         // ---------------------------
-        ctCache = new CreationTimeCache();
+        ctCache = getCTC();
         iter = ctCache.getFiles();
         assertEquals(hash1, iter.next());
         assertFalse(iter.hasNext());
@@ -378,7 +385,7 @@ public class CreationTimeCacheTest
 
         // should have three values
         // ---------------------------
-        ctCache = new CreationTimeCache();
+        ctCache = getCTC();
         iter = ctCache.getFiles();
         assertEquals(hash3, iter.next());
         assertEquals(hash4, iter.next());
@@ -394,7 +401,7 @@ public class CreationTimeCacheTest
         // should have two values but exclude one
         // ---------------------------
         fm.setExcludeURN(hash4);
-        ctCache = new CreationTimeCache();
+        ctCache = getCTC();
         iter = ctCache.getFiles();
         assertEquals(hash2, iter.next());
         assertFalse(iter.hasNext());
@@ -418,7 +425,7 @@ public class CreationTimeCacheTest
         
         // should be a empty cache
         // ---------------------------
-        ctCache = new CreationTimeCache();
+        ctCache = getCTC();
         assertFalse(ctCache.getFiles().hasNext());
 
         TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");

@@ -43,12 +43,10 @@ public final class CreationTimeCache {
     private static FileManager fileManager;
 
     /**
-     * CreationTimeCache container.  LOCKING: obtain this.  Although 
-     * CREATE_URN_TO_TIME_MAP is static, CreationTimeCache is a singleton, so
-     * obtaining CreationTimeCache's monitor is sufficient -- and slightly
-     * more convenient.
+     * CreationTimeCache container.  LOCKING: obtain this.
+     * URN -> Creation Time (Long)
      */
-    private final Map /* URN -> Creation Time (Long) */ URN_TO_TIME_MAP;
+    private final Map URN_TO_TIME_MAP;
 
     /**
      * Alternate container.  LOCKING: obtain this.
@@ -75,7 +73,7 @@ public final class CreationTimeCache {
      * You should never really call this - use instance - not private for
      * testing.
      */
-    CreationTimeCache() {
+    private CreationTimeCache() {
         URN_TO_TIME_MAP = createMap();
         // use a custom comparator to sort the map in descending order....
         TIME_TO_URNSET_MAP = new TreeMap(new MyComparator());
@@ -114,6 +112,8 @@ public final class CreationTimeCache {
             Long cTime = (Long) currEntry.getValue();
             
             // check to see if file still exists
+            // NOTE: technically a URN can map to multiple FDs, but I only want
+            // to know about one.  getFileDescForUrn prefers FDs over iFDs.
             FileDesc fd = fileManager.getFileDescForUrn(currURN);
             if ((fd == null) || (fd.getFile() == null) || 
                 !fd.getFile().exists()) {
@@ -144,7 +144,8 @@ public final class CreationTimeCache {
     public synchronized void addTime(URN urn, long time) 
         throws IllegalArgumentException {
         if (urn == null) throw new IllegalArgumentException("Null URN.");
-        if (time <= 0) throw new IllegalArgumentException("Bad Time.");
+        if (time <= 0) throw new IllegalArgumentException("Bad Time = " +
+                                                          time);
         Long cTime = new Long(time);
 
         // populate urn to time
@@ -153,17 +154,20 @@ public final class CreationTimeCache {
 
     /**
      * Commits the CreationTime for the specified <tt>URN</tt> instance.  Should
-     * be called for complete files that are shared.
+     * be called for complete files that are shared.  addTime() for the input
+     * URN should have been called first (otherwise you'll get a
+     * IllegalArgumentException)
 	 *
 	 * @param urn the <tt>URN</tt> instance containing Time to store
-     * @throws IllegalArgumentException If urn is null or associated time is
-     * invalid.
+     * @throws IllegalArgumentException If urn is null or the urn was never
+     * added in addTime();
      */
     public synchronized void commitTime(URN urn) 
         throws IllegalArgumentException {
         if (urn == null) throw new IllegalArgumentException("Null URN.");
         Long cTime = (Long) URN_TO_TIME_MAP.get(urn);
-        if  (cTime == null) throw new IllegalArgumentException("Bad Time.");
+        if  (cTime == null) 
+            throw new IllegalArgumentException("Never added URN via addTime()");
 
         // populate time to set of urns
         Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
@@ -200,7 +204,7 @@ public final class CreationTimeCache {
                 urnList.add(innerIter.next());
         }
 
-        return urnList.listIterator();
+        return urnList.iterator();
     }
 
 
@@ -217,13 +221,22 @@ public final class CreationTimeCache {
     public synchronized void persistCache() {
         //It's not ideal to hold a lock while writing to disk, but I doubt think
         //it's a problem in practice.
+        ObjectOutputStream oos = null;
         try {
-            ObjectOutputStream oos = 
-			    new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
+            oos = new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
             oos.writeObject(URN_TO_TIME_MAP);
-            oos.close();
-        } catch (Exception e) {
-            ErrorService.error(e);
+        }
+        catch (FileNotFoundException fnfe) {
+            Assert.that(false, "Couldn't Write find cache file!!");
+        }
+        catch (IOException e) {
+            Assert.that(false, "Couldn't Write to Disk!!");
+        }
+        finally {
+            try {
+                oos.close();
+            }
+            catch (IOException ignored) {}
         }
     }
 
@@ -279,12 +292,13 @@ public final class CreationTimeCache {
 
             // put the urn in a set of urns that have that creation time....
             Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
-            if (urnSet == null)
+            if (urnSet == null) {
                 urnSet = new HashSet();
+                // populate the reverse mapping
+                TIME_TO_URNSET_MAP.put(cTime, urnSet);
+            }
             urnSet.add(urn);
 
-            // and populate the reverse mapping
-            TIME_TO_URNSET_MAP.put(cTime, urnSet);
         }
     }
 
@@ -326,15 +340,9 @@ public final class CreationTimeCache {
         public int compare(Object o1, Object o2) {
             if ((o1 instanceof Long) && (o2 instanceof Long))
                 return 0 - ((Long)o1).compareTo(((Long)o2));
-            ErrorService.error(new Exception("Should only compare longs!!" +
-                                             "  o1.class = " + o1.getClass() +
-                                             ", o2.class = " + o2.getClass()));
-            return 0;
+            throw new IllegalArgumentException("Should only compare longs!!" +
+                                               "  o1.class = " + o1.getClass() +
+                                               ", o2.class = " + o2.getClass());
         }
-
-        public boolean equals(Object o) {
-            return (o instanceof MyComparator);
-        }
-
     }
 }
