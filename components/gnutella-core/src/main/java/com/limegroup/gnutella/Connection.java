@@ -195,8 +195,10 @@ public class Connection implements Runnable {
         SettingsManager settings=SettingsManager.instance();
         sendString(settings.getConnectString()+"\n\n");
         expectString(settings.getConnectOkString()+"\n\n");
-        if ( doShutdown )
+        if ( doShutdown ) {
             sock.close();
+            return; //don't start output thread
+        }      
 
         Thread t=new Thread(new OutputRunner());
         t.setDaemon(true);
@@ -235,9 +237,10 @@ public class Connection implements Runnable {
         SettingsManager settings=SettingsManager.instance();
         expectString(settings.getConnectStringRemainder()+"\n\n");
         sendString(settings.getConnectOkString()+"\n\n");
-        if ( doShutdown )
+        if ( doShutdown ) {
             sock.close();
-
+            return; //don't start output thread.
+        }
 
         Thread t=new Thread(new OutputRunner());
         t.setDaemon(true);
@@ -786,6 +789,7 @@ public class Connection implements Runnable {
      */
     public void shutdown() {
         doShutdown = true;
+        connectionClosed=true;
         try {
             sock.close();
         } catch(Exception e) {}
