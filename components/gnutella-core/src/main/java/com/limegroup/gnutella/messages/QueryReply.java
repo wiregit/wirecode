@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
+import java.util.Locale;
 import com.sun.java.util.collections.*;
 
 /**
@@ -829,7 +830,7 @@ public class QueryReply extends Message implements Serializable{
             
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
-            this.vendor=vendorT.toUpperCase();
+            this.vendor=vendorT.toUpperCase(Locale.US);
             this.pushFlag=pushFlagT;
             this.busyFlag=busyFlagT;
             this.uploadedFlag=uploadedFlagT;
