@@ -70,7 +70,7 @@ public class HTTPManager {
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 
-	    //readRange();
+	    readRange();
 
 	    HTTPUploader uploader;
 	    uploader = new HTTPUploader(s, _filename, _index, _manager, _uploadBegin, _uploadBegin);
@@ -130,40 +130,41 @@ public class HTTPManager {
 
 
 	while (true) {	    
+
 	    str = _br.readLine();
-	    if (str==null) {
+
+	    if ( (str==null) || (str.equals("")) ){
 		break;
 	    }
-	    
-	    if (str.indexOf("Range: bytes=") != -1) {
-		String sub = str.substring(13);
-		sub = sub.trim();   // remove the white space
-		char c;
-		c = sub.charAt(0);  // get the first character
-		if (c == '-') {  // - n
-		    String second = sub.substring(1);
-		    second = second.trim();
-		    _uploadEnd = java.lang.Integer.parseInt(second);
-		}
-		else {                // m - n or 0 - 
-		    int dash = sub.indexOf("-");
+
+  	    if (str.indexOf("Range: bytes=") != -1) {
+  		String sub = str.substring(13);
+  		sub = sub.trim();   // remove the white space
+  		char c;
+  		c = sub.charAt(0);  // get the first character
+  		if (c == '-') {  // - n
+  		    String second = sub.substring(1);
+  		    second = second.trim();
+  		    _uploadEnd = java.lang.Integer.parseInt(second);
+  		}
+  		else {                // m - n or 0 - 
+  		    int dash = sub.indexOf("-");
 		    
-		    String first = sub.substring(0, dash);
-		    first = first.trim();
+  		    String first = sub.substring(0, dash);
+  		    first = first.trim();
 		    
-		    _uploadBegin = java.lang.Integer.parseInt(first);
+  		    _uploadBegin = java.lang.Integer.parseInt(first);
 		    
-		    String second = sub.substring(dash+1);
-		    second = second.trim();
+  		    String second = sub.substring(dash+1);
+  		    second = second.trim();
 		    
-		    if (!second.equals("")) {
-			_uploadEnd = java.lang.Integer.parseInt(second);
-		    }
-		}
+  		    if (!second.equals("")) {
+  			_uploadEnd = java.lang.Integer.parseInt(second);
+  		    }
+  		}
 		
-	    }
+  	    }
 	}
-	
     }
 
     public void shutdown() {

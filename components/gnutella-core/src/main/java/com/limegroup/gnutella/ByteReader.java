@@ -96,6 +96,7 @@ public class ByteReader {
   	byte[] nline = nl.getBytes();
 
 	while (true) {
+
 	    c = _istream.read();
 
 	    if (c == -1) 
@@ -124,6 +125,7 @@ public class ByteReader {
 	}
 
 	finalString += new String(buf, 0, numBytes);
+
 	return finalString;
 
     }
