@@ -99,7 +99,7 @@ public class SetDenseTableMessage extends RouteTableMessage {
                                    byte tableTTL, 
                                    byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, payload.length,
-              RouteTableMessage.RESET_VARIANT, tableTTL);
+              RouteTableMessage.SET_DENSE_BLOCK_VARIANT, tableTTL);
 
         //Verify length and parse startOffset variable.
         if (payload.length<=BITMAP_PAYLOAD_POSITION)
@@ -145,6 +145,16 @@ public class SetDenseTableMessage extends RouteTableMessage {
         return bits.get(i-startOffset);
     }
 
+
+    public String toString() {
+        StringBuffer buf=new StringBuffer();
+        int x=0;
+        for (int i=0; i<bitsLength; i++) {
+            if (bits.get(i)) 
+                x++;
+        }
+        return "{TTTL: "+getTableTTL()+", entries: "+x+"}";
+    }
 
     /** Unit test */
     public static void main(String[] args) {
