@@ -404,14 +404,13 @@ public abstract class MessageRouter
     {
         //_numQueryRequests++;
 
-		// if it's a request from a leaf, send it out via GUESS --
+		// if it's a request from a leaf and we GUESS, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
-		if(handler.isSupernodeClientConnection()) {
+		if(handler.isSupernodeClientConnection() && 
+           RouterService.isGUESSCapable()) 
 			unicastQueryRequest(request, handler);
-		} 
-        else if(request.getTTL() > 0) {
+        else if(request.getTTL() > 0)
 			broadcastQueryRequest(request, handler);
-		}
 			
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer

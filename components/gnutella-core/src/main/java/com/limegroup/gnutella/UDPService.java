@@ -72,11 +72,13 @@ public final class UDPService implements Runnable {
 	 * over UDP.
 	 */
 	public void start() {
-
 		// if we're already listening, return
 		if(_udpThread.isAlive()) return;
-		_udpThread.setDaemon(true);		
-		_udpThread.start();
+        
+        if (SettingsManager.instance().getGuessEnabled()) {
+            _udpThread.setDaemon(true);		
+            _udpThread.start();
+        }
 	}
 
 	/**
