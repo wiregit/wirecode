@@ -110,19 +110,6 @@ public class Main implements ActivityCallback, ErrorCallback {
     /////////////////////////// ActivityCallback methods //////////////////////
 
     public void connectionInitializing(Connection c) {
-//		String host = c.getOrigHost();
-//		int    port = c.getOrigPort();
-		String direction=null;
-		String direction2=null;
-		if (c.isOutgoing()) {
-			direction="outgoing";
-			direction2="to ";
-		} else {
-			direction="incoming";
-			direction2="from ";
-		}
-
-		;//System.out.println("Creating "+direction+" connection "+direction2+host+":"+port+"...");
     }
 
     public void connectionInitialized(Connection c) {
