@@ -348,6 +348,62 @@ public class LeafRoutingTest extends BaseTestCase {
     }
 
 
+    public void testLeafAnswersURNQueries() throws Exception {
+        drain(ultrapeer2);
+
+        // make sure the set up succeeded
+        assertTrue(rs.getFileManager().getNumFiles() == 2);
+
+        // get the URNS for the files
+        File berkeley = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File susheel = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        Iterator iter = FileDesc.calculateAndCacheURN(berkeley).iterator();
+        URN berkeleyURN = (URN) iter.next();
+        iter = FileDesc.calculateAndCacheURN(susheel).iterator();
+        URN susheelURN = (URN) iter.next();
+
+        // send a query that should hit
+        QueryRequest query = QueryRequest.createQuery(berkeleyURN);
+
+        ultrapeer2.send(query);
+        ultrapeer2.flush();
+        
+        // hope for the result
+        Message m = null;
+        do {
+            m = ultrapeer2.receive(TIMEOUT);
+            if (m instanceof QueryReply) {
+                QueryReply qr = (QueryReply) m;
+                iter = qr.getResults();
+                Response first = (Response) iter.next();
+                assertEquals(first.getUrns(),
+                             FileDesc.calculateAndCacheURN(berkeley));
+            }
+        } while (!(m instanceof QueryReply)) ;
+        
+        // send another query that should hit
+        query = QueryRequest.createQuery(susheelURN);
+
+        ultrapeer2.send(query);
+        ultrapeer2.flush();
+        
+        // hope for the result
+        m = null;
+        do {
+            m = ultrapeer2.receive(TIMEOUT);
+            if (m instanceof QueryReply) {
+                QueryReply qr = (QueryReply) m;
+                iter = qr.getResults();
+                Response first = (Response) iter.next();
+                assertEquals(first.getUrns(),
+                             FileDesc.calculateAndCacheURN(susheel));
+            }
+        } while (!(m instanceof QueryReply)) ;
+    }
+
+
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
     private Set /* of Endpoint */ list2set(String addresses) {
