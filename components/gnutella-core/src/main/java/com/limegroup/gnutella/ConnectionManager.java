@@ -920,7 +920,9 @@ public class ConnectionManager {
         //get remote address
         String remoteAddress 
             = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
-        if(remoteAddress != null)
+        //set the remote port if not outgoing connection (as for the outgoing
+        //connection, we already know the port at which remote host listens)
+        if((remoteAddress != null) && (!connection.isOutgoing()))
         {
             try
             {
@@ -1014,7 +1016,7 @@ public class ConnectionManager {
      * @param hostAddresses The string representing the addressess to be 
      * added. It should be in the form:
      * <p> IP Address:Port [,IPAddress:Port]* 
-     * <p> e.g. 123.4.5.67:6346,234.5.6.78:6347 
+     * <p> e.g. 123.4.5.67:6346, 234.5.6.78:6347 
      * @param connection The connection on which we received the addresses
      */
     private void updateHostCache(Properties headers, ManagedConnection
@@ -1311,8 +1313,7 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                if(_hasShieldedClientSupernodeConnection)
-                {
+                if(_hasShieldedClientSupernodeConnection){
                     lostShieldedClientSupernodeConnection();
                 }
             }
