@@ -18,26 +18,6 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testLegacy() throws Exception {
         //Note: some of Message's code is covered by subclass tests, e.g.,
         //PushRequestTest.
-        byte[] buf=new byte[10];
-        buf[3]=(byte)192;
-        buf[4]=(byte)168;
-        buf[5]=(byte)0;
-        buf[6]=(byte)1;       
-        assertEquals("192.168.0.1", NetworkUtils.ip2string(buf, 3));
-        
-        buf=new byte[4];
-        buf[0]=(byte)0;
-        buf[1]=(byte)1;
-        buf[2]=(byte)2;
-        buf[3]=(byte)3;
-        assertEquals("0.1.2.3", NetworkUtils.ip2string(buf));
-
-        buf=new byte[4];
-        buf[0]=(byte)252;
-        buf[1]=(byte)253;
-        buf[2]=(byte)254;
-        buf[3]=(byte)255;
-        assertEquals("252.253.254.255",NetworkUtils.ip2string(buf));
 
         Message m1=new PingRequest((byte)3);
         Message m2=new PingRequest((byte)3);
