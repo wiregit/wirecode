@@ -36,25 +36,30 @@ public final class AlternateLocation
 	 * January 1, 1970, 00:00:00 GMT.
 	 */
 	private final long TIME;
+
+	/**
+	 * Cached hash code that is lazily initialized.
+	 */
+	private volatile int hashCode = 0;
 	
 
 	/**
 	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
 	 * specified string argument.  
 	 *
-	 * @param LOCATION a string containing a single alternate location,
+	 * @param location a string containing a single alternate location,
 	 *  including a full URL for a file and an optional date
 	 * @throws <tt>IOException</tt> if there is any problem constructing
 	 *  the new instance from the specified string
 	 */
-	public AlternateLocation(final String LOCATION) throws IOException {
+	public AlternateLocation(final String location) throws IOException {
 		try {
-			URL = AlternateLocation.createUrl(LOCATION);
+			URL = AlternateLocation.createUrl(location);
 		} catch(MalformedURLException e) {
 			throw new IOException("MALFORMED URL");
 		}
 		
-		if(!AlternateLocation.isTimestamped(LOCATION)) {
+		if(!AlternateLocation.isTimestamped(location)) {
 			OUTPUT_DATE_TIME = null;		
 			
 			// just set the time to be as old as possible since there's
@@ -63,7 +68,7 @@ public final class AlternateLocation
 		}
 		else {
 			// this can be null
-			OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(LOCATION);			
+			OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(location);			
 			Date date = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
 			TIME = date.getTime();
 		}		
@@ -73,14 +78,14 @@ public final class AlternateLocation
 	 * Creates a new <tt>AlternateLocation</tt> instance for the given host
 	 * and the specified <tt>URN</tt>.
 	 *
-	 * @param HOST_NAME the address of the alternate location host
-	 * @param URN the <tt>URN</tt> for the resource
+	 * @param hostName the address of the alternate location host
+	 * @param urn the <tt>URN</tt> for the resource
 	 * @throws <tt>MalformedURLException</tt> if a <tt>URL</tt> instance
 	 *  could not be succussfully constructed from the supplied arguments
 	 */
-	public AlternateLocation(final String HOST_NAME, URN URN) 
+	public AlternateLocation(final String hostName, URN urn) 
 		throws MalformedURLException {
-		String fullUrl = HOST_NAME+HTTPConstants.URI_RES_N2R+URN.toString();
+		String fullUrl = hostName+HTTPConstants.URI_RES_N2R+urn.toString();
 		this.URL = new URL(fullUrl);
 
 		// make the date the current time
@@ -142,8 +147,8 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if the string represents a valid date 
 	 *  according to our critetia, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidDate(final String DATE) {
-		int length = DATE.length();
+	private static boolean isValidDate(final String date) {
+		int length = date.length();
 		final String DASH = "-";
 		final String COLON = ":";
 		// if the date length is less than ten, then the date does not contain
@@ -159,19 +164,19 @@ public final class AlternateLocation
 			return false;
 		}
 		// the date must be in this millenium
-		if(!DATE.startsWith("2")) {
+		if(!date.startsWith("2")) {
 			return false;
 		}
-		int firstDashIndex  = DATE.indexOf(DASH);
-		int secondDashIndex = DATE.indexOf(DASH, firstDashIndex+1);
+		int firstDashIndex  = date.indexOf(DASH);
+		int secondDashIndex = date.indexOf(DASH, firstDashIndex+1);
 		if((firstDashIndex == -1) || (secondDashIndex == -1)) {
 			return false;
 		}
 
 		if(length == 10) return true;
  
-		int firstColonIndex  = DATE.indexOf(COLON);
-		int secondColonIndex = DATE.indexOf(COLON, firstColonIndex+1);
+		int firstColonIndex  = date.indexOf(COLON);
+		int secondColonIndex = date.indexOf(COLON, firstColonIndex+1);
 		if((firstColonIndex != 13) || (secondColonIndex != 16)) {
 			return false;
 		}
@@ -185,42 +190,44 @@ public final class AlternateLocation
 	 *  is guaranteed to be non-null
 	 */
 	public URL getUrl() {
-		// this is fine because the URL class is immutable
+		// this is fine because the URL class is immutable??
 		return URL;
 	}
 
 	/**
-	 * A new <tt>Date</tt> instance representing the timestamp for this 
-	 * alternate location.
-	 *
-	 * @return a new <tt>Date</tt> instance representing the timestamp for this 
-	 * alternate location
+	 * A <tt>long</tt> representing the timestamp for this alternate 
+	 * location, or the number of milliseconds since January 1, 1970, 
+	 * 00:00:00 GMT.  If the alternate location is not timestamped, 
+	 * this will return 0 (the oldest possible time).
+	 * 
+	 * @return a <tt>long</tt> representing the timestamp for this alternate 
+	 * location, or the number of milliseconds since January 1, 1970, 
+	 * 00:00:00 GMT
 	 */
-	public Date getTimestamp() {
-		// this is fine because the Date class is immutable
-		return new Date(TIME);
+	public long getTimestamp() {
+		return TIME;
 	}
 
 	/**
 	 * Parses out the time-date string from the alternate location
 	 * header string, throwing an exception if there is any error.
 	 *
-	 * @param LOCATION the full alternate-location HTTP header string,
+	 * @param location the full alternate-location HTTP header string,
 	 *  as specified in HUGE v0.93
 	 * @return the date/time string from the the alternate location
 	 *  header, or <tt>null</tt> if the date/time string could not
 	 *  be extracted, is invalid, or does not exist
 	 */
-	private static String extractDateTimeString(final String LOCATION) {
-		if(!AlternateLocation.isTimestamped(LOCATION)) {
+	private static String extractDateTimeString(final String location) {
+		if(!AlternateLocation.isTimestamped(location)) {
 			return null;
 		}
-		int dateIndex = LOCATION.lastIndexOf(" ");
+		int dateIndex = location.lastIndexOf(" ");
 		if((dateIndex == -1) ||
-		   ((dateIndex+1) >= LOCATION.length())) {
+		   ((dateIndex+1) >= location.length())) {
 			return null;
 		}
-		String dateTimeString = LOCATION.substring(dateIndex+1).trim(); 
+		String dateTimeString = location.substring(dateIndex+1).trim(); 
 		if(AlternateLocation.isValidDate(dateTimeString)) {
 			return dateTimeString; 
 		} else {
@@ -232,30 +239,28 @@ public final class AlternateLocation
 	 * Creates a new <tt>Date</tt> instance from the date specified in
 	 * the alternate location header.
 	 *
-	 * @param DATE_TIME_STRING the extracted date-time string from the
+	 * @param dateTimeString the extracted date-time string from the
 	 *  alternate location header
 	 * @return a new <tt>Date</tt> instance for the date specified in
 	 *  the header, or a new <tt>Date</tt> instance of the oldest
 	 *  possible date (according to the <tt>Date</tt> class) in the case 
 	 *  where no timestamp data could be successfully created
 	 */
-	private static Date createDateInstance(final String DATE_TIME_STRING) {
-		int dateTimeSepIndex = DATE_TIME_STRING.indexOf("T");
+	private static Date createDateInstance(final String dateTimeString) {
+		int dateTimeSepIndex = dateTimeString.indexOf("T");
 
 		// if there's no "T", or it f
 		if((dateTimeSepIndex == -1) || 
-		   ((dateTimeSepIndex+1) >= DATE_TIME_STRING.length())) {
+		   ((dateTimeSepIndex+1) >= dateTimeString.length())) {
 			return new Date(0);
-			//throw new IOException("INVALID DATE/TIME STRING");
 		}
-		String YYYYMMDD = DATE_TIME_STRING.substring(0, dateTimeSepIndex);
+		String YYYYMMDD = dateTimeString.substring(0, dateTimeSepIndex);
 		String hhmmss = 
-		    DATE_TIME_STRING.substring(dateTimeSepIndex+1, 
-									   DATE_TIME_STRING.length()-1);
+		    dateTimeString.substring(dateTimeSepIndex+1, 
+									 dateTimeString.length()-1);
 		StringTokenizer stdate = new StringTokenizer(YYYYMMDD, "-");
 		if(stdate.countTokens() != 3) {
 			return null;
-			//throw new IOException("INVALID DATE FORMAT");
 		}
 		String YYYYStr = stdate.nextToken();
 		String MMStr   = stdate.nextToken();
@@ -270,7 +275,6 @@ public final class AlternateLocation
 		StringTokenizer sttime = new StringTokenizer(hhmmss, ":");
 		if(sttime.countTokens() != 3) {
 			return new Date(0);
-			//throw new IOException("INVALID TIME FORMAT");
 		}
 		String hhStr = sttime.nextToken();
 		String mmStr = sttime.nextToken();
@@ -288,7 +292,7 @@ public final class AlternateLocation
 	 * Creates a new <tt>URL</tt> instance based on the URL specified in
 	 * the alternate location header.
 	 * 
-	 * @param LOCATION_HEADER the alternate location header from an HTTP
+	 * @param locationHeader the alternate location header from an HTTP
 	 *  header
 	 * @return a new <tt>URL</tt> instance for the URL in the alternate
 	 *  location header
@@ -297,32 +301,32 @@ public final class AlternateLocation
 	 * @throws <tt>MalformedURLException</tt> if the enclosed URL is not
 	 *  formatted correctly
 	 */
-	private static URL createUrl(final String LOCATION_HEADER) 
+	private static URL createUrl(final String locationHeader) 
 		throws IOException {
-		String test = LOCATION_HEADER.toLowerCase();
+		String test = locationHeader.toLowerCase();
 		String urlString;		
 		if(!test.startsWith("http")) {
-			int colonIndex  = LOCATION_HEADER.indexOf(":");
+			int colonIndex  = locationHeader.indexOf(":");
 			if(colonIndex == -1) {
 				throw new IOException("ERROR EXTRACTING URL STRING");
 			}
-			if(!AlternateLocation.isTimestamped(LOCATION_HEADER)) {				
-				urlString = LOCATION_HEADER.substring(colonIndex+1);
+			if(!AlternateLocation.isTimestamped(locationHeader)) {				
+				urlString = locationHeader.substring(colonIndex+1);
 			}
 			else {
-				int dateIndex = LOCATION_HEADER.lastIndexOf(" ");
+				int dateIndex = locationHeader.lastIndexOf(" ");
 				if(dateIndex == -1) {
 					throw new IOException("ERROR EXTRACTING URL DATE");
 				}
-				urlString = LOCATION_HEADER.substring(colonIndex+1, dateIndex);
+				urlString = locationHeader.substring(colonIndex+1, dateIndex);
 			}
 		} else {
-			if(AlternateLocation.isTimestamped(LOCATION_HEADER)) {
-				int dateIndex = LOCATION_HEADER.lastIndexOf(" ");
-				urlString = LOCATION_HEADER.substring(0, dateIndex);
+			if(AlternateLocation.isTimestamped(locationHeader)) {
+				int dateIndex = locationHeader.lastIndexOf(" ");
+				urlString = locationHeader.substring(0, dateIndex);
 			}
 			else {
-				urlString = LOCATION_HEADER;
+				urlString = locationHeader;
 			}
 		}
 
@@ -334,16 +338,16 @@ public final class AlternateLocation
 	 * Convenience method for checking whether or not the specified 
 	 * alternate location header is timestamped.
 	 *
-	 * @param LOCATION_HEADER the header to check for a timestamp
+	 * @param locationHeader the header to check for a timestamp
 	 * @return <tt>true</tt> if the header has a timestamp, <tt>false</tt>
 	 *  otherwise
 	 */
-	private static boolean isTimestamped(final String LOCATION_HEADER) {
-		int dateIndex = LOCATION_HEADER.lastIndexOf(" ");
+	private static boolean isTimestamped(final String locationHeader) {
+		int dateIndex = locationHeader.lastIndexOf(" ");
 		if(dateIndex == -1) {
 			return false;
 		}
-		else if((LOCATION_HEADER.length()-dateIndex) > 21) {
+		else if((locationHeader.length()-dateIndex) > 21) {
 			return false;
 		}
 		return true;
@@ -357,31 +361,7 @@ public final class AlternateLocation
 	 *  a timestamp, <tt>false</tt> otherwise
 	 */
 	public boolean isTimestamped() {
-		return (OUTPUT_DATE_TIME != null);
-	}
-
-	/**
-	 * Returns whether this <tt>AlternateLocation</tt> instance is
-	 * older than the <tt>AlternateLocation</tt> argument.
-	 * 
-	 * @return <tt>true</tt> if the date for this <tt>AlternateLocation</tt>
-	 *  is older than the date for the <tt>AlternateLocation</tt>
-	 *  argument, and otherwise returns <tt>false</tt> 
-	 */
-	public boolean isOlderThan(AlternateLocation loc) {
-		return this.getTimestamp().before(loc.getTimestamp());
-	}
-
-	/**
-	 * Returns whether this <tt>AlternateLocation</tt> instance is
-	 * newer than the <tt>AlternateLocation</tt> argument.
-	 * 
-	 * @return <tt>true</tt> if the date for this <tt>AlternateLocation</tt>
-	 *  is newer than the date for the <tt>AlternateLocation</tt>
-	 *  argument, and otherwise returns <tt>false</tt> 
-	 */
-	public boolean isNewerThan(AlternateLocation loc) {
-		return this.getTimestamp().after(loc.getTimestamp());
+		return (TIME != 0);
 	}
 
 	/**
@@ -405,9 +385,8 @@ public final class AlternateLocation
 	 * @see java.lang.Comparable
 	 */
 	public int compareTo(Object obj) {
-		if(this.equals(obj)) return 0;
 		AlternateLocation al = (AlternateLocation)obj;		
-		long anotherTime = al.getTimestamp().getTime();
+		long anotherTime = al.getTimestamp();
 		return (TIME<anotherTime ? 1 : (TIME==anotherTime ? 0 : -1));
 	}
 
@@ -426,18 +405,28 @@ public final class AlternateLocation
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation al = (AlternateLocation)obj;
-		Date date = al.getTimestamp();
+		long ts = al.getTimestamp();
 		URL url = al.getUrl();
-		if(al.isTimestamped() && this.isTimestamped()) {
-			if(date.compareTo(this.getTimestamp()) != 0) {
-				return false;
-			}
+		return ((ts == TIME) && url.equals(URL));
+	}
+
+	/**
+	 * Overrides the hashCode method of Object to meet the contract of 
+	 * hashCode.  Since we override equals, it is necessary to also 
+	 * override hashcode to ensure that two "equal" alternate locations
+	 * return the same hashCode, less we unleash unknown havoc on the
+	 * hash-based collections.
+	 *
+	 * @return a hash code value for this object
+	 */
+	public int hashCode() {
+		if(hashCode == 0) {
+			int result = 17;
+			result = (37*result) + (int)(TIME ^ (TIME >>> 32));
+			result = (37*result) + this.URL.hashCode();
+			hashCode = result;
 		}
-		else if(!(!al.isTimestamped() && !this.isTimestamped())) {
-			return false;
-		}
-		
-		return this.URL.equals(url);
+		return hashCode;
 	}
 
 	/**
