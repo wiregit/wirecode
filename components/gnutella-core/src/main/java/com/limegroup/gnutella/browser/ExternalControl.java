@@ -105,7 +105,9 @@ public class ExternalControl {
 
 			// First read extra parameter
 			socket.setSoTimeout(SettingsManager.instance().getTimeout());
-			String word=IOUtils.readWord(in,500);
+			ByteReader br = new ByteReader(socket.getInputStream());
+            // read the first line. if null, throw an exception
+            String line = br.readLine();
 			socket.setSoTimeout(0);
 
 			BufferedOutputStream out =
@@ -114,7 +116,7 @@ public class ExternalControl {
 			byte[] bytes=s.getBytes();
 			out.write(bytes);
 			out.flush();
-		    handleMagnetRequest(word);
+		    handleMagnetRequest(line);
 		} catch (IOException e) {
 		}
 			
