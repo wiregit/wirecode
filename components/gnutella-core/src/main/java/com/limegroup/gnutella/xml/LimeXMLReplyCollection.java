@@ -447,18 +447,32 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             for(Iterator i = query.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
+                // Get the name of the particular field being queried for.
                 final String name = (String)entry.getKey();
+                // Lookup the matching Trie for that field.
                 Trie trie = (Trie)trieMap.get(name);
-                // no matching trie?.. ignore.
+                // No matching trie?.. Ignore.
                 if(trie == null)
                     continue;
+                // Get the value of that field being queried for.    
                 final String value = (String)entry.getValue();
+                // Get our shared XML docs that match this value.
                 Iterator /* of List */ iter = trie.getPrefixedBy(value);
-                while(iter.hasNext()) {
-                    List matchesVal = (List)iter.next();
-                    if( matching == null ) // delayed allocation of the set..
+                // If some matches and 'matching' not allocated yet,
+                // allocate a new Set for storing matches
+                if(iter.hasNext()) {
+                    if (matching == null)
                         matching = new HashSet();
-                    matching.addAll(matchesVal);
+                    // Iterate through each set of matches the Trie found
+                    // and add those matching-lists to our set of matches.
+                    // Note that the trie.getPrefixedBy returned
+                    // an Iterator of Lists -- this is because the Trie
+                    // does prefix matching, so there are many Lists of XML
+                    // docs that could match.
+                    while(iter.hasNext()) {
+                        List matchesVal = (List)iter.next();
+                        matching.addAll(matchesVal);
+                    }
                 }
             }
         }
