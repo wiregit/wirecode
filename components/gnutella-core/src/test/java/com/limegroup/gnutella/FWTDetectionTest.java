@@ -101,9 +101,71 @@ public class FWTDetectionTest extends BaseTestCase {
     }
     
     public void tearDown() {
-        RouterService.disconnect();
+        cmStub.setConnected(false);
         ponger1.drain();
         ponger2.drain();
+    }
+    
+    /**
+     * tests the scenario where we are not connected
+     * b) do not have valid external address
+     * c) can't do solicited
+     * 
+     * This test should be run first.
+     */
+    public void testDisconnected() throws Exception {
+        cmStub.setConnected(false);
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        assertTrue(UDPService.instance().canDoFWT());
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        assertFalse(UDPService.instance().canDoFWT());
+        
+    }
+    
+    /**
+     * tests scenarios where we can and can't do solicited
+     */
+    public void testSolicited() throws Exception{
+        cmStub.setConnected(true);
+        
+        //make sure our port is valid
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        assertTrue(
+                NetworkUtils.isValidAddress(RouterService.getExternalAddress()));
+        
+        //if we can't do solicited, we're out
+        UDPService.instance().setReceiveSolicited(false);
+        assertFalse(UDPService.instance().canReceiveSolicited());
+        assertFalse(UDPService.instance().canDoFWT());
+        
+        UDPService.instance().setReceiveSolicited(true);
+        assertTrue(UDPService.instance().canReceiveSolicited());
+        assertTrue(UDPService.instance().canDoFWT());
+    }
+    
+    public void testInvalidExternal() throws Exception {
+        cmStub.setConnected(true);
+        
+        // make sure we can receive solicited
+        UDPService.instance().setReceiveSolicited(true);
+        assertTrue(UDPService.instance().canReceiveSolicited());
+        
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getByName("0.0.0.0"));
+        assertFalse(
+                NetworkUtils.isValidAddress(RouterService.getExternalAddress()));
+        assertFalse(UDPService.instance().canDoFWT());
+        
+        
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        assertTrue(
+                NetworkUtils.isValidAddress(RouterService.getExternalAddress()));
+        assertTrue(UDPService.instance().canDoFWT());
+        
+        
+        assertTrue(UDPService.instance().canDoFWT());
+        
+        
     }
     /**
      * tests if the pings are requesting ip:port check properly
@@ -150,6 +212,7 @@ public class FWTDetectionTest extends BaseTestCase {
         Thread.sleep(500);
         cmStub.setConnected(true);
         assertTrue(UDPService.instance().canDoFWT());
+        assertFalse(ConnectionSettings.EVER_DISABLED_FWT.getValue());
         cmStub.setConnected(false);
     }
     
@@ -172,6 +235,18 @@ public class FWTDetectionTest extends BaseTestCase {
         assertFalse(UDPService.instance().canDoFWT());
         assertTrue(ConnectionSettings.EVER_DISABLED_FWT.getValue());
         cmStub.setConnected(false);
+    }
+    
+    /**
+     * tests the case where the pong says we have different address
+     */
+    public void testPongCarriesBadAddress() throws Exception {
+        
+        Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
+        ponger1.reply(badAddress);
+        Thread.sleep(500);
+        cmStub.setConnected(true);
+        assertFalse(UDPService.instance().canDoFWT());
     }
     
     private static void writeToGnet(String hosts) throws Exception {
