@@ -42,13 +42,13 @@ public class ManagedDownloader implements Downloader, Serializable {
       considers two files with the same name and file size to be duplicates.
 
       When discussing swarmed downloads, it's useful to divide parts of a file
-      into three categories: black, grey, and white.  Black regions have already
+      into three categories: black, grey, and white. Black regions have already
       been downloaded to disk.  Grey regions have been assigned to a downloader
       but not yet completed.  White regions have not been assigned to a
       downloader.
       
       LimeWire uses the following algorithm for swarming.  First all download
-      locations are divided into buckets of "same" files.  Then the following is
+      locations are divided into buckets of "same" files. Then the following is
       done for each bucket:
 
       while there are still more (grey or white) blocks to download,
@@ -91,12 +91,13 @@ public class ManagedDownloader implements Downloader, Serializable {
       startBestDownload executes the IF-statement in the pseudocode above.
 
       Currently the desired parallelism is fixed at 4, except for modem users.
-      Better to choose this according to the downloaders capacity and the number
-      and speed of uploaders.
+      Better to choose this according to the downloaders capacity and the 
+      number and speed of uploaders.
 
-      For push downloads, the acceptDownload(Socket) method of ManagedDownloader
-      is called from the Acceptor instance.  This thread simply passes the
-      Socket to findConnectable, which waits appropriately with timeout.  */
+      For push downloads, the acceptDownload(Socket) method of 
+      ManagedDownloaderis called from the Acceptor instance.  This 
+      thread simply passes the Socket to findConnectable, which waits 
+      appropriately with timeout.  */
     
     /** Ensures backwards compatibility. */
     static final long serialVersionUID = 2772570805975885257L;
@@ -151,7 +152,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     
 
     ////////////////////////// Core Variables /////////////////////////////
-    /** The buckets of "same" files, each a list of RemoteFileDesc.  One by one,
+    /** The buckets of "same" files, each a list of RemoteFileDesc. One by one,
      *  we will try to swarm each bucket.  Buckets are passed to the
      *  tryAllDownloadsX, removeBest, and tryOneDownload methods, which can
      *  mutate them.  Also, existing buckets can be modified and new buckets
@@ -246,7 +247,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Creates a new ManagedDownload to download the given files.  The download
      * attempts to begin immediately; there is no need to call initialize.
      * Non-blocking.
-     *     @param manager the delegate for queueing purposes.  Also the callback
+     *     @param manager the delegate for queueing purposes. Also the callback
      *      for changes in state.
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
@@ -293,16 +294,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         stream.readObject();
 
         //The following is needed to prevent NullPointerException when reading
-        //serialized object from disk.  This can't be done in the constructor or
+        //serialized object from disk. This can't be done in the constructor or
         //initializer statements, as they're not executed.  Nor should it be
         //done in initialize, as that could cause problems in resume().
         reqLock=new RequeryLock();
     }
 
     /** 
-     * Initializes a ManagedDownloader read from disk.  Also used for internally
+     * Initializes a ManagedDownloader read from disk. Also used for internally
      * initializing or resuming a normal download; there is no need to
-     * explicitly call this method in that case.  After the call, this is in the
+     * explicitly call this method in that case. After the call, this is in the
      * queued state, at least for the moment.
      *     @requires this is uninitialized or stopped, 
      *      and allFiles, and incompleteFileManager are set
@@ -334,7 +335,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /**
-     * Returns true if 'other' could conflict with one of the files in this.  In
+     * Returns true if 'other' could conflict with one of the files in this. In
      * other if this.conflicts(other)==true, no other ManagedDownloader should
      * attempt to download other.
      */
@@ -416,7 +417,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns true if 'other' could conflict with one of the files in this. 
      * This is a much less strict version compared to conflicts().
-     * WARNING - THIS SHOULD NOT BE USED WHEN THE Downloader IS IN A DOWNLOADING
+     * WARNING-THIS SHOULD NOT BE USED WHEN THE Downloader IS IN A DOWNLOADING
      * STATE!!!  Ideally used when WAITING_FOR_RESULTS....
      */
     public boolean conflictsLAX(RemoteFileDesc other) {
@@ -640,7 +641,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** 
      * Actually does the download, finding duplicate files, trying all
-     * locations, resuming, waiting, and retrying as necessary.  Also takes care
+     * locations, resuming, waiting, and retrying as necessary. Also takes care
      * of moving file from incomplete directory to save directory and adding
      * file to the library.  Called from dloadManagerThread.  
      */
@@ -746,7 +747,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     synchronized (this) {
                         retriesWaiting=0;
                         for (Iterator iter=buckets.buckets();iter.hasNext();) {
-                            List /* of RemoteFileDesc */ bucket=(List)iter.next();
+                            List /* of RemoteFileDesc */ bucket=
+                                                            (List)iter.next();
                             retriesWaiting+=bucket.size();
                         }
                     }
@@ -993,9 +995,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread() {
                     public void run() {
-                        connectAndStartDownload(rfd);
-                        //System.out.println("Sumeet: end of run");
-                    }
+                        try {
+                            connectAndStartDownload(rfd);
+                            //System.out.println("Sumeet: end of run");
+                        } catch (Exception e) {
+                            //This is a "firewall" for reporting unhandled
+                            //errors.  We don't really try to recover at this
+                            //point, but we do attempt to display the error in
+                            //the GUI for debugging purposes.
+                            ManagedDownloader.this.manager.internalError(e);
+                        }
+                    }//end of run
                 };
                 connectCreator.start();
             }//end of for 
@@ -1108,15 +1118,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloaders.add(dloader);
 			chatList.addHost(dloader);
         }
-        try {
-            tryOneDownload(dloader);
-        } catch (Exception e) {
-            //This is a "firewall" for reporting unhandled errors.
-            //We don't really try to recover at this point, but we
-            //do attempt to display the error in the GUI for
-            //debugging purposes.
-            ManagedDownloader.this.manager.internalError(e);
-        }
+         
+        tryOneDownload(dloader);
     }
 
     /**
@@ -1454,7 +1457,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    /////////////////////////////   Display Variables ////////////////////////////
+    /////////////////////////////Display Variables////////////////////////////
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
     private void setState(int newState) {
@@ -1595,7 +1598,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns the time to wait between the n'th and n+1'th automatic requery,
      * where n=requeries.  Hence getMinutesToWaitForRequery(0) is the time to
-     * wait before the first requery.  getMinutesToWaitForRequery(1) is the time
+     * wait before the first requery. getMinutesToWaitForRequery(1) is the time
      * to wait after that before requerying again.
      *
      * @param requeriesthe number of requeries sent, which must be non-negative
@@ -1611,7 +1614,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Can be underst00d as follows:
      *  -- The tryAllDownloads thread does a lock(), which will cause it to
      *  wait() for up to waitTime.  it may be woken up earlier if it gets
-     *  a requery result.  moreover, it won't wait if it has a result already...
+     *  a requery result. moreover, it won't wait if it has a result already...
      *  -- The addDownload method, upon getting a result that matches, will
      *  wake up the tryAllDownloads thread with a release().  
      *  WARNING:  THIS IS VERY SPECIFIC SYNCHRONIZATION.  IT WAS NOT MEANT TO 
