@@ -57,9 +57,10 @@ public class DownloadManager implements BandwidthTracker {
      */
     private Map queryDetails = new Hashtable();
 
-    /** The amount of time between requeries....
+    /** The amount of time between requeries: 
+     *  45 minutes
      */
-    private final long TIME_BETWEEN_REQUERIES = 30 * 60 * 1000; // 30 minutes
+    public final static long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
 
     /** The last time that a requery was sent.
      */
