@@ -82,7 +82,9 @@ public class CountPercent {
             HTMLOutput html = new HTMLOutput(df, pc, langs, basicTotal);
             html.printHTML(System.out);
             break;
-        case ACTION_RELEASE: // release updates first.
+        case ACTION_RELEASE: 
+            // release does an update, ensuring bad keys are gone
+            // & native2ascii is done.
         case ACTION_UPDATE:
             loader.extendVariantLanguages();
             Set validKeys = new HashSet();
@@ -176,8 +178,7 @@ public class CountPercent {
         // and copy'm to a release dir.
         File release = new File(root, "release");
         deleteAll(release);
-        release.delete();
-        copy(root, release, new Filter(validLangs));
+        copy(root, release, new ReleaseFilter(validLangs));
     }
     
     /**
@@ -241,12 +242,14 @@ public class CountPercent {
     }        
     
     /**
-     * Filter for files.
+     * Filter for releasing files.
      */
-    private static class Filter implements FileFilter {
+    private static class ReleaseFilter implements FileFilter {
         final List validLangs;
         
-        Filter(List valid) { validLangs = valid; }
+        ReleaseFilter(List valid) {
+            validLangs = valid;
+        }
         
         public boolean accept(File f) {
             if(f.isDirectory())
@@ -259,8 +262,14 @@ public class CountPercent {
                 return true; // base resource.
             int idxP = name.indexOf(".");
             String code = name.substring(idxU + 1, idxP);
+            if(code.equals("en")) // always valid.
+                return true;
+            
+            // check to see if the code is in the list of valid codes.
             for(Iterator i = validLangs.iterator(); i.hasNext(); ) {
                 LanguageInfo li = (LanguageInfo)i.next();
+                // if its the base of a variant or the variant itself,
+                // accept it.  (need bases so the variant works.)
                 if(code.equals(li.getBaseCode()) || code.equals(li.getCode()))
                     return true;
             }
