@@ -516,7 +516,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 *  by the <tt>File</tt> instance could not be found
      */
     public InputStream createInputStream() throws FileNotFoundException {
-		return new FileInputStream(FILE);
+		return new BufferedInputStream(new FileInputStream(FILE));
     }
     
     /**

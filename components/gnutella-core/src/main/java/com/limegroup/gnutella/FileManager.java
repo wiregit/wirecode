@@ -317,7 +317,6 @@ public abstract class FileManager {
         return (FileDesc)_files.get(i);
     }
 
-
     /**
      * Determines whether or not the specified index is valid.  The index
      * is valid if it is within range of the number of files shared, i.e.,
@@ -536,7 +535,7 @@ public abstract class FileManager {
      * will be ignored.<p>
 	 *
      * This method is thread-safe but non-blocking.  When the method returns,
-     * the directory and extension settings used by addFileIfShared() are
+     * the directory and extension settings used by addFile() are
      * initialized.  However, files will actually be indexed asynchronously in
      * another thread.  This is useful because indexing may take up to 30
      * seconds or so if sharing many files.  If loadSettings is subsequently
@@ -781,19 +780,31 @@ public abstract class FileManager {
         }
     }
     
-
+     /**
+      * @modifies this
+      * @effects adds the given file to this, if it exists in a shared 
+      *  directory and has a shared extension.  Returns true iff the file
+      *  was actually added.  <b>WARNING: this is a potential security 
+      *  hazard.</b> 
+      *
+      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+      *  added, otherwise <tt>null</tt>
+      */
+    public FileDesc addFileIfShared(File file) {
+        return addFileIfShared(file, true);
+    }
+    
     /**
-     * @modifies this
-     * @effects adds the given file to this, if it exists in a shared 
-     *  directory and has a shared extension.  Returns true iff the file
-     *  was actually added.  <b>WARNING: this is a potential security 
-     *  hazard.</b> 
-     *
-     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
-     *  added, otherwise <tt>null</tt>
+     * The actual implementation of addFileIfShared(File)
+     * @param file the file to add
+     * @param notify if true notifies the frontend via 
+     * ActivityCallback.handleFileManagerEvent() about
+     * the Event
+     * @return Returns FileDesc or null
      */
-	public FileDesc addFileIfShared(File file) {
-        //Make sure capitals are resolved properly, etc.
+    protected FileDesc addFileIfShared(File file, boolean notify) {
+        
+        	// Make sure capitals are resolved properly, etc.
         File f = null;
         try {
             f = FileUtils.getCanonicalFile(file);
@@ -801,7 +812,7 @@ public abstract class FileManager {
                 return null;
         } catch (IOException e) {
             return null;
-		}
+	}
         File dir = FileUtils.getParentFile(f);
         if (dir==null) 
             return null;
@@ -822,9 +833,17 @@ public abstract class FileManager {
             fd = null;
         }
 
+        // Notify the GUI...
+        if (notify && fd != null) {
+            FileManagerEvent evt = new FileManagerEvent(this, 
+                                            FileManagerEvent.ADD, 
+                                            new FileDesc[]{fd});
+                                            
+            RouterService.getCallback().handleFileManagerEvent(evt);
+        }
+        
         return fd;
-	}
-
+    }
 
     /**
      * @modifies this
@@ -836,8 +855,16 @@ public abstract class FileManager {
      * @return the <tt>FileDesc</tt> for the new file if it was successfully 
      *  added, otherwise <tt>null</tt>
      */
-	public abstract FileDesc addFileIfShared(File file, List metadata);
-
+    public FileDesc addFileIfShared(File file, List metadata) {
+        return addFileIfShared(file, metadata, true);
+    }
+    
+    /**
+     * The actual implemenation of addFileIfShared(File file, List metadata)
+     */
+    protected abstract FileDesc addFileIfShared(File file, List metadata, boolean notify);
+    
+    
     /**
      * @requires the given file exists and is in a shared directory
      * @modifies this
@@ -1064,21 +1091,37 @@ public abstract class FileManager {
         URN oldURN = getURNForFile(f);
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(oldURN);
-        FileDesc removed = removeFileIfShared(f);
+        FileDesc removed = removeFileIfShared(f, false);
         if( removed == null ) // nothing removed, exit.
             return null;
-        FileDesc fd = addFileIfShared(f);
+        FileDesc fd = addFileIfShared(f, false);
         //re-populate the ctCache
         if ((fd != null) && (cTime != null)) { 
             synchronized (ctCache) {
-                ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+                ctCache.removeTime(fd.getSHA1Urn()); //createFileDesc() put lastModified
                 ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
                 ctCache.commitTime(fd.getSHA1Urn());
             }
         }
+        
+        // Notify the GUI about the changes...
+        FileManagerEvent evt = null;
+        
+        if (fd != null) {
+            evt = new FileManagerEvent(this, 
+                                       FileManagerEvent.CHANGE, 
+                                       new FileDesc[]{removed,fd}); 
+        } else {
+            evt = new FileManagerEvent(this, 
+                                       FileManagerEvent.REMOVE, 
+                                       new FileDesc[]{removed});
+        }
+        
+        RouterService.getCallback().handleFileManagerEvent(evt);
+        
         return fd;
     }
-
+    
     /**
      * @modifies this
      * @effects ensures the first instance of the given file is not
@@ -1088,6 +1131,13 @@ public abstract class FileManager {
      *  disk.
      */
     public synchronized FileDesc removeFileIfShared(File f) {
+        return removeFileIfShared(f, true);
+    }
+    
+    /**
+     * The actual implementation of removeFileIfShared(File)
+     */
+    protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
         repOk();
         
         //Take care of case, etc.
@@ -1155,6 +1205,16 @@ public abstract class FileManager {
             CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
   
         repOk();
+        
+        // Notify the GUI...
+        if (notify && fd != null) {
+            FileManagerEvent evt = new FileManagerEvent(this, 
+                                            FileManagerEvent.REMOVE, 
+                                            new FileDesc[]{fd});
+                                            
+            RouterService.getCallback().handleFileManagerEvent(evt);
+        }
+        
         return fd;
     }
     
@@ -1198,15 +1258,25 @@ public abstract class FileManager {
      */
     public synchronized boolean renameFileIfShared(File oldName,
                                                    File newName) {
-        FileDesc fd = getFileDescForFile(oldName);
-        if( fd == null )
+        FileDesc removed = getFileDescForFile(oldName);
+        if( removed == null )
             return false;
         List xmlDocs = new LinkedList();
-        xmlDocs.addAll(fd.getLimeXMLDocuments());            
-        fd = removeFileIfShared(oldName);
-        Assert.that( fd != null, "invariant broken.");
+        xmlDocs.addAll(removed.getLimeXMLDocuments());            
+        removed = removeFileIfShared(oldName, false);
+        Assert.that( removed != null, "invariant broken.");
         // hash didn't change so no need to re-input creation time
-        fd = addFileIfShared(newName, xmlDocs);
+        FileDesc fd = addFileIfShared(newName, xmlDocs, false);
+        
+        // Notify the GUI...
+        if (fd != null) {
+            FileManagerEvent evt = new FileManagerEvent(this, 
+                                            FileManagerEvent.RENAME, 
+                                            new FileDesc[]{removed,fd});
+                                            
+            RouterService.getCallback().handleFileManagerEvent(evt);
+        }
+        
         return (fd != null);
     }
 

@@ -118,14 +118,14 @@ public class MetaFileManager extends FileManager {
             }
         }
 
-        FileDesc removed = removeFileIfShared(f);        
+        FileDesc removed = removeFileIfShared(f, false);        
         if(fd != removed) {
             Assert.that(false, 
                 "wanted to remove: " + fd +
                 "\ndid remove: " + removed);
         }
         _needRebuild = true;
-        fd = addFileIfShared(f, xmlDocs);
+        fd = addFileIfShared(f, xmlDocs, false);
         // file may not be shared anymore or may be installer file
         if ((fd != null) && (cTime != null)) { 
             //re-populate the ctCache
@@ -135,8 +135,24 @@ public class MetaFileManager extends FileManager {
                 ctCache.commitTime(fd.getSHA1Urn());
             }
         }
+        
+        // Notify the GUI about the changes...
+        FileManagerEvent evt = null;
+        
+        if (fd != null) {
+            evt = new FileManagerEvent(this, 
+                                       FileManagerEvent.CHANGE, 
+                                       new FileDesc[]{removed,fd});
+        } else {
+            evt = new FileManagerEvent(this, 
+                                       FileManagerEvent.REMOVE, 
+                                       new FileDesc[]{removed});
+        }
+                                            
+        RouterService.getCallback().handleFileManagerEvent(evt);
+        
         return fd;
-    }
+    }        
     
     /**
      * Finds the audio metadata document in allDocs, and makes it's id3 fields
@@ -192,8 +208,8 @@ public class MetaFileManager extends FileManager {
      * Removes the LimeXMLDocuments associated with the removed
      * FileDesc from the various LimeXMLReplyCollections.
      */
-    public FileDesc removeFileIfShared(File f) {
-        FileDesc fd = super.removeFileIfShared(f);
+    protected FileDesc removeFileIfShared(File f, boolean notify) {
+        FileDesc fd = super.removeFileIfShared(f, notify);
         // nothing removed, ignore.
         if( fd == null )
             return null;
@@ -228,8 +244,10 @@ public class MetaFileManager extends FileManager {
      *
      * @return The FileDesc that was added, or null if nothing added.
      */
-	public FileDesc addFileIfShared(File file, List metadata) {
-        FileDesc fd = super.addFileIfShared(file);
+    protected FileDesc addFileIfShared(File file, List metadata, boolean notify) {
+        
+        // do not kick off a FileManagerEvent.ADD event
+        FileDesc fd = super.addFileIfShared(file, false);
         
         // if not added, exit.
         if( fd == null )
@@ -276,6 +294,15 @@ public class MetaFileManager extends FileManager {
         }
 
         _needRebuild = true;
+        
+        	// Notify the GUI...
+        if (notify && fd != null) {
+            FileManagerEvent evt = new FileManagerEvent(this, 
+                    FileManagerEvent.ADD, new FileDesc[]{fd});
+
+            RouterService.getCallback().handleFileManagerEvent(evt);
+        }
+        
         return fd;
     }
 

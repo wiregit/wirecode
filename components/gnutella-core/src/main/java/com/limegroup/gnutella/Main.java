@@ -224,6 +224,8 @@ public class Main implements ActivityCallback, ErrorCallback {
 
 	public void addSharedFile(FileDesc file, File parent) {}
 	
+	public void handleFileManagerEvent(FileManagerEvent evt) {}
+	
 	public void handleSharedFileUpdate(File file) {}
 
 	public void clearSharedFiles() {}

@@ -28,8 +28,8 @@ public final class SettingsFactory {
     private LongSetting LAST_EXPIRE_TIME = null;
     
     /** 
-	 * <tt>File</tt> object from which settings are loaded and saved 
-	 */    
+     * <tt>File</tt> object from which settings are loaded and saved 
+     */    
     private File SETTINGS_FILE;
     
     private final String HEADING;
@@ -42,7 +42,7 @@ public final class SettingsFactory {
     /**
      * The <tt>Properties</tt> instance containing all settings.
      */
-	protected final Properties PROPS = new Properties(DEFAULT_PROPS);
+    protected final Properties PROPS = new Properties(DEFAULT_PROPS);
     
     /* List of all settings associated with this factory 
      * LOCKING: must hold this monitor
@@ -60,55 +60,55 @@ public final class SettingsFactory {
 
     private boolean expired = false;
     
-	/**
-	 * Creates a new <tt>SettingsFactory</tt> instance with the specified file
-	 * to read from and write to.
-	 *
-	 * @param settingsFile the file to read from and to write to
-	 */
-	SettingsFactory(File settingsFile) {
+    /**
+     * Creates a new <tt>SettingsFactory</tt> instance with the specified file
+     * to read from and write to.
+     *
+     * @param settingsFile the file to read from and to write to
+     */
+    SettingsFactory(File settingsFile) {
         this(settingsFile, "");
     }
     
-	/**
-	 * Creates a new <tt>SettingsFactory</tt> instance with the specified file
-	 * to read from and write to.
-	 *
-	 * @param settingsFile the file to read from and to write to
+    /**
+     * Creates a new <tt>SettingsFactory</tt> instance with the specified file
+     * to read from and write to.
+     *
+     * @param settingsFile the file to read from and to write to
      * @param heading heading to use when writing property file
-	 */
-	SettingsFactory(File settingsFile, String heading) {
+     */
+    SettingsFactory(File settingsFile, String heading) {
         SETTINGS_FILE = settingsFile;
         if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
         HEADING = heading;
-		reload();
-	}
-	
-	/**
-	 * Returns the iterator over the settings stored in this factory.
-	 *
-	 * LOCKING: The caller must ensure that this factory's monitor
-	 *   is held while iterating over the iterator.
-	 */
-	public synchronized Iterator iterator() {
-	    return settings.iterator();
-	}
+        reload();
+    }
+    
+    /**
+     * Returns the iterator over the settings stored in this factory.
+     *
+     * LOCKING: The caller must ensure that this factory's monitor
+     *   is held while iterating over the iterator.
+     */
+    public synchronized Iterator iterator() {
+        return settings.iterator();
+    }
 
-	/**
-	 * Reloads the settings with the predefined settings file from
+    /**
+     * Reloads the settings with the predefined settings file from
      * disk.
-	 */
-	public synchronized void reload() {
-		// If the props file doesn't exist, the init sequence will prompt
-		// the user for the required values, so return.  If this is not 
-		// loading limewire.props, but rather something like themes.txt,
-		// we also return, as attempting to load an invalid file will
-		// not do any good.
-		if(!SETTINGS_FILE.isFile()) {
-		    setExpireValue();
-		    return;
+     */
+    public synchronized void reload() {
+        // If the props file doesn't exist, the init sequence will prompt
+        // the user for the required values, so return.  If this is not 
+        // loading limewire.props, but rather something like themes.txt,
+        // we also return, as attempting to load an invalid file will
+        // not do any good.
+        if(!SETTINGS_FILE.isFile()) {
+            setExpireValue();
+            return;
         }
-		FileInputStream fis = null;
+        FileInputStream fis = null;
         try {
             fis = new FileInputStream(SETTINGS_FILE);
             // Loading properties can cause problems if the
@@ -127,7 +127,7 @@ public final class SettingsFactory {
                 MessageService.showError("ERROR_PROPS_CORRUPTED");
             }
         } catch(IOException e) {
-			ErrorService.error(e);
+            ErrorService.error(e);
             // the default properties will be used -- this is fine and expected
         } finally {
             if( fis != null ) {
@@ -145,12 +145,12 @@ public final class SettingsFactory {
         }
         
         setExpireValue();
-	}
-	
-	/**
-	 * Sets the last expire time if not already set.
-	 */
-	private synchronized void setExpireValue() {
+    }
+    
+    /**
+     * Sets the last expire time if not already set.
+     */
+    private synchronized void setExpireValue() {
         // Note: this has only an impact on launch time when this
         // method is called by the constructor of this class!
         if (LAST_EXPIRE_TIME == null) {
@@ -165,28 +165,28 @@ public final class SettingsFactory {
             if (expired)
                 LAST_EXPIRE_TIME.setValue(System.currentTimeMillis());
         }
-    }	    
-	
-	/**
-	 * Changes the backing file to use for this factory.
-	 */
+    }       
+    
+    /**
+     * Changes the backing file to use for this factory.
+     */
     public synchronized void changeFile(File toUse) {
         SETTINGS_FILE = toUse;
         if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
         revertToDefault();
         reload();
     }
-	
-	/**
-	 * Reverts all settings to their factory defaults.
-	 */
-	public synchronized void revertToDefault() {
-	    Iterator ii = settings.iterator();
-	    while( ii.hasNext() ) {
-	        Setting set = (Setting)ii.next();
-	        set.revertToDefault();
-	    }
-	}
+    
+    /**
+     * Reverts all settings to their factory defaults.
+     */
+    public synchronized void revertToDefault() {
+        Iterator ii = settings.iterator();
+        while( ii.hasNext() ) {
+            Setting set = (Setting)ii.next();
+            set.revertToDefault();
+        }
+    }
     
     /**
      * Save setting information to property file
@@ -232,7 +232,7 @@ public final class SettingsFactory {
         } catch(FileNotFoundException e) {
             ErrorService.error(e);
         } catch (IOException e) {
-			ErrorService.error(e);
+            ErrorService.error(e);
         } finally {
             if ( out != null ) {
                 try {
@@ -249,14 +249,14 @@ public final class SettingsFactory {
         return PROPS;
     }
     
-	/**
-	 * Creates a new <tt>StringSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized StringSetting createStringSetting(String key, 
+    /**
+     * Creates a new <tt>StringSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized StringSetting createStringSetting(String key, 
                                                           String defaultValue) {
         StringSetting result = 
             new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
@@ -269,20 +269,20 @@ public final class SettingsFactory {
      */
     public synchronized StringSetting createSettableStringSetting(String key,
                 String defaultValue, String simppKey) {
-		StringSetting result =  new StringSetting(
+        StringSetting result =  new StringSetting(
                             DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
         handleSettingInternal(result, simppKey);
         return result;
     }
 
-	/**
-	 * Creates a new <tt>BooleanSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized BooleanSetting createBooleanSetting(String key, 
+    /**
+     * Creates a new <tt>BooleanSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized BooleanSetting createBooleanSetting(String key, 
                                                         boolean defaultValue) {
         BooleanSetting result =
           new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
@@ -295,20 +295,20 @@ public final class SettingsFactory {
      */
     public synchronized BooleanSetting createSettableBooleanSetting(String key, 
               boolean defaultValue, String simppKey) {
-		BooleanSetting result = new BooleanSetting(
+        BooleanSetting result = new BooleanSetting(
                            DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
         handleSettingInternal(result, simppKey);
         return result;
-	}
+    }
 
-	/**
-	 * Creates a new <tt>IntSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized IntSetting createIntSetting(String key, 
+    /**
+     * Creates a new <tt>IntSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized IntSetting createIntSetting(String key, 
                                                          int defaultValue) {
         IntSetting result = 
             new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
@@ -318,23 +318,23 @@ public final class SettingsFactory {
     
     public synchronized IntSetting createSettableIntSetting(String key, 
                         int defaultValue, String simppKey, int max, int min) {
-		IntSetting result = new IntSetting(
+        IntSetting result = new IntSetting(
                    DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
-	}
+    }
 
 
-	/**
-	 * Creates a new <tt>ByteSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized ByteSetting createByteSetting(String key, 
+    /**
+     * Creates a new <tt>ByteSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized ByteSetting createByteSetting(String key, 
                                                       byte defaultValue) {
-		ByteSetting result = 
+        ByteSetting result = 
              new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
@@ -342,23 +342,23 @@ public final class SettingsFactory {
     
     public synchronized ByteSetting createSettableByteSetting(String key, 
                       byte defaultValue, String simppKey, byte max, byte min) {
-		ByteSetting result = new ByteSetting(
+        ByteSetting result = new ByteSetting(
              DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
-	}
+    }
 
 
-	/**
-	 * Creates a new <tt>LongSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized LongSetting createLongSetting(String key, 
+    /**
+     * Creates a new <tt>LongSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized LongSetting createLongSetting(String key, 
                                                       long defaultValue) {
-		 LongSetting result = 
+         LongSetting result = 
              new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
          handleSettingInternal(result, null);
          return result;
@@ -366,30 +366,30 @@ public final class SettingsFactory {
     
     public synchronized LongSetting createSettableLongSetting(String key,
                        long defaultValue, String simppKey, long max, long min) {
-		 LongSetting result = 
+         LongSetting result = 
              new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, 
                                                             simppKey, max, min);
          handleSettingInternal(result, simppKey);
          return result;
-	}
+    }
 
-	/**
-	 * Creates a new <tt>FileSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized FileSetting createFileSetting(String key, 
+    /**
+     * Creates a new <tt>FileSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized FileSetting createFileSetting(String key, 
                                                       File defaultValue) {
-	    String parentString = defaultValue.getParent();
-	    if( parentString != null ) {
-		    File parent = new File(parentString);
-		    if(!parent.isDirectory())
-		        parent.mkdirs();
+        String parentString = defaultValue.getParent();
+        if( parentString != null ) {
+            File parent = new File(parentString);
+            if(!parent.isDirectory())
+                parent.mkdirs();
         }
 
-		FileSetting result = 
+        FileSetting result = 
             new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
@@ -397,29 +397,29 @@ public final class SettingsFactory {
 
     public synchronized FileSetting createSettableFileSetting(String key, 
                       File defaultValue, String simppKey) {
-	    String parentString = defaultValue.getParent();
-	    if( parentString != null ) {
-		    File parent = new File(parentString);
-		    if(!parent.isDirectory())
-		        parent.mkdirs();
+        String parentString = defaultValue.getParent();
+        if( parentString != null ) {
+            File parent = new File(parentString);
+            if(!parent.isDirectory())
+                parent.mkdirs();
         }
 
-		FileSetting result = new FileSetting(
+        FileSetting result = new FileSetting(
                    DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
         handleSettingInternal(result, simppKey);
         return result;
-	}
+    }
 
-	/**
-	 * Creates a new <tt>ColorSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized ColorSetting createColorSetting(String key, 
+    /**
+     * Creates a new <tt>ColorSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized ColorSetting createColorSetting(String key, 
                                                         Color defaultValue) {
-		ColorSetting result = 
+        ColorSetting result = 
         ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key,defaultValue);
         handleSettingInternal(result, null);
         return result;
@@ -427,12 +427,12 @@ public final class SettingsFactory {
 
     public synchronized ColorSetting createSettableColorSetting(String key, 
                    Color defaultValue, String simppKey) {
-		ColorSetting result = 
+        ColorSetting result = 
         ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, 
                                         defaultValue, simppKey);
         handleSettingInternal(result, simppKey);
         return result;
-	}
+    }
 
     /**
      * Creates a new <tt>CharArraySetting</tt> instance for a character array 
@@ -460,15 +460,15 @@ public final class SettingsFactory {
     }
     
     /**
-	 * Creates a new <tt>FloatSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized FloatSetting createFloatSetting(String key, 
+     * Creates a new <tt>FloatSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized FloatSetting createFloatSetting(String key, 
                                                         float defaultValue) {
-		FloatSetting result = 
+        FloatSetting result = 
             new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         handleSettingInternal(result, null);
         return result;
@@ -476,11 +476,11 @@ public final class SettingsFactory {
 
     public synchronized FloatSetting createSettableFloatSetting(String key, 
                    float defaultValue, String simppKey, float max, float min) {
-		FloatSetting result = new FloatSetting(
+        FloatSetting result = new FloatSetting(
                   DEFAULT_PROPS, PROPS, key, defaultValue, simppKey, max, min);
         handleSettingInternal(result, simppKey);
         return result;
-	}
+    }
     
     /**
      * Creates a new <tt>StringArraySetting</tt> instance for a String array 
@@ -532,45 +532,45 @@ public final class SettingsFactory {
     }
     
     /**
-	 * Creates a new expiring <tt>BooleanSetting</tt> instance with the
-	 * specified key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting 
+     * Creates a new expiring <tt>BooleanSetting</tt> instance with the
+     * specified key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting 
      */
-	public synchronized BooleanSetting createExpirableBooleanSetting(String key,
+    public synchronized BooleanSetting createExpirableBooleanSetting(String key,
                                                         boolean defaultValue) {
         BooleanSetting result = createBooleanSetting(key, defaultValue);
         
         if (expired)
             result.revertToDefault();
         return result;
-	}
+    }
     
     /**
-	 * Creates a new expiring <tt>IntSetting</tt> instance with the specified
-	 * key and default value.
-	 *
-	 * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
-	public synchronized IntSetting createExpirableIntSetting(String key, 
+     * Creates a new expiring <tt>IntSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized IntSetting createExpirableIntSetting(String key, 
                                                              int defaultValue) {
-		IntSetting result = createIntSetting(key, defaultValue);
+        IntSetting result = createIntSetting(key, defaultValue);
         
         if (expired)
             result.revertToDefault();
         
         return result;
-	}
+    }
     
     /**
      * Creates a new <tt>FontNameSetting</tt> instance with the specified
      * key and default value.
      *
      * @param key the key for the setting
-	 * @param defaultValue the default value for the setting
-	 */
+     * @param defaultValue the default value for the setting
+     */
     public synchronized FontNameSetting createFontNameSetting(String key, 
                                                            String defaultValue){
         FontNameSetting result = 
@@ -585,8 +585,31 @@ public final class SettingsFactory {
         new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
         handleSettingInternal(result, simppKey);
         return result;
- 	}
+    }
     
+    /**
+     * Creates a new <tt>PasswordSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized PasswordSetting createPasswordSetting(
+            String key, String defaultValue) {
+        PasswordSetting result = 
+            new PasswordSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
+    // Doesn't make sense. :)
+    /*public synchronized PasswordSetting createSettablePasswordSetting(String key,
+            String defaultValue, String simppKey) {
+        PasswordSetting result =  new PasswordSetting(
+                            DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
+        handleSettingInternal(result, simppKey);
+        return result;
+    }*/
     
     private synchronized void handleSettingInternal(Setting setting, 
                                                            String simppKey) {
@@ -606,7 +629,7 @@ public final class SettingsFactory {
             //update the mapping of the simpp key to the setting.
             simppKeyToSetting.put(simppKey, setting);
         }
-	}
+    }
     
     /**
      * Package access for getting a loaded setting corresponding to a simppKey

@@ -7,6 +7,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
@@ -65,6 +66,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void setAnnotateEnabled(boolean enabled) {}
     public String getHostValue(String key) { return null;}
     public void handleSharedFileUpdate(File file) { }
+    public void handleFileManagerEvent(FileManagerEvent evt) {}
     public void notifyUserAboutUpdate(String version, boolean isPro, boolean l){
     }
     public void fileManagerLoaded() {}
