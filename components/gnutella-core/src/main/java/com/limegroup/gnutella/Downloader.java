@@ -1,9 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
-import java.net.InetAddress;
 import com.sun.java.util.collections.Iterator;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import java.io.File;
 
 /**
