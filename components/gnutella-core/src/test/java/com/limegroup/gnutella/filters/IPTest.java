@@ -95,7 +95,7 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! filter.allow(
             new QueryReply(new byte[16], (byte)3, 6346, address2, 0,
                            new Response[0], new byte[16], false)));
-        assertTrue(filter.allow(new QueryRequest((byte)3, 0, "test", false)));
+        assertTrue(filter.allow(QueryRequest.createQuery("test", (byte)3)));
         PushRequest push1=new PushRequest( 
             new byte[16], (byte)3, new byte[16], 0l, address, 6346);
         assertTrue(filter.allow(push1));

@@ -36,9 +36,7 @@ public final class BrowseHostUploadState implements HTTPMessage {
             return;
         }   
         //create a new indexing query
-        QueryRequest indexingQuery
-            = new QueryRequest((byte)1, 0, FileManager.INDEXING_QUERY, false,
-                               false);
+		QueryRequest indexingQuery = QueryRequest.createBrowseHostQuery();
         
         //get responses from file manager
         Response[] responses = RouterService.getFileManager().query(indexingQuery);

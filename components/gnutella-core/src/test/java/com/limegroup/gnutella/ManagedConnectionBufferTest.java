@@ -86,7 +86,9 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         //later, we simulate a stall in the network.
         out.stopOutputRunner();
         Message m=null;
-        out.send(new QueryRequest((byte)5, 0, "test", false));
+        //out.send(new QueryRequest((byte)5, 0, "test", false));
+		
+		out.send(QueryRequest.createQuery("test", (byte)5));
         m=new PingRequest((byte)5);
         m.hop();
         out.send(m);
@@ -123,8 +125,10 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         out.send(new PatchTableMessage((short)2, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 5, 9));
-        out.send(new QueryRequest((byte)5, 0, "test2", false));
-        m=new QueryRequest((byte)5, 0, "test far", false);
+
+		out.send(QueryRequest.createQuery("test2", (byte)5));
+				 
+		m = QueryRequest.createQuery("test far", (byte)5);
         m.hop();
         out.send(m);
                
@@ -221,9 +225,11 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         
         //Drop one message
         out.stopOutputRunner();        
-        out.send(new QueryRequest((byte)3, 0, "0", false));   
+        //out.send(new QueryRequest((byte)3, 0, "0", false));   
+        out.send(QueryRequest.createQuery("0", (byte)3));   
         sleep(1200);
-        out.send(new QueryRequest((byte)3, 0, "1200", false));        
+        //out.send(new QueryRequest((byte)3, 0, "1200", false));        
+        out.send(QueryRequest.createQuery("1200", (byte)3)); 
         out.startOutputRunner();
         Message m=(QueryRequest)in.receive(500);
         assertTrue("m not a queryrequest", m instanceof QueryRequest);
@@ -237,15 +243,15 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
 
         //Drop many messages
         out.stopOutputRunner();        
-        out.send(new QueryRequest((byte)3, 0, "0", false));   
+        out.send(QueryRequest.createQuery("0", (byte)3));   
         sleep(300);
-        out.send(new QueryRequest((byte)3, 0, "300", false));        
+        out.send(QueryRequest.createQuery("300", (byte)3));        
         sleep(300);
-        out.send(new QueryRequest((byte)3, 0, "600", false));        
+        out.send(QueryRequest.createQuery("600", (byte)3));        
         sleep(500);
-        out.send(new QueryRequest((byte)3, 0, "1100", false));
+        out.send(QueryRequest.createQuery("1100", (byte)3));
         sleep(900);
-        out.send(new QueryRequest((byte)3, 0, "2000", false));
+        out.send(QueryRequest.createQuery("2000", (byte)3));
         out.startOutputRunner();
         m=in.receive(500);
         assertTrue("m not a queryrequest", m instanceof QueryRequest);
@@ -270,14 +276,14 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         // head...tail
         out.stopOutputRunner(); 
         out.send(hopped(new PingRequest((byte)4)));
-        out.send(new QueryRequest((byte)3, 0, "a", false));
+        out.send(QueryRequest.createQuery("a", (byte)3));
         out.startOutputRunner();
         assertTrue("didn't recieve queryrequest", in.receive() instanceof QueryRequest);
         assertTrue("didn't recieve pingrequest", in.receive() instanceof PingRequest);
 
         //tail...<wrap>...head
         out.stopOutputRunner(); 
-        out.send(new QueryRequest((byte)3, 0, "a", false));
+        out.send(QueryRequest.createQuery("a", (byte)3));
         out.send(hopped(new PingRequest((byte)5)));
         out.startOutputRunner();
         assertTrue("didn't recieve pingrequest", in.receive() instanceof PingRequest);
@@ -296,7 +302,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                                 new Response[0], new byte[16], false));
         out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(new QueryRequest((byte)3, 0, "a", false));
+        out.send(QueryRequest.createQuery("a", (byte)3));
         out.startOutputRunner();
         m=in.receive();
         assertTrue("Got: "+m, m instanceof QueryRequest);
@@ -327,8 +333,8 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         long initialBytes = out.getBytesSent();
         
         for (int i=0; i<total; i++) {
-            out.send(new QueryRequest((byte)4, i, 
-                                      "Some reaaaaaalllllly big query", false));
+            out.send(QueryRequest.createQuery(
+                                      "Some reaaaaaalllllly big query", (byte)3));
         }
 
         int read=0;

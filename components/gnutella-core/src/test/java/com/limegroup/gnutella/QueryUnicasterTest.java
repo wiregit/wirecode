@@ -72,7 +72,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
 
         // add a Query
-        QueryRequest qr = new QueryRequest((byte)2, 0, "Susheel", false);
+		QueryRequest qr = QueryRequest.createQuery("Susheel", (byte)2);
         assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
         QueryUnicaster.instance().addQuery(qr, null);
         assertTrue(QueryUnicaster.instance().getQueryNumber() == 1);
@@ -153,7 +153,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         }
 
         // add a Query
-        QueryRequest qr = new QueryRequest((byte)2, 0, "Daswani", false);
+		QueryRequest qr = QueryRequest.createQuery("Daswani", (byte)2);
         QueryUnicaster.instance().addQuery(qr, null);
 
         // add these endpoints....

@@ -46,49 +46,6 @@ public final class QueryHandler {
 	 */
 	private static final int HASH_QUERY_RESULTS = 10;
 
-	/**
-	 * Constant for the query quid.
-	 */
-	private final byte[] GUID;
-
-	/**
-	 * Constant for the number of hops the query has travelled -- 0 for
-	 * queries initiated by this host, 1 for queries initiated from
-	 * leaves.
-	 */
-	private final byte HOPS;
-
-	/**
-	 * Constamnt for the query string.
-	 */
-	private final String QUERY;
-
-	/**
-	 * Constant for the xml query string.
-	 */
-	private final String XML_QUERY;
-
-	/**
-	 * Constant for the payload of this query.
-	 */
-	private final byte[] PAYLOAD;
-
-	/**
-	 * Constant for the types of urns to request -- any type for these
-	 * queries.
-	 */
-	private static final Set URN_TYPES;
-
-	/**
-	 * Constant for the urns to request -- an empty set for the new
-	 * queries issued by this factory.
-	 */
-	private static final Set QUERY_URNS;
-
-	/**
-	 * Empty payload to avoid passing around nulls.
-	 */
-	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	/**
 	 * Constant handle to the <tt>MessageRouter</tt> instance.
@@ -136,14 +93,11 @@ public final class QueryHandler {
 	 */
 	private final ReplyHandler REPLY_HANDLER;
 
-	// statically initialize an unmodifiable set of urn types so that
-	// they'll be available for all instances
-	static {
-		Set urnTypes  = new HashSet();
-		urnTypes.add(UrnType.ANY_TYPE);
-		URN_TYPES = Collections.unmodifiableSet(urnTypes);
-		QUERY_URNS = Collections.unmodifiableSet(new HashSet());
-	}
+	/**
+	 * Constant for the <tt>QueryRequest</tt> used to build new queries.
+	 */
+	private final QueryRequest QUERY;
+
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -158,16 +112,7 @@ public final class QueryHandler {
 	 */
 	private QueryHandler(QueryRequest query, int results, ReplyHandler handler) {
 		boolean isHashQuery = !query.getQueryUrns().isEmpty();
-		GUID = query.getGUID();
-		if(isHashQuery) {
-			QUERY = "\\";
-			XML_QUERY = "";
-		} else {
-			QUERY = query.getQuery();
-			XML_QUERY = query.getRichQuery();
-		}
-		HOPS = query.getHops();
-		PAYLOAD = query.getPayload();
+		QUERY = query;
 		if(isHashQuery) {
 			RESULTS = HASH_QUERY_RESULTS;
 		} else {
@@ -235,13 +180,13 @@ public final class QueryHandler {
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 
 		// build it from scratch if it's from us
-		if(HOPS == 0) {
-			return new QueryRequest(GUID, ttl, HOPS, QUERY, XML_QUERY, false, 
-									URN_TYPES, QUERY_URNS,
-									!RouterService.acceptedIncomingConnection());
+		if(QUERY.getHops() == 0) {
+			return QueryRequest.createQuery(QUERY, ttl);
 		} else {
 			try {
-				return new QueryRequest(GUID, ttl, HOPS, PAYLOAD);
+				return QueryRequest.createNetworkQuery(QUERY.getGUID(), ttl, 
+													   QUERY.getHops(), 
+													   QUERY.getPayload());
 			} catch(BadPacketException e) {
 				// this should never happen, since the query was already 
 				// read from the network, so report an error
@@ -249,15 +194,6 @@ public final class QueryHandler {
 				return null;
 			}
 		}
-	}
-
-	/**
-	 * Accessor for the guid for this query.
-	 *
-	 * @return the guid for this query
-	 */
-	public byte[] getGUID() {
-		return GUID;
 	}
 
 
@@ -327,6 +263,9 @@ public final class QueryHandler {
 				hostsToQuery/remainingConnections;
 			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
+			if(ttl == 4 && remainingConnections > 10) {
+				ttl = 3;
+			}
 			QueryRequest query = createQuery(ttl);
 
 
@@ -354,7 +293,7 @@ public final class QueryHandler {
 
 		byte ttl = 2;
 		QueryRequest query = createQuery(ttl);
-        int limit = Math.min(3, connections.size());
+        int limit = Math.min(2, connections.size());
 		for(int i=0; i<limit; i++) {
 			ManagedConnection mc = (ManagedConnection)connections.get(i);
 
@@ -406,10 +345,7 @@ public final class QueryHandler {
 	 * @return <tt>true</tt> if this query has received enough results,
 	 *  <tt>false</tt> otherwise
 	 */
-	public boolean hasEnoughResults() {
-		//System.out.println("QueryHandler::hasEnoughResults::"+
-		//			   _resultCounter.getNumResults());
-		
+	public boolean hasEnoughResults() {		
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
@@ -427,6 +363,6 @@ public final class QueryHandler {
 
 	// overrides Object.toString
 	public String toString() {
-		return "QueryHandler: QUERY: "+QUERY+" XML_QUERY: "+XML_QUERY;
+		return "QueryHandler: QUERY: "+QUERY;
 	}
 }

@@ -145,7 +145,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         drain(_leaf1);
         drain(_leaf2);
 
-        QueryRequest qr = new QueryRequest((byte) 3, 0, "susheel", false);
+        QueryRequest qr = QueryRequest.createQuery("susheel", (byte)3);
         
         // first make sure query gets through.....
         _leaf2.send(qr);
@@ -181,7 +181,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         }
         catch (Exception whatever) {}
 
-        qr = new QueryRequest((byte) 3, 0, "daswani", false);
+        qr = QueryRequest.createQuery("daswani", (byte)3);
         _leaf2.send(qr);
         _leaf2.flush();
         
@@ -210,7 +210,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         }
         catch (InterruptedException ignored) {}
 
-        qr = new QueryRequest((byte) 3, 0, "foosball", false);
+        qr = QueryRequest.createQuery("foosball", (byte)3);
         _leaf2.send(qr);
         _leaf2.flush();
 

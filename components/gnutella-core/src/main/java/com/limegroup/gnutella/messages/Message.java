@@ -220,7 +220,7 @@ public abstract class Message
                 return new PingReply(guid,ttl,hops,payload);
             case F_QUERY:
                 if (length<3) break;
-                return new QueryRequest(guid,ttl,hops,payload);
+				return QueryRequest.createNetworkQuery(guid, ttl, hops, payload);
             case F_QUERY_REPLY:
                 if (length<26) break;
                 return new QueryReply(guid,ttl,hops,payload);

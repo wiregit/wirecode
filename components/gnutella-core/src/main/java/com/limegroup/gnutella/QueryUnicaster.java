@@ -242,8 +242,9 @@ public final class QueryUnicaster {
                             ; // don't send another....
                         else {
 							InetAddress ip = toQuery.getAddress();
-                            QueryRequest qrToSend = getQueryRequest(currQB._qr,
-                                                                    queryKey);
+							QueryRequest qrToSend = 
+								QueryRequest.createQueryKeyQuery(currQB._qr, 
+																 queryKey);
 							udpService.send(qrToSend, ip, toQuery.getPort());
 							currentHostUsed = true;
 							if(RECORD_STATS)
@@ -557,16 +558,6 @@ public final class QueryUnicaster {
             return "{QueryKeyBundle: " + _queryKey + " BirthTime = " +
             _birthTime;
         }
-    }
-
-    /** Returns a QueryRequest that is a copy of the input QR associated with
-     *  the input QueryKey.
-     */
-    private static QueryRequest getQueryRequest(QueryRequest qr, QueryKey qk) {
-        return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
-                                qr.getQuery(), qr.getRichQuery(), 
-                                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                                qk, qr.isFirewalledSource());
     }
 
 

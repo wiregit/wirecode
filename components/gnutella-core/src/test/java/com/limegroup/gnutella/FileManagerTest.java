@@ -73,8 +73,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, fman.getNumFiles());
         assertEquals("Unexpected size of filemanager",
             1, fman.getSize());
-        responses=fman.query(new QueryRequest((byte)3,0,"unit",
-                                                         false));
+        responses=fman.query(QueryRequest.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
         
         // should not be able to remove unshared file
@@ -103,7 +102,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
                   fman.addFileIfShared(f2));
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
-        responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
+        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
         assertTrue("responses gave same index " +
              "[0:" + responses[0].getIndex() + "], " +
              "[1:" + responses[1].getIndex() + "]",
@@ -131,7 +130,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             fman.removeFileIfShared(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
-        responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
+        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 1, responses.length);
         files=fman.getSharedFiles(_sharedDir);
         assertEquals("unexpected files length", 1, files.length);
@@ -150,7 +149,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             fman.addFileIfShared(f3));
         assertEquals("unexpected file size", 12, fman.getSize());
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
-        responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
+        responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
         assertTrue("response[0] index should not be 1", responses[0].getIndex()!=1);
         assertTrue("response[1] index should not be 1", responses[1].getIndex()!=1);
@@ -161,7 +160,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("should not have gotten anything");
         } catch (IndexOutOfBoundsException e) { }
 
-        responses=fman.query(new QueryRequest((byte)3,0,"*unit*", false));
+        responses=fman.query(QueryRequest.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
 
         files=fman.getSharedFiles(_sharedDir);
@@ -220,8 +219,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size",
             Integer.MAX_VALUE, fman.getSize());
-        responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*", 
-                                              false));
+        responses=fman.query(QueryRequest.createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
         assertEquals("files differ", responses[1].getName(), f5.getName());
