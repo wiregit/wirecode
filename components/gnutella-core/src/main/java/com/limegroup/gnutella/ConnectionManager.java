@@ -272,6 +272,13 @@ public class ConnectionManager {
     }
 
     /**
+     * @return true if incoming connection slots are still available.
+     */
+    public boolean haveAvailableIncoming() {
+        return (_incomingConnections < _keepAlive);
+    }
+
+    /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but

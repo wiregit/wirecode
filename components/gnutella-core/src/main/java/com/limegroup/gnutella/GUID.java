@@ -31,6 +31,11 @@ public class GUID /* implements Comparable */ {
     /** Used to generated new GUID's. */
     private static Random rand=new Random();
 
+    /** Gnutella Protocol Version "0.5" */
+    public static final int GNUTELLA_VERSION_05 = 0;
+    /** Gnutella Protocol Version "0.6" */
+    public static final int GNUTELLA_VERSION_06 = 1;
+
     /** The contents of the GUID.  INVARIANT: bytes.length==SZ */
     private byte[] bytes;
 
@@ -48,7 +53,8 @@ public class GUID /* implements Comparable */ {
 
         //Apply common tags.
         ret[8]=(byte)0xFF;    //Mark as "new" GUID.  (See isNewGUID().)
-        ret[15]=(byte)0x00;   //Version number is 0.
+        //ret[15]=(byte)0x00;   //Version number is 0.
+        ret[15]=(byte)0x01; //Version number is 1.
 
         //Apply LimeWire's marking.  You could probably avoid calls to ByteOrder
         //as an optimization.
@@ -113,6 +119,18 @@ public class GUID /* implements Comparable */ {
         //Is byte 8 all 1's?  Note that we downcast 0xFF first so both sides of
         //the equality are automatically widened, with the same sign extension.
         return bytes[8]==(byte)0xFF;
+    }
+
+    /** Same as getProtocolVersion(this.bytes) */
+    public final int getProtocolVersion() {
+        return getProtocolVersion(this.bytes);
+    }
+
+    /**  
+     * Returns byte[15], indicating protocol version.
+     */  
+    public static int getProtocolVersion(byte[] bytes) {
+        return ((int)bytes[15]);
     }
 
     public boolean equals(Object o) {

@@ -21,7 +21,20 @@ import java.util.Date;
  * written to disk.
  */
 public class HostCatcher {
-    /** The number of router pongs to store. */
+    /**
+     * Increment for number of pongs stored in the cache (per ttl).  So if
+     * the number of pongs for TTL 1 = 10, then number of pongs for TTL 2 = 
+     * TTL 1 number of pongs + increment, TTL 3 = TTL 2 + number of pongs +
+     * increment, etc.  This is done because we will store more pongs from
+     * hosts that are further away from us (i.e., greater TTL), since it is
+     * more likely that I will have more pongs from all my neighbors's 
+     * neighbors, than from my direct neighbors.
+     */
+    private static final int CACHE_TTL_SIZE_INCREMENT = 10;
+    /** Number of pongs to store in cache for TTL 1. */
+    private static final int CACHE_TTL_1_SIZE = 10;
+
+     /** The number of router pongs to store. */
     private static final int GOOD_SIZE=30;
     /** The number of normal pongs to store. */
     private static final int NORMAL_SIZE=70;
@@ -29,9 +42,23 @@ public class HostCatcher {
     private static final int BAD_SIZE=10;
     private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
 
-    private static final int GOOD_PRIORITY=2;
-    private static final int NORMAL_PRIORITY=1;
-    private static final int BAD_PRIORITY=0;
+    /* Cache expire time is 3 seconds */
+    private static final long CACHE_EXPIRE_TIME = 3000;
+
+    /**
+     * There are two pong caches used, a normal pong cache and a reserve
+     * pong cache.  The normal pong cache will only consist of pongs from
+     * new clients (i.e., that are not firewalled and can currently accept
+     * incoming connections).  Reserve cache is for all pongs from the router
+     * and any old clients (before protocol version 0.6).  The max ttl of any
+     * pongs that are put into the cache is the max ttl that we will use to
+     * get new pongs to refresh the cache.
+     */
+    private PongCache cache =
+        new PongCache(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+
+    private PongCache reserveCache = 
+        new PongCache(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
 
     /* Our representation consists of a set and a queue, both bounded in size.
      * The set lets us quickly check if there are duplicates, while the queue
@@ -558,6 +585,69 @@ public class HostCatcher {
         return queue.toString();
     }
 
+    /**
+     * Cache used to store all the pongs sent to us.  It stores all the
+     * pongs as an array of ArrayLists.  We use an ArrayList (instead of 
+     * DoublyLinkedList) because we don't need to remove entries one at a time
+     * (we just clear the cache at once).  Also, ArrayList allows us to return 
+     * a random element (using the indexOf method) whereas DoublyLinkedList
+     * has only basic methods to access the list.
+     */
+    private class PongCache {
+        private ArrayList[] pongs;
+
+        private Random random; //used for returning random Pongs from cache.
+
+        public PongCache(int maxTTL) {
+            //array of 0 .. maxTTL ArrayLists
+            pongs = new ArrayList[maxTTL];
+
+            int numOfPongsAllowed = CACHE_TTL_1_SIZE;
+            for (int i = 0; i < pongs.length; i++)
+            {
+                pongs[i] = new ArrayList(numOfPongsAllowed);
+                numOfPongsAllowed += CACHE_TTL_SIZE_INCREMENT;
+            }
+
+            random = new Random();
+        }
+
+        /** 
+         * adds a Pong to the cache, based on its TTL.
+         */
+        private void addPongToCache(PingReply pr) {
+            int ttl = pr.getTTL();
+            
+            if (ttl > pongs.length)
+                return; //if greater than Max TTL allowed, do nothing.
+
+            pongs[ttl-1].add(pr);
+        }
+
+        /**
+         * clears out all the pongs currently in the cache.
+         */
+        private void clearCache() {
+            for (int i = 0; i < pongs.length; i++) {
+                pongs[i].clear();
+            }
+        }
+
+        /**
+         * Return a pong for a specified TTL.  Basically, return a random
+         * pong from the ArrayList of that specified TTL.  Return null 
+         * if the ttl is greater than the Max TTL allowed for caching.
+         */
+        private PingReply getPong(int ttl) {
+            if (ttl > pongs.length)
+                return null;
+
+            ArrayList arrayOfPongs = pongs[ttl-1];
+            int index = random.nextInt(arrayOfPongs.size());
+            return arrayOfPongs.indexOf(index);
+        }
+    }
+
 //      /** Unit test: just calls tests.HostCatcherTest, since it
 //       *  is too large and complicated for this.
 //       */
@@ -568,4 +658,10 @@ public class HostCatcher {
 //          com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
 //      }
 }
+
+
+
+
+
+
 

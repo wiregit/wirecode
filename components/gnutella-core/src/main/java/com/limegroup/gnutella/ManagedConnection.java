@@ -145,6 +145,49 @@ public class ManagedConnection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
 
+    /** 
+     * indicates whether the connection is to an "old Gnutella client" 
+     * (according to the the Protocol Version number in any message GUID).
+     */
+    private boolean _isOldClient = false;
+
+    /**
+     * This is the last GUID (from a PING only) sent by the client that
+     * we are connected to.  This is used when sending cached PingReplies
+     * (PONGs).
+     */
+    private byte[] _lastPingGUID = null;
+
+    /**
+     * Used for determining if a PING received from an old client is 
+     * processed or dropped.  (Used in Throttling old clients from sending
+     * to many pings).
+     */
+    private long _oldClientAcceptTime = 0;
+
+    /**
+     * First Ping is used to determine if this is a connection to an older
+     * client or not.  Then, we can set the accept time for allowing Pings
+     * from this older client.
+     */
+    private boolean _receivedFirstPing = false;
+
+    /**
+     * Throttle time for Pings from older clients.  (3 Seconds).  Note:
+     * it is the same value as HostCatcher.CACHE_EXPIRE_TIME, but for 
+     * clarity purposes, it makes sense to have a static constant 
+     * here too.
+     */
+    private static final long PING_THROTTLE_TIME = 3000;
+
+    /**
+     * Array of needed pongs where the index to the array is the Pongs 
+     * (indexed by number of hops) that we want to return to the client
+     * connected to us.
+     */
+    private int[] neededPongsArray = 
+        new int[MessageRouter.MAX_TTL_FOR_CACHE_REFRESH];
+
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
                       int port,
@@ -416,22 +459,84 @@ public class ManagedConnection
                 _numReceivedMessagesDropped++;
                 continue;
             }
+            
+            //if Ping or Pong received, we must process the request
+            //rather than incrementing the hops and decrementing the TTL
+            //here.
+            if(m instanceof PingRequest) {
+                //if an older client, see if we need to throttle the Ping.
+                if (_isOldClient && throttlePing())
+                {
+                    countDroppedMessage();
+                    continue;
+                }
+
+                _lastPingGUID = m.getGUID();
+                _router.handlePingRequestPossibleDuplicate(
+                    (PingRequest)m, this);
+                if (!_receivedFirstPing) 
+                    checkForOlderClient(m); //older client?
+                continue;
+            }
+            else if (m instanceof PingReply) {
+                _router.handlePingReply((PingReply)m, this);
+                continue;
+            }
 
             // Increment hops and decrease TTL
             m.hop();
 
-            if(m instanceof PingRequest)
-                _router.handlePingRequestPossibleDuplicate(
-                    (PingRequest)m, this);
-            else if (m instanceof PingReply)
-                _router.handlePingReply((PingReply)m, this);
-            else if (m instanceof QueryRequest)
+            if (m instanceof QueryRequest)
                 _router.handleQueryRequestPossibleDuplicate(
                     (QueryRequest)m, this);
             else if (m instanceof QueryReply)
                 _router.handleQueryReply((QueryReply)m, this);
             else if (m instanceof PushRequest)
                 _router.handlePushRequest((PushRequest)m, this);
+        }
+    }
+
+    /**
+     * Determines if this connection is to an older client by checking the
+     * Protocol Version (of the GUID of the Message) and sets necessary
+     * flags.
+     */
+    private void checkForOlderClient(Message m)
+    {
+        _receivedFirstPing = true;
+
+        //if the protocol version is less than 1, it's an older client.
+        if (GUID.getProtocolVersion(m.getGUID()) < 
+            GUID.GNUTELLA_VERSION_06) {
+            _isOldClient = true;
+            _oldClientAcceptTime = System.currentTimeMillis() + 
+                this.PING_THROTTLE_TIME;
+        }
+    }
+
+    /**
+     * Determines whether to throttle (i.e., drop) a ping request.  Basically,
+     * this method checks to make sure the ping received is greater than
+     * THROTTLE_TIME.  If so, then it's okay to process this ping, otherwise
+     * throttle the PingRequest.
+     * @requires - this is connection is to an older client.
+     */
+    private boolean throttlePing()
+    {
+        //if not older client, shouldn't be calling method, but just in case
+        //the ping should be processed.
+        if (!_isOldClient)
+            return false; 
+
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime > _oldClientAcceptTime) {
+            _oldClientAcceptTime = System.currentTimeMillis() + 
+                PING_THROTTLE_TIME;
+            return false;
+        }
+        else {
+            return true;
         }
     }
 
@@ -719,6 +824,21 @@ public class ManagedConnection
      */
     public boolean isKillable() {
         return _isKillable;
+    }
+
+    /**
+     * Is this an older client (by protocol version number in GUID)
+     */
+    public boolean isOldClient() {
+        return _isOldClient;
+    }
+
+    /**
+     * returns the last PING GUID sent by the client that we are connected 
+     * to.
+     */
+    public byte[] getLastPingGUID() {
+        return _lastPingGUID;
     }
 
     /** Unit test.  Only tests statistics methods. */

@@ -92,6 +92,18 @@ public abstract class MessageRouter
 	protected UploadManager _uploadManager;
 
     /**
+     * Max TTL used when sending PingRequests for refreshing the HostCatcher.
+     * Also used to store how many Pongs (PingReplies) we need to send to
+     * another client in response to a Ping.
+     */
+    public static final int MAX_TTL_FOR_CACHE_REFRESH = 7;
+
+    /**
+     * The max number of pongs to return in response to a ping.
+     */
+    public static final int MAX_PONGS_TO_RETURN = 10;
+
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter()
