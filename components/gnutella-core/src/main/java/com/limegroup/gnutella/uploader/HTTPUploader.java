@@ -184,6 +184,11 @@ public class HTTPUploader implements Uploader {
     
 	public void start() {
 		try {
+			prepareFile();
+		} catch (IOException e) {
+			setState(FILE_NOT_FOUND);
+		}
+		try {
 			readHeader();
 			_state.doUpload(this);
 		} catch (FreeloaderUploadingException e) { 
@@ -231,6 +236,8 @@ public class HTTPUploader implements Uploader {
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
 			break;
+		case FILE_NOT_FOUND:
+			_state = new FileNotFoundUploadState();
 		case COMPLETE:
 			break;
 		}
@@ -348,6 +355,44 @@ public class HTTPUploader implements Uploader {
 	}
 
 
+	/*
+	 * prepares the requested file to be read.
+	 */
+
+	/**
+	 * prepares the file to be read for sending accross the socket
+	 */
+	private void prepareFile() throws IOException {
+		// get the appropriate file descriptor
+		FileDesc fdesc;
+		try {
+			fdesc = FileManager.instance().get(_index);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IOException();
+		}
+		
+		/* For regular (client-side) uploads, get name. 
+		 * For pushed (server-side) uploads, check to see that 
+		 * the index matches the filename. */
+		String name = fdesc._name;
+		if (_filename == null) {
+            _filename = name;
+        } else {
+			/* matches the name */
+			if ( !name.equals(_filename) ) {
+				throw new IOException();
+			}
+        }
+
+		// set the file size
+        _fileSize = fdesc._size;
+
+		// get the fileInputStream
+		String path = fdesc._path;
+		File myFile = new File(path);
+		_fis = new FileInputStream(myFile);
+
+	}
 
 }
 

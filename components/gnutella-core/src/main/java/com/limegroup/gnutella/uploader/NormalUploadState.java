@@ -44,7 +44,7 @@ public class NormalUploadState implements UploadState {
 		_uploadBegin =  _uploader.getUploadBegin();
 
 		/* prepare the file to be read */
-		prepareFile();
+		// prepareFile();
 		/* write the header information to the socket */
 		writeHeader();
 		/* write the file to the socket */
@@ -127,37 +127,37 @@ public class NormalUploadState implements UploadState {
 	/**
 	 * prepares the file to be read for sending accross the socket
 	 */
-	private void prepareFile() throws IOException {
-		// get the appropriate file descriptor
-		FileDesc fdesc;
-		try {
-			fdesc = FileManager.instance().get(_index);
-		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
-		}
+//  	private void prepareFile() throws IOException {
+//  		// get the appropriate file descriptor
+//  		FileDesc fdesc;
+//  		try {
+//  			fdesc = FileManager.instance().get(_index);
+//  		} catch (IndexOutOfBoundsException e) {
+//  			throw new IOException();
+//  		}
 		
-		/* For regular (client-side) uploads, get name. 
-		 * For pushed (server-side) uploads, check to see that 
-		 * the index matches the filename. */
-		String name = fdesc._name;
-		if (_filename == null) {
-            _filename = name;
-        } else {
-			/* matches the name */
-			if ( !name.equals(_filename) ) {
-				throw new IOException();
-			}
-        }
+//  		/* For regular (client-side) uploads, get name. 
+//  		 * For pushed (server-side) uploads, check to see that 
+//  		 * the index matches the filename. */
+//  		String name = fdesc._name;
+//  		if (_filename == null) {
+//              _filename = name;
+//          } else {
+//  			/* matches the name */
+//  			if ( !name.equals(_filename) ) {
+//  				throw new IOException();
+//  			}
+//          }
 
-		// set the file size
-        _fileSize = fdesc._size;
+//  		// set the file size
+//          _fileSize = fdesc._size;
 
-		// get the fileInputStream
-		String path = fdesc._path;
-		File myFile = new File(path);
-		_fis = new FileInputStream(myFile);
+//  		// get the fileInputStream
+//  		String path = fdesc._path;
+//  		File myFile = new File(path);
+//  		_fis = new FileInputStream(myFile);
 
-	}
+//  	}
 
 	/** eventually this method should determine the 
 	 * mime type of a file fill in the details of 

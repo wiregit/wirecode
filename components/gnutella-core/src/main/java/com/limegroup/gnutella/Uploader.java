@@ -28,6 +28,7 @@ public interface Uploader {
 	public static final int COMPLETE         = 5;
 	public static final int INTERRUPTED      = 6;
 	public static final int PUSH_FAILED      = 7;
+	public static final int FILE_NOT_FOUND   = 8;
 
 	/**
 	 * Stops this upload.  If the download is already 
