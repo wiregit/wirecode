@@ -685,13 +685,12 @@ public final class HTTPUploader implements Uploader {
         else {                
 			// m - n or 0 -
             int dash = sub.indexOf("-");
-			String first;
-			try {
-				first = sub.substring(0, dash);
-			} catch (IndexOutOfBoundsException e) {
-				throw new ProblemReadingHeaderException();
-			}
-            first = first.trim();
+            
+            // If the "-" does not exist, the head is incorrectly formatted.
+            if(dash == -1) {
+                throw new ProblemReadingHeaderException();
+            }
+			String first = sub.substring(0, dash).trim();
 			try {
 				_uploadBegin = java.lang.Integer.parseInt(first);
 			} catch (NumberFormatException e) {
