@@ -54,7 +54,7 @@ public final class QueryHandler {
      * out a TTL=3 query, we will then wait TTL*TIME_TO_WAIT_PER_HOP
      * milliseconds.
      */
-    static final long TIME_TO_WAIT_PER_HOP = 2000;
+    static final long TIME_TO_WAIT_PER_HOP = 2500;
 
 
 	/**
@@ -123,11 +123,13 @@ public final class QueryHandler {
      */
     private volatile boolean _forwardedToLeaves = false;
 
-    /**
-     * Constant <tt>ProbeQuery</tt> instance for managing the probe.
-     */
-    private final ProbeQuery PROBE_QUERY;
 
+    /**
+     * Boolean for whether or not we've sent the probe query.
+     */
+    private boolean _probeQuerySent;
+
+    
     /**
      * <tt>List</tt> of TTL=1 probe connections that we've already used.
      */
@@ -158,9 +160,6 @@ public final class QueryHandler {
 
 		REPLY_HANDLER = handler;
         RESULT_COUNTER = counter;
-        PROBE_QUERY = 
-            new ProbeQuery(_connectionManager.getInitializedConnections(),
-                           this);
 	}
 
 
@@ -284,7 +283,7 @@ public final class QueryHandler {
 
             // send the query to our leaves if there's a hit and wait,
             // otherwise we'll move on to the probe
-            if(qrt.contains(query)) {
+            if(qrt != null && qrt.contains(query)) {
                 RouterService.getMessageRouter().
                     forwardQueryRequestToLeaves(query, 
                                                 REPLY_HANDLER); 
@@ -297,10 +296,17 @@ public final class QueryHandler {
         }
         
         // 2) If we haven't sent the probe query, send it
-        if(!PROBE_QUERY.probeSent()) {
-            long timeToWait = PROBE_QUERY.getTimeToWait();            
-            _theoreticalHostsQueried += PROBE_QUERY.sendProbe();
+        if(!_probeQuerySent) {
+            ProbeQuery pq = 
+                new ProbeQuery(_connectionManager.getInitializedConnections(),
+                               this);
+            long timeToWait = pq.getTimeToWait();            
+            _theoreticalHostsQueried += pq.sendProbe();
+            System.out.println("QueryHandler::sendQuery:"+
+                               "_theoreticalHostsQueried: "+
+                               QUERY.getQuery()+" "+_theoreticalHostsQueried); 
             _nextQueryTime = _curTime + timeToWait;
+            _probeQuerySent = true;
         }
 
         // 3) If we haven't yet satisfied the query, keep trying
@@ -344,7 +350,7 @@ public final class QueryHandler {
             
             // also, pretend we have fewer connections than we do
             // in case they go away
-			int remainingConnections = length - hostsQueried - 4;
+			int remainingConnections = length - hostsQueried - 3;
 			remainingConnections = Math.max(remainingConnections, 1);
 			
 			int results = handler.RESULT_COUNTER.getNumResults();
@@ -352,11 +358,25 @@ public final class QueryHandler {
 				(double)results/(double)handler._theoreticalHostsQueried;
 			
 			int resultsNeeded = handler.RESULTS - results;
+            if(handler.QUERY.getHops() == 0) {
+                System.out.println("QueryHandler::sendQuery::"+
+                                   "results needed: "+
+                                   handler.QUERY.getQuery()+" "+
+                                   resultsNeeded); 
+            }
 			
 			int hostsToQuery = 20000;
 			if(resultsPerHost != 0) {
 				hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
 			}
+
+            if(handler.QUERY.getHops() == 0) {
+                System.out.println("QueryHandler::sendQuery::"+
+                                   "hosts to query: "+
+                                   handler.QUERY.getQuery()+" "+
+                                   hostsToQuery); 
+            }
+
 			
 			int hostsToQueryPerConnection = 
 				hostsToQuery/remainingConnections;			
@@ -449,7 +469,7 @@ public final class QueryHandler {
 
             // biased towards lower TTLs since the horizon expands so
             // quickly
-            int hosts = (int)(12.0*calculateNewHosts(degree, i));
+            int hosts = (int)(16.0*calculateNewHosts(degree, i));
             if(hosts >= hostsToQueryPerConnection) {
                 return i;
             }

@@ -26,7 +26,6 @@ final class ProbeQuery {
      */
     private final QueryHandler QUERY_HANDLER;
 
-    private boolean _probeSent;
 
     /**
      * Constructs a new <tt>ProbeQuery</tt> instance with the specified
@@ -46,15 +45,6 @@ final class ProbeQuery {
         TTL_2_PROBES = lists[1];        
     }
     
-    /**
-     * Checks to see if the probe has already been sent. 
-     *
-     * @return <tt>true</tt> if this probe has already been sent,
-     *  otherwise <tt>false</tt>
-     */
-    boolean probeSent() {
-        return _probeSent;
-    }
 
     /**
      * Obtains the time to wait for probe results to return.
@@ -65,13 +55,13 @@ final class ProbeQuery {
     long getTimeToWait() {
 
         // determine the wait time.  we wait a little longer per
-        // hop for probes to give them more time
+        // hop for probes to give them more time -- also weight
+        // this depending on how many TTL=1 probes we're sending
         if(!TTL_2_PROBES.isEmpty()) 
-            return QueryHandler.TIME_TO_WAIT_PER_HOP*2*
-                TTL_2_PROBES.size();
+            return (long)((double)QueryHandler.TIME_TO_WAIT_PER_HOP*2.2);
         if(!TTL_1_PROBES.isEmpty()) 
-            return QueryHandler.TIME_TO_WAIT_PER_HOP*
-                TTL_1_PROBES.size();
+            return (long)((double)QueryHandler.TIME_TO_WAIT_PER_HOP*3.0*
+                (double)TTL_1_PROBES.size());
         return 0L;
     }
     
@@ -83,11 +73,10 @@ final class ProbeQuery {
      *  probe
      */
     int sendProbe() {
-        _probeSent = true;
-        //if(QUERY_HANDLER.QUERY.getHops() == 0) {
+        if(QUERY_HANDLER.QUERY.getHops() == 0) {
             System.out.println("ProbeQuery::sendProbe::"+
                                QUERY_HANDLER.QUERY); 
-            //}
+        }
         Iterator iter = TTL_1_PROBES.iterator();
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
@@ -95,16 +84,11 @@ final class ProbeQuery {
             if(QUERY_HANDLER.QUERY.getHops() == 0) {
                 System.out.println("ProbeQuery::sendProbe::TTL=1"); 
             }
-            ManagedConnection mc = null;
-            try {
-                mc = (ManagedConnection)iter.next();
-                hosts += 
-                    QUERY_HANDLER.sendQueryToHost(query, 
-                                                  mc, QUERY_HANDLER);
-            } catch(Exception e) {
-                System.out.println("mc: "+mc);
-                e.printStackTrace();
-            }
+
+            ManagedConnection mc = (ManagedConnection)iter.next();
+            hosts += 
+                QueryHandler.sendQueryToHost(query, 
+                                             mc, QUERY_HANDLER);
         }
         
         query = QUERY_HANDLER.createQuery((byte)2);
@@ -115,8 +99,8 @@ final class ProbeQuery {
             }
             ManagedConnection mc = (ManagedConnection)iter.next();
             hosts += 
-                QUERY_HANDLER.sendQueryToHost(query, 
-                                              mc, QUERY_HANDLER);
+                QueryHandler.sendQueryToHost(query, 
+                                             mc, QUERY_HANDLER);
         }
         
         TTL_1_PROBES.clear();
@@ -195,8 +179,10 @@ final class ProbeQuery {
             return returnLists;
         }
 
-        if(numHitConnections > 4) {
-            ttl1List.addAll(hitConnections.subList(numHitConnections-4, 
+        if(numHitConnections > 3) {
+            int numToTry = Math.min(6, numHitConnections);
+            ttl1List.addAll(hitConnections.subList(numHitConnections-
+                                                   numToTry, 
                                                    numHitConnections));
             return returnLists;
         }
