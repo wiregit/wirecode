@@ -12,6 +12,8 @@ import com.sun.java.util.collections.*;
  * by Chris Adamson and released under GPL.  Information about the format was
  * originally found on <url>http://www.oreillynet.com/pub/wlg/3130</url>.
  * 
+ * A great THANK YOU to Roger Kapsi for his help!
+ * 
  * 
  * The m4a files have a tree structure composed of atoms.  
  * Atoms are similar to xml tags. 
@@ -20,6 +22,7 @@ import com.sun.java.util.collections.*;
  * [ftyp]
  * [moov]
  *    [mvhd]
+ * 		(length info - 5th 32bit int divided by 4th 32 bit int)
  *    [trak]
  *    [udta]
  *       [meta]
@@ -35,6 +38,7 @@ import com.sun.java.util.collections.*;
  *    [data]
  *      (the genre of the file) 
  * 
+ * 
  * furthermore, each atom has a 8 or 16 byte header.  
  * 32 bit unsigned integer size (includes header).  If its 1, there is extended size.
  * 32 bit id
@@ -43,6 +47,17 @@ import com.sun.java.util.collections.*;
  * Although sometimes the atom names can be represented as strings, sometimes they 
  * contain non-asccii characters, so it is safer to represent all atom names as integers.
  * (that's what says in the spec too)
+ * 
+ * NOTE: This parser does not parse the bitrate info.  The reason is that
+ * the bitrate info is contained in the [esds] atom, or the [alac] atom if the codec
+ * is lossless, and the bitrate info is stored in different format in those atoms, neither
+ * of which are documented.
+ *   
+ * Furthermore, the [esds] atom is in different location in files purchased from 
+ * the store than in those ripped from cds.  Creating a hierarchical parser (i.e. 
+ * parser which parses the entire file and creates the atom structure in memory) 
+ * is not trivial because of various artifacts (like unexpected offsets) which apple 
+ * introduced to prevent people from parsing their files.  
  */
 public class M4AMetaData extends AudioMetaData {
 	
@@ -53,6 +68,16 @@ public class M4AMetaData extends AudioMetaData {
 	private static final int MOOV_ATOM = 0x6d6f6f76;
 	private static final int MVHD_ATOM = 0x6d766864;
 	private static final int TRAK_ATOM = 0x7472616b;
+	private static final int TKHD_ATOM = 0x746b6864;
+	private static final int MDIA_ATOM = 0x6d646961;
+	private static final int ESDS_ATOM = 0x65736473;
+	private static final int MDHD_ATOM = 0x6d646864;
+	private static final int MINF_ATOM = 0x6d696e66;
+	private static final int DINF_ATOM = 0x64696e66;
+	private static final int SMHD_ATOM = 0x736d6864;
+	private static final int STBL_ATOM = 0x7374626c;
+	private static final int STSD_ATOM = 0x73747364;
+	private static final int MP4A_ATOM = 0x6d703461;
 	private static final int UDTA_ATOM = 0x75647461;
 	private static final int META_ATOM = 0x6d657461;
 	private static final int HDLR_ATOM = 0x68646c72;
@@ -219,7 +244,17 @@ public class M4AMetaData extends AudioMetaData {
 		try {
 			skipAtom(FTYP_ATOM,_in);
 			enterAtom(MOOV_ATOM,_in);
-			skipAtom(MVHD_ATOM,_in);
+			
+			//extract the bitrate.
+			
+			int mvhdSize = enterAtom(MVHD_ATOM,_in)-20;
+			_in.skip(12);
+			int timeScale = _in.readInt();
+			int timeUnits = _in.readInt();
+			setLength((int) ( timeUnits/timeScale));
+			_in.skip(mvhdSize);
+			
+			//continue with the rest of the atoms we don't care about
 			skipAtom(TRAK_ATOM,_in);
 			enterAtom(UDTA_ATOM,_in);
 			enterAtom(META_ATOM,_in);
