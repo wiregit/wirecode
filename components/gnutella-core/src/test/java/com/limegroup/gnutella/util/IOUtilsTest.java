@@ -33,9 +33,18 @@ public final class IOUtilsTest extends TestCase {
 	public void testIOUtilsReadWord() {
 		String firstWord = "GET";
 		String test0 = firstWord+" /get/0/file.txt";
-		InputStream stream = new ByteArrayInputStream(test0.getBytes());
+		InputStream stream0 = new ByteArrayInputStream(test0.getBytes());
 		try {
-			String result = IOUtils.readWord(stream, 4);
+			String result = IOUtils.readWord(stream0, 3);
+			assertEquals("result should equal first word", result, firstWord);
+		} catch(IOException e) {
+			fail("unexpected exception: "+e);
+		}
+
+
+		InputStream stream1 = new ByteArrayInputStream(test0.getBytes());
+		try {
+			String result = IOUtils.readWord(stream1, 4);
 			assertEquals("result should equal first word", result, firstWord);
 		} catch(IOException e) {
 			fail("unexpected exception: "+e);
