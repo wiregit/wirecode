@@ -2139,26 +2139,18 @@ public class Connection implements IpPort, Candidate {
 	}
 	
 	public boolean equals(Object o) {
-		if (o==null) return false;
-		
-		if (! (o instanceof IpPort))
-			return false;
 		
 		//first try a cast to connection
+		//and use the Object.equals
 		if (o instanceof Connection) {
-			Connection other = (Connection)o;
-			
-			if (isInitialized() != other.isInitialized())
-				return false;
-			
-			// with Connection objects use the string address.
-			return getAddress().equals(other.getAddress());
-			
+			return super.equals(o);
 		}
 		
-		IpPort other = (IpPort)o;
-		return other.getInetAddress().equals(getInetAddress()) &&
+		if (o instanceof IpPort) {
+			IpPort other = (IpPort)o;
+			return other.getInetAddress().equals(getInetAddress()) &&
 				other.getPort() == getPort();
-		
+		}
+		return false;
 	}
 }
