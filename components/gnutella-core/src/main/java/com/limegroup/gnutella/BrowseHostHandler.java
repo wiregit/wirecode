@@ -317,6 +317,7 @@ public class BrowseHostHandler {
         		LOG.debug("read message "+m);
         	}
         	catch (BadPacketException bpe) {LOG.debug(bpe);}
+        	catch (IOException expected){} // either timeout, or the remote closed.
         	if(m == null) 
         		return;
         	 else {
