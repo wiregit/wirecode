@@ -2,16 +2,12 @@ package com.limegroup.gnutella.connection;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.handshaking.*;
 import junit.framework.*;
 import com.limegroup.gnutella.util.*;
-import java.net.*;
-import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
-
 
 
 /**
@@ -59,7 +55,7 @@ public final class HandshakingTest extends BaseTestCase {
 		//ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		//RouterService rs = new RouterService(new ActivityCallbackStub());
 		//rs.start();		
-		ROUTER_SERVICE.clearHostCatcher();
+		RouterService.clearHostCatcher();
 		ROUTER_SERVICE.start();
 	}
 
@@ -91,8 +87,8 @@ public final class HandshakingTest extends BaseTestCase {
 
 				if(i == ConnectionManager.ULTRAPEER_CONNECTIONS) {
 
-					// this should throw an IOException because the connection should 
-					// really be closed
+					// this should throw an IOException because the connection 
+					// should  really be closed
 					curConn.receive(6000);
 					fail("accepted beyond max connections");
 				}
@@ -206,7 +202,8 @@ public final class HandshakingTest extends BaseTestCase {
 	}
 
 	private static final class UltrapeerResponder implements HandshakeResponder {
-		public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) 
+		public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) 
 			throws IOException {
 			return HandshakeResponse.createResponse(new Properties());
 		}		
@@ -237,7 +234,8 @@ public final class HandshakingTest extends BaseTestCase {
 			CONNECT_STRING = connectString;
 
 			try {
-				PrivilegedAccessor.setValue(this, "GNUTELLA_CONNECT_06", CONNECT_STRING);
+				PrivilegedAccessor.setValue(this, "GNUTELLA_CONNECT_06", 
+                    CONNECT_STRING);
 			} catch(Exception e) {
 				fail("could not initialize test", e);
 			}		
