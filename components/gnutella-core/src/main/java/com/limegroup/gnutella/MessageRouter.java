@@ -777,7 +777,8 @@ public abstract class MessageRouter {
 		
 		// always send the query to your multicast people
 		multicastQueryRequest(
-		    QueryRequest.createMulticastQuery(query.getGUID(), query.getQuery(),
+		    QueryRequest.createMulticastQuery(query.getGUID(), 
+											  query.getQuery(),
 											  query.getRichQuery(), 
 											  query.getQueryUrns()));
 		
