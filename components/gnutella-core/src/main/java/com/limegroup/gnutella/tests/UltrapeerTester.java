@@ -253,23 +253,23 @@ public class UltrapeerTester {
 
     private static void testBigPingBroadcast() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing big ping broadcast from old connnection"
-                           +", no forwarding to leaf, with reply");
+        System.out.println("-Testing big ping broadcast from leaf connnection"
+                           +", no payload forwarding to old, with big reply");
         drain(old);
-        drain(leaf);
+        drain(ultrapeer);
 
-        //Send Big ping. 
-        //Note: we are using the GroupPing's constructor for now
+        //1a. Send big ping (not GGEP...which should be ok)
         byte[] payload= new byte[16];
         byte c = 65; //'A'
         for(int i=0;i<16;i++, c++)
             payload[i] = c;
         
         Message m=new PingRequest(GUID.makeGuid(), (byte)7, (byte)0,payload);
-        ultrapeer.send(m);
-        ultrapeer.flush();
-              
-        m=old.receive(TIMEOUT);
+        leaf.send(m);
+        leaf.flush();
+            
+        //1b. Make sure ultrapeer gets it with payload.
+        m=ultrapeer.receive(TIMEOUT);
         PingRequest ping = null;
         try{
             ping = (PingRequest)m;
@@ -279,6 +279,7 @@ public class UltrapeerTester {
         }
         Assert.that(m.getHops()==(byte)1); 
         Assert.that(m.getTTL()==(byte)6);
+        Assert.that(m.getLength()==16);
         //lets make sure the payload got there OK
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try{
@@ -295,10 +296,21 @@ public class UltrapeerTester {
         Assert.that(out.equals
                     ("ABCDEFGHIJKLMNOP"),"wrong payload in old client "+out);
         
-        Assert.that(! drain(leaf));
+        //1c. Make sure old gets it wihtout payload.
+        m=old.receive(TIMEOUT);
+        ping = null;
+        try{
+            ping = (PingRequest)m;
+        }catch(ClassCastException cce){
+            cce.printStackTrace();
+            Assert.that(false,"Big ping not created properly on old client");
+        }
+        Assert.that(m.getHops()==(byte)1); 
+        Assert.that(m.getTTL()==(byte)6);
+        Assert.that(m.getLength()==0);
 
-        //Send reply
 
+        //2a. Send reply from ultrapeer
         //create payload for big pong
         byte[] payload2 = new byte[14+2];
         //add the port
@@ -323,17 +335,19 @@ public class UltrapeerTester {
         payload2[14] = (byte) 65;
         payload2[15] = (byte) 66;
 
-        drain(ultrapeer);       
+        drain(leaf);       
 
         PingReply pong=new PingReply(m.getGUID(),
                                      (byte)7,
                                      (byte)0,
                                      payload2);
-        old.send(pong);
-        old.flush();
+        ultrapeer.send(pong);
+        ultrapeer.flush();
+
+        //2b. Make sure leaf reads it.
         PingReply ourPong = null;
         for (int i=0; i<10; i++) {
-            PingReply pongRead=(PingReply)ultrapeer.receive(TIMEOUT);
+            PingReply pongRead=(PingReply)leaf.receive(TIMEOUT);
             if (pongRead.getPort()==pong.getPort()){
                 ourPong = pongRead;
                 break;
@@ -462,6 +476,7 @@ class LeafProperties extends Properties {
     public LeafProperties() {
         put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+        put(ConnectionHandshakeHeaders.GGEP, "0.5");
     }
 }
 
@@ -469,6 +484,7 @@ class UltrapeerProperties extends Properties {
     public UltrapeerProperties() {
         put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "true");
+        put(ConnectionHandshakeHeaders.GGEP, "1.0");  //just for fun
     }
 }
 

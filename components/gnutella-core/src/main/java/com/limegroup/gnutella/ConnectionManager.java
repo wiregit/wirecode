@@ -150,12 +150,13 @@ public class ConnectionManager {
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
   		watchdog.start();
-
-		if(_settings.getConnectOnStartup()) {
-			setKeepAlive(_settings.getKeepAlive());
-		}
-        //setMaxIncomingConnections(
-		//SettingsManager.instance().getMaxIncomingConnections());
+        
+        //We used to set the keep-alive to zero here, but that caused problems
+        //because connection fetchers could wait in HostCatcher.getAnEndpoint()
+        //before HostCatcher.expire() had been called.  As a result, LimeWire
+        //sometimes failed to connect on startup, esp. if the gnutella.net file
+        //was empty.  Turns out this code isn't needed, as
+        //RouterService.initialize() does the right thing.
     }
 
 
@@ -767,22 +768,7 @@ public class ConnectionManager {
             }
         }
     }
-    
-    /**
-     * Adds connected supernode endpoints to host catcher
-     */
-    public void cacheConnectedSupernodeEndpoints() {
-        for (Iterator iter=getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            //add the endpoint to hostcatcher
-            if (c.isSupernodeConnection()) {
-                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getPort()), true);
-            }
-        }
-    }
-    
+
     /**
      * Connects to the network.  Ensures the number of messaging connections
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
@@ -987,12 +973,21 @@ public class ConnectionManager {
 
     /**
      * Initializes an outgoing connection created by a ConnectionFetcher
+     * Throws any of the exceptions listed in Connection.initialize on
+     * failure; no cleanup is necessary in this case.
      *
-     * @throws IOException on failure.  No cleanup is necessary if this happens.
+     * @exception IOException we were unable to establish a TCP connection
+     *  to the host
+     * @exception NoGnutellaOkException we were able to establish a 
+     *  messaging connection but were rejected
+     * @exception BadHandshakeException some other problem establishing 
+     *  the connection, e.g., the server responded with HTTP, closed the
+     *  the connection during handshaking, etc. 
+     * @see com.limegroup.gnutella.Connection#initialize(int)
      */
     private void initializeFetchedConnection(ManagedConnection c,
                                              ConnectionFetcher fetcher)
-            throws IOException {
+            throws NoGnutellaOkException, BadHandshakeException, IOException {
         synchronized(this) {
             if(fetcher.isInterrupted())
                 // Externally generated interrupt.
@@ -1454,7 +1449,21 @@ public class ConnectionManager {
                 ConnectionManager.this);
 
             try {
-                initializeFetchedConnection(connection, this);
+                //Try to connect, recording success or failure so HostCatcher
+                //can update connection history.  Note that we declare 
+                //success if we were able to establish the TCP connection
+                //but couldn't handshake (NoGnutellaOkException).
+                try {
+                    initializeFetchedConnection(connection, this);
+                    _catcher.doneWithConnect(endpoint, true);
+                } catch (NoGnutellaOkException e) {
+                    _catcher.doneWithConnect(endpoint, true);
+                    throw e;                    
+                } catch (IOException e) {
+                    _catcher.doneWithConnect(endpoint, false);
+                    throw e;
+                }
+                //Handle messages.
                 sendInitialPingRequest(connection);
                 connection.loopForMessages();
             } catch(IOException e) {
@@ -1463,7 +1472,9 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                _catcher.doneWithEndpoint(endpoint);
+                //Record that we're done with the connection, which may allow
+                //HostCatcher to go on to other endpoints.
+                _catcher.doneWithMessageLoop(endpoint);
                 if (connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
             }

@@ -107,6 +107,10 @@ public abstract class RouteTableMessage extends Message {
         return variant;
     }
 
+    /** Returns this. */
+    public Message stripExtendedPayload() {
+        return this;
+    }
 
     /** Unit test */
     public static void main(String[] args) {                  

@@ -14,7 +14,9 @@ import com.sun.java.util.collections.Iterator;
  * the heap, these objects must not be mutated in a way that affects compareTo.
  * <b>This class is not synchronized; that is up to the user.</b><p>
  *
- * BinaryHeap now contains a constructor to allow dynamic resizing as well.
+ * BinaryHeap now contains a constructor to allow dynamic resizing as well.<p>
+ *
+ * @see FixedsizePriorityQueueTest
  */
 public class BinaryHeap
 {

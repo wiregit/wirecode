@@ -144,7 +144,16 @@ public class StringUtils {
             return c;            
     }
 
-    /** Returns the tokens of s delimited by the given delimeter, without
+    /**
+     * Exactly like split(s, Character.toString(delimeter))
+     */
+    public static String[] split(String s, char delimeter) {
+        //Character.toString only available in Java 1.4+
+        return split(s, delimeter+"");
+    }
+
+    /** 
+     *  Returns the tokens of s delimited by the given delimeter, without
      *  returning the delimeter.  Repeated sequences of delimeters are treated
      *  as one. Examples:
      *  <pre>
@@ -154,19 +163,72 @@ public class StringUtils {
      *  </pre>
      *
      * <b>Note that whitespace is preserved if it is not part of the delimeter.</b>
-     * An older version of this trim()'ed each token of whitespace.  */
-    public static String[] split(String s, char delimeter) {
-        return split(s, delimeter+"");
-    }
-
-    /** Exactly like split(String,char), except ANY of the delimeters in
-     *  "delimeters" can be used to split s. */
+     * An older version of this trim()'ed each token of whitespace.  
+     */
     public static String[] split(String s, String delimeters) {
         //Tokenize s based on delimeters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimeters);
         Vector buf = new Vector();        
         while (tokenizer.hasMoreTokens())
             buf.add(tokenizer.nextToken());
+
+        //Copy from buffer to array.
+        String[] ret = new String[buf.size()];
+        for(int i=0; i<buf.size(); i++)
+            ret[i] = (String)buf.get(i);
+
+        return ret;
+    }
+
+    /**
+     * Exactly like splitNoCoalesce(s, Character.toString(delimeter))
+     */
+    public static String[] splitNoCoalesce(String s, char delimeter) {
+        //Character.toString only available in Java 1.4+
+        return splitNoCoalesce(s, delimeter+"");
+    }
+
+    /**
+     * Similar to split(s, delimeters) except that subsequent delimeters are not
+     * coalesced, so the returned array may contain empty strings.  If s starts
+     * (ends) with a delimeter, the returned array starts (ends) with an empty
+     * strings.  If s contains N delimeters, N+1 strings are always returned.
+     * Examples:
+     *
+    *  <pre>
+     *    split("a//b/ c /","/")=={"a","","b"," c ", ""}
+     *    split("a b", "/")=={"a b"}.
+     *    split("///", "/")=={"","","",""}.
+     *  </pre>
+     *
+     * @return an array A s.t. s.equals(A[0]+d0+A[1]+d1+...+A[N]), where 
+     *  for all dI, dI.size()==1 && delimeters.indexOf(dI)>=0; and for
+     *  all c in A[i], delimeters.indexOf(c)<0
+     */
+    public static String[] splitNoCoalesce(String s, String delimeters) {
+        //Tokenize s based on delimeters, adding to buffer.
+        StringTokenizer tokenizer = new StringTokenizer(s, delimeters, true);
+        Vector buf = new Vector(); 
+        //True if last token was a delimeter.  Initialized to true to force
+        //an empty string if s starts with a delimeter.
+        boolean gotDelimeter=true; 
+        while (tokenizer.hasMoreTokens()) {
+            String token=tokenizer.nextToken();
+            //Is token a delimeter?
+            if (token.length()==1 && delimeters.indexOf(token)>=0) {
+                //If so, add blank only if last token was a delimeter.
+                if (gotDelimeter)
+                    buf.add("");
+                gotDelimeter=true;
+            } else {
+                //If not, add "real" token.
+                buf.add(token);
+                gotDelimeter=false;
+            }            
+        }
+        //Add trailing empty string UNLESS s is the empty string.
+        if (gotDelimeter && !buf.isEmpty())
+            buf.add("");
 
         //Copy from buffer to array.
         String[] ret = new String[buf.size()];
@@ -241,99 +303,5 @@ public class StringUtils {
         return valueSet;
     }
     
-    /*
-    public static void main(String args[]) {
-        //Case methods.  Test all boundary conditions.
-        //See ASCII table for further justification.
-        Assert.that(toOtherCase('\0')=='\0');
-        Assert.that(toOtherCase('0')=='0');
-        Assert.that(toOtherCase('@')=='@');
-        Assert.that(toOtherCase('A')=='a');
-        Assert.that(toOtherCase('H')=='h');
-        Assert.that(toOtherCase('Z')=='z');
-        Assert.that(toOtherCase('[')=='[');
-        Assert.that(toOtherCase('`')=='`');
-        Assert.that(toOtherCase('a')=='A');
-        Assert.that(toOtherCase('h')=='H');
-        Assert.that(toOtherCase('z')=='Z');
-        Assert.that(toOtherCase('{')=='{');        
-
-        //Wildcards
-        Assert.that(StringUtils.contains("", "") == true);
-        Assert.that(StringUtils.contains("abc", "") == true);
-        Assert.that(StringUtils.contains("abc", "b") == true);
-        Assert.that(StringUtils.contains("abc", "d") == false);
-        Assert.that(StringUtils.contains("abcd", "a*d") == true);
-        Assert.that(StringUtils.contains("abcd", "*a**d*") == true);
-        Assert.that(StringUtils.contains("abcd", "d*a") == false);
-        Assert.that(StringUtils.contains("abcd", "*.*") == false);
-        Assert.that(StringUtils.contains("abc.d", "*.*") == true);
-        Assert.that(StringUtils.contains("abc.", "*.*") == true);
-
-        //Spaces and wildcards
-        Assert.that(StringUtils.contains("abcd", "x") == false);
-        Assert.that(StringUtils.contains("abcd", "a b") == true);
-        Assert.that(StringUtils.contains("abcd", "a x") == false);
-        Assert.that(StringUtils.contains("abcd", "a c") == true);
-        Assert.that(StringUtils.contains("abcd", "a+c") == true);
-        Assert.that(StringUtils.contains("abcd", "d a") == true);
-        Assert.that(StringUtils.contains("abcd", "a d+c") == true);
-        Assert.that(StringUtils.contains("abcd", "a dc") == false);
-        Assert.that(StringUtils.contains("abcd", "a b*c") == true);
-        Assert.that(StringUtils.contains("abcd", "a c*b") == false);
-        Assert.that(StringUtils.contains("abcd", " ab+") == true);
-        Assert.that(StringUtils.contains("abcd", "+x+") == false);
-        Assert.that(StringUtils.contains("abcde", "ab bcd") == true);
-        Assert.that(StringUtils.contains("abcde", "ab bd") == false);
-        Assert.that(StringUtils.contains("abcdefghj",
-                                         "+*+*ab*d+def*g c ") == true);  
-
-        //Cases 
-        Assert.that(StringUtils.contains("aBcDd", "bCD", true) == true);
-        Assert.that(StringUtils.contains("aBcDd", "bCD", false) == false);
-        Assert.that(StringUtils.contains("....", "..", true) == true);
-        Assert.that(StringUtils.contains("....", "..", false) == true);
-
-        //Clip2 compatibility      
-        Assert.that(StringUtils.contains("abcd", " ") == true);
-        Assert.that(StringUtils.contains("abcd", "    ") == true);
-                                         
-        //split tests
-        String in;
-        String[] expected;
-        String[] result;
-        
-        in="a//b/ c /"; expected=new String[] {"a","b"," c "};
-        result=split(in, '/');
-        Assert.that(Arrays.equals(expected, result));
-        
-        in="a b";       expected=new String[] {"a b"};
-        result=split(in, '/');
-        Assert.that(Arrays.equals(expected, result));
-        
-        in="///";       expected=new String[] {};
-        result=split(in, '/');
-        Assert.that(Arrays.equals(expected, result));
-
-        in="a+b|c|+d+|";     expected=new String[] {"a", "b", "c", "d"};
-        result=split(in, "+|");
-        Assert.that(Arrays.equals(expected, result));
-
-        //Unit tests for compareToIgnoreCase.  These require Java 2.
-        testCompareIgnoreCase("", "");
-        testCompareIgnoreCase("", "b");
-        testCompareIgnoreCase("a", "");
-        testCompareIgnoreCase("abc", "AbC");
-        testCompareIgnoreCase("aXc", "ayc");
-        testCompareIgnoreCase("aXc", "aYc");
-        testCompareIgnoreCase("axc", "ayc");
-        testCompareIgnoreCase("axc", "aYc");
-        testCompareIgnoreCase("abc", "AbCdef");
-    }
-
-    private static void testCompareIgnoreCase(String a, String b) {
-        Assert.that(a.compareToIgnoreCase(b)==compareIgnoreCase(a, b));
-        Assert.that(b.compareToIgnoreCase(a)==compareIgnoreCase(b, a));
-    }
-    */
+    //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
 }

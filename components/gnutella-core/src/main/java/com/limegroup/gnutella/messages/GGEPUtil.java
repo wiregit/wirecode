@@ -20,32 +20,26 @@ public class GGEPUtil {
     private static byte[] qrGGEP = null;
 
     static {
-        HashMap headers = new HashMap();
         ByteArrayOutputStream oStream = new ByteArrayOutputStream();
 
         // the standard GGEP has nothing.
         try {
-            GGEP standard = new GGEP(headers);
+            GGEP standard = new GGEP(false);
             standard.write(oStream);
             standardGGEP = oStream.toByteArray();
         }
         catch (IOException writeError) {
         }
-        catch (BadGGEPPropertyException bgpe) {
-        }
 
         // a GGEP block with BHOST
-        headers.clear();
         oStream.reset();
-            headers.put(GGEP.GGEP_HEADER_BROWSE_HOST, null);
         try {
-            GGEP bhost = new GGEP(headers);
+            GGEP bhost = new GGEP(false);
+            bhost.put(GGEP.GGEP_HEADER_BROWSE_HOST);
             bhost.write(oStream);
             qrGGEP = oStream.toByteArray();
         }
         catch (IOException writeError) {
-        }
-        catch (BadGGEPPropertyException bgpe) {
         }
         Assert.that(qrGGEP != null);
     }

@@ -55,7 +55,9 @@ public class LazyProperties extends Properties
         props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING,
                           "0.1");
         props.put(ConnectionHandshakeHeaders.USER_AGENT,
-                          CommonUtils.getVendor());                
+                          CommonUtils.getVendor());       
+        props.put(ConnectionHandshakeHeaders.GGEP, 
+                          "0.5");
     }
     
 }

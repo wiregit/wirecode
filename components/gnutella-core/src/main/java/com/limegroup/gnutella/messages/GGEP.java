@@ -5,19 +5,24 @@ import java.io.*;
 import com.limegroup.gnutella.Assert;
 import java.util.Enumeration;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.StringComparator;
 
 /** 
- * An abstraction of a GGEP Block.
- * A GGEP Block can be thought of as a collection of key/value pairs.
- * A key (extension header) cannot be greater than 15 bytes, and the value
- * (extension data) can be at most 2^24-1 bytes (and could be 0).
- * The order of the Extensions is immaterial.  Extensions supported by LimeWire
- * have keys specified in this class (prefixed by GGEP_HEADER...)
+ * A mutable GGEP extension block.  A GGEP block can be thought of as a
+ * collection of key/value pairs.  A key (extension header) cannot be greater
+ * than 15 bytes.  The value (extension data) can be 0 to 2^24-1 bytes.  Values
+ * can be formatted as a number, boolean, or generic blob of binary data.  If
+ * necessary (e.g., for query replies), GGEP will COBS-encode values to remove
+ * null bytes.  (TODO: THIS IS NOT CURRENTLY IMPLEMENTED.)  The order of the
+ * extensions is immaterial.  Extensions supported by LimeWire have keys
+ * specified in this class (prefixed by GGEP_HEADER...)  
  */
 public class GGEP extends Object {
 
     /** The extension header (key) for Browse Host. */
     public static final String GGEP_HEADER_BROWSE_HOST = "BH";
+    /** The extension header (key) for average daily uptime. */
+    public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
@@ -29,9 +34,19 @@ public class GGEP extends Object {
      */
     public static final byte GGEP_PREFIX_MAGIC_NUMBER = (byte) 0xC3;
 
-    /** The collection of key/value pairs this GGEP instance represents.
+    /** 
+     * The collection of key/value pairs.  Rep. rationale: arrays of bytes are
+     * convenient for values since they're easy to convert to numbers or
+     * strings.  But strings are conventient for keys since they define hashCode
+     * and equals.
      */
-    private Map _props = null;
+    private Map /*String->byte[]*/ _props = new TreeMap(new StringComparator());
+
+    /**
+     * False iff this should COBS encode values to prevent null bytes.
+     * Default is false, to be conservative.
+     */
+    public boolean allowNulls=false;
 
 	/**
 	 * Cached hash code value to avoid calculating the hash code from the
@@ -39,70 +54,19 @@ public class GGEP extends Object {
 	 */
 	private volatile int hashCode = 0;
 
-    Map getProps() {
-        return _props;
-    }
 
-    /** Constructs a GGEP instance with the set of specified key/val pairs.
-     *  The key and values you submit should be stringable!  The key string
-     *  should be non-null and not the empty string!  The value, if null, is
-     *  assumed to be not-present (extension data is optional).
-     *  @param props The collection of GGEP headers/keys and data/values.
-     *  @exception BadGGEPPropertyException Thrown if any of the input
-     *  properties are too large or if your data contains nulls (0x0)).
+    //////////////////// Encoding/Decoding (Map <==> byte[]) ///////////////////
+
+    /** 
+     * Creates a new empty GGEP block.  Typically this is used for outgoing
+     * messages and mutated before encoding.  
+     *
+     * @param allowNulls true if nulls are allowed in extension values; true if
+     *  this should activate COBS encoding if necessary to remove null bytes. 
      */
-    public GGEP(Map props) throws BadGGEPPropertyException {
-        _props = new HashMap();
-        Iterator keys = props.keySet().iterator();
-        // we need to do the following:
-        // 1) make sure everything is of the right size
-        // 2) input everything into our HashMap as a String...
-        while (keys.hasNext()) {
-            Object currKey = keys.next();
-            Object currValue = props.get(currKey);
-
-            // check the key...
-            if (!(currKey instanceof String))
-                currKey = currKey.toString();
-            validateKey((String)currKey);
-
-            // check the data...
-            if ((currValue != null) && !(currValue instanceof String))
-                currValue = currValue.toString();
-            validateValue((String)currValue);
-
-            // everything checks out...
-            _props.put(currKey, currValue);
-        }
-    }
-
-    private static final String EMPTY_STRING = "";
-
-    private void validateKey(String key) throws BadGGEPPropertyException {
-        if ((key == null) ||
-            key.equals(EMPTY_STRING) ||
-            (key.getBytes().length > MAX_KEY_SIZE_IN_BYTES) ||
-            containsNull(key)
-            )
-            throw new BadGGEPPropertyException();
-    }
-
-    private void validateValue(String value) throws BadGGEPPropertyException {
-        if ((value != null) && 
-            ((value.getBytes().length > MAX_VALUE_SIZE_IN_BYTES) ||
-             (containsNull(value)))
-            )
-            throw new BadGGEPPropertyException();
-    }
-
-    private boolean containsNull(String value) {
-        byte[] bytes = value.getBytes();
-        for (int i = 0; i < bytes.length; i++)
-            if (bytes[i] == 0x0)
-                return true;
-        return false;
-    }
-    
+    public GGEP(boolean allowNulls) {
+        this.allowNulls=allowNulls;
+    }    
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
      *  messageBytes[beginOffset].  If you are unsure of whether or not there is
@@ -147,7 +111,7 @@ public class GGEP extends Object {
             currIndex += headerLen;
             final int dataLength = deriveDataLength(messageBytes, currIndex);
 
-            String extensionData = null;
+            byte[] extensionData = null;
 
             currIndex++;
             if (dataLength > 0) {
@@ -166,7 +130,7 @@ public class GGEP extends Object {
                 if (compressed)
                     continue;
 
-                extensionData = new String(data);
+                extensionData = data;
 
                 currIndex += dataLength;
             }
@@ -250,24 +214,6 @@ public class GGEP extends Object {
         return length;
     }
 
-    /** Provides access to the extension headers represented by this GGEP
-     *  instance.
-     *  @return An Set (Strings) of all the keys/headers in this GGEP 
-     *  Block.
-     */
-    public Set getHeaders() {
-        return _props.keySet();
-    }
-
-    /** Accesses the specific String-based extension data representation for a
-     *  given extension header.
-     *  @return The extension data (value) for the given extension header
-     *  (key). Can very well return null, headers don't HAVE to have data.
-     */
-    public String getData(String header) {
-        return (String) _props.get(header);
-    }
-
     /** Writes this GGEP instance as a properly formatted GGEP Block.
      *  @param out This GGEP instance is written to out.
      *  @exception IOException Thrown if had error writing to out.
@@ -281,16 +227,16 @@ public class GGEP extends Object {
             // for each header, write the GGEP header and data
             while (headers.hasNext()) {
                 String currHeader = (String) headers.next();
-                String currData   = (String) getData(currHeader);
+                byte[] currData   = (byte[]) _props.get(currHeader);
                 int dataLen = 0;
                 if (currData != null)
-                    dataLen = currData.getBytes().length;
+                    dataLen = currData.length;
                 debug("GGEP.write(): dataLen for " + currHeader + 
                       " is " + dataLen);
                 writeHeader(currHeader, dataLen, 
                             !headers.hasNext(), out);
                 if (dataLen > 0)
-                    writeData(currData, out);
+                    out.write(currData);
             }
         }
         debug("GGEP.write(): returning " + 
@@ -342,13 +288,6 @@ public class GGEP extends Object {
         out.write(toWrite);
     }
 
-    private void writeData(String data, OutputStream out) throws IOException {
-        // write now, all we need to do is write the data bytes.  but in the
-        // future, we may need to encode or compress the data and then write it
-        // out.
-        out.write(data.getBytes());
-    }
-
     /** Constructs an array of all GGEP blocks starting at
      *  messageBytes[beginOffset].
      *  @param messageBytes The InputStream to attempt to read one or more GGEP
@@ -377,16 +316,184 @@ public class GGEP extends Object {
         return retGGEPs;
     }
 
+
+    ////////////////////////// Key/Value Mutators and Accessors ////////////////
+
+    /** 
+     * Adds a key with raw byte value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data
+     * @exception IllegalArgumentException key is of an illegal length;
+     *  or value contains a null bytes, null bytes are disallowed, and
+     *  COBS encoding is not supported
+     */
+    public void put(String key, byte[] value) throws IllegalArgumentException {
+        validateKey(key);
+        //TODO: COBS encoding.  Make validateValue more relaxed.
+        validateValue(value);
+        _props.put(key, value);
+    }
+
+
+    /** 
+     * Adds a key with string value, using the default character encoding.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data
+     * @exception IllegalArgumentException key is of an illegal length;
+     *  or value contains a null bytes, null bytes are disallowed, and
+     *  COBS encoding is not supported
+     */
+    public void put(String key, String value) throws IllegalArgumentException {
+        put(key, value==null ? null : value.getBytes());
+    }
+
+    /** 
+     * Adds a key with integer value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data, which should be an unsigned integer
+     * @exception IllegalArgumentException key is of an illegal length; or value
+     *  is negative; or value contains a null bytes, null bytes are disallowed,
+     *  and COBS encoding is not supported 
+     */
+    public void put(String key, int value) throws IllegalArgumentException {
+        if (value<0)  //TODO: ?
+            throw new IllegalArgumentException("Negative value");
+        put(key, ByteOrder.int2minLeb(value));
+    }
+
+    /** 
+     * Adds a key without any value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @exception IllegalArgumentException key is of an illegal length;
+     *  or value contains a null bytes, null bytes are disallowed, and
+     *  COBS encoding is not supported
+     */
+    public void put(String key) throws IllegalArgumentException {
+        put(key, (byte[])null);
+    }
+
+    /**
+     * Returns the value for a key, as raw bytes.
+     * @param key the name of the GGEP extension
+     * @return the GGEP extension data associated with the key
+     * @exception BadGGEPPropertyException extension not found, was corrupt,
+     *  or has no associated data.  Note that BadGGEPPropertyException is
+     *  is always thrown for extensions with no data; use hasKey instead.
+     */
+    public byte[] getBytes(String key) throws BadGGEPPropertyException {
+        byte[] ret=(byte[])_props.get(key);
+        if (ret==null)
+            throw new BadGGEPPropertyException();
+        return ret;
+    }
+
+    /**
+     * Returns the value for a key, as a string.
+     * @param key the name of the GGEP extension
+     * @return the GGEP extension data associated with the key
+     * @exception BadGGEPPropertyException extension not found, was corrupt,
+     *  or has no associated data.   Note that BadGGEPPropertyException is
+     *  is always thrown for extensions with no data; use hasKey instead.
+     */
+    public String getString(String key) throws BadGGEPPropertyException {
+        return new String(getBytes(key));
+    }
+
+    /**
+     * Returns the value for a key, as an integer
+     * @param key the name of the GGEP extension
+     * @return the GGEP extension data associated with the key
+     * @exception BadGGEPPropertyException extension not found, was corrupt,
+     *  or has no associated data.   Note that BadGGEPPropertyException is
+     *  is always thrown for extensions with no data; use hasKey instead.
+     */
+    public int getInt(String key) throws BadGGEPPropertyException {
+        byte[] bytes=getBytes(key);
+        if (bytes.length<1)
+            throw new BadGGEPPropertyException("No bytes");
+        if (bytes.length>4)
+            throw new BadGGEPPropertyException("Integer too big");
+        return ByteOrder.leb2int(bytes, 0, bytes.length);
+    }
+
+    /**
+     * Returns whether this has the given key.
+     * @param key the name of the GGEP extension
+     * @return true if this has a key
+     */
+    public boolean hasKey(String key) {
+        return _props.containsKey(key);
+    }
+
+    /** 
+     * Returns the set of keys.
+     * @return a set of all the GGEP extension header name in this, each
+     *  as a String.
+     */
+    public Set getHeaders() {
+        return _props.keySet();
+    }
+
+    private void validateKey(String key) throws IllegalArgumentException {
+        byte[] bytes=key.getBytes();
+        if ((key == null)
+                || key.equals("")
+                || (bytes.length > MAX_KEY_SIZE_IN_BYTES)
+                || containsNull(bytes))
+            throw new IllegalArgumentException();
+    }
+
+    private void validateValue(byte[] value) throws IllegalArgumentException {
+        if (value==null)
+            return;
+        if (value.length>MAX_VALUE_SIZE_IN_BYTES)
+            throw new IllegalArgumentException();
+        if (!allowNulls && containsNull(value))
+            throw new IllegalArgumentException();
+    }
+
+    private boolean containsNull(byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++)
+            if (bytes[i] == 0x0)
+                return true;
+        return false;
+    }
+
+    
+    //////////////////////////////// Miscellany ///////////////////////////////
+
     /** @return True if the two Maps that represent header/data pairs are
      *  equivalent.
      */
     public boolean equals(Object o) {
-		if(o == this) return true;
-        if (o instanceof GGEP) 
-            return _props.equals(((GGEP)o).getProps());
-        return false;
+        if (! (o instanceof GGEP))
+            return false; 
+        //This is O(n lg n) time with n keys.  It would be great if we could
+        //just check that the trees are isomorphic.  I don't think this code is
+        //really used anywhere, however.
+        return this.subset((GGEP)o) && ((GGEP)o).subset(this);
     }
-
+    
+    /** Returns true if this is a subset of other, e.g., all of this' keys 
+     *  can be found in OTHER with the same value. */
+    private boolean subset(GGEP other) {
+        for (Iterator iter=this._props.keySet().iterator(); iter.hasNext(); ) {
+            String key=(String)iter.next();
+            byte[] v1=(byte[])this._props.get(key);
+            byte[] v2=(byte[])other._props.get(key);
+            //Remember that v1 and v2 can be null.
+            if ((v1==null) != (v2==null))
+                return false;
+            if (v1!=null && !Arrays.equals(v1, v2))
+                return false;
+        }
+        return true;
+    }
+                
 	// overrides Object.hashCode to be consistent with equals
 	public int hashCode() {
 		if(hashCode == 0) {

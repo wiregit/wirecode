@@ -5,82 +5,146 @@ import com.sun.java.util.collections.*;
 import junit.framework.*;
 
 public class GGEPTest extends TestCase {
-
-    private Map hashMap = null;
-
     public GGEPTest(String name) {
         super(name);
     }
 
-    protected void setUp() {
-        hashMap = new HashMap();
+    public static Test suite() {
+        return new TestSuite(GGEPTest.class);
     }
 
-    // tests map constructor, should pass....
-    public void testMapConstructor1() {
-        hashMap.clear();
-        hashMap.put("A","B");
-        hashMap.put("C",null);
-        hashMap.put(GGEP.GGEP_HEADER_BROWSE_HOST,"");
+    public void testStringKeys() {
         try {
-            GGEP temp = new GGEP(hashMap);
-        }
-        catch (BadGGEPPropertyException hopefullyNot) {
-            Assert.assertTrue("Test 1 Constructor Failed!", false);
+            GGEP temp = new GGEP(true);
+            temp.put("A", "B");
+            temp.put("C", (String)null);
+            temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
+            assertTrue(temp.hasKey("A"));
+            assertTrue(temp.getString("A").equals("B"));
+            assertTrue(temp.hasKey("C"));
+            assertTrue(temp.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
+            assertTrue(temp.getString(GGEP.GGEP_HEADER_BROWSE_HOST).equals(""));
+        } catch (IllegalArgumentException failed) {
+            fail("Spurious IllegalArgumentException.");
+        } catch (BadGGEPPropertyException failed) {
+            fail("Couldn't get property");
         }
     }
 
-    // tests that map constructor doesn't accept keys that are too long, should
-    // throw an exception
-    public void testMapConstructor2() {
-        hashMap.clear();
-
-        hashMap.put("THIS KEY IS WAY TO LONG!", "");
-
+    public void testByteKeys() {
         try {
-            GGEP temp = new GGEP(hashMap);
-            Assert.assertTrue("Test 2 Constructor Failed!", false);
+            GGEP temp = new GGEP(true);
+            temp.put("A", new byte[] { (byte)3 });
+            assertTrue(temp.hasKey("A"));
+            assertTrue(Arrays.equals(temp.getBytes("A"),
+                                     new byte[] { (byte)3 }));
+        } catch (IllegalArgumentException failed) {
+            fail("Spurious IllegalArgumentException.");
+        } catch (BadGGEPPropertyException failed) {
+            fail("Couldn't get property");
         }
-        catch (BadGGEPPropertyException hopefullySo) {
-        }        
     }
 
-    // tests that map constructor doesn't accept data that is too long, should
-    // throw an exception
-    public void testMapConstructor3() {
-        hashMap.clear();
+    public void testIntKeys() {
+        try {
+            GGEP temp = new GGEP(true);
+            temp.put("A", 527);
+            assertTrue(temp.hasKey("A"));
+            assertTrue(temp.getInt("A")==527);
+            assertTrue(Arrays.equals(temp.getBytes("A"),
+                                     new byte[] { (byte)0x0F, (byte)0x02 }));
+        } catch (IllegalArgumentException failed) {
+            fail("Spurious IllegalArgumentException.");
+        } catch (BadGGEPPropertyException failed) {
+            fail("Couldn't get property");
+        }
+    }
 
+    /** Tests that map constructor doesn't accept keys that are too long, should
+     *  throw an exception */
+    public void testKeyTooBig() {
+        try {
+            GGEP temp = new GGEP(true);
+            temp.put("THIS KEY IS WAY TO LONG!", "");
+            fail("No IllegalArgumentException.");
+        } catch (IllegalArgumentException pass) { 
+        }
+    }
+
+    /** Tests that map constructor doesn't accept data that is too long, should
+     *  throw an exception. */
+    public void testValueTooBig() {
         StringBuffer bigBoy = new StringBuffer(GGEP.MAX_VALUE_SIZE_IN_BYTES+10);
         for (int i = 0; i < GGEP.MAX_VALUE_SIZE_IN_BYTES+10; i++)
             bigBoy.append("1");
         
-        hashMap.put("WHATEVER", bigBoy);
         try {
-            GGEP temp = new GGEP(hashMap);
-            Assert.assertTrue("Test 3 Constructor Failed!", false);
-        }
-        catch (BadGGEPPropertyException hopefullySo) {
-        }
+            GGEP temp = new GGEP(true);
+            temp.put("WHATEVER", bigBoy.toString());
+            fail("No IllegalArgumentException.");
+        } catch (IllegalArgumentException pass) { }
     }
 
-
-    // tests that map constructor doesn't accept data that has a 0x0, should
-    // throw an exception
-    public void testMapConstructor4() {
-        hashMap.clear();
+    /** Null bytes allowed, e.g., in ping replies */
+    public void testValueContainsLegalNull() {
         byte[] bytes = new byte[2];
         bytes[0] = (byte)'S';
         bytes[1] = (byte)0x0;
         String hasANull = new String(bytes);
 
-        hashMap.put("WHATEVER", hasANull);
         try {
-            GGEP temp = new GGEP(hashMap);
-            Assert.assertTrue("Test 4 Constructor Failed!", false);
-        }
-        catch (BadGGEPPropertyException hopefullySo) {
+            GGEP temp = new GGEP(true);
+            temp.put("WHATEVER", hasANull);
+        } catch (IllegalArgumentException pass) { 
+            fail("No IllegalArgumentException.");
         }
     }
+
+    /** Null bytes disallowed, e.g., in query replies.  
+     *  TODO: ultimately this will enable COBS encoding. */
+    public void testValueContainsIllegalNull() {
+        byte[] bytes = new byte[2];
+        bytes[0] = (byte)'S';
+        bytes[1] = (byte)0x0;
+        String hasANull = new String(bytes);
+
+        try {
+            GGEP temp = new GGEP(false);
+            temp.put("WHATEVER", hasANull);
+            fail("No IllegalArgumentException.");
+        } catch (IllegalArgumentException pass) { }
+    }
+
+    public void testEquals() {
+        GGEP a1=new GGEP(true);
+        a1.put("K1", "V1");
+        GGEP a2=new GGEP(true);
+        a2.put("K1", "V1");
+        GGEP b1=new GGEP(true);
+        b1.put("K1");
+        GGEP b2=new GGEP(true);
+        b2.put("K1");
+
+        assertTrue(a1.equals(a1));
+        assertTrue(a1.equals(a2));
+        assertTrue(b1.equals(b1));
+        assertTrue(b1.equals(b2));
+        assertTrue(! a1.equals(b1));
+        assertTrue(! b1.equals(a1));
+        
+        GGEP c1=new GGEP(true);
+        c1.put("K1", "V1");
+        c1.put("K2", "V2");
+        GGEP c2=new GGEP(true);
+        c2.put("K1", "V1");
+        c2.put("K2", "V2");        
+
+        assertTrue(c1.equals(c1));
+        assertTrue(c1.equals(c2));
+        assertTrue(! a1.equals(c1));
+        assertTrue(! b1.equals(c1));
+    }
+
 
     public void testStaticReadMethod() {
         byte[] bytes = new byte[24];
@@ -163,8 +227,6 @@ public class GGEPTest extends TestCase {
         catch (BadGGEPBlockException hopefullyNot) {
             Assert.assertTrue("Test 5 Constructor Failed!", false);
         }
-
-
     }
 
 
@@ -200,16 +262,20 @@ public class GGEPTest extends TestCase {
             GGEP temp = new GGEP(bytes,0, endOffset);
             Set headers = temp.getHeaders();
             Assert.assertTrue("Test 5 - NO BHOST!", headers.contains("BHOST"));
-            Object shouldBeNull = temp.getData("BHOST");
-            Assert.assertTrue("Test 5 - NOT NULL!", shouldBeNull == null);
+            try {
+                temp.getString("BHOST");
+                fail("No BadGGEPPropertyException.");
+            } catch (BadGGEPPropertyException e) {
+            }
             Assert.assertTrue("Test 5 - NO SUSH!", headers.contains("SUSHEEL"));
-            Object shouldNotBeNull = temp.getData("SUSHEEL");
+            Object shouldNotBeNull = temp.getString("SUSHEEL");
             Assert.assertTrue("Test 5 - NULL!", shouldNotBeNull != null);
             Assert.assertTrue("Test 5 - endOffset off: " + endOffset[0], 
                               endOffset[0] == 24);
-        }
-        catch (BadGGEPBlockException hopefullyNot) {
-            Assert.assertTrue("Test 5 Constructor Failed!", false);
+        } catch (BadGGEPBlockException fail) {
+            fail("BadGGEPBlockException thrown.");
+        } catch (BadGGEPPropertyException fail) {
+            fail("BadGGEPPropertyException thrown.");
         }
     }
 
@@ -318,7 +384,7 @@ public class GGEPTest extends TestCase {
             one = new GGEP(bytes,0,null);
         }
         catch (BadGGEPBlockException hopefullyNot) {
-            Assert.assertTrue("Write Test Failed!", false);
+            Assert.assertTrue("Writnew String(data);e Test Failed!", false);
         }
         ByteArrayOutputStream oStream = new ByteArrayOutputStream();
         try {
@@ -331,20 +397,13 @@ public class GGEPTest extends TestCase {
         catch (BadGGEPBlockException hopefullyNot2) {
             Assert.assertTrue("Write wrote incorrectly!!", false);
         }
-
+                
+        assertTrue("Different headers",
+                   one.getHeaders().equals(two.getHeaders()));
         Assert.assertTrue("One is not Two!!", one.equals(two));
     }
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }
-
-    public static Test suite() {
-        TestSuite suite =  new TestSuite("GGEP Unit Tests");
-        suite.addTest(new TestSuite(GGEPTest.class));
-        return suite;
-    }
-
-
-
 }

@@ -139,6 +139,9 @@ public class RouterService
 
 		this.downloader.initialize(callback, router, acceptor, fileManager);
 		
+        //Ensure statistcs have started (by loading class).
+        Statistics.instance();
+
 		SupernodeAssigner sa=new SupernodeAssigner(uploadManager, 
                                                    downloader, 
                                                    manager);
@@ -414,11 +417,11 @@ public class RouterService
      * Shuts down the backend and writes the gnutella.net file.
      */
     public void shutdown() {
+        //Update fractional uptime statistics (before writing limewire.props)
+        Statistics.instance().shutdown();
+
         //Write gnutella.net
         try {
-            //ask the manager to add connected supernode endpoints to
-            //host catcher
-            manager.cacheConnectedSupernodeEndpoints();
             catcher.write(SettingsManager.instance().getHostList());
         } catch (IOException e) {}
 		finally {
@@ -513,7 +516,12 @@ public class RouterService
                 BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
                 max);
 
-        //set the new keep alive
+        //set the new keep alive.  To allow connections to bootstrap servers, we
+        //expire the HostCatcher if the keep alive was zero.  This is similar to
+        //calling connect(), except that it does not get the keep alive from
+        //SettingsManager.
+        if (manager.getKeepAlive()==0)
+            catcher.expire();
         forceKeepAlive(newKeep);
     }
 

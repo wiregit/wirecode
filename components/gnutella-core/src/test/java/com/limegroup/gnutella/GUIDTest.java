@@ -20,6 +20,10 @@ public class GUIDTest extends TestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return new TestSuite(GUIDTest.class);
+    }
+
     public void setUp() {
         //Prevents NullPointerException's in testIsX.
         //Otherwise not needed.
@@ -231,7 +235,7 @@ public class GUIDTest extends TestCase {
 
         b2[7]+=1;
         g2=new GUID(b2);
-        assertTrue(g1.compareTo(g2)<0);
+        assertTrue(g1.compareTo(g2)<0);  //TODO: this occasionally fails. Why?
         assertTrue((new GUID.GUIDComparator()).compare(g1, g2) < 0);
         assertTrue((new GUID.GUIDComparator()).compare(g2, g1) > 0);
         assertTrue((new GUID.GUIDByteComparator()).compare(b1, b2) < 0);
