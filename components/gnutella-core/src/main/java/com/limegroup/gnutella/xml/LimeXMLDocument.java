@@ -64,14 +64,14 @@ public class LimeXMLDocument implements Serializable {
     public LimeXMLDocument(Node node, Node rootElement){        
         try{
             grabDocInfo(rootElement,true);
-        }catch(SchemaNotFoundException e){
+        } catch(SchemaNotFoundException e) {
             //not the fault of the grabDocInfo method
-        }
+        } catch (IOException ignored2) {}
         try{
             grabDocInfo(node,false);
-        }catch(SchemaNotFoundException e){
+        } catch(SchemaNotFoundException e) {
             //not the fault of the grabDocInfo method
-        }
+        } catch (IOException ignored2) {}
         createMap(node,rootElement.getNodeName());
     }
 
@@ -167,9 +167,11 @@ public class LimeXMLDocument implements Serializable {
      * call createMap wht root. This will ensure no loss of data
      */
     private void grabDocInfo(Node docElement,boolean root)
-        throws SchemaNotFoundException{
+        throws SchemaNotFoundException, IOException {
                         
         //Element docElement = doc.getDocumentElement();
+        if(docElement==null)
+            throw new IOException("null doc element");
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
         for(int i=0; i< size; i++){
