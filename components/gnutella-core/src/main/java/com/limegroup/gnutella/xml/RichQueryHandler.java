@@ -31,7 +31,12 @@ class RichQueryHandler{
             return instance;
         }
     }
-
+    
+    /**
+     * Returns an array of Responses that correspond to documents
+     * that have a match with the XMLQuery String
+     * Warning: Returns null if the XMLQuery is malformed.
+     */
     public Response[] query(String XMLQuery){
         LimeXMLDocument queryDoc = null;
         try{// if we catch an exception here the query is malformed.
