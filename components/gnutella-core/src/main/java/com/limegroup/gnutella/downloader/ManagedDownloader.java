@@ -1023,15 +1023,33 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             assignDownload(dloader);      
         } catch(TryAgainLaterException tale) {
+            debug("connectAndStartDownload: TALException thrown ");
+            resetNeeded(dloader);
             files.add(rfd);//we can try this rfd again later
             return;
-        } catch (Exception e) {//IOException, FileNotFound, NotSharing,
+        } catch (Exception e) {
+            debug ("connectAndStartDownload : other exception thrown");
+            //IOException, FileNotFound, NotSharing
             //InterruptedException, NoSuchElementException 
             //Don't care about this rfd...lose it.
+            resetNeeded(dloader);
             return;
-        }        
+        }
     }
-
+    
+    private synchronized void resetNeeded(HTTPDownloader dloader) {
+        debug ("downloader failed. adding to white..."+
+               "Downloader: initial, read, toRead :"+
+               dloader+", "+
+               dloader.getInitialReadingPoint()+", "+
+               dloader.getAmountRead()+", "+
+               dloader.getAmountToRead());
+        int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
+        int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
+        Interval in = new Interval(low,high);
+        needed.add(in);
+    }
+    
     /** Returns true if another downloader is allowed. */
     private synchronized boolean allowAnotherDownload() {
         //TODO1: this should really be done dynamically by observing capacity
@@ -1231,7 +1249,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
-        debug("MANAGER: attempting connect to "
+        debug("WORKER: attempting connect to "
               +rfd.getHost()+":"+rfd.getPort());
 
         if(!needsPush) {
@@ -1300,20 +1318,25 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  termination
      */
     private void tryOneDownload(HTTPDownloader downloader) {
+        boolean problem = false;
         try {
             downloader.doDownload(true);
         } catch (IOException e) {
+            problem = true;
 			chatList.removeHost(downloader);
         } catch (OverlapMismatchException e) {
+            problem = true;
             corrupted=true;
             stop();
-        } finally {
+        } finally {       
+            if (problem)
+                resetNeeded(downloader);
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop);
             //In order to reuse this location again, we need to know the
             //RemoteFileDesc.  TODO2: use measured speed if possible.
-            RemoteFileDesc rfd=downloader.getRemoteFileDesc();
+            RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
             synchronized (this) {
                 dloaders.remove(downloader);
                 terminated.add(downloader);
@@ -1323,10 +1346,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     incompleteFileManager.getFile(rfd),
                     init,
                     init+downloader.getAmountRead());
-                //System.out.println("Sumeet: worker thread about to terminate");
                 this.notifyAll();
-                //System.out.println("Sumeet: notified");
-                System.out.flush();
             }
         }
     }
