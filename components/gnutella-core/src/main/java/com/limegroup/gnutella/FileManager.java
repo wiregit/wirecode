@@ -931,7 +931,7 @@ public abstract class FileManager {
     /** Simple test that checks whether this might be an installer.
      *  Is this test internationalized?  Not yet but maybe it should be....
      */
-    private boolean isInstallerFile(File file) {
+    protected boolean isInstallerFile(File file) {
         String fileName = file.getName().toLowerCase();
         
         // filename can't be less than 'limewire.***'
@@ -1048,19 +1048,18 @@ public abstract class FileManager {
         URN oldURN = getURNForFile(f);
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(oldURN);
-        // Is this assertion too stringent?  Possibly.  There is only one
-        // VERY unlikely case where it could happen.  It is probably better to
-        // have the assert there than not.
-        Assert.that(cTime != null);
+        if (cTime == null) Assert.that(isInstallerFile(f), "File is " + f);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
         FileDesc fd = addFileIfShared(f);
         //re-populate the ctCache
-        synchronized (ctCache) {
-            ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
-            ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
-            ctCache.commitTime(fd.getSHA1Urn());
+        if ((fd != null) && (cTime != null)) { 
+            synchronized (ctCache) {
+                ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+                ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+                ctCache.commitTime(fd.getSHA1Urn());
+            }
         }
         return fd;
     }

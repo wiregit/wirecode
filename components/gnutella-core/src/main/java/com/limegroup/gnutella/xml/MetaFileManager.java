@@ -97,7 +97,7 @@ public class MetaFileManager extends FileManager {
         // *----
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
-        Assert.that(cTime != null);
+        if (cTime == null) Assert.that(isInstallerFile(f), "File is " + f);
         // ----*
         List xmlDocs = new LinkedList();
         if( LimeXMLUtils.isMP3File(f) ) {
@@ -114,7 +114,8 @@ public class MetaFileManager extends FileManager {
         Assert.that(fd == removed, "did not remove valid fd.");
         _needRebuild = true;
         fd = addFileIfShared(f, xmlDocs);
-        if (fd != null) { // file was not re-shared? weird but possible
+        // file may not be shared anymore or may be installer file
+        if ((fd != null) && (cTime != null)) { 
             //re-populate the ctCache
             // *----
             synchronized (ctCache) {
