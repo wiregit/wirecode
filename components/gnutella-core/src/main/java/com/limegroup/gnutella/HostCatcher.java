@@ -83,20 +83,13 @@ public class HostCatcher {
     private static final int NORMAL_PRIORITY=1; //old client pongs
     private static final int BAD_PRIORITY=0; //private IP pongs
 
-    /* reserve cache consists of a set and a queue, both bounded in size.
-     * The set lets us quickly check if there are duplicates, while the queue
-     * provides ordering.  The elements at the END of the queue have the highest
-     * priority. Note that if a priority queue is used instead of a bucket
-     * queue, old router pongs must be flushed when reconnecting to the server.
+    /* reserve cache consists of a queue bounded in size.  The elements at the
+     * END of the queue have the highest priority. 
      *
-     * INVARIANT: queue contains no duplicates and contains exactly the
-     *  same elements as set.
-     * LOCKING: obtain cacheLock before modifying reserve cache.
-     */
+     * LOCKING: obtain cacheLock before modifying reserve cache.  */
     private BucketQueue /* of Endpoint */ reserveCacheQueue=
         new BucketQueue(new int[] {BAD_SIZE, OLD_CLIENT_SIZE, 
             ROUTER_SIZE, NEW_CLIENT_SIZE});
-    private Set /* of Endpoint */ reserveCacheSet=new HashSet();
 
     private Acceptor acceptor;
     private ConnectionManager manager;
@@ -201,14 +194,9 @@ public class HostCatcher {
                 else
                     e.setWeight(NORMAL_PRIORITY);
 
-                if ((! reserveCacheSet.contains(e)) && 
-                    (! Acceptor.isMe(host, port))) {
+                if (! Acceptor.isMe(host, port)) {
                     //add e to the head.  Order matters!
-                    Object removed=reserveCacheQueue.insert(e);
-                    //Shouldn't happen...
-                    if (removed!=null)
-                        reserveCacheSet.remove(removed);
-                    reserveCacheSet.add(e);
+                    reserveCacheQueue.insert(e);
                 }
             }
             cacheLock.notify();
@@ -430,16 +418,8 @@ public class HostCatcher {
             e.setWeight(NORMAL_PRIORITY);
 
         synchronized(cacheLock) {
-            if (! (reserveCacheSet.contains(e))) {
-                //Adding e may eject an older point from queue, so we have to
-                //cleanup the set to maintain rep. invariant.
-                reserveCacheSet.add(e);
-                Object ejected=reserveCacheQueue.insert(e);
-                if (ejected!=null)
-                    reserveCacheSet.remove(ejected);
-
-                cacheLock.notify();
-            }
+            reserveCacheQueue.insert(e);
+            cacheLock.notify();
         }
 
         //notify router thread that a pong was received from the router (if 
@@ -471,15 +451,8 @@ public class HostCatcher {
 //                  continue;
 
 //              e.setWeight(BEST_PRIORITY);
-//              //only add the element if it doesn't exist already
-//              if (!reserveCacheSet.contains(e)) {
-//                  //Adding e may eject an older point from queue, so we have to
-//                  //cleanup the set to maintain rep. invariant.
-//                  reserveCacheSet.add(e);
-//                  Object ejected=reserveCacheQueue.insert(e);
-//                  if (ejected!=null)
-//                      reserveCacheSet.remove(ejected);
-//              }
+//              reserveCacheSet.add(e);
+//              reserveCacheQueue.insert(e);
 //          }
 //      }
 
@@ -490,7 +463,6 @@ public class HostCatcher {
     private void resetReserveCache() {
         synchronized (cacheLock) {
             reserveCacheQueue.clear();
-            reserveCacheSet.clear();
         }
     }
 
@@ -568,9 +540,6 @@ public class HostCatcher {
             Endpoint e;
             synchronized (cacheLock) {
                 e=(Endpoint)reserveCacheQueue.extractMax();
-                boolean ok=reserveCacheSet.remove(e);
-                //check that e actually was in set.
-                Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             }
             return e;
         } else
