@@ -543,27 +543,45 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
 
-    public void testPushProxyGGEP() {
-        /*
+    public void testPushProxyGGEP() throws Exception {
+        basicTest(false, false);
+        basicTest(false, true);
+        basicTest(true, false);
+        basicTest(true, true);
+    }
+
+
+    private void basicTest(final boolean browseHost, final boolean multicast) 
+        throws Exception {
         GGEP testGGEP = null;
+        int numHeaders = 1;
+
         // first take input of proxies
         String[] hosts = {"www.limewire.com", "www.limewire.org",
                           "www.susheeldaswani.com", "www.stanford.edu"};
         PushProxyInterface[] proxies = new PushProxyInterface[hosts.length];
         for (int i = 0; i < proxies.length; i++)
             proxies[i] = new QueryReply.PushProxyContainer(hosts[i], 6346);
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, proxies), 
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
+                                                proxies), 
                             0, null);
-        assertEquals(1, testGGEP.getHeaders().size());
+        if (browseHost) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
+        }
+        if (multicast) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
+        }
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
-        */
-        
-                            
-
-        
+        assertEquals(numHeaders, testGGEP.getHeaders().size());
+        PushProxyInterface[] retProxies = 
+            _ggepUtil.getPushProxies(new GGEP[] { testGGEP });
+        assertTrue(retProxies.length == 3);
+        for (int i = 0; i < retProxies.length; i++)
+            retProxies[i].equals(proxies[i]);
 
     }
-
 
     /**
      * Test to make sure that results that have no name are rejected 
