@@ -34,8 +34,6 @@ public class HTTPAcceptor implements Runnable {
 	private static final String NOCONTENT      = "HTTP/1.1 204 No Content\r\n";
 	/** Magnet detail command */
     private static final String MAGNETDETAIL   = "magcmd/detail?";
-    /** Magnet email command */
-    private static final String MAGNETEMAIL    = "magcmd/email?";
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -315,16 +313,6 @@ public class HTTPAcceptor implements Runnable {
             String page=MagnetHTML.buildMagnetDetailPage(command);
             
             HTTPHandler.createPage(socket, page);
-		} else if (str.indexOf(MAGNETEMAIL) >= 0) {
-			int loc = 0;
-			if ((loc = str.indexOf(MAGNETEMAIL)) < 0)
-				return;
-			int loc2 = str.lastIndexOf(" HTTP");
-			String command = 
-				  str.substring(loc+MAGNETEMAIL.length(), loc2);
-			String page=MagnetHTML.buildMagnetEmailPage(command);
-			
-		    HTTPHandler.createPage(socket, page);
 		} else if (str.indexOf(MAGNET) >= 0) {
 			// trigger an operation
 			int loc  = str.indexOf(MAGNET);
