@@ -38,14 +38,9 @@ import java.text.ParseException;
  * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
  * use those anymore.
  */
-public class HostCatcher {    
+public class HostCatcher implements HostListener {    
     //These constants are package-access for testing.  
     //That's ok as they're final.
-
-    /**
-     * Variable for the host ranker that quickly tests hosts for connectivity.
-     */
-    private UDPHostRanker _ranker;
 
     /** The number of milliseconds to wait after trying gnutella.net entries
      *  before resorting to GWebCache HOSTFILE requests. */
@@ -55,7 +50,7 @@ public class HostCatcher {
      *  This should be large enough to store all permanent addresses. */
     static final int GOOD_SIZE=1000;
     /** The number of normal pongs to store. */
-    static final int NORMAL_SIZE=400;
+    static final int NORMAL_SIZE = 1000;
 
     /** The number of permanent locations to store in gnutella.net */
     static final int PERMANENT_SIZE=GOOD_SIZE;
@@ -142,10 +137,10 @@ public class HostCatcher {
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize() {
-        System.out.println("HostCatcher::initialize");
         //Read gnutella.net
         try {
-			read(HOST_FILE);
+			Collection hosts = read(HOST_FILE);
+            UDPHostRanker.createRanker(hosts.iterator(), this);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -167,7 +162,8 @@ public class HostCatcher {
                                NetworkUtils.isValidPort(port) &&
                                !NetworkUtils.isPrivateAddress(addr)) {
                                 Endpoint e=new Endpoint(addr, port);
-								//This spawn another thread, so blocking is not an issue.
+								// This spawn another thread, so blocking is not 
+                                // an issue.
 								gWebCache.sendUpdatesAsync(e);
 							}
                         }
@@ -191,9 +187,11 @@ public class HostCatcher {
      * @modifies this
      * @effects read hosts from the given file.  
      */
-    synchronized void read(File hostFile) throws FileNotFoundException, 
-												 IOException {
+    synchronized Collection read(File hostFile) throws FileNotFoundException, 
+	   IOException {
         BufferedReader in = null;
+        
+        List hosts = new LinkedList();
         try {
             in = new BufferedReader(new FileReader(hostFile));
             while (true) {
@@ -211,8 +209,9 @@ public class HostCatcher {
     
                 //Is it a normal endpoint?
                 try {
-                    ExtendedEndpoint e=ExtendedEndpoint.read(line);
-                    add(e, NORMAL_PRIORITY);
+                    //ExtendedEndpoint e=ExtendedEndpoint.read(line);
+                    hosts.add(ExtendedEndpoint.read(line));
+                    //add(e, NORMAL_PRIORITY);
                 } catch (ParseException pe) {
                     continue;
                 }
@@ -222,6 +221,7 @@ public class HostCatcher {
                 if( in != null )
                     in.close();
             } catch(IOException e) {}
+            return hosts;
         }
     }
 
@@ -274,6 +274,10 @@ public class HostCatcher {
      * @return true iff pr was actually added 
      */
     public boolean add(PingReply pr) {
+        if(NetworkUtils.isPrivateAddress(pr.getIP())) {
+            // Never accept private addresses.
+            return false;
+        }
         //Convert to endpoint
         ExtendedEndpoint endpoint;
         
@@ -386,12 +390,12 @@ public class HostCatcher {
         }
 
         //we notify the callback in two different situations.  One situation, we
-        //always notify the GUI (e.g., a SimplePongCacheServer which needs to know
-        //when a new host was added).  The second situation is if the host catcher
-        //is not full, so that the endpoint is added to the GUI for the user to
-        //view and use.  The second situation occurs the majority of times and
-        //only in special cases such as a SimplePongCacheServer would the first 
-        //situation occur.
+        //always notify the GUI (e.g., a SimplePongCacheServer which needs to 
+        //know when a new host was added).  The second situation is if the host 
+        //catcher is not full, so that the endpoint is added to the GUI for the 
+        //user to view and use.  The second situation occurs the majority of 
+        //times and only in special cases such as a SimplePongCacheServer would 
+        //the first situation occur.
         if (alwaysNotifyKnownHost || notifyGUI) {
             RouterService.getCallback().knownHost(e);
 		}
@@ -453,13 +457,6 @@ public class HostCatcher {
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
-            
-            if(_ranker.hasHosts()) {
-                IpPort host = _ranker.remove();
-                System.out.println("returning UDP endpoint");
-                return new Endpoint(host.getAddress().getHostName(), 
-                    host.getPort());
-            }
             //If we've completely run out of hosts, asynchronously contact a
             //GWebCache server to get more addresses.  Note, however, that this
             //will not do anything if we're currently connecting to a GWebCache.
@@ -492,7 +489,6 @@ public class HostCatcher {
                 // is added to the queue
                 //  (presumably from fetchEndpointsAsync working)               
                 
-                System.out.println("returning regular endpoint");
                 return getAnEndpointInternal();
             } catch (NoSuchElementException e) { }
             
@@ -592,9 +588,11 @@ public class HostCatcher {
         //Make n the # of hosts to return--never more than the # of ultrapeers.
         n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
         //Copy n best hosts into temporary buffer.
-        ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
-        for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); iter.hasNext(); )
+        List /* of ExtendedEndpoint */ buf = new ArrayList(n);
+        for(Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); 
+            iter.hasNext(); ) {
             buf.add(iter.next());
+        }
         //And return iterator of contents.
         return buf.iterator();
     }
@@ -680,12 +678,10 @@ public class HostCatcher {
         }
     }
 
-    /**
-     * 
-     */
-    public void sendPings() {
-        _ranker = UDPHostRanker.createRanker(getHosts());
-        
+
+    // Implements HostListener interface -- inherit doc comment.
+    public void addHost(IpPort host) {
+        add(new Endpoint(host.getAddress().getHostName(),host.getPort()),true);   
     }
 
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
