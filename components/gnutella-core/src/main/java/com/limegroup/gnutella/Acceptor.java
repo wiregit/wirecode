@@ -222,16 +222,25 @@ public class Acceptor implements Runnable {
             
         
             //a) Try new port.
-            ServerSocket newSocket=null;
+            ServerSocket newSocket = null;
             try {
-                newSocket=new ServerSocket(port);
+            	if(CommonUtils.isJava14OrLater()) {
+					java.nio.channels.ServerSocketChannel channel = 
+						java.nio.channels.ServerSocketChannel.open();
+					channel.configureBlocking(true);
+					channel.socket().bind(new InetSocketAddress(port));
+					//channel.register();
+					newSocket = channel.socket();
+            	} else {
+                	newSocket = new ServerSocket(port);
+            	}
+
+                
             } catch (IOException e) {
                 udpServiceSocket.close();
                 throw e;
-            } catch (IllegalArgumentException e) {
-                udpServiceSocket.close();
-                throw new IOException("could not create a listening socket");
-            }
+            } 
+            
             //b) Close old socket (if non-null)
             if (_socket!=null) {
                 try {
@@ -345,7 +354,11 @@ public class Acceptor implements Runnable {
                 synchronized (SOCKET_LOCK) {
                     if (_socket!=null) {
                         try {
-                            client=_socket.accept();
+                        	if(CommonUtils.isJava14OrLater()) {
+                        		client = _socket.getChannel().accept().socket();
+                        	} else {
+                            	client = _socket.accept();
+                        	}
                         } catch (IOException e) {
                             continue;
                         }

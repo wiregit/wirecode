@@ -201,6 +201,7 @@ public abstract class MessageRouter {
      */
     public void handleMessage(Message msg, 
                               ManagedConnection receivingConnection) {
+        System.out.println("MessageRouter::handleMessage!!!!!");
         // Increment hops and decrease TTL.
         msg.hop();
 	   
@@ -887,7 +888,7 @@ public abstract class MessageRouter {
                 PushProxyAcknowledgement ack = 
                     new PushProxyAcknowledgement(addr,RouterService.getPort(),
                                                  ppReq.getClientGUID());
-                source.send(ack);
+                source.write(ack);
                 
                 // 2)
                 _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(),
@@ -917,7 +918,7 @@ public abstract class MessageRouter {
             throw new NullPointerException("null connection");
         }
         _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
-        connection.send(request);
+        connection.write(request);
     }
 
     /**
@@ -933,7 +934,7 @@ public abstract class MessageRouter {
             throw new NullPointerException("null connection");
         }
         _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
-        connection.send(request);
+        connection.write(request);
     }
 
     /**
@@ -1043,7 +1044,7 @@ public abstract class MessageRouter {
                    (Math.random() < percentToIgnore)) {
                     continue;
                 } else {
-                    c.send(request);
+                    c.write(request);
                 }
             }
         }
@@ -1315,7 +1316,7 @@ public abstract class MessageRouter {
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
-            sendConnection.send(request);
+            sendConnection.write(request);
 		}		
     }
     
@@ -1331,7 +1332,7 @@ public abstract class MessageRouter {
         if( mc == null )
             throw new NullPointerException("null connection");
         
-        mc.originateQuery(query);
+        mc.write(query);
     }
     
 
@@ -2019,7 +2020,7 @@ public abstract class MessageRouter {
             }
             
 		    for(Iterator iter = patches.iterator(); iter.hasNext();) {
-		        c.send((RouteTableMessage)iter.next());
+		        c.write((RouteTableMessage)iter.next());
     	    }
     	    
             c.setQueryRouteTableSent(table);

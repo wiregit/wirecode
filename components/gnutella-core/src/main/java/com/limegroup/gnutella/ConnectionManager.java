@@ -12,6 +12,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
@@ -1027,7 +1028,7 @@ public class ConnectionManager {
         else
             pr = new PingRequest((byte)4);   
         
-        connection.send(pr);
+        connection.write(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
             connection.flush();
@@ -1417,7 +1418,7 @@ public class ConnectionManager {
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
         if (!c.isOutgoing() && !allowConnection(c)) {
-            c.loopToReject(_catcher);   
+            // c.loopToReject();  TODO:: re-enable this!!!   
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
@@ -1538,8 +1539,10 @@ public class ConnectionManager {
 														 port);
 		}
 
-		// this can throw IOException
-		conn.loopForMessages();		
+		if(!CommonUtils.isJava14OrLater()) {
+			// this can throw IOException
+			conn.loopForMessages();	
+		}	
 	}
     
     /**

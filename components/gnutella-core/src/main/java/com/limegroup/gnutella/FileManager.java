@@ -217,7 +217,7 @@ public class FileManager {
      *      @modifies this
      *      @see loadSettings */
     public void initialize() {
-		this._callback = RouterService.getCallback();
+		FileManager._callback = RouterService.getCallback();
 		loadSettings(false);
     }
 

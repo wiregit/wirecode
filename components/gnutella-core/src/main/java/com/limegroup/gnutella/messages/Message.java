@@ -1,12 +1,21 @@
 package com.limegroup.gnutella.messages;
 
-import com.sun.java.util.collections.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.messages.vendor.*;
+import com.sun.java.util.collections.Iterator;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -31,10 +40,11 @@ public abstract class Message
 
     private final static boolean PARSE_GROUP_PINGS = false;
     
-    public static final int N_UNKNOWN = -1;
-    public static final int N_TCP = 1;
-    public static final int N_UDP = 2;
-    public static final int N_MULTICAST = 3;
+	public static final int N_UNKNOWN = -1;
+	public static final int N_TCP = 1;
+	public static final int N_UDP = 2;
+	public static final int N_MULTICAST = 3;
+    
 
     /**
      * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,

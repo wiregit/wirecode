@@ -2,11 +2,15 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SocketChannel;
 import java.util.zip.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.connection.MessageWriter;
+import com.limegroup.gnutella.connection.NIODispatcher;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
@@ -138,7 +142,7 @@ public class Connection {
      * This also protects us from calling methods on the Inflater/Deflater
      * objects after end() has been called on them.
      */
-    protected volatile boolean _closed=false;
+    protected volatile boolean _closed = false;
 
     /** 
 	 * The headers read from the connection.
@@ -241,6 +245,12 @@ public class Connection {
      */
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
+        
+    /**
+     * Handle to the <tt>MessageWriter</tt> for this connection -- the
+     * message writer takes care of writing messages to the network.
+     */
+    private MessageWriter _messageWriter;
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -328,10 +338,9 @@ public class Connection {
     protected void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
 			if(_headers.supportsVendorMessages()) {
-                send(MessagesSupportedVendorMessage.instance());
+				// TODO:: this should probably not throw BadPacketException
+                write(MessagesSupportedVendorMessage.instance());
 			}
-        }
-        catch (IOException ioe) {
         }
         catch (BadPacketException bpe) {
             // should never happen.
@@ -415,6 +424,10 @@ public class Connection {
             close();
             throw new IOException("could not establish connection");
         }
+        
+		SocketChannel channel = _socket.getChannel();
+		Assert.that(channel != null, "Null channel for socket ("+isOutgoing()+")");
+		channel.configureBlocking(true);  //for handshaking; see initialize()
 
         try {
             //In all the line reading code below, we are somewhat lax in
@@ -471,6 +484,12 @@ public class Connection {
             close();
             throw new BadHandshakeException(e);
         }
+        
+        _socket.getChannel().configureBlocking(false);
+        if(CommonUtils.isJava14OrLater()) {
+			NIODispatcher.instance().addReader(this);
+        }
+        _messageWriter = new MessageWriter(_socket.getChannel());
     }
 
     /**
@@ -865,7 +884,14 @@ public class Connection {
         return new BufferedInputStream(_socket.getInputStream());
     }    
     
-    
+    /**
+     * Accessor for the <tt>SelectableChannel</tt> for this socket.
+     *  
+     * @return the <tt>SelectableChannel</tt> for this socket
+     */
+    public SelectableChannel getChannel() {
+    	return _socket.getChannel();
+    }
 
     /////////////////////////////////////////////////////////////////////////
 
@@ -874,6 +900,15 @@ public class Connection {
      */
     public boolean isOutgoing() {
         return OUTGOING;
+    }
+
+    /** 
+	 * Returns true if this has queued data.  For Connection, hasQueued()
+     *  implies that this is unable to accept more messages; subclasses with
+     *  additional buffering may change that. 
+	 */
+    public boolean hasQueued() {
+        return _messageWriter.hasQueued();
     }
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
@@ -980,6 +1015,72 @@ public class Connection {
     }
 
     /**
+     * Attempts to send m, or as much as possible.  First attempts to add m to
+     * this' send queue, possibly discarding other queued messages (or m) for
+     * which sending has not yet started.  Then attempts to send as much data to
+     * the network as possible without blocking.  Calls
+     * listener.needsWrite(this) if not all data was sent.  Calls
+     * listener.error(this) if connection closed.<p>
+     *
+     * This method is called from deep within the bowels of the message handling
+     * code.  That's why it doesn't block and generates needWrite events through
+     * a callback in addition to a return value.  
+     *
+     * @return true iff this still has unsent queued data.  If true, the caller
+     *  must subsequently call write() again 
+     */
+    public boolean write(Message m) {
+        if (!isOpen()) {
+            return false;
+        }                    
+
+        try {            
+            boolean needsWrite = _messageWriter.write(m);
+            if (needsWrite)
+                NIODispatcher.instance().addWriter(this); 
+            return needsWrite;
+        } catch (IOException e) {
+            return false;
+        }                 
+    }
+
+    /**
+     * Sends as much queued data as possible, if any.  Calls
+     * listener.error(this) if connection closed.  Typically does NOT call
+     * listener.needsWrite(this), though subclasses may change this behavior.<p>
+     *
+     * This method is called within the Selector code, which typically
+     * needs to know whether to register the write operation.  That's why this
+     * returns a value instead of using the callback.
+     * 
+     * @return true iff this still has unsent queued data.  If true, the caller
+     *  must subsequently call write() again 
+     */
+    public boolean write() {
+        if (!isOpen()) {
+            return false;
+        }
+
+        // in order to analyze the savings of compression,
+        // we must add the 'new' data to a stat.
+        long priorCompressed = 0, priorUncompressed = 0;
+
+        try {        
+			if ( isWriteDeflated() ) {
+                priorUncompressed = _deflater.getTotalIn();
+                priorCompressed = _deflater.getTotalOut();
+            }    
+			return _messageWriter.write();
+			// TODO1 handle statististics -- compression etc.
+        } catch (IOException e) {
+            return false;
+        }  catch(NullPointerException e) {
+			return false;
+            //throw CONNECTION_CLOSED;
+        }               
+    }
+
+    /**
      * Sends a message.  The message may be buffered, so call flush() to
      * guarantee that the message is sent synchronously.  This method is NOT
      * thread-safe. Behavior is undefined if two threads are in a send call
@@ -990,6 +1091,7 @@ public class Connection {
      * @effects send m on the network.  Throws IOException if problems
      *   arise.
      */
+/*
     public void send(Message m) throws IOException {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
@@ -1005,12 +1107,19 @@ public class Connection {
                 priorCompressed = _deflater.getTotalOut();
             }
             
-            m.write(_out);
+            if(CommonUtils.isJava14OrLater()) {
+            	if(!_messageWriter.write(m)) {
+					
+				}
+            } else {
+           		m.write(_out);
+            }
             updateWriteStatistics(m, priorUncompressed, priorCompressed);
         } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
         }
     }
+*/
 
     /**
      * Flushes any buffered messages sent through the send method.
@@ -1045,7 +1154,7 @@ public class Connection {
      * @param pUn the prior uncompressed traffic, used for adding to stats
      * @param pComp the prior compressed traffic, used for adding to stats
      */
-    private void updateWriteStatistics(Message m, long pUn, long pComp) {
+    public void updateWriteStatistics(Message m, long pUn, long pComp) {
         if( m != null )
             _bytesSent += m.getTotalLength();
         if(isWriteDeflated()) {
@@ -1285,9 +1394,7 @@ public class Connection {
         // method is called asynchronously before the socket is initialized.
         _closed = true;
         if(_socket != null) {
-            try {				
-                _socket.close();
-            } catch(IOException e) {}
+            Sockets.close(_socket);
         }
         
         // tell the inflater & deflater that we're done with them.
@@ -1310,16 +1417,16 @@ public class Connection {
        // another closes it.
        // See BugParade ID: 4505257
        
-       if (_in != null) {
-           try {
-               _in.close();
-           } catch (IOException e) {}
-       }
-       if (_out != null) {
-           try {
-               _out.close();
-           } catch (IOException e) {}
-       }
+//       if (_in != null) {
+//           try {
+//               _in.close();
+//           } catch (IOException e) {}
+//       }
+//       if (_out != null) {
+//           try {
+//               _out.close();
+//           } catch (IOException e) {}
+//       }
     }
 
     
@@ -1641,6 +1748,15 @@ public class Connection {
      *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
 		return _headers.isQueryRoutingEnabled();
+    }
+    
+    /**
+     * Accessor for the soft max TTL for this connection.
+     * 
+     * @return the "soft max TTL" for this connection
+     */
+    public byte getSoftMax() {
+    	return _softMax;
     }
 
     // overrides Object.toString

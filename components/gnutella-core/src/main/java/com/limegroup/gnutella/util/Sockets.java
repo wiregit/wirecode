@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.net.*;
+import java.nio.channels.SocketChannel;
 import java.io.*;
 import java.lang.reflect.*;
 import com.limegroup.gnutella.*;
@@ -115,6 +116,12 @@ public class Sockets {
             throw new IllegalArgumentException("port out of range: "+port);
         }
         if (CommonUtils.isJava14OrLater()) {
+			InetSocketAddress addr = new InetSocketAddress(host, port);
+			if (addr.isUnresolved())
+				throw new IOException("Couldn't resolve address");
+			Socket ret = SocketChannel.open().socket();
+			ret.connect(addr, timeout);
+			return ret;
             //a) Non-blocking IO using Java 1.4. Conceptually, this code
             //   does the following:
             //      SocketAddress addr=new InetSocketAddress(host, port);
@@ -125,6 +132,7 @@ public class Sockets {
             //   of Java.  Worse, it may cause runtime errors if class loading
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
+            /*
             try {
                 Socket ret = (Socket)_socketClass.newInstance();
 
@@ -147,6 +155,7 @@ public class Sockets {
                 // does
                 ErrorService.error(e);
             }
+            */
         }
      
         if (timeout!=0) {
@@ -157,6 +166,32 @@ public class Sockets {
             return new Socket(host, port);
         }
     }
+    
+	/**
+	 * Utility method for closing the socket.  Handles socket closing slightly differently
+	 * depending on the java version.
+	 * 
+	 * @param s the <tt>Socket</tt> to close
+	 */
+	public static void close(Socket s) {
+		if(CommonUtils.isJava14OrLater()) {
+			//There is a bug in Java 1.4 where s.close() does not work if the
+			//socket s was created from a SocketChannel and s.setSoTimeout() was
+			//ever called.  The work around is to shutdown the input and output
+			//streams independently.
+			try { s.shutdownInput(); } catch(IOException e) {}
+			try { s.shutdownOutput(); } catch(IOException e) {}
+			//However, we still need to call _socket.close to ensure it's
+			//cancelled from any selectors.
+			try { s.close(); } catch(IOException e) { }
+		} else {
+			try {
+                s.close();
+            } catch (IOException e) {
+            	// nothing to do
+            }
+		}
+	}
 
 
 	/** 

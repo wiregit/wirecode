@@ -2,7 +2,6 @@ package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
 import java.util.Properties;
 import java.io.IOException;
 

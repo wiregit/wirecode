@@ -6,7 +6,6 @@ import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way

@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
@@ -228,6 +229,7 @@ public class RouterService {
 	    new HTTPAcceptor().start();	
         Pinger.instance().start();
         ConnectionWatchdog.instance().start();
+        NIODispatcher.instance();
 	}
 
     /**
