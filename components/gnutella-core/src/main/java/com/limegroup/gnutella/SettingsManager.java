@@ -43,6 +43,8 @@ public class SettingsManager implements SettingsInterface
     private static boolean  filterAdult_;
     private static boolean  filterVbs_;
     private static boolean  filterHtml_;
+    private static boolean  useQuickConnect_;
+    private static String[] quickConnectHosts_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -336,6 +338,23 @@ public class SettingsManager implements SettingsInterface
 			try {setFilterVbs(bs);}
 			catch (IllegalArgumentException ie){}
 		    }
+		else if(key.equals(SettingsInterface.USE_QUICK_CONNECT))
+		    {
+			boolean bs;
+			if (p.equals("true"))
+			    bs=true;
+			else if (p.equals("false"))
+			    bs=false;
+			else
+			    return;
+			try {setUseQuickConnect(bs);}
+			catch (IllegalArgumentException ie){}
+		    }
+		else if(key.equals(SettingsInterface.QUICK_CONNECT_HOSTS))
+		    {
+			try {setQuickConnectHosts(decode(p));}
+			catch (IllegalArgumentException ie){}
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -370,6 +389,8 @@ public class SettingsManager implements SettingsInterface
 	catch(IllegalArgumentException e){setDirectories(home_);}
 	try{setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){setSaveDirectory(home_);}
+	setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
+	setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
     }
 
     /** returns the time to live */
@@ -431,6 +452,9 @@ public class SettingsManager implements SettingsInterface
     public boolean getFilterHtml(){return filterHtml_;}
     public boolean getFilterVbs(){return filterVbs_;}
 
+    public boolean getUseQuickConnect(){return useQuickConnect_;}
+    public String[] getQuickConnectHosts(){return quickConnectHosts_;}    
+ 
     /** specialized method for getting the number 
      *  of files scanned */
     public int getFilesScanned()
@@ -755,7 +779,30 @@ public class SettingsManager implements SettingsInterface
 		writeProperties();	
 	    }
     }
-    
+    public synchronized void setUseQuickConnect(boolean useQuickConnect)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		useQuickConnect_ = useQuickConnect;
+		Boolean b = new Boolean(useQuickConnect);
+		String s = b.toString();
+		props_.setProperty(SettingsInterface.USE_QUICK_CONNECT, s);
+		writeProperties();	
+	    }
+    }
+    public synchronized void setQuickConnectHosts(String[] hosts) {
+	if(hosts == null)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		quickConnectHosts_ = hosts;
+		props_.setProperty(SettingsInterface.QUICK_CONNECT_HOSTS, 
+				   encode(hosts));
+		writeProperties();
+	    }
+    }
 
     /**
      *  Sets the pathname String for the file that 

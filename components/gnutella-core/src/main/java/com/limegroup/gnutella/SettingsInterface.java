@@ -40,6 +40,8 @@ public interface SettingsInterface
     public boolean    getFilterAdult();
     public boolean    getFilterVbs();
     public boolean    getFilterHtml();
+    public boolean    getUseQuickConnect();
+    public String[]   getQuickConnectHosts();
 
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
@@ -131,6 +133,10 @@ public interface SettingsInterface
     public void setFilterVbs(boolean b);
     public void setFilterHtml(boolean b);
 
+    public void setUseQuickConnect(boolean b);
+    public void setQuickConnectHosts(String[] hosts);
+
+
     /** specialized method for writing the 
      *  properties file for the network discoverer
      */
@@ -183,7 +189,14 @@ public interface SettingsInterface
     public static final boolean DEFAULT_FILTER_VBS     = true;
     /** Filter .htm[l] files? */
     public static final boolean DEFAULT_FILTER_HTML    = false;
-    
+    /** Use quick connect hosts instead of gnutella.net? */
+    public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
+    /** List of hosts to try on quick connect */
+    public static final String[] DEFAULT_QUICK_CONNECT_HOSTS 
+	= {"gnutellahosts.com:6346", "gnet.ath.cx:6346",
+	   "gnet1.ath.cx:6346","gnet2.ath.cx:6346","gnet3.ath.cx:6346",
+	   "gnet4.ath.cx:6346"};
+
     // The property key name constants 
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
@@ -205,7 +218,9 @@ public interface SettingsInterface
     public static final String FILTER_DUPLICATES = "FILTER_DUPLICATES";
     public static final String FILTER_ADULT   = "FILTER_ADULT";
     public static final String FILTER_HTML    = "FILTER_HTML";
-    public static final String FILTER_VBS     = "FILTER_VBS";   
+    public static final String FILTER_VBS     = "FILTER_VBS";
+    public static final String USE_QUICK_CONNECT = "USE_QUICK_CONNECT";
+    public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }
