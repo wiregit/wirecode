@@ -31,6 +31,11 @@ public class QueryKey {
      *  MAX_QK_SIZE_IN_BYTES
      */
     private byte[] _queryKey;
+
+    static {
+        // initialize the logi.crypto package
+        org.logi.crypto.Crypto.initRandom();
+    }
     
     private QueryKey(byte[] key) throws IllegalArgumentException {
         if ((key.length < MIN_QK_SIZE_IN_BYTES) ||
@@ -105,7 +110,11 @@ public class QueryKey {
         // dynamically set where the secret pad will be....
         int first, second;
         first = secretPad._pad[0] % 8;
+        if (first < 0)
+            first *= -1;
         second = secretPad._pad[1] % 8;
+        if (second < 0)
+            second *= -1;
         if (second == first) {
             if (first == 0)
                 second = 1;
