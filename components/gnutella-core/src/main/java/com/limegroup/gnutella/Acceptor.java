@@ -348,8 +348,6 @@ public class Acceptor extends Thread {
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
-                 //     HTTPManager mgr = new HTTPManager(_socket, _router,
-//                          Acceptor.this, _callback, false);
 					_uploadManager.acceptUpload(HTTPRequestMethod.GET, _socket);
                 }
 				else if (word.equals("HEAD")) {
