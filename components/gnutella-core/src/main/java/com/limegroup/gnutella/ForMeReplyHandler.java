@@ -371,7 +371,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
     /**
      * drops the message
      */
-    public void send(Message m){}
+    public void reply(Message m){}
 
 }
 

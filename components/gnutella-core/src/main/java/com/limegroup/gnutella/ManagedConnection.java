@@ -1579,6 +1579,10 @@ public class ManagedConnection extends Connection
     public void setLocalePreferencing(boolean b) {
         RESPONSE_HEADERS.setLocalePreferencing(b);
     }
+    
+    public void reply(Message m){
+    	send(m);
+    }
 
     /** Class-wide expiration mechanism for all ManagedConnections.
      *  Only expires on-demand.

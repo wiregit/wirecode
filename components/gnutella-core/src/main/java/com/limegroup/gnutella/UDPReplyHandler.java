@@ -289,7 +289,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 		UDPService.instance().send(m, IP, PORT);
 	}
 	
-	public void send(Message m) {
+	public void reply(Message m) {
 		UDPService.instance().send(m, IP,PORT);
 	}
 	

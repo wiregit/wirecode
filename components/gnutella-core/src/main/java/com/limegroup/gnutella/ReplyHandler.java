@@ -166,7 +166,7 @@ public interface ReplyHandler {
     /**
      * Just sends whatever message we ask it to.
      */
-    public void send(Message m);
+    public void reply(Message m);
 
 }
 

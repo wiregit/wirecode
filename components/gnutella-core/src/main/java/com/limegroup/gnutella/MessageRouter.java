@@ -2566,7 +2566,7 @@ public abstract class MessageRouter {
     	if (!_promotionManager.allowUDPPing(handler))
     		return; 
     	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.send(newMsg);
+    	handler.reply(newMsg);
     }
     
     /**

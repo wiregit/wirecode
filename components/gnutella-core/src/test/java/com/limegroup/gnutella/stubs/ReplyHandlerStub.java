@@ -24,7 +24,7 @@ public class ReplyHandlerStub implements ReplyHandler {
     public boolean isOpen() {
         return true;
     }
-	public void send(Message m) {
+	public void reply(Message m) {
 	}
     public void handlePingReply(PingReply pingReply, 
                                 ReplyHandler receivingConnection) {
