@@ -11,7 +11,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.xml.sax.SAXException;
+
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.Response;
 
 
@@ -29,25 +32,41 @@ public final class LimeXMLDocumentHelper{
      */
     public static List getDocuments(String aggregatedXML, 
                                     int totalResponseCount) {
+        
         if(aggregatedXML==null || aggregatedXML.equals(""))
             return Collections.EMPTY_LIST;
+        
         List results = new ArrayList();
+        
         Iterator xmlDocumentsIterator = XMLParsingUtils.split(aggregatedXML).iterator();
         while(xmlDocumentsIterator.hasNext()) {
             String xmlDocument = (String)xmlDocumentsIterator.next();
+            
             XMLParsingUtils.Result parsingResult;
             try {
                 parsingResult = XMLParsingUtils.parse(xmlDocument);
-            } catch (Exception x) {continue;} //bad xml, ignore
+            } catch (SAXException sax) {
+                continue;// bad xml, ignore
+            } catch (IOException bad) {
+                break; // abort
+            }
+            
             String indexKey = parsingResult.canonicalKeyPrefix + "index__";
-            Iterator mapsIterator = parsingResult.canonicalAttributeMaps.iterator();
             LimeXMLDocument[] documents = new LimeXMLDocument[totalResponseCount];
+            
+            Iterator mapsIterator = parsingResult.canonicalAttributeMaps.iterator();
             while(mapsIterator.hasNext()) {
                 try {
                     TreeMap map = (TreeMap)mapsIterator.next();
+                    
                     int index = Integer.parseInt((String)map.get(indexKey));
+                    if (index >= documents.length)
+                        continue; // bad?
+                    
                     documents[index] = new LimeXMLDocument(map,parsingResult.schemaURI);
-                } catch(Exception x) {continue;}//bad data, ignore
+                } catch(NumberFormatException bad) {
+                    ErrorService.error(bad);
+                }
             }
             results.add(documents);
         }
