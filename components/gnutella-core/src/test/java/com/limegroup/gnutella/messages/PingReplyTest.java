@@ -19,6 +19,38 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    /**
+     * Tests the method for creating a new pong with a changed GUID out
+     * of an existing pong
+     */
+    public void testMutateGUID() throws Exception {
+        byte[] guid = new GUID().bytes();
+        byte ttl = 4;
+        int port = 6444;
+        byte[] ip = new byte[6];
+        long files = 500L;
+        long kbytes = 75580L;
+        boolean isUltrapeer = false;
+        int dailyUptime = 10;
+        boolean isGUESSCapable = false;
+        
+        PingReply pr = 
+            PingReply.create(guid, ttl, port, ip, files, kbytes, 
+                             isUltrapeer, dailyUptime, isGUESSCapable);
+        
+        PingReply testPR = pr.mutateGUID(new GUID().bytes());
+        
+        assertNotEquals(pr.getGUID(), testPR.getGUID());
+        assertEquals(pr.getTTL(), testPR.getTTL());
+        assertEquals(pr.getPort(), testPR.getPort());
+        assertEquals(pr.getIP(), testPR.getIP());
+        assertEquals(pr.getFiles(), testPR.getFiles());
+        assertEquals(pr.getKbytes(), testPR.getKbytes());
+        assertEquals(pr.isUltrapeer(), testPR.isUltrapeer());
+        assertEquals(pr.getDailyUptime(), testPR.getDailyUptime());
+        assertEquals(pr.supportsUnicast(), testPR.supportsUnicast());
+    }
+
     public void testNewPong() {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
