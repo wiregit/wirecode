@@ -1381,8 +1381,9 @@ public final class SettingsManager {
 	 * Returns a string specifying the full pathname of the file listing
      * the hosts
 	 */
-    public String getHostList() {
-		return new File(HOST_LIST_NAME).getAbsolutePath();
+    public String getHostList() {        
+		return new File(CommonUtils.getUserSettingsDir(), 
+                        HOST_LIST_NAME).getAbsolutePath();
 	}
 
     /** Returns the keep alive value */
@@ -3517,7 +3518,9 @@ public final class SettingsManager {
 			PROPS.save(ostream, "");
 			ostream.close();
 		}
-		catch (Exception e){}
+		catch (Exception e){
+            // TODO: we really should find a way to log this
+        }
 		finally {
 			try {
 				if(ostream != null) ostream.close();
