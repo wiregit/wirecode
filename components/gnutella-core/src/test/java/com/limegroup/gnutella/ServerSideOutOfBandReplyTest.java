@@ -507,11 +507,14 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
+        assertTrue(reply.getNumResults() == 1);
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()));
+            new LimeACKVendorMessage(new GUID(message.getGUID()),
+                                     reply.getNumResults());
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());
@@ -533,6 +536,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
+        assertTrue(((QueryReply)message).getResultCount() == 1);
 
         // make sure that if we send the ACK we don't get another reply - this
         // is current policy but we may want to change it in the future
@@ -558,6 +562,166 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         catch (IOException expected) {}
 
 
+    }
+
+    // makes sure that if we ack back with less results than what the server
+    // has we only get back what we asked for.
+    public void testPiecemealOutOfBandResults() throws Exception {
+        DatagramPacket pack = null;
+
+        drainAll();
+
+        QueryRequest query = 
+            QueryRequest.createOutOfBandQuery("txt",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        Message message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get VM", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            message = Message.read(in);
+            // we should NOT get a reply to our query
+            assertTrue(!((message instanceof QueryReply) &&
+                         (Arrays.equals(message.getGUID(), query.getGUID()))));
+        }
+
+        // make sure the GUID is correct
+        assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
+        assertTrue(reply.getNumResults() == 2);
+
+        // ok - we should ACK the ReplyNumberVM
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 1);
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+
+        // now we should get the reply!
+        while (!(message instanceof QueryReply)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get reply", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = Message.read(in);
+        }
+        // make sure this is the correct QR
+        assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
+        assertTrue(((QueryReply)message).getResultCount() == 1);
+
+        // make sure that if we send the ACK we don't get another reply - this
+        // is current policy but we may want to change it in the future
+        baos = new ByteArrayOutputStream();
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+
+        // now we should NOT get the reply!
+        try {
+            while (true) {
+                UDP_ACCESS.setSoTimeout(500);
+                pack = new DatagramPacket(new byte[1000], 1000);
+                UDP_ACCESS.receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                message = Message.read(in);
+                assertTrue(!((message instanceof QueryReply) &&
+                             (Arrays.equals(message.getGUID(), 
+                                            ack.getGUID()))));
+            }
+        }
+        catch (IOException expected) {}
+    }
+
+    // makes sure that if we ACK back with a 0 for the number of results we
+    // don't get a query reply
+    public void testSimpleACKOutOfBandResults() throws Exception {
+        DatagramPacket pack = null;
+
+        drainAll();
+
+        QueryRequest query = 
+            QueryRequest.createOutOfBandQuery("txt",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER_1.send(query);
+        ULTRAPEER_1.flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        Message message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get VM", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            message = Message.read(in);
+            // we should NOT get a reply to our query
+            assertTrue(!((message instanceof QueryReply) &&
+                         (Arrays.equals(message.getGUID(), query.getGUID()))));
+        }
+
+        // make sure the GUID is correct
+        assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
+        assertTrue(reply.getNumResults() == 2);
+
+        // ok - we should ACK the ReplyNumberVM
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 0);
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+
+        // now we should NOT get the reply!
+        try {
+            while (true) {
+                UDP_ACCESS.setSoTimeout(500);
+                pack = new DatagramPacket(new byte[1000], 1000);
+                UDP_ACCESS.receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                message = Message.read(in);
+                assertTrue(!((message instanceof QueryReply) &&
+                             (Arrays.equals(message.getGUID(), 
+                                            ack.getGUID()))));
+            }
+        }
+        catch (IOException expected) {}
     }
 
     // tests that MessageRouter expires GUIDBundles/Replies in a timely fashion
@@ -598,6 +762,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
+        assertTrue(reply.getNumResults() == 1);
 
         // WAIT for the expirer to expire the query reply
         Thread.sleep(60 * 1000); // 1 minute - expirer must run twice
@@ -605,7 +771,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()));
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 
+                                     reply.getNumResults());
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());

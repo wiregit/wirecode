@@ -748,16 +748,28 @@ public abstract class MessageRouter {
      */
     protected void handleLimeACKMessage(LimeACKVendorMessage ack,
                                         DatagramPacket datagram) {
+
         GUID refGUID = new GUID(ack.getGUID());
         QueryResponseBundle bundle = 
             (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
-        if (bundle != null) {
+
+        if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress addr = datagram.getAddress();
             int port = datagram.getPort();
 
-            //convert responses to QueryReplies
-            Iterator /*<QueryReply>*/ iterator = 
-                responsesToQueryReplies(bundle._responses, bundle._query);
+            //convert responses to QueryReplies, but only send as many as the
+            //node wants
+            Iterator iterator = null;
+            if (ack.getNumResults() < bundle._responses.length) {
+                Response[] desired = new Response[ack.getNumResults()];
+                for (int i = 0; i < desired.length; i++)
+                    desired[i] = bundle._responses[i];
+                iterator = responsesToQueryReplies(desired, bundle._query);
+            }
+            else 
+                iterator = responsesToQueryReplies(bundle._responses, 
+                                                   bundle._query);
+
             //send the query replies
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();

@@ -70,10 +70,10 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // -----------------------------
         // test network constructor....
         vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, (byte) 0, 
-                                      1, new byte[0]);
+                                      2, new byte[1]);
         testWrite(vm);
         // test other constructor....
-        vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()));
+        vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
 
         // Reply Number
@@ -114,6 +114,40 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
                 new ByteArrayInputStream(baos.toByteArray());
             ReplyNumberVendorMessage vmRead = 
                 (ReplyNumberVendorMessage) Message.read(bais);
+            assertEquals(vm, vmRead);
+            assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
+            assertEquals("after Read guids aren't equal!", guid, 
+                         new GUID(vmRead.getGUID()));
+        }
+    }
+
+
+    public void testLimeACK() throws Exception {
+        try {
+            GUID g = new GUID(GUID.makeGuid());
+            LimeACKVendorMessage vm = new LimeACKVendorMessage(g, -1);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+        try {
+            GUID g = new GUID(GUID.makeGuid());
+            LimeACKVendorMessage vm = new LimeACKVendorMessage(g, 256);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        for (int i = 0; i < 256; i++) {
+            GUID guid = new GUID(GUID.makeGuid());
+            LimeACKVendorMessage vm = new LimeACKVendorMessage(guid,
+                                                                       i);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
+            assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            ByteArrayInputStream bais = 
+                new ByteArrayInputStream(baos.toByteArray());
+            LimeACKVendorMessage vmRead = 
+                (LimeACKVendorMessage) Message.read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
