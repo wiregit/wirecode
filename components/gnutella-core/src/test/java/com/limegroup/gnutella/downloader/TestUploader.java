@@ -26,6 +26,7 @@ public class TestUploader {
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
 	private URN                         sha1;
+    private boolean http11 = true;
     ServerSocket server = null;
     private boolean busy = false;
     //Note about queue testing: This is how the queuing simulation works: If
@@ -165,7 +166,7 @@ public class TestUploader {
                 Thread runner=new Thread() {
                     public void run() {          
                         try {
-                            if (!stopped) {
+                            while(http11 && !stopped) {
                                 handleRequest(mySocket);
                                 if (queue) { 
                                     mySocket.setSoTimeout(MAX_POLL);
@@ -198,7 +199,6 @@ public class TestUploader {
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
         //use that.  Otherwise, send the whole file.  Skip all other headers.
-        //TODO2: later we should check here for HTTP1.1
         //TODO2: Later we should also check the validity of the requests
         BufferedReader input = 
             new BufferedReader(
@@ -219,7 +219,8 @@ public class TestUploader {
 			if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(line)) {
 				sha1 = readContentUrn(line);
 			}
-
+            
+            
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
             if (i==0) {
@@ -232,6 +233,10 @@ public class TestUploader {
                 start=p.a;
                 stop=p.b;;
             }
+            
+            i = line.indexOf("GET");
+            if(i==0)
+                http11 = line.indexOf("1.1") > 0;
 		}
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 

@@ -1631,7 +1631,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 return 1;
             } catch (IOException iox) {
-                iox.printStackTrace();
                 debug("iox thrown in assignAndRequest "+dloader);
                 return 0; //discard the rfd of dloader
             } finally {

@@ -175,6 +175,7 @@ public class HTTPDownloader implements BandwidthTracker {
         throws IOException, TryAgainLaterException, FileNotFoundException, 
                NotSharingException, QueuedException {
         _amountToRead = stop-start;
+        _amountRead = 0;
 		_initialReadingPoint = start;
         //Write GET request and headers.  TODO: we COULD specify the end of the
         //range (i.e., start+bytes).  But why bother?
@@ -271,7 +272,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
         //Now read each header...
 		while (true) {            
-			str = _byteReader.readLine();			
+			str = _byteReader.readLine();
             if (str==null || str.equals(""))
                 break;
 
