@@ -241,8 +241,7 @@ public final class HandshakeResponse {
             (getMaxTTL() < 5) &&
             isDynamicQueryConnection();
         
-        GOOD_ULTRAPEER = isGoodLeaf() && 
-            supportsProbeQueries();
+        GOOD_ULTRAPEER = isGoodLeaf(); // && supportsProbeQueries();
         
         
         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
