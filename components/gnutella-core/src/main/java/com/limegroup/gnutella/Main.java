@@ -20,8 +20,10 @@ public class Main implements ActivityCallback {
 	//                            new StandardMessageRouter(callback));
     //} else {
         service=new RouterService(callback,
-                                  new StandardMessageRouter(callback));
-
+              (new com.limegroup.gnutella.server.ServerMessageRouter(callback)));
+                                  
+        service.initialize();
+        
 		//}
 
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
