@@ -1018,7 +1018,7 @@ public class Connection {
 
         //...and am I a leaf node?
         String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
+            ConnectionHandshakeHeaders.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1091,7 +1091,7 @@ public class Connection {
 
         //...and am I a supernode?
         String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
+            ConnectionHandshakeHeaders.X_ULTRAPEER);
         if (value==null)
             return false;
         else if (!Boolean.valueOf(value).booleanValue())
@@ -1110,7 +1110,7 @@ public class Connection {
 
 
     /** True if the remote host supports query routing (QRP).  This is only 
-     *  meaningful in the context of leaf-supernode relationships. */
+     *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
 		return HEADERS.isQueryRoutingEnabled();
     }
