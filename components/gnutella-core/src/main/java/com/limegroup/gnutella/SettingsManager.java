@@ -93,7 +93,6 @@ public class SettingsManager implements SettingsInterface
      */
     private SettingsManager()
     {
-	System.out.println("SettingsManager::SettingsManager");
 	props_      = new Properties();
 	ndProps_    = new Properties();
 	fileSep_    = System.getProperty("file.separator");
