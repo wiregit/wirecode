@@ -1,13 +1,9 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
@@ -83,12 +79,12 @@ public class ClientSideBrowseHostTest
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
+        RouterService.clearHostCatcher();
+        RouterService.connect();
         Thread.sleep(1000);
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
+        connect();
     }        
     
     public void setUp() throws Exception  {
@@ -101,17 +97,17 @@ public class ClientSideBrowseHostTest
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
+     private static void connect() 
          throws IOException, BadPacketException {
          debug("-Establish connections");
 
      }
      
-     private static Connection connect(RouterService rs, int port, 
+     private static Connection connect(int port, 
                                        boolean ultrapeer) 
          throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
          
@@ -129,6 +125,7 @@ public class ClientSideBrowseHostTest
          }
          Connection con = new Connection(socket, responder);
          con.initialize();
+         con.buildAndStartQueues();
          replyToPing(con, ultrapeer);
          return con;
      }
@@ -156,14 +153,14 @@ public class ClientSideBrowseHostTest
          throw new IOException();
      }
 
-    private static void replyToPing(Connection c, boolean ultrapeer) 
+    private static void replyToPing(Connection conn, boolean ultrapeer) 
         throws Exception {
         // respond to a ping iff one is given.
         Message m = null;
         byte[] guid;
         try {
             while (!(m instanceof PingRequest)) {
-                m = c.receive(500);
+                m = conn.receive(500);
             }
             guid = ((PingRequest)m).getGUID();            
         } catch(InterruptedIOException iioe) {
@@ -171,15 +168,15 @@ public class ClientSideBrowseHostTest
             guid = new GUID().bytes();
         }
         
-        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
+        Socket socket = (Socket)PrivilegedAccessor.getValue(conn, "_socket");
         PingReply reply = 
         PingReply.createExternal(guid, (byte)7,
                                  socket.getLocalPort(), 
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
         reply.hop();
-        c.writer().simpleWrite(reply);
-        c.writer().flush();
+        conn.writer().simpleWrite(reply);
+        conn.writer().flush();
     }
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -191,7 +188,7 @@ public class ClientSideBrowseHostTest
     // 3. if all else fails the client sends a PushRequest
 
     public void testHTTPRequest() throws Exception {
-        testUP = connect(rs, 6355, true);
+        testUP = connect(6355, true);
 
         drain(testUP);
         // some setup
@@ -199,7 +196,7 @@ public class ClientSideBrowseHostTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "boalt.org");
+        RouterService.query(guid, "boalt.org");
 
         // the testUP should get it
         Message m = null;
@@ -231,7 +228,7 @@ public class ClientSideBrowseHostTest
         // request
         Thread browseThread = new Thread() {
             public void run() {
-                rs.doBrowseHost(callback.getRFD().getHost(),
+                RouterService.doBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 null);
@@ -259,7 +256,7 @@ public class ClientSideBrowseHostTest
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "Host");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // let the other side do its thing
@@ -298,7 +295,7 @@ public class ClientSideBrowseHostTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "nyu.edu");
+        RouterService.query(guid, "nyu.edu");
 
         // the testUP should get it
         Message m = null;
@@ -332,7 +329,7 @@ public class ClientSideBrowseHostTest
         // request
         Thread browseThread = new Thread() {
             public void run() {
-                rs.doBrowseHost(callback.getRFD().getHost(),
+                RouterService.doBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies);
@@ -368,7 +365,7 @@ public class ClientSideBrowseHostTest
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // now we need to GIV
@@ -393,7 +390,7 @@ public class ClientSideBrowseHostTest
         st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "Host");
         addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // let the other side do its thing
@@ -431,7 +428,7 @@ public class ClientSideBrowseHostTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "anita");
+        RouterService.query(guid, "anita");
 
         // the testUP should get it
         Message m = null;
@@ -460,7 +457,7 @@ public class ClientSideBrowseHostTest
         // tell the leaf to browse host the file,
         Thread browseThread = new Thread() {
             public void run() {
-                rs.doBrowseHost(callback.getRFD().getHost(),
+                RouterService.doBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
                                 proxies);
@@ -488,7 +485,7 @@ public class ClientSideBrowseHostTest
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(500);
+                c.receive(500);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {

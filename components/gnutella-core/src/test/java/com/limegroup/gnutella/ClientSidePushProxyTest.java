@@ -5,8 +5,6 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
@@ -82,12 +80,12 @@ public class ClientSidePushProxyTest
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
         rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
+        RouterService.clearHostCatcher();
+        RouterService.connect();
         Thread.sleep(1000);
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
+        connect();
     }        
     
     public void setUp() throws Exception  {
@@ -100,7 +98,7 @@ public class ClientSidePushProxyTest
 
      ////////////////////////// Initialization ////////////////////////
 
-     private static void connect(RouterService rs) 
+     private static void connect() 
      throws IOException, BadPacketException {
          debug("-Establish connections");
          //Ugh, there is a race condition here from the old days when this was
@@ -110,11 +108,11 @@ public class ClientSidePushProxyTest
          //System.out.println("Please establish a connection to localhost:6350\n");
      }
      
-     private static Connection connect(RouterService rs, int port, 
+     private static Connection connect(int port, 
                                        boolean ultrapeer) 
          throws Exception {
          ServerSocket ss=new ServerSocket(port);
-         rs.connectToHostAsynchronously("127.0.0.1", port);
+         RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
          
@@ -132,6 +130,7 @@ public class ClientSidePushProxyTest
          }
          Connection con = new Connection(socket, responder);
          con.initialize();
+         con.buildAndStartQueues();
          replyToPing(con, ultrapeer);
          return con;
      }
@@ -190,7 +189,7 @@ public class ClientSidePushProxyTest
     // THIS TEST SHOULD BE RUN FIRST!!
     public void testPushProxySetup() throws Exception {
 
-        testUP = connect(rs, 6355, true);
+        testUP = connect(6355, true);
 
         // send a MessagesSupportedMessage
         testUP.writer().simpleWrite(MessagesSupportedVendorMessage.instance());
@@ -217,7 +216,7 @@ public class ClientSidePushProxyTest
         drain(testUP);
 
         // make sure leaf is sharing
-        assertEquals(2, rs.getFileManager().getNumFiles());
+        assertEquals(2, RouterService.getFileManager().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
@@ -250,7 +249,7 @@ public class ClientSidePushProxyTest
 
         // test that the client responds to a PushRequest
         PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
-                                         rs.getMessageRouter()._clientGUID,
+                                         RouterService.getMessageRouter()._clientGUID,
                                          0, 
                                          InetAddress.getLocalHost().getAddress(),
                                          9000);
@@ -272,7 +271,7 @@ public class ClientSidePushProxyTest
         // confirm a GIV
         currLine = reader.readLine();
         String givLine = "GIV 0:" + 
-        (new GUID(rs.getMessageRouter()._clientGUID)).toHexString();
+        (new GUID(RouterService.getMessageRouter()._clientGUID)).toHexString();
         assertTrue(currLine.startsWith(givLine));
 
         // everything checks out!
@@ -288,7 +287,7 @@ public class ClientSidePushProxyTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "boalt.org");
+        RouterService.query(guid, "boalt.org");
 
         // the testUP should get it
         Message m = null;
@@ -318,7 +317,7 @@ public class ClientSidePushProxyTest
 
         // tell the leaf to download the file, should result in push proxy
         // request
-        rs.download((new RemoteFileDesc[] { callback.getRFD() }), true);
+        RouterService.download((new RemoteFileDesc[] { callback.getRFD() }), true);
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
@@ -348,7 +347,7 @@ public class ClientSidePushProxyTest
         StringTokenizer st = new StringTokenizer(currLine, ":");
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
-        Arrays.equals(addr.getAddress(), rs.getAddress());
+        Arrays.equals(addr.getAddress(), RouterService.getAddress());
         assertEquals(Integer.parseInt(st.nextToken()), PORT);
 
         // send back a 202 and make sure no PushRequest is sent via the normal
@@ -398,7 +397,7 @@ public class ClientSidePushProxyTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "golf is awesome");
+        RouterService.query(guid, "golf is awesome");
 
         // the testUP should get it
         Message m = null;
@@ -438,7 +437,7 @@ public class ClientSidePushProxyTest
 
         // construct and send a query        
         byte[] guid = GUID.makeGuid();
-        rs.query(guid, "berkeley.edu");
+        RouterService.query(guid, "berkeley.edu");
 
         // the testUP should get it
         Message m = null;
@@ -509,7 +508,7 @@ public class ClientSidePushProxyTest
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(500);
+                c.receive(500);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
