@@ -121,6 +121,12 @@ public class LimeXMLReplyCollection {
         // .sxml files (so we don't lose any annotated XML), we need to
         // ensure that we can handle all cases and update them to the
         // current format.
+        // From LimeWire 4.0 on, LimeWire began to understand ID3v2 data.
+        // To ensure that the .sxml files kept the most recent data (and
+        // data in sync with the file), LimeXMLDocuments added a 'supportID3v2'
+        // field.  If one is deserialized without it, and it associates
+        // with a file that can have id3v2 (an mp3 file), the file is
+        // re-scanned for newer data.
         
         // This iterates over each shared FileDesc to find the associated entry
         // in the map read off disk. If no entry is found, it could be for a 
@@ -185,6 +191,12 @@ public class LimeXMLReplyCollection {
             
             if( doc == null ) // no document, ignore.
                 continue;
+                
+            if(!doc.supportsID3v2() && LimeXMLUtils.isMP3File(file)) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("reconstructing document for id3v2: " + file);
+                doc = constructDocument(null, file);
+            }
                 
             // Verify the doc has information in it.
             if(!doc.isValid()) {

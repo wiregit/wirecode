@@ -49,6 +49,16 @@ public class LimeXMLDocument implements Serializable {
     private String action="";
     
     /**
+     * Indicator that the LimeXMLDocument was created after
+     * LimeWire began to understand id3v2 data.
+     * Older LimeXMLDocuments are deserialized with this as false.
+     *
+     * MUST NOT BE FINAL, or else readObject won't mark it as false.
+     */
+    private boolean supportsID3v2 = true;
+    public boolean supportsID3v2() { return supportsID3v2; }
+    
+    /**
      * Cached list of keywords.  Because keywords are only filled up
      * upon construction, they can be cached upon retrieval.
      */
