@@ -5,6 +5,10 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
 import java.io.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.sun.java.util.collections.Set;
 
 
@@ -15,6 +19,8 @@ import com.sun.java.util.collections.Set;
  */
 public class LimitReachedUploadState implements HTTPMessage {
 
+    private static final Log LOG = LogFactory.getLog(LimitReachedUploadState.class);
+	
 	/**
 	 * Constant for the <tt>FileDesc</tt> instance that was requested.
 	 */
@@ -52,11 +58,13 @@ public class LimitReachedUploadState implements HTTPMessage {
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
 	public LimitReachedUploadState(HTTPUploader uploader) {
+		LOG.debug("creating limit reached state");
         UPLOADER = uploader;
 		FILE_DESC = uploader.getFileDesc();
 	}
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+		LOG.debug("writing headers");
 		String str;
 		str = "HTTP/1.1 503 Service Unavailable\r\n";
 		ostream.write(str.getBytes());
@@ -107,6 +115,7 @@ public class LimitReachedUploadState implements HTTPMessage {
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
+		LOG.debug("writing body");
 		ostream.write(ERROR_MESSAGE);
 	}
 	

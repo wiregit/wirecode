@@ -79,6 +79,7 @@ public class BandwidthThrottle {
     public BandwidthThrottle(float bytesPerSecond, boolean switching) {
         setRate(bytesPerSecond);
         setSwitching(switching);
+
     }    
 
     /**

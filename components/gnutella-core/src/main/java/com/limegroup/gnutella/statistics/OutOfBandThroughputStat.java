@@ -22,24 +22,21 @@ public class OutOfBandThroughputStat extends BasicStatistic {
     public static final int PROXY_SUCCESS_RATE = 80;
     public static final int TERRIBLE_SUCCESS_RATE = 40;
     
-    private static final int thirtyMins = 30 * 60 * 1000;
-    
-
-    private static final Runnable adjuster = new Runnable() {
-        public void run() {
-        	if (LOG.isDebugEnabled())
-        		LOG.debug("current success rate "+ getSuccessRate()+
-        				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
-						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
-            if (!isSuccessRateGreat() &&
-                !isSuccessRateTerrible()) {
-            	LOG.debug("boosting sample size by 500");
-                MIN_SAMPLE_SIZE += 500;
-            }
-        }
-    };
-    
     static {
+        Runnable adjuster = new Runnable() {
+            public void run() {
+            	if (LOG.isDebugEnabled())
+            		LOG.debug("current success rate "+ getSuccessRate()+
+            				" based on "+((int)RESPONSES_REQUESTED.getTotal())+ 
+    						" measurements with a min sample size "+MIN_SAMPLE_SIZE);
+                if (!isSuccessRateGreat() &&
+                    !isSuccessRateTerrible()) {
+                	LOG.debug("boosting sample size by 500");
+                    MIN_SAMPLE_SIZE += 500;
+                }
+            }
+        };
+        int thirtyMins = 30 * 60 * 1000;
     	RouterService.schedule(adjuster, thirtyMins, thirtyMins);
     }
     

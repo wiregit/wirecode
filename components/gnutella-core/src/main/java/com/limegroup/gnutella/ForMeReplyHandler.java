@@ -21,6 +21,19 @@ import org.apache.commons.logging.Log;
 public final class ForMeReplyHandler implements ReplyHandler {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
+    
+
+
+    /**
+     * The maximum number of PushRequests per 30 seconds.
+     */
+    private final int MAX_PUSH_REQUESTS = 5;    
+    
+    /**
+     * Keeps track of what hosts have sent us PushRequests lately.
+     */
+    private final Map /* String -> IntWrapper */ PUSH_REQUESTS = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
 
 	/**
 	 * Instance following singleton.
@@ -41,7 +54,14 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	 * Private constructor to ensure that only this class can construct
 	 * itself.
 	 */
-	private ForMeReplyHandler() {}
+	private ForMeReplyHandler() {
+	    //Clear push requests every 30 seconds.
+	    RouterService.schedule(new Runnable() {
+	        public void run() {
+	            PUSH_REQUESTS.clear();
+	        }
+	    }, 30 * 1000, 30 * 1000);
+    }
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
         //Kill incoming connections that don't share.  Note that we randomly
@@ -171,55 +191,41 @@ public final class ForMeReplyHandler implements ReplyHandler {
      * There's no point in sending them a GIV to have them send a GET
      * just to return a 404 or Busy or Malformed Request, etc..
      */
-	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler) {
+	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler){
         //Ignore push request from banned hosts.
         if (handler.isPersonalSpam(pushRequest))
             return;
-		
-        // Unpack the message
-        byte[] ip = pushRequest.getIP();
-        StringBuffer buf = new StringBuffer();
-        buf.append(ByteOrder.ubyte2int(ip[0])+".");
-        buf.append(ByteOrder.ubyte2int(ip[1])+".");
-        buf.append(ByteOrder.ubyte2int(ip[2])+".");
-        buf.append(ByteOrder.ubyte2int(ip[3])+"");
-        String h = buf.toString();
+            
+        String h = NetworkUtils.ip2string(pushRequest.getIP());
+        
+       // make sure the guy isn't hammering us
+        IntWrapper i = (IntWrapper)PUSH_REQUESTS.get(h);
+        if(i == null) {
+            i = new IntWrapper(1);
+            PUSH_REQUESTS.put(h, i);
+        } else {
+            i.addInt(1);
+            // if we're over the max push requests for this host, exit.
+            if(i.getInt() > MAX_PUSH_REQUESTS)
+                return;
+        }
         
         // if the IP is banned, don't accept it
-        if (RouterService.getAcceptor().isBannedIP(h)) {
+        if (RouterService.getAcceptor().isBannedIP(h))
             return;
-        }
+
         int port = pushRequest.getPort();
         // if invalid port, exit
-        if (!NetworkUtils.isValidPort(port) ) {
+        if (!NetworkUtils.isValidPort(port) )
             return;
-        }
         
-        int index = (int)pushRequest.getIndex();
-
-        FileManager fm = RouterService.getFileManager();
-        if(!fm.isValidIndex(index)) {
-            return;
-        }
-
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        
-        FileDesc desc = fm.get(index);
-        
-        // if the file has been unshared, return
-        if(desc == null) {
-            return;
-        }
-
-        String file = desc.getName();
-
         RouterService.getPushManager().
-            acceptPushUpload(file, h, port, 
-                             index, req_guid_hexstring,
-                             pushRequest.isMulticast() // force accept
-                             );
+            acceptPushUpload(h, port, req_guid_hexstring,
+                             pushRequest.isMulticast(), // force accept
+                             pushRequest.isFirewallTransferPush());
 	}
 	
 	public boolean isOpen() {

@@ -6,10 +6,12 @@ import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.bitzi.util.Base32;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -901,6 +903,13 @@ public class DownloadManager implements BandwidthTracker {
         return true;
     }
 
+    /**
+     * Sends a push through multicast.
+     *
+     * Returns true only if the RemoteFileDesc was a reply to a multicast query
+     * and we wanted to send through multicast.  Otherwise, returns false,
+     * as we shouldn't reply on the multicast network.
+     */
     private boolean sendPushMulticast(RemoteFileDesc file, byte []guid) {
         // Send as multicast if it's multicast.
     	if( file.isReplyToMulticast() ) {
@@ -913,56 +922,43 @@ public class DownloadManager implements BandwidthTracker {
                                          file.getClientGUID(),
                                          file.getIndex(),
                                          addr,
-                                         port);
+                                         port,
+                                         Message.N_MULTICAST);
                 router.sendMulticastPushRequest(pr);
+                if (LOG.isInfoEnabled())
+            		LOG.info("Sending push request through multicast " + pr);
                 return true;
             }
         }
-    	
     	return false;
     }
-    
+
+    /**
+     * Sends a push through UDP.
+     *
+     * This always returns true, because a UDP push is always sent.
+     */    
     private boolean sendPushUDP(RemoteFileDesc file, byte[] guid) {
-    	LOG.trace("DM.sendPushUDP(): entered.");
-    
-    	byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
-        
-        
-        // If it wasn't multicast, try sending to the proxies if it had them.
-        // and cannot accept udp push or the udp push was already sent.
-                
-        //send the push through udp if we can
-        
         PushRequest pr = 
                 new PushRequest(guid,
                                 (byte)2,
                                 file.getClientGUID(),
                                 file.getIndex(),
-                                addr,
-                                port,
+                                RouterService.getAddress(),
+                                RouterService.getPort(),
 								Message.N_UDP);
-        	
         if (LOG.isInfoEnabled())
-        		LOG.info("Sending push request through udp "+pr);
-            
-            
+        		LOG.info("Sending push request through udp " + pr);
         			
         UDPService udpService = UDPService.instance();
-        
         //and send the push to the node 
         try {
-        	
         	InetAddress address = InetAddress.getByName(file.getHost());
-        	
-        	udpService.send(pr,
-            		address,file.getPort());
-        	
-        }catch(UnknownHostException notCritical) {}
+        	udpService.send(pr, address, file.getPort());
+        } catch(UnknownHostException notCritical) {
         	//We can't send the push to a host we don't know
         	//but we can still send it to the proxies.
-        finally {
-        
+        } finally {
         	//make sure we send it to the proxies, if any
         	Set proxies = file.getPushProxies();
         	for (Iterator iter = proxies.iterator();iter.hasNext();) {
@@ -970,99 +966,150 @@ public class DownloadManager implements BandwidthTracker {
         		udpService.send(pr,ppi.getPushProxyAddress(),ppi.getPushProxyPort());
         	}
         }
-        
         return true;
-        
-        
-
-
     }
     
-    private boolean sendPushTCP(RemoteFileDesc file, byte []guid) {
-    	LOG.trace("DM.sendPushTCP(): entered.");
-    	
-    	byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
-    	
-    	Set proxies = file.getPushProxies();
-        if (!proxies.isEmpty()) {
-            //TODO: investigate not sending a HTTP request to a proxy
-            //you are directly connected to.  How much of a problem is this?
-            //Probably not much of one at all.  Classic example of code
-            //complexity versus efficiency.  It may be hard to actually
-            //distinguish a PushProxy from one of your UP connections if the
-            //connection was incoming since the port on the socket is ephemeral 
-            //and not necessarily the proxies listening port
-            // we have proxy info - give them a try
-            LOG.info("DM.sendPush(): proxy info exists.");
-            boolean requestSuccessful = false;
+    /**
+     * Sends a push through TCP.
+     *
+     * Returns true if we have a valid push route, or if a push proxy
+     * gave us a succesful sending notice.
+     */
+    private boolean sendPushTCP(final RemoteFileDesc file, final byte[] guid) {
+        // if this is a FW to FW transfer, we must consider special stuff
+        final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
+                         UDPService.instance().canReceiveSolicited() &&
+                        !RouterService.acceptedIncomingConnection();
 
-            // set up request
-            final String requestString = "/gnutella/push-proxy?ServerID=" + 
-                Base32.encode(file.getClientGUID());
-            final String nodeString = "X-Node";
-            final String nodeValue = NetworkUtils.ip2string(addr) + ":" + port;
+    	// try sending to push proxies...
+    	if(sendPushThroughProxies(file, guid, shouldDoFWTransfer))
+    	    return true;
+    	    
+        // if push proxies failed, but we need a fw-fw transfer, give up.
+        if(shouldDoFWTransfer)
+            return false;
 
-            // try to contact each proxy
-            Iterator iter = proxies.iterator();
-            while(iter.hasNext() && !requestSuccessful) {
-                PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                String ppIp = ppi.getPushProxyAddress().getHostAddress();
-                int ppPort = ppi.getPushProxyPort();
-                String connectTo = 
-                    "http://" + ppIp + ":" + ppPort + requestString;
-                HeadMethod head = new HeadMethod(connectTo);
-                head.addRequestHeader(nodeString, nodeValue);
-                head.addRequestHeader("Cache-Control", "no-cache");                
-                HttpClient client = HttpClientManager.getNewClient();
-                if(LOG.isTraceEnabled())
-                    LOG.trace("Push Proxy Requesting with: " + connectTo);
-                try {
-                    client.executeMethod(head);
-                    if(head.getStatusCode() == 202) {
-                        if(LOG.isInfoEnabled())
-                            LOG.info("Succesful push proxy: " + connectTo);
-                        requestSuccessful = true;
-                    } else {
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Invalid push proxy: " + connectTo +
-                                     ", response: " + head.getStatusCode());
-                    }
-                } catch (IOException ioe) {
-                    LOG.warn("PushProxy request exception", ioe);
-                } finally {
-                    if( head != null )
-                        head.releaseConnection();
-                }   
-            }
-
-            if (requestSuccessful)
-                return requestSuccessful;
-            // else just send a PushRequest as normal
-        }
-
-        //send the push through tcp.
         PushRequest pr = 
         	new PushRequest(guid,
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
-                            addr,
-                            port);
-
+                            RouterService.getAddress(),
+                            RouterService.getPort());
         if(LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
-        
-        
-        
         try {
         	router.sendPushRequest(pr);
         } catch (IOException e) {
+            // this will happen if we have no push route.
         	return false;
         }
 
         return true;
-    	
+    }
+    
+    /**
+     * Sends a push through push proxies.
+     *
+     * Returns true if a push proxy gave us a succesful reply,
+     * otherwise returns false is all push proxies tell us the sending failed.
+     */
+    private boolean sendPushThroughProxies(final RemoteFileDesc file,
+                                           final byte[] guid,
+                                           boolean shouldDoFWTransfer) {
+    	Set proxies = file.getPushProxies();
+    	if(proxies.isEmpty())
+    	    return false;
+    	    
+        byte[] externalAddr = RouterService.getExternalAddress();
+        // if a fw transfer is necessary, but our external address is invalid,
+        // then exit immediately 'cause nothing will work.
+        if (shouldDoFWTransfer && !NetworkUtils.isValidAddress(externalAddr))
+            return false;
+
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+
+        //TODO: investigate not sending a HTTP request to a proxy
+        //you are directly connected to.  How much of a problem is this?
+        //Probably not much of one at all.  Classic example of code
+        //complexity versus efficiency.  It may be hard to actually
+        //distinguish a PushProxy from one of your UP connections if the
+        //connection was incoming since the port on the socket is ephemeral 
+        //and not necessarily the proxies listening port
+        // we have proxy info - give them a try
+
+        // set up the request string --
+        // if a fw-fw transfer is required, add the extra "file" parameter.
+        final String request = "/gnutella/push-proxy?ServerID=" + 
+                               Base32.encode(file.getClientGUID()) +
+          (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "");
+            
+        final String nodeString = "X-Node";
+        final String nodeValue =
+            NetworkUtils.ip2string(shouldDoFWTransfer ? externalAddr : addr) +
+            ":" + port;
+
+        // try to contact each proxy
+        for(Iterator iter = proxies.iterator(); iter.hasNext(); ) {
+            PushProxyInterface ppi = (PushProxyInterface)iter.next();
+            final String ppIp = ppi.getPushProxyAddress().getHostAddress();
+            final int ppPort = ppi.getPushProxyPort();
+            String connectTo =  "http://" + ppIp + ":" + ppPort + request;
+            HeadMethod head = new HeadMethod(connectTo);
+            head.addRequestHeader(nodeString, nodeValue);
+            head.addRequestHeader("Cache-Control", "no-cache");
+            HttpClient client = HttpClientManager.getNewClient();
+            if(LOG.isTraceEnabled())
+                LOG.trace("Push Proxy Requesting with: " + connectTo);
+            try {
+                client.executeMethod(head);
+                if(head.getStatusCode() == 202) {
+                    if(LOG.isInfoEnabled())
+                        LOG.info("Succesful push proxy: " + connectTo);
+                    if (shouldDoFWTransfer)
+                        startFWIncomingThread(file);
+                    return true; // push proxy succeeded!
+                } else {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Invalid push proxy: " + connectTo +
+                                 ", response: " + head.getStatusCode());
+                }
+            } catch (IOException ioe) {
+                LOG.warn("PushProxy request exception", ioe);
+            } finally {
+                if( head != null )
+                    head.releaseConnection();
+            }   
+        }
+        
+        // they all failed.
+        return false;
+    }
+    
+    /**
+     * Starts a thread waiting for an incoming fw-fw transfer.
+     */
+    private void startFWIncomingThread(final RemoteFileDesc file) {
+        // we need to open up our NAT for incoming UDP, so
+        // start the UDPConnection.  The other side should
+        // do it soon too so hopefully we can communicate.
+        Thread startPushThread = new ManagedThread("FWIncoming") {
+            public void managedRun() {
+                try {
+                    Socket fwTrans = 
+                        new UDPConnection(file.getHost(), file.getPort());
+                    // TODO: put this out to Acceptor in // the future
+                    InputStream is = fwTrans.getInputStream();
+                    String word = IOUtils.readWord(is, 4);
+                    if (word.equals("GIV"))
+                        acceptDownload(fwTrans);
+                    else
+                        fwTrans.close();
+                } catch (IOException crap) {}
+            }
+        };
+        startPushThread.start();
     }
 
     /**
@@ -1076,7 +1123,6 @@ public class DownloadManager implements BandwidthTracker {
      *  <tt>false</tt>
      */
     public void sendPush(final RemoteFileDesc file) {
-    	
     	//Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = RouterService.getAddress();
@@ -1085,32 +1131,38 @@ public class DownloadManager implements BandwidthTracker {
             !NetworkUtils.isValidPort(port) )
             return;
         
-        final byte []guid = GUID.makeGuid();
+        final byte[] guid = GUID.makeGuid();
         
+        // If multicast worked, try nothing else.
     	if (sendPushMulticast(file,guid))
     		return;
     	
+        // if we can't accept incoming connections, we can only try
+        // using the TCP push proxy, which will do fw-fw transfers.
+        if(!RouterService.acceptedIncomingConnection()) {
+            sendPushTCP(file, guid);
+            return;
+        }
+        
     	//remember that we are waiting a push from this host 
         //for the specific file.
-        byte[] key = file.getClientGUID();        	
-        
+        byte[] key = file.getClientGUID();
         synchronized(UDP_FAILOVER) {
         	Set files = (Set)UDP_FAILOVER.get(key);
-        	
         	if (files==null)
         		files = new HashSet();
-        	
         	files.add(file.getFileName());
-        	
         	UDP_FAILOVER.put(key,files);
         }
         	
-        // schedule the failover tcp pusher
+        // schedule the failover tcp pusher, which will run
+        // if we don't get a response from the UDP push
+        // within the UDP_PUSH_FAILTIME timeframe
         RouterService.schedule(new Runnable(){
         	public void run() {
         		FAILOVERS.add(new PushFailoverRequestor(file,guid));
         	}},UDP_PUSH_FAILTIME,0);
-        
+
     	sendPushUDP(file,guid);
     }
 
@@ -1160,7 +1212,7 @@ public class DownloadManager implements BandwidthTracker {
         }   
 
         //2. Parse and return the fields.
-        try {            
+        try {
             //a) Extract file index.  IndexOutOfBoundsException
             //   or NumberFormatExceptions will be thrown here if there's
             //   a problem.  They're caught below.

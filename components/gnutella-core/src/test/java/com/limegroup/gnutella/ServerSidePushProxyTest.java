@@ -230,6 +230,13 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
                 leafGUID.toHexString(), "127.0.0.1", 6346, m, 400);
     }
     
+    public void testFirewallTransferPushProxyWorks() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer((int)PushRequest.FW_TRANS_INDEX));
+        tRequest("GET", "/gnutella/push-proxy", "ServerID",
+                 Base32.encode(clientGUID), "127.0.0.1", 6346, m, 202);
+    }
+    
     private void tRequest(String reqMethod, String reqKey, String initKey,
                           String guid, String ip, int port, Map params,
                           int opcode)

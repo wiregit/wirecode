@@ -5,6 +5,10 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import java.net.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
@@ -15,6 +19,8 @@ import com.limegroup.gnutella.statistics.*;
  */
 public final class PushProxyUploadState implements HTTPMessage {
     
+    private static final Log LOG = LogFactory.getLog(PushProxyUploadState.class);
+	
     public static final String P_SERVER_ID = "ServerId";
     public static final String P_GUID = "guid";
     public static final String P_FILE = "file";
@@ -25,10 +31,12 @@ public final class PushProxyUploadState implements HTTPMessage {
 		new ByteArrayOutputStream();
     
     public PushProxyUploadState(HTTPUploader uploader) {
+    	LOG.debug("creating push proxy upload state");
 		this._uploader = uploader;
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
+		LOG.debug("writing headers");
 
         byte[] clientGUID  = GUID.fromHexString(_uploader.getFileName());
         InetAddress hostAddress = _uploader.getNodeAddress();
@@ -88,6 +96,7 @@ public final class PushProxyUploadState implements HTTPMessage {
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
+		LOG.debug("writing body");
         ostream.write(BAOS.toByteArray());
         _uploader.setAmountUploaded(BAOS.size());
         debug("PPUS.doUpload(): returning.");

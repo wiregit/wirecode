@@ -28,10 +28,10 @@ public class URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
                              LimeXMLDocument xmlDoc, Set urns,
                              boolean replyToMulticast, boolean firewalled,
                              String vendor, long timestamp, URL url,
-                             Set proxies) {
+                             Set proxies, boolean canDoFWTransfer) {
         super(host, port, index, filename, size, clientGUID, speed, chat,
               quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-              vendor, timestamp, proxies, -1);
+              vendor, timestamp, proxies, -1, canDoFWTransfer);
         this._url=url;
     }
 

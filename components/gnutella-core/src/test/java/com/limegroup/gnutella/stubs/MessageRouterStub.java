@@ -32,11 +32,14 @@ public class MessageRouterStub extends MessageRouter {
                                            DatagramPacket datagram,
                                            ReplyHandler handler) {}
 
-    protected List createQueryReply(byte[] guid, byte ttl, long speed, Response[] res,
-                                    byte[] clientGUID, 
-                                    boolean busy, boolean uploaded, 
+    protected List createQueryReply(byte[] guid, byte ttl,
+                                    long speed, 
+                                    Response[] res, byte[] clientGUID, 
+                                    boolean busy, 
+                                    boolean uploaded, 
                                     boolean measuredSpeed, 
-                                    boolean isFromMcast) {
+                                    boolean isFromMcast,
+                                    boolean shouldMarkForFWTransfer) {
         return new LinkedList();
-    }    
+    }
 }

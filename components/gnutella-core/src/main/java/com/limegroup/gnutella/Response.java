@@ -801,7 +801,8 @@ public class Response {
                  data.getVendorCode(),
                  System.currentTimeMillis(),
                  data.getPushProxies(),
-                 getCreateTime()
+                 getCreateTime(),
+                 data.supportsFWTransfer()
                 );
             cachedRFD = rfd;
             return rfd;
