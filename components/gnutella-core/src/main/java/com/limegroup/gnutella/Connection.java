@@ -579,7 +579,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             
             if(CommonUtils.isJava14OrLater() && 
                ConnectionSettings.USE_NIO.getValue()) {
-                _socket.getChannel().configureBlocking(false);       
+                _socket.getChannel().configureBlocking(false);
+                NIODispatcher.instance().addReader(this);     
             }
             // create the output queues for messages
             _messageWriter = new MessageWriterProxy(this); 
@@ -2081,10 +2082,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
-        System.out.println("Connection::loopForMessages");
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
-           NIODispatcher.instance().addReader(this); 
+           // anything to do here??
         } else {
             MessageRouter router = RouterService.getMessageRouter();
             while (true) {
