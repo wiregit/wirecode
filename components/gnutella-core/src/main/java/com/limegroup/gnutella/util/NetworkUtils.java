@@ -2,6 +2,8 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella .*;
+import com.limegroup.gnutella.filters.IP;
+import com.limegroup.gnutella.filters.IPList;
 import java.io.*;
 import java.net.*;
 
@@ -12,6 +14,37 @@ import com.sun.java.util.collections.Arrays;
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class NetworkUtils {
+    
+    /**
+     * The list of invalid addresses.
+     */
+    private static final IPList INVALID_ADDRESSES = new IPList();
+    
+    /**
+     * The list of private addresses.
+     */
+    private static final IPList PRIVATE_ADDRESSES = new IPList();
+    
+    /**
+     * The list of local addresses.
+     */
+    private static final IPList LOCAL_ADDRESSES = new IPList();
+    
+    static {
+        INVALID_ADDRESSES.add("0.*/8");
+        INVALID_ADDRESSES.add("255.*/8");
+        
+        PRIVATE_ADDRESSES.add("0.*/8");
+        PRIVATE_ADDRESSES.add("127.*/8");
+        PRIVATE_ADDRESSES.add("255.*/8");
+        PRIVATE_ADDRESSES.add("10.*/8");
+        PRIVATE_ADDRESSES.add("172.16.*/12");
+        PRIVATE_ADDRESSES.add("169.254.*/16");
+        PRIVATE_ADDRESSES.add("192.168.*/16");
+        
+        LOCAL_ADDRESSES.add("127.*/8");
+    }
+
 
     /**
      * Ensure that this class cannot be constructed.
@@ -34,13 +67,7 @@ public final class NetworkUtils {
 	 * Returns whether or not the specified address is valid.
 	 */
 	public static boolean isValidAddress(byte[] addr) {
-	    if( addr[0] == 0 && addr[1] == 0 && addr[2] == 0 && addr[3] == 0)
-            return false;
-        if( addr[0] == 255 && addr[1] == 255 && 
-            addr[2] == 255 && addr[3] == 255)
-            return false;
-
-        return true;
+	    return !INVALID_ADDRESSES.contains(new IP(addr));
     }
     
     /**
@@ -66,10 +93,11 @@ public final class NetworkUtils {
 	 */
 	public static boolean isLocalAddress(InetAddress addr) {
 	    try {
+	        if( LOCAL_ADDRESSES.contains(new IP(addr.getAddress())) )
+	            return true;
+
             InetAddress address = InetAddress.getLocalHost();
-            byte[] byteAddress = addr.getAddress();
-            return (address.equals(addr) ||
-                    byteAddress[0] == 127);
+            return Arrays.equals(address.getAddress(), addr.getAddress());
         } catch(UnknownHostException e) {
             return false;
         }
@@ -137,27 +165,7 @@ public final class NetworkUtils {
         if( !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() )
             return false;
             
-        if (address[0]==(byte)10) {
-            return true;  //10.0.0.0 - 10.255.255.255
-        } else if (address[0]==(byte)127) {
-            return true;  //127.x.x.x
-        } else if (address[0]==(byte)172 &&
-                   address[1]>=(byte)16 &&
-                   address[1]<=(byte)31) {
-            return true;  //172.16.0.0 - 172.31.255.255
-        } else if (address[0]==(byte)192 &&
-                   address[1]==(byte)168) {
-            return true; //192.168.0.0 - 192.168.255.255
-        } else if (address[0]==(byte)169 &&
-                   address[1]==(byte)254) {
-            return true; //169.254.0.0 - 169.254.255.255 (local link)
-        } else if (address[0]==(byte)0) {
-            return true; //0.0.0.0 -- reserved 
-            //} else if (address[0]>=(byte)240) {
-            //return true; //240 and above -- broadcast, multicast
-        } else {
-            return false; // otherwise, it's not private
-        }
+        return PRIVATE_ADDRESSES.contains(new IP(address));
     }
 
     /**
