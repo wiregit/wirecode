@@ -10,20 +10,18 @@ import com.limegroup.gnutella.*;
  *stuff Chris is writing can update the list.
  * @ author Sumeet Thadani
  */
-class BlackListFilter extends SpamFilter{
+public class BlackListFilter extends SpamFilter{
     
     private Vector badHosts = new Vector();
     private ConnectionManager cm;
     private static BlackListFilter instance;
-    private String allHosts;
 
-    //constructors
+    /** Constructs a new BlackListFilter containing the addresses listed
+     *  in the SettingsManager. */
     protected BlackListFilter(){
-	allHosts = SettingsManager.instance().getBannedIps();
-	StringTokenizer st = new StringTokenizer(allHosts,";");
-	while(st.hasMoreTokens()){
-	    badHosts.add(st.nextToken());
-	}
+	String[] allHosts = SettingsManager.instance().getBannedIps();
+	for (int i=0; i<allHosts.length; i++)
+	    badHosts.add(allHosts[i]);
     }
     
     /** To ensure the singleton pattern
@@ -34,31 +32,36 @@ class BlackListFilter extends SpamFilter{
 	return instance;
     }
     
-    /** Adds a bad host to the bad hosts list if it was not already there */
+    /** 
+     * @modifies this
+     * @effects ensures badGuy is in this.  <i>Settings manager is not
+     *  modified.</i>
+     */
     public void add(String badGuy){
 	if (badHosts.contains(badGuy))
 	    return; // no duplicates please
 	badHosts.add(badGuy);
-	if (allHosts.equals(""))
-	    allHosts = ""+badGuy;
-	else
-	    allHosts = allHosts+";"+badGuy;
-	SettingsManager.instance().setBannedIps(allHosts);//write to disk
     }
-    
-    /** Removes a good host from the bad hosts list */
+
+    /** 
+     * @modifies this
+     * @effects ensures goodGuy is not in this.   <i>Settings manager is not
+     *  modified.</i>
+     */
     public void delete(String goodGuy){
 	String newAllHosts= "";
 	if (!(badHosts.contains(goodGuy)))
 	    return; // no need to remove somthing thats not there
 	badHosts.removeElement(goodGuy);
-	//resonctruct the list
-	for(int i =0; i< badHosts.size();i++){
-	    newAllHosts = (String)badHosts.get(i);
-	    newAllHosts = newAllHosts + ";";
-	}
-	allHosts = newAllHosts;
-	SettingsManager.instance().setBannedIps(allHosts);
+    }
+
+    /**
+     * @modifies this
+     * @effects ensures this is empty.  <i>Settings manager is not
+     *  modified.</i>
+     */
+    public void clear() {
+	badHosts.clear();
     }
     
     /** Checks if a given host is in the the bad hosts list 
