@@ -1139,6 +1139,24 @@ public class ManagedConnection
 		return Integer.valueOf(connections).intValue();
 	}
 
+	/**
+	 * Returns whether or not this connection is to an Ultrapeer that 
+	 * supports query routing between Ultrapeers at 1 hop.
+	 *
+	 * @return <tt>true</tt> if this is an Ultrapeer connection that
+	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
+	 *  otherwise <tt>false</tt>
+	 */
+	public boolean isUltrapeerQueryRoutingConnection() {
+		if(!isSupernodeConnection()) return false;
+
+		String value = 
+			getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
+		if(value == null) return false;
+		
+		return Boolean.valueOf(value).booleanValue();
+	}
+
 
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
