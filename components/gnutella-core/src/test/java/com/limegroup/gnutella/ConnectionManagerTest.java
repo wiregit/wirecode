@@ -85,9 +85,9 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         // u ==> i should be ultrapeer
         // l ==> i should be leaf
         ManagedConnection u1, l1, l2;
-        u1 = new SupernodeClient(1);
-        l1 = new ClientSupernode(2);
-        l2 = new ClientSupernode(3);
+        u1 = new SupernodeClient();
+        l1 = new ClientSupernode();
+        l2 = new ClientSupernode();
         
         // add a supernode => client connection
         initializeStart(u1);
@@ -125,7 +125,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         initializeDone(l1);
         assertTrue("should be supernode", mgr.isSupernode());
         assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-    }
+    }   
         
     
     /**
@@ -289,8 +289,8 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
     
     private static class ClientSupernode extends TestManagedConnection {
         
-        ClientSupernode(int i) {
-            super(false, i, 0);
+        ClientSupernode() {
+            super(false, 0, 0);
         }
         
         public boolean isClientSupernodeConnection() {
@@ -302,8 +302,8 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     private static class SupernodeClient extends TestManagedConnection {
-        SupernodeClient(int i) {
-            super(false, i, 0);
+        SupernodeClient() {
+            super(false, 0, 0);
         }
         public boolean isClientSupernodeConnection() {
             return false;
