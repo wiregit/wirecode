@@ -84,6 +84,9 @@ public class FileManager {
      *  if this has no callback.  */
     protected static ActivityCallback _callback;
 
+      /** The chord handle for adding newly shared files to the chord */
+    private static ChordLookupService _chord;
+
     /** Characters used to tokenize queries and file names. */
     public static final String DELIMETERS=" -._+/*()\\";
     private static final boolean isDelimeter(char c) {
@@ -122,8 +125,10 @@ public class FileManager {
      *  callback to be "callback", and notifies "callback" of all file loads.
      *      @modifies this
      *      @see loadSettings */
-    public void initialize(ActivityCallback callback) {
+    public void initialize(ActivityCallback callback, ChordLookupService chord) {
         this._callback=callback;
+	_chord=chord;
+
         loadSettings(false);
     }
 
@@ -641,6 +646,7 @@ public class FileManager {
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
      *  file is in the shared directory.</b> 
      */
+
     private boolean addFile(File file) {
         repOk();
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
@@ -662,6 +668,10 @@ public class FileManager {
             FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
             _files.add(fileDesc);
             _numFiles++;
+
+	    // CHORD
+	    // Add the new file to the chord index for others to see.
+	    _chord.addFile(fileDesc);
 		
             //Register this file with its parent directory.
             File parent=getParentFile(file);

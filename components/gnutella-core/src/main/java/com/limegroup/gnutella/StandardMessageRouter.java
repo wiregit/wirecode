@@ -25,7 +25,7 @@ public class StandardMessageRouter
     {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
-        if (!receivingConnection.isPersonalSpam(queryRequest))
+        if (receivingConnection!=null && !receivingConnection.isPersonalSpam(queryRequest))
         {
             _callback.handleQueryString(queryRequest.getQuery());
         }
@@ -75,6 +75,13 @@ public class StandardMessageRouter
         //This results in a GGEP extension, which will be stripped before
         //sending it to older clients.
         int dailyUptime=Statistics.instance().calculateDailyUptime();
+
+	/* Check for Chord membership. Nodes that are in the chord signal this
+	   by sending a GGEP integer in pingreplies */
+	boolean chordMemberBool = _chord.isMember();
+	int chordMember = 0;
+	if(chordMemberBool) chordMember = 1;
+
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
                                             acceptor.getPort(),
@@ -82,7 +89,8 @@ public class StandardMessageRouter
                                             num_files,
                                             kilobytes,
                                             markPong,
-                                            dailyUptime);
+                                            dailyUptime,
+											chordMember);
 
         try
         {
@@ -135,6 +143,12 @@ public class StandardMessageRouter
         //We override the super's method so the receiving connection's
         //statistics are updated whether or not this is for me.
         receivingConnection.updateHorizonStats(pingReply);
+
+//	System.out.println("Handling pingreply: "+pingReply);
+
+	if(!_chord.isMember() && pingReply.hasGGEPExtension() && pingReply.isChordMember())
+	   _chord.connect(ChordLookupService.DEFAULT_CHORD_PORT, pingReply.getIP());
+
         super.handlePingReply(pingReply, receivingConnection);
     }
 
@@ -314,7 +328,7 @@ public class StandardMessageRouter
         ManagedConnection receivingConnection)
     {
         //Ignore push request from banned hosts.
-        if (receivingConnection.isPersonalSpam(pushRequest))
+        if (receivingConnection!=null && receivingConnection.isPersonalSpam(pushRequest))
             return;
 
         // Ignore excess upload requests

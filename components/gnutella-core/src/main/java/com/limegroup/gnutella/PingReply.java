@@ -35,11 +35,12 @@ public class PingReply extends Message implements Serializable {
      *  bytes, i.e., 0 < files < 2^32.
      * @param kbytes the total size of all files I'm sharing, in kilobytes.
      *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     */
+     */	
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes) {
         this(guid, ttl, port, ip, files, kbytes, false);
-    }
+	}
+	
 
     /**
      * Creates a new ping from scratch with ultrapeer extension data.
@@ -60,7 +61,7 @@ public class PingReply extends Message implements Serializable {
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes, 
              boolean isUltrapeer) { 
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1);
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1, 0);
     }
 
     /**
@@ -85,9 +86,9 @@ public class PingReply extends Message implements Serializable {
      */
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes,
-             boolean isUltrapeer, int dailyUptime) {
+             boolean isUltrapeer, int dailyUptime, int chordMember) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             dailyUptime>=0 ? newGGEP(dailyUptime) : null);
+             dailyUptime >= 0 ? newGGEP(dailyUptime, chordMember) : null);
     }
      
     /** Internal constructor used to bind the encoded GGEP payload, avoiding the
@@ -120,10 +121,11 @@ public class PingReply extends Message implements Serializable {
     }
 
     /** Returns the GGEP payload bytes to encode the given uptime */
-    private static byte[] newGGEP(int dailyUptime) {
+    private static byte[] newGGEP(int dailyUptime, int chordMember) {
         try {
             GGEP ggep=new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+			ggep.put(GGEP.GGEP_HEADER_CHORD_MEMBER, chordMember);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
@@ -208,6 +210,27 @@ public class PingReply extends Message implements Serializable {
             throw new BadPacketException("Couldn't find uptime extension.");
         }
     }
+
+       /**
+	 * Returns whether or not the node denoted by this <tt>PingReply</tt>
+	 * instance is a member of the Chord.
+	 *
+	 * @return <tt>true</tt> if this node is currently a member of the Chord,
+	 *  <tt>false</tt> otherwise
+	 */
+	public synchronized boolean isChordMember() {
+		parseGGEP();
+		if(ggep == null) {
+		   return false;
+		   //	throw new BadPacketException("missing GGEP block");
+		} 
+		try {
+			return (ggep.getInt(GGEP.GGEP_HEADER_CHORD_MEMBER)>0);
+		} catch(BadGGEPPropertyException e) {
+		   return false;
+		   //throw new BadPacketException("could not find chord GGEP extension");
+		}
+	}
 
     public synchronized boolean hasGGEPExtension() {
         parseGGEP();

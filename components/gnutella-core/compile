@@ -3,7 +3,7 @@
 
 # NOTE:  If you are using cygwin on Windows, the colon below 
 #        should be a semi-colon
-CLASSPATH=".:lib/collections.jar:lib/xerces.jar:lib/MRJToolkitStubs.jar"
+CLASSPATH=.:../chord:lib/collections.jar:lib/xerces.jar:lib/MRJToolkitStubs.jar:/home/csgrads/jeriksson/programs/jakarta-ant-1.4.1/lib/ant.jar
 export CLASSPATH
 
 ant

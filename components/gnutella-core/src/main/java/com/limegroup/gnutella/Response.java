@@ -178,6 +178,14 @@ public class Response {
 			 "", fd.getUrns(), null);
 	}
 
+      /** CHORD ADDITION
+	  Allows the construction of responses from remote hosts with URNS.
+      */
+      public Response(long index, long size, String name, Set urns)
+      {
+	 this(index,size,name,null,urns,null);
+      }
+
     /**
 	 * Overloaded constructor that allows the creation of Responses with
      * meta-data and a <tt>Set</tt> of <tt>URN</tt> instances.  This 

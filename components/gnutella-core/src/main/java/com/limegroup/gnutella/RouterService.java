@@ -59,6 +59,9 @@ public class RouterService
     private ChatManager chatManager;//keep the reference around...prevent class GC
     private SimpleTimer timer;
 
+    // CHORD ADDITION
+    private ChordLookupService chord;
+
     
     /**
      * For authenticating users
@@ -110,20 +113,21 @@ public class RouterService
   		this.manager = createConnectionManager();
   		this.catcher = createHostCatcher();
   		this.downloader = new DownloadManager();
+		this.chord = new ChordLookupService();
   		this.uploadManager = new UploadManager(this.callback, this.router, 
 											   this.fileManager);
 
-        this.chatManager = ChatManager.instance();
+		this.chatManager = ChatManager.instance();
 
 		// Now, link all the pieces together, starting the various threads.
 		this.catcher.initialize(acceptor, manager,
 								SettingsManager.instance().getHostList());
-		this.router.initialize(acceptor, manager, catcher, uploadManager);
+		this.router.initialize(acceptor, manager, catcher, uploadManager, chord);
 		this.manager.initialize(router, catcher);		
 		//this.uploadManager.initialize(callback, router, acceptor,fileManager);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
-        this.chatManager.setActivityCallback(callback);
-
+		this.chatManager.setActivityCallback(callback);
+	
 		//We used to call the following code here:
         //  		if(settings.getConnectOnStartup()) {
         //  			this.catcher.connectToRouter();
@@ -137,7 +141,8 @@ public class RouterService
         //HostCatcher.expire() would instead call Thread.interrupt, causing
         //HostCatcher.connectUntilPong to be restarted.       
 
-		this.downloader.initialize(callback, router, acceptor, fileManager);
+		this.chord.initialize(acceptor, uploadManager, downloader, callback);
+		this.downloader.initialize(callback, router, acceptor, fileManager, chord);
 		
         //Ensure statistcs have started (by loading class).
         Statistics.instance();
@@ -215,7 +220,7 @@ public class RouterService
     public void postGuiInit() {
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
-        fileManager.initialize(callback);
+        fileManager.initialize(callback, chord);
         // Restore any downloads in progress.
         downloader.postGuiInit(this);
     }

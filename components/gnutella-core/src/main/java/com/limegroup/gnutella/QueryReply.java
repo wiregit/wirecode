@@ -935,4 +935,9 @@ public class QueryReply extends Message implements Serializable{
             e.printStackTrace();
     }
 
+      //TODO: Do this in a less hackish way.
+      public boolean isChordReply() {
+	 byte[] guid=getGUID();
+	 return guid[0]=='C' && guid[1]=='H' && guid[2]=='O' && guid[3]=='R' && guid[4]=='D';
+      }
 } //end QueryReply

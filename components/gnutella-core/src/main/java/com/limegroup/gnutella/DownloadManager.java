@@ -37,6 +37,11 @@ public class DownloadManager implements BandwidthTracker {
     private Acceptor acceptor;
     /** Used to check if the file exists. */
     private FileManager fileManager;
+    
+    /** CHORD ADDITION 
+        Chord handle for looking up more file sources */
+    private ChordLookupService chord;
+
     /** The repository of incomplete files 
      *  INVARIANT: incompleteFileManager is same as those of all downloaders */
     private IncompleteFileManager incompleteFileManager
@@ -68,6 +73,7 @@ public class DownloadManager implements BandwidthTracker {
      */
     private List querySentMDs = new ArrayList();
 
+
     //////////////////////// Creation and Saving /////////////////////////
 
     /** 
@@ -81,11 +87,13 @@ public class DownloadManager implements BandwidthTracker {
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor,
-                           FileManager fileManager) {
+                           FileManager fileManager,
+                           ChordLookupService chord) {
         this.callback=callback;
         this.router=router;
         this.acceptor=acceptor;
         this.fileManager=fileManager;
+	this.chord=chord;
     }
 
     /**
@@ -256,6 +264,13 @@ public class DownloadManager implements BandwidthTracker {
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.
         writeSnapshot();
+
+	// CHORD - run an initial chord lookup to get alternate locations.
+	// this really should be in a separate thread or async, but I'll leave
+	// it like this for now.
+
+	runChordLookup(files);
+
         return downloader;
     }   
     
@@ -353,8 +368,14 @@ public class DownloadManager implements BandwidthTracker {
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
         // short-circuit.
-        if (qr.calculateQualityOfService(!acceptor.acceptedIncoming()) < 1)
-            return;
+        
+        // CHORD TODO: Should put this line back eventually, with some modifications
+
+       if (qr.calculateQualityOfService(!acceptor.acceptedIncoming()) < 1 &&
+	  !qr.isChordReply())
+	  return;
+
+       System.out.println("IN DownloadManager.handleQueryReply()");
 
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
@@ -645,6 +666,9 @@ public class DownloadManager implements BandwidthTracker {
                 // send away....
                 for (int i = 0; i < qReqs.length; i++)
                     router.broadcastQueryRequest(qReqs[i]);            
+
+		// do a new chord lookup for each requery
+		runChordLookup(rfds);
             }
             else if ((rfds.length == 0) && 
                      (requerier instanceof RequeryDownloader)) {
@@ -664,6 +688,35 @@ public class DownloadManager implements BandwidthTracker {
         return allowed;
     }
 
+      private void runChordLookup(RemoteFileDesc[] rfds)
+      {
+	 /* 
+	    Run a CHORD lookup for the given file URN.
+	    We're assuming that all matching files have the same hash, so
+	    searching using just the hash of the first file with a hash is enough.
+		   
+	    Loop through all files' urns in search of the first SHA-1 URN, then break.
+	 */ 
+	 for (int i = 0; i < rfds.length; i++) {
+
+	    // CHORD TODO: remove this temporary lookup. It looks for filenames
+	    // because of the lack of sources with URNs online.
+	    // chord.lookupURN(rfds[i].getFileName());
+
+	    Set urns;
+	    if((urns=rfds[i].getUrns())!=null) {
+	       Iterator urni=urns.iterator();
+	       while(urni.hasNext()) {
+		  URN urn=(URN)urni.next();
+		  if(urn.getUrnType().isSHA1()) {
+		     chord.lookupURN(urn);
+		     break;
+		  }
+	       }
+	    }
+	 }		
+      }
+    
 
     /**
      * Sends a push request for the given file.  Returns false iff no push could

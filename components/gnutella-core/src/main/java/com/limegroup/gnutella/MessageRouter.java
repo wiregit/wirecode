@@ -19,6 +19,7 @@ public abstract class MessageRouter
     protected HostCatcher _catcher;
     protected ConnectionManager _manager;
     protected Acceptor _acceptor;
+    protected ChordLookupService _chord;
 
     /**
      * @return the GUID we attach to QueryReplies to allow PushRequests in
@@ -142,12 +143,14 @@ public abstract class MessageRouter
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager,
-                    HostCatcher catcher, UploadManager uploadManager)
+			   HostCatcher catcher, UploadManager uploadManager, 
+			   ChordLookupService chord)
     {
         _acceptor = acceptor;
         _manager = manager;
         _catcher = catcher;
         _uploadManager = uploadManager;
+	_chord = chord;
     }
 
     public String getPingRouteTableDump()
