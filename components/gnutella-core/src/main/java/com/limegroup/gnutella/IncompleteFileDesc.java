@@ -1,12 +1,10 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.Interval;
 import com.sun.java.util.collections.*;
 import java.io.*;
-import java.net.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.altlocs.*;
 
