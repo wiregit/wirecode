@@ -157,16 +157,6 @@ public class GGEP extends Object {
                 currIndex += dataLength;
             }
 
-            debug("");
-            debug("GGEP(): --------- block info ---------");
-            debug("GGEP(): onLastExtension = " + onLastExtension);
-            debug("GGEP(): encoded = " + encoded);
-            debug("GGEP(): compressed = " + compressed);
-            debug("GGEP(): headerLen = " + headerLen);
-            debug("GGEP(): extension header = " + extensionHeader);
-            debug("GGEP(): dataLength = " + dataLength);
-            debug("GGEP(): extension data = " + extensionData);
-
             // ok, everything checks out, just slap it in the hashmapper...
             _props.put(extensionHeader, extensionData);
 
@@ -266,8 +256,6 @@ public class GGEP extends Object {
                         currData = COBSUtil.cobsEncode(currData);
                     dataLen = currData.length;
                 }
-                debug("GGEP.write(): dataLen for " + currHeader + 
-                      " is " + dataLen);
                 writeHeader(currHeader, dataLen, 
                             !headers.hasNext(), out,
                             shouldEncode);
@@ -275,8 +263,6 @@ public class GGEP extends Object {
                     out.write(currData);
             }
         }
-        debug("GGEP.write(): returning " + 
-              toHexString(((ByteArrayOutputStream)out).toByteArray()));
     }
 
 
