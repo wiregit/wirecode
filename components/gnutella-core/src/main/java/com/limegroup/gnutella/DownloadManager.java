@@ -5,7 +5,6 @@ import com.limegroup.gnutella.downloader.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
-import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.bitzi.util.Base32;
@@ -381,9 +380,9 @@ public class DownloadManager implements BandwidthTracker {
         //Instantiate downloader, validating incompleteFile first.
         ResumeDownloader downloader=null;
         try {
-            String name=incompleteFileManager.getCompletedName(incompleteFile);
+            String name=IncompleteFileManager.getCompletedName(incompleteFile);
             int size=ByteOrder.long2int(
-                incompleteFileManager.getCompletedSize(incompleteFile));
+                IncompleteFileManager.getCompletedSize(incompleteFile));
             downloader = new ResumeDownloader(incompleteFileManager,
                                               incompleteFile,
                                               name,
