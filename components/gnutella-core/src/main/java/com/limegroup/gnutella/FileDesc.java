@@ -24,7 +24,9 @@ public class FileDesc {
      * @param n the name of the file (e.g., "funny.txt")
      * @param p the fully-qualified path of the file
      *  (e.g., "/home/local/funny.txt")
-     * @param s the size of the file, in bytes
+     * @param s the size of the file, in bytes.  (Note that
+     *  files are currently limited to Integer.MAX_VALUE bytes
+     *  length, i.e., 2048MB.)
      */
     public FileDesc(int i, String n, String p, int s) {
         _index = i;
