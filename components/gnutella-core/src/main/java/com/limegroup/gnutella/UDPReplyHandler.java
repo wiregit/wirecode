@@ -160,6 +160,17 @@ public final class UDPReplyHandler implements ReplyHandler {
 		return false;
 	}
 
+    /**
+     * Returns <tt>false</tt> since UDP reply handlers are not TCP 
+     * connections in the first place.
+     *
+     * @return <tt>false</tt>, since UDP handlers are not connections in
+     *  the first place, and therefore cannot use Ultrapeer query routing
+     */
+    public boolean isUltrapeerQueryRoutingConnection() {
+        return false;
+    }
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

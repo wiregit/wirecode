@@ -169,6 +169,17 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	public boolean isHighDegreeConnection() {
 		return false;
 	}	
+
+    /**
+     * Returns <tt>false</tt>, since this connection is me, and it's not
+     * possible to pass query routing tables to oneself.
+     *
+     * @return <tt>false</tt>, since you cannot pass query routing tables
+     *  to yourself
+     */
+    public boolean isUltrapeerQueryRoutingConnection() {
+        return false;
+    }
 }
 
 

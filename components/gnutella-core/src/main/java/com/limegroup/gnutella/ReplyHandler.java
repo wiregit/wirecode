@@ -84,4 +84,12 @@ public interface ReplyHandler {
 	 * otherwise <tt>false</tt>
 	 */
 	public boolean isHighDegreeConnection();
+
+    /**
+     * Returns whether or not this handler uses Ultrapeer query routing.
+     *
+     * @return <tt>true</tt> if this connection uses query routing
+     *  between Ultrapeers, otherwise <tt>false</tt>
+     */
+    public boolean isUltrapeerQueryRoutingConnection();
 }
