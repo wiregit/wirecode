@@ -127,10 +127,6 @@ public class FWTDetectionTest extends BaseTestCase {
     
     /**
      * tests the scenario where we are not connected
-     * b) do not have valid external address
-     * c) can't do solicited
-     * 
-     * This test should be run first.
      */
     public void testDisconnected() throws Exception {
         cmStub.setConnected(false);
@@ -139,6 +135,48 @@ public class FWTDetectionTest extends BaseTestCase {
         ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
         assertFalse(UDPService.instance().canDoFWT());
         
+    }
+    
+    /**
+     * tets the scenario where we have and have not received a pong 
+     */
+    public void testNotReceivedPong() throws Exception {
+        cmStub.setConnected(true);
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        assertTrue(UDPService.instance().canDoFWT());
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        assertFalse(UDPService.instance().canDoFWT());
+        
+        cmStub.setConnected(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
+        
+        connectAsync();
+        
+        //we should receive a udp ping requesting ip
+        assertTrue(ponger1.listen().requestsIP());
+        
+        //reply with a pong that does not carry info
+        ponger1.reply(null);
+        
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        assertTrue(UDPService.instance().canDoFWT());
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        assertFalse(UDPService.instance().canDoFWT());
+        
+        //reply with a pong that does carry info
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        Endpoint myself = new Endpoint(RouterService.getExternalAddress(),
+                RouterService.getPort());
+        ponger1.reply(myself);
+        Thread.sleep(1000);
+        
+        cmStub.setConnected(true);
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(false);
+        assertTrue(UDPService.instance().canDoFWT());
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        assertTrue(UDPService.instance().canDoFWT());
     }
     
     /**
