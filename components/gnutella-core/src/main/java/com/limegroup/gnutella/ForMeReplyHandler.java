@@ -122,6 +122,17 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	public boolean isKillable() {
 		return false;
 	}
+
+	/**
+	 * Implements <tt>ReplyHandler</tt> interface.  Returns whether this
+	 * node is a leaf or an Ultrapeer.
+	 *
+	 * @return <tt>true</tt> if this node is a leaf node, otherwise 
+	 *  <tt>false</tt>
+	 */
+	public boolean isLeafConnection() {
+		return !RouterService.isSupernode();
+	}
 }
 
 
