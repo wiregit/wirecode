@@ -23,6 +23,8 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 	
 	private static final long TEST_TIMEOUT=300;
 	
+	BestCandidates _bestCandidates = BestCandidates.instance();
+	
 	/**
 	 * the advertiser
 	 */
@@ -31,7 +33,7 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 	/**
 	 * some notification objects
 	 */
-	static Object _leafLock, _upLock, _upLockNull;
+	static Object _leafLock, _upLock;
 	
 	/**
 	 * some connections
@@ -58,7 +60,6 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		
 		_leafLock = new Object();
 		_upLock = new Object();
-		_upLockNull = new Object();
 		
 		_notSupporting = new UPConnection(false);
 		_supporting = new UPConnection(true);
@@ -75,10 +76,15 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 			PrivilegedAccessor.setValue(CandidateAdvertiser.class,"LEAF_INTERVAL",new Long(TEST_TIMEOUT));
 			PrivilegedAccessor.setValue(CandidateAdvertiser.class,"UP_INTERVAL",new Long(TEST_TIMEOUT));
 			
-			BestCandidates.purge();
+			_bestCandidates.purge();
 			
 			_advertiser = (CandidateAdvertiser)
 			PrivilegedAccessor.getValue(BestCandidates.class, "_advertiser");
+			
+			_advertiser.cancel();
+			_advertiser = new CandidateAdvertiser();
+			
+			PrivilegedAccessor.setValue(_bestCandidates,"_advertiser",_advertiser);
 			
 			//replace the original connection manager with the stub
 			_manager.setInitializedConnections(_list);
@@ -111,10 +117,7 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		synchronized(_upLock) {
 			_upLock.wait(TEST_TIMEOUT);
 		}
-		synchronized(_upLockNull) {
-			_upLockNull.wait(TEST_TIMEOUT);
-		}
-		assertGreaterThanOrEquals(2*TEST_TIMEOUT,System.currentTimeMillis() -now);
+		assertGreaterThanOrEquals(TEST_TIMEOUT,System.currentTimeMillis() -now);
 		
 		assertTrue(_leaf._gotIt);
 		assertFalse(_supporting._gotNotNull);
@@ -129,23 +132,11 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 	 */
 	public void testUPFunctionality() throws Exception {
 		_manager.setSupernode(true);
+		
 		assertTrue(RouterService.isSupernode());
 		
 		long now = System.currentTimeMillis();
 		
-		//first, we should receive a null message.
-		
-		_supporting._gotNotNull = false;
-		_supporting._gotNull = false;
-		synchronized(_upLockNull) {
-			_upLockNull.wait(TEST_TIMEOUT);
-		}
-		
-		assertTrue(_supporting._gotNull);
-		assertFalse(_supporting._gotNotNull);
-		
-		_supporting._gotNull=false;
-		assertLessThanOrEquals(TEST_TIMEOUT+20, System.currentTimeMillis()-now);
 		
 		synchronized(_upLock) {
 			_upLock.wait(TEST_TIMEOUT);
@@ -157,7 +148,6 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		assertGreaterThanOrEquals(2*TEST_TIMEOUT,System.currentTimeMillis() -now);
 		
 		assertFalse(_supporting._gotNotNull);
-		assertFalse(_notSupporting._gotNull);
 		assertFalse(_notSupporting._gotNotNull);
 		assertFalse(_leaf._gotIt);
 		
@@ -166,9 +156,8 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		candidates[0] = new RemoteCandidate("1.2.3.4",15,(short)2);
 		BestCandidatesVendorMessage bcvm = new BestCandidatesVendorMessage(candidates);
 		_advertiser.setMsg(bcvm);
-		assertNotNull(PrivilegedAccessor.getValue(_advertiser, "_bcvm"));
 		
-		_supporting._gotNull=false;
+		assertNotNull(PrivilegedAccessor.getValue(_advertiser, "_bcvm"));
 		
 		now = System.currentTimeMillis();
 		
@@ -176,31 +165,15 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		synchronized(_upLock) {
 			_upLock.wait(TEST_TIMEOUT);
 		}
+		
 		assertTrue(_supporting._gotNotNull);
-		assertFalse(_supporting._gotNull);
 		assertFalse(_notSupporting._gotNotNull);
-		assertFalse(_notSupporting._gotNull);
 		assertFalse(_leaf._gotIt);
 		assertLessThanOrEquals(TEST_TIMEOUT+20, System.currentTimeMillis()-now);
 		
+		
+		//after another interval, we should get the same message
 		_supporting._gotNotNull=false;
-		now = System.currentTimeMillis();
-		
-		//the field should turn to null now
-		//and after a period it should get advertised again.
-		assertNull(PrivilegedAccessor.getValue(_advertiser, "_bcvm"));
-		
-		synchronized(_upLockNull) {
-			_upLockNull.wait(TEST_TIMEOUT);
-		}
-		
-		assertTrue(_supporting._gotNull);
-		assertFalse(_supporting._gotNotNull);
-		assertFalse(_notSupporting._gotNotNull);
-		assertFalse(_notSupporting._gotNull);
-		assertFalse(_leaf._gotIt);
-		assertLessThanOrEquals(TEST_TIMEOUT+20, System.currentTimeMillis()-now);
-		
 		now = System.currentTimeMillis();
 		
 		synchronized(_leafLock) {
@@ -211,11 +184,11 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		}
 		
 		
-		assertFalse(_supporting._gotNotNull);
+		assertTrue(_supporting._gotNotNull);
 		assertFalse(_notSupporting._gotNotNull);
-		assertFalse(_notSupporting._gotNull);
 		assertFalse(_leaf._gotIt);
 		assertGreaterThanOrEquals(2*TEST_TIMEOUT,System.currentTimeMillis() -now);
+		
 	}
 	
 	/**
@@ -249,17 +222,11 @@ public class CandidateAdvertiserTest extends BaseTestCase {
 		
 		public void handleBestCandidatesMessage(BestCandidatesVendorMessage m) {
 		
-			
-			if (m != null)
-				synchronized(_upLock){
-					_gotNotNull=true;
-					_upLock.notifyAll();
-				}
-			else
-				synchronized(_upLockNull) {
-					_gotNull=true;
-					_upLockNull.notifyAll();
-				}
+			synchronized(_upLock){
+				_gotNotNull=true;
+				_upLock.notifyAll();
+			}
+		
 		}
 		
 		public int remoteHostSupportsBestCandidates() {
