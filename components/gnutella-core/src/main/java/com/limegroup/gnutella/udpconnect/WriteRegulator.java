@@ -114,13 +114,16 @@ public class WriteRegulator {
           (((baseWait * _sendWindow.getWindowSize()) / _skipLimit) * 2) / 4;
         if ( rtt != 0 && baseWait != 0 && 
              (windowDelay < rtt || rtt > maxRTT) ) {
-//log("RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
-//" rtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
-//" lRTT:"+_sendWindow.lowRoundTripTime()+
-//" sWait:"+sentWait+
-//" mRTT:"+maxRTT+
-//" wDelay:"+windowDelay+
-//" sT:"+sleepTime);
+            if(LOG.isDebugEnabled())  
+                LOG.debug(
+                  "RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
+                  " rtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
+                  " lRTT:"+_sendWindow.lowRoundTripTime()+
+                  " sWait:"+sentWait+
+                  " mRTT:"+maxRTT+
+                  " wDelay:"+windowDelay+
+                  " sT:"+sleepTime);
+
             if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;
                 _skipLimit /= 2;
