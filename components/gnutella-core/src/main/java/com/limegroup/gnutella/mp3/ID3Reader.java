@@ -5,7 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
-import de.ueberdosis.mp3info.id3v2.*;
+import de.vdheide.mp3.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -188,29 +188,25 @@ public final class ID3Reader {
      */
     public static boolean hasVerifiedLicense(String filename) 
         throws IOException {
-        
-        de.ueberdosis.mp3info.ID3Reader reader = 
-            new de.ueberdosis.mp3info.ID3Reader(filename);
-        
-        ID3V2Tag v2Tag = reader.getV2Tag();
 
-        if (v2Tag == null)
-            return false;
-
-        java.util.Vector frames = v2Tag.getFrames();
-        java.util.Enumeration iter = frames.elements();
-
-        while (iter.hasMoreElements()) {
-            FrameT currFrameT = (FrameT) iter.nextElement();
-            if (currFrameT instanceof FrameTCOP) {
-                byte[] copyrightBytes = currFrameT.getData();
-                String copyrightString = new String(copyrightBytes);
-                if (copyrightString.indexOf("verify at") > 0)
-                    return true;
-            }
+        try {
+            MP3File mp3 = new MP3File(filename);
+            TagContent content = mp3.getCopyrightText();
+            if (filename.indexOf("verify at") > -1)
+                return true;
+            else
+                return false;
         }
-
-        return false;
+        catch (NoMP3FrameException why) {
+            throw new IOException();
+        }
+        catch (FrameDamagedException thatsucks) {
+            throw new IOException();
+        }
+        catch (ID3v2Exception suckypoo) {
+            throw new IOException();
+        }
+        
     }
 
 
