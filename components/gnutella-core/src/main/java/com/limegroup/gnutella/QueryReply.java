@@ -41,6 +41,8 @@ public class QueryReply extends Message implements Serializable{
     private volatile int uploadedFlag=UNDEFINED;
     /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
     private volatile int measuredSpeedFlag=UNDEFINED;
+    /** If parsed, one of TRUE (client supports chat), FALSE, or UNDEFINED. */
+    private volatile int supportsChat=UNDEFINED;
     
     private static final int TRUE=1;
     private static final int FALSE=0;
@@ -68,7 +70,7 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
-             false, false, false, false, false);
+             false, false, false, false, false, false);
     }
 
 
@@ -84,14 +86,17 @@ public class QueryReply extends Message implements Serializable{
      *  upload
      * @param measuredSpeed true iff speed is measured, not as reported by the
      *  user
+     * @param supportsChat true iff the host currently allows chatting.
      */
     public QueryReply(byte[] guid, byte ttl, 
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID,
             boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed) {
+            boolean finishedUpload, boolean measuredSpeed,
+            boolean supportsChat) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
-             true, needsPush, isBusy, finishedUpload, measuredSpeed);
+             true, needsPush, isBusy, finishedUpload, measuredSpeed,
+             supportsChat);
     }
 
     /** 
@@ -101,11 +106,12 @@ public class QueryReply extends Message implements Serializable{
              int port, byte[] ip, long speed, Response[] responses,
              byte[] clientGUID,
              boolean includeQHD, boolean needsPush, boolean isBusy,
-             boolean finishedUpload, boolean measuredSpeed) {
+             boolean finishedUpload, boolean measuredSpeed,
+             boolean supportsChat) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               //11 bytes for header, plus file records, plus optional 7 byte QHD
-              //without private area, plus 16-byte footer
-              11 + rLength(responses) + (includeQHD ? 4+3 : 0) + 16);
+              //plus one byte private area, plus 16-byte footer
+              11 + rLength(responses) + (includeQHD ? 4+3+1 : 0) + 16);
         Assert.that((port&0xFFFF0000)==0);
         Assert.that(ip.length==4);
         Assert.that((speed&0xFFFFFFFF00000000l)==0);
@@ -157,6 +163,8 @@ public class QueryReply extends Message implements Serializable{
                 | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
                 | (measuredSpeed ? SPEED_MASK : 0));
+            //d) private area: one flag that says whether we support chat
+            payload[i++]=(byte)(supportsChat ? 0x1 : 0);
         }        
 
         //Write footer at payload[i...i+16-1]
@@ -346,6 +354,28 @@ public class QueryReply extends Message implements Serializable{
         }
     }
 
+    /** 
+     * Returns true iff the client supports chat.  Throws BadPacketException if
+     * the flag couldn't be extracted, either because it is missing or
+     * corrupted.  Typically this exception is treated the same way as returning
+     * false.  
+     */
+    public boolean getSupportsChat() throws BadPacketException {
+        parseResults();
+
+        switch (supportsChat) {
+        case UNDEFINED:
+            throw new BadPacketException();
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for supportsChat: "+supportsChat);
+            return false;
+        }
+    }
+
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
      *    Tries to extract metadata and store in vendor and pushFlagSet.
@@ -453,6 +483,7 @@ public class QueryReply extends Message implements Serializable{
             int busyFlagT=UNDEFINED;
             int uploadedFlagT=UNDEFINED;
             int measuredSpeedFlagT=UNDEFINED;
+            int supportsChatT=UNDEFINED;
 
             //a) extract vendor code
             try {
@@ -491,6 +522,16 @@ public class QueryReply extends Message implements Serializable{
             }
             i+=length;
 
+            //Parse LimeWire's private area.  Currently only a single byte
+            //whose LSB is 0x1 if we support chat, or 0x0 if we do.
+            int privateLength=payload.length-i;
+            if (privateLength>0 && vendorT.equals("LIME")) {
+                if (payload[i]==(byte)0x1)
+                    supportsChatT=TRUE;
+                else if (payload[i]==(byte)0x0)
+                    supportsChatT=FALSE;
+            }
+
             if (i>payload.length-16)
                 throw new BadPacketException(
                     "Common payload length too large.");
@@ -502,6 +543,7 @@ public class QueryReply extends Message implements Serializable{
             this.busyFlag=busyFlagT;
             this.uploadedFlag=uploadedFlagT;
             this.measuredSpeedFlag=measuredSpeedFlagT;
+            this.supportsChat=supportsChatT;
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -659,6 +701,11 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(false);
             e.printStackTrace();
         }
+        try {
+            qr.getSupportsChat();
+            Assert.that(false);
+        } catch (BadPacketException e) {
+        }
 
         //Weird case.  No common data.  (Don't allow.)
         payload=new byte[11+11+(4+1+2)+16];
@@ -742,16 +789,17 @@ public class QueryReply extends Message implements Serializable{
        
 
         //Normal case: busy and push bits defined and set
-        payload=new byte[11+11+(4+3+0)+16];
+        payload=new byte[11+11+(4+3+1)+16];
         payload[0]=1;                //Number of results
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
-        payload[11+11+1]=(byte)105;  //The character 'i'
+        payload[11+11+1]=(byte)73;   //The character 'I'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
         payload[11+11+4+1]=(byte)0x1d;  //111X1 
         payload[11+11+4+2]=(byte)0x1c;  //111X0
+        payload[11+11+4+2+1]=(byte)0x1; //supports chat
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -765,6 +813,7 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(qr.getIsMeasuredSpeed()==true);
             Assert.that(qr.getHadSuccessfulUpload()==true);
             Assert.that(qr.getHadSuccessfulUpload()==true);
+            Assert.that(qr.getSupportsChat()==true);
         } catch (BadPacketException e) {
             System.out.println(e.toString());
             Assert.that(false);
@@ -772,7 +821,7 @@ public class QueryReply extends Message implements Serializable{
 
           
         //Normal case: busy and push bits defined and unset
-        payload=new byte[11+11+(4+3+0)+16];
+        payload=new byte[11+11+(4+3+1)+16];
         payload[0]=1;                //Number of results
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
@@ -795,6 +844,10 @@ public class QueryReply extends Message implements Serializable{
             System.out.println(e.toString());
             Assert.that(false);
         }  
+        try {
+            qr.getSupportsChat();
+            Assert.that(false); //LiME!=LIME when looking at private area
+        } catch (BadPacketException e) { }
 
         //Create extended QHD from scratch
         responses=new Response[2];
@@ -803,7 +856,7 @@ public class QueryReply extends Message implements Serializable{
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          false, true, true, false);
+                          false, true, true, false, true);
         Assert.that(qr.getIP().equals("255.0.0.1"));
         Assert.that(qr.getPort()==0xFFFF);
         Assert.that(qr.getSpeed()==u4);
@@ -820,6 +873,7 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(qr.getIsBusy()==true);
             Assert.that(qr.getHadSuccessfulUpload()==true);
             Assert.that(qr.getIsMeasuredSpeed()==false);
+            Assert.that(qr.getSupportsChat()==true);
         } catch (BadPacketException e) {
             Assert.that(false);
         } catch (NoSuchElementException e) {
@@ -833,13 +887,14 @@ public class QueryReply extends Message implements Serializable{
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          true, false, false, true);
+                          true, false, false, true, false);
         try {
             Assert.that(qr.getVendor().equals("LIME"));
             Assert.that(qr.getNeedsPush()==true);
             Assert.that(qr.getIsBusy()==false);
             Assert.that(qr.getHadSuccessfulUpload()==false);
             Assert.that(qr.getIsMeasuredSpeed()==true);
+            Assert.that(qr.getSupportsChat()==false);
         } catch (BadPacketException e) {
             Assert.that(false);
         } catch (NoSuchElementException e) {
@@ -853,10 +908,11 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(false);
         }
         byte[] bytes=out.toByteArray();
-        //Length includes header, query hit header and footer, responses, and QHD
-        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+3));
-        Assert.that(bytes[bytes.length-16-2]==0x1d); //11101
-        Assert.that(bytes[bytes.length-16-1]==0x11); //10001
+        //Length includes header, query hit header and footer, responses, and
+        //QHD (public and private)
+        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+3+1));
+        Assert.that(bytes[bytes.length-16-1-2]==0x1d); //11101
+        Assert.that(bytes[bytes.length-16-1-1]==0x11); //10001
 
 
         //Create from scratch with no bits set
