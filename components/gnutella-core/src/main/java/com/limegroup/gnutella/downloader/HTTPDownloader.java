@@ -776,7 +776,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public void doDownload(VerifyingFile commonOutFile) 
         throws IOException {
-        _socket.setSoTimeout(0);//once downloading we can stall for a bit
+        _socket.setSoTimeout(10*60*1000);//downloading, can stall upto 10 mins
         long currPos = _initialReadingPoint;
         try {
             int c = -1;
