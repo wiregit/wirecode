@@ -22,7 +22,26 @@ public class Acceptor extends Thread {
     private int _port=0;
     private Object _socketLock=new Object();
 
-    private static volatile byte[] _address;
+    /**
+     * The real address of this host--assuming there's only one--used for pongs
+     * and query replies.  This value is ignored if FORCE_IP_ADDRESS is
+     * true. This is initialized in three stages:
+     *   1. Statically initialized to all zeroes.
+     *   2. Initialized in the Acceptor thread to getLocalHost().
+     *   3. Initialized each time a connection is initialized to the local
+     *      address of that connection's socket. 
+     *
+     * Why are all three needed?  Step (3) is needed because (2) can often fail
+     * due to a JDK bug #4073539, or if your address changes via DHCP.  Step (2)
+     * is needed because (3) ignores local addresses of 127.0.0.1.  Step (1) is
+     * needed because (2) can't occur in the main thread, as it may block
+     * because the update checker is trying to resolve addresses.  (See JDK bug
+     * #4147517.)  Note this may delay the time to create a listening socket by
+     * a few seconds; big deal!
+     *
+     * LOCKING: obtain Acceptor.class' lock 
+     */
+    private static byte[] _address=new byte[4];
 
     private Vector _badHosts = new Vector();
 
@@ -34,18 +53,6 @@ public class Acceptor extends Thread {
 
 	private boolean _acceptedIncoming = false;
 
-
-	//  Statically initialize address which should be replaced by a true socket
-	//
-    static {
-        try {
-            _address = InetAddress.getLocalHost().getAddress();
-        } catch (Exception e) {
-            //In case of UnknownHostException or SecurityException, we have
-            //no choice but to use a fake address: all zeroes.
-            _address = new byte[4];
-        }
-	}
 
 	/**
      * @modifes this
@@ -106,13 +113,11 @@ public class Acceptor extends Thread {
      * and pushes.
      */
     public byte[] getAddress() {
-        //TODO3: if FORCE_LOCAL_IP is true, then use that value instead.
-        //       (Alternative implementation: just set this._address accordingly
-        //        during initialization.)
-
 		if(SettingsManager.instance().getForceIPAddress())
 			return SettingsManager.instance().getForcedIPAddress();
-        return _address;
+        synchronized (Acceptor.class) {
+            return _address;
+        }
     }
 
     /**
@@ -206,6 +211,15 @@ public class Acceptor extends Thread {
      *   changed accordingly.
      */
     public void run() {
+        //0. Get local address.  This must be done here--not in the static
+        //   initializer--because it can block under certain conditions.
+        //   See the notes for _address.
+        try {
+            setAddress(InetAddress.getLocalHost().getAddress());
+        } catch (UnknownHostException e) {
+        } catch (SecurityException e) {
+        }
+
         // Create the server socket, bind it to a port, and listen for
         // incoming connections.  If there are problems, we can continue
         // onward.
