@@ -194,6 +194,25 @@ public final class ThemeSettings extends LimeProps {
     }
     
     /**
+     * Formats a theme name, removing the underscore characters,
+     * capitalizing the first letter of each word, and removing
+     * the 'lwtp'.
+     */
+    public static String formatName(String name) {
+        // strip off the .lwtp
+        name = name.substring(0, name.length()-5);
+        StringBuffer formatted = new StringBuffer(name.length());
+        StringTokenizer st = new StringTokenizer(name, "_");
+        String next;
+        for(; st.hasMoreTokens(); ) {
+            next = st.nextToken();
+            formatted.append(" " + next.substring(0,1).toUpperCase(Locale.US));
+            if(next.length() > 1) formatted.append(next.substring(1));
+        }
+        return formatted.toString();
+    }        
+    
+    /**
      * Setting for the default theme file to use for LimeWire display.
      */
     public static final FileSetting THEME_DEFAULT =
