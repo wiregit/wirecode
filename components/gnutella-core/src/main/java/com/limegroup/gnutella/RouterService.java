@@ -845,6 +845,7 @@ public class RouterService {
     public static void stopQuery(GUID guid) {
         QueryUnicaster.instance().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
+        router.queryKilled(guid);
     }
 
     /** 

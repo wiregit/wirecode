@@ -181,6 +181,20 @@ public class DownloadManager implements BandwidthTracker {
         return waiting.size();
     }
 
+    public synchronized boolean guidForQueryIsDownloading(GUID guid) {
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {
+            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            if ((dGUID != null) && (dGUID.equals(guid)))
+                return true;
+        }
+        for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
+            GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
+            if ((dGUID != null) && (dGUID.equals(guid)))
+                return true;
+        }
+        return false;
+    }
+
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
@@ -760,6 +774,8 @@ public class DownloadManager implements BandwidthTracker {
         waiting.remove(downloader);
         querySentMDs.remove(downloader);
         downloader.finish();
+        if (downloader.getQueryGUID() != null)
+            router.downloadFinished(downloader.getQueryGUID());
         notify();
         callback.removeDownload(downloader);
         //Save this' state to disk for crash recovery.  Note that a downloader

@@ -197,6 +197,28 @@ public abstract class MessageRouter {
                                10 * CLEAR_TIME);
     }
 
+    /** Call this to inform us that a query has been killed by a user or
+     *  whatever.  Useful for purging unneeded info.
+     *  @throws IllegalArgumentException if the guid is null
+     */
+    public void queryKilled(GUID guid) throws IllegalArgumentException {
+        if (guid == null)
+            throw new IllegalArgumentException("Input GUID is null!");
+        if (!RouterService.getDownloadManager().guidForQueryIsDownloading(guid))
+            _bypassedResults.remove(guid);
+    }
+
+    /** Call this to inform us that a download is finished or whatever.  Useful
+     *  for purging unneeded info.
+     *  @throws IllegalArgumentException if the guid is null
+     */
+    public void downloadFinished(GUID guid) throws IllegalArgumentException {
+        if (guid == null)
+            throw new IllegalArgumentException("Input GUID is null!");
+        if (!_callback.queryIsAlive(guid))
+            _bypassedResults.remove(guid);
+    }
+    
     public String getPingRouteTableDump() {
         return _pingRouteTable.toString();
     }

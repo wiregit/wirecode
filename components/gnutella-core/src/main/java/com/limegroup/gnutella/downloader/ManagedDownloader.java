@@ -3139,6 +3139,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * change.
      *************************************************************************/
 
+    /** @return the GUID of the query that spawned this downloader.  may be null.
+     */
+    public GUID getQueryGUID() {
+        return _originalQueryGUID;
+    }
+
     public synchronized int getState() {
         return state;
     }

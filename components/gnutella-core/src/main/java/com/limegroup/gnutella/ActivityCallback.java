@@ -182,6 +182,11 @@ public interface ActivityCallback
 	 */
 	public void showDownloads();
 
+    /**
+     * @return true if the guid is still viewable to the user, else false.
+     */
+    public boolean queryIsAlive(GUID guid);
+
 
     public String getHostValue(String key);
 
