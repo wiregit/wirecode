@@ -189,16 +189,12 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      *         there was an error.
      */
     public static HashTree createHashTree(InputStream is, String sha1,
-                                          String root32, long fileSize) {
+                                          String root32, long fileSize)
+                                          throws IOException {
         if(LOG.isTraceEnabled())
             LOG.trace("reading " + sha1 + "." + root32 + " dime data.");
-        try {
-            return new HashTree(HashTreeHandler.read(is, fileSize, root32),
-                                sha1, fileSize);
-        } catch (IOException ioe) {
-            LOG.debug(ioe);
-            return null;
-        }
+        return new HashTree(HashTreeHandler.read(is, fileSize, root32),
+                            sha1, fileSize);
     }
 
     /**
@@ -304,7 +300,8 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     public List getAllNodes() {
         if(ALL_NODES == null) {
             if(DEPTH <= MAX_DEPTH_TO_STORE)
-                ALL_NODES = createAllNodes(NODES);
+                ALL_NODES =
+                    Collections.unmodifiableList(createAllNodes(NODES));
             else
                 return createAllNodes(NODES);
         }

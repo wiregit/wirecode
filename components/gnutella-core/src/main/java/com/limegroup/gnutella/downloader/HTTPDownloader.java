@@ -488,14 +488,21 @@ public class HTTPDownloader implements BandwidthTracker {
             return null;
         }
 
-        HashTree hashTree = HashTree.createHashTree(is, _rfd.getSHA1Urn().toString(), _root32, (long)_rfd.getSize());
+        HashTree hashTree = null;
+        try {
+            hashTree =
+                HashTree.createHashTree(is, _rfd.getSHA1Urn().toString(),
+                                        _root32, (long)_rfd.getSize());
+        } catch(IOException failed) {}
+
         // Get somebody else to THEX me up! I don't want to download a hash
         // tree from a host that sent me an illegal THEX reply.  
         if (hashTree == null) {
             if (LOG.isDebugEnabled())
-            LOG.debug("hashtree from " + _host + ":" + _port + "was null"); 
+                LOG.debug("hashtree from " + _host + ":" + _port + "was null");
             _rfd.setTHEXFailed();
         }
+
         return hashTree;
     }	
 	

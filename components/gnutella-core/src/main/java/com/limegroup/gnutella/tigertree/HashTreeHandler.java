@@ -79,7 +79,7 @@ class HashTreeHandler {
      *            the <tt>HashTree</tt> to construct this message from
      */
     public HashTreeHandler(HashTree tree) {
-        LOG.trace("creating HashTreeDIMEMessage for sending");
+        LOG.trace("creating HashTreeHandler for sending");
         TREE = tree;
         ALL_NODES = TREE.getAllNodes();
         ROOT_HASH = Base32.decode(TREE.getRootHash());
@@ -131,11 +131,10 @@ class HashTreeHandler {
      * @return The list of all nodes in this tree.
      * @throws IOException
      *             in case of a problem reading from the InputStream
-     * @see com.limegroup.gnutella.dime.AbstractDIMEMessage
      */
     static List read(InputStream is, long fileSize, String root32)
       throws IOException {
-        LOG.trace("creating HashTreeDIMEMessage from network");
+        LOG.trace("creating HashTreeHandler from network");
         DIMEParser parser = new DIMEParser(is);
         DIMERecord xmlRecord = parser.nextRecord();
         DIMERecord treeRecord = parser.nextRecord();
@@ -176,13 +175,6 @@ class HashTreeHandler {
      */
     public List getAllNodes() {
         return ALL_NODES;
-    }
-
-    /**
-     * @return Returns the RootHash.
-     */
-    public byte[] getRootHash() {
-        return ROOT_HASH;
     }
 
     /*
@@ -287,7 +279,9 @@ class HashTreeHandler {
         boolean isValid() {
             if (_parsed == UNKNOWN) {
                 _parsed = parse() ? VALID : INVALID;
-            } else if(_parsed == INVALID) {
+            }
+            
+            if(_parsed == INVALID) {
                 return false;
             } else if (_blockSize != HashTree.BLOCK_SIZE) {
                 if(LOG.isDebugEnabled())

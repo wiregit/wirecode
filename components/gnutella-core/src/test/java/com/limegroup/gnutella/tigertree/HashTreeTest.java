@@ -34,7 +34,9 @@ public class HashTreeTest extends BaseTestCase {
     private static final String root32 =
         "IXVJNDJ7U3NCMZE5ZWBVCXSMWMFY4ZCXG5LUYAY";
         
-    private HashTree hashTree;
+    private static HashTree hashTree;
+    private static DIMERecord xmlRecord;
+    private static DIMERecord treeRecord;
 
     public HashTreeTest(String name) {
         super(name);
@@ -58,6 +60,10 @@ public class HashTreeTest extends BaseTestCase {
         // if we get the root hash right, the rest will be working, too
         assertEquals(root32, hashTree.getRootHash());
         assertEquals(4, hashTree.getDepth());
+        assertTrue(hashTree.isGoodDepth());
+        assertEquals("/uri-res/N2X?" + sha1, hashTree.getThexURI());
+        assertEquals("/uri-res/N2X?" + sha1 + ";" + root32,
+            hashTree.httpStringValue());
         {
             List allNodes = hashTree.getAllNodes();
             assertEquals(5, allNodes.size());
@@ -67,6 +73,7 @@ public class HashTreeTest extends BaseTestCase {
             three = (List)allNodes.get(2);
             four = (List)allNodes.get(3);
             five = (List)allNodes.get(4);
+            assertEquals(five, hashTree.getNodes());
             
             // tree looks like:
             //                 u (root)
@@ -93,8 +100,8 @@ public class HashTreeTest extends BaseTestCase {
         // Should be two DIME Records.
         ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
         DIMEParser parser = new DIMEParser(in);
-        DIMERecord xmlRecord = parser.nextRecord();
-        DIMERecord treeRecord = parser.nextRecord();
+        xmlRecord = parser.nextRecord();
+        treeRecord = parser.nextRecord();
         assertTrue(!parser.hasNext());
         
         UUID uuid = verifyXML(xmlRecord);
@@ -134,6 +141,96 @@ public class HashTreeTest extends BaseTestCase {
 
         assertEquals(cranges.get(0), cranges2.get(0));
         assertEquals(((Interval)cranges.get(0)).low, 0);
+    }
+    
+    public void testCorruptedTreeFromNetwork() throws Throwable {
+        // Easiest way to test is to use existing DIMERecords and then
+        // hack them up.
+        DIMERecord corruptedXML = null, corruptedTree = null;
+        
+        // Test various ways of XML corruption first.
+        String data = new String(xmlRecord.getData());
+        int a, b;
+        StringBuffer sb;
+        String fakeData = data.substring(1);
+        
+        corruptedXML = createCorruptRecord(xmlRecord, fakeData);
+        try {
+            HashTree tree = createTree(corruptedXML, treeRecord);
+            fail("expected exception");
+        } catch(IOException expected) {}
+        
+        // try with an invalid file size.
+        sb = new StringBuffer(data);
+        a = data.indexOf("'", data.indexOf("file size="));
+        b = data.indexOf("'", a+1);
+        sb.replace(a+1, b, "0201981");
+        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corruptedXML, treeRecord);
+            fail("expected exception");
+        } catch(IOException expected) {}
+        
+        // try with an invalid segmentsize
+        sb = new StringBuffer(data);
+        a = data.indexOf("'", data.indexOf("segmentsize="));
+        b = data.indexOf("'", a+1);
+        sb.replace(a+1, b, "42");
+        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corruptedXML, treeRecord);
+            fail("expected exception");
+        } catch(IOException expected) {}
+        
+        // try with an invalid algorithm
+        sb = new StringBuffer(data);
+        a = data.indexOf("'", data.indexOf("digest algorithm="));
+        b = data.indexOf("'", a+1);
+        sb.replace(a+1, b, "http://open-content.net/spec/digest/sha1");
+        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corruptedXML, treeRecord);
+            fail("expected exception");
+        } catch(IOException expected) {}
+        
+        // try with an invalid hash size.
+        sb = new StringBuffer(data);
+        a = data.indexOf("'", data.indexOf("outputsize="));
+        b = data.indexOf("'", a+1);
+        sb.replace(a+1, b, "20");
+        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corruptedXML, treeRecord);
+            fail("expected exception");
+        } catch(IOException expected) {}        
+        
+        // try with an invalid serialized tree type.
+        sb = new StringBuffer(data);
+        a = data.indexOf("'", data.indexOf("type="));
+        b = data.indexOf("'", a+1);
+        sb.replace(a+1, b, "http://open-content.net/spec/thex/depthfirst");
+        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corruptedXML, treeRecord);
+            fail("expected exception");
+        } catch(IOException expected) {}                
+    }
+    
+    private HashTree createTree(DIMERecord a, DIMERecord b) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DIMEGenerator gen = new DIMEGenerator();
+        gen.add(a); gen.add(b);
+        gen.write(out);
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        return HashTree.createHashTree(in, sha1, root32, file.length());
+    }
+    
+    private DIMERecord createCorruptRecord(DIMERecord base, String data) {
+        return DIMERecord.create((byte)base.getTypeId(),
+                                 base.getOptions(),
+                                 base.getId(),
+                                 base.getType(),
+                                 data.getBytes());
     }
     
     private UUID verifyXML(DIMERecord xml) throws Throwable {
