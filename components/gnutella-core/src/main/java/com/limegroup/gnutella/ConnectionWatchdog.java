@@ -216,9 +216,9 @@ public final class ConnectionWatchdog implements Runnable {
      *  leaf connecions. */
     private Iterator allConnections() {
         List normal = 
-            RouterService.getConnectionManager().getInitializedConnections2();
+            RouterService.getConnectionManager().getInitializedConnections();
         List leaves = 
-            RouterService.getConnectionManager().getInitializedClientConnections2();
+            RouterService.getConnectionManager().getInitializedClientConnections();
 
         List buf=new ArrayList(normal.size()+leaves.size());
         buf.addAll(normal);
