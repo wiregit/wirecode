@@ -129,11 +129,11 @@ public class HTTPDownloader {
      *
      * @param timeout the timeout to use for connecting, in milliseconds,
      *  or zero if no timeout
+     * @exception CantConnectException could not establish a TCP connection
      * @exception TryAgainLaterException the host is busy
      * @exception FileNotFoundException the host doesn't recognize the file
-     * @exception NotSharingException the host isn't sharing files
-     * @exception IOException couldn't contact server in time, or miscellaneous 
-     *  error 
+     * @exception NotSharingException the host isn't sharing files (BearShare)
+     * @exception miscellaneous error 
      */
 	public void connect(int timeout) throws IOException {        
         //Connect, if not already done.  Ignore 
@@ -148,7 +148,7 @@ public class HTTPDownloader {
             }
             istream=_socket.getInputStream(); 
         } catch (Exception e) {
-            throw new IOException();
+            throw new CantConnectException();
         }
         _byteReader = new ByteReader(istream);
 

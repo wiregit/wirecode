@@ -750,14 +750,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 ret.connect(CONNECT_TIME);
                 return ret;
             } catch (TryAgainLaterException e) {
+                //Add this for retry later
                 busy.add(rfd);
-                continue;
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) {
-                //TODO: differentiate between "can't connect" and other
-                //misc. errors
+            } catch (CantConnectException e) {
+                //Schedule for pushing
                 files.add(new RemoteFileDesc2(rfd, true));
-                continue;
+            } catch (IOException e) {
+                //Miscellaneous error: never revisit.
             }
         }
     }
