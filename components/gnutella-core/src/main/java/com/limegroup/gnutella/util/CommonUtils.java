@@ -91,6 +91,8 @@ public final class CommonUtils {
 	 */
 	private static final String HTTP_SERVER;
 
+    private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
+
 	/**
 	 * Make sure the constructor can never be called.
 	 */
@@ -403,26 +405,63 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public static File getUserSettingsDir() {
-        File settingsDir = null;
-		if(CommonUtils.isWindows()) {
-			settingsDir = CommonUtils.getCurrentDirectory();
-		} else if(CommonUtils.isMacOSX()) {            
+        File settingsDir = new File(getUserHomeDir(), 
+                                    LIMEWIRE_PREFS_DIR_NAME);
+
+        // make sure Windows files are moved
+        moveWindowsFiles(settingsDir);
+        if(CommonUtils.isMacOSX()) {            
             File tempSettingsDir = new File(getUserHomeDir(), 
                                             "Library/Preferences");
-            settingsDir = new File(tempSettingsDir, ".limewire");
-		} else {
-            settingsDir = new File(getUserHomeDir(), 
-							       ".limewire");
-		}
+            settingsDir = new File(tempSettingsDir, LIMEWIRE_PREFS_DIR_NAME);
+		} 
 
-		if(settingsDir == null) {
-		    settingsDir = new File(getUserHomeDir(), 
-							       ".limewire");
-		}
         if(!settingsDir.isDirectory()) {
             settingsDir.mkdirs();
         }
         return settingsDir;
+    }
+
+    /**
+     * Boolean for whether or not the windows files have been copied.
+     */
+    private static boolean _windowsFilesMoved = false;
+
+    /**
+     * The array of files that should be stored in the user's home 
+     * directory.
+     */
+    private static final String[] USER_FILES = {
+        "limewire.props",
+        "gnutella.net",
+        "fileurns.cache"
+    };
+
+    /**
+     * On Windows, this copies files from the current directory to the
+     * user's LimeWire home directory.  The installer does not have
+     * access to the user's home directory, so these files must be
+     * copied.  Note that they are only copied, however, if existing 
+     * files are not there.  This ensures that the most recent files,
+     * and the files that should be used, should always be saved in 
+     * the user's home LimeWire preferences directory.
+     */
+    private static void moveWindowsFiles(File settingsDir) {
+        if(!isWindows()) return;
+        if(_windowsFilesMoved) return;
+        File currentDir = CommonUtils.getCurrentDirectory();
+        for(int i=0; i<USER_FILES.length; i++) {
+            File curUserFile = new File(settingsDir, USER_FILES[i]);
+            File curDirFile  = new File(currentDir, USER_FILES[i]);
+            if(curUserFile.isFile()) {
+                continue;
+            }
+            if(settingsDir.isDirectory()) {
+                settingsDir.mkdirs();
+            }
+            copy(curDirFile, curUserFile));
+        }
+        _windowsFilesMoved = true;
     }
 	
 	/**
