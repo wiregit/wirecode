@@ -447,7 +447,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private int corruptState;
     private Object corruptStateLock;
-    
+
+    /**
+     * Locking object to be used for accessing all alternate locations.
+     * LOCKING: never try to obtain monitor on this if you hold the monitor on
+     * altLock 
+     */
+    private Object altLock;
+
     /**
      * stores a HashTree that will be requested if we find it.
      */
@@ -573,6 +580,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         threadLockToSocket=Collections.synchronizedMap(new HashMap());
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
+        altLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
         // stores up to 1000 locations for up to an hour each
@@ -911,9 +919,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // See if we have already tried and failed with this location
         // This is only done if the location we're trying is an alternate..
-        if (other.isFromAlternateLocation() && 
-            invalidAlts.contains(other.getRemoteHostData())) {
-            return false;
+        synchronized(altLock) {
+            if (other.isFromAlternateLocation() && 
+                invalidAlts.contains(other.getRemoteHostData())) {
+                return false;
+            }
         }
         
 
@@ -1229,24 +1239,26 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         if(good) {
-            //check if validAlts contains loc to avoid duplicate stats, and
-            //spurious count increments in the local
-            //AlternateLocationCollections
-            if(!validAlts.contains(loc)) {
-                if( RECORD_STATS && rfd.isFromAlternateLocation() )
-                    DownloadStat.ALTERNATE_WORKED.incrementStat(); 
-                validAlts.add(loc);
-                if( ifd != null )
-                    ifd.addVerified(forFD);
+            synchronized(altLock) {
+                //check if validAlts contains loc to avoid duplicate stats, and
+                //spurious count increments in the local
+                //AlternateLocationCollections
+                if(!validAlts.contains(loc)) {
+                    if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                        DownloadStat.ALTERNATE_WORKED.incrementStat(); 
+                    validAlts.add(loc);
+                    if( ifd != null )
+                        ifd.addVerified(forFD);
+                }  else {
+                    if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                        DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+                    validAlts.remove(loc);
+                    if( ifd != null )
+                        ifd.remove(forFD);
+                    invalidAlts.add(rfd.getRemoteHostData());
+                    recentInvalidAlts.add(loc);
+                }
             }
-        } else {
-            if( RECORD_STATS && rfd.isFromAlternateLocation() )
-                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-            validAlts.remove(loc);
-            if( ifd != null )
-                ifd.remove(forFD);
-            invalidAlts.add(rfd.getRemoteHostData());
-            recentInvalidAlts.add(loc);
         }
     }
 
@@ -2060,7 +2072,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void addLocationsToFile(AlternateLocationCollection validAlts,
                                     AlternateLocationCollector collector) {
         
-        synchronized(validAlts) {
+        synchronized(altLock) {
             for(Iterator i = validAlts.iterator(); i.hasNext();) {
                 AlternateLocation al = (AlternateLocation)i.next();
                 collector.add(al.createClone());
@@ -2304,7 +2316,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //have discovered so far. These will be cleared out after the first
         //write, from them on, only newly successful rfds will be sent as alts
         if(validAlts != null) {
-            synchronized(validAlts) {
+            synchronized(altLock) {
                 Iterator iter = validAlts.iterator();
                 int count = 0;
                 while(iter.hasNext() && count < 10) {
@@ -2939,16 +2951,20 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	public int getNumberOfAlternateLocations() {
 	    if ( validAlts == null ) return 0;
-	    return validAlts.getAltLocsSize();
+        synchronized(altLock) {
+            return validAlts.getAltLocsSize();
+        }
     }
 
     /**
      * Returns the number of invalid alternate locations that this download is
      * using.
      */
-    public synchronized int getNumberOfInvalidAlternateLocations() {
+    public int getNumberOfInvalidAlternateLocations() {
         if ( invalidAlts == null ) return 0;
-        return invalidAlts.size();
+        synchronized(altLock) {
+            return invalidAlts.size();
+        }
     }
     
     /**
