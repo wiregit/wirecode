@@ -49,6 +49,8 @@ public class ResumeDownloader extends ManagedDownloader
                             String name,
                             int size) {
         super( new RemoteFileDesc[0], incompleteFileManager);
+        if( incompleteFile == null )
+            throw new NullPointerException("null incompleteFile");
         this._incompleteFile=incompleteFile;
         if(name==null || name.equals(""))
             throw new IllegalArgumentException("Bad name in ResumeDownloader");
