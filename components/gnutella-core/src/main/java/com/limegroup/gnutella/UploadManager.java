@@ -61,6 +61,8 @@ public class UploadManager {
     private MessageRouter _router;
     /** Used for get addresses in pushes. */
     private Acceptor _acceptor;
+	/** set to true when an upload has been succesfully completed. */
+	private boolean _hadSuccesfulUpload;
 
    //////////////////////// Main Public Interface /////////////////////////
 
@@ -76,6 +78,7 @@ public class UploadManager {
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor) {
+		_hadSuccesfulUpload = false;
         _callback = callback;
         _router = router;
         _acceptor = acceptor;
@@ -150,6 +153,17 @@ public class UploadManager {
 	public int uploadsInProgress() {
 		return _activeUploads;
 	}
+
+
+	/**
+	 * this method was added to adopt more of the BearShare QHD
+	 * standard.  Bit 3 in the QHD is for whether of not this 
+	 * client has ever completed a succesful upload.  this variable
+	 * is set per session.
+	 */
+	public boolean hadSuccesfulUpload() {
+		return _hadSuccesfulUpload;
+	} 
 
 	//////////////////////// Private Interface /////////////////////////
 
@@ -408,6 +422,13 @@ public class UploadManager {
                     // handles it internally.  is this the correct
                     // way to handle it?
                     _up.start();
+					// check the state of the upload once the
+					// start method has finished.  if it is complete...
+					if ((!_hadSuccesfulUpload) && 
+						(_up.getState() == Uploader.COMPLETE)) {
+						// then set a flag in the upload manager...
+						_hadSuccesfulUpload = true;
+					}
                 }  finally {
                     synchronized(UploadManager.this) { _activeUploads--; }
                 }
@@ -420,6 +441,8 @@ public class UploadManager {
 					removeFromMap(_host);
 					removeAttemptedPush(_host, _index);
 					_callback.removeUpload(_up);		
+					System.out.println("succesful upload? " 
+									   + hadSuccesfulUpload() );
 				}
 			}
 			
