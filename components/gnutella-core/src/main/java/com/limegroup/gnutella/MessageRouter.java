@@ -920,10 +920,11 @@ public abstract class MessageRouter {
                     // whatever...
                     ; 
                 else return;
-                //mark the other node as OOB capable
-                handler.setUDPCapable(true);
+                
             }
-
+            //mark the other node as OOB capable
+            handler.setUDPCapable(request.desiresOutOfBandReplies());
+            
             // don't send it to leaves here -- the dynamic querier will 
             // handle that
             locallyEvaluate = false;

@@ -291,8 +291,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	 * @see com.limegroup.gnutella.ReplyHandler#isUDPCapable()
 	 */
 	public boolean isUDPCapable() {
-		// of course I am! :)
-		return true;
+		return RouterService.isGUESSCapable();
 	}
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.ReplyHandler#setUDPCapable(boolean)
