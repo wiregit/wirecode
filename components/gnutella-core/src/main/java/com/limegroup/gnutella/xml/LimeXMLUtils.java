@@ -759,6 +759,27 @@ public class LimeXMLUtils
         return retBytes;
     }
 
+    /**
+     * Does an approximate check on the passed string for xml validity
+     * @param inputStr The string to be tested
+     * @return true, if the passed can be determined to be non-valid XML,
+     * false otherwise.
+     * Note that this method does only approximate evaluation. It guarantees
+     * only that if true is returned, then the passed string was not a valid
+     * xml string. The converse is not true.
+     */
+    public static boolean notValidXML(String inputStr)
+    {
+        //return true, if the passed string doesnt start with valid XML header
+        if(inputStr == null || inputStr.trim().equals("")
+            || !inputStr.startsWith(XMLStringUtils.XML_VERSION_DELIM))
+            return true;
+        
+        //return false if we are not able to classify the passed string as 
+        //non-valid xml
+        return false;
+    }
+    
     /*
       public static void main(String argv[]) throws Exception {
       // TEST FOR hashFile(File)
