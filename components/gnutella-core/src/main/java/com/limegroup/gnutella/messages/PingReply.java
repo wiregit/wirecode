@@ -78,6 +78,23 @@ public class PingReply extends Message implements Serializable {
      */
     private final boolean HAS_GGEP_EXTENSION;
 
+    /**
+     * Cached constant for the vendor GGEP extension.
+     */
+    private static final byte[] CACHED_VENDOR = new byte[5];
+
+    // performs any necessary static initialization of fields,
+    // such as the vendor GGEP extension
+    static {
+        byte[] payload = new byte[5];
+        // set 'LIME'
+        System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
+                         0, CACHED_VENDOR, 0,
+                         CommonUtils.QHD_VENDOR_NAME.getBytes().length);
+        CACHED_VENDOR[4] = convertToGUESSFormat(CommonUtils.getMajorVersionNumber(),
+                                         CommonUtils.getMinorVersionNumber());
+    }
+
 
     /**
      * Creates a new <tt>PingReply</tt> for this host with the specified
@@ -503,8 +520,8 @@ public class PingReply extends Message implements Serializable {
         }
         
         // all pongs should have vendor info
-        addVendorExtension(ggep);
-        
+        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
+
         return ggep;
     }
 
@@ -540,20 +557,6 @@ public class PingReply extends Message implements Serializable {
 
         // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
-    }
-
-
-    //TODO:: No reason whatsoever not to cache this...
-    private static void addVendorExtension(GGEP ggep) {
-        byte[] payload = new byte[5];
-        // set 'LIME'
-        System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
-                         0, payload, 0,
-                         CommonUtils.QHD_VENDOR_NAME.getBytes().length);
-        payload[4] = convertToGUESSFormat(CommonUtils.getMajorVersionNumber(),
-                                          CommonUtils.getMinorVersionNumber());
-         // add it
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);
     }
 
     /** puts major as the high order bits, minor as the low order bits.
