@@ -966,7 +966,9 @@ public class UDPConnectionProcessor {
                 // Adjust the receivers window space with knowledge of
                 // how many extra messages we have sent since this ack
                 if ( _sequenceNumber > wStart ) 
-                    _receiverWindowSpace += (wStart - _sequenceNumber);
+                    _receiverWindowSpace = 
+					  DATA_WINDOW_SIZE + (int) (wStart - _sequenceNumber);
+                    //_receiverWindowSpace += (wStart - _sequenceNumber);
 
                 // Reactivate writing if required
                 if ( (priorR == 0 || _waitingForDataSpace) && 
@@ -1062,7 +1064,9 @@ public class UDPConnectionProcessor {
                 // Adjust the receivers window space with knowledge of
                 // how many extra messages we have sent since this ack
                 if ( _sequenceNumber > wStart ) 
-                    _receiverWindowSpace += (wStart - _sequenceNumber);
+                    _receiverWindowSpace = 
+					  DATA_WINDOW_SIZE + (int) (wStart - _sequenceNumber);
+                    //_receiverWindowSpace += (wStart - _sequenceNumber);
 
                 // If receiving KeepAlives when closed, send another FinMessage
                 if ( isClosed() ) {
