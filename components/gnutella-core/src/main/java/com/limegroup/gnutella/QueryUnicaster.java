@@ -20,7 +20,7 @@ public final class QueryUnicaster {
 
     /** The number of Endpoints where you should start sending pings to them.
      */
-    public static final int MIN_ENDPOINTS = 50;
+    public static final int MIN_ENDPOINTS = 10;
 
     /** The max number of unicast pongs to store.
      */
@@ -167,7 +167,7 @@ public final class QueryUnicaster {
                 waitForQueries();
                 GUESSEndpoint toQuery = getUnicastHost();
                 purgeGuidsInternal(); // in case any were added while asleep
-
+				boolean currentHostUsed = false;
                 synchronized (_queries) {
                     Iterator iter = _queries.values().iterator();
                     while (iter.hasNext()) {
@@ -186,12 +186,19 @@ public final class QueryUnicaster {
 								  " query " + currQB._qr.getQuery());
 							udpService.send(currQB._qr, ip, 
 											toQuery.getPort());
+							currentHostUsed = true;
 							SentMessageStatHandler.UDP_QUERY_REQUESTS.
                                 addMessage(currQB._qr);
 							currQB._hostsQueried.add(toQuery);
                         }
                     }
                 }
+
+				// add the current host back to the list if it was not used for 
+				// any query
+				if(!currentHostUsed) {
+					addUnicastEndpoint(toQuery);
+				}
                 
                 // purge stale queries, hold lock so you don't miss any...
                 synchronized (_qGuidsToRemove) {
@@ -225,9 +232,10 @@ public final class QueryUnicaster {
     private void waitForQueries() throws InterruptedException {
         debug("QueryUnicaster.waitForQueries(): waiting for Queries.");
         synchronized (_queries) {
-            if (_queries.isEmpty())
+            if (_queries.isEmpty()) {
                 // i'll be notifed when stuff is added...
                 _queries.wait();
+			}
         }
         debug("QueryUnicaster.waitForQueries(): numQueries = " + 
               _queries.size());
@@ -250,9 +258,12 @@ public final class QueryUnicaster {
                 _queries.put(guid, qb);
                 retBool = true;
             }
-            if (retBool)
-                _queries.notify();
+            if (retBool) {
+                _queries.notifyAll();
+			}
         }
+
+		// return if this node originated the query
         if (reference == null)
             return retBool;
 
@@ -274,24 +285,35 @@ public final class QueryUnicaster {
     public void addUnicastEndpoint(InetAddress address, int port) {
         if (!SettingsManager.instance().getGuessEnabled()) return;
         if (notMe(address, port)) {
-            synchronized (_queryHosts) {
-                debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
-                if (_queryHosts.size() == MAX_ENDPOINTS)
-                    _queryHosts.removeLast(); // evict a old guy...
-                _queryHosts.addFirst(new GUESSEndpoint(address, port));
-                _queryHosts.notify();
-				if(UDPService.instance().isListening() &&
-				   !RouterService.isGUESSCapable() &&
-				   _testUDPPingsSent < 5) {
-					PingRequest pr = new PingRequest((byte)1);
-					UDPService.instance().send(pr, address, port);
-					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
-					_testUDPPingsSent++;
-				}
-                debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
-            }
+			GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
+			addUnicastEndpoint(endpoint);
         }
     }
+
+	/** Adds the <tt>GUESSEndpoint</tt> instance to the host data.
+	 *
+	 *  @param endpoint the <tt>GUESSEndpoint</tt> to add
+	 */
+	private void addUnicastEndpoint(GUESSEndpoint endpoint) {
+		synchronized (_queryHosts) {
+			debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
+			if (_queryHosts.size() == MAX_ENDPOINTS)
+				_queryHosts.removeLast(); // evict a old guy...
+			_queryHosts.addFirst(endpoint);
+			_queryHosts.notify();
+			if(UDPService.instance().isListening() &&
+			   !RouterService.isGUESSCapable() &&
+			   _testUDPPingsSent < 5) {
+				PingRequest pr = new PingRequest((byte)1);
+				UDPService.instance().send(pr, endpoint.getAddress(), 
+										   endpoint.getPort());
+				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+				_testUDPPingsSent++;
+			}
+			debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
+		}
+	}
+
 
     /** 
      * Returns whether or not the Endpoint refers to me!  True if it doesn't,
@@ -308,7 +330,7 @@ public final class QueryUnicaster {
         }
         else if ((port == RouterService.getPort()) &&
 				 Arrays.equals(address.getAddress(), 
-							   RouterService.getAddress())) {
+							   RouterService.getAddress())) {			
 			retVal = false;
 		}
 
@@ -379,8 +401,9 @@ public final class QueryUnicaster {
                     RouterService.getMessageRouter().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }
-                // now wait, what else can we do?
-                _queryHosts.wait();
+
+				// now wait, what else can we do?
+				_queryHosts.wait();
             }
             debug("QueryUnicaster.getUnicastHost(): got a host, let go lock!");
         }
@@ -392,7 +415,6 @@ public final class QueryUnicaster {
             // if i haven't pinged him 'recently', then ping him...
             if (_pingList.add(toReturn)) {  
                 PingRequest pr = new PingRequest((byte)1);
-                UDPService udpService = UDPService.instance();
 				InetAddress ip = toReturn.getAddress();				
 				UDPService.instance().send(pr, ip, toReturn.getPort());
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
@@ -406,7 +428,7 @@ public final class QueryUnicaster {
     private class QueryBundle {
         public static final int MAX_RESULTS = 250;
         public static final int MAX_QUERIES = 1000;
-        QueryRequest _qr = null;
+        final QueryRequest _qr;
         // the number of results received per Query...
         int _numResults = 0;
         /** The Set of Endpoints queried for this Query.
@@ -416,13 +438,11 @@ public final class QueryUnicaster {
         public QueryBundle(QueryRequest qr) {
             _qr = qr;
         }
-
-        public boolean equals(Object other) {
-            boolean retVal = false;
-            if (other instanceof QueryBundle)
-                retVal = _qr.equals(((QueryBundle)other)._qr);
-            return retVal;
-        }
+		
+		// overrides toString to provide more information
+		public String toString() {
+			return "QueryBundle: "+_qr;
+		}
     }
 
 
