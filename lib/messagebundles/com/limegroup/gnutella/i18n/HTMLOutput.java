@@ -257,7 +257,7 @@ class HTMLOutput {
             else
                 newpage.append(",\n");
             newpage.append(
-"       <b>" + l.getLink() + "</b>");
+"       " + l.getLink());
             first = false;
         }
         if (!first)
@@ -278,10 +278,10 @@ class HTMLOutput {
 "     simple text file to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
-"     For <b>Central European languages</b>, the prefered format is a simple text\n" +
+"     For <b>Central European languages</b>, the preferred format is a simple text\n" +
 "     file encoded with the ISO-8859-2 character set, or an UTF-8 encoded simple\n" +
 "     text file (which can be edited with NotePad on Windows 2000/XP), or a\n" +
-"     correctly marked-up HTML document such as HTML email, or a Word document.<br /><br />\\n" +
+"     correctly marked-up HTML document such as HTML email, or a Word document.<br /><br />\n" +
 "     \n" +
 "     For <b>other European languages</b>, the preferred format is a plain-text\n" +
 "     file, encoded preferably with UTF-8 or a ISO-8859-* character set that\n" +
@@ -348,14 +348,14 @@ class HTMLOutput {
 "     \n" +
 "     <b><big>How to Submit Corrections or Enhancements for Your Language</big></b><br />\n" +
 "     <br />\n" +
-"     Users that do not have the correct tools to edit a messages bundle can send us\n" +
+"     Users that do not have the correct tools to edit a message bundle can send us\n" +
 "     an Email in English or in French that explains their needs. \n" +
 "     For any discussion with the contributing translators you may write to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br /><br />\n" +
 "     \n" +
 "     <b>If your corrections are significant</b>, you may send us your complete\n" +
 "     message bundle. Please be sure to include all resource strings defined in the\n" +
-"     latest version of the existing messages bundle before sending us your\n" +
+"     latest version of the existing message bundle before sending us your\n" +
 "     revision.<br /><br />\n" +
 "     \n" +
 "     <b>For simple few corrections or additions</b>, just send the corrected lines\n" +
