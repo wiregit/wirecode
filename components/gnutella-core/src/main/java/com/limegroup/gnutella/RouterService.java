@@ -842,13 +842,18 @@ public class RouterService
      * @param files a group of "similar" files to smart download
      * @param overwrite true iff the download should proceded without
      *  checking if it's on disk
+     * @param queryString this should be a non-null string that is the user's
+     * query.  useful for our automatic requery feature....
+     * @param richQueryString this can be a null or hopefully "", but it
+     * signifies the rich query portion of the user's query....
      * @return the download object you can use to start and resume the download
      * @exception AlreadyDownloadingException the file is already being 
      *  downloaded.
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
+	public Downloader download(RemoteFileDesc[] files, boolean overwrite,
+                               String queryString, String richQueryString) 
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
 		return downloader.getFiles(files, overwrite);
