@@ -691,7 +691,7 @@ public class ConnectionManager {
 
     /** Returns the number of connections to other ultrapeers.  Caller MUST hold
      *  this' monitor. */
-    public synchronized int ultrapeerConnections() {
+    private int ultrapeerConnections() {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
