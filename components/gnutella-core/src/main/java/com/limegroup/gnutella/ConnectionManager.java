@@ -768,7 +768,7 @@ public class ConnectionManager {
             Random random = new Random();
             int hops;
             PingReplyCache pongCache = PingReplyCache.instance();
-            PingReplyCacheEntry entry = null;
+            PingReply entry = null;
             PingReply pr = null;
             
             //if neither the pong cache, nor the reserve cache contains any
@@ -784,14 +784,14 @@ public class ConnectionManager {
                 try {
                     hops = random.nextInt
                         (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-                    entry = pongCache.getEntry(hops+1);
+                    entry = pongCache.getEntry(hops+1, null);
                     //if nothing in the cache, then try from the reserve cache
                     if (entry == null) {
                         endpoint = _catcher.getAnEndpoint();
                     }
                     else {
-                        pr = entry.getPingReply();
-                        endpoint = new Endpoint(pr.getIPBytes(), pr.getPort());
+                        endpoint = 
+                            new Endpoint(entry.getIPBytes(), entry.getPort());
                     }
                 } catch (NoSuchElementException exc2) {
                     //If we get here, it means that even the reserve cache has

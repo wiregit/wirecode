@@ -58,6 +58,14 @@ public class ManagedConnection
         new ManagedConnectionMessageStats(this);
 
 
+    /**
+     * Reference to ManagedConnectionPingInfo for this connection.  This 
+     * reference contains the last GUID, whether to throttle an incoming ping, 
+     * the needed pongs to return, etc .  It's initially set to null and then
+     * instantianted when the first ping is received.
+     */
+    private ManagedConnectionPingInfo pingInfo = null;
+
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
     private volatile long _bytesSent;
@@ -77,7 +85,7 @@ public class ManagedConnection
      * indicates whether the connection is to an "old Gnutella client" 
      * (according to the the Protocol Version number in any message GUID).
      */
-    private boolean _isOldClient = false;
+    private boolean _isOldClient = true;
 
     /**
      * First Ping is used to determine if this is a connection to an older
@@ -450,10 +458,10 @@ public class ManagedConnection
 
         //if it is an old GUID or the protocol version is less than 1, 
         //it's an older client.
-        if ((!GUID.isNewGUID(guid)) || 
-             (GUID.getProtocolVersion(guid) < 
+        if ((GUID.isNewGUID(guid)) && 
+             (GUID.getProtocolVersion(guid) >= 
               GUID.GNUTELLA_VERSION_06) ) 
-            _isOldClient = true;
+            _isOldClient = false;
     }
 
     /**
@@ -495,6 +503,62 @@ public class ManagedConnection
     public PingReply getRemotePong() {
         return _remotePong;
     }
+
+    /**
+     * Determines whether to throttle an incoming ping request by calling
+     * the ManagedConnectionPingInfo's throttle message.  Note, that if
+     * a ManagedConnectionPinfoInfo has not been instantiated yet (i.e., no
+     * ping received), then it is instantiated here without checking if the
+     * ping should be throttled.
+     */
+    public boolean throttlePing() {
+        if (pingInfo == null) {
+            pingInfo = new ManagedConnectionPingInfo();
+            return false;
+        }
+        else {
+            if (pingInfo.throttlePing()) {
+                countDroppedMessage();
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    //------ Interface to ManagedConnectionPingInfo -----------------
+    public void setLastPingGUID(byte[] guid) {
+        pingInfo.setLastGUID(guid);
+    }
+
+    public void setNeededPingReplies(int ttl) {
+        pingInfo.setNeededPingReplies(ttl);
+    }
+
+    public int getTotalPongsNeeded() {
+        return pingInfo.getTotalNeeded();
+    }
+
+    public byte[] getLastPingGUID() {
+        return pingInfo.getLastGUID();
+    }
+
+    public int getLastPingTTL() {
+        return pingInfo.getLastTTL();
+    }
+
+    public int[] getNeededPongsList() {
+        return pingInfo.getNeededPingReplies();
+    }
+
+    /**
+     * Returns whether ManagedConnectionPingInfo is instantiated or not.
+     */
+    public boolean receivedFirstPing() {
+        return (pingInfo == null);
+    }
+    //end -- Interface
 
     /**
      * A callback for the ConnectionManager to inform this connection that a

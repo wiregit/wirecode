@@ -45,7 +45,7 @@ public class ManagedConnectionPingInfo {
      */
     private int _totalNeeded;
 
-    public ManagedConnectionPingInfo(boolean isOldClient) {
+    public ManagedConnectionPingInfo() {
         _clientAcceptTime = System.currentTimeMillis() + PING_THROTTLE_TIME;
 
         resetNeeded();

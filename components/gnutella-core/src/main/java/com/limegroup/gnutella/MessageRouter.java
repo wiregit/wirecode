@@ -27,13 +27,6 @@ public abstract class MessageRouter
     private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
     /**
-     * Maps Managed Connection to ManagedConnectionPingInfo to keep track
-     * of Ping Request Information used when routing Ping Replies and 
-     * throttling Ping Requests from old client.s
-     */
-    private HashMap _pingInformationTable = new HashMap();
-
-    /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
      */
     private RouteTable _queryRouteTable = new RouteTable(2048);
@@ -164,18 +157,12 @@ public abstract class MessageRouter
         return _pushRouteTable.toString();
     }
 
-    public String getPingInformationTableDump()
-    {
-        return _pingInformationTable.toString();
-    }
-
     /**
      * A callback for ConnectionManager to clear a ManagedConnection from
      * the routing tables when the connection is closed.
      */
     public void removeConnection(ManagedConnection connection)
     {
-        _pingInformationTable.remove(connection);
         _queryRouteTable.removeReplyHandler(connection);
         _pushRouteTable.removeReplyHandler(connection);
     }
@@ -229,28 +216,11 @@ public abstract class MessageRouter
     public void handlePingRequest(PingRequest pingRequest,
                                   ManagedConnection receivingConnection)
     {
-        ManagedConnectionPingInfo pingInfo = null;
-        boolean oldClient = receivingConnection.isOldClient();
-
-        //try to get Ping Info for managed connection.  If it doesn't exist,
-        //then add to the mapping of connection to Ping Info.
-        if (!_pingInformationTable.containsKey(receivingConnection)) 
-        {
-            pingInfo = new ManagedConnectionPingInfo(oldClient);
-            _pingInformationTable.put(receivingConnection,pingInfo);
-        }
-        else
-        {
-            pingInfo = (ManagedConnectionPingInfo)_pingInformationTable.get(
-                 receivingConnection);
-            //see if we need to throttle this ping
-            if (pingInfo.throttlePing())
-            {
-                receivingConnection.countDroppedMessage();
-                return;
-            }
-        }
-
+        //if the receiving connection needs to throttle the ping, then just
+        //return.
+        if (receivingConnection.throttlePing())
+            return;
+            
         _numProcessedPingRequests++;
 
         //if PingReplyCache expired, refresh cache.  This has to be synchronized,
@@ -261,18 +231,18 @@ public abstract class MessageRouter
                 refreshPingReplyCache(receivingConnection);
         }
 
-        //set necessary info in pingInfo.  Since hop() has been called on
+        //set necessary info in the connection.  Since hop() has been called on
         //the message, we need to set the needed to the original TTL.
-        pingInfo.setLastGUID(pingRequest.getGUID());
-        pingInfo.setNeededPingReplies(((int)pingRequest.getTTL()+1));
+        receivingConnection.setLastPingGUID(pingRequest.getGUID());
+        receivingConnection.setNeededPingReplies(((int)pingRequest.getTTL()+1));
         
         respondToPingRequest(pingRequest, _acceptor, receivingConnection);
 
         //send back pongs
-        if (_pongCache.size() > pingInfo.getTotalNeeded())
-            sendSomePongs(receivingConnection, pingInfo);
+        if (_pongCache.size() > receivingConnection.getTotalPongsNeeded())
+            sendSomePongs(receivingConnection);
         else if (_pongCache.size() > 0) //only send if some entries in cache
-            sendAllPongs(receivingConnection, pingInfo);
+            sendAllPongs(receivingConnection);
     }
 
     /**
@@ -282,15 +252,14 @@ public abstract class MessageRouter
      * MAX_PONGS_TO_RETURN.  The pongs are randomly retrieved from the Ping
      * ReplyCache.
      */
-    private void sendSomePongs(ManagedConnection receivingConnection,
-                               ManagedConnectionPingInfo pingInfo)
+    private void sendSomePongs(ManagedConnection receivingConnection)
     {
-        byte[] guid = pingInfo.getLastGUID();
-        int[] neededPongs = pingInfo.getNeededPingReplies();
-        int ttl = pingInfo.getLastTTL(); //ttl of last PingRequest.
+        byte[] guid = receivingConnection.getLastPingGUID();
+        int[] neededPongs = receivingConnection.getNeededPongsList();
+        int ttl = receivingConnection.getLastPingTTL(); 
         int sentCount = 0;
         Random random = new Random(); //for starting point of retreiving pongs
-        int neededCount = pingInfo.getTotalNeeded();
+        int neededCount = receivingConnection.getTotalPongsNeeded();
 
         //make sure not to return more than the max num allowed to return.
         if (neededCount > MAX_PONGS_TO_RETURN)
@@ -302,7 +271,7 @@ public abstract class MessageRouter
         {
             //try to send out a ping reply, if successfull, increment count and
             //make sure not more than max sent out.
-            if (sendAPingReply(receivingConnection, pingInfo, i+1)) 
+            if (sendAPingReply(receivingConnection, i+1)) 
             {
                 sentCount++;
                 if (sentCount >= neededCount) //don't send more than max pongs.
@@ -314,7 +283,7 @@ public abstract class MessageRouter
         {
             //try to send out a ping reply, if successfull, increment count and
             //make sure not more than max sent out.
-            if (sendAPingReply(receivingConnection, pingInfo, i+1)) 
+            if (sendAPingReply(receivingConnection, i+1)) 
             {
                 sentCount++;
                 if (sentCount >= neededCount) //don't send more than max pongs.
@@ -332,11 +301,10 @@ public abstract class MessageRouter
      * @requires - size of PingReplyCache < total num of needed pongs by the
      *             receiving connection.
      */
-    private void sendAllPongs(ManagedConnection receivingConnection,
-                              ManagedConnectionPingInfo pingInfo)
+    private void sendAllPongs(ManagedConnection receivingConnection)
     {
-        byte[] guid = pingInfo.getLastGUID();
-        int[] neededPongs = pingInfo.getNeededPingReplies();
+        byte[] guid = receivingConnection.getLastPingGUID();
+        int[] neededPongs = receivingConnection.getNeededPongsList();
         
         for (Iterator iter = _pongCache.iterator(); 
              iter.hasNext(); ) 
@@ -362,9 +330,9 @@ public abstract class MessageRouter
      * sent or false, if the ping reply wasn't sent.
      */
     private boolean sendAPingReply(ManagedConnection receivingConnection, 
-                                   ManagedConnectionPingInfo pingInfo, int hops)
+                                   int hops)
     {
-        int[] neededPongs = pingInfo.getNeededPingReplies();
+        int[] neededPongs = receivingConnection.getNeededPongsList();
         if (neededPongs[hops-1] == 0)
             return false; //no need to send a pong for this hops.
 
@@ -374,7 +342,7 @@ public abstract class MessageRouter
             return false;
         
         //create the "cached" ping reply and send it.
-        byte[] guid = pingInfo.getLastGUID();
+        byte[] guid = receivingConnection.getLastPingGUID();
         PingReply pr = new PingReply(guid, cachedPingReply.getTTL(), 
             (byte)hops, cachedPingReply.getPort(), cachedPingReply.getIPBytes(), 
              cachedPingReply.getFiles(), cachedPingReply.getKbytes());
@@ -656,17 +624,16 @@ public abstract class MessageRouter
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (c != connection)
             {
-                ManagedConnectionPingInfo pingInfo = 
-                    (ManagedConnectionPingInfo)_pingInformationTable.get(c);
-                //no ping information, connection hasn't sent a ping yet (other
-                //than maybe a handshake ping), so just continue.
-                if (pingInfo == null)
+                //first make sure that the connection wants some pongs (i.e.,
+                //sent at least one "real" ping request yet, not just a 
+                //handshake ping.
+                if (c.receivedFirstPing())
                     continue;
 
-                int[] neededPongs = pingInfo.getNeededPingReplies();
+                int[] neededPongs = c.getNeededPongsList();
                 if (neededPongs[hops-1] > 0)
                 {
-                    byte[] guid = pingInfo.getLastGUID();
+                    byte[] guid = c.getLastPingGUID();
                     //send pong
                     PingReply pr = new PingReply(guid, ttl, hops, port, ip,
                         files, kbytes);
