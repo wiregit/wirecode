@@ -65,6 +65,16 @@ public class UnavailableRangeUploadState implements HTTPMessage {
                                           new HTTPHeaderValueCollection(alts),
                                           ostream);
 				}
+				
+				if (UPLOADER.wantsFAlts()) {
+					alts = UPLOADER.getNextSetOfPushAltsToSend();
+					if(alts.size() > 0) {
+						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+	                                          new HTTPHeaderValueCollection(alts),
+	                                          ostream);
+					}
+					
+				}
 			}
             if (FILE_DESC instanceof IncompleteFileDesc) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc)FILE_DESC;

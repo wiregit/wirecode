@@ -128,6 +128,16 @@ public final class NormalUploadState implements HTTPMessage {
                                           new HTTPHeaderValueCollection(alts),
                                           ostream);
 				}
+				
+				if (_uploader.wantsFAlts()) {
+					alts = _uploader.getNextSetOfPushAltsToSend();
+					if(alts.size() > 0) {
+						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+	                                          new HTTPHeaderValueCollection(alts),
+	                                          ostream);
+					}
+					
+				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
                                           ((IncompleteFileDesc)FILE_DESC),

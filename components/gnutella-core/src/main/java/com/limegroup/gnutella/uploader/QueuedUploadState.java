@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.http.*;
+
 import java.io.*;
 import com.sun.java.util.collections.Set;
 import com.sun.java.util.collections.HashSet;
@@ -44,6 +45,16 @@ public class QueuedUploadState implements HTTPMessage {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
                                           new HTTPHeaderValueCollection(alts),
                                           ostream);
+				}
+				
+				if (UPLOADER.wantsFAlts()) {
+					alts = UPLOADER.getNextSetOfPushAltsToSend();
+					if(alts.size() > 0) {
+						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+	                                          new HTTPHeaderValueCollection(alts),
+	                                          ostream);
+					}
+					
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

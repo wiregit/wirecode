@@ -529,12 +529,16 @@ public final class HTTPUploader implements Uploader {
             }
             
         }
-        
-        //if the other side indicated they want firewalled altlocs
-        //send some.
-        
-        coll = _fileDesc.getPushAlternateLocationCollection();
-        if (coll != null && _wantsFalts)
+        return ret == null ? DataUtils.EMPTY_SET : ret;
+    }
+    
+    Set getNextSetOfPushAltsToSend() {
+    	AlternateLocationCollection coll = 
+    		_fileDesc.getPushAlternateLocationCollection();
+    	
+    	Set ret = null;
+    	
+    	if (coll != null && _wantsFalts)
         	synchronized(coll) {
         		Iterator iter  = coll.iterator();
         		//Synchronization note: We hold the locks of two
@@ -1115,6 +1119,10 @@ public final class HTTPUploader implements Uploader {
     
     public float getAverageBandwidth() {
         return bandwidthTracker.getAverageBandwidth();
+    }
+    
+    public boolean wantsFAlts() {
+    	return _wantsFalts;
     }
     
     private final boolean debugOn = false;

@@ -79,6 +79,16 @@ public class LimitReachedUploadState implements HTTPMessage {
                                           new HTTPHeaderValueCollection(alts),
                                           ostream);
 				}
+				
+				if (UPLOADER.wantsFAlts()) {
+					alts = UPLOADER.getNextSetOfPushAltsToSend();
+					if(alts.size() > 0) {
+						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+	                                          new HTTPHeaderValueCollection(alts),
+	                                          ostream);
+					}
+					
+				}
 				// write the Retry-After header, using different values
 				// depending on if we had any alts to send or not.
 				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
