@@ -30,6 +30,7 @@ public class ConnectionHandshakeHeaders
     public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
     public static final String REMOTE_IP            = "Remote-IP";
     public static final String GGEP                 = "GGEP";
+    public static final String X_GUESS              = "X-Guess";
 
     /** 
      * The true/false values for some headers.  Note that these are not the only
