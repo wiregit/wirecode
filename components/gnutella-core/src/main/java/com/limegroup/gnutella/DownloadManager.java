@@ -299,6 +299,42 @@ public class DownloadManager implements BandwidthTracker {
                     break;
                 }
             }
+
+        if (htGuidToADD.containsKey(new GUID(qr.getGUID()))) {
+            // get the appropriate details....
+            AutoDownloadDetails add = 
+            (AutoDownloadDetails) htGuidToADD.get(new GUID(qr.getGUID()));
+            List toDL = new ArrayList();
+
+            // are there any files you should get?
+            for (int i = 0; i < rfds.length; i++) 
+                if (add.addDownload(rfds[i]))
+                    toDL.add(rfds[i]);
+
+            // if so, start downloading them....
+            if (toDL.size() > 0) {
+                RemoteFileDesc[] toGet = new RemoteFileDesc[1];
+                for (int i = 0; i < toGet.length; i++) {                
+                    toGet[0] = (RemoteFileDesc) toDL.get(i);
+                    try {
+                        getFiles(toGet, false);
+                    }
+                    catch (AlreadyDownloadingException ade) {
+                        // not too much of a surprise, defn. possible...
+                    }
+                    catch (FileExistsException fee) {
+                        // yeah, don't dl a file if the user has it already...
+                    }
+                    catch (java.io.FileNotFoundException fnfe) {
+                        // i guess the RFD expired....
+                    }
+                }
+            }
+
+            // if you've got enough files, don't consider this guy in the future
+            if (add.expired())
+                htGuidToADD.remove(new GUID(qr.getGUID()));
+        }
     }
 
 
@@ -660,15 +696,30 @@ public class DownloadManager implements BandwidthTracker {
     /** Encapsulates important details about a auto download....
      */
     private class AutoDownloadDetails {
+        // the query associated with this search
         private String query = null;
+        // the rich query associated with this search
         private String richQuery = null;
+        // the 'filter' associated with this search
         private MediaType type = null;
+        // the list of downloads made so far - should not exceed size
+        // MAX_DOWNLOADS
+        private List dlList = null;
 
+        // don't auto dl any more than this number of files....
+        public static final int MAX_DOWNLOADS = 2;
+
+        /**
+         * @param inQuery the standard query string associated with this query.
+         * @param inRichQuery the rich query associated with this string.
+         * @param inType the mediatype associated with this string.....
+         */
         public AutoDownloadDetails(String inQuery, String inRichQuery, 
                                    MediaType inType) {
             query = inQuery;
             richQuery = inRichQuery;
             type = inType;
+            dlList = new Vector();
         }
 
         public String getQuery() {
@@ -682,6 +733,32 @@ public class DownloadManager implements BandwidthTracker {
         public MediaType getMediaType() {
             return type;
         }
+
+        /**
+         * @param toAdd The RFD you are TRYING to add.
+         * @return Whether or not the add was successful. 
+         */
+        public synchronized boolean addDownload(RemoteFileDesc toAdd) {
+            boolean retVal = true;
+            
+            if (!expired())
+                dlList.add(toAdd);
+            else 
+                retVal = false;
+
+            return retVal;
+        }
+
+        /** @return true when the AutoDownload process is complete.
+         */
+        public boolean expired() {
+            boolean retVal = false;
+            if (dlList.size() >= MAX_DOWNLOADS)
+                retVal = true;
+            return retVal;
+        }
+
+
     }
 
 
