@@ -1693,29 +1693,29 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int tryAllDownloads3() throws InterruptedException {
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
+        int completedSize = -1;
         synchronized(this) {
-            needed=new IntervalSet(); 
+            needed=new IntervalSet();
             {//all variables in this block have limited scope
-                RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
-                File incFile=incompleteFileManager.getFile(rfd);
+                Assert.that(incompleteFile != null);
                 synchronized (incompleteFileManager) {
                     if( commonOutFile != null )
                         commonOutFile.clearManagedDownloader();
                     //get VerifyingFile
                     commonOutFile=
-                    incompleteFileManager.getEntry(incFile);
+                    incompleteFileManager.getEntry(incompleteFile);
                 }
                 if(commonOutFile==null) {//no entry in incompleteFM
                     debug("creating a verifying file");
                     commonOutFile = new VerifyingFile(true);
                     //we must add an entry for this in IncompleteFileManager
                     incompleteFileManager.
-                                   addEntry(incFile,commonOutFile);
+                                   addEntry(incompleteFile,commonOutFile);
                 }
                                 
                 //need to get the VerifyingFile ready to write
                 try {
-                    commonOutFile.open(incFile,this);
+                    commonOutFile.open(incompleteFile,this);
                 } catch(IOException e) {
                     // This is a serious problem if it happens.
                     // TODO: add better checking to make sure it's possible
@@ -1726,7 +1726,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     return COULDNT_MOVE_TO_LIBRARY;
                 }
                 //update needed
-                Iterator iter=commonOutFile.getFreeBlocks(rfd.getSize());
+                completedSize =
+                   (int)IncompleteFileManager.getCompletedSize(incompleteFile);
+                Iterator iter=commonOutFile.getFreeBlocks(completedSize);
                 while (iter.hasNext())
                     addToNeeded((Interval)iter.next());
             }
@@ -1757,6 +1759,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         int doneSize =
                             (int)IncompleteFileManager.getCompletedSize(
                                 incompleteFile);
+                        Assert.that( completedSize == doneSize,
+                            "incomplete files (or size!) changed!");
                         Assert.that(
                             !commonOutFile.getFreeBlocks(doneSize).hasNext(),
                             "file is incomplete, but needed.isEmpty()" );
