@@ -180,9 +180,8 @@ public class Connection implements Runnable {
      * Receives a message.
      *
      * @requires this is in the CONNECTED state
-     * @effects See specification of Message.read. Note that this <i>may</i> be
-     *  non-blocking, but there is no hard guarantee on the maximum
-     *  block time.  This is thread-safe.
+     * @effects exactly like Message.read(), but blocks until a 
+     *  message is available.
      */
     public Message receive() throws IOException, BadPacketException {
 	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
@@ -195,6 +194,29 @@ public class Connection implements Runnable {
 	    //if (m!=null)
 	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
+	}
+    }
+
+    /**
+     * Receives a message with timeout.
+     *
+     * @requires this is in the CONNECTED state
+     * @effects exactly like Message.read(), but throws InterruptedIOException if
+     *  timeout!=0 and no message is read after "timeout" milliseconds.  In this
+     *  case, you should terminate the connection, as half a message may have been 
+     *  read.
+     */
+    public Message receive(int timeout) 
+	throws IOException, BadPacketException, InterruptedIOException {
+	synchronized (in) {
+	    //temporarily change socket timeout.
+	    int oldTimeout=sock.getSoTimeout();
+	    sock.setSoTimeout(timeout);
+	    try {
+		return receive();
+	    } finally {
+		sock.setSoTimeout(oldTimeout);
+	    }
 	}
     }
 
@@ -488,5 +510,30 @@ public class Connection implements Runnable {
 //      public static void main(String args[]) {
 //  	System.out.println(ConnectionManager.ME_CONNECTION.toString());
 //  	System.out.println((new Connection("somehost.com",123)).toString());
+
+//  	Connection c=new Connection("localhost", 6346);
+//  	try {
+//  	    c.connect();
+//  	    System.out.print("This should pause for 5 seconds...");
+//  	    try {
+//  		c.receive(5000);
+//  	    } catch (InterruptedIOException e) { 
+//  	    } catch (BadPacketException e) {
+//  		System.out.println("I wasn't expecting BadPacketException!");
+//  	    } catch (IOException e) {
+//  		System.out.println("I wasn't expecting IOException!");
+//  	    }
+//  	    System.out.println("done.");
+//  	    System.out.println("This should hang forever...");
+//  	    try {
+//  		c.receive(0);
+//  	    } catch (BadPacketException e) {
+//  		System.out.println("I wasn't expecting BadPacketException!");
+//  	    } catch (IOException e) {
+//  		System.out.println("I wasn't expecting IOException!");
+//  	    }
+//  	} catch (IOException e) {
+//  	    System.out.println("Got IOException");
+//  	}
 //      }	
 }
