@@ -152,7 +152,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 								   HugeTestUtils.URNS[i].httpStringValue(), 10, 
 								   GUID.makeGuid(), 10, true, 2, true, null, 
 								   HugeTestUtils.URN_SETS[i],
-                                   false,false,"",0,null);
+                                   false,false,"",0,null, -1);
 
             // just make sure this doesn't throw an exception
 			AlternateLocation.create(rfd);
@@ -164,7 +164,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    HugeTestUtils.URNS[0].httpStringValue(), 10, 
                                    GUID.makeGuid(), 10, true, 2, true, null, 
                                    HugeTestUtils.URN_SETS[0],
-                                   false,false,"",0,null);
+                                   false,false,"",0,null, -1);
 
             // this should throw an exception, since it's a private address.
             AlternateLocation.create(rfd);        

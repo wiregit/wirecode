@@ -32,19 +32,19 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         rf1=new RemoteFileDesc(
             "1.2.3.4", 6346, 0, "some file.txt", 1000, 
             new byte[16], SpeedConstants.T1_SPEED_INT, false, 3, 
-            false, null, null, false, false,"",0,null);
+            false, null, null, false, false,"",0,null, -1);
         rf2=new RemoteFileDesc(
             "1.2.3.5", 6346, 0, "some file.txt", 1000, 
             new byte[16], SpeedConstants.T1_SPEED_INT, false, 3, 
-            false, null, null, false, false,"",0,null);
+            false, null, null, false, false,"",0,null, -1);
         rf3=new RemoteFileDesc(
             "1.2.3.6", 6346, 0, "some file.txt", 1010, 
             new byte[16], SpeedConstants.T1_SPEED_INT, false, 3, 
-            false, null, null, false, false,"",0,null);
+            false, null, null, false, false,"",0,null, -1);
         rf4=new RemoteFileDesc(
             "1.2.3.6", 6346, 0, "some file.txt", 1010, 
             new byte[16], SpeedConstants.T3_SPEED_INT, false, 0, 
-            false, null, null, false, false,"",0,null);
+            false, null, null, false, false,"",0,null, -1);
 
         Set /* of URN */ urnSet1=null;
         Set /* of URN */ urnSet2=null;
@@ -65,11 +65,11 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         rf5=new RemoteFileDesc(
             "1.2.3.7", 6346, 0, "some file.txt", 1000, 
             new byte[16], SpeedConstants.T1_SPEED_INT, false, 3, 
-            false, null, urnSet1, false, false,"",0,null);
+            false, null, urnSet1, false, false,"",0,null, -1);
         rf6=new RemoteFileDesc(
             "1.2.3.8", 6346, 0, "some file.txt", 1000, 
             new byte[16], SpeedConstants.T1_SPEED_INT, false, 3, 
-            false, null, urnSet2, false, false,"",0,null);
+            false, null, urnSet2, false, false,"",0,null, -1);
     }
 
 

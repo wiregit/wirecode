@@ -416,6 +416,37 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
     }
     
     /**
+     * Tests that the GGEP'd CT extension is read correctly.
+     */
+    public void testGGEPCreateTimeExtension() throws Exception {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    
+	    ByteOrder.int2leb(257, baos);
+	    ByteOrder.int2leb(1029, baos);
+	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
+	    baos.write(name);
+	    
+	    GGEP info = new GGEP();
+	    long time = System.currentTimeMillis();
+	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
+	    info.write(baos);
+	    
+	    // write out closing null.
+	    baos.write((byte)0);
+	    
+	    byte[] output = baos.toByteArray();
+	    ByteArrayInputStream in = new ByteArrayInputStream(output);
+	    Response r = Response.createFromStream(in);
+	    assertEquals("wrong index", 257, r.getIndex());
+	    assertEquals("wrong size", 1029, r.getSize());
+	    assertEquals("wrong name", "sam", r.getName());
+	    // too annoying to check extension was correct.
+	    assertEquals("leftover input", -1, in.read());
+	    
+	    assertEquals("wrong time", time, r.getCreateTime());
+    }
+        
+    /**
      * Tests that GGEP can be both before & after other extensions.
      */
     public void testGGEPWithOtherExtensions() throws Exception {
