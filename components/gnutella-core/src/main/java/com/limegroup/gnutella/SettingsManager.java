@@ -176,9 +176,16 @@ public class SettingsManager {
     
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
-    private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
-    private volatile long DEFAULT_SUPERNODE_PROBATION_TIME = 300000; //5 min
-    private volatile boolean DEFAULT_SUPERNODE_MODE = true;
+    private final int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
+    private final long DEFAULT_SUPERNODE_PROBATION_TIME 
+        = 300000; //5 min
+    private final boolean DEFAULT_SUPERNODE_MODE = true;
+    
+    //authentication settings
+    private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY 
+        = false;
+    private static final String DEFAULT_COOKIES_FILE 
+        = "lib" + File.separator + "STDataMap.dat";
     
 
 	/**
@@ -312,6 +319,17 @@ public class SettingsManager {
     private final String SUPERNODE_PROBATION_TIME 
        = "SUPERNODE_PROBATION_TIME"; 
     private final String SUPERNODE_MODE             = "SUPERNODE_MODE";
+    
+    //authentication settings
+    private final String ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY
+        = "ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY";
+    
+    /**
+     * The property that denotes the file that stores the 
+     * Schema Transformation DataMap
+     */
+    private static final String COOKIES_FILE
+        = "COOKIES_FILE";
 
 	/**
 	 * Constant key for the minimum quality to allow in search results.
@@ -840,22 +858,26 @@ public class SettingsManager {
                     setEverSupernodeCapable(b.booleanValue());
                 }
 				
-                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS))
-                {
+                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS)){
                     setMaxShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS))
-                {
+                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)){
                     setMinShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(SUPERNODE_PROBATION_TIME))
-                {
+                else if(key.equals(SUPERNODE_PROBATION_TIME)){
                     setSupernodeProbationTime((new Long(p)).longValue());
                 }
-                else if(key.equals(SUPERNODE_MODE))
-                {
+                else if(key.equals(SUPERNODE_MODE)){
                     setSupernodeMode((new Boolean(p)).booleanValue());
                 }
+                else if(key.equals(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)){
+                    setAcceptAuthenticatedConnectionsOnly(
+                        (new Boolean(p)).booleanValue());
+                }
+                else if(key.equals(COOKIES_FILE)){
+                   setCookiesFile(p);
+                }
+                setCookiesFile(DEFAULT_COOKIES_FILE);
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -960,18 +982,17 @@ public class SettingsManager {
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
         setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
         setSupernodeMode(DEFAULT_SUPERNODE_MODE);
+        
+        //authentication settings
+        setAcceptAuthenticatedConnectionsOnly(
+            DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY);
+        setCookiesFile(DEFAULT_COOKIES_FILE);
+        
 		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
 		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
 		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
         setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
         
-        //settings for Supernode implementation
-        setMaxShieldedClientConnections(
-            DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
-        setMinShieldedClientConnections(
-            DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
-        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
-        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
@@ -1678,6 +1699,24 @@ public class SettingsManager {
     public boolean hasShieldedClientSupernodeConnection()
     {
         return _shieldedClientSupernodeConnection;
+    }
+    
+    /**
+     * Tells whether this node should accept authenticated connections only
+     * @return true, if this node should accept authenticated connections
+     * only, false otherwise
+     */
+    public boolean getAcceptAuthenticatedConnectionsOnly() {
+        return Boolean.valueOf(PROPS.getProperty(
+            ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)).booleanValue();
+    }
+    
+    /**
+     * Returns the name of the file that stores cookies
+     * @return The name of the cookies file
+     */
+    public String getCookiesFile() {
+        return PROPS.getProperty(COOKIES_FILE);
     }
     
     /******************************************************
@@ -2705,8 +2744,7 @@ public class SettingsManager {
      * the supernode
      */
     public void setMaxShieldedClientConnections(
-        int maxShieldedClientConnections)
-    {
+        int maxShieldedClientConnections){
         this._maxShieldedClientConnections = maxShieldedClientConnections;
         PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(maxShieldedClientConnections));
@@ -2719,8 +2757,7 @@ public class SettingsManager {
      * supernode to client-node.
      */
     public void setMinShieldedClientConnections(
-        int minShieldedClientConnections)
-    {
+        int minShieldedClientConnections){
         this._minShieldedClientConnections = minShieldedClientConnections;
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
@@ -2730,8 +2767,7 @@ public class SettingsManager {
      * Sets the probation time for s supernode, during which supernode
      * decides whether to swith to client mode or stay as supernode
      */
-    public void setSupernodeProbationTime(long supernodeProbationTime)
-    {
+    public void setSupernodeProbationTime(long supernodeProbationTime){
         this._supernodeProbationTime = supernodeProbationTime;
         PROPS.put(SUPERNODE_PROBATION_TIME, 
             Long.toString(supernodeProbationTime));
@@ -2740,8 +2776,7 @@ public class SettingsManager {
     /**
      * Sets whether the node is gonna be a supernode or not
      */
-    public void setSupernodeMode(boolean supernodeMode)
-    {
+    public void setSupernodeMode(boolean supernodeMode){
         this._supernodeMode = supernodeMode;
         PROPS.put(SUPERNODE_MODE, 
             (new Boolean(supernodeMode)).toString());
@@ -2753,10 +2788,29 @@ public class SettingsManager {
      * for client nodes only
      * @param flag the flag value to be set
      */
-    public void setShieldedClientSupernodeConnection(boolean flag)
-    {
+    public void setShieldedClientSupernodeConnection(boolean flag){
         _shieldedClientSupernodeConnection = flag;
     }
+    
+    /**
+     * Sets the flag indicating whether this node should accept
+     * only authenticated connections
+     * @param flag the flag value to be set
+     */
+    public void setAcceptAuthenticatedConnectionsOnly(
+        final boolean flag) {
+        PROPS.put(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY, 
+            (new Boolean(flag)).toString());
+    }
+    
+    /**
+     * Sets the name of the file that stores cookies
+     * @param filename The file name to be set
+     */
+    public void setCookiesFile(final String filename) {
+        PROPS.put(COOKIES_FILE, filename);
+    }
+    
     
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
