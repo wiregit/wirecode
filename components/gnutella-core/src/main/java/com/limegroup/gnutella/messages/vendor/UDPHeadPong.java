@@ -211,6 +211,9 @@ public class UDPHeadPong extends VendorMessage {
 		URN urn = ping.getUrn();
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		
+		boolean didNotSendAltLocs=false;
+		boolean didNotSendRanges = false;
+		
 		try{
 			
 		byte features = ping.getFeatures();
@@ -254,6 +257,8 @@ public class UDPHeadPong extends VendorMessage {
 		//write out the return code and the queue status
 		daos.writeByte(queueStatus);
 		
+		
+		
 		//if we sent partial file and the remote asked for ranges, send them 
 		if (retCode == PARTIAL_FILE && ping.requestsRanges()) {
 			IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
@@ -265,14 +270,15 @@ public class UDPHeadPong extends VendorMessage {
 				caos.write(ranges);
 			} 
 			else { //the ranges will not fit - say we didn't send them.
-				features = (byte) ( features & ~UDPHeadPing.INTERVALS);
-				baos.toByteArray()[0] = features;
+				didNotSendRanges=true;
 			}
 			
 		}
 		
 		//if we have any altlocs and enough room in the packet, add them.
 		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
+		
+		
 		
 		if (altlocs!= null && altlocs.hasAlternateLocations() &&
 				ping.requestsAltlocs()) {
@@ -283,8 +289,7 @@ public class UDPHeadPong extends VendorMessage {
 			
 			if (altbytes ==null){
 				//altlocs will not fit or none available - say we didn't send them
-				features = (byte) ( features & ~UDPHeadPing.ALT_LOCS);
-				baos.toByteArray()[0] = features;
+				didNotSendAltLocs=true;
 			} else { 
 				daos.writeShort((short)altbytes.length);
 				caos.write(altbytes);
@@ -297,7 +302,17 @@ public class UDPHeadPong extends VendorMessage {
 		}
 		
 		//done!
-		return baos.toByteArray();
+		byte []ret = baos.toByteArray();
+		
+		//if we did not add ranges or altlocs due to constraints, 
+		//update the flags now.
+		
+		if (didNotSendRanges)
+			ret[0] = (byte) (ret[0] & ~UDPHeadPing.INTERVALS);
+		if (didNotSendAltLocs)
+			ret[0] = (byte) (ret[0] & ~UDPHeadPing.ALT_LOCS);
+		
+		return ret;
 	}
 	
 	/**
