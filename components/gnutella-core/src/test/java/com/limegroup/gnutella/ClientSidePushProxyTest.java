@@ -161,7 +161,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // set up a server socket
         ServerSocket ss = new ServerSocket(7000);
         ss.setReuseAddress(true);        
-        ss.setSoTimeout(15*TIMEOUT);
+        ss.setSoTimeout(25*TIMEOUT);
 
         // send a reply with some PushProxy info
         Set proxies = new HashSet();

@@ -1067,9 +1067,6 @@ public class DownloadManager implements BandwidthTracker {
     	
     }
 
-    public void sendPush(final RemoteFileDesc file) {
-    	sendPush(file, new Object());
-    }
     /**
      * Sends a push request for the given file.  Returns false iff no push could
      * be sent, i.e., because no routing entry exists. That generally means you
@@ -1080,7 +1077,7 @@ public class DownloadManager implements BandwidthTracker {
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public void sendPush(final RemoteFileDesc file, final Object toNotify) {
+    public void sendPush(final RemoteFileDesc file) {
     	
     	//Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
@@ -1113,7 +1110,7 @@ public class DownloadManager implements BandwidthTracker {
         // schedule the failover tcp pusher
         RouterService.schedule(new Runnable(){
         	public void run() {
-        		FAILOVERS.add(new PushFailoverRequestor(file,guid,toNotify));
+        		FAILOVERS.add(new PushFailoverRequestor(file,guid));
         	}},UDP_PUSH_FAILTIME,0);
         
     	sendPushUDP(file,guid);
@@ -1242,12 +1239,10 @@ public class DownloadManager implements BandwidthTracker {
 		
 		final RemoteFileDesc _file;
 		final byte [] _guid;
-		final Object _toNotify;
 		
-		public PushFailoverRequestor(RemoteFileDesc file, byte [] guid,Object toNotify) {
+		public PushFailoverRequestor(RemoteFileDesc file, byte [] guid) {
 			_file = file;
 			_guid = guid;
-			_toNotify=toNotify;
 		}
 		
 		public void run() {
@@ -1267,10 +1262,7 @@ public class DownloadManager implements BandwidthTracker {
 			}
 			
 			if (proceed)
-				if (sendPushTCP(_file,_guid))
-					synchronized(_toNotify) {
-						_toNotify.notify();
-					}
+				sendPushTCP(_file,_guid);
 		}
 	}
 

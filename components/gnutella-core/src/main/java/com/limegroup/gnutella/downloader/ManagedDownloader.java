@@ -2598,19 +2598,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean pushSent;
         synchronized(threadLock) {
             // only wait if we actually were able to send the push
-            manager.sendPush(rfd,threadLock);
+            manager.sendPush(rfd);
             
-                //No loop is actually needed here, assuming spurious
-                //notify()'s don't occur.  (They are not allowed by the Java
-                //Language Specifications.)  Look at acceptDownload for
-                //details.
-                try {
-                    threadLock.wait(PUSH_CONNECT_TIME);  
-                } catch(InterruptedException e) {
-                    if(RECORD_STATS)
-                        DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
-                    throw new IOException("push interupted.");
-                }
+            //No loop is actually needed here, assuming spurious
+            //notify()'s don't occur.  (They are not allowed by the Java
+            //Language Specifications.)  Look at acceptDownload for
+            //details.
+            try {
+                threadLock.wait(PUSH_CONNECT_TIME);  
+            } catch(InterruptedException e) {
+                if(RECORD_STATS)
+                    DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
+                throw new IOException("push interupted.");
+            }
             
         }
         
