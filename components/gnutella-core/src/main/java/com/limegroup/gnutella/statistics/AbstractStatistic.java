@@ -98,14 +98,18 @@ public abstract class AbstractStatistic implements Statistic {
 		
 	// inherit doc comment
 	public Integer[] getStatHistory() {
-		_statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
+        synchronized(STAT_HISTORY) {
+            _statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
+        }
 		return _statHistory;
 	}
 
 	// inherit doc comment
 	public void storeCurrentStat() {
-		STAT_HISTORY.remove(0);
-		STAT_HISTORY.add(new Integer(_current));
+        synchronized(STAT_HISTORY) {
+            STAT_HISTORY.remove(0);
+            STAT_HISTORY.add(new Integer(_current));
+        }
 		if(_current > _max) {
 			_max = _current;
 		}
