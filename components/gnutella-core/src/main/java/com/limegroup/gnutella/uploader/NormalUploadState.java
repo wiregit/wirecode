@@ -187,8 +187,11 @@ public class NormalUploadState implements UploadState {
 		// to be 1 - n instead of 0 - (n-1), but because this is
 		// an optional field in the regular case, we don't need
 		// to send it.
+        // 
+        // Earlier version of LimeWire mistakenly sent "bytes=" instead of
+        // "bytes ".  Thankfully most clients understand both.
 		if (_uploadBegin != 0) {
-			str = "Content-range: bytes=" + _uploadBegin  +
+			str = "Content-range: bytes " + _uploadBegin  +
 			"-" + ( _fileSize - 1 )+ "/" + _fileSize + "\r\n";
 			_ostream.write(str.getBytes());
 		}
