@@ -155,8 +155,10 @@ public class UDPBufferedOutputStream extends OutputStream {
     /**
      *  Closing output stream has no effect. 
      */
-    public void close() throws IOException {
-        _connectionActive = false;
+    public synchronized void close() throws IOException {
+        if (!_connectionActive)
+            throw new IOException("already closed");
+        connectionClosed();
     }
 
     /**
@@ -217,7 +219,7 @@ public class UDPBufferedOutputStream extends OutputStream {
      *  Package accessor for erroring out and waking up any further activity.
      */
     synchronized void connectionClosed() {
-        _connectionActive = false;
+        _connectionActive=false;
 		notify();
     }
 
