@@ -283,11 +283,14 @@ public class Acceptor implements Runnable {
         } catch (IOException e) {
             socketError = e;
             //2. Try 10 different ports
-            for (int i=0; i<10; i++) {
+            int numToTry = 10;
+            for (int i=0; i<numToTry; i++) {
 				tempPort = i+6346;
 				// do not try to bind to the multicast port.
-				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue())
+				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue()) {
+				    numToTry++;
 				    continue;
+				}
                 try {
                     setListeningPort(tempPort);
 					_port = tempPort;
