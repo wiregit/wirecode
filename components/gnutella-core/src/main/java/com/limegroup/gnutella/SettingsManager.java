@@ -799,7 +799,7 @@ public class SettingsManager implements SettingsInterface
 
     public synchronized void setParallelSearchMax(int max)
     {
-	if(false)
+	if(max<1)
 	    throw new IllegalArgumentException();
 	else
 	    {
