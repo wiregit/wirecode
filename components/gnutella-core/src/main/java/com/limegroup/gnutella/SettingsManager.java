@@ -601,6 +601,15 @@ public class SettingsManager implements SettingsInterface
         return HTTPUtil.stringSplit(directories_, ';');
     }
 
+	public String[] getDirectoriesWithIncompleteAsArray() {
+		String temp = directories_;
+        temp.trim();
+		if(!temp.endsWith(";")) 
+			temp += ";";
+		temp += getIncompleteDirectory();
+        return HTTPUtil.stringSplit(temp, ';');		
+	}
+
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
 
@@ -663,7 +672,7 @@ public class SettingsManager implements SettingsInterface
      * private methods to handle versioning
      * control information
      */
-    public String getCurrentVersion() {
+    public String getCurrentVersion(){ 
         //This is intentionally hard-coded in.
         return CURRENT_VERSION;
     }
