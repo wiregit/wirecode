@@ -5,6 +5,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
@@ -349,8 +350,11 @@ public class Acceptor extends Thread {
                 else if (word.equals("GET")) {
                  //     HTTPManager mgr = new HTTPManager(_socket, _router,
 //                          Acceptor.this, _callback, false);
-					_uploadManager.acceptUpload(_socket);
+					_uploadManager.acceptUpload(HTTPRequestMethod.GET, _socket);
                 }
+				else if (word.equals("HEAD")) {
+					_uploadManager.acceptUpload(HTTPRequestMethod.HEAD, _socket);
+				}
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
                     _downloadManager.acceptDownload(_socket);
