@@ -157,7 +157,6 @@ public final class UDPServiceStub extends UDPService {
                         // Drop message if in flaky range
                         int num = _random.nextInt(100);
                         if (num < _pctFlaky) {
-System.out.println("dropping: "+msg);
                             msg = null;  
                         } else {
                             break;
