@@ -2228,7 +2228,7 @@ public class Connection implements Candidate {
 			
 			//we are trying to send too soon.  However if the message should be scheduled
 			//to be sent once the interval expires.
-			if (m!=null){
+			if (m!=null && !m.isSame(_candidatesSent)){
 				_needsAdvertisement=true;
 				_candidatesSent=m;
 			}
