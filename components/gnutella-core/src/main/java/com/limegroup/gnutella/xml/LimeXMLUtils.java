@@ -33,6 +33,19 @@ public class LimeXMLUtils
 
     private static final double MATCHING_RATE = .9;
 
+    private static final String C_HEADER_NAME = "Content-Type";
+    private static final String C_HEADER_NONE_VAL = "xml/plaintext";
+    private static final String C_HEADER_ZLIB_VAL = "xml/deflate";
+    private static final String C_HEADER_GZIP_VAL = "xml/gzip";
+    
+    private static final String COMPRESS_HEADER_ZLIB = 
+        "{"+ C_HEADER_NAME + ":" + C_HEADER_ZLIB_VAL + "}";
+    private static final String COMPRESS_HEADER_GZIP = 
+        "{"+ C_HEADER_NAME + ":" + C_HEADER_GZIP_VAL + "}";
+    private static final String COMPRESS_HEADER_NONE = 
+        "{"+ C_HEADER_NAME + ":" + C_HEADER_NONE_VAL + "}";
+
+
     /**
      * Returns an instance of InputSource after reading the file, and trimming
      * the extraneous white spaces.
@@ -454,17 +467,64 @@ public class LimeXMLUtils
     }
 
 
-
-    /** Returns a GZIP'ed version of data. */
+    /** @return A properly formatted version of the input data.
+     */
     public static byte[] compress(byte[] data) {
+
+        byte[] compressedData = null;
+        if (shouldCompress(data)) 
+                compressedData = compressZLIB(data);
+        
+        byte[] retBytes = null;
+        if (compressedData != null) {
+            retBytes = new byte[COMPRESS_HEADER_ZLIB.length() +
+                               compressedData.length];
+            System.arraycopy(COMPRESS_HEADER_ZLIB.getBytes(),
+                             0,
+                             retBytes,
+                             0,
+                             COMPRESS_HEADER_ZLIB.length());
+            System.arraycopy(compressedData, 0,
+                             retBytes, COMPRESS_HEADER_ZLIB.length(),
+                             compressedData.length);
+        }
+        else {  // essentially compress failed, just send prefixed raw data....
+            retBytes = new byte[COMPRESS_HEADER_NONE.length() +
+                                data.length];
+            System.arraycopy(COMPRESS_HEADER_NONE.getBytes(),
+                             0,
+                             retBytes,
+                             0,
+                             COMPRESS_HEADER_NONE.length());
+            System.arraycopy(data, 0,
+                             retBytes, COMPRESS_HEADER_NONE.length(),
+                             data.length);
+
+        }
+
+        return retBytes;
+    }
+
+
+    /** Currently, all data is compressed.  In the future, this will handle
+     *  heuristics about whether data should be compressed or not.
+     */
+    private static boolean shouldCompress(byte[] data) {
+        if (data.length >= 1000)
+            return true;
+        else
+            return false;
+    }
+
+    /** Returns a ZLIB'ed version of data. */
+    private static byte[] compressZLIB(byte[] data) {
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             DeflaterOutputStream gos=new DeflaterOutputStream(baos);
             gos.write(data, 0, data.length);
             gos.flush();
             gos.close();                      //flushes bytes
-            System.out.println("compression savings: " +
-                               ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
+            //            System.out.println("compression savings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
             return baos.toByteArray();
         } catch (IOException e) {
             //This should REALLY never happen because no devices are involved.
@@ -473,11 +533,106 @@ public class LimeXMLUtils
             return null;
         }
     }
+
+
+    /** Returns a GZIP'ed version of data. */
+    private static byte[] compressGZIP(byte[] data) {
+        try {
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            DeflaterOutputStream gos=new GZIPOutputStream(baos);
+            gos.write(data, 0, data.length);
+            gos.flush();
+            gos.close();                      //flushes bytes
+            //            System.out.println("compression savings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
+            return baos.toByteArray();
+        } catch (IOException e) {
+            //This should REALLY never happen because no devices are involved.
+            //But could we propogate it up.
+            Assert.that(false, "Couldn't write to byte stream");
+            return null;
+        }
+    }
+
+
+
  
 
-    /** Returns the uncompressed version of the given GZIP'ed bytes.  Throws
+    /** @return Correctly uncompressed data (according to Content-Type header) 
+     *  May return a byte[] of length 0 if something bad happens. 
+     */
+    public static byte[] uncompress(byte[] data) throws Exception {
+        byte[] retBytes = new byte[0];
+
+        String headerFragment = new String(data, 1, 
+                                           C_HEADER_NAME.length());
+        
+        if (headerFragment.equals(C_HEADER_NAME)) {
+            // we have well formed input (so far)
+            headerFragment = new String(data,
+                                        (1+C_HEADER_NAME.length()+1),
+                                        max3(C_HEADER_NONE_VAL.length(),
+                                             C_HEADER_ZLIB_VAL.length(),
+                                             C_HEADER_GZIP_VAL.length())
+                                        );
+
+            if (headerFragment.indexOf(C_HEADER_NONE_VAL) == 0) {
+                retBytes = new byte[data.length-COMPRESS_HEADER_NONE.length()];
+                System.arraycopy(data,
+                                 COMPRESS_HEADER_NONE.length(),
+                                 retBytes,
+                                 0,
+                                 data.length-COMPRESS_HEADER_NONE.length());
+            }
+            else if (headerFragment.indexOf(C_HEADER_GZIP_VAL) == 0) {
+                retBytes = new byte[data.length-COMPRESS_HEADER_GZIP.length()];
+                System.arraycopy(data,
+                                 COMPRESS_HEADER_GZIP.length(),
+                                 retBytes,
+                                 0,
+                                 data.length-COMPRESS_HEADER_GZIP.length());
+                retBytes = uncompressGZIP(retBytes);                
+            }
+            else if (headerFragment.indexOf(C_HEADER_ZLIB_VAL) == 0) {
+                retBytes = new byte[data.length-COMPRESS_HEADER_ZLIB.length()];
+                System.arraycopy(data,
+                                 COMPRESS_HEADER_ZLIB.length(),
+                                 retBytes,
+                                 0,
+                                 data.length-COMPRESS_HEADER_ZLIB.length());
+                retBytes = uncompressZLIB(retBytes);                
+            }
+            else
+                ; // uncompressible XML, just drop it on the floor....
+        }
+        else
+            return data;  // the Content-Type header is optional, assumes PT
+        
+
+        return retBytes;
+    }
+
+
+
+    /** Returns the uncompressed version of the given ZLIB'ed bytes.  Throws
      *  IOException if the data is corrupt. */
-    public static byte[] uncompress(byte[] data) throws IOException {
+    private static byte[] uncompressGZIP(byte[] data) throws IOException {
+        ByteArrayInputStream bais=new ByteArrayInputStream(data);
+        InflaterInputStream gis=new GZIPInputStream(bais);
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        while (true) {
+            int b=gis.read();
+            if (b==-1)
+                break;
+            baos.write(b);
+        }
+        return baos.toByteArray();
+    }
+
+        
+
+    /** Returns the uncompressed version of the given ZLIB'ed bytes.  Throws
+     *  IOException if the data is corrupt. */
+    private static byte[] uncompressZLIB(byte[] data) throws IOException {
         ByteArrayInputStream bais=new ByteArrayInputStream(data);
         InflaterInputStream gis=new InflaterInputStream(bais);
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -489,6 +644,19 @@ public class LimeXMLUtils
         }
         return baos.toByteArray();
     }
+
+
+    private static int max3(int a, int b, int c) {
+        return max2(max2(a,b),c);
+    }
+
+    private static int max2(int a, int b) {        
+        if (a > b)
+            return a;
+        else
+            return b;
+    }
+
 
     /*
     public static void main(String argv[]) {
