@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
+import java.net.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
@@ -73,27 +74,173 @@ public class PingReply extends Message implements Serializable {
      */
     private final boolean HAS_GGEP_EXTENSION;
 
+
     /**
-     * Creates a new ping from scratch.
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID and ttl.
      *
-     * @param guid the sixteen byte message GUID
-     * @param ttl the message TTL to use
-     * @param port my listening port.  MUST fit in two signed bytes,
-     *  i.e., 0 < port < 2^16.
-     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  format e.g. {18, 239, 0, 144}.
-     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @param kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
      */
-    public PingReply(byte[] guid, byte ttl, int port, byte[] ip, long files, 
-                     long kbytes) {
-        this(guid, ttl, port, ip, files, kbytes, false);
+    public static PingReply create(byte[] guid, byte ttl) {
+        return create(guid, ttl, RouterService.getPort(),
+                      RouterService.getAddress(),
+                      (long)RouterService.getNumSharedFiles(),
+                      (long)RouterService.getSharedFileSize()/1024,
+                      RouterService.isSupernode(),
+                      Statistics.instance().calculateDailyUptime(),
+                      UDPService.instance().isGUESSCapable());
     }
 
     /**
-     * Creates a new ping from scratch with ultrapeer extension data.
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, ttl, and query key.
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param key the <tt>QueryKey</tt> for this reply
+     */                                   
+    public static PingReply createQueryKeyReply(byte[] guid, byte ttl, 
+                                                QueryKey key) {
+        return create(guid, ttl, 
+                      RouterService.getPort(),
+                      RouterService.getAddress(),
+                      RouterService.getNumSharedFiles(),
+                      RouterService.getSharedFileSize()/1024,
+                      RouterService.isSupernode(),
+                      qkGGEP(key));
+    }
+
+    /**
+     * Creates a new <tt>PingReply</tt> for this host with the specified
+     * GUID, ttl, and query key.
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param key the <tt>QueryKey</tt> for this reply
+     */                                   
+    public static PingReply createQueryKeyReply(byte[] guid, byte ttl, 
+                                                int port, byte[] ip,
+                                                long sharedFiles, 
+                                                long sharedSize,
+                                                boolean ultrapeer,
+                                                QueryKey key) {
+        return create(guid, ttl, 
+                      port,
+                      ip,
+                      sharedFiles,
+                      sharedSize,
+                      ultrapeer,
+                      qkGGEP(key));
+    }
+
+    /**
+     * Creates a new <tt>PingReply</tt> for an external node -- the data
+     * in the reply will not contain data for this node.  In particular,
+     * the data fields are set to zero because we do not know these
+     * statistics for the other node.
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
+     */
+    public static PingReply 
+        create(byte[] guid, byte ttl, int port, byte[] address) {
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl, port, address, 0, 0, false, -1, false); 
+    }
+
+    /**
+     * Creates a new <tt>PingReply</tt> for an external node -- the data
+     * in the reply will not contain data for this node.  In particular,
+     * the data fields are set to zero because we do not know these
+     * statistics for the other node.
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
+     * @param ultrapeer whether or not we should mark this node as
+     *  being an Ultrapeer
+     */
+    public static PingReply 
+        createExternal(byte[] guid, byte ttl, int port, byte[] address,
+                       boolean ultrapeer) {
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl, port, address, 0, 0, ultrapeer, -1, false); 
+    }
+
+    /**
+     * Creates a new <tt>PingReply</tt> for an external node -- the data
+     * in the reply will not contain data for this node.  In particular,
+     * the data fields are set to zero because we do not know these
+     * statistics for the other node.  This is primarily used for testing.
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
+     * @param ultrapeer whether or not we should mark this node as
+     *  being an Ultrapeer
+     */
+    public static PingReply 
+        createExternal(byte[] guid, byte ttl, int port, byte[] address,
+                       int uptime,
+                       boolean ultrapeer) {
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl, port, address, 0, 0, ultrapeer, uptime, false); 
+    }
+
+    /**
+     * Creates a new <tt>PingReply</tt> instance for a GUESS node.  This
+     * method should only be called if the caller is sure that the given
+     * node is, in fact, a GUESS-capable node.  This method is only used
+     * to create pongs for nodes other than ourselves.  
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param ep the <tt>Endpoint</tt> instance containing data about 
+     *  the remote host
+     */       
+    public static PingReply 
+        createGUESSReply(byte[] guid, byte ttl, Endpoint ep) 
+        throws UnknownHostException {
+        int port = ep.getPort();
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl,
+                      port,
+                      ep.getHostBytes(),
+                      0, 0, true, -1, true);        
+    }
+
+    /**
+     * Creates a new <tt>PingReply</tt> instance for a GUESS node.  This
+     * method should only be called if the caller is sure that the given
+     * node is, in fact, a GUESS-capable node.  This method is only used
+     * to create pongs for nodes other than ourselves.  Given that this
+     * reply is for a remote node, we do not know the data for number of
+     * shared files, etc, and so leave it blank.
+     *
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param port the port the remote host is listening on
+     * @param address the address of the node
+     */
+    public static PingReply 
+        createGUESSReply(byte[] guid, byte ttl, int port, byte[] address) {
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl, port, address, 0, 0, true, -1, true); 
+    }
+
+    /**
+     * Creates a new pong with the specified data -- used primarily for
+     * testing!
      *
      * @param guid the sixteen byte message GUID
      * @param ttl the message TTL to use
@@ -105,14 +252,16 @@ public class PingReply extends Message implements Serializable {
      *  bytes, i.e., 0 < files < 2^32.
      * @param kbytes the total size of all files I'm sharing, in kilobytes.
      *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     * @param isUltrapeer true if this should be a marked ultrapeer pong,
-     *  which sets kbytes to the nearest power of 2 not less than 8.
      */
-    public PingReply(byte[] guid, byte ttl,
-                     int port, byte[] ip, long files, long kbytes, 
-                     boolean isUltrapeer) { 
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1, false);
+    public static PingReply 
+        create(byte[] guid, byte ttl,
+               int port, byte[] ip, long files, long kbytes) {
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl, port, ip, files, kbytes, 
+                      false, -1, false); 
     }
+
 
     /**
      * Creates a new ping from scratch with ultrapeer and daily uptime extension
@@ -134,164 +283,92 @@ public class PingReply extends Message implements Serializable {
      *  3600 for one hour per day.  Negative values mean "don't know".
      *  GGEP extension blocks are allocated if dailyUptime is non-negative.  
      */
-    public PingReply(byte[] guid, byte ttl,
-             int port, byte[] ip, long files, long kbytes,
-             boolean isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
+    public static PingReply 
+        create(byte[] guid, byte ttl,
+               int port, byte[] ip, long files, long kbytes,
+               boolean isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
+ 		if(!CommonUtils.isValidPort(port))
+			throw new IllegalArgumentException("invalid port: "+port);     
+        return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
+                      newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
+
 
     /**
-     * Use this constructor to make a PingReply with a QueryKey.  
+     * Creates a new <tt>PingReply</tt> instance with the specified
+     * criteria.
      *
-     * @param guid the sixteen byte message GUID
-     * @param ttl the message TTL to use
-     * @param port my listening port.  MUST fit in two signed bytes,
-     *  i.e., 0 < port < 2^16.
-     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
-     *  format e.g. {18, 239, 0, 144}.
-     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
-     *  bytes, i.e., 0 < files < 2^32.
-     * @param kbytes the total size of all files I'm sharing, in kilobytes.
-     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
-     * @param isUltrapeer true if this should be a marked ultrapeer pong,
-     *  which sets kbytes to the nearest power of 2 not less than 8.
-     * @param queryKey the QueryKey you want the receiving host to use for UDP
-     *  query credentials.
+     * @return a new <tt>PingReply</tt> instance containing the specified
+     *  data
      */
-    public PingReply(byte[] guid, byte ttl, int port, byte[] ip, 
-                     long files, long kbytes, boolean isUltrapeer,
-                     QueryKey queryKey) {
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             qkGGEP(queryKey));
-    }
+    private static PingReply 
+        create(byte[] guid, byte ttl, int port, byte[] ip, long files,
+               long kbytes, boolean isUltrapeer, byte[] extensions) {
 
-    /** Internal constructor used to bind the encoded GGEP payload, avoiding the
-     *  need to construct it more than once.  
-     *  @param extension the encoded GGEP payload, or null if none */
-    private PingReply(byte[] guid, byte ttl, int port, byte[] ip, long files, 
-                      long kbytes, boolean isUltrapeer, byte[] extensions) {
-        super(guid, Message.F_PING_REPLY, ttl, (byte)0, 
-            STANDARD_PAYLOAD_SIZE + (extensions==null ? 0 : extensions.length));
  		if(!CommonUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);
         
-        PAYLOAD = new byte[getLength()];
+        int length = STANDARD_PAYLOAD_SIZE + 
+            (extensions == null ? 0 : extensions.length);
+
+        byte[] payload = new byte[length];
         //It's ok if casting port, files, or kbytes turns negative.
-        ByteOrder.short2leb((short)port, PAYLOAD, 0);
-        //Payload stores IP in BIG-ENDIAN
-        PAYLOAD[2]=ip[0];
-        PAYLOAD[3]=ip[1];
-        PAYLOAD[4]=ip[2];
-        PAYLOAD[5]=ip[3];
-        ByteOrder.int2leb((int)files, PAYLOAD, 6);
+        ByteOrder.short2leb((short)port, payload, 0);
+        //payload stores IP in BIG-ENDIAN
+        payload[2]=ip[0];
+        payload[3]=ip[1];
+        payload[4]=ip[2];
+        payload[5]=ip[3];
+        ByteOrder.int2leb((int)files, payload, 6);
         ByteOrder.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), 
-                          PAYLOAD, 
+                          payload, 
                           10);
         
         //Encode GGEP block if included.
         if (extensions!=null) {
             System.arraycopy(extensions, 0, 
-                             PAYLOAD, STANDARD_PAYLOAD_SIZE, 
+                             payload, STANDARD_PAYLOAD_SIZE, 
                              extensions.length);
-        }            
-
-        PORT = port;//ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
-        FILES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,6));
-        KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
-
-        // IP is big-endian
-        IP = ip2string(PAYLOAD, 2);
-
-        // GGEP parsing
-        GGEP ggep = parseGGEP();
-        int dailyUptime = -1;
-        boolean supportsUnicast = false;
-        String vendor = "";
-        int vendorMajor = -1;
-        int vendorMinor = -1;
-        QueryKey key = null;
-        if(ggep != null) {
-            if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
-                try {
-                    dailyUptime = 
-                        ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
-                } catch(BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
-            }
-
-            supportsUnicast = 
-                ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT); 
-
-            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
-                try {
-                    vendor = 
-                        new String(ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO),
-                                   0, 4);   
-                } catch(BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
-
-                try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    vendorMajor = (bytes[4] >> 4);
-                } catch (BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
-                try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    vendorMinor = (bytes[4] & 15);
-                }
-                catch (BadGGEPPropertyException e) {
-                    // simply don't assign it
-                }
-             }
-
-            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                try {
-                    byte[] bytes = 
-                        ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    key = QueryKey.getQueryKey(bytes, false);
-                }
-                catch (IllegalArgumentException malformedQueryKey) { 
-                    // simply don't assign it
-                }
-                catch (BadGGEPPropertyException corrupt) { 
-                    // simply don't assign it
-                }
-            }
         }
-
-        HAS_GGEP_EXTENSION = ggep != null;
-        DAILY_UPTIME = dailyUptime;
-        SUPPORTS_UNICAST = supportsUnicast;
-        VENDOR = vendor;
-        VENDOR_MAJOR_VERSION = vendorMajor;
-        VENDOR_MINOR_VERSION = vendorMinor;
-        QUERY_KEY = key;
-
+        return new PingReply(guid, ttl, (byte)0, payload);
     }
 
+
     /**
-     * Wrap a PingReply around stuff snatched from the network.
-     * <p>
-     * Initially this method required that payload.lenghth == 14. But now we
-     * support for big pings and pongs. 
+     * Creates a new <tt>PingReply</tt> instance from the network.
      *
-     * @exception BadPacketException payload is too small
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param hops the hops for this message
+     * @param payload the message payload
+     * @throws <tt>BadPacketException</tt> if the message is invalid for
+     *  any reason
      */
-    public PingReply(byte[] guid, byte ttl, byte hops, byte[] payload) 
+    public static PingReply 
+        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
         throws BadPacketException {
-        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
         if (payload.length<STANDARD_PAYLOAD_SIZE)
-            throw new BadPacketException("invalid payload length");
-        this.PAYLOAD=payload;
+            throw new BadPacketException("invalid payload length");   
+        int port = ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
+ 		if(!CommonUtils.isValidPort(port))
+			throw new BadPacketException("invalid port: "+port);     
+        return new PingReply(guid, ttl, hops, payload);
+    }
+     
+    /**
+     * Sole <tt>PingReply</tt> constructor.  This establishes all ping
+     * reply invariants.
+     * @param guid the Globally Unique Identifier (GUID) for this message
+     * @param ttl the time to live for this message
+     * @param hops the hops for this message
+     * @param payload the message payload
+     */
+    private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload) {
+        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
+        PAYLOAD = payload;
         PORT = ByteOrder.ubytes2int(ByteOrder.leb2short(PAYLOAD,0));
         FILES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,6));
         KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
- 		if(!CommonUtils.isValidPort(getPort()))
-			throw new BadPacketException("invalid port: "+PORT);
 
         // IP is big-endian
         IP = ip2string(PAYLOAD, 2);
@@ -363,8 +440,9 @@ public class PingReply extends Message implements Serializable {
         VENDOR_MAJOR_VERSION = vendorMajor;
         VENDOR_MINOR_VERSION = vendorMinor;
         QUERY_KEY = key;
+        
     }
-     
+
 
     /** Returns the GGEP payload bytes to encode the given uptime */
     private static byte[] newGGEP(int dailyUptime, boolean isUltrapeer,
@@ -625,13 +703,13 @@ public class PingReply extends Message implements Serializable {
         System.arraycopy(PAYLOAD, 0,
                          newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
-        try {
+        //try {
             return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
                                  newPayload);
-        } catch (BadPacketException e) {
-            Assert.that(false, "Couldn't strip payload! "+e);
-            return null;
-        }
+            //} catch (BadPacketException e) {
+            //Assert.that(false, "Couldn't strip payload! "+e);
+            //return null;
+            //}
     }
 
 

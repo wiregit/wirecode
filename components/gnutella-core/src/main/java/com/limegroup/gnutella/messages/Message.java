@@ -266,7 +266,8 @@ public abstract class Message
                 return new PingRequest(guid,ttl,hops);
 
             case F_PING_REPLY:
-                return new PingReply(guid,ttl,hops,payload);
+                return PingReply.createFromNetwork(guid, ttl, hops, payload);
+                //return new PingReply(guid,ttl,hops,payload);
             case F_QUERY:
                 if (length<3) break;
 				return QueryRequest.createNetworkQuery(

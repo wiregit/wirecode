@@ -51,25 +51,13 @@ public class StandardMessageRouter extends MessageRouter {
         //send its own ping in all the cases
         int newTTL = hops+1;
         if ( (hops+ttl) <=2)
-            newTTL = 1;
-        
-        int num_files = RouterService.getNumSharedFiles();
-        int kilobytes = RouterService.getSharedFileSize()/1024;
+            newTTL = 1;        
 
-        //We should indicate GUESS support....
-        boolean isGUESSCapable=UDPService.instance().isGUESSCapable();
-        //Daily average uptime.  If too slow, use FRACTIONAL_UPTIME property.
-        //This results in a GGEP extension, which will be stripped before
-        //sending it to older clients.
-        int dailyUptime=Statistics.instance().calculateDailyUptime();
-        PingReply pingReply = 
-            new PingReply(pingRequest.getGUID(), (byte)newTTL,
-                          RouterService.getPort(), RouterService.getAddress(),
-                          num_files, kilobytes, RouterService.isSupernode(),
-                          dailyUptime, isGUESSCapable);
+        PingReply pr = 
+            PingReply.create(pingRequest.getGUID(), (byte)newTTL);
 
         try {
-            sendPingReply(pingReply);
+            sendPingReply(pr);
         }
         catch(IOException e) {}
     }
@@ -91,13 +79,13 @@ public class StandardMessageRouter extends MessageRouter {
 		if(iter.hasNext()) {
 			while(iter.hasNext()) {
 				GUESSEndpoint host = (GUESSEndpoint)iter.next();				
-				PingReply reply = 
-					new PingReply(request.getGUID(), (byte)1, 
-								  host.getPort(),
-								  host.getAddress().getAddress(), 
-								  (long)0, (long)0, true);
+                PingReply pr = 
+                    PingReply.createExternal(request.getGUID(), (byte)1,
+                                             host.getPort(),
+                                             host.getAddress().getAddress(),
+                                             true);
 				try {
-					sendPingReply(reply);
+					sendPingReply(pr);
 				} catch(IOException e) {					
 					// we can't do anything other than try to send it
 					continue;
@@ -129,15 +117,18 @@ public class StandardMessageRouter extends MessageRouter {
             //get the next connection
             ManagedConnection connection = (ManagedConnection)iterator.next();
             //create the pong for this connection
-            PingReply pr = new PingReply(m.getGUID(), (byte)2,
-                connection.getOrigPort(),
-                connection.getInetAddress().getAddress(), 0, 0); 
+
+            PingReply pr = 
+                PingReply.createExternal(m.getGUID(), (byte)2, 
+                                         connection.getOrigPort(),
+                                         connection.getInetAddress().getAddress(),
+                                         false);
+                                                    
             
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
             
-            try
-            {
+            try {
                 sendPingReply(pr);
             }
             catch(IOException e) {}

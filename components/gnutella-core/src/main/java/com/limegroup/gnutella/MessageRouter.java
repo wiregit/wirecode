@@ -365,13 +365,11 @@ public abstract class MessageRouter {
 		PingReply reply;
 		if(host != null) {
 			try {
-				reply = new PingReply(guid, (byte)1,
-									  host.getPort(),
-									  host.getHostBytes(),
-									  (long)0, (long)0, true);
-			} catch(UnknownHostException e) {
+                
+                reply = PingReply.createGUESSReply(guid, (byte)1, host);
+            } catch(UnknownHostException e) {
 				reply = createPingReply(guid);
-			}
+            }
 		} else {
 			reply = createPingReply(guid);
 		}
@@ -390,19 +388,11 @@ public abstract class MessageRouter {
 	private PingReply createPingReply(byte[] guid) {
 		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
 		if(endpoint == null) {
-			return new PingReply(guid, (byte)1,
-								 RouterService.getPort(),
-								 RouterService.getAddress(),
-								 RouterService.getNumSharedFiles(),
-								 RouterService.getSharedFileSize()/1024,
-								 RouterService.isSupernode(),
-								 Statistics.instance().calculateDailyUptime(),
-                                 UDPService.instance().isGUESSCapable());
+            return PingReply.create(guid, (byte)1);
 		} else {
-			return new PingReply(guid, (byte)1,
-								 endpoint.getPort(),
-								 endpoint.getAddress().getAddress(),
-								 0, 0, true, 0, true);
+            return PingReply.createGUESSReply(guid, (byte)1, 
+                                              endpoint.getPort(),
+                                              endpoint.getAddress().getAddress());
 		}
 	}
 
@@ -541,22 +531,19 @@ public abstract class MessageRouter {
             // fast!
             InetAddress address = datagram.getAddress();
             int port = datagram.getPort();
-            QueryKey qkToDeliver = QueryKey.getQueryKey(address, port, 
-                                                        _secretKey, _secretPad);
+            QueryKey key = QueryKey.getQueryKey(address, port, 
+                                                _secretKey, _secretPad);
 
             // respond with Pong with QK, as GUESS requires....
             int num_files = RouterService.getNumSharedFiles();
-            int kilobytes = RouterService.getSharedFileSize()/1024;
-            
-            PingReply pRep = new PingReply(pr.getGUID(), (byte) 1, 
-                                           RouterService.getPort(),
-                                           RouterService.getAddress(),
-                                           num_files, kilobytes, isSupernode, 
-                                           qkToDeliver);
-            UDPService.instance().send(pRep, datagram.getAddress(),
+            int kilobytes = RouterService.getSharedFileSize()/1024;           
+
+            PingReply reply = 
+                PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
+            UDPService.instance().send(reply, datagram.getAddress(),
                                        datagram.getPort());
             if (RECORD_STATS)
-                SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pRep);
+                SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
         }
     }
 
@@ -943,7 +930,8 @@ public abstract class MessageRouter {
 	 
 		List list=_manager.getInitializedConnections2();
 		int limit;
-		if(handler.isHighDegreeConnection()) {
+		if(handler.isHighDegreeConnection() && 
+           handler.isUltrapeerQueryRoutingConnection()) {
 			limit = list.size();
 		} else {
 			limit = Math.min(5, list.size());

@@ -721,24 +721,47 @@ public class ManagedConnection extends Connection
             //mark the pong if supernode
             PingReply pr;
             if(connection.isSupernodeConnection()) {
+                /*
                 pr = new PingReply(m.getGUID(),(byte)2,
                                    connection.getOrigPort(),
                                    connection.getInetAddress().getAddress(), 
                                    0, 0, true);  
+                */
+                pr = PingReply.
+                    createExternal(m.getGUID(), (byte)2, 
+                                   connection.getOrigPort(),
+                                   connection.getInetAddress().getAddress(), 
+                                   true);
             } else if(connection.isLeafConnection() 
                 || connection.isOutgoing()){
                 //we know the listening port of the host in this case
+                /*
                 pr = new PingReply(m.getGUID(),(byte)2,
                                    connection.getOrigPort(),
                                    connection.getInetAddress().getAddress(), 
                                    0, 0); 
+                */
+
+                pr = PingReply.
+                    createExternal(m.getGUID(), (byte)2, 
+                                   connection.getOrigPort(),
+                                   connection.getInetAddress().getAddress(), 
+                                   false);
             }
             else{
                 //Use the port '0' in this case, as we dont know the listening
                 //port of the host
+                /*
                 pr = new PingReply(m.getGUID(),(byte)2, 0,
                                    connection.getInetAddress().getAddress(), 
                                    0, 0); 
+                */
+
+                pr = PingReply.
+                    createExternal(m.getGUID(), (byte)2, 
+                                   0,
+                                   connection.getInetAddress().getAddress(), 
+                                   false);
             }
             
             //hop the message, as it is ideally coming from the connected host
