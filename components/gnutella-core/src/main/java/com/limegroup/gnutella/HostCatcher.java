@@ -42,6 +42,10 @@ public class HostCatcher {
     //These constants are package-access for testing.  
     //That's ok as they're final.
 
+    /** The number of milliseconds to wait after trying gnutella.net entries
+     *  before resorting to GWebCache HOSTFILE requests. */
+    public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
+
     /** The number of supernode pongs to store. */
     static final int GOOD_SIZE=400;
     /** The number of normal pongs to store. 
@@ -93,7 +97,10 @@ public class HostCatcher {
     
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache=new BootstrapServerManager(this);
-    
+    /** The time we're next allowed to send a HOSTFILE request because of no
+     *  fresh ultrapeer pongs.  The default value of MAX_VALUE means we're not
+     *  initially allowed to. */
+    private long nextAllowedFetchTime=Long.MAX_VALUE;
 
     private Acceptor acceptor;
     private ConnectionManager manager;
@@ -417,12 +424,29 @@ public class HostCatcher {
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
-            //If we've run out of good hosts, asynchronously contact a GWebCache
-            //server to get more addresses.  Note, however, that this will not
-            //do anything if we're already in the process of connecting.  See
-            //also expire().
-            if (getNumUltrapeerHosts()==0) 
+            //If we've completely run out of hosts, asynchronously contact a
+            //GWebCache server to get more addresses.  Note, however, that this
+            //will not do anything if we're currently connecting to a GWebCache.
+            //TODO: do we need rate-limiting code?
+            if (getNumHosts()==0) {
                 gWebCache.fetchEndpointsAsync();
+            }
+            //If there are no good, fresh ultrapeer pongs--these exclude
+            //gnutella.net entries--schedule a fetch in GWEBCACHE_DELAY
+            //milliseconds if it's still needed then.
+            else if (getNumUltrapeerHosts()==0) {
+                long now=System.currentTimeMillis();
+                //Be patient; maybe some gnutella.net entries will work.
+                if (now < nextAllowedFetchTime) {
+                    nextAllowedFetchTime=Math.min(
+                        nextAllowedFetchTime, now+GWEBCACHE_DELAY);
+                } 
+                //Give up and use GWebCache.
+                else {
+                    gWebCache.fetchEndpointsAsync();
+                    nextAllowedFetchTime=Long.MAX_VALUE;
+                }
+            }
 
             try { 
                 return getAnEndpointInternal();
@@ -580,11 +604,6 @@ public class HostCatcher {
         //Fetch more GWebCache urls once per session.
         //(Well, once per connect really--good enough.)
         gWebCache.fetchBootstrapServersAsync();
-        //It's not strictly necessary to fetch endpoints here, since
-        //getAnEndpoint() does that when there are no more good endpoints.  But
-        //this can help get fresh values if LimeWire has been disconnected for a
-        //while.
-        gWebCache.fetchEndpointsAsync();
     }
 
     /**
@@ -672,4 +691,6 @@ public class HostCatcher {
     }
 
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
+    //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
+    //           
 }

@@ -11,6 +11,7 @@ public class AllTests {
         TestSuite suite=new TestSuite("GWebCache tests");
         suite.addTest(BootstrapServerTest.suite());
         suite.addTest(BootstrapServerManagerTest.suite());
+        suite.addTest(HostCatcherFetchTest.suite());
         return suite;
     }
 
