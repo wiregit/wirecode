@@ -138,20 +138,14 @@ public abstract class Message
             i+=got;
         }
 
-		//System.out.println("Message::read: buf         "+buf); 
         //2. Unpack.
         byte[] guid=new byte[16];
-		//System.out.println("Message::read: guid:        "+guid); 
         for (int i=0; i<16; i++) //TODO3: can optimize
             guid[i]=buf[i];
         byte func=buf[16];
-		//System.out.println("Message::read: func:        "+func); 
         byte ttl=buf[17];
-		//System.out.println("Message::read: ttl:         "+ttl); 
         byte hops=buf[18];
-		//System.out.println("Message::read: hops:        "+hops); 
         int length=ByteOrder.leb2int(buf,19);
-		//System.out.println("Message::read: length:        "+length); 
         //2.5 If the length is hopelessly off (this includes lengths >
         //    than 2^31 bytes, throw an irrecoverable exception to
         //    cause this connection to be closed.
