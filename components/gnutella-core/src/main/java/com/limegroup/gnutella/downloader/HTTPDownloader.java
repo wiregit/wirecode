@@ -315,6 +315,11 @@ public class HTTPDownloader implements BandwidthTracker {
         throws IOException, TryAgainLaterException, FileNotFoundException, 
              NotSharingException, QueuedException, RangeNotAvailableException,
              ProblemReadingHeaderException, UnknownCodeException {
+        if(start < 0)
+            throw new IllegalArgumentException("invalid start: " + start);
+        if(stop <= start)
+            throw new IllegalArgumentException("stop(" + stop +
+                                               ") <= start(" + start +")");
 
         _amountToRead = stop-start;
         _totalAmountRead += _amountRead;
