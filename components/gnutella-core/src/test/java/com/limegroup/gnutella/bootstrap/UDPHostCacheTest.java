@@ -308,7 +308,7 @@ public class UDPHostCacheTest extends BaseTestCase {
         assertEquals(1, e3.getUDPHostCacheFailures());
         assertEquals(4, e4.getUDPHostCacheFailures());
         assertEquals(2, e5.getUDPHostCacheFailures());
-        assertEquals(5, cache.getSize());
+        assertEquals(5, cache.getSize()); 
         
         // reset data, try again.
         cache.resetData();
