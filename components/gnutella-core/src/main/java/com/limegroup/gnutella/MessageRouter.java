@@ -505,15 +505,12 @@ public abstract class MessageRouter {
 
     protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
                                       InetAddress address, int port) {
-        try {
-            if (reply.getQueryKey() != null) {
-                // this is a PingReply in reply to my QueryKey Request - 
-                //consume the Pong and return, don't process as usual....
-                UNICASTER.handleQueryKeyPong(reply);
-                return;
-            }
+        if (reply.getQueryKey() != null) {
+            // this is a PingReply in reply to my QueryKey Request - 
+            //consume the Pong and return, don't process as usual....
+            UNICASTER.handleQueryKeyPong(reply);
+            return;
         }
-        catch (BadPacketException ignored) {}
 
         // also add the sender of the pong if different from the host
         // described in the reply...
@@ -651,6 +648,12 @@ public abstract class MessageRouter {
      */
     public void sendPingRequest(PingRequest request,
                                 ManagedConnection connection) {
+        if(request == null) {
+            throw new NullPointerException("null ping");
+        }
+        if(connection == null) {
+            throw new NullPointerException("null connection");
+        }
         _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
@@ -661,6 +664,12 @@ public abstract class MessageRouter {
      */
     public void sendQueryRequest(QueryRequest request,
                                  ManagedConnection connection) {
+        if(request == null) {
+            throw new NullPointerException("null query");
+        }
+        if(connection == null) {
+            throw new NullPointerException("null connection");
+        }
         _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
@@ -806,7 +815,6 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
-		//System.out.println("MessageRouter::sendRoutedQueryToHost"); 
 		//TODO:
 		//because of some very obscure optimization rules, it's actually
 		//possible that qi could be non-null but not initialized.  Need
@@ -830,6 +838,7 @@ public abstract class MessageRouter {
      */
     protected synchronized void unicastQueryRequest(QueryRequest query,
                                                     ReplyHandler conn) {
+        
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
 				
@@ -1007,11 +1016,7 @@ public abstract class MessageRouter {
             handler.countDroppedMessage();
         }
 
-		boolean supportsUnicast = false;
-		try {
-			supportsUnicast = reply.supportsUnicast();
-		} catch(BadPacketException e) {
-		}
+		boolean supportsUnicast = reply.supportsUnicast();
 
         //Then, if a marked pong from an Ultrapeer that we've never seen before,
         //send to all leaf connections except replyHandler (which may be null),
@@ -1042,6 +1047,13 @@ public abstract class MessageRouter {
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler handler) {
+
+        if(queryReply == null) {
+            throw new NullPointerException("null query reply");
+        }
+        if(handler == null) {
+            throw new NullPointerException("null ReplyHandler");
+        }
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
@@ -1125,6 +1137,12 @@ public abstract class MessageRouter {
      */
     public void handlePushRequest(PushRequest request,
                                   ReplyHandler handler) {
+        if(request == null) {
+            throw new NullPointerException("null request");
+        }
+        if(handler == null) {
+            throw new NullPointerException("null ReplyHandler");
+        }
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(request.getClientGUID());
@@ -1145,15 +1163,18 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    public void sendPingReply(PingReply pingReply)
+    public void sendPingReply(PingReply pong)
         throws IOException {
+        if(pong == null) {
+            throw new NullPointerException("null pong");
+        }
         ReplyHandler replyHandler =
-            _pingRouteTable.getReplyHandler(pingReply.getGUID());
+            _pingRouteTable.getReplyHandler(pong.getGUID());
 
         if(replyHandler != null)
-            replyHandler.handlePingReply(pingReply, null);
+            replyHandler.handlePingReply(pong, null);
         else
-            throw new IOException();
+            throw new IOException("could not find reply handler");
     }
 
     /**
@@ -1165,6 +1186,9 @@ public abstract class MessageRouter {
     public void sendQueryReply(QueryReply queryReply)
         throws IOException {
  
+        if(queryReply == null) {
+            throw new NullPointerException("null reply");
+        }
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
         //numbers).
@@ -1183,7 +1207,7 @@ public abstract class MessageRouter {
             rrp.getReplyHandler().handleQueryReply(queryReply, null);
         }
         else
-            throw new IOException();
+            throw new IOException("no route for reply");
     }
 
     /**
@@ -1192,16 +1216,19 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    public void sendPushRequest(PushRequest pushRequest)
+    public void sendPushRequest(PushRequest push)
         throws IOException {
+        if(push == null) {
+            throw new NullPointerException("null push");
+        }
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
-            _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
+            _pushRouteTable.getReplyHandler(push.getClientGUID());
 
         if(replyHandler != null)
-            replyHandler.handlePushRequest(pushRequest, null);
+            replyHandler.handlePushRequest(push, null);
         else
-            throw new IOException();
+            throw new IOException("no route for push");
     }
 
     /**
@@ -1218,7 +1245,8 @@ public abstract class MessageRouter {
         //Mutate query route table associated with receivingConnection.  
         //(This is legal.)  Create a new one if none exists.
         synchronized (queryUpdateLock) {
-            ManagedConnectionQueryInfo qi=receivingConnection.getQueryRouteState();
+            ManagedConnectionQueryInfo qi =
+                receivingConnection.getQueryRouteState();
             if (qi==null) {
                 //There's really no need to check if c is an old client here;
                 //it certainly didn't send a RouteTableMessage by accident!
