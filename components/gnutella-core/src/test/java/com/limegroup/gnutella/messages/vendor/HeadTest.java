@@ -5,6 +5,7 @@ import java.io.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.downloader.Interval;
@@ -32,7 +33,8 @@ public class HeadTest extends BaseTestCase {
 	/**
 	 * two collections of altlocs, one for the complete and one for the incomplete file
 	 */
-	static AlternateLocationCollection _alCollectionComplete,_alCollectionIncomplete;
+	static AlternateLocationCollection _alCollectionComplete,_alCollectionIncomplete,
+		_pushCollection;
 	
 	/**
 	 * URNs for the 3 files that will be requested
@@ -111,6 +113,8 @@ public class HeadTest extends BaseTestCase {
 		
 		_complete.setAlternateLocationCollection(_alCollectionComplete);
 		_partial.setAlternateLocationCollection(_alCollectionIncomplete);
+		_partial.setPushAlternateLocationCollection(_pushCollection);
+		
 		
 		
 		Map urns = new HashMap();
@@ -314,9 +318,16 @@ public class HeadTest extends BaseTestCase {
 	}
 	
 	public void testFirewalledAltlocs() throws Exception {
-		HeadPing ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS);
+		
+		//try with a file that doesn't have push locs
+		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.PUSH_ALTLOCS);
 		assertTrue(ping1.requestsPushLocs());
 		HeadPong pong1 = reparse (new HeadPong(ping1));
+		assertNull(pong1.getPushLocs());
+		
+		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS);
+		assertTrue(ping1.requestsPushLocs());
+		pong1 = reparse (new HeadPong(ping1));
 
 		assertNull(pong1.getRanges());
 		assertNull(pong1.getAltLocs());
@@ -345,68 +356,38 @@ public class HeadTest extends BaseTestCase {
 	
 	private static void  createCollections() throws Exception{
 			
-		Set alternateLocations = new HashSet();
-        
-		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
-             alternateLocations.add(
-                       AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]));
-		}
+		
 
 
-        boolean created = false;
-		Iterator iter = alternateLocations.iterator();
-		for(; iter.hasNext(); ) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-			if(!created) {
-				_alCollectionComplete = 
-					AlternateLocationCollection.create(al.getSHA1Urn());
-                created = true;
-			}            
+        _alCollectionComplete=AlternateLocationCollection.create(_haveFull);
+        _alCollectionIncomplete=AlternateLocationCollection.create(_havePartial);
+        _pushCollection=AlternateLocationCollection.create(_havePartial);
+		
+		for(int i=0;i<10;i++ ) {
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
 			_alCollectionComplete.add(al);
 		}
-        assertTrue("failed to set test up",
-        		_alCollectionComplete.getAltLocsSize()==alternateLocations.size());
+        assertEquals("failed to set test up",10,
+        		_alCollectionComplete.getAltLocsSize());
         
-        alternateLocations = new HashSet();
-        
-		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
-             alternateLocations.add(
-                       AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]));
-		}
-
-
-        created = false;
-		iter = alternateLocations.iterator();
-		for(; iter.hasNext(); ) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-			if(!created) {
-				_alCollectionIncomplete = 
-					AlternateLocationCollection.create(al.getSHA1Urn());
-                created = true;
-			}            
+        for(int i=0;i<10;i++ ) {
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_havePartial);
 			_alCollectionIncomplete.add(al);
 		}
+        assertEquals("failed to set test up",10,
+        		_alCollectionIncomplete.getAltLocsSize());
+        
 
-        assertTrue("failed to set test up",
-        		_alCollectionIncomplete.getAltLocsSize()==alternateLocations.size());
         
         //add some firewalled altlocs to the incomplete collection
         
-        PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
-		Set proxies = new HashSet();
-		proxies.add(ppi);
+        GUID guid = new GUID(GUID.makeGuid());
 		
-        pe = new PushEndpoint(GUID.makeGuid(),proxies);
-        //test an rfd with push proxies
-        
-		RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
-                HugeTestUtils.URNS[0].httpStringValue(), 10, 
-                pe.getClientGUID(), 10, true, 2, true, null, 
-                HugeTestUtils.URN_SETS[0],
-                false,true,"",0,proxies,-1);
-		
-		AlternateLocation firewalled = AlternateLocation.create(fwalled);
-		_alCollectionIncomplete.add(firewalled);
+		AlternateLocation firewalled = AlternateLocation.create(guid.toHexString()+
+				";1.2.3.4:5",_havePartial);
+		pe = ((PushAltLoc)firewalled).getPushAddress();
+		_pushCollection=AlternateLocationCollection.create(_havePartial);
+		_pushCollection.add(firewalled);
 	}
 	
 	

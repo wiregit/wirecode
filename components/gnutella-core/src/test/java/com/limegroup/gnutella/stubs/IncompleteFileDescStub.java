@@ -26,7 +26,7 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
     private static Set localSet2,globalSet;
     public Set localSet;
     
-    private AlternateLocationCollection _altlocCollection;
+    private AlternateLocationCollection _altlocCollection,_pushCollection;
     
     private byte [] _ranges;
     
@@ -110,8 +110,17 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 		return _altlocCollection;
 	}
 	
+	public AlternateLocationCollection getPushAlternateLocationCollection() {
+
+		return _pushCollection;
+	}
+	
 	public void setAlternateLocationCollection(AlternateLocationCollection what) {
 		_altlocCollection=what;
+	}
+	
+	public void setPushAlternateLocationCollection(AlternateLocationCollection what) {
+		_pushCollection=what;
 	}
 	
 	public boolean addVerified(AlternateLocation al) {

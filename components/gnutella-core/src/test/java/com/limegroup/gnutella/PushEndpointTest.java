@@ -44,17 +44,17 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE,
     			one.getSizeBytes());
     	assertEquals(1,one.getProxies().size());
-    	assertFalse(one.supportsFWTransfers());
+    	assertEquals(0,one.supportsFWTransfers());
     	
     	PushEndpoint two = new PushEndpoint(guid2.bytes(),set2);
     	assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE,
     			two.getSizeBytes());
     	assertEquals(2,two.getProxies().size());
-    	assertFalse(two.supportsFWTransfers());
+    	assertEquals(0,two.supportsFWTransfers());
     	
     	//test features
-    	PushEndpoint three = new PushEndpoint(guid2.bytes(),set2,0xFF);
-    	assertTrue(three.supportsFWTransfers());
+    	PushEndpoint three = new PushEndpoint(guid2.bytes(),set2,0x0,1);
+    	assertGreaterThan(0,three.supportsFWTransfers());
     	
     	//the equals method ignores the features since all we care about 
     	//is the ip address when putting in maps and sets.
@@ -81,7 +81,7 @@ public class PushEndpointTest extends BaseTestCase {
     	set6.add(ppi5);set6.add(ppi6);
     	
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	assertFalse(one.supportsFWTransfers());
+    	assertEquals(0,one.supportsFWTransfers());
     	byte [] network = one.toBytes();
     	byte [] network2 = new byte [one.getSizeBytes()+5];
     	one.toBytes(network2,2);
@@ -91,16 +91,16 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(one,one_prim);
     	one_prim = PushEndpoint.fromBytes(network2,2);
     	assertEquals(one,one_prim);
-    	assertFalse(one_prim.supportsFWTransfers());
+    	assertEquals(0,one_prim.supportsFWTransfers());
     	
     	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,
-    			PushEndpoint.F2F_TRANSFER);
-    	assertTrue(six.supportsFWTransfers());
+    			0,2);
+    	assertEquals(2,six.supportsFWTransfers());
     	network = six.toBytes();
     	assertEquals(six.getSizeBytes(),network.length);
     	PushEndpoint four = PushEndpoint.fromBytes(network);
     	assertNotEquals(six,four);
-    	assertTrue(four.supportsFWTransfers());
+    	assertEquals(2,four.supportsFWTransfers());
     	
     	Set sent = new HashSet(set6);
     	sent.retainAll(four.getProxies());
