@@ -58,11 +58,12 @@ public class WriteRegulator {
         if  (rtt == 0) 
             rtt = 10;
         int baseWait   = Math.min(realRTT, 2000)/3;  
-        int sleepTime  = ((usedSpots) * baseWait);
+        int sleepTime  = ((usedSpots+1) * baseWait);
 
         // Ensure the sleep time is fairly distributed
         if ( sleepTime < windowSize ) {
             double pct = (double) sleepTime / (double) windowSize;
+System.out.println("pct :"+pct);
             if ( Math.random() < pct )
                 sleepTime      = 1;
             else
