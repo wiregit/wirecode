@@ -495,7 +495,6 @@ public final class UploadManager implements BandwidthTracker {
                 int upStart = uploader.getUploadBegin();
                 int upEnd = uploader.getUploadEnd();
                 if ( !ifd.isRangeSatisfiable(upStart, upEnd) ) {
-                    System.out.println(uploader + " bad range.");
                     uploader.setState(Uploader.UNAVAILABLE_RANGE);
                 }
                 return;

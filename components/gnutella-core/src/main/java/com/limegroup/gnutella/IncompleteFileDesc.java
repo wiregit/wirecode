@@ -147,13 +147,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	public String toString() {
 		return ("IncompleteFileDesc:\r\n"+
 				"name:     "+_name+"\r\n"+
-				"index:    "+getIndex()+"\r\n"+
-				"path:     "+getPath()+"\r\n"+
-				"size:     "+_size+"\r\n"+
-				"modTime:  "+lastModified()+"\r\n"+
-				"File:     "+getFile()+"\r\n"+
-				"urns:     "+getUrns()+"\r\n"+
-				"alt locs: "+getAlternateLocationCollection()+"\r\n");
+				"index:    "+getIndex()+"\r\n");
 	}
 }
 
