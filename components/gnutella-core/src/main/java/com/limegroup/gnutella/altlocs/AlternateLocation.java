@@ -366,17 +366,17 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 */
 	private static URL createUrl(final String locationHeader) 
 		throws IOException {
-		String test = locationHeader.toLowerCase();
+		String locHeader = locationHeader.toLowerCase();
 		
 		//Doesn't start with http? Bad.
-		if(!test.startsWith("http"))
+		if(!locHeader.startsWith("http"))
 		    throw new IOException("invalid location: " + locationHeader);
 		
 		//Had multiple http's in it? Bad.
-		if(test.lastIndexOf("http://") > 4) 
+		if(locHeader.lastIndexOf("http://") > 4) 
             throw new IOException("invalid location: " + locationHeader);
             
-        String urlStr = AlternateLocation.removeTimestamp(locationHeader);
+        String urlStr = AlternateLocation.removeTimestamp(locHeader);
         URL url = new URL(urlStr);
         String host = url.getHost();
         
@@ -470,8 +470,11 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	public boolean equals(Object obj) {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
-		AlternateLocation al = (AlternateLocation)obj;
-		return URL == null ? al.URL == null : URL.equals(al.URL);
+		AlternateLocation other = (AlternateLocation)obj;
+		return (URL.getHost().equals(other.URL.getHost()) &&
+                URL.getPort() == other.URL.getPort() &&
+                SHA1_URN.equals(other.SHA1_URN) &&
+                URL.getProtocol().equals(other.URL.getProtocol()) );
 	}
 
     /**
@@ -504,12 +507,16 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
         int ret = _count - other._count;
         if(ret!=0) 
             return ret;
-        if (this.URL.equals(other.URL)) 
-            return 0;
         ret = this.URL.getHost().compareTo(other.URL.getHost());
         if(ret!=0)
             return ret;
-        return (this.URL.getPort() - other.URL.getPort());
+        ret = (this.URL.getPort() - other.URL.getPort());
+        if(ret!=0)
+            return ret;
+        ret = SHA1_URN.hashCode() - other.SHA1_URN.hashCode();
+        if(ret != 0)
+            return ret;
+        return URL.getProtocol().hashCode()-other.URL.getProtocol().hashCode();
     }
 
 	/**
@@ -522,8 +529,14 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * @return a hash code value for this object
 	 */
 	public int hashCode() {
-		if(hashCode == 0)
-		    hashCode = 37 * this.URL.hashCode();
+		if(hashCode == 0) {
+            int result = 17;
+            result = (37* result)+this.URL.getHost().hashCode();
+            result = (37* result)+this.URL.getPort();
+            result = (37* result)+this.SHA1_URN.hashCode();
+            result = (37* result)+this.URL.getProtocol().hashCode();
+            hashCode = result;
+        }
 		return hashCode;
 	}
 
