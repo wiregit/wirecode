@@ -60,7 +60,15 @@ public final class LimeXMLDocumentHelper{
                 Node currNode = (Node)children.get(i);
                 String cIndex = getAttributeValue(currNode,"index");
                 int currIndex= Integer.parseInt(cIndex);
-                LimeXMLDocument currDoc=new LimeXMLDocument(currNode,rootElement);
+                LimeXMLDocument currDoc=null;
+                try {
+                    currDoc = new LimeXMLDocument(currNode,rootElement);
+                } catch (IOException e) {
+                    continue;//ignoring these exceptions has the same effect
+                }
+                catch (SchemaNotFoundException snfx) {
+                    continue;//ignoring these exceptions has the same effect
+                } 
                 docs[currIndex]=currDoc;
             }
             retList.add( docs);
@@ -105,9 +113,16 @@ public final class LimeXMLDocumentHelper{
             Node currNode = (Node)iterator.next();
             //convert the subtree represented by the child node to an 
             //instance of LimeXMLDocument, and add to the list of documents
-            docs.add(new LimeXMLDocument(currNode,rootElement));
+            LimeXMLDocument doc = null;
+            try {
+                doc = new LimeXMLDocument(currNode,rootElement);
+            } catch(IOException iox) {
+                continue;
+            } catch(SchemaNotFoundException snfx) {
+                continue;
+            } 
+            docs.add(doc);
         }
-        
         //return the list of documents
         return docs;
     }

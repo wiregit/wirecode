@@ -61,17 +61,10 @@ public class LimeXMLDocument implements Serializable {
     }
     
     
-    public LimeXMLDocument(Node node, Node rootElement){        
-        try{
-            grabDocInfo(rootElement,true);
-        } catch(SchemaNotFoundException e) {
-            //not the fault of the grabDocInfo method
-        } catch (IOException ignored2) {}
-        try{
-            grabDocInfo(node,false);
-        } catch(SchemaNotFoundException e) {
-            //not the fault of the grabDocInfo method
-        } catch (IOException ignored2) {}
+    public LimeXMLDocument(Node node, Node rootElement) throws 
+    SchemaNotFoundException, IOException {
+        grabDocInfo(rootElement,true);
+        grabDocInfo(node,false);
         createMap(node,rootElement.getNodeName());
     }
 
