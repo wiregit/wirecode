@@ -58,7 +58,6 @@ public class OGGMetaData extends AudioMetaData{
 		
 		try {
 			vfile = new VorbisFile(_file.getAbsolutePath());
-			
 		}catch (JOrbisException failed) {
 			throw new IOException (failed.getMessage());
 		}

@@ -162,15 +162,15 @@ public class MP3MetaData extends AudioMetaData {
             if(frameContent == null || frameContent.trim().equals(""))
                 continue;
             //check which tag we are looking at
-            if(ID3Editor.TITLE_ID.equals(frameID)) 
+            if(MetaDataEditor.TITLE_ID.equals(frameID)) 
                 data.setTitle(frameContent);
-            else if(ID3Editor.ARTIST_ID.equals(frameID)) 
+            else if(MetaDataEditor.ARTIST_ID.equals(frameID)) 
                 data.setArtist(frameContent);
-            else if(ID3Editor.ALBUM_ID.equals(frameID)) 
+            else if(MetaDataEditor.ALBUM_ID.equals(frameID)) 
                 data.setAlbum(frameContent);
-            else if(ID3Editor.YEAR_ID.equals(frameID)) 
+            else if(MetaDataEditor.YEAR_ID.equals(frameID)) 
                 data.setYear(frameContent);
-            else if(ID3Editor.COMMENT_ID.equals(frameID)) {
+            else if(MetaDataEditor.COMMENT_ID.equals(frameID)) {
                 //ID3v2 comments field has null separators embedded to encode
                 //language etc, the real content begins after the last null
                 byte[] bytes = frame.getContent();
@@ -186,12 +186,12 @@ public class MP3MetaData extends AudioMetaData {
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
                 data.setComment(frameContent);
             }
-           else if(ID3Editor.TRACK_ID.equals(frameID)) {
+           else if(MetaDataEditor.TRACK_ID.equals(frameID)) {
                 try {
                     data.setTrack(Short.parseShort(frameContent));
                 } catch (NumberFormatException ignored) {} 
             }
-            else if(ID3Editor.GENRE_ID.equals(frameID)) {
+            else if(MetaDataEditor.GENRE_ID.equals(frameID)) {
                 //ID3v2 frame for genre has the byte used in ID3v1 encoded
                 //within it -- we need to parse that out
                 int startIndex = frameContent.indexOf("(");

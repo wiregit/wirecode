@@ -632,7 +632,7 @@ public class LimeXMLReplyCollection {
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        ID3Editor commitWith = ripMP3XML(mp3FileName, doc, checkBetter);
+        MetaDataEditor commitWith = ripMP3XML(mp3FileName, doc, checkBetter);
         if (commitWith != null)  {// commit to disk.
             if(commitWith.getCorrectDocument() == null) 
                 mp3WriteState = commitID3Data(mp3FileName, commitWith);
@@ -665,12 +665,12 @@ public class LimeXMLReplyCollection {
      * @return An ID3Editor to use when committing or null if nothing 
      *  should be editted.
      */
-    private ID3Editor ripMP3XML(String mp3File, LimeXMLDocument doc, 
+    private MetaDataEditor ripMP3XML(String mp3File, LimeXMLDocument doc, 
                                                         boolean checkBetter) {
         if (!LimeXMLUtils.isMP3File(mp3File))
             return null;
 
-        ID3Editor newValues = new ID3Editor();
+        MetaDataEditor newValues = new MetaDataEditor();
         String newXML = null;
 
         try {
@@ -681,7 +681,7 @@ public class LimeXMLReplyCollection {
         newValues.removeID3Tags(newXML);
         
         // Now see if the file already has the same info ...
-        ID3Editor existing = new ID3Editor();
+        MetaDataEditor existing = new MetaDataEditor();
         LimeXMLDocument existingDoc = null;
         try {
             existingDoc = MetaDataReader.readDocument(new File(mp3File));
@@ -729,9 +729,9 @@ public class LimeXMLReplyCollection {
      * Commits the changes to disk.
      * If anything was changed on disk, notifies the FileManager of a change.
      */
-    private int commitID3Data(String mp3FileName, ID3Editor editor) {
+    private int commitID3Data(String mp3FileName, MetaDataEditor editor) {
         //write to mp3 file...
-        int retVal = editor.writeID3DataToDisk(mp3FileName);
+        int retVal = editor.commitMetaData(mp3FileName);
         if(LOG.isDebugEnabled())
             LOG.debug("wrote data: " + retVal);
         // any error where the file wasn't changed ... 
