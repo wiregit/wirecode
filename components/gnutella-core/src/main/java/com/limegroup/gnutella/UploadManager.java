@@ -132,51 +132,29 @@ public class UploadManager {
 		upThread.start();
 	}
 
-	public void acceptPushUpload(String file, 
-                                 String host, int port, 
-                                 int index, String guid) { 
-        //This is a hack to make sure push resumed uploads work with BearShare.
-        //The problem arises when you are uploading data to BearShare and you
-        //kill the upload.  BearShare sends a second push very quickly, before
-        //the first upload has time to die.  (Probably because the first upload
-        //is throttled and sleeping for CYCLE_TIME.)  Hence LimeWire refuses to
-        //try the resume because the (second) call to testAttemptedPush fails.
-        //
-        //We use the easiest solution possible here; just wait to make sure that
-        //the first upload has died.  Note that we must do this before acquiring
-        //the lock.  Other solutions are more complex and include looking at the
-        //range request (which we don't have here) or taking special action when
-        //killing uploads.
-        //
-        //One could actually argue that there in fact there is no need for
-        //resumes to work at all in this situation' as the server's user clearly
-        //intended to kill the upload.  But I think it's only fair that we treat
-        //BearShare and LimeWire users equally.  Besides it will make testing
-        //much simpler!
-        try {
-            Thread.sleep(NormalUploadState.CYCLE_TIME);
-        } catch (InterruptedException e) { }
+	public synchronized void acceptPushUpload(String file, 
+											  String host, int port, 
+											  int index, String guid) { 
 
-        synchronized (this) {
-            clearFailedPushes();
+		clearFailedPushes();
 
-            Uploader uploader;
-            uploader = new HTTPUploader(file, host, port, index, guid, this);
-            // testing if we are either currently attempting a push, 
-            // or we have unsuccessfully attempted a push with this host in the
-            // past.
-            if ( (! testAttemptedPush(host, index) )  ||
-                 (! testFailedPush(host, index) ) )
-                return;
+		Uploader uploader;
+		uploader = new HTTPUploader(file, host, port, index, guid, this);
+		// testing if we are either currently attempting a push, 
+		// or we have unsuccessfully attempted a push with this host in the
+		// past.
+		if ( (! testAttemptedPush(host, index) )  ||
+			 (! testFailedPush(host, index) ) )
+			return;
 
-            insertAndTest(uploader, host);
-            insertAttemptedPush(host, index);
+		insertAndTest(uploader, host);
+		insertAttemptedPush(host, index);
 
-            UploadRunner runner = new UploadRunner(uploader, host, index);
-            Thread upThread = new Thread(runner);
-            upThread.setDaemon(true);
-            upThread.start();
-		}
+		UploadRunner runner = new UploadRunner(uploader, host, index);
+		Thread upThread = new Thread(runner);
+		upThread.setDaemon(true);
+		upThread.start();
+		
 	}
 
 	/** 
