@@ -14,8 +14,14 @@ public class UDPConnectionProcessor {
     /** Define the chunk size used for data bytes */
     public static final int   DATA_CHUNK_SIZE         = 512;
 
+    /** Handle to the output stream that is the input to this connection */
+    private UDPBufferedOutputStream  _input;
+
+    /** The limit on space for data to be written out */
+    private int               _chunkLimit;
+
     /** Record the desired connection timeout on the connection */
-    private int               connectTimeOut          = MAX_CONNECT_WAIT_TIME;
+    private long              connectTimeOut          = MAX_CONNECT_WAIT_TIME;
 
     /** Record the desired read timeout on the connection */
     private int               readTimeOut             = 0;
@@ -119,6 +125,8 @@ public class UDPConnectionProcessor {
         _theirConnectionID = UDPMultiplexor.UNASSIGNED_SLOT; 
 		_connectionState   = PRECONNECT_STATE;
 		_lastSendTime      = 0l;
+    	_chunkLimit        = DATA_WINDOW_SIZE; // TODO: This varies based on
+											   // Window fullness
 
 		_udpService        = UDPService.instance();
 
@@ -144,8 +152,13 @@ public class UDPConnectionProcessor {
         return null;
 	}
 
+    /**
+     *  Create a special output stream that feeds byte array chunks
+	 *  into this connection.
+     */
 	public OutputStream getOutputStream() throws IOException {
-        return null;
+        _input = new UDPBufferedOutputStream(this);
+        return _input;
 	}
 
 	public void setSoTimeout(int timeout) throws SocketException {
@@ -247,6 +260,13 @@ public class UDPConnectionProcessor {
      */
 	public byte getConnectionID() {
 		return _myConnectionID;
+	}
+
+    /**
+     *  Return the room for new local incoming data in chunks
+     */
+	public int getChunkLimit() {
+		return _chunkLimit;
 	}
 
     /**
