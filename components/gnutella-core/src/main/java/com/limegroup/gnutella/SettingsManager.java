@@ -1002,6 +1002,9 @@ public class SettingsManager implements SettingsInterface
     public void setSaveDirectory(String dir) {
         File saveFile = new File(dir);
 		String parent = saveFile.getParent();
+		if(!parent.endsWith(File.separator)) {
+			parent += File.separator;
+		}
 		File incFile  = new File(parent, "Incomplete");
 		saveFile.mkdirs();
 		incFile.mkdirs();
