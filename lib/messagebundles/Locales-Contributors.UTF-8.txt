@@ -27,13 +27,17 @@ en      American English        About page    mail: translate AT limewire DOT or
 en_US   /United States          Download page "Adam Fisk, LimeWire"
 en_CA   /Canada                               mail: afisk AT limewire DOT org
 en_PR   /Puerto Rico                          "Greg Bildson, GUI project owner"
-en_PH   /Philipins                            mail: gbildson AT limewire DOT org
+en_PH   /Philipins                            mail: gbildson AT limepeer DOT com
+en_VG   /American Virgin Islands              "Sam Berlin, LimeWire"
+en_MH   /Marshall Islands                     mail: sberlin AT limepeer DOT com
 ------- ----------------------- ------------- -------------------------------
-en_GB   English/United Kingdom  Messages      Reviewer needed?
+en_GB   English/United Kingdom  Messages      Is a reviewer needed?
 en_ZA   /South Africa                         
 en_AU   /Australia                            
 en_NZ   /New Zealand                          
 en_IN   /India                                
+en_VI   /British Virgin Islands               
+en_BM   /Bermuda                              
 ------- ----------------------- ------------- -------------------------------
 af      Afrikaans/South Africa Messages       "Jacques Coetsee"
 af_ZA   Afrikaans/Suid-Afrika                 mail: jacques.coetsee AT riversidelofts DOT co DOT za
@@ -80,6 +84,7 @@ fr_MA   /Maroc
 fr_TU   /Tunisie                              
 fr_MR   /Mauritanie                           
 fr_LB   /Liban                                
+fr_CM   /Cameroun                             
 ------- ----------------------- ------------- -------------------------------
 gl      Gallegan/Spain          Messages      New translator needed !
 gl_ES   Gallego/España                        mail: ? AT ? DOT ?
@@ -180,8 +185,8 @@ tr      Turkish/Turkey          Messages      "E. Hakan Duran"
 tr_TR   Türkçe/Türkiye                        mail: hakan_duran AT hotmail DOT com
 tr_CY   /Kıbrıs                               
 ------- ----------------------- ------------- -------------------------------
-vi      Vietnamese/Vietnam      Messages      New translator needed !
-vi_VN   Tiếng Việt Nam/Việt Nam                mail: ? AT ? DOT ?
+vi      Vietnamese/Vietnam      Messages      "Tri Hoang"
+vi_VN   Tiếng Việt/Việt Nam                   mail: trihhoang AT yahoo DOT co DOT uk
 ------- ----------------------- ------------- -------------------------------
 ******* Languages with Greek characters *************************************
 ------- ----------------------- ------------- -------------------------------
@@ -259,7 +264,7 @@ bu_MM                                         mail: ? AT ? DOT ?
 ******* Languages with Far-East Asian characters ****************************
 ------- ----------------------- ------------- -------------------------------
 ja      Japanese/Japan          Messages      "T. Yuji"
-ja_JP   日本語/日本                                 mail: yujit AT hotmail DOT com
+ja_JP   日本語/日本                           mail: yujit AT hotmail DOT com
                                               "Takahiro Kawaguchi"
                                               mail: esperoboy AT mac DOT com
                                               "Takanobu Torigoe"
@@ -268,14 +273,14 @@ ja_JP   日本語/日本                                 mail: yujit AT hotmail 
                                               mail: shinada AT gmx DOT net
 ------- ----------------------- ------------- -------------------------------
 ko      Korean/Korea            Messages      New translator needed !
-ko_KR   한글 (국제)/대한민국                        mail: ? AT ? DOT ?
+ko_KR   한글 (국제)/대한민국                   mail: ? AT ? DOT ?
 ko_KP   /Dem.Rep.Korea                        
 ------- ----------------------- ------------- -------------------------------
 zh      Chinese(Simplified)     Messages      "Shawn (Xiao Kehua)"
-zh_CN   汉语 (国际)/中国           Download page  mail: xiao_khua AT cvicse DOT com
+zh_CN   汉语 (国际)/中国        Download page mail: xiao_khua AT cvicse DOT com
 zh_SG   /Singapore                            
 ------- ----------------------- ------------- -------------------------------
 zh_TW   Chinese (Traditional)   Messages      "Zou Ciyouan"
-zh_HK   漢語 (國際)/中國台灣/香港                   mail: zouciyouan AT yeah DOT net
-zh_MO   /澳門                     
+zh_HK   漢語 (國際)/中國台灣/香港             mail: zouciyouan AT yeah DOT net
+zh_MO   /澳門                                 
 ------- ----------------------- ------------- -------------------------------
