@@ -172,7 +172,7 @@ public final class SupernodeAssigner {
             //AND am I not firewalled?
 			SETTINGS.getEverAcceptedIncoming() &&
             //AND I have accepted incoming messages over UDP
-            RouterService.isGUESSCapable() &&
+            //RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
 			SUPERNODE_OS;
         
