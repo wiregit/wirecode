@@ -6,7 +6,12 @@ import java.io.*;
 
 
 /**
- * The PATCH route table update message.
+ * The PATCH route table update message.  This class is as simple as possible.
+ * For example, the getData() method returns the raw bytes of the message,
+ * requiring the caller to call the getEntryBits() method to calculate the i'th
+ * patch value.  (Note that this is trivial if getEntryBits() returns 8.)  This
+ * is by intention, as patches are normally split into several 
+ * PatchTableMessages.
  */
 public class PatchTableMessage extends RouteTableMessage {
     /** For sequenceNumber and size, we really do need values of 0-255.
@@ -126,10 +131,11 @@ public class PatchTableMessage extends RouteTableMessage {
         StringBuffer buf=new StringBuffer();
         buf.append("{PATCH, Sequence: "+getSequenceNumber()+"/"+getSequenceSize()
               +", Compr: "+getCompressor()+", [");
-        for (int i=0; i<data.length; i++) {
-            if (data[i]!=0)
-                buf.append(i+"/"+data[i]+", ");
-        }
+//          for (int i=0; i<data.length; i++) {
+//              if (data[i]!=0)
+//                  buf.append(i+"/"+data[i]+", ");
+//          }
+        buf.append("<"+data.length+" bytes>");
         buf.append("]");
         return buf.toString();
     }
