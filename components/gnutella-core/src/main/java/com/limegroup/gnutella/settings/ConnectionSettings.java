@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 /**
- * Settings for connections.
+ * Settings for Gnutella TCP connections.
  */
 public final class ConnectionSettings extends AbstractSettings {
 
@@ -58,6 +58,20 @@ public final class ConnectionSettings extends AbstractSettings {
      */
     public static final IntSetting MULTICAST_PORT =
         CFG_FACTORY.createIntSetting("MULTICAST_PORT", 6347);
+
+	/**
+	 * Setting for whether or not to use connection preferencing -- used
+	 * primarily for testing.
+	 */
+	public static final BooleanSetting PREFERENCING_ACTIVE =
+		CFG_FACTORY.createBooleanSetting("PREFERENCING_ACTIVE", true);
+
+	/**
+	 * Setting for whether or not the removal of connections should 
+	 * be allowed -- used for testing.
+	 */
+	public static final BooleanSetting REMOVE_ENABLED =
+		CFG_FACTORY.createBooleanSetting("REMOVE_ENABLED", true);
 
 }
 
