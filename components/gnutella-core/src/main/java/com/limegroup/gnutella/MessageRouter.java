@@ -64,6 +64,7 @@ import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.StatisticsSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.statistics.ConnectionStat;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
@@ -2694,6 +2695,10 @@ public abstract class MessageRouter {
      * Replies to a head ping sent from the given ReplyHandler.
      */
     private void handleHeadPing(HeadPing ping, ReplyHandler handler) {
+        // do not process pings in the legacy format
+        if ((ping.getFeatures() & HeadPing.GGEP_PING) == 0) 
+            return;
+        
         GUID clientGUID = ping.getClientGuid();
         ReplyHandler pingee;
         

@@ -24,7 +24,10 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.CountingGGEP;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
@@ -68,8 +71,12 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * the rest - altlocs and pushlocs (if requested)
  * 
  * Curent format:
- * one big GGEP block.  We do not reply to pings that do not support GGEP, and only existing
- * LimeWire clients will send pongs in the old format.
+ * One big GGEP block.  We do not reply to pings that do not support GGEP, and only existing
+ * LimeWire clients will send pongs in the legacy format.
+ * 
+ * Format for ranges: 
+ * if bit 0 of byte 0 is set, then the rest of the field is in the list of 32-bit ranges format.
+ * (we don't parse any other format at present).
  */
 public class HeadPong extends VendorMessage {
 	
@@ -101,17 +108,23 @@ public class HeadPong extends VendorMessage {
 	private static final byte DOWNLOADING = (byte)0x8;
 	
 	private static final byte CODES_MASK=(byte)0xF;
+	
 	/**
 	 * all our slots are full..
 	 */
 	private static final byte BUSY=(byte)0x7F;
 	
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	
 	/**
 	 * the features contained in this pong.  Same as those of the originating ping
 	 */
 	private byte _features;
+	
+	/**
+	 * the features field of the ggep block.  For now we parse only 4 bytes
+	 */
+	private int _ggepFeatures;
 	
 	/**
 	 * available ranges
@@ -154,6 +167,11 @@ public class HeadPong extends VendorMessage {
 	private boolean _isDownloading;
 	
 	/**
+	 * the ggep block contained in this pong
+	 */
+	private CountingGGEP _ggep;
+	
+	/**
 	 * creates a message object with data from the network.
 	 */
 	protected HeadPong(byte[] guid, byte ttl, byte hops,
@@ -178,6 +196,9 @@ public class HeadPong extends VendorMessage {
     		//read and mask the features
     		_features = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
     		
+    		if (version == VERSION && (_features & HeadPing.GGEP_PING)!= HeadPing.GGEP_PING)
+    		    throw new BadPacketException("pong version 2 that is not GGEP??");
+    		
     		//read the response code
     		byte code = dais.readByte();
     		
@@ -197,30 +218,58 @@ public class HeadPong extends VendorMessage {
     		
     		//read the queue status
     		_queueStatus = dais.readByte();
-    		
-    		//if we have a partial file and the pong carries ranges, parse their list
+
     		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
-    			_completeFile=true;
-    		else {
-    			//also check if the host is downloading the file
-    			if ((code & DOWNLOADING) == DOWNLOADING)
-    				_isDownloading=true;
-    			
-    			if ((_features & HeadPing.INTERVALS) == HeadPing.INTERVALS)
-    				_ranges = readRanges(dais);
-    		}
+		        _completeFile=true;
     		
-    		//parse any included firewalled altlocs
-    		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
-    			_pushLocs=readPushLocs(dais);
+    		// if this is a new pong, parse it as a GGEP map
+    		if (version == VERSION) 
+    		    parseGGEPPong(payload);
+    		else 
+    		    parseLegacyPong(code, dais);
     		
-    			
-    		//parse any included altlocs
-    		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
-    			_altLocs=readLocs(dais);
 		} catch(IOException oops) {
 			throw new BadPacketException(oops.getMessage());
+		} catch (BadGGEPBlockException oops2) {
+		    throw new BadPacketException(oops2.getMessage());
+		} catch (BadGGEPPropertyException oops3) {
+		    throw new BadPacketException(oops3.getMessage());
 		}
+	}
+
+	/**
+	 * parses the ggep block contained in this pong, and reads which features are available
+	 * @param payload
+	 * @throws BadGGEPBlockException
+	 */
+	private void parseGGEPPong(byte [] payload) 
+		throws BadGGEPBlockException, BadGGEPPropertyException, BadPacketException {
+	    
+	    _ggep = new CountingGGEP(payload,8);
+	    byte [] props = _ggep.get(GGEPHeadConstants.GGEP_PROPS);
+	    if (props.length < 1)
+	        throw new BadPacketException("invalid properties field");
+	    
+	    _ggepFeatures = props[props.length -1]; // eventually parse other bytes too.
+	}
+	
+	private void parseLegacyPong(byte code, DataInputStream dais) 
+		throws IOException, BadPacketException {
+	    
+	    //check if the host is downloading the file
+	    if ((code & DOWNLOADING) == DOWNLOADING)
+	        _isDownloading=true;
+	    
+	    if ((_features & HeadPing.INTERVALS) == HeadPing.INTERVALS)
+	        _ranges = read32bitRanges(dais);
+	    
+	    //parse any included firewalled altlocs
+	    if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
+	        _pushLocs=readPushLocs(dais);
+	    
+	    //parse any included altlocs
+	    if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
+	        _altLocs=readLocs(dais);
 	}
 	
 	/**
@@ -307,51 +356,19 @@ public class HeadPong extends VendorMessage {
     		if (LOG.isDebugEnabled())
     			LOG.debug("our queue status is "+queueStatus);
     		
-    		// if the remote contained a GGEP field with the properties entry,
-    		// respond with our properties entry.
-    		if ((features & HeadPing.GGEP_PING) == HeadPing.GGEP_PING) {
-    		    addGGEPProperties(daos,features,desc,null);
-    		}
+    		//create the GGEP block
+    		GGEP ggep = new GGEP(true);
     		
-    		//if we sent partial file and the remote asked for ranges, send them 
-    		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
-    			didNotSendRanges=!writeRanges(caos,desc);
-    		
-    		//if we have any firewalled altlocs and enough room in the packet, add them.
-    		if (ping.requestsPushLocs()){
-    			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
-    				HeadPing.FWT_PUSH_ALTLOCS;
-    			didNotSendPushAltLocs = !writePushLocs(caos,desc, FWTOnly);
-    		}
-    		
-    		//now add any non-firewalled altlocs in case they were requested. 
-    		if (ping.requestsAltlocs()) 
-    			didNotSendAltLocs=!writeLocs(caos,desc);
+    		//put in our supported features with metadata
+    		addGGEPProperties(ggep);
 			
 		} catch(IOException impossible) {
 			ErrorService.error(impossible);
 		}
 		
-		//done!
-		byte []ret = baos.toByteArray();
-		
-		//if we did not add ranges or altlocs due to constraints, 
-		//update the flags now.
-		
-		if (didNotSendRanges){
-			LOG.debug("not sending ranges");
-			ret[0] = (byte) (ret[0] & ~HeadPing.INTERVALS);
-		}
-		if (didNotSendAltLocs){
-			LOG.debug("not sending altlocs");
-			ret[0] = (byte) (ret[0] & ~HeadPing.ALT_LOCS);
-		}
-		if (didNotSendPushAltLocs){
-			LOG.debug("not sending push altlocs");
-			ret[0] = (byte) (ret[0] & ~HeadPing.PUSH_ALTLOCS);
-		}
-		return ret;
+		return baos.toByteArray();
 	}
+	
 	
 	/**
 	 * 
@@ -370,20 +387,70 @@ public class HeadPong extends VendorMessage {
 	}
 	
 	/**
-	 * 
 	 * @return the available ranges the alternate location has
 	 */
 	public IntervalSet getRanges() {
-		return _ranges;
+	    if (_ranges == null)
+	        readRanges();
+	    return _ranges;
+	
 	}
 	
 	/**
-	 * 
+	 * extracts the ranges from the GGEP block.
+	 * if the HeadPong is in legacy format, ranges are already parsed.
+	 */
+	private void readRanges() {
+	    if (_ggep == null)
+	        return;
+	    
+	    if ((_ggepFeatures & GGEPHeadConstants.RANGES) != GGEPHeadConstants.RANGES)
+	        return;
+	    
+	    try {
+	        byte [] ranges = _ggep.getBytes((char)GGEPHeadConstants.RANGES+"d");
+	        
+	        // for now we parse only 32 bit range lists
+	        if ((ranges[0] & GGEPHeadConstants.RANGE_LIST) == GGEPHeadConstants.RANGE_LIST) {
+	            if ((ranges[0] & GGEPHeadConstants.LONG_RANGES) == 0) {
+	                ByteArrayInputStream bais = new ByteArrayInputStream(ranges,1,ranges.length -1);
+	                read32bitRanges(new DataInputStream(bais));
+	            }
+	            // else parse a 64 bit range list
+	        }
+	        // else parse a bitset format.
+	    }catch(BadGGEPPropertyException bad) {}
+	    catch(IOException bad) {}
+	}
+	
+	/**
 	 * @return set of <tt>Endpoint</tt> 
 	 * containing any alternate locations this alternate location returned.
 	 */
 	public Set getAltLocs() {
+	    if (_altLocs == null)
+	        readAltLocs();
 		return _altLocs;
+	}
+	
+	/**
+	 * extracts the altlocs from the GGEP block.
+	 * if the HeadPong is in legacy format, the altlocs are already parsed.
+	 */
+	private void readAltLocs() {
+	    if (_ggep == null)
+	        return;
+	    
+	    if ((_ggepFeatures & GGEPHeadConstants.ALTLOCS) != GGEPHeadConstants.ALTLOCS)
+	        return;
+	    
+	    try {
+	        byte [] altlocs = _ggep.getBytes((char)GGEPHeadConstants.ALTLOCS+"d");
+	        ByteArrayInputStream bais = new ByteArrayInputStream(altlocs);
+	        readLocs(new DataInputStream(bais));
+	    } catch (BadGGEPPropertyException bad){}
+	    catch(BadPacketException bad){}
+	    catch(IOException bad){}
 	}
 	
 	/**
@@ -392,7 +459,29 @@ public class HeadPong extends VendorMessage {
 	 * containing any firewalled locations this alternate location returned.
 	 */
 	public Set getPushLocs() {
+	    if (_pushLocs == null)
+	        readPushLocs();
 		return _pushLocs;
+	}
+	
+	/**
+	 * extracts the pushlocs from the GGEP block.
+	 * if the HeadPong is in legacy format, the pushlocs are already parsed.
+	 */
+	private void readPushLocs() {
+	    if (_ggep == null)
+	        return;
+	    
+	    if ((_ggepFeatures & GGEPHeadConstants.PUSHLOCS) != GGEPHeadConstants.PUSHLOCS)
+	        return;
+	    
+	    try {
+	        byte [] pushlocs = _ggep.getBytes((char)GGEPHeadConstants.PUSHLOCS+"d");
+	        ByteArrayInputStream bais = new ByteArrayInputStream(pushlocs);
+	        readPushLocs(new DataInputStream(bais));
+	    } catch (BadGGEPPropertyException bad){}
+	    catch(BadPacketException bad){}
+	    catch(IOException bad){}
 	}
 	
 	/**
@@ -402,13 +491,13 @@ public class HeadPong extends VendorMessage {
 	public Set getAllLocsRFD(RemoteFileDesc original){
 		Set ret = new HashSet();
 		
-		if (_altLocs!=null)
+		if (getAltLocs() != null)
 			for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
 				IpPort current = (IpPort)iter.next();
 				ret.add(new RemoteFileDesc(original,current));
 			}
 		
-		if (_pushLocs!=null)
+		if (getPushLocs() != null)
 			for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
 				PushEndpoint current = (PushEndpoint)iter.next();
 				ret.add(new RemoteFileDesc(original,current));
@@ -473,7 +562,7 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * reads available ranges from an inputstream
 	 */
-	private final IntervalSet readRanges(DataInputStream dais)
+	private final IntervalSet read32bitRanges(DataInputStream dais)
 		throws IOException{
 		int rangeLength=dais.readUnsignedShort();
 		byte [] ranges = new byte [rangeLength];
@@ -618,22 +707,22 @@ public class HeadPong extends VendorMessage {
 	 * writes a ggep field to the given stream with values depending on the features
 	 * byte.
 	 */
-	private static void addGGEPProperties(DataOutputStream stream, 
-	        byte features, FileDesc desc, GGEP pinger) {
-	    GGEP ggep = new GGEP(true);
+	private static void addGGEPProperties(GGEP dest) {
 	    
 	    // add the features we understand
 	    byte [] supportedFeatures = new byte[] {(byte)
 	            (GGEPHeadConstants.GGEP_BLOOM |
 	            GGEPHeadConstants.GGEP_PUSH_BLOOM |
-	            GGEPHeadConstants.GGEP_MYPE)};
-	    ggep.put(GGEPHeadConstants.GGEP_PROPS,supportedFeatures);
+	            GGEPHeadConstants.GGEP_MYPE |
+	            GGEPHeadConstants.RANGES |
+	            GGEPHeadConstants.ALTLOCS |
+	            GGEPHeadConstants.PUSHLOCS)};
+	    dest.put(GGEPHeadConstants.GGEP_PROPS,supportedFeatures);
 	    
-	    // if the pinger asked for altlocs, and included a digest, say that we will include
-	    // the total number of altlocs we have and the number of skipped altlocs with our
-	    // altloc block.
+	    //also say that we support only the list of 32-bit ranges format.
+	    dest.put((char)GGEPHeadConstants.RANGES+"m",GGEPHeadConstants.RANGE_LIST);
 	    
-	    }
+	}
 	
 	
 }

@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AltLocDigest;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
@@ -442,6 +444,54 @@ public class HeadTest extends BaseTestCase {
 		assertEquals(pong.getAltLocs().size() + pong.getPushLocs().size(),
 				rfds.size());
 		
+	}
+	
+	public void testDigests() throws Exception {
+	    
+	    // create a headping whose digest claims it knows all altlocs 
+	    AltLocDigest direct = _alCollectionComplete.getDigest();
+	    HeadPing ping = new HeadPing(_haveFull,null, new AltLocDigest[]{direct,null},
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING);
+	    
+	    // the pong should not carry any altlocs in it
+	    HeadPong pong = reparse(new HeadPong(ping));
+	    assertTrue(pong.supportsDigests());
+	    assertNull(pong.getAltLocs());
+	    
+	    // try a headping carrying some, but not all of the altlocs
+	    direct = new AltLocDigest();
+	    
+	    Set digestLocs = new HashSet();
+	    Set nonDigestLocs = new HashSet();
+	    for(int i=0;i<5;i++ ) {
+            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
+            AlternateLocation al2 = AlternateLocation.create("1.2.3."+(i+5)+":1234",_haveFull);
+            digestLocs.add(al);
+            nonDigestLocs.add(al2);
+		}
+	    direct.addAll(digestLocs);
+	    
+	    ping = new HeadPing(_haveFull,null, new AltLocDigest[]{direct,null},
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING);
+	    
+	    pong = reparse(new HeadPong(ping));
+	    assertEquals(5,pong.getAltLocs().size());
+	    assertTrue(pong.getAltLocs().containsAll(nonDigestLocs));
+	    assertTrue(nonDigestLocs.containsAll(pong.getAltLocs()));
+	    assertNotNull(pong.getPushLocs());
+	    for (Iterator iter = digestLocs.iterator();iter.hasNext();)
+	        assertFalse(pong.getAltLocs().contains(iter.next()));
+	    
+	    
+	    // try a headping with an altloc and pushloc digest
+	    AltLocDigest push = _pushCollection.getPushDigest();
+	    
+	    ping = new HeadPing(_havePartial,null, new AltLocDigest[]{direct,push},
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING);
+	    
+	    pong = reparse(new HeadPong(ping));
+	    
+	    assertNull(pong.getPushLocs());
 	}
 	
 	private HeadPong reparse(HeadPong original) throws Exception{

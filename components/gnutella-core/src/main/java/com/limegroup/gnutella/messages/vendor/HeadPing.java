@@ -384,6 +384,13 @@ final class GGEPHeadConstants {
 	static final int RANGES = 0x1 << 3;
 	
 	/**
+	 * possible values for the metadata field of the RANGES key.  The same format is prepended
+	 * to the content of the data key to facilitate parsing.
+	 */
+	static final int RANGE_LIST = 0x1;
+	static final int LONG_RANGES = 0x1 << 1;
+	
+	/**
 	 * a flag whose presence indicates support for including altlocs in the response.
 	 */
 	static final int ALTLOCS = 0x1 << 4;
@@ -395,5 +402,5 @@ final class GGEPHeadConstants {
 	 * of altlocs filtered and the total number of altlocs available. 
 	 */
 	static final int ALT_MESH_STAT = 0x1 << 6;
-	static final int PUSH_MESH_STAT = 0x1 << 6;
+	static final int PUSH_MESH_STAT = 0x1 << 7;
 }

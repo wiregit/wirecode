@@ -324,6 +324,7 @@ public class GGEP {
                 int dataLen = 0;
                 boolean shouldEncode = shouldCOBSEncode(currData);
                 boolean shouldCompress = shouldCompress(currHeader);
+                boolean isCompressed = isCompressed(currHeader);
                 if (currData != null) {
                     if (shouldCompress) {
                         currData = IOUtils.deflate(currData);
@@ -336,7 +337,7 @@ public class GGEP {
                 }
                 writeHeader(currHeader, dataLen, 
                             !headers.hasNext(), out,
-                            shouldEncode, shouldCompress);
+                            shouldEncode, shouldCompress | isCompressed);
                 if (dataLen > 0) 
                     out.write(currData);
             }
@@ -354,6 +355,9 @@ public class GGEP {
         return (_props.get(header) instanceof NeedsCompression);
     }
     
+    private final boolean isCompressed(String header) {
+        return (_props.get(header) instanceof CompressedData);
+    }
     private void writeHeader(String header, final int dataLen, 
                              boolean isLast, OutputStream out, 
                              boolean isEncoded, boolean isCompressed) 
@@ -431,6 +435,14 @@ public class GGEP {
         validateKey(key);
         //validateValue(value); // done when writing.  TODO: do here?
         _props.put(key, new NeedsCompression(value));
+    }
+    
+    /**
+     * Adds a key which is already compressed
+     */
+    public void putAndCompress(String key, byte[] value) throws IllegalArgumentException {
+        value = IOUtils.deflate(value);
+        _props.put(key, new CompressedData(value));
     }
 
     /** 
@@ -588,6 +600,8 @@ public class GGEP {
         Object value = _props.get(key);
         if(value instanceof NeedsCompression)
             return ((NeedsCompression)value).data;
+        else if (value instanceof CompressedData)
+            return ((CompressedData)value).data;
         else
             return (byte[])value;
     }
@@ -663,6 +677,13 @@ public class GGEP {
 	private static class NeedsCompression {
 	    final byte[] data;
 	    NeedsCompression(byte[] data) {
+	        this.data = data;
+	    }
+	}
+	
+	protected static class CompressedData {
+	    final byte[] data;
+	    CompressedData(byte [] data) {
 	        this.data = data;
 	    }
 	}
