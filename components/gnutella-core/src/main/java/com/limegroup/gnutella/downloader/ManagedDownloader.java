@@ -10,6 +10,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.guess.*;
 
 import java.io.*;
 import java.net.*;
@@ -1407,10 +1408,22 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // try to do iterative guessing here
                 if (_originalQueryGUID != null) { 
                     MessageRouter mr = RouterService.getMessageRouter();
-                    Set guessLocs =mr.getGuessLocs(_originalQueryGUID);
+                    Set guessLocs = mr.getGuessLocs(_originalQueryGUID);
                     
                     if ((guessLocs != null) && !guessLocs.isEmpty()) {
-                        // start guessing....
+                        setState(ITERATIVE_GUESSING);
+                        boolean areThereNewResults = false;
+                        URN bestURN = buckets.getBestURN();
+                        for (Iterator i = guessLocs.iterator();
+                             i.hasNext() && !areThereNewResults; ) {
+                            // send a guess query
+                            GUESSEndpoint ep = (GUESSEndpoint) i.next();
+                            OnDemandUnicaster.instance().query(ep, bestURN);
+                            // wait a while for a result
+                            areThereNewResults = reqLock.lock(750);
+                        }
+                        if (areThereNewResults)
+                            continue;
                     }
                 }
 
