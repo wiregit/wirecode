@@ -265,7 +265,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_MAX_UPLOADS      = 8;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
-    public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
+    public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
     public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
