@@ -16,5 +16,5 @@ public class Assert {
     }
 }
     
-class AssertFailure extends Error {
+class AssertFailure extends RuntimeException {
 }
