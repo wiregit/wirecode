@@ -469,16 +469,38 @@ public class HTTPDownloader implements Runnable {
 
 	    String incompleteDir = set.getIncompleteDirectory();
 
-        // String pathname = incompleteDir +  _filename;
-        // File myFile = new File(pathname);
         File myFile = new File(incompleteDir, _filename);
 		String pathname = myFile.getAbsolutePath();
 
-
-	    // String path = _downloadDir + _filename;
-        // File myTest = new File(path);
 		File myTest = new File(_downloadDir, _filename);
 		String path = myTest.getAbsolutePath();
+
+		/********* Double Checking For Security **********/
+		/* This is necessary, and a little tricky. I 
+		   check to see if the canonical path of the
+		   parent of the requested file is equivalent
+		   to the canonical path of the shared directory. */
+
+		File f;		
+		String p;
+		try {
+			File shared = new File(_downloadDir);
+			String shared_path = shared.getCanonicalPath();
+			
+			f = new File(myTest.getParent());
+			p = f.getCanonicalPath();
+			
+			if (!p.equals(shared_path)) {
+				System.out.println("Caught the malicious one!");
+				_state = ERROR;
+				return;
+			}
+		} catch (Exception e) {
+			_state = ERROR;
+			return;
+		}
+
+		/***********End of Double Check ***********/
 
 
         if ((myTest.exists()) && (!_resume)) {
@@ -492,12 +514,6 @@ public class HTTPDownloader implements Runnable {
 
         try {
             _fos = new FileOutputStream(pathname, _resume);
-            //If this is a server-side push download (i.e.,
-            //_socket!=null), we must reset the timeouts so downloads
-            //don't fail unexpectedly.  (The timeout was set in
-            //HTTPManager.)
-            if (_socket!=null)
-                _socket.setSoTimeout(0);                
         }
         catch (FileNotFoundException e) {
             _state = ERROR;
