@@ -19,7 +19,48 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(CommonUtilsTest.class);
     }  
 
+    /**
+     * Tests the method for comparing two longs.  This method is necessary in
+     * LimeWire because the Long compareTo method was only added in Java 1.2.
+     * The test works by making sure that the values returned are consistent
+     * with the Long compareTo method.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testLongCompareTo() throws Exception {
+        Long firstLong = new Long(1);
+        Long secondLong = new Long(1);
+        
+        // check the case where the arguments are equal.
+        int result = CommonUtils.longCompareTo(firstLong, secondLong);
+        assertEquals("unexpected value", 0, result);
 
+        // make sure we get the same value as the Long class.
+        assertEquals("unexpected value", result,
+            firstLong.compareTo(secondLong));
+        
+        // check the case where the first argument is less than the second
+        // argument
+        firstLong = new Long(0);
+        result = CommonUtils.longCompareTo(firstLong, secondLong);
+        assertLessThan("unexpected value", 0, result);
+        // make sure we get the same value as the Long class.
+        
+        assertEquals("unexpected value", result, 
+            firstLong.compareTo(secondLong));
+
+        // check the case where the second argument is less than the first
+        // argument
+        firstLong = new Long(4);
+        result = CommonUtils.longCompareTo(firstLong, secondLong);
+        assertGreaterThan("unexpected value", 0, result);
+
+        // make sure we get the same value as the Long class.
+        assertEquals("unexpected value", result, 
+            firstLong.compareTo(secondLong));
+        
+    }
+    
     public void testMajorRevisionMethod() {
         int majorVersion = CommonUtils.getMajorVersionNumber();
         assertEquals(2,majorVersion);
