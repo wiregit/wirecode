@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.net.*;
 import java.io.*;
 import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.filters.*;
@@ -270,8 +271,11 @@ public class TestUploader {
         int start = 0;
         int stop = TestFile.length();
         boolean firstLine=true;
+        AlternateLocationCollection badLocs = null;
+        AlternateLocationCollection goodLocs = null;
         while (true) {
             String line=input.readLine();
+            System.out.println(line);
             //DownloadTest.debug(line+"\n"); 
             if (firstLine) {
                 request=line;
@@ -285,15 +289,11 @@ public class TestUploader {
 			if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(line)) {
 				_sha1 = readContentUrn(line);
 			}
-
-			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
-				if(incomingAltLocs == null) {
-					incomingAltLocs =
-						AlternateLocationCollection.create(_sha1);
-				}
-				readAlternateLocations(line, incomingAltLocs);
-            }        
             
+            if(HTTPHeaderName.NALTS.matchesStartOfString(line))
+               readAlternateLocations(line,badLocs);
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line))
+				readAlternateLocations(line, goodLocs);
             
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
@@ -312,6 +312,24 @@ public class TestUploader {
             if(i==0)
                 http11 = line.indexOf("1.1") > 0;
 		}
+        if(_sha1!=null) {
+            if(incomingAltLocs == null)
+                incomingAltLocs = AlternateLocationCollection.create(_sha1);
+            System.out.println("Sumeet:adding n-alts "+(badLocs!=null));
+            if(badLocs!=null) {
+                synchronized(badLocs) {
+                    Iterator iter = badLocs.iterator();
+                    incomingAltLocs.remove((AlternateLocation)iter.next());
+                }
+            }
+            System.out.println("Sumeet:adding good alts"+(goodLocs!=null));
+            if(goodLocs!=null) {
+                synchronized(goodLocs) {
+                    Iterator iter = goodLocs.iterator();
+                    incomingAltLocs.add((AlternateLocation)iter.next());
+                }        
+            }
+        }
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
         //Send the data.
@@ -527,14 +545,15 @@ public class TestUploader {
 	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
 	 *  locations should be added to
 	 */
-	private static void readAlternateLocations(final String altHeader,
-											   final AlternateLocationCollector alc) {
-		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+	private void readAlternateLocations(final String altHeader,
+                                               AlternateLocationCollector alc) {
+		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-
+        if(alc == null && _sha1!=null)
+            alc = AlternateLocationCollection.create(_sha1);
 		while(st.hasMoreTokens()) {
 			try {
 				// note that the trim method removes any CRLF character

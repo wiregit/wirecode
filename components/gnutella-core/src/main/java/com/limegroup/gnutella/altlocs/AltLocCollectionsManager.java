@@ -24,6 +24,8 @@ public class AltLocCollectionsManager {
                                    AlternateLocationCollection f) {
         if(!v.getSHA1Urn().equals(f.getSHA1Urn()))
             throw new IllegalArgumentException("Collections do not match");
+        if(v==null || f == null)
+            throw new IllegalArgumentException("Null collection as argument");
         _validAltLocs = v;
         _failedAltLocs = f;
     }

@@ -2071,13 +2071,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
                 AlternateLocationCollection c = dloader.getAltLocsReceived();
-                synchronized(c) { 
-                    Iterator iter = c.iterator();
-                    while(iter.hasNext()) {
-                        AlternateLocation loc = (AlternateLocation)iter.next();
-                        RemoteFileDesc rfd = loc.createRemoteFileDesc
-                        (dloader.getRemoteFileDesc().getSize());
-                        addDownload(rfd, false);//dont cache
+                if(c!=null) {
+                    synchronized(c) { 
+                        Iterator iter = c.iterator();
+                        while(iter.hasNext()) {
+                            AlternateLocation al=(AlternateLocation)iter.next();
+                            RemoteFileDesc rfd = al.createRemoteFileDesc
+                            (dloader.getRemoteFileDesc().getSize());
+                            addDownload(rfd, false);//dont cache
+                        }
                     }
                 }
                 //Update the needed list unless any of the following happened: 
@@ -2935,8 +2937,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = false;
-    private final boolean log = false;
+    private final boolean debugOn = true;
+    private final boolean log = true;
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {

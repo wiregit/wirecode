@@ -93,7 +93,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * succeeded of failed to download from. The collections managed by this
      * AltLocManager are passed on to the uploader during every HTTP handshake.
      */
-    private final AltLocCollectionsManager _sendLocsManager;
+    private AltLocCollectionsManager _sendLocsManager;
 
 	private int _port;
 	private String _host;
@@ -156,16 +156,20 @@ public class HTTPDownloader implements BandwidthTracker {
         URN urn = rfd.getSHA1Urn();
         _altLocsReceived = urn==null ? null:
             AlternateLocationCollection.create(urn);
-        AlternateLocationCollection s = AlternateLocationCollection.create(urn);
-        AlternateLocationCollection f = AlternateLocationCollection.create(urn);
-        _sendLocsManager = new AltLocCollectionsManager(s,f);
+        AlternateLocationCollection s = null;
+        AlternateLocationCollection f = null;
+        if(urn!=null) {
+             s= AlternateLocationCollection.create(urn);
+             f=AlternateLocationCollection.create(urn);
+             _sendLocsManager = new AltLocCollectionsManager(s,f);
+        }
         
 		_amountRead = 0;
 		_totalAmountRead = 0;
 		// if we have not downloaded at least 25% of the file, 
 		// don't share it.
 		_minPartialFileSize = Math.max(MIN_PARTIAL_FILE_BYTES,
-		    (int)(rfd.getSize() * .25 )); 
+                                       (int)(rfd.getSize() * .25 )); 
     }
 
     ////////////////////////Alt Locs methods////////////////////////
@@ -183,12 +187,16 @@ public class HTTPDownloader implements BandwidthTracker {
     }
         
     void addSuccessfulAltLoc(AlternateLocation loc) {
+        if(_sendLocsManager==null)             
+            createSendLocs(loc.getSHA1Urn());
         _sendLocsManager.addLocation(loc);
     }
     
     void addFailedAltLoc(AlternateLocation loc) {
+        if(_sendLocsManager==null)             
+            createSendLocs(loc.getSHA1Urn());
         _sendLocsManager.removeLocation(loc,true);//it failed
-    }    
+    }
     
     ///////////////////////////////// Connection /////////////////////////////
 
@@ -275,6 +283,8 @@ public class HTTPDownloader implements BandwidthTracker {
         //  The VerifyingFile is not corrupted,
         //  We have downloaded a large enough portion of the file,
         //  and We have accepted incoming during this session.
+        //System.out.println("Sumeet: checking to add myself to mesh \n"+"setting:"+UploadSettings.ALLOW_PARTIAL_SHARING.getValue() + "\n corrupted:"+!_outIsCorrupted+"\n incoming:"+RouterService.acceptedIncomingConnection()+"\n min Size:"+(_incompleteFile.length() > _minPartialFileSize));
+
         if(_rfd.getSHA1Urn()!=null && 
            UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
            !_outIsCorrupted &&
@@ -289,17 +299,19 @@ public class HTTPDownloader implements BandwidthTracker {
 		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,sha1,out);
 
         //write altLocs and n-alt-locs
-        if( _sendLocsManager.goodSize() > 0) 
+        //System.out.println("Sumeet: sendLocs=null?"+(_sendLocsManager==null));
+        //System.out.println("Sumeet: sendLocs size: "+_sendLocsManager.goodSize());
+        if( _sendLocsManager!=null && _sendLocsManager.goodSize() > 0) 
             HTTPUtils.writeHeader
             (HTTPHeaderName.ALT_LOCATION,_sendLocsManager.getGoodAltLocs(),out);
 
         //write-nalts
-        if( _sendLocsManager.badSize() > 0) 
+        if( _sendLocsManager!=null && _sendLocsManager.badSize() > 0) 
             HTTPUtils.writeHeader
             (HTTPHeaderName.NALTS,_sendLocsManager.getFailedAltLocs(),out);
 
-        //clear the collections
-        _sendLocsManager.clear();
+        if(_sendLocsManager!=null) //clear the collections
+            _sendLocsManager.clear();
 
 
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
@@ -337,6 +349,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		// Read the response code from the first line and check for any errors
 		String str = _byteReader.readLine();  
+        //System.out.println("\t\t\t"+str);
 		if (str==null || str.equals(""))
             throw new IOException();
 		if(!CommonUtils.isJava118()) 
@@ -348,6 +361,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //Now read each header...
 		while (true) {            
 			str = _byteReader.readLine();
+            //System.out.println("\t\t\t"+str);
             if (str==null || str.equals(""))
                 break;
 			if(!CommonUtils.isJava118()) 
@@ -849,7 +863,12 @@ public class HTTPDownloader implements BandwidthTracker {
         return bandwidthTracker.getAverageBandwidth();
     }
             
-	
+    private void createSendLocs(URN urn) {
+        AlternateLocationCollection v = AlternateLocationCollection.create(urn);
+        AlternateLocationCollection f = AlternateLocationCollection.create(urn);
+        _sendLocsManager  = new AltLocCollectionsManager(v,f);
+    }
+
 	////////////////////////////// Unit Test ////////////////////////////////
 
     public String toString() {
