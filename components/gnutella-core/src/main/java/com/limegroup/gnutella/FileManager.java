@@ -150,6 +150,7 @@ public class FileManager{
     /** subclasses must override this method */
     protected ArrayList search(String query) {
 	ArrayList response_list = new ArrayList();
+	try {
 	try{
 	    pattern = compiler.compile(query);}
 	catch(MalformedPatternException e){
@@ -167,6 +168,9 @@ public class FileManager{
 	    input = new PatternMatcherInput(file_name);
 	    if (matcher.contains(input,pattern))
 		response_list.add(_files.get(i));
+	}
+	} catch (Exception e2) {
+	    System.out.println("Exception:"+ e2);
 	}
 	return response_list;
     }    

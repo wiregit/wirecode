@@ -76,6 +76,7 @@ public class GUID /* implements Comparable */ {
      */
     public String toHexString() {
 	StringBuffer buf=new StringBuffer();
+	String       str;
 	int val;
 	for (int i=0; i<SZ; i += 4)
 	{
@@ -83,7 +84,10 @@ public class GUID /* implements Comparable */ {
 	    val = (val * 256) + bytes[i+1];
 	    val = (val * 256) + bytes[i+2];
 	    val = (val * 256) + bytes[i+3];
-	    buf.append( Integer.toHexString(val) );	  
+	    str = Integer.toHexString(val);	  
+	    while ( str.length() < 8 )
+		str = "0" + str;
+	    buf.append( str );	  
 	}
 	return buf.toString();
     }

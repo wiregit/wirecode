@@ -190,7 +190,7 @@ public class HTTPDownloader implements Runnable {
 
 		SettingsManager set = SettingsManager.instance();
 		_downloadDir = set.getSaveDirectory();
-		String pathname = _downloadDir  + _filename;
+		String pathname = _downloadDir  + "/ " + _filename;
 		System.out.println("THe Pathname is " + pathname);
 
 
@@ -311,7 +311,8 @@ public class HTTPDownloader implements Runnable {
 
 		    bos.write(buf, 0, c);
 
-		    _amountRead+=c;
+		    //_amountRead+=c;
+		    _amountRead++;
 		    System.out.println("THe Amoutn read: " + _amountRead);
 		    count++;
 		}

@@ -305,7 +305,8 @@ public class HTTPUploader implements Runnable {
 	    }
 	    // System.out.println("after second try/catch");
 
-	    _amountRead += c;
+	    //_amountRead += c;
+	    _amountRead++;
 	}
 
 	try {
