@@ -1522,6 +1522,7 @@ public class ConnectionManager {
      * @param conn the <tt>Connection</tt> to finish initializing
      */
     private void completeConnectionInitialization(Connection conn) {
+        System.out.println("ConnectionManager::completeConnectionInitialization");
         boolean connectionOpen = false;
         synchronized(this) {
             if(conn.isOutgoing()) {
@@ -1604,6 +1605,7 @@ public class ConnectionManager {
 	 *  for messages
 	 */
 	private void startConnection(Connection conn) throws IOException {
+        System.out.println("ConnectionManager::startConnection");
 	    Thread.currentThread().setName("MessageLoopingThread");
 
 		if(conn.isGUESSUltrapeer()) {
