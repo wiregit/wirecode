@@ -174,31 +174,32 @@ public class MetaFileManager extends FileManager {
 		_callback.setAnnotateEnabled(true);
     }
 
+    /**
+     * Creates a new array, the size of which is less than or equal
+     * to normals.length + metas.length.
+     */
     private Response[] union(Response[] normals, Response[] metas){       
         if(normals == null)
             return metas;
-        if(metas==null)
+        if(metas == null)
             return normals;
-        //So they are both not null
-        HashSet unionSet = new HashSet();
-        for (int j =0; j<metas.length; j++){
-            if(metas[j] != null){
-                //There will be nulls at the end of metas if meta-data 
-                // inconsistent see bad case in RichQueryHandler for details
-                unionSet.add(metas[j]);
-            }
-        }
-        for(int i =0; i<normals.length; i++)
+            
+            
+        // It is important to use a HashSet here so that duplicate
+        // responses are not sent.
+        // Unfortunately, it is still possible that one Response
+        // did not have metadata but the other did, causing two
+        // responses for the same file.
+            
+        Set unionSet = new HashSet();
+        for(int i = 0; i < metas.length; i++)
+            unionSet.add(metas[i]);
+        for(int i = 0; i < normals.length; i++)
             unionSet.add(normals[i]);
+
         //The set contains all the elements that are the union of the 2 arrays
-        int size = unionSet.size();
-        Iterator iter = unionSet.iterator();
-        unionSet = null;//clear the memory
-        Response[] retArray = new Response[size];
-        for (int k =0; k< size; k++){
-            Response r = (Response)iter.next();
-            retArray[k]=r;
-        }
+        Response[] retArray = new Response[unionSet.size()];
+        retArray = (Response[])unionSet.toArray(retArray);
         return retArray;
     }
 
