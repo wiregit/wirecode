@@ -61,6 +61,83 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
     /**
+     * Tests to make sure that we ignore hosts that have expired.
+     * 
+     * @throws Exception if any error occurs
+     */
+    public void testIgnoreExpiredHosts() throws Exception {
+        Endpoint expiredHost = new Endpoint("20.4.5.7", 6346);
+        HostCatcher catcher = new HostCatcher();
+        catcher.initialize();
+        catcher.add(expiredHost,true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
+        Endpoint accessedHost = catcher.getAnEndpoint();
+        assertNotNull("host should not be null", accessedHost);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
+        
+        catcher.expireHost(expiredHost);
+        catcher.add(expiredHost, true);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());        
+    }
+    
+    /**
+     * Tests to make sure that we ignore hosts that have been put on probation.
+     * 
+     * @throws Exception if any error occurs
+     */
+    public void testIgnoreProbatedHosts() throws Exception {
+        Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
+        HostCatcher catcher = new HostCatcher();
+        catcher.initialize();
+        catcher.add(probatedHost,true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
+        Endpoint accessedHost = catcher.getAnEndpoint();
+        assertNotNull("host should not be null", accessedHost);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
+        
+        catcher.putHostOnProbation(probatedHost);
+        catcher.add(probatedHost, true);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());        
+    }
+    
+    /**
+     * Tests to make sure that hosts that are put on probation are properly 
+     * recovered.
+     * 
+     * @throws Exception if any error occurs
+     */
+    public void testRecoveryOfHostsOnProbation() throws Exception {
+        HostCatcher catcher = new HostCatcher();
+        long waitTime = 100;
+        PrivilegedAccessor.setValue(HostCatcher.class, 
+            "PROBATION_RECOVERY_WAIT_TIME", new Long(waitTime));
+        long interval = 20000;
+        PrivilegedAccessor.setValue(HostCatcher.class, 
+            "PROBATION_RECOVERY_TIME", new Long(interval));
+        
+        Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
+        
+        // Put the host on probation.
+        catcher.putHostOnProbation(probatedHost);
+        
+        catcher.add(probatedHost, true);
+        
+        // And make sure that it did not get added
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
+        
+        // Start the probation recovery sequence...
+        catcher.initialize();        
+        
+        // Sleep until the recovery operation takes place...
+        Thread.sleep(waitTime+200);
+        
+        // Finally, make sure we are then able to add the host that was 
+        // formerly on probation.
+        catcher.add(probatedHost, true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());        
+    }
+    
+    /**
      * Tests to make sure that recovering used hosts works as expected.  This
      * method is used when the user's network connection goes down.
      *
