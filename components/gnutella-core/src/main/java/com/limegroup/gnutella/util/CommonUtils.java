@@ -194,7 +194,36 @@ public final class CommonUtils {
 	 * Initialize the settings statically. 
 	 */
 	static {
-		// get the operating system
+	    setOperatingSystems();
+		
+		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
+			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
+		}
+		else {
+			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
+                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
+            _isPro = true;
+		}
+	}
+	
+	/**
+	 * Sets the operating system variables.
+	 */
+	private static void setOperatingSystems() {
+		_isWindows = false;
+		_isWindowsNTor2000orXP = false;
+		_isWindows2000orXP = false;
+		_isWindowsNT = false;
+		_isWindowsXP = false;
+		_isWindows95 = false;
+		_isWindows98 = false;
+		_isWindowsMe = false;
+		_isSolaris = false;
+		_isLinux = false;
+		_isOS2 = false;
+		_isMacOSX = false;
+
+
 		String os = System.getProperty("os.name").toLowerCase(Locale.US);
 
 		// set the operating system variables
@@ -225,16 +254,7 @@ public final class CommonUtils {
 				_isMacOSX = true;
 			}
 		}
-		
-		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
-			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
-		}
-		else {
-			HTTP_SERVER = ("LimeWire/"+LIMEWIRE_VERSION.
-                           substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
-            _isPro = true;
-		}
-	}
+    }
 
     /** Gets the major version of GUESS supported.
      */

@@ -26,7 +26,7 @@ class OS {
         StringTokenizer st = new StringTokenizer(oses, ",");
         OS[] all = new OS[st.countTokens()];
         for(int i = 0; st.hasMoreTokens(); i++) {
-            all[i] = new OS(st.nextToken());
+            all[i] = new OS(st.nextToken().trim());
         }
         return all;
     }
