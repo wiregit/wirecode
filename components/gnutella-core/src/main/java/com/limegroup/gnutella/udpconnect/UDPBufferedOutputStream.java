@@ -158,7 +158,7 @@ public class UDPBufferedOutputStream extends OutputStream {
     public synchronized void close() throws IOException {
         if (!_connectionActive)
             throw new IOException("already closed");
-        connectionClosed();
+        _processor.close();
     }
 
     /**
@@ -219,6 +219,7 @@ public class UDPBufferedOutputStream extends OutputStream {
      *  Package accessor for erroring out and waking up any further activity.
      */
     synchronized void connectionClosed() {
+        LOG.debug("connection closed");
         _connectionActive=false;
 		notify();
     }

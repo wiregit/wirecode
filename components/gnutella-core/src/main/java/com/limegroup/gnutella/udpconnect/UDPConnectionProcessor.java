@@ -324,10 +324,12 @@ public class UDPConnectionProcessor {
 	}
 
 	public synchronized void close() throws IOException {
-
+	    if (LOG.isDebugEnabled())
+	        LOG.debug("closing connection",new Exception());
+	    
         // If closed then done
         if ( _connectionState == FIN_STATE ) 
-            return;
+            throw new IOException("already closed");
 
         // Shutdown keepalive event callbacks
         if ( _keepaliveEvent  != null ) 

@@ -244,6 +244,7 @@ public class UDPBufferedInputStream extends InputStream {
      *  This does nothing for now.
      */
     public void close() throws IOException {
+        _processor.close();
     }
 
     /**
