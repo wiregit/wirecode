@@ -59,7 +59,7 @@ public final class DataUtils {
      * Determines whether or not the the child Set contains any elements
      * that are in the parent's set.
      */
-    public static boolean containsAny(Collection parent, Set children) {
+    public static boolean containsAny(Collection parent, Collection children) {
         for(Iterator i = children.iterator(); i.hasNext(); )
             if(parent.contains(i.next()))
                 return true;
