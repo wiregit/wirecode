@@ -57,8 +57,7 @@ public class PongCacheMessageRouter extends MessageRouter
         {
             ManagedConnection conn = 
                 (ManagedConnection)outgoingConnections.elementAt(i);
-            if (!conn.isOldClient())
-                conn.send(new PingRequest((byte)this.MAX_TTL_FOR_CACHE_REFRESH));
+            conn.send(new PingRequest((byte)this.MAX_TTL_FOR_CACHE_REFRESH));
         }
     }
    
@@ -78,18 +77,30 @@ public class PongCacheMessageRouter extends MessageRouter
         long files = pingReply.getFiles();
         long kbytes = pingReply.getKbytes();
         byte ttl = pingReply.getTTL();
-        byte[] guid = pingReply.getGUID();
 
         for (int i=0; i<incomingConnections.size(); i++)
         {
             ManagedConnection c = 
                 (ManagedConnection)incomingConnections.elementAt(i);
+
             if (c != connection)
             {
-                //send pong
-                PingReply pr = new PingReply(guid, ttl, hops, port, ip,
-                    files, kbytes);
-                c.send(pr);
+                //first make sure that the connection wants some pongs (i.e.,
+                //sent at least one "real" ping request yet, not just a 
+                //handshake ping.
+                if (!c.receivedFirstPing())
+                    continue;
+
+                int[] neededPongs = c.getNeededPongsList();
+                if (neededPongs[hops-1] > 0)
+                {
+                    byte[] guid = c.getLastPingGUID();
+                    //send pong
+                    PingReply pr = new PingReply(guid, ttl, hops, port, ip,
+                        files, kbytes);
+                    c.send(pr);
+                    neededPongs[hops-1]--;
+                }
             }
         }
     }
@@ -114,10 +125,9 @@ public class PongCacheMessageRouter extends MessageRouter
         outgoingConnections.add(conn);
     }
 
-    public void handlePingRequest(PingRequest pingRequest,
-                                  ManagedConnection receivingConnection)
+    protected void handlePingRequest(PingRequest pingRequest,
+                                     ManagedConnection receivingConnection)
     {
-        System.out.println("Received ping request");
         super.handlePingRequest(pingRequest, receivingConnection);
     }
 

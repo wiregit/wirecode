@@ -247,26 +247,7 @@ public class RouterService
      *  pong server as needed.
      */
     public void connect() {
-        //HACK. People used to complain that the connect button wasn't
-        //working when the host catcher was empty and 
-        //USE_QUICK_CONNECT=false.  This is not a bug; LimeWire isn't supposed 
-        //to connect to the pong server in this case.  But this IS admittedly 
-        //confusing.  So we force a connection to the pong server in this case 
-        //by disconnecting and temporarily setting USE_QUICK_CONNECT to true.  
-        //But we have to sleep(..) a little bit before setting 
-        //USE_QUICK_CONNECT back to false to give the connection fetchers time 
-        //to do their thing.  Ugh.  A Thread.yield() may work here too, but 
-        //that's less dependable.  And I do not want to bother with 
-        //wait/notify's just for this obscure case.
-        SettingsManager settings=SettingsManager.instance();
-        boolean useHack=
-            (!settings.getUseQuickConnect())
-                && catcher.mainCacheSize()==0 
-                && (!catcher.reserveCacheSufficient());
-        if (useHack) {
-            settings.setUseQuickConnect(true);
-            disconnect();
-        }
+        SettingsManager settings = SettingsManager.instance();
 
         //force the catcher to connect to router.
         catcher.connectToPongServer();
@@ -288,14 +269,6 @@ public class RouterService
 
         //int incoming=settings.getKeepAlive();
         //setMaxIncomingConnections(incoming);
-
-        //See note above.
-        if (useHack) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) { }
-            SettingsManager.instance().setUseQuickConnect(false);
-        }
     }
 
     /**
@@ -347,18 +320,11 @@ public class RouterService
         catcher.reset();
     }
 
-    /**
-     * Get the reserve number of hosts from the host catcher
-     */
-    public int getNumReserveHosts() {
-        return(catcher.reserveCacheSize());
-    }
-
     /** 
-     * Get the number of hosts from the Ping Reply Cache
+     * Get the number of hosts from the host catcher
      */
     public int getRealNumHosts() {
-        return (catcher.mainCacheSize());
+        return (catcher.cacheSize());
     }
 
     /**
@@ -553,17 +519,17 @@ public class RouterService
     }
 
     /**
-     *  Return an iterator on the hostcatcher hosts
+     * Returns the number of hosts in the host catcher main cache.
      */
-    public Iterator getReserveHosts() {
-        return catcher.getReserveHosts();
+    public int getNumCachedHosts() {
+        return catcher.cacheSize();
     }
 
     /**
-     * Return an iterator on the PingReplyCache hosts
+     * Return an iterator on the cached hosts in HostCatcher
      */
     public Iterator getCachedHosts() {
-        return catcher.getCachedHosts();
+        return catcher.getNPingReplies(null, 100);
     }
 
     /**
@@ -585,13 +551,6 @@ public class RouterService
      */
     public int getNumLocalSearches() {
         return router.getNumQueryRequests();
-    }
-
-    /**
-     *  Remove unwanted or used entries from host catcher
-     */
-    public void removeHost(String host, int port) {
-        catcher.removeHost(host, port);
     }
 
     /**

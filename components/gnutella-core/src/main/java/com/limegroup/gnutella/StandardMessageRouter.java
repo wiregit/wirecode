@@ -15,8 +15,8 @@ public class StandardMessageRouter
     /**
      * Override of handleQueryRequest to send query strings to the callback.
      */
-    public void handleQueryRequest(QueryRequest queryRequest,
-                                   ManagedConnection receivingConnection)
+    protected void handleQueryRequest(QueryRequest queryRequest,
+                                      ManagedConnection receivingConnection)
     {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
@@ -45,11 +45,16 @@ public class StandardMessageRouter
         if (!_manager.hasAvailableIncoming() && ((hops+ttl) > 2)) 
             return;
 
+        //for crawler pings we shouldn't send the pong with hops+1 as TTL.
+        int newTTL = hops+1;
+        if ( (hops+ttl) <=2)
+            newTTL = 1;
+
         int num_files = FileManager.instance().getNumFiles();
         int kilobytes = FileManager.instance().getSize()/1024;
 
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
-                                            (byte)(pingRequest.getHops()+1),
+                                            (byte)newTTL,
                                             acceptor.getPort(),
                                             acceptor.getAddress(),
                                             num_files,
@@ -57,7 +62,7 @@ public class StandardMessageRouter
         connection.send(pingReply);
     }
 
-    public void handlePingReply(PingReply pingReply,
+    protected void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection)
     {
         super.handlePingReply(pingReply, receivingConnection);

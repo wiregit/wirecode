@@ -158,7 +158,7 @@ public class PongCacheTest
             return false;
         }
 
-        while (count < 4)
+        while (count < 2)
         {
             try 
             {
@@ -192,7 +192,7 @@ public class PongCacheTest
                 break;
             }
         }
-        if (count < 4)
+        if (count < 2)
             return false;
         else
             return true;

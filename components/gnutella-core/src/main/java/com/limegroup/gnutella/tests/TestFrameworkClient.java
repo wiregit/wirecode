@@ -133,8 +133,7 @@ public class TestFrameworkClient extends UnicastRemoteObject
     public int[] getNetworkStatistics() throws RemoteException
     {
         int[] stats = new int[4];
-        stats[0] = rs.getRealNumHosts();
-        stats[1] = rs.getNumReserveHosts();
+        stats[0] = rs.getNumCachedHosts();
         stats[2] = rs.getTotalProcessedPingRequests();
         stats[3] = rs.getTotalBroadcastPingRequests();
 

@@ -391,11 +391,32 @@ public class ConnectionManager {
      * to get some pongs back.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        PingRequest handshake = new PingRequest((byte)1);
-        connection.send(handshake);
+        //only send handshake ping, if not a connection to a router (e.g., 
+        //router.limewire.com)
+        if (!isRouterConnection(connection)) {
+            PingRequest handshake = new PingRequest((byte)1);
+            //record the GUID of the handshake ping
+            connection.setHandshakeGUID(handshake.getGUID());
+            connection.send(handshake);
+        }
         PingRequest initialPing = 
             new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
         connection.send(initialPing);
+    }
+
+    /**
+     * Returns whether a connection is to a pong cache server such as router.
+     * limewire.com or gnutellahosts.com
+     */
+    private boolean isRouterConnection(ManagedConnection connection) {
+        String host = connection.getOrigHost();
+        String[] routers = SettingsManager.instance().getQuickConnectHosts();
+        for (int i = 0; i < routers.length; i++) {
+            if (host.equals(routers[i]))
+                return true;
+        }
+
+        return false;
     }
 
     /**

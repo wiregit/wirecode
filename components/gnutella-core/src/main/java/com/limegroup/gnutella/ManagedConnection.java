@@ -102,7 +102,13 @@ public class ManagedConnection
      * from the socket, since the port for incoming connections is an ephemeral
      * port.
      */
-    private PingReply _remotePong;
+    private PingReply _remotePong = null;
+
+    /**
+     * GUID of handshake ping sent.  This is used to determine if a pong 
+     * received is a handshake pong or not.
+     */
+    private byte[] _handshakeGUID = null;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -411,48 +417,22 @@ public class ManagedConnection
                 continue;
             }
 
-            //if crawler ping, send back pongs of neighbors.
-            if ((m instanceof PingRequest) && (isCrawlerPing(m))) {
-                _router.sendCrawlerPingReplies((PingRequest)m, this);
-                continue;
-            }
-
-            // Increment hops and decrease TTL
-            m.hop();
-
-            if(m instanceof PingRequest) {
-                //first ping should be checked if it is an older client (by
-                //Gnutella protocol version in GUID).
-                if (!_receivedFirstPing) 
-                    checkForOlderClient(m); 
-                if (isHandshake(m)) //if handshake, respond with own address
-                    _router.sendMyAddress((PingRequest)m, this);
-                else //normal case, MessageRouter handles the ping request
-                    _router.handlePingRequest((PingRequest)m, this);
-            }
-            else if (m instanceof PingReply) {
-                if (isHandshake(m)) //if handshake respond pong, store it.
-                    _remotePong = (PingReply)m;
-                else //normal case, MessageRouter handles the pong
-                    _router.handlePingReply((PingReply)m, this);
-            }
-            else if (m instanceof QueryRequest)
-                _router.handleQueryRequestPossibleDuplicate(
-                    (QueryRequest)m, this);
-            else if (m instanceof QueryReply)
-                _router.handleQueryReply((QueryReply)m, this);
-            else if (m instanceof PushRequest)
-                _router.handlePushRequest((PushRequest)m, this);
+            //call MessageRouter to handle and process the message
+            _router.handleMessage(m, this);
         }
     }
-
+        
     /**
      * Determines if this connection is to an older client by checking the
      * Protocol Version (of the GUID of the Message) and sets necessary
      * flags.  It also makes sure the GUID is a new GUID (based on byte[8])
      */
-    private void checkForOlderClient(Message m)
+    public void checkForOlderClient(Message m)
     {
+        //if already checked once, we don't need to check again
+        if (_receivedFirstPing)
+            return;
+
         _receivedFirstPing = true;
         byte[] guid = m.getGUID();
 
@@ -464,44 +444,50 @@ public class ManagedConnection
             _isOldClient = false;
     }
 
-    /**
-     * Returns whether the Ping received was from a GNUTELLA crawler, by 
-     * looking at the TTL and hops count.
-     */
-    private boolean isCrawlerPing(Message m) {
-        int ttl = (int)m.getTTL();
-        int hops = (int)m.getHops();
 
-        if ((ttl == 2) && (hops == 0))
-            return true;
-        else
-            return false;
+    /**
+     * Sets the remote pong to the pong passed in.  This remote pong can later
+     * be used in responding to crawler pings.
+     */
+    public void setRemotePong(PingReply pong) {
+        _remotePong = pong;
+    }
+
+
+    /**
+     * Sets the handshake GUID to the guid passed in.  This guid is used to 
+     * match a handshake pong to our handshake ping.
+     */
+    public void setHandshakeGUID(byte[] guid) {
+        _handshakeGUID = guid;
     }
 
     /**
-     * Returns whether the message received was a handshake by looking at the
-     * ttl and hops count.  (ttl should be 0 and hops should be 1) since we 
-     * should be calling this method after calling hop on the messsage.
-     *
-     * @required - m.hop() has been called
+     * Returns the handshake GUID of the initial ping request this connection
+     * sent.
      */
-    private boolean isHandshake(Message m) {
-        int ttl = (int)m.getTTL(); 
-        int hops = (int)m.getHops();
-
-        if ((ttl == 0) && (hops == 1))
-            return true;
-        else
-            return false;
+    public byte[] getHandshakeGUID() {
+        return _handshakeGUID;
     }
 
     /**
      * Return the remote pong (sent in the response to the handshake ping 
-     * request).  This is used to return pongs to the crawler of all our 
-     * neighbors.
+     * request) with the guid passed in.  This is used to return pongs to the 
+     * crawler of all our neighbors.  If the pong is null (i.e., no handshake 
+     * pong received yet, then if the connection is an outgoing connection, 
+     * it returns the address of the outgoing connection, otherwise it returns 
+     * null.
      */
-    public PingReply getRemotePong() {
-        return _remotePong;
+    public PingReply getRemotePong(byte[] guid) {
+        PingReply pr = null;
+        if (_remotePong != null) 
+            pr = new PingReply(guid, (byte)1, _remotePong.getPort(), 
+                _remotePong.getIPBytes(), _remotePong.getFiles(), 
+                _remotePong.getKbytes());
+        else if (isOutgoing()) //if outgoing, we know the address and port
+            pr = new PingReply(guid, (byte)1, getOrigPort(), 
+                getInetAddress().getAddress(), 0, 0);
+        return pr;
     }
 
     /**
@@ -556,7 +542,7 @@ public class ManagedConnection
      * Returns whether ManagedConnectionPingInfo is instantiated or not.
      */
     public boolean receivedFirstPing() {
-        return (pingInfo == null);
+        return (pingInfo != null);
     }
     //end -- Interface
 

@@ -33,6 +33,10 @@ public class HostCatcher {
      * cache.  Each PingReply is stored in the main cache based on the hops 
      * count (since that indicates how many hops away from us this client is).  
      *
+     * Basically: main cache is a bucket of pongs (indexed or sorted by hops).  
+     * Each bucket of pongs is indexed by the hops count (i.e., 0 to main cache
+     * length where the index i is the bucket of pongs that are i+1 hops away).
+
      * Note: Only newer clients's pongs are stored in the main cache.  That is, 
      * only clients using protocol version (0.6) or higher.
      */
@@ -110,6 +114,9 @@ public class HostCatcher {
     /** The amount of MILLISECONDS to wait after starting a connection before
      *  trying another. */
     private static final int CONNECT_TIME=6000;  //6 seconds
+    /** The number of MILLISECONDS to wait when trying to return random pongs.
+     *  This ensures that we are not waiting forever to return pongs. */
+    private static final long MAX_WAIT_TIME_GETTING_PONGS=100;
 
 
     /**
@@ -231,9 +238,10 @@ public class HostCatcher {
         }
         
         //2.) Write out the connections in the main cache if any
-        if (mainCacheSize() > 0) {
-            for (Iterator iter=getCachedHosts(); iter.hasNext(); ) {
-                PingReply pr = ((MainCacheEntry)iter.next()).getPingReply();
+        if (cacheSize() > 0) {
+            for (Iterator iter=getCachedHosts(null, mainCache.length); 
+                 iter.hasNext(); ) {
+                PingReply pr = (PingReply)iter.next();
                 Endpoint e = new Endpoint(pr.getIP(), pr.getPort());
                 if (connections.contains(e))
                     continue;
@@ -242,7 +250,7 @@ public class HostCatcher {
             }
         }
         
-        //2.) Write hosts in reserve cache that are not in connections--in 
+        //3.) Write hosts in reserve cache that are not in connections--in 
         //order.
         for (int i=reserveCacheQueue.size()-1; i>=0; i--) {
             Endpoint e=(Endpoint)reserveCacheQueue.extractMax();
@@ -261,21 +269,20 @@ public class HostCatcher {
     //--------- Main Cache methods
 
     /** 
-     * adds a Pong to the cache, based on its hops.  If the PingReply is from an
-     * older client, then don't add it to the cache.  Note: hop() has already
-     * been called on this ping reply before we add it to the cache.  Returns
-     * true if the pong was successfully added to the cache, false otherwise.
+     * adds a Pong to the main cache, based on its hops.  If the PingReply is 
+     * from an older client, then don't add it to the cache.  Note: hop() has 
+     * already been called on this ping reply before we add it to the cache.  
+     * Returns true if the pong was successfully added to the cache, false 
+     * otherwise.
      *
-     * requires: PingReply is from a newer client (Gnutella protocol version
-     *           0.6 or higher).
      */
-    public boolean addToMainCache(PingReply pr, 
-                                  ManagedConnection connection) {
+    private boolean addToMainCache(PingReply pr, 
+                                   ManagedConnection connection) {
         if (GUID.getProtocolVersion(pr.getGUID()) < GUID.GNUTELLA_VERSION_06)
             return false;
 
         int hops = (int)pr.getHops();
-        if (hops > (mainCache.length-1))
+        if (hops >= mainCache.length)
             return false; //if greater than Max Hops allowed, do nothing.
 
         //if private IP address, ignore.
@@ -289,8 +296,8 @@ public class HostCatcher {
             //managed connections).
             MainCacheEntry newEntry = 
                 new MainCacheEntry(pr, connection);
-            if (!(mainCache[hops].contains(newEntry)))
-                mainCache[hops].add(newEntry);
+            if (!(mainCache[hops-1].contains(newEntry)))
+                mainCache[hops-1].add(newEntry);
             cacheLock.notify();
         }
         return true;
@@ -301,7 +308,7 @@ public class HostCatcher {
      * time the cache expires.  Also, copies the contents of the main cache
      * into the reserve cache.
      */
-    public synchronized void clearMainCache() {
+    public synchronized void clearCache() {
         //first copy contents of main cache into reserve cache.
         copyCacheContents();
         
@@ -326,37 +333,26 @@ public class HostCatcher {
     /**
      * Return a main cache entry for a specified hops.  Basically, return a 
      * random cache entry from the ArrayList of that specified hops.  Return 
-     * null if the hops is greater than the Max Hops allowed for caching.  If no
-     * entries in the cache returns null.  Also, return null, if the retrieved
-     * entry is from the connection passed in.
+     * null if there are no entries in the main cache for that particular hops.
      */
-    public PingReply getMainCacheEntry(int hops, Connection conn) {
-        if (hops > mainCache.length)
-            return null;
-
-        if (mainCacheSize() <= 0)
-            return null;
-
+    private MainCacheEntry getCacheEntry(int hops) {
         //if no entries for the passed in hops, return null
         if (mainCache[hops-1].size() == 0)
             return null;
 
-        PingReply pr = null;
+        MainCacheEntry entry = null;
         synchronized (cacheLock) {
             ArrayList arrayOfPongs = mainCache[hops-1];
             int index = random.nextInt(arrayOfPongs.size());
-            MainCacheEntry entry = 
-                (MainCacheEntry)arrayOfPongs.get(index);
-            if (entry.getManagedConnection() != conn)
-                pr = entry.getPingReply();
+            entry = (MainCacheEntry)arrayOfPongs.get(index);
         }
-        return pr;
+        return entry;
     }
 
     /**
      * Returns the number of pongs we've received so far in the main cache.
      */
-    public int mainCacheSize() {
+    public int cacheSize() {
         int numPongs = 0;
 
         for (int i = 0; i < mainCache.length; i++)
@@ -368,7 +364,7 @@ public class HostCatcher {
     /**
      * Returns whether or not main cache is expired, based on the expire time.
      */
-    public boolean mainCacheExpired() {
+    public boolean cacheExpired() {
         long currentTime = System.currentTimeMillis();
         if (currentTime > mainCacheExpireTime)
             return true;
@@ -377,34 +373,24 @@ public class HostCatcher {
     }
 
     /**
-     * Returns an unmodifiable iterator to access all the main cache entries 
+     * Returns an unmodifiable iterator to access all the pongs in the main
+     * cache.  However, only returns pongs which are at most maxHops away.
      */
-    public Iterator getCachedHosts() {
-        ArrayList[] mainCacheClone = new ArrayList[mainCache.length];
+    private Iterator getCachedHosts(Connection conn, int maxHops) {
+        ArrayList[] mainCacheClone = new ArrayList[maxHops];
         synchronized(cacheLock) {
-            for (int i = 0; i < mainCache.length; i++)
-            {
-                mainCacheClone[i] = new ArrayList(mainCache[i]);
+            for (int i = 0; i < mainCacheClone.length; i++) {
+                mainCacheClone[i] = new ArrayList();
+                Iterator iter = mainCache[i].iterator();
+                while (iter.hasNext()) {
+                    MainCacheEntry entry = (MainCacheEntry)iter.next();
+                    //only copy ping replies not from the Connection passed in
+                    if (entry.getManagedConnection() != conn) 
+                        mainCacheClone[i].add(entry.getPingReply());
+                }
             }
         }
-
         return (new MainCacheIterator(mainCacheClone));
-    }
-
-    /**
-     * Returns an unmodifiable iterator to access all the main cache entries
-     * for a particular hops.
-     */
-    public Iterator getCachedHosts(int hops) {
-        ArrayList[] mainCacheClone = new ArrayList[mainCache.length];
-        synchronized(cacheLock) {
-            for (int i = 0; i < mainCache.length; i++)
-            {
-                mainCacheClone[i] = new ArrayList(mainCache[i]);
-            }
-        }
-
-        return (new MainCacheIterator(mainCacheClone, hops));
     }
     //--------- end Main cache methods
 
@@ -412,12 +398,10 @@ public class HostCatcher {
     //--------- Reserve Cache methods
 
     /**
-     * @modifies this
-     * @effects may choose to add hosts listed in pr to this.
-     *  If non-null, receivingConnection may be used to prioritize pr.
+     * Adds a ping reply to the reserve cache.
      */
-    public void addToReserveCache(PingReply pr, 
-                                  ManagedConnection receivingConnection) {
+    private void addToReserveCache(PingReply pr, 
+                                   ManagedConnection receivingConnection) {
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
                     pr.getFiles(), pr.getKbytes());
 
@@ -474,11 +458,11 @@ public class HostCatcher {
      * the set and queue).
      */ 
     private void copyCacheContents() {
-        for (Iterator iter = getCachedHosts(); 
+        for (Iterator iter = getCachedHosts(null, mainCache.length); 
              iter.hasNext(); ) {
             //all addresses from the main cache are considered the "best"
             //endpoints in the reserve cache.
-            PingReply pr = ((MainCacheEntry)iter.next()).getPingReply();
+            PingReply pr = (PingReply)iter.next();
             Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort(), 
                                       pr.getFiles(), pr.getKbytes());
             e.setWeight(BEST_PRIORITY);
@@ -494,24 +478,6 @@ public class HostCatcher {
         }
     }
 
-    /** 
-     * return whether the reserve cache size is sufficient enough to not
-     * cause a refresh of the cache (i.e., broadcast a ping).  
-     */
-    public boolean reserveCacheSufficient() {
-        if (reserveCacheQueue.size() < RESERVE_CACHE_SUFFICIENT_CAPACITY) 
-            return false;
-        else 
-            return true;
-    }
-
-    /**
-     * Return the number of hosts in the reserve cache.
-     */
-    public int reserveCacheSize() {
-        return (reserveCacheQueue.size());
-    }
-
     /**
      * @modifies reserve cache
      * @effects removes all entries from reserve cache
@@ -523,51 +489,7 @@ public class HostCatcher {
         }
     }
 
-
-    /**
-     * Returns an iterator of the hosts in reserve cache, in order of priority.
-     * This can be modified while iterating through the result, but
-     * the modifications will not be observed.
-     */
-    public Iterator getReserveHosts() {
-        Iterator iter;
-        synchronized (cacheLock) {
-            //clone the queue before iterating.
-            iter = new BucketQueue(reserveCacheQueue).iterator();
-        }
-        return iter;
-    }
-
-    /**
-     * @requires n>0
-     * @effects returns an iterator that yields up the best n endpoints of this.
-     *  It's not guaranteed that these are reachable. This can be modified while
-     *  iterating through the result, but the modifications will not be
-     * observed.  
-     */
-    public Iterator getBestReserveHosts(int n) {
-        Iterator iter;
-        synchronized (cacheLock) {
-            //clone the queue before iterating.
-            iter = new BucketQueue(reserveCacheQueue).iterator(n);
-        }
-        return iter;
-    }
-
-    /**
-     *  Remove unwanted or used entries from the reserve cache
-     */
-    public void removeHost(String host, int port) {
-        synchronized (cacheLock) {
-            Endpoint e=new Endpoint(host, port);
-            boolean removed1=reserveCacheSet.remove(e);
-            boolean removed2=reserveCacheQueue.removeAll(e);
-            //Check that set.contains(e) <==> queue.contains(e)
-            Assert.that(removed1==removed2, 
-                "Rep. invariant for HostCatcher broken.");
-        }
-    }
-    //---------- end Reserve cache methods
+  //---------- end Reserve cache methods
 
     /**
      * This thread contacts the pong server and waits until it gets a pong
@@ -630,48 +552,8 @@ public class HostCatcher {
     } //end RouterConnectorThread
 
     /**
-     * @modifies this
-     * @effects remove a random host from the main cache.  However, if we cannot
-     *  retrieve an elment from the main cache (after trying twice), then try
-     *  to obtain an endpoint from the reserve cache.  If the reserve cache is
-     *  also empty, wait until an endpoint is available unless an external 
-     *  interrupt is caused by an InterruptedException.  
-     */
-    public Endpoint getAnEndpoint() throws InterruptedException {
-        Endpoint endpoint = null;
-        while (true) {
-            //first, try the main cache two times, in case the first time, a null
-            //is returned.
-            if (mainCacheSize() > 0) { 
-                Random random = new Random();
-                int hops;
-                for (int i = 0; i < 2; i++) {
-                    hops = 
-                        random.nextInt(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-                    PingReply pr = getMainCacheEntry(hops+1, null);
-                    if (pr != null) {
-                        endpoint = new Endpoint(pr.getIP(), pr.getPort());
-                        return endpoint;
-                    }
-                }
-            }
-            //next try the reserve cache
-            try {
-                endpoint = getAnEndpointInternal();
-                return endpoint;
-            } catch(NoSuchElementException e) {
-                synchronized(cacheLock) {
-                    //wait for a host in either the main cache or the reserve cache
-                    cacheLock.wait(); 
-                }
-            }
-        }
-    }
-
-    /**
-     * @effects returns the highest priority endpoint in reserve cache,
-     *  regardless of quick-connect settings, etc.  Throws NoSuchElementException
-     *  if reserve cache is empty.
+     * returns the highest priority endpoint in reserve cache.  Throws 
+     * NoSuchElementException if reserve cache is empty.
      */
     private Endpoint getAnEndpointInternal()
         throws NoSuchElementException {   
@@ -688,23 +570,6 @@ public class HostCatcher {
             return e;
         } else
             throw new NoSuchElementException();
-    }
-
-    /**
-     * @modifies this 
-     * removes all entries from this 
-     */
-    public synchronized void reset() {
-        resetMainCache();
-        resetReserveCache();
-    }
-
-    /**
-     * Creates seperate thread to connect to a pong cache server (i.e., router.
-     * limewire.com) and wait for some pongs.
-     */
-    public void connectToPongServer() {
-        new RouterConnectorThread().start();
     }
 
     /** Returns true iff ip is the ip address of router.limewire.com or 
@@ -729,6 +594,169 @@ public class HostCatcher {
             return false;
     }
 
+    /**
+     * Creates a clone of the main cache with random entries (i.e., pongs)  
+     * gotten from the main cache which are at most maxHops away and were
+     * not sent from the Connection passed in.  Up to n random pongs are
+     * returned in the cached clone.
+     */
+    private ArrayList[] createMainCacheClone(Connection conn, int n, 
+                                             int maxHops) {
+        //first, instantiate a new array of ArrayLists (clone)
+        ArrayList[] cacheClone = new ArrayList[mainCache.length];
+        for (int i = 0; i < cacheClone.length; i++) 
+            cacheClone[i] = new ArrayList();
+            
+        //only add to clone if there are some pongs in the main cache
+        if (cacheSize() > 0) {
+            int count = 0;
+            int hops = random.nextInt(maxHops);
+            //max time to wait for adding pongs.  We use this to ensure
+            //that we are not waiting forever to get some pongs
+            long waitTime = System.currentTimeMillis() + 
+                MAX_WAIT_TIME_GETTING_PONGS;
+            
+            //return n random entries from the main cache or as many entries
+            //until we timeout for returning pongs.
+            while ( (count < n) && 
+                (System.currentTimeMillis() <= waitTime)) {
+                MainCacheEntry entry = getCacheEntry(hops+1);
+                if (entry == null) {
+                    hops++;
+                    if (hops >= maxHops)
+                        hops = 0;
+                    continue;
+                }
+                if (entry.getManagedConnection() != conn) {
+                    cacheClone[hops].add(entry.getPingReply());
+                    count++;
+                }
+            }
+        }
+        return cacheClone;
+    }
+
+    //--------- public access methods
+
+    /**
+     * Tries to add the ping reply to the main cache.  However, if the 
+     * connection that receiving the pong is an old client or from a router
+     * connection, then add it to the reserve cache rather than the main 
+     * cache.  If it was succesfully added to the main cache, then return true,
+     * otherwise, return false.  NOTE: Adding to the reserve cache always returns
+     * false, since we want to somehow indicate that we didn't successfully add
+     * to the main cache because that might generate some unwanted behaviors from 
+     * the calling object.
+     */
+    public boolean addToCache(PingReply pr, 
+                              ManagedConnection receivingConnection) {
+        //if received from an old client or from a router, place the PingReply
+        //in the reserve cache (i.e., hostcatcher).
+        if ((receivingConnection.isOldClient()) || 
+            (receivingConnection.isRouterConnection())) {
+            addToReserveCache(pr, receivingConnection);
+            return false; //always return false when adding to reserve cache.
+        }
+        else
+            return addToMainCache(pr, receivingConnection);
+
+    }
+
+    /**
+     *  Retrieves a random host from the main cache.  However, if we cannot
+     *  retrieve an element from the main cache (after trying twice), then try
+     *  to obtain an endpoint from the reserve cache.  If the reserve cache is
+     *  also empty, wait until an endpoint is available (unless an external 
+     *  interrupt is generated)  
+     */
+    public Endpoint getAnEndpoint() throws InterruptedException {
+        Endpoint endpoint = null;
+        while (true) {
+            //first, try the main cache two times, in case the first time, a null
+            //is returned.
+            if (cacheSize() > 0) { 
+                int hops;
+                for (int i = 0; i < 2; i++) {
+                    hops = 
+                        random.nextInt(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+                    MainCacheEntry entry = getCacheEntry(hops+1);
+                    if (entry != null) {
+                        //make sure we didn't return this host previously during
+                        //this cache cyle.
+                        if (entry.wasPreviouslyReturned())
+                            continue;
+                        entry.markPreviouslyReturned();
+                        PingReply pr = entry.getPingReply();
+                        endpoint = new Endpoint(pr.getIP(), pr.getPort());
+                        return endpoint;
+                    }
+                }
+            }
+            //next try the reserve cache
+            try {
+                endpoint = getAnEndpointInternal();
+                return endpoint;
+            } catch(NoSuchElementException e) {
+                synchronized(cacheLock) {
+                    //wait for a host in either the main cache or the reserve 
+                    //cache
+                    cacheLock.wait(); 
+                }
+            }
+        }
+    }
+
+    /**
+     * @modifies this 
+     * removes all entries from this 
+     */
+    public synchronized void reset() {
+        resetMainCache();
+        resetReserveCache();
+    }
+
+    /**
+     * Creates seperate thread to connect to a pong cache server (i.e., router.
+     * limewire.com) and wait for some pongs.
+     */
+    public void connectToPongServer() {
+        new RouterConnectorThread().start();
+    }
+
+    /**
+     * Returns an iterator of up to N Ping Replies which were not received from
+     * conn.  These ping replies are only retrieved from the main cache.
+     */
+    public Iterator getNPingReplies(Connection conn, int n) {
+        //if not enough pongs in the cache, return all of them, except for the
+        //pongs received from the connection passed in.
+        if (n >= cacheSize())  
+            return getCachedHosts(conn, mainCache.length);
+        else {
+            ArrayList[] cacheClone = 
+                createMainCacheClone(conn, n, mainCache.length);
+            return new MainCacheIterator(cacheClone);
+        }
+    }
+
+
+    /**
+     * Returns an iterator of up to N Ping Replies which were not received from
+     * conn.  However, the ping replies returned will not be more than maxHops
+     * away from us.  These ping replies are only retrieved from the main cache.
+     */
+    public Iterator getNPingReplies(Connection conn, int n, int maxHops) {
+        //if not enough pongs in the cache, return all of them, except for the
+        //pongs received from the connection passed in.
+        if (n >= cacheSize())
+            return getCachedHosts(conn, maxHops);
+        else {
+            ArrayList[] cacheClone = createMainCacheClone(conn, n, maxHops);
+            return new MainCacheIterator(cacheClone);
+        }
+    }
+
+
 //      /** Unit test: just calls tests.HostCatcherTest, since it
 //       *  is too large and complicated for this.
 //       */
@@ -749,25 +777,14 @@ class MainCacheIterator extends UnmodifiableIterator
 {
     //actual clone of cache that is being iterated over.
     private ArrayList[] cache;
-
     private int hopsIndex; //index to current hops list.
     private int i; //index to current object in current hops list.
-    private int origHopsIndex; //index if iterator for only one hop list.
     
     public MainCacheIterator(ArrayList[] cache)
     {
         this.cache = cache;
         hopsIndex = 0;
         i = 0;
-        origHopsIndex = -1;
-    }
-    
-    public MainCacheIterator(ArrayList[] cache, int hops)
-    {
-        this.cache = cache;
-        hopsIndex = hops-1;
-        i = 0;
-        origHopsIndex = hopsIndex;
     }
     
     public boolean hasNext()
@@ -777,24 +794,16 @@ class MainCacheIterator extends UnmodifiableIterator
             return false;
         
         //if we've gone through the entire cache, then we're done.
-        if (hopsIndex >= MessageRouter.MAX_TTL_FOR_CACHE_REFRESH)
+        if (hopsIndex >= cache.length)
             return false;
         
-        if (origHopsIndex >= 0) //returning entries for only one hops.
+        //check to make sure not all entries have been used up (i.e., 
+        //returned)
+        while (cache[hopsIndex].size() == 0)
         {
-            if (hopsIndex > origHopsIndex) 
+            hopsIndex++;
+            if (hopsIndex >= cache.length)
                 return false;
-        }
-        else
-        {
-            //check to make sure not all entries have been used up (i.e., 
-            //returned)
-            while (cache[hopsIndex].size() == 0)
-            {
-                hopsIndex++;
-                if (hopsIndex >= MessageRouter.MAX_TTL_FOR_CACHE_REFRESH)
-                    return false;
-            }
         }
         
         return true;
@@ -806,8 +815,7 @@ class MainCacheIterator extends UnmodifiableIterator
         if (!hasNext()) 
             throw new NoSuchElementException();
         
-        MainCacheEntry cacheEntry = 
-            (MainCacheEntry)cache[hopsIndex].get(i);
+        PingReply pr = (PingReply)cache[hopsIndex].get(i);
         i++;
         
         if (i >= cache[hopsIndex].size())
@@ -816,7 +824,7 @@ class MainCacheIterator extends UnmodifiableIterator
             i = 0;
         }
         
-        return cacheEntry;
+        return pr;
     }
 
     //calculates the number of entries in the cloned cache that we are iterating
@@ -842,11 +850,18 @@ class MainCacheEntry
 {
     private PingReply pingReply;
     private ManagedConnection connection;
+    //this is used when returning pingreplies from the cache to the Connection
+    //fetchers.  If the entry was usedBefore, it means that another Connection
+    //fetcher tried to connect to it.  We use this flag to ensure that we don't
+    //return the same host to more than one ConnectionFetcher (during one 
+    //expiration time or cache cycle, that is).
+    private boolean previouslyReturned;
 
     public MainCacheEntry(PingReply pingReply, ManagedConnection connection)
     {
         this.pingReply = pingReply;
         this.connection = connection;
+        previouslyReturned = false;
     }
 
     public PingReply getPingReply()
@@ -857,6 +872,25 @@ class MainCacheEntry
     public ManagedConnection getManagedConnection()
     {
         return connection;
+    }
+
+    /**
+     * Once previouslyReturned is set to true once, it says true for the 
+     * lifetime of this entry in the main cache.
+     */
+    public void markPreviouslyReturned()
+    {
+        previouslyReturned = true;
+    }
+
+    /**
+     * Returns whether this entry in the main cache has already been returned to
+     * a Connection Fetcher previously, ensuring that we don't return the same
+     * entry twice.
+     */
+    public boolean wasPreviouslyReturned()
+    {
+        return previouslyReturned;
     }
 
     /**

@@ -44,16 +44,12 @@ public class Main implements ActivityCallback {
         //Print push route
         else if (command.equals("stat")) {
             service.dumpConnections();
-            System.out.println("Number of cached hosts: "+service.getRealNumHosts());
-            System.out.println("Number of reserve hosts: "+service.getReserveHosts());
+            System.out.println("Number of cached hosts: "+
+                service.getRealNumHosts());
+          
         }
         //Print hostcatcher
         else if (command.equals("catcher")) {
-            for (Iterator iter=service.getReserveHosts(); iter.hasNext(); )
-            System.out.println(iter.next().toString());
-        }
-        //Print pong cache
-        else if (command.equals("pong cache")) {
             for (Iterator iter=service.getCachedHosts(); iter.hasNext(); )
             System.out.println(((MainCacheEntry)iter.next()).
                 getPingReply().toString());
