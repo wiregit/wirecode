@@ -337,12 +337,24 @@ public class RouterService
      * Shut stuff down and write the gnutella.net file
      */
     public void shutdown() {
+        //Write gnutella.net
         try {
             catcher.write(SettingsManager.instance().getHostList());
         } catch (IOException e) {}
 		finally {
 			SettingsManager.instance().writeProperties();
 		}
+        //Cleanup any preview files.  Note that these will not be deleted if
+        //your previewer is still open.
+        File incompleteDir=new File(
+            SettingsManager.instance().getIncompleteDirectory());
+        String[] files=incompleteDir.list();
+        for (int i=0; i<files.length; i++) {
+            if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
+                File file=new File(incompleteDir, files[i]);
+                file.delete();  //May or may not work; ignore return code.
+            }
+        }
     }
 
     /**

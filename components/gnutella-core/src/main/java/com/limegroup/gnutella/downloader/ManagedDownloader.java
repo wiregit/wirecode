@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.Launcher;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.io.*;
@@ -333,23 +333,41 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (dloader==null)
             return;
 
-        //a) If the file is being downloaded, launch incomplete file. If the
-        //download hasn't started, the incomplete file may not even exist--not a
-        //problem.  Note that if the download completes while the incomplete
-        //file is being previewed, it will be copied, not moved.
-        String partial=dloader.getFileName();
-        File absolute=null;
-        if (dloader.getAmountRead()<dloader.getFileSize()) {  //Incomplete
-            absolute=incompleteFileManager.
-                getFile(partial, dloader.getFileSize());            
-        }
-        //b) Otherwise, launch completed file.
-        else 
-            absolute=new File(SettingsManager.instance().getSaveDirectory(),
-                              partial);        
-        try {
-            Launcher.launch(absolute.getAbsolutePath());
-        } catch (IOException e) { }
+        //Unfortunately this must be done in a background thread because the
+        //copying (see below) can take a lot of time.  If we can avoid the copy
+        //in the future, we can avoid the thread.
+        Thread worker=new Thread() {
+            public void run() {              
+                String name=dloader.getFileName();
+                File file=null;
+
+                //a) If the file is being downloaded, create *copy* of
+                //incomplete file.  The copy is needed because some programs,
+                //notably Windows Media Player, attempt to grab exclusive file
+                //locks.  If the download hasn't started, the incomplete file
+                //may not even exist--not a problem.
+                if (dloader.getAmountRead()<dloader.getFileSize()) {
+                    File incomplete=incompleteFileManager.
+                        getFile(name, dloader.getFileSize());            
+                    file=new File(incomplete.getParent(),
+                                  IncompleteFileManager.PREVIEW_PREFIX
+                                      +incomplete.getName());
+                    if (! CommonUtils.copy(incomplete, file)) //note side-effect
+                        return;
+                }
+                //b) Otherwise, choose completed file.
+                else 
+                    file=new File(SettingsManager.instance().getSaveDirectory(),
+                                  name);     
+
+                try {
+                    Launcher.launch(file.getAbsolutePath());
+                } catch (IOException e) { }
+            }
+        };
+        worker.setDaemon(true);
+        worker.setName("Launcher thread");
+        worker.start();
     }
 
     /** Actually does the download. */

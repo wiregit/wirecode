@@ -18,6 +18,8 @@ public class IncompleteFileManager implements Serializable {
      * file.  To make it easier to break the temporary name into its constituent
      * parts, this should not contain a number. */
     static final String SEPARATOR="-";
+    /** The prefix added to preview copies of incomplete files. */
+    public static final String PREVIEW_PREFIX="Preview-";
 
     /** Creates a new TemporaryFile object to for a normal of the given
      *  file/location pair.  The location of the file is determined by the
