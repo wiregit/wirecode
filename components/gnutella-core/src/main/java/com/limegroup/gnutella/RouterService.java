@@ -58,6 +58,7 @@ public final class RouterService {
     private final FileManager fileManager = new MetaFileManager();
 	//keep the reference around...prevent class GC
     private final ChatManager chatManager = ChatManager.instance();
+	private final Statistics statistics = Statistics.instance();
     private final SimpleTimer timer;
 
 	/**
@@ -114,11 +115,7 @@ public final class RouterService {
 		// Now, link all the pieces together, starting the various threads.
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
 		this.manager.initialize(router, catcher);	   
-		this.downloader.initialize(callback, router, acceptor, fileManager);
-		
-        //Ensure statistcs have started (by loading class).
-        Statistics.instance();
-
+		this.downloader.initialize(callback, router, acceptor, fileManager); 
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
 													 manager);
