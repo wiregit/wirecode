@@ -1,8 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.util.*;
-
 /**
  *  Interface for connection events to be fed from the router into the 
  *  visual world.
