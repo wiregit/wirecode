@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
+import com.sun.java.util.collections.*;
+import java.util.StringTokenizer;
 import java.io.*;
 import com.limegroup.gnutella.util.NameValue;
 import org.apache.xerces.parsers.DOMParser;
@@ -18,7 +19,22 @@ public class LimeXMLDocument{
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    protected Map fieldToValue = new TreeMap();
+    private Map fieldToValue = new TreeMap(new Comparator(){
+        public int compare(Object o1, Object o2){
+            //This treemap will be comparing only strings and so we can 
+            //get away with this. The regular Comparable interface was 
+            //introduced in 1.2 and the Macs still use 1.1
+            String a = (String)o1;
+            String b = (String)o2;
+            return a.compareTo(b);            
+        }
+        public boolean equals(Object o){
+            //String other = (String)o;
+            //String me = (String)this;
+            return this.equals(o);
+        }
+    }
+    );
     protected String schemaUri;
     //protected String XMLString;//this is what is sent back on the wire.
     /** 

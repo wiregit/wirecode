@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Stores information pertaining to fields (elements) in xml documents

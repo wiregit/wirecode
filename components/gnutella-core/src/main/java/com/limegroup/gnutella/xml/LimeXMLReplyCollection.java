@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.xml;
 
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.mp3.*;
 import com.limegroup.gnutella.*;
 import java.io.*;
-import java.util.*;
 
 /**
  *  Stores a schema and a list of Replies corresponding to the 
@@ -44,7 +44,7 @@ public class LimeXMLReplyCollection{
         Map hashToXMLStr = ms.getMap();
         ID3Reader id3Reader = new ID3Reader();
         Iterator iter = fileToHash.keySet().iterator();
-        LimeXMLDocument doc;
+        LimeXMLDocument doc=null;
         while(iter.hasNext()) {
             boolean solo=false;
             File file = (File)iter.next();
@@ -58,6 +58,8 @@ public class LimeXMLReplyCollection{
                     XMLString = joinAudioXMLStrings(XMLString,fileXMLString);
                 doc = new LimeXMLDocument(XMLString);
             }catch(Exception e){
+                //System.out.println("Audio file "+file);
+                //e.printStackTrace();
                 continue;
             }
             if(doc!=null)
@@ -131,7 +133,10 @@ public class LimeXMLReplyCollection{
         MapSerializer ret = null;
         try{
             ret = new MapSerializer(dataFile);
-        }catch(Exception e){}
+        }catch(Exception e){
+            //System.out.println("Sumeet file is "+fname);
+            //e.printStackTrace();
+        }
         return ret;
     }
         
@@ -216,7 +221,7 @@ public class LimeXMLReplyCollection{
         boolean written = false;
         if(found){
             //ID3Editor editor = null;
-            written = toDisk("");//no file modified...just del meta
+            written = toDisk("",false);//no file modified...just del meta
         }
         if(!written && found)//put it back to maintin consistency
             mainMap.put(hash,val);
@@ -235,7 +240,7 @@ public class LimeXMLReplyCollection{
      * if this.audio==true. When it is an audio collection, we use this
      * modified file to commit data to it. 
      */
-    public boolean toDisk(String modifiedFile){
+    public boolean toDisk(String modifiedFile, boolean mp3){
         this.replyDocs=null;//things are about to be changed.
         Iterator iter = mainMap.keySet().iterator();
         this.outMap = new HashMap();        
@@ -249,7 +254,7 @@ public class LimeXMLReplyCollection{
             catch (SchemaNotFoundException snfe) {
                 continue;
             }
-            if(audio){
+            if(audio &&  mp3){
                 String fName = currDoc.getIdentifier();
                 ID3Editor e = new ID3Editor();
                 xml = e.removeID3Tags(xml);
@@ -261,9 +266,9 @@ public class LimeXMLReplyCollection{
             outMap.put(hash,xml);
             //System.out.println("Sumeet: outging XML String=\n"+xml);
         }//OK...all the docs have been converted to XML strings
-        if(!audio)
+        if(!audio || (audio && !mp3))//if not audio or (audio and nonmp3)
             return write();
-        else//go back to mp3ToDisk()
+        else//go back to mp3ToDisk()//audio and mp3
             return true;
     }
      
@@ -286,12 +291,15 @@ public class LimeXMLReplyCollection{
     
     public boolean mp3ToDisk(String mp3FileName){
         int i = mp3FileName.lastIndexOf(".");
+        boolean mp3= false;
         if (i<0)
             return false;
+        if(mp3FileName.substring(i+1).equalsIgnoreCase("mp3"))
+            mp3 = true;
         boolean wrote=false;
         boolean wrote2 = false;
         //write out to disk in the regular way
-        toDisk(mp3FileName);//remove nonID3 stuff and store in outMap
+        toDisk(mp3FileName,mp3);//remove nonID3 stuff and store in outMap
         if (this.editor != null){//now outMap is populated            
             wrote2 = this.editor.writeID3DataToDisk(mp3FileName);//to mp3 file
             //Note: above operation has changed the hash of the file.

@@ -5,7 +5,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileDesc;
 import org.xml.sax.SAXException;
 import java.io.IOException;
-import java.util.List;
+import com.sun.java.util.collections.List;
 
 
 /**

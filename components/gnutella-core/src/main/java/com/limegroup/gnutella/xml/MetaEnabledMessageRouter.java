@@ -2,7 +2,8 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
+
 
 /** A special meta-enabled Message router.  Inherits much from 
  *  StandardMessageRouter, just given extra functionality when

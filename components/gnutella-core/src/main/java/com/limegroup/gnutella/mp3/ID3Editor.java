@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.mp3;
 
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Used when a user wants to edit meta-information about a .mp3 file, and asks
@@ -91,6 +91,7 @@ public class ID3Editor{
             rippedStuff = ripTag(xmlStr, TITLE_STRING);
 
             title_ = (String)rippedStuff[2];
+            debug("title = "+title_);
 
             i = ((Integer)rippedStuff[0]).intValue();
             j = ((Integer)rippedStuff[1]).intValue();        
@@ -102,6 +103,7 @@ public class ID3Editor{
             rippedStuff = ripTag(xmlStr, ARTIST_STRING);
 
             artist_ = (String)rippedStuff[2];
+            debug("artist = "+artist_);
 
             i = ((Integer)rippedStuff[0]).intValue();
             j = ((Integer)rippedStuff[1]).intValue();        
@@ -196,6 +198,7 @@ public class ID3Editor{
                 return true;//since that info was probably not there
             file.seek(length - 128);
         }catch(IOException ee){
+            //ee.printStackTrace();
             return true;//since that info was probably not there
         }        
         byte[] buffer = new byte[30];//max buffer length...drop/pickup vehicle
@@ -204,13 +207,24 @@ public class ID3Editor{
         String tag="";
         try{
             file.readFully(buffer,0,3);
-            tag = new String(buffer,0,3, "Cp437");
+            tag = new String(buffer,0,3);
         }catch (Exception e){
+            e.printStackTrace();
             return true; //since the info was probably not there
         }
-        if(!tag.equals("TAG"))
-            return true;//since that info was probably not there
-
+        //We are sure this is an MP3 file. Otherwise this method would never be 
+        //called.
+        if(!tag.equals("TAG")){
+            //Write the TAG
+            try{
+                byte[] tagBytes = "TAG".getBytes();//has to be len 3
+                file.seek(length-128);//reset the file-pointer
+                file.write(tagBytes,0,3);//write these three bytes into the File
+            }catch(Exception eee){
+                return false;
+            }
+        }
+        debug("about to start writing to file");
         boolean b = toFile(title_,30,file,buffer);
         b = (b && toFile(artist_,30,file,buffer));
         b = (b&& toFile(album_,30,file,buffer));
@@ -237,6 +251,7 @@ public class ID3Editor{
 
     private boolean toFile(String val,int maxLen, RandomAccessFile file,
                         byte[] buffer){
+        debug("writing value to file "+val);
         byte[] fromString;
         if(val==null || val.equals("")){
             fromString = new byte[maxLen];
@@ -266,7 +281,7 @@ public class ID3Editor{
     }
 
     private byte getGenreByte(){
-        if(genre_==null) return 0;            
+        if(genre_==null) return -1;            
         else if(genre_.equals("Blues")) return 0;
         else if(genre_.equals("Classic Rock")) return 1;
         else if(genre_.equals("Country")) return 2;
@@ -393,7 +408,7 @@ public class ID3Editor{
         else if(genre_.equals("A capella")) return 123;
         else if(genre_.equals("Euro-House")) return 124;
         else if(genre_.equals("Dance Hall")) return 125;
-        else return 0;
+        else return -1;
         }
 
     /*
