@@ -1,10 +1,10 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 3.9.3
+# Messages Bundle for LimeWire 3.9.4
 # Specialization for: Hindi - India (standard Devanagari script)
-# Dummy resources bundle for missing translation.
+# Maintained by the LimeWire project team.
 ################################################################################
 LOCALE_LANGUAGE_CODE=hi
-LOCALE_LANGUAGE_NAME=हिन्दी
+LOCALE_LANGUAGE_NAME=हिंदी
 LOCALE_COUNTRY_CODE=
 LOCALE_COUNTRY_NAME=इंडिया
 LOCALE_VARIANT_CODE=
@@ -16,7 +16,7 @@ LOCALE_SCRIPT_NAME=Devanagari
 # Key/value pair for whether or not bold characters should be used for this
 # locale. Must be "true" or "false" (true only for complex scripts).
 ################################################################################
-DISABLE_BOLD_CHARACTERS=true
+DISABLE_BOLD_CHARACTERS=false
 
 ################################################################################
 # Key/value pair for whether or not the layout should be adapted for right-to-
@@ -33,37 +33,37 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 # Keys/value pairs for general strings that can be used in any components
 ################################################################################
-GENERAL_OK_BUTTON_LABEL=ओके
-#??? GENERAL_OK_BUTTON_TIP=Apply Operation.
-GENERAL_CANCEL_BUTTON_LABEL=रद्द
-#??? GENERAL_CANCEL_BUTTON_TIP=Cancel Operation.
-#??? GENERAL_APPLY_BUTTON_LABEL=Apply
-#??? GENERAL_APPLY_BUTTON_TIP=Apply Operation.
-GENERAL_CLOSE_BUTTON_LABEL=समाप्त
-GENERAL_CLOSE_BUTTON_TIP=खिडकी बंद करे.
+GENERAL_OK_BUTTON_LABEL=ठीक
+GENERAL_OK_BUTTON_TIP=क्रिया लागू करें.
+GENERAL_CANCEL_BUTTON_LABEL=रद्द करें
+GENERAL_CANCEL_BUTTON_TIP=क्रिया रद्द करें.
+GENERAL_APPLY_BUTTON_LABEL=लागू करें
+GENERAL_APPLY_BUTTON_TIP=क्रिया लागू करें.
+GENERAL_CLOSE_BUTTON_LABEL=बंद करें
+GENERAL_CLOSE_BUTTON_TIP=खिडकी बंद करें.
 GENERAL_BACK_BUTTON_LABEL=<< पिछला
-GENERAL_NEXT_BUTTON_LABEL=आगला >>
+GENERAL_NEXT_BUTTON_LABEL=अगला >>
 GENERAL_FINISH_BUTTON_LABEL=समाप्त
-#??? GENERAL_DEFAULT_BUTTON_LABEL=Use Default
-#??? GENERAL_BROWSE_BUTTON_LABEL=Browse...
-#??? GENERAL_BROWSE_HOST_LABEL=Browse Host
-GENERAL_BROWSE_HOST_TIP=चुने हुए कंप्यूटर की सारी फाइले देखें
+GENERAL_DEFAULT_BUTTON_LABEL=डीफ़ोल्ट्स इस्तमाल करें
+GENERAL_BROWSE_BUTTON_LABEL=ब्राउज़ करें...
+GENERAL_BROWSE_HOST_LABEL=मेज़बान ब्राउज़ करें
+GENERAL_BROWSE_HOST_TIP=चुने हुए कंप्यूटर की सारी फाइलें देखें
 
 #Options
-OPTIONS_BUTTONS_OK_LABEL=ओके
-#??? OPTIONS_BUTTONS_OK_TIP=Apply Your Changes and Close Window
+OPTIONS_BUTTONS_OK_LABEL=ठीक
+OPTIONS_BUTTONS_OK_TIP=परिवर्तनों का प्रयोग करें और खिडकी बंद करें
 OPTIONS_BUTTONS_CANCEL_LABEL=रद्द
-#??? OPTIONS_BUTTONS_CANCEL_TIP=Cancel Your Changes and Close Window
-OPTIONS_BUTTONS_APPLY_LABEL=प्रयोग करें
-OPTIONS_BUTTONS_APPLY_TIP=परिवर्तनो का प्रयोग करें
-#??? OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
+OPTIONS_BUTTONS_CANCEL_TIP=परिवर्तन रद्द करें और खिडकी बंद करें
+OPTIONS_BUTTONS_APPLY_LABEL=लागू करें
+OPTIONS_BUTTONS_APPLY_TIP=परिवर्तनें लागू करें
+OPTIONS_RESTART_REQUIRED=एक या अनेक विकल्प पुनरारंभ के बाद लागू होंगे.
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore defaults
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert all settings to the factory defaults.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
 ################################################################################
-YES=ठीक है
-NO=नही
+YES=हाँ
+NO=नहीं
 
-################################################################################
-# All other translated resources are missing. Look at the default English file.
-################################################################################
+#  Incomplete translation. Missing messages will be found in the default English resources.
