@@ -319,8 +319,11 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 		} else if (msg instanceof QueryReply) {
-			if(RECORD_STATS)
+			if(RECORD_STATS) {
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+                QueryReply qr = (QueryReply)msg;
+                OutOfBandThroughputStat.RESPONSES_RECEIVED.incrementStat();
+            }
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
@@ -833,6 +836,8 @@ public abstract class MessageRouter {
                                           reply.getNumResults());
             UDPService.instance().send(ack, datagram.getAddress(),
                                        datagram.getPort());
+            if (RECORD_STATS)
+                OutOfBandThroughputStat.RESPONSES_REQUESTED.incrementStat(reply.getNumResults());
         }
         catch (BadPacketException terrible) {
             ErrorService.error(terrible);
