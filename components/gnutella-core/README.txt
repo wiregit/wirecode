@@ -1,5 +1,5 @@
 The core project includes code required to run the Gnutella protocol and advanced sharing abilities.  This project combined with the gui project make up the LimeWire client.
-
+  
 Compilation:
 
 Compiling this package requires ant and Java 1.3.1. These can be downloaded respectively from:
