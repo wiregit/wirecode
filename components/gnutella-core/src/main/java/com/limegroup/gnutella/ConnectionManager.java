@@ -1395,7 +1395,7 @@ public class ConnectionManager {
      * This will remove the connections that we've been connected to
      * for the shortest amount of time.
      */
-    private void stabilizeConnections() {
+    private synchronized void stabilizeConnections() {
         while(getNumInitializedConnections() > _preferredConnections) {
             ManagedConnection newest = null;
             for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
@@ -1407,7 +1407,6 @@ public class ConnectionManager {
             if(newest != null)
                 remove(newest);
         }
-        adjustConnectionFetchers();
     }    
 
     /**
@@ -1823,7 +1822,7 @@ public class ConnectionManager {
     /**
      * Sets the maximum number of connections we'll maintain.
     */
-    private synchronized void setPreferredConnections() {
+    private void setPreferredConnections() {
         // if we're disconnected, do nothing.
         if(!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
            _disconnectTime != 0)
