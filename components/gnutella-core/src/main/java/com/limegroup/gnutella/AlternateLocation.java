@@ -390,12 +390,12 @@ public final class AlternateLocation
 	/**
 	 * Overrides the equals method to accurately compare 
 	 * <tt>AlternateLocation</tt> instances.  <tt>AlternateLocation</tt>s 
-	 * are equal if their <tt>URL</tt>s and <tt>Date</tt>s are equal.
+	 * are equal if their <tt>URL</tt>s and timestamps are equal.
 	 *
 	 * @param obj the <tt>Object</tt> instance to compare to
-	 * @return <tt>true</tt> if the <tt>URL</tt> and <tt>Date</tt> of this
+	 * @return <tt>true</tt> if the <tt>URL</tt> and timestamp of this
 	 *  <tt>AlternateLocation</tt> are equal to the <tt>URL</tt> and 
-	 *  <tt>Date</tt> of the <tt>AlternateLocation</tt> location argument,
+	 *  timestamp of the <tt>AlternateLocation</tt> location argument,
 	 *  and otherwise returns <tt>false</tt>
 	 */
 	public boolean equals(Object obj) {
