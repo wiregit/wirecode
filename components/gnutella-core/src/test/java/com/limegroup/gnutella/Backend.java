@@ -44,7 +44,12 @@ public final class Backend {
 	 * Constructs a new <tt>Backend</tt>.
 	 */
 	private Backend(ActivityCallback callback) {
-
+		System.out.println("STARTING BACKEND"); 
+		File gnutellaDotNet = new File("gnutella.net");
+		
+		// remove hosts file to get rid of variable conditions across
+		// test runs
+		gnutellaDotNet.delete();
 		SettingsManager settings = SettingsManager.instance();
 		settings.setPort(6346);
 		settings.setKeepAlive(1);
@@ -74,7 +79,7 @@ public final class Backend {
 			public void run() {
 				shutdown("AUTOMATED");
 			}
-		}, 100*1000);
+		}, 200*1000);
 	}
 
 	/**
@@ -138,8 +143,11 @@ public final class Backend {
 		} 
 	}
 
+	/**
+	 * Main method is necessary to run a stand-alone server that tests can be 
+	 * run off of.
+	 */
 	public static void main(String[] args) {
-		System.out.println("STARTING BACKEND"); 
 		Backend.instance();
 	}
 }
