@@ -157,8 +157,7 @@ public final class HTTPUtils {
 	 * @param valueStr the value of the header, generally the httpStringValue
 	 *  or a HttpHeaderValue, or just a String.
 	 */
-	private static String createHeader(HTTPHeaderName name, 
-									   String valueStr) 
+	private static String createHeader(HTTPHeaderName name, String valueStr) 
 		throws IOException {
 		if((name == null) || (valueStr == null)) {
 			throw new NullPointerException("null value in creating http header");
@@ -187,4 +186,32 @@ public final class HTTPUtils {
 		if(index <= 0) return null;
 		return header.substring(index+1).trim();
 	}
+
+	/**
+     * Utility method for writing a header with an integer value.  This removes
+     * the burden to the caller of converting integer HTTP values to strings.
+     * 
+	 * @param name the <tt>HTTPHeaderName</tt> of the header to write
+	 * @param value the int value of the header
+	 * @param writer the <tt>Writer</tt> instance to write the header to
+	 * @throws IOException if an IO error occurs during the write
+	 */
+    public static void writeHeader(HTTPHeaderName name, int value, 
+        Writer writer) throws IOException {
+        writeHeader(name, String.valueOf(value), writer);
+    }
+    
+    /**
+     * Utility method for writing a header with an integer value.  This removes
+     * the burden to the caller of converting integer HTTP values to strings.
+     * 
+     * @param name the <tt>HTTPHeaderName</tt> of the header to write
+     * @param value the int value of the header
+     * @param stream the <tt>OutputStream</tt> instance to write the header to
+     * @throws IOException if an IO error occurs during the write
+     */
+    public static void writeHeader(HTTPHeaderName name, int value, 
+        OutputStream stream) throws IOException {
+        writeHeader(name, String.valueOf(value), stream);
+    }
 }
