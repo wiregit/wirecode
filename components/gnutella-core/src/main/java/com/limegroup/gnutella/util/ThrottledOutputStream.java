@@ -42,7 +42,7 @@ public class ThrottledOutputStream extends OutputStream {
      */
     public void write(final int b) throws IOException {
         int allow=_throttle.request(1); //Note that _request never returns zero.
-        Assert.that(allow==1, "request(..) broken"+allow);
+        Assert.that(allow==1);
         _delegate.write(b);
     }
     
@@ -63,8 +63,7 @@ public class ThrottledOutputStream extends OutputStream {
         //that calls this.write() resulting in HALF the throughput.
         while (totalLength > 0) {
             int length = _throttle.request(totalLength);    
-            Assert.that(length+offset<=data.length, 
-                "request(..) broken: "+length+" "+offset+" "+data.length);
+            Assert.that(length+offset<=data.length);
             _delegate.write(data, offset, length);
             totalLength -= length;
             offset += length;
