@@ -60,6 +60,24 @@ public final class MP3Info {
                 (pos < _fileSize) ) {         // & possible
 
             file.readFully(headerBytes); 
+            if (pos == 0) {
+                String string = new String(headerBytes, 0, 3);
+                if (string.equalsIgnoreCase("id3")) {
+                    debug("MP3Info(): has id3v2 stuff, should skip the tag.");
+                    // skip to id3v2 size
+                    pos += 6;
+                    file.seek(pos);
+                    file.readFully(headerBytes);
+                    pos = getID3v2Length(headerBytes);
+                    // in case lenght is not set, just default to old
+                    // inefficient yet safe behavior
+                    if (pos == 0)
+                        pos++; 
+                    file.seek(pos);
+                    debug("MP3Info(): id3v2 length is " + pos);
+                    continue; // skip back to top...
+                }
+            }
 
             _header.loadHeader(headerBytes);
             if (_header.isValidHeader()) 
@@ -100,6 +118,23 @@ public final class MP3Info {
         debug("MP3Info(): is this a Variable bit rate? " + _isVariableBitRate);
         
         file.close();        
+    }
+
+    /**
+     * @return the length denoted by the four bytes input.  This length format
+     * is specified in the id3v2 standard.  basically, it is 28 bits amongst
+     * four bytes, the first bit of each byte is 0.
+     */
+    private int getID3v2Length(byte[] fourBytes) {
+        int retInt = 0;
+        final int numRelevantBits = 7;
+        
+        for (int i = 0; i < fourBytes.length; i++) {
+            retInt = retInt << numRelevantBits;
+            retInt = retInt | fourBytes[i];
+        }
+
+        return retInt;
     }
 
 
@@ -224,7 +259,6 @@ public final class MP3Info {
             System.out.println(out);
     }
         
-
     /*
       public static void main(String argv[]) throws Exception{
       for (int i = 0; i < argv.length; i++) {
@@ -241,7 +275,6 @@ public final class MP3Info {
       }
       }
     */
-
         
     private class MP3Header {
 
