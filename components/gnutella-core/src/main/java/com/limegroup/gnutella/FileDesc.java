@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
@@ -322,7 +320,6 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("URN does not match:\n"+
 											   SHA1_URN+"\n"+sha1);
 		}
-		URL url = al.getUrl();
 		return ALT_LOCS.addAlternateLocation(al);
 	}
 
