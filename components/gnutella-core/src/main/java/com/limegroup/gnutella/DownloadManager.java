@@ -704,12 +704,11 @@ public class DownloadManager implements BandwidthTracker {
 
     /////////////////// Internal Method to Parse GIV String ///////////////////
 
-    private static class GIVLine {
-        String file;
-        int index;
-        byte[] clientGUID;
+    private static final class GIVLine {
+        final String file;
+        final int index;
+        final byte[] clientGUID;
         GIVLine(String file, int index, byte[] clientGUID) {
-            this.clientGUID=clientGUID;
             this.file=file;
             this.index=index;
             this.clientGUID=clientGUID;
