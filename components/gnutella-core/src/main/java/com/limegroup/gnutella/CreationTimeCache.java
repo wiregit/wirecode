@@ -23,6 +23,9 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * the case that the URNs in the sets of the Time->URNSet lookup are a subset
  * of the URNs in the URN->Time lookup.  For more details, see addTime and
  * commitTime.
+ *
+ * LOCKING: Note on grabbing the FM lock - if I ever do that, I first grab that
+ * lock before grabbing my lock.  Please keep doing that as you add code.
  */
 public final class CreationTimeCache {
     
@@ -95,7 +98,11 @@ public final class CreationTimeCache {
      * @param shouldClearURNSetMap true if you want to clear TIME_TO_URNSET_MAP
      * too
      */
-    private synchronized void pruneTimes(boolean shouldClearURNSetMap) {
+    private void pruneTimes(boolean shouldClearURNSetMap) {
+        // if i'm using FM, always grab that lock first and then me.  be quick
+        // about it though :)
+        synchronized (RouterService.getFileManager()) {
+        synchronized (this) {
         Iterator iter = URN_TO_TIME_MAP.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry currEntry = (Map.Entry) iter.next();
@@ -112,6 +119,8 @@ public final class CreationTimeCache {
                 iter.remove();
                 if (shouldClearURNSetMap) removeURNFromURNSet(currURN, cTime);
             }
+        }
+        }
         }
     }
 
@@ -190,8 +199,12 @@ public final class CreationTimeCache {
      * me. null is fine though.
      * @return a List ordered by younger URNs.
      */
-    public synchronized List getFiles(final QueryRequest request, final int max)
+    public List getFiles(final QueryRequest request, final int max)
         throws IllegalArgumentException {
+        // if i'm using FM, always grab that lock first and then me.  be quick
+        // about it though :)
+        synchronized (RouterService.getFileManager()) {
+        synchronized (this) {
         if (max < 1) throw new IllegalArgumentException("bad max = " + max);
         List urnList = new ArrayList();
         Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
@@ -236,6 +249,8 @@ public final class CreationTimeCache {
         }
 
         return urnList;
+        }
+        }
     }
 
 
