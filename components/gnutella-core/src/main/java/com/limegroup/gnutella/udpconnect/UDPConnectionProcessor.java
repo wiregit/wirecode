@@ -748,6 +748,11 @@ log("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
                 DataRecord drec = _receiveWindow.addData(dmsg);  
             	drec.ackTime = System.currentTimeMillis();
 				drec.acks++;
+
+				// Notify InputStream that data is available for reading
+				if ( _output != null )
+					_output.wakeup();
+
                 // TODO: You are not enforcing any real upper limit 
             } else {
 log("Received duplicate block num: "+ dmsg.getSequenceNumber());
