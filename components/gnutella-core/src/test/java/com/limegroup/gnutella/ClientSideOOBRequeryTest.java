@@ -10,6 +10,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.downloader.*;
 import com.bitzi.util.*;
 
 import junit.framework.*;
@@ -815,6 +816,111 @@ public class ClientSideOOBRequeryTest
 
     }
 
+
+    public void testBusyDownloadLocatesSources() throws Exception {
+
+        keepAllAlive(testUPs);
+        // clear up any messages before we begin the test.
+        drainAll();
+
+        DatagramPacket pack = null;
+
+        Message m = null;
+
+        byte[] guid = rs.newQueryGUID();
+        rs.query(guid, "whatever");
+        // i need to pretend that the UI is showing the user the query still
+        callback.setGUID(new GUID(guid));
+        
+        QueryRequest qr = 
+            (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
+                                                         QueryRequest.class);
+        assertNotNull(qr);
+        assertTrue(qr.desiresOutOfBandReplies());
+
+        // ok, the leaf is sending OOB queries - good stuff, now we should send
+        // a lot of results back and make sure it buffers the bypassed OOB ones
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[200];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+
+        // create a test uploader and send back that response
+        final int UPLOADER_PORT = 10000;
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        uploader.setBusy(true);
+        URN urn =
+        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        Set urns = new HashSet();
+        urns.add(urn);
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
+                                                "whatever", 10, GUID.makeGuid(),
+                                                1, false, 3, false, null, 
+                                                urns, false, false, 
+                                                "LIME", 0, new HashSet());
+
+        // wait for processing
+        Thread.sleep(1500);
+
+        for (int i = 0; i < UDP_ACCESS.length; i++) {
+            ReplyNumberVendorMessage vm = 
+                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      testUPs[0].getInetAddress(), PORT);
+            UDP_ACCESS[i].send(pack);
+        }
+
+        // wait for processing
+        Thread.sleep(500);
+
+        {
+            // all the UDP ReplyNumberVMs should have been bypassed
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNotNull(endpoints);
+            assertEquals(UDP_ACCESS.length, endpoints.size());
+        }
+        
+        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        // we should start getting guess queries on all UDP ports, actually
+        // querykey requests
+        for (int i = 0; i < UDP_ACCESS.length; i++) {
+            boolean gotPing = false;
+            while (!gotPing) {
+                try {
+                    byte[] datagramBytes = new byte[1000];
+                    pack = new DatagramPacket(datagramBytes, 1000);
+                    UDP_ACCESS[i].setSoTimeout(10000); // may need to wait
+                    UDP_ACCESS[i].receive(pack);
+                    InputStream in = new ByteArrayInputStream(pack.getData());
+                    m = Message.read(in);
+                    m.hop();
+                    if (m instanceof PingRequest)
+                        gotPing = ((PingRequest) m).isQueryKeyRequest();
+                }
+                catch (InterruptedIOException iioe) {
+                    assertTrue("was successful for " + i,
+                               false);
+                }
+            }
+        }
+
+
+        callback.clearGUID();
+    }
 
 
     //////////////////////////////////////////////////////////////////
