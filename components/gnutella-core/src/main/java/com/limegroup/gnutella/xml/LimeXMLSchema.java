@@ -204,7 +204,7 @@ public class LimeXMLSchema
      *
      * @return list (of SchemaFieldInfo) of all the fields in this schema.
      */
-    public List getCanonicalizedFieldNames()
+    public List getCanonicalizedFields()
     {
         return _canonicalizedFields;
     }
@@ -221,7 +221,7 @@ public class LimeXMLSchema
             System.out.println("Printing fields:");
             
             //get the fields and print those
-            Iterator iterator = schema.getCanonicalizedFieldNames().iterator();
+            Iterator iterator = schema.getCanonicalizedFields().iterator();
             while(iterator.hasNext())
             {
                 SchemaFieldInfo fieldInfo = (SchemaFieldInfo)iterator.next();
