@@ -31,15 +31,25 @@ public class HTTPDownloader {
 	private ByteReader _byteReader;
 	private FileOutputStream _fos;
 	private Socket _socket;
+    private File _incompleteFile;
 
 	/**
+     * Creates a server-side push download.
+     * 
 	 * @param file the name of the file	
-	 * @param index the index of the file that the client sent
-	 * @param guid the unique identifier of the client
+     * @param socket the socket to download from.  The "GIV..." line must
+     *  have been read from socket.  HTTP headers may not have been read or 
+     *  buffered.
+	 * @param index the index of the file that the uploader sent in the GIV line.
+	 * @param guid the unique identifier of the uploader sent in the GIV line.
+     * @param incompleteFile the temp file to use while downloading.  No other 
+     *  thread or process should be using this file.
+     *
 	 * @exception CantConnectException couldn't connect to the host.
 	 */
 	public HTTPDownloader(String file, Socket socket, 
-							 int index, byte[] guid) 
+                          int index, byte[] guid,
+                          File incompleteFile) 
 		throws IOException {
 		_filename = file;
 		_index = index;
@@ -48,20 +58,35 @@ public class HTTPDownloader {
 		_amountRead = 0;
 		_fileSize = -1;
 		_initialReadingPoint = 0;
+        _incompleteFile=incompleteFile;
 
 		connect(socket, file, index);
 		
 	}
 	
     /**
+     * Creates a client-side normal download.
+     *
+     * @param file the name of the file to get
+     * @param host the name of the host to connect to
+     * @param port the port to use on "host"
+     * @param index the index of the file on the server
+     * @param guid the uploader's unique server GUID.  I don't think this is
+     *  currently used.
+     * @param size the expected size of the file when the download is complete
+     * @param resume true if we should initially resume for the temporary file
      * @param timeout the amount of time, in milliseconds, to wait
      *  when establishing a connection.   Must be non-negative.  A
      *  timeout of 0 means no timeout.
+     * @param incompleteFile the temp file to use while downloading.  No other 
+     *  thread or process should be using this file.
+     *
      * @exception CantConnectException couldn't connect to the host.
      */
 	public HTTPDownloader(String file, String host, 
-							 int port, int index, byte[] guid, 
-							 int size, boolean resume, int timeout) 
+                          int port, int index, byte[] guid, 
+                          int size, boolean resume, int timeout,
+                          File incompleteFile) 
 		throws IOException {
 
 		_filename = file;
@@ -71,11 +96,11 @@ public class HTTPDownloader {
 		_fileSize = size;
 		_initialReadingPoint = 0;
 		
+        _incompleteFile=incompleteFile;
 		if (resume) {			
 			// now, check to see if a file of that name alread exists in the
 			// temporary directory.  incompleteFile represents the file as it
 			// would be named in the temporary incomplete directory
-			File incompleteFile = new TemporaryFile(_filename, guid);			
 			if (incompleteFile.exists()) {
 				// dont alert an error if the file doesn't 
 				// exist, just assume a starting range of 0;
@@ -310,8 +335,7 @@ public class HTTPDownloader {
 
 	  
         //2. Do actual download, appending to incomplete file if necessary.
-		File incomplete_file = new TemporaryFile(_filename, _guid);
-		String path_to_incomplete = incomplete_file.getAbsolutePath();
+		String path_to_incomplete = _incompleteFile.getAbsolutePath();
 		boolean append = false;
 
 		if (_initialReadingPoint > 0)
@@ -355,7 +379,7 @@ public class HTTPDownloader {
 			//always safe to do this since we prompted the user in
 			//SearchView/DownloadManager.
 			complete_file.delete();
-			boolean ok = incomplete_file.renameTo(complete_file);
+			boolean ok = _incompleteFile.renameTo(complete_file);
 			if (! ok) 
 				throw new FileCantBeMovedException();
 			//renameTo is not guaranteed to work, esp. when the
