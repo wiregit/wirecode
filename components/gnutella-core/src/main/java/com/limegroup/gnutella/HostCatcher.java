@@ -5,8 +5,6 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 
 import org.apache.commons.logging.Log;
@@ -365,23 +363,15 @@ public class HostCatcher {
         ExtendedEndpoint endpoint;
         
         if(pr.getDailyUptime() != -1) {
-            endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
+            endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort(), 
 											pr.getDailyUptime());
         } else {
-            endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort());
+            endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
         }
 
         if(pr.supportsUnicast()) {
-            try {
-                QueryUnicaster.instance().
-					addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
-									   pr.getPort());
-            } catch(UnknownHostException e) {
-                // nothing we can do if the host is not recognized -- this
-                // should never happen for raw IP addresses, as there is
-                // no DNS lookup anyway after Java 1.1 (1.1.8 does NOT
-                // do a DNS lookup).
-            }
+            QueryUnicaster.instance().
+				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from 
@@ -510,7 +500,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        if (NetworkUtils.isPrivateAddress(e.getAddress()))
+        if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
             return false;
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
