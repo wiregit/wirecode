@@ -140,6 +140,10 @@ public class UDPHostCache {
     public synchronized boolean fetchHosts() {
         // If the order has possibly changed, resort.
         if(dirty) {
+            // shuffle then sort, ensuring that we're still going to use
+            // hosts in order of failure, but within each of those buckets
+            // the order will be random.
+            Collections.shuffle(udpHosts);
             Collections.sort(udpHosts, FAILURE_COMPARATOR);
             dirty = false;
         }
@@ -234,11 +238,7 @@ public class UDPHostCache {
         // just insert him at the beginning.  we'll sort later.
         udpHosts.add(0, e);
         udpHostsSet.add(e);
-        // we need to sort if this guy had any failures.
-        // otherwise, the front of the list is the place
-        // to go.
-        if(e.getUDPHostCacheFailures() != 0)
-            dirty = true;
+        dirty = true;
         return true;
     }
     
@@ -249,12 +249,6 @@ public class UDPHostCache {
     public synchronized void hostCachesAdded() {
         if(udpHostsSet.isEmpty())
             loadDefaults();
-        // shuffle then sort, ensuring that we're still going to use
-        // hosts in order of failure, but within each of those buckets
-        // the order will be random.
-        Collections.shuffle(udpHosts);
-        Collections.sort(udpHosts, FAILURE_COMPARATOR);
-        dirty = false;
     }
     
     protected void loadDefaults() {
