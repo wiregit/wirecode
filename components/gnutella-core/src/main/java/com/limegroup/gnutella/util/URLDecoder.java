@@ -25,7 +25,7 @@ public class URLDecoder {
                         sb.append((char)Integer.parseInt(
                                         s.substring(i+1,i+3),16));
                     } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException();
+                        throw new IllegalArgumentException(s);
                     }
                     i += 2;
                     break;
