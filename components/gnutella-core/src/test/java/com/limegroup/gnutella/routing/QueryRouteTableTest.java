@@ -12,6 +12,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -30,87 +31,65 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
 
     /** May return null!
      */ 
-    private BitSet getBitTable(QueryRouteTable source) {
+    private BitSet getBitTable(QueryRouteTable source) throws Exception {
         BitSet retSet = null;
-        try {
             retSet = (BitSet) PrivilegedAccessor.getValue(source,
                                                           "bitTable");
-        }
-        catch (Exception ignored) {}
         return retSet;
     }
 
     /** If it can't get anything, will return 0.
      */ 
-    private int getBitTableLength(QueryRouteTable source) {
+    private int getBitTableLength(QueryRouteTable source) throws Exception {
         int retLength = 0;
-        try {
             Integer intObj = 
                (Integer)PrivilegedAccessor.getValue(source,
                                                     "bitTableLength");
             retLength = intObj.intValue();
-        }
-        catch (Exception ignored) {}
         return retLength;
     }
 
 
     /** If it can't get anything, will return 0.
      */ 
-    private void setUncompressor(QueryRouteTable source, Inflater inflater) {
-        try {
+    private void setUncompressor(QueryRouteTable source, Inflater inflater) throws Exception {
             PrivilegedAccessor.setValue(source, "uncompressor", inflater);
-        }
-        catch (Exception ignored) {}
     }
 
     
-    private byte[] invokeCompress(QueryRouteTable source, byte[] chunk) {
+    private byte[] invokeCompress(QueryRouteTable source, byte[] chunk) throws Exception {
         byte[] retBytes = new byte[0];
-        try {
-            retBytes = 
-            (byte[]) PrivilegedAccessor.invokeMethod(source, "compress", chunk);
-        }        
-        catch (Exception ignored) {}
+        retBytes = IOUtils.deflate(chunk);
         return retBytes;
     }
 
 
-    private byte[] invokeUncompress(QueryRouteTable source, byte[] chunk) {
+    private byte[] invokeUncompress(QueryRouteTable source, byte[] chunk) throws Exception {
         byte[] retBytes = new byte[0];
-        try {
             retBytes = 
             (byte[]) PrivilegedAccessor.invokeMethod(source, "uncompress", chunk);
-        }        
-        catch (Exception ignored) {}
         return retBytes;
     }
 
 
-    private byte[] invokeHalve(byte[] chunk) {
+    private byte[] invokeHalve(byte[] chunk) throws Exception {
         byte[] retBytes = new byte[0];
-        try {
             retBytes = 
             (byte[]) PrivilegedAccessor.invokeMethod(QueryRouteTable.class, 
                                                      "halve", chunk);
-        }        
-        catch (Exception ignored) {}
         return retBytes;
     }
 
 
-    private byte[] invokeUnhalve(byte[] chunk) {
+    private byte[] invokeUnhalve(byte[] chunk) throws Exception {
         byte[] retBytes = new byte[0];
-        try {
             retBytes = 
             (byte[]) PrivilegedAccessor.invokeMethod(QueryRouteTable.class, 
                                                      "unhalve", chunk);
-        }        
-        catch (Exception ignored) {}
         return retBytes;
     }
     
-    private int entries(QueryRouteTable tbl) {
+    private int entries(QueryRouteTable tbl) throws Exception{
         BitSet set = getBitTable(tbl);
         return set.cardinality();
     }
