@@ -197,7 +197,10 @@ public final class NIODispatcher implements Runnable {
 					try {
 						Message msg = MessageReader.createMessageFromTCP(key);
 						
-						// TODO:: don't use Message Router
+						if(msg == null) {
+							continue;
+						}
+						// TODO:: don't use RouterService
 						RouterService.getMessageRouter().handleMessage(msg, 
 							(ManagedConnection)key.attachment());
 					} catch (IOException e) {
