@@ -693,9 +693,8 @@ public class SettingsManager implements SettingsInterface
 
     /** set the directory for saving files */
     public synchronized void setSaveDirectory(String dir) {
-		boolean fb = dir.endsWith(fileSep_);
-		if(fb == false)
-			dir = dir.concat(fileSep_);
+		if(!dir.endsWith(fileSep_))
+			dir += fileSep_;
 		File f = new File(dir);
 		boolean b = f.isDirectory();
 		if(b == false)
@@ -708,9 +707,8 @@ public class SettingsManager implements SettingsInterface
     }
 
 	public synchronized void setIncompleteDirectory(String dir) {
-		boolean fb = dir.endsWith(fileSep_);
-		if(fb == false)
-			dir = dir.concat(fileSep_);
+		if(!dir.endsWith(fileSep_))
+			dir += fileSep_;
 		File f = new File(dir);
 		boolean b = f.isDirectory();
 		if(b == false)
@@ -722,6 +720,8 @@ public class SettingsManager implements SettingsInterface
 	}
 
     public synchronized void setSaveDefault(String dir) {
+		if(!dir.endsWith(fileSep_))
+			dir += fileSep_;
 		File f = new File(dir);
 		boolean b = f.isDirectory();
 		if(!b)
