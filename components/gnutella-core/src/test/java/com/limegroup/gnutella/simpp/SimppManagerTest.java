@@ -415,6 +415,39 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
+    public void testSimppTakesEffect() {        
+        assertEquals("base case did not revert to defaults",4, 
+                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        //1. Test that Simpp files read off disk take effect. 
+        _simppMessageNumber = OLD;
+        changeSimppFile();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ix) {
+            fail("could not set up test");
+        }
+        resetSettingmanager();
+        assertEquals("base case did not revert to defaults",12, 
+                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        //2. Test that simpp messages read off the network take effect
+        //Get a new message from a connection and make sure the value is changed
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(NEW, true, true);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        assertEquals("test_upload setting not changed to simpp value", 15,
+                                 UploadSettings.TEST_UPLOAD_SETTING.getValue());
+    }
+
+
     public void testIOXLeavesSimppUnchanged() {
        //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
@@ -477,5 +510,17 @@ public class SimppManagerTest extends BaseTestCase {
         SimppManager.instance();
         CapabilitiesVM.instance();
     }
-
+    
+    private static void resetSettingmanager() {
+        try {
+            PrivilegedAccessor.setValue(SimppSettingsManager.class,
+                                                              "INSTANCE", null);
+        } catch (IllegalAccessException eax) {
+            fail("unable to nullify SimppManager.INSTANCE");
+        } catch (NoSuchFieldException nsfx) {
+            fail("unable to nullify SimppManager.INSTANCE");
+        }
+        SimppSettingsManager.instance();
+    }
+    
 }
