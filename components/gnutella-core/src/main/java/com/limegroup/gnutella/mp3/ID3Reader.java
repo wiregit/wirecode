@@ -147,7 +147,7 @@ public final class ID3Reader {
             strB.append("/>");
             strB.append("</audios>");
         }
-        
+
         return strB.toString();
     }
 
@@ -375,7 +375,7 @@ public final class ID3Reader {
         }
         //7. genre
         try {
-            str = mp3File.getTrack().getTextContent();
+            str = mp3File.getGenre().getTextContent();
         } catch(FrameDamagedException ignored) {
             str = "";
         }
