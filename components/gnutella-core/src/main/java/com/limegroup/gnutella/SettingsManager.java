@@ -109,6 +109,8 @@ public class SettingsManager implements SettingsInterface
     private String fileName_;
     private String ndFileName_;
     private String saveShareDir_;
+	private String oldJARName_ = "";
+	private boolean deleteOldJAR_ = false;
 
 
     /**
@@ -422,6 +424,12 @@ public class SettingsManager implements SettingsInterface
 				else if(key.equals(SESSIONS)) {
 					setSessions(Integer.parseInt(p)+1);
 				}
+				else if(key.equals(OLD_JAR_NAME)) {
+					setOldJARName(p);
+				}
+				else if(key.equals(DELETE_OLD_JAR)) {
+					setDeleteOldJAR(Boolean.getBoolean(p));
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -682,6 +690,15 @@ public class SettingsManager implements SettingsInterface
 
 	public int getSessions() {
 		return sessions_;
+	}
+
+
+	public boolean getDeleteOldJAR() {
+		return deleteOldJAR_;
+	}
+
+	public String getOldJARName() {
+		return oldJARName_;
 	}
 
     /******************************************************
@@ -958,6 +975,17 @@ public class SettingsManager implements SettingsInterface
         String s = Integer.toString(advancedInfo);
         props_.put(ADVANCED_QUERY_INFO, s);
     }
+
+	public void setDeleteOldJAR(boolean delete) {
+		deleteOldJAR_ = delete;
+		String s = new Boolean(deleteOldJAR_).toString();
+		props_.put(DELETE_OLD_JAR, s);
+	}
+
+	public void setOldJARName(String name) {
+		oldJARName_ = name;
+		props_.put(OLD_JAR_NAME, oldJARName_);
+	}
 
     /******************************************************
      *********  START OF CONFIGURATION SETTINGS ***********
