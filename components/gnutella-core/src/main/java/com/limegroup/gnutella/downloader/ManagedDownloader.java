@@ -651,7 +651,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(allFiles[0].getSHA1Urn() == null) {
 			return QueryRequest.createQuery(extractQueryString());
 		}
-		return QueryRequest.createQuery(extractQueryString());
+		return QueryRequest.createRequery(allFiles[0].getSHA1Urn());
     }
 
     /** We need to offer this to subclasses to override because they might
@@ -759,7 +759,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         String retString = sb.toString();
         Assert.that(retString.length() <= MAX_LEN);
-        return retString;
+        return I18NConvert.instance().getNorm(retString);
     }
 
     /** Returns the canonicalized non-trivial search keywords in fileName. */
