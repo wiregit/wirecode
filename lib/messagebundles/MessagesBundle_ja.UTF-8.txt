@@ -842,6 +842,7 @@ ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=ホストを閲覧出来ません
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_INVALID_THEME_FILE=選択されたテーマファイルは破損しているか存在しません.　他のテーマを選択するかデフォルトテーマを適用ください。
 ERROR_BAD_MAGNET_LINK=マグネット(MAGNET）リンクが無効です
+ERROR_INVALID_URLS_IN_MAGNET=マグネット(MAGNET)リンクに使われているURLが無効です。指定されたファイルは正しくダウンロードしないかもしれません。
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
