@@ -212,6 +212,8 @@ public class UploadTest extends TestCase {
                                           "abcdefghijklmnopqrstuvwxyz");
             assertTrue("piplining with push download",passed);
          
+            tMixedPersistentRequests();
+
             System.out.println("passed");
         } catch (IOException e) {
             e.printStackTrace();
@@ -469,10 +471,25 @@ public class UploadTest extends TestCase {
 											BufferedWriter out,
 											BufferedReader in,
 											int expectedSize) 
+                                            throws IOException {
+        return downloadInternal1("GET", file, header, out, in, expectedSize);
+    }
+
+    /** 
+     * Same as downloadInternal1(file, header, out, in, expectedSize), but
+     * uses the given request type.
+     * @param request an HTTP request such as "GET" or "HEAD"
+     */
+    private static String downloadInternal1(String request,
+                                            String file,
+											String header,
+											BufferedWriter out,
+											BufferedReader in,
+											int expectedSize) 
         throws IOException {
         //Assert.that(out!=null && in!=null,"socket closed my server");
         //1. Send request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write(request+" /get/"+index+"/"+file+" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection: Keep-Alive\r\n");
@@ -611,5 +628,31 @@ public class UploadTest extends TestCase {
             buf.append((char)c1);
         }
         return ret && buf.toString().equals(expResp);
+    }
+
+    /** Makes sure that a HEAD request followed by a GET request does the right
+     *  thing. */
+    public void tMixedPersistentRequests() {
+        Socket s = null;
+        try {
+            //1. Establish connection.
+            s = new Socket(address, port);
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                          s.getInputStream()));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                                                          s.getOutputStream()));
+            //2. Send HEAD request
+            assertEquals("",
+                downloadInternal1("HEAD", encodedFile, null, out, in, 0));
+            //3. Send GET request, make sure data ok.
+            assertEquals(alphabet,
+                downloadInternal1(encodedFile, null, out, in, alphabet.length()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail ("Mysterious IO problem: "+e);
+        } finally {
+            if (s!=null)
+                try { s.close(); } catch (IOException ignore) { }
+        }
     }
 }

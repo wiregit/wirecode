@@ -131,16 +131,18 @@ public final class UploadManager implements BandwidthTracker {
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
 	 * if it successfully parses the HTTP request.  BLOCKING.
 	 *
-	 * @param method the <tt>HTTPRequestMethod</tt> that will delegate to
-	 *  the appropriate response handlers for the type of request
-	 * @param socket the <tt>Socket</tt> that will be used for the new upload
+	 * @param method the initial request type to use, e.g., GET or HEAD
+	 * @param socket the <tt>Socket</tt> that will be used for the new upload.
+     *  It is assumed that the initial word of the request (e.g., "GET") has
+     *  been consumed (e.g., by Acceptor)
 	 */
-    public void acceptUpload(HTTPRequestMethod method, Socket socket) {
+    public void acceptUpload(final HTTPRequestMethod method, Socket socket) {
         debug(" accepting upload");
         HTTPUploader uploader = null;
 		try {
             int queued = -1;
             String oldFileName = "";
+            HTTPRequestMethod currentMethod=method;
             //do uploads
             while(true) {
                 //parse the get line
@@ -150,7 +152,7 @@ public final class UploadManager implements BandwidthTracker {
                 
                 String fileName = line._fileName;
                 
-                uploader=new HTTPUploader(method, fileName, 
+                uploader=new HTTPUploader(currentMethod, fileName, 
                               socket, line._index, this, _fileManager, _router);
                 
                 uploader.readHeader();
@@ -170,8 +172,9 @@ public final class UploadManager implements BandwidthTracker {
                 if ((!line.isHTTP11()||uploader.getCloseConnection())
                                                              && queued!=QUEUED)
                     return;
-                //read the first word of the next request
-                //and proceed only if "GET" or "HEAD" request
+                //read the first word of the next request and proceed only if
+                //"GET" or "HEAD" request.  Versions of LimeWire before 2.7
+                //forgot to switch the request method.
                 debug(uploader+" waiting for next request with socket ");
                 int oldTimeout = socket.getSoTimeout();
                 if(queued!=QUEUED)
@@ -182,8 +185,12 @@ public final class UploadManager implements BandwidthTracker {
                 String word = IOUtils.readWord(socket.getInputStream(), 4);
                 debug(uploader+" next request arrived ");
                 socket.setSoTimeout(oldTimeout);
-                if(!word.equalsIgnoreCase("GET")&&!word.equalsIgnoreCase
-                                                                     ("HEAD"))
+                if (word.equals("GET"))
+                    currentMethod=HTTPRequestMethod.GET;
+                else if (word.equals("HEAD"))
+                    currentMethod=HTTPRequestMethod.HEAD;
+                else
+                    //Unknown request type
                     return;
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
