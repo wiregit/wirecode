@@ -15,7 +15,7 @@ import com.limegroup.gnutella.stubs.*;
 public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     private String _remoteHost = "localhost";
-    private int _remotePort = 6000;
+    private int _remotePort = 6300;
     private static final int TIMEOUT = 500;
     private boolean _localTest = true;
 
