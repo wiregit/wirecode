@@ -1117,7 +1117,7 @@ public class DownloadTest extends TestCase {
         assertTrue(message,ok);
     }
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     
     static void debug(String message) {
         if(DEBUG) 
