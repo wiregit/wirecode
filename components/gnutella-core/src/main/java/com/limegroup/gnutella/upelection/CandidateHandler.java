@@ -37,6 +37,7 @@ public class CandidateHandler {
 	
 	public CandidateHandler(Connection c) {
 		_connection = c;
+		_features = new Properties();
 	}
 	
     
@@ -164,21 +165,27 @@ public class CandidateHandler {
 				( isTCPCapable() && //incoming TCP
 				isUDPCapable() && //unsolicited UDP
 				_connection.isGoodLeaf() &&
-				getBandwidth() > 16 &&
-				getJVM().indexOf("1.4.0") == -1))
+				getBandwidth() > 16))
 					return false;
 			
-			//filter out non-32 bit windowses
-			if (getOS().startsWith("windows") && 
+    		//jre 1.4.0 is really bad
+    		if (getJVM()!=null && getJVM().indexOf("1.4.0")!=-1)
+    			return false;
+    		
+
+    		if (getOS()!=null) {
+    			
+    			//filter out non-32 bit windowses
+    			if (getOS().startsWith("windows") && 
 					getOS().indexOf("xp") ==-1 &&
 					getOS().indexOf("2000") ==-1)
-					return false;
-			
-			//and mac os 9
-			if (getOS().startsWith("mac os") &&
-					!getOS().endsWith("x"))
-				return false;
-			
+    				return false;
+    			
+    			//and mac os 9
+    			if (getOS().startsWith("mac os") &&
+    					!getOS().endsWith("x"))
+    				return false;
+    		}
 			return true;
     }
     
