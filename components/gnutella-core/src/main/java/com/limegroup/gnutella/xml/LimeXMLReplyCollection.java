@@ -418,7 +418,7 @@ public class LimeXMLReplyCollection{
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        ID3Editor commitWith = ripMP3XML(mp3FileName, hash, doc);
+        ID3Editor commitWith = ripMP3XML(mp3FileName, doc);
         if (commitWith != null)  // commit to disk.
             mp3WriteState = commitID3Data(mp3FileName, hash, commitWith);
         
@@ -435,7 +435,7 @@ public class LimeXMLReplyCollection{
      * @return An ID3Editor to use when committing or
      *  null if nothing should be editted.
      */
-    private ID3Editor ripMP3XML(String mp3File, URN hash, LimeXMLDocument doc){
+    private ID3Editor ripMP3XML(String mp3File, LimeXMLDocument doc){
         if (!LimeXMLUtils.isMP3File(mp3File))
             return null;
 
