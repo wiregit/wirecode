@@ -1404,7 +1404,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // this.  since we can't guarantee we won't be holding this' lock,
             // we leave it up to manager to start us off if we have new sources
         }
-        
+
         return true;
     }
     
@@ -1429,6 +1429,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * the proxies of the two.
      */
     private static void updateRFDList(RemoteFileDesc rfd, List coll) {
+        
         if (rfd.getPushProxies().size() == 0)
             return;
         
@@ -2475,12 +2476,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(stealLock) {
                     // if we didn't get queued doing the tree request,
                     // request another file.
-                    if(status == null || !status.isQueued()) {
-                        status = assignAndRequest(dloader, http11);
+                    try {
+                        if(status == null || !status.isQueued()) {
+                            status = assignAndRequest(dloader, http11);
+                        }
+                    } finally {
+                        if( status == null || !status.isConnected() )
+                            releaseRanges(dloader);
                     }
-                    
-                    if(!status.isConnected())
-                        releaseRanges(dloader);
                 }
                 
                 if(status.isPartialData()) {
@@ -2536,10 +2539,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             Assert.that(status.isConnected());
             //Step 3. OK, we have successfully connected, start saving the
             // file to disk
-            boolean downloadOK = doDownload(dloader, http11);
+            boolean downloadOK = false;
             
-            // Always release the ranges that were leftover from this download
-            releaseRanges(dloader);
+            try {
+                downloadOK = doDownload(dloader, http11);
+            } finally {
+                // Always release the ranges that were leftover from this download
+                releaseRanges(dloader);
+            }
             
             // If the download failed, don't keep trying to download.
             if(!downloadOK)
@@ -2852,7 +2859,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                               boolean http11) {
         RemoteFileDesc rfd = dloader.getRemoteFileDesc();
         if(LOG.isTraceEnabled())
-            LOG.trace("assignAndRequest for: " + rfd);
+            LOG.trace(Thread.currentThread().hashCode()+" assignAndRequest for: " + rfd);
         
         try {
             if (commonOutFile.hasFreeBlocksToAssign()) {
@@ -2863,7 +2870,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch(NoSuchElementException nsex) {
             DownloadStat.NSE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())            
-                LOG.debug("nsex thrown in assingAndRequest "+dloader,nsex);
+                LOG.debug(Thread.currentThread().hashCode()+" nsex thrown in assingAndRequest "+dloader,nsex);
             synchronized(this) {
                 // Add to files, keep checking for stalled uploader with
                 // this rfd
@@ -3145,19 +3152,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         int newHigh = (dloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
         if(newLow > low) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: Host gave subrange, different low.  Was: " +
+                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                        " Host gave subrange, different low.  Was: " +
                           low + ", is now: " + newLow);
             commonOutFile.releaseBlock(new Interval(low, newLow-1));
         }
         if(newHigh < high) {
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: Host gave subrange, different high.  Was: " +
+                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                        " Host gave subrange, different high.  Was: " +
                           high + ", is now: " + newHigh);
             commonOutFile.releaseBlock(new Interval(newHigh+1, high));
         }
         
         if(LOG.isDebugEnabled())
-            LOG.debug("WORKER: assigning white " + newLow + "-" + newHigh +
+            LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                    " assigning white " + newLow + "-" + newHigh +
                       " to " + dloader);
     }
 
@@ -3187,6 +3197,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //      I think it's ok, though it could result in >100% in the GUI
         HTTPDownloader biggest = null;
         synchronized (this) {
+            if (dloaders.isEmpty()) {
+                Assert.silent(commonOutFile.hasFreeBlocksToAssign());
+                assignWhite(dloader,http11);
+                return;
+            }
             for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
                 HTTPDownloader h = (HTTPDownloader)iter.next();
                 // If this guy isn't downloading, don't steal from him.
@@ -3224,19 +3239,20 @@ public class ManagedDownloader implements Downloader, Serializable {
                 bandwidthVictim = biggest.getAverageBandwidth();
                 biggest.getMeasuredBandwidth(); // trigger IDE.
             } catch (InsufficientDataException ide) {
-                LOG.debug("victim does not have datapoints", ide);
+                LOG.debug(Thread.currentThread().hashCode()+" victim does not have datapoints", ide);
                 bandwidthVictim = -1;
             }
             try {
                 bandwidthStealer = dloader.getAverageBandwidth();
                 dloader.getMeasuredBandwidth(); // trigger IDE.
             } catch(InsufficientDataException ide) {
-                LOG.debug("stealer does not have datapoints", ide);
+                LOG.debug(Thread.currentThread().hashCode()+" stealer does not have datapoints", ide);
                 bandwidthStealer = -1;
             }
             
             if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: " + dloader + " attempting to steal from " + 
+                LOG.debug("WORKER: "+Thread.currentThread().hashCode()+" " 
+                        	+ dloader + " attempting to steal from " + 
                           biggest + ", stealer speed [" + bandwidthStealer +
                           "], victim speed [ " + bandwidthVictim + "]");
             
@@ -3274,7 +3290,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     throw new IOException("bad stealer.");
                 }
                 if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER: picking stolen grey "
+                    LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
+                            " picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+dloader);
                 biggest.stopAt(start);
                 biggest.stop();
@@ -3392,7 +3409,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             if(LOG.isDebugEnabled())
-                LOG.debug("    WORKER: terminating from "+downloader+" at "+stop+ 
+                LOG.debug("    WORKER:+"+Thread.currentThread().hashCode()+
+                        " terminating from "+downloader+" at "+stop+ 
                   " error? "+problem);
             synchronized (this) {
                 if (problem) {

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.*;
 import com.bitzi.util.Base32;
 import java.net.*;
@@ -804,6 +805,12 @@ public class RemoteFileDesc implements Serializable {
                 ! ( Arrays.equals(_clientGUID,other._clientGUID)))
             return false;
 
+        // when testing we consider different PE's different
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+            if (! (getPushAddr().equals(other.getPushAddr())))
+                return false;
+        }
+        
         if (_urns.isEmpty() && other._urns.isEmpty())
             return nullEquals(_filename, other._filename);
         else

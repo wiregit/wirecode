@@ -522,7 +522,7 @@ public class BootstrapServerManager {
                              "close");
         get.setFollowRedirects(false);
         HttpClient client = HttpClientManager.getNewClient(30*1000, 10*1000);
-        try {
+        try {System.out.println(connectTo);
             HttpClientManager.executeMethodRedirecting(client, get);
             InputStream is = get.getResponseBodyAsStream();
             
