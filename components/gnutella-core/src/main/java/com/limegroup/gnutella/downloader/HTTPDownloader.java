@@ -242,9 +242,11 @@ public class HTTPDownloader {
 		// accept anything that is 2xx
 		if ( (code < 200) || (code > 300) ) {
 			if (code == 404)
-				throw new com.limegroup.gnutella.downloader.FileNotFoundException();
+				throw new 
+				    com.limegroup.gnutella.downloader.FileNotFoundException();
 			else if (code == 410)
-				throw new com.limegroup.gnutella.downloader.NotSharingException();
+				throw new 
+                    com.limegroup.gnutella.downloader.NotSharingException();
 			else if (code == 503)
 				throw new TryAgainLaterException();
 			// a general catch for 4xx and 5xx's
@@ -430,7 +432,7 @@ public class HTTPDownloader {
 
 	/****************** UNIT TEST *********************/
 	
-	//  private HTTPDownloader(String str) {
+//  	private HTTPDownloader(String str) {
 //  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 //  		_byteReader = new ByteReader(stream);
 //  	}
