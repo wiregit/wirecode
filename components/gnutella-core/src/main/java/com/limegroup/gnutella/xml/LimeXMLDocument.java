@@ -317,6 +317,25 @@ public class LimeXMLDocument implements Serializable {
         return fieldToValue.size();
     }
 
+    /** When parsing XML, some data should not be split up.  Note that here
+     *  and take action to dole out later.
+     */
+    public boolean shouldSkipIndivisibleKeyword(String currKey, String val) {
+        // unfortunately, parsing of CC stuff requires special casing
+        if (isAudioSchemaURI() && 
+            currKey.equals(CCConstants.LICENSE_KEY)) {
+            if ((val != null) && 
+                (val.startsWith(CCConstants.CC_URI_PREFIX))) {
+                hasCCLicense = true;
+                return true;
+                // suppose hasCCLicense is false here - should we really be
+                // skipping?  It may be masking a bug with LWs, but it could
+                // also be a third party decision.  Let it go....
+            }
+        }
+        return false;
+    }
+
     /**
      * Returns all the non-numeric fields in this.  These are
      * not necessarily QRP keywords.  For example, one of the
@@ -330,19 +349,12 @@ public class LimeXMLDocument implements Serializable {
 
         List retList = new ArrayList();
         Iterator iter = fieldToValue.keySet().iterator();
-        final boolean isAudioSchemaURI = isAudioSchemaURI();
         while(iter.hasNext()){
             boolean number = true;//reset
             String currKey = (String) iter.next();
             String val = (String) fieldToValue.get(currKey);
-            // unfortunately, parsing of CC stuff requires special casing
-            if (isAudioSchemaURI && 
-                currKey.equals(CCConstants.LICENSE_KEY)) {
-                if ((val != null) && 
-                    (val.startsWith(CCConstants.CC_URI_PREFIX)))
-                    hasCCLicense = true;
-                continue; // don't want to add this as an divisible keyword
-            }
+            if (shouldSkipIndivisibleKeyword(currKey, val))
+                continue;
             try{
                 new Double(val); // will trigger NFE.
             }catch(NumberFormatException e){

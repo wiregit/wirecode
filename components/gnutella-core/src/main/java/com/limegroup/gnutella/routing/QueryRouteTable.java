@@ -280,7 +280,7 @@ public class QueryRouteTable {
             }
         }
 
-        // some parts of the query are indivisible, so don't do some nonstandard
+        // some parts of the query are indivisible, so do some nonstandard
         // matching
         iter=richQuery.getKeyWordsIndivisible().iterator();
         while(iter.hasNext()) {

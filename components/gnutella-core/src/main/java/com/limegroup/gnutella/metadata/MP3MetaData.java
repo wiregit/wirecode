@@ -244,7 +244,7 @@ public class MP3MetaData extends AudioMetaData {
                 String license = null;
                 while ((license == null) && st.hasMoreTokens()) {
                     String currToken = st.nextToken();
-                    if (currToken.startsWith("http"))
+                    if (currToken.startsWith(CCConstants.CC_URI_PREFIX))
                         license = currToken;
                 }
                 setCCLicense(license);
