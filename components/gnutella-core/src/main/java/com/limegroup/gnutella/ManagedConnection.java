@@ -31,10 +31,12 @@ import com.limegroup.gnutella.routing.*;
  * setPersonalFilter and setRouteFilter.<p>
  *
  * ManagedConnection maintain a large number of statistics, such as the number
- * of bytes read and written.  On the query-routing3-branch and pong-caching CVS
- * branches, these statistics have been bundled into a single object, reducing
- * the complexity of ManagedConnection.  We will likely merge this change into
- * ManagedConnection in the future, so please bear with this for now.<p>
+ * of bytes read and written.  ManagedConnection doesn't quite fit the
+ * BandwidthTracker interface, unfortunately.  On the query-routing3-branch and
+ * pong-caching CVS branches, these statistics have been bundled into a single
+ * object, reducing the complexity of ManagedConnection.  We will likely merge
+ * this change into ManagedConnection in the future, so please bear with this
+ * for now.<p>
  * 
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
@@ -192,10 +194,14 @@ public class ManagedConnection
     private long _nextQRPForwardTime;
 
 
-    /** The total number of bytes sent/received since last checked. 
+    /** The total number of bytes sent/received.
      *  These are not synchronized and not guaranteed to be 100% accurate. */
     private volatile long _bytesSent;
+    private BandwidthTrackerImpl _upBandwidthTracker=
+        new BandwidthTrackerImpl();
     private volatile long _bytesReceived;
+    private BandwidthTrackerImpl _downBandwidthTracker=
+        new BandwidthTrackerImpl();
 
     /** 
      * True if this connected to a router (e.g. future router.limewire.com) or
@@ -729,26 +735,33 @@ public class ManagedConnection
     }
 
     /**
-     * @modifies this
-     * @effects returns and resets the number of bytes received since the last
-     *  call to this method.  This number may exclude bytes read in bad messages
-     *  and bytes from TCP/IP protocol headers.
+     * Takes a snapshot of the upstream and downstream bandwidth since the last
+     * call to measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
      */
-    public synchronized long getBytesReceived() {
-        long ret=_bytesReceived;
-        _bytesReceived=0;
-        return ret;
+    public void measureBandwidth() {
+        _upBandwidthTracker.measureBandwidth(
+             ByteOrder.long2int(_bytesSent));
+        _downBandwidthTracker.measureBandwidth(
+             ByteOrder.long2int(_bytesReceived));
     }
-    
+
     /**
-     * @modifies this
-     * @effects returns and resets the number of bytes sent since the last
-     *  call to this method.  This number may exclude TCP/IP protocol headers.
+     * Returns the upstream bandwidth between the last two calls to
+     * measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
      */
-    public synchronized long getBytesSent() {
-        long ret=_bytesSent;
-        _bytesSent=0;
-        return ret;
+    public float getMeasuredUpstreamBandwidth() {
+        return _upBandwidthTracker.getMeasuredBandwidth();
+    }
+
+    /**
+     * Returns the downstream bandwidth between the last two calls to
+     * measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public float getMeasuredDownstreamBandwidth() {
+        return _downBandwidthTracker.getMeasuredBandwidth();
     }
 
     /** 

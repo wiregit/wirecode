@@ -190,10 +190,13 @@ public final class SupernodeAssigner implements Runnable {
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
         _uploadTracker.measureBandwidth();
         _downloadTracker.measureBandwidth();
+        _manager.measureBandwidth();
 		int newUpstreamBytesPerSec = 
-            (int)_uploadTracker.getMeasuredBandwidth();
+            (int)_uploadTracker.getMeasuredBandwidth()
+           +(int)_manager.getMeasuredUpstreamBandwidth();
 		int newDownstreamBytesPerSec = 
-            (int)_downloadTracker.getMeasuredBandwidth();
+            (int)_downloadTracker.getMeasuredBandwidth()
+           +(int)_manager.getMeasuredDownstreamBandwidth();
 		if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
 			_maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
 			SETTINGS.setMaxUpstreamBytesPerSec(_maxUpstreamBytesPerSec);

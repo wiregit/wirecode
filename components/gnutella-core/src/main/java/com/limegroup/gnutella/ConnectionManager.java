@@ -21,6 +21,9 @@ import com.limegroup.gnutella.util.CommonUtils;
  * in message broadcasting.  For this reason, the code is highly tuned to avoid
  * locking in the getInitializedConnections() methods.  Adding and removing
  * connections is a slower operation.  
+ * 
+ * ConnectionManager has methods to get up and downstream bandwidth, but it 
+ * doesn't quite fit the BandwidthTracker interface.
  */
 public class ConnectionManager {
     /* List of all connections.  This is implemented with two data structures:
@@ -316,6 +319,51 @@ public class ConnectionManager {
      */
     public int getNumInitializedConnections() {
         return _initializedConnections.size();
+    }
+
+
+
+    /**
+     * Takes a snapshot of the upstream and downstream bandwidth since the last
+     * call to measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public void measureBandwidth() {
+        List connections=getInitializedConnections();
+        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            mc.measureBandwidth();
+        }
+    }
+
+    /**
+     * Returns the upstream bandwidth between the last two calls to
+     * measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public float getMeasuredUpstreamBandwidth() {
+        float sum=0.f;
+        List connections=getInitializedConnections();
+        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            sum+=mc.getMeasuredUpstreamBandwidth();
+        }
+        return sum;
+    }
+
+    /**
+     * Returns the downstream bandwidth between the last two calls to
+     * measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public float getMeasuredDownstreamBandwidth() {
+        float sum=0.f;
+        List connections=getInitializedConnections();
+        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            sum+=mc.getMeasuredDownstreamBandwidth();
+        }
+        return sum;
     }
 
     /**
