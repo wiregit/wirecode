@@ -146,14 +146,14 @@ public class Response {
 		} else {
 			this.name = name;
 		}
-        this.nameBytes = name.getBytes();
+        this.nameBytes = this.name.getBytes();
 
 		if(metadata == null) {
 			this.metadata = "";
 		} else {
 			this.metadata = metadata.trim();
 		}
-		this.metaBytes = metadata.getBytes();
+		this.metaBytes = this.metadata.getBytes();
 		if(urns == null) {
 			// this is necessary because Collections.EMPTY_SET is not
 			// serializable in collections 1.1
@@ -162,7 +162,7 @@ public class Response {
 		else {
 			this.urns = Collections.unmodifiableSet(urns);
 		}
-		extBytes = createExtBytes(this.urns);
+		this.extBytes = createExtBytes(this.urns);
     }
     
 
