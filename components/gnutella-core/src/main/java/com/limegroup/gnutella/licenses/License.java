@@ -10,12 +10,21 @@ import com.limegroup.gnutella.URN;
  */
 public interface License {
     
+    static final int UNVERIFIED = 0;
+    static final int VERIFYING = 1;
+    static final int VERIFIED = 2;
+    
     /**
      * True if this license has been externally verified.
      *
      * This does NOT indicate whether or not the license was valid.
      */
     public boolean isVerified();
+    
+    /**
+     * True if this license is currently being or in queue for verification.
+     */
+    public boolean isVerifying();
     
     /**
      * True if this license was verified and is valid & matches the given URN.

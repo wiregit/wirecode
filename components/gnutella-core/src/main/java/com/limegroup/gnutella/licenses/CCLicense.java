@@ -47,7 +47,7 @@ import org.xml.sax.SAXException;
     /**
      * Whether or not this license has been verified.
      */
-    private transient boolean verified;
+    private transient int verified = UNVERIFIED;
     
     /**
      * Whether or not this license is valid.
@@ -102,7 +102,8 @@ import org.xml.sax.SAXException;
         this.licenseLocation = uri;
     }
     
-    public boolean isVerified() { return verified; }
+    public boolean isVerifying() { return verified == VERIFYING; }
+    public boolean isVerified() { return verified == VERIFIED; }
     public String getLicense() { return license; }
     public URL getLicenseDeed() { return licenseURL; }
     public URN getExpectedURN() { return expectedURN; }
@@ -167,8 +168,10 @@ import org.xml.sax.SAXException;
      * The listener is notified when verification is finished.
      */
     public void verify(VerificationListener listener) {
-        if(!isVerified())
+        if(!isVerified() && !isVerifying()) {
+            verified = VERIFYING;
             VQUEUE.add(new Verifier(listener));
+        }
     }
 
     /**
@@ -364,7 +367,7 @@ import org.xml.sax.SAXException;
         public void run() {
             valid = doVerification(getBody());
             lastVerifiedTime = System.currentTimeMillis();
-            verified = true;
+            verified = VERIFIED;
             LicenseCache.instance().addVerifiedLicense(CCLicense.this);
             if(vc != null)
                 vc.licenseVerified(CCLicense.this);
