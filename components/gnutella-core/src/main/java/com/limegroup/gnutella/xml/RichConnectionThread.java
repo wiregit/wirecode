@@ -22,6 +22,7 @@ public final class RichConnectionThread extends Thread{
         this.ipAddress = ip;
         this.query = qr;
         this.callback = callback;
+        setName("RichConnectionThread");
     }
 
     /**
