@@ -146,13 +146,19 @@ public class HTTPDownloader implements BandwidthTracker {
      * LOCKING: this 
      */
 	private int _amountToRead;
+    
     /** 
-     *  The index to start reading from the server and start writing to the
-     *  file.
+     *  The index to start reading from the server 
      * LOCKING: this 
      */
 	private int _initialReadingPoint;
 	
+    /** 
+     *  The index to actually start writing to the file.
+     *  LOCKING:this
+     */
+    private int _initialWritingPoint;
+    
 	/**
 	 * Whether this download has been terminated due to a theft.
 	 * LOCKING: this
@@ -176,12 +182,6 @@ public class HTTPDownloader implements BandwidthTracker {
 	private InputStream _input;
     private File _incompleteFile;
     
-    /**
-     * The last state of commonOutFile.isCorrupted.
-     * Used to know whether or not to add ourselves to the mesh.
-     */
-    private boolean _outIsCorrupted;
-
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
@@ -196,7 +196,6 @@ public class HTTPDownloader implements BandwidthTracker {
      * The firewalled locations to send to uploaders that are interested
      */
     private Set _goodPushLocs;
-    
     
     /**
      * The bad firewalled locations to send to uploaders that are interested
@@ -314,7 +313,6 @@ public class HTTPDownloader implements BandwidthTracker {
 		_filename = rfd.getFileName();
 		_index = rfd.getIndex();
 		_guid = rfd.getClientGUID();
-		//_amountToRead = rfd.getSize();
 		_amountToRead = 0;
 		_port = rfd.getPort();
 		_host = rfd.getHost();
@@ -501,6 +499,7 @@ public class HTTPDownloader implements BandwidthTracker {
             _totalAmountRead += _amountRead;
             _amountRead = 0;
             _initialReadingPoint = start;
+            _initialWritingPoint = start;
             _bodyConsumed = false;
             _contentLength = 0;
         }
@@ -1093,7 +1092,6 @@ public class HTTPDownloader implements BandwidthTracker {
 	private boolean isPartialFileValid() {
 	    return _rfd.getSHA1Urn() != null && 
                UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-               !_outIsCorrupted &&
                _incompleteFile.length() > MIN_PARTIAL_FILE_BYTES &&
                NetworkUtils.isValidPort(RouterService.getPort()) &&
                NetworkUtils.isValidAddress(RouterService.getAddress()); 
@@ -1579,21 +1577,45 @@ public class HTTPDownloader implements BandwidthTracker {
                     break;
                            
 				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
-                //2. Check that data read matches any non-zero bytes already on
-                //disk, i.e., from previous downloads.  Assumption: "holes" in
-                //file are zeroed.  Be careful not read beyond end of file,
-                //which is easy in the case of resuming.  Also note that
-                //amountToCheck can be negative; the file length isn't extended
-                //until the first write after a seek.
-				
+
 				synchronized(this) {
 				    if (_isActive) {
-				        commonOutFile.writeBlock(currPos,c, buf);
-				        
-				        _outIsCorrupted = commonOutFile.isCorrupted();
+                        
+                        _amountRead += c;
+                        
+                        // skip until we reach the initial writing point
+                        int skipped = 0;
+                        while (_initialWritingPoint > currPos && c > 0) {
+                            skipped++;
+                            currPos++;
+                            c--;
+                        }
+                        
+                        // if we're still not there, continue
+                        if (_initialWritingPoint > currPos || c == 0) {
+                            if (LOG.isDebugEnabled())
+                                LOG.debug("skipped "+skipped+" bytes");
+                            
+                            continue;
+                        }
+                        
+                        // if are there, but we had to skip some bytes, trim the buffer
+                        byte [] toWrite;
+                        if (skipped > 0) {
+                            if (LOG.isDebugEnabled())
+                                LOG.debug("got to the writing point, trimming buffer by "+
+                                        skipped +" to "+c+" bytes");
+                            
+                            toWrite = new byte[c];
+                            System.arraycopy(buf,skipped,toWrite,0,c);
+                        } else
+                            toWrite = buf;
+                        
+                        // write to disk
+				        commonOutFile.writeBlock(currPos,c, toWrite);
 				        
 				        currPos += c;//update the currPos for next iteration
-				        _amountRead += c;
+				        
 				    }
 				    else {
 				        if (LOG.isDebugEnabled())
@@ -1654,6 +1676,14 @@ public class HTTPDownloader implements BandwidthTracker {
         _amountToRead=(stop-_initialReadingPoint);
     }
     
+    public void startAt(int start) {
+        if (_isActive)
+            throw new IllegalStateException("downloader already running");
+        synchronized(this) {
+            _initialWritingPoint = start;
+        }
+    }
+    
     public synchronized void setVictim() {
         _victim = true;
         stop();
@@ -1663,6 +1693,7 @@ public class HTTPDownloader implements BandwidthTracker {
     ///////////////////////////// Accessors ///////////////////////////////////
 
     public synchronized int getInitialReadingPoint() {return _initialReadingPoint;}
+    public synchronized int getInitialWritingPoint() {return _initialWritingPoint;}
 	public synchronized int getAmountRead() {return _amountRead;}
 	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public synchronized int getAmountToRead() {return _amountToRead;}

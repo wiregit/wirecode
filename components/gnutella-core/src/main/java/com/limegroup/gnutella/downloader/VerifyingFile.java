@@ -44,11 +44,6 @@ public class VerifyingFile {
     private RandomAccessFile fos;
 
     /**
-     * Whether or not we've detected corruption in the file.
-     */
-    private volatile boolean isCorrupted;
-
-    /**
      * The ManagedDownloader this is working for.
      */
     private ManagedDownloader managedDownloader; 
@@ -336,26 +331,6 @@ public class VerifyingFile {
         leasedBlocks.delete(in);
     }
 	
- 
-	// TODO: get rid of this
-    public synchronized int leaseFromPartial(Interval in) {
-		Interval clipped = (Interval)partialBlocks.getOverlapIntervals(in).get(0);
-		
-		if (LOG.isDebugEnabled()) {
-            LOG.debug("moving interval back to lease"+in+
-					"which was clipped to "+clipped+
-					" status is "+dumpState());
-		}
-		
-        partialBlocks.delete(clipped);
-        leasedBlocks.add(clipped);
-		
-        if (LOG.isDebugEnabled())
-            LOG.debug("state after re-lease "+dumpState());
-		
-		return clipped.low;
-    }
-    
     /**
      * Returns all downloaded blocks with an Iterator.
      */
@@ -459,13 +434,6 @@ public class VerifyingFile {
     }   
     
     /**
-     * Returns whether or not we have determined if the written is corrupted.
-     */
-    public boolean isCorrupted() {
-        return isCorrupted;
-    }
-    
-    /**
      * Returns the ManagedDownloader this VerifyingFile is associated with.
      * If this VerifyingFile is closed, the return value will be null.
      */
@@ -474,19 +442,6 @@ public class VerifyingFile {
     }
     
     /////////////////////////private helpers//////////////////////////////
-    
-    /*
-     * @return the number of bytes from low where the two intervals,
-     * begin to overlap.
-     */
-    private int findInitialPoint(Interval interval, long low) {
-        //Remember this is the overlap interval
-        if(interval.low <= low)//equivalent to interval.low == low
-            return 0;
-        else //interval.low > low
-            return interval.low - (int)low;
-            
-    }
     
     /**
      * Fits an interval inside a chunk.  This ensures that the interval is never larger

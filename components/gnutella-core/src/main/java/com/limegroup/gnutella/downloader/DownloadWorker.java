@@ -963,28 +963,28 @@ public class DownloadWorker implements Runnable {
     NoSuchElementException,  IOException, TryAgainLaterException, 
     QueuedException, FileNotFoundException, NotSharingException,  
     NoSuchRangeException  {
+        
         //If this _downloader is a partial source, don't attempt to steal...
         //too confusing, too many problems, etc...
         if( _downloader.getRemoteFileDesc().isPartialSource() )
             throw new NoSuchRangeException();
 
-        //Split largest "gray" interval, i.e., steal part of another
+        //Split largest "gray" interval, i.e., steal another
         //downloader's region for a new downloader.  
-        //TODO3: split interval into P-|_activeWorkers|, etc., not just half
-        //TODO3: there is a minor race condition where biggest and 
-        //      _downloader could write to the same region of the file
-        //      I think it's ok, though it could result in >100% in the GUI
         HTTPDownloader biggest = null;
         List workers = _manager.getActiveWorkers();
         
         for (Iterator iter=workers.iterator(); iter.hasNext();) {
             HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
+            
             // If this guy isn't downloading, don't steal from him.
             if(!h.isActive())
                 continue;
+            
             // If we have no one to steal from, use 
             if(biggest == null)
                 biggest = h;
+            
             // Otherwise, steal only if what's left is
             // larger and there's stuff left.
             else {
@@ -996,7 +996,7 @@ public class DownloadWorker implements Runnable {
             }
         }                
         
-        if (biggest==null) {//Not using downloader...but RFD maybe useful
+        if (biggest==null) {//Not using this downloader...but RFD maybe useful
 
 	    // Note: there is a rare scenario where if there are no
 	    // active downloaders but there are some connecting ones
@@ -1011,7 +1011,8 @@ public class DownloadWorker implements Runnable {
         //variable.
         int amountRead = biggest.getAmountRead();
         int left = biggest.getAmountToRead()-amountRead;
-        //check if we need to steal the last chunk from a slow downloader.
+        
+        //check if we need to steal from a slow downloader.
 		float bandwidthVictim = -1;
 		float bandwidthStealer = -1;
 		
@@ -1022,6 +1023,7 @@ public class DownloadWorker implements Runnable {
 			LOG.debug("victim does not have datapoints", ide);
 			bandwidthVictim = -1;
 		}
+        
 		try {
 			bandwidthStealer = _downloader.getAverageBandwidth();
 			_downloader.getMeasuredBandwidth(); // trigger IDE.
@@ -1030,17 +1032,17 @@ public class DownloadWorker implements Runnable {
 			bandwidthStealer = -1;
 		}
 		
-		if(LOG.isDebugEnabled())
+		if(LOG.isDebugEnabled()) {
 			LOG.debug("WORKER: "+
 					_downloader + " attempting to steal from " + 
 					biggest + ", stealer speed [" + bandwidthStealer +
 					"], victim speed [ " + bandwidthVictim + "]");
+        }
 		
-		// If we do have a measured bandwidth for the existing download,
-		// and it is slower than what is acceptable, let the new guy steal.
+		// If this downloader is faster than the victim
 		// OR
-		// If the new guy is of an acceptable speed and his average
-		// bandwidth is faster than the existing one, let him steal.
+		// If we don't know how fast is this downloader but the victim is slow,
+        // let this steal.
 		if (bandwidthStealer > bandwidthVictim ||
 				(bandwidthVictim != -1 &&
 						bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
@@ -1048,8 +1050,9 @@ public class DownloadWorker implements Runnable {
 		{
 			//replace (bad boy) biggest if possible
 			int start = biggest.getInitialReadingPoint() + amountRead;
-			final int stop = biggest.getInitialReadingPoint() + 
-			biggest.getAmountToRead();
+            start = Math.max(start, biggest.getInitialWritingPoint());
+            
+			final int stop = biggest.getInitialReadingPoint() + biggest.getAmountToRead();
 			
 			// If we happened to finish off the download, throw NSEX
 			// and so we don't download any more.
@@ -1067,44 +1070,43 @@ public class DownloadWorker implements Runnable {
 			// there's no point in stealing, so throw an exception and
 			// don't steal.
 			if( newHigh < stop ) {
-				if(LOG.isDebugEnabled())
+				if(LOG.isDebugEnabled()) {
 					LOG.debug("WORKER: not stealing because stealer " +
 							"gave a subrange.  Expected low: " + start +
 							", high: " + stop + ".  Was low: " + newLow +
 							", high: " + newHigh);
+                }
+                
 				throw new IOException("bad stealer.");
 			}
-			if(LOG.isDebugEnabled())
+            
+			if(LOG.isDebugEnabled()) {
 				LOG.debug("WORKER:"+
 						" picking stolen grey "
 						+start+"-"+stop+" from "+biggest+" to "+_downloader);
-			
+            }
+            
 			// stop the victim
-			Interval toFree = null;
+			int newStart;
 			synchronized(biggest) {
 				biggest.stopAt(stop);
 				biggest.setVictim();
 				
 				// free up whatever the victim wrote while we were connecting
 				// unless that data is already verified or pending verification
-				int middle = biggest.getInitialReadingPoint()+biggest.getAmountRead();
+				newStart = biggest.getInitialReadingPoint() + biggest.getAmountRead();
 				
 				// the victim may have even completed their download while we were
 				// connecting
-				if (stop <= middle)
+				if (stop <= newStart)
 					throw new NoSuchElementException();
-				
-				if (start < middle)
-					toFree = new Interval(start,middle-1);
+                
+                if (newStart > start && LOG.isDebugEnabled())
+                    LOG.debug("victim managed to download "+(newStart - start)
+                            +" bytes while stealer was connecting");
 			}
 			
-			// TODO: get rid of this hack and make the downloader start
-			// writing at middle
-			if (toFree != null) {
-				int writeStart = _commonOutFile.leaseFromPartial(toFree);
-				if (writeStart != newLow)
-					LOG.warn(" will overwrite some stuff... :(");
-			}
+			_downloader.startAt(newStart);
 		}
 		else { //less than MIN_SPLIT_SIZE...but we are doing fine...
 			throw new NoSuchElementException();
