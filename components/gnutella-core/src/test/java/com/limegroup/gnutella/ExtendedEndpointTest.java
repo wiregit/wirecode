@@ -257,6 +257,16 @@ public class ExtendedEndpointTest extends TestCase {
         assertTrue(comparator.compare(bad, good)<0);
         assertTrue(comparator.compare(good, bad)>0); 
     }
+
+    public void testUnicastSupportConstructor() {
+        ExtendedEndpoint test1=new ExtendedEndpoint("18.239.0.146", 6346,
+                                                    35, true);
+        ExtendedEndpoint test2=new ExtendedEndpoint("18.239.0.146", 6346,
+                                                    35, false);
+        assertTrue(test1.getUnicastSupport());
+        assertTrue(!test2.getUnicastSupport());
+    }
+
 }
 
 /** Fakes the system time. */
