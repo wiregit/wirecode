@@ -318,11 +318,21 @@ public class ConnectionManager {
      * @return the number of initialized connections, which is less than or equals
      *  to the number of connections.
      */
-    public int getNumInitializedConnections() {
-        return _initializedConnections.size();
+    private int getNumInitializedConnections() {
+		return _initializedConnections.size();
     }
 
-
+	/**
+	 * Returns whether or not the client has an established connection with
+	 * another Gnutella client.
+	 *
+	 * @return <tt>true</tt> if the client is currently connected to 
+	 *  another Gnutella client, <tt>false</tt> otherwise
+	 */
+	public boolean isConnected() {
+		return ((_initializedClientConnections.size() > 0) ||
+				(_initializedConnections.size() > 0));
+	}
 
     /**
      * Takes a snapshot of the upstream and downstream bandwidth since the last
