@@ -1025,7 +1025,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Cleans up information before this downloader is removed from memory.
      */
     public void finish() {
-        commonOutFile.clearManagedDownloader();
+        if( commonOutFile != null )
+            commonOutFile.clearManagedDownloader();
     }
 
 
@@ -1548,6 +1549,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                 File incompleteFile=incompleteFileManager.getFile(rfd);
                 synchronized (incompleteFileManager) {
+                    if( commonOutFile != null )
+                        commonOutFile.clearManagedDownloader();
                     //get VerifyingFile
                     commonOutFile=
                     incompleteFileManager.getEntry(incompleteFile);
