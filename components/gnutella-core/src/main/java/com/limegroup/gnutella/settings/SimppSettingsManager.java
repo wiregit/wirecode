@@ -95,7 +95,7 @@ public class SimppSettingsManager {
                 //we never want to write this setting out
                 currSetting.setAlwaysSave(false);
                 //set the setting to the value that simpp says
-                setSettingByType(currSetting, simppValue);
+                currSetting.loadValue(simppValue);
             }
         }//end of synchronized block
         _isDefault = false;
@@ -112,7 +112,7 @@ public class SimppSettingsManager {
                 String currEntry = (String)iter.next();
                 String defaultValue = (String)_defaults.get(currEntry);
                 Setting currSetting = findSettingByName(currEntry);
-                setSettingByType(currSetting, defaultValue);
+                currSetting.loadValue(defaultValue);
             }            
         } //end of synchronized 
         _isDefault = true;
@@ -124,12 +124,6 @@ public class SimppSettingsManager {
     private Setting findSettingByName(String settingName) {
         LimeProps limeProps = LimeProps.instance();
         return limeProps.getSetting(settingName);
-    }
-
-    private void setSettingByType(Setting toSet, String value) {
-        
-        //TODO: Find out what kind of setting it is an set the value
-        //accordingly
     }
 
     private Setting makeSettingPerType(String settingKey, String settingValue) {
