@@ -146,7 +146,10 @@ public final class AlternateLocationCollection
                 LOCATIONS.put(al,al);
                 return true;
             }
-            return false;
+            else {
+                old.increment();
+                return false;
+            }
         }
     }
 	
@@ -161,44 +164,18 @@ public final class AlternateLocationCollection
 			return false; //it cannot be in this list if it has a different SHA1
 		
 		synchronized(this) {
-            return LOCATIONS.remove(al) != null;
+            AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
+            if(loc==null) //it's not in locations, cannot remove
+                return false;
+            if(loc.getCount() == 0) {
+                LOCATIONS.remove(al);
+                return true;
+            }
+            else {
+                loc.decrement();
+                return false;
+            }
 		}
-    }
-    
-    /**
-     * @return true if alt was actually removed from the collection.
-     * if alt was merely demoted, returns false
-     */
-    public boolean removeWithDemotion(AlternateLocation altLoc) {
-        AlternateLocation alt = null;
-        synchronized(this) {
-            alt = LOCATIONS.get(altLoc);
-        }
-        if(alt==null) //we don't have it, so cannot remove it
-            return false;
-        if(alt.getDemoted()) //already demoted? remove
-            return remove(alt);
-        // We have it, and it's not demoted
-        alt.demote();
-        return false;
-    }
-
-    /**
-     * @return true iff we add and it was not already in the collection.
-     * if we promote it, we return false.
-     */
-    public boolean addWithPromotion(AlternateLocation altLoc) {
-        AlternateLocation alt = null;
-        synchronized(this) {
-            alt = LOCATIONS.get(altLoc);
-        }
-        if(alt==mull) //we don't have it, add it
-            return add(alt);
-        //OK. We already have it
-        if(alt.getDemoted())  //was it demoted?  promote it 
-            alt.promote();
-        //it's clear that we aleady have it, so we cannot add again
-        return false;
     }
 
 	/**

@@ -4,10 +4,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
-import java.util.Date;
 import java.util.StringTokenizer;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.io.*;
 import com.limegroup.gnutella.*;
 
@@ -17,7 +14,8 @@ import com.limegroup.gnutella.*;
  * operations as comparing alternate locations based on the date they were 
  * stored.
  */
-public final class AlternateLocation implements HTTPHeaderValue {
+public final class AlternateLocation implements 
+                    HTTPHeaderValue, com.sun.java.util.collections.Comparable {
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
@@ -41,13 +39,12 @@ public final class AlternateLocation implements HTTPHeaderValue {
 	private static final byte[] EMPTY_GUID = new byte[16];
     
     /**
-     * Not integral to the use of AlternateLocations. This is more like a
-     * utility field, which can be used to demote AlternateLocations, if the
-     * user of this class wishes to maintain that state. Specifically,
-     * LimeWire's download code does not demote AlternateLocations, but the
-     * upload code does.
+     * maintins a count of how many times this alternate location has been seen.
+     * A value of 0 means this alternate location was failed one more time that
+     * it has succeeded. Newly created AlternateLocations start out wit a value
+     * of 1.
      */
-    private boolean _demoted = false;
+    private int _count = 0;
 
     ////////////////////////"Constructors"//////////////////////////////
     
@@ -186,6 +183,7 @@ public final class AlternateLocation implements HTTPHeaderValue {
 	private AlternateLocation(final URL url, final URN sha1) {
 		this.URL       = url;
 		this.SHA1_URN  = sha1;
+        _count = 1;
 	}
 
     //////////////////////////////accessors////////////////////////////
@@ -217,7 +215,7 @@ public final class AlternateLocation implements HTTPHeaderValue {
     /**
      * Accessor to find if this has been demoted
      */
-    public boolean getDemoted() { return _demoted; }
+    public int getCount() { return _count; }
     
 
     ////////////////////////////Mesh utility methods////////////////////////////
@@ -248,7 +246,6 @@ public final class AlternateLocation implements HTTPHeaderValue {
                                   null);
 	}
 
-    ////////////////////////////modifiers///////////////////////////
     /**
      * package access method to "demote" an AlternateLocation -- used when 
      * a downloader claims it failed to use the location. An AlternateLocation
@@ -256,13 +253,16 @@ public final class AlternateLocation implements HTTPHeaderValue {
      * result in removal from the mesh. However, a demoted AlternateLocation
      * can be re-instated if a download finds that it works. 
      */
-    public void demote() {_demoted = true;}
+    public void decrement() {
+        Assert.that(_count > -1, "decrementing AltLoc with count == 0");
+        _count--;
+    }
 
     /**
      * package access to promote this. 
      * @see demote
      */
-    public void promote() {_demoted = false; }
+    public void increment() {_count++; }
 
 
     ///////////////////////////////helpers////////////////////////////////
@@ -371,6 +371,36 @@ public final class AlternateLocation implements HTTPHeaderValue {
 		AlternateLocation al = (AlternateLocation)obj;
 		return URL == null ? al.URL == null : URL.equals(al.URL);
 	}
+
+    /**
+     * The idea is that this is smaller than any AlternateLocation who has a
+     * greater value of _count. There is one exception to this rule -- a count
+     * of 0 indicates that the AlternateLocation has the greatest value.  
+     * <p>
+     * This is because we want to have a sorted set of AlternateLocation where
+     * any AlternateLocation with a count 0 puts it at the end of the list
+     * because it probably does not work.  
+     * <p> 
+     * Further we want to get AlternateLocations with smaller counts to be 
+     * propogated more, since this will serve to get better load balancing of
+     * uploader.  
+     */
+    public int compareTo(Object obj) {
+        if (this==obj) //equal
+            return 0;
+        if(obj == null) //I am greater
+            return 1;
+        if( !(obj instanceof AlternateLocation) ) //I am greater
+            return 1;
+        AlternateLocation other = (AlternateLocation) obj;
+        if(_count == other._count) //equal
+            return 0;
+        if(_count==0 && other._count>0) //I am greater
+            return 1;
+        if(_count>0 && other._count==0) //I am smaller
+            return 1;
+        return (_count - other._count);
+    }
 
 	/**
 	 * Overrides the hashCode method of Object to meet the contract of 
