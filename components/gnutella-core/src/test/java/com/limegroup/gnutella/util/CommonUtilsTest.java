@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.util;
 
 import junit.framework.*;
+import com.sun.java.util.collections.*;
+import java.util.jar.*;
+import java.io.*;
 
 /**
  * Tests certain features of CommonUtils
@@ -44,5 +47,27 @@ public class CommonUtilsTest extends TestCase {
         assertTrue(minorVersion==7);        
     }
     
+
+	/**
+	 * Test the method for copying files from jars to disk.
+	 */
+	public void testCommonUtilsCopyResourceFile() {
+		File newResourceFile = new File("themes", "copyTest");
+		newResourceFile.deleteOnExit();
+		String fileName = "com/sun/java/util/collections/Comparable.class";
+		try {
+			JarFile collections = new JarFile(new File("lib", "collections.jar"));
+			JarEntry entry = collections.getJarEntry(fileName);
+			long entrySize = entry.getCompressedSize();
+			CommonUtils.copyResourceFile(fileName, newResourceFile);
+			assertEquals("size of file in jar should equal size on disk", 
+						 entrySize, newResourceFile.length());
+		} catch(Exception e) {
+			fail("unexpected exception: "+e);
+		}		
+
+		newResourceFile.delete();
+		new File("themes").delete();
+	}
 
 }
