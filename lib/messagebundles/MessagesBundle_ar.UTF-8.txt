@@ -12,6 +12,7 @@ LOCALE_VARIANT_NAME=دولي
 LOCALE_SCRIPT_CODE=Arab
 LOCALE_SCRIPT_NAME=Arabic
 # Generated from Windows ANSI Arabic, with: native2ascii -encoding CP1256 < MessagesBundle.CP1256.txt | native2ascii -reverse -encoding UTF-8 > MessagesBundle.UTF-8.txt
+# Warning: correct editing of this file requires a text editor (like NotePad on Windows XP) that supports the Unicode BiDirectional algorithm, and able to insert LRE format controls.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
 # locale. Must be "true" or "false" (true only for complex scripts).
@@ -41,17 +42,17 @@ GENERAL_APPLY_BUTTON_LABEL=إضافة
 GENERAL_APPLY_BUTTON_TIP=إضافة.
 GENERAL_CLOSE_BUTTON_LABEL=إغلاق
 GENERAL_CLOSE_BUTTON_TIP=إغلاق النافذة.
-GENERAL_BACK_BUTTON_LABEL=السابق >>
-GENERAL_NEXT_BUTTON_LABEL=<< التالي
+GENERAL_BACK_BUTTON_LABEL=<< السابق
+GENERAL_NEXT_BUTTON_LABEL=التالي >>
 GENERAL_FINISH_BUTTON_LABEL=إنهاء
 GENERAL_DEFAULT_BUTTON_LABEL=استخدام الافتراضيات
-GENERAL_BROWSE_BUTTON_LABEL=... استعراض
+GENERAL_BROWSE_BUTTON_LABEL=استعراض...
 GENERAL_BROWSE_HOST_LABEL=استعراض المضيف
 GENERAL_BROWSE_HOST_TIP=عرض جميع الملفات على الكمبيوتر الحالي.
 
 #Options
 OPTIONS_BUTTONS_OK_LABEL=موافق
-OPTIONS_BUTTONS_OK_TIP=أضف التغييرات واغلق النافذة.
+OPTIONS_BUTTONS_OK_TIP أضف التغييرات واغلق النافذة.
 OPTIONS_BUTTONS_CANCEL_LABEL=إلغاء الأمر
 OPTIONS_BUTTONS_CANCEL_TIP=تجاهل التغييرات واغلق النافذة.
 OPTIONS_BUTTONS_APPLY_LABEL=إضافة
@@ -84,7 +85,7 @@ GENERAL_UNIT_KBPSEC=ك.ب/ث
 ################################################################################
 # Key/value pair for the main application title
 ################################################################################
-APP_TITLE=لايم وير : يمكنك من مشاركة المعلومات
+APP_TITLE=لايم وير: يمكنك من مشاركة المعلومات
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
@@ -95,14 +96,14 @@ ABOUT_LABEL_ADDRESS=http://www.limewire.com
 ABOUT_LABEL_END=جميع الحقوق محفوظة (c)2000-2003 Lime Wire LLC
 ABOUT_LABEL_TITLE=حول لايم وير
 #??? ABOUT_CREDITS_LABEL=Credits
-ABOUT_CREDITS_TIP=عرض معلومات حول لايم وير
+ABOUT_CREDITS_TIP=عرض معلومات حول لايم وير.
 ABOUT_NOTICE_LABEL=ملاحظات
 #??? ABOUT_NOTICE_TIP=Display distribution and contact information.
 ABOUT_LICENSE_LABEL=الاتفاقية
-ABOUT_LICENSE_TIP=عرض بنود الاتفاقية الخاصة بالبرنامج
+ABOUT_LICENSE_TIP=عرض بنود الاتفاقية الخاصة بالبرنامج.
 #??? ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically scroll
 ABOUT_BUTTON_LABEL=موافق
-ABOUT_BUTTON_TIP=إغلاق النافذة
+ABOUT_BUTTON_TIP=إغلاق النافذة.
 #Do not uncomment the following lines without providing a translated HTML file!
 #ABOUT_FILE_NAME=about_ar.html
 
@@ -110,10 +111,10 @@ ABOUT_BUTTON_TIP=إغلاق النافذة
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
 TOTD_TITLE=تلميح اليوم
-TOTD_INTRODUCTION=... هل تعلم أن
+TOTD_INTRODUCTION=...هل تعلم أن
 TOTD_SHOW_AT_STARTUP=إظهار التلميح عند البداية
-TOTD_NEXT=<< التلميح التالي
-TOTD_PREVIOUS=التلميح السابق >>
+TOTD_NEXT=التلميح التالي >>
+TOTD_PREVIOUS=<< التلميح السابق
 TOTD_CLOSE=إغلاق
 
 ###################################################################
@@ -131,7 +132,7 @@ TRAY_EXIT_LABEL=خروج
 SEARCH_TITLE=بحث
 MONITOR_TITLE=متابعة
 CONNECTIONS_TITLE=اتصالات
-#??? LIBRARY_TITLE=Library
+LIBRARY_TITLE=المكتبة
 SHOPPING_TITLE=متجر لايم وير
 OPTIONS_TITLE=خيارات
 STATS_TITLE=إحصائيات
@@ -141,11 +142,11 @@ UPLOAD_TITLE=الملفات الجاري تحميلها
 ################################################################################
 # Key/value pairs for the tooltips of the main windows
 ################################################################################
-SEARCH_TIP=بحث وتنزيل ملفات
-MONITOR_TIP=عرض نتائج البحث والملفات الجاري تحميلها
-CONNECTIONS_TIP=اتصل مع مستخدمين آخرين
-#??? LIBRARY_TIP=View repository of saved files
-SHOPPING_TIP=تسوق مع لايم وير
+SEARCH_TIP=بحث وتنزيل ملفات.
+MONITOR_TIP=عرض نتائج البحث والملفات الجاري تحميلها.
+CONNECTIONS_TIP=اتصل مع مستخدمين آخرين.
+#??? LIBRARY_TIP=View repository of saved files.
+SHOPPING_TIP=تسوق مع لايم وير.
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -168,19 +169,19 @@ MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_MNEMONIC=A
 MENU_FILE_LIBRARY_ADD_SHARED_FOLDER_ACCESSIBLE=أضف المجلد الذي ترغب في مشاركته.
 MENU_FILE_LIBRARY_NEW_FOLDER=(N) مجلد جديد
 MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
-MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=أضف المجلد إلى المكتبة الحالية.
+MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=أضف المجلد إلى المكتبة المختارة.
 MENU_FILE_LIBRARY_UNSHARE_FOLDER=(P) إيقاف مشاركة المجلد
 MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
-MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=إيقاف مشاركة مجلد المكتبة الحالية.
+MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=إيقاف مشاركة مجلد المكتبة المختارة.
 MENU_FILE_LIBRARY_RENAME_FOLDER=(R) إعادة تسمية المجلد
 MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
-MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=إعادة تسمية مجلد المكتبة الحالية.
+MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=إعادة تسمية مجلد المكتبة المختارة.
 MENU_FILE_LIBRARY_LAUNCH_FILES=(L) فتح الملف (الملفات)
 MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
-MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=فتح الملفات الحالية.
-MENU_FILE_LIBRARY_DELETE_FILES=(E) إلغاء الملفات
+MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=فتح الملفات المختارة.
+MENU_FILE_LIBRARY_DELETE_FILES=(E) حذف الملفات
 MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
-MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=إلغاء الملفات الحالية.
+MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=حذف الملفات المختارة.
 MENU_FILE_LIBRARY_REFRESH=(S) تحديث
 MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
 MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=إعادة تنزيل المكتبة.
@@ -188,7 +189,7 @@ MENU_FILE_LIBRARY_EXPLORE=(X) استكشاف
 MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
 MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=فتح مجلد المكتبة.
 
-#??? MENU_NAV_TITLE=(N) Navigation
+MENU_NAV_TITLE=(N) تجول
 MENU_NAV_TITLE_MNEMONIC=N
 MENU_NAV_SEARCH=(S) بحث
 MENU_NAV_SEARCH_MNEMONIC=S
@@ -210,7 +211,7 @@ MENU_VIEW_TITLE=(V) عرض
 MENU_VIEW_TITLE_MNEMONIC=V
 MENU_VIEW_SHOW_HIDE_TITLE=(W) عرض/إخفاء
 MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
-#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or hide individual tabs.
+#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=(W) Show or hide individual tabs.
 MENU_VIEW_MONITOR=(M) متابعة
 MENU_VIEW_MONITOR_MNEMONIC=M
 MENU_VIEW_MONITOR_ACCESSIBLE=عرض شاشة المتابعة.
@@ -241,17 +242,17 @@ MENU_RESOURCES_TITLE=(R) الموارد
 MENU_RESOURCES_TITLE_MNEMONIC=R
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
-#??? MENU_RESOURCES_PRO_ACCESSIBLE=Display the LimeWire PRO website.
+MENU_RESOURCES_PRO_ACCESSIBLE=عرض موقع Lime PRO.
 MENU_RESOURCES_LIMESHOP=LimeShop
 MENU_RESOURCES_LIMESHOP_MNEMONIC=L
-#??? MENU_RESOURCES_LIMESHOP_ACCESSIBLE=Display the LimeShop website.
+MENU_RESOURCES_LIMESHOP_ACCESSIBLE=عرض موقع LimeShop.
 
 MENU_TOOLS_TITLE=(T) أدوات
 MENU_TOOLS_TITLE_MNEMONIC=T
-MENU_TOOLS_STATISTICS=(S) ... إحصائيات
+MENU_TOOLS_STATISTICS=(S) إحصائيات...
 MENU_TOOLS_STATISTICS_MNEMONIC=S
 MENU_TOOLS_STATISTICS_ACCESSIBLE=عرض شاشة الإحصائيات.
-MENU_TOOLS_OPTIONS=(O) ... خيارات
+MENU_TOOLS_OPTIONS=(O) خيارات...
 MENU_TOOLS_OPTIONS_MNEMONIC=O
 MENU_TOOLS_OPTIONS_ACCESSIBLE=عرض شاشة الخيارات.
 
@@ -263,7 +264,7 @@ MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=مساعدة حول كيفية استخدا�
 MENU_HELP_TOTD=(D) تلميح اليوم
 MENU_HELP_TOTD_MNEMONIC=D
 MENU_HELP_TOTD_ACCESSIBLE=إظهار نافذة تلميح اليوم.
-#??? MENU_HELP_FAQ=FAQ
+#??? MENU_HELP_FAQ=F.A.Q.
 MENU_HELP_FAQ_MNEMONIC=F
 MENU_HELP_FAQ_ACCESSIBLE=أسئلة متكررة حول لايم وير.
 MENU_HELP_FORUM=(M) ساحة الحوار
@@ -275,7 +276,7 @@ MENU_HELP_FRIEND_ACCESSIBLE=أخبر صديق عن لايم وير.
 #??? MENU_HELP_REVIEW=(R) Review LimeWire
 MENU_HELP_REVIEW_MNEMONIC=R
 MENU_HELP_REVIEW_ACCESSIBLE=Submit a review of LimeWire.
-#??? MENU_HELP_ABOUT=(A) ... حول لايم وير
+MENU_HELP_ABOUT=(A) حول LimeWire...
 MENU_HELP_ABOUT_MNEMONIC=A
 MENU_HELP_ABOUT_ACCESSIBLE=معلومات حول لايم وير.
 #??? MENU_HELP_ERROR=(E) Generate error
@@ -286,22 +287,22 @@ MENU_HELP_ERROR_MNEMONIC=E
 # Keys/value pairs for general tables info
 ################################################################################
 #??? TABLES_USE_ROWSTRIPE=Stripe rows
-#??? TABLES_REAL_TIME_SORTING=Sort automatically
+TABLES_REAL_TIME_SORTING=ترتيب تلقائي
 #??? TABLES_DISPLAY_TOOLTIPS=Display tooltips
 
 ################################################################################
 # Keys/value pairs for SearchView stuff....
 ################################################################################
 SEARCH_DOWNLOAD_BUTTON_LABEL=تنزيل
-SEARCH_DOWNLOAD_BUTTON_TIP=تنزيل جميع الملفات الحالية.
+SEARCH_DOWNLOAD_BUTTON_TIP=. تنزيل جميع الملفات المختارة.
 SEARCH_WISHLIST_BUTTON_LABEL=أضف إلى قائمة الأمنيات
 #??? SEARCH_WISHLIST_BUTTON_TIP=Spawn a LimeWire Robot to look for the content.
 SEARCH_BROWSE_HOST_BUTTON_LABEL=استعراض المضيف
 SEARCH_BROWSE_HOST_BUTTON_TIP=إظهار جميع ملفات الكمبيوتر الحالي.
-SEARCH_CHAT_BUTTON_LABEL=... دردشة
-SEARCH_CHAT_BUTTON_TIP=دردشة مع المضيف الحالي.
-SEARCH_BUY_CD_LABEL=... شراء
-SEARCH_BUY_CD_TIP=شراء المنتج الحالي
+SEARCH_CHAT_BUTTON_LABEL=دردشة...
+SEARCH_CHAT_BUTTON_TIP=دردشة مع المضيف الحالي...
+SEARCH_BUY_CD_LABEL=شراء...
+SEARCH_BUY_CD_TIP=شراء المنتج الحالي.
 SEARCH_SEARCH_BUTTON_LABEL=بحث
 SEARCH_SEARCH_BUTTON_TIP=بحث على الشبكة عن هذه الكلمات.
 SEARCH_STOP_BUTTON_LABEL=قف
@@ -316,19 +317,19 @@ SEARCH_PUBLIC_CHAT_STRING=دردشة مع المضيف
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=إعادة البحث
 #??? SEARCH_PUBLIC_BLOCK_STRING=Block host
 SEARCH_RESULT_TABLE_LABEL=النتائج
-SEARCH_SEARCHING_LABEL=... جاري البحث
-SEARCH_VIRUS_MSG_ONE=واحد من الملفات الحالية برنامج
+SEARCH_SEARCHING_LABEL=جاري البحث...
+SEARCH_VIRUS_MSG_ONE=واحد من الملفات المختارة برنامج
 SEARCH_VIRUS_MSG_TWO=قابل للتنفيذ وقد يحتوي على فيروس. هل
-SEARCH_VIRUS_MSG_THREE=ترغب بالفعل في تنزيله؟
+SEARCH_VIRUS_MSG_THREE=ترغب بالفعل في تنزيله ؟
 SEARCH_SHOW_MESSAGE_MSG=عدم إظهار هذه الرسالة مرة أخرى
 SEARCH_DOWNLOAD_DIALOG_CONFIRM=طلب تنزيل ملف
 SEARCH_DEFAULT_FIELD_TITLE=اسم الملف
 SEARCH_MULTIPLE_HOSTS=متعدد
 AUTO_DL_CHECKBOX_STRING=تنزيل تلقائي
-AUTO_DL_CHECKBOX_TOOLTIP=سيقوم لايم وير بتنزيل الملفات لك
+AUTO_DL_CHECKBOX_TOOLTIP=سيقوم لايم وير بتنزيل الملفات لك.
 
 #Media Types
-MEDIA_ANY_TYPE=أي نوع
+MEDIA_ANY_TYPE=كافة الأنواع
 MEDIA_DOCUMENTS=مستندات
 MEDIA_PROGRAMS=برامج
 MEDIA_AUDIO=صوت
@@ -348,58 +349,58 @@ RESULT_PANEL_COUNT=#
 
 DOWNLOAD_KILL_BUTTON_LABEL=إنهاء التنزيل
 DOWNLOAD_KILL_BUTTON_TIP=أوقف تنزيل الملفات المختارة.
-#??? DOWNLOAD_RESUME_BUTTON_LABEL=Resume
+DOWNLOAD_RESUME_BUTTON_LABEL=إيقاف مؤقت
 #??? DOWNLOAD_RESUME_BUTTON_TIP=Try to reattempt a download.
 DOWNLOAD_SOURCES_BUTTON_LABEL=ابحث عن مصادر
-DOWNLOAD_SOURCES_BUTTON_TIP=جرب البحث عن مصادر للملفات التي فشل تنزيلها
-#??? DOWNLOAD_CLEAR_BUTTON_LABEL=Clear inactive
+DOWNLOAD_SOURCES_BUTTON_TIP=جرب البحث عن مصادر للملفات التي فشل تنزيلها.
+DOWNLOAD_CLEAR_BUTTON_LABEL=مسح الغير نشط
 DOWNLOAD_CLEAR_BUTTON_TIP=إزالة الملفات الغير نشطة الجاري تنزيلها.
 
 LIBRARY_LAUNCH_BUTTON_LABEL=فتح
 LIBRARY_LAUNCH_BUTTON_TIP=فتح الملفات المختارة.
-LIBRARY_DELETE_BUTTON_LABEL=إلغاء
-LIBRARY_DELETE_BUTTON_TIP=إلغاء الملفات المختارة.
+LIBRARY_DELETE_BUTTON_LABEL=حذف
+LIBRARY_DELETE_BUTTON_TIP=حذف الملفات المختارة.
 LIBRARY_REFRESH_BUTTON_LABEL=تحديث
 LIBRARY_REFRESH_BUTTON_TIP=إعادة تحميل المجلدات المشاركة.
 LIBRARY_EXPLORE_BUTTON_LABEL=استكشاف
 LIBRARY_EXPLORE_BUTTON_TIP=فتح مجلد المكتبة.
-#??? LIBRARY_PLAYLIST_BUTTON_LABEL=To playlist
-#??? LIBRARY_PLAYLIST_BUTTON_TIP=Add selected files to the playlist.
+LIBRARY_PLAYLIST_BUTTON_LABEL=إلى قائمة القراءة
+LIBRARY_PLAYLIST_BUTTON_TIP=إضافة الملفات المختارة إلى قائمة القراءة.
 #??? LIBRARY_ANNOTATE_BUTTON_LABEL=Annotate...
 #??? LIBRARY_ANNOTATE_BUTTON_TIP=Annotate selected file.
-#??? LIBRARY_RESUME_BUTTON_LABEL=Resume
-LIBRARY_RESUME_BUTTON_TIP=استأنف تنزيل الملفات المختارة الغير كاملة
+LIBRARY_RESUME_BUTTON_LABEL=إيقاف مؤقت
+LIBRARY_RESUME_BUTTON_TIP=استأنف تنزيل الملفات المختارة الغير كاملة.
 
-PLAYLIST_LOAD_BUTTON_LABEL=... فتح
-#??? PLAYLIST_LOAD_BUTTON_TIP=Open a new or existing playlist.
-PLAYLIST_SAVE_BUTTON_LABEL=... حفظ
-#??? PLAYLIST_SAVE_BUTTON_TIP=Save the current playlist.
-PLAYLIST_DELETE_BUTTON_LABEL=إزالة
-#??? PLAYLIST_DELETE_BUTTON_TIP=Remove selected file from playlist.
-#??? PLAYLIST_FILE_DESCRIPTION=Playlist files (*.m3u)
+PLAYLIST_LOAD_BUTTON_LABEL=فتح...
+PLAYLIST_LOAD_BUTTON_TIP=فتح قائمة قراءة جديدة أو موجودة مسبقا.
+PLAYLIST_SAVE_BUTTON_LABEL=حفظ...
+PLAYLIST_SAVE_BUTTON_TIP=حفظ قائمة القراءة الحالية.
+PLAYLIST_DELETE_BUTTON_LABEL=حذف
+PLAYLIST_DELETE_BUTTON_TIP=حذف الملفات المختارة من قائمة القراءة.
+PLAYLIST_FILE_DESCRIPTION=ملفات قائمة القراءة (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 #??? MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAY_BUTTON_TIP=تشغيل.
-#??? MEDIA_PAUSE_BUTTON_TIP=Pause
-#??? MEDIA_STOP_BUTTON_TIP=Stop
-#??? MEDIA_FORWARD_BUTTON_TIP=Forward
-#??? MEDIA_REWIND_BUTTON_TIP=Rewind
+MEDIA_PAUSE_BUTTON_TIP=إيقاف مؤقت.
+MEDIA_STOP_BUTTON_TIP=إيقاف.
+MEDIA_FORWARD_BUTTON_TIP=تقديم.
+MEDIA_REWIND_BUTTON_TIP=إرجاع.
 
 #anu added
 PASSWORD_DIALOG_USERNAME_FIELD_LABEL=اسم المستخدم
 PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=كلمة السر
 
 ################################################################################
-# Key/value pairs for Statistics String....
+# Key/value pairs for Statistics String...
 ################################################################################
 STATISTICS_AVAILABLE=متاح
 STATISTICS_FILES=ملفات
 STATISTICS_DISCONNECTED=قطع اتصال / لايوجد ملفات متاحة
 STATISTICS_SHARING=مشاركة
-STATISTICS_SHARING_TOOLTIP=عدد الملفات التي تشاركها
+STATISTICS_SHARING_TOOLTIP=عدد الملفات التي تشاركها.
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -420,7 +421,7 @@ DOWNLOAD_SPEED_COLUMN=السرعة
 DOWNLOAD_TIME_REMAINING_COLUMN=الوقت
 #??? DOWNLOAD_SERVER_COLUMN=Vendor/version
 #??? DOWNLOAD_STATUS_QUEUED=Queued
-DOWNLOAD_STATUS_CONNECTING=... اتصال
+DOWNLOAD_STATUS_CONNECTING=اتصال...
 #??? DOWNLOAD_STATUS_WAITING=Waiting for busy hosts
 DOWNLOAD_STATUS_COMPLETE=مكتمل
 #??? DOWNLOAD_STATUS_ABORTED=Aborted
@@ -430,16 +431,16 @@ DOWNLOAD_STATUS_DOWNLOADING=جاري التنزيل من
 #??? DOWNLOAD_STATUS_CORRUPT_FILE=File corrupted
 #??? DOWNLOAD_STATUS_REQUERYING=Querying network
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=انتظار
-#??? DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=s for sources
+#??? DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=ث for sources
 DOWNLOAD_STATUS_WAITING_FOR_USER=أحتاج إلى مزيد من المصادر
 #??? DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for stable connections
 DOWNLOAD_HOSTS_LABEL=المضيفون
 #??? DOWNLOAD_STATUS_REMOTE_QUEUED=Waiting in line, position
-DOWNLOAD_STATUS_HASHING=... تتم الآن مراجعة محتويات الملف
-DOWNLOAD_STATUS_SAVING=... يتم الآن حفظ الملف
-DOWNLOAD_AWAITING_SOURCES=... قد يحتاج لايم وير إلى إجراء بحث متقدم
-DOWNLOAD_APPLY_NEW_THEME_START=لقد قمت بتنزيل سمة جديدة باسم"
-DOWNLOAD_APPLY_NEW_THEME_END=." هل ترغب في استخدام هذه السمة الجديدة
+DOWNLOAD_STATUS_HASHING=تتم الآن مراجعة محتويات الملف...
+DOWNLOAD_STATUS_SAVING=يتم الآن حفظ الملف...
+DOWNLOAD_AWAITING_SOURCES=قد يحتاج لايم وير إلى إجراء بحث متقدم...
+DOWNLOAD_APPLY_NEW_THEME_START=لقد قمت بتنزيل سمة جديدة باسم "
+DOWNLOAD_APPLY_NEW_THEME_END=". هل ترغب في استخدام هذه السمة الجديدة.
 #??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
 #??? DOWNLOAD_BUSY_HOSTS=Busy hosts
 #??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
@@ -451,11 +452,11 @@ DOWNLOAD_APPLY_NEW_THEME_END=." هل ترغب في استخدام هذه الس�
 UPLOAD_POPUP_MENU_KILL_UPLOAD=إنهاء التحميل
 UPLOAD_POPUP_MENU_CHAT=دردشة مع المضيف
 UPLOAD_KILL_BUTTON_LABEL=إنهاء التحميل
-UPLOAD_KILL_BUTTON_TIP=إيقاف الملفات المختارة الجاري تحميلها
+UPLOAD_KILL_BUTTON_TIP=إيقاف الملفات المختارة الجاري تحميلها.
 UPLOAD_CLEAR_BUTTON_LABEL=مسح الغير نشط
-UPLOAD_CLEAR_BUTTON_TIP=إزالة الملفات الجاري تحميلها الغير نشطة
+UPLOAD_CLEAR_BUTTON_TIP=إزالة الملفات الجاري تحميلها الغير نشطة.
 UPLOAD_CHAT_BUTTON_LABEL=دردشة مع المضيف
-UPLOAD_CHAT_BUTTON_TIP=دردشة مع مستخدم آخر من المضيف الحالي
+UPLOAD_CHAT_BUTTON_TIP=دردشة مع مستخدم آخر من المضيف الحالي.
 UPLOAD_TABLE_STRING_NAME=الاسم
 UPLOAD_TABLE_STRING_HOST=المضيف
 UPLOAD_TABLE_STRING_SIZE=الحجم
@@ -483,69 +484,69 @@ UPLOAD_ACTIVE=نشط
 ###################################################################
 # Key/value pairs for MonitorView
 ###################################################################
-#??? MONITOR_VIEW_INCOMING_SEARCHES=Incoming searches
+MONITOR_VIEW_INCOMING_SEARCHES=نتائج البحث الواردة
 MONITOR_VIEW_ENABLE=ممكّن
-#??? MONITOR_VIEW_SHOW_LAST=Show last
-#??? MONITOR_VIEW_SEARCHES=searches
+MONITOR_VIEW_SHOW_LAST=أظهر آخر
+MONITOR_VIEW_SEARCHES=نتيجة بحث
 #??? MONITOR_VIEW_LEAF_MESSAGE=Your client is a leaf node shielded by an Ultrapeer. Hence you will see few or no searches in the monitor window.
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
 # options window, setup windows, and potentially other places
 ################################################################################
-#??? MODEM_SPEED=Modem
+MODEM_SPEED=مودم
 #??? CABLE_SPEED=Cable/DSL
 T1_SPEED=T1
-#??? T3_SPEED=T3 or Higher
+T3_SPEED=T3 أو أعلى
 MULTICAST_SPEED=Ethernet
 
 ###################################################################
 # Key/value pairs for ConnectionView
 ###################################################################
 #??? CV_PANEL_TITLE=Connected hosts
-#??? CV_COLUMN_HOST=Host
-#??? CV_COLUMN_STATUS=Status
-#??? CV_COLUMN_MESSAGE=Messages (I/O)
-#??? CV_COLUMN_BANDWIDTH=Bandwidth (I/O)
+CV_COLUMN_HOST=المضيف
+CV_COLUMN_STATUS=الحالة
+CV_COLUMN_MESSAGE=الرسائل (I/O)
+CV_COLUMN_BANDWIDTH=سرعة النقل (I/O)
 #??? CV_COLUMN_DROPPED=Dropped (I/O)
 #??? CV_COLUMN_HOSTS=Hosts
-#??? CV_COLUMN_PROTOCOL=Protocol
+CV_COLUMN_PROTOCOL=بروتوكول
 #??? CV_COLUMN_VENDOR=Vendor/Version
-#??? CV_COLUMN_TIME=Time
+CV_COLUMN_TIME=الوقت
 #??? CV_COLUMN_COMPRESSION=Compressed (I/O)
 #??? CV_COLUMN_QRP_FULL=QRP (%)
-#??? CV_BUTTON_REMOVE=Remove
-#??? CV_BUTTON_TOOLTIP_REMOVE=Remove the selected connections.
-#??? CV_BUTTON_ADD=Add
+CV_BUTTON_REMOVE=إزالة
+CV_BUTTON_TOOLTIP_REMOVE=إزالة الاتصالات المختارة
+CV_BUTTON_ADD=إضافة
 #??? CV_BUTTON_TOOLTIP_ADD=Create a new outgoing connection.
 #??? CV_LABEL_KEEP_BEGIN=Keep approximately
 #??? CV_LABEL_KEEP_END=connections up.
-#??? CV_TABLE_STRING_CONNECTING=Connecting...
+CV_TABLE_STRING_CONNECTING=جاري الاتصال...
 #??? CV_TABLE_STRING_LEAF=Leaf
 #??? CV_TABLE_STRING_ULTRAPEER=Ultrapeer
 #??? CV_TABLE_STRING_STANDARD=0.6
-#??? CV_TABLE_STRING_INCOMING=Incoming
-#??? CV_TABLE_STRING_OUTGOING=Outgoing
-#??? CV_TABLE_STRING_CONNECTED_ON=Connected on 
+CV_TABLE_STRING_INCOMING=الوارد
+CV_TABLE_STRING_OUTGOING=الصادر
+CV_TABLE_STRING_CONNECTED_ON=متصل على
 #??? CV_STRING_CLIENT=[Leaf]
 #??? CV_STRING_ULTRAPEER=[Ultrapeer]
-#??? CV_TABLE_STRING_KBPSEC=KB/s
+CV_TABLE_STRING_KBPSEC=ك.ب/ث
 
 ################################################################################
 # Key/value pairs for strings in the library window
 ################################################################################
-#??? LIBRARY_TABLE_NAME=Name
-#??? LIBRARY_TABLE_TITLE=Title
-#??? LIBRARY_TABLE_ARTIST=Artist
-#??? LIBRARY_TABLE_SIZE=Size
-#??? LIBRARY_TABLE_TYPE=Type
+LIBRARY_TABLE_NAME=الاسم
+LIBRARY_TABLE_TITLE=العنوان
+LIBRARY_TABLE_ARTIST=الفنان
+LIBRARY_TABLE_SIZE=الحجم
+LIBRARY_TABLE_TYPE=النوع
 #??? LIBRARY_TABLE_PATH=Path
 #??? LIBRARY_TABLE_HITCOUNT=Hits
-#??? LIBRARY_TABLE_NUMALTLOC=Locations
+LIBRARY_TABLE_NUMALTLOC=المواقع
 #??? LIBRARY_TABLE_UPLOAD_COUNT=Uploads
-#??? LIBRARY_TREE_NEW_FOLDER_LABEL=New folder
-#??? LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Stop sharing
-#??? LIBRARY_TREE_RENAME_FOLDER_LABEL=Rename
+LIBRARY_TREE_NEW_FOLDER_LABEL=مجلد جديد
+LIBRARY_TREE_UNSHARE_FOLDER_LABEL=إيقاف المشاركة
+LIBRARY_TREE_RENAME_FOLDER_LABEL=إعادة تسمية
 #??? LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=To playlist
 
 ################################################################################
@@ -556,30 +557,30 @@ MULTICAST_SPEED=Ethernet
 ###################################################################
 # Key/value pairs for PlayListGUI
 ###################################################################
-#??? PLAYLIST_TITLE=MP3 playlist
-#??? PLAYLIST_TABLE_NAME=Name
-#??? PLAYLIST_TABLE_LENGTH=Length
+PLAYLIST_TITLE=MP3 قائمة قراءة
+PLAYLIST_TABLE_NAME=الاسم
+PLAYLIST_TABLE_LENGTH=الطول
 #??? PLAYLIST_TABLE_BITRATE=Bitrate
-#??? PLAYLIST_OPTIONS_STRING=Play options:
-#??? PLAYLIST_OPTIONS_CONTINUE=Continuous
+PLAYLIST_OPTIONS_STRING=خيارات التشغيل
+PLAYLIST_OPTIONS_CONTINUE=متصل
 #??? PLAYLIST_OPTIONS_SHUFFLE=Shuffle
-#??? PLAYLIST_DIALOG_OPEN_TITLE=Select playlist (.m3u)
-#??? PLAYLIST_DIALOG_SAVE_TITLE=Save playlist as....
-#??? PLAYLIST_DIALOG_SAVE_SAVE=Save
+PLAYLIST_DIALOG_OPEN_TITLE=اختر قائمة قراءة (*.m3u)
+PLAYLIST_DIALOG_SAVE_TITLE=حفظ قائمة القراءة باسم
+PLAYLIST_DIALOG_SAVE_SAVE=حفظ
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
-#??? SETUP_LANGUAGE_TITLE=Language options
-#??? SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
-#??? SETUP_WELCOME_TITLE=Welcome
+SETUP_LANGUAGE_TITLE=خيارات اللغة
+SETUP_LANGUAGE_LABEL=LimeWire من فضلك قم باختيار اللغة التي تود أن يستخدمها
+SETUP_WELCOME_TITLE=مرحبا
 #??? SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
 #??? SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
-#??? SETUP_SAVE_TITLE=Save directory
+SETUP_SAVE_TITLE=حفظ المجلد
 #??? SETUP_SAVE_LABEL=Please choose a folder where you would like your files to be downloaded. This folder will also be shared with other gnutella users by default.
-#??? SETUP_SPEED_TITLE=Connection speed
-#??? SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
+SETUP_SPEED_TITLE=سرعة الاتصال
+#??? SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network per?ormance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 #??? SETUP_STARTUP_TITLE=System startup
 #??? SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
 #??? SETUP_STARTUP_CHECKBOX=Start automatically
@@ -589,29 +590,29 @@ MULTICAST_SPEED=Ethernet
 #??? SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
 #??? SETUP_CONFIRM_TITLE=Confirm scan
 #??? SETUP_CONFIRM_LABEL=We identified the directories below as ones that you might like to share. If you would like to share one of these directories, simply check its associated checkbox. Subdirectories of shared directories will also be shared.
-#??? SETUP_FINISH_TITLE=Finish setup
+SETUP_FINISH_TITLE=إنهاء التثبيت
 #??? SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
 
 ################################################################################
 # Key/value pairs for the file chooser
 ################################################################################
-#??? DIRECTORY_CHOOSER_CAPTION=Select
+DIRECTORY_CHOOSER_CAPTION=اختر
 
 ################################################################################
 # Key/value pairs for a directory file chooser
 ################################################################################
-#??? FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
-#??? FILE_CHOOSER_DIRECTORY_TITLE=Select directory
+FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=اختر
+FILE_CHOOSER_DIRECTORY_TITLE=اختر مجلد
 
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
-#??? INIT_SAVE_DIRECTORY_FIELD_LABEL=Directory:
-INIT_SAVE_BROWSE_BUTTON_LABEL=... استعراض
-#??? INIT_SAVE_BROWSE_BUTTON_TIP=Choose another directory.
-#??? INIT_SAVE_DEFAULT_BUTTON_LABEL=Use default
+INIT_SAVE_DIRECTORY_FIELD_LABEL=المجلد
+INIT_SAVE_BROWSE_BUTTON_LABEL=استعراض...
+INIT_SAVE_BROWSE_BUTTON_TIP=اختر مجلداَ آخراَ.
+INIT_SAVE_DEFAULT_BUTTON_LABEL=استخدام الافتراضيات
 #??? INIT_SAVE_DEFAULT_BUTTON_TIP=Use the default directory.
 
 ################################################################################
@@ -619,12 +620,11 @@ INIT_SAVE_BROWSE_BUTTON_LABEL=... استعراض
 ################################################################################
 #??? PRO_TITLE=Upgrade to PRO
 #??? PRO_LABEL_THANKS=For TURBOcharged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
-
 #??? PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
 #??? GO_PRO_TIP=Get LimeWire PRO now.
 #??? WHYGOPRO=Why go PRO?
 #??? WHYGOPRO_TIP=What does PRO give me?
-#??? GO_PRO_LATER=Later
+GO_PRO_LATER=لاحقا
 #??? GO_PRO_LATER_TIP=Get LimeWire PRO later.
 
 ###################################################################
@@ -634,28 +634,28 @@ INIT_SAVE_BROWSE_BUTTON_LABEL=... استعراض
 #??? META_EDITOR_ANNOTATING_FILE=Annotating file
 #??? META_EDITOR_SAVE_LABEL=Save
 META_EDITOR_CANCEL_LABEL=إلغاء الأمر
-#??? META_EDITOR_DELETE_LABEL=Delete
-#??? META_EDITOR_EDITING_LABEL=Edit annotation of type:
-#??? META_EDITOR_ADDING_LABEL=Add annotation of type:
+META_EDITOR_DELETE_LABEL=حذف
+#??? META_EDITOR_EDITING_LABEL=Edit annotation of type
+#??? META_EDITOR_ADDING_LABEL=Add annotation of type
 #MetaSearchFrame
 #??? META_SEARCH_TITLE=Metasearch input window
 #??? META_SEARCH_STRING=Search string
 META_SEARCH_CANCEL_BUTTON_LABEL=إلغاء الأمر
-#??? META_SEARCH_SEARCH_BUTTON_LABEL=Search
+META_SEARCH_SEARCH_BUTTON_LABEL=بحث
 #ViewChooserDialog
 #??? VIEW_CHOOSER_TITLE=Choose View
 VIEW_CHOOSER_OK_BUTTON_LABEL=موافق
 VIEW_CHOOSER_CANCEL_BUTTON_LABEL=إلغاء الأمر
 #IndentingPanel
-#??? XML_SEARCH_MORE_OPTIONS_LABEL=More search options
+XML_SEARCH_MORE_OPTIONS_LABEL=المزيد من خيارات البحث
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
 ################################################################################
-#??? LIST_EDITOR_ADD_BUTTON=Add...
-#??? LIST_EDITOR_ADD_BUTTON_2=Add
-LIST_EDITOR_BROWSE_BUTTON=... استعراض
-#??? LIST_EDITOR_REMOVE_BUTTON=Remove
+LIST_EDITOR_ADD_BUTTON=إضافة...
+LIST_EDITOR_ADD_BUTTON_2=إضافة
+LIST_EDITOR_BROWSE_BUTTON=استعراض...
+LIST_EDITOR_REMOVE_BUTTON=إزالة
 #??? LIST_EDITOR_ADD_BUTTON_TIP=Add new list item.
 #??? LIST_EDITOR_REMOVE_BUTTON_TIP=Remove selected item.
 
@@ -667,48 +667,48 @@ LIST_EDITOR_BROWSE_BUTTON=... استعراض
 ################################################################################
 # Keys/value pairs for general button labels/tooltips used in various windows
 ################################################################################
-#??? GENERAL_CHAT_BUTTON_LABEL=Chat...
-#??? GENERAL_CHAT_BUTTON_TIP=Chat with host.
-#??? GENERAL_LAUNCH_BUTTON_LABEL=Launch
-#??? GENERAL_LAUNCH_BUTTON_TIP=Launch file.
+GENERAL_CHAT_BUTTON_LABEL=دردشة...
+GENERAL_CHAT_BUTTON_TIP=دردشة مع المضيف.
+GENERAL_LAUNCH_BUTTON_LABEL=فتح
+GENERAL_LAUNCH_BUTTON_TIP=فتح الملف.
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips
 ################################################################################
 #??? CHAT_BLOCK_BUTTON_LABEL=Block host
-#??? CHAT_SEND_BUTTON_LABEL=Send message
-#??? CHAT_STOP_BUTTON_LABEL=End chat
+CHAT_SEND_BUTTON_LABEL=ارسل رسالة
+CHAT_STOP_BUTTON_LABEL=إنهاء الدردشة
 #??? CHAT_BLOCK_BUTTON_TIP=Block current host.
-#??? CHAT_SEND_BUTTON_TIP=Send a message to a host.
-#??? CHAT_STOP_BUTTON_TIP=Stop chatting with a host.
+CHAT_SEND_BUTTON_TIP=ارسل رسالة إلى المضيف.
+CHAT_STOP_BUTTON_TIP=إنهاء الدردشة مع المضيف.
 
 ################################################################################
 # Key/value pairs for the ChatFrame that is displayed while chatting
 ################################################################################
-#??? CHAT_WITH_LABEL=Chatting with
-#??? CHAT_HOST_UNAVAILABLE=Host is unavailable
-#??? CHAT_YOU=You
+CHAT_WITH_LABEL=الدردشة حالياَ مع
+CHAT_HOST_UNAVAILABLE=المضيف غير متاح
+CHAT_YOU=أنت
 
 ###################################################################
 # Key/value pairs for splash screen status text
 ###################################################################
-#??? SPLASH_STATUS_RESOURCE_MANAGER=Loading resources...
-#??? SPLASH_STATUS_SEARCH_WINDOW=Loading search window...
-#??? SPLASH_STATUS_OPTIONS_WINDOW=Loading options window...
-#??? SPLASH_STATUS_USER_SETTINGS=Loading user settings...
-#??? SPLASH_STATUS_SHARED_FILES=Loading shared files...
-#??? SPLASH_STATUS_INTERFACE=Loading user interface...
-#??? SPLASH_STATUS_UPDATES=Checking for updates...
+SPLASH_STATUS_RESOURCE_MANAGER=يتم الآن تحيل الموارد...
+SPLASH_STATUS_SEARCH_WINDOW=يتم الآن تحميل نافذة البحث...
+SPLASH_STATUS_OPTIONS_WINDOW=يتم الآن تحميل نافذة الخيارات...
+SPLASH_STATUS_USER_SETTINGS =يتم الآن تحميل إعدادات المستخدم...
+SPLASH_STATUS_SHARED_FILES=يتم الآن تحميل الملفات المشارَكة...
+SPLASH_STATUS_INTERFACE=يتم الآن تحميل واجهة المستخدم...
+SPLASH_STATUS_UPDATES=يتم الآن مراجعة التحديثات...
 #??? SPLASH_STATUS_CORE_COMPONENTS=Loading core components...
-#??? SPLASH_STATUS_DOWNLOAD_WINDOW=Loading download window...
-#??? SPLASH_STATUS_LIBRARY_WINDOW=Loading library window...
-#??? SPLASH_STATUS_UPLOAD_WINDOW=Loading upload window...
-#??? SPLASH_STATUS_MONITOR_WINDOW=Loading monitor window...
-#??? SPLASH_STATUS_CONNECTION_WINDOW=Loading connection window...
-#??? SPLASH_STATUS_STATISTICS_WINDOW=Loading statistics window...
-#??? SPLASH_STATUS_STATUS_WINDOW=Loading status window...
-#??? SPLASH_STATUS_MENUS=Loading menus...
-#??? SPLASH_STATUS_MESSAGE_SERVICE=Loading messages...
+SPLASH_STATUS_DOWNLOAD_WINDOW=يتم الآن تحميل نافذة التنزيل...
+SPLASH_STATUS_LIBRARY_WINDOW=يتم الآن تحميل نافذة المكتبة...
+#??? SPLASH_STATUS_UPLOAD_WINDOW=يتم الآن تحميل upload...
+SPLASH_STATUS_MONITOR_WINDOW=يتم الآن تحميل نافذة المتابعة...
+SPLASH_STATUS_CONNECTION_WINDOW=يتم الآن تحميل نافذة الاتصال...
+SPLASH_STATUS_STATISTICS_WINDOW=يتم الآن تحميل نافذة الإحصائيات...
+SPLASH_STATUS_STATUS_WINDOW=يتم الآن تحميل نافذة إظهار الحالة...
+SPLASH_STATUS_MENUS=يتم الآن تحميل القوائم...
+SPLASH_STATUS_MESSAGE_SERVICE=يتم الآن تحميل الرسائل...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to 
@@ -742,33 +742,33 @@ LIST_EDITOR_BROWSE_BUTTON=... استعراض
 #??? UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
 #??? UPDATE_ERROR_LAX_IO=Error accessing your file system.
 UPDATE_CANCEL_BUTTON_LABEL=إلغاء الأمر
-#??? UPDATE_CANCEL_BUTTON_TIP=Cancel the update.
+UPDATE_CANCEL_BUTTON_TIP=إلغاء التحديث.
 #??? UPDATE_NOW_TIP=Update LimeWire now.
 #??? UPDATE_LATER_TIP=Update LimeWire later.
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
 ################################################################################
-#??? MESSAGE_CAPTION=Message
-#??? MESSAGE_ERROR_CAPTION=Error
+MESSAGE_CAPTION=رسالة
+MESSAGE_ERROR_CAPTION=خطأ
 #??? MESSAGE_SHARE_SAVE_DIR=Would you like to add the save directory to your list of shared directories? Subdirectories of this directory will also be shared.
-#??? MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this directory?
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=هل أنت متأكد أنك تريد إلغاء مشاركة هذا المجلد؟
 #??? MESSAGE_CANNOT_UNSHARE_SUBDIRS=LimeWire cannot stop sharing subdirectories of directories that are shared.
 #??? MESSAGE_OVERWRITE_EXISTING_FILE=Overwrite existing file
 #??? MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
-#??? MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
-#??? MESSAGE_UNABLE_TO_DELETE_FILE_START=Unable to delete the file
-#??? MESSAGE_UNABLE_TO_DELETE_FILE_END=It may be in use by another application.
-#??? MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Unable to delete the directory
-#??? MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Unable to rename the directory
-#??? MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. It may be in use by another application.
-#??? MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
-#??? MESSAGE_UNABLE_TO_RENAME_FILE_END=It may be in use by another application.
+MESSAGE_CONFIRM_FILE_DELETE=هل أنت متأكد أنك تريد حذف الملف (الملفات)؟
+MESSAGE_UNABLE_TO_DELETE_FILE_START=لا يمكن حذف الملف
+MESSAGE_UNABLE_TO_DELETE_FILE_END=قد يكون مستخدما في تطبيق آخر
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=لا يمكن حذف المجلد
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=لا يمكن إعادة تسمية المجلد
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=قد يكون مستخدما في تطبيق آخر
+MESSAGE_UNABLE_TO_RENAME_FILE_START=لا يمكن إعادة تسمية الملف
+MESSAGE_UNABLE_TO_RENAME_FILE_END=قد يكون مستخدم في تطبيق آخر
 #??? MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire will not allow you to
-#??? MESSAGE_INCOMPLETE_DIRECTORY_END=the folder reserved for incomplete files.
+MESSAGE_INCOMPLETE_DIRECTORY_END=المجلد محفوظ للملفات غير الكاملة
 #??? MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified directory for saving files. Please try a different directory.
 #??? MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
-#??? MESSAGE_CONTINUE_DOWNLOAD=Do you want to continue the download?
+MESSAGE_CONTINUE_DOWNLOAD=هل تريد إكمال التنزيل؟
 #??? MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
 
 ################################################################################
@@ -793,14 +793,14 @@ UPDATE_CANCEL_BUTTON_LABEL=إلغاء الأمر
 ################################################################################
 # Key/Value pairs for internal error messages
 ################################################################################
-#??? ERROR_INTERNAL_TITLE=Internal error
+ERROR_INTERNAL_TITLE=خطأ داخلي
 #??? ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
-#??? ERROR_INTERNAL_SEND=Send
+ERROR_INTERNAL_SEND=إرسال
 #??? ERROR_INTERNAL_REVIEW=Review
 #??? ERROR_INTERNAL_DISCARD=Discard
-#??? ERROR_INTERNAL_COPY=Copy report
+ERROR_INTERNAL_COPY=نسخ التقرير
 ERROR_INTERNAL_OK=موافق
-#??? ERROR_INTERNAL_ALWAYS_SEND=Always send immediately
+ERROR_INTERNAL_ALWAYS_SEND=دائما أرسل في الحال
 #??? ERROR_INTERNAL_ALWAYS_REVIEW=Always ask for review
 #??? ERROR_INTERNAL_ALWAYS_DISCARD=Always discard bugs
 #??? ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
@@ -808,7 +808,7 @@ ERROR_INTERNAL_OK=موافق
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
-#??? ERROR_PORT_UNAVAILABLE=Port not available. Please select a different port.
+ERROR_PORT_UNAVAILABLE=المنفذ غير متاح. من فضلك اختر منفذ آخر.
 #??? ERROR_KEEP_ALIVE=LimeWire does not allow you to maintain this many connections, as it creates excess traffic that clogs the network.
 #??? ERROR_TOO_LOW_FOR_ULTRAPEER=Ultrapeers with leaf nodes need at least six connections.
 #??? ERROR_TOO_HIGH_FOR_LEAF=Leaves only need one connection, since they are connected to an Ultrapeer.
@@ -826,8 +826,8 @@ ERROR_INTERNAL_OK=موافق
 #??? ERROR_INVALID_GROUP=You need to select a valid group.
 #??? ERROR_ALREADY_DOWNLOADING=You are already downloading
 #??? ERROR_ALREADY_EXISTS=You have already downloaded
-#??? ERROR_CANT_RESUME_START=The file
-#??? ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
+ERROR_CANT_RESUME_START=لا يبدو الملف ناقصا ولا يمكن إكمال تنزيله
+ERROR_CANT_RESUME_END=الملف.
 #??? ERROR_LOCATING_BROWSER_THEMES=LimeWire could not locate your browser. The LimeWire themes address is:\n"http://www.limewire.com/skins".
 #??? ERROR_LOCATING_BROWSER_SUPPORT=LimeWire could not locate your browser. The LimeWire support address is:\n"http://www.limewire.com/support".
 #??? ERROR_LOCATING_BROWSER_FAQ=LimeWire could not locate your browser. The LimeWire FAQ address is:\n"http://www.limewire.com/support/faq.htm".
@@ -835,19 +835,19 @@ ERROR_INTERNAL_OK=موافق
 #??? ERROR_LOCATING_BROWSER_FRIEND=LimeWire could not locate your browser. The LimeWire "Tell a friend" form address is:\n"http://www.limewire.com/index.jsp/tell_friend".
 #??? ERROR_LOCATING_BROWSER_GENERAL=LimeWire could not locate your default browser.
 #??? ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save directory. Please select a new save directory in the Options menu and try again.
-#??? ERROR_DEL_META_USER=Cannot remove unsaved info.
-#??? ERROR_DEL_META_SYSTEM=Unable to remove data.
-#??? ERROR_SAVE_META_DOC=Internal document error. Data could not be saved.
-#??? ERROR_SAVE_META_ILLEGAL=Nothing to save.
-#??? ERROR_SAVE_META_FILE=File not found or corrupt file. Data could not be saved
-#??? ERROR_SAVE_META_RW=Read write error. Data could not be saved.
-#??? ERROR_SAVE_META_ID3=File corrupt. Data could not be saved.
-#??? ERROR_SAVE_META_DISK=Internal error. Data could not be saved.
+ERROR_DEL_META_USER=لا يمكن إزالة المعلومات الغير محفوظة.
+ERROR_DEL_META_SYSTEM=لا يمكن إزالة البيانات
+ERROR_SAVE_META_DOC=حدث خطأ داخلي في المستند. لا يمكن حفظ البيانات
+ERROR_SAVE_META_ILLEGAL=لا شئ موجود ليتم حفظه.
+ERROR_SAVE_META_FILE=الملف غير موجود أو تالف. لا يمكن حفظ البيانات
+ERROR_SAVE_META_RW=حدث خطأ في الكتابة أو القراءة. لا يمكن حفظ البيانات
+ERROR_SAVE_META_ID3=الملف تالف. لا يمكن حفظ البيانات
+ERROR_SAVE_META_DISK=حدث خطأ داخلي. لا يمكن حفظ البيانات
 #??? ERROR_SAVE_META_BAD=Incorrect format entered. Changes will not be saved.
 #??? ERROR_REMOVE_LAST_COL=You cannot turn off all columns.
-#??? ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Could not browse host
-#??? ERROR_BROWSE_HOST_FAILED_END_KEY=.
-#??? ERROR_INVALID_THEME_FILE=The theme file you selected does not exist or is invalid. Please choose another file, or use the default.
+ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=لا يمكن استعراض المضيف
+ERROR_BROWSE_HOST_FAILED_END_KEY=.
+ERROR_INVALID_THEME_FILE=السمة التي قمت باختيارها غير موجودة أو غير صالحة. من فضلك قم باختيار ملف آخر أو استخدم السمة الافتراضية.
 #??? ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
 
 ################################################################################
@@ -856,39 +856,39 @@ ERROR_INTERNAL_OK=موافق
 # package com.limegroup.gnutella.gui.options
 ################################################################################
 #??? OPTIONS_LOCALIZE_MAIN_TITLE=Localize
-#??? OPTIONS_SAVE_MAIN_TITLE=Saving
-#??? OPTIONS_SHARED_MAIN_TITLE=Sharing
-#??? OPTIONS_SPEED_MAIN_TITLE=Speed
+OPTIONS_SAVE_MAIN_TITLE=حفظ
+OPTIONS_SHARED_MAIN_TITLE=مشاركة
+OPTIONS_SPEED_MAIN_TITLE=السرعة
 #??? OPTIONS_DOWNLOAD_MAIN_TITLE=Downloads
 #??? OPTIONS_UPLOAD_MAIN_TITLE=Uploads
-#??? OPTIONS_UPLOAD_BASIC_MAIN_TITLE=Basic
+OPTIONS_UPLOAD_BASIC_MAIN_TITLE=أساسي
 #??? OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Slots
-#??? OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
-#??? OPTIONS_SHUTDOWN_MAIN_TITLE=Shutdown
-#??? OPTIONS_CHAT_MAIN_TITLE=Chat
+OPTIONS_CONNECTIONS_MAIN_TITLE=اتصالات
+OPTIONS_SHUTDOWN_MAIN_TITLE=إيقاف التشغيل
+OPTIONS_CHAT_MAIN_TITLE=دردشة
 #??? OPTIONS_PLAYER_MAIN_TITLE=Player
 #??? OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #??? OPTIONS_APPS_MAIN_TITLE=Helper apps
 #??? OPTIONS_BUGS_MAIN_TITLE=Bug reports
-#??? OPTIONS_GUI_MAIN_TITLE=View
+OPTIONS_GUI_MAIN_TITLE=عرض
 #??? OPTIONS_POPUPS_MAIN_TITLE=Popups
 #??? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete text
-#??? OPTIONS_THEME_MAIN_TITLE=Theme
-#??? OPTIONS_SKIN_MAIN_TITLE=Skin
-#??? OPTIONS_SEARCH_MAIN_TITLE=Searching
+OPTIONS_THEME_MAIN_TITLE=سمة
+#??? OPTIONS_SKIN_MAIN_TITLE=سطح
+OPTIONS_SEARCH_MAIN_TITLE=بحث
 #??? OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Limit
-#??? OPTIONS_SEARCH_QUALITY_MAIN_TITLE=Quality
-#??? OPTIONS_SEARCH_SPEED_MAIN_TITLE=Speed
+OPTIONS_SEARCH_QUALITY_MAIN_TITLE=الجودة
+OPTIONS_SEARCH_SPEED_MAIN_TITLE=السرعة
 #??? OPTIONS_FILTERS_MAIN_TITLE=Filters
 #??? OPTIONS_RESULTS_MAIN_TITLE=Keywords
 #??? OPTIONS_MESSAGES_MAIN_TITLE=Hosts
-#??? OPTIONS_ADVANCED_MAIN_TITLE=Advanced
-#??? OPTIONS_COMPRESSION_MAIN_TITLE=Compression
+OPTIONS_ADVANCED_MAIN_TITLE=متقدم
+OPTIONS_COMPRESSION_MAIN_TITLE=الضغط
 #??? OPTIONS_PREFERENCING_MAIN_TITLE=Preferencing
-#??? OPTIONS_PORT_MAIN_TITLE=Port
-#??? OPTIONS_FIREWALL_MAIN_TITLE=Firewalls
-#??? OPTIONS_PRIVATE_NET_MAIN_TITLE=Private network
-#??? OPTIONS_STARTUP_MAIN_TITLE=System startup
+OPTIONS_PORT_MAIN_TITLE=المنفذ
+OPTIONS_FIREWALL_MAIN_TITLE=الحوائط النارية
+OPTIONS_PRIVATE_NET_MAIN_TITLE=شبكة خاصة
+#??? OPTIONS_S?ARTUP_MAIN_TITLE=System startup
 
 ################################################################################
 # Key/value pairs for the localization options window item
@@ -896,33 +896,33 @@ ERROR_INTERNAL_OK=موافق
 ################################################################################
 #??? OPTIONS_LOCALIZE_TITLE=International localization
 #??? OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that its displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
-#??? OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=Language
-#??? OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=Country
+OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=اللغة
+OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=البلد
 
 ################################################################################
 # Key/value pairs for the save directory options window item
 # in the options window
 ################################################################################
-#??? OPTIONS_SAVE_DIR_TITLE=Save directory
-#??? OPTIONS_SAVE_DIR_LABEL=You can choose the directory for saving files.
-#??? OPTIONS_SAVE_DIR_BOX_LABEL=Directory:
-OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=... استعراض
-#??? OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=Use default
-#??? OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=Choose another directory.
-#??? OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Use the default directory.
-#??? OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=Incomplete files
-#??? OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=You can automatically delete old incomplete download files.
-#??? OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Days to keep incomplete files:
+OPTIONS_SAVE_DIR_TITLE=مجلد الحفظ
+OPTIONS_SAVE_DIR_LABEL=يمكنك اختيار مجلد لحفظ الملفات.
+OPTIONS_SAVE_DIR_BOX_LABEL=المجلد
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=استعراض...
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_LABEL=استخدم الافتراضيات
+OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=اختر مجلد آخر.
+OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=استخدم المجلد الافتراضي.
+OPTIONS_PURGE_INCOMPLETE_TIME_TITLE=الملفات الغير مكتملة
+OPTIONS_PURGE_INCOMPLETE_TIME_LABEL=يمكنك إلغاء الملفات القديمة الغير مكتملة تلقائيا.
+OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=عدد الأيام لحفظ الملفات الغير مكتملة.
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
 # in the options window
 ################################################################################
-#??? OPTIONS_SHARED_DIRS_TITLE=Shared directories
-#??? OPTIONS_SHARED_DIRS_LABEL=You can choose the directories for sharing files. Files in these directories are displayed in the library.
-#??? OPTIONS_SHARED_DIRS_BOX_LABEL=Directories:
-#??? OPTIONS_SHARED_DIRS_BUTTON_LABEL=Add directory...
-#??? OPTIONS_SHARED_DIRS_BUTTON_TIP=Add a directory to share.
+OPTIONS_SHARED_DIRS_TITLE=المجلدات المشارَكة
+OPTIONS_SHARED_DIRS_LABEL=يمكنك غختيار مجلدات لمشاركة الملفات . المجلدات الموجودة في هذه الملفات يتم عرضها في المكتبة.
+OPTIONS_SHARED_DIRS_BOX_LABEL=المجلدات
+OPTIONS_SHARED_DIRS_BUTTON_LABEL=إضافة مجلد...
+OPTIONS_SHARED_DIRS_BUTTON_TIP=مشاركة المجلد.
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -931,16 +931,16 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=... استعراض
 #??? OPTIONS_SHARED_EXTENSIONS_TITLE=Shared extensions
 #??? OPTIONS_SHARED_EXTENSIONS_LABEL=You can choose which file extensions you would like to share.
 #??? OPTIONS_SHARED_EXTENSIONS_BOX_LABEL=Extensions:
-#??? OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=Use defaults
+OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_LABEL=استخدم الافتراضيات
 #??? OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Share the default file extensions.
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
 # in the options window
 ################################################################################
-#??? OPTIONS_SPEED_TITLE=Connection speed
+OPTIONS_SPEED_TITLE=سرعة الاتصال
 #??? OPTIONS_SPEED_LABEL=You can specify your connection speed so that LimeWire can optimize performance.
-#??? OPTIONS_SPEED_BOX_LABEL=Speed:
+OPTIONS_SPEED_BOX_LABEL=السرعة
 
 ################################################################################
 # Key/Value pairs for disabling supernode support
@@ -968,9 +968,9 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=... استعراض
 # Key/Value pairs for the options for automatically clearing downloads
 # in the options window
 ################################################################################
-#??? OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear downloads
-#??? OPTIONS_DOWNLOAD_CLEAR_LABEL=You can choose whether or not to automatically clear downloads that have completed.
-#??? OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-clear completed downloads:
+OPTIONS_DOWNLOAD_CLEAR_TITLE=مسح الملفات التي تم تنزيلها
+OPTIONS_DOWNLOAD_CLEAR_LABEL=يمكنك الاختيار بين المسح التلقائي للملفات التي تم تنزيلها أو لا.
+OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات التي تم تنزيلها
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -1013,7 +1013,7 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=... استعراض
 
 ################################################################################
 # Key/Value pairs for the options for the number of uploads per persons
-################################################################################
+################################?###############################################
 #??? OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads per person
 #??? OPTIONS_UPLOAD_PER_PERSON_LABEL=Allow this many uploads per person.
 #??? OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Uploads per person:
@@ -1021,25 +1021,25 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=... استعراض
 ################################################################################
 # Key/Value pairs for connecting on startup
 ################################################################################
-#??? OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on startup
-#??? OPTIONS_CONNECT_ON_STARTUP_LABEL=You can choose whether or not to automatically connect to the network when the application starts up.
-#??? OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Connect on startup:
+OPTIONS_CONNECT_ON_STARTUP_TITLE=الاتصال عند بدء التشغيل
+OPTIONS_CONNECT_ON_STARTUP_LABEL=يمكنك الاختيار بين الاتصال التلقائي بالشبكة عند تشغيل البرنامج أو لا.
+OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=اتصل عند بدء التشغيل
 
 ################################################################################
 # Key/Value pairs for shutdown options
 ################################################################################
-#??? OPTIONS_SHUTDOWN_TITLE=Shutdown options
-#??? OPTIONS_SHUTDOWN_LABEL=You can choose the default shutdown behavior.
-#??? OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=Shutdown immediately
-#??? OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=Shutdown after transfers
+OPTIONS_SHUTDOWN_TITLE=خيارات إيقاف التشغيل
+OPTIONS_SHUTDOWN_LABEL=يمكنك اختيار طريقة إيقاف التشغيل التلقائية.
+OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=إيقاف التشغيل في الحال
+OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=إيقاف التشغيل بعد الانتهاء من التحويلات
 #??? OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to system tray
 
 ################################################################################
 # Key/Value pairs for the chat options in the options window
 ################################################################################
-#??? OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable chat:
-#??? OPTIONS_CHAT_ACTIVE_TITLE=Host communication
-#??? OPTIONS_CHAT_ACTIVE_LABEL=You can turn chat on or off.
+OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=تمكين الدردشة
+OPTIONS_CHAT_ACTIVE_TITLE=اتصال المضيف
+OPTIONS_CHAT_ACTIVE_LABEL=يمكنك تمكين أو إيقاف تشغيل الدردشة.
 
 ################################################################################
 # Key/Value pairs for the player options in the options window
@@ -1058,88 +1058,88 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_LABEL=... استعراض
 ################################################################################
 # Key/Value pairs for url handler options
 ################################################################################
-#??? OPTIONS_BROWSER_PREFERENCE_TITLE=Browser options
-#??? OPTIONS_BROWSER_PREFERENCE_LABEL=You can choose which browser to use.
-#??? OPTIONS_BROWSER_BOX_LABEL=Browser
-#??? OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Image options
-#??? OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=You can choose which image viewer to use.
-#??? OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image viewer
-#??? OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video options
-#??? OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=You can choose which video player to use.
-#??? OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video player
-#??? OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio options
-#??? OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=You can choose which audio player to use.
-#??? OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio player
+OPTIONS_BROWSER_PREFERENCE_TITLE=خيارات المتصفح
+OPTIONS_BROWSER_PREFERENCE_LABEL=يمكنك اختيار المتصفح الذي ترغب في استخدامه.
+OPTIONS_BROWSER_BOX_LABEL=المتصفح
+OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=خيارات الصور
+OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=يمكنك اختيار عارض الصور الذي ترغب في استخدامه.
+OPTIONS_IMAGE_VIEWER_BOX_LABEL=عارض الصور
+OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=خيارات الفيديو
+OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=يمكنك اختيار مشغل ملفات الفيديو الذي ترغب في استخدامه.
+OPTIONS_VIDEO_PLAYER_BOX_LABEL=مشغل ملفات الفيديو
+OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=خيارات الصوت
+OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=يمكنك اختيار مشغل ملفات الصوت الذي ترغب في استخدامه.
+OPTIONS_AUDIO_PLAYER_BOX_LABEL=مشغل ملفات الصوت
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message bug reports
 ################################################################################
 #??? OPTIONS_BUGS_TITLE=Bug reports
-#??? OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View example'. Choosing 'Always send immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always ask for review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always discard bugs' will cause LimeWire to ignore all bugs (this is not recommended).
-#??? OPTIONS_BUGS_VIEW_EXAMPLE=View example
+#??? OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View example'. Choosing 'Always send immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always ask for review' wil? tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always discard bugs' will cause LimeWire to ignore all bugs (this is not recommended).
+OPTIONS_BUGS_VIEW_EXAMPLE=عرض مثال
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message popups
 ################################################################################
-#??? OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
-#??? OPTIONS_ALWAYS_USE_ANSWER=Always use this answer
+OPTIONS_DO_NOT_ASK_AGAIN=عدم عرض هذه الرسالة مرة أخرى
+OPTIONS_ALWAYS_USE_ANSWER=استخدم نفس الإجابة دائما
 #??? OPTIONS_POPUPS_TITLE=Popups
-#??? OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen 'Do not display this message again' or 'Always use this answer'.
-#??? OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Revert to default
+#??? OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen "عدم عرض هذه الرسالة مرة أخرى" or "استخدم نفس الإجابة دائما".
+OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=استعادة الافتراضيات
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
 # search textfield
 ################################################################################
-#??? OPTIONS_AUTOCOMPLETE_TITLE=Autocomplete
-#??? OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields
+OPTIONS_AUTOCOMPLETE_TITLE=استكمال تلقائي
+#??? OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
 #??? OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields
 
 ################################################################################
 # Key/Value pairs for theme options
 ################################################################################
-#??? OPTIONS_THEME_TITLE=Theme options
+OPTIONS_THEME_TITLE=خيارات السمة
 #??? OPTIONS_THEME_LABEL=You can select from alternate themes for LimeWire.
 #??? OPTIONS_THEME_BROWSE_BUTTON_TIP=Locate theme file
-#??? OPTIONS_THEME_DEFAULT_BUTTON_TIP=Use default theme file
-#??? OPTIONS_THEME_BOX_LABEL=File:
-#??? OPTIONS_THEME_FILE_LABEL=You can choose your current theme.
-#??? OPTIONS_THEME_FILE_CHOOSER_TITLE=Choose your theme
+OPTIONS_THEME_DEFAULT_BUTTON_TIP=استخدم السمة الافتراضية.
+OPTIONS_THEME_BOX_LABEL=ملف
+OPTIONS_THEME_FILE_LABEL=يمكنك اختيار السمة الحالية
+OPTIONS_THEME_FILE_CHOOSER_TITLE=اختر السمة الخاصة بك
 #??? THEME_FILE_DESCRIPTION=LimeWire theme files (*.lwtp)
 #??? THEME_CHANGED_MESSAGE=To try your new theme, you must restart LimeWire.
 
 ################################################################################
 # Key/Value pairs for skin options
 ################################################################################
-#??? OPTIONS_SKIN_TITLE=Skin options
+OPTIONS_SKIN_TITLE=خيارات السطح
 #??? OPTIONS_SKIN_LABEL=Choose LimeWire's skin. Using SkinLF developed by L2FProd.com (http://www.L2FProd.com/).
-#??? OPTIONS_SKIN_BROWSE_BOX_LABEL=Skin:
-#??? OPTIONS_SKIN_BROWSE_BUTTON_LABEL=...skins استعراض
-#??? OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=Preview
-#??? OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=No skin
-#??? OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=Download...
-#??? OPTIONS_SKIN_BROWSE_BUTTON_TIP=Choose another skin.
-#??? OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Preview selected skin.
+OPTIONS_SKIN_BROWSE_BOX_LABEL=السطح
+OPTIONS_SKIN_BROWSE_BUTTON_LABEL=استعراض الأسطح...
+OPTIONS_SKIN_PREVIEW_BUTTON_LABEL=مشاهدة
+OPTIONS_SKIN_DEFAULT_BUTTON_LABEL=لا يوجد سطح
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_LABEL=جاري التنزيل...
+OPTIONS_SKIN_BROWSE_BUTTON_TIP=اختر سطحا آخرا.
+OPTIONS_SKIN_PREVIEW_BUTTON_TIP=مشاهدة السطح المختار.
 #??? OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Don't skin LimeWire.
-#??? OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Download new skins from www.javootoo.com...
+OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=قم بتنزيل أسطح جديدة من www.javootoo.com...
 #??? SKIN_APPLY_MESSAGE=Skin changes only take effect after restarting LimeWire...
 #??? SKIN_RESTART_NEEDED=LimeWire must be restarted for this skin change to take effect.
 
 ################################################################################
 # Key/Value pairs for browse for new skins option pane
 ################################################################################
-#??? OPTIONS_BROWSE_SKIN_TITLE=Browse for new skins
-#??? OPTIONS_BROWSE_SKIN_LABEL=Find skins at http://www.javootoo.com
+OPTIONS_BROWSE_SKIN_TITLE=استعراض أسطح جديدة
+OPTIONS_BROWSE_SKIN_LABEL=المزيد من الأسطح تجدها في http://www.javootoo.com.
 
 ################################################################################
 # Key/value pairs for the skin options window
 ################################################################################
-#??? SKIN_EDITOR_PREVIEW_BUTTON=Preview
-#??? SKIN_EDITOR_REMOVE_BUTTON=Use default
-SKIN_EDITOR_BROWSE_BUTTON=... استعراض
-#??? SKIN_EDITOR_PREVIEW_BUTTON_TIP=Preview skin
-#??? SKIN_EDITOR_REMOVE_BUTTON_TIP=Use the default skin
-#??? SKIN_EDITOR_BROWSE_BUTTON_TIP=Browse for skins
+SKIN_EDITOR_PREVIEW_BUTTON=مشاهدة
+SKIN_EDITOR_REMOVE_BUTTON=استخدم الافتراضيات
+SKIN_EDITOR_BROWSE_BUTTON=استعراض...
+SKIN_EDITOR_PREVIEW_BUTTON_TIP=مشاهدة السطح.
+SKIN_EDITOR_REMOVE_BUTTON_TIP=استخدام السطح الافتراضي.
+SKIN_EDITOR_BROWSE_BUTTON_TIP=استعراض الأسطح.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
@@ -1152,7 +1152,7 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 ################################################################################
 # Key/Value pairs for search quality options in the options window
 ################################################################################
-#??? OPTIONS_SEARCH_QUALITY_TITLE=Search result quality
+OPTIONS_SEARCH_QUALITY_TITLE=جودة نتيجة البحث
 #??? OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display. Four star results indicate that the host returning the result is not firewalled and has free upload slots.
 #??? OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Show only four star results
 #??? OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Show only three and four star results
@@ -1162,12 +1162,12 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 ################################################################################
 # Key/Value pairs for minimum search result speed options
 ################################################################################
-#??? OPTIONS_SEARCH_SPEED_TITLE=Search result speed
-#??? OPTIONS_SEARCH_SPEED_LABEL=You can select the minimum speed of search results to display.
+OPTIONS_SEARCH_SPEED_TITLE=سرعة نتيجة البحث
+OPTIONS_SEARCH_SPEED_LABEL=يمكنك اختيار أقل سرعة لنتائج البحث لعرضها.
 #??? OPTIONS_SEARCH_SPEED_T3_LABEL=Show only results of T3 speed or higher
 #??? OPTIONS_SEARCH_SPEED_T1_LABEL=Show only results of T1 speed or higher
 #??? OPTIONS_SEARCH_SPEED_CABLE_LABEL=Show only results of cable/DSL speed or higher
-#??? OPTIONS_SEARCH_SPEED_ALL_LABEL=Show all speeds
+#??? OPTIONS_SEARCH_SPEED_ALL_LABEL=إظهار جميع السرعات
 
 ################################################################################
 # Key/Value pairs for result filtering options
@@ -1198,7 +1198,7 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 # Key/Value pairs for disabling compression support
 ################################################################################
 #??? OPTIONS_COMPRESSION_TITLE=Compression capabilities
-#??? OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disabling these options.
+#??? OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disa?ling these options.
 #??? OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Disable outgoing compression
 #??? OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Disable incoming compression
 
@@ -1210,8 +1210,8 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 #??? OPTIONS_CONNECT_PREF_LABEL=You can limit who is able to connect to you based on the number of files they share.
 #??? OPTIONS_CONNECT_PREF_BOX_LABEL=Files you must share to not be a freeloader:
 #??? OPTIONS_CONNECT_PREF_SLIDER_LABEL=Allow freeloaders:
-#??? OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Rarely
-#??? OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Always
+OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=نادرا
+OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=دائما
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
@@ -1236,8 +1236,8 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 ################################################################################
 #??? OPTIONS_CONNECT_STRING_TITLE=Private network
 #??? OPTIONS_CONNECT_STRING_LABEL=You can set the connection handshake for a private Gnutella network. Other Gnutella hosts you connect to will need the same handshake.
-#??? OPTIONS_CONNECT_STRING_STRING_LABEL=Connect string:
-#??? OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Connect OK string:
+#??? OPTIONS_CONNECT_STRING_STRING_LABEL=Connect string
+#??? OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Connect OK string
 
 ################################################################################
 # Key/Value pairs for browse for the Private Net options pane
@@ -1245,9 +1245,9 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 #??? OPTIONS_PRIVATE_NET_TITLE=Private network
 #??? OPTIONS_PRIVATE_NET_LABEL=Configure private network options for LimeWire.
 #??? OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a Private Network?
-#??? OPTIONS_PRIVATE_CACHE_IP_LABEL=Hostname
-#??? OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
-#??? OPTIONS_PRIVATE_CACHE_NAME_LABEL=Name
+OPTIONS_PRIVATE_CACHE_IP_LABEL=اسم المضيف
+OPTIONS_PRIVATE_CACHE_PORT_LABEL=المنفذ
+OPTIONS_PRIVATE_CACHE_NAME_LABEL=الاسم
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -1255,7 +1255,7 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 ################################################################################
 #??? OPTIONS_STARTUP_TITLE=System startup
 #??? OPTIONS_STARTUP_LABEL=You can choose whether or not to automatically run LimeWire when your computer starts.
-#??? OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on system startup:
+#??? OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on system startup
 
 ################################################################################
 # Key/value pairs for top-level stats panels
@@ -1268,7 +1268,7 @@ SKIN_EDITOR_BROWSE_BUTTON=... استعراض
 
 #??? STATS_ADVANCED_PANE_TITLE=Advanced
 #??? STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic. This information can be useful for advanced users as well as for researchers working on the Gnutella network. For example, researchers can choose to write any statistic to a file. This file will be named automatically and will be saved in the working directory. Data will be reported in comma-delimited format, easily viewable in any spreadsheet program. Advanced statistics are not displayed by default and are not recommended for most users.
-#??? STATS_ADVANCED_CHECK_BOX_LABEL=Show advanced statistics:
+#??? STATS_ADVANCED_CHECK_BOX_LABEL=Show advanced statistics
 
 # Advanced Gnutella messages panes
 GNUTELLA_MESSAGES=Gnutella
@@ -1276,30 +1276,30 @@ GNUTELLA_MESSAGES=Gnutella
 ###################################################################
 # Key/value pairs for network state statistics panel
 ###################################################################
-#??? STATS_NETWORK_INFO_TITLE=Network information
+STATS_NETWORK_INFO_TITLE=معلومات الشبكة
 
-#??? STATS_CONNECTION_TITLE=Connections
-#??? STATS_UPLOADS=Current uploads:
-#??? STATS_DOWNLOADS=Current downloads:
-#??? STATS_NET=Current hosts:
-#??? STATS_HOSTS=Total hosts:
-#??? STATS_FILES=Total files:
-#??? STATS_FILE_SIZE=Total file MBs:
+STATS_CONNECTION_TITLE=الاتصالات
+#??? STATS_UPLOADS=Current uploads
+#??? STATS_DOWNLOADS=Current downloads
+#??? STATS_NET=Current hosts
+#??? STATS_HOSTS=Total hosts
+STATS_FILES=العدد الكلي للملفات
+#??? STATS_FILE_SIZE=Total file MBs
 
 #??? STATS_NETWORK_TITLE=Net
-#??? STATS_TOTAL_MESSAGES=Total messages:
-#??? STATS_LOCAL_SEARCHES=Local searches:
-#??? STATS_ROUTING_ERRORS=Routing errors:
-#??? STATS_DROPPED_MESSAGES=Dropped messages:
-#??? STATS_DOWNLOAD_COUNT=Download count:
-#??? STATS_UPLOAD_COUNT=Upload count:
+STATS_TOTAL_MESSAGES=العدد الكلي للرسائل
+#??? STATS_LOCAL_SEARCHES=Local searches
+#??? STATS_ROUTING_ERRORS=Routing errors
+#??? STATS_DROPPED_MESSAGES=Dropped messages
+#??? STATS_DOWNLOAD_COUNT=Download count
+#??? STATS_UPLOAD_COUNT=Upload count
 
-#??? STATS_BUTTON_LABEL=Update
+STATS_BUTTON_LABEL=تحديث
 
 ################################################################################
 # Key/value pairs for bandwidth statistics panes
 ################################################################################
-#??? BANDWIDTH_KEY=Bandwidth
+BANDWIDTH_KEY=سرعة النقل
 #??? STATS_TOTAL_UPSTREAM_BANDWIDTH_TITLE=Upstream
 #??? STATS_TOTAL_UPSTREAM_BANDWIDTH_LABEL=Total bandwidth used to send outgoing data, either through uploads or Gnutella messages.
 #??? STATS_TOTAL_DOWNSTREAM_BANDWIDTH_TITLE=Downstream
@@ -1320,7 +1320,7 @@ GNUTELLA_MESSAGES=Gnutella
 #??? RECEIVED_QUERY_REQUESTS=Queries
 #??? RECEIVED_QUERY_REPLIES=Query hits
 
-#??? RECEIVED_MESSAGE_BYTES=Kilobytes
+RECEIVED_MESSAGE_BYTES=ك.ب
 #??? RECEIVED_QUERY_REQUESTS_BYTES=Queries
 #??? RECEIVED_QUERY_REPLIES_BYTES=Query hits
 
@@ -1329,7 +1329,7 @@ GNUTELLA_MESSAGES=Gnutella
 STATS_RECEIVED_TCP=TCP
 STATS_RECEIVED_UDP=UDP
 STATS_RECEIVED_MULTICAST=Multicast
-#??? LIME_RECEIVED_MESSAGE_BYTES=Kilobytes
+LIME_RECEIVED_MESSAGE_BYTES=ك.ب
 STATS_RECEIVED_TCP_BYTES=TCP
 STATS_RECEIVED_UDP_BYTES=UDP
 STATS_RECEIVED_MULTICAST_BYTES=Multicast
@@ -1392,7 +1392,7 @@ STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
-#??? STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
+#??? ST?TS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=Queries
 #??? STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=TCP queries received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=Query hits
@@ -1438,7 +1438,7 @@ STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 #??? STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_TITLE=Query hits
 #??? STATS_LIME_RECEIVED_BYTES_TCP_QUERY_REPLIES_LABEL=TCP query hits received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_TITLE=Pushes
-#??? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires?
 # number of kilobytes received for LimeWire-specific stats -- UDP
 #??? STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=Total
 #??? STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
@@ -1493,7 +1493,7 @@ QRP_MESSAGES=QRP
 #??? STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Hit
 #??? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False positive
 
-################################################################################
+#############?##################################################################
 # Key/value pairs for advanced Gnutella message statistics -- errors messages
 ################################################################################
 #??? ERROR_MESSAGES=Errors
@@ -1516,14 +1516,14 @@ QRP_MESSAGES=QRP
 ################################################################################
 #??? SENT_MESSAGES=Sent
 #??? SENT_MESSAGE_NUMBER=Number
-#??? SENT_MESSAGE_BYTES=Kilobytes
+SENT_MESSAGE_BYTES=ك.ب
 #??? SENT_LIMEWIRE=LimeWire messages
 
 #??? LIME_SENT_MESSAGES_NUMBER=Number
 STATS_SENT_TCP=TCP
 STATS_SENT_UDP=UDP
 STATS_SENT_MULTICAST=Multicast
-#??? LIME_SENT_MESSAGES_BYTES=Kilobytes
+LIME_SENT_MESSAGES_BYTES=ك.ب
 STATS_SENT_TCP_BYTES=TCP
 STATS_SENT_UDP_BYTES=UDP
 STATS_SENT_MULTICAST_BYTES=Multicast
@@ -1564,7 +1564,7 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? STATS_LIME_SENT_TCP_QUERY_REPLIES_TITLE=Query hits
 #??? STATS_LIME_SENT_TCP_QUERY_REPLIES_LABEL=TCP query hits sent from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_SENT_TCP_PUSH_REQUESTS_TITLE=Pushes
-#??? STATS_LIME_SENT_TCP_PUSH_REQUESTS_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_SENT_TCP_PUSH_REQUES?S_LABEL=TCP pushes sent from all Gnutella clients versus other LimeWires.
 # number of messages sent for LimeWire-specific stats -- UDP
 #??? STATS_LIME_SENT_UDP_MESSAGES_TITLE=Total
 #??? STATS_LIME_SENT_UDP_MESSAGES_LABEL=Total number of messages sent by other LimeWires.
@@ -1614,7 +1614,7 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=Kilobytes for UDP pongs sent from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=Queries
 #??? STATS_LIME_SENT_BYTES_UDP_QUERIES_LABEL=Kilobytes for UDP queries sent from all Gnutella clients versus other LimeWires.
-#??? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_TITLE=Query hits
+#??? STATS_LIME_SENT_B?TES_UDP_QUERY_REPLIES_TITLE=Query hits
 #??? STATS_LIME_SENT_BYTES_UDP_QUERY_REPLIES_LABEL=Kilobytes for UDP query hits sent from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_TITLE=Pushes
 #??? STATS_LIME_SENT_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes sent from all Gnutella clients versus other LimeWires.
@@ -1670,7 +1670,7 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- flow control
-################################################################################
+###################################?############################################
 #??? FLOW_CONTROLLED_MESSAGES=Flow control
 #??? STATS_FLOW_CONTROL_TITLE=Number
 #??? STATS_FLOW_CONTROL_LABEL=Statistics for flow controlled messages.
@@ -1723,7 +1723,7 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? STATS_UPLOAD_REQUESTS_TITLE=Requests
 #??? STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
 #??? STATS_UPLOAD_RESPONSES_TITLE=Responses
-#??? STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the amount of requests for which we have attempted to transfer a portion of a file.
+#??? STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the amount of requests for which we have attempted to transf?r a portion of a file.
 #??? STATS_UPLOAD_METHODS_TITLE=Request methods
 #??? STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
 #??? STATS_UPLOAD_GENERAL_TITLE=General
@@ -1733,16 +1733,16 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 # Key/Value pairs for statistics graph axis labels
 ################################################################################
 # defaults
-#??? DEFAULT_X_AXIS_LABEL=seconds
+DEFAULT_X_AXIS_LABEL=ث
 #??? DEFAULT_Y_AXIS_LABEL=messages
-#??? DEFAULT_Y_BYTE_AXIS_LABEL=kilobytes
-#??? Y_AXIS_BANDWIDTH_LABEL=kilobytes
+DEFAULT_Y_BYTE_AXIS_LABEL=ك.ب
+Y_AXIS_BANDWIDTH_LABEL=ك.ب
 
 ################################################################################
 # Key/Value pairs for statistics graph legend labels and stat window titles
 ################################################################################
 # Column names
-#??? STATS_LEGEND_NAME=Name
+STATS_LEGEND_NAME=الاسم
 #??? STATS_LEGEND_AVERAGE=Average
 #??? STATS_LEGEND_MAX=Max
 #??? STATS_LEGEND_TOTAL=Total
@@ -1814,9 +1814,9 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast messages
 
 # Generic Errors
-#??? ERROR_ALL_RECEIVED=All errors
-#??? ERROR_CONNECTION_CLOSED=Connection closed
-#??? ERROR_INVALID_LENGTH=Invalid payload length
+ERROR_ALL_RECEIVED=جميع الأخطاء
+ERROR_CONNECTION_CLOSED=تم قطع الاتصال
+#??? ERROR_INVALID_LENGTH=Invalid pay?oad length
 #??? ERROR_INVALID_HOPS=Invalid hops
 #??? ERROR_INVALID_TTL=Invalid TTL
 #??? ERROR_HOPS_EXCEED_SOFT_MAX=Hops > soft max
@@ -1923,7 +1923,7 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? DOWNLOAD_NOT_SHARING=Not sharing files
 #??? DOWNLOAD_QUEUED=Queued
 #??? DOWNLOAD_RANGE_UNAVAILABLE=Range unavailable
-#??? DOWNLOAD_PROBLEM_READING_HEADER=Problem reading header
+#??? DOWNLOAD_PROBLEM_READING_HEADER=Problem readi?g header
 #??? DOWNLOAD_UNKNOWN_CODE=Unknown response code
 #??? DOWNLOAD_NO_SUCH_RANGE=Incompatible ranges
 #??? DOWNLOAD_ERROR=IO error
@@ -1962,8 +1962,8 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? UPLOAD_STAT_FREELOADER=Freeloader
 #??? UPLOAD_STAT_QUEUED=Queued
 #??? UPLOAD_STAT_NORMAL=Normal
-#??? UPLOAD_STAT_GET=Get
-#??? UPLOAD_STAT_HEAD=Head
+#??? UPLOAD_STAT_GET=GET
+#??? UPLOAD_STAT_HEAD=HEAD
 #??? UPLOAD_STAT_UNKNOWN=Unknown
 #??? UPLOAD_STAT_PUSHED_GET=Pushed GET
 #??? UPLOAD_STAT_PUSHED_HEAD=Pushed HEAD
@@ -1981,7 +1981,7 @@ STATS_SENT_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? LEAF_OUTGOING_ACCEPT=Out acc.
 #??? LEAF_INCOMING_REJECT=In rej.
 #??? LEAF_INCOMING_ACCEPT=In acc.
-#??? UP_OUTGOING_REJECT_FULL=Out rej. (Full)
+#??? UP_OUTGOING_REJECT_FULL=Out rej. (full)
 #??? UP_OUTGOING_GUIDANCE_FOLLOWED=Out acc. (followed guidance)
 #??? UP_OUTGOING_GUIDANCE_IGNORED=Out acc. (ignored guidance)
 #??? UP_OUTGOING_ACCEPT=Out acc. (no guidance)
