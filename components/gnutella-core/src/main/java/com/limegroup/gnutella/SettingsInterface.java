@@ -37,7 +37,6 @@ public interface SettingsInterface
      *  host list file get saved*/
     public String getPath();
 
-
     /** set the user time to live */
     public void setTTL(byte ttl) 
 	throws IllegalArgumentException;
@@ -126,7 +125,7 @@ public interface SettingsInterface
     public static final String TIMEOUT              = "TIMEOUT";
     public static final String KEEP_ALIVE           = "KEEP_ALIVE";
     public static final String PORT                 = "PORT";
-    public static final String SPEED                = "SPEED";
+    public static final String SPEED                = "CONNECTION_SPEED";
     public static final String SEARCH_LIMIT         = "SEARCH_LIMIT";
     public static final String CLIENT_ID            = "CLIENT_ID";
     public static final String STATS                = "STATS";
