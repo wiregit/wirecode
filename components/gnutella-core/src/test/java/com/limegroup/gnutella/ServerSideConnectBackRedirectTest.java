@@ -304,12 +304,10 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         TCP_ACCESS.setSoTimeout(1000);
         try {
             Socket x = TCP_ACCESS.accept();
-            byte[] read = new byte[3];
+            byte[] read = new byte["CONNECT BACK\r\n\r\n".length() + 1];
             int n = x.getInputStream().read(read);
-            assertEquals(2, n);
-            assertEquals('\n', read[0]);
-            assertEquals('\n', read[1]);
-            assertEquals(0, read[2]);
+            assertEquals(read.length - 1, n);
+            assertEquals("CONNECT BACK\r\n\r\n\u0000".getBytes(), read);
         } catch (IOException bad) {
             fail("got IOX", bad);
         }
