@@ -9,7 +9,7 @@ import de.vdheide.mp3.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
- * files and creates GMLDocuments from them. 
+ * files and creates XMLDocuments from them. 
  *
  * @author Sumeet Thadani
  */
@@ -17,6 +17,9 @@ public final class ID3Reader {
     private static final String schemaURI = 
          "http://www.limewire.com/schemas/audio.xsd";
 
+    private static final String ISO_LATIN_1 = "8859_1";
+    private static final String UNICODE = "Unicode";
+    
     private static final String KEY_PREFIX = "audios" + 
         XMLStringUtils.DELIMITER + "audio" + XMLStringUtils.DELIMITER;
     private static final String TRACK_KEY =    KEY_PREFIX + "track" + 
@@ -206,7 +209,12 @@ public final class ID3Reader {
      * Helper method to generate a string from an id3v1 filled buffer.
      */
     private static String getString(byte[] buffer, int length) {
-        return new String(buffer, 0, getTrimmedLength(buffer, length));
+        try {
+            return new String(buffer, 0, getTrimmedLength(buffer, length), ISO_LATIN_1);
+        } catch (UnsupportedEncodingException err) {
+            // should never happen
+            return null;
+        }
     }
 
     /**
@@ -233,11 +241,21 @@ public final class ID3Reader {
         
         //rather than getting each frame indvidually, we can get all the frames
         //and iterate, leaving the ones we are not concerned with
-
         for(Iterator iter=frames.iterator() ; iter.hasNext() ; ) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
             String frameID = frame.getID();
-            String frameContent = new String(frame.getContent()).trim();
+            byte[] contentBytes = frame.getContent();
+            String frameContent = null;
+            
+            if (contentBytes.length > 0) {
+                try {
+                    String enc = (frame.isISOLatin1()) ? ISO_LATIN_1 : UNICODE;
+                    frameContent = new String(contentBytes, enc).trim();
+                } catch (UnsupportedEncodingException err) {
+                    // should never happen
+                }
+            }
+
             if(frameContent == null || frameContent.trim().equals(""))
                 continue;
             //check which tag we are looking at

@@ -37,6 +37,9 @@ public class ID3Editor {
     private static final String BITRATE_STRING = "bitrate=\"";
     private static final String SECONDS_STRING = "seconds=\"";
 
+    private static final String ISO_LATIN_1 = "8859_1";
+    private static final String UNICODE = "Unicode";
+    
     static final String TITLE_ID = "TIT2";
     static final String ARTIST_ID = "TPE1";
     static final String ALBUM_ID = "TALB";
@@ -446,17 +449,31 @@ public class ID3Editor {
     }
 
     private ID3v2Frame makeFrame(String frameID, String value) {
+        
+        boolean isISOLatin1 = true;
+        
+        // Basic/ISO-Latin-1: 0x0000 ... 0x00FF
+        // Unicode: > 0x00FF ??? Even with 3byte chars?
+        for(int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) > 0x00FF) {
+                isISOLatin1 = false;
+                break;
+            }
+        }
+        
         try {
             return new ID3v2Frame(frameID, 
-                              value.getBytes(), 
+                              value.getBytes((isISOLatin1) ? ISO_LATIN_1 : UNICODE), 
                               true, //discard tag if it's altered/unrecognized
                               true, //discard tag if file altered/unrecognized
                               false,//read/write
                               ID3v2Frame.NO_COMPRESSION, //no compression
                               (byte)0,//no encryption
-                              (byte)0 //no Group
-                              );//no
+                              (byte)0, //no Group
+                              isISOLatin1);
         } catch(ID3v2DecompressionException cx) {
+            return null;
+        } catch (UnsupportedEncodingException err) {
             return null;
         }
     }
@@ -545,9 +562,15 @@ public class ID3Editor {
         if (val==null || val.equals("")) {
             fromString = new byte[maxLen];
             Arrays.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
-        } else
-            fromString = val.getBytes();
-            
+        } else {
+            try {
+                fromString = val.getBytes(ISO_LATIN_1);
+            } catch (UnsupportedEncodingException err) {
+                // Should never happen
+                return false;
+            }
+        }
+        
         int len = fromString.length;
         if (len < maxLen) {
             System.arraycopy(fromString,0,buffer,0,len);
