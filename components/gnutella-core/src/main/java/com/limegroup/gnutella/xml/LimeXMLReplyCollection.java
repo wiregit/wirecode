@@ -379,7 +379,6 @@ public class LimeXMLReplyCollection {
         }
         
         fd.addLimeXMLDocument(replyDoc);
-        replyDoc.setIdentifier(fd.getFile());
     }
 
 
@@ -457,6 +456,7 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             for(Iterator i = query.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
+
                 // Get the name of the particular field being queried for.
                 final String name = (String)entry.getKey();
                 // Lookup the matching Trie for that field.

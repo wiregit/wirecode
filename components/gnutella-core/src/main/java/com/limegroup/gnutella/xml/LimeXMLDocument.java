@@ -12,12 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.metadata.MP3MetaData;
 import com.limegroup.gnutella.util.NameValue;
 
 import org.apache.commons.logging.LogFactory;

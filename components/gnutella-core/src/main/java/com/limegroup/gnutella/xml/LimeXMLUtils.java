@@ -210,10 +210,11 @@ public class LimeXMLUtils
             Map.Entry entry = (Map.Entry)i.next();
             String currFieldName = (String)entry.getKey();
             String queryValue = (String)entry.getValue();
-            Assert.that( queryValue != null, "null value");            
+            Assert.that( queryValue != null, "null value");
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
+            
             if((replyDocValue == null) || replyDocValue.equals(""))
                 nullCount++;
             else {
@@ -229,15 +230,13 @@ public class LimeXMLUtils
                             matchedBitrate = true;
                     }
                     continue;
-                }
-                catch (NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                     // just roll through and try to do a normal test...
                 } 
                 // we used to do a .equalsIgnoreCase, but that is a little too
                 // rigid.  so do a ignore case prefix match.
                 String queryValueLC = queryValue.toLowerCase(Locale.US);
-                String replyDocValueLC = 
-                              I18NConvert.instance().getNorm(replyDocValue);
+                String replyDocValueLC = I18NConvert.instance().getNorm(replyDocValue);
                 if(replyDocValueLC.startsWith(queryValueLC))
                     matchCount++;
             }
