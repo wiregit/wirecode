@@ -27,11 +27,6 @@ public final class UDPAcceptor implements Runnable {
 	private final int BUFFER_SIZE = 8192;
 
 	/**
-	 * Constant buffer used for the message header data.
-	 */
-	private byte[] HEADER_BUF=new byte[23];
-
-	/**
 	 * Instance accessor.
 	 */
 	public static UDPAcceptor instance() {
@@ -79,7 +74,7 @@ public final class UDPAcceptor implements Runnable {
 					//Message message = Message.readUdpData(data);	
 					// we do things the old way temporarily
 					InputStream in = new ByteArrayInputStream(data);
-					Message message = Message.read(in, HEADER_BUF);		
+					Message message = Message.read(in);		
 					if(message == null) continue;
 					router.handleUDPMessage(message, datagram);					
 				} catch(BadPacketException e) {
@@ -97,9 +92,9 @@ public final class UDPAcceptor implements Runnable {
 		UDP_SOCKET.send(datagram);
 	}
 
-	public DatagramSocket getDatagramSocket() {
-		return UDP_SOCKET;
-	}
+	//public DatagramSocket getDatagramSocket() {
+	//return UDP_SOCKET;
+	//}
 
 	/**
 	 * Returns the port that the UDP socket is listening on.
