@@ -192,7 +192,7 @@ public final class UDPService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);
+                    Message message = Message.read(in, Message.N_UDP);
                     if (!isGUESSCapable()) {
                         if (message instanceof PingRequest) {
                             GUID guidReceived = new GUID(message.getGUID());

@@ -50,12 +50,6 @@ public final class MulticastService implements Runnable {
      */
     private int _port = -1;
 
-    /**
-     * Used for synchronized SEND access to the UDP socket.  Should only be used
-     * in the send method.
-     */
-    //private final Object _sendLock = new Object();
-
 	/**
 	 * Constant for the size of Multicast messages to accept -- dependent upon
 	 * IP-layer fragmentation.
@@ -102,11 +96,11 @@ public final class MulticastService implements Runnable {
      */
     MulticastSocket newListeningSocket(int port, InetAddress group) throws IOException {
         try {
-            _port = port;
-            _group = group;
             MulticastSocket sock = new MulticastSocket(port);
             sock.setTTL((byte)3);
             sock.joinGroup(group);
+            _port = port;
+            _group = group;            
             return sock;
         }
         catch (SocketException se) {
@@ -135,24 +129,21 @@ public final class MulticastService implements Runnable {
             _socket.close();
         //b) Replace with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
-            //synchronized (_sendLock) {
-                // if the input is null, then the service will shut off ;) .
-                // leave the group if we're shutting off the service.
-                if (multicastSocket == null 
-                 && _socket != null
-                 && _group != null) {
-                    try {
-                        _socket.leaveGroup(_group);
-                    } catch(IOException ignored) {
-                        // ideally we would check if the socket is closed,
-                        // which would prevent the exception from happening.
-                        // but that's only available on 1.4 ... 
-                    }                        
-                }
-                _socket = (MulticastSocket) multicastSocket;
-                _receiveLock.notify();
-               // _sendLock.notify();
-           // }
+            // if the input is null, then the service will shut off ;) .
+            // leave the group if we're shutting off the service.
+            if (multicastSocket == null 
+             && _socket != null
+             && _group != null) {
+                try {
+                    _socket.leaveGroup(_group);
+                } catch(IOException ignored) {
+                    // ideally we would check if the socket is closed,
+                    // which would prevent the exception from happening.
+                    // but that's only available on 1.4 ... 
+                }                        
+            }
+            _socket = (MulticastSocket) multicastSocket;
+            _receiveLock.notify();
         }
 	}
 
