@@ -1816,7 +1816,7 @@ public class ConnectionManager {
     public void noInternetConnection() {
         
         // Notify the user that they have no internet connection.
-        MessageService.showError("NO_INTERNET");
+        MessageService.showError("NO_INTERNET", QuestionsHandler.NO_INTERNET);
         
         _noInternetConnection = true;
         

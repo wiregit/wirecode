@@ -86,4 +86,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting THEME_DOWNLOADED =
         FACTORY.createIntSetting("THEME_DOWNLOADED", 0);
+        
+    /**
+     * Settings for whether or not to display a message that no
+     * internet connection is detected.
+     */
+    public static final BooleanSetting NO_INTERNET =
+        FACTORY.createBooleanSetting("NO_INTERNET", false);
 }
