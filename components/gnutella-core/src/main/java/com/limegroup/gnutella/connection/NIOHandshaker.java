@@ -114,6 +114,14 @@ public class NIOHandshaker extends AbstractHandshaker {
         write();
     }
 
+    /**
+     * Writes handshaking data to the network depending on the current state
+     * of the handshake.  This may, for example, write the connection
+     * request on an outgoing handshake, or it may write the handshake 
+     * response.
+     * 
+     * @throws IOException if there is an IO error writing data to the network
+     */
     public boolean write() throws IOException  {
         if(CONNECTION.isOutgoing() && _requestBuffer.hasRemaining())  {
             // if this returns true, this will no longer be registered for
@@ -157,53 +165,6 @@ public class NIOHandshaker extends AbstractHandshaker {
     }    
 
 
-    /**
-     * Writes the properties in props to network, including the blank line at
-     * the end.  Throws IOException if there are any problems.
-     * @param props The headers to be sent. Note: null argument is 
-     * acceptable, if no headers need to be sent (still the trailer will
-     * be sent
-     * @modifies network 
-     */
-    private static boolean sendHeaders(Connection conn, Properties headers, 
-        HeaderWriter writer, Properties headersWritten) throws IOException {
-        boolean allHeadersWritten = true;
-        Enumeration enum = headers.propertyNames();
-        List headersToRemove = new LinkedList();
-        while (enum.hasMoreElements()) {
-            String key = (String)enum.nextElement();
-            String value = headers.getProperty(key);
-            // Overwrite any domain name with true IP address
-            if ( HeaderNames.REMOTE_IP.equals(key) )
-                value = 
-                    conn.getSocket().getInetAddress().getHostAddress();
-            if (value==null)
-                value = "";
-            boolean headerWritten = writer.writeHeader(key+": "+value+CRLF);   
-            if(headerWritten) {
-                headersToRemove.add(key);
-                headersWritten.put(key, value);
-            } else  {
-                allHeadersWritten = false;
-                break;
-            }
-        }
-        
-
-        if(allHeadersWritten) {
-            //send the trailer
-            return writer.closeHeaderWriting();
-            
-        } else {
-            Iterator iter = headersToRemove.iterator();
-            while(iter.hasNext())  {
-                String key = (String)iter.next();
-                headers.remove(key);
-            }
-            return false;           
-        }
-    }
-
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.Handshaker#setWriteRegistered(boolean)
      */
@@ -224,20 +185,16 @@ public class NIOHandshaker extends AbstractHandshaker {
         
         // inherit doc comment
         public HandshakeState handshake() throws IOException {
-            //1. Send "GNUTELLA CONNECT/0.6" and headers
-            if(_headerWriter.hasBufferedData())  {
-                if(_headerWriter.write())  {
-                    return new OutgoingHeaderState();
-                }
+            // Send "GNUTELLA CONNECT/0.6" and headers
+            if(writeBuffer(_requestBuffer)) {
+                   
             }
-            boolean wroteOutgoingConnect = 
-                _headerWriter.writeHeader(GNUTELLA_CONNECT_06+CRLF);
-            if(wroteOutgoingConnect)  {
-                return new OutgoingHeaderState();
-            } else if(!_registered) {
-                NIODispatcher.instance().addWriter(CONNECTION);
-            }   
-            return this;                        
+            
+            if(_requestBuffer.hasRemaining()) {
+                return this;
+            } else {
+                return null;
+            }      
         }
     }
     
