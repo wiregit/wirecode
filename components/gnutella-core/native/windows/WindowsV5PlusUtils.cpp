@@ -1,3 +1,34 @@
+//*****************************************************************************
+//#define NEW_CODE		//	Turns on the new WinXP ICF firewall detection code
+#define MACHINE_ARCH	//	Turns on the machine arch macros
+//*****************************************************************************
+// NOTE:  To compile this file with GCC, the following command should be used:
+//
+//	gcc -mno-cygwin -I/cygdrive/c/Program\ Files/Java/jdk1.5.0_01/include 
+//		-I/cygdrive/c/Program\ Files/Java/jdk1.5.0_01/include/win32
+//		-I/cygdrive/c/Program\ Files/Microsoft\ XP\ SP2\ PSDK/Include
+//		-Wl,--add-stdcall-alias -shared -o WindowsV5PlusUtils.dll WindowsV5PlusUtils.cpp
+//
+//	NOTE: Replace the -I include paths with the paths to the Java & WinXP SP2 
+//		PSDK include files (see below comments for Download URL of PSDK)
+//*****************************************************************************
+//	NOTE: As of Tuesday, 25th January 2005, this file won't compile under GCC.
+//		Lots of errors in the Windows include files cause problems.  This file 
+//		should probably be compiled under MS VC++ to a DLL.  I will work on this
+//		more tomorrow, to get a clean build made.
+//*****************************************************************************
+
+#ifdef MACHINE_ARCH
+	//	_M_IX86 must be defined for x86 architectures
+	#ifndef _M_IX86
+	#define _M_IX86
+	#endif
+
+	#ifndef _WIN32
+	#define _WIN32
+	#endif
+#endif
+
 #include <jni.h>
 #include <windows.h>
 
@@ -24,6 +55,7 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(
 //	http://www.microsoft.com/msdownload/platformsdk/sdkupdate/XPSP2FULLInstall.htm
 //	and may still be.
 //*****************************************************************************
+#ifdef NEW_CODE
 #include <netfw.h>
 #include <objbase.h>
 #include <oleauto.h>
@@ -700,7 +732,7 @@ error:
 	return (jboolean)bReturn;
 }
 
-
+#endif
 
 
 
