@@ -1008,7 +1008,9 @@ public class SettingsManager implements SettingsInterface
 			tempPath = tempPath.substring(0, tempPath.length() -1);
 		}
 		tempPath = tempPath.substring(0, tempPath.lastIndexOf(File.separator)+1);
-		File incFile  = new File(tempPath, "Incomplete");
+		tempPath += "Incomplete";
+		tempPath += File.separator;
+		File incFile  = new File(tempPath);
 		if(!saveFile.isDirectory()) {
 			saveFile.mkdirs();
 		}
