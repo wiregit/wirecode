@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
@@ -260,8 +259,8 @@ public class StringUtils {
                     c2 = Character.toLowerCase(c2);
                     if (c1 != c2) {
                         return c1 - c2;
-        }
-    }
+                    }
+                }
             }
         }
         return n1 - n2;
