@@ -106,23 +106,23 @@ final class HugeTestUtils {
 		                     "2002-04-09T20:32:33Z",
 		"http://Y.Y.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2002.mpg "+
-		               "2002-04-09T20:32:33Z",
+		               "2002-04-09T20:32:34Z",
 		"http://Y.Z.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "2002-04-09T20:32:33Z",
-		"http://Y.W.Y.Y:6352/get/2/"+
+		"http://Y.W.Y.Y:6342/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "2002-04-09T20:32:33Z",
-		"http://Y.T.Y.Y:6352/get/2/"+
+		"http://Y.T.Y.Y:6351/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "2002-04-09T20:32:33Z",
-		"http: //Y.R.Y.Y:6352/get/2/"+
+		"http: //Y.R.Y.Y:6362/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "2002-04-09T20:32:33Z",
 		"http: //Y.R.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "\r\n2002-04-09T20:32:33Z",
-		"http: //Y.R.Y.Y:6352/get/2/"+
+		"http: //Y.R.Y.Y:6382/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "  \n\r\n2002-04-09T20:32:33Z",
 		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
@@ -140,7 +140,7 @@ final class HugeTestUtils {
 	 */
 	static final String[] VALID_NONTIMESTAMPED_LOCS = {
 		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.Y.Y.Y:6352/get/2/"+
+		    ": http://Y.Y.C.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
 		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
 		    ": http://Y.X.Y.Y:6352/get/2/"+
@@ -148,13 +148,13 @@ final class HugeTestUtils {
 		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
 		    ": http://Y.R.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		"http://Y.Y.Y.Y:6352/get/2/"+
+		"http://Y.Y.Y.Y:6322/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		"http: //Y.Y.Y.Y:6352/get/2/"+
+		"http: //Y.Y.Y.Y:6332/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		"http://Y.S.Y.Y:6352/get/2/"+
+		"http://Y.S.Y.M:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		"http://Y.Z.Y.Y:6352/get/2/"+
+		"http://Y.Z.Y.R:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg"
 	};
 
