@@ -975,6 +975,14 @@ public final class QueryRequestTest extends BaseTestCase {
         }
 
     }
+
+    public void testProxyQueries() throws Exception {
+        QueryRequest query = QueryRequest.createQuery("sush");
+        assertFalse(query.desiresOutOfBandReplies());
+        QueryRequest proxy = QueryRequest.createProxyQuery(query,
+                                                           query.getGUID());
+        assertTrue(proxy.desiresOutOfBandReplies());
+    }
     
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();

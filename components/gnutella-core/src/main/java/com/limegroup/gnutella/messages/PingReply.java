@@ -372,22 +372,21 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param guid the guid to use for the new <tt>PingReply</tt>
      * @return a new <tt>PingReply</tt> instance with the specified GUID
      *  and all of the data from this <tt>PingReply</tt>
+     * @throws IllegalArgumentException if the guid is not 16 bytes or the input
+     * (this') format is bad
      */
     public PingReply mutateGUID(byte[] guid) {
-        if(CLIENT_LOCALE != null && !"".equals(CLIENT_LOCALE))
-            return PingReply.create(guid,
-                                    getTTL(), getPort(),
-                                    getIPBytes(), getFiles(), getKbytes(),
-                                    isUltrapeer(), getDailyUptime(),
-                                    supportsUnicast(),
-                                    getClientLocale(),
-                                    getNumFreeLocaleSlots());
-        else //don't create newGGEPWithLocale if locale was not specified
-            return PingReply.create(guid, 
-                                    getTTL(), getPort(),
-                                    getIPBytes(), getFiles(), getKbytes(),
-                                    isUltrapeer(), getDailyUptime(),
-                                    supportsUnicast());        
+        if (guid.length != 16)
+            throw new IllegalArgumentException("bad guid size: " + guid.length);
+
+        // i can't just call a new constructor, i have to recreate stuff
+        try {
+            return createFromNetwork(guid, getTTL(), getHops(), PAYLOAD); 
+        }
+        catch (BadPacketException ioe) {
+            throw new IllegalArgumentException("Input pong was bad!");
+        }
+
     }
 
     /**
