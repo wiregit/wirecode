@@ -111,6 +111,18 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	assertFalse(fakeDownloader._addedFailed);
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
+    	//now repeat the test, pretending the uploader wants push altlocs
+    	fakeDownloader.setWantsFalts(true);
+    	
+    	//and see if it behaves correctly
+    	PrivilegedAccessor.invokeMethod(
+    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
+				new Class[]{RemoteFileDesc.class,boolean.class});
+    	
+    	//make sure the downloader did not get notified
+    	assertFalse(fakeDownloader._addedFailed);
+    	assertTrue(fakeDownloader._addedSuccessfull);
+    	
     	//make sure the file was added to the file descriptor
     	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
     	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
@@ -440,6 +452,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     
     static class AltlocDownloaderStub extends HTTPDownloaderStub {
     	
+    	boolean _stubFalts;
+    	
     	RemoteFileDesc rfd;
     	public AltlocDownloaderStub(RemoteFileDesc fd){
     		super(fd,null);
@@ -455,6 +469,14 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		
 		public RemoteFileDesc getRemoteFileDesc() {
 			return rfd;
+		}
+		
+		public void setWantsFalts(boolean doesIt) {
+			_stubFalts=doesIt;
+		}
+		
+		public boolean wantsFalts(){
+			return _stubFalts;
 		}
     }
 }

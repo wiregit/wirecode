@@ -11,6 +11,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -341,7 +342,7 @@ public class PushLocTest extends BaseTestCase {
 		HTTPUploader u = (HTTPUploader)l.get(0);
 		
 		assertFalse(u.wantsFAlts());
-		assertFalse(u.wantsFWTAlts());
+		assertEquals(0,u.wantsFWTAlts());
 		
 		try {
 			in.close();
@@ -371,7 +372,7 @@ public class PushLocTest extends BaseTestCase {
 		u = (HTTPUploader)l.get(0);
 		
 		assertTrue(u.wantsFAlts());
-		assertFalse(u.wantsFWTAlts());
+		assertEquals(0,u.wantsFWTAlts());
 		
 		try {
 			in.close();
@@ -399,7 +400,7 @@ public class PushLocTest extends BaseTestCase {
 		u = (HTTPUploader)l.get(0);
 		
 		assertTrue(u.wantsFAlts());
-		assertTrue(u.wantsFWTAlts());
+		assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
 		
 		try {
 			in.close();
@@ -429,7 +430,7 @@ public class PushLocTest extends BaseTestCase {
 		
 		fd.add(direct);
 		fd.add(push);
-		
+		assertEquals(0,((PushAltLoc)push).getPushAddress().supportsFWTVersion());
 		assertEquals(2,fd.getAltLocsSize());
 		
 		//send a set of headers without the FALT header.  The response should
@@ -540,7 +541,7 @@ public class PushLocTest extends BaseTestCase {
 		out = new BufferedWriter(
 				new OutputStreamWriter(s.getOutputStream()));
 		
-		sendHeader(fileName,FWAWTFeatures+":", out);
+		sendHeader(fileName,FWAWTFeatures, out);
 		
 		Thread.sleep(700);
 		
