@@ -77,7 +77,7 @@
                pattern="EEE, MMM d, yyyy hh:mm a"/>
      </tstamp>
      <clover-report>
-       <current outfile="${cloverdir}/html"
+       <current outfile="${cloverdir}/html/results"
                 title="LimeWire - ${clover.time}">
          <format type="html"/> 
        </current>	 
@@ -94,7 +94,7 @@
                pattern="EEE, MMM d, yyyy hh:mm a"/>
      </tstamp>
     <clover-report>
-      <historical outfile="${cloverdir}/history/html"
+      <historical outfile="${cloverdir}/html/historical"
                   title="LimeWire - ${clover.time}"
                   historyDir="${cloverdir}/history">
         <format type="html"/>
