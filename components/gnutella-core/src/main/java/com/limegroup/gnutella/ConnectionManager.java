@@ -259,9 +259,11 @@ public class ConnectionManager {
      * Reset how many connections you want and start kicking more off
      * if required.  This IS synchronized because we don't want threads
      * adding or removing connections while this is deciding whether
-     * to add more threads.
+     * to add more threads.  Ignores request if a shielded leaf node.
      */
     public synchronized void setKeepAlive(int newKeep) {
+        if (hasClientSupernodeConnection())
+            return;
         _keepAlive = newKeep;
         adjustConnectionFetchers();
     }
@@ -835,8 +837,8 @@ public class ConnectionManager {
         // Deactivate checking for Ultra Fast Shutdown
 		deactivateUltraFastConnectShutdown(); 
         //set keep alive to 0, so that we are not fetching any connections
-        //Keep Alive is not set to zero, so that when this connection drops,
-        //we automatically start fetching a new connection
+        //KEEP_ALIVE property is not set to zero, so that when this connection
+        //drops, we automatically start fetching a new connection
         setKeepAlive(0);
         
         //close all other connections
@@ -845,23 +847,8 @@ public class ConnectionManager {
         {
             ManagedConnection connection = (ManagedConnection)iterator.next();
             if(!connection.equals(supernodeConnection))
-                connection.close();
+                remove(connection);
         }
-        
-        //reinitialize the lists.  TODO: avoid this by using proper disconnect()
-        //method.
-        List newConnections=new ArrayList();
-        newConnections.add(supernodeConnection);
-        _connections = newConnections;
-        
-        newConnections = new ArrayList();
-        newConnections.add(supernodeConnection);
-        _initializedConnections = newConnections;
-        
-        _initializedClientConnections = new ArrayList();
-        
-        _incomingConnections = 0;
-        _incomingClientConnections=0;
     }
     
     /** 
@@ -872,8 +859,8 @@ public class ConnectionManager {
     {
         if(_connections.size() == 0)
         {
-            //set keep alive to 4, so that we start fetching new connections
-            setKeepAlive(4);
+            //Return KEEP_ALIVE to old value.
+            setKeepAlive(SettingsManager.instance().getKeepAlive());
         }
     }
     
