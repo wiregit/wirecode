@@ -87,7 +87,16 @@ public class MetaFileManager extends FileManager {
                     if(collection.getDone())//if we have some valid data
                         mapper.add(schemas[i],collection);
                 }
-            }//end of if
+                //Now we should read embedded meta-date from files.
+                //for now we just do .mp3 files. We need to add code here 
+                //for every embedded reader we make.
+                //ID3Reader id3Reader = new ID3Reader();
+                //get List for file names
+                
+                //create the first LImeXMLDocument and create the collection
+                //add the remaining LimeXMLDocuments
+                //and add the collection to the mapper
+            }//end of if, now we are initialized
             initialized = true;
             //System.out.println("Sumeet: Printing current xml data");
             //showXMLData();
