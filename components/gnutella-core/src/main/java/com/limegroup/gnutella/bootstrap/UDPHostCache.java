@@ -4,17 +4,23 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.UDPHostRanker;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.MessageListener;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.UDPReplyHandler;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
+import com.limegroup.gnutella.util.IpPort;
 
 import java.io.Writer;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.LinkedList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +35,11 @@ import org.apache.commons.logging.Log;
 public class UDPHostCache {
     
     private static final Log LOG = LogFactory.getLog(UDPHostCache.class);
+    
+    /**
+     * The maximum number of failures to allow for a given cache.
+     */
+    private static final int MAXIMUM_FAILURES = 3;
     
     /**
      * The total number of udp host caches to remember between
@@ -48,7 +59,7 @@ public class UDPHostCache {
     private final FixedsizePriorityQueue /* of ExtendedEndpoint */ udpHosts =
         new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
-    private final Set /* of ExtendedEndpoint */ udpHostsSet =new HashSet();
+    private final Set /* of ExtendedEndpoint */ udpHostsSet = new HashSet();
     
     /**
      * A set of hosts who we've recently contacted, so we don't contact them
@@ -139,7 +150,7 @@ public class UDPHostCache {
 
         UDPHostRanker.rank(
             hosts,
-            null,
+            new HostExpirer(hosts),
             // cancel when connected -- don't send out any more pings
             new Cancellable() {
                 public boolean isCancelled() {
@@ -149,7 +160,18 @@ public class UDPHostCache {
             PingRequest.createUDPPing()
         );
         return true;
-    }       
+    }
+    
+    /**
+     * Removes a given hostcache from this.
+     */
+    public synchronized boolean remove(ExtendedEndpoint e) {
+        boolean removed1=udpHosts.remove(e);
+        boolean removed2=udpHostsSet.remove(e);
+        Assert.that(removed1==removed2,
+                    "Set "+removed1+" but queue "+removed2);
+        return removed1;
+    }
     
     /**
      * Adds a new udp hostcache to this.
@@ -190,4 +212,55 @@ public class UDPHostCache {
       // ADD DEFAULT UDP HOST CACHES HERE.
     }
     
+    /**
+     * Listener that listens for message from the specified hosts,
+     * marking any hosts that did not have a message processed
+     * as failed host caches, causing them to increment a failure
+     * count.  If hosts exceed the maximum failures, they are
+     * removed as potential hostcaches.
+     */
+    private class HostExpirer implements MessageListener {
+        // note that this MUST use IpPort.COMPARATOR to efficiently
+        // look up ReplyHandlers vs ExtendedEndpoints
+        private final Set hosts = new TreeSet(IpPort.COMPARATOR);
+        private byte[] guid;
+        
+        /**
+         * Constructs a new HostExpirer for the specified hosts.
+         */
+        public HostExpirer(Collection hosts) {
+            this.hosts.addAll(hosts);
+        }
+        
+        /**
+         * Notification that a message has been processed.
+         */
+        public void processMessage(Message m, ReplyHandler handler) {
+            // allow only udp replies.
+            if(handler instanceof UDPReplyHandler) {
+                hosts.remove(handler);
+                if(hosts.isEmpty())
+                    RouterService.getMessageRouter().unregisterMessageListener(guid, this);
+            }
+        }
+        
+        /**
+         * Notification that this listener is now registered with the specified GUID.
+         */
+        public void registered(byte[] g) {
+            this.guid = g;
+        }
+        
+        /**
+         * Notification that this listener is now unregistered for the specified guid.
+         */
+        public void unregistered(byte[] g) {
+            for(Iterator i = hosts.iterator(); i.hasNext(); ) {
+                ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                ep.recordUDPHostCacheFailure();
+                if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
+                    remove(ep);
+            }
+        }
+    }
 }

@@ -60,9 +60,9 @@ public class UDPHostRanker {
      * 
      * @param hosts the hosts to rank
      */
-    private UDPHostRanker(Collection hosts,
-                          MessageListener listener,
-                          Cancellable canceller, 
+    private UDPHostRanker(final Collection hosts,
+                          final MessageListener listener,
+                          final Cancellable canceller, 
                           Message message) {
         int waits = 0;
         while(!UDPService.instance().isListening() && waits < 10 &&
@@ -81,7 +81,7 @@ public class UDPHostRanker {
         if(message == null)
             message = PingRequest.createUDPPing();
             
-        final GUID messageGUID = new GUID(message.getGUID());
+        final byte[] messageGUID = message.getGUID();
         
         if (listener != null)
             ROUTER.registerMessageListener(messageGUID, listener);
@@ -104,13 +104,12 @@ public class UDPHostRanker {
 
         // also take care of any MessageListeners
         if (listener != null) {
-
             // Now schedule a runnable that will remove the mapping for the GUID
             // of the above message after 20 seconds so that we don't store it 
             // indefinitely in memory for no reason.
             Runnable udpMessagePurger = new Runnable() {
                     public void run() {
-                        ROUTER.unregisterMessageListener(messageGUID);
+                        ROUTER.unregisterMessageListener(messageGUID, listener);
                     }
                 };
          

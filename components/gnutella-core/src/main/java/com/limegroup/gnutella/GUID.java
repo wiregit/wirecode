@@ -362,6 +362,9 @@ public class GUID implements Comparable {
         else
             return 1;
     }
+    
+    public static final Comparator GUID_COMPARATOR = new GUIDComparator();
+    public static final Comparator GUID_BYTE_COMPARATOR = new GUIDByteComparator();
 
     /** Compares GUID's lexically. */
     public static class GUIDComparator implements Comparator {

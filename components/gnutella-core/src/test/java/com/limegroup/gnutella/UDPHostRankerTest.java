@@ -96,7 +96,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
 
-        rs.getMessageRouter().registerMessageListener(guid, ml);
+        rs.getMessageRouter().registerMessageListener(guid.bytes(), ml);
         Map map = 
         (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                           "_messageListeners");
@@ -108,7 +108,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         testUP[0].flush();
         Thread.sleep(2000);
         
-        rs.getMessageRouter().unregisterMessageListener(guid);
+        rs.getMessageRouter().unregisterMessageListener(guid.bytes(), ml);
         assertEquals(0, map.size());
         assertEquals(1, ml.count);
     }
@@ -117,10 +117,12 @@ public class UDPHostRankerTest extends ClientSideTestCase {
     
     private class MLImpl implements MessageListener {
         public int count = 0;
-        public void processMessage(Message m) {
+        public void processMessage(Message m, ReplyHandler handler) {
             assertTrue(m instanceof PingReply);
             count++;
         }
+        public void registered(byte[] guid) {}
+        public void unregistered(byte[] guid) {}
     }
     
     private class IpPortImpl implements IpPort {

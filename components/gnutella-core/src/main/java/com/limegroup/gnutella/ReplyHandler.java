@@ -10,14 +10,13 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.util.IpPort;
 
 /**
  * An interface for those things that handle replies and thus are placed
  * as values in RouteTables.
- * This interface is implemented by ManagedConnection and by
- * MessageRouter.ForMeReplyHandler.
  */
-public interface ReplyHandler {
+public interface ReplyHandler extends IpPort {
 
     /**
      * Handle the PingReply, failing silently
@@ -139,13 +138,6 @@ public interface ReplyHandler {
      *  <tt>false</tt>
      */
     boolean allowNewPings();
-
-    /**
-     * Accessor for the <tt>InetAddress</tt> instance for this host.
-     *
-     * @return the <tt>InetAddress</tt> instance for this host
-     */
-    InetAddress getInetAddress();
 
     /**
      * Determines whether or not this <tt>ReplyHandler</tt> is considered

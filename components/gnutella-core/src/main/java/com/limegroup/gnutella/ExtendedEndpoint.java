@@ -80,8 +80,12 @@ public class ExtendedEndpoint extends Endpoint {
     private String _clientLocale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
         
-    /** Whether or not this is a udp hostcache. */
-    private boolean udpHostCache = false;
+    /**
+     * The number of times this has failed while attempting to connect
+     * to a UDP host cache.
+     * If -1, this is NOT a udp host cache.
+     */
+    private int udpHostCacheFailures = -1;
     
 
     /** locale of this client */
@@ -196,14 +200,29 @@ public class ExtendedEndpoint extends Endpoint {
      * Determines if this is an ExtendedEndpoint for a UDP Host Cache.
      */
     public boolean isUDPHostCache() {
-        return udpHostCache;
+        return udpHostCacheFailures != -1;
+    }
+    
+    /**
+     * Records a UDP Host Cache failure.
+     */
+    public void recordUDPHostCacheFailure() {
+        Assert.that(isUDPHostCache());
+        udpHostCacheFailures++;
+    }
+    
+    /**
+     * Determines how many failures this UDP host cache had.
+     */
+    public int getUDPHostCacheFailures() {
+        return udpHostCacheFailures;
     }
     
     /**
      * Sets if this a UDP host cache endpoint.
      */
     public ExtendedEndpoint setUDPHostCache(boolean cache) {
-        udpHostCache = cache;
+        udpHostCacheFailures = 0;
         return this;
     }
 
@@ -248,15 +267,15 @@ public class ExtendedEndpoint extends Endpoint {
     public void write(Writer out) throws IOException {
         out.write(getAddress());
         out.write(":");
-        out.write(Integer.toString(getPort()));
+        out.write(getPort() + "");
         out.write(FIELD_SEPARATOR);
         
         if (dailyUptime>=0)
-            out.write(Integer.toString(dailyUptime));
+            out.write(dailyUptime + "");
         out.write(FIELD_SEPARATOR);
 
         if (timeRecorded>=0)
-            out.write(Long.toString(timeRecorded));
+            out.write(timeRecorded + "");
         out.write(FIELD_SEPARATOR);
 
         write(out, getConnectionSuccesses());
@@ -266,17 +285,16 @@ public class ExtendedEndpoint extends Endpoint {
         out.write(_clientLocale);
         out.write(FIELD_SEPARATOR);
         if(isUDPHostCache())
-            out.write("true");
+            out.write(udpHostCacheFailures + "");
         out.write(EOL);
     }
 
-    /** Writes elements of LONGS to OUT. */
-    private void write(Writer out, Iterator /* of Long */ longs) 
+    /** Writes Objects to 'out'. */
+    private void write(Writer out, Iterator objects) 
                        throws IOException {
-        while (longs.hasNext()) {
-            long n=((Long)longs.next()).longValue();
-            out.write(Long.toString(n));
-            if (longs.hasNext())
+        while (objects.hasNext()) {
+            out.write(objects.next().toString());
+            if (objects.hasNext())
                 out.write(LIST_SEPARATOR);            
         }
     }
@@ -360,7 +378,11 @@ public class ExtendedEndpoint extends Endpoint {
         
         //7. udp-host
         if(linea.length>=7) {
-            ret.setUDPHostCache(linea[6].equalsIgnoreCase("true"));
+            try {
+                int i = Integer.parseInt(linea[6]);
+                if(i >= 0)
+                    ret.udpHostCacheFailures = i;
+            } catch(NumberFormatException nfe) {}
         }
 
         return ret;

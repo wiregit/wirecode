@@ -593,14 +593,14 @@ public class HostCatcherTest extends BaseTestCase {
         ggep = new GGEP(true);
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
         pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
-                    new byte[] { 1, 1, 1, 1 },
+                    new byte[] { 5, 4, 3, 2 },
                     (long)0, (long)0, false, ggep);
         hc.add(pr);
         assertEquals(0, hc.getNumHosts());
         assertEquals(3, uhc.getSize());
         
         Set s = (Set)PrivilegedAccessor.getValue(uhc, "udpHostsSet");
-        // assert that it had all our valid values.
+        // assert that it had all our endpoints.
         assertContains(s, new ExtendedEndpoint("1.1.1.1", 1));
         assertContains(s, new ExtendedEndpoint("3.2.3.4", 6346));
         assertContains(s, new ExtendedEndpoint("www.limewire.org", 1));

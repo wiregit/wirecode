@@ -87,10 +87,16 @@ public class ReplyHandlerStub implements ReplyHandler {
         try {
             return InetAddress.getByName("30.24.0.5");
         } catch(UnknownHostException e) {
-            // should NEVER happen
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("impossible!");
         }
+    }
+    
+    public String getAddress() {
+        return "30.24.0.5";
+    }
+    
+    public int getPort() {
+        return 6346;
     }
 
     public void handleStatisticVM(StatisticVendorMessage svm) { }
