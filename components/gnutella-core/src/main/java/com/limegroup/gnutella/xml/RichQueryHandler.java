@@ -6,6 +6,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Iterator;
 
 
 /**
@@ -65,8 +66,8 @@ public class RichQueryHandler{
         boolean busy = 
             RouterService.getUploadManager().isBusy() &&
             RouterService.getUploadManager().isQueueFull();
-        for(int i = 0; i < s; i++) {
-            LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
+        for(Iterator i = matchingReplies.iterator(); i.hasNext(); ) {
+            LimeXMLDocument currDoc = (LimeXMLDocument)i.next();
             String subjectFile = currDoc.getIdentifier();//returns null if none
             FileDesc fd = null;
             Response res = null;
