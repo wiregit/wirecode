@@ -1596,13 +1596,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             // (we perform this check on a copy of the set)
             
             PushAltLoc ploc = (PushAltLoc)loc;
-            if (ploc.getPushAddress().getProxies().isEmpty())
+            if (ploc.isDemoted())
                 return;
             
             PushAltLoc pFD = (PushAltLoc)forFD;
             pFD.updateProxies(good);
             
-            Assert.that(!ploc.getPushAddress().getProxies().isEmpty());
+            Assert.that(!ploc.isDemoted());
         }
         
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {

@@ -22,6 +22,14 @@ import com.limegroup.gnutella.util.NameValue;
  */
 
 public class PingRequest extends Message {
+
+    /**
+     * various flags related to the SCP ggep field
+     */
+    public static final byte SCP_LEAF = 0x0;
+    public static final byte SCP_ULTRAPEER = 0x1;
+   
+
     /**
      * With the Big Ping and Big Pong extensions pings may have a payload
      */
@@ -110,9 +118,9 @@ public class PingRequest extends Message {
         }
         byte[] data = new byte[1];
         if(RouterService.isSupernode())
-            data[0] = 0x1;
+            data[0] = SCP_ULTRAPEER;
         else
-            data[0] = 0x0;
+            data[0] = SCP_LEAF;
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         return new PingRequest(guid.bytes(), (byte)1, l);
     }
