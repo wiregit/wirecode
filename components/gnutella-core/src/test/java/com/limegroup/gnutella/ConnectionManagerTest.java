@@ -56,7 +56,6 @@ public class ConnectionManagerTest extends BaseTestCase {
     
     private static void setSettings() throws Exception {
         ConnectionSettings.PORT.setValue(6346);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
@@ -181,7 +180,7 @@ public class ConnectionManagerTest extends BaseTestCase {
     }
     
     public void testSupernodeStatus() throws Exception {
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);        
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionManager mgr = RouterService.getConnectionManager();
         
         // test preconditions
@@ -192,9 +191,9 @@ public class ConnectionManagerTest extends BaseTestCase {
         // u ==> i should be ultrapeer
         // l ==> i should be leaf
         ManagedConnection u1, l1, l2;
-        u1 = new SupernodeClient();
-        l1 = new ClientSupernode();
-        l2 = new ClientSupernode();
+        u1 = new SupernodeClient(true);
+        l1 = new ClientSupernode(true);
+        l2 = new ClientSupernode(true);
         
         // add a supernode => client connection
         initializeStart(u1);
@@ -236,7 +235,148 @@ public class ConnectionManagerTest extends BaseTestCase {
         initializeDone(l1);
         assertTrue("should be supernode", mgr.isSupernode());
         assertTrue("should not be leaf", !mgr.isShieldedLeaf());
-    }   
+    }
+    
+    /**
+     * Tests the various connection-counting methods
+     */
+    public void testGetNumberOfConnections() throws Exception {
+        ManagedConnection[] limeLeaves = new ManagedConnection[30];
+        ManagedConnection[] nonLimeLeaves = new ManagedConnection[30];
+        ManagedConnection[] limePeers = new ManagedConnection[32];
+        ManagedConnection[] nonLimePeers = new ManagedConnection[32];
+        
+        for(int i = 0; i < limeLeaves.length; i++)
+            limeLeaves[i] = new SupernodeClient(true);
+        for(int i = 0; i < nonLimeLeaves.length; i++)
+            nonLimeLeaves[i] = new SupernodeClient(false);
+        for(int i = 0; i < limePeers.length; i++)
+            limePeers[i] = new SupernodeSupernode(true);
+        for(int i = 0; i < nonLimePeers.length; i++)
+            nonLimePeers[i] = new SupernodeSupernode(false);
+            
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        ConnectionManager mgr = RouterService.getConnectionManager();
+        // test preconditions
+        assertTrue("should start as supernode", mgr.isSupernode());
+        assertTrue("should not be leaf", !mgr.isShieldedLeaf());
+        
+        assertEquals(32, mgr.getNumFreeNonLeafSlots());
+        assertEquals(29, mgr.getNumFreeLimeWireNonLeafSlots());
+        assertEquals(30, mgr.getNumFreeLeafSlots());
+        assertEquals(28, mgr.getNumFreeLimeWireLeafSlots());
+        
+        // Add 10 limewire leaves and 5 limewire peers.
+        for(int i = 0; i < 10; i++) {
+            initializeStart(limeLeaves[i]);
+            initializeDone(limeLeaves[i]);
+        }
+        for(int i = 0; i < 5; i++) {
+            initializeStart(limePeers[i]);
+            initializeDone(limePeers[i]);
+        }
+        // Are now 10 lime leaves & 5 lime peers.
+        // Equaling: 10 leaves & 5 peers.
+        assertEquals(20, mgr.getNumFreeLeafSlots());
+        assertEquals(18, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(27, mgr.getNumFreeNonLeafSlots());
+        assertEquals(24, mgr.getNumFreeLimeWireNonLeafSlots());
+        
+        // Add 1 non lime leaf and 2 non limewire peers.
+        for(int i = 0; i < 1; i++) {
+            initializeStart(nonLimeLeaves[i]);
+            initializeDone(nonLimeLeaves[i]);
+        }
+        for(int i = 0; i < 2; i++) {
+            initializeStart(nonLimePeers[i]);
+            initializeDone(nonLimePeers[i]);
+        }
+        // Are now 10 lime leaves, 1 non lime leaf, 5 lime peers, 2 non lime peers
+        // Equaling: 11 leaves & 7 peers
+        assertEquals(19, mgr.getNumFreeLeafSlots());
+        assertEquals(18, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(25, mgr.getNumFreeNonLeafSlots());
+        assertEquals(24, mgr.getNumFreeLimeWireNonLeafSlots());
+        
+        // Add a bunch of non lime peers & leaves.
+        for(int i = 1; i < 15; i++) {
+            initializeStart(nonLimeLeaves[i]);
+            initializeDone(nonLimeLeaves[i]);
+        }
+        for(int i = 2; i < 15; i++) {
+            initializeStart(nonLimePeers[i]);
+            initializeDone(nonLimePeers[i]);
+        }
+        // There are now 15 non lime leaves & non lime peers connected,
+        // 10 lime leaves, and 5 lime peers.
+        // Equaling: 25 leaves and 20 peers.
+        assertEquals(5, mgr.getNumFreeLeafSlots());
+        assertEquals(5, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(12, mgr.getNumFreeNonLeafSlots());
+        assertEquals(12, mgr.getNumFreeLimeWireNonLeafSlots());
+        
+        // Add 5 lime leaves and 12 lime peers
+        for(int i = 10; i < 15; i++) {
+            initializeStart(limeLeaves[i]);
+            initializeDone(limeLeaves[i]);
+        }
+        for(int i = 5; i < 17; i++) {
+            initializeStart(limePeers[i]);
+            initializeDone(limePeers[i]);
+        }
+        // There are now 15 non lime leaves & non lime peers,
+        // 15 lime leaves, and 17 lime peers.
+        // Equaling: 30 leaves and 32 peers.
+        assertEquals(0, mgr.getNumFreeLeafSlots());
+        assertEquals(0, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(0, mgr.getNumFreeNonLeafSlots());
+        assertEquals(0, mgr.getNumFreeLimeWireNonLeafSlots());
+        
+        // Now kill all but 2 of the non lime leaves
+        // and all but 3 of non lime peers.
+        for(int i = 14; i >= 2; i--)
+            mgr.remove(nonLimeLeaves[i]);
+        for(int i = 14; i >= 3; i--)
+            mgr.remove(nonLimePeers[i]);
+        // There are now 2 non lime leaves and 3 non lime peers,
+        // and 15 lime leaves and 17 lime peers.
+        // Equaling: 17 leaves and 20 peers
+        assertEquals(13, mgr.getNumFreeLeafSlots());
+        assertEquals(13, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(12, mgr.getNumFreeNonLeafSlots());
+        assertEquals(12, mgr.getNumFreeLimeWireNonLeafSlots());
+        
+        // Now add 13 lime leaves and 12 lime peers.
+        for(int i = 15; i < 28; i++) {
+            initializeStart(limeLeaves[i]);
+            initializeDone(limeLeaves[i]);
+        }
+        for(int i = 17; i < 29; i++) {
+            initializeStart(limePeers[i]);
+            initializeDone(limePeers[i]);
+        }
+        // There are now 2 non lime leaves and 3 non lime peers,
+        // and 28 lime leaves and 29 lime peers
+        // Equaling: 30 leaves and 32 peers
+        assertEquals(0, mgr.getNumFreeLeafSlots());
+        assertEquals(0, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(0, mgr.getNumFreeNonLeafSlots());
+        assertEquals(0, mgr.getNumFreeLimeWireNonLeafSlots());
+        
+        // Now kill off the rest of the non lime peers and leaves.
+        for(int i = 1; i >= 0; i--)
+            mgr.remove(nonLimeLeaves[i]);
+        for(int i = 2; i >= 0; i--)
+            mgr.remove(nonLimePeers[i]);
+        // There are now no non lime leaves and no non lime peers,
+        // and 28 lime leaves and 29 lime peers
+        // Equaling: 28 leaves and 29 peers
+        assertEquals(2, mgr.getNumFreeLeafSlots());
+        assertEquals(0, mgr.getNumFreeLimeWireLeafSlots());
+        assertEquals(3, mgr.getNumFreeNonLeafSlots());
+        assertEquals(0, mgr.getNumFreeLimeWireNonLeafSlots());
+    }
+        
         
     
     /**
@@ -381,12 +521,15 @@ public class ConnectionManagerTest extends BaseTestCase {
         protected void startOutputRunner() {
             // do nothing
         }
-    }  
+    }
     
     private static class ClientSupernode extends TestManagedConnection {
         
-        ClientSupernode() {
+        final boolean isLime;
+        
+        ClientSupernode(boolean lime) {
             super(false, 0, 0);
+            isLime = lime;
         }
         
         public boolean isClientSupernodeConnection() {
@@ -394,18 +537,48 @@ public class ConnectionManagerTest extends BaseTestCase {
         }
         public boolean isSupernodeClientConnection() {
             return false;
+        }
+        public boolean isLimeWire() {
+            return isLime;
         }
     }
     
     private static class SupernodeClient extends TestManagedConnection {
-        SupernodeClient() {
+        final boolean isLime;
+        
+        SupernodeClient(boolean lime) {
             super(false, 0, 0);
+            isLime = lime;
         }
         public boolean isClientSupernodeConnection() {
             return false;
         }
         public boolean isSupernodeClientConnection() {
             return true;
+        }
+        public boolean isLimeWire() {
+            return isLime;
+        }
+    }
+    
+    private static class SupernodeSupernode extends TestManagedConnection {
+        final boolean isLime;
+        
+        SupernodeSupernode(boolean lime) {
+            super(false, 0, 0);
+            isLime = lime;
+        }
+        public boolean isSupernodeSupernodeConnection() {
+            return false;
+        }
+        public boolean isClientSupernodeConnection() {
+            return false;
+        }
+        public boolean isSupernodeClientConnection() {
+            return false;
+        }
+        public boolean isLimeWire() {
+            return isLime;
         }
     }
           
