@@ -182,7 +182,10 @@ public class HTTPDownloader implements Runnable {
 
 	SettingsManager set = SettingsManager.instance();
 	_downloadDir = set.getSaveDirectory();
-	String pathname = _downloadDir  + _filename;
+	
+	String fs = System.getProperty("file.seperator");
+
+	String pathname = _downloadDir + fs + _filename;
 	
 	System.out.println(pathname);
 	try {

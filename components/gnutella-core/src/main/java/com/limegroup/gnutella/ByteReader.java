@@ -74,15 +74,15 @@ public class ByteReader {
 	int b = -1;
 	int i = 0;	
 	int numBytes = 0;
-	boolean endOfLine = false;
+	//	boolean endOfLine = false;
 
 	String cr = "\r";
-	byte[] creturn = cr.getBytes();
+  	byte[] creturn = cr.getBytes();
 
-	String nl = "\n";
-	byte[] nline = nl.getBytes();
+  	String nl = "\n";
+  	byte[] nline = nl.getBytes();
 
-	while (!endOfLine) {
+	while (true) {
 	    try {
 		c = _istream.read();
 	    }
@@ -110,7 +110,8 @@ public class ByteReader {
 		// numBytes++;
 		
 		if ( b == nline[0] ) 
-		    endOfLine = true;
+		    break;
+		    // endOfLine = true;
 		else {
 		    buf[i++] = (byte)c;
 		    buf[i++] = (byte)b;
