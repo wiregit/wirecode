@@ -52,6 +52,9 @@ public class UDPConnectionProcessor {
     /** Define the size of the data window */
     private static final int  DATA_WINDOW_SIZE        = 20;
 
+    /** Define the maximum accepted write ahead packet */
+    private static final int  DATA_WRITE_AHEAD_MAX    = DATA_WINDOW_SIZE + 5;
+
     /** The maximum number of times to try and send a data message */
     private static final int  MAX_SEND_TRIES          = 8;
 
@@ -836,8 +839,16 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
             // Pass the data message to the output window
             DataMessage dmsg = (DataMessage) msg;
 
+            // If message is more than limit beyond window, then throw it away
+            int seqNo      = dmsg.getSequenceNumber();
+            int baseSeqNo  = _receiveWindow.getWindowStart();
+            if ( seqNo > (baseSeqNo + DATA_WRITE_AHEAD_MAX) ) {
+log2("Received block num too far ahead: "+ seqNo);
+               return;
+            }
+
             // Make sure the data is not before the window start
-            if ( dmsg.getSequenceNumber() >= _receiveWindow.getWindowStart() ) {
+            if ( seqNo >= baseSeqNo ) {
 				// Record the receipt of the data in the receive window
                 DataRecord drec = _receiveWindow.addData(dmsg);  
             	drec.ackTime = System.currentTimeMillis();
@@ -846,8 +857,6 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
 				// Notify InputStream that data is available for reading
 				if ( _output != null )
 					_output.wakeup();
-
-                // TODO: You are not enforcing any real upper limit 
             } else {
 log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             }
