@@ -190,8 +190,11 @@ public final class ID3Reader {
     /**
      * @return true if the mp3 file has license information in its ID3v2 TCOP
      * tag.
+     * @param filename The name of the file to verify.
+     * @param hash The string representation of the hash for filename.
      */
-    public static boolean hasVerifiedLicense(String filename) 
+    public static boolean hasVerifiedLicense(final String filename,
+                                             final String hash) 
         throws IOException {
 
         // 1. see if the mp3 file has a TCOP v2 Frame with a 'verify at' and
@@ -268,7 +271,6 @@ public final class ID3Reader {
                 if (!f.exists())
                     return false;
                 
-                String hash = URN.createSHA1Urn(f).toString();
                 int index = htmlContent.indexOf(hash);
                 if (index < 0)
                     return false;
@@ -290,10 +292,6 @@ public final class ID3Reader {
             else
                 return false;
 
-        }
-        catch (InterruptedException hashingFailed) {
-            ErrorService.error(hashingFailed);
-            throw new IOException();
         }
         catch (ConnectException possible) {
             return false;

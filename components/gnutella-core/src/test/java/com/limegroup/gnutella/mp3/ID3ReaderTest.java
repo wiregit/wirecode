@@ -2,7 +2,7 @@ package com.limegroup.gnutella.mp3;
 
 import junit.framework.*;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.BaseTestCase;
 import java.util.*;
 import java.net.*;
@@ -29,7 +29,7 @@ public class ID3ReaderTest extends BaseTestCase {
 	}
 
     public void testVerifyCCLicense() throws Exception {
-        
+
         final ServerSocket ss = new ServerSocket(9999);
         Thread answerThread = new Thread() {
                 public void run() {
@@ -50,7 +50,10 @@ public class ID3ReaderTest extends BaseTestCase {
         answerThread.start();
         Thread.sleep(1000);
 
-        assertTrue(ID3Reader.hasVerifiedLicense(fileNameToTest));
+        File f = new File(fileNameToTest);
+        assertTrue(f.exists());
+        assertTrue(ID3Reader.hasVerifiedLicense(fileNameToTest,
+                                                URN.createSHA1Urn(f).toString()));
         ss.close();
     }
 
