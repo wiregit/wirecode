@@ -27,6 +27,32 @@ import org.cybergarage.upnp.device.DeviceChangeListener;
  *     SubDevice: urn:schemas-upnp-org:device:WANConnectionDevice:1
  *        Service: urn:schemas-upnp-org:service:WANIPConnection:1
  * 
+ * Every port mapping is a tuple of:
+ *  - External address (can be wildcard)
+ *  - External port
+ *  - Internal address
+ *  - Internal port
+ *  - Protocol (TCP|UDP)
+ *  - Description
+ * 
+ * Port mappings can be removed, but that is a blocking network operation which will
+ * slow down the shutdown process of Limewire.  It is safe to let port mappings persist 
+ * between limewire sessions. In the meantime however, the NAT may assign a different 
+ * ip address to the local node.  That's why we need to find any previous mappings 
+ * the node has created and update them with our new address. In order to uniquely 
+ * distinguish which mappings were made by us, we put our client GUID in the description 
+ * field.
+ * 
+ * NOTES:
+ * 
+ * Not all NATs support mappings with different external port and internal ports. Therefore
+ * if we were unable to map our desired port but were able to map another one, we should
+ * pass this information on to Acceptor. 
+ * 
+ * Some buggy NATs do not distinguish mappings by the Protocol field.  Therefore
+ * we first map the UDP port, and then the TCP port since it is more important should the
+ * first mapping get overwritten.
+ * 
  */
 public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	
@@ -170,7 +196,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	public void finalize() {
 		if (_running) {
 			LOG.warn("finalizing a running UPnPManager!");
-			stop();
+			halt();
 			super.finalize();
 		}
 	}
@@ -183,7 +209,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	public static void main(String[] args) throws Exception {
 		final UPnPManager cp = new UPnPManager();
 		Thread.sleep(4000);
-		System.out.println(cp.getNATAddress());
+		LOG.debug("start");
+		LOG.debug("found "+cp.getNATAddress());
 		synchronized(cp)  {
 			cp.wait();
 		}
