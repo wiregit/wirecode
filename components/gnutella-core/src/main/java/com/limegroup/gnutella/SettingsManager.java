@@ -29,6 +29,7 @@ public class SettingsManager implements SettingsInterface
     private static short    searchLimit_;
     private static boolean  stats_;
     private static String   clientID_;
+    private static int      maxConn_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -41,6 +42,11 @@ public class SettingsManager implements SettingsInterface
 
     private String fileName_;
 
+    /**
+     * This method provides the only access
+     * to an instance of this class in 
+     * accordance with the singleton pattern
+     */
     public static SettingsManager instance()
     {
 	if(instance_ == null)
@@ -48,14 +54,16 @@ public class SettingsManager implements SettingsInterface
 	return instance_;
     }
 
-    /** Set the start properties */
+    /** The constructor is private to ensure
+     *  that only one copy will be created
+     */
     private SettingsManager()
     {
 	props_ = new Properties();
        	initSettings();
     }
 
-    /** Check the properties file and set props */
+    /** Check the properties file and set the props */
     private void initSettings()
     {
 	Properties tempProps = new Properties();
@@ -244,6 +252,22 @@ public class SettingsManager implements SettingsInterface
 			    setStats(SettingsInterface.DEFAULT_STATS);
 			}
 		    }		
+
+		else if(key.equals(SettingsInterface.MAX_CONN))
+		    {
+			try {
+			    i = Integer.parseInt(p);
+			    try {
+				setMaxConn(i);
+			    }
+			    catch (IllegalArgumentException ie){
+				setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
+			    }
+			}
+			catch(NumberFormatException nfe){
+			    setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
+			}
+		    }		
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -265,6 +289,7 @@ public class SettingsManager implements SettingsInterface
 	setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
 	setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
 	setStats(SettingsInterface.DEFAULT_STATS);
+	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
     }
 
     /**
@@ -323,6 +348,11 @@ public class SettingsManager implements SettingsInterface
     public boolean getStats()
     {
 	return stats_;
+    }
+
+    public int getMaxConn()
+    {
+	return maxConn_;
     }
 
  
@@ -386,17 +416,41 @@ public class SettingsManager implements SettingsInterface
 		
     }
 
+    /**
+     *
+     */
     public void setHostList(String hostList)
 	throws IllegalArgumentException
     {
-	if(false)
-	    throw new IllegalArgumentException();
+	System.out.println("SettingsManager::setHostList::file: " + hostList);
+	String home = System.getProperty("user.home");
+	System.out.println(home);
+	//String fileName;
+	File f = new File(hostList);
+	//File test = new File("e:\cookie");
+	System.out.println("line separator: " + System.getProperty("line.separator"));
+	if(f.isFile() == true)
+	    hostList_ = hostList;
+
 	else
 	    {
-		hostList_ = hostList;
-		props_.setProperty(SettingsInterface.HOST_LIST, hostList_);
-		writeProperties();
+		String fileName = System.getProperty("user.home");
+		fileName = fileName + System.getProperty("file.separator");
+		fileName = fileName + SettingsInterface.DEFAULT_HOST_LIST;
+		try
+		    {
+			FileWriter fw = new FileWriter(fileName);
+			hostList_ = fileName;
+		    }
+		catch(IOException e)
+		    {
+			// not sure what to do if the filewriter
+			// fails to create a file
+		    }		
 	    }
+
+	props_.setProperty(SettingsInterface.HOST_LIST, home);//hostList_);
+	writeProperties();		
     }
 
     public void setKeepAlive(int keepAlive)
@@ -474,6 +528,19 @@ public class SettingsManager implements SettingsInterface
 		Boolean b = new Boolean(stats_);
 		String s = b.toString();
 		props_.setProperty(SettingsInterface.STATS, s);
+		writeProperties();
+	    }
+    }
+
+    public void setMaxConn(int maxConn)
+    {
+	if(maxConn < 0)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		maxConn_ = maxConn;		
+		String s = Integer.toString(maxConn_);
+		props_.setProperty(SettingsInterface.MAX_CONN, s);
 		writeProperties();
 	    }
     }
