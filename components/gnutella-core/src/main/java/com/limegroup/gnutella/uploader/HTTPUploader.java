@@ -9,6 +9,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.*;
 import java.net.*;
 import java.util.Date;
+import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringUtils;
@@ -39,6 +40,18 @@ public class HTTPUploader implements Uploader {
 	private int _chatPort;
 
 	private URN _urn = null;
+
+	/**
+	 * The URN specified in the X-Gnutella-Content-URN header, if any.
+	 */
+	private URN _requestedURN = null;
+
+	/**
+	 * <tt>Map</tt> instance for storing unique alternate locations sent in 
+	 * the upload header.
+	 */
+	private Map _alternateLocations = null;
+
     private final FileManager _fileManager;
 
     private final BandwidthTrackerImpl bandwidthTracker=
@@ -316,13 +329,21 @@ public class HTTPUploader implements Uploader {
 	public int getChatPort() {return _chatPort;}
 
 	/**
-	 * Accessor for the <tt>URN</tt> instance for this uploader to report
-	 * in the upload headers.
+	 * Accessor for the <tt>URN</tt> instance for the file requested, which
+	 * is <tt>null</tt> if there is no URN for the file.
 	 *
-	 * @return the <tt>URN</tt> instance for this upload, which can be
-	 *  <tt>null</tt> if no URN has been assigned
+	 * @return the <tt>URN</tt> instance for the file being uploaded, which
+	 *  can be <tt>null</tt> if no URN has been assigned
 	 */
 	public URN getUrn() {return _urn;}
+
+	/**
+	 * Returns the requested <tt>URN</tt> as specified in the 
+	 * "X-Gnutella-Content-URN" extension header, defined in HUGE v0.93.
+	 *
+	 * @return the requested <tt>URN</tt>
+	 */
+	public URN getRequestedURN() {return _requestedURN;}
 	/****************** private methods *******************/
 
 
@@ -346,7 +367,7 @@ public class HTTPUploader implements Uploader {
             if ( (str==null) || (str.equals("")) )
                 break;
 
-			if (str.toUpperCase().indexOf("CHAT:") != -1) {
+			else if (str.toUpperCase().indexOf("CHAT:") != -1) {
 				String sub;
 				try {
 					sub = str.substring(5);
@@ -374,7 +395,7 @@ public class HTTPUploader implements Uploader {
 			// "Range: bytes ", etc.  Note that the "=" is required by HTTP, but
             //  old versions of BearShare do not send it.  The value following the
             //  bytes unit will be in the form '-n', 'm-n', or 'm-'.
-            if (indexOfIgnoreCase(str, "Range:") == 0) {
+            else if (indexOfIgnoreCase(str, "Range:") == 0) {
                 //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
                 //that we don't validate the data between "Range:" and the
                 //bytes.
@@ -451,7 +472,7 @@ public class HTTPUploader implements Uploader {
             }
 
 			// check the User-Agent field of the header information
-			if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
+			else if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
 				if (SettingsManager.instance().getAllowBrowser() == false) {
@@ -479,6 +500,16 @@ public class HTTPUploader implements Uploader {
 				}
 				userAgent = str.substring(11).trim();
 			}
+
+			else if(indexOfIgnoreCase(str, HTTPConstants.CONTENT_URN_HEADER) != -1) {
+				_requestedURN = HTTPUploader.readContentURN(str);
+			}
+			else if(indexOfIgnoreCase(str, HTTPConstants.ALTERNATE_LOCATION_HEADER) != -1) {
+				if(_alternateLocations == null) {
+					_alternateLocations = new HashMap();
+				}
+				HTTPUploader.readAlternateLocations(_alternateLocations, str);
+			}
 		}
 
 		if (_uploadEnd == 0)
@@ -486,11 +517,103 @@ public class HTTPUploader implements Uploader {
 	}
 
 	/**
+	 * This method parses the "X-Gnutella-Content-URN" header, as specified
+	 * in HUGE v0.93.  This assigns the requested urn value for this 
+	 * upload, which otherwise remains null.
+	 *
+	 * @param CONTENT_URN_STR the string containing the header
+	 * @return a new <tt>URN</tt> instance for the request line, or 
+	 *  <tt>null</tt> if there was any problem creating it
+	 */
+	private static URN readContentURN(final String CONTENT_URN_STR) {
+		int offset = CONTENT_URN_STR.indexOf(":");
+		int spaceIndex = CONTENT_URN_STR.indexOf(" ");
+		if(offset == -1) {
+			return null;
+		}
+		if(spaceIndex == -1) {
+			// this means that there's no space after the colon
+			offset++;
+		}
+		else if((spaceIndex - offset) == 1) {
+			// this means that there is a space after the colon,
+			// so the urn is offset by one more index
+			offset += 2;
+		}
+		else {
+			// otherwise, the request is of an unknown form, so just
+			// return without setting _requestedURN
+			return null;
+		}
+		
+		String urnStr = CONTENT_URN_STR.substring(offset);
+		try {
+			return URNFactory.createURN(urnStr);
+		} catch(IOException e) {
+			// this will be thrown if the URN string was invalid for any
+			// reason -- just return null
+			return null;
+		}		
+	}
+	
+	/**
+	 * Reads alternate location header.  The header can contain only one
+	 * alternate location, or it can contain many in the same header.
+	 * This method adds them all to the <tt>Map</tt> of alternate 
+	 * locations for the uploader.
+	 *
+	 * @param MAP the <tt>Map</tt> to insert alternate locations into
+	 * @param ALT_HEADER the full alternate locations header
+	 */
+	private static void readAlternateLocations(final Map MAP,
+											   final String ALT_HEADER) {
+		int colonIndex = ALT_HEADER.indexOf(":");
+		if(colonIndex == -1) {
+			return;
+		}
+		final String ALTERNATE_LOCATIONS = 
+		    ALT_HEADER.substring(colonIndex+1).trim();
+		StringTokenizer st = new StringTokenizer(ALTERNATE_LOCATIONS, ",");
+
+		// this limits the number of alternate location headers to read
+		// to 20
+		int i=0;
+		while(st.hasMoreTokens() && (i<20)) {
+			storeAlternateLocation(MAP, st.nextToken().trim());
+			i++;
+		}
+	}
+
+	/**
+	 * Reads an individual alternate location and adds a new 
+	 * <tt>AlternateLocation</tt> instance to the specified <tt>Map</tt>.
+	 *
+	 * @param MAP the <tt>Map</tt> to insert alternate locations into
+	 * @param LOCATION the string representation of the individual alternate 
+	 * location to add
+	 */
+	private static void storeAlternateLocation(final Map MAP,
+											   final String LOCATION) {
+		// note that this removes other "whitespace" characters besides
+		// space and tab, which is not strictly correct
+		final String LINE = LOCATION.trim();		
+		AlternateLocation al = null;
+		try {
+			al = new AlternateLocation(LINE);
+		} catch(IOException e) {
+			e.printStackTrace();
+			// just return without adding it.
+			return;
+		}
+		MAP.put(al.toString(), al);
+	}
+
+	/**
 	 * a helper method to compare two strings 
 	 * ignoring their case.
 	 */ 
 	private int indexOfIgnoreCase(String str, String section) {
-		// convert both strings to lower case
+		// convert both strings to lower case -- this is expensive
 		String aaa = str.toLowerCase();
 		String bbb = section.toLowerCase();
 		// then look for the index...
@@ -543,6 +666,34 @@ public class HTTPUploader implements Uploader {
     public boolean getCloseConnection() {
         return _state.getCloseConnection();
     }
+
+	/*
+	public static void main(String[] args) {
+		String str = HTTPConstants.CONTENT_URN_HEADER +
+		" urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+		URN urn = HTTPUploader.readContentURN(str);
+
+		String alt0 = "X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
+		"lime%20capital%20management%2001.mpg "+
+		"2002-04-09T20:32:33Z";
+		String alt1 = "X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
+		"lime%20capital%20management%2001.mpg "+
+		"2002-04-09T20:32:33Z, "+
+		"http://Y.Y.Y.Y:6352/get/2/"+
+		"lime%20capital%20management%2002.mpg "+
+		"2002-04-09T20:32:33Z, "+
+		"http://Y.Y.Y.Y:6352/get/2/"+
+		"lime%20capital%20management%2003.mpg "+
+		"2002-04-09T20:32:33Z";
+		
+		Map newMAP = new HashMap();
+		HTTPUploader.readAlternateLocations(newMAP, alt0);
+		HTTPUploader.readAlternateLocations(newMAP, alt1);
+		System.out.println("MAP: ");
+		System.out.println(newMAP); 
+		System.out.println("size: "+newMAP.size()); 
+	}
+	*/
 }
 
 
