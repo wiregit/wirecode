@@ -164,6 +164,7 @@ public class StandardMessageRouter
     /**
      * Handles the PingReply by updating horizon stats.
      */
+	/*
     protected void handlePingReplyForMe(
         PingReply pingReply,
         ReplyHandler handler)
@@ -184,6 +185,7 @@ public class StandardMessageRouter
             _manager.remove((ManagedConnection)handler);
         }
     }
+	*/
 
     /**
      * Responds to the QueryRequest by calling FileManager.query()
@@ -287,6 +289,7 @@ public class StandardMessageRouter
      * Handles the QueryReply by starting applying the personal filter and then
      * displaying the result.
      */
+	/*
     protected void handleQueryReplyForMe(
         QueryReply queryReply,
         ReplyHandler receivingConnection)
@@ -300,10 +303,12 @@ public class StandardMessageRouter
             _downloader.handleQueryReply(queryReply);
         }
     }
+	*/
 
     /**
      * Handles the PushRequest by starting an HTTPUploader
      */
+	/*
     protected void handlePushRequestForMe(
         PushRequest pushRequest,
         ReplyHandler receivingConnection)
@@ -311,14 +316,6 @@ public class StandardMessageRouter
         //Ignore push request from banned hosts.
         if (receivingConnection.isPersonalSpam(pushRequest))
             return;
-
-        // Ignore excess upload requests
-        //if (_callback.getNumUploads() >=
-/*
-        if (HTTPUploader.getUploadCount() >=
-                SettingsManager.instance().getMaxUploads())
-            return;
-*/
 		
         // Unpack the message
         byte[] ip = pushRequest.getIP();
@@ -350,11 +347,6 @@ public class StandardMessageRouter
         if (!_acceptor.isBannedIP(h))	
             _uploadManager.acceptPushUpload(file, h, port, 
                                             index, req_guid_hexstring);
-
-//          HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
-//                                             _callback);
-//          Thread t=new Thread(up);
-//          t.setDaemon(true);
-//          t.start();
     }
+	*/
 }
