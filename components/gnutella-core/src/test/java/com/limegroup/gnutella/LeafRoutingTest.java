@@ -223,17 +223,16 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch (IOException e) {
 			String hosts=c.headers().getProperty(HeaderNames.X_TRY);
             //System.out.println("X-Try: "+hosts);
-            assertNotNull("hosts should not be null", hosts);
-            Set s=list2set(hosts);
+            assertNull("hosts should be null", hosts);
+            //Set s=list2set(hosts);
 
             // size should be 0 since the test contains no non-Ultrapeer nodes
-            assertEquals("unexpected size of X-Try hosts list", 0, s.size());
+            //assertEquals("unexpected size of X-Try hosts list", 0, s.size());
 
-            hosts=c.headers().getProperty(
-                                HeaderNames.X_TRY_ULTRAPEERS);
+            hosts = c.headers().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertNotNull("unexpected null value", hosts);
-            s=list2set(hosts);
+            Set s=list2set(hosts);
             assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+hosts, 
                          8, s.size());
             byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
