@@ -1174,21 +1174,31 @@ public class ManagedConnection
                 //Under some circumstances, we can decide to reject a connection
                 //during handshaking because no slots are available.  You might
                 //think you could reject the connection if
-                //_manager.hasAvailableIncoming(Q) is false, where Q is the
-                //value of Query-Routing written by the remote host.
-                //Unfortunately this fails when Q==true because of supernode
-                //guidance; we don't know whether they'll become a leaf node or
-                //not.  So we use the following conservative test, and depend on
-                //the old-fashioned reject connection mechanism in
-                //ConnectionManager for the other cases.
-                if (!_manager.hasAvailableIncoming(false)
-                        && !_manager.hasAvailableIncoming(true))
+                //!_manager.hasAvailableIncoming(A, L), where A is true if the
+                //connection is the connection is ultrapeer-aware and L is true
+                //if the user is a leaf.  Unfortunately this fails when the
+                //incoming connection is an ultrapeer (A&&!L) because of
+                //supernode guidance; we don't know whether they'll become a
+                //leaf node or not.  So we use the following conservative test,
+                //and depend on the old-fashioned reject connection mechanism in
+                //ConnectionManager for the other cases.  TODO: factor this!
+                Properties props=response.getHeaders();
+                String isUltrapeer=
+                    props.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+                if (//it's an unrouted old-style connection, and no slot
+                       (isUltrapeer==null 
+                            && !_manager.hasAvailableIncoming(false, false))
+                    //OR leaf, and no space (TODO)
+                    //OR no space for leaves or ultrapeers
+                    || (!_manager.hasAvailableIncoming(true, true)
+                            && !_manager.hasAvailableIncoming(true, false))) {
                     return new HandshakeResponse(
                                    HandshakeResponse.SLOTS_FULL,
                                    HandshakeResponse.SLOTS_FULL_MESSAGE,
                                    ret);
-                else
+                } else {
                     return new HandshakeResponse(ret);
+                }
             } else {
                 //Outgoing connection.  Did the server request we become a leaf?
                 Properties ret=new Properties();

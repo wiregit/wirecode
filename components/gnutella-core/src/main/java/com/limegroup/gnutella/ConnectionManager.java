@@ -422,27 +422,66 @@ public class ConnectionManager {
     }
 
     /**
-     * If leaf==true, returns true if this has slots for incoming leaf
-     * connections.  If leaf==false, returns false if this has slots 
-     * for incoming supernode or 0.4 connections.  Does not account for
-     * supernode capabilities in this decision.
+     * Returns true if this has slots for an incoming connection, <b>without
+     * accounting for this' ultrapeer capabilities</b>.  More specifically:
+     * <ul>
+     * <li>if !isUltrapeerAware, returns true if this has space for an incoming
+     *  unrouted 0.4-style connection.  The value of isLeaf is ignored.
+     * <li>if isUltrapeerAware&&isLeaf, returns true if this has slots for an
+     *  incoming leaf connection.
+     * <li>if isUltrapeerAware&&!isLeaf, returns true if this has slots for an
+     *  incoming ultrapeer connection.
+     * </ul>
+     *
+     * @param isUltrapeerAware whether the connection wrote the X-Ultrapeer 
+     *  header
+     * @param isLeaf whether the value of the X-Ultrapeer header was false,
+     *  assuming it was written
      */
-    public boolean hasAvailableIncoming(boolean leaf) {
+    public synchronized boolean hasAvailableIncoming(boolean isUltrapeerAware,
+                                                     boolean isLeaf) {
         SettingsManager settings=SettingsManager.instance();
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
         if (_keepAlive<=0)
             return false;
         else if (hasClientSupernodeConnection())
-            return false;
-        else if (leaf) {
-            //As the spec. says, this assumes we are in supernode mode.
-            int shieldedMax=
-                SettingsManager.instance().getMaxShieldedClientConnections();
-            return _incomingClientConnections < shieldedMax;
+            //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
+            return false;  
+        else if (isUltrapeerAware) {
+            if (isLeaf) {
+                //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
+                int shieldedMax=
+                   SettingsManager.instance().getMaxShieldedClientConnections();
+                return _incomingClientConnections < shieldedMax;
+            } else {
+                //2. Ultrapeer.  Changed ultrapeers to prefer other ultrapeers.
+                //incoming ultrapeers are always allowed if there are fewer than
+                //KEEP_ALIVE ultrapeer connections, regardless of the number of
+                //incoming connections. So if you fetched KEEP_ALIVE outgoing
+                //connections, received KEEP_ALIVE incoming old-fashioned
+                //connections, then received KEEP_ALIVE incoming ultrapeer
+                //connections, you could temporarily have 3*KEEP_ALIVE (~18)
+                //connections!  Thankfully this almost never happens.
+                return ultrapeerConnections() < _keepAlive;
+            }
         } else {
+            //3. Old-style unrouted connection.
             return _incomingConnections < _keepAlive;
         }
+    }
+
+    /** Returns the number of connections to other ultrapeers.  Caller MUST hold
+     *  this' monitor. */
+    private int ultrapeerConnections() {
+        //TODO3: augment state of this if needed to avoid loop
+        int ret=0;
+        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            if (mc.isSupernodeConnection())
+                ret++;
+        }
+        return ret;
     }
 
     /**
@@ -1149,7 +1188,9 @@ public class ConnectionManager {
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
         if (!c.isOutgoing() && 
-                !hasAvailableIncoming(c.isSupernodeClientConnection())) {
+                !hasAvailableIncoming(
+                    c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)!=null,
+                    c.isSupernodeClientConnection())) {
             c.loopToReject(_catcher);     
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
