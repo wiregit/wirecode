@@ -81,11 +81,15 @@ public final class AlternateLocation implements
 	public static AlternateLocation create(final String location) 
                                                            throws IOException {
 		if(location == null || location.equals(""))
-			throw new IOException("null or empty in alt loc: "+location);
+			throw new IOException("null or empty location");
 
 		URL url = AlternateLocation.createUrl(location);        
 		if(url == null)
 			throw new IOException("could not parse url for alt loc: "+location);
+        if(!NetworkUtils.isValidPort(url.getPort()))
+            throw new IOException("invalid port");
+        if(NetworkUtils.isPrivateAddress(url.getHost()))
+            throw new IOException("invalid address");
 
 		URN sha1 = null;
 		try {
@@ -118,8 +122,10 @@ public final class AlternateLocation implements
 			throw new NullPointerException("cannot accept null URL");
 
 
-		if( !NetworkUtils.isValidPort(url.getPort()) )
-			throw new IllegalArgumentException("invalid port: "+url.getPort());
+		if(!NetworkUtils.isValidPort(url.getPort()))
+			throw new IOException("invalid port");
+        if(NetworkUtils.isPrivateAddress(url.getHost()))
+            throw new IOException("invalid address");			
 
 		// create a new URL instance from the data for the given url
 		// and the urn
@@ -147,27 +153,22 @@ public final class AlternateLocation implements
 	 *  a valid urn or if it's a private address
 	 * @throws <tt>NullPointerException</tt> if the <tt>rfd</tt> is 
 	 *  <tt>null</tt>
-     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     * @throws <tt>IOException</tt> if the port is invalid
 	 */
 	public static AlternateLocation create(final RemoteFileDesc rfd) 
 		                                                    throws IOException {
 		if(rfd == null) {
 			throw new NullPointerException("cannot accept null RFD");
 		}
-		URN urn = rfd.getSHA1Urn();
-		if(urn == null) {
-			throw new IOException("no SHA1 in RFD");
-		}
-		int port = rfd.getPort();
-		if(!NetworkUtils.isValidPort(port)) {
-			throw new IllegalArgumentException("invalid port: "+port);
-		}	
 
-        InetAddress address = InetAddress.getByName(rfd.getHost());
-        if(NetworkUtils.isPrivateAddress(address.getAddress())) {
-            throw new IOException("cannot accept private addresses: "+
-                                  address.getAddress());
-        }
+		URN urn = rfd.getSHA1Urn();
+		if(urn == null)
+			throw new IOException("no SHA1 in RFD");
+		int port = rfd.getPort();
+		if(!NetworkUtils.isValidPort(port))
+			throw new IOException("invalid port");
+        if(NetworkUtils.isPrivateAddress(rfd.getHost()))
+            throw new IOException("invalid address");
 
 		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
