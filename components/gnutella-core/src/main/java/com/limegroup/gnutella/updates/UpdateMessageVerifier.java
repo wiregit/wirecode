@@ -67,7 +67,7 @@ public class UpdateMessageVerifier {
     public static void main(String[] args) {
         try {
         RandomAccessFile f=new RandomAccessFile(
-                                   new File("lib\\signed_update_file.xml"),"r");
+                                   new File("lib\\update.xml"),"r");
         byte[] content = new byte[(int)f.length()];
         f.readFully(content);
         f.close();

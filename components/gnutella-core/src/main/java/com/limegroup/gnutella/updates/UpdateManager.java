@@ -22,7 +22,7 @@ public class UpdateManager {
 
     private UpdateManager() {
         try {
-            File file = new File("lib\\signed_update_file.xml");
+            File file = new File("lib\\update.xml");
             RandomAccessFile f=new RandomAccessFile(file,"r");
             byte[] content = new byte[(int)f.length()];
             f.readFully(content);
@@ -166,8 +166,8 @@ public class UpdateManager {
      *  writes data to signed_updateFile
      */ 
     private void commitVersionFile(byte[] data) throws IOException {
-        File f = new File("lib\\signed_update_file.xml");
-        File nf = new File("lib\\signed_update_file.new");
+        File f = new File("lib\\update.xml");
+        File nf = new File("lib\\update.new");
         RandomAccessFile raf = new RandomAccessFile(nf,"rw");
         raf.write(data);
         boolean deleted = nf.renameTo(f);

@@ -22,7 +22,7 @@ public class UpdateFileState implements HTTPMessage {
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
         System.out.println("Sumeet: writeHeaders start");
         //If any of this throws an exception, we will not send the headers.
-        File f = new File("lib\\signed_update_file.xml");
+        File f = new File("lib\\update.xml");
         RandomAccessFile raf = new RandomAccessFile(f,"r");
         int len = (int)raf.length();//not a very long file so no risk
         updateContents = new byte[len];
