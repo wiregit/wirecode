@@ -537,16 +537,16 @@ public final class RouterService {
         if (manager.hasSupernodeClientConnection()) {
             //Also the request to decrease the keep alive below a minimum
             //level is invalid, if we are an Ultrapeer with leaves
-            if (newKeep < manager.MIN_CONNECTIONS_FOR_SUPERNODE)
+            if (newKeep < manager.ULTRAPEER_CONNECTIONS)
                 throw new BadConnectionSettingException(
                 BadConnectionSettingException.TOO_LOW_FOR_ULTRAPEER,
-                manager.MIN_CONNECTIONS_FOR_SUPERNODE);
-            else if (newKeep > manager.MIN_CONNECTIONS_FOR_SUPERNODE 
+                manager.ULTRAPEER_CONNECTIONS);
+            else if (newKeep > manager.ULTRAPEER_CONNECTIONS 
                 && newKeep > max)
                 throw new BadConnectionSettingException(
                 BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                manager.MIN_CONNECTIONS_FOR_SUPERNODE > max ?
-                    manager.MIN_CONNECTIONS_FOR_SUPERNODE : max);
+                manager.ULTRAPEER_CONNECTIONS > max ?
+                    manager.ULTRAPEER_CONNECTIONS : max);
         } else if (newKeep > max)
             //cant have too many connections based upon node's speed
             throw new BadConnectionSettingException(
