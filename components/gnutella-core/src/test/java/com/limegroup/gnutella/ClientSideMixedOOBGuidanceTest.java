@@ -202,13 +202,17 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
         // now confirm that we leaf guide the 'even' guys but not the others.
         Message m = null;
-        assertGreaterThan(SearchResultHandler.REPORT_INTERVAL, 4*testUP.length);
+        // ensure that we'll get a QueryStatusResponse from the Responses
+        // we're sending.
         for (int i = 0; i < testUP.length; i++) {
-            Response[] res = new Response[4];
+            Response[] res = new Response[7];
             res[0] = new Response(10, 10, "susheel"+i);
             res[1] = new Response(10, 10, "susheel smells good"+i);
             res[2] = new Response(10, 10, "anita is sweet"+i);
             res[3] = new Response(10, 10, "anita is prety"+i);
+            res[4] = new Response(10, 10, "susheel smells bad" + i);
+            res[5] = new Response(10, 10, "renu is sweet " + i);
+            res[6] = new Response(10, 10, "prety is spelled pretty " + i);
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
@@ -223,7 +227,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
             if ((i==0) || (i==2)) {
                 assertNotNull(stat);
                 assertEquals(new GUID(stat.getGUID()), queryGuid);
-                assertEquals(4, stat.getNumResults());
+                assertEquals(5, stat.getNumResults());
             }
             else
                 assertNull(stat);
@@ -254,7 +258,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
     }
 
     public static Integer numUPs() {
-        return new Integer(4);
+        return new Integer(3);
     }
 
     public static ActivityCallback getActivityCallback() {
