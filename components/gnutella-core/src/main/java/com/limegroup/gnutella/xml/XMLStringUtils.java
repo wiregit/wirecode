@@ -54,6 +54,11 @@ public class XMLStringUtils
      */
     public static final String XML_DOC_START_IDENTIFIER = "<?xml";
 
+    /** The xml tag describing the version of xml used.  Used primarly as a
+     *  delimiter for xml in a Query Reply.
+     */
+    public static final String XML_VERSION_DELIM = "<?xml version=\"1.0\"?>";
+
 
     
     /**
