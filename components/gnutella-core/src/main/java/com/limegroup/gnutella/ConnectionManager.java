@@ -98,7 +98,7 @@ public class ConnectionManager {
      * Minimum umber of connections that a supernode with leaf connections,
      * must have
      */
-    private static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
+    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
     
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_SUPERNODES headers. */
@@ -280,12 +280,45 @@ public class ConnectionManager {
      * and newKeep>1 (sic).
      */
     public synchronized void setKeepAlive(int newKeep) {
-        if (newKeep>1 && hasClientSupernodeConnection())
+        //The request for increasing keep alive if we are leaf node is invalid
+        if ((newKeep > 1) && hasClientSupernodeConnection())
             return;
+        
         _keepAlive = newKeep;
         adjustConnectionFetchers();
     }
 
+    /**
+     * Checks if the passed new keep alive value is valid for the current
+     * state of the node.
+     * <p> Examples of invalid Keep Alive values:
+     * <ul>
+     * <li> Negative keep alive values are invalid
+     * <li> if we are leaf node, and the new keep alive value is greater than 1
+     * <li> If we are an Ultrapeer with leaves, and the new keep alive value
+     * is lesser than acceptable minimum
+     * </ul>
+     * @param newKeep The keep alive value to be tested
+     * @return true, if the new keep alive value is valid in the context of 
+     * present state of this node, false otherwise
+     */ 
+    boolean isValidKeepAlive(int newKeep) {
+        //Negative keep alive is invalid
+        if(newKeep < 0)
+            return false;
+        //The request for increasing keep alive if we are leaf node is invalid
+        if ((newKeep > 1) && hasClientSupernodeConnection())
+            return false;
+        //Also the request to decrease the keep alive below a minimum
+        //level is invalid, if we are an Ultrapeer with leaves
+        if(_incomingClientConnections > 0 
+            && newKeep < MIN_CONNECTIONS_FOR_SUPERNODE)
+            return false;
+        
+        //valid otherwise
+        return true;
+    }
+    
     /**
      * Ensures that if a node is acting as supernode, it has atleast 
      * some minimum number of connections opened
@@ -295,8 +328,6 @@ public class ConnectionManager {
         //volatile value
         if(_incomingClientConnections > 0 
             && _keepAlive < MIN_CONNECTIONS_FOR_SUPERNODE){
-            SettingsManager.instance().setKeepAlive(
-                MIN_CONNECTIONS_FOR_SUPERNODE);
             setKeepAlive(MIN_CONNECTIONS_FOR_SUPERNODE);
         }
     }
