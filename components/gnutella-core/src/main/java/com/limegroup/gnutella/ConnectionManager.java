@@ -1092,43 +1092,17 @@ public class ConnectionManager {
                                        && _keepAlive>0;
         if (firstShieldedConnection)
             setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
-
-        //This is totally disabled now that leaves can have multiple connections.
-//          //Set keep alive to 1, so that we are not fetching any connections.
-//          //KEEP_ALIVE property is not modified, so that when this connection
-//          //drops, we can restore _keepAlive to its old value.  Note that we do
-//          //not set _keepAlive to 0.  This allows
-//          //lostShieldedClientSupernodeConnection to distinguish between being
-//          //disconnected by the user and being disconnected by the remote host.
-//          //(An earlier version required you to press the disconnect button twice
-//          //when in leaf mode.)  hasAvailableIncoming will not allow incoming
-//          //connections when we have a client/supernode connection, regardless of
-//          //_keepAlive.  The call to math.min prevents us from reconnecting if
-//          //disconnected.
-//          setKeepAlive(Math.min(1, _keepAlive));
-        
-//          //close all other connections
-//          Iterator iterator = _connections.iterator();
-//          while(iterator.hasNext())
-//          {
-//              ManagedConnection connection = (ManagedConnection)iterator.next();
-//              if(!connection.equals(supernodeConnection))
-//                  remove(connection);
-//          }
     }
     
     /** 
-     * Indicates that the node is in the client node, and has now
-     * lost its only connection to the supernode
+     * Indicates that the node is in client mode and has lost a leaf
+     * to ultrapeer connection.
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        //If the user is connected and we've lost all client connections, run
-        //the quick connect logic.  See gotShieldedClientSupernodeConnection.
-        if(_keepAlive>0 && !hasClientSupernodeConnection())
-        {
-            connect();
-        }
+        //Does nothing!  adjustConnectionFetchers takes care of everything now.
+        //I'm leaving this method here as a nice place holder in case we
+        //need to take action in the future.
     }
     
     /**
