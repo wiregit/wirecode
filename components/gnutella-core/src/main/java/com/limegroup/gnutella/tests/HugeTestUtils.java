@@ -118,7 +118,21 @@ final class HugeTestUtils {
 		               "2002-04-09T20:32:33Z",
 		"http: //Y.R.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z"
+		               "2002-04-09T20:32:33Z",
+		"http: //Y.R.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "\r\n2002-04-09T20:32:33Z",
+		"http: //Y.R.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "  \n\r\n2002-04-09T20:32:33Z",
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		               ":http: //Y.R.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "  \n\r\n2002-04-09T20:32:33Z",
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		               ":http: //Y.R.Y.Y:6352/get/2/"+
+		               "lime%20capital%20management%2001.mpg "+
+		               "  \n\r\n2002-04-09T20:32:33Z"
 	};
 
 	/**
