@@ -610,10 +610,9 @@ public abstract class MessageRouter {
 
 		qh.setRouteTableEntry(rte);
 
-		// create a query to send to leaves
-		QueryRequest query = qh.createQuery((byte)1);
 		if(RouterService.isSupernode()) {
-			forwardQueryRequestToLeaves(query, null);
+			// create a query to send to leaves
+			forwardQueryRequestToLeaves(qh.createQuery((byte)1), null);
 		}
 
 		DYNAMIC_QUERIER.addQuery(qh);
