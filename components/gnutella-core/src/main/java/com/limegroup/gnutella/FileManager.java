@@ -197,7 +197,7 @@ public abstract class FileManager {
      * qrt
      */
     protected static QueryRouteTable _queryRouteTable;
-    protected static boolean _needRebuild = true;
+    protected static volatile boolean _needRebuild = true;
 
     /**
      * Characters used to tokenize queries and file names.
@@ -1147,6 +1147,7 @@ public abstract class FileManager {
             buildQRT();
             _needRebuild = false;
         }
+        System.out.println("getQRT()");
         return _queryRouteTable;
     }
 
@@ -1156,7 +1157,7 @@ public abstract class FileManager {
      * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
     protected void buildQRT() {
-        //System.out.println("build QRT");
+        System.out.println("build QRT");
         _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) 
