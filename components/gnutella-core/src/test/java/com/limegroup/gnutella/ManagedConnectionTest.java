@@ -346,7 +346,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                Message m = c.receive(2000);
+                c.receive(2000);
                 ret=true;
             } catch (InterruptedIOException e) {
                 return ret;
