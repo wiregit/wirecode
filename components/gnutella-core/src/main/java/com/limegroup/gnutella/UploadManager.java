@@ -1022,7 +1022,6 @@ public final class UploadManager implements BandwidthTracker {
     }
 
     static void tBandwidthTracker(UploadManager upman) {
-        System.out.print("-Testing bandwidth tracker...");
         upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
         Assert.that(upman.measuredUploadSpeed()==-1);
         upman.reportUploadSpeed(100000, 2000000);  //20 kB/s

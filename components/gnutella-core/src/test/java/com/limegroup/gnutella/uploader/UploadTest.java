@@ -207,7 +207,8 @@ public class UploadTest extends TestCase {
             passed = pipelineDownloadPush(file,null, 
                                           "abcdefghijklmnopqrstuvwxyz");
             assertTrue("piplining with push download",passed);
-            
+         
+            System.out.println("passed");
         } catch (IOException e) {
             e.printStackTrace();
 			assertTrue("unexpected exception: "+e, false);
