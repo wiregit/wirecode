@@ -954,7 +954,7 @@ public class Connection {
             }
             
             // DO THE ACTUAL READ
-            msg = Message.read(_in, HEADER_BUF, _softMax);
+            msg = Message.read(_in, HEADER_BUF, Message.N_TCP, _softMax);
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will

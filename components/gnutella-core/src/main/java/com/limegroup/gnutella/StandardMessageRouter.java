@@ -6,6 +6,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 
@@ -182,6 +183,13 @@ public class StandardMessageRouter extends MessageRouter {
                                          byte[] clientGUID) {
         // Run the local query
         Response[] responses = _fileManager.query(queryRequest);
+        
+        if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
+            if( responses != null && responses.length > 0 )
+                RoutedQueryStat.LEAF_HIT.incrementStat();
+            else
+                RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
+        }
 
         sendResponses(responses, queryRequest, clientGUID);
         
