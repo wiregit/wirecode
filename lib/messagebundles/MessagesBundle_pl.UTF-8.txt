@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 2.9.12
+# Messages Bundle for LimeWire 4.1.6
 # Specialization for: Polish - Poland
 # Thanks to: Gregory Jaworek
 ################################################################################
@@ -57,6 +57,9 @@ OPTIONS_BUTTONS_CANCEL_LABEL=Anuluj
 OPTIONS_BUTTONS_CANCEL_TIP=Anulowanie wprowadzonych zmian i zamknięcie tego okna
 OPTIONS_BUTTONS_APPLY_LABEL=Zastosuj
 OPTIONS_BUTTONS_APPLY_TIP=Naciśnij, aby zastosować wprowadzone zmiany
+#??? OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore defaults
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert all settings to the factory defaults.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -69,10 +72,12 @@ NO=Nie
 ################################################################################
 #??? GENERAL_AVERAGE_BANDWIDTH=Average bandwidth
 #??? GENERAL_ALTERNATE_LOCATIONS=Valid alternate locations
+#??? GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid alternate locations
 #??? GENERAL_STARTED_ON=Started on 
 #??? GENERAL_FINISHED_ON=Finished on 
 #??? GENERAL_TIME_SPENT=Time spent
 #??? GENERAL_REVERT_TO_DEFAULT=Revert to default
+#??? GENERAL_MORE_OPTIONS=More options
 
 # StatusLine, Statistics and GUIUtils
 GENERAL_UNIT_TERABYTES=TB
@@ -92,13 +97,41 @@ APP_TITLE=LimeWire: witamy w sieci Gnutella
 ABOUT_TITLE=O programie LimeWire
 ABOUT_LABEL_START=Program kliencki LimeWire
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_END=Prawa autorskie (c)2000-2002 Lime Wire LLC
+ABOUT_LABEL_END=Prawa autorskie (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=O programie LimeWire
+#??? ABOUT_CREDITS_LABEL=Credits
+#??? ABOUT_CREDITS_TIP=Display credits information about LimeWire.
+#??? ABOUT_NOTICE_LABEL=Notice
+#??? ABOUT_NOTICE_TIP=Display distribution and contact information.
+#??? ABOUT_LICENSE_LABEL=License
+#??? ABOUT_LICENSE_TIP=Display the license agreement about this software.
 ABOUT_BUTTON_LABEL=OK
 ABOUT_BUTTON_TIP=Zamknięcie tego okienka
 ABOUT_SCROLL_CHECK_BOX_LABEL=Przewijaj automatycznie
 ABOUT_FILE_NAME=about_po.html
 #Do not uncomment the above line without providing this translated HTML file!
+
+###################################################################
+# Key/value pairs for the tip of the day window (not the tips themselves)
+###################################################################
+#??? TOTD_TITLE=Tip of the day
+#??? TOTD_INTRODUCTION=Did you know...
+#??? TOTD_SHOW_AT_STARTUP=Show tips at startup
+#??? TOTD_NEXT=Next tip
+#??? TOTD_PREVIOUS=Previous tip
+TOTD_CLOSE=Zamknij
+
+###################################################################
+# Key/value pairs for the Getting Started image
+###################################################################
+#??? GETTING_STARTED_TITLE=Getting started
+#??? GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
+
+###################################################################
+# Key/value pairs for the Going Pro image.
+###################################################################
+#??? GOING_PRO_TITLE=The most advanced file sharing program on the planet!
+#??? GOING_PRO_DESCRIPTION=Better search results\nTurbo charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
 
 ###################################################################
 # Key/value pairs for the Windows system tray -- Coming soon...
@@ -187,9 +220,15 @@ MENU_NAV_LIB_ACCESSIBLE=Pokaż panel plikoteki.
 
 MENU_VIEW_TITLE=Widok
 MENU_VIEW_TITLE_MNEMONIC=W
+#??? MENU_VIEW_SMALL_ICONS=Small icons
+#??? MENU_VIEW_SMALL_ICONS_MNEMONIC=S
+#??? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use small icons.
+#??? MENU_VIEW_TEXT_WITH_ICONS=Icon text
+#??? MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
+#??? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show text below icons.
 #??? MENU_VIEW_SHOW_HIDE_TITLE=Show/hide
 #??? MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
-#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or hide individual tabs
+#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or hide individual tabs.
 MENU_VIEW_MONITOR=Kontrola
 MENU_VIEW_MONITOR_MNEMONIC=K
 MENU_VIEW_MONITOR_ACCESSIBLE=Pokaż panel kontrolny.
@@ -199,14 +238,32 @@ MENU_VIEW_CONNECTIONS_ACCESSIBLE=Pokaż panel połączeń.
 MENU_VIEW_LIBRARY=Plikoteka
 MENU_VIEW_LIBRARY_MNEMONIC=P
 MENU_VIEW_LIBRARY_ACCESSIBLE=Pokaż panel plikoteki.
-#??? MENU_VIEW_THEMES_TITLE=Zastosuj themes
+MENU_VIEW_THEMES_TITLE=Zastosuj skórka
 #??? MENU_VIEW_THEMES_TITLE_MNEMONIC=T
-#??? MENU_VIEW_THEMES_GET_MORE=Get more themes
+#??? MENU_VIEW_THEMES_GET_MORE=Get more skins
 #??? MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
-#??? MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more themes from limewire.com
+#??? MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more skins from limewire.com
+#??? MENU_VIEW_THEMES_REFRESH=Refresh skins
+#??? MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
+#??? MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Reload available skins from disk
 MENU_VIEW_THEMES_USE_DEFAULT=Użyj domyślnego
 MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
-#??? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default theme
+#??? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default skin
+#??? MENU_VIEW_LANGS_TITLE=Change Language
+#??? MENU_VIEW_LANGS_TITLE_MNEMONIC=H
+#??? MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help translate LimeWire
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language.
+#??? MENU_VIEW_SEARCH_TITLE=Search
+#??? MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
+#??? MENU_VIEW_SEARCH_ACCESSIBLE=Search tab options.
+#??? MENU_VIEW_SEARCH_FILTERS=Result filters
+#??? MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
+#??? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show search result filters.
+#??? MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
+#??? MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
+#??? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix button.
 
 MENU_RESOURCES_TITLE=Zasoby
 MENU_RESOURCES_TITLE_MNEMONIC=Z
@@ -228,6 +285,9 @@ MENU_HELP_TITLE_MNEMONIC=O
 MENU_HELP_USING_LIMEWIRE=Korzystanie z LimeWire
 MENU_HELP_USING_LIMEWIRE_MNEMONIC=K
 MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=Ogólna pomoc w korzystaniu z programu LimeWire.
+#??? MENU_HELP_TOTD=Tip of the Day
+#??? MENU_HELP_TOTD_MNEMONIC=D
+#??? MENU_HELP_TOTD_ACCESSIBLE=Show the "Tip of the day" window
 MENU_HELP_FAQ=FAQ
 MENU_HELP_FAQ_MNEMONIC=F
 MENU_HELP_FAQ_ACCESSIBLE=Najczęściej zadawane pytania dotyczące LimeWire.
@@ -243,10 +303,21 @@ MENU_HELP_REVIEW_ACCESSIBLE=Prześlij swoją opinię o LimeWire.
 MENU_HELP_ABOUT=O programie...
 MENU_HELP_ABOUT_MNEMONIC=O
 MENU_HELP_ABOUT_ACCESSIBLE=Ogólne informacje o programie.
+#??? MENU_HELP_ERROR=Generate error
+#??? MENU_HELP_ERROR_MNEMONIC=E
+#??? MENU_HELP_ERROR_ACCESSIBLE=Generate a popup error for testing.
+
+################################################################################
+# Keys/value pairs for general tables info
+################################################################################
+#??? TABLES_USE_ROWSTRIPE=Stripe Rows
+#??? TABLES_REAL_TIME_SORTING=Sort Automatically
+#??? TABLES_DISPLAY_TOOLTIPS=Extended Tooltips
 
 ################################################################################
 # Keys/value pairs for SearchView stuff....
 ################################################################################
+#??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
 SEARCH_DOWNLOAD_BUTTON_LABEL=Pobierz
 SEARCH_DOWNLOAD_BUTTON_TIP=Rozpoczęcie pobierania wszystkich wybranych plików.
 SEARCH_WISHLIST_BUTTON_LABEL=Dodaj do Listy Marzeń
@@ -267,18 +338,37 @@ SEARCH_PUBLIC_STOP_STRING=Przerwij szukanie
 SEARCH_PUBLIC_BROWSE_STRING=Przeglądanie hosta
 SEARCH_PUBLIC_CHAT_STRING=Rozpocznij czata z hostem
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Zajrzyj na Bitzi Web...
+#??? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet details for file
+#??? SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Powtórz szukanie
 SEARCH_PUBLIC_BLOCK_STRING=Zablokuj hosta
 SEARCH_RESULT_TABLE_LABEL=Wyniki
 SEARCH_SEARCHING_LABEL=Szukanie...
-SEARCH_VIRUS_MSG_ONE=Jeden z zaznaczonych plików jest wykonywalny 
-SEARCH_VIRUS_MSG_TWO=i może zawierać wirusa. Czy na pewno chcesz 
+SEARCH_VIRUS_MSG_ONE=Jeden z zaznaczonych plików jest wykonywalny
+SEARCH_VIRUS_MSG_TWO=i może zawierać wirusa. Czy na pewno chcesz
 SEARCH_VIRUS_MSG_THREE=pobrać ten plik?
 SEARCH_SHOW_MESSAGE_MSG=Nie pokazuj więcej tej wiadomości
 SEARCH_DOWNLOAD_DIALOG_CONFIRM=Polecenie pobrania
 SEARCH_DEFAULT_FIELD_TITLE=Nazwa pliku
+#??? SEARCH_MULTIPLE_HOSTS=Multiple
 AUTO_DL_CHECKBOX_STRING=Pobieranie automatyczne
 AUTO_DL_CHECKBOX_TOOLTIP=Automatyczne pobieranie plików przez LimeWire.
+#??? SEARCH_TYPE_KEYWORD=Keyword
+#??? SEARCH_TYPE_WHATSNEW=What's new
+#??? SEARCH_TYPE_BROWSEHOST=Direct connect
+#??? SEARCH_BROWSEHOST_TITLE=Got friends?
+#??? SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
+#??? SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
+#??? SEARCH_BROWSEHOST_BUTTON=Direct connect
+#??? SEARCH_WHATSNEW_HIDE_ADULT=Hide adult content
+#??? SEARCH_WHATSNEW_TITLE_ONE=Don't know
+#??? SEARCH_WHATSNEW_TITLE_TWO=what to look for?
+#??? SEARCH_WHATSNEW_DESC=A "What's New" search will search for files that have been recently added to the network.
+#??? SEARCH_CURRENT_SEARCH=Current search:
+#??? SEARCH_WHATS_NEW_SMALL=New
+#??? SEARCH_SELECT_TYPE=Select type:
+#??? SEARCH_FILTER_RESULTS=Filter results:
+#??? SEARCH_BACK_TO_SEARCH=Back to search
 
 #Media Types
 MEDIA_ANY_TYPE=Dowolny
@@ -291,18 +381,30 @@ MEDIA_IMAGES=Obrazki
 #ResultPanel Columns for normal view
 RESULT_PANEL_QUALITY=Jakość
 RESULT_PANEL_NAME=Nazwa pliku
+#??? RESULT_PANEL_ICON=Icon
 RESULT_PANEL_TYPE=Typ
 RESULT_PANEL_SIZE=Rozmiar
 RESULT_PANEL_SPEED=Łącze
 RESULT_PANEL_CHAT=Czat
 RESULT_PANEL_LOCATION=Lokalizacja
 RESULT_PANEL_COUNT=#
-RESULT_PANEL_VENDOR=Producent/wersja
+RESULT_PANEL_VENDOR=Producent
+#??? RESULT_PANEL_ADDED=Created
 
+#Filter labels.
+SEARCH_FILTER_ALL=Pokazuj
+SEARCH_FILTER_OPTION=Opcja
+SEARCH_FILTER_OPTIONS=Opcje
+#??? SEARCH_FILTER_MEDIA=Media
+
+DOWNLOAD_LAUNCH_BUTTON_LABEL=Podgląd
+DOWNLOAD_LAUNCH_BUTTON_TIP=Preview the selected download.
 DOWNLOAD_KILL_BUTTON_LABEL=Zatrzymaj
 DOWNLOAD_KILL_BUTTON_TIP=Wstrzymanie pobierania wybranych plików.
 DOWNLOAD_RESUME_BUTTON_LABEL=Wznów
 DOWNLOAD_RESUME_BUTTON_TIP=Naciśnij, aby spróbować podjąć próbę wznowienia pobierania pliku.
+DOWNLOAD_SOURCES_BUTTON_LABEL=Find sources
+DOWNLOAD_SOURCES_BUTTON_TIP=Try to locate other sources for failed download.
 DOWNLOAD_CLEAR_BUTTON_LABEL=Usuń nieaktywne
 DOWNLOAD_CLEAR_BUTTON_TIP=Usuwanie nieaktywnych downloadów z listy.
 
@@ -351,6 +453,23 @@ STATISTICS_FILES=plików
 STATISTICS_DISCONNECTED=Brak połączenia / pliki niedostępne
 STATISTICS_SHARING=Udostępnianie
 STATISTICS_SHARING_TOOLTIP=Liczba udostępnianych przez ciebie plików
+STATISTICS_CONNECTION_DISCONNECTED=Brak połączenia
+#??? STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
+STATISTICS_CONNECTION_CONNECTING=Łączenie
+#??? STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network.
+#??? STATISTICS_CONNECTION_POOR=Poor
+#??? STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network.
+#??? STATISTICS_CONNECTION_FAIR=Fair
+#??? STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger.
+#??? STATISTICS_CONNECTION_GOOD=Good
+#??? STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection.
+#??? STATISTICS_CONNECTION_EXCELLENT=Excellent
+#??? STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED=TurboCharged
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience TurboCharged connections all the time with LimeWire Pro.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
+#??? STATISTICS_CONNECTION_QUALITY=Quality:
+#??? STATISTICS_CONNECTION_IDLE=Idle
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -379,14 +498,29 @@ DOWNLOAD_STATUS_FAILED=Pobranie nie było możliwe
 DOWNLOAD_STATUS_DOWNLOADING=Pobieranie od
 DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=Przeniesienie do plikoteki nie było możliwe
 DOWNLOAD_STATUS_CORRUPT_FILE=Plik uszkodzony
+#??? DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering corrupted file
+#??? DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery failed
 DOWNLOAD_STATUS_REQUERYING=Ponawianie zapytania do sieci
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=Ponowne zapytanie przesłane, oczekiwanie 
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=na wyniki
+#??? DOWNLOAD_STATUS_WAITING_FOR_USER=Need more sources
+#??? DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for stable connections
 DOWNLOAD_HOSTS_LABEL=hosty
+DOWNLOAD_HOST_LABEL=host
 DOWNLOAD_STATUS_REMOTE_QUEUED=Zdalnie skolejkowane na pozycji
-DOWNLOAD_STATUS_HASHING=Verifying File Contents...
-DOWNLOAD_STATUS_SAVING=Saving File...
-#??? DOWNLOAD_AWAITING_SOURCES=Awaiting more sources...
+#??? DOWNLOAD_STATUS_HASHING=Verifying file contents...
+#??? DOWNLOAD_STATUS_SAVING=Saving file...
+#??? DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
+#??? DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
+#??? DOWNLOAD_APPLY_NEW_THEME_END=". Would you like to use this new skin?
+#??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
+#??? DOWNLOAD_BUSY_HOSTS=Busy hosts
+#??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
+#??? DOWNLOAD_SEARCHING=Locating sources....
+#??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
+#??? DOWNLOAD_MAGNET_DIALOG=Would you like to download
+#??? DOWNLOAD_FROM=from
+#??? DOWNLOAD_MAGNET_DIALOG_END=?
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -398,6 +532,7 @@ UPLOAD_KILL_BUTTON_TIP=Zatrzmanie wybranych wysyłek.
 UPLOAD_CLEAR_BUTTON_LABEL=Usuń nieaktywne
 UPLOAD_CLEAR_BUTTON_TIP=Usuwa nieaktywne wysyłki.
 UPLOAD_CHAT_BUTTON_LABEL=Czatuj z hostem
+UPLOAD_CHAT_BUTTON_TIP=Rozpocznij czat z wybranym hostem.
 UPLOAD_TABLE_STRING_NAME=Nazwa pliku
 UPLOAD_TABLE_STRING_HOST=Host
 UPLOAD_TABLE_STRING_SIZE=Rozmiar
@@ -413,10 +548,16 @@ UPLOAD_TABLE_STRING_LIMITREACHED=Osiągnięty limit wysyłek
 UPLOAD_TABLE_STRING_FREELOADER=Wysyłka do Wolnego Strzelca
 UPLOAD_TABLE_STRING_PUSHFAILED=Połączenie niemożliwe
 UPLOAD_TABLE_STRING_INTERRUPTED=Transfer przerwany
+#??? UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Range unavailable
+#??? UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Malformed request
 UPLOAD_TABLE_STRING_COMPLETE=Ukończono
+#??? UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned greedy servent
+#??? UPLOAD_TABLE_STRING_HASH_TREE=Uploading hash tree
 UPLOAD_TABLE_STRING_FNF=Nie znaleziono pliku
 UPLOAD_TABLE_STRING_QUEUED=Skolejkowane
 UPLOAD_STRING_KBPSEC=KB/s
+#??? UPLOAD_ACTIVE=active
+UPLOAD_QUEUED=skolejkowane
 
 ###################################################################
 # Key/value pairs for MonitorView
@@ -437,6 +578,14 @@ T1_SPEED=T1
 T3_SPEED=T3 lub szybsze
 MULTICAST_SPEED=Ethernet
 
+################################################################################
+# HTML Page stuff
+################################################################################
+HTML_PAGE_TITLE=Download page
+# SPACE AT END NEEDS TO BE THERE!!!
+HTML_PAGE_LISTING=File listing for 
+HTML_PAGE_MAGNET=Magnet links for fast downloads (if you have LimeWire installed)
+
 ###################################################################
 # Key/value pairs for ConnectionView
 ###################################################################
@@ -451,6 +600,8 @@ CV_COLUMN_PROTOCOL=Protokół
 CV_COLUMN_VENDOR=Producent/wersja
 CV_COLUMN_TIME=Czas
 #??? CV_COLUMN_COMPRESSION=Compressed (P/W)
+CV_COLUMN_QRP_FULL=QRP (%/rozmiar)
+#??? CV_COLUMN_QRP_USED=QRP empty
 CV_BUTTON_REMOVE=Odłącz
 CV_BUTTON_TOOLTIP_REMOVE=Rozłączanie wybranych połączeń
 CV_BUTTON_ADD=Dodaj
@@ -458,9 +609,15 @@ CV_BUTTON_TOOLTIP_ADD=Zestawianie nowego połączenia wychodzącego
 CV_LABEL_KEEP_BEGIN=Podtrzymuj około
 CV_LABEL_KEEP_END=aktywnych połączeń.
 CV_TABLE_STRING_CONNECTING=Łączenie...
+CV_TABLE_STRING_CONNECTINGS=łączenie
 CV_TABLE_STRING_LEAF=Listek
+CV_TABLE_STRING_LEAVES=Listeky
 CV_TABLE_STRING_ULTRAPEER=UltraHost
+CV_TABLE_STRING_ULTRAPEERS=UltraHosty
+CV_TABLE_STRING_PEER=Host
+CV_TABLE_STRING_PEERS=Hosty
 CV_TABLE_STRING_STANDARD=0.6
+#??? CV_TABLE_STRING_STANDARDS=standard
 CV_TABLE_STRING_INCOMING=Przychodzące
 CV_TABLE_STRING_OUTGOING=Wychodzące
 #??? CV_TABLE_STRING_CONNECTED_ON=Connected on 
@@ -471,6 +628,7 @@ CV_TABLE_STRING_KBPSEC=KB/s
 ################################################################################
 # Key/value pairs for a strings in the library window
 ################################################################################
+#??? LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_NAME=Nazwa pliku
 #??? LIBRARY_TABLE_TITLE=Title
 #??? LIBRARY_TABLE_ARTIST=Artist
@@ -484,6 +642,8 @@ LIBRARY_TREE_NEW_FOLDER_LABEL=Nowy katalog
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=Wstrzymaj udostępnianie
 LIBRARY_TREE_RENAME_FOLDER_LABEL=Zmień nazwę
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=Do playlisty
+#??? LIBRARY_TREE_SAVED_DIRECTORY=Saved files
+#??? LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete files
 
 ################################################################################
 # Key/value pairs for burn cd link
@@ -503,25 +663,37 @@ PLAYLIST_OPTIONS_SHUFFLE=Losowanie
 PLAYLIST_DIALOG_OPEN_TITLE=Wybierz playlistę (.m3u)
 PLAYLIST_DIALOG_SAVE_TITLE=Zapisz playlistę jako...
 PLAYLIST_DIALOG_SAVE_SAVE=Zapisz
+#??? PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
+#??? PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
+#??? PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
+#??? PLAYLIST_FILE_MISSING=. The file cannot be found.
+#??? PLAYLIST_FILE_CORRUPT=. The file is corrupt.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
-SETUP_WELCOME_LABEL=Witamy w programie instalacyjnym LimeWire, który przeprowadzi Cię przez szereg czynności konfiguracyjnych optymalizujących pracę programu pod kątem wydajności.
-SETUP_SAVE_LABEL=Wybierz katalog w którym chciałbyś przechowywać pobrane pliki. Domyślnie, katalog ten będzie także udostępniony innym użytkownikow sieci Gnutella.
-SETUP_SPEED_LABEL=Określ jakim łączem do Internetu dysponujesz. Bardzo ważne jest, abyś określił jego rodzaj precyzyjnie, ma to wpływ na pracę całej sieci. Jeżeli nie jesteś pewien typu posiadanego łącza lub jeśli Twoje łącze nie znajduje się na tej liście to wybierz takie, które wydaje Ci się najbardziej odpowiednie.
-SETUP_SCAN_LABEL=LimeWire może teraz szybko przejrzeć Twoje zasoby w poszukiwaniu plików multimedialnych. Następnie będziesz mógł wybrać które katalogi udostępnić, a których nie. Czy chciałbyś skorzystać z tej możliwości?
-SETUP_WAIT_LABEL=Trwa skanowanie zasobów, prosimy poczekać...
-SETUP_CONFIRM_LABEL=Wymienione poniżej katalogi zawierają pliki które, być może, chciałbyś udostępnić. Jeżeli chciałbyś udostępnić któreś z nich to po prostu zaznacz je. Udostępnione zostaną również ich podkatalogi.
-SETUP_FINISH_LABEL=Instalacja LimeWire dobiegła pomyślnie końca. Naciśnij na "Finish" i rozpocznij pracę z programem.
+#??? SETUP_LANGUAGE_TITLE=Language options
+#??? SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_WELCOME_TITLE=Witamy
+SETUP_WELCOME_LABEL=Witamy w programie instalacyjnym LimeWire, który przeprowadzi Cię przez szereg czynności konfiguracyjnych optymalizujących pracę programu pod kątem wydajności.
+#??? SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
 SETUP_SAVE_TITLE=Katalog dla pobranych plików
+SETUP_SAVE_LABEL=Wybierz katalog w którym chciałbyś przechowywać pobrane pliki. Domyślnie, katalog ten będzie także udostępniony innym użytkownikow sieci Gnutella.
 SETUP_SPEED_TITLE=Rodzaj łącza do Internetu
+SETUP_SPEED_LABEL=Określ jakim łączem do Internetu dysponujesz. Bardzo ważne jest, abyś określił jego rodzaj precyzyjnie, ma to wpływ na pracę całej sieci. Jeżeli nie jesteś pewien typu posiadanego łącza lub jeśli Twoje łącze nie znajduje się na tej liście to wybierz takie, które wydaje Ci się najbardziej odpowiednie.
+#??? SETUP_STARTUP_TITLE=System startup
+#??? SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
+#??? SETUP_STARTUP_CHECKBOX=Start automatically
 SETUP_SCAN_TITLE=Przeszukiwanie zasobów
+SETUP_SCAN_LABEL=LimeWire może teraz szybko przejrzeć Twoje zasoby w poszukiwaniu plików multimedialnych. Następnie będziesz mógł wybrać które katalogi udostępnić, a których nie. Czy chciałbyś skorzystać z tej możliwości?
 SETUP_WAIT_TITLE=Analiza zasobów
+SETUP_WAIT_LABEL=Trwa skanowanie zasobów, prosimy poczekać...
 SETUP_CONFIRM_TITLE=Potwierdzenie rozpoczęcia przeszukiwania
+SETUP_CONFIRM_LABEL=Wymienione poniżej katalogi zawierają pliki które, być może, chciałbyś udostępnić. Jeżeli chciałbyś udostępnić któreś z nich to po prostu zaznacz je. Udostępnione zostaną również ich podkatalogi.
+#??? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_FINISH_TITLE=Zakończenie instalacji
+SETUP_FINISH_LABEL=Instalacja LimeWire dobiegła pomyślnie końca. Naciśnij na "Finish" i rozpocznij pracę z programem.
 
 ################################################################################
 # Key/value pairs for the file chooser
@@ -550,6 +722,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=Spowoduje wybranie katalogu domyślnego
 ################################################################################
 PRO_TITLE=Dokonaj upgrade-u do wersji PRO
 PRO_LABEL_THANKS=LimeWire to efekt ciężkiej, dwuletniej pracy zespołu składającego się z siedmiu programistów. Jeżeli korzystasz i doceniasz zalety LimeWire, prosimy Cię o zakupienie wersji LimeWire PRO. Każdy zakupiony egzemplarz wersji LimeWire PRO to większa szansa na rozwój pakietu w przyszłości.
+
 PRO_LABEL_QUESTION=Upgradujemy do LimeWire PRO?
 GO_PRO_TIP=Kup LimeWire PRO właśnie teraz.
 WHYGOPRO=Dlaczego wersja PRO?
@@ -578,6 +751,37 @@ VIEW_CHOOSER_OK_BUTTON_LABEL=OK
 VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Anuluj
 #IndentingPanel
 XML_SEARCH_MORE_OPTIONS_LABEL=Dodatkowe opcje wyszukiwania
+
+#??? META_EDITOR_INFO_TAB_LABEL=Info
+META_EDITOR_OK_BUTTON_LABEL=OK
+META_EDITOR_CANCEL_BUTTON_LABEL=Anuluj
+META_EDITOR_ADVANCED_BUTTON_LABEL=Advanced
+#??? META_EDITOR_RESET_LABEL=Reset
+
+META_EDITOR_AUDIO_LABEL=Muzyka
+#??? META_EDITOR_TITLE_LABEL=Title:
+#??? META_EDITOR_ARTIST_LABEL=Artist:
+#??? META_EDITOR_ALBUM_LABEL=Album:
+#??? META_EDITOR_GENRE_LABEL=Genre:
+#??? META_EDITOR_YEAR_LABEL=Year:
+META_EDITOR_TYPE_LABEL=Typ:
+#??? META_EDITOR_TRACK_LABEL=Track:
+#??? META_EDITOR_LANGUAGE_LABEL=Language:
+#??? META_EDITOR_SECONDS_LABEL=Length:
+#??? META_EDITOR_BITRATE_LABEL=Bitrate:
+#??? META_EDITOR_COMMENTS_LABEL=Comments:
+META_EDITOR_SHA1_LABEL=SHA1:
+#??? META_EDITOR_PRICE_LABEL=Price:
+#??? META_EDITOR_LINK_LABEL=Link:
+#??? META_EDITOR_ACTION_LABEL=Action:
+#??? META_EDITOR_STARS_LABEL=Stars:
+
+META_EDITOR_SIZE_LABEL=Rozmiar:
+#??? META_EDITOR_DATE_MODIFIED_LABEL=Date modified:
+#??? META_EDITOR_KIND_LABEL=Kind:
+#??? META_EDITOR_MP3_KIND_LABEL=MPEG-1 Audio Layer 3
+#??? META_EDITOR_MP4_KIND_LABEL=MPEG-4 Audio
+META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
@@ -623,6 +827,7 @@ CHAT_YOU=Ty
 # Key/value pairs for splash screen status text
 ###################################################################
 SPLASH_STATUS_RESOURCE_MANAGER=Ładowanie zasobów...
+SPLASH_STATUS_HTML_ENGINE=Ładowanie HTML-Engine...
 SPLASH_STATUS_SEARCH_WINDOW=Ładowanie okna wyszukiwarki...
 SPLASH_STATUS_OPTIONS_WINDOW=Ładowanie okna opcji...
 SPLASH_STATUS_USER_SETTINGS=Ładowanie ustawień użytkownika...
@@ -637,22 +842,39 @@ SPLASH_STATUS_MONITOR_WINDOW=Ładowanie panela kontrola...
 SPLASH_STATUS_CONNECTION_WINDOW=Ładowanie panela połączeń...
 SPLASH_STATUS_STATISTICS_WINDOW=Ładowanie panela statystyk...
 SPLASH_STATUS_STATUS_WINDOW=Ładowanie panela stanu...
+SPLASH_STATUS_PLAYLIST_WINDOW=Ładowanie panela playlista...
 SPLASH_STATUS_MENUS=Ładowanie menu...
 SPLASH_STATUS_MESSAGE_SERVICE=Ładowanie wiadomości...
+SPLASH_STATUS_ICONS=Ładowanie Icons...
+SPLASH_STATUS_I18N=Ładowanie internationalization-support...
+SPLASH_STATUS_DAAP=Ładowanie Digital-Audio-Access-Protocol...
+SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Ładowanie connection-listener...
+SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Ładowanie message-router...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Ładowanie connection-management...
+#??? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating hosty...
+SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Ładowanie shared-files...
+SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Ładowanie old-downloads...
+#??? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
+SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Ładowanie directed-querier...
+SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Ładowanie MAGNET-listener...
+SPLASH_STATUS_COMPONENT_LOADING_PINGER=Ładowanie hosty-listener...
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Ładowanie stale-connection-management...
+SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Ładowanie saved-files...
+SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Ładowanie secure-settings...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to 
 # support LimeWire through contributions.
 ##################################################################
-#??? SUPPORT_LIMEWIRE_01=Support Future LimeWire Development
-#??? SUPPORT_LIMEWIRE_02=Click Here to Support LimeWire's Development of Open, Peer-to-Peer Networks
-#??? SUPPORT_LIMEWIRE_03=Support Research and Development of the LimeWire Open Networking Platform
-#??? SUPPORT_LIMEWIRE_04=Click Here to Become a Supporter of LimeWire Research
-#??? SUPPORT_LIMEWIRE_05=Support Open Networks
-#??? SUPPORT_LIMEWIRE_06=Click Here to Support Open Source and Open Protocols
-#??? SUPPORT_LIMEWIRE_07=Click here to help LimeWire build the digital commons.
-#??? SUPPORT_LIMEWIRE_08=Contribute to Open Source Peer-to-Peer Networking.
-#??? SUPPORT_LIMEWIRE_09=Support a new distribution community for independent artists.
+#??? SUPPORT_LIMEWIRE_01=For TURBO Charged searches get LimeWire Pro.
+#??? SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
+#??? SUPPORT_LIMEWIRE_03=Support research and development of the LimeWire open networking platform.
+#??? SUPPORT_LIMEWIRE_04=For TURBO Charged searches get LimeWire Pro.
+#??? SUPPORT_LIMEWIRE_05=Support open networks.
+#??? SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
+#??? SUPPORT_LIMEWIRE_07=For TURBO Charged searches get LimeWire Pro.
+#??? SUPPORT_LIMEWIRE_08=Keep the Internet open. Get Pro.
+#??? SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get Pro.
 #??? SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
 
 ################################################################################
@@ -661,6 +883,7 @@ SPLASH_STATUS_MESSAGE_SERVICE=Ładowanie wiadomości...
 ################################################################################
 UPDATE_DIALOG_CAPTION=Instalowanie poprawek dla LimeWire
 #??? UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
+#??? UPDATE_MESSAGE_SMALL=A newer version is available, update?
 UPDATE_SUCCEEDED_MESSAGE=Instalacja poprawek dla Twojej kopii LimeWire zakończyła się pomyślnie. Nowa wersja zacznie działać w momencie ponownego uruchomienia programu.
 UPDATE_WEB_PAGE_ERROR_MESSAGE=Podczas próby połączenia ze stroną domową LimeWire celem pobrania nowszej wersji programu wystąpił błąd. Instalację poprawki dokończ poprzez otwarcie w swojej przeglądarce adresu http://www.limewire.com.
 UPDATE_ERROR_MESSAGE_START=Podczas instalowania poprawek dla Twojej kopii LimeWire wystąpił następujący błąd: 
@@ -671,9 +894,9 @@ UPDATE_ERROR_LAX_FILE_NOT_FOUND=Błąd związany z próbą odnalezienia pliku ko
 UPDATE_ERROR_LAX_SECURITY=Błąd związany z prawami dostępu w Twoim systemie plików.
 UPDATE_ERROR_LAX_IO=Błąd podczas próby dostępu do Twojego systemu plików.
 UPDATE_CANCEL_BUTTON_LABEL=Anuluj
-UPDATE_CANCEL_BUTTON_TIP=Anulowanie instalacji poprawek
+UPDATE_CANCEL_BUTTON_TIP=Anulowanie instalacji poprawek.
 UPDATE_NOW_TIP=Zainstaluj poprawki do LimeWire
-UPDATE_LATER_TIP=Zainstaluj poprawki do LimeWire później
+UPDATE_LATER_TIP=Zainstaluj poprawki do LimeWire później.
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
@@ -698,6 +921,7 @@ MESSAGE_INCOMPLETE_DIRECTORY_END=katalogu zarezerwowany dla plików niekompletny
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire nie był w stanie użyć podanego katalogu do zapisania pobieranych plików. Prosimy wybrać inny katalog.
 MESSAGE_FILE_CORRUPT=LimeWire wykrył uszkodzenie wewnątrz tego pliku 
 MESSAGE_CONTINUE_DOWNLOAD=Czy chcesz kontynuować pobieranie?
+#??? MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
@@ -705,11 +929,61 @@ MESSAGE_CONTINUE_DOWNLOAD=Czy chcesz kontynuować pobieranie?
 ################################################################################
 INVALID_SAVE_DIR_LABEL=Wybrany katalog nie może zostać użyty do zapisu pobieranych plików. Prosimy wybrać inny katalog w oknie wyboru katalogu.
 
-ERROR_INTERNAL_SERVLET=Podczas pracy LimeWire wystąpił błąd wewnętrzny. Mimo to, LimeWire jest w stanie usunąć usterkę i kontynuować działanie.
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet
+################################################################################
+#??? NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet and you haven't used your machine in awhile, so we'll automatically
+# keep trying.
+################################################################################
+#??? NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire is trying to connect
+# to too many GWebCaches for various reasons.
+################################################################################
+#??? GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#??? GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+
+################################################################################
+# Key/Value pairs for friendly error messages.
+# Every kind of error MUST be implemented for all types.
+# Currently, the only error is DISK_FULL and the only types are DOWNLOAD and GENERIC.
+################################################################################
+#??? ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
+#??? ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
+#??? ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.
+#??? ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
+#??? ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete directory. To continue using LimeWire, please choose a different Save Directory.
+#??? ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
+#??? ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#??? ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+
+################################################################################
+# Key/Value pairs for internal error messages
+################################################################################
+#??? ERROR_INTERNAL_TITLE=Internal error
+ERROR_INTERNAL_SERVLET=Podczas pracy LimeWire wystąpił błąd wewnętrzny. Mimo to, LimeWire jest w stanie usunąć usterkę i kontynuować działanie. To aid with debugging, please click 'Send' to notify LimeWire about the problem.
+#??? ERROR_INTERNAL_SEND=Send
+#??? ERROR_INTERNAL_REVIEW=Review
+#??? ERROR_INTERNAL_DISCARD=Discard
+#??? ERROR_INTERNAL_COPY=Copy report
+ERROR_INTERNAL_OK=OK
+#??? ERROR_INTERNAL_ALWAYS_SEND=Always send immediately
+#??? ERROR_INTERNAL_ALWAYS_REVIEW=Always ask for review
+#??? ERROR_INTERNAL_ALWAYS_DISCARD=Always discard bugs
+#??? ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
 
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
+#??? ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
 ERROR_PORT_UNAVAILABLE=Ten port nie jest dostępny. Prosimy wybrać inny port.
 ERROR_KEEP_ALIVE=LimeWire nie zezwala na zestawienie tej ilości połączeń, gdyż spowodowałoby to przytkanie sieci.
 ERROR_TOO_LOW_FOR_ULTRAPEER=UltraHosty z dołączonymi listkami wymagają minimum sześciu połączeń.
@@ -721,12 +995,16 @@ ERROR_NETWORK_FLOODING=To zapytanie może wygenerować wiele trafień, których 
 ERROR_BROWSE_FAILED=Przeglądnięcie plików na wybranym hoście nie było możliwe. Najprawdopodobniej osiągnięty został limit połączeń.
 ERROR_INVALID_SAVE_DIRECTORY=Wybrany katalog nie może zostać użyty do zapisu pobranych plików. Prosimy wybrać inny katalog lub zdefiniować domyślny.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Wystąpił problem w dostępie do katalogu z pobranymi plikami. Być może został omyłkowo skasowany lub posiada niewłaściwe prawa dostępu. Prosimy wybrać inny katalog.
+#??? ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save directory is invalid. You may not have permissions to write to the selected directory. LimeWire will revert to your previously selected directory.
 ERROR_INVALID_SHARED_DIRECTORY=Wybrany katalog nie może zostać udostępniony. Prosimy wybrać inny katalog lub zdefiniować domyślny.
 ERROR_FORCE_IP_PORT_RANGE=Opcja wymuszania adresu IP wymaga podania numeru portu w przedziale 1-65535.
 ERROR_CONNECT_STRING=Argument parametru Connect musi zawierać minimum jeden dowolny znak oraz jedną spację i nie może zawierać ciągów: 'GIV', 'GET' bądź innych słów kluczowych stosowanych w protokole HTTP.
 ERROR_PORT_RANGE=Prosimy podać numer portu w zakresie 1-65535.
 ERROR_INVALID_GROUP=Prosimy prawidłowo wybrać grupę.
 ERROR_ALREADY_DOWNLOADING=Pobieranie już się rozpoczęło.
+#??? ERROR_ALREADY_EXISTS=You have already downloaded
+#??? NO_PREVIEW_BEGIN=There is nothing to preview for file
+#??? NO_PREVIEW_END=.
 #??? ERROR_CANT_RESUME_START=The file
 #??? ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
 ERROR_LOCATING_BROWSER_THEMES=LimeWire nie odnalazł Twojej przeglądarki www. Adres pomocy themów LimeWire:\n"http://www.limewire.com".
@@ -748,7 +1026,20 @@ ERROR_SAVE_META_BAD=Zły format danych. Nie udało się wprowadzić zmian.
 ERROR_REMOVE_LAST_COL=Wyłączenie wszystkich kolumn nie jest możliwe.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Przeglądnięcie hosta 
 ERROR_BROWSE_HOST_FAILED_END_KEY=nie było możliwe.
-#??? ERROR_INVALID_THEME_FILE=The theme file you selected does not exist or is invalid. Please choose another file, or use the default.
+#??? ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
+#??? ERROR_INVALID_THEME_FILE=The skin file you selected does not exist or is invalid. Please choose another file, or use the default.
+#??? ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
+#??? ERROR_THEME_OUT_OF_DATE_TITLE=Invalid skin
+#??? ERROR_THEME_OUT_OF_DATE_GET_MORE=Get new skins
+#??? ERROR_THEME_OUT_OF_DATE_LATER=Later
+#??? ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
+#??? ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
+#??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
+#??? ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
+#??? ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -767,12 +1058,15 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=Połączenia
 OPTIONS_SHUTDOWN_MAIN_TITLE=Zamykanie
 OPTIONS_CHAT_MAIN_TITLE=Czat
 OPTIONS_PLAYER_MAIN_TITLE=Odtwarzacz
+OPTIONS_ITUNES_MAIN_TITLE=iTunes
+#??? OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
+#??? OPTIONS_ITUNES_DAAP_MAIN_TITLE=Sharing
 #??? OPTIONS_APPS_MAIN_TITLE=Helper apps
+#??? OPTIONS_BUGS_MAIN_TITLE=Bug reports
 #??? OPTIONS_GUI_MAIN_TITLE=View
 #??? OPTIONS_POPUPS_MAIN_TITLE=Popups
 #??? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete text
-#??? OPTIONS_ROW_STRIPE_MAIN_TITLE=Row stripes
-OPTIONS_THEME_MAIN_TITLE=Thema
+OPTIONS_THEME_MAIN_TITLE=Skórka
 OPTIONS_SKIN_MAIN_TITLE=Skórka
 OPTIONS_SEARCH_MAIN_TITLE=Wyszukiwanie
 OPTIONS_SEARCH_LIMIT_MAIN_TITLE=Limit
@@ -787,6 +1081,9 @@ OPTIONS_PREFERENCING_MAIN_TITLE=Preferowanie
 OPTIONS_PORT_MAIN_TITLE=Port
 OPTIONS_FIREWALL_MAIN_TITLE=Zabezpieczenia
 OPTIONS_PRIVATE_NET_MAIN_TITLE=Podsieć prywatna
+#??? OPTIONS_STARTUP_MAIN_TITLE=System startup
+#??? OPTIONS_PROXY_MAIN_TITLE=Proxy
+#??? OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale preferencing
 
 ################################################################################
 # Key/value pairs for the localization options window item
@@ -848,6 +1145,13 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Jeżeli dyspnonujesz szybkim łączem to mo
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Wyłącz UltraHost-a:
 
 ################################################################################
+# Key/Value pairs for disabling OOB support
+################################################################################
+#??? OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
+#??? OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band Searching results in faster result delivery to your client, though some internet connections may not work well with this feature.
+#??? OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Enable OOB Searching:
+
+################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
 # in the options window
 ################################################################################
@@ -862,6 +1166,15 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Pobrań maks.:
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Czyszczenie listy pobrań
 OPTIONS_DOWNLOAD_CLEAR_LABEL=Możesz ustalić czy chcesz automatycznie usuwać z listy ukończone pobrania.
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Automatycznie usuwaj ukończone pobrania:
+
+################################################################################
+# Key/Value pairs for the options for setting the bandwidth devoted
+# to downloads in the options window
+################################################################################
+OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Przepływność dla pobrań
+OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=Tutaj możesz zdefiniować procent Twojej przepływności jaką chcesz przeznaczyć dla pobrań.
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Bez limitu
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Przepł. pobrań:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -879,6 +1192,14 @@ OPTIONS_UPLOAD_BANDWIDTH_TITLE=Przepływność dla wysyłek
 OPTIONS_UPLOAD_BANDWIDTH_LABEL=Tutaj możesz zdefiniować procent Twojej przepływności jaką chcesz przeznaczyć dla wysyłek. Ustawienie ilości slotów na zero spowoduje całkowite wyłączenie wysyłek.
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Bez limitu
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Przepł. wysyłek:
+
+################################################################################
+# Key/Value pairs for the options for automatically sharing partially downloaded
+# files.
+################################################################################
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Partial Files
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow Partial Sharing
 
 ################################################################################
 # Key/Value pairs for the options for the hard maximum number of uploads
@@ -932,20 +1253,48 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=Opcje odwtarzacza
 OPTIONS_PLAYER_PREFERENCE_LABEL=Wybierz czy do odtwarzania plików MP3 chcesz używać odtarzacza systemowego czy też wbudowanego w LimeWire.
 
 ################################################################################
+# Key/Value pairs for the iTunes options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
+#??? OPTIONS_ITUNES_PREFERENCE_TITLE=Importing
+#??? OPTIONS_ITUNES_PREFERENCE_LABEL=You can have LimeWire import newly downloaded songs into iTunes.
+
+################################################################################
+# Key/Value pairs for the iTunes/DAAP options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your music on the local area network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable compatability mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my music:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability mode
+
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
+OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Hasło:
+
+################################################################################
 # Key/Value pairs for url handler options
 ################################################################################
 OPTIONS_BROWSER_PREFERENCE_TITLE=Opcje przeglądarki
 OPTIONS_BROWSER_PREFERENCE_LABEL=Możesz wybrać jakiej przeglądarki będziesz używać.
 OPTIONS_BROWSER_BOX_LABEL=Przeglądarka
 OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Opcje image
-OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=Możesz wybrać jakiej image viewer będziesz używać.
-OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image viewer
+OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=Możesz wybrać jakiej Image-Viewer będziesz używać.
+#??? OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image viewer
 OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Opcje video
 OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=Możesz wybrać jakiej odtarzacza video będziesz używać.
 OPTIONS_VIDEO_PLAYER_BOX_LABEL=Odwtarzacza video
 OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Opcje audio
 OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Możesz wybrać jakiej odtarzacza audio będziesz używać.
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=Odwtarzacza audio
+
+################################################################################
+# Key/value pairs for asking whether or not to display message bug reports
+################################################################################
+#??? OPTIONS_BUGS_TITLE=Bug reports
+#??? OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard Bugs' will cause LimeWire to ignore all bugs (this is not recommended).
+#??? OPTIONS_BUGS_VIEW_EXAMPLE=View example
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message popups
@@ -963,13 +1312,6 @@ OPTIONS_AUDIO_PLAYER_BOX_LABEL=Odwtarzacza audio
 #??? OPTIONS_AUTOCOMPLETE_TITLE=Autocomplete
 #??? OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
 #??? OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of text fields
-
-################################################################################
-# Key/value pairs for the options pane used to enable and disable row striping
-################################################################################
-#??? OPTIONS_ROW_STRIPE_TITLE=Row striping
-#??? OPTIONS_ROW_STRIPE_LABEL=You can enable or disable the striping of rows in tables.
-#??? OPTIONS_ROW_STRIPE_DISPLAY_CHECK_BOX_LABEL=Enable row striping
 
 ################################################################################
 # Key/Value pairs for theme options
@@ -1090,6 +1432,15 @@ OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=Rzadko
 OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Zawsze
 
 ################################################################################
+# Key/Value pairs for the options for setting connection locale preferences
+# in the advanced panel of the options window
+################################################################################
+#??? OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale preferencing
+#??? OPTIONS_CONNECT_LOCALE_PREF_LABEL=You can choose to preference connections that are advertising the same locale as you are. Choosing a large number of connection to preference may cause your client to take a long time to connect to the network.
+#??? OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Turn preferencing on:
+#??? OPTIONS_CONNECT_LOCALE_PREF_NUM_LABEL=Number of connections to preference
+
+################################################################################
 # Key/Value pairs for the options for setting the listening port
 # in the options window
 ################################################################################
@@ -1124,6 +1475,31 @@ OPTIONS_PRIVATE_NET_TITLE=Podsieć prywatna
 #??? OPTIONS_PRIVATE_CACHE_IP_LABEL=Hostname
 OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
 OPTIONS_PRIVATE_CACHE_NAME_LABEL=Nazwa
+
+################################################################################
+# Key/Value pairs for the options for automatically clearing uploads
+# in the options window
+################################################################################
+#??? OPTIONS_STARTUP_TITLE=System startup
+#??? OPTIONS_STARTUP_LABEL=You can choose whether or not to automatically run LimeWire when your computer starts.
+#??? OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on system startup:
+
+################################################################################
+# Key/Value pairs for browse for the proxy options pane
+################################################################################
+#??? OPTIONS_PROXY_TITLE=Proxy
+#??? OPTIONS_PROXY_LABEL=Configure proxy options for LimeWire.
+#??? OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=No Proxy
+OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
+OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
+OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
+#??? OPTIONS_PROXY_HOST_LABEL=Proxy
+OPTIONS_PROXY_PORT_LABEL=Port
+#??? OPTIONS_PROXY_LOGIN_TITLE=Login Details
+#??? OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy
+#??? OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication. (Does not work for HTTP Proxies)
+OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Użytkownik
+OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Hasło
 
 ################################################################################
 # Key/value pairs for top-level stats panels
