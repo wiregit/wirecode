@@ -541,8 +541,7 @@ public class ConnectionManager {
         return Math.max(0, 
                         getNumFreeNonLeafSlots() 
                         - Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
-                        - Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                                   - _localeMatchingPeers)
+                        - getNumLimeWireLocalePrefSlots()
                         );
     }
 
@@ -800,8 +799,7 @@ public class ConnectionManager {
                 // NUM_LOCALE_PREF locale connections but we could have more so
                 // we get the max)
                 locale_num = 
-                    Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                             - _localeMatchingPeers);
+                    getNumLimeWireLocalePrefSlots();
             }
 
 
