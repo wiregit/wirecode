@@ -1177,12 +1177,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         URN bucketHash = buckets.getURNForBucket(bucketNumber);
         URN fileHash=null;
         try {
+            // let the user know we're hashing the file
+            setState(HASHING);
             fileHash = URN.createSHA1Urn(incompleteFile);
         } catch(IOException ignored) {}
         if(bucketHash!=null) { //if bucketHash==null, we cannot check
             //if fileHash == null, it will be a mismatch
             synchronized(corruptStateLock) {
                 if(!bucketHash.equals(fileHash)) {
+                    // immediately set as corrupt,
+                    // will change to non-corrupt later if user ignores
+                    setState(CORRUPT_FILE);
                     promptAboutCorruptDownload();
                     debug("hash verification problem, fileHash="+
                                        fileHash+", bucketHash="+bucketHash);
@@ -1199,6 +1204,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return CORRUPT_FILE;
             } 
         }
+        
+        // let the user know we're saving the file...
+        setState( SAVING );
+        
         //4. Move to library.  
         //System.out.println("MANAGER: completed");
         //Delete target.  If target doesn't exist, this will fail silently.
@@ -2146,13 +2155,28 @@ public class ManagedDownloader implements Downloader, Serializable {
                       .getRemoteFileDesc().getSize();
     }
 
+    /**
+     * Return the amount read.
+     * The return value is dependent on the state of the downloader.
+     * If it is corrupt, it will return how much it tried to read
+     *  before noticing it was corrupt.
+     * If it is hashing, it will return how much of the file has been hashed.
+     * All other times it will return the amount downloaded.
+     * All return values are in bytes.
+     */
     public synchronized int getAmountRead() {
-        if (state!=CORRUPT_FILE) {
-            if(commonOutFile==null)
-                return 0;
-            return commonOutFile.getBlockSize();
-        } else {
+        if ( state == CORRUPT_FILE )
             return corruptFileBytes;
+        else if ( state == HASHING ) {
+            if ( incompleteFile == null )
+                return 0;
+            else
+                return URN.getHashingProgress(incompleteFile);
+        } else {
+            if ( commonOutFile == null )
+                return 0;
+            else
+                return commonOutFile.getBlockSize();
         }
     }
      
