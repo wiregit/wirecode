@@ -103,11 +103,19 @@ public final class CompositeQueue {
      */
     private int _dropped = 0;
     
-
+    /**
+     * Creates a new <tt>CompositeQueue</tt> instance.
+     * 
+     * @return a new <tt>CompositeQueue</tt> instance
+     */
+    public static CompositeQueue createQueue() {
+        return new CompositeQueue();
+    }
+    
     /** 
      * Constructs a new queue with the default message buffers. 
      */
-    public CompositeQueue() {
+    private CompositeQueue() {
         QUEUES[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, true);
         QUEUES[PRIORITY_PUSH]
