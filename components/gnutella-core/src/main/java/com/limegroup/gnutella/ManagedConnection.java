@@ -462,6 +462,59 @@ public class ManagedConnection
     }
 
     /**
+     * Implements the reject connection mechanism.  Loops until receiving a
+     * handshake ping, responds with the best N pongs, and closes the
+     * connection.  Closes the connection if no ping is received within a
+     * reasonable amount of time.  
+     */
+    void loopToReject(HostCatcher catcher) {
+        try {
+        //The first message we get from the remote host should be its initial
+        //ping.  However, some clients may start forwarding packets on the
+        //connection before they send the ping.  Hence the following loop.  The
+        //limit of 10 iterations guarantees that this method will not run for
+        //more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
+        for (int i=0; i<10; i++) {
+            Message m=null;
+            try {
+                // get the timeout from SettingsManager
+                m=receive(SettingsManager.instance().getTimeout());
+                if (m==null)
+                    return; //Timeout has occured and we havent received the ping,
+                            //so just return
+            }// end of try for BadPacketEception from socket
+            catch (BadPacketException e) {
+                return; //Its a bad packet, just return
+            }
+            if((m instanceof PingRequest) && (m.getHops()==0)) {
+                // this is the only kind of message we will deal with
+                // in Reject Connection
+                // If any other kind of message comes in we drop
+                Iterator iter = catcher.getBestHosts(10);
+                 // we are going to send rejected host the top ten
+                 // connections
+                while(iter.hasNext()) {
+                    Endpoint bestEndPoint =(Endpoint)iter.next();
+                    // make a pong with this host info
+                    PingReply pr = new PingReply(m.getGUID(),(byte)1,
+                        bestEndPoint.getPort(),
+                        bestEndPoint.getHostBytes(), 0, 0);
+                    // the ttl is 1; and for now the number of files
+                    // and kbytes is set to 0 until chris stores more
+                    // state in the hostcatcher
+                    send(pr);
+                }
+                flush();
+                return;
+            }// end of (if m is PingRequest)
+        } // End of while(true)
+        } catch (IOException e) {
+        } finally {
+            close();
+        }
+    }
+
+    /**
      * Handles core Gnutella request/reply protocol.  This call
      * will run until the connection is closed.  Note that this is called
      * from the run methods of several different thread implementations
@@ -1050,10 +1103,10 @@ public class ManagedConnection
         
         public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) {
-            Properties ret=new Properties();
             
             if(!outgoing) {
                 //Incoming connection....
+                Properties ret=new Properties();
                 ret.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
                 addCommonProperties(ret);
                 
@@ -1065,12 +1118,31 @@ public class ManagedConnection
                 ret.put(ConnectionHandshakeHeaders.X_MY_ADDRESS,
                     _manager.getSelfAddress().getHostname() + ":"
                     + _manager.getSelfAddress().getPort());
-                    
-                
+                                    
                 //also add some host addresses in the response 
                 addHostAddresses(ret, _manager);
+
+                //Under some circumstances, we can decide to reject a connection
+                //during handshaking because no slots are available.  You might
+                //think you could reject the connection if
+                //_manager.hasAvailableIncoming(Q) is false, where Q is the
+                //value of Query-Routing written by the remote host.
+                //Unfortunately this fails when Q==true because of supernode
+                //guidance; we don't know whether they'll become a leaf node or
+                //not.  So we use the following conservative test, and depend on
+                //the old-fashioned reject connection mechanism in
+                //ConnectionManager for the other cases.
+                if (!_manager.hasAvailableIncoming(false)
+                        && !_manager.hasAvailableIncoming(true))
+                    return new HandshakeResponse(
+                                   HandshakeResponse.SLOTS_FULL,
+                                   HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                   ret);
+                else
+                    return new HandshakeResponse(ret);
             } else {
                 //Outgoing connection.  Did the server request we become a leaf?
+                Properties ret=new Properties();
                 String neededS=response.getHeaders().
                     getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
                 if (neededS!=null 
@@ -1080,8 +1152,8 @@ public class ManagedConnection
                     ret.put(ConnectionHandshakeHeaders.X_SUPERNODE, 
                                     "False");
                 }
+                return new HandshakeResponse(ret);
             }
-            return new HandshakeResponse(ret);
         }
     }
     

@@ -188,16 +188,7 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         //TODO2: We need to re-enable the reject connection mechanism.  The
-         //catch is that you don't know whether to reject for sure until you've
-         //handshaked.  Basically RejectConnection is no longer sufficient, so I
-         //propose eliminating it; just use a normal ManagedConnection but don't
-         //add it to list of connections, and don't add it to gui.  This
-         //requires some refactoring of that damn initialization code.
-         
          //1. Initialize connection.  It's always safe to recommend new headers.
-         boolean wasShielded=hasClientSupernodeConnection();
-         int oldKeepAlive=_keepAlive;
          ManagedConnection connection=null;
          try {
              connection = new ManagedConnection(socket, _router, this);
@@ -209,13 +200,6 @@ public class ConnectionManager {
              return;
          }
          
-         //dont keep the connection, if we are not a supernode
-         synchronized(this){
-             if(wasShielded) {
-                 remove(connection);
-             }
-         }
-         
          //update the connection count
          try {   
              synchronized (_incomingConnectionsLock) {
@@ -224,26 +208,9 @@ public class ConnectionManager {
                  else
                      _incomingConnections++;
              }                  
-
-             //a) Not needed: kill.  The test for "oldKeepAlive<=0" is needed to
-             //make disconnect() work.  We can't just look at _keepAlive because
-             //we set it to zero when getting incoming client-supernode
-             //connection.  TODO: reject as described above. This should really
-             //be done in headers whenever possible.
-             int shieldedMax=
-                SettingsManager.instance().getMaxShieldedClientConnections();
-             if (   (connection.isSupernodeClientConnection() 
-                        && _incomingClientConnections > shieldedMax)
-                 || (!connection.isClientSupernodeConnection() 
-                        && _incomingConnections > _keepAlive)
-                 || (oldKeepAlive <= 0)) {  //see above
-                 synchronized(this) {
-                     remove(connection);
-                 }
-             } else {                     
-                 sendInitialPingRequest(connection);
-                 connection.loopForMessages();
-             }
+             
+             sendInitialPingRequest(connection);
+             connection.loopForMessages();
          } catch(IOException e) {
          } catch(Exception e) {
              //Internal error!
@@ -350,12 +317,26 @@ public class ConnectionManager {
     }
 
     /**
-     * @return true if incoming connection slots are still available.
+     * If leaf==true, returns true if this has slots for incoming leaf
+     * connections.  If leaf==false, returns false if this has slots 
+     * for incoming supernode or 0.4 connections.  Does not account for
+     * supernode capabilities in this decision.
      */
-    public boolean hasAvailableIncoming() {
-        return ((_incomingConnections < _keepAlive)
-            || (isSupernode() && (_incomingClientConnections < 
-            _settings.getMaxShieldedClientConnections())));
+    public boolean hasAvailableIncoming(boolean leaf) {
+        SettingsManager settings=SettingsManager.instance();
+        //Don't allow anything if disconnected or shielded leaf
+        if (_keepAlive<=0)
+            return false;
+        else if (hasClientSupernodeConnection())
+            return false;
+        else if (leaf) {
+            //TODO: if we aren't in supernode mode, this will be lower.
+            int shieldedMax=
+                SettingsManager.instance().getMaxShieldedClientConnections();
+            return _incomingClientConnections < shieldedMax;
+        } else {
+            return _incomingConnections < _keepAlive;
+        }
     }
 
     /**
@@ -1005,19 +986,26 @@ public class ConnectionManager {
     
     /**
      * Initializes an outgoing connection created by createConnection or any
-     * incomingConnection.
+     * incomingConnection.  If this is an incoming connection and there are no
+     * slots available, rejects it and throws IOException.
      *
      * @throws IOException on failure.  No cleanup is necessary if this happens.
      */
     private void initializeExternallyGeneratedConnection(ManagedConnection c)
             throws IOException {
-        synchronized(this) {
-            connectionInitializing(c);
-            // We've added a connection, so the need for connections went down.
-            adjustConnectionFetchers();
+        //For outgoing connections add it to the GUI and the fetcher lists now.
+        //For incoming, we'll do this below after checking incoming connection
+        //slots.  This keeps reject connections from appearing in the GUI, as
+        //well as improving performance slightly.
+        if (c.isOutgoing()) {
+            synchronized(this) {
+                connectionInitializing(c);
+                // We've added a connection, so the need for connections went down.
+                adjustConnectionFetchers();
+            }
+            _callback.connectionInitializing(c);
         }
-        _callback.connectionInitializing(c);
-
+            
         try {
             c.initialize();
         } catch(IOException e) {
@@ -1028,6 +1016,28 @@ public class ConnectionManager {
             //if the connection received headers, process the headers to
             //take steps based on the headers
             processConnectionHeaders(c);
+        }
+
+        //If there's not space for the connection, reject it.  This mechanism
+        //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
+        //connections.  Sometimes ManagedConnections are handled by headers
+        //directly.
+        if (!c.isOutgoing() && 
+                !hasAvailableIncoming(c.isSupernodeClientConnection())) {
+            c.loopToReject(_catcher);            
+            remove(c);
+            throw new IOException("No space for connection");
+        }
+
+        //For incoming connections, add it to the GUI.  For outgoing connections
+        //this was done at the top of the method.  See note there.
+        if (! c.isOutgoing()) {
+            synchronized(this) {
+                connectionInitializing(c);
+                // We've added a connection, so the need for connections went down.
+                adjustConnectionFetchers();
+            }
+            _callback.connectionInitializing(c);
         }
 
         boolean connectionOpen = false;
