@@ -79,30 +79,35 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // Reply Number
         // -----------------------------
         // test network constructor....
-        vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, (byte) 0, 
-                                      1, new byte[1]);
+        vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                          (byte) 0, 1, new byte[1]);
         testWrite(vm);
         // test other constructor....
-        vm = new ReplyNumberVendorMessage(5);
+        vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
     }
 
 
     public void testReplyNumber() throws Exception {
         try {
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(0);
+            GUID g = new GUID(GUID.makeGuid());
+            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 0);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
         try {
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(256);
+            GUID g = new GUID(GUID.makeGuid());
+            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 256);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
 
         for (int i = 1; i < 256; i++) {
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(i);
+            GUID guid = new GUID(GUID.makeGuid());
+            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(guid,
+                                                                       i);
             assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
+            assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             ByteArrayInputStream bais = 
@@ -111,6 +116,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
                 (ReplyNumberVendorMessage) Message.read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
+            assertEquals("after Read guids aren't equal!", guid, 
+                         new GUID(vmRead.getGUID()));
         }
     }
 
