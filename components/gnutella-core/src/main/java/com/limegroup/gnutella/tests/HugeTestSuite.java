@@ -19,6 +19,7 @@ public final class HugeTestSuite {
 		TestSuite suite = new TestSuite("Huge 0.94 Tests");
 		suite.addTest(UrnTest.suite());
 		suite.addTest(AlternateLocationTest.suite());
+		suite.addTest(UrnFactoryTest.suite());
 		return suite;
 	}
 }
