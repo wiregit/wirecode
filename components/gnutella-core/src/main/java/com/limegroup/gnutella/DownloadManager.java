@@ -261,20 +261,48 @@ public class DownloadManager implements BandwidthTracker {
     
     /**
      * Starts a resume download for the given incomplete file.
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception CantResumeException incompleteFile is not a valid 
+     *  incomplete file
      */ 
     public synchronized Downloader startResumeDownload(File incompleteFile)
-            throws AlreadyDownloadingException {
-        //TODO: check for conflicts
-        //TODO: refactor
-        ResumeDownloader downloader = new ResumeDownloader(this,
-                                                     fileManager,
-                                                     incompleteFileManager,
-                                                     callback,
-                                                     incompleteFile);
+            throws AlreadyDownloadingException, CantResumeException { 
+        //Check for conflicts.  TODO: refactor to make less like conflicts().
+        for (Iterator iter=active.iterator(); iter.hasNext(); ) {  //active
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            if (md.conflicts(incompleteFile))                   
+                throw new AlreadyDownloadingException(md.getFileName());
+        }
+        for (Iterator iter=waiting.iterator(); iter.hasNext(); ) { //queued
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            if (md.conflicts(incompleteFile))                   
+                throw new AlreadyDownloadingException(md.getFileName());
+        }
+
+        //Instantiate downloader, validating incompleteFile first.
+        ResumeDownloader downloader=null;
+        try {
+            String name=incompleteFileManager.getCompletedName(incompleteFile);
+            int size=ByteOrder.long2int(
+                incompleteFileManager.getCompletedSize(incompleteFile));
+            downloader = new ResumeDownloader(this,
+                                              fileManager,
+                                              incompleteFileManager,
+                                              callback,
+                                              incompleteFile,
+                                              name,
+                                              size);
+        } catch (IllegalArgumentException e) {
+            throw new CantResumeException(incompleteFile.getName());
+        }
+
+        //Add download to appropriate lists and write snapshot.  
+        //TODO: factor to make less like getFiles().
         waiting.add(downloader);
         callback.addDownload(downloader);
-        //Save this' state to disk for crash recovery.
         writeSnapshot();
+
         //Start a requery immediately, bypassing the rate-limited requerying
         //of sendQuery, as called from ManagedDownloader.tryAllDownloads.
         router.broadcastQueryRequest(downloader.newRequery());

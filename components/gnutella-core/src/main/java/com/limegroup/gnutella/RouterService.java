@@ -918,9 +918,13 @@ public class RouterService
 
    /**
      * Starts a resume download for the given incomplete file.
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception CantResumeException incompleteFile is not a valid 
+     *  incomplete file
      */ 
     public synchronized Downloader startResumeDownload(File incompleteFile)
-            throws AlreadyDownloadingException {
+            throws AlreadyDownloadingException, CantResumeException {
         return downloader.startResumeDownload(incompleteFile);
     }
 

@@ -442,19 +442,28 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * Returns true if 'other' could conflict with one of the files in this. In
-     * other if this.conflicts(other)==true, no other ManagedDownloader should
-     * attempt to download other.
+     * other words, if this.conflicts(other)==true, no other ManagedDownloader
+     * should attempt to download other.  
      */
     public boolean conflicts(RemoteFileDesc other) {
+        File otherFile=incompleteFileManager.getFile(other);
+        return conflicts(otherFile);
+    }
+
+    /**
+     * Returns true if this is using (or could use) the given incomplete file.
+     * @param incompleteFile an incomplete file, which SHOULD be the return
+     *  value of IncompleteFileManager.getFile
+     */
+    public boolean conflicts(File incompleteFile) {
         synchronized (this) {
-            File otherFile=incompleteFileManager.getFile(other);
             //TODO3: this is stricter than necessary.  What if a location has
             //been removed?  Tricky without global variables.  At the least we
             //should return false if in COULDNT_DOWNLOAD state.
             for (int i=0; i<allFiles.length; i++) {
                 RemoteFileDesc rfd=(RemoteFileDesc)allFiles[i];
                 File thisFile=incompleteFileManager.getFile(rfd);
-                if (thisFile.equals(otherFile))
+                if (thisFile.equals(incompleteFile))
                     return true;
             }
         }

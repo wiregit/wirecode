@@ -4,40 +4,49 @@ import com.limegroup.gnutella.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+/**
+ * A ManagedDownloader that tries to resume to a specific incomplete file.  The
+ * ResumeDownloader initially has no locations to download from.  Instead it
+ * immediately requeries--by hash if possible--and only accepts results that
+ * would result in resumes from the specified incomplete file.
+ */
 public class ResumeDownloader extends ManagedDownloader 
         implements Serializable {
     private final IncompleteFileManager _incompleteFileManager;
     private final File _incompleteFile;
-    private String _name;
-    private int _size;
+    private final String _name;
+    private final int _size;
 
-    /** Creates a RequeryDownloader to finish downloading incompleteFile.
-     *  @param incompleteFile the incomplete file to resume to */
+    /** 
+     * Creates a RequeryDownloader to finish downloading incompleteFile.  This
+     * constructor has preconditions on several parameters; putting the burden
+     * on the caller makes the method easier to implement, since the superclass
+     * constructor immediately starts a download thread.
+     *
+     * @param incompleteFile the incomplete file to resume to, which
+     *  MUST be the result of IncompleteFileManager.getFile.
+     * @param name the name of the completed file, which MUST be the result of
+     *  IncompleteFileManager.getCompletedName(incompleteFile)
+     * @param size the size of the completed file, which MUST be the result of
+     *  IncompleteFileManager.getCompletedSize(incompleteFile) */
     public ResumeDownloader(DownloadManager manager,
                             FileManager fileManager,
                             IncompleteFileManager incompleteFileManager,
                             ActivityCallback callback,
-                            File incompleteFile) {
+                            File incompleteFile,
+                            String name,
+                            int size) {
         super(manager, new RemoteFileDesc[0], fileManager,
               incompleteFileManager,callback);
         this._incompleteFileManager=incompleteFileManager;
         this._incompleteFile=incompleteFile;
-        try {
-            this._name=incompleteFileManager.getCompletedName(_incompleteFile);
-            this._size=ByteOrder.long2int(
-                incompleteFileManager.getCompletedSize(_incompleteFile));
-        } catch (IllegalArgumentException e) {
-            Assert.that(false, _incompleteFile+" wasn't from IFM");
-        }
+        this._name=name;
+        this._size=size;
     }
 
-//      /** Necessary to make tryAllDownloads send a requery right away. */
-//      protected int getMinutesToWaitForRequery(int requeries) { 
-//          if (requeries==0)
-//              return 0;
-//          else
-//              return 5;
-//      }
+    public boolean conflicts(File incompleteFile) {
+        return incompleteFile.equals(_incompleteFile);
+    }
 
     public boolean conflictsLAX(RemoteFileDesc other) {        
         return _incompleteFile.equals(_incompleteFileManager.getFile(other));
