@@ -48,6 +48,10 @@ public class PushAltLoc extends AlternateLocation {
 		_fileName = name;
 	}
 	
+	protected String generateHTTPString() {
+		return _pushAddress.httpStringValue();
+	}
+	
 	public RemoteFileDesc createRemoteFileDesc(int size) {
 		Set urnSet = new HashSet();
 		urnSet.add(getSHA1Urn());

@@ -4,7 +4,10 @@ package com.limegroup.gnutella.altlocs;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -19,11 +22,9 @@ import com.sun.java.util.collections.Set;
  */
 public class DirectAltLoc extends AlternateLocation {
 
-	/**
-	 * A <tt>URL</tt> instance for the URL specified in the header.
-	 */
-	private final URL URL;
 	
+	private final IpPort _node;
+	private final String _fileName;
 	
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
@@ -43,24 +44,37 @@ public class DirectAltLoc extends AlternateLocation {
         if(NetworkUtils.isPrivateAddress(url.getHost()))
             throw new IOException("invalid address: " + url.getHost());
             
-	    
-		this.URL       = url;
-		InetAddress ia = InetAddress.getByName(URL.getHost());
-		String ip = NetworkUtils.ip2string(ia.getAddress());
-		if( URL.getPort() == 6346 )
-		    DISPLAY_STRING = ip;
-		else
-		    DISPLAY_STRING = ip + ":" + URL.getPort();
+	    try {
+	    	_node = new QueryReply.IPPortCombo(url.getHost(),url.getPort());
+	    }catch(UnknownHostException bad) {
+	    	throw new IOException("invalid direct loc");
+	    }
+
         _count = 1;
         _demoted = false;
+        _fileName = url.getFile();
+	}
+	
+	protected DirectAltLoc(IpPort address, String fileName, URN sha1) 
+		throws IOException{
+		super(sha1);
+		_node=address;
+		_fileName=fileName;
+	}
+	
+	protected String generateHTTPString() {
+		String ret = _node.getAddress();
+		if (_node.getPort()!=6346)
+			ret = ret+":"+_node.getPort();
+		return ret;
 	}
 	
 	public RemoteFileDesc createRemoteFileDesc(int size) {
 		Set urnSet = new HashSet();
 		urnSet.add(getSHA1Urn());
         int quality = 3;
-		RemoteFileDesc ret = new RemoteFileDesc(URL.getHost(), URL.getPort(),
-								  0, URL.getFile(), size,  
+		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),
+								  0, _fileName, size,  
 								  DataUtils.EMPTY_GUID, 1000,
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
@@ -73,7 +87,7 @@ public class DirectAltLoc extends AlternateLocation {
 	public synchronized AlternateLocation createClone() {
         AlternateLocation ret = null;
         try {
-        		ret = new DirectAltLoc(this.URL, this.SHA1_URN);
+        		ret = new DirectAltLoc(_node, _fileName, this.SHA1_URN);
 
         } catch(IOException ioe) {
             ErrorService.error(ioe);
@@ -88,7 +102,7 @@ public class DirectAltLoc extends AlternateLocation {
 	 * Returns the host/port of this alternate location as an endpoint.
 	 */
 	public Endpoint getHost() {
-	    return new Endpoint(this.URL.getHost(), this.URL.getPort());
+	    return new Endpoint(_node.getAddress(), _node.getPort());
 	}
 
 	
@@ -103,10 +117,8 @@ public class DirectAltLoc extends AlternateLocation {
 		DirectAltLoc other = (DirectAltLoc)o;
 		
 
-		return (URL.getHost().equals(other.URL.getHost()) &&
-                URL.getPort() == other.URL.getPort() &&
-                SHA1_URN.equals(other.SHA1_URN) &&
-                URL.getProtocol().equals(other.URL.getProtocol()) );
+		return (_node.equals(other._node) &&
+                SHA1_URN.equals(other.SHA1_URN));
 		
 	}
 
@@ -120,10 +132,10 @@ public class DirectAltLoc extends AlternateLocation {
 		
 			DirectAltLoc other = (DirectAltLoc)o;
 		
-			ret = this.URL.getHost().compareTo(other.URL.getHost());
+			ret = _node.getAddress().compareTo(other._node.getAddress());
 			if(ret!=0)
 				return ret;
-			ret = (this.URL.getPort() - other.URL.getPort());
+			ret = (_node.getPort() - other._node.getPort());
 			if(ret!=0)
 				return ret;
 		}
@@ -134,9 +146,8 @@ public class DirectAltLoc extends AlternateLocation {
 	public int hashCode() {
 		if (hashCode ==0) {
 		int result = super.hashCode();
-			result = (37* result)+this.URL.getHost().hashCode();
-			result = (37* result)+this.URL.getPort();
-			result = (37* result)+this.URL.getProtocol().hashCode();
+			result = (37* result)+_node.getAddress().hashCode();
+			result = (37* result)+_node.getPort();
 			hashCode=result;
 		}
 		return hashCode;
@@ -149,6 +160,6 @@ public class DirectAltLoc extends AlternateLocation {
 	 * @return the string representation of this alternate location
 	 */
 	public String toString() {
-		return this.URL.toExternalForm()+","+_count+","+_demoted;
+		return _node+","+_count+","+_demoted;
 	}
 }

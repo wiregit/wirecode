@@ -256,6 +256,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
     ////////////////////////////Mesh utility methods////////////////////////////
 
 	public String httpStringValue() {
+		if (DISPLAY_STRING == null) 
+			DISPLAY_STRING = generateHTTPString();
 	    return DISPLAY_STRING;
     }
 
@@ -461,6 +463,8 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
  
         			
     }
+    
+    protected abstract String generateHTTPString();
 
 	/**
 	 * Overrides the hashCode method of Object to meet the contract of 
