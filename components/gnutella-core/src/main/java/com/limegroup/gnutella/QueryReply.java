@@ -10,10 +10,10 @@ import com.sun.java.util.collections.*;
  * discovered until the getResponses methods are called.<p>
  *
  * This class has partial support for BearShare-style query reply trailers.  You
- * can extract the vendor code and push flags, but you can't create them.  These
- * methods may throw BadPacketException if the metadata cannot be extracted.
- * Note that BadPacketException does not mean that other data (namely responses)
- * cannot be read; MissingDataException might have been a better name.
+ * can extract the vendor code, push flag, and busy flag. These methods may
+ * throw BadPacketException if the metadata cannot be extracted.  Note that
+ * BadPacketException does not mean that other data (namely responses) cannot be
+ * read; MissingDataException might have been a better name.  
  */
 public class QueryReply extends Message implements Serializable{
     //Rep rationale: because most queries aren't directed to us (we'll just
@@ -32,9 +32,15 @@ public class QueryReply extends Message implements Serializable{
     /** If parsed, the responses vendor string, if defined, or null
      *  otherwise. */
     private volatile String vendor=null;
-    /** If parsed and vendor!=null, true iff the push flag is set. */
-    private volatile boolean pushFlagSet;
+    /** If parsed, one of TRUE (push needed), FALSE, or UNDEFINED. */
+    private volatile int pushFlag=UNDEFINED;
+    /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
+    private volatile int busyFlag=UNDEFINED;
     
+    private static final int TRUE=1;
+    private static final int FALSE=0;
+    private static final int UNDEFINED=-1;
+
 
     /** Creates a new query reply.  The number of responses is responses.length
      *
@@ -195,7 +201,7 @@ public class QueryReply extends Message implements Serializable{
         parseResults();
         if (vendor==null)
             throw new BadPacketException();
-        return vendor;
+        return vendor;        
     }
 
     /** 
@@ -206,20 +212,41 @@ public class QueryReply extends Message implements Serializable{
      */
     public boolean getNeedsPush() throws BadPacketException {
         parseResults();
-        if (vendor==null)
+
+        switch (pushFlag) {
+        case UNDEFINED:
             throw new BadPacketException();
-        return pushFlagSet;
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for push flag: "+pushFlag);
+            return false;
+        }
     }
 
     /** 
      * Returns true if this has no more download slots.  Returns false if the
      * busy bit is present but not set.  Throws BadPacketException if the flag
      * couldn't be extracted, either because it is missing or corrupted.  
-     * <b>TODO: this is stubbed out now.</b>
      */
     public boolean getIsBusy() throws BadPacketException {
-        return false;
+        parseResults();
+
+        switch (busyFlag) {
+        case UNDEFINED:
+            throw new BadPacketException();
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for busy flag: "+pushFlag);
+            return false;
+        }
     }
+
 
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
@@ -298,42 +325,74 @@ public class QueryReply extends Message implements Serializable{
         //      vendor payload        (length until clientGUID)
         //The normal 16 byte clientGUID follows, of course.
         //
-        //Currently the common payload consists of a single byte
-        //whose low bit is one if we should try a push.
+        //The first byte of the common payload has a one in its first bit* if we
+        //should try a push.  Following this byte is an optional second byte
+        //that further defines/refines flags in the first byte.  If the third
+        //bit of the second byte is 1, then the server is busy iff the third bit
+        //of the first byte is 1.  Likewise, if the first bit of the second byte
+        //is zero, the first bit of the first byte is actually undefined!  Note
+        //that the second bit of both bytes is unused; this is to work around
+        //older versions of BearShare.
+        //
+        //*Here, we use 1-N numbering.  So "first bit" refers to the least
+        //significant bit.
         try {
 			if (i > (payload.length-16-4-2)) {   //see above
                 throw new BadPacketException("No metadata");
             }
             //Attempt to verify.  Results are not copied to this until verified.
             String vendorT=null;
-            boolean pushFlagSetT;
-            //Apparently the US-ASCII encoding is NOT supported by all
-            //platforms.  But since we do not use the vendor string yet, we
-            //ignore it.
-//              try {
-//                  //Must use ASCII encoding since characters are more than two
-//                  //bytes on other platforms!
-//                  vendorT=new String(payload, i, 4, "US-ASCII");
-//                  Assert.that(vendorT.length()==4,
-//                              "Vendor length wrong.  Wrong character encoding?");
-//              } catch (UnsupportedEncodingException e) {
-//                  Assert.that(false, "No support for ASCII encoding.");
-//              }
+            int pushFlagT=UNDEFINED;
+            int busyFlagT=UNDEFINED;
+
+            //a) extract vendor code
+            try {
+                //Must use ISO encoding since characters are more than two
+                //bytes on other platforms.  TODO: test on different installs!
+                vendorT=new String(payload, i, 4, "ISO-8859-1");
+                Assert.that(vendorT.length()==4,
+                            "Vendor length wrong.  Wrong character encoding?");
+            } catch (UnsupportedEncodingException e) {
+                Assert.that(false, "No support for ISO-8859-1 encoding");
+            }
             i+=4;
+
+            //b) extract payload length
             int length=ByteOrder.ubyte2int(payload[i]);
-            if (length==0)
+            if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
             i++;
-            pushFlagSetT = (payload[i]&0x1)==1;
+
+            //c) extract push and busy bits from common payload
+            if (length==1) {        //early BearShare
+                pushFlagT = (payload[i]&0x1)==1 ? TRUE : FALSE;
+            } else {                //BearShare 2.2.0+
+                byte flags=payload[i];
+                byte control=payload[i+1];                
+                final int PUSH_MASK=0x1;
+                if ((control & PUSH_MASK)!=0)
+                    pushFlagT = (flags&PUSH_MASK)!=0 ? TRUE : FALSE;
+                final int BUSY_MASK=0x4;
+                if ((control & BUSY_MASK)!=0)
+                    busyFlagT = (flags&BUSY_MASK)!=0 ? TRUE : FALSE;
+//              System.out.println("Got extended QHD");
+//              System.out.println("   vendor: "+vendorT);
+//              System.out.println("   flags: "+Integer.toBinaryString(flags));
+//              System.out.println("   control: "+Integer.toBinaryString(control));
+//              System.out.println("   busy? "+(busyFlagT==TRUE));
+//              System.out.println("   push? "+(pushFlagT==TRUE));
+            }
             i+=length;
+
             if (i>payload.length-16)
                 throw new BadPacketException(
                     "Common payload length too large.");
 
             //All set.  Accept parsed values.
-            this.pushFlagSet=pushFlagSetT;
-//              Assert.that(vendorT!=null);
-//              this.vendor=vendorT.toUpperCase();
+            Assert.that(vendorT!=null);
+            this.vendor=vendorT.toUpperCase();
+            this.pushFlag=pushFlagT;
+            this.busyFlag=busyFlagT;
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -358,7 +417,6 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Unit test */
-    /*
     public static void main(String args[]) {
         byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
         long u4=0x00000000FFFFFFFFl;
@@ -526,7 +584,92 @@ public class QueryReply extends Message implements Serializable{
         try {
             qr.getVendor();
             Assert.that(false);
-        } catch (BadPacketException e) { }            
+        } catch (BadPacketException e) { }  
+
+
+        ///////////// BearShare 2.2.0 QHD (busy bits and friends) ///////////
+
+
+        //Normal case: busy and push bits undefined and unset.
+        //(We don't bother testing undefined and set.  Who cares?)
+        payload=new byte[11+11+(4+3+0)+16];
+        payload[0]=1;                //Number of results
+        payload[11+8]=(byte)65;      //The character 'A'
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)105;  //The character 'i'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)2;
+        payload[11+11+4+1]=(byte)0x0; 
+        payload[11+11+4+2]=(byte)0x0; //no data known
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            String vendor=qr.getVendor();
+            Assert.that(vendor.equals("LIME"), vendor);
+            vendor=qr.getVendor();
+            Assert.that(vendor.equals("LIME"), vendor);
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            Assert.that(false);
+        }                                        
+        try {
+            Assert.that(qr.getNeedsPush()==true);
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            Assert.that(qr.getIsBusy()==true);
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+       
+
+        //Normal case: busy and push bits defined and set
+        payload=new byte[11+11+(4+3+0)+16];
+        payload[0]=1;                //Number of results
+        payload[11+8]=(byte)65;      //The character 'A'
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)105;  //The character 'i'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)2;
+        payload[11+11+4+1]=(byte)0x5; 
+        payload[11+11+4+2]=(byte)0x5;  
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            String vendor=qr.getVendor();
+            Assert.that(vendor.equals("LIME"), vendor);
+            Assert.that(qr.getNeedsPush()==true);
+            Assert.that(qr.getNeedsPush()==true);
+            Assert.that(qr.getIsBusy()==true); //==> throws BPExc
+            Assert.that(qr.getIsBusy()==true);
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            Assert.that(false);
+        }                                        
+
+          
+        //Normal case: busy and push bits defined and unset
+        payload=new byte[11+11+(4+3+0)+16];
+        payload[0]=1;                //Number of results
+        payload[11+8]=(byte)65;      //The character 'A'
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)105;  //The character 'i'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)2;
+        payload[11+11+4+1]=(byte)0xa; //set second and fourth for kicks 
+        payload[11+11+4+2]=(byte)0x5;  
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            String vendor=qr.getVendor();
+            Assert.that(vendor.equals("LIME"), vendor);
+            Assert.that(qr.getNeedsPush()==false);
+            Assert.that(qr.getIsBusy()==false);
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
+            Assert.that(false);
+        }    
     }
-    */
 }
