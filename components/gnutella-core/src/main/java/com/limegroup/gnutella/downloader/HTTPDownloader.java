@@ -349,7 +349,9 @@ public class HTTPDownloader implements BandwidthTracker {
                                 new HTTPHeaderValueCollection(writeClone),out);
 
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
-		if (ChatSettings.CHAT_ENABLED.getValue() ) {
+		if (ChatSettings.CHAT_ENABLED.getValue() &&
+		    RouterService.acceptedIncomingConnection() &&
+		    !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
             int port = RouterService.getPort();
             String host = NetworkUtils.ip2string(RouterService.getAddress());
             out.write("Chat: " + host + ":" + port + "\r\n");            

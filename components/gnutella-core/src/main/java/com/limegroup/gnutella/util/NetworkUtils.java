@@ -170,6 +170,19 @@ public final class NetworkUtils {
 
     /**
      * Utility method for determing whether or not the given 
+     * address is private taking an InetAddress object as argument
+     * like the isLocalAddress(InetAddress) method. Delegates to 
+     * <tt>isPrivateAddress(byte[] address)</tt>.
+     *
+     * @return <tt>true</tt> if the specified address is private,
+     *  otherwise <tt>false</tt>
+     */
+    public static boolean isPrivateAddress(InetAddress address) {
+        return isPrivateAddress(address.getAddress());
+    }
+
+    /**
+     * Utility method for determing whether or not the given 
      * address is private.  Delegates to 
      * <tt>isPrivateAddress(byte[] address)</tt>.
      *
@@ -180,8 +193,7 @@ public final class NetworkUtils {
      */
     public static boolean isPrivateAddress(String address) {
         try {
-            return isPrivateAddress(
-                InetAddress.getByName(address).getAddress());
+            return isPrivateAddress(InetAddress.getByName(address));
         } catch(UnknownHostException uhe) {
             return true;
         }
