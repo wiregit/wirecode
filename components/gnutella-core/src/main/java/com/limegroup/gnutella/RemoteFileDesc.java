@@ -246,7 +246,28 @@ public class RemoteFileDesc implements Serializable {
         if(_urns == null) {
             _urns = DataUtils.EMPTY_SET;
             _browseHostEnabled= false;
+        } else {
+            // It seems that the Urn Set has some java.io.Files
+            // inserted into it. See:
+            // http://bugs.limewire.com:8080/bugs/searching.jsp?disp1=l&disp2=c&disp3=o&disp4=j&l=141&c=188&m=694_223
+            // Here we check for this case and remove the offending object.
+            HashSet newUrns = null;
+            Iterator iter = _urns.iterator();
+            while(iter.hasNext()) {
+                Object next = iter.next();
+                if(!(next instanceof URN)) {
+                    if(newUrns == null) {
+                        newUrns = new HashSet();
+                        newUrns.addAll(_urns);
+                    }
+                    newUrns.remove(next);
+                }
+            }
+            if(newUrns != null) {
+                _urns = Collections.unmodifiableSet(newUrns);
+            }
         }
+                
         if(_proxies == null) {
             _proxies = DataUtils.EMPTY_SET;
         }
