@@ -12,7 +12,7 @@ import java.security.*;
  *
  * This class is immutable.
  */
-public final class URN implements HTTPHeaderValue {
+public final class URN implements HTTPHeaderValue, Serializable {
 
 	/**
 	 * Constant for the leading URN string identifier, as specified in
@@ -20,35 +20,36 @@ public final class URN implements HTTPHeaderValue {
 	 * should be used in a case-insensitive manner in compliance with
 	 * the URN specification (RFC 2141).
 	 */
-	public static final String URN_NAMESPACE_ID = "urn:";
+	public static final transient String URN_NAMESPACE_ID = "urn:";
 
 	/**
 	 * The identifier for a SHA1 Namespace Identifier string.  This
 	 * is "sha1" and should also be used in a case-insensitive manner.
 	 */
-	private static final String SHA1 = "sha1";
+	private static final transient String SHA1 = "sha1";
 
 	/**
 	 * Constant for the bitprint Namespace Identifier string.  This 
 	 * is "bitprint" and should be used in a case-insensitive manner.
 	 */
-	private static final String BITPRINT = "bitprint";
+	private static final transient String BITPRINT = "bitprint";
 	
 	/**
 	 * Constant for the URN identifier constant combined with the
 	 * SHA1 identifier constant.  This is used to identify SHA1 URNs.
 	 */
-	public static final String URN_SHA1 = URN_NAMESPACE_ID+SHA1;
+	public static final transient String URN_SHA1 = 
+		URN_NAMESPACE_ID+SHA1;
 
 	/**
 	 * Constant code for a SHA1 URN.
 	 */
-	public static final int SHA1_URN = 100;
+	public static final transient int SHA1_URN = 100;
 
 	/**
 	 * The string representation of the URN.
 	 */
-	private final String URN_STRING;
+	private final transient String URN_STRING;
 
 	/**
 	 * Cached hash code that is lazily initialized.
@@ -105,6 +106,7 @@ public final class URN implements HTTPHeaderValue {
 		return URN_STRING.substring(0,URN_STRING.indexOf(':',4)+1);		
 	}
 
+	// implements HTTPHeaderValue
 	public String httpStringValue() {
 		return URN_STRING;
 	}
@@ -254,21 +256,7 @@ public final class URN implements HTTPHeaderValue {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Returns the string representation of the URN.  This is in the form:<p>
-	 * 
-	 * <URN> ::= "urn:" <NID> ":" <NSS> <p>
-	 * 
-	 * as outlined in RFC 2141.
-	 *
-	 * @return the string representation of the URN, or <tt>null</tt> if none
-	 *  has been assigned
-	 */
-	public String stringValue() {
-		return URN_STRING;
-	}
+	}	//}
 
 	/**
 	 * Returns whether or not this URN is a SHA1 URN.  Note that a bitprint
