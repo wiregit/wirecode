@@ -97,7 +97,8 @@ public class DownloadTest extends TestCase {
         
         try {
             Thread.sleep(300);   
-        } catch (Interupted
+        } catch (InterruptedException ignored) {}
+        
         uploader1=new TestUploader("6346", 6346);
         uploader2=new TestUploader("6347", 6347);
         uploader3=new TestUploader("6348", 6348);
