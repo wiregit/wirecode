@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
+import java.net.*;
 
 /**
  * Stub for the <tt>ReplyHandler</tt> interface.
@@ -69,6 +70,16 @@ public class ReplyHandlerStub implements ReplyHandler {
     }
 
     public void updatePingTime() {
+    }
+    
+    public InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByName("30.24.0.5");
+        } catch(UnknownHostException e) {
+            // should NEVER happen
+            e.printStackTrace();
+            return null;
+        }
     }
 }
 
