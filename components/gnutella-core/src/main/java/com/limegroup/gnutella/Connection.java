@@ -415,7 +415,6 @@ public class Connection {
      * initialize().  
      *    @requires _socket, _out are properly set up */
     private void sendString(String s) throws IOException {
-        System.out.println(s);
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
         _out.write(bytes);
