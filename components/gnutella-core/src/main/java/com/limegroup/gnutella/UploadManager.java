@@ -8,9 +8,9 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
+import java.util.StringTokenizer;
 import com.limegroup.gnutella.downloader.*; //for testing
 import com.limegroup.gnutella.tests.util.*; //for testing
-import java.util.StringTokenizer;
 
 /**
  * The list of all the uploads in progress.
@@ -141,6 +141,9 @@ public final class UploadManager implements BandwidthTracker {
 				try {
 					line = parseGET(socket);
 				} catch(IOException e) {
+					// TODO: we should really be returning 4XX errors here, 
+					// as this indicates that there was a problem with the
+					// client request
 					return;
 				}
 
