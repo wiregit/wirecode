@@ -10,14 +10,14 @@ public class Main {
     public static void main(String args[]) {
 	//Start thread to accept connections.  Optional first arg is the 
 	//listening port number.
-	Router router=null;
+	ConnectionManager manager=null;
 	if (args.length==1) {
-	    router=new Router(Integer.parseInt(args[0]));
+	    manager=new ConnectionManager(Integer.parseInt(args[0]));
 	} else {
-	    router=new Router();
+	    manager=new ConnectionManager();
 	}
-	router.setKeepAlive(Const.KEEP_ALIVE);
-	Thread t=new Thread(router);
+	manager.setKeepAlive(Const.KEEP_ALIVE);
+	Thread t=new Thread(manager);
 	t.setDaemon(true);
 	t.start();	
 
@@ -32,10 +32,10 @@ public class Main {
 		    break;
 		//Print routing tables
 		else if (command.equals("route"))
-		    System.out.println(router.routeTable.toString());
+		    System.out.println(manager.routeTable.toString());
 		//Print connections
 		else if (command.equals("stat")) {
-		    Iterator iter=router.connections();
+		    Iterator iter=manager.connections();
 		    while (iter.hasNext())
 			System.out.println(iter.next().toString());
 		}
@@ -46,7 +46,7 @@ public class Main {
 			int port=6346;
 			if (commands.length>=3)
 			    port=Integer.parseInt(commands[2]);
-			Connection c=new Connection(router, commands[1], port);
+			Connection c=new Connection(manager, commands[1], port);
 			//System.out.println("Connection established.");
 			Thread tc=new Thread(c);
 			tc.setDaemon(true);
@@ -60,7 +60,7 @@ public class Main {
 	    }	    
 	}
 	System.out.println("Good bye.");
-	router.shutdown(); //write gnutella.net
+	manager.shutdown(); //write gnutella.net
     }
 
     /** Returns an array of strings containing the words of s, where

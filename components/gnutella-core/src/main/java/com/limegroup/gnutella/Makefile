@@ -1,6 +1,6 @@
 javac=javac
 
-classes = Main.class Router.class RouteTable.class \
+classes = Main.class ConnectionManager.class RouteTable.class \
 	Connection.class BadPacketException.class GUID.class \
 	UnmodifiableIterator.class Assert.class Const.class \
 	Message.class PingRequest.class PingReply.class \

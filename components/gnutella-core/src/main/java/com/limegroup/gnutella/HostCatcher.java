@@ -20,7 +20,7 @@ public class HostCatcher {
     protected Set /* of Endpoint */ candidates=new HashSet();
 
     /** Where to add new connections. */
-    protected Router router;
+    protected ConnectionManager manager;
 
     /** The good connections we've made.  We keep this around to write
       * it to disk.  This is NOT synchronized directly; rather you
@@ -33,20 +33,20 @@ public class HostCatcher {
     }
 
     /** 
-     * Creates an empty host catcher.  The router r is where new connection
+     * Creates an empty host catcher.  The manager r is where new connection
      *  should be registered in the choose method.
      */
-    public HostCatcher(Router r) { this.router=r; }
+    public HostCatcher(ConnectionManager manager) { this.manager=manager; }
 
     /** 
      * Creates a host catcher containing the hosts in the given file.
      * If filename does not exist, then no error message is printed
      * and this is initially empty.  The file is expected to contain a
      * sequence of lines in the format "<host>:port\n".  Lines not in
-     * this format are silently ignored.  r is as described above.  
+     * this format are silently ignored.  manager is as described above.  
      */
-    public HostCatcher(Router r, String filename) {
-	this.router=r;
+    public HostCatcher(ConnectionManager manager, String filename) {
+	this.manager=manager;
 	
 	BufferedReader in=null;
 	try {
@@ -148,9 +148,9 @@ public class HostCatcher {
     }
 
     /**
-     * @modifies router
+     * @modifies manager
      * @effects returns a new outgoing connection to some host in this,
-     *  adds the connection to router, and removes it from this (atomically).
+     *  adds the connection to manager, and removes it from this (atomically).
      *  If no such host can be found, throws NoSuchElementException.  This
      *  method <i>is</i> thread-safe, but it can be run in parallel with
      *  itself.
@@ -173,7 +173,7 @@ public class HostCatcher {
 	    //   successful, add the endpoint to the elected set so we 
 	    //   can write to disk and try later.
 	    try {
-		Connection ret=new Connection(router,e.hostname,e.port);
+		Connection ret=new Connection(manager,e.hostname,e.port);
 		synchronized(elected) {
 		    elected.add(e);
 		}
@@ -191,13 +191,13 @@ public class HostCatcher {
     }
 
     /** Unit test.  First arg is filename */
-    public static void main(String args[]) {
-	HostCatcher hc=new HostCatcher(new Router(), args[0]);
-	System.out.println(hc.toString());
-    }
+//      public static void main(String args[]) {
+//  	HostCatcher hc=new HostCatcher(new ConnectionManager(), args[0]);
+//  	System.out.println(hc.toString());
+//      }
 }
 
-/** Immutable. */
+/** Immutable IP/port pair. */
 class Endpoint {
     String hostname;
     int port;
