@@ -27,6 +27,7 @@ import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -49,6 +50,13 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    private static void setAccepted(boolean yes) {
+    	try { 
+            PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(yes)); 
+        }catch(Exception bad) { 
+            ErrorService.error(bad); 
+        }
+    }
     ///////////////////////// Actual Tests ////////////////////////////
     
     // THIS TEST SHOULD BE RUN FIRST!!
@@ -74,7 +82,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     }
 
     public void testQueryReplyHasProxiesAndCanGIV() throws Exception {
-
+    	setAccepted(false);
         drain(testUP[0]);
 
         // make sure leaf is sharing
@@ -144,6 +152,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
     
     public void testHTTPRequest() throws Exception {
+    	setAccepted(true);
         drain(testUP[0]);
         // some setup
         byte[] clientGUID = GUID.makeGuid();
