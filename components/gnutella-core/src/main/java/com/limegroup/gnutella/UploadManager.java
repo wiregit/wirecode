@@ -161,11 +161,9 @@ public class UploadManager {
 		// add to the Map
 		insertIntoMap(host);
 
-		if (! testPerHostLimit(host) ) 
+		if ( (! testPerHostLimit(host) ) ||
+			 ( ! testTotalUploadLimit() ) )
 			 uploader.setState(Uploader.LIMIT_REACHED);
-			 
-		if ( ! testTotalUploadLimit() ) 
-			uploader.setState(Uploader.LIMIT_REACHED);
 
 		_callback.addUpload(uploader);		
 
