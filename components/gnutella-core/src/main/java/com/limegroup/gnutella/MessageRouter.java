@@ -1620,6 +1620,13 @@ public abstract class MessageRouter {
 
         int numHops = queryRequest.getHops();
 
+        if(REPLY_LIMIT > 1 && numHops > 2 && numResponses > 10) {
+            List randomizedResponses = Arrays.asList(responses);
+            Collections.shuffle(randomizedResponses);
+            responses = 
+                (Response[])randomizedResponses.subList(0, 10).toArray();
+            numResponses = responses.length;
+        }
         while (numResponses > 0) {
             int arraySize;
             // if there are more than 255 responses,
