@@ -16,6 +16,7 @@ public class RouterService
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
+    private DownloadManager downloader;
 
     /**
      * Create a RouterService accepting connections on the default port
@@ -40,13 +41,15 @@ public class RouterService
         this.manager = new ConnectionManager(callback);
         this.router = router;
         this.catcher = new HostCatcher(callback);
+        downloader = new DownloadManager();
 
         // Now, link all the pieces together, starting the various threads.
         this.catcher.initialize(acceptor, manager,
                                 SettingsManager.instance().getHostList());
         this.router.initialize(acceptor, manager, catcher);
         this.manager.initialize(router, catcher);
-        this.acceptor.initialize(manager, router);
+        this.acceptor.initialize(manager, router, downloader);
+        this.downloader.initialize(callback, router, acceptor);
     }
 
     /**
@@ -548,79 +551,22 @@ public class RouterService
         return SettingsManager.instance();
     }
 
-    /**
-     * Initialize a download request
-     */
-    private Downloader initDownload(String ip, int port, int index,
-          String fname, byte[] bguid, int size) {
-		return new Downloader("http", ip, port, index, fname, router,
-								  acceptor, callback, bguid, size);
-    }
-
-    /**
-     * Kickoff a download request
-     */
-    public void kickoffDownload(Downloader down) {
-
-        down.ensureDequeued();
-
-        Thread t = new Thread(down);
-
-        t.setDaemon(true);
-
-        t.start();
-    }
-
-    /**
-     * Create and kickoff a download request
-     */
-    public void tryDownload(String ip, int port, int index, String fname,
-      byte[] bguid, int size) {
-
-        Downloader down = initDownload(ip, port, index, fname, bguid, size);
-
-        kickoffDownload(down);
-    }
-
-    /**
-     * Create and kickoff a smart download.  The following files will be
-     * downloaded in parallel or serial until there is success or total failure.
-     * It is assumed they are "similar", in some sense of the word.
-     * TODO: is this really the place for it?  Also, we need queued downloads     
-     */
-    public void tryDownload(RemoteFileDesc[] files) {
-        SmartDownloader down=new SmartDownloader(router, files,
-                                                 acceptor, callback);
-        kickoffDownload(down);
-    }
-
-
-    /**
-     * Create a queued download request
-     */
-    public void queueDownload(String ip, int port, int index, String fname,
-            byte[] bguid, int size) {
-
-        Downloader down = initDownload(ip, port, index, fname, bguid, size);
-
-        down.setQueued();
-        callback.addDownload( down );
-    }
-
-    /**
-     * Try to resume a download request
-     */
-    public void resumeDownload( Downloader mgr ) {
-        mgr.resume();
-
-        kickoffDownload(mgr);
-    }
-
 
     /**
      * Return how many files are being shared
      */
     public int getNumSharedFiles( ) {
         return( FileManager.instance().getNumFiles() );
+    }
+
+    /**
+     * Downloads the given files, stopping after ANY of the files is
+     * successfully downloaded.  May retry and/or queue the download as
+     * necessary.  Generally the download start immediately.  Returns a
+     * Downloader object that can be used to stop and resume the download. 
+     *     @modifies network, disk
+     */
+    public Downloader download(RemoteFileDesc[] files) {
+        return downloader.getFiles(files);
     }
 }

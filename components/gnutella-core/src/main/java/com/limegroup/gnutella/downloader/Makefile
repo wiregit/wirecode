@@ -1,5 +1,5 @@
-# Makefile for LimeWire.
-# Requires Gnu Make.
+# Non-recursive makefile.
+
 
 # the java compiler
 JAVAC  = javac -g
@@ -11,25 +11,13 @@ SRCS := $(wildcard *.java)
 OBJS  = $(SRCS:.java=.class)
 
 # make everything, (just makes .class files, for now)
-all: $(OBJS) gui util filters downloader
+all: $(OBJS)
 
 $(OBJS): %.class: %.java
 	$(JAVAC) $<
 
-# make subdirectories.  TODO: can you make this more general?
-.PHONY: gui
-gui:
-	$(MAKE) -C $@
-.PHONY: util
-util:
-	$(MAKE) -C $@
-.PHONY: filters
-filters:
-	$(MAKE) -C $@
-
 # clean and then make again
-again:  clean
-	$(JAVAC) *.java
+again:  clean all
 
 # clean up after making - remove core, ~ files, and .bak files
 clean:
