@@ -725,7 +725,7 @@ public class ManagedConnection
                 pr = new PingReply(m.getGUID(),(byte)2,
                 connection.getOrigPort(),
                 connection.getInetAddress().getAddress(), 0, 0, true);  
-            } else if(connection.isClientConnection() 
+            } else if(connection.isLeafConnection() 
                 || connection.isOutgoing()){
                 //we know the listening port of the host in this case
                 pr = new PingReply(m.getGUID(),(byte)2,
@@ -1144,21 +1144,16 @@ public class ManagedConnection
                 ConnectionHandshakeHeaders.USER_AGENT);
     }
 
-    /** Returns true if this is as a special "router" connection, e.g. to
-     *  router.limewire.com.  */
-    //public boolean isRouterConnection() {
-	//  return this._isRouter;
-    //}
 
-    /** Returns true iff this connection wrote "Supernode: false".
+    /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
-    public boolean isClientConnection() {
+    public boolean isLeafConnection() {
         String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
         if (value==null)
             return false;
         else
-            //X-Supernode: true  ==> false
-            //X-Supernode: false ==> true
+            //X-Ultrapeer: true  ==> false
+            //X-Ultrapeer: false ==> true
             return !Boolean.valueOf(value).booleanValue();
     }
 
@@ -1197,6 +1192,7 @@ public class ManagedConnection
         else 
             return !Boolean.valueOf(value).booleanValue();
     }
+
 
 	/**
 	 * Returns whether or not this connection is to a client supporting
@@ -1272,7 +1268,7 @@ public class ManagedConnection
 	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
-        if (! isClientConnection())
+        if (! isLeafConnection())
             return false;
 
         //...and am I a supernode?
