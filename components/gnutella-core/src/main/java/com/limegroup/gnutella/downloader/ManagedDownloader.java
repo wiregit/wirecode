@@ -102,7 +102,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
-      example, one might simultaneously download the first half of book from
+      example, one might simultaneously download the first half of a file from
       server A and the second half from server B.  This increases throughput if
       the downstream capacity of the downloader is greater than the upstream
       capacity of the fastest uploader.
@@ -120,7 +120,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
       While the file has not been downloaded, and we have not given up
       try to increasing parallelism, to our maximum capacity...
-      Each potential downloader thats working in parallel does these steps
+      Each potential downloader that is working in parallel does these steps
       1. Establish a TCP connection with an rfd
          if unable to connect end this parallel execution
       2. This step has two parts
@@ -133,11 +133,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 they were in before we started trying. However, if the http 
                 handshaking was successful, the downloader can keep the 
                 part it obtained.
-          The two steps above must be  atomic wrt other downloaders. 
-          Othersise, other downloaders in parallel will be  able to steal the 
+          The two steps above must be atomic wrt other downloaders. 
+          Otherwise, other downloaders in parallel will be able to steal the 
           same white areas, or grey areas from the same downloaders.
       3. Download the file by delegating to the HTTPDownloader, and then do 
-         the book-keeping. Termination may be normal or abnormal. 
+         the bookkeeping. Termination may be normal or abnormal.
 
      ManagedDownloader delegates to multiple HTTPDownloader instances, one for
      each HTTP connection.  HTTPDownloader uses Java's RandomAccessFile class,

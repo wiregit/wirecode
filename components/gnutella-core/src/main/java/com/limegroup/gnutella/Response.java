@@ -45,9 +45,9 @@ public class Response {
     private static final Log LOG = LogFactory.getLog(Response.class);
     
     /**
-     * The magic byte to use as extension seperators.
+     * The magic byte to use as extension separators.
      */
-    private static final byte EXT_SEPERATOR = 0x1c;
+    private static final byte EXT_SEPARATOR = 0x1c;
     
     /**
      * The maximum number of alternate locations to include in responses
@@ -379,19 +379,19 @@ public class Response {
     				URN urn = (URN)iter.next();
                     Assert.that(urn!=null, "Null URN");
     				baos.write(urn.toString().getBytes());
-    				// If there's another URN, add the seperator.
+    				// If there's another URN, add the separator.
     				if (iter.hasNext()) {
-    					baos.write(EXT_SEPERATOR);
+    					baos.write(EXT_SEPARATOR);
     				}
     			}
     			
     			// If there's ggep data, write the separator.
     		    if( !ggep.isEmpty() )
-    		        baos.write(EXT_SEPERATOR);
+    		        baos.write(EXT_SEPARATOR);
             }
             
             // It is imperitive that GGEP is added LAST.
-            // That is because GGEP can contain 0x1c (EXT_SEPERATOR)
+            // That is because GGEP can contain 0x1c (EXT_SEPARATOR)
             // within it, which would cause parsing problems
             // otherwise.
             if(!ggep.isEmpty())

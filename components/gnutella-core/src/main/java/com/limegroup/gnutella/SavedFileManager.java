@@ -15,9 +15,9 @@ import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /**
- * Manages saved files.
+ * Singleton that manages saved files.
  *
- * Every minute it erases the stored data and adds new information,
+ * Every three minutes it erases the stored data and adds new information,
  * as read from the disk.
  */
 public final class SavedFileManager implements Runnable {

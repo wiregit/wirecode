@@ -458,7 +458,7 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
                uploader.getIndex() != RESOURCE_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD &&
-               !uploader.isNetworkShare();
+               !uploader.isForcedShare();
 	}
     
     /**
@@ -475,7 +475,7 @@ public class UploadManager implements BandwidthTracker {
     private boolean shouldBypassQueue(HTTPUploader uploader) {
         return uploader.getState() != Uploader.CONNECTING ||
                uploader.getMethod() == HTTPRequestMethod.HEAD ||
-               uploader.isNetworkShare();
+               uploader.isForcedShare();
     }
     
     /**

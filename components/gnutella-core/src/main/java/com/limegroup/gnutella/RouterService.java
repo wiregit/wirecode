@@ -610,7 +610,7 @@ public class RouterService {
 	}
 
     /**
-     * Schedules the given task for repeated fixed-delay execution on this'
+     * Schedules the given task for repeated fixed-delay execution on this's
      * backend thread.  <b>The task must not block for too long</b>, as 
      * a single thread is shared among all the backend.
      *

@@ -1,4 +1,3 @@
-
 package com.limegroup.gnutella;
 
 import java.util.EventObject;

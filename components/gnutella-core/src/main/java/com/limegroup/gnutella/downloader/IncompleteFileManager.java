@@ -45,8 +45,8 @@ public class IncompleteFileManager implements Serializable {
      * The original version of IncompleteFileManager consisted solely of a
      * mapping from File to List<Interval> and used default serialization.
      * Starting with version 1.10 of this file, we started using VerifyingFile
-     * instead of List<Interval> internally.  But because we wanted forwards and
-     * backwards compatibility, we replaced each VerifyingFile with an
+     * instead of List<Interval> internally.  But because we wanted forward- and
+     * backward-compatibility, we replaced each VerifyingFile with an
      * equivalent List<Interval> when writing to downloads.dat.  We reversed
      * this transformation when reading from downloads.dat.  All this was
      * implemented with custom writeObject and readObject methods.  
@@ -57,8 +57,8 @@ public class IncompleteFileManager implements Serializable {
      * HASHES can be read from the input stream?  To get around this, we
      * reverted back to default Java serialization with one twist; before
      * delegating to defaultWriteObject, we temporarily transform BLOCKS to use
-     * List<Interval>.  Similary, we do the inverse transformation after calling
-     * defaultReadObject.  This is backwards compatible and will make versioning
+     * List<Interval>.  Similarly, we do the inverse transformation after calling
+     * defaultReadObject.  This is backward-compatible and will make versioning
      * less difficult in the future.
      *
      * The moral of the story is this: be very careful when modifying this class
@@ -139,12 +139,11 @@ public class IncompleteFileManager implements Serializable {
     /** Returns true iff file is "too old". */
     private static final boolean isOld(File file) {
         //Inlining this method allows some optimizations--not that they matter.
-        long lastModified=file.lastModified();
-        long days=SharingSettings.INCOMPLETE_PURGE_TIME.getValue();;
+        long days=SharingSettings.INCOMPLETE_PURGE_TIME.getValue();
         //Back up a couple days. 
         //24 hour/day * 60 min/hour * 60 sec/min * 1000 msec/sec
         long purgeTime=System.currentTimeMillis()-days*24l*60l*60l*1000l;
-        return lastModified<purgeTime;            
+        return file.lastModified() < purgeTime;            
     }
 
 

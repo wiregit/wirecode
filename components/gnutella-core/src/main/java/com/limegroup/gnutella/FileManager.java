@@ -492,7 +492,7 @@ public abstract class FileManager {
      * @param directory Gets all files under this directory RECURSIVELY.
      * @param filter If null, then returns all files.  Else, only returns files
      * extensions in the filter array.
-     * @return A Array of Files recursively obtained from the directory,
+     * @return An array of Files recursively obtained from the directory,
      * according to the filter.
      * 
      * TODO:: add test!
@@ -624,7 +624,7 @@ public abstract class FileManager {
         } 
     }
 
-    /** Returns true if the load thread has been interrupted an this should stop
+    /** Returns true if the load thread has been interrupted and this should stop
      *  loading files. */
     protected boolean loadThreadInterrupted() {
         return _loadThreadInterrupted;
@@ -637,7 +637,7 @@ public abstract class FileManager {
         return _loadFinished;
     }
 
-    /** Clears this', reloads this' extensions, generates an array of
+    /** Clears and reloads this's extensions, generates an array of
      *  directories, and then indexes the generated directories files.
      *  NOTE TO SUBCLASSES: extend this method as needed, it shall be
      *  threaded and run asynchronously as to not slow down the main
@@ -751,7 +751,7 @@ public abstract class FileManager {
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return Collections.EMPTY_LIST;
             
-        boolean isNetworkShare = directory.equals(FORCED_SHARE);
+        boolean isForcedShare = directory.equals(FORCED_SHARE);
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
@@ -775,7 +775,7 @@ public abstract class FileManager {
                 
             _sharedDirectories.put(directory, new IntSet());
             
-            if(!isNetworkShare)
+            if(!isForcedShare)
                 RouterService.getCallback().addSharedDirectory(directory, parent);
                 
             _numPendingFiles += numShareable;
@@ -787,7 +787,7 @@ public abstract class FileManager {
         // is closer to correct number.
         List added = new LinkedList();
         added.add(new KeyValue(directory, file_list));
-        if(!isNetworkShare) { // don't share subdirectories of the network-share dir.
+        if(!isForcedShare) { // don't share subdirectories of the forcibly shared dir.
             for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
                 added.addAll(updateDirectories(dir_list[i], directory));
             }
@@ -987,10 +987,10 @@ public abstract class FileManager {
             }
 		
             // Commit the time in the CreactionTimeCache, but don't share
-            // the installer.  We populare free limewire's with free installers
+            // the installer.  We populate free LimeWire's with free installers
             // so we have to make sure we don't influence the what is new
             // result set.
-            if (!isInstallerFile(file) && !isNetworkShare(file)) {
+            if (!isInstallerFile(file) && !isForcedShare(file)) {
                 URN mainURN = fileDesc.getSHA1Urn();
                 CreationTimeCache ctCache = CreationTimeCache.instance();
                 synchronized (ctCache) {
@@ -1438,7 +1438,6 @@ public abstract class FileManager {
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
         boolean includeXML = shouldIncludeXMLInResponse(request);
-        LimeXMLDocument doc = request.getRichQuery();
 
         //Special case: return up to 3 of your 'youngest' files.
         if (request.isWhatIsNewRequest()) 
@@ -1455,12 +1454,11 @@ public abstract class FileManager {
         //Normal case: query the index to find all matches.  TODO: this
         //sometimes returns more results (>255) than we actually send out.
         //That's wasted work.
-        IntSet matches = null;
         //Trie requires that getPrefixedBy(String, int, int) passes
         //an already case-changed string.  Both search & urnSearch
-        //do thise kind of match, so we canonicalise the case for them.
+        //do this kind of match, so we canonicalize the case for them.
         str = _KeywordTrie.canonicalCase(str);        
-        matches = search( str, matches);
+        IntSet matches = search(str, null);
         if(request.getQueryUrns().size() > 0) {
             matches = urnSearch(request.getQueryUrns().iterator(),matches);
         }
@@ -1471,8 +1469,9 @@ public abstract class FileManager {
 
         List responses = new LinkedList();
         final MediaType.Aggregator filter = MediaType.getAggregator(request);
+        LimeXMLDocument doc = request.getRichQuery();
 
-        // Iterate through our hit indexes to create a list of results.
+        // Iterate through our hit indices to create a list of results.
         for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
@@ -1554,7 +1553,7 @@ public abstract class FileManager {
             FileDesc desc = (FileDesc)_files.get(i);
             // If the file was unshared or is an incomplete file,
             // DO NOT SEND IT.
-            if (desc==null || desc instanceof IncompleteFileDesc || isNetworkShare(desc)) 
+            if (desc==null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
                 continue;
         
             Assert.that(j<ret.length,
@@ -1706,14 +1705,14 @@ public abstract class FileManager {
     /**
      * Determines if this FileDesc is a network share.
      */
-    public static boolean isNetworkShare(FileDesc desc) {
-        return isNetworkShare(desc.getFile());
+    public static boolean isForcedShare(FileDesc desc) {
+        return isForcedShare(desc.getFile());
     }
     
     /**
      * Determines if this File is a network share.
      */
-    public static boolean isNetworkShare(File file) {
+    public static boolean isForcedShare(File file) {
         File parent = file.getParentFile();
         return parent != null && parent.equals(FORCED_SHARE);
     }
