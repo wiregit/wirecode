@@ -372,7 +372,8 @@ public class ConnectionManager {
             ManagedConnection mc=(ManagedConnection)iter.next();
             try {
                 InetAddress addr=mc.getInetAddress();
-                Assert.that(addr!=null, "No address for "+mc);
+                Assert.that(addr!=null, 
+                            "No address for "+mc+" "+mc.isOutgoing());
                 if (addr.getHostAddress().equals(hostName))
                     return true;
             } catch (IllegalStateException e) {

@@ -835,9 +835,15 @@ public class Connection {
      */
     public InetAddress getInetAddress() throws IllegalStateException {
         try {
-            return _socket.getInetAddress();
+            //TODO: this is just a work-around....let's just eliminate this
+            //method.
+            return InetAddress.getByName(_host);
         } catch (NullPointerException e) {
             throw new IllegalStateException("Not initialized");
+        } catch (UnknownHostException e) {
+            //Actually this COULD happen
+            Assert.that(false, "Couldn't resolve already resolved name");
+            return null;
         }
     }
 
