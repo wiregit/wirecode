@@ -431,6 +431,8 @@ public class ConnectionManager {
      * Returns true if this is a super node with a connection to a leaf. 
      */
     public boolean hasSupernodeClientConnection() {
+        //TODO: this is wrong.  What about outgoing supernode->client
+        //connections.  They're rare but possible.
         if(_incomingClientConnections > 0)
             return true;
         else
@@ -1236,10 +1238,12 @@ public class ConnectionManager {
      * stricter.  
      */
     public boolean allowClientMode() {
-        //if is a supernode, and have client connections, 
+        //if is a supernode, and have other connections (client or ultrapeer),
         //or the supernode status is forced, dont change mode
+        int connections=getNumInitializedConnections()
+                       +_initializedClientConnections.size();
         if (_settings.getForceSupernodeMode() 
-            || (isSupernode() && _incomingClientConnections > 0))
+            || (isSupernode() && connections > 0))
             return false;
         else
             return true;

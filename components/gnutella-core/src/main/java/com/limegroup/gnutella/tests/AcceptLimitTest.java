@@ -21,6 +21,7 @@ import java.io.*;
  *  through 503 or old way.
  * <li>pongs given out if slots for any type of connection
  * <li>ultrapeers are preferenced properly (including when fetching)
+ * <li>Ultrapeer guidance handled properly.
  * </ul>
  */
 public class AcceptLimitTest {
@@ -58,6 +59,7 @@ public class AcceptLimitTest {
         settings.setConnectOnStartup(false);
         settings.setEverSupernodeCapable(true);
         settings.setDisableSupernodeMode(false);
+        settings.setForceSupernodeMode(false);
         settings.setMaxShieldedClientConnections(LEAF_CONNECTIONS);
         settings.setKeepAlive(KEEP_ALIVE);
         ActivityCallback callback=new ActivityCallbackStub();
@@ -75,7 +77,15 @@ public class AcceptLimitTest {
             e.printStackTrace();
             Assert.that(false); 
         }
-        
+
+        System.out.println("\nTesting ultrapeer guidance:");
+        testGuidanceI(rs);
+        cleanup(rs);
+        testGuidanceII(rs);
+        cleanup(rs);
+        testGuidanceIII(rs);
+        cleanup(rs);
+
         testFetchI(rs, router);
         cleanup(rs);
         testFetchII(rs, router);
@@ -291,6 +301,85 @@ public class AcceptLimitTest {
         return ret;
     }
 
+    private static void testGuidanceI(RouterService rs) {
+        System.out.println("-Testing normal leaf guidance");
+        Assert.that(rs.isSupernode());
+        Assert.that(! rs.hasClientSupernodeConnection());
+        MiniAcceptor acceptor=new MiniAcceptor(
+            new GuidingUltrapeerResponder(), 6340);
+        Thread.yield();
+        rs.connectToHostAsynchronously("localhost", 6340);
+        Connection in=acceptor.accept();
+        Assert.that(! rs.isSupernode());
+        Assert.that(rs.hasClientSupernodeConnection()); 
+        in.close();
+    }
+
+    private static void testGuidanceII(RouterService rs) {
+        System.out.println("-Testing ignored leaf guidance (because of leaf)");
+        //Connect one leaf
+        Assert.that(rs.getNumConnections()==0);
+        Assert.that(rs.isSupernode());
+        Assert.that(! rs.hasClientSupernodeConnection());
+        MiniAcceptor acceptor=new MiniAcceptor(
+            new LeafResponder(), 6341);
+        Thread.yield();
+        rs.connectToHostAsynchronously("localhost", 6341);
+        Connection in=acceptor.accept();
+        Assert.that(in!=null);
+        Assert.that(rs.isSupernode());
+        Assert.that(rs.getNumConnections()==1);
+        //Assert.that(rs.hasSupernodeClientConnection());
+
+
+        //Now connect to ultrapeer, ignoring guidance
+        acceptor=new MiniAcceptor(
+            new GuidingUltrapeerResponder(), 6342);
+        Thread.yield();
+        rs.connectToHostAsynchronously("localhost", 6342);
+        Connection in2=acceptor.accept();
+        Assert.that(in2!=null);
+        Assert.that(rs.isSupernode());
+        //Assert.that(rs.hasSupernodeClientConnection());
+        Assert.that(rs.getNumConnections()==2);
+
+        in.close();
+        in2.close();
+    }
+
+
+    private static void testGuidanceIII(RouterService rs) {
+        System.out.println("-Testing ignored leaf guidance (because of ultrapeer)");
+        //Connect one ultrapeer
+        Assert.that(rs.getNumConnections()==0);
+        Assert.that(rs.isSupernode());
+        Assert.that(! rs.hasClientSupernodeConnection());
+        MiniAcceptor acceptor=new MiniAcceptor(
+            new UltrapeerResponder(), 6343);
+        Thread.yield();
+        rs.connectToHostAsynchronously("localhost", 6343);
+        Connection in=acceptor.accept();
+        Assert.that(in!=null);
+        Assert.that(rs.isSupernode());
+        Assert.that(rs.getNumConnections()==1);
+
+        //Now connect to ultrapeer, ignoring guidance
+        acceptor=new MiniAcceptor(
+            new GuidingUltrapeerResponder(), 6344);
+        Thread.yield();
+        rs.connectToHostAsynchronously("localhost", 6344);
+        Connection in2=acceptor.accept();
+        Assert.that(in2!=null);
+        Assert.that(rs.isSupernode());
+        Assert.that(rs.getNumConnections()==2);
+
+        in.close();
+        in2.close();
+    }
+
+
+    /////////////////////////////////////////////////////////////////////
+
     /** 
      * Returns a connection of the given type to host:port, 
      * or null if it failed.
@@ -413,6 +502,22 @@ class UltrapeerResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) throws IOException {
         return new HandshakeResponse(new UltrapeerProperties());
+    }
+}
+
+class GuidingUltrapeerResponder implements HandshakeResponder {
+    public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException {
+        Properties props=new UltrapeerProperties();
+        props.put(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED, "false");
+        return new HandshakeResponse(props);
+    }
+}
+
+class LeafResponder implements HandshakeResponder {
+    public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException {
+        return new HandshakeResponse(new LeafProperties());
     }
 }
 
