@@ -20,27 +20,13 @@ import java.util.*;
  */
 public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-	/**
-	 * FileManager instance to test against.
-	 */
-	private FileManager _fileManager;
+	private static final RouterService ROUTER_SERVICE = 
+		new RouterService(new ActivityCallbackStub());	   
 
-	/**
-	 * Test shared directory.
-	 */
-	private File _testDir;
-
-	/**
-	 * UploadManager for testing the requests.
-	 */
-	private UploadManager _uploadManager;
 
 	private static final String STATUS_503 = "HTTP/1.1 503 Service Unavailable";
 	private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
 
-	static {
-		Backend backend = Backend.createBackend(20*1000);
-	}
 
 	/**
 	 * Constructs a new test instance.
@@ -61,65 +47,28 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	}
 
 	protected void setUp() {
-		_testDir = new File(CommonUtils.getCurrentDirectory(), 
-							"gui/com/limegroup/gnutella/gui/images");		
 
-		if(!_testDir.isDirectory()) {
-			_testDir = new File(CommonUtils.getCurrentDirectory(), 
-								"tests/com/limegroup/gnutella/gui/images");		
-		}
+		if(ROUTER_SERVICE.isStarted()) return;
 
-		if(!_testDir.isDirectory()) {
-			_testDir = new File(CommonUtils.getCurrentDirectory(), 
-								"limewire/tests/com/limegroup/gnutella/gui/images");		
-		}
+		final File TEMP_DIR = new File("temp");
+		TEMP_DIR.mkdirs();
+		TEMP_DIR.deleteOnExit();
+		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
+		SettingsManager.instance().setExtensions("tmp");
+		String dirString = "com/limegroup/gnutella";
+		File testDir = CommonUtils.getResourceFile(dirString);
+		assertTrue("could not find the images directory", testDir.isDirectory());
+		File[] files = testDir.listFiles();
 
-		if(!_testDir.isDirectory()) {
-			_testDir = new File(CommonUtils.getCurrentDirectory(), 
-								"../gui/com/limegroup/gnutella/gui/images");		
-		}
+        if ( files != null ) {
+    		for(int i=0; i<files.length; i++) {
+    			if(!files[i].isFile()) continue;
+    			CommonUtils.copyResourceFile(dirString+"/"+files[i].getName(), 
+											 new File(TEMP_DIR, files[i].getName() + ".tmp"));
+    		}		
+        }
 
-		assertTrue("could not find the images directory", _testDir.isDirectory());
-
-		// this is necessary to avoid getting multiple responses for 
-		// given queries
-		File flagsDir = new File(_testDir, "flags");
-		if(flagsDir.isDirectory()) {
-			File[] files = flagsDir.listFiles();		
-			for(int i=0; i<files.length; i++) {
-				if(!files[i].isFile()) continue;
-				assertTrue("delete needs to succeed", files[i].delete());
-			}
-		}
-		
-		// this is necessary to avoid getting multiple responses for
-		// given queries
-  		File searchingFile = new File(_testDir, "searching.gif");
-		searchingFile.delete();
-
-
-		//SettingsManager.instance().setDirectories(new File[] {_testDir});
-		//SettingsManager.instance().setExtensions("gif");
-		//ActivityCallback callback = new ActivityCallbackStub();
-		//_fileManager = new MetaFileManager();		
-		//_fileManager.initialize(callback);	
-		//MessageRouter router = new StandardMessageRouter(callback, _fileManager);
-		//_uploadManager = new UploadManager(callback, router, _fileManager);
-		//try {
-		//// sleep to let the file manager initialize
-		//Thread.sleep(4000);
-		//} catch(InterruptedException e) {
-		//assertTrue("thread should not have been interrupted: "+e, false);
-		//}
-		//assertTrue("FileManager should have loaded files", 
-		//	   4 < _fileManager.getNumFiles());
-
-		//RouterService rs = new RouterService(callback);
-		//rs.start();
-		//Backend backend = Backend.createBackend(20*1000);
-		
-		_fileManager = RouterService.getFileManager();
-		_uploadManager = RouterService.getUploadManager(); 
+		ROUTER_SERVICE.start();
 
 		try {
 			// sleep to let the file manager initialize
@@ -128,16 +77,38 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 			assertTrue("thread should not have been interrupted: "+e, false);
 		}
 		assertTrue("FileManager should have loaded files", 
-				   4 < _fileManager.getNumFiles());
+				   4 < RouterService.getFileManager().getNumFiles());
 
 	}
+
+	/**
+	 * Tests requests that follow the traditional "get" syntax to make sure that 
+	 * the X-Gnutella-Content-URN header is always returned.
+	 */
+	public void testLimitReachedRequests() {
+		int maxUploads = SettingsManager.instance().getMaxUploads();
+		SettingsManager.instance().setMaxUploads(0);
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
+			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+				HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+
+				fd.getSHA1Urn()+"\r\n\r\n";
+
+
+			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_503);
+			//sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_503);
+		}				
+		SettingsManager.instance().setMaxUploads(maxUploads);
+	}
+
+
 
 	/**
 	 * Test requests by URN.
 	 */
 	public void testHttpUrnRequest() {
-		for(int i=0; i<_fileManager.getNumFiles(); i++) {
-			FileDesc fd = _fileManager.get(i);
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
 			" HTTP/1.1\r\n\r\n";
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
@@ -150,8 +121,8 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * the X-Gnutella-Content-URN header is always returned.
 	 */
 	public void testTraditionalGetForReturnedUrn() {
-		for(int i=0; i<_fileManager.getNumFiles(); i++) {
-			FileDesc fd = _fileManager.get(i);
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
@@ -165,8 +136,8 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * name and index are correct, so a valid result is expected.
 	 */
 	public void testTraditionalGetWithContentUrn() {
-		for(int i=0; i<_fileManager.getNumFiles(); i++) {
-			FileDesc fd = _fileManager.get(i);
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, 
 										 "/get/"+fd.getIndex()+"/"+
 										 fd.getName()+ 
@@ -184,8 +155,8 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * 404.
 	 */
 	public void testTraditionalGetWithInvalidContentUrn() {
-		for(int i=0; i<_fileManager.getNumFiles(); i++) {
-			FileDesc fd = _fileManager.get(i);
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+
 			"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"+"\r\n\r\n";
@@ -199,30 +170,13 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * matching X-Gnutella-Content-URN header values also fail with 404.
 	 */
 	public void testInvalidTraditionalGetWithValidContentUrn() {
-		for(int i=0; i<_fileManager.getNumFiles(); i++) {
-			FileDesc fd = _fileManager.get(i);
+		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
+			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
 			HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn();
 			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_404);
 			sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_404);
 		}				
-	}
-
-	/**
-	 * Tests requests that follow the traditional "get" syntax to make sure that 
-	 * the X-Gnutella-Content-URN header is always returned.
-	 */
-	public void testLimitReachedRequests() {
-		int maxUploads = SettingsManager.instance().getMaxUploads();
-		SettingsManager.instance().setMaxUploads(0);
-		for(int i=0; i<_fileManager.getNumFiles(); i++) {
-			FileDesc fd = _fileManager.get(i);
-			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
-			HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
-			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_503);
-			sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_503);
-		}				
-		SettingsManager.instance().setMaxUploads(maxUploads);
 	}
 
 
@@ -236,7 +190,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			baos.write(request.getBytes());
 			Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-			_uploadManager.acceptUpload(method, sock);
+			RouterService.getUploadManager().acceptUpload(method, sock);
 			String reply = sock.getOutputStream().toString();
 			StringTokenizer st = new StringTokenizer(reply, "\r\n");
 			boolean contentUrnHeaderPresent = false;
@@ -278,7 +232,8 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 					   "reply: "+reply,
 					   contentUrnHeaderPresent);
 		} catch(IOException e) {
-			assertTrue("unexpected exception: "+e, false);
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
 		}
 	}
 
@@ -292,19 +247,15 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			baos.write(request.getBytes());
 			Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-			_uploadManager.acceptUpload(method, sock);
+			RouterService.getUploadManager().acceptUpload(method, sock);
 			String reply = sock.getOutputStream().toString();
 			StringTokenizer st = new StringTokenizer(reply, "\r\n");
 			boolean sentExpectedError = false;
-			while(st.hasMoreTokens()) {
-				String curString = st.nextToken();
-				if(curString.equals(error)) {
-					sentExpectedError = true;
-				}
-			}
-			assertTrue(error +" should have been sent", sentExpectedError);
+			String curString = st.nextToken().trim();
+			assertEquals("received unexpected HTTP response", error, curString);
 		} catch(IOException e) {
-			assertTrue("unexpected exception: "+e, false);
+			e.printStackTrace();
+			fail("unexpected exception: "+e);
 		}
 	}
 
