@@ -55,7 +55,8 @@ public final class AlternateLocation
 	 *  throw NullPointerException here, but since we're already forcing the
 	 *  caller to catch IOException, we might as well throw in in both cases
 	 */
-	public static AlternateLocation createAlternateLocation(final String location) 
+	public static AlternateLocation 
+		createAlternateLocation(final String location) 
 		throws IOException {
 		if(location == null || location.equals("")) {
 			throw new IOException("NULL OR EMPTY STRING IN ALTERNATE LOCATION");
@@ -63,7 +64,8 @@ public final class AlternateLocation
 
 		URL url = AlternateLocation.createUrl(location);
 		if(url == null) {
-			throw new IOException("could not parse url for alt loc: "+location);
+			throw new IOException("could not parse url for alt loc: "+
+								  location);
 		}
 		String outputDateTime = AlternateLocation.extractTimestamp(location);
 		Date date;
@@ -117,9 +119,11 @@ public final class AlternateLocation
 	 * @return a new <tt>AlternateLocation</tt>
 	 * @throws <tt>IOException</tt> if the <tt>rfd</tt> does not contain
 	 *  a valid urn
-	 * @throww <tt>NullPointerException</tt> if the <tt>rfd</tt> is <tt>null</tt>
+	 * @throww <tt>NullPointerException</tt> if the <tt>rfd</tt> is 
+	 *  <tt>null</tt>
 	 */
-	public static AlternateLocation createAlternateLocation(final RemoteFileDesc rfd) 
+	public static AlternateLocation 
+		createAlternateLocation(final RemoteFileDesc rfd) 
 		throws IOException {
 		if(rfd == null) {
 			throw new NullPointerException("cannot accept null RFD");
@@ -140,7 +144,8 @@ public final class AlternateLocation
 	 * and <tt>Date</tt> timestamp.
 	 *
 	 * @param url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
-	 * @param date the <tt>Date</tt> timestamp for the <tt>AlternateLocation</tt>
+	 * @param date the <tt>Date</tt> timestamp for the 
+	 *  <tt>AlternateLocation</tt>
 	 */
 	private AlternateLocation(final URL url, final Date date) {
 		this.URL = url;
@@ -148,7 +153,8 @@ public final class AlternateLocation
 		if(TIME == 0) {
 			this.OUTPUT_DATE_TIME = null;
 		} else {
-			this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(date);
+			this.OUTPUT_DATE_TIME = 
+				AlternateLocation.convertDateToString(date);
 		}
 	}
 
@@ -325,7 +331,8 @@ public final class AlternateLocation
 			int MM   = Integer.parseInt(MMStr);
 			int DD   = Integer.parseInt(DDStr);
 			
-			// no one implemented HUGE before 2001 and no one likely will past 4000
+			// no one implemented HUGE before 2001 and no one likely will 
+			// past 4000
 			if(YYYY < 2001 || YYYY > 4000) return false;
 			if(MM < 1 || MM > 12) return false;
 			if(DD < 1 || DD > 31) return false;
@@ -372,7 +379,8 @@ public final class AlternateLocation
 			int DD = Integer.parseInt(DDStr);		
 			
 			if(!st.hasMoreTokens()) {
-				Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+				Calendar cal = 
+					Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 				cal.set(YYYY, MM, DD);
 				return cal.getTime();
 			}
@@ -450,19 +458,14 @@ public final class AlternateLocation
 	private static String extractTimestamp(final String location) {
 		StringTokenizer st = new StringTokenizer(location);
 		int numToks = st.countTokens();
-		if(numToks != 2 && numToks != 3) {
-			return null;
+		String curTok = null;
+		for(int i=0; i<numToks; i++) {
+			curTok = st.nextToken();
 		}
-		else {
-			String curTok = null;
-			for(int i=0; i<numToks; i++) {
-				curTok = st.nextToken();
-			}
-			if(AlternateLocation.isValidTimestamp(curTok)) {
-				return curTok;
-			} else {
-				return null;
-			}
+		if(AlternateLocation.isValidTimestamp(curTok)) {
+			return curTok;
+		} else {
+			return null;
 		}
 	}
 
@@ -480,11 +483,17 @@ public final class AlternateLocation
 	private static String removeTimestamp(final String locationHeader) {
 		StringTokenizer st = new StringTokenizer(locationHeader);
 		int numToks = st.countTokens();
-		if(numToks == 1 || numToks == 2 || numToks == 3) {
-			return st.nextToken();
-		} else {
-			return null;
+		if(numToks == 1) {
+			return locationHeader;
 		}
+		String curTok = null;
+		for(int i=0; i<numToks; i++) {
+			curTok = st.nextToken();
+		}
+		
+		int tsIndex = locationHeader.indexOf(curTok);
+		if(tsIndex == -1) return null;
+		return locationHeader.substring(0, tsIndex);
 	}
 
 
