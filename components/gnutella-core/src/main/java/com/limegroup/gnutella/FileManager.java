@@ -985,7 +985,7 @@ public abstract class FileManager {
             // the installer.  We populare free limewire's with free installers
             // so we have to make sure we don't influence the what is new
             // result set.
-            if (!isInstallerFile(file)) {
+            if (!isInstallerFile(file) && !isNetworkShare(file)) {
                 URN mainURN = fileDesc.getSHA1Urn();
                 CreationTimeCache ctCache = CreationTimeCache.instance();
                 synchronized (ctCache) {
@@ -1549,10 +1549,7 @@ public abstract class FileManager {
             FileDesc desc = (FileDesc)_files.get(i);
             // If the file was unshared or is an incomplete file,
             // DO NOT SEND IT.
-            if (desc==null || desc instanceof IncompleteFileDesc) 
-                continue;    
-            File parent = desc.getFile().getParentFile();
-            if(parent != null && parent.equals(SUBDIR_SHARE))
+            if (desc==null || desc instanceof IncompleteFileDesc || isNetworkShare(desc)) 
                 continue;
         
             Assert.that(j<ret.length,
@@ -1701,6 +1698,20 @@ public abstract class FileManager {
         }
     }
     
+    /**
+     * Determines if this FileDesc is a network share.
+     */
+    public static boolean isNetworkShare(FileDesc desc) {
+        return isNetworkShare(desc.getFile());
+    }
+    
+    /**
+     * Determines if this File is a network share.
+     */
+    public static boolean isNetworkShare(File file) {
+        File parent = file.getParentFile();
+        return parent != null && parent.equals(SUBDIR_SHARE);
+    }
 
 
     ///////////////////////////////////// Testing //////////////////////////////
