@@ -90,6 +90,19 @@ public class FileManager {
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
     protected static ActivityCallback _callback;
+    
+    /**
+     * The only ShareableFileFilter object that should be used.
+     */
+    public static FilenameFilter SHAREABLE_FILE_FILTER =
+        new ShareableFileFilter();
+        
+    /**
+     * The only DirectoryFilter object that should be used.
+     */
+    public static FilenameFilter DIRECTORY_FILTER = new DirectoryFilter();
+        
+    
 
     /** Characters used to tokenize queries and file names. */
     public static final String DELIMETERS=" -._+/*()\\";
@@ -425,7 +438,7 @@ public class FileManager {
             //from starting up immediately after checking for null.
             //
             //TODO: the call to join would block if the call to File.list called
-            //by listFiles called by addDirectory blocks.  If this is the case,
+            //by listFiles called by updateDirectories blocks.  If this is the case,
             //we need to spawn a thread before join'ing.
             if (_loadThread!=null) {
                 _loadThreadInterrupted = true;
@@ -516,11 +529,13 @@ public class FileManager {
         //files.
         {
             // Add each directory as long as we're not interrupted.
-            int i=0;
-            while (i<directories.length && !loadThreadInterrupted()) {
-                addDirectory(directories[i], null);      
-                i++;
+            List added = new LinkedList();
+            for(int i=0; i<directories.length&&!loadThreadInterrupted(); i++) {
+                added.addAll(updateDirectories(directories[i], null));
             }
+            // Add the files that were just marked as being shareable.
+            if ( !loadThreadInterrupted() )
+                updateSharedFiles(added);
             
             // Compact the index once.  As an optimization, we skip this
             // if loadSettings has subsequently been called.
@@ -531,78 +546,97 @@ public class FileManager {
 		// write out the cache of URNs
 		UrnCache.instance().persistCache();
     }
-
-
+    
     /**
+     * Recursively adds this directory and all subdirectories
+     * to the shared directories and updated the number of pending
+     * shared files. If directory doesn't exist, isn't a 
+     * directory, or has already been added, does nothing.
+     * This method is thread-safe.  It acquires locks on a per-directory basis.
+     * If the _loadThread is interrupted while scanning the contents of
+     * directory, it returns immediately.
      * @requires directory is part of DIRECTORIES_TO_SEARCH_FOR_FILES or one of
      *  its children, and parent is directory's shared parent or null if
      *  directory's parent is not shared.
      * @modifies this
-     * @effects adds all files with shared extensions in directory and its
-     *  (recursive) children to this.  If directory doesn't exist, isn't a 
-     *  directory, or has already been added, does nothing.  Entries in this 
-     *  before the call are unmodified.
-     *     This method is thread-safe.  It acquires locks on a per-file basis.
-     *  If the _loadThread is interrupted while adding the contents of the
-     *  directory, it returns immediately.  */
-    private void addDirectory(File directory, File parent) {
+     * @return A List of directories that were added. The list
+     *         in the form of a KeyValue pair, the key being
+     *         the directory, and the value being an array of
+     *         shareable files in that directory.
+     */
+    private List updateDirectories(File directory, File parent) {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
             directory=getCanonicalFile(directory);
         } catch (IOException e) {
-            return;  //doesn't exist?
+            return new LinkedList();  //doesn't exist?
         }
-
-        //List contents of directory.
-        File[] file_list = listFiles(directory);
-        if (file_list == null) 
-            return; // directory doesn't exist or isn't a directory...
-        int n = file_list.length;                   /* directory */
         
-        //Register this directory with list of share directories.
-        synchronized (this) {
-            if (_sharedDirectories.get(directory)!=null)
-                //directory already added.  Don't re-add.
-                return;
-            _sharedDirectories.put(directory, new IntSet());
-            if (_callback!=null)
-                _callback.addSharedDirectory(directory, parent);
-            // add this dir's files to the pending files
-            // this number MUST be decreased after any type of
-            // file is processed, regardless of if it's a directory,
-            // or a file (shared or unshared).
-            _numPendingFiles += n;                
-        }
-      
-        //First add all files.  We'll add the directories later to smooth out
-        //what the user sees.  It also decreases the size of the IntSet values
-        //in _sharedDirectories.  Again, this is not strictly necessary for
-        //correctness.
-        // NOTE: If files are added first, pending files will experience a
-        //       jump in the amount of pending shared every so often,
-        //       because directories are processed last.
-        //       So, processing files first is a trade-off between
-        //       a smooth display in the library and a smooth display
-        //       in the status line.
-        List /* of File */ directories=new ArrayList();
-        for (int i=0; i<n && !loadThreadInterrupted(); i++) {
-            if (file_list[i].isDirectory())     /* prepares for the recursive call */
-                directories.add(file_list[i]);
-            else                                /* add the file with the */
-                addFile(file_list[i]);
-            // decrease the pending files.
-            // the synchronization may not be really necessary,
-            // but if it is, it must *not* go around the addFile also,
-            // since that also blocks on this
-            synchronized(this) { _numPendingFiles--; }
-        }
-        //Now add directories discovered in previous pass.
-        Iterator iter=directories.iterator();
-        while (iter.hasNext() && !loadThreadInterrupted())
-            addDirectory((File)iter.next(), directory); /* the recursive call */
-    }
+        //STEP 1:
+        // Scan subdirectory for the amount of shared files.
+        File[] dir_list = listFiles(directory, DIRECTORY_FILTER);
+        File[] file_list = listFiles(directory, SHAREABLE_FILE_FILTER);
+        
+        // no shared files or subdirs
+        if ( dir_list == null && file_list == null )
+            return new LinkedList();
 
+        int numShareable = file_list.length;
+        int numSubDirs = dir_list.length;
+            
+        //STEP 2:
+        // Tell the GUI that this file is being shared and update
+        // the amount of pending shared files.
+        synchronized (this) {
+            // if it was already added, ignore.
+            if ( _sharedDirectories.get(directory) != null)
+                return new LinkedList();
+                
+            _sharedDirectories.put(directory, new IntSet());
+            if( _callback != null )
+                _callback.addSharedDirectory(directory, parent);
+                
+            _numPendingFiles += numShareable;
+        }
+        
+        //STEP 3:
+        // Recursively add subdirectories.
+        // This has the effect of ensuring that the number of pending files
+        // is closer to correct number.
+        List added = new LinkedList();
+        added.add(new KeyValue(directory, file_list));
+        for(int i = 0; i < numSubDirs && !loadThreadInterrupted(); i++) {
+            added.addAll(updateDirectories(dir_list[i], directory));
+        }
+        
+        return added;
+    }
+    
+    /**
+     * Updates the shared files with the list of shareable files.
+     * This method is thread-safe.  It acquires locks on a per-file basis.
+     * If the _loadThread is interrupted while adding the contents of the
+     * directory, it returns immediately.     
+     * @param List a list of KeyValue objects, the key being the directory
+     *        the files are in, and the value being an array of the shareable
+     *        files.
+     */
+     private void updateSharedFiles(List toShare) {
+        for(Iterator i = toShare.iterator();
+          i.hasNext() && !loadThreadInterrupted(); ) {
+            KeyValue info = (KeyValue)i.next();
+            File[] shareables = (File[])info.getValue();
+            for(int j=0; j<shareables.length && !loadThreadInterrupted();j++) {
+                addFile(shareables[j]);
+                synchronized(this) { _numPendingFiles--; }
+            }
+            // let the gc clean up the array of shareables.
+            info.setValue(null);
+            
+        }
+    }
+    
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists in a shared 
@@ -913,6 +947,21 @@ public class FileManager {
     }
     
     /**
+     * Same as f.listFiles(FileNameFilter) in JDK1.2
+     */
+    public static File[] listFiles(File f, FilenameFilter filter) {
+        String[] children=f.list(filter);
+        if(children == null)
+            return null;
+        File[] ret = new File[children.length];
+        for (int i=0; i<children.length; i++) {
+            ret[i] = new File(f, children[i]);
+        }
+
+        return ret;
+    }    
+    
+    /**
      * called when a query route table has to be made. The current 
      * implementaion just takes all the file names and they are split
      * internally when added the QRT
@@ -1126,6 +1175,26 @@ public class FileManager {
             }
         }
         return ret;
+    }
+    
+    /**
+     * A filter for listing all shared files.
+     */
+    private static class ShareableFileFilter implements FilenameFilter {
+        public boolean accept(File dir, String name) {
+            File f = new File(dir, name);
+            return isFileShareable(f, f.length());
+        }
+    }
+    
+    /**
+     * A filter for listing subdirectory only.
+     */
+    private static class DirectoryFilter implements FilenameFilter {
+        public boolean accept(File dir, String name) {
+            File f = new File(dir, name);
+            return f.isDirectory();
+        }
     }
     
 
