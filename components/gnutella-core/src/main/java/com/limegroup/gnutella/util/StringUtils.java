@@ -19,14 +19,14 @@ public class StringUtils {
      *  StringUtils.contains("abcd", "d*a") ==> false
      *  </pre> 
      */
-    public static boolean contains(String input, String pattern) {
+    public static final boolean contains(String input, String pattern) {
         return contains(input, pattern, false);
     }
 
     /** Exactly like contains(input, pattern), but case is ignored if
      *  ignoreCase==true. */
-    public static boolean contains(String input, String pattern,
-                                   boolean ignoreCase) {
+    public static final boolean contains(String input, String pattern,
+                                         boolean ignoreCase) {
         //More efficient algorithms are possible, e.g. a modified version of the
         //Rabin-Karp algorithm, but they are unlikely to be faster with such
         //short strings.  Also, some contant time factors could be shaved by
@@ -76,33 +76,70 @@ public class StringUtils {
      *  or -1 if no such i exists.  If ignoreCase==false, case doesn't matter
      *  when comparing characters.
      */
-    private static int subset(String little, int littleStart, int littleStop,
-                              String big, int bigStart,
-                              boolean ignoreCase) {
+    private static final int subset(String little, int littleStart, int littleStop,
+                                    String big, int bigStart,
+                                    boolean ignoreCase) {
         //Equivalent to
         // return big.indexOf(little.substring(littleStart, littleStop), bigStart);
         //but without an allocation.
+        //Note special case for ignoreCase below.
         
-        final int n=big.length()-(littleStop-littleStart)+1;
-      outerLoop:
-        for (int i=bigStart; i<n; i++) {
-            //Check if little[littleStart...littleStop-1] matches with shift i
-            final int n2=littleStop-littleStart;
-            for (int j=0 ; j<n2 ; j++) {
-                char c1=big.charAt(i+j); 
-                char c2=little.charAt(littleStart+j);
-                if (ignoreCase) {
-                    c1=Character.toLowerCase(c1);
-                    c2=Character.toLowerCase(c2);
-                }
-                if (c1!=c2)
-                    continue outerLoop;
-            }            
-            return i;
-        }                
-        return -1;
+        if (ignoreCase) {
+            final int n=big.length()-(littleStop-littleStart)+1;
+        outerLoop:
+            for (int i=bigStart; i<n; i++) {
+                //Check if little[littleStart...littleStop-1] matches with shift i
+                final int n2=littleStop-littleStart;
+                for (int j=0 ; j<n2 ; j++) {
+                    char c1=big.charAt(i+j); 
+                    char c2=little.charAt(littleStart+j);
+                    if (c1!=c2 && c1!=toOtherCase(c2))  //Ignore case. See below.
+                        continue outerLoop;
+                }            
+                return i;
+            }                
+            return -1;
+        } else {
+            final int n=big.length()-(littleStop-littleStart)+1;
+        outerLoop:
+            for (int i=bigStart; i<n; i++) {
+                final int n2=littleStop-littleStart;
+                for (int j=0 ; j<n2 ; j++) {
+                    char c1=big.charAt(i+j); 
+                    char c2=little.charAt(littleStart+j);
+                    if (c1!=c2)                        //Consider case.  See above.
+                        continue outerLoop;
+                }            
+                return i;
+            }                
+            return -1;
+        }
     }
 
+    /** If c is a lower case ASCII character, returns Character.toUpperCase(c).
+     *  Else if c is an upper case ASCII character, returns Character.toLowerCase(c),
+     *  Else returns c.
+     *  Note that this is <b>not internationalized</b>; but it is fast.
+     */
+    public static final char toOtherCase(char c) {
+        int i=(int)c; 
+        final int A=(int)'A';   //65
+        final int Z=(int)'Z';   //90
+        final int a=(int)'a';   //97
+        final int z=(int)'z';   //122
+        final int SHIFT=a-A;
+
+        if (i<A)          //non alphabetic
+            return c;
+        else if (i<=Z)    //upper-case
+            return (char)(i+SHIFT);
+        else if (i<a)     //non alphabetic
+            return c;
+        else if (i<=z)    //lower-case
+            return (char)(i-SHIFT);
+        else              //non alphabetic
+            return c;            
+    }
 
     /** Returns the tokens of s delimited by the given delimeter,
      *  without returning the delimeter.  Examples:
@@ -127,6 +164,21 @@ public class StringUtils {
 
     /*
     public static void main(String args[]) {
+        //Case methods.  Test all boundary conditions.
+        //See ASCII table for further justification.
+        Assert.that(toOtherCase('\0')=='\0');
+        Assert.that(toOtherCase('0')=='0');
+        Assert.that(toOtherCase('@')=='@');
+        Assert.that(toOtherCase('A')=='a');
+        Assert.that(toOtherCase('H')=='h');
+        Assert.that(toOtherCase('Z')=='z');
+        Assert.that(toOtherCase('[')=='[');
+        Assert.that(toOtherCase('`')=='`');
+        Assert.that(toOtherCase('a')=='A');
+        Assert.that(toOtherCase('h')=='H');
+        Assert.that(toOtherCase('z')=='Z');
+        Assert.that(toOtherCase('{')=='{');        
+
         //Wildcards
         Assert.that(StringUtils.contains("", "") == true);
         Assert.that(StringUtils.contains("abc", "") == true);
@@ -162,6 +214,10 @@ public class StringUtils {
         Assert.that(StringUtils.contains("aBcDd", "bCD", false) == false);
         Assert.that(StringUtils.contains("....", "..", true) == true);
         Assert.that(StringUtils.contains("....", "..", false) == true);
+
+        //Clip2 compatibility      
+        Assert.that(StringUtils.contains("abcd", " ") == true);
+        Assert.that(StringUtils.contains("abcd", "    ") == true);
                                          
         //Unit tests for split in HTTPUtil.
     }
