@@ -2,6 +2,9 @@ package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*; 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -13,8 +16,13 @@ import junit.extensions.*;
  */
 public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+    private static final String EXTENSION = "XYZ";
+    private static final int MAX_LOCATIONS = 10;
+
     private QueryReply.GGEPUtil _ggepUtil = new QueryReply.GGEPUtil();
-	
+    private FileManager fman = null;
+    private Object loaded = new Object();
+    
 	/**
 	 * Constructs a new test instance for query replies.
 	 */
@@ -32,6 +40,27 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+	
+    
+    public static void globalSetUp() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        try {
+            RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        } catch (SecurityException e) {
+        }        
+    }
+    
+	public void setUp() throws Exception {
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        	    
+	    cleanFiles(_sharedDir, false);
+	    fman = new SimpleFileManager();
+	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+	    
+	}
+		
 
 	/**
 	 * Runs the legacy unit test that was formerly in QueryReply.
@@ -743,8 +772,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         }
 
     }
-
-
     
     public void testPushProxyQueryReply() throws Exception {
         String[] hosts = {"www.limewire.com", "www.limewire.org",
@@ -797,7 +824,50 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         }
     }
-
+    
+    public void testQueryReplyHasAlternates() throws Exception {
+        addFilesToLibrary();
+        addAlternateLocationsToFiles();
+        
+        boolean checked = false;
+		for(int i = 0; i < fman.getNumFiles(); i++) {
+			FileDesc fd = fman.get(i);
+			Response testResponse = new Response(fd);
+			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			Response[] hits = fman.query(qr);
+			assertNotNull("didn't get a response for query " + qr, hits);
+			// we can only do this test on 'unique' names, so if we get more than
+			// one response, don't test.
+			if ( hits.length != 1 ) continue;
+			checked = true;
+			
+			// first check basic stuff on the response.
+			assertEquals("responses should be equal", testResponse, hits[0]);
+			assertEquals("should have 10 other alts",
+			    10, testResponse.getLocations().size());
+			assertEquals("should have equal alts",
+			    testResponse.getLocations(), hits[0].getLocations());
+			    
+			// then actually create a QueryReply and read it, to make
+			// sure we can write & read stuff correctly.
+            QueryReply qReply = new QueryReply(GUID.makeGuid(), (byte) 4, 
+                                           6346, new byte[4], 0, hits,
+                                           GUID.makeGuid(), new byte[0],
+                                           false, false, true, true, true, false,
+                                           null);			    
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            qReply.write(baos);
+            ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+            QueryReply readQR = (QueryReply) Message.read(bais);
+            
+            List readHits = readQR.getResultsAsList();
+            assertEquals("wrong # of results", hits.length, readHits.size());
+            Response hit = (Response)readHits.get(0);
+            assertEquals("wrong # of alts",
+                hits[0].getLocations(), hit.getLocations());
+		}        
+    }
 
 
     /**
@@ -822,5 +892,76 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         } catch(BadPacketException e) {
         }
     }
+
+	private void addFilesToLibrary() throws Exception {
+		String dirString = "com/limegroup/gnutella";
+		File testDir = CommonUtils.getResourceFile(dirString);
+		testDir = testDir.getCanonicalFile();
+		assertTrue("could not find the gnutella directory",
+		    testDir.isDirectory());
+		
+        File[] testFiles = testDir.listFiles(new FileFilter() { 
+            public boolean accept(File file) {
+                // use files with a $ because they'll generally
+                // trigger a single-response return, which is
+                // easier to check
+                return !file.isDirectory() && file.getName().indexOf("$")!=-1;
+            }
+        });
+		assertNotNull("no files to test against", testFiles);
+		assertNotEquals("no files to test against", 0, testFiles.length);
+
+        waitForLoad();
+
+   		for(int i=0; i<testFiles.length; i++) {
+			if(!testFiles[i].isFile()) continue;
+			File shared = new File(
+			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
+			assertTrue("unable to get file",
+			    CommonUtils.copy( testFiles[i], shared));
+            assertNotEquals(null, fman.addFileIfShared(shared));
+		}
+        
+        // the below test depends on the filemanager loading shared files in 
+        // alphabetical order, and listFiles returning them in alphabetical
+        // order since neither of these must be true, a length check can
+        // suffice instead.
+        //for(int i=0; i<files.length; i++)
+        //    assertEquals(files[i].getName()+".tmp", 
+        //                 fman.get(i).getFile().getName());
+            
+        assertEquals("unexpected number of shared files",
+            testFiles.length, fman.getNumFiles() );
+    }
     
+    private void addAlternateLocationsToFiles() throws Exception {
+        FileDesc[] fds = fman.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++) {
+            String urn = fds[i].getSHA1Urn().httpStringValue();
+            for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
+                String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
+                fds[i].add(AlternateLocation.create(loc));
+            }
+        }
+    }
+    
+    private class FManCallback extends ActivityCallbackStub {
+        public void fileManagerLoaded() {
+            synchronized(loaded) {
+                loaded.notify();
+            }
+        }
+    }
+    
+    private void waitForLoad() {
+        synchronized(loaded) {
+            try {
+                fman.loadSettings(false); // true won't matter either                
+                loaded.wait();
+            } catch (InterruptedException e) {
+                //good.
+            }
+        }
+    }   
+
 }
