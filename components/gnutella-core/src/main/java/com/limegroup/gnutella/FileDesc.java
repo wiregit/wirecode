@@ -5,10 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.util.DataUtils;
+
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.ArrayList;
 
 
 /**
@@ -54,7 +60,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
 	 * is immutable.
 	 */
-    private Set /* of URNS */ URNS; 
+    private final Set /* of URNS */ URNS; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -62,10 +68,14 @@ public class FileDesc implements AlternateLocationCollector {
 	private final File FILE;
 
 	/**
-	 * The SHA1 <tt>URN</tt> instance.
-	 * Set by constructor and recalculateAndCacheURN method.
+	 * The constant SHA1 <tt>URN</tt> instance.
 	 */
-	private URN SHA1_URN;
+	private final URN SHA1_URN;
+	
+	/**
+	 * The LimeXMLDocs associated with this FileDesc.
+	 */
+	private List /* of LimeXMLDocument */ _limeXMLDocs;
 
 	/**
 	 * The collection of alternate locations for the file.
@@ -159,28 +169,6 @@ public class FileDesc implements AlternateLocationCollector {
 			UrnCache.instance().addUrns(file, urns);
 		}
         return urns;
-    }
-    
-    /**
-     * Recalculates and caches the URNs for this file.
-     * All previous information is lost.
-     *
-     * @return an unmodifiable <tt>Set</tt> of <tt>URN</tt>.  If the calling
-     * thread is interrupted while executing this, returns an empty set.  
-	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument is
-	 *  <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>file</tt> argument
-	 *  denotes a file that is not a file on disk
-     * @throws <tt>IOException</tt> if there is an IO error calculating the 
-     *  URN
-     * @throws <tt>InterruptedException</tt> if the thread that calculates
-     *  the URN is interrupted
-     */
-    public void /* of URN */ recalculateAndCacheURN() 
-      throws IOException, InterruptedException {
-        UrnCache.instance().removeUrns(FILE);
-        URNS = FileDesc.calculateAndCacheURN(FILE);
-        SHA1_URN = extractSHA1();
     }
 
 	/**
@@ -281,7 +269,51 @@ public class FileDesc implements AlternateLocationCollector {
 	public String getPath() {
 		return FILE.getAbsolutePath();
 	}
+	
+	/**
+	 * Adds a LimeXMLDocument to this FileDesc.
+	 */
+	public void addLimeXMLDocument(LimeXMLDocument doc) {
+	    if( _limeXMLDocs == null ) {
+	        _limeXMLDocs = new ArrayList(1);
+	    }
+	    _limeXMLDocs.add(doc);
+    }
+    
+    /**
+     * Replaces one LimeXMLDocument with another.
+     */
+    public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
+                                          LimeXMLDocument newDoc) {
+        if( _limeXMLDocs == null )
+            return false;
 
+        int index = _limeXMLDocs.indexOf(oldDoc);
+        if( index == -1 )
+            return false;
+        _limeXMLDocs.remove(index);
+        _limeXMLDocs.add(newDoc);
+        return true;
+    }
+    
+    /**
+     * Removes a LimeXMLDocument from the FileDesc.
+     */
+    public boolean removeLimeXMLDocument(LimeXMLDocument toRemove) {
+        if( _limeXMLDocs == null )
+            return false;
+        return _limeXMLDocs.remove(toRemove);
+    }   
+    
+    /**
+     * Returns the LimeXMLDocuments for this FileDesc.
+     */
+    public List getLimeXMLDocuments() {
+        if(_limeXMLDocs == null )
+            return DataUtils.EMPTY_LIST;
+        else
+            return _limeXMLDocs;
+    }
 
 	/**
 	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
@@ -469,14 +501,14 @@ public class FileDesc implements AlternateLocationCollector {
     
     /**
      * Utility method for toString that converts the specified
-     * <tt>Set</tt> to a string.
+     * <tt>Iterator</tt>'s items to a string.
      *
-     * @param info the <tt>Set</tt> to convert
+     * @param i the <tt>Iterator</tt> to convert
      * @return the contents of the set as a comma-delimited string
      */
-    private String listSet(Set info) {
+    private String listInformation(Iterator i) {
         StringBuffer stuff = new StringBuffer();
-        for(Iterator i = info.iterator(); i.hasNext(); ) {
+        for(; i.hasNext(); ) {
             stuff.append(i.next().toString());
             if( i.hasNext() )
                 stuff.append(", ");
@@ -493,7 +525,8 @@ public class FileDesc implements AlternateLocationCollector {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+listSet(URNS)+"\r\n"+
+				"urns:     "+listInformation(URNS.iterator())+"\r\n"+
+				"docs:     "+listInformation(_limeXMLDocs.iterator())+"\r\n"+
 				"alt locs: "+ALT_LOCS+"\r\n");
 	}
 }
