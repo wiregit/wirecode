@@ -344,17 +344,6 @@ public class LimeXMLReplyCollection{
             return (LimeXMLDocument)mainMap.get(hash);
         }
     }
-
-    /**
-     * Returns the list of LimeXMLDocuments contained in this collection.
-     */
-    public List getCollectionList(){
-        List replyDocs = new ArrayList();
-        synchronized(mainMap){
-            replyDocs.addAll(mainMap.values());
-        }
-        return replyDocs;
-    }
         
     /**
      * Returns all documents that match the particular query.
