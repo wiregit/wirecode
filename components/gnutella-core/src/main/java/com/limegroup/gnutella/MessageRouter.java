@@ -1435,7 +1435,6 @@ public abstract class MessageRouter {
                 ManagedConnection c = (ManagedConnection)list.get(i);
                 if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
                     c.handlePingReply(reply, handler);
-                    c.updatePongTime();
                 }
             }
         }
