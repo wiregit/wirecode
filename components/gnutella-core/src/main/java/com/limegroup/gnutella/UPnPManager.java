@@ -35,7 +35,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  *        Service: urn:schemas-upnp-org:service:WANIPConnection:1
  * 
  * Every port mapping is a tuple of:
- *  - External address (can be wildcard)
+ *  - External address ("" is wildcard)
  *  - External port
  *  - Internal address
  *  - Internal port
@@ -62,6 +62,9 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * Some buggy NATs do not distinguish mappings by the Protocol field.  Therefore
  * we first map the UDP port, and then the TCP port since it is more important should the
  * first mapping get overwritten.
+ * 
+ * The cyberlink library uses an internal thread that tries to discover any UPnP devices.  
+ * After we discover a router or give up on trying to, we should call stop().
  * 
  */
 public class UPnPManager extends ControlPoint implements DeviceChangeListener{
@@ -101,9 +104,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 */
 	private Service _service;
 	
-	/** whether we are currently performing any UPnP operations */
-	private volatile boolean _running;
-	
 	/** The tcp and udp mappings created this session */
 	private Mapping _tcp, _udp;
 	
@@ -112,7 +112,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		addDeviceChangeListener(this);
 		
 		start();
-		_running=true;
 	}
 	
 	/**
@@ -177,8 +176,10 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		if (_service == null) {
 			LOG.debug("couldn't find service");
 			_router=null;
-		} else
+		} else {
 			LOG.debug("found service");
+			stop();
+		}
 	}
 	
 	/**
@@ -337,15 +338,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	}
 
 	/**
-	 * halts any UPnP operations.  There are few internal threads which
-	 * can be killed if we know we're not going to be using UPnP anymore.
-	 */
-	public void halt() {
-		if (stop()) 
-			_running=false;
-	}
-
-	/**
 	 * schedules a shutdown hook which will clear the mappings created
 	 * this session. 
 	 */
@@ -372,11 +364,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	}
 	
 	public void finalize() {
-		if (_running) {
-			LOG.warn("finalizing a running UPnPManager!");
-			halt();
-			super.finalize();
-		}
+		stop();
 	}
 
 	/**

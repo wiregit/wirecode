@@ -452,31 +452,28 @@ public class Acceptor implements Runnable {
         if (_socket != null && 
         		UPNP_MANAGER != null) {
         	
+        	// if we haven't discovered the router by now, its not there
+        	UPNP_MANAGER.stop();
+        	
         	if(UPNP_MANAGER.NATPresent() &&
 				NetworkUtils.isValidPort(_port) &&
 				!ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
         	
         		int mappedPort = UPNP_MANAGER.mapPort(_port);
-
+        		
         		// if we couldn't map anything, halt
         		// otherwise update our forced port status
-        		if (mappedPort == 0)
-        			UPNP_MANAGER.halt();
-        		else {
-        			ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        			ConnectionSettings.FORCED_PORT.setValue(mappedPort);
-        			
-        			// we could get our external address from the NAT but its too slow
-        			// so we just trigger another connect back request
-        			// This should happen long before the first scheduled
-        			// IncomingValidator tasks, otherwise the resetters may overlap.
-        			resetLastConnectBackTime();
-        			RouterService.schedule(new IncomingValidator(),500,0);
+        		ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        		ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        		
+        		// we could get our external address from the NAT but its too slow
+        		// so we just trigger another connect back request
+        		// This should happen long before the first scheduled
+        		// IncomingValidator tasks, otherwise the resetters may overlap.
+        		resetLastConnectBackTime();
+        		RouterService.schedule(new IncomingValidator(),500,0);
         			UDPService.instance().triggerConnectBack();
-        		}
         	}
-        	else 
-        		UPNP_MANAGER.halt(); // we have a nat but are not mapping
         }
         
         socketError = null;
