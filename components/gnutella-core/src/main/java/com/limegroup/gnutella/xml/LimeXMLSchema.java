@@ -324,6 +324,13 @@ public class LimeXMLSchema
             //    return null;
         }
     }//end of private innner class
+    
+    /**
+     * Returns the display name of this schema.
+     */
+    public String getDescription() {
+        return getDisplayString(_schemaUri);
+    }
 
     /**
      * Utility method to be used in the gui to display schemas

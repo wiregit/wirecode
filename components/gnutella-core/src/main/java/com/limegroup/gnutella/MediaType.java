@@ -95,12 +95,23 @@ public class MediaType implements Serializable {
         return allMediaTypes;
     }
     
+    /**
+     * Retrieves the media type for the specified schema's description.
+     */
+    public static boolean getSchemaForDescription(String schemaDesc) {
+        final MediaType[] types = getDefaultMediaTypes();
+        for (int i = types.length; --i >= 0;)
+            if (schema.equals(types[i].schema))
+                return types[i];
+        return null;
+    }
+    
     public static boolean isDefaultType(String schema) {
         final MediaType[] types = getDefaultMediaTypes();
         for (int i = types.length; --i >= 0;)
             if (schema.equals(types[i].schema))
                 return true;
-            return false;
+        return false;
     }
     
     // do we really need this static method ?

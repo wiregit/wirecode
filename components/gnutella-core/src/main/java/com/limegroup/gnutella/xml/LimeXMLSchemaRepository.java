@@ -89,6 +89,17 @@ public class LimeXMLSchemaRepository
     }
     
     /**
+     * Returns all availble schemas.
+     */
+    public List getAllAvailableSchemas() {
+        List list = new LinkedList();
+        synchronized(_uriSchemaMap) {
+            list.addAll(_uriSchemaMap.values());
+        }
+        return list;
+    }
+    
+    /**
      * Returns the URIs scooresponding to the schemas that we have
      * @return the URIs scooresponding to the schemas that we have
      */ 
@@ -108,11 +119,6 @@ public class LimeXMLSchemaRepository
                 String a = (String)o1;
                 String b = (String)o2;
                 return a.compareTo(b);            
-            }
-            public boolean equals(Object o){
-                //String other = (String)o;
-                //String me = (String)this;
-                return this.equals(o);
             }
         }
         );
