@@ -435,7 +435,9 @@ public class ManagedConnection extends Connection
 
     /**
      * Determines whether or not the specified <tt>QueryRequest</tt>
-     * instance has a hit in the query routing tables.
+     * instance has a hit in the query routing tables.  If this 
+     * connection has not yet sent a query route table, this returns
+     * <tt>false</tt>.
      *
      * @param query the <tt>QueryRequest</tt> to check against
      *  the tables
