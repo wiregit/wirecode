@@ -34,8 +34,10 @@ public final class PushProxyUploadState implements HTTPMessage {
         InetAddress hostAddress = _uploader.getNodeAddress();
         int    hostPort    = _uploader.getNodePort();
         
-        if ((clientGUID.length != 16) || (hostAddress == null) ||
-            (!NetworkUtils.isValidPort(hostPort))) {
+        if ( clientGUID.length != 16 ||
+             hostAddress == null ||
+             !NetworkUtils.isValidPort(hostPort) ||
+             !NetworkUtils.isValidAddress(hostAddress)) {
             // send back a 400
             String str = "HTTP/1.1 400 Push Proxy: Bad Request\r\n";
             ostream.write(str.getBytes());
