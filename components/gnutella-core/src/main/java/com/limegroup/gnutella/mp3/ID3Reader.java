@@ -247,25 +247,28 @@ public final class ID3Reader {
         } catch(FrameDamagedException ignored) {}
 
         try {
-            data.setTrack(
-                Short.parseShort(mp3File.getTrack().getTextContent()));
+            String track = mp3File.getTrack().getTextContent();
+            if(track != null)
+                data.setTrack(Short.parseShort(track));
         }
         catch(FrameDamagedException ignored) {}
         catch(NumberFormatException nfe) {}
         
         try {
             String genre = mp3File.getGenre().getTextContent();
-            //ID3v2 frame for genre has the byte used in ID3v1 encoded within it
-            //-- we need to parse that out
-            int index = genre.indexOf(")");
-            //Note: It's possible that the user entered her own genre in which
-            //case there could be spurious braces, the id3v2 braces enclose
-            //values between 0 -127 so the index of the closing brace should be
-            //either 2, 3 or 4
-            if(index == -1 || !(index==2 || index==3 || index==4) )
-                data.setGenre(genre);
-            else 
-                data.setGenre(genre.substring(index+1));
+            if(genre != null) {
+                //ID3v2 frame for genre has the byte used in ID3v1 encoded within it
+                //-- we need to parse that out
+                int index = genre.indexOf(")");
+                //Note: It's possible that the user entered her own genre in which
+                //case there could be spurious braces, the id3v2 braces enclose
+                //values between 0 -127 so the index of the closing brace should be
+                //either 2, 3 or 4
+                if(index == -1 || !(index==2 || index==3 || index==4) )
+                    data.setGenre(genre);
+                else 
+                    data.setGenre(genre.substring(index+1));
+            }
         } catch(FrameDamagedException ignored) {}
         
         return data;
