@@ -10,9 +10,6 @@ import com.limegroup.gnutella.ByteOrder;
 public class VendorMessage extends Message {
 
     private static final int LENGTH_MINUS_PAYLOAD = 8;
-    private static final byte[] LIME_BYTES = {(byte) 76, (byte) 73,
-                                              (byte) 77, (byte) 69};
-                                              
 
     /**
      * Bytes 0-3 of the Vendor Message.  Something like "LIME".getBytes().
@@ -32,6 +29,10 @@ public class VendorMessage extends Message {
     /** The actual payload of the message.
      */
     private byte[] _payload = null;
+
+    /** Cache this for convenience.
+     */
+    private VendorMessagePayload _vmp = null;
 
     //----------------------------------
     // CONSTRUCTORS
@@ -96,11 +97,14 @@ public class VendorMessage extends Message {
         return new String(_vendorIDBytes);
     }
 
-    public VendorMessagePayload getVendorMessagePayload() {
-        return VendorMessagePayload.getVendorMessagePayload(_vendorIDBytes,
-                                                            _subSelector,
-                                                            _version,
-                                                            _payload);
+    public VendorMessagePayload getVendorMessagePayload() 
+        throws BadPacketException {
+        if (_vmp == null)
+            _vmp =VendorMessagePayload.getVendorMessagePayload(_vendorIDBytes,
+                                                               _subSelector,
+                                                               _version,
+                                                               _payload);
+        return _vmp;
     }
 
     //----------------------------------
