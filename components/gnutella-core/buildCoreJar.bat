@@ -2,6 +2,7 @@
 cd ..\core
 jar -cvf ..\gui\lib\core.jar com\bitzi\util\*.class
 jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\connection\*.class
+jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\bootstrap\*.class
 jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\chat\*.class
 jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\mp3\*.class
 jar -uvf ..\gui\lib\core.jar com\limegroup\gnutella\http\*.class
