@@ -364,6 +364,13 @@ public class LimeXMLDocument implements Serializable {
     public Set getNameValueSet() {
         return fieldToValue.entrySet();
     }
+    
+    /**
+     * Returns a collection of the values of this LimeXMLDocument.
+     */
+    public Collection getValueList() {
+        return fieldToValue.values();
+    }
 
     /** This method is only guaranteed to work if getSchemaURI() returns a 
      *  non-null value.
