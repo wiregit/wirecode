@@ -38,6 +38,8 @@ public class ClientSidePushProxyTest
 
     private static MyActivityCallback callback;
 
+    private static final byte[] LOCALHOST = {(byte)127,(byte)0,(byte)0,(byte)1};
+
     public ClientSidePushProxyTest(String name) {
         super(name);
     }
@@ -205,8 +207,7 @@ public class ClientSidePushProxyTest
 
         // we should answer the push proxy request
         PushProxyAcknowledgement ack = 
-        new PushProxyAcknowledgement(InetAddress.getLocalHost(), 
-                                     6355, new GUID(m.getGUID()));
+            new PushProxyAcknowledgement(LOCALHOST, 6355, new GUID(m.getGUID()));
         testUP.send(ack);
         testUP.flush();
 
@@ -243,7 +244,8 @@ public class ClientSidePushProxyTest
         Iterator iter = proxies.iterator();
         PushProxyInterface ppi = (PushProxyInterface)iter.next();
         assertEquals(ppi.getPushProxyPort(), 6355);
-        assertTrue(ppi.getPushProxyAddress().equals(InetAddress.getLocalHost()));
+        assertEquals(NetworkUtils.ip2string(LOCALHOST), 
+                     NetworkUtils.ip2string(ppi.getPushProxyAddress()));
 
         // set up a ServerSocket to get give on
         ServerSocket ss = new ServerSocket(9000);
@@ -305,7 +307,7 @@ public class ClientSidePushProxyTest
 
         // send a reply with some PushProxy info
         Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        proxies.add(new QueryReply.PushProxyContainer(LOCALHOST, 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
@@ -457,8 +459,8 @@ public class ClientSidePushProxyTest
         // send a reply with some BAD PushProxy info
         //PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[2];
         Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 8000));
+        proxies.add(new QueryReply.PushProxyContainer(LOCALHOST, 7000));
+        proxies.add(new QueryReply.PushProxyContainer(LOCALHOST, 8000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "berkeley.edu");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 

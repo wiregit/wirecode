@@ -7,6 +7,8 @@ import java.io.*;
 import java.net.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
+    private static final byte[] LOCALHOST = {(byte)127,(byte)0,(byte)0,(byte)1};
+
     public VendorMessageTest(String name) {
         super(name);
     }
@@ -117,7 +119,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
                                           (byte) 0, 2, bytes);
         testWrite(vm);
         // test other constructor....
-        vm = new PushProxyAcknowledgement(InetAddress.getLocalHost(), 5);
+        vm = new PushProxyAcknowledgement(LOCALHOST, 5);
         testRead(vm);
 
         // Query Status Request
@@ -315,8 +317,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         testWrite(req);
         testRead(req);
 
-        InetAddress addr = InetAddress.getLocalHost();
-        PushProxyAcknowledgement ack = new PushProxyAcknowledgement(addr, 6346);
+        PushProxyAcknowledgement ack = new PushProxyAcknowledgement(LOCALHOST, 
+                                                                    6346);
         assertEquals(InetAddress.getLocalHost(), ack.getListeningAddress());
         assertTrue(ack.getListeningPort() == 6346);
         testWrite(ack);

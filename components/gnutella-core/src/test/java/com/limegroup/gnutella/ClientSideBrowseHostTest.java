@@ -38,6 +38,8 @@ public class ClientSideBrowseHostTest
 
     private static MyActivityCallback callback;
 
+    private static final byte[] LOCALHOST = {(byte)127,(byte)0,(byte)0,(byte)1};
+
     public ClientSideBrowseHostTest(String name) {
         super(name);
     }
@@ -215,7 +217,7 @@ public class ClientSideBrowseHostTest
 
         // send a reply with some PushProxy info
         PushProxyInterface[] proxies = new QueryReply.PushProxyContainer[1];
-        proxies[0] = new QueryReply.PushProxyContainer("127.0.0.1", 7000);
+        proxies[0] = new QueryReply.PushProxyContainer(LOCALHOST, 7000);
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
@@ -312,7 +314,7 @@ public class ClientSideBrowseHostTest
         //final PushProxyInterface[] proxies = 
         //  new QueryReply.PushProxyContainer[1];
         final Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7000));
+        proxies.add(new QueryReply.PushProxyContainer(LOCALHOST, 7000));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "nyu.edu");
         m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
@@ -443,7 +445,7 @@ public class ClientSideBrowseHostTest
         //final PushProxyInterface[] proxies = 
         //  new QueryReply.PushProxyContainer[1];
         final Set proxies = new HashSet();
-        proxies.add(new QueryReply.PushProxyContainer("127.0.0.1", 7001));
+        proxies.add(new QueryReply.PushProxyContainer(LOCALHOST, 7001));
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "anita");
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 

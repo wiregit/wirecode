@@ -11,7 +11,7 @@ public interface PushProxyInterface {
      */
     public int getPushProxyPort();
     
-    /** @return the InetAddress of the PushProxyHost host 
+    /** @return the address, in bytes, of the PushProxyHost host 
      */
-    public InetAddress getPushProxyAddress();
+    public byte[] getPushProxyAddress();
 }

@@ -905,7 +905,7 @@ public class DownloadManager implements BandwidthTracker {
             Iterator iter = proxies.iterator();
             while(iter.hasNext() && !requestSuccessful) {
                 PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                String ppIp = ppi.getPushProxyAddress().getHostName();
+                String ppIp = NetworkUtils.ip2string(ppi.getPushProxyAddress());
                 int ppPort = ppi.getPushProxyPort();
                 String connectTo = 
                     "http://" + ppIp + ":" + ppPort + requestString;

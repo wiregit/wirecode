@@ -247,7 +247,7 @@ public class ManagedConnection extends Connection
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
      */
-    private InetAddress pushProxyAddr = null;
+    private byte[] pushProxyAddr = null;
 
     /** Use this if a PushProxyAck is received for this MC meaning the remote
      *  Ultrapeer can serve as a PushProxy
@@ -1390,7 +1390,7 @@ public class ManagedConnection extends Connection
      *  getPushProxyPort() > -1
      *  @see getPushProxyPort()
      */
-    public InetAddress getPushProxyAddress() {
+    public byte[] getPushProxyAddress() {
         return pushProxyAddr;
     }
     

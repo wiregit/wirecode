@@ -1162,8 +1162,7 @@ public class QueryReply extends Message implements Serializable{
                 Iterator iter = proxies.iterator();
                 while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                     PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                    String host = 
-                        ppi.getPushProxyAddress().getHostAddress();
+                    byte[] host = ppi.getPushProxyAddress();
                     int port = ppi.getPushProxyPort();
                     try {
                         IPPortCombo combo = new IPPortCombo(host, port);
@@ -1278,8 +1277,7 @@ public class QueryReply extends Message implements Serializable{
     public static class PushProxyContainer implements PushProxyInterface {
         IPPortCombo _combo;
 
-        public PushProxyContainer(String hostAddress, int port) 
-            throws UnknownHostException {
+        public PushProxyContainer(byte[] hostAddress, int port) {
             _combo = new IPPortCombo(hostAddress, port);
         }
 
@@ -1291,7 +1289,7 @@ public class QueryReply extends Message implements Serializable{
         public int getPushProxyPort() {
             return _combo.getPort();
         }
-        public InetAddress getPushProxyAddress() {
+        public byte[] getPushProxyAddress() {
             return _combo.getAddress();
         }
 
@@ -1319,7 +1317,7 @@ public class QueryReply extends Message implements Serializable{
      */
     public static class IPPortCombo {
         private int _port;
-        private InetAddress _addr;
+        private byte[] _addr;
         
         public static final String DELIM = ":";
 
@@ -1341,38 +1339,38 @@ public class QueryReply extends Message implements Serializable{
             if (networkData.length != 6)
                 throw new BadPacketException("Weird Input");
 
-            String host = NetworkUtils.ip2string(networkData, 0);
+            byte[] host = new byte[4];
+            for (int i = 0; i < host.length; i++)
+                host[i] = networkData[i];
             int port = ByteOrder.ubytes2int(ByteOrder.leb2short(networkData, 4));
+
+            if (!NetworkUtils.isValidAddress(host))
+                throw new BadPacketException("invalid addr: " + host);
+            _addr = host;
             if (!NetworkUtils.isValidPort(port))
                 throw new BadPacketException("Bad Port: " + port);
             _port = port;
-            try {
-                _addr = InetAddress.getByName(host);
-            } catch(UnknownHostException uhe) {
-                throw new BadPacketException("bad host.");
-            }
-            if (!NetworkUtils.isValidAddress(_addr))
-                throw new BadPacketException("invalid addr: " + _addr);
         }
 
         /**
          * Constructor used for local data.
          * Throws IllegalArgumentException on errors.
          */
-        public IPPortCombo(String hostAddress, int port) 
-            throws UnknownHostException, IllegalArgumentException  {
+        public IPPortCombo(byte[] hostAddress, int port) 
+            throws IllegalArgumentException  {
             if (!NetworkUtils.isValidPort(port))
                 throw new IllegalArgumentException("Bad Port: " + port);
             _port = port;
-            _addr = InetAddress.getByName(hostAddress);
-            if (!NetworkUtils.isValidAddress(_addr))
-                throw new IllegalArgumentException("invalid addr: " + _addr);
+            if (!NetworkUtils.isValidAddress(hostAddress))
+                throw new IllegalArgumentException("invalid addr: " + 
+                                                   hostAddress);
+            _addr = hostAddress;
         }
 
         public int getPort() {
             return _port;
         }
-        public InetAddress getAddress() {
+        public byte[] getAddress() {
             return _addr;
         }
 
@@ -1383,7 +1381,7 @@ public class QueryReply extends Message implements Serializable{
             byte[] retVal = new byte[6];
             
             for (int i=0; i < 4; i++)
-                retVal[i] = _addr.getAddress()[i];
+                retVal[i] = _addr[i];
 
             ByteOrder.short2leb((short)_port, retVal, 4);
 

@@ -24,6 +24,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     private FileManager fman = null;
     private Object loaded = new Object();
     
+    private static final byte[] LOCALHOST = {(byte)127,(byte)0,(byte)0,(byte)1};
+    private static final byte[] BAD_ADDRESS = {(byte)0,(byte)0,(byte)0,(byte)0};
+
 	/**
 	 * Constructs a new test instance for query replies.
 	 */
@@ -611,8 +614,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         int numHeaders = 1;
 
         // first take input of proxies
-        String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.stanford.edu"};
+        byte[][] hosts = {{(byte)64, (byte)61, (byte)25, (byte)171},
+                          {(byte)64, (byte)61, (byte)25, (byte)172},
+                          {(byte)216, (byte)226, (byte)138, (byte)104},
+                          {(byte)171, (byte)67, (byte)16, (byte)58}};
+
         Set proxies = new HashSet();
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
@@ -661,7 +667,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // trying to input
         try {
             PushProxyInterface proxy = 
-                new QueryReply.PushProxyContainer("0.0.0.0", 6346);
+                new QueryReply.PushProxyContainer(BAD_ADDRESS, 6346);
         }
         catch (IllegalArgumentException expected) {}
 
@@ -681,7 +687,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         // trying to input is the only case
         try {
             PushProxyInterface proxy = 
-                new QueryReply.PushProxyContainer("0.0.0.0", 634600);
+                new QueryReply.PushProxyContainer(LOCALHOST, 634600);
         }
         catch (IllegalArgumentException expected) {}
 
@@ -753,16 +759,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             while(iter.hasNext()) {
                 final int inIndex = 6*j;
                 PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                InetAddress addr = ppi.getPushProxyAddress();
                 byte[] tempAddr = new byte[4];
                 System.arraycopy(bytes, inIndex, tempAddr, 0, 4);
 
-                InetAddress addr2 = InetAddress.getByAddress(tempAddr);
-                String address = addr2.getHostAddress();
-                
                 int curPort = ByteOrder.leb2int(bytes, inIndex+4, 2);
                 PushProxyInterface ppi2 = 
-                    new QueryReply.PushProxyContainer(address, curPort);
+                    new QueryReply.PushProxyContainer(tempAddr, curPort);
 
                 assertTrue(proxies.contains(ppi2));
                 //assertEquals(addr, addr2);
@@ -788,8 +790,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     }
     
     public void testPushProxyQueryReply() throws Exception {
-        String[] hosts = {"www.limewire.com", "www.limewire.org",
-                          "www.susheeldaswani.com", "www.berkeley.edu"};
+        byte[][] hosts = {{(byte)64, (byte)61, (byte)25, (byte)171},
+                          {(byte)64, (byte)61, (byte)25, (byte)172},
+                          {(byte)216, (byte)226, (byte)138, (byte)104},
+                          {(byte)171, (byte)67, (byte)16, (byte)58}};
+
 
         for (int outer = 0; outer < hosts.length; outer++) {
             //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];

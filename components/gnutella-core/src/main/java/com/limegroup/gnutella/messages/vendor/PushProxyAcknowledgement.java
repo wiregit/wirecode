@@ -15,7 +15,7 @@ public final class PushProxyAcknowledgement extends VendorMessage {
 
     /** The payload has 4 bytes dedicated to the IP of the proxy.
      */
-    private final InetAddress _addr;
+    private final byte[] _addr;
 
     /** The payload has a 16-bit unsigned value - the port - at which one should
      *  connect back.
@@ -48,7 +48,7 @@ public final class PushProxyAcknowledgement extends VendorMessage {
     /** @param port The port you want people to connect back to.  If you give a
      *  bad port I don't check so check yourself!
      */
-    public PushProxyAcknowledgement(InetAddress addr, int port) 
+    public PushProxyAcknowledgement(byte[] addr, int port) 
         throws BadPacketException {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(addr, port));
@@ -61,7 +61,7 @@ public final class PushProxyAcknowledgement extends VendorMessage {
      *  @param guid In case you want to set the guid (the PushProxy protocol
      *  advises this).
      */
-    public PushProxyAcknowledgement(InetAddress addr, int port,
+    public PushProxyAcknowledgement(byte[] addr, int port,
                                     GUID guid) throws BadPacketException {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(addr, port));
@@ -78,23 +78,14 @@ public final class PushProxyAcknowledgement extends VendorMessage {
 
     /** @return the InetAddress the PushProxy is listening on....
      */
-    public InetAddress getListeningAddress() {
+    public byte[] getListeningAddress() {
         return _addr;
     }
 
-    private static byte[] derivePayload(InetAddress addr, int port) 
-        throws BadPacketException{
-        try {
-            // i do it during construction....
-            QueryReply.IPPortCombo combo = 
-                new QueryReply.IPPortCombo(addr.getHostName(), port);
-            return combo.toBytes();
-        }
-        catch (UnknownHostException uhe) {
-            // this should never happen!!!
-            ErrorService.error(uhe);
-            throw new BadPacketException("Bad host - should never happen!!!");
-        }
+    private static byte[] derivePayload(byte[] addr, int port) {
+        // i do it during construction....
+        QueryReply.IPPortCombo combo = new QueryReply.IPPortCombo(addr, port);
+        return combo.toBytes();
     }
 
     /** Overridden purely for stats handling.
