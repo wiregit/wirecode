@@ -2,11 +2,12 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.routing.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
+import java.net.*;
 
-import com.limegroup.gnutella.routing.*;
 
 /**
  * One of the three classes that make up the core of the backend.  This
@@ -217,14 +218,33 @@ public abstract class MessageRouter
      * The handler for all message types.  Processes a message based on the 
      * message type.
      */	
-	public void handleUDPMessage(Message msg, ReplyHandler handler)
+	public void handleUDPMessage(Message msg, DatagramPacket datagram)
     {
         // Increment hops and decrease TTL.
         msg.hop();
 
         if (msg instanceof QueryRequest) {
-            handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, handler);
-		} else if (msg instanceof QueryReply) {
+			QueryRequest request = (QueryRequest)msg;
+			if(!request.supportsUnicast()) return;
+			InetAddress udpAddress = request.getUDPAddress();
+			int udpPort = request.getUDPPort().intValue();
+			if(_manager.isSupernode()) {
+				InetAddress datagramAddress = datagram.getAddress();
+				int datagramPort = datagram.getPort();
+				if(udpAddress != datagramAddress) {
+					// this signifies a possible attack -- unicast udp 
+					// requests to UltraPeers should have the same
+					// udp reply address as the address they were
+					// sent from
+					return;
+				}
+			}
+			UDPReplyHandler handler = 
+			    new UDPReplyHandler(udpAddress, udpPort);
+            handleUDPQueryRequestPossibleDuplicate(request, handler);
+		} else if (msg instanceof QueryReply) {			
+			UDPReplyHandler handler = 
+			    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
             handleQueryReply((QueryReply)msg, handler);
 		}
     }
