@@ -45,8 +45,7 @@ public final class FontNameSetting extends Setting {
      * is set to the default (dialog) in the constructor.
      */
     protected void loadValue(String sValue) {
-        if(isRoman()) 
-            _fontName = sValue;
+        _fontName = sValue;
     }
 
     
