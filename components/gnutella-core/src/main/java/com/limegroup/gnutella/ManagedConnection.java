@@ -73,15 +73,6 @@ public class ManagedConnection extends Connection {
         new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
 
 
-    /** 
-     * The bandwidth trackers for the up/downstream.
-     * These are not synchronized and not guaranteed to be 100% accurate.
-     */
-    private BandwidthTrackerImpl _upBandwidthTracker=
-        new BandwidthTrackerImpl();
-    private BandwidthTrackerImpl _downBandwidthTracker=
-        new BandwidthTrackerImpl();
-
     /**
      * Creates a new outgoing connection to the specified host on the
 	 * specified port.  
@@ -224,47 +215,5 @@ public class ManagedConnection extends Connection {
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
         }
-    }
-   
-    /**
-     * Takes a snapshot of the upstream and downstream bandwidth since the last
-     * call to measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth 
-     */
-    public void measureBandwidth() {
-        _upBandwidthTracker.measureBandwidth(
-             ByteOrder.long2int(stats().getBytesSent()));
-        _downBandwidthTracker.measureBandwidth(
-             ByteOrder.long2int(stats().getBytesReceived()));
-    }
-
-    /**
-     * Returns the upstream bandwidth between the last two calls to
-     * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth 
-     */
-    public float getMeasuredUpstreamBandwidth() {
-        float retValue = 0; //initialize to default
-        try {
-            retValue = _upBandwidthTracker.getMeasuredBandwidth();
-        } catch(InsufficientDataException ide) {
-            return 0;
-        }
-        return retValue;
-    }
-
-    /**
-     * Returns the downstream bandwidth between the last two calls to
-     * measureBandwidth.
-     * @see BandwidthTracker#measureBandwidth 
-     */
-    public float getMeasuredDownstreamBandwidth() {
-        float retValue = 0;
-        try {
-            retValue = _downBandwidthTracker.getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
-            return 0;
-        }
-        return retValue;
     }
 }
