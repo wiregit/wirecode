@@ -28,7 +28,7 @@ public class RecorderMessageRouter extends StandardMessageRouter
 * Vector of messages that we receive along with time stamps
 */
 private Vector messages = new Vector(SIZE); //10,000 messages 
-private static final int SIZE=5000;
+private static final int SIZE=20000;
 private int mCount = 0;
     
 private synchronized void addMessage(Message m)
@@ -77,10 +77,10 @@ private synchronized void dumpMessages()
  * Creates new instance
  * @param callback Callback, whom to notify on various events
  */
-public RecorderMessageRouter(ActivityCallback callback) 
+public RecorderMessageRouter(ActivityCallback callback, FileManager fm) 
 {
     //pass it to super class
-    super(callback);
+    super(callback,fm);
 }
 
 /** 
