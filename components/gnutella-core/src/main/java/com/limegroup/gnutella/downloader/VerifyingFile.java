@@ -111,6 +111,8 @@ public class VerifyingFile {
     }
   
     public void close() {
+        if(fos==null)
+            return;
         try { 
             fos.close();
         } catch (IOException ioe) {}

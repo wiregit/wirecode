@@ -955,7 +955,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 			}
         }
         
-
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
         try {
@@ -1102,6 +1101,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     commonOutFile.open(incompleteFile,this);
                 } catch(IOException e) {
+                    //TODO: This is not really grounds for an internal error.
+                    //This situation can arise during normal operation, e.g., if
+                    //the user adjusts directory permissions.  However, this is
+                    //happening more often than we expect, so we're adding
+                    //debugging information.
+                    Assert.that(false,"Could not create incomplete file \""
+                                +incompleteFile+"\", "+
+                                incompleteFile.exists()+", "+
+                                incompleteFile.canWrite()+", "+
+                                incompleteFile.canRead()+", "+
+                                incompleteFile.isDirectory()+", "+
+                                incompleteFile.isFile());
                     return GAVE_UP;
                 }
                 //update needed
