@@ -320,14 +320,14 @@ public class ID3Editor{
         
         if (val==null || val.equals("")) {
             fromString = new byte[maxLen];
-            Arrays.fill(fromString,0,maxLen-1,(byte)0);//fill it all with 0
+            Arrays.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
         } else
             fromString = val.getBytes();
             
         int len = fromString.length;
         if (len < maxLen) {
             System.arraycopy(fromString,0,buffer,0,len);
-            Arrays.fill(buffer,len,maxLen-1,(byte)0);//fill the rest with 0s
+            Arrays.fill(buffer,len,maxLen,(byte)0);//fill the rest with 0s
         } else//cut off the rest
             System.arraycopy(fromString,0,buffer,0,maxLen);
             
