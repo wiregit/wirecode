@@ -91,7 +91,7 @@ public class GUESSMonitor extends BaseTestCase {
     }
 
     
-    private class MyMessageRouter extends MetaEnabledMessageRouter {
+    private class MyMessageRouter extends StandardMessageRouter {
 
         private List _guessPongs = new Vector();
         private Set  _uniqueHosts = Collections.synchronizedSet(new HashSet());
