@@ -91,7 +91,12 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	private void buildConnections() {
+    /**
+     * Create the necessary connections.
+     * 
+     * @throws Exception if any error occurs
+     */
+	private void buildConnections() throws Exception {
 	    LEAF =
 			new Connection("localhost", ULTRAPEER_PORT, 
 						   new LeafHeaders("localhost"),
@@ -192,6 +197,16 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
 
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+           PrivilegedAccessor.setValue(LEAF, "_messageReader", 
+                TestNIOMessageReader.createReader(LEAF));
+           PrivilegedAccessor.setValue(ULTRAPEER_1, "_messageReader", 
+               TestNIOMessageReader.createReader(ULTRAPEER_1));
+           PrivilegedAccessor.setValue(ULTRAPEER_2, "_messageReader", 
+               TestNIOMessageReader.createReader(ULTRAPEER_2));
+        }
+        
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 		assertTrue("LEAF should be connected", LEAF.isOpen());
@@ -232,7 +247,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		QueryRequest qr = QueryRequest.createQuery("crap");
         ULTRAPEER_2.writer().simpleWrite(qr);
         ULTRAPEER_2.writer().flush();
-              
         Message m = ULTRAPEER_1.reader().read(TIMEOUT);
 		assertInstanceof("expected a query request", QueryRequest.class, m);
         
@@ -247,8 +261,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     
     /**
      * Tests a query sent from the leaf.  The query should be received by both
-     * Ultrapeer connections -- the one connected to the leaf, as well as the
-     * other one.
+     * Ultrapeer connections.
      */
     public void testBroadcastFromLeaf() throws Exception {
         //drain(LEAF);
@@ -840,7 +853,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.reader().read(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
             } catch (InterruptedIOException e) {
 				// we read a null message or received another 
