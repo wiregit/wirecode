@@ -10,7 +10,7 @@ import com.sun.java.util.collections.*;
  * mappings may be purged without warning, preferably using a FIFO
  * policy.
  */
-public class RouteTable {
+class RouteTable {
     /* The ForgetfulHashMap takes care of all the work.
      * TODO3: I wish we could avoid creating new GUIDs everytime
      */
@@ -27,7 +27,7 @@ public class RouteTable {
     }
 
     /**
-     * @requires guid not in this, guid and c are non-null, guid.length==16
+     * @requires guid and c are non-null, guid.length==16
      * @effects adds the routing entry to this
      */
     public synchronized void routeReply(byte[] guid,
@@ -35,6 +35,26 @@ public class RouteTable {
         Assert.that(replyHandler != null);
         GUID g=new GUID(guid);
         _map.put(g, replyHandler);
+    }
+
+    /**
+     * Same as routeReply, except that the routing is only done if a routing
+     * for the given GUID doesn't already exist.
+     * @requires guid and c are non-null, guid.length==16
+     * @effects adds the routing entry to this or returns false
+     * @return true if the routing was successfully created, false if a routing
+     *   for the given GUID already existed
+     */
+    public boolean tryToRouteReply(byte[] guid,
+                                       ReplyHandler replyHandler) {
+        Assert.that(replyHandler != null);
+        GUID g=new GUID(guid);
+        if(!_map.containsKey(g)) {
+            _map.put(g, replyHandler);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

@@ -16,7 +16,7 @@ import com.limegroup.gnutella.util.Buffer;
  */
 public class ManagedConnection
         extends Connection
-        implements PingReplyHandler, QueryReplyHandler, PushRequestHandler {
+        implements ReplyHandler {
     private MessageRouter _router;
     private ConnectionManager _manager;
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
@@ -351,16 +351,21 @@ public class ManagedConnection
                 continue;
             }
 
+            // Increment hops and decrease TTL
+            m.hop();
+
             if(m instanceof PingRequest)
-                _router.handlePingRequest((PingRequest)m, this);
+                _router.handlePingRequestPossibleDuplicate(
+                    (PingRequest)m, this);
             else if (m instanceof PingReply)
-                _router.routePingReply((PingReply)m, this);
+                _router.handlePingReply((PingReply)m, this);
             else if (m instanceof QueryRequest)
-                _router.handleQueryRequest((QueryRequest)m, this);
+                _router.handleQueryRequestPossibleDuplicate(
+                    (QueryRequest)m, this);
             else if (m instanceof QueryReply)
-                _router.routeQueryReply((QueryReply)m, this);
+                _router.handleQueryReply((QueryReply)m, this);
             else if (m instanceof PushRequest)
-                _router.routePushRequest((PushRequest)m, this);
+                _router.handlePushRequest((PushRequest)m, this);
         }
     }
 
@@ -421,39 +426,34 @@ public class ManagedConnection
 
     /**
      * This method is called when a reply is received for a PingRequest
-     * originating on this Connection.  So, just adjust the hops and send it
-     * back.
+     * originating on this Connection.  So, just send it back.
+     * If modifying this method, note that receivingConnection may
+     * by null.
      */
     public void handlePingReply(PingReply pingReply,
-                                ManagedConnection receivingConnection,
-                                MessageRouter router,
-                                ActivityCallback callback) {
-        pingReply.hop();
+                                ManagedConnection receivingConnection) {
         send(pingReply);
     }
 
     /**
      * This method is called when a reply is received for a QueryRequest
-     * originating on this Connection.  So, just adjust the hops and send it
-     * back.  If the sending fails, the calls fails silently.
+     * originating on this Connection.  So, send it back.
+     * If modifying this method, note that receivingConnection may
+     * by null.
      */
     public void handleQueryReply(QueryReply queryReply,
-                                 ManagedConnection receivingConnection,
-                                 MessageRouter router,
-                                 ActivityCallback callback) {
-        queryReply.hop();
+                                 ManagedConnection receivingConnection) {
         send(queryReply);
     }
 
     /**
      * This method is called when a PushRequest is received for a QueryReply
-     * originating on this Connection.  So, just adjust the hops and send it
-     * back.
+     * originating on this Connection.  So, just send it back.
+     * If modifying this method, note that receivingConnection may
+     * by null.
      */
     public void handlePushRequest(PushRequest pushRequest,
-                                  MessageRouter router,
-                                  ActivityCallback callback) {
-        pushRequest.hop();
+                                  ManagedConnection receivingConnection) {
         send(pushRequest);
     }
 

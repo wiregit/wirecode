@@ -9,20 +9,19 @@ import java.io.IOException;
  * as they pass through.  To do so, it aggregates a ConnectionManager that
  * maintains a list of connections.
  */
-public class MessageRouter
+public abstract class MessageRouter
 {
     private HostCatcher _catcher;
     private ConnectionManager _manager;
     private Acceptor _acceptor;
-    private ActivityCallback _callback;
 
-    private GUID _clientId;
+    /**
+     * @return the GUID we attach to QueryReplies to allow PushRequests in
+     *         response.
+     */
+    private byte[] _clientGUID;
 
-    private PingRequestHandler _pingRequestHandler;
-    private PingReplyHandler _pingReplyHandler;
-    private QueryRequestHandler _queryRequestHandler;
-    private QueryReplyHandler _queryReplyHandler;
-    private PushRequestHandler _pushRequestHandler;
+    private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers
@@ -86,56 +85,32 @@ public class MessageRouter
      */
     private volatile int _numRouteErrors;
 
-
-
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
-    public MessageRouter(ActivityCallback callback,
-                         PingRequestHandler pingRequestHandler,
-                         PingReplyHandler pingReplyHandler,
-                         QueryRequestHandler queryRequestHandler,
-                         QueryReplyHandler queryReplyHandler,
-                         PushRequestHandler pushRequestHandler)
+    protected MessageRouter()
     {
-        _callback = callback;
-        _pingRequestHandler = pingRequestHandler;
-        _pingReplyHandler = pingReplyHandler;
-        _queryRequestHandler = queryRequestHandler;
-        _queryReplyHandler = queryReplyHandler;
-        _pushRequestHandler = pushRequestHandler;
-
         try
         {
-            _clientId = new GUID(GUID.fromHexString(
-                SettingsManager.instance().getClientID()));
+            _clientGUID = new GUID(GUID.fromHexString(
+                SettingsManager.instance().getClientID())).bytes();
         }
         catch (IllegalArgumentException e)
         {
             //This should never happen! But if it does, we can recover.
-            _clientId = new GUID(Message.makeGuid());
+            _clientGUID = Message.makeGuid();
         }
     }
 
     /**
      * Links the MessageRouter up with the other back end pieces
      */
-    public void initialize(Acceptor acceptor,
-                           ConnectionManager manager,
-                           HostCatcher catcher)
+    void initialize(Acceptor acceptor, ConnectionManager manager,
+                    HostCatcher catcher)
     {
         _acceptor = acceptor;
         _manager = manager;
         _catcher = catcher;
-    }
-
-    /**
-     * @return the GUID we attach to QueryReplies to allow PushRequests in
-     *         response.
-     */
-    public byte[] getClientGUID()
-    {
-        return _clientId.bytes();
     }
 
     public String getPingRouteTableDump()
@@ -157,80 +132,230 @@ public class MessageRouter
      * A callback for ConnectionManager to clear a ManagedConnection from
      * the routing tables when the connection is closed.
      */
-    public void removeReplyHandler(ReplyHandler replyHandler)
+    public void removeConnection(ManagedConnection connection)
     {
-        _pingRouteTable.removeReplyHandler(replyHandler);
-        _queryRouteTable.removeReplyHandler(replyHandler);
-        _pushRouteTable.removeReplyHandler(replyHandler);
+        _pingRouteTable.removeReplyHandler(connection);
+        _queryRouteTable.removeReplyHandler(connection);
+        _pushRouteTable.removeReplyHandler(connection);
     }
 
-    //
-    // Begin message receiving calls
-    //
-
     /**
-     * Checks that a PingRequest is not yet routed, then increments the
-     * PingRequest count and delegates to the PingRequestHandler to handle it.
+     * The handler for PingRequests received in
+     * ManagedConnection.loopForMessages().  Checks the routing table to see
+     * if the request has already been seen.  If not, calls handlePingRequest.
      */
-    public void handlePingRequest(PingRequest pingRequest,
-                                  ManagedConnection receivingConnection)
-            throws IOException
+    final void handlePingRequestPossibleDuplicate(
+        PingRequest pingRequest, ManagedConnection receivingConnection)
     {
-        if(_pingRouteTable.getReplyHandler(pingRequest.getGUID()) == null)
-        {
-            _numPingRequests++;
-            _pingRequestHandler.handlePingRequest(pingRequest,
-                                                  receivingConnection,
-                                                  this,
-                                                  _callback,
-                                                  _acceptor,
-                                                  _manager);
-        }
+        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(),
+                                      receivingConnection))
+            handlePingRequest(pingRequest, receivingConnection);
     }
 
     /**
-     * Checks that a QueryRequest is not yet routed, then increments the
-     * QueryRequest count and delegates to the PingRequestHandler to handle it.
+     * The handler for QueryRequests received in
+     * ManagedConnection.loopForMessages().  Checks the routing table to see
+     * if the request has already been seen.  If not, calls handleQueryRequest.
+     */
+    final void handleQueryRequestPossibleDuplicate(
+        QueryRequest queryRequest, ManagedConnection receivingConnection)
+    {
+        if(_queryRouteTable.tryToRouteReply(queryRequest.getGUID(),
+                                            receivingConnection))
+            handleQueryRequest(queryRequest, receivingConnection);
+    }
+
+    /**
+     * The default handler for PingRequests received in
+     * ManagedConnection.loopForMessages().  This implementation updates stats,
+     * does the broadcast, and generates a response.
+     *
+     * You can customize behavior in three ways:
+     *   1. Override. You can assume that duplicate messages
+     *      (messages with the same GUID that arrived via different paths) have
+     *      already been filtered.  If you want stats updated, you'll
+     *      have to call super.handlePingRequest.
+     *   2. Override broadcastPingRequest.  This allows you to use the default
+     *      handling framework and just customize request routing.
+     *   3. Implement respondToPingRequest.  This allows you to use the default
+     *      handling framework and just customize responses.
+     */
+    protected void handlePingRequest(PingRequest pingRequest,
+                                     ManagedConnection receivingConnection)
+    {
+        _numPingRequests++;
+
+        if(pingRequest.getTTL() > 0)
+            broadcastPingRequest(pingRequest, receivingConnection,
+                                 _manager);
+
+        respondToPingRequest(pingRequest, _acceptor);
+    }
+
+    /**
+     * The default handler for QueryRequests received in
+     * ManagedConnection.loopForMessages().  This implementation updates stats,
+     * does the broadcast, and generates a response.
+     *
+     * You can customize behavior in three ways:
+     *   1. Override. You can assume that duplicate messages
+     *      (messages with the same GUID that arrived via different paths) have
+     *      already been filtered.  If you want stats updated, you'll
+     *      have to call super.handleQueryRequest.
+     *   2. Override broadcastQueryRequest.  This allows you to use the default
+     *      handling framework and just customize request routing.
+     *   3. Implement respondToQueryRequest.  This allows you to use the default
+     *      handling framework and just customize responses.
      */
     public void handleQueryRequest(QueryRequest queryRequest,
                                    ManagedConnection receivingConnection)
-            throws IOException
     {
-        if(_queryRouteTable.getReplyHandler(queryRequest.getGUID()) == null)
+        _numQueryRequests++;
+
+        if(queryRequest.getTTL() > 0)
+            broadcastQueryRequest(queryRequest, receivingConnection,
+                                  _manager);
+
+        respondToQueryRequest(queryRequest, _acceptor, _clientGUID);
+    }
+
+    /**
+     * Sends the ping request to the designated connection,
+     * setting up the proper reply routing.
+     */
+    public void sendPingRequest(PingRequest pingRequest,
+                                ManagedConnection connection)
+    {
+        _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
+        connection.send(pingRequest);
+    }
+
+    /**
+     * Sends the query request to the designated connection,
+     * setting up the proper reply routing.
+     */
+    public void sendQueryRequest(QueryRequest queryRequest,
+                                 ManagedConnection connection)
+    {
+        _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
+        connection.send(queryRequest);
+    }
+
+    /**
+     * Broadcasts the ping request to all initialized connections,
+     * setting up the proper reply routing.
+     */
+    public void broadcastPingRequest(PingRequest pingRequest)
+    {
+        _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
+        broadcastPingRequest(pingRequest, null, _manager);
+    }
+
+    /**
+     * Broadcasts the query request to all initialized connections,
+     * setting up the proper reply routing.
+     */
+    public void broadcastQueryRequest(QueryRequest queryRequest)
+    {
+        _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
+        broadcastQueryRequest(queryRequest, null, _manager);
+    }
+
+    /**
+     * Broadcasts the ping request to all initialized connections that
+     * are not the receivingConnection, setting up the routing
+     * to the designated PingReplyHandler.  This is called from the default
+     * handlePingRequest and the default broadcastPingRequest(PingRequest)
+     *
+     * If different (smarter) broadcasting functionality is desired, override
+     * as desired.  If you do, note that receivingConnection may be null (for
+     * requests originating here).
+     */
+    protected void broadcastPingRequest(PingRequest pingRequest,
+                                        ManagedConnection receivingConnection,
+                                        ConnectionManager manager)
+    {
+        // Note the use of initializedConnections only.
+        for(Iterator iterConnections =
+                manager.getInitializedConnections().iterator();
+            iterConnections.hasNext();  )
         {
-            _numQueryRequests++;
-            _queryRequestHandler.handleQueryRequest(queryRequest,
-                                                    receivingConnection,
-                                                    this,
-                                                    _callback,
-                                                    _acceptor,
-                                                    _manager);
+            ManagedConnection c = (ManagedConnection)iterConnections.next();
+            if(c != receivingConnection)
+                c.send(pingRequest);
         }
     }
 
     /**
-     * Uses the ping route table to route a ping reply.  If an appropriate route
+     * Broadcasts the query request to all initialized connections that
+     * are not the receivingConnection, setting up the routing
+     * to the designated QueryReplyHandler.  This is called from the default
+     * handleQueryRequest and the default broadcastQueryRequest(QueryRequest)
+     *
+     * If different (smarter) broadcasting functionality is desired, override
+     * as desired.  If you do, note that receivingConnection may be null (for
+     * requests originating here).
+     */
+    protected void broadcastQueryRequest(QueryRequest queryRequest,
+                                        ManagedConnection receivingConnection,
+                                        ConnectionManager manager)
+    {
+        // Note the use of initializedConnections only.
+        for(Iterator iterConnections =
+                manager.getInitializedConnections().iterator();
+            iterConnections.hasNext();  )
+        {
+            ManagedConnection c = (ManagedConnection)iterConnections.next();
+            if(c != receivingConnection)
+                c.send(queryRequest);
+        }
+    }
+
+    /**
+     * Respond to the ping request.  Implementations typically will either
+     * do nothing (if they don't think a response is appropriate) or call
+     * sendPingReply(PingReply).
+     * This method is called from the default handlePingRequest.
+     */
+    protected abstract void respondToPingRequest(PingRequest pingRequest,
+                                                 Acceptor acceptor);
+
+
+    /**
+     * Respond to the query request.  Implementations typically will either
+     * do nothing (if they don't think a response is appropriate) or call
+     * sendQueryReply(QueryReply).
+     * This method is called from the default handleQueryRequest.
+     */
+    protected abstract void respondToQueryRequest(QueryRequest queryRequest,
+                                                  Acceptor acceptor,
+                                                  byte[] clientGUID);
+    /**
+     * The default handler for PingRequests received in
+     * ManagedConnection.loopForMessages().  This implementation
+     * uses the ping route table to route a ping reply.  If an appropriate route
      * doesn't exist, records the error statistics.  On sucessful routing,
      * the PingReply count is incremented.
      *
      * In all cases, the ping reply is recorded into the host catcher.
+     *
+     * Override as desired, but you probably want to call super.handlePingReply
+     * if you do.
      */
-    public void routePingReply(PingReply pingReply,
-                               ManagedConnection receivingConnection)
+    public void handlePingReply(PingReply pingReply,
+                                ManagedConnection receivingConnection)
     {
         //update hostcatcher (even if the reply isn't for me)
         _catcher.spy(pingReply);
 
-        PingReplyHandler replyHandler = (PingReplyHandler)
+        ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(pingReply.getGUID());
 
         if(replyHandler != null)
         {
             _numPingReplies++;
             replyHandler.handlePingReply(pingReply,
-                                         receivingConnection,
-                                         this,
-                                         _callback);
+                                         receivingConnection);
         }
         else
         {
@@ -240,15 +365,19 @@ public class MessageRouter
     }
 
     /**
-     * Uses the query route table to route a query reply.  If an appropriate
+     * The default handler for QueryReplies received in
+     * ManagedConnection.loopForMessages().  This implementation
+     * uses the query route table to route a query reply.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
-     * the QueryReply count is incremented, and a routing is created for
-     * subsequent PushRequests
+     * the QueryReply count is incremented.
+     *
+     * Override as desired, but you probably want to call super.handleQueryReply
+     * if you do.
      */
-    public void routeQueryReply(QueryReply queryReply,
-                                ManagedConnection receivingConnection)
+    public void handleQueryReply(QueryReply queryReply,
+                                 ManagedConnection receivingConnection)
     {
-        QueryReplyHandler replyHandler = (QueryReplyHandler)
+        ReplyHandler replyHandler =
             _queryRouteTable.getReplyHandler(queryReply.getGUID());
 
         if(replyHandler != null)
@@ -260,9 +389,7 @@ public class MessageRouter
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        receivingConnection);
             replyHandler.handleQueryReply(queryReply,
-                                          receivingConnection,
-                                          this,
-                                          _callback);
+                                          receivingConnection);
         }
         else
         {
@@ -272,21 +399,26 @@ public class MessageRouter
     }
 
     /**
-     * Uses the push route table to route a push request.  If an appropriate
+     * The default handler for PushRequests received in
+     * ManagedConnection.loopForMessages().  This implementation
+     * uses the push route table to route a push request.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
      * the PushRequest count is incremented.
+     *
+     * Override as desired, but you probably want to call
+     * super.handlePushRequest if you do.
      */
-    public void routePushRequest(PushRequest pushRequest,
-                                 ManagedConnection receivingConnection)
+    public void handlePushRequest(PushRequest pushRequest,
+                                  ManagedConnection receivingConnection)
     {
         // Note the use of getClientGUID() here, not getGUID()
-        PushRequestHandler replyHandler = (PushRequestHandler)
+        ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
 
         if(replyHandler != null)
         {
-            _numPushRequests++;
-            replyHandler.handlePushRequest(pushRequest, this, _callback);
+            _numPingReplies++;
+            replyHandler.handlePushRequest(pushRequest, receivingConnection);
         }
         else
         {
@@ -295,92 +427,47 @@ public class MessageRouter
         }
     }
 
-    //
-    // End message receiving calls
-    //
-
-    //
-    // Begin message sending calls
-    //
-
     /**
-     * Sends the ping request to the designated connection,
-     * setting up the routing to the MessageRouter's PingReplyHandler
+     * Uses the ping route table to send a PingReply to the appropriate
+     * connection.  Since this is used for PingReplies orginating here, no
+     * stats are updated.
+     * @throws IOException if no appropriate route exists.
      */
-    public void sendPingRequest(PingRequest pingRequest,
-                                ManagedConnection connection)
+    public void sendPingReply(PingReply pingReply)
         throws IOException
     {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), _pingReplyHandler);
-        connection.send(pingRequest);
+        ReplyHandler replyHandler =
+            _pingRouteTable.getReplyHandler(pingReply.getGUID());
+
+        if(replyHandler != null)
+            replyHandler.handlePingReply(pingReply, null);
+        else
+            throw new IOException();
     }
 
     /**
-     * Broadcasts the ping request to all initialized connections,
-     * setting up the routing to the MessageRouter's PingReplyHandler
+     * Uses the query route table to send a QueryReply to the appropriate
+     * connection.  Since this is used for QueryReplies orginating here, no
+     * stats are updated.
+     * @throws IOException if no appropriate route exists.
      */
-    public void broadcastPingRequest(PingRequest pingRequest)
-    {
-        broadcastPingRequest(pingRequest, _pingReplyHandler);
-    }
-
-    /**
-     * Broadcasts the ping request to all initialized connections that
-     * are not the designated PingReplyHandler, setting up the routing
-     * to the designated PingReplyHandler
-     */
-    public void broadcastPingRequest(PingRequest pingRequest,
-                                     PingReplyHandler replyHandler)
-    {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), replyHandler);
-        broadcastRequest(pingRequest, replyHandler);
-    }
-
-    /**
-     * Sends the query request to the designated connection,
-     * setting up the routing to the MessageRouter's QueryReplyHandler
-     */
-    public void sendQueryRequest(QueryRequest queryRequest,
-                                 ManagedConnection connection)
-            throws IOException
-    {
-        _queryRouteTable.routeReply(queryRequest.getGUID(), _queryReplyHandler);
-        connection.send(queryRequest);
-    }
-
-    /**
-     * Broadcasts the query request to all initialized connections,
-     * setting up the routing to the MessageRouter's QueryReplyHandler
-     */
-    public void broadcastQueryRequest(QueryRequest queryRequest)
-    {
-        broadcastQueryRequest(queryRequest, _queryReplyHandler);
-    }
-
-    /**
-     * Broadcasts the query request to all initialized connections that
-     * are not the designated QueryReplyHandler, setting up the routing
-     * to the designated QueryReplyHandler
-     */
-    public void broadcastQueryRequest(QueryRequest queryRequest,
-                                      QueryReplyHandler replyHandler)
-    {
-        _queryRouteTable.routeReply(queryRequest.getGUID(), replyHandler);
-        broadcastRequest(queryRequest, replyHandler);
-    }
-
-    /**
-     * Sends the query reply to the designated connection,
-     * setting up the routing to the MessageRouter's PushRequestHandler.
-     */
-    public void sendQueryReply(QueryReply queryReply,
-                               ManagedConnection connection)
+    public void sendQueryReply(QueryReply queryReply)
         throws IOException
     {
-        // Note the use of getClientGUID() here, not getGUID()
-        _pushRouteTable.routeReply(queryReply.getClientGUID(),
-                                   _pushRequestHandler);
-        connection.send(queryReply);
+        ReplyHandler replyHandler =
+            _queryRouteTable.getReplyHandler(queryReply.getGUID());
+
+        if(replyHandler != null)
+        {
+            // Prepare a routing for a PushRequest, which works
+            // here like a QueryReplyReply
+            // Note the use of getClientGUID() here, not getGUID()
+            _pushRouteTable.routeReply(queryReply.getClientGUID(),
+                                       _forMeReplyHandler);
+            replyHandler.handleQueryReply(queryReply, null);
+        }
+        else
+            throw new IOException();
     }
 
     /**
@@ -393,56 +480,41 @@ public class MessageRouter
         throws IOException
     {
         // Note the use of getClientGUID() here, not getGUID()
-        PushRequestHandler replyHandler = (PushRequestHandler)
+        ReplyHandler replyHandler =
             _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
 
         if(replyHandler != null)
-        {
-            _numPushRequests++;
-            replyHandler.handlePushRequest(pushRequest, this, _callback);
-        }
+            replyHandler.handlePushRequest(pushRequest, null);
         else
-        {
             throw new IOException();
-        }
     }
 
     /**
-     * A private method called from broadcastPingRequest and
-     * broadcastQueryRequest.
-     *
-     * @modifies network
-     * @effects sends the message m to all connections that are not the
-     * designated reply handler
-     *
-     * Underlying IO errors (e.g., because a connection has closed) are caught
-     * and silently ignored.
+     * Handle a reply to a PingRequest that originated here.
+     * Implementations typically process that various statistics in the reply.
+     * This method is called from the default handlePingReply.
      */
-    private void broadcastRequest(Message m, Object replyHandler)
-    {
-        Assert.that(m != null);
-        // Note the use of initializedConnections only.
-        for(Iterator iterConnections =
-                _manager.getInitializedConnections().iterator();
-            iterConnections.hasNext();  )
-        {
-            Connection c = (Connection)iterConnections.next();
-            if(c != replyHandler)
-            {
-                try
-                {
-                    c.send(m);
-                }
-                catch (IOException e)
-                {}
-            }
-        }
-    }
+    protected abstract void handlePingReplyForMe(
+        PingReply pingReply,
+        ManagedConnection receivingConnection);
 
-    //
-    // End message sending calls
-    //
+    /**
+     * Handle a reply to a QueryRequest that originated here.
+     * Implementations typically display or record the results of the query.
+     * This method is called from the default handleQueryReply.
+     */
+    protected abstract void handleQueryReplyForMe(
+        QueryReply queryReply,
+        ManagedConnection receivingConnection);
 
+    /**
+     * Handle a PushRequest reply to a QueryReply that originated here.
+     * Implementations typically display or record the results of the query.
+     * This method is called from the default handlePushRequest
+     */
+    protected abstract void handlePushRequestForMe(
+        PushRequest pushRequest,
+        ManagedConnection receivingConnection);
 
     //
     // Begin Statistics Accessors
@@ -564,4 +636,32 @@ public class MessageRouter
     //
     // End Statistics Accessors
     //
+
+    /**
+     * This is the class that goes in the route table when a request is
+     * sent whose reply is for me.
+     */
+    private final class ForMeReplyHandler
+        implements ReplyHandler
+    {
+        public ForMeReplyHandler() {}
+
+        public void handlePingReply(PingReply pingReply,
+                                    ManagedConnection receivingConnection)
+        {
+            handlePingReplyForMe(pingReply, receivingConnection);
+        }
+
+        public void handleQueryReply(QueryReply queryReply,
+                                     ManagedConnection receivingConnection)
+        {
+            handleQueryReplyForMe(queryReply, receivingConnection);
+        }
+
+        public void handlePushRequest(PushRequest pushRequest,
+                                      ManagedConnection receivingConnection)
+        {
+            handlePushRequestForMe(pushRequest, receivingConnection);
+        }
+    }
 }
