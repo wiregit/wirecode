@@ -1,13 +1,17 @@
 package com.limegroup.gnutella.http;
 
-import com.limegroup.gnutella.http.*;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
+
+import com.limegroup.gnutella.util.BaseTestCase;
+
 import junit.framework.*;
-import junit.extensions.*;
 
 /**
  * Tests the HTTPUtils class.
  */
-public final class HttpUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class HttpUtilsTest extends BaseTestCase {
 
 	/**
 	 * Constructs a new HttpUtilsTest.
@@ -27,6 +31,32 @@ public final class HttpUtilsTest extends com.limegroup.gnutella.util.BaseTestCas
 		junit.textui.TestRunner.run(suite());
 	}
 
+    /**
+     * Tests the method for writing an HTTP header with an integer value to a
+     * <tt>Writer</tt>.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteHeaderWithIntValueToWriter() throws Exception {
+        StringWriter writer = new StringWriter();
+        HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, 200, writer);
+        assertEquals("unexpected header", "Content-Length: 200\r\n", 
+            writer.toString());
+    }
+    
+    /**
+     * Tests the method for writing an HTTP header with an integer value to a
+     * stream.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testWriteHeaderWithIntValueToStream() throws Exception {
+        OutputStream stream = new ByteArrayOutputStream();
+        HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, 200, stream);
+        assertEquals("unexpected header", "Content-Length: 200\r\n", 
+            stream.toString());
+    }
+    
 	/**
 	 * Tests the method to extract a header value from an HTTP header.
 	 */
