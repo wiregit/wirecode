@@ -2207,8 +2207,7 @@ public class DownloadTest extends BaseTestCase {
         //now uploader 2 should have been removed.
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
-        int qPos = Integer.parseInt
-        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        int qPos = downloader.getQueuePosition();
         
         assertEquals("incorrect swarming ",2,swarm);
         assertEquals("queued uploader not dropped",1,queued);
