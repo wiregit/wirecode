@@ -20,8 +20,20 @@ import java.io.*;
 public class UltrapeerRoutingTest extends TestCase {
     static final int PORT=6667;
     static final int TIMEOUT=500;
+
+    /**
+     * Leaf connection to the Ultrapeer.
+     */
     static Connection leaf;
+
+    /**
+     * Ultrapeer connection.
+     */
     static Connection ultrapeer;
+
+    /**
+     * Traditional, non-Ultrapeer connection (pre-Ultrapeer).
+     */
     static Connection old;
 
     public UltrapeerRoutingTest(String name) {
@@ -63,11 +75,11 @@ public class UltrapeerRoutingTest extends TestCase {
         FileManager files=new FileManagerStub();
         MessageRouter router=new MessageRouterStub();
         RouterService rs=new RouterService(callback);
-        assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
+        assertEquals("unexpected port", PORT, settings.getPort());
         rs.start();
         rs.clearHostCatcher();
         rs.connect();
-        assertEquals(PORT, settings.getPort());
+        assertEquals("unexpected port", PORT, settings.getPort());
 
         //Start actual tests.
         try {
@@ -84,13 +96,11 @@ public class UltrapeerRoutingTest extends TestCase {
             doDropAndDuplicate();   //must be last; closes old
             shutdown();
         } catch (IOException e) { 
-            System.err.println("Mysterious IOException:");
             e.printStackTrace();
-            assertTrue(false);
+            fail("unexpected exception: "+e);
         } catch (BadPacketException e) { 
-            System.err.println("Mysterious bad packet:");
             e.printStackTrace();
-            assertTrue(false);
+            fail("unexpected exception: "+e);
         }
         
         //System.out.println("Done");
@@ -104,15 +114,15 @@ public class UltrapeerRoutingTest extends TestCase {
         //2. unrouted ultrapeer connection
         ultrapeer=new Connection("localhost", PORT, 
 								 new UltrapeerProperties(),
-								 new EmptyResponder());
-		//false);
+								 new EmptyResponder(),
+                                 false);
         ultrapeer.initialize();
         
         //3. routed leaf, with route table for "test"
         leaf=new Connection("localhost", PORT, 
 							new LeafProperties(),
-							new EmptyResponder());
-		//false);
+							new EmptyResponder(),
+                            false);
         leaf.initialize();
         QueryRouteTable qrt=new QueryRouteTable();
         qrt.add("test");
@@ -134,17 +144,17 @@ public class UltrapeerRoutingTest extends TestCase {
         leaf.send(qr);
         leaf.flush();
         
-        Message m=old.receive(TIMEOUT);
-        assertTrue(m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue(m.getHops()==(byte)1); //used to be not decremented
-        assertTrue(m.getTTL()==(byte)5);
+        Message m = old.receive(TIMEOUT);
+        assertTrue("message not a QueryRequest", m instanceof QueryRequest);
+        assertTrue("unexpected query", ((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue("unexpected hops", m.getHops()==(byte)1); //used to be not decremented
+        assertEquals("unexpected TTL",  (byte)5, m.getTTL());
       
         m=ultrapeer.receive(TIMEOUT);
-        assertTrue(m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("crap"));
-        assertTrue(m.getHops()==(byte)1); //used to be not decremented
-        assertTrue(m.getTTL()==(byte)5);
+        assertTrue("message not a QueryRequest", m instanceof QueryRequest);
+        assertTrue("unexpected query", ((QueryRequest)m).getQuery().equals("crap"));
+        assertTrue("unexpected hops", m.getHops()==(byte)1); //used to be not decremented
+        assertEquals("unexpected TTL",  (byte)5, m.getTTL());
 
         //2. Check that replies are routed back.
         drain(leaf);

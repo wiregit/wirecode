@@ -214,7 +214,8 @@ public class LeafRoutingTest extends TestCase {
         //System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
-                                    new OldResponder());
+                                    new OldResponder(),
+                                    false);
         try {
             c.initialize();
             assertTrue("Handshake succeeded!", false);
