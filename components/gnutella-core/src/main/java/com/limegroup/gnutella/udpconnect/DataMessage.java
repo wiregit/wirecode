@@ -60,6 +60,12 @@ public class DataMessage extends UDPConnectionMessage {
         return chunk;
     }
 
+    public byte getDataAt(int i) {
+        if (i < MAX_GUID_DATA) 
+            return _data1[i+(16-MAX_GUID_DATA)];
+        return _data2[i-MAX_GUID_DATA];
+    }
+
 	public String toString() {
 		return "DataMessage DestID:"+getConnectionID()+" len:"+
           getDataLength()+" seq:"+getSequenceNumber();
