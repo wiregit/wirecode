@@ -59,7 +59,7 @@ public class ConnectionManager {
      * must have. */
     public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 12;
     /** The desired number of slots to reserve for good connections (e.g.,
      *  LimeWire) unrouted connections. */
     public static final int RESERVED_GOOD_CONNECTIONS = 2;   

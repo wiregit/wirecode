@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.search.*;
 import java.util.*;
 import com.sun.java.util.collections.Arrays;
 import java.io.*;
@@ -59,8 +60,12 @@ public class RichConnectionThread extends Thread{
                 //handle the query reply...
                 //we know its for us...so we need not route...just consume it
                 byte[] replyGUID = qr.getGUID();
-                if(Arrays.equals(replyGUID,queryGUID))
-                    callback.handleQueryReply(qr);
+                if(Arrays.equals(replyGUID,queryGUID)) {
+					SearchResultHandler resultHandler = 
+						RouterService.getSearchResultHandler();
+					resultHandler.handleQueryReply(qr);
+                    //callback.handleQueryReply(qr);
+				}
             }
         } catch(Throwable t) {
             RouterService.error(t);

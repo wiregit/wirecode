@@ -38,9 +38,9 @@ public class QueryRequest extends Message implements Serializable{
     private final Set /* of URN */ queryUrns;
 
     /**
-     * The Query Key associated with this Query.
+     * The Query Key associated with this query -- can be null.
      */
-    private QueryKey queryKey = null;
+    private final QueryKey queryKey;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -186,8 +186,8 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 			tempQueryUrns = new HashSet();
 		}
-        if (queryKey != null)
-            this.queryKey = queryKey;
+
+		this.queryKey = queryKey;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {

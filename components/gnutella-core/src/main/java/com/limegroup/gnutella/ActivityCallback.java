@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.security.User;
 import com.sun.java.util.collections.*;
 
@@ -51,7 +53,10 @@ public interface ActivityCallback
      * @see RouterService#query(String,int,MediaType)
      * @see RouterService#matchesType(byte[],Response)
      */
-    public void handleQueryReply( QueryReply qr );
+    //public void handleQueryReply( QueryReply qr );
+
+	public void handleQueryResult(HostData data, Response response, 
+								  List docs);
 
     /**
      * Add a query string to the monitor screen

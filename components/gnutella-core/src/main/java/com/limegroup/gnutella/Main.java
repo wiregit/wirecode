@@ -5,6 +5,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.search.*;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -141,15 +142,23 @@ public class Main implements ActivityCallback {
 		//Do nothing.
     }
 
-    public void handleQueryReply( QueryReply qr ) {
+//     public void handleQueryReply( QueryReply qr ) {
+// 		synchronized(System.out) {
+// 			System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
+// 			try {
+// 				for (Iterator iter=qr.getResults(); iter.hasNext(); )
+// 					System.out.println("   "+((Response)iter.next()).getName());
+// 			} catch (BadPacketException e) { }
+// 		}
+//     }
+
+	public void handleQueryResult(HostData data, Response response, 
+								  List docs) {
 		synchronized(System.out) {
-			System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
-			try {
-				for (Iterator iter=qr.getResults(); iter.hasNext(); )
-					System.out.println("   "+((Response)iter.next()).getName());
-			} catch (BadPacketException e) { }
+			System.out.println("Query hit from "+data.getIP()+":"+data.getPort()+":");
+			System.out.println("   "+response.getName());
 		}
-    }
+	}
 
     /**
      *  Add a query string to the monitor screen

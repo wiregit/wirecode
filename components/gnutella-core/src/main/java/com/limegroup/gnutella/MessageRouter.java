@@ -4,6 +4,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.messages.*;
 
@@ -572,6 +573,59 @@ public abstract class MessageRouter {
 		broadcastQueryRequest(request, null);
 		//}
     }
+
+	/**
+	 * Initiates a dynamic query.  Only Ultrapeer should call this method,
+	 * as this technique relies on fairly high numbers of connections to 
+	 * dynamically adjust the TTL based on the number of results received, 
+	 * the number of remaining connections, etc.
+	 *
+	 * @param factory the <tt>QueryFactory</tt> instance that generates
+	 *  queries for this dynamic query
+	 */
+	public void sendDynamicQuery(QueryFactory factory) {
+		SearchResultHandler resultHandler = RouterService.getSearchResultHandler();
+		GUID guid = factory.getGUID();
+		resultHandler.addGuid(guid);
+		_queryRouteTable.routeReply(guid.bytes(), FOR_ME_REPLY_HANDLER);
+		
+		// create a query to send to leaves
+		QueryRequest query = factory.createQuery((byte)1);
+		if(RouterService.isSupernode()) {
+			forwardQueryRequestToLeaves(query, null);
+		}
+
+		List list = _manager.getInitializedConnections2();
+		int length = list.size();
+		for(int i=0; i<length; i++) {
+			int results = resultHandler.getNumResults(guid);
+			if(results >= 100) return;
+			ManagedConnection mc = (ManagedConnection)list.get(i);			
+			query = createQuery(i,factory, length-i, results);
+			sendQueryRequest(query, mc, null);
+		}
+	}
+
+	/**
+	 * Creates a new <tt>QueryRequest</tt> instsnce, dynamically setting the
+	 * TTL based on a variety of factors.  
+	 */
+	private QueryRequest createQuery(int index, QueryFactory factory, 
+									 int remainingConnections, int results) {
+		System.out.println("MessageRouter::createQuery::results: "+results); 
+		System.out.println("MessageRouter::createQuery::remaining connections: "+
+						   remainingConnections); 
+		System.out.println(); 
+		if(index != 0) {
+			try {
+				int sleepTime = 16000/index;
+				Thread.sleep(sleepTime);
+			} catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return factory.createQuery((byte)2);		
+	}
 
     /**
      * Broadcasts the ping request to all initialized connections that

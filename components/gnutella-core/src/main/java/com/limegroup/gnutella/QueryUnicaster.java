@@ -169,6 +169,7 @@ public final class QueryUnicaster {
                 try {
                     queryLoop();
                 } catch(Throwable t) {
+					t.printStackTrace();
                     RouterService.error(t);
                 }
 			}
@@ -178,13 +179,22 @@ public final class QueryUnicaster {
         _querier.setDaemon(true);
 
         // only if settings says i can....
+        //if (SearchSettings.GUESS_ENABLED.getValue())
+		//  _querier.start();
+
+        //QueryKeyExpirer expirer = new QueryKeyExpirer();
+        //RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
+
+    }
+
+	public void start() {
+        // only if settings says i can....
         if (SearchSettings.GUESS_ENABLED.getValue())
             _querier.start();
 
         QueryKeyExpirer expirer = new QueryKeyExpirer();
         RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
-
-    }
+	}
 
     /** 
      * The main work to be done.

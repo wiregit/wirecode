@@ -14,6 +14,7 @@ import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
+import com.limegroup.gnutella.search.*;
 
 
 /**
@@ -93,7 +94,7 @@ public final class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = new UploadManager();
+    private static final UploadManager uploadManager = new UploadManager();
 
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();
@@ -114,6 +115,13 @@ public final class RouterService {
 	 * messages.
 	 */
 	private static final UDPService udpService = UDPService.instance();
+
+	/**
+	 * Constant for the <tt>SearchResultHandler</tt> class that processes
+	 * search results sent back to this client.
+	 */
+	private static final SearchResultHandler RESULT_HANDLER =
+		new SearchResultHandler();
 
     /**
      * isShuttingDown flag
@@ -189,8 +197,7 @@ public final class RouterService {
 	public void start() {
 		// start up the UDP server thread
 		catcher.initialize();
-		acceptor.initialize();
-		
+		acceptor.initialize();		
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         fileManager.initialize();
@@ -200,6 +207,8 @@ public final class RouterService {
         
         UpdateManager updater = UpdateManager.instance();//initialize
         updater.postGuiInit(callback);
+		RESULT_HANDLER.start();
+		QueryUnicaster.instance().start();
 	}
 
     /**
@@ -287,6 +296,15 @@ public final class RouterService {
      */
 	public static HostCatcher getHostCatcher() {
 		return catcher;
+	}
+
+    /** 
+     * Accessor for the <tt>SearchResultHandler</tt> instance.
+     *
+     * @return the <tt>SearchResultHandler</tt> in use
+     */
+	public static SearchResultHandler getSearchResultHandler() {
+		return RESULT_HANDLER;
 	}
 
     /**
@@ -746,16 +764,25 @@ public final class RouterService {
 		Thread searcherThread = new Thread("SearcherThread") {
 			public void run() {
                 try {
-                    // per HUGE v0.94, ask for URNs on responses
-                    Set reqUrns = new HashSet();
-                    reqUrns.add(UrnType.ANY_TYPE);
-                    
-                    QueryRequest qr = 
-                        new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
-                                         query, richQuery, false, reqUrns, null,
-                                         !acceptedIncomingConnection());
-                    verifier.record(qr, type);
-                    router.broadcastQueryRequest(qr);
+					//if(!isSupernode()) {
+					if(false) {
+						// per HUGE v0.94, ask for URNs on responses
+						Set urnTypes = new HashSet();
+						urnTypes.add(UrnType.ANY_TYPE);
+						QueryRequest qr = 
+							new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
+											 query, richQuery, false, urnTypes, null,
+											 !acceptedIncomingConnection());
+						verifier.record(qr, type);
+						router.broadcastQueryRequest(qr);
+					} else {
+						QueryFactory qf = 
+							QueryFactory.createFactory(guid, query, richQuery);
+
+						RESULT_HANDLER.addGuid(new GUID(guid));
+						// TODO: what should we do about verifier here???
+						router.sendDynamicQuery(qf);
+					}
                 } catch(Throwable t) {
                     RouterService.error(t);
                 }
@@ -1011,7 +1038,7 @@ public final class RouterService {
      * @param type The mediatype associated with this search.
      */
     public static Downloader download(String query, String richQuery,
-                               byte[] guid, MediaType type) 
+									  byte[] guid, MediaType type) 
         throws AlreadyDownloadingException {
         return downloader.download(query, richQuery, guid, type);
     }

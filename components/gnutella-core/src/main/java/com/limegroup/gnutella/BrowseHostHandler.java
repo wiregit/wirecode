@@ -206,10 +206,12 @@ public class BrowseHostHandler {
             else {
                 if(m instanceof QueryReply) {
                     debug("BHH.browseExchange(): read a QR");        
-                    QueryReply queryReply = (QueryReply)m;
+                    QueryReply reply = (QueryReply)m;
                     m.setGUID(_guid);
-                    if (_callback != null)
-                        _callback.handleQueryReply(queryReply);
+					
+					RouterService.getSearchResultHandler().handleQueryReply(reply);
+                    //if (_callback != null)
+					//  _callback.handleQueryReply(queryReply);
                 }
             }
         }        
