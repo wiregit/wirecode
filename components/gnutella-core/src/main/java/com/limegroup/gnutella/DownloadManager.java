@@ -306,6 +306,18 @@ public class DownloadManager implements BandwidthTracker {
             rfds = new RemoteFileDesc[0];
         }
         
+        handleManagedDownloaderAdditions(rfds);
+
+        handlePotentialAutoDownload(new GUID(qr.getGUID()),
+                                    rfds);
+    }
+
+
+    private void handleManagedDownloaderAdditions(RemoteFileDesc[] rfds) {
+
+        if (rfds.length == 0)
+            return;
+
         // need to synch because active and waiting are not thread safe
         List downloaders = new ArrayList();
         synchronized (this) { 
@@ -332,23 +344,22 @@ public class DownloadManager implements BandwidthTracker {
                     break;
                 }
             }
+    }
 
-        if (queryDetails.containsKey(new GUID(qr.getGUID()))) {
+
+
+    private void handlePotentialAutoDownload(GUID qrGUID, 
+                                             RemoteFileDesc[] rfds) {
+        if (queryDetails.containsKey(qrGUID)) {
             // get the appropriate details....
             AutoDownloadDetails add = 
-            (AutoDownloadDetails) queryDetails.get(new GUID(qr.getGUID()));
-            List toDL = new ArrayList();
+            (AutoDownloadDetails) queryDetails.get(qrGUID);
 
             // are there any files you should get?
+            RemoteFileDesc[] toGet = new RemoteFileDesc[1];
             for (int i = 0; i < rfds.length; i++) 
-                if (add.addDownload(rfds[i]))
-                    toDL.add(rfds[i]);
-
-            // if so, start downloading them....
-            if (toDL.size() > 0) {
-                RemoteFileDesc[] toGet = new RemoteFileDesc[1];
-                for (int i = 0; i < toGet.length; i++) {                
-                    toGet[0] = (RemoteFileDesc) toDL.get(i);
+                if (add.addDownload(rfds[i])) {
+                    toGet[0] = rfds[i];
                     try {
                         getFiles(toGet, false);
                         add.commitDownload(toGet[0]);
@@ -369,11 +380,10 @@ public class DownloadManager implements BandwidthTracker {
                         add.removeDownload(toGet[0]);
                     }
                 }
-            }
-
+                        
             // if you've got enough files, don't consider this guy in the future
             if (add.expired())
-                queryDetails.remove(new GUID(qr.getGUID()));
+                queryDetails.remove(qrGUID);
         }
     }
 
