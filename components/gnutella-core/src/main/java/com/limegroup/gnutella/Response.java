@@ -956,7 +956,7 @@ public class Response {
             info.put(GGEP.GGEP_HEADER_ALTS, baos.toByteArray());
             
             if(ggep.createTime > 0)
-                info.put(GGEP.GGEP_HEADER_ALTS, ggep.createTime);
+                info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime);
             
             
             info.write(out);
