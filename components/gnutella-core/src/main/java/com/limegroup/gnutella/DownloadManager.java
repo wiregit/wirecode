@@ -392,7 +392,7 @@ public class DownloadManager implements BandwidthTracker {
                 Double.parseDouble(currToken);
                 continue;
             }
-            catch (Exception e) {}
+            catch (NumberFormatException ignored) {}
             retString.append(currToken + " ");
         }
         return retString.toString();
