@@ -45,9 +45,9 @@ public class QueryRequest extends Message {
     }
 
     /** 
-      * Note: the minimum speed can be represented as a 4-byte unsigned 
-      * number, but Java ints are signed.  Hence we must use a long.  The
-      * value returned is always smaller than 2^32.
+      * Note: the minimum speed can be represented as a 2-byte unsigned 
+      * number, but Java shorts are signed.  Hence we must use an int.  The
+      * value returned is always smaller than 2^16.
       */
     public int getMinSpeed() {
 	short speed=ByteOrder.leb2short(payload,0);
