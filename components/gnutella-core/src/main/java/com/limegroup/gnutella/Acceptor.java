@@ -251,9 +251,19 @@ public class Acceptor extends Thread {
                 String word=readWord(in);
                 _socket.setSoTimeout(0);
 
-                //1. Gnutella connection
+                //1. Gnutella connection.  If the user hasn't changed the
+                //   handshake string, we accept the default ("GNUTELLA 
+                //   CONNECT/0.4") or the proprietary limewire string
+                //   ("LIMEWIRE CONNECT/0.4").  Otherwise we just accept
+                //   the user's value.
+                boolean useDefaultConnect=
+                    SettingsManager.instance().getConnectString().equals(
+                         SettingsInterface.DEFAULT_CONNECT_STRING);
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
+                    _manager.acceptConnection(_socket);
+                }
+                else if (useDefaultConnect && word.equals("LIMEWIRE")) {
                     _manager.acceptConnection(_socket);
                 }
                 //2. Incoming upload via HTTP
