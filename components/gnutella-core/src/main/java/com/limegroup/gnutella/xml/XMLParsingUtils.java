@@ -15,8 +15,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
+import org.apache.xerces.parsers.SAXParser;
 
 import com.limegroup.gnutella.ErrorService;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Provides just enough functionality for our simple schemas,
@@ -24,6 +28,8 @@ import com.limegroup.gnutella.ErrorService;
  * @author  tjones
  */
 public class XMLParsingUtils {
+    
+    private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
     
 
     static final private String XML_START = "<?xml";
@@ -112,8 +118,7 @@ public class XMLParsingUtils {
         LimeParser() {
             XMLReader reader;
             try {
-                reader =
-                    XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+                reader = new SAXParser();
                 reader.setContentHandler(this);
                 reader.setFeature("http://xml.org/sax/features/namespaces", false);
             }catch(SAXException bad) {
