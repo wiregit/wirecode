@@ -2949,11 +2949,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int getSwarmCapacity() {
         int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
         if(capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
-            return 2;
+            return SpeedConstants.MODEM_SWARM;
         else if (capacity <= SpeedConstants.T1_SPEED_INT) //DSL, Cable, T1 = 6
-            return 6;
+            return SpeedConstants.T1_SWARM;
         else // T3
-            return 8;        
+            return SpeedConstants.T3_SWARM;
     }
 
     /** 
