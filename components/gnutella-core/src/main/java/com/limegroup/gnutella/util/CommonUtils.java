@@ -969,9 +969,9 @@ public final class CommonUtils {
 	 * Returns whether or not the supplied address is a local address.
 	 */
 	public static boolean isLocalAddress(InetAddress addr) {
-	    try {	    
+	    try {
             InetAddress address = InetAddress.getLocalHost();
-            byte[] byteAddress = address.getAddress();
+            byte[] byteAddress = addr.getAddress();
             return (address.equals(addr) ||
                     byteAddress[0] == 127);
         } catch(UnknownHostException e) {
