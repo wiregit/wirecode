@@ -72,8 +72,9 @@ public class DuplicateFilter extends SpamFilter {
         for (Iterator iter=pings.iterator(); iter.hasNext(); ) {
             PingPair other=(PingPair)iter.next();
             //The following assertion fails for mysterious reasons on the
-            //Macintosh.  Luckily it need not hold for the code to work
-            //correctly.
+            //Macintosh.  Also, it can fail if the user adjusts the clock, e.g.,
+            //for daylight savings time.  Luckily it need not hold for the code
+            //to work correctly.  
             //  Assert.that(me.time>=other.time,"Unexpected clock behavior");
             if ((me.time-other.time) > PING_LAG)
                 //All remaining pings have smaller timestamps.
@@ -101,7 +102,8 @@ public class DuplicateFilter extends SpamFilter {
         //of this...
         for (Iterator iter=queries.iterator(); iter.hasNext(); ) {
             QueryPair other=(QueryPair)iter.next();
-            Assert.that(me.time>=other.time,"Unexpected clock behavior");
+            // The following assertion need not hold.  See allowPing.
+            //   Assert.that(me.time>=other.time,"Unexpected clock behavior");
             if ((me.time-other.time) > QUERY_LAG)
                 //All remaining queries have smaller timestamps.
                 break;
