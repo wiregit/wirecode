@@ -118,4 +118,9 @@ public interface ActivityCallback
     /** internal error */
 	public static final int INTERNAL_ERROR = 2;
 
+    /** 
+	 * Error that caused an assertion failure.
+	 */
+	public static final int ASSERT_ERROR = 3;
+
 }
