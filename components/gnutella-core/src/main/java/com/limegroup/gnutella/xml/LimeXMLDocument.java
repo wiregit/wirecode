@@ -34,50 +34,53 @@ public class LimeXMLDocument{
     
     protected Map fieldToValue;
     protected String schemaUri;
+    /** 
+     * Field corresponds to the name of the file for which this
+     * meta-data corresponds to. It can be null if the data is pure meta-data
+     */
+    protected String identifier;
     
     //constructors
-    public LimeXMLDocument(String XMLString)
-        throws SAXException, IOException{
-        DOMParser parser = new DOMParser();
-        //TODO2: make sure that the schema actually validates documents
-        //documentBuilderFactory.setValidating(true);
-        //documentBuilderFactory.setNamespaceAware(true);
+    public LimeXMLDocument(String XMLString) throws SAXException, 
+                                        SchemaNotFoundException, IOException{
         InputSource doc = new InputSource(new StringReader(XMLString));
-        Document document = null;
-        parser.parse(doc);
-        document = parser.getDocument();
-        makeSchemaURI(document);
-        createMap(document);
+        initialize(doc);
     }
     
-    public LimeXMLDocument(File f)
-        throws FileNotFoundException, SAXException, IOException{
+    public LimeXMLDocument(File f) throws SchemaNotFoundException, 
+                             FileNotFoundException, SAXException, IOException{
+        InputSource doc = null;
+        doc = new InputSource(new FileInputStream(f));
+        initialize(doc);        
+    }
+    
+    private void initialize(InputSource doc) throws SchemaNotFoundException{
         DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
-        InputSource doc = null;
-        doc = new InputSource(new FileInputStream(f));
         Document document = null;
         parser.parse(doc);
         document=parser.getDocument();
+        grabDocInfo(document);
         createMap(document);
     }
-    
 
-    private void makeSchemaURI(Document doc){
+    private void grabDocInfo(Document doc) throws SchemaNotFoundEception{
         Element docElement = doc.getDocumentElement();
-        List attributes = LimeXMLUtils.getAttributes(docElement.getAttributes());
+        List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
         for(int i=0; i< size; i++){
             Node att = (Node)attributes.get(i);
             String attName = att.getNodeName();
             String lowerAttName = attName.toLowerCase();
-            if (lowerAttName.indexOf("schemalocation") >= 0){
+            if (lowerAttName.indexOf("schemalocation") >= 0)
                 schemaUri = att.getNodeValue();
-                break;
-            }
+            else if (loweAttName.indexOf("identifier") >= 0)
+                identifier = att.getNodeValue();
         }
+        if(schemaURI = null)//we cannot have a doc with out a schema
+            throw new SchemaNotFoundException();
     }
 
     private void createMap(Document doc) {
@@ -103,7 +106,7 @@ public class LimeXMLDocument{
     private String doEntry(Node currNode, String parentName){
         String currTag;
         if(!parentName.equals(""))
-            currTag =parentName+XMLStringUtils.DELIMITER+currNode.getNodeName();
+            currTag=parentName+XMLStringUtils.DELIMITER+currNode.getNodeName();
         else
             currTag = currNode.getNodeName();
             
@@ -123,7 +126,7 @@ public class LimeXMLDocument{
             Node att = (Node)attributes.get(i);
             String attName = att.getNodeName();
             String attString = 
-            currTag + XMLStringUtils.DELIMITER+attName+XMLStringUtils.DELIMITER;
+            currTag+XMLStringUtils.DELIMITER+attName+XMLStringUtils.DELIMITER;
             String attValue = att.getNodeValue();
             fieldToValue.put(attString,attValue);
         }
@@ -140,7 +143,6 @@ public class LimeXMLDocument{
         return schemaUri;
     }
     
-
     /**
      * Returns a List <NameValue>, where each name-value corresponds to a
      * Canonicalized field name (placeholder), and its corresponding value in

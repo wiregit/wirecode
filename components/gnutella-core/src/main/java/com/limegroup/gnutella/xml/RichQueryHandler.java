@@ -45,14 +45,20 @@ class RichQueryHandler{
             return null; //Return null
         }catch (IOException ee){
             return null;
-        }            
-        String schema = queryDoc.getSchemaURI();
+        }catch(SchemaNotFoundException eee){
+            return null;
+        }
         
+        String schema = queryDoc.getSchemaURI();        
         SchemaReplyCollectionMapper mapper = 
                             SchemaReplyCollectionMapper.instance();
         LimeXMLReplyCollection replyDocs = mapper.getReplyCollection(schema);
         List matchingReplies = replyDocs.getMatchingReplies(queryDoc);
         //TODO1: Complete
+        int size = matchingReplies.size();
+        for(int i=0; i<size;i++){            
+            
+        }
         //find out if these replyDocuments correspond to dome file 
         //(by checking the identifier tags.)
         //If they correspond to files we make responses in the 

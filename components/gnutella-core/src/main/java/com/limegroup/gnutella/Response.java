@@ -18,7 +18,7 @@ public class Response {
 	/** The meta variable is a string of meta information that
 	 *  will be added per response (as opposed to per QueryReply
 	 */
-	private String meta;
+	private String metadata;
 	
 
     /** Creates a fresh new response.
@@ -36,7 +36,23 @@ public class Response {
         this.size=size;
         this.name=name;
         this.nameBytes = name.getBytes();
-		meta = "";
+		metadata = "";
+    }
+
+    /**Overloaded constructor that allows the creation of Responses with
+     * meta-data
+     */
+    public Response(long index, long size, String name,String metadata) {
+        Assert.that((index & 0xFFFFFFFF00000000l)==0,
+                "Response constructor: index too big!");
+        Assert.that((size &  0xFFFFFFFF00000000l)==0,
+                "Response constructor: size too big!");
+
+        this.index=index;
+        this.size=size;
+        this.name=name;
+        this.nameBytes = name.getBytes();
+		this.metadata = metadata;
     }
 
     public long getIndex() {
@@ -66,12 +82,8 @@ public class Response {
         return name;
     }
 
-	public void setMeta(String m) {
-		meta = m;
-	}
-	
-	public String getMeta() {
-		return meta;
+	public String getMetadata() {
+		return metadata;
 	}
 
 
@@ -99,5 +111,6 @@ public class Response {
         byte[] nameBytes = r.getNameBytes();
         Assert.that (nameBytes[0] == 65);
     } 
-    */       
+    */
 }
+
