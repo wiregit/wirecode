@@ -5,7 +5,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.HTTPHeaderValueSet;
+import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -94,12 +94,12 @@ public class HTTPDownloader implements BandwidthTracker {
     /**
      *  The good locations to send the uploaders as in the alts list
      */
-    private HTTPHeaderValueSet _goodLocs;
+    private Set _goodLocs;
     
     /** 
      * The list to send in the n-alts list
      */
-    private HTTPHeaderValueSet _badLocs;
+    private Set _badLocs;
     
     /**
      * The list of already written alts, used to stop duplicates
@@ -175,8 +175,8 @@ public class HTTPDownloader implements BandwidthTracker {
             AlternateLocationCollection.create(urn);
         AlternateLocationCollection s = null;
         AlternateLocationCollection f = null;
-        _goodLocs = new HTTPHeaderValueSet();
-        _badLocs = new HTTPHeaderValueSet();
+        _goodLocs = new HashSet();
+        _badLocs = new HashSet();
         _writtenGoodLocs = new HashSet();
         _writtenBadLocs = new HashSet();
 		_amountRead = 0;
@@ -335,12 +335,12 @@ public class HTTPDownloader implements BandwidthTracker {
         //We don't want to hold locks while doing network operations, so we use
         //this variable to clone _goodLocs and _badLocs and write to network
         //while iterating over the clone
-        HTTPHeaderValueSet writeClone = null;
+        Set writeClone = null;
         
         //write altLocs 
         synchronized(_goodLocs) {
             if(_goodLocs.size() > 0) {
-                writeClone = new HTTPHeaderValueSet();
+                writeClone = new HashSet();
                 Iterator iter = _goodLocs.iterator();
                 while(iter.hasNext()) {
                     Object next = iter.next();
@@ -351,13 +351,14 @@ public class HTTPDownloader implements BandwidthTracker {
             }
         }
         if(writeClone != null) //have something to write?
-            HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,writeClone,out);
+            HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+                                 new HTTPHeaderValueCollection(writeClone),out);
         
         writeClone = null;
         //write-nalts        
         synchronized(_badLocs) {
             if(_badLocs.size() > 0) {
-                writeClone = new HTTPHeaderValueSet();
+                writeClone = new HashSet();
                 Iterator iter = _badLocs.iterator();
                 while(iter.hasNext()) {
                     Object next = iter.next();
@@ -369,7 +370,8 @@ public class HTTPDownloader implements BandwidthTracker {
         }
 
         if(writeClone != null) //have something to write?
-            HTTPUtils.writeHeader(HTTPHeaderName.NALTS,writeClone,out);
+            HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
+                                new HTTPHeaderValueCollection(writeClone),out);
 
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
         SettingsManager sm=SettingsManager.instance();
