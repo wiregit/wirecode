@@ -906,9 +906,17 @@ public abstract class FileManager {
                 synchronized (ctCache) {
                     Long cTime = ctCache.getCreationTime(mainURN);
                     if (cTime == null)
-                        ctCache.addTime(mainURN, file.lastModified());
-                    // this call may be superfluous but it is quite fast....
-                    ctCache.commitTime(mainURN);
+                        cTime = new Long(file.lastModified());
+                    // if cTime is non-null but 0, then the IO subsystem is
+                    // letting us know that the file was FNF or an IOException
+                    // occurred - the best course of action is to
+                    // ignore the issue and not add it to the CTC, hopefully
+                    // we'll get a correct reading the next time around...
+                    if (cTime.longValue() > 0) {
+                        // these calls may be superfluous but are quite fast....
+                        ctCache.addTime(mainURN, cTime.longValue());
+                        ctCache.commitTime(mainURN);
+                    }
                 }
             }
 
