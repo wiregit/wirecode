@@ -209,7 +209,7 @@ public class DownloadTest extends TestCase {
             vf.open(file,null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0,TestFile.length(),true);
-            downloader.doDownload(vf);
+            downloader.doDownload(vf,false);
         } catch (IOException e) {
             assertTrue("Unexpected exception: "+e,false);
         } 
@@ -231,7 +231,7 @@ public class DownloadTest extends TestCase {
             vf.open(file,null);
             downloader.connectTCP(0);
             downloader.connectHTTP(0, TestFile.length(),true);
-            downloader.doDownload(vf);
+            downloader.doDownload(vf, false);
         } catch (IOException e) {
             assertTrue("Unexpected exception: "+e, false);
         } 
@@ -981,7 +981,7 @@ public class DownloadTest extends TestCase {
         assertTrue(message,ok);
     }
 
-    private static final boolean DEBUG=false;
+    private static final boolean DEBUG=true;
     
     static void debug(String message) {
         if(DEBUG) 
