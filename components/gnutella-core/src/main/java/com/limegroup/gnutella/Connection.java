@@ -300,7 +300,6 @@ public class Connection {
      * @exception IOException any other error.  
      */
     private void initializeOutgoing() throws IOException {
-        System.out.println("Connection::initializeOutgoing"); 
         //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
         //user.  If the other end doesn't understand it--too bad!  There is an
         //option at higher levels to retry.
@@ -587,7 +586,6 @@ public class Connection {
      * initialize().  
      *    @requires _socket, _out are properly set up */
     private void sendString(String s) throws IOException {
-        System.out.println("Connection::sendString: "+s); 
         if(s == null || s.equals("")) {
             throw new NullPointerException("null or empty string: "+s);
         }
