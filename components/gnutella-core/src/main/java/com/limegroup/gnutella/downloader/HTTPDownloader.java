@@ -112,6 +112,9 @@ public class HTTPDownloader {
 		_initialReadingPoint = start;
     }
 
+
+    ///////////////////////////////// Connection /////////////////////////////
+
     /** 
      * Initializes this without timeout; same as connect(0). 
      * @see connect(int)
@@ -172,52 +175,6 @@ public class HTTPDownloader {
         readHeaders();
 	}
 	
-
-
-    /** 
-     * Stops this immediately.  This method is always safe to call.
-     *     @modifies this
-     */
-	public void stop() {        
-        if (_byteReader != null)
-            _byteReader.close();
-        try {
-            if (_fos != null)
-                _fos.close();
-        } catch (IOException e) { }
-        try {
-            if (_socket != null)
-                _socket.close();
-        } catch (IOException e) { }
-	}
-
-    public int getInitialReadingPoint() {return _initialReadingPoint;}
-	public int getAmountRead() {return _amountRead;}
-	public int getAmountToRead() {return _amountToRead;}
-    /** 
-     * Forces this to not write past the given byte of the file, if it has not
-     * already done so.  Typically this is called to reduce the download window;
-     * doing otherwise will typically result in incomplete downloads.
-     * 
-     * @param stop a byte index into the file, using 0 to N-1 notation.  
-     */
-    public void stopAt(int stop) {_amountToRead=(stop-_initialReadingPoint);}
-    public InetAddress getInetAddress() {return _socket.getInetAddress();}
-	public boolean chatEnabled() {
-		return _chatEnabled;
-	}
-
-	/* Construction time variables */
-	public int getIndex() {return _index;}
-  	public String getFileName() {return _filename;}
-  	public byte[] getGUID() {return _guid;}
-	public int getPort() {return _port;}
-    /** Returns the RemoteFileDesc passed to this' constructor. */
-    public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
-    /** Returns true iff this is a push download. */
-    public boolean isPush() {return _isPush;}
-	
-
 
     /*
      * Reads the headers from this, setting _initialReadingPoint and _amountToRead.
@@ -316,7 +273,6 @@ public class HTTPDownloader {
 
     }
 
-
     /** 
      * Returns the start byte offset in the given "Content-range" header,
      * throwing an exception if it couldn't be parsed.  Does not strictly
@@ -378,6 +334,8 @@ public class HTTPDownloader {
         return numBeforeDash;
     }
 
+    
+    /////////////////////////////// Download ////////////////////////////////
 
     /*
      * Downloads the content from the server and writes it to a temporary
@@ -429,7 +387,61 @@ public class HTTPDownloader {
 	}
 
 
-	/****************** UNIT TEST *********************/
+    /** 
+     * Stops this immediately.  This method is always safe to call.
+     *     @modifies this
+     */
+	public void stop() {        
+        if (_byteReader != null)
+            _byteReader.close();
+        try {
+            if (_fos != null)
+                _fos.close();
+        } catch (IOException e) { }
+        try {
+            if (_socket != null)
+                _socket.close();
+        } catch (IOException e) { }
+	}
+
+    /**
+     * Instructs this to stop after reading the given byte in the file.
+     * @param stop the byte offset to stop at
+     */
+    public void stopAt(int stop) {
+        _amountToRead=(stop-_initialReadingPoint);
+    }
+
+
+    ///////////////////////////// Accessors ///////////////////////////////////
+
+    public int getInitialReadingPoint() {return _initialReadingPoint;}
+	public int getAmountRead() {return _amountRead;}
+	public int getAmountToRead() {return _amountToRead;}
+
+    /** 
+     * Forces this to not write past the given byte of the file, if it has not
+     * already done so.  Typically this is called to reduce the download window;
+     * doing otherwise will typically result in incomplete downloads.
+     * 
+     * @param stop a byte index into the file, using 0 to N-1 notation.  
+     */
+    public InetAddress getInetAddress() {return _socket.getInetAddress();}
+	public boolean chatEnabled() {
+		return _chatEnabled;
+	}
+
+	public int getIndex() {return _index;}
+  	public String getFileName() {return _filename;}
+  	public byte[] getGUID() {return _guid;}
+	public int getPort() {return _port;}
+    /** Returns the RemoteFileDesc passed to this' constructor. */
+    public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
+    /** Returns true iff this is a push download. */
+    public boolean isPush() {return _isPush;}
+	
+
+	////////////////////////////// Unit Test ////////////////////////////////////
 
 	
 //  	private HTTPDownloader(String str) {
