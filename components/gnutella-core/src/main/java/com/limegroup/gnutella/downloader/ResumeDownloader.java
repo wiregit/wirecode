@@ -119,12 +119,15 @@ public class ResumeDownloader extends ManagedDownloader
      * @param numRequeries The number of requeries sent so far.
      */
     protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        // if i've sent a query already or i was respawned from disk, act like
-        // a ManagedDownloader
-        if (numRequeries > 0)
+        // created from starting up LimeWire.
+        if(deserializedFromDisk)
+            return false;
+        // clicked Find More Sources?
+        else if(numRequeries > 0)
             return super.shouldSendRequeryImmediately(numRequeries);
-        else // yup, send it immediately.
-            return true; 
+        // created from clicking 'Resume' in the library
+        else
+            return true;
     }
  
     protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {
@@ -136,11 +139,6 @@ public class ResumeDownloader extends ManagedDownloader
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
-//        Set queryUrns=null;
-//        if (downloadSHA1!=null) {
-//            queryUrns=new HashSet(1);
-//            queryUrns.add(downloadSHA1);
-//        }
         // Extract a query string from our filename.
         String queryName = StringUtils.createQueryString(getFileName());
 

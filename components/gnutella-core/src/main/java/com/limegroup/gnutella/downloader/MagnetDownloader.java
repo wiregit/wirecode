@@ -242,16 +242,19 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      */
     protected QueryRequest newRequery(int numRequeries)
         throws CantResumeException {
-
-        if (_textQuery != null)
-            return QueryRequest.createQuery(_textQuery);
-        else if (_filename != null)
-            return QueryRequest.createQuery(_filename);
-        else if (_urn != null)
+        
+        if (_textQuery != null) {
+            String q = StringUtils.createQueryString(_textQuery);
+            return QueryRequest.createQuery(q);
+        } else if (_filename != null) {
+            String q = StringUtils.createQueryString(_filename);
+            return QueryRequest.createQuery(q);
+        } else if (_urn != null)
             return QueryRequest.createQuery(_urn);
         else if (_defaultURLs != null && _defaultURLs.length > 0)
             throw new CantResumeException("exact source");
-        else return super.newRequery(numRequeries);
+        else
+            return super.newRequery(numRequeries);
 
         /* //TODO: if we ever add back URN query support
         boolean isRequery = numRequeries!=0;
