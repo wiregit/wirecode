@@ -17,8 +17,8 @@ import java.util.*;
 public class SchemaServerMethodTransformationData 
 {
     //constants defining the methods to communicate with server
-    public static final int HTTP_POST   = 1;
-    public static final int HTTP_GET    = 2;
+    public static final String HTTP_POST   = "HTTP_POST";
+    public static final String HTTP_GET    = "HTTP_GET";
     
     /**
      * The server to connect to 
@@ -33,7 +33,7 @@ public class SchemaServerMethodTransformationData
     /**
      * The method to be used to send data to the server
      */
-    private int _method = HTTP_POST;
+    private String _method = HTTP_POST;
     
     /**
      * Path of the script to send the HTTP request to
@@ -83,9 +83,29 @@ public class SchemaServerMethodTransformationData
     }
     
     
-    /** Creates new ServerMethodTransformation */
-    public SchemaServerMethodTransformationData()
+    /** 
+     * Creates new ServerMethodTransformation, and initializesvarios fields
+     * to the passed values. 
+     */
+    public SchemaServerMethodTransformationData(String serverHostname,
+    int serverPort, String method, String scriptPath)
     {
+        //initialize the fields
+        this._serverHostname = serverHostname;
+        this._serverPort = serverPort;
+        this._method = method;
+        this._scriptPath = scriptPath;
+    }
+    
+    /**
+     * Maps the given field to specified name
+     * @param fieldName The field to be mapped
+     * @param mappedName The new name for the field (name that the field is
+     * mapped to
+     */
+    public void addFieldMapping(String fieldName, String mappedName)
+    {
+        _fieldMap.put(fieldName, mappedName);
     }
     
 }
