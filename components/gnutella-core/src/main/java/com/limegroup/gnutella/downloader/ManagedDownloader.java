@@ -1317,7 +1317,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 				HeadRequester requester = 
 			        new HeadRequester(files, fileHash, 
 									  fileDesc, totalAlternateLocations);
-				Thread headThread = new Thread(requester);
+				Thread headThread = new Thread(requester, "HEAD Request Thread");
 				headThread.setDaemon(true);
 				headThread.start();
 			}
