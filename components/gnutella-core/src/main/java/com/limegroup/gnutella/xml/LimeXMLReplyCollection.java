@@ -260,6 +260,8 @@ public class LimeXMLReplyCollection{
             if(o==doc){
                 found = true;
                 replyDocs.remove(i);
+                size--;//size of replyDocs is down
+                i--;//we want to remain at the same index for next round.
                 if(replyDocs.size() == 0){//if there are no more replies.
                     removeFromRepository();//remove this collection from map
                     //Note: this follows the convention of the MetaFileManager
@@ -270,7 +272,7 @@ public class LimeXMLReplyCollection{
         }
         boolean written = false;
         if(found){
-            ID3Editor editor = null;
+            //ID3Editor editor = null;
             written = toDisk("");//no file modified...just del meta
         }
         if(!written && found)//put it back to maintin consistency
