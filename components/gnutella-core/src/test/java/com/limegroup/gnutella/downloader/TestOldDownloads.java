@@ -43,7 +43,7 @@ public class TestOldDownloads extends TestCase {
         dm.initialize(callback, new MessageRouterStub(), 
                       null, new FileManagerStub());
         assertTrue(dm.readSnapshot(new File(
-                        "com\\limegroup\\gnutella\\downloader",file)));
+                        "com/limegroup/gnutella/downloader",file)));
         assertTrue(callback.downloaders.size()==1);
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);
         assertTrue(md.getFileName(),md.getFileName().equals("Test1.mp3"));
