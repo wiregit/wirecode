@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.connection.UltraPeerListener;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -128,6 +129,11 @@ public class ConnectionManager {
      */
     private Authenticator _authenticator;
 
+	/**
+	 * A list of listeners that listen for this node becoming an UltraPeer.
+	 */
+	private List _ultraPeerListeners = new ArrayList();
+
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -229,8 +235,7 @@ public class ConnectionManager {
          } catch(IOException e) {
          } catch(Exception e) {
              //Internal error!
-             RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
-											   e);
+             RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
          } finally {
             //if we were leaf to a supernode, reconnect to network 
             if (connection.isClientSupernodeConnection())
@@ -771,9 +776,33 @@ public class ConnectionManager {
                     =new ArrayList(_initializedClientConnections);
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
+				fireUltraPeerConnectionEstablished();
             }
         }
     }
+
+	/**
+	 * Called when this node establishes a leaf connection, indicating
+	 * that it is now an UltraPeer.  This method notifies all registered
+	 * listeners of the change.
+	 */
+	private void fireUltraPeerConnectionEstablished() {
+		Iterator iter = _ultraPeerListeners.iterator();
+		while(iter.hasNext()) {
+			UltraPeerListener listener = (UltraPeerListener)iter.next();
+			listener.ultraPeerConnectionEstablished();
+		}
+	}
+
+	/**
+	 * Adds the specified <tt>UltraPeerListener</tt> to the <tt>List</tt>
+	 * of listeners.
+	 *
+	 * @param listener the <tt>UltraPeerListener</tt> to add
+	 */
+	public void addUltraPeerListener(UltraPeerListener listener) {
+		_ultraPeerListeners.add(listener);
+	}
 
     /**
      * Disconnects from the network.  Closes all connections and sets
@@ -1349,8 +1378,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
-												  e);
+                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1396,8 +1424,7 @@ public class ConnectionManager {
      * This thread does the message loop for ManagedConnections created
      * through createGroupConnectionBlocking
      */
-    private class GroupOutgoingConnectionThread
-            extends Thread {
+    private class GroupOutgoingConnectionThread extends Thread {
         private ManagedConnection _connection;
         private PingRequest       _specialPing;
 
@@ -1420,8 +1447,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
-												  e);
+                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1505,8 +1531,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, 
-												  e);
+                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
                 //Record that we're done with the connection, which may allow
