@@ -190,7 +190,7 @@ public final class RouterService {
 	 * been constructed.
 	 */
 	public void start() {
-	    if ( _started ) return;
+	    if ( isStarted() ) return;
         _started = true;
 
 		acceptor.start();			   
@@ -232,7 +232,7 @@ public final class RouterService {
      * @return <tt>true</tt> if the backend threads have been started,
      *  otherwise <tt>false</tt>
      */
-    public boolean isStarted() {
+    public static boolean isStarted() {
         return _started;
     }
 
