@@ -50,6 +50,21 @@ public class LimeXMLDocument{
         createMap(document);
     }
     
+    /**
+     * Returns the unique identifier which identifies the schema this XML
+     * document conforms to
+     * @return the unique identifier which identifies the schema this XML
+     * document conforms to
+     */
+    public String getSchemaURI()
+    {
+        //TODO (for Sumeet)
+        
+        //anu remove
+        return null;
+    }
+    
+    
     public LimeXMLDocument(File f) {
         DOMParser parser = new DOMParser();
         //TODO2: make sure that the schema actually validates documents
