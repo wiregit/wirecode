@@ -92,7 +92,10 @@ public class AutoDownloadDetails implements Serializable {
         query = inQuery;
         richQuery = inRichQuery;
         type = inType;
-        mediaDesc = type.getMimeType();
+        if(type != null)
+            mediaDesc = type.getMimeType();
+        else
+            mediaDesc = null;
         guid = inGuid;
         dlList = new Vector();
         wordSet = new HashSet();
