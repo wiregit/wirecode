@@ -9,7 +9,7 @@ import com.limegroup.gnutella.util.*;
  * An attempt to add new entry throws an NoMoreStorageException
  * @see NoMoreStorageException
  */
-public class FixedSizeHashMap
+public class FixedsizeHashMap
 {
 
 /**
@@ -31,7 +31,7 @@ private HashMap hashMap = null;
  * @param size the number of entries to hold
  * @exception IllegalArgumentException if size is less < 1.
  */
-public FixedSizeHashMap(int size)
+public FixedsizeHashMap(int size)
 {
     hashMap = new HashMap(size * 4/3); //it might throw IllegalArgumentException
                        //in case the size is negative
@@ -39,14 +39,16 @@ public FixedSizeHashMap(int size)
 }
 
 /**
- * @modifies this
- * @effects Maps the given key to the given value, ensuring that
- * (key, value) is the newest pair in this.  If adding the key
- * would make this contain more elements than the size given at
- * construction, removes the oldest key-value pair and returns it;
- * otherwise returns null.
+* Maps the given key to the given value. If adding the key
+* would make this contain more elements than the size given at
+* construction, the passed entry is not stored and NoMoreStorageException
+* gets throwned.
+* @exception NoMoreStorageException when no more space left in the storage
+* ideally, before calling put method, it should be checked whether the map is
+* already full or not
+* @see isfull()
  */
-public Object put(Object key, Object value) throws NoMoreStorageException
+public Object put(Object key, Object value) 
 {
     Object retValue = null;
     
@@ -85,7 +87,38 @@ public Object put(Object key, Object value) throws NoMoreStorageException
     return retValue;
 }
 
+/**
+* Returns the value mapped to the given key
+* @param key The given key
+* @return the value given key maps to
+*/
+public Object get(Object key)
+{
+    return hashMap.get(key);
+}
 
+/**
+* Removes the mapping specified by given key from the underlying datastructure
+* @param key The key to be removed
+* @return the value associated with the key, or null if the key was not present
+*/
+public Object remove(Object key)
+{
+    //remove the mapping
+    Object ret = hashMap.remove(key);
+    
+    //if the mapping existed
+    if(ret != null)
+    {
+        //decrement the count
+        count--;
+    }
+    //else do nothing
+    
+    //return the value the key mapped to (or else it'll be null)
+    return ret;
+    
+}
 
 
 /**

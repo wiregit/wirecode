@@ -7,7 +7,7 @@ package com.limegroup.gnutella.util;
  * @author Anurag Singla
  */
 
-public class NoMoreStorageException extends Exception
+public class NoMoreStorageException extends RuntimeException
 {
     public NoMoreStorageException()
     {
