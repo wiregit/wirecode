@@ -214,11 +214,20 @@ public final class NormalUploadState implements HTTPMessage {
 	    // This is de facto not limiting the uploads
 	    int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
 	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
-	        // connection speed is in kbits per second
-	        ConnectionSettings.CONNECTION_SPEED.getValue() / 8.f 
-	        // upload speed is in percent
-	        * uSpeed / 100.f
-	        // wee need bytes per second
+            // if the uploads are limited, take messageUpstream
+            // for ultrapeers into account, - don't allow lower 
+            // speeds than 1kb/s so uploads won't stall completely
+            // if the user accidently sets his connection speed 
+            // lower than his message upstream
+            Math.max(
+                // connection speed is in kbits per second
+                ConnectionSettings.CONNECTION_SPEED.getValue() / 8.f 
+                // upload speed is in percent
+                * uSpeed / 100.f
+                // reduced upload speed if we are an ultrapeer
+                - RouterService.getConnectionManager()
+                .getMeasuredUpstreamBandwidth(), 1.f )
+	        // we need bytes per second
 	        * 1024;
 	    return ret;
     }

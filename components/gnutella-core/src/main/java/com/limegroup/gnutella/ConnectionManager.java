@@ -142,6 +142,16 @@ public class ConnectionManager {
 	private volatile int _demotionLimit = 0;
 
     /**
+     * The current measured upstream bandwidth.
+     */
+    private volatile float _measuredUpstreamBandwidth = 0.f;
+
+    /**
+     * The current measured downstream bandwidth.
+     */
+    private volatile float _measuredDownstreamBandwidth = 0.f;
+
+    /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      * @param authenticator Authenticator instance for authenticating users
      */
@@ -449,11 +459,17 @@ public class ConnectionManager {
      * @see BandwidthTracker#measureBandwidth 
      */
     public void measureBandwidth() {
+        float upstream=0.f;
+        float downstream=0.f;
         List connections=getInitializedConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc=(ManagedConnection)iter.next();
             mc.measureBandwidth();
+            upstream+=mc.getMeasuredUpstreamBandwidth();
+            downstream+=mc.getMeasuredDownstreamBandwidth();
         }
+        _measuredUpstreamBandwidth=upstream;
+        _measuredDownstreamBandwidth=downstream;
     }
 
     /**
@@ -462,13 +478,7 @@ public class ConnectionManager {
      * @see BandwidthTracker#measureBandwidth 
      */
     public float getMeasuredUpstreamBandwidth() {
-        float sum=0.f;
-        List connections=getInitializedConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            sum+=mc.getMeasuredUpstreamBandwidth();
-        }
-        return sum;
+        return _measuredUpstreamBandwidth;
     }
 
     /**
@@ -477,13 +487,7 @@ public class ConnectionManager {
      * @see BandwidthTracker#measureBandwidth 
      */
     public float getMeasuredDownstreamBandwidth() {
-        float sum=0.f;
-        List connections=getInitializedConnections();
-        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            sum+=mc.getMeasuredDownstreamBandwidth();
-        }
-        return sum;
+        return _measuredDownstreamBandwidth;
     }
 
     /**
