@@ -31,4 +31,16 @@ public final class SearchSettings extends AbstractSettings {
      */
     public static final CharArraySetting ILLEGAL_CHARS =
         FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
+
+    /**
+     * Setting for the maximum number of bytes to allow in queries.
+     */
+    public static final IntSetting MAX_QUERY_LENGTH =
+        FACTORY.createIntSetting("MAX_QUERY_LENGTH", 30);
+
+    /**
+     * Setting for the maximum number of bytes to allow in XML queries.
+     */
+    public static final IntSetting MAX_XML_QUERY_LENGTH =
+        FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 90);
 }
