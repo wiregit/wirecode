@@ -1121,12 +1121,16 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        //This is just an approximation.  The assumption is that all the
-        //initializing connections are going to be unrouted connections.  Leaf
-        //nodes, if any, will come to us.
-        int nonLeafConnections=getNumConnections()
-                                   - _initializedClientConnections.size();
-        int need = _keepAlive - nonLeafConnections - _fetchers.size();
+        //Try to achieve KEEP_ALIVE ultrapeer connections.  Conservatively
+        //assume that all connections being fetched right now will become
+        //ultrapeers.  To prevent fragmentation with clients that don't support
+        //ultrapeers, we'll give the first DESIRED_OLD_CONNECTIONS ultrapeers
+        //protected status.  See hasAvailableIncoming(boolean, boolean) and
+        //killExcessConnections().
+        int goodConnections=ultrapeerConnections()
+                         +_initializingFetchedConnections.size()
+                         +Math.min(oldConnections(), DESIRED_OLD_CONNECTIONS);
+        int need = _keepAlive - goodConnections - _fetchers.size();
 
         // Start connection fetchers as necessary
         while(need > 0) {
@@ -1664,6 +1668,7 @@ public class ConnectionManager {
 
             try {
                 initializeFetchedConnection(connection, this);
+                killExcessConnections();
                 sendInitialPingRequest(connection);
                 connection.loopForMessages();
             } catch(IOException e) {
