@@ -67,7 +67,6 @@ public class UDPHostRanker {
         Iterator iter = hosts.iterator();
         while(iter.hasNext()) {
             IpPort host = (IpPort)iter.next();
-            System.out.println("UDPHostRanker::sending ping");
             UDPService.instance().send(ping, host, LISTENER);
         }
     }
