@@ -149,6 +149,15 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         List results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                      1, results.size());
+                     
+        // Ensure that a search for a matching title doesn't work
+        // if we put it in the artist field ...
+        nameVals = new ArrayList();
+        nameVals.add(new NameValue(ARTIST_KEY, "tfie"));
+        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        results = collection.getMatchingReplies(searchDoc);
+        assertEquals("Not the correct amount of results",
+                     0, results.size());
 
         // make sure a little more complex match works, no mp3 has album but one
         // has a title beginning with s
