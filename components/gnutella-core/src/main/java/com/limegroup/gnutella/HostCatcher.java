@@ -161,8 +161,8 @@ public class HostCatcher {
 	//but converse does not hold; cached pongs from Gnucache
 	//servers have hops==0.   TODO3: if this is slow, change implementation
 	//of ConnectionManager.isConnected.
-	if (manager!=null && manager.isConnected(pr.getIP(), pr.getPort()))
-	    return;
+	//if (manager!=null && manager.isConnected(pr.getIP(), pr.getPort()))
+	//    return;
 
 	//Add it to the likely set, remove it from the maybes set if
 	//it's there.
