@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.Stack;
@@ -59,7 +60,7 @@ public final class QueryUnicaster {
 
     /** The fixed size list of endpoints i've pinged.
      */
-    private FixedSizeList _pingList;
+    private Buffer _pingList;
 
     /** A List of query GUIDS to purge.
      */
@@ -139,7 +140,7 @@ public final class QueryUnicaster {
         // construct DSes...
         _queries = new Hashtable();
         _queryHosts = new LinkedList();
-        _pingList = new FixedSizeList(25);
+        _pingList = new Buffer(25);
         _querySets = new Hashtable();
         _qGuidsToRemove = new Vector();
 
@@ -411,11 +412,14 @@ public final class QueryUnicaster {
             GUESSEndpoint toReturn = 
                 (GUESSEndpoint) _queryHosts.removeLast();
             // if i haven't pinged him 'recently', then ping him...
-            if (_pingList.add(toReturn)) {  
-                PingRequest pr = new PingRequest((byte)1);
-				InetAddress ip = toReturn.getAddress();				
-				UDPService.instance().send(pr, ip, toReturn.getPort());
-				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+            synchronized (_pingList) {
+                if (!_pingList.contains(toReturn)) {
+                    PingRequest pr = new PingRequest((byte)1);
+                    InetAddress ip = toReturn.getAddress();				
+                    UDPService.instance().send(pr, ip, toReturn.getPort());
+                    _pingList.add(toReturn);
+                    SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+                }
             }
             return toReturn;
         }
@@ -441,37 +445,6 @@ public final class QueryUnicaster {
 		public String toString() {
 			return "QueryBundle: "+_qr;
 		}
-    }
-
-
-    /** 
-     * Temporary DS that keeps holds Objects and evicts the oldest entry when
-     * the threshold is reached.
-     * Handles all synchronization.
-     */ 
-    private class FixedSizeList {
-        
-        private int _threshold = 1;
-        private List _objects = new ArrayList();
-
-        /** Minimum threshold is 1.
-         */
-        public FixedSizeList(int threshold) {
-            if (threshold > 0)
-                _threshold = threshold;
-        }
-
-        /* @return if the badboy o was added.
-         */
-        public synchronized boolean add(GUESSEndpoint o) {
-            boolean hasObject = _objects.contains(o);
-            if (!hasObject) {
-                if (_objects.size() >= _threshold)
-                    _objects.remove(0);
-                _objects.add(o);
-            }
-            return !hasObject;
-        }
     }
 
 
