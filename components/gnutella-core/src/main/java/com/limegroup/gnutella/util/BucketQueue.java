@@ -96,7 +96,7 @@ public class BucketQueue implements Cloneable {
      */
     public Object insert(Object o, int priority) {
         repOk();
-        if(priority > buckets.length) {
+        if(priority < 0 || priority >= buckets.length) {
             throw new IllegalArgumentException("Bad priority: "+priority);
         }
 
@@ -169,7 +169,7 @@ public class BucketQueue implements Cloneable {
      *  as determined by this' constructor
      */
     public int size(int priority) throws IllegalArgumentException {
-        if(priority > buckets.length) {
+        if(priority < 0 || priority >= buckets.length) {
             throw new IllegalArgumentException("Bad priority: "+priority);
         }
 
