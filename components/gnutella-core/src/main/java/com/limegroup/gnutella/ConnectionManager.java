@@ -67,7 +67,7 @@ public class ConnectionManager implements Runnable {
 
     private int keepAlive=0;
     private ActivityCallback callback;
-    public String ClientId;
+    public GUID ClientId;
     private int   activeAttempts = 0;
     public boolean stats;
 
@@ -223,11 +223,19 @@ public class ConnectionManager implements Runnable {
     }
     
     public void propertyManager(){
-	ClientId = SettingsManager.instance().getClientID();
-	if (ClientId == null){
-	    ClientId = new String(Message.makeGuid());
-	    SettingsManager.instance().setClientID(ClientId);
+	boolean ok=true;
+	try {
+	    ClientId = new GUID(GUID.fromHexString(SettingsManager.instance().getClientID()));
+	    if (ClientId==null)
+		ok=false;
+	} catch (IllegalArgumentException e) {
+	    ok=false;
 	}
+	if (!ok) {
+	    //This should never happen! But if it does, we can recover.
+	    ClientId=new GUID(Message.makeGuid());
+	}
+
 	boolean statVal = SettingsManager.instance().getStats();
 	if(statVal)
 	    stats = true;
@@ -610,10 +618,7 @@ public class ConnectionManager implements Runnable {
      */
     public boolean isClient(byte[] ClientId){
 	//get the client ID from the gnutella.ini file.
-	String packetId = new String (ClientId);
-	if ( this.ClientId.equals(packetId) )
-	    return true;
-	return false;
+	return this.ClientId.equals(new GUID(ClientId));
     }
 
     /**
