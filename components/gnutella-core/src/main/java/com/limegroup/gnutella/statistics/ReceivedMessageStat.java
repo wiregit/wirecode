@@ -52,7 +52,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_MESSAGES.incrementStat();
-			ALL_UDP_MESSAGES.incrementStat();
+			UDP_ALL_MESSAGES.incrementStat();
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_MESSAGES.incrementStat();
-			ALL_TCP_MESSAGES.incrementStat();
+			TCP_ALL_MESSAGES.incrementStat();
 		}
 	}
 
@@ -101,7 +101,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
-			ALL_UDP_MESSAGES_BYTES.addData(data);
+			UDP_ALL_MESSAGES_BYTES.addData(data);
 		}
 	}
 
@@ -114,7 +114,7 @@ public class ReceivedMessageStat extends AbstractStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
-			ALL_TCP_MESSAGES_BYTES.addData(data);
+			TCP_ALL_MESSAGES_BYTES.addData(data);
 		}
 	}
 
@@ -127,13 +127,13 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	/**
 	 * <tt>Statistic</tt> for all UPD messages received.
 	 */
-	public static final Statistic ALL_UDP_MESSAGES =
+	public static final Statistic UDP_ALL_MESSAGES =
 		new ReceivedMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages received.
 	 */
-	public static final Statistic ALL_TCP_MESSAGES =
+	public static final Statistic TCP_ALL_MESSAGES =
 		new ReceivedMessageStat();
 
 	/**
@@ -272,13 +272,13 @@ public class ReceivedMessageStat extends AbstractStatistic {
 	/**
 	 * <tt>Statistic</tt> for all UPD messages received.
 	 */
-	public static final Statistic ALL_UDP_MESSAGES_BYTES =
+	public static final Statistic UDP_ALL_MESSAGES_BYTES =
 		new ReceivedMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages received.
 	 */
-	public static final Statistic ALL_TCP_MESSAGES_BYTES =
+	public static final Statistic TCP_ALL_MESSAGES_BYTES =
 		new ReceivedMessageStatBytes();
 
 	/**

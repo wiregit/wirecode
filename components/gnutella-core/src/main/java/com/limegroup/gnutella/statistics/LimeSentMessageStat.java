@@ -41,7 +41,7 @@ public class LimeSentMessageStat extends AbstractStatistic {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_MESSAGES.incrementStat();
-			ALL_UDP_MESSAGES.incrementStat();
+			UDP_ALL_MESSAGES.incrementStat();
 		}
 	}
 
@@ -52,7 +52,7 @@ public class LimeSentMessageStat extends AbstractStatistic {
 		public void incrementStat() {
 			super.incrementStat();
 			ALL_MESSAGES.incrementStat();
-			ALL_TCP_MESSAGES.incrementStat();
+			TCP_ALL_MESSAGES.incrementStat();
 		}
 	}
 
@@ -76,7 +76,7 @@ public class LimeSentMessageStat extends AbstractStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
-			ALL_UDP_MESSAGES_BYTES.addData(data);
+			UDP_ALL_MESSAGES_BYTES.addData(data);
 		}
 	}
 
@@ -89,7 +89,7 @@ public class LimeSentMessageStat extends AbstractStatistic {
 		public void addData(int data) {
 			super.addData(data);
 			ALL_MESSAGES_BYTES.addData(data);
-			ALL_TCP_MESSAGES_BYTES.addData(data);
+			TCP_ALL_MESSAGES_BYTES.addData(data);
 		}
 	}
 
@@ -102,13 +102,13 @@ public class LimeSentMessageStat extends AbstractStatistic {
 	/**
 	 * <tt>Statistic</tt> for all UPD messages sent.
 	 */
-	public static final Statistic ALL_UDP_MESSAGES =
+	public static final Statistic UDP_ALL_MESSAGES =
 		new LimeSentMessageStat();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages sent.
 	 */
-	public static final Statistic ALL_TCP_MESSAGES =
+	public static final Statistic TCP_ALL_MESSAGES =
 		new LimeSentMessageStat();
 
 	/**
@@ -223,13 +223,13 @@ public class LimeSentMessageStat extends AbstractStatistic {
 	/**
 	 * <tt>Statistic</tt> for all UPD messages sent.
 	 */
-	public static final Statistic ALL_UDP_MESSAGES_BYTES =
+	public static final Statistic UDP_ALL_MESSAGES_BYTES =
 		new LimeSentMessageStatBytes();
 
 	/**
 	 * <tt>Statistic</tt> for all TCP messages sent.
 	 */
-	public static final Statistic ALL_TCP_MESSAGES_BYTES =
+	public static final Statistic TCP_ALL_MESSAGES_BYTES =
 		new LimeSentMessageStatBytes();
 
 	/**
