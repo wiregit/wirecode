@@ -1,5 +1,5 @@
 package com.limegroup.gnutella.security;
-
+import com.sun.java.util.collections.Set;
 /**
  * An interface for authentication purposes.
  * @author Anurag Singla
@@ -12,9 +12,9 @@ public interface Authenticator
      * @param username the "user" to be authenticated.
      * @param password the password of the user.
      * @param domain The domain for which to authenticate user
-     * @return true if the user is recognized as an authenticated user,
-     * false otherwise.
+     * @return the set (of Strings) of domains to which user is successfully
+     * authenticated. Returns null, if the authentication failed.
      */
-    public boolean authenticate(String username, String passwd, String domain);
+    public Set authenticate(String username, String passwd, String domain);
 }
 

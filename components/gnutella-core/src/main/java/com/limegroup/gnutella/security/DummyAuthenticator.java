@@ -1,4 +1,6 @@
 package com.limegroup.gnutella.security;
+import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 
 /**
  * A dummy authenticator. Does nothing
@@ -7,14 +9,16 @@ package com.limegroup.gnutella.security;
 public class DummyAuthenticator implements Authenticator
 {
     /**
-     * Always return true
+     * Always return a set with default domain
      * @param username the "user" to be authenticated.
      * @param password the password of the user.
      * @param domain The domain for which to authenticate user
-     * @return Always returns true
+     * @return the set (of Strings) consisting of just the default domain
      */
-    public boolean authenticate(String username, String passwd, String domain)
+    public Set authenticate(String username, String passwd, String domain)
     {
-        return true;
+        Set retSet = new HashSet();
+        retSet.add(User.DEFAULT_DOMAIN);
+        return retSet;
     }
 }
