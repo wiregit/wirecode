@@ -576,6 +576,7 @@ public class ManagedConnection
         //send the pongs for the Ultrapeer & 0.4 connections
         List /*<ManagedConnection>*/ nonLeafConnections 
             = _manager.getInitializedConnections2();
+        
         supersendNeighborPongs(m, nonLeafConnections);
         
         //send the pongs for leaves
@@ -612,9 +613,18 @@ public class ManagedConnection
                 pr = new PingReply(m.getGUID(),(byte)2,
                 connection.getOrigPort(),
                 connection.getInetAddress().getAddress(), 0, 0, true);  
-            } else {
+            } else if(connection.isClientConnection() 
+                || connection.isOutgoing()){
+                //we know the listening port of the host in this case
                 pr = new PingReply(m.getGUID(),(byte)2,
                 connection.getOrigPort(),
+                connection.getInetAddress().getAddress(), 0, 0); 
+            }
+            else{
+                //Use the port '0' in this case, as we dont know the listening
+                //port of the host
+                pr = new PingReply(m.getGUID(),(byte)2,
+                0,
                 connection.getInetAddress().getAddress(), 0, 0); 
             }
             
