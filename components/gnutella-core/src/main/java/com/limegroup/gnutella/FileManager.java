@@ -4,6 +4,8 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import java.security.*;
+
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -73,6 +75,12 @@ public class FileManager {
      *  if this has no callback.  */
     private static ActivityCallback _callback;
 
+    /**
+     * A generetor for the hashes of the files. 
+     */
+    private MessageDigest shaGenerator;
+    private boolean canHash = true;
+
     /** Characters used to tokenize queries and file names. */
     public static final String DELIMETERS=" -._+/*()\\";
     private static final boolean isDelimeter(char c) {
@@ -111,6 +119,11 @@ public class FileManager {
      *      @modifies this
      *      @see loadSettings */
     public void initialize(ActivityCallback callback) {
+        try{
+            shaGenerator = MessageDigest.getInstance("SHA");
+        }catch(NoSuchAlgorithmException nsae){
+            canHash = false;
+        }
         this._callback=callback;
         loadSettings(false);
     }
@@ -542,8 +555,26 @@ public class FileManager {
             long n = file.length();  
             if (n>Integer.MAX_VALUE || n<0)
                 return false;
-            _size += n;                    
-            _files.add(new FileDesc(_files.size(), name, path,  (int)n));
+            _size += n;
+            byte[] hash = null;
+            boolean hashed = false;
+            if(canHash){
+                //Lets calculate the hash for this file
+                hashed = true;
+                try{
+                    RandomAccessFile rFile = new RandomAccessFile(file, "r");
+                    byte[] fileBytes = new byte[(int)rFile.length()];
+                    rFile.readFully(fileBytes);
+                    rFile.close();
+                    hash = shaGenerator.digest(fileBytes);
+                }catch(Exception e){//could not hash
+                    hashed = false;
+                }
+            }
+            if(!canHash || !hashed)
+                _files.add(new FileDesc(_files.size(), name, path,  (int)n));
+            else
+                _files.add(new FileDesc(_files.size(),name,path,(int)n, hash));
             _numFiles++;
             int j=_files.size()-1;              //this' index
 

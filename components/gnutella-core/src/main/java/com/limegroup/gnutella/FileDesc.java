@@ -12,6 +12,10 @@ public class FileDesc {
     public String _path;
     public String _name;
     public int _size;
+    /**
+     * byte[] that stores the hash of the file. The format of the hash is SHA1
+     */
+    byte[] _hash;
 		
     /**
      * @param i index of the file
@@ -27,6 +31,15 @@ public class FileDesc {
         _name = n;
         _path = p;
         _size = s;
+        _hash = null;
+    }
+
+    public FileDesc(int i, String n, String p, int s, byte[] h) {
+        _index = i;
+        _name = n;
+        _path = p;
+        _size = s;
+        _hash = h;
     }
 
     public void print() {
@@ -34,6 +47,7 @@ public class FileDesc {
         System.out.println("Index: " + _index);
         System.out.println("Size: " + _size);
         System.out.println("Path: " + _path);
+        System.out.println("Hash  " + _hash);
         System.out.println(" ");
     }
 }
