@@ -33,24 +33,21 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	}
 	
 	
+	
 	private static byte [] derivePayload(Candidate []bestCandidates){
 		
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte [] networkData;
 		
-		Writer wr = new OutputStreamWriter(bos);
-
-		try{
-			bestCandidates[0].write(wr); //my best leaf
-			if (bestCandidates[1]!=null) 
-				bestCandidates[1].write(wr); //best leaf at ttl 1
-			wr.flush();
-			bos.flush();
-		}catch(IOException iox) {
-			//weird.  can't really do much except report it.
-			ErrorService.getErrorCallback().error(iox);
+		if (bestCandidates[1]!=null) { 
+			networkData = new byte [16];
+			System.arraycopy(bestCandidates[1].toByte(),0,networkData,8,8);
 		}
+		else 
+			networkData = new byte[8];
+
+		System.arraycopy(bestCandidates[0].toByte(),0,networkData,0,8); 
 		
-		return bos.toByteArray();
+		return networkData;
 	}
 	
 	
@@ -71,40 +68,26 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 */
 	private void parseCandidates(byte [] payload) throws BadPacketException {
 		
-
-		if (payload==null || payload.length==0)
-			throw new BadPacketException("empty payload for message with GUID "+new String(getGUID()));
+		//check if the message has the proper size payload
+		if (payload==null || 
+				!(payload.length==8 || payload.length==16))
+			throw new BadPacketException("invalid length payload for message with GUID "+new String(getGUID()));
 		
 		_bestCandidates = new Candidate[2];
 		
-		//split the payload in two lines
-		String both = new String(payload);
+		//we have at least one candidate
+		byte [] one = new byte[8];
+		System.arraycopy(payload,0,one,0,8);
+		_bestCandidates[0] = new Candidate(one);
 		
-		if (both.indexOf("\n")==-1)
-			throw new BadPacketException();
-		
-		if (both.indexOf("\n")==both.lastIndexOf("\n")) {
-			//seems like we either have an invalid packet or the other side knows of only one peer.
-			try{
-				_bestCandidates[0] = new Candidate(both);
-				_bestCandidates[1] = null;
-			} catch (ParseException pex){
-				//invalid packet
-				throw new BadPacketException();
-			}
-		} //otherwise, parse both
-		else {
-			String ttl0 = both.substring(0,both.indexOf("\n"));
-			String ttl1 = both.substring(both.indexOf("\n")+1,both.length());
-		
-			try {
-				_bestCandidates[0] = new Candidate(ttl0);
-				_bestCandidates[1] = new Candidate(ttl1);
-			}catch(ParseException pex) {
-				throw new BadPacketException();
-			}
-			
+		//if the size of the payload is 16 we have two candidates
+		if (payload.length==16) {
+			System.arraycopy(payload,8,one,0,8);
+			_bestCandidates[1]= new Candidate(one);
 		}
+		else //otherwise the other peer advertised just a single candidate
+			_bestCandidates[1]=null;
+		
 	}
 	/**
 	 * @return Returns the _bestCandidates.

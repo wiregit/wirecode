@@ -10,9 +10,12 @@ import java.net.InetAddress;
 import java.text.ParseException;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Comparator;
+
+import java.net.UnknownHostException;
 
 
 public class Candidate implements Comparable{
@@ -23,142 +26,59 @@ public class Candidate implements Comparable{
 	private ReplyHandler _advertiser;
 	
 	/**
-	 * the node that is the best candidate
+	 * the uptime of this Candidate in minutes
 	 */
-	
-	private ExtendedEndpoint _endpoint;
+	private final short _uptime;
 	
 	/**
-	 * deserializes a Candidate.  It delegates the parsing to the
-	 * ExtendedEndpoint.read method.
-	 * @param line  the line representing the endpoint
-	 * @throws ParseException parsing failed
+	 * the IpPort of this candidate
+	 * 
 	 */
-	public Candidate(String line) throws ParseException {
-		_endpoint = ExtendedEndpoint.read(line);
-	}
-	
-	/**
-	 * creates a new Candidate from a Connection object. 
-	 * Note: this casts the uptime of the connection to int.
-	 * @param con the connection to consider a candidate
-	 */
-	public Candidate(Connection con) {
-		_endpoint = new ExtendedEndpoint(con.getInetAddress().getHostAddress(),
-					con.getPort(),
-					(int)(System.currentTimeMillis() - con.getConnectionTime()));
-	}
-	
-	/**
-	 * @return Returns the advertiser.
-	 */
-	public ReplyHandler getAdvertiser() {
-		return _advertiser;
-	}
-	
-	public void setAdvertiser(ReplyHandler advertiser) {
-		_advertiser = advertiser;
-	}
-	
+	private final QueryReply.IPPortCombo _address;
 	
 	
 	/**
-	 * @param o
-	 * @return
+	 * the unit to count the uptime in.  Will be changed by tests, so 
+	 * its not final.
 	 */
+	private static int MINUTE = 60*1000;
+	
+	
+	/**
+	 * creates a Candidate from a Connection object
+	 * @param c the connection to our leaf
+	 * @throws UnknownHostException if the ip address could not be resolved. The caller should
+	 * skip such hosts.
+	 */
+	public Candidate(Connection c) throws UnknownHostException {
+		_uptime = (short)( (System.currentTimeMillis() - c.getConnectionTime())/(MINUTE) );
+		_address = new QueryReply.IPPortCombo(c.getAddress(),c.getPort());
+	}
+	
+	public Candidate(byte [] data) throws BadPacketException {
+		if (data.length!=8)
+			throw new BadPacketException("invalid size candidate");
+		
+		byte [] ip_port = new byte[6];
+		System.arraycopy(data,0,ip_port,0,6);
+		
+		_address = QueryReply.IPPortCombo.getCombo(ip_port);
+		_uptime  =(short) ByteOrder.ubytes2int(ByteOrder.leb2short(data, 6));
+	}
+	
+	public byte [] toByte() {
+		byte [] ipport = _address.toBytes();
+		byte [] ret = new byte[8];
+		
+		System.arraycopy(ipport,0,ret,0,ipport.length);
+		ByteOrder.short2leb(_uptime,ret,6);
+		return ret;
+	}
+	
 	public int compareTo(Object o) {
-		return _endpoint.compareTo(o);
+		Candidate other = (Candidate)o;
+		return _uptime-other._uptime;
 	}
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		return _endpoint.equals(obj);
-	}
-	/**
-	 * @return
-	 */
-	public String getAddress() {
-		return _endpoint.getAddress();
-	}
-	/**
-	 * @return
-	 */
-	public Iterator getConnectionFailures() {
-		return _endpoint.getConnectionFailures();
-	}
-	/**
-	 * @return
-	 */
-	public Iterator getConnectionSuccesses() {
-		return _endpoint.getConnectionSuccesses();
-	}
-	/**
-	 * @return
-	 */
-	public int getConnectivity() {
-		return _endpoint.getConnectivity();
-	}
-	/**
-	 * @return
-	 */
-	public int getDailyUptime() {
-		return _endpoint.getDailyUptime();
-	}
-	/**
-	 * @return
-	 */
-	public InetAddress getInetAddress() {
-		return _endpoint.getInetAddress();
-	}
-	/**
-	 * @return
-	 */
-	public int getPort() {
-		return _endpoint.getPort();
-	}
-	/**
-	 * @return
-	 */
-	public long getTimeRecorded() {
-		return _endpoint.getTimeRecorded();
-	}
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		return _endpoint.hashCode();
-	}
-	/**
-	 * @return
-	 */
-	public boolean isPrivateAddress() {
-		return _endpoint.isPrivateAddress();
-	}
-	/**
-	 * @param other
-	 * @return
-	 */
-	public boolean isSameSubnet(Endpoint other) {
-		return _endpoint.isSameSubnet(other);
-	}
-	/**
-	 * @param out
-	 * @throws IOException
-	 */
-	public void write(Writer out) throws IOException {
-		_endpoint.write(out);
-	}
-	
-	/**
-	 * delegate to ExtendedEndpoint
-	 * @return
-	 */
-	private int connectScore() {
-		return _endpoint.connectScore();
-	}
-	
-	
 	/**
 	 * returns comparator identical to the one for 
 	 * ExtendedEndpoints.
@@ -170,7 +90,7 @@ public class Candidate implements Comparable{
 	
 	/**
 	 * the comparator needs to be overriden too because of 
-	 * decorator.
+	 * decorator and null values support.
 	 */
 	static class CandidatePriorityComparator implements Comparator {
         public int compare(Object extEndpoint1, Object extEndpoint2) {
@@ -183,11 +103,41 @@ public class Candidate implements Comparable{
         	
             Candidate a=(Candidate)extEndpoint1;
             Candidate b=(Candidate)extEndpoint2;
-            int ret=a.connectScore()-b.connectScore();
-            if (ret!=0) 
-                return ret;
-            else
-                return a.getDailyUptime() - b.getDailyUptime();
+            return a._uptime-b._uptime;
+            
         }
     }
+	
+	/**
+	 * @return Returns the _advertiser.
+	 */
+	public ReplyHandler getAdvertiser() {
+		return _advertiser;
+	}
+	/**
+	 * @param _advertiser The _advertiser to set.
+	 */
+	public void setAdvertiser(ReplyHandler _advertiser) {
+		this._advertiser = _advertiser;
+	}
+	
+	/**
+	 * Constructs a candidate with explicitly supplied values.  Will probably be used
+	 * only in testing.
+	 * @param host the host
+	 * @param port the port
+	 * @param uptime the uptime in minutes
+	 */
+	public Candidate(String host, int port, short uptime) throws UnknownHostException {
+
+		_address = new QueryReply.IPPortCombo(host, port);
+
+		_uptime = uptime;
+	}
+	/**
+	 * @return the InetAddress of the candidate
+	 */
+	public InetAddress getInetAddress() {
+		return _address.getInetAddress();
+	}
 }
