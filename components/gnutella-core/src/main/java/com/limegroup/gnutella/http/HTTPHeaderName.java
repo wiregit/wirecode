@@ -34,8 +34,7 @@ public class HTTPHeaderName {
 	/**
 	 * Header for alternate file locations, as per HUGE v0.94.
 	 */
-	public static final HTTPHeaderName ALT_LOCATION = 
-		new HTTPHeaderName("X-AltLocs");
+	public static final HTTPHeaderName ALT_LOCATION=new HTTPHeaderName("X-Alt");
 	
     public static final HTTPHeaderName OLD_ALT_LOCS = 
         new HTTPHeaderName("X-Gnutella-Alternate-Location");
@@ -44,8 +43,7 @@ public class HTTPHeaderName {
     /**
      * Header for failed Alternate locations to be added to mesh
      */
-    public static final HTTPHeaderName NALTS = 
-        new HTTPHeaderName("X-NAlts");
+    public static final HTTPHeaderName NALTS = new HTTPHeaderName("X-NAlt");
     
 
 	/**
