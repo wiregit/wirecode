@@ -11,11 +11,9 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.util.ArrayListUtil;
+import com.limegroup.gnutella.util.*;
 
-public class FileManager{
+public class FileManager {
     /** the total size of all files, in bytes.
      *  INVARIANT: _size=sum of all size of the elements of _files */
     private int _size;
@@ -30,10 +28,10 @@ public class FileManager{
     /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  INVARIANT: For all keys k in
-     * _index, for all i in _index.getAll(k), _files[i]._path.substring(k)!=-1.
-     * Likewise for all i, for all k in _files[i]._path, _index.getAll(k)
+     * _index, for all i in _index.get(k), _files[i]._path.substring(k)!=-1.
+     * Likewise for all i, for all k in _files[i]._path, _index.get(k)
      * contains i. */
-    private Trie /* String -> Integer*  */ _index;
+    private Trie /* String -> Set<Integer>  */ _index;
 
     private String[] _extensions;
     private Set _sharedDirectories;
@@ -173,19 +171,21 @@ public class FileManager{
             _size += n;                         /* the appropriate info */
             _files.add(new FileDesc(_files.size(), name, path,  n));
             _numFiles++;
-            
-            //TODO2: save space by not adding path components to Trie, or using
-            //a special value for the value.  Likewise for common extensions
-            //like "mp3".  Perhaps this logic could go into Trie, e.g., a
-            //compress(..) method.  But then the Trie has to be careful remove
-            //values.
 
-            //Update index...
+            //For each keyword...
+            Integer j=new Integer(_files.size()-1);
             String[] keywords=StringUtils.split(path, DELIMETERS);
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
-                Integer j=new Integer(_files.size()-1);
-                _index.add(keyword, j);
+                //Ensure there _index has a set of indices associated with
+                //keyword.
+                Set indices=(Set)_index.get(keyword);
+                if (indices==null) {
+                    indices=new TreeSet(ArrayListUtil.integerComparator());
+                    _index.add(keyword, indices);
+                }
+                //Add j to the set.
+                indices.add(j);
             }
         }
     }
@@ -250,7 +250,12 @@ public class FileManager{
                                                     DELIMETERS);
                 for (int j=0; j<keywords.length; j++) {
                     String keyword=keywords[j];
-                    _index.remove(keyword, new Integer(i));
+                    Set indices=(Set)_index.get(keyword);
+                    if (indices!=null) {
+                        indices.remove(new Integer(i));
+                        //TODO2: prune tree if possible.  call
+                        //_index.remove(keyword) if indices.size()==0.
+                    }
                 }
                 return true;  //No more files in list will match this.
             }
@@ -326,7 +331,10 @@ public class FileManager{
         for (int i=0; i < hashsize; i++) {
             addDirectory(dirs[i]);
         }
+     
 
+        //System.out.println("Index loaded.");
+        //System.out.println(_index.toString());   
     }
 
     /**
@@ -379,7 +387,8 @@ public class FileManager{
     /**
      * Returns a set of indices of files matching q, or null if there are no
      * matches.  Subclasses may override to provide different notions of
-     * matching.  
+     * matching.  The caller of this method must not mutate the returned
+     * value.
      */
     protected synchronized Set search(String query) {
         //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
@@ -387,8 +396,9 @@ public class FileManager{
         //then you need to make _files volatile and work on a local reference,
         //i.e., "_files=this._files"
 
-        //TODO3: can we avoid allocating sets here?  Are better representations
-        //better?
+        //As an optimization, we lazily allocate all sets in case there are no
+        //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
+        //returns an iterator of one element and there is only one keyword.
         Set ret=null;
 
         //For each keyword in the query....  (Note that we avoid calling
@@ -404,27 +414,30 @@ public class FileManager{
                     break;
             }
 
-            //Now search for keywords[i...j-1].
-            Iterator /* of List<Integer> */ iter=
+            //Search for keyword, i.e., keywords[i...j-1].  
+            Iterator /* of Set<Integer> */ iter=
                 _index.getPrefixedBy(query, i, j);
-            Set matches=null;  //allocated lazily below
-            while (iter.hasNext()) {
-                Integer k=(Integer)iter.next();
-                if (matches==null)
-                    matches=new TreeSet(ArrayListUtil.integerComparator());
-                matches.add(k);
-            }
-            //No matches for this keyword?
-            if (matches==null)
+            if (iter.hasNext()) {
+                //Got match.  Union contents of the iterator and store in
+                //matches.
+                Set matches=new TreeSet(ArrayListUtil.integerComparator());
+                while (iter.hasNext()) {                
+                    Set s=(Set)iter.next();
+                    matches.addAll(s);
+                }
+
+                //Intersect matches with ret.  If ret isn't allocated,
+                //initialize to matches.
+                if (ret==null)   
+                    ret=matches;
+                else
+                    ret.retainAll(matches);
+            } else {
+                //No match.  Optimizaton: no matches for keyword => failure
                 return null;
-
-            //Set up ret variable as needed.
-            else if (ret==null)   
-                ret=matches;
-            else
-                ret.retainAll(matches);
-
-            //Optimization: if no matches, don't check others..
+            }
+            
+            //Optimization: no matches after intersect => failure
             if (ret.size()==0)
                 return null;        
             i=j;
