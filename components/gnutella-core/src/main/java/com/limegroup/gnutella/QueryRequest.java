@@ -4,6 +4,11 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 
+/**
+ * This class encapsulates the data in an individual Gnutella query, 
+ * handling both queries coming in from the network and new outgoing
+ * queries.
+ */
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
@@ -11,14 +16,14 @@ public class QueryRequest extends Message implements Serializable{
     private final int minSpeed;
     /** The query string, if we've already extracted it.  Null otherwise. 
      *  LOCKING: obtain this' lock. */
-    private final String query;//=null;
-    private final String richQuery;// = null;
+    private final String query;
+    private final String richQuery;
 
     // HUGE v0.93 fields
     /** Any URN types requested on responses */
-    private final Set requestedUrnTypes;// = null;
+    private final Set requestedUrnTypes;
     /** Any exact URNs requested to match */
-    private final Set queryUrns;// = null;
+    private final Set queryUrns;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -42,6 +47,24 @@ public class QueryRequest extends Message implements Serializable{
         this(ttl, minSpeed, query, richQuery, false, null, null);
     }
 
+    /**
+     * Older form of the constructor calls the newer form of the constructor
+     * with a empty rich query
+     */
+    public QueryRequest(byte ttl, int minSpeed, String query) {
+        this(ttl, minSpeed, query, "", false, null, null);
+    }
+
+
+    /**
+     * Older form of the constructor calls the newer form of the constructor
+     * with a empty rich query, but allows you to flag as a requery
+     */
+    public QueryRequest(byte ttl, int minSpeed, 
+                        String query, boolean isRequery) {
+        this(ttl, minSpeed, query, "", isRequery, null, null);
+    }
+
 
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
@@ -62,14 +85,12 @@ public class QueryRequest extends Message implements Serializable{
 		Set tempQueryUrns = null;
 		if(requestedUrnTypes != null) {
 			tempRequestedUrnTypes = new HashSet(requestedUrnTypes);
-			//this.requestedUrnTypes = new HashSet(requestedUrnTypes);
 		} else {
 			tempRequestedUrnTypes = new HashSet();
 		}
 		
 		if(queryUrns != null) {
 			tempQueryUrns = new HashSet(queryUrns);
-			//this.queryUrns = new HashSet(queryUrns);
 		} else {
 			tempQueryUrns = new HashSet();
 		}
@@ -80,7 +101,8 @@ public class QueryRequest extends Message implements Serializable{
             ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
             baos.write(query.getBytes());              // write query
             baos.write(0);                             // null
-            // now write any & all HUGE v0.93 General Extension Mechanism extensions
+            // now write any & all HUGE v0.93 General Extension Mechanism 
+			// extensions
             boolean addDelimiterBefore = false;
 			
 			// add the rich query
@@ -110,25 +132,6 @@ public class QueryRequest extends Message implements Serializable{
 		this.requestedUrnTypes = Collections.unmodifiableSet(tempRequestedUrnTypes);
     }
 
-    /**
-     * Older form of the constructor calls the newer form of the constructor
-     * with a empty rich query
-     */
-    public QueryRequest(byte ttl, int minSpeed, String query) {
-        this(ttl, minSpeed, query, "", false, null, null);
-    }
-
-
-    /**
-     * Older form of the constructor calls the newer form of the constructor
-     * with a empty rich query, but allows you to flag as a requery
-     */
-    public QueryRequest(byte ttl, int minSpeed, 
-                        String query, boolean isRequery) {
-        this(ttl, minSpeed, query, "", isRequery, null, null);
-    }
-
-
     /*
      * Build a new query with data snatched from network
      *
@@ -137,7 +140,7 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, byte hops,
 						byte[] payload) {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
-		if(this.payload == null) {
+		if(payload == null) {
 			this.payload = EMPTY_BYTE_ARRAY;
 		}
 		else {
@@ -149,18 +152,14 @@ public class QueryRequest extends Message implements Serializable{
 		Set tempQueryUrns = null;
 		Set tempRequestedUrnTypes = null;
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-            short sp = ByteOrder.leb2short(bais);
-            tempMinSpeed = ByteOrder.ubytes2int(sp);
-            //query = readNullTerminatedString(bais);
-            tempQuery = readNullTerminatedString(bais);
+            ByteArrayInputStream bais = new ByteArrayInputStream(this.payload);
+			short sp = ByteOrder.leb2short(bais);
+			tempMinSpeed = ByteOrder.ubytes2int(sp);
+            tempQuery = super.readNullTerminatedString(bais);
             // handle extensions, which include rich query and URN stuff
-            //queryUrns=null;
-            //requestedUrnTypes=null;
-            String exts = readNullTerminatedString(bais);
+            String exts = super.readNullTerminatedString(bais);
             StringTokenizer stok = new StringTokenizer(exts,"\u001c");
             while (stok.hasMoreElements()) {
-                //handleGemExtensionString(stok.nextToken());
 				String curExtStr = stok.nextToken();
 				if(URN.isUrn(curExtStr)) {
 					// it's an URN to match, of form "urn:namespace:etc"
@@ -182,7 +181,8 @@ public class QueryRequest extends Message implements Serializable{
 					// URNs on responses, so add the URN prefix there, too
 					tempRequestedUrnTypes.add(urn.getUrnType());
 				} else if(UrnType.isSupportedUrnType(curExtStr)) {
-					// it's an URN type to return, of form "urn" or "urn:namespace"
+					// it's an URN type to return, of form "urn" or 
+					// "urn:namespace"
 					if(tempRequestedUrnTypes == null) {
 						tempRequestedUrnTypes = new HashSet();
 					}
@@ -259,36 +259,6 @@ public class QueryRequest extends Message implements Serializable{
 		return queryUrns;
     }
 
-    /** 
-     * Returns the number of raw bytes used to represent the query in this
-     * message, excluding any null terminators. The returned value is typically
-     * used in conjunction with getQueryByteAt. Because of character encoding
-     * problems, the returned value does not necessarily equal getQuery.length()
-     * or getQuery.getBytes().length.  
-     */
-    public int getQueryLength(){
-        //if it's double null terminated
-        if (super.getLength()>3 && payload[payload.length-2]==(byte)0)
-            return payload.length-4;
-        else //normal case
-            return payload.length-3;
-    }
-    
-    /** 
-     * Returns the pseudoIndex'th byte of the raw query in this message. Throws
-     * ArrayIndexOutOfBoundsException if pseudoIndex<0 or
-     * pseudoIndex>=getQueryLength, i.e., if the given index is either within
-     * the first two bytes of the payload or goes into the null termination
-     * area.  Because of different character encodings, the returned value does
-     * not necessarily equal getQuery().getBytes()[pseudoIndex].
-     */
-    public byte getQueryByteAt(int pseudoIndex)
-		throws ArrayIndexOutOfBoundsException {
-        if (pseudoIndex<0 || pseudoIndex > getQueryLength()-1)
-            throw new ArrayIndexOutOfBoundsException();
-        return payload[pseudoIndex+2];
-    }
-
     /**
 	 * Note: the minimum speed can be represented as a 2-byte unsigned
 	 * number, but Java shorts are signed.  Hence we must use an int.  The
@@ -302,53 +272,6 @@ public class QueryRequest extends Message implements Serializable{
         return "QueryRequest("+getQuery()+", "+getMinSpeed()
             +", "+super.toString()+")";
     }
-
-    /** Unit test */
-    /*
-    public static void main(String args[]) {
-        int u2=0x0000FFFF;
-        QueryRequest qr=new QueryRequest((byte)3,u2,"");
-        Assert.that(qr.getMinSpeed()==u2);
-        Assert.that(qr.getQuery().equals(""));
-        Assert.that(qr.getQueryLength()==0);
-        
-
-        qr=new QueryRequest((byte)3,(byte)1,"ZZZ");
-        Assert.that(qr.getMinSpeed()==(byte)1);
-        Assert.that(qr.getQuery().equals("ZZZ"));
-        Assert.that(qr.getQueryLength()==3);
-        System.out.println("(ZZZ) First byte = "+qr.getQueryByteAt(0));
-
-        //String is single null-terminated.
-        byte[] payload=new byte[2+2];
-        payload[2]=(byte)65;
-        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-        Assert.that(qr.getLength()==4);
-        String s=qr.getQuery();
-        Assert.that(s.equals("A"), s);
-        Assert.that(qr.getQueryLength()==1);
-        Assert.that(qr.getQueryByteAt(0)==65);//first byte of query.
-
-
-        //String is double null-terminated.
-        payload=new byte[2+3];
-        payload[2]=(byte)65;
-        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-        s=qr.getQuery();
-        Assert.that(s.equals("A"), s);
-        Assert.that(qr.getQueryLength()==1);
-        Assert.that(qr.getQueryByteAt(0)==65);
-
-        //String is empty.
-        payload=new byte[2+1];
-        qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-        s=qr.getQuery();
-        Assert.that(s.equals(""), s);
-        Assert.that(qr.getQueryLength()==0);
-        System.out.println("here comes an exception");
-        qr.getQueryByteAt(0);
-    }
-    */
 }
 
 
