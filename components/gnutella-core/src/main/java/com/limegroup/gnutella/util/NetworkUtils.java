@@ -190,9 +190,7 @@ public final class NetworkUtils {
         
         
         int addr = ((address[0] & 0xFF) << 24) | 
-        			((address[1] & 0xFF)<< 16) | 
-        			((address[2] & 0xFF) << 8) |
-        			(address[3] & 0xFF);
+        			((address[1] & 0xFF)<< 16);
         
         for (int i =0;i< 7;i++){
             if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) ==

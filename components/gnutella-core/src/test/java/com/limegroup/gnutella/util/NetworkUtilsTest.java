@@ -26,6 +26,8 @@ public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         "192.168.255.255",
         "169.254.0.0",
         "169.254.255.255",
+        "255.1.2.3",
+        "255.0.0.0"
         //"240.0.0.0",
     };
 
