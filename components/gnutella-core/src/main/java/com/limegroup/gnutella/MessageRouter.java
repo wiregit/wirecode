@@ -68,11 +68,10 @@ public abstract class MessageRouter {
     private final ReplyHandler FOR_ME_REPLY_HANDLER = 
 		ForMeReplyHandler.instance();
 		
-    /** 
-     * The time to wait between route table updates, in milliseconds. 
+    /**
+     * The maximum size for <tt>RouteTable</tt>s.
      */
-    private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
-    private int MAX_ROUTE_TABLE_SIZE=50000;        //actually 100,000 entries
+    private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
@@ -215,12 +214,17 @@ public abstract class MessageRouter {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
-		} else if (msg instanceof RouteTableMessage) {
+		} else if (msg instanceof ResetTableMessage) {
 			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handleRouteTableMessage((RouteTableMessage)msg,
+				ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handleResetTableMessage((ResetTableMessage)msg,
                                     receivingConnection);
-		} 
+		} else if (msg instanceof PatchTableMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handlePatchTableMessage((PatchTableMessage)msg,
+                                    receivingConnection);            
+        }
         else if (msg instanceof MessagesSupportedVendorMessage) 
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         else if (msg instanceof HopsFlowVendorMessage)
@@ -613,16 +617,6 @@ public abstract class MessageRouter {
            (!reply.getIP().equals(address.getHostAddress()))) {
             UNICASTER.addUnicastEndpoint(address, port);
 		}
-
-		// TODO: are we sure we want to do this?
-        // notify neighbors of new unicast endpoint...
-//         Iterator guessUltrapeers = 
-// 			_manager.getConnectedGUESSUltrapeers().iterator();
-//         while (guessUltrapeers.hasNext()) {
-//             ManagedConnection currMC = 
-// 				(ManagedConnection) guessUltrapeers.next();
-// 			currMC.handlePingReply(reply, handler);
-//         }
         
         // normal pong processing...
         handlePingReply(reply, handler);
@@ -920,15 +914,6 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
-		//TODO:
-		//because of some very obscure optimization rules, it's actually
-		//possible that qi could be non-null but not initialized.  Need
-		//to be more careful about locking here.
-
-        //if(!mc.hasRouteTableData()) return false;
-		//ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-		//if (qi.lastReceived==null) 
-        //return false;
 		if (mc.hitsQueryRouteTable(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
@@ -1568,39 +1553,61 @@ public abstract class MessageRouter {
 
 
     /**
-     * Handles a query route table update message that originated from
-     * receivingConnection.
+     * Handles a message to reset the query route table for the given
+     * connection.
+     *
+     * @param rtm the <tt>ResetTableMessage</tt> for resetting the query
+     *  route table
+     * @param mc the <tt>ManagedConnection</tt> for which the query route
+     *  table should be reset
      */
-    private void handleRouteTableMessage(RouteTableMessage m,
-										 ManagedConnection receivingConnection) {
-        //if not a supernode-client, ignore
-        if(! receivingConnection.isSupernodeClientConnection() &&
-		   ! receivingConnection.isUltrapeerQueryRoutingConnection())
-            return;
-                                            
-        //Mutate query route table associated with receivingConnection.  
-        //(This is legal.)  Create a new one if none exists.
-        synchronized (receivingConnection.getQRPLock()) {
-            receivingConnection.updateQueryRouteTable(m);
+    private void handleResetTableMessage(ResetTableMessage rtm,
+                                         ManagedConnection mc) {
 
-            /*
-            ManagedConnectionQueryInfo qi =
-                receivingConnection.getQueryRouteState();
-            if (qi.lastReceived==null) {
-                //TODO3: it's somewhat silly to allocate a new table and then
-                //immediately replace its state with RESET.  Probably best to
-                //have QueryRouteTable lazily allocate memory.
-                qi.lastReceived=new QueryRouteTable();
-            }
-            try {
-                qi.lastReceived.update(m);    
-            } catch (BadPacketException e) {
-                //TODO: ?
-            }
-            */
+        // if it's not from a leaf or an Ultrapeer advertising 
+        // QRP support, ignore it
+        if(!isQRPConnection(mc)) return;
+
+        // reset the query route table for this connection
+        synchronized (mc.getQRPLock()) {
+            mc.resetQueryRouteTable(rtm);
         }
     }
 
+    /**
+     * Handles a message to patch the query route table for the given
+     * connection.
+     *
+     * @param rtm the <tt>PatchTableMessage</tt> for patching the query
+     *  route table
+     * @param mc the <tt>ManagedConnection</tt> for which the query route
+     *  table should be patched
+     */
+    private void handlePatchTableMessage(PatchTableMessage ptm,
+                                         ManagedConnection mc) {
+        // if it's not from a leaf or an Ultrapeer advertising 
+        // QRP support, ignore it
+        if(!isQRPConnection(mc)) return;
+
+        // patch the query route table for this connection
+        synchronized(mc.getQRPLock()) {
+            mc.patchQueryRouteTable(ptm);
+        }
+    }
+
+    /**
+     * Utility method for checking whether or not the given connection
+     * is able to pass QRP messages.
+     *
+     * @param c the <tt>Connection</tt> to check
+     * @return <tt>true</tt> if this is a QRP-enabled connection,
+     *  otherwise <tt>false</tt>
+     */
+    private static boolean isQRPConnection(Connection c) {
+        if(c.isSupernodeClientConnection()) return true;
+        if(c.isUltrapeerQueryRoutingConnection()) return true;
+        return false;
+    }
 
     /** Thread the processing of QRP Table delivery. */
     private class QRPPropagator extends Thread {
@@ -1668,8 +1675,6 @@ public abstract class MessageRouter {
 
 
 			c.incrementNextQRPForwardTime(time);
-
-			ManagedConnectionQueryInfo qi=c.getQueryRouteState();
 				
 			//Create table to send on this connection...
 			if (table == null) {
@@ -1678,11 +1683,13 @@ public abstract class MessageRouter {
 
 			//..and send each piece.
 			//TODO2: use incremental and interleaved update
-			for (Iterator iter=table.encode(qi.lastSent); iter.hasNext();) {  
+			for (Iterator iter=table.encode(c.getQueryRouteTableSent()); 
+                 iter.hasNext();) {  
 				RouteTableMessage m=(RouteTableMessage)iter.next();
 				c.send(m);
 			}
-			qi.lastSent=table;
+            c.setQueryRouteTableSent(table);
+			//qi.lastSent=table;
 		}
     }
 
@@ -1731,9 +1738,9 @@ public abstract class MessageRouter {
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
         	synchronized (mc.getQRPLock()) {
-				ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-				if(qi.lastReceived != null) {
-					qrt.addAll(qi.lastReceived);
+                QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
+				if(qrtr != null) {
+					qrt.addAll(qrtr);
 				}
 			}
 		}
