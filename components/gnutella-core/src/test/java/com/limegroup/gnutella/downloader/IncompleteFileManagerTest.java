@@ -8,6 +8,11 @@ import java.io.*;
 public class IncompleteFileManagerTest extends TestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;
+    
+    static {
+        SettingsManager.instance();
+    }
+    
 
     public IncompleteFileManagerTest(String name) {
         super(name);
@@ -277,14 +282,21 @@ public class IncompleteFileManagerTest extends TestCase {
             in.close();
             
             //Make sure it's the same.
-            VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(
-                                                 new File("T-1839-file name.txt"));
+            File incomp = null;
+            File inDir = null;
+            try {
+                inDir = SettingsManager.instance().getIncompleteDirectory();
+            } catch(java.io.FileNotFoundException fnfe) {
+                fail("unable to set up test-cannot find incomplete directory");
+            }
+            incomp =  new File(inDir, "T-1839-file name.txt");
+            VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(incomp);
             assertTrue(vf2!=null);
             Iterator /* of Interval */ iter=vf2.getBlocks();
             assertTrue(iter.hasNext());
             assertEquals(new Interval(10, 100), iter.next());
             assertTrue(!iter.hasNext());
-            assertEquals(new File("T-1839-file name.txt"),
+            assertEquals(new File(inDir, "T-1839-file name.txt"),
                 ifm2.getFile(newRFD("different name.txt", 1839, 
                                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
         } catch (IOException e) {
