@@ -350,9 +350,12 @@ public final class QueryHandler {
 
         // 3) If we haven't yet satisfied the query, keep trying
         else {
-            // otherwise, just send a normal query
+            // Otherwise, just send a normal query -- make a copy of the 
+            // connections because we'll be modifying it.
             int newHosts = 
-                sendQuery(_connectionManager.getInitializedConnections());
+                sendQuery(
+                    new ArrayList(
+                            _connectionManager.getInitializedConnections()));
             if(newHosts == 0) {
                 // if we didn't query any new hosts, wait awhile for new
                 // connections to potentially appear
@@ -369,9 +372,9 @@ public final class QueryHandler {
 
                 int resultFactor =
                     Math.max(1, 
-                        (int)(RESULTS/2)-(30*RESULT_COUNTER.getNumResults()));
+                        (RESULTS/2)-(30*RESULT_COUNTER.getNumResults()));
 
-                int decrementFactor = Math.max(1, (int)(_numDecrements/6));
+                int decrementFactor = Math.max(1, (_numDecrements/6));
 
                 // the current decrease is weighted based on the number
                 // of results returned and on the number of connections
@@ -469,7 +472,7 @@ public final class QueryHandler {
         int resultsNeeded = RESULTS - results;
         int hostsToQuery = 40000;
         if(resultsPerHost != 0) {
-            hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
+            hostsToQuery = (int)(resultsNeeded/resultsPerHost);
         }
                 
         
