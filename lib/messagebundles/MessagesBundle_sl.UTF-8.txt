@@ -135,7 +135,7 @@ GENERAL_UNIT_KBPSEC=kB/s
 # Key/value pair for the main application title
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
-#? APP_TITLE=
+APP_TITLE=LimeWire: Poganjam mrežo Gnutella
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
@@ -429,9 +429,9 @@ MENU_VIEW_LIBRARY_ACCESSIBLE=Prikaži okno knjižnice.
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language
 #? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=
 #### MENU_VIEW_SEARCH_TITLE=Search
-#? MENU_VIEW_SEARCH_TITLE=
+MENU_VIEW_SEARCH_TITLE=Iskanje
 #### MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
-#? MENU_VIEW_SEARCH_TITLE_MNEMONIC=
+MENU_VIEW_SEARCH_TITLE_MNEMONIC=I
 #### MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
 #? MENU_VIEW_SEARCH_ACCESSIBLE=
 #### MENU_VIEW_SEARCH_FILTERS=Result Filters
@@ -441,9 +441,9 @@ MENU_VIEW_LIBRARY_ACCESSIBLE=Prikaži okno knjižnice.
 #### MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show Search Result Filters
 #? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=
 #### MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
-#? MENU_VIEW_SEARCH_MAGNETMIX=
+MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 #### MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
-#? MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=
+MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 #### MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
 #? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=
 
@@ -1136,9 +1136,9 @@ CV_STRING_ULTRAPEER=[Ultrapeer]
 #### CV_TABLE_STRING_KBPSEC=KB/s
 CV_TABLE_STRING_KBPSEC=kB/s
 #### CV_ADD_HOST_LABEL=Host:
-#? CV_ADD_HOST_LABEL=
+CV_ADD_HOST_LABEL=Gostitelj:
 #### CV_ADD_PORT_LABEL=Port:
-#? CV_ADD_PORT_LABEL=
+CV_ADD_PORT_LABEL=Vrata:
 #### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
 #? CV_ADD_DIALOG_TITLE=
 
