@@ -181,6 +181,8 @@ public class RouterService
         // Ensure the keep alive is at least 1.
         if (settings.getKeepAlive()<1)
             settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
+        if (settings.getKeepAliveOld()<1)
+            settings.setKeepAliveOld(SettingsInterface.DEFAULT_KEEP_ALIVE_OLD);
         int oldKeepAlive = settings.getKeepAlive();
 
         // Build an endpoint of the group server
@@ -203,27 +205,26 @@ public class RouterService
             return;
         }
 
-        // Reset the KeepAlive to greater than 1
-        //oldKeepAlive;
-
         //Ensure settings are positive
-        int outgoing=settings.getKeepAlive();
-        if (outgoing<1) {
-            outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);
+        int outgoingNew=settings.getKeepAlive();
+        if (outgoingNew<1) {
+            outgoingNew = settings.DEFAULT_KEEP_ALIVE;
+            settings.setKeepAlive(outgoingNew);
         }
-        //int incoming=settings.getMaxIncomingConnections();
-        ///if (incoming<1 && outgoing!=0) {
-		// incoming = outgoing/2;
-		//  settings.setMaxIncomingConnections(incoming);
-        //}
+        int outgoingOld=settings.getKeepAliveOld();
+        if (outgoingOld<1) {
+            outgoingOld = settings.DEFAULT_KEEP_ALIVE_OLD;
+            settings.setKeepAliveOld(outgoingOld);
+        }
 
 		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
+		if ( outgoingNew < 10 ) {
+			outgoingNew = 10;
 			manager.activateUltraFastConnectShutdown();
 		}
-        setKeepAlive(outgoing);
+        //Actually notify the backend.
+        setKeepAlive(outgoingNew, true);
+        setKeepAlive(outgoingOld, false);
         settings.setUseQuickConnect(useQuickConnect);
     }
 
@@ -239,22 +240,25 @@ public class RouterService
         catcher.connectToPongServer();
 
         //Ensure outgoing connections is positive.
-        int outgoing=settings.getKeepAlive();
-        if (outgoing<1) {
-            outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);
+        int outgoingNew=settings.getKeepAlive();
+        if (outgoingNew<1) {
+            outgoingNew = settings.DEFAULT_KEEP_ALIVE;
+            settings.setKeepAlive(outgoingNew);
         }
-        //Actually notify the backend.
+        int outgoingOld=settings.getKeepAliveOld();
+        if (outgoingOld<1) {
+            outgoingOld = settings.DEFAULT_KEEP_ALIVE_OLD;
+            settings.setKeepAliveOld(outgoingOld);
+        }
 
 		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
+		if ( outgoingNew < 10 ) {
+			outgoingNew = 10;
 			manager.activateUltraFastConnectShutdown();
 		}
-        setKeepAlive(outgoing);
-
-        //int incoming=settings.getKeepAlive();
-        //setMaxIncomingConnections(incoming);
+        //Actually notify the backend.
+        setKeepAlive(outgoingNew, true);
+        setKeepAlive(outgoingOld, false);
     }
 
     /**
@@ -268,12 +272,11 @@ public class RouterService
 		manager.deactivateUltraFastConnectShutdown(); 
 
         SettingsManager settings=SettingsManager.instance();
-        int oldKeepAlive=settings.getKeepAlive();
 
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.
-        setKeepAlive(0);
-        //setMaxIncomingConnections(0);
+        setKeepAlive(0, true);
+        setKeepAlive(0, false);
         //2. Remove all connections.
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {
@@ -338,21 +341,15 @@ public class RouterService
     }
 
     /**
-     *  Reset how many connections you want and start kicking more off
-     *  if required.  Does not affect the KEEP_ALIVE property.
+     * Reset how many connections you want and start kicking more off if
+     * required.  If isNew, the value refers to new connections only; otherwise
+     * it refers to old connections only.  Does not affect the KEEP_ALIVE or
+     * KEEP_ALIVE_OLD properties. 
      */
-    public void setKeepAlive(int newKeep) {
-        manager.setKeepAlive(newKeep);
+    public void setKeepAlive(int keep, boolean isNew) {
+        manager.setKeepAlive(keep, isNew);
     }
 
-    /**
-     * Sets the max number of incoming Gnutella connections allowed by the
-     * connection manager.  This does not affect the permanent
-     * MAX_INCOMING_CONNECTIONS property.  
-     */
-    //public void setMaxIncomingConnections(int max) {
-	//manager.setMaxIncomingConnections(max);
-    //}
 
     /**
      * Notify the backend that spam filters settings have changed, and that

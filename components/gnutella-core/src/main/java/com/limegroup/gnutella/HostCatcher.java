@@ -305,12 +305,11 @@ public class HostCatcher {
 
     /**
      * Clears out all the pongs currently in the main cache and sets the next
-     * time the cache expires.  Also, copies the contents of the main cache
-     * into the reserve cache.
+     * time the cache expires.  
      */
     public synchronized void clearCache() {
         //first copy contents of main cache into reserve cache.
-        copyCacheContents();
+        //copyCacheContents();
         
         //next clear the main cache.
         for (int i = 0; i < mainCache.length; i++) 
@@ -453,30 +452,30 @@ public class HostCatcher {
         }
     }
 
-    /**
-     * Copies the contents of the main cache into the reserve cache (both
-     * the set and queue).
-     */ 
-    private void copyCacheContents() {
-        for (Iterator iter = getCachedHosts(null, mainCache.length); 
-             iter.hasNext(); ) {
-            //all addresses from the main cache are considered the "best"
-            //endpoints in the reserve cache.
-            PingReply pr = (PingReply)iter.next();
-            Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort(), 
-                                      pr.getFiles(), pr.getKbytes());
-            e.setWeight(BEST_PRIORITY);
-            //only add the element if it doesn't exist already
-            if (!reserveCacheSet.contains(e)) {
-                //Adding e may eject an older point from queue, so we have to
-                //cleanup the set to maintain rep. invariant.
-                reserveCacheSet.add(e);
-                Object ejected=reserveCacheQueue.insert(e);
-                if (ejected!=null)
-                    reserveCacheSet.remove(ejected);
-            }
-        }
-    }
+//      /**
+//       * Copies the contents of the main cache into the reserve cache (both
+//       * the set and queue).
+//       */ 
+//      private void copyCacheContents() {
+//          for (Iterator iter = getCachedHosts(null, mainCache.length); 
+//               iter.hasNext(); ) {
+//              //all addresses from the main cache are considered the "best"
+//              //endpoints in the reserve cache.
+//              PingReply pr = (PingReply)iter.next();
+//              Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort(), 
+//                                        pr.getFiles(), pr.getKbytes());
+//              e.setWeight(BEST_PRIORITY);
+//              //only add the element if it doesn't exist already
+//              if (!reserveCacheSet.contains(e)) {
+//                  //Adding e may eject an older point from queue, so we have to
+//                  //cleanup the set to maintain rep. invariant.
+//                  reserveCacheSet.add(e);
+//                  Object ejected=reserveCacheQueue.insert(e);
+//                  if (ejected!=null)
+//                      reserveCacheSet.remove(ejected);
+//              }
+//          }
+//      }
 
     /**
      * @modifies reserve cache
@@ -663,18 +662,19 @@ public class HostCatcher {
     }
 
     /**
-     *  Retrieves a random host from the main cache.  However, if we cannot
-     *  retrieve an element from the main cache (after trying twice), then try
-     *  to obtain an endpoint from the reserve cache.  If the reserve cache is
-     *  also empty, wait until an endpoint is available (unless an external 
-     *  interrupt is generated)  
+     *  Blocks until an address is available, and then returns that address.
+     *  getAnEndpoint will (almost) never return the same address twice.  Throws
+     *  InterruptedException if the calling thread is interrupted while waiting.
+     *  If newOnly is true, will only return the address of a new host.
+     *  Otherwise, will try to return the address of an old host, though there
+     *  is a low probability that the address could actually be a new host. 
      */
-    public Endpoint getAnEndpoint() throws InterruptedException {
+    public Endpoint getAnEndpoint(boolean newOnly) throws InterruptedException {
         Endpoint endpoint = null;
         while (true) {
-            //first, try the main cache two times, in case the first time, a null
-            //is returned.
-            if (cacheSize() > 0) { 
+            //a) try the main cache two times, in case a null is returned the
+            //first time
+            if (newOnly && cacheSize()>0) { 
                 int hops;
                 for (int i = 0; i < 2; i++) {
                     hops = 
@@ -692,16 +692,20 @@ public class HostCatcher {
                     }
                 }
             }
-            //next try the reserve cache
-            try {
-                endpoint = getAnEndpointInternal();
-                return endpoint;
-            } catch(NoSuchElementException e) {
-                synchronized(cacheLock) {
-                    //wait for a host in either the main cache or the reserve 
-                    //cache
-                    cacheLock.wait(); 
-                }
+            //b) try the reserve cache.  TODO: this includes stale new addresses.
+            if (!newOnly) {
+                try {
+                    endpoint = getAnEndpointInternal();
+                    return endpoint;
+                } catch(NoSuchElementException e) { }
+            }
+
+            //Wait for addresses (new or old) to come in.  TODO3: could use
+            //finer-grained locking.
+            synchronized(cacheLock) {
+                //wait for a host in either the main cache or the reserve 
+                //cache
+                cacheLock.wait(); 
             }
         }
     }

@@ -43,22 +43,30 @@ public class ConnectionManager {
         new ArrayList();
 
     /** 
-     * The number of connections to keep up.  Initially we will try _keepAlive
-     * outgoing connections.  At the same time we will accept up to _keepAlive
-     * incoming connections.  As outgoing connections fail, we will not accept
-     * any more incoming connections.  Hence we will converge on exactly
-     * _keepAlive incoming connections.  
+     * The number of new connections to keep up.  Initially we will try
+     * _keepAlive outgoing connections.  At the same time we will accept up to
+     * _keepAlive incoming connections.  As outgoing connections fail, we will
+     * not accept any more incoming connections.  Hence we will converge on
+     * exactly _keepAlive incoming connections.  
      */
     private volatile int _keepAlive=0;
-    /** The number of incoming connections.  Used to avoid the cost of scanning
-     * through _initializedConnections when deciding whether to accept incoming..
+    /**
+     * The number of old connections to keep up.  Same rules as _keepAlive apply.
+     */
+    private volatile int _keepAliveOld=0;
+
+
+    /** The number of incoming connections, including both new and old.  Used to
+     *  avoid the cost of scanning through _initializedConnections when deciding
+     *  whether to accept incoming..
      *
      *  INVARIANT: _incomingConnections>=the number of incoming connections in
      *  _connections.  In the "steady state", i.e., when no incoming connections
      *  are being initialized, this value is exactly equal to the number of
      *  incoming connections.
      *
-     *  LOCKING: obtain _incomingConnectionLock */
+     *  LOCKING: obtain _incomingConnectionLock 
+     */
     private volatile int _incomingConnections=0;
     /** The lock for the number of incoming connnections. */
     private Object _incomingConnectionsLock=new Object();
@@ -94,9 +102,8 @@ public class ConnectionManager {
 //          watchdog.start();
         System.err.println("WARNING: ConnectionWatchdog disabled.");
 
-        setKeepAlive(_settings.getKeepAlive());
-        //setMaxIncomingConnections(
-		//SettingsManager.instance().getMaxIncomingConnections());
+        setKeepAlive(_settings.getKeepAlive(), true);
+        setKeepAlive(_settings.getKeepAliveOld(), false);
     }
 
 
@@ -168,10 +175,12 @@ public class ConnectionManager {
          //before actually managing the connection.
          boolean allowConnection=false;
          synchronized (_incomingConnectionsLock) {
-             if (_incomingConnections < _keepAlive) {
-                 //Yes, we'll allow it.  Increment the incoming count NOW even
-                 //before this connection is processed.  The value will be
-                 //decremented in the finally clause below.
+             if (_incomingConnections < (_keepAlive+_keepAliveOld)) {
+                 //Yes, we'll tentatively allow it.  There's a chance that we
+                 //may still decide to kill this after discovering whether it's
+                 //new or old.  For now, increment the incoming count NOW even before
+                 //this connection is processed.  The value will be decremented
+                 //in the finally clause below.
                  _incomingConnections++;
                  allowConnection=true;
              }
@@ -220,7 +229,18 @@ public class ConnectionManager {
 			}
          }
      }
-//don't broadcast pin
+
+    public boolean isStillNeeded(ManagedConnection connection) {
+        //Note that the count includes connection. TODO2: replacing
+        //_incomingConnections with _incomingConnectionsNew/Old would make this
+        //much more efficient.  That could be important.
+        boolean isNew=!connection.isOldClient();
+        if (isNew) 
+            return getNumInitializedConnections(isNew)<=_keepAlive;
+        else
+            return getNumInitializedConnections(isNew)<=_keepAliveOld;
+    }
+
     /**
      * @modifies this, route table
      * @effects closes c and removes it from this' connection list and
@@ -245,20 +265,25 @@ public class ConnectionManager {
 	 * this method reduces the number of connections
 	 */
 	public synchronized void reduceConnections() {
-		int newKeepAlive = Math.min(_keepAlive, 2);
-		setKeepAlive(newKeepAlive);
+		setKeepAlive(Math.min(_keepAlive, 2), true);
+        setKeepAlive(Math.min(_keepAlive, 2), false);
 	}
 
     /**
-     * Reset how many connections you want and start kicking more off
-     * if required.  This IS synchronized because we don't want threads
-     * adding or removing connections while this is deciding whether
-     * to add more threads.
+     * Reset how many connections you want and start kicking more off if
+     * required.  If isNew, the value refers to new connections only; otherwise
+     * it refers to old connections only.  This IS synchronized because we don't
+     * want threads adding or removing connections while this is deciding
+     * whether to add more threads.  
      */
-    public synchronized void setKeepAlive(int newKeep) {
-        _keepAlive = newKeep;
+    public synchronized void setKeepAlive(int n, boolean isNew) {
+        if (isNew)
+            _keepAlive = n;
+        else
+            _keepAliveOld = n;
         adjustConnectionFetchers();
     }
+
 
     /**
      * Sets the maximum number of incoming connections.  This does not
@@ -290,6 +315,26 @@ public class ConnectionManager {
      */
     public int getNumInitializedConnections() {
         return _initializedConnections.size();
+    }
+
+    /**
+     * If isNew, returns the number of initialized connections to new clients.
+     * Otherwise, returns the number of initialized connections to old clients,
+     * which may erroneously include some new connections for which we have not
+     * yet received handshake pings.  In either case, the return value is less
+     * than or equal to the number of connections.
+     */
+    public int getNumInitializedConnections(boolean isNew) {
+        //This is always safe to do since the list is never mutated.
+        List _initializedConnectionsSnapshot=_initializedConnections;
+        int ret=0;
+        for (int i=0; i<_initializedConnectionsSnapshot.size(); i++) {
+            ManagedConnection mc=
+                (ManagedConnection)_initializedConnectionsSnapshot.get(i);
+            if (mc.isOldClient()!=isNew)
+                ret++;
+        }
+        return ret;
     }
 
     /**
@@ -440,7 +485,7 @@ public class ConnectionManager {
 				    desired--;
             }
 			if ( desired <= 0 ) {
-        	    setKeepAlive(outgoing);
+        	    setKeepAlive(outgoing, true);
 				// Deactivate extra ConnectionWatchdog Process
 		        deactivateUltraFastConnectShutdown(); 
 			}
@@ -787,7 +832,7 @@ public class ConnectionManager {
 
             do {
                 try {
-                    endpoint = _catcher.getAnEndpoint();
+                    endpoint = _catcher.getAnEndpoint(false);  //TODO: fix
                 } catch (InterruptedException exc2) {
                     // Externally generated interrupt.
                     // The interrupting thread has recorded the

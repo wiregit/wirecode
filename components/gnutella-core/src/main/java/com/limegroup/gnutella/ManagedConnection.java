@@ -436,12 +436,14 @@ public class ManagedConnection
     /**
      * Determines if this connection is to an older client by checking the
      * Protocol Version (of the GUID of the Message) and sets necessary
-     * flags.  It also makes sure the GUID is a new GUID (based on byte[8])
+     * flags.  It also makes sure the GUID is a new GUID (based on byte[8]).
+     * Returns true iff m was the first handshake ping.  (You'll need to
+     * call isOldClient to find whether this was new.)
      */
-    public void checkForOlderClient(Message m) {
+    public boolean checkForOlderClient(Message m) {
         //if already checked once, we don't need to check again
-        if (_receivedFirstPing)
-            return;
+        if (_receivedFirstPing || m.getHops()!=1) //m.hop() already called
+            return false;
 
         _receivedFirstPing = true;
         byte[] guid = m.getGUID();
@@ -452,6 +454,7 @@ public class ManagedConnection
              (GUID.getProtocolVersion(guid) >= 
               GUID.GNUTELLA_VERSION_06) ) 
             _isOldClient = false;
+        return true;
     }
 
 

@@ -39,6 +39,8 @@ public interface SettingsInterface {
     public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
     /** Default value for the keep alive */
     public static final int     DEFAULT_KEEP_ALIVE     = 4;
+    /** Default value for the old connection keep alive */
+    public static final int     DEFAULT_KEEP_ALIVE_OLD = 2;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
@@ -48,8 +50,6 @@ public interface SettingsInterface {
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client guid */
     public static final String  DEFAULT_CLIENT_ID      = null;
-    /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
@@ -134,13 +134,12 @@ public interface SettingsInterface {
     public static final String MAX_LENGTH            = "MAX_LENGTH";
     public static final String TIMEOUT               = "TIMEOUT";
     public static final String KEEP_ALIVE            = "KEEP_ALIVE";
+    public static final String KEEP_ALIVE_OLD        = "KEEP_ALIVE_OLD";
     public static final String PORT                  = "PORT";
     public static final String SPEED                 = "CONNECTION_SPEED";
     public static final String UPLOAD_SPEED          = "UPLOAD_SPEED";
     public static final String SEARCH_LIMIT          = "SEARCH_LIMIT";
     public static final String CLIENT_ID             = "CLIENT_ID";
-    public static final String MAX_INCOMING_CONNECTIONS
-        = "MAX_INCOMING_CONNECTIONS";
     public static final String SAVE_DIRECTORY        
 		= "DIRECTORY_FOR_SAVING_FILES";
     public static final String DIRECTORIES

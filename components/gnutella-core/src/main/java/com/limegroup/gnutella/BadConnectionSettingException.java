@@ -1,12 +1,9 @@
 package com.limegroup.gnutella;
 
 /** 
- * The exception thrown when you try to set your incoming/outgoing connections
- * to a bad value.  Contains suggested new values for the settings and a reason
- * for the exception.<p>
- *
- * Design note: some may argue that this should be multiple classes or an enum.
- * But there could be multiple reasons for an exception, so we may use masks.
+ * The exception thrown when you try to set your KEEP_ALIVE values to a bad
+ * value.  Contains suggested new values for the settings and a reason for the
+ * exception.
  */
 public class BadConnectionSettingException extends RuntimeException {
     public final static int NEGATIVE_VALUE=0x1;
@@ -14,26 +11,20 @@ public class BadConnectionSettingException extends RuntimeException {
     
     /** INVARIANT: One of the static fields defined above. */
     private int reason;
-    /** The suggested KEEP_ALIVE. */
-    private int suggestedOutgoing;
-    /** The suggested MAX_INCOMING_CONNECTIONS */
-    private int suggestedIncoming;
+    /** The suggested new value. */
+    private int suggestion;
 
     /**
      * @param reason why the settings were rejected.  This value
      *  must be one of NEGATIVE_VALUE, TOO_HIGH_FOR_SPEED
-     * @param suggestedOutgoing the suggested KEEP_ALIVE
-     * @param suggestedIncoming the suggested MAX_INCOMING_CONNECTIONS
+     * @param suggestion the suggested new value
      */
     public BadConnectionSettingException(int reason,
-                                         int suggestedOutgoing,
-                                         int suggestedIncoming) {
+                                         int suggestion) {
         this.reason=reason;
-        this.suggestedIncoming=suggestedIncoming;
-        this.suggestedOutgoing=suggestedOutgoing;
+        this.suggestion=suggestion;
     }
 
-    public int getReason() { return reason; }
-    public int getSuggestedOutgoing() { return suggestedOutgoing; }
-    public int getSuggestedIncoming() { return suggestedIncoming; }
+    public int getReason() { return reason; }    
+    public int getSuggestion() { return suggestion; }
 }

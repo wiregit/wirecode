@@ -33,12 +33,12 @@ public class SettingsManager implements SettingsInterface {
     private volatile int      _timeout;
     private volatile String   _hostList;
     private volatile int      _keepAlive;
+    private volatile int      _keepAliveOld;
     private volatile int      _port;
     private volatile int      _connectionSpeed;
     private volatile int      _uploadSpeed;
     private volatile byte     _searchLimit;
     private volatile String   _clientID;
-    private volatile int      _maxIncomingConn;
     private volatile String   _saveDirectory;
     private volatile String   _directories;
     private volatile String   _extensions;
@@ -243,6 +243,10 @@ public class SettingsManager implements SettingsInterface {
                     //Verified for real later.  See note below.
                     setKeepAlive(Integer.parseInt(p));
                 }
+                else if(key.equals(KEEP_ALIVE_OLD)) {
+                    //Verified for real later.  See note below.
+                    setKeepAliveOld(Integer.parseInt(p));
+                }
                 else if(key.equals(PORT)) {
                     setPort(Integer.parseInt(p));
                 }
@@ -260,10 +264,6 @@ public class SettingsManager implements SettingsInterface {
                     setClientID(p);
                 }
 
-                else if(key.equals(MAX_INCOMING_CONNECTIONS)) {
-                    //Verified for real later.  See note below.
-                    setMaxIncomingConnections(Integer.parseInt(p));
-                }
 
                 else if(key.equals(SAVE_DIRECTORY)) {
                     setSaveDirectory(p);
@@ -498,7 +498,7 @@ public class SettingsManager implements SettingsInterface {
         //MAX_INCOMING_CONNECTIONS are sufficiently low.
         if ( getConnectionSpeed()<=56 ) { //modem
             setKeepAlive(Math.min(2, getKeepAlive()));
-            setMaxIncomingConnections(2);
+            setKeepAliveOld(Math.min(2, getKeepAliveOld()));
         }
     }
 
@@ -516,12 +516,12 @@ public class SettingsManager implements SettingsInterface {
         setTimeout(DEFAULT_TIMEOUT);
         setHostList(DEFAULT_HOST_LIST);
         setKeepAlive(DEFAULT_KEEP_ALIVE);
+        setKeepAliveOld(DEFAULT_KEEP_ALIVE_OLD);
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_SPEED);
         setUploadSpeed(DEFAULT_UPLOAD_SPEED);
         setSearchLimit(DEFAULT_SEARCH_LIMIT);
         setClientID( (new GUID(Message.makeGuid())).toHexString() );
-        setMaxIncomingConnections(DEFAULT_MAX_INCOMING_CONNECTION);
         setBannedIps(DEFAULT_BANNED_IPS);
         setBannedWords(DEFAULT_BANNED_WORDS);
         setFilterAdult(DEFAULT_FILTER_ADULT);
@@ -603,8 +603,11 @@ public class SettingsManager implements SettingsInterface {
      *  pathname of the file listing the hosts */
     public String getHostList(){return _hostList;}
 
-    /** returns the keep alive value */
+    /** returns the keep alive value for new connections */
     public int getKeepAlive(){return _keepAlive;}
+
+    /** returns the keep alive value for old connections */
+    public int getKeepAliveOld(){return _keepAliveOld;}
 
     /** returns the client's port number */
     public int getPort(){return _port;}
@@ -620,9 +623,6 @@ public class SettingsManager implements SettingsInterface {
 
     /** returns the client id number */
     public String getClientID(){return _clientID;}
-
-    /** returns the maximum number of connections to hold */
-    public int getMaxIncomingConnections(){return _maxIncomingConn;}
 
 	/** returns the maximum number of uploads per person */
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
@@ -956,55 +956,74 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /**
-     * Sets the keepAlive without checking the maximum value.
-     * Throws IllegalArgumentException if keepAlive is negative.
+     * Sets the keepAlive for new connections without checking the maximum
+     * value.  Throws IllegalArgumentException if keepAlive is negative.  
      */
     public void setKeepAlive(int keepAlive)
         throws IllegalArgumentException {
         try {
-            setKeepAlive(keepAlive, false);
+            setKeepAlive(keepAlive, false, true);
+        } catch (BadConnectionSettingException e) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+
+    /**
+     * Sets the keepAlive for old connections without checking the maximum
+     * value.  Throws IllegalArgumentException if keepAlive is negative.  
+     */
+    public void setKeepAliveOld(int keepAlive) 
+        throws IllegalArgumentException {
+        try {
+            setKeepAlive(keepAlive, false, false);
         } catch (BadConnectionSettingException e) {
             throw new IllegalArgumentException();
         }
     }
 
     /**
-     * Sets the keep alive. If keepAlive is negative, throws
-     * BadConnectionSettingException with a suggested value of 0.
-     *
-     * If checkLimit is true, BadConnectionSettingException is thrown if
-     * keepAlive is too large for the current connection speed.  The suggestions
-     * are not necessarily guaranteed to be valid however.
+     * Sets the keep alive for new connections if isNew==true, or oldConnections
+     * otherwise. If keepAlive is negative, throws BadConnectionSettingException
+     * with a suggested value of 0.  If checkLimit is true, throws
+     * BadConnectionSettingException if keepAlive is too large for the current
+     * connection speed.  The suggestions are not necessarily guaranteed to be
+     * valid however.  
      */
-    public void setKeepAlive(int keepAlive, boolean checkLimit)
-        throws BadConnectionSettingException {
-        int incoming=getMaxIncomingConnections();
+    public void setKeepAlive(int keepAlive, boolean checkLimit, boolean isNew)
+            throws BadConnectionSettingException {
         if (checkLimit) {
-            int max=maxConnections();
+            int max=maxConnections(isNew);
             //Too high for this connection speed?  Decrease it.
             if (keepAlive > max) {
                 throw new BadConnectionSettingException(
-                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                    max, maxConnections());
+                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED, max);
             }
         }
 
         if (keepAlive<0) {
             throw new BadConnectionSettingException(
-                BadConnectionSettingException.NEGATIVE_VALUE,
-                0, getMaxIncomingConnections());
+                BadConnectionSettingException.NEGATIVE_VALUE, 0);
         } else {
-            _keepAlive = keepAlive;
-            String s = Integer.toString(_keepAlive);
-            _props.put(KEEP_ALIVE, s);
+            if (isNew) {
+                _keepAlive = keepAlive;
+                String s = Integer.toString(_keepAlive);
+                _props.put(KEEP_ALIVE, s);
+            } else {
+                _keepAliveOld = keepAlive;
+                String s = Integer.toString(_keepAliveOld);
+                _props.put(KEEP_ALIVE_OLD, s);
+            }
         }
     }
 
     /** 
 	 * Returns the maximum number of connections for the given connection
-     * speed.  
+     * speed.  If isNew, considers new connections only; otherwise considers
+     * old connections only.
 	 */
-    private int maxConnections() {
+    private int maxConnections(boolean isNew) {
+        //Yes, isNew is currently ignored.
         int speed=getConnectionSpeed();
         //I'm copying these numbers out of GUIStyles.  I don't want this to
         //depend on GUI code, though.
@@ -1038,55 +1057,6 @@ public class SettingsManager implements SettingsInterface {
     public void setClientID(String clientID) {
 		_clientID = clientID;
 		_props.put(CLIENT_ID, _clientID);
-    }
-
-    /**
-     * Sets the max number of incoming connections without checking the maximum
-     * value. Throws IllegalArgumentException if maxConn is negative.
-     */
-    public void setMaxIncomingConnections(int maxConn)
-        throws IllegalArgumentException {
-        try {
-            setMaxIncomingConnections(maxConn, false);
-        } catch (BadConnectionSettingException e) {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    /**
-     * Sets the maximum number of incoming connections (incoming and
-     * outgoing). If maxConn is negative, throws
-     * BadConnectionSettingException with a suggested value of 0.
-     *
-     * If checkLimit is true, then if keepAlive is too large for the current
-     * connection speed or too small for the current number of outgoing
-     * connections, throws BadConnectionSettingException with suggested new
-     * values.  The suggestions attempt to set MAX_INCOMING_CONNECTIONS to
-     * maxConn, even if that means adjusting the KEEP_ALIVE.  The suggestions are
-     * not necessarily guaranteed to be valid however.
-     */
-    public void setMaxIncomingConnections(int maxConn,
-                                                       boolean checkLimit)
-        throws BadConnectionSettingException {
-        if (checkLimit) {
-            int max=maxConnections();
-            //Too high for this connection speed?  Decrease it.
-            if (maxConn > max) {
-                throw new BadConnectionSettingException(
-                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                    getKeepAlive(), max);
-            }
-        }
-
-        if(maxConn < 0) {
-            throw new BadConnectionSettingException(
-                BadConnectionSettingException.NEGATIVE_VALUE,
-                getKeepAlive(), 0);
-        } else {
-            _maxIncomingConn = maxConn;
-            String s = Integer.toString(maxConn);
-            _props.put(MAX_INCOMING_CONNECTIONS, s);
-        }
     }
 
     /** 
