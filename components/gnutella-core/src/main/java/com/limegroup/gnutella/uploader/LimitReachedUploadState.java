@@ -25,15 +25,15 @@ public class LimitReachedUploadState implements HTTPMessage {
 
     /**
      * Number of seconds the remote host should wait before retrying in
-     * case we don't have any alt-locs left to send
+     * case we don't have any alt-locs left to send. (5 minutes)
      */
-    private static final int NO_ALT_LOCS_RETRY_AFTER = 60 * 5; // 5 minutes
+    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 5);
 
     /**
      * Number of seconds the remote host should wait before retrying in
-     * case we still have alt-locs left to send
+     * case we still have alt-locs left to send. (1 minute)
      */
-    private static final int NORMAL_RETRY_AFTER = 60 * 1; // 1 minute
+    private static final String NORMAL_RETRY_AFTER = "" + (60 * 1);
 
 	/**
 	 * The error message to send in the message body.
@@ -75,13 +75,12 @@ public class LimitReachedUploadState implements HTTPMessage {
                                           new HTTPHeaderValueCollection(alts),
                                           ostream);
 				}
-                // write retry after if the sha1 is not null
-                str = HTTPHeaderName.RETRY_AFTER.toString() + ": ";
-                if (alts.size() == 0) {
-                    str = str + String.valueOf(NO_ALT_LOCS_RETRY_AFTER);
-                } else {
-                    str = str + String.valueOf(NORMAL_RETRY_AFTER);
-                }
+				// write the Retry-After header, using different values
+				// depending on if we had any alts to send or not.
+				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
+				    alts.size() == 0 ? 
+				        NO_ALT_LOCS_RETRY_AFTER : NORMAL_RETRY_AFTER,
+				    ostream);
                 ostream.write(str.getBytes());
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
@@ -89,10 +88,9 @@ public class LimitReachedUploadState implements HTTPMessage {
                                           ostream);
                 }
 			} else {
-                // write retry after if sha1 is null
-                str = HTTPHeaderName.RETRY_AFTER.toString() + ": "
-                    + String.valueOf(NO_ALT_LOCS_RETRY_AFTER);
-                ostream.write(str.getBytes());
+			    HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
+			                          NO_ALT_LOCS_RETRY_AFTER,
+			                          ostream);
             }
 		}
 		
