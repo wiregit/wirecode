@@ -77,6 +77,52 @@ class HTTPUploader {
     
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
+
+
+	_filename = file;
+	_amountRead = 0;
+	_manager = m;
+	_callback = _manager.getCallback();
+	_fmanager = FileManager.getFileManager();
+	_fdesc = null;
+	
+	try {	                         /* look for the file */
+	    _fdesc = (FileDesc)_fmanager._files.get(_index);
+	}                                /* if its not found... */
+	catch (ArrayIndexOutOfBoundsException e) {
+	    doNoSuchFile();              /* send an HTTP error */
+	    return;
+	}
+	/* check to see if the index */
+	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
+	    doNoSuchFile();
+  	    return;
+  	}
+	
+	_sizeOfFile = _fdesc._size;
+
+	URLConnection conn;
+
+	try {
+	    URL url = new URL(protocal, host, port, file);
+	    conn = url.openConnection();
+	}
+	catch (java.net.MalformedURLException e) {
+	    _callback.error("Bad URL");
+	    return;
+	}
+	catch (IOException e) {
+	    _callback.error("can't open connection");
+	    return;
+	}
+	try {
+	    _ostream = conn.getOutputStream();
+	    OutputStreamWriter osr = new OutputStreamWriter(_ostream);
+	    _out = new BufferedWriter(osr);
+	}
+	catch (IOException e) {
+	    _callback.error("can't open output stream");
+	}
 			
     }
 
