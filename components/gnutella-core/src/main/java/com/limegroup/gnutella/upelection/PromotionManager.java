@@ -14,7 +14,11 @@ import java.net.InetAddress;
 
 public class PromotionManager {
 	
-	private static long REQUEST_TIMEOUT = Constants.MINUTE;
+	/**
+	 * the leaf promotion timeout is a quarter of the ultrapeer timeout.
+	 */
+	private static long UP_REQUEST_TIMEOUT = Constants.MINUTE;
+	private static long LEAF_REQUEST_TIMEOUT = UP_REQUEST_TIMEOUT/4;
 	
 	/**
 	 * ref to the UDP service.  Not final so that tests can change it.
@@ -82,7 +86,7 @@ public class PromotionManager {
     	
     	
     	//schedule the expiration of the process
-    	_expirer = new Expirer();
+    	_expirer = new Expirer(LEAF_REQUEST_TIMEOUT);
     	
     	//ping the original requestor
     	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
@@ -139,7 +143,7 @@ public class PromotionManager {
     	//*************************
     	//we know we have received a proper ACK.
     	//postpone the expiration 
-    	_expirer = new Expirer();    	
+    	_expirer.cancel();    	
     	
     	
     	//then, proceed as appropriate:
@@ -148,6 +152,7 @@ public class PromotionManager {
     	if (!isSupernode) {
     		Thread promoter = new ManagedThread(
     				new Promoter(sender));
+    		promoter.setName("Promotion thread");
     		promoter.setDaemon(true);
     		promoter.start();
     	} 
@@ -155,6 +160,7 @@ public class PromotionManager {
     		//we are the originally requesting UP, ACK back.
     		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
     		_udpService.send(pong, sender);
+    		_expirer = new Expirer(UP_REQUEST_TIMEOUT);
 
     	}
 	}
@@ -173,7 +179,7 @@ public class PromotionManager {
 			_promotionPartner = BestCandidates.getBest();
 			
 			//start a resetting thread
-			_expirer = new Expirer();
+			_expirer = new Expirer(UP_REQUEST_TIMEOUT);
 		}
 		
 		//*******
@@ -190,36 +196,33 @@ public class PromotionManager {
 	 * interrupt to cancel.
 	 * 
 	 */
-	private class Expirer extends ManagedThread {
+	private class Expirer implements Runnable {
 		
+		boolean _cancelled = false;
 		
+		public void cancel() {
+			_cancelled = true;
+		}
 		/**
 		 * creates a new expiring thread which interrupts
 		 * any currently running expiring threads.
 		 */
-		public Expirer() {
-			super("promotion expiring thread");
+		public Expirer(long timeout) {
 			
 			if (_expirer!=null)
-				_expirer.interrupt();
+				_expirer.cancel();
 			
 			_expirer=this;
-			setDaemon(true);
-			start();
+			
+			RouterService.schedule(this,timeout,0);
+
 		}
 		
-		public void managedRun() {
-			try {
-				//sleep some time
-				Thread.sleep(REQUEST_TIMEOUT);
-				
-				//and clear the state
+		public void run() {
+			if (!_cancelled)
 				synchronized(_promotionLock) {
 					_promotionPartner=null;
 				}
-			}catch(InterruptedException iex) {
-				//end the thread.
-			}
 		}
 	}
 	
