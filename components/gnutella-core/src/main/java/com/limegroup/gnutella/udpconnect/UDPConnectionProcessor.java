@@ -378,9 +378,10 @@ public class UDPConnectionProcessor {
     public void wakeupWriteEvent() {
         if ( _waitingForDataAvailable ) {
             LOG.debug("wakupWriteEvent");
-            _waitingForDataAvailable = false;
-            _safeWriteWakeup.updateTime(System.currentTimeMillis()+2);
-            _scheduler.scheduleEvent(_safeWriteWakeup);
+            if (_safeWriteWakeup.getEventTime() == Long.MAX_VALUE) {
+                _safeWriteWakeup.updateTime(System.currentTimeMillis()+2);
+                _scheduler.scheduleEvent(_safeWriteWakeup);
+            }
         }
     }
 
@@ -1028,6 +1029,13 @@ public class UDPConnectionProcessor {
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
                     sendKeepAlive();
+if(LOG.isDebugEnabled())  
+LOG.debug("  -- write: "+_writeDataEvent.getEventTime() +" ack: "+
+_ackTimeoutEvent.getEventTime() +
+" wds: "+_waitingForDataSpace +
+" wda: "+_waitingForDataAvailable+
+" ic: "+_inputFromOutputStream.getPendingChunks()
+);
                 } else {
                     return;
                 }
@@ -1114,11 +1122,4 @@ public class UDPConnectionProcessor {
     }
     //
     // -----------------------------------------------------------------
-
-    public static void log(String msg) {
-    }
-
-	public static void log2(String msg) {
-		System.err.println(msg);
-	}
 }
