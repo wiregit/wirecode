@@ -45,13 +45,6 @@ public class HandshakingStat extends AdvancedStatistic {
 	    new HandshakingStat();
 	    
     /**
-     * Statistic for an outgoing rejected connection to a non-ultrapeer
-     * if we're an ultrapeer.
-     */
-    public static final Statistic UP_OUTGOING_REJECT_NON_UP =
-        new HandshakingStat();
-	    
-    /**
      * Statistic for an outgoing rejected connection to an ultrapeer
      * because we didn't have enough room if we're an ultrapeer.
      */

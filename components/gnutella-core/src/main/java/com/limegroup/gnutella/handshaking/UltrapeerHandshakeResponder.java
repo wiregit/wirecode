@@ -14,13 +14,6 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
  */
 public class UltrapeerHandshakeResponder 
     extends AuthenticationHandshakeResponder {
-
-	/**
-	 * Handle to the <tt>ConnectionManager</tt> for use in determining
-	 * whether or not connections should be accepted.
-	 */
-    private final ConnectionManager _manager;
-    
     /**
      * Creates a new instance of ClientHandshakeResponder
      * @param manager Instance of connection manager, managing this
@@ -31,7 +24,6 @@ public class UltrapeerHandshakeResponder
      */
     public UltrapeerHandshakeResponder(String host) {
         super(RouterService.getConnectionManager(), host);
-        this._manager = RouterService.getConnectionManager();
     }
     
     //inherit doc comment
@@ -48,16 +40,10 @@ public class UltrapeerHandshakeResponder
 	 * @param response the headers read from the connection
 	 */
 	private HandshakeResponse respondToOutgoing(HandshakeResponse response) {
-		//Outgoing connection.  If the other guy is ultrapeer unaware and I
-		//already have enough old-fashioned connections, reject it.  We've
-		//already given ultrapeer guidance at this point, so there's no
-		//"second chance" like in the reject(..) method.
-		if(!response.isUltrapeer()) {
-		    if( RECORD_STATS )
-		        HandshakingStat.UP_OUTGOING_REJECT_NON_UP.incrementStat();
-		    return HandshakeResponse.createRejectOutgoingResponse();
-        }
-
+	    
+		//Outgoing connection.
+		
+		//If our slots are full, reject it.
 		if(!_manager.allowConnection(response)) {
 		    if( RECORD_STATS )
 		        HandshakingStat.UP_OUTGOING_REJECT_FULL.incrementStat();
@@ -65,6 +51,8 @@ public class UltrapeerHandshakeResponder
         }
 
 		Properties ret = new Properties();
+		// They might be giving us guidance
+		// (We don't give them guidance for outgoing)
         if(response.hasLeafGuidance()) {
             // Become a leaf if its a good ultrapeer & we can do it.
             if(_manager.allowLeafDemotion() && response.isGoodUltrapeer()) {

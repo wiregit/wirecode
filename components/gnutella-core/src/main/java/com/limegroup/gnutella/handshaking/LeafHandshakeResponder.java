@@ -10,7 +10,7 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
  * connection handshake while accepting incoming connections
  */
 public final class LeafHandshakeResponder 
-    extends AuthenticationHandshakeResponder {    
+    extends AuthenticationHandshakeResponder {
     
     /**
      * Creates a new instance of LeafHandshakeResponder
@@ -81,9 +81,8 @@ public final class LeafHandshakeResponder
         respondToIncoming(HandshakeResponse hr) {
         Properties ret = new LeafHeaders(getRemoteIP());
         
-
-        if (RouterService.isShieldedLeaf()) {
-            //a) If we're already a leaf, reject
+        //If we already have enough ultrapeers, reject.
+        if(!_manager.allowConnection(hr)) {
             if( RECORD_STATS )
                 HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
             return HandshakeResponse.createLeafRejectIncomingResponse();

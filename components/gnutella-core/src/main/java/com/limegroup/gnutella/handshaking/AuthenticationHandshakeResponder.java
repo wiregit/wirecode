@@ -41,7 +41,7 @@ public abstract class AuthenticationHandshakeResponder
      * An instance of connection manager (to reference other stuff
      * held by connection manager)
      */
-    private final ConnectionManager _manager;
+    protected final ConnectionManager _manager;
     
     /**
      * The host to which are opening connection

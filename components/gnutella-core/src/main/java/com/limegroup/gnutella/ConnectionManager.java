@@ -597,13 +597,17 @@ public class ConnectionManager {
         //than N-K connections.  With time, this converges on all good
         //connections.
 
-        //Don't allow anything if disconnected or shielded leaf.  This rule is
-        //critical to the working of gotShieldedClientSupernodeConnection.
+        //Don't allow anything if disconnected.
         if (!ConnectionSettings.IGNORE_KEEP_ALIVE.getValue() && _keepAlive <= 0) {
             return false;
 		} else if (RouterService.isShieldedLeaf()) {
-			// we're a leaf -- don't allow any incoming connections
-            return false;  
+		    // Allow incoming if the other side is a good ultrapeer and we
+		    // aren't at our max.
+		    if(hr.isGoodUltrapeer() &&
+		       _shieldedConnections < PREFERRED_CONNECTIONS_FOR_LEAF)
+		       return true;
+            else
+                return false;
 		} else if (hr.isLeaf() || leaf) {
             // Leaf. As the spec. says, this assumes we are an ultrapeer.
             // If the leaf supports features we're looking for, accept it
