@@ -104,7 +104,7 @@ public class HTTPUploader implements Runnable {
 	} catch (IOException e) {
 	    _state = ERROR;
 	}
-	_filename = file.trim(); //TODO: really?
+	_filename = file;
     }
 	
     
@@ -192,8 +192,8 @@ public class HTTPUploader implements Runnable {
 	    //Check that the filename matches what we sent
 	    //in the GIV request.  I guess it doesn't need
 	    //to match technically, but we check to be safe.
-	    String filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP"));
-	    if (filename!=_filename)
+	    String filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP")-1);
+	    if (! filename.equals(_filename))
 		throw new IOException();
 	    int index = java.lang.Integer.parseInt(parse[1]);
 	    if (index!=_index)
@@ -224,7 +224,6 @@ public class HTTPUploader implements Runnable {
 	catch (ArrayIndexOutOfBoundsException e) {
 	    throw new FileNotFoundException();
 	}
-	_fdesc._name = _fdesc._name.trim(); //TODO: ?
 	
 	/* For client-side uploads, get name. For server-side
 	 * uploads, check to see that the index matches the
