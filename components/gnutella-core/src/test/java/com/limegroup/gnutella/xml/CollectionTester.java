@@ -3,6 +3,7 @@ package com.limegroup.gnutella.xml;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.mp3.*;
 import junit.framework.*;
 
 /** Unit test for LimeXMLReplyCollection.
@@ -202,6 +203,7 @@ public class CollectionTester extends TestCase {
 
 
     public void testSerialized() {
+        createFiles();
         populateDirectory();
 
         LimeXMLReplyCollection audioCollection = 
@@ -259,7 +261,7 @@ public class CollectionTester extends TestCase {
                            keywords.contains("daswani") )
                           );
         
-        restoreDirectory();
+        clearDirectory();
     }
 
 
@@ -274,6 +276,44 @@ public class CollectionTester extends TestCase {
     }
 
 
+    private void createFiles() {
+        try {
+        HashMap map = new HashMap();
+        LimeXMLDocument doc = null;
+        LimeXMLReplyCollection.MapSerializer ms = null;
+        // make audio.collection
+        doc = (new ID3Reader()).readDocument(vader);
+        map.put(mfm.readFromMap(vader), doc);
+        doc = (new ID3Reader()).readDocument(swing);
+        map.put(mfm.readFromMap(swing), doc);
+        ms = new LimeXMLReplyCollection.MapSerializer(new File(fileLocation+"audio.collection"), map);
+        ms.commit();
+        // made video.collection
+        List nameVals = new ArrayList();
+        map = new HashMap();
+        nameVals.add(new NameValue("videos__video__director__","daswani"));
+        nameVals.add(new NameValue("videos__video__title__","susheel"));
+        doc = new LimeXMLDocument(nameVals, schemaURIVideo);
+        doc.setIdentifier(swing.getCanonicalPath());
+        doc.getXMLString();
+        map.put(mfm.readFromMap(swing), doc);
+        nameVals = new ArrayList();
+        nameVals.add(new NameValue("videos__video__director__","file"));
+        nameVals.add(new NameValue("videos__video__title__","null"));
+        doc = new LimeXMLDocument("<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video title=\"null\" director=\"file\" ></video></videos>");
+        doc.setIdentifier(mason.getCanonicalPath());
+        doc.getXMLString();
+        map.put(mfm.readFromMap(mason), doc);
+        ms = new LimeXMLReplyCollection.MapSerializer(new File(fileLocation+"video.collection"), map);
+        ms.commit();
+        }
+        catch (Exception e) {
+            Assert.assertTrue("Could not make collections!",
+                              false);
+        }
+    }
+    
+
     private void populateDirectory() {
         File audioFile = new File(fileLocation + "audio.collection");
         File videoFile = new File(fileLocation + "video.collection");
@@ -285,16 +325,6 @@ public class CollectionTester extends TestCase {
                           videoFile.exists());
         audioFile.renameTo(newAudio);
         videoFile.renameTo(newVideo);
-    }
-
-
-    private void restoreDirectory() {
-        File audioFile = new File(fileLocation + "audio.collection");
-        File videoFile = new File(fileLocation + "video.collection");
-        File newAudio  = new File("lib/xml/data/audio.sxml");
-        File newVideo  = new File("lib/xml/data/video.sxml");
-        newAudio.renameTo(audioFile);
-        newVideo.renameTo(videoFile);
     }
 
 
