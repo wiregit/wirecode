@@ -592,6 +592,22 @@ public class Response {
 		return urns;
     }
     
+	/**
+	 * Accessor for the SHA1 URN for this <tt>Response</tt>.
+	 *
+	 * @return the SHA1 <tt>URN</tt> for this <tt>Response</tt>, or 
+	 *  <tt>null</tt> if there is none
+	 */
+	public URN getSHA1Urn() {
+		Iterator iter = urns.iterator(); 
+		while(iter.hasNext()) {
+			URN urn = (URN)iter.next();
+			if(urn.isSHA1()) {
+				return urn;
+			}
+		}
+		return null;
+	}
     
     byte[] getExtBytes() {
         return extBytes;
