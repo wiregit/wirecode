@@ -1,8 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
 import com.sun.java.util.collections.*;
-import org.xml.sax.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
@@ -134,18 +132,6 @@ public class ResponseVerifier {
 
     public String toString() {
         return mapper.toString();
-    }
-
-
-    /** Returns all search terms as one long string.  This includes xml and
-     *  the standard search terms.  the terms are all in lowercase....
-     */
-    private static String getSearchTerms(Response resp) {
-        StringBuffer retSB = new StringBuffer();
-        String[] terms = getSearchTerms(resp.getName(), resp.getDocument());
-        for (int i = 0; i < terms.length; i++)
-            retSB.append(terms[i] + " ");
-        return retSB.toString().trim();
     }
 
     private static String[] getSearchTerms(String query,
