@@ -1145,9 +1145,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // called stop() and then initialize.
                     reqLock.releaseDueToNewResults();
                 } else
-                    //This stopped because all hosts were tried.  (Note that this
-                    //couldn't have been user aborted.)  Therefore no threads are
-                    //running in this and it may be safely resumed.
+                    //This stopped because all hosts were tried.  (Note that
+                    //this couldn't have been user aborted.)  Therefore no
+                    //threads are running in this and it may be safely resumed.
                     initialize(this.manager, this.fileManager, this.callback, 
                                false);
             } else if (state==WAITING_FOR_RETRY) {
@@ -3222,9 +3222,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  WORK WITH MORE THAN ONE PRODUCER OR ONE CONSUMER.
      */
     private class RequeryLock extends Object {
-        private boolean shouldWait = true;
+        private volatile boolean shouldWait = true;
         // returned from lock to signify the reason for exit
-        private boolean newResults = false;
+        private volatile boolean newResults = false;
 
         public synchronized void releaseDueToNewResults() {
             shouldWait = false;
