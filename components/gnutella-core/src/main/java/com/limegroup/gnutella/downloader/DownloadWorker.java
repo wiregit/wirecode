@@ -393,8 +393,8 @@ public class DownloadWorker implements Runnable {
             high = _downloader.getInitialReadingPoint()+_downloader.getAmountToRead()-1;
         }
         
-        //note: the high'th byte will also be downloaded.
-        if( (high-low)>0) {//dloader failed to download a part assigned to it?
+
+        if( (high-low)>=0) {//dloader failed to download a part assigned to it?
             
             if (LOG.isDebugEnabled())
                 LOG.debug("releasing ranges "+new Interval(low,high));
