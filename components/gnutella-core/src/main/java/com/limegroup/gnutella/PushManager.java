@@ -24,7 +24,15 @@ public final class PushManager {
      *  window in which Gnutella resends pushes by default
      */
     private static final int PUSH_INVALIDATE_TIME=60*5;  //5 minutes
+
     
+    /**
+     * The timeout for the connect time while establishing the socket. Set to
+     * the same value as NORMAL_CONNECT_TIME is ManagedDownloader.
+     */
+    private static final int CONNECT_TIMEOUT = 10000;//10 secs
+
+
 	/**
      * The list of all files that we've tried unsuccessfully to upload
      * via pushes.  (Here successful means we were able to connect.
@@ -105,7 +113,7 @@ public final class PushManager {
                 Socket s = null;
                 try {
         			// try to create the socket.
-        			s = Sockets.connect(host, port, 5000);
+        			s = Sockets.connect(host, port, CONNECT_TIMEOUT);
         			// open a stream for writing to the socket
         			OutputStream ostream = s.getOutputStream();        
         			String giv = "GIV " + index + ":" + guid + "/" + 
