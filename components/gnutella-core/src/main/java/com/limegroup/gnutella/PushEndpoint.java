@@ -226,7 +226,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
-		where[offset] = (byte)(Math.min(4,proxies.size()) | _features);
+		where[offset] = (byte)(Math.min(4,proxies.size()) | getFeatures());
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,offset+1,16);
@@ -314,9 +314,27 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	/**
 	 * @return which version of F2F transfers this PE supports.
+	 * This always returns the most current version we know the PE supports
+	 * unless it has never been put in the map.
 	 */
 	public int supportsFWTVersion() {
-		return _fwtVersion;
+		GuidSetWrapper current = (GuidSetWrapper)
+			GUID_PROXY_MAP.get(_guid);
+		int currentVersion = current == null ? 
+				_fwtVersion : current.getFWTVersion();
+		return currentVersion;
+	}
+	
+	/**
+	 * Sets the fwt version supported for all PEs pointing to the
+	 * given client guid.
+	 */
+	public static void setFWTVersionSupported(byte[] guid,int version){
+		GUID g = new GUID(guid);
+		GuidSetWrapper current = (GuidSetWrapper)
+			GUID_PROXY_MAP.get(g);
+		if (current!=null)
+			current.setFWTVersion(version);
 	}
 	
 	public int hashCode() {
@@ -339,7 +357,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public String toString() {
-		String ret = "PE [FEATURES:"+_features+", FWT Version:"+_fwtVersion+
+		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+supportsFWTVersion()+
 			", GUID:"+_guid+", proxies:{ "; 
 		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
 			PushProxyInterface ppi = (PushProxyInterface)iter.next();
@@ -353,10 +371,11 @@ public class PushEndpoint implements HTTPHeaderValue{
 	    StringBuffer httpString =new StringBuffer(_guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
-		if (_fwtVersion!=0)
+	    int fwtVersion=supportsFWTVersion();
+		if (fwtVersion!=0)
 			httpString.append(HTTPConstants.FW_TRANSFER)
 				.append("/")
-				.append(_fwtVersion)
+				.append(fwtVersion)
 				.append(";");
 		
 		int proxiesWritten=0;
@@ -377,8 +396,27 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 	}
 	
+	/**
+	 * @return the various features this PE reports.  This always
+	 * returns the most current features, or the ones it was created with
+	 * if they have never been updated.
+	 */
 	public int getFeatures() {
-		return _features & FEATURES_MASK;
+		GuidSetWrapper current = (GuidSetWrapper)
+			GUID_PROXY_MAP.get(_guid);
+		int currentFeatures = current==null ? _features : current.getFeatures();
+		return currentFeatures & FEATURES_MASK;
+	}
+
+	/**
+	 * updates the features of all PushEndpoints for the given guid 
+	 */
+	public static void setFeatures(byte [] guid,int features) {
+		GUID g = new GUID(guid);
+		GuidSetWrapper current = (GuidSetWrapper)
+			GUID_PROXY_MAP.get(g);
+		if (current!=null)
+			current.setFeatures(features);
 	}
 	
 	/**
@@ -388,14 +426,21 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public void updateProxies(boolean good) {
 	    GuidSetWrapper existing;
+	    GUID guidRef = null;
 
 	    synchronized(GUID_PROXY_MAP) {
 	        existing = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
-	        
-	        // if we do not have a mapping for this guid, add a
-	        // new one atomically
-	        if (existing == null){ 
-	            existing = new GuidSetWrapper(_guid);
+
+		// try to get a hard ref so that the mapping won't expire
+		if (existing!=null)
+		    guidRef=existing.getGuid();	        
+
+	        // if we do not have a mapping for this guid, or it just expired,
+	        // add a new one atomically
+			// (we don't care about the proxies of the expired mapping)
+	        if (existing == null || guidRef==null){
+	        	
+	            existing = new GuidSetWrapper(_guid,_features,_fwtVersion);
 	            if (good)
 	                existing.updateProxies(_proxies,true);
 	            else
@@ -403,7 +448,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	            
 	            GUID_PROXY_MAP.put(_guid,existing);
 	            
-	            // clear the reference
+	            // clear the reference to the set
 	            _proxies=null;
 	            return;
 	        }
@@ -414,8 +459,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	    existing.updateProxies(_proxies,good);
 	    
 	    // make sure the PE points to the actual key guid
-	    _guid = existing.getGuid();
-	    Assert.that(_guid != null);
+	    _guid = guidRef;
 	    _proxies = null;
 	}	
 	
@@ -494,8 +538,16 @@ public class PushEndpoint implements HTTPHeaderValue{
 	private static class GuidSetWrapper {
 	    private final WeakReference _guidRef;
 	    private Set _proxies;
+	    private int _features,_fwtVersion;
+	    
 	    GuidSetWrapper(GUID guid) {
+	    	this(guid,0,0);
+	    }
+	    
+	    GuidSetWrapper(GUID guid,int features, int version) {
 	        _guidRef = new WeakReference(guid);
+	        _features=features;
+	        _fwtVersion=version;
 	    }
 	    
 	    synchronized void updateProxies(Set s, boolean add){
@@ -518,6 +570,22 @@ public class PushEndpoint implements HTTPHeaderValue{
 	    
 	    synchronized Set getProxies() {
 	        return _proxies != null ? _proxies : Collections.EMPTY_SET;
+	    }
+	    
+	    synchronized int getFeatures() {
+	    	return _features;
+	    }
+	    
+	    synchronized int getFWTVersion() {
+	    	return _fwtVersion;
+	    }
+	    
+	    synchronized void setFeatures(int features) {
+	    	_features=features;
+	    }
+	    
+	    synchronized void setFWTVersion(int version){
+	    	_fwtVersion=version;
 	    }
 	    
 	    GUID getGuid() {

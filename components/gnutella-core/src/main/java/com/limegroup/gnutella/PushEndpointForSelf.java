@@ -37,4 +37,18 @@ public class PushEndpointForSelf extends PushEndpoint {
         return RouterService.getConnectionManager().getPushProxies();
     }
     
+    /**
+     * we always have the same features
+     */
+    public int getFeatures() {
+    	return 0;
+    }
+    
+    /**
+     * we always support the same fwt version
+     */
+    public int supportsFWTVersion() {
+    	return UDPConnection.VERSION;
+    }
+    
 }

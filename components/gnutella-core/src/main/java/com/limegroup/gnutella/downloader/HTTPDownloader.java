@@ -1399,15 +1399,9 @@ public class HTTPDownloader implements BandwidthTracker {
                     //ignore this header
                     continue;
                 }
-            	
-            	// replace the FWT version in the rfd with the one reported
-            	// by the header if they don't match
-            	if (_rfd.getPushAddr().supportsFWTVersion()!=FWTVersion)
-            	    _rfd.setPushAddress(
-            	        new PushEndpoint(_rfd.getClientGUID(),
-            	                _rfd.getPushProxies(),
-            	                _rfd.getPushAddr().getFeatures(),
-            	                FWTVersion));
+
+                // update the FWT version we know for this host
+            	PushEndpoint.setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
             }
         }
     }
