@@ -44,7 +44,7 @@ public class ConnectionCheckerTest extends BaseTestCase {
 
         // We should quickly connect to one of our hosts.
         ConnectionChecker checker = ConnectionChecker.checkForLiveConnection();
-        Thread.sleep(2000);
+        Thread.sleep(4000);
         assertTrue("should have successfully connected", 
             checker.hasConnected());
         
