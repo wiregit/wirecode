@@ -176,34 +176,35 @@ public final class HandshakeResponse {
      * @param message the response message to use.
      * @param headers the headers to use in the response.
      */
-     HandshakeResponse(int code, String message, Properties headers) { 
-         STATUS_CODE = code;
-         STATUS_MESSAGE = message;
-         HEADERS = headers;
-         DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
-         HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
-         ULTRAPEER_QRP = 
-             isVersionOrHigher(HEADERS, 
-                               HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
-         MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
-         DYNAMIC_QUERY = 
-             isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
-         PROBE_QUERIES = 
-             isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
-
-         GOOD_LEAF = isHighDegreeConnection() &&
-             isUltrapeerQueryRoutingConnection() &&
-             (getMaxTTL() < 5) &&
-             isDynamicQueryConnection();
-
-         GOOD_ULTRAPEER = isGoodLeaf() && 
-             supportsProbeQueries();
-             
-
-         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
-         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
-     }
-   
+    HandshakeResponse(int code, String message, Properties headers) { 
+        STATUS_CODE = code;
+        STATUS_MESSAGE = message;
+        HEADERS = headers;
+        DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
+        HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
+        ULTRAPEER_QRP = 
+            isVersionOrHigher(HEADERS, 
+                              HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
+        MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, 
+                                         (byte)4);
+        DYNAMIC_QUERY = 
+            isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+        PROBE_QUERIES = 
+            isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
+        
+        GOOD_LEAF = isHighDegreeConnection() &&
+            isUltrapeerQueryRoutingConnection() &&
+            (getMaxTTL() < 5) &&
+            isDynamicQueryConnection();
+        
+        GOOD_ULTRAPEER = isGoodLeaf() && 
+            supportsProbeQueries();
+        
+        
+        ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
+        LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
+    }
+    
     /**
      * Creates an empty response with no headers.  This is useful, for 
      * example, during connection handshaking when we haven't yet read
@@ -214,7 +215,7 @@ public final class HandshakeResponse {
     public static HandshakeResponse createEmptyResponse() {
         return new HandshakeResponse(new Properties());
     }
-
+    
     /**
      * Constructs the response from the other host during connection
      * handshaking.
@@ -226,7 +227,7 @@ public final class HandshakeResponse {
         createResponse(Properties headers) throws IOException {
         return new HandshakeResponse(headers);
     }
-
+    
     /**
      * Constructs the response from the other host during connection
      * handshaking.
@@ -246,7 +247,7 @@ public final class HandshakeResponse {
         }
         return new HandshakeResponse(code, message, headers);        
     }
-
+    
     /**
      * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
      * potential connection.
