@@ -96,8 +96,6 @@ public class MetaFileManager extends FileManager {
             return normals;
         //So they are both not null
         HashSet unionSet = new HashSet();
-        for(int i =0; i<normals.length; i++)
-            unionSet.add(normals[i]);
         for (int j =0; j<metas.length; j++){
             if(metas[j] != null){
                 //There will be nulls at the end of metas if meta-data 
@@ -105,6 +103,8 @@ public class MetaFileManager extends FileManager {
                 unionSet.add(metas[j]);
             }
         }
+        for(int i =0; i<normals.length; i++)
+            unionSet.add(normals[i]);
         //The set contains all the elements that are the union of the 2 arrays
         int size = unionSet.size();
         Iterator iter = unionSet.iterator();
