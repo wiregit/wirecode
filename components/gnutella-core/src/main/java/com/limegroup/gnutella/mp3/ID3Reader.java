@@ -286,7 +286,8 @@ public final class ID3Reader {
                 String retrievedLicense = htmlContent.substring(0, index);
                 if (retrievedLicense == null)
                     return false;
-                
+
+                http.disconnect();
                 return retrievedLicense.equals(license);
             }
             else
