@@ -979,8 +979,8 @@ public abstract class MessageRouter
         // get the appropriate queryReply information
         byte[] guid = queryRequest.getGUID();
         byte ttl = (byte)(queryRequest.getHops() + 1);
-        int port = _acceptor.getPort();
-        byte[] ip = _acceptor.getAddress();
+        int port = RouterService.getPort();
+        byte[] ip = RouterService.getAddress();
 
 		UploadManager um = RouterService.getUploadManager();
 
