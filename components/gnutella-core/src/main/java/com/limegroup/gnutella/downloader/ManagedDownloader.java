@@ -975,7 +975,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             if(!downloadSHA1.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and our sha1 match.
-                Assert.that(false, "wrong IFD.\n" +
+                Assert.silent(false, "wrong IFD.\n" +
                            "we are resuming :"+(this instanceof ResumeDownloader)+
                            "ours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
@@ -983,6 +983,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                            "\ntheir hashes: " +
                            DataUtils.listSet(ifd.getUrns())+
                           "\nifm.hashes : "+incompleteFileManager.dumpHashes());
+                fileManager.removeFileIfShared(incompleteFile);
             }
         }
         
