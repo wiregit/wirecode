@@ -7,15 +7,19 @@ import java.util.Date;
 
 /**
  * A spam filter that tries to eliminate duplicate packets from
- * overzealous users:
+ * overzealous users.  Since requests are not traceable, we 
+ * have to use the following heuristics:
  *
  * <ul>
  * <li>Two pings are considered duplicates if they have 
- * GUIDs differing by no more than K bytes and arrived within N
- * seconds.
+ * GUIDs differing by no more than K bytes, arrived within N
+ * seconds, and have the same hops counts.
  * <li>Two queries are considered duplicates if they have 
- * the same query string and arrived within N seconds of each other.
+ * the same query string, arrived within N seconds of each other,
+ * and have the same hops counts.
  * </ul>
+ *
+ * It would also be possible to special-case hops counts of zero.
  */
 public class DuplicateFilter extends SpamFilter {  
     /**
@@ -52,7 +56,7 @@ public class DuplicateFilter extends SpamFilter {
      */
     private Buffer /* of QueryPair */ queries=new Buffer(BUF_SIZE);
     /** The time, in milliseconds, allowed between similar queries. */
-    private static final int QUERY_LAG=4000;
+    private static final int QUERY_LAG=2000;
 
     public boolean allow(Message m) {
         if (m instanceof PingRequest)
@@ -65,7 +69,8 @@ public class DuplicateFilter extends SpamFilter {
 
     public boolean allowPing(PingRequest pr) {
         PingPair me=new PingPair(pr.getGUID(),
-                                 (new Date()).getTime());
+                                 (new Date()).getTime(),
+                                 pr.getHops());
 
         //Consider all pings that came in within PING_LAG milliseconds 
         //of this...
@@ -79,7 +84,10 @@ public class DuplicateFilter extends SpamFilter {
             if ((me.time-other.time) > PING_LAG)
                 //All remaining pings have smaller timestamps.
                 break;
-            //Are the GUIDs similar?.  TODO2: can optimize
+            //If different hops, keep looking
+            if (other.hops != me.hops)
+                continue;
+            //Are the GUIDs similar?.  TODO3: can optimize
             int matches=0;
             for (int i=0; i<me.guid.length; i++) {
                 if (me.guid[i]==other.guid[i])
@@ -96,7 +104,8 @@ public class DuplicateFilter extends SpamFilter {
 
     public boolean allowQuery(QueryRequest qr) {
         QueryPair me=new QueryPair(qr.getQuery(),
-                                   (new Date()).getTime());
+                                   (new Date()).getTime(),
+                                   qr.getHops());
     
         //Consider all queries that came in within QUERY_LAG milliseconds 
         //of this...
@@ -107,6 +116,9 @@ public class DuplicateFilter extends SpamFilter {
             if ((me.time-other.time) > QUERY_LAG)
                 //All remaining queries have smaller timestamps.
                 break;
+            //If different hops, keep looking
+            if (other.hops != me.hops)
+                continue;
             //Are the queries the same?
             if (me.query.equals(other.query)) {
                 queries.add(me);
@@ -142,6 +154,8 @@ public class DuplicateFilter extends SpamFilter {
         Assert.that(!filter.allow(pr));
         pr=new PingRequest((byte)2);
         Assert.that(filter.allow(pr));
+        pr.hop(); //hack to get different hops count
+        Assert.that(filter.allow(pr));
 
 
         qr=new QueryRequest((byte)2, 0, "search1");
@@ -161,6 +175,8 @@ public class DuplicateFilter extends SpamFilter {
         Assert.that(!filter.allow(qr));
         qr=new QueryRequest((byte)2, 0, "search3");
         Assert.that(filter.allow(qr));
+        qr.hop(); //hack to get different hops count
+        Assert.that(filter.allow(qr));
     }
     */
 }
@@ -168,10 +184,12 @@ public class DuplicateFilter extends SpamFilter {
 class PingPair {
     byte[] guid;
     long time;
+    int hops;
 
-    PingPair(byte[] guid, long time) {
+    PingPair(byte[] guid, long time, int hops) {
         this.guid=guid;
         this.time=time;
+        this.hops=hops;
     }
 
     public String toString() {
@@ -182,10 +200,12 @@ class PingPair {
 class QueryPair {
     String query;
     long time;
+    int hops;
     
-    QueryPair(String query, long time) {
+    QueryPair(String query, long time, int hops) {
         this.time=time;
         this.query=query;
+        this.hops=hops;
     }
 
     public String toString() {
