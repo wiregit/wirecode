@@ -1048,10 +1048,9 @@ public class ConnectionManager {
 
     /** 
      * Indicates that we are a client node, and have received supernode
-     * connection. Executing this method will lead to dropping all the 
-     * connections except the one to the supernode. 
-     * @param supernodeConnection The connectionto the supernode that we
-     * wanna preserve
+     * connection.  This may choose to adjust its keep-alive. 
+     * @param supernodeConnection the newly initialized leaf-ultrapeer
+     *  connection
      */
     private synchronized void gotShieldedClientSupernodeConnection(
         ManagedConnection supernodeConnection)
