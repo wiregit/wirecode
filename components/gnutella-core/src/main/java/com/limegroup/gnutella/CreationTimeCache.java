@@ -92,11 +92,15 @@ public final class CreationTimeCache {
         URN_TO_TIME_MAP.remove(urn);
         
         Iterator iter = TIME_TO_URNSET_MAP.entrySet().iterator();
+        // find the urn in the map:
+        // 1) get rid of it
+        // 2) get rid of the empty set if it exists
         while (iter.hasNext()) {
             Map.Entry currEntry = (Map.Entry) iter.next();
             Set urnSet = (Set) currEntry.getValue();
             if (urnSet.contains(urn)) {
-                urnSet.remove(urn);
+                urnSet.remove(urn); // 1)
+                if (urnSet.size() < 1) iter.remove(); // 2)
                 break;
             }
         }

@@ -108,9 +108,6 @@ public class MetaFileManager extends FileManager {
         xmlDocs.addAll(fd.getLimeXMLDocuments());
         FileDesc removed = removeFileIfShared(f);        
         Assert.that(fd == removed, "did not remove valid fd.");
-        // remove succeeded, get rid of old time entry from cache (it will be
-        // reinput in addFileIfShared
-        CreationTimeCache.instance().removeTime(removed.getSHA1Urn());
         _needRebuild = true;
         return addFileIfShared(f, xmlDocs, cTime.longValue());
     }        

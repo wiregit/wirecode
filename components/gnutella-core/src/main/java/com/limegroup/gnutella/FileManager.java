@@ -1033,9 +1033,6 @@ public abstract class FileManager {
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
-        // remove succeeded, get rid of old time entry from cache (it will be
-        // reinput in addFileIfShared
-        CreationTimeCache.instance().removeTime(oldURN);
         FileDesc fd = addFileIfShared(f, cTime.longValue());
         return fd;
     }
@@ -1097,7 +1094,7 @@ public abstract class FileManager {
         boolean removed=siblings.remove(i);
         Assert.that(removed, "File "+i+" not found in "+siblings);
 
-        //Remove references to this from index.                                            
+        //Remove references to this from index.
         String[] keywords = extractKeywords(fd);
         for (int j=0; j<keywords.length; j++) {
             String keyword=keywords[j];
@@ -1111,6 +1108,9 @@ public abstract class FileManager {
 
         //Remove hash information.
         this.removeUrnIndex(fd);
+        //Remove creation time information
+        if (_urnIndex.get(fd.getSHA1Urn()) == null)
+            CreationTimeCache.instance().removeTime(fd.getSHA1Urn());
   
         repOk();
         return fd;
