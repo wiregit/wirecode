@@ -248,7 +248,7 @@ public class HostCatcher {
 			supportsUnicast = pr.supportsUnicast();
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
 											pr.getDailyUptime());
-        } catch (BadPacketException bpe) {
+        } catch (BadPacketException e) {
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort());
         }
 
@@ -318,10 +318,6 @@ public class HostCatcher {
 
         //Skip if this host is banned.
         if (RouterService.getAcceptor().isBannedIP(e.getHostname()))
-            return false;
-
-        //Skip if this is the router.
-        if (ManagedConnection.isRouter(e.getHostname())) 
             return false;
 
         //Add to permanent list, regardless of whether it's actually in queue.

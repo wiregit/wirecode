@@ -232,7 +232,7 @@ public class ManagedConnection
      * pong-cache server (e.g. gnutellahosts.com).  This may be replaced
      * with a more general priority-based scheme later.
      */
-    private boolean _isRouter=false;
+    //private boolean _isRouter=false;
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
@@ -266,12 +266,12 @@ public class ManagedConnection
      * @param router where to report messages
      * @param where to report my death.  Also used for reject connections.
      */
-    ManagedConnection(String host,
-                      int port,
-                      MessageRouter router,
-                      ConnectionManager manager) {
-        this(translateHost(host), port, router, manager, isRouter(host));
-    }
+    //ManagedConnection(String host,
+	//                int port,
+    //                  MessageRouter router,
+    //                  ConnectionManager manager) {
+    //    this(translateHost(host), port, router, manager, isRouter(host));
+    //}
 
     /**
      * Creates an outgoing connection.  The connection is considered a special
@@ -279,33 +279,27 @@ public class ManagedConnection
      * already be translated.  This constructor exists only for the convenience
      * of implementation.
      */
-    private ManagedConnection(String host,
-                              int port,
-                              MessageRouter router,
-                              ConnectionManager manager,
-                              boolean isRouter) {
+    public ManagedConnection(String host,
+							 int port,
+							 MessageRouter router,
+							 ConnectionManager manager) {
+		//boolean isRouter) {
         //If a router connection, connect as 0.4 by setting responders to null.
         //(Yes, it's a hack, but this is how Connection(String,int) is
         //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
         //the headers according to whether we're supernode capable.
         super(host, port, 
-              isRouter ? 
-                  null :
-                  (manager.isSupernode() ? 
-                      (Properties)(new SupernodeProperties(host)) : 
-                      (Properties)(new ClientProperties(host))),
-              isRouter ? 
-                  null : 
-                  (manager.isSupernode() ?
-                      (HandshakeResponder)
-                      (new SupernodeHandshakeResponder(manager, host)) :
-                      (HandshakeResponder)
-                      (new ClientHandshakeResponder(manager, host))),
-              !isRouter);
+			  (manager.isSupernode() ? 
+			   (Properties)(new SupernodeProperties(host)) : 
+			   (Properties)(new ClientProperties(host))),
+			  (manager.isSupernode() ?
+			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
+			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)));
+		//!isRouter);
         
         _router = router;
         _manager = manager;
-        _isRouter = isRouter;
+        //_isRouter = isRouter;
     }
 
     /**
@@ -320,11 +314,11 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager) {
         super(socket, 
-            manager.isSupernode() ? 
-            (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
-                socket.getInetAddress().getHostAddress())) : 
-            (HandshakeResponder)(new ClientHandshakeResponder(manager,
-                socket.getInetAddress().getHostAddress())));
+			  manager.isSupernode() ? 
+			  (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
+			      socket.getInetAddress().getHostAddress())) : 
+			  (HandshakeResponder)(new ClientHandshakeResponder(manager,
+				  socket.getInetAddress().getHostAddress())));
         _router = router;
         _manager = manager;
     }
@@ -332,10 +326,10 @@ public class ManagedConnection
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-        if (_isRouter)
-            super.initialize();   //no timeout for bootstrap server
-        else
-            super.initialize(CONNECT_TIMEOUT);
+        //if (_isRouter)
+		//  super.initialize();   //no timeout for bootstrap server
+        //else
+		super.initialize(CONNECT_TIMEOUT);
 
         //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
         //save a fair bit of memory by not using buffering at all.  But this
@@ -1150,9 +1144,9 @@ public class ManagedConnection
 
     /** Returns true if this is as a special "router" connection, e.g. to
      *  router.limewire.com.  */
-    public boolean isRouterConnection() {
-        return this._isRouter;
-    }
+    //public boolean isRouterConnection() {
+	//  return this._isRouter;
+    //}
 
     /** Returns true iff this connection wrote "Supernode: false".
      *  This does NOT necessarily mean the connection is shielded. */
@@ -1363,6 +1357,7 @@ public class ManagedConnection
 
     /** Returns true iff hostname is any of the routerX.limewire.com's (possibly
      *  in dotted-quad form). */
+	/*
     public static boolean isRouter(String hostname) {
         //Taken from the old ConnectionManager.createRouterConnection method.
         if (hostname.startsWith("router") && hostname.endsWith("limewire.com"))
@@ -1379,6 +1374,7 @@ public class ManagedConnection
             return true;
         return false;
     }
+	*/
 
     /** 
      * Tests representation invariants.  For performance reasons, this is
