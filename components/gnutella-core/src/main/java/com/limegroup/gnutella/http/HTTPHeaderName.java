@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.http;
 
+import java.util.Locale;
+
 /**
  * This class defines an "enum" for HTTP header names, following the
  * typesafe enum pattern.
@@ -26,7 +28,7 @@ public class HTTPHeaderName {
 	 */
 	private HTTPHeaderName(final String name) {
 		NAME = name;
-		LOWER_CASE_NAME = name.toLowerCase();
+		LOWER_CASE_NAME = name.toLowerCase(Locale.US);
 	}
 
 	/**
@@ -122,7 +124,7 @@ public class HTTPHeaderName {
 	 *  returns <tt>false</tt>
 	 */
 	public boolean matchesStartOfString(String str) {
-		return str.toLowerCase().startsWith(LOWER_CASE_NAME);
+		return str.toLowerCase(Locale.US).startsWith(LOWER_CASE_NAME);
 	}
 
 	/**
