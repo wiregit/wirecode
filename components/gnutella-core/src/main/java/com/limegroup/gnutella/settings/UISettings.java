@@ -26,5 +26,17 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting MAGNETMIX_BUTTON = 
         FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON",
-                                     !CommonUtils.isPro());     
+                                     !CommonUtils.isPro());
+                                     
+    /**
+     * Setting for using small icons.
+     */
+    public static final BooleanSetting SMALL_ICONS =
+        FACTORY.createBooleanSetting("UI_SMALL_ICONS", true);
+        
+    /**
+     * Setting for displaying text under icons.
+     */
+    public static final BooleanSetting TEXT_WITH_ICONS =
+        FACTORY.createBooleanSetting("UI_TEXT_WITH_ICONS", true);
 }
