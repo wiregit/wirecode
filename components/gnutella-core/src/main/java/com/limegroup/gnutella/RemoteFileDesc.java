@@ -363,7 +363,6 @@ public class RemoteFileDesc implements Serializable {
             }
         }
                 
-        _pushAddr = new PushEndpoint(_clientGUID);
 		// preserve the invariant that the LimeXMLDocument array either be
 		// null or have at least one element
 		if(_xmlDocs != null && _xmlDocs.length == 0) {
