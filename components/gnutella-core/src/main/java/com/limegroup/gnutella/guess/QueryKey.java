@@ -72,6 +72,12 @@ public class QueryKey {
         out.write(_queryKey);
     }
 
+    /** Returns a String with the QueryKey represented as a BigInteger.
+     */
+    public String toString() {
+        return "{Query Key: " + (new java.math.BigInteger(_queryKey)) + "}";
+    }
+
     //--------------------------------------
     //--- PUBLIC STATIC CONSTRUCTION METHODS
 
