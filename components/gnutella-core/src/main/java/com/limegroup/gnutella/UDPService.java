@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
@@ -188,7 +189,7 @@ public final class UDPService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_UDP);
+                    Message message = BIOMessageReader.createMessageFromUDP(in);
                     if (!isGUESSCapable()) {
                         if (message instanceof PingRequest) {
                             GUID guidReceived = new GUID(message.getGUID());

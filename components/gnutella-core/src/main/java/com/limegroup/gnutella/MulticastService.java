@@ -1,9 +1,7 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
-
 import java.net.*;
 import java.io.*;
 
@@ -94,7 +92,8 @@ public final class MulticastService implements Runnable {
      * @exception IOException Thrown if the MulticastSocket could not be
      * created.
      */
-    MulticastSocket newListeningSocket(int port, InetAddress group) throws IOException {
+    MulticastSocket newListeningSocket(int port, InetAddress group) 
+        throws IOException {
         try {
             MulticastSocket sock = new MulticastSocket(port);
             sock.setTTL((byte)3);
@@ -189,7 +188,8 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_MULTICAST);
+                    Message message = 
+                        BIOMessageReader.createMessageFromMulticast(in);
                     if(message == null) continue;
                     router.handleMulticastMessage(message, datagram);
                 }
