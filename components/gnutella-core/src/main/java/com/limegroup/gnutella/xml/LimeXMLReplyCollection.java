@@ -365,6 +365,9 @@ public class LimeXMLReplyCollection{
         synchronized(mainMap){
             oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
         }
+        
+        // TODO:: what happens if oldDoc is null??  we currently won't add 
+        // newDoc in this case -- should we???
         fd.replaceLimeXMLDocument(oldDoc, newDoc);
         return oldDoc;
     }
