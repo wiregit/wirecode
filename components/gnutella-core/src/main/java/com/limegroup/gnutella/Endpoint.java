@@ -9,9 +9,9 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     String hostname;
     int port;
     /** Number of files at the host, or -1 if unknown */
-    private long files=-1l;
+    private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
-    private long kbytes=-1l;
+    private long kbytes=-1;
     
     /**
      * Needed for Network Discovery. Records information regarding wthether the neighbours
@@ -26,10 +26,19 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     
     /**
      * Sets the connectivity of the node
-     * @param connectvity the connectivity to be set 
+     * @param connectivity the connectivity to be set 
      */
     public void setConnectivity(int connectivity){
 	this.connectivity = connectivity;
+    }
+    
+    /**
+     * returns the connectivity of the node
+     * @return The connectivity of the node 
+     */
+    public int getConnectivity()
+    {
+        return connectivity;
     }
     
     /**
@@ -68,7 +77,7 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     }
     
     public String toString() {
-	return hostname+":"+port;
+	return hostname+":"+port + " connectivity=" + connectivity;
     }
     
     public String getHostname(){
@@ -84,12 +93,25 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
         return files;
     }
     
+ /** Sets the number of files the host has */
+    public void setFiles(long files) {
+        this.files = files;
+    }
+    
+    
+    
     /** Returns the size of all files the host has, in kilobytes, 
      *  or -1 if I don't know */   
     public long getKbytes() {
         return kbytes;
     }
 
+    /** Sets the size of all files the host has, in kilobytes, 
+    */   
+    public void setKbytes(long kbytes) {
+        this.kbytes = kbytes;
+    }
+    
     /** 
      * Endpoints are equal if their hostnames and ports are.  The number
      * and size of files does not matter.
@@ -108,7 +130,7 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     
     
     protected Object clone(){
-	return new Endpoint(new String(hostname), port);
+	return new Endpoint(new String(hostname), port, files, kbytes);
     }
     
     /**
