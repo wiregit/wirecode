@@ -256,14 +256,8 @@ public abstract class MessageRouter
 			MessageStat.UDP_PING_REQUESTS.incrementStat();
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
-			MessageStat.UDP_PING_REPLIES.incrementStat();
-			PingReply reply = (PingReply)msg;
-			if((reply.getPort() != port) || 
-			   (!reply.getIP().equals(address.getHostAddress()))) {
-				UNICASTER.addUnicastEndpoint(datagram.getAddress(),
-											 datagram.getPort());		
-			}
-			handlePingReply((PingReply)msg, handler);
+            MessageStat.UDP_PING_REPLIES.incrementStat();
+            handleUDPPingReply((PingReply)msg, handler, address, port);
 		} else if(msg instanceof PushRequest) {
 			MessageStat.UDP_PUSH_REQUESTS.incrementStat();
 			handlePushRequest((PushRequest)msg, handler);
@@ -383,6 +377,29 @@ public abstract class MessageRouter
         respondToUDPPingRequest(pingRequest);
     }
     
+
+    protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
+                                      InetAddress address, int port) {
+
+        // also add the sender of the pong if different from the host
+        // described in the reply...
+        if((reply.getPort() != port) || 
+           (!reply.getIP().equals(address.getHostAddress()))) 
+            UNICASTER.addUnicastEndpoint(address, port);
+
+        // notify neighbors of new unicast endpoint...
+        Iterator guessUltrapeers = 
+        _manager.getConnectedGUESSUltrapeers().iterator();
+        while (guessUltrapeers.hasNext()) {
+            ManagedConnection currMC = 
+            (ManagedConnection) guessUltrapeers.next();
+            currMC.send(reply);
+        }
+        
+        // normal pong processing...
+        handlePingReply(reply, handler);
+    }
+
     
     /**
      * The default handler for QueryRequests received in

@@ -732,6 +732,25 @@ public class ConnectionManager {
 		return null;
 	}
     
+
+    /** Returns a <tt>List<tt> of Ultrapeers connected via TCP that are GUESS
+     *  enabled.
+     *
+     * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
+     * are represented as ManagedConnections.
+     */
+	public List getConnectedGUESSUltrapeers() {
+        List retList = new ArrayList();
+		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
+			ManagedConnection connection = (ManagedConnection)iter.next();
+			if(connection.isSupernodeConnection() && 
+               connection.isGUESSUltrapeer()) 
+				retList.add(connection);
+		}
+		return retList;
+	}
+
+
     /**
      * @return Returns endpoint representing its own address and port
      */
