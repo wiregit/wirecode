@@ -49,7 +49,7 @@ public class Response {
                 "Response constructor: index too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
                 "Response constructor: size too big!");
-
+        metadata = metadata.trim();
         this.index=index;
         this.size=size;
         this.name=name;
