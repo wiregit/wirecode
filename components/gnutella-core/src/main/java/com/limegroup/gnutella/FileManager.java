@@ -1027,12 +1027,15 @@ public abstract class FileManager {
      *  changed, otherwise <tt>null</tt>
      */
     public FileDesc fileChanged(File f) {
-        Long cTime = 
-            CreationTimeCache.instance().getCreationTime(getURNForFile(f));
+        URN oldURN = getURNForFile(f);
+        Long cTime = CreationTimeCache.instance().getCreationTime(oldURN);
         Assert.that(cTime != null);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
+        // remove succeeded, get rid of old time entry from cache (it will be
+        // reinput in addFileIfShared
+        CreationTimeCache.instance().removeTime(oldURN);
         FileDesc fd = addFileIfShared(f, cTime.longValue());
         return fd;
     }

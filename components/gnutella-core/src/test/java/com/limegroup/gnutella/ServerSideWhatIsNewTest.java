@@ -395,7 +395,66 @@ public class ServerSideWhatIsNewTest
             if (currResp.getName().equals(tempFile2.getName()))
                 gotTempFile2 = true;
         }
-        assertTrue(gotTempFile1 && gotTempFile2);
+        assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
+                   gotTempFile2, gotTempFile1 && gotTempFile2);
+    }
+
+    
+    // test that the fileChanged method of FM does the right thing.  this isn't
+    // a total black box test, but hacking up the changing of ID3 data isn't
+    // worth the cost.  this test should be good enough....
+    public void testFileChanged() throws Exception {
+        FileManager fm = rs.getFileManager();
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        URN tempFile1URN = fm.getURNForFile(tempFile1);
+        Long cTime = ctCache.getCreationTime(tempFile1URN);
+
+        FileWriter writer = null;
+        {
+            writer = new FileWriter(tempFile1);
+            writer.write(berkeley.getName(), 0, berkeley.getName().length());
+            writer.flush();
+            writer.close();
+        }
+
+        assertNotNull(rs.getFileManager().fileChanged(tempFile1));
+        assertNotNull(fm.getURNForFile(tempFile1));
+        assertNotEquals(tempFile1URN, fm.getURNForFile(tempFile1));
+        assertEquals(ctCache.getCreationTime(fm.getURNForFile(tempFile1)),
+                     cTime);
+
+        // now just send another What Is New query and make sure everything
+        // is kosher - probbably overkill but whatever....
+        drain(testUP);
+
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        testUP.send(whatIsNewQuery);
+        testUP.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        QueryReply reply = 
+            (QueryReply) getFirstInstanceOfMessageType(testUP,
+                                                       QueryReply.class);
+        assertNotNull(reply);
+        assertEquals(3, reply.getResultCount());
+        boolean gotTempFile1 = false, gotTempFile2 = false;
+        
+        Iterator iter = reply.getResults();
+        while (iter.hasNext()) {
+            Response currResp = (Response) iter.next();
+            if (currResp.getName().equals(tempFile1.getName()))
+                gotTempFile1 = true;
+            if (currResp.getName().equals(tempFile2.getName()))
+                gotTempFile2 = true;
+        }
+        assertTrue("file 1? " + gotTempFile1 + ", file 2? " +
+                   gotTempFile2, gotTempFile1 && gotTempFile2);
+
     }
 
 
