@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -25,6 +26,8 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.RoundRobinQueue;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.AssertComparisons;
 import com.sun.java.util.collections.Iterator;
@@ -142,6 +145,11 @@ public class TestUploader extends AssertComparisons {
     private boolean interestedInFalts = false;
     
     /**
+     * whether we are firewalled
+     */
+    private boolean isFirewalled = false;
+    
+    /**
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
@@ -211,7 +219,7 @@ public class TestUploader extends AssertComparisons {
         reset();
         LOG.debug("starting to handle request with direct socket given");
         
-        Thread t = new Thread() {
+        Thread t = new Thread(name) {
             public void run() {
                 synchronized(TestUploader.this) {
                     try{
@@ -222,7 +230,6 @@ public class TestUploader extends AssertComparisons {
                         ErrorService.error(hmm);
                     }
                 }
-                
                 Runnable r = new SocketHandler(socket);
                 r.run();
             }
@@ -427,6 +434,13 @@ public class TestUploader extends AssertComparisons {
     }
     
     /**
+     * sets whether the uploader is firewalled, which affects headers written
+     */
+    public void setFirewalled(boolean yes) {
+        isFirewalled=yes;
+    }
+    
+    /**
      * Sets whether or not we'll use a bad thex response header.
      */
     public void setUseBadThexResponseHeader(boolean yes ) {
@@ -498,7 +512,7 @@ public class TestUploader extends AssertComparisons {
                 LOG.debug("Uploader accepted connection");
                 //spawn thread to handle request
                 final Socket mySocket = socket;
-                Thread runner=new Thread(new SocketHandler(mySocket));
+                Thread runner=new Thread(new SocketHandler(mySocket),name);
                 runner.start();
             } catch (IOException e) {
                 LOG.debug("exception in accept", e);
@@ -517,6 +531,7 @@ public class TestUploader extends AssertComparisons {
     public boolean isBannedIP(String ip) {        
         return !IP_FILTER.allow(ip);
     }
+    
     
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
@@ -738,8 +753,25 @@ public class TestUploader extends AssertComparisons {
                                   TestFile.tree(),
                                   out);
         }
-        if(interestedInFalts) 
-            HTTPUtils.writeFeatures(out);
+        if(interestedInFalts)
+            if (!isFirewalled) 
+                HTTPUtils.writeFeatures(out);
+            else {
+                boolean previous = RouterService.acceptedIncomingConnection();
+                
+                try{
+                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                        "_acceptedIncoming",new Boolean(false));
+                    
+                    HTTPUtils.writeFeatures(out);
+                    
+                    PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                            "_acceptedIncoming",new Boolean(previous));
+                }catch(Exception bad) {
+                    ErrorService.error(bad);
+                }
+            }
+        
 
         str = "\r\n";
 		out.write(str.getBytes());
@@ -933,15 +965,17 @@ public class TestUploader extends AssertComparisons {
 		}		
 	}
 	
+	
 	private class SocketHandler implements Runnable {
 	    private final Socket mySocket;
 	    public SocketHandler(Socket s) {
 	        mySocket=s;
 	    }
-	    public void run() {          
+	    public void run() {  
+	        LOG.debug(name+" starting to upload.. ");
             try {
                 while(http11 && !stopped) {
-                    Thread.yield();
+
                     handleRequest(mySocket);
                     if (queue) { 
                         mySocket.setSoTimeout(MAX_POLL);
@@ -958,6 +992,7 @@ public class TestUploader extends AssertComparisons {
             } catch(Throwable t) {
                 ErrorService.error(t);
             } finally {
+                
                 try {
                     mySocket.close();
                 } catch (IOException e) {

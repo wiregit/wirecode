@@ -47,6 +47,7 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
@@ -1103,7 +1104,62 @@ public class DownloadTest extends BaseTestCase {
     }
     
     /**
-     * tests that a download from a push location becomes an alternate location      
+     * tests that a push uploader passes push loc and the new push loc receives
+     * the first uploader as an altloc.
+     */
+    public void testPushUploaderPassesPushLoc() throws Exception {
+        
+        final int RATE=500;
+        
+        TestUploader first = new TestUploader("first pusher");
+        first.setRate(RATE);
+        first.stopAfter(600000);
+        
+        TestUploader second = new TestUploader("second pusher");
+        second.setRate(RATE/2);
+        second.stopAfter(500000);
+        second.setInterestedInFalts(true);
+        
+        AlternateLocation firstLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),savedFile.getName());
+        
+        AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
+        alCol.add(pushLoc);
+        
+        first.setAlternateLocations(alCol);
+        
+        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),first);
+        
+        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+                savedFile.getName(),second);
+        
+        RemoteFileDesc []rfd ={firstLoc.createRemoteFileDesc(TestFile.length())};
+        
+        tGeneric(rfd);
+        
+        
+        assertGreaterThan("first pusher did no work",100000,first.amountUploaded());
+        assertGreaterThan("second pusher did no work",100000,second.amountUploaded());
+        
+        assertEquals(1,second.getAlternateLocations().getAltLocsSize());
+        
+        assertTrue("interested uploader didn't get first loc",
+                second.getAlternateLocations().contains(firstLoc));
+        
+        
+    }
+    
+    /**
+     * tests that a download from a push location becomes an alternate location.
+     * 
+     * It creates a push uploader from which we must create a PushLoc.  
+     * After a while, two open uploaders join the swarm  -one which is interested 
+     * in receiving push locs and one which isn't.  The interested one should
+     * receive the push loc, the other one should not.
      */
     public void testPusherBecomesPushLocAndSentToInterested() throws Exception {
         LOG.debug("-Testing push download creating a push location...");
@@ -1118,12 +1174,20 @@ public class DownloadTest extends BaseTestCase {
         
         TestUploader pusher = new TestUploader("push uploader");
         pusher.setRate(RATE);
-        pusher.stopAfter(150000);
+        pusher.stopAfter(200000);
+        
         
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
         
         RemoteFileDesc pushRFD = pushLoc.createRemoteFileDesc(TestFile.length());
+        
+        assertFalse(pushRFD.supportsFWTransfer());
+        assertTrue(pushRFD.needsPush());
+
+        
+
+        
         RemoteFileDesc openRFD1 = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc openRFD2 = newRFDWithURN(PORT_2,100,TestFile.hash().toString());
         
@@ -1132,6 +1196,7 @@ public class DownloadTest extends BaseTestCase {
         
         PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
                 savedFile.getName(),pusher);
+
         
         tGeneric(now,later);
         
@@ -1143,11 +1208,68 @@ public class DownloadTest extends BaseTestCase {
 
         assertGreaterThan("pusher did no work",100*1024,pusher.amountUploaded());
         
+        
         AlternateLocationCollection alc = uploader1.getAlternateLocations();
         assertTrue("interested uploader did not get pushloc",alc.contains(pushLoc));
         
+        
         alc=uploader2.getAlternateLocations();
         assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
+        
+        
+        alc=pusher.getAlternateLocations();
+        assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
+        
+
+    }
+    
+    /**
+     * tests that a pushloc which we thought did not support FWT 
+     * but actually does updates its status through the headers
+     */
+    public void testPushLocUpdatesFWTStatus() throws Exception {
+        
+        final int RATE=100;
+        
+        
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(900000);
+        uploader1.setInterestedInFalts(true);
+        
+        TestUploader pusher2 = new TestUploader("firewalled pusher");
+        pusher2.setRate(RATE);
+        pusher2.stopAfter(200000);
+        pusher2.setFirewalled(true);
+        pusher2.setInterestedInFalts(true);
+        
+        AlternateLocation pushLocFWT = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),
+                savedFile.getName());
+        
+        RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
+        
+        RemoteFileDesc pushRFD2 = pushLocFWT.createRemoteFileDesc(TestFile.length());
+        assertFalse(pushRFD2.supportsFWTransfer());
+        assertTrue(pushRFD2.needsPush());
+        
+        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+                savedFile.getName(),pusher2);
+        
+        RemoteFileDesc [] now = {pushRFD2};
+        RemoteFileDesc [] later = {openRFD};
+        
+        tGeneric(now,later);
+        
+        AlternateLocationCollection alc = uploader1.getAlternateLocations();
+        assertEquals(1,alc.getAltLocsSize());
+        
+        PushAltLoc pushLoc = (PushAltLoc)alc.iterator().next();
+        
+        assertEquals(UDPConnection.VERSION,pushLoc.supportsFWTVersion());
+        
+        RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1);
+        assertTrue(readRFD.supportsFWTransfer());
+        
     }
     
     /**
