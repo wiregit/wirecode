@@ -571,7 +571,7 @@ public class HTTPDownloader implements Runnable {
 	}
 
 
-    public void readHeader() {
+    public void readHeader() throws IOException {
         String str = " ";
 
         boolean foundLength = false;
@@ -581,38 +581,26 @@ public class HTTPDownloader implements Runnable {
         int     lineNumber = -1;
 
         while (true) {
-            try {
-                str = _br.readLine();
-                lineNumber++;
-            } catch (IOException e) {
-                _state = ERROR;
-                return;
-            }
+
+			str = _br.readLine();
+			lineNumber++;
 
             //EOF?
             if (str==null || str.equals(""))
                 break;
 
             // Handle errors not conforming to HTTP spec
-            if ( lineNumber == 0 )
-            {
+            if ( lineNumber == 0 ) {
+            
                 // Handle a 503 error from Gnotella/Gnutella
                 if ( str.equals("3") || 
-                     str.startsWith("3 Upload limit reached") )
-                {
-                	_stateString = TryAgainLater;
-                    _state = ERROR;
-                    return;
-                }
+					 str.startsWith("3 Upload limit reached") )
+					throw new IOException("Try Again Later");
 
                 // Handle a 404 error from Gnotella/Gnutella
-                if ( str.equals("4") || 
-                     str.startsWith("4 File Not Found") )
-                {
-                    _stateString = "File Not Found";
-                    _state = ERROR;
-                    return;
-                }
+                if ( str.equals("4") || str.startsWith("4 File Not Found") ) 
+					throw new IOException("File Not Found");
+                
             }
 
             if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
@@ -621,16 +609,14 @@ public class HTTPDownloader implements Runnable {
                 try {
                     sub=str.substring(15);
                 } catch (IndexOutOfBoundsException e) {
-                    _state = ERROR;
-                    return;
+					throw new IOException("Problem Reading Header");
                 }
                 sub = sub.trim();
                 try {
                     tempSize = java.lang.Integer.parseInt(sub);
                 }
                 catch (NumberFormatException e) {
-                    _state = ERROR;
-                    return;
+					throw new IOException("Problem Reading Header");
                 }
 
                 foundLength = true;
@@ -652,23 +638,17 @@ public class HTTPDownloader implements Runnable {
 					sub = sub.trim();
 					sub_two = sub_two.trim();
                 } catch (IndexOutOfBoundsException e) {
-                    // _state = ERROR;
-					return;
+					throw new IOException("Problem Reading Header");
                 }
 				try {
 					tempSize = java.lang.Integer.parseInt(sub_two);
                     resumeInit = java.lang.Integer.parseInt(sub);
                 }
                 catch (NumberFormatException e) {
-                    // _state = ERROR;
-                    return;
+					throw new IOException("Problem Reading Header");
                 }
 				_amountRead = resumeInit;
-				// tempSize++;
-				// amountRead is actually one less than the value sent, 
-				// becasue the value sent says you will be getting the
-				// values of n - m, which means we've already only read
-				// (n-1)
+
 				_amountRead--;  
                 _resume = true;
 				foundLength = true;
@@ -678,11 +658,12 @@ public class HTTPDownloader implements Runnable {
         if (foundLength) {
             if ( tempSize != -1 ) {
 				_sizeOfFile = tempSize;
-
+				
 			}
-        } else {
-            _state = ERROR;
-        }
+        } 
+		else 
+			throw new IOException("Problem Reading Header");
+        
     }
 
     public void shutdown()
