@@ -79,7 +79,7 @@ public class RichQueryHandler{
             metadata = currDoc.getXMLString();
             if(subjectFile==null){//pure data (data about NO file)
                 index = INDEX;
-                name = "";
+                name = metadata.substring(22,33);//after <?xml version="1.0"?>
                 size = metadata.length();//Here: size = size of metadata String
             }
             else { //meta-data about a specific file
