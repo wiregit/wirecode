@@ -55,6 +55,9 @@ public class RichQueryHandler{
         List matchingReplies = replyCol.getMatchingReplies(queryDoc);
         //matchingReplies = a List of LimeXMLDocuments that match the query
         int s = matchingReplies.size();
+        if( s == 0 ) // no matching replies.
+            return null; 
+        
         Response[] retResponses = new Response[s];
         //FileManager fManager = FileManager.instance();
         //We need the MetaFileManager to get the FileDesc from full FileName
@@ -100,6 +103,9 @@ public class RichQueryHandler{
             retResponses[z] = res;
             z++;
         }
+        
+        if( z == 0 )
+            return null; // no responses
 
         // need to ensure that no nulls are returned in my response[]
         // z is a count of responses constructed, see just above...
