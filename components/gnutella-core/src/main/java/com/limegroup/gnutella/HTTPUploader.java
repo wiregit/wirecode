@@ -71,9 +71,12 @@ public class HTTPUploader implements Runnable {
 	_sizeOfFile = _fdesc._size;
 	
 	try {
-	    OutputStream _ostream = _socket.getOutputStream();
-	    OutputStreamWriter osw = new OutputStreamWriter(_ostream);
-  	    _out = new BufferedWriter(osw, 1); 
+	    _ostream = _socket.getOutputStream();
+	    if (_ostream == null)
+		System.out.println("ostream is null");
+	       
+	    // OutputStreamWriter osw = new OutputStreamWriter(_ostream);
+  	    // _out = new BufferedWriter(osw, 1); 
 	}
 	catch (Exception e) {
 	    System.out.println("ERROR C");
@@ -214,13 +217,28 @@ public class HTTPUploader implements Runnable {
 
     public void writeHeader() {
 	try {
-	    _out.write("HTTP 200 OK \r\n");
-	    _out.write("Server: Gnutella \r\n");
+	//      _out.write("HTTP 200 OK \r\n");
+//  	    _out.write("Server: Gnutella \r\n");
+//  	    String type = getMimeType();       /* write this method later  */
+//  	    _out.write("Content-type:" + type + "\r\n"); 	
+//  	    _out.write("Content-length:"+ _sizeOfFile + "\r\n");
+//  	    _out.write("\r\n");
+//  	    _out.flush();
+
+
+	    String str = "HTTP 200 OK \r\n";
+
+	    _ostream.write(str.getBytes());
+	    str = "Server: Gnutella \r\n";
+	    _ostream.write(str.getBytes());
 	    String type = getMimeType();       /* write this method later  */
-	    _out.write("Content-type:" + type + "\r\n"); 	
-	    _out.write("Content-length:"+ _sizeOfFile + "\r\n");
-	    _out.write("\r\n");
-	    _out.flush();
+	    str = "Content-type:" + type + "\r\n"; 	
+	    _ostream.write(str.getBytes());
+	    str = "Content-length:"+ _sizeOfFile + "\r\n";
+	    _ostream.write(str.getBytes());
+	    str = "\r\n";
+	    _ostream.write(str.getBytes());
+
 	}
 
 	catch (Exception e) {
@@ -251,7 +269,13 @@ public class HTTPUploader implements Runnable {
 
 	// byte[] buf = new byte[1024]; 
 
-  	
+  	//  try {
+//  	OutputStream _ostream = _socket.getOutputStream();
+//  	}
+//  	catch (IOException e) {
+
+//  	}
+	
 	while (true){
 	    // System.out.println("amount just read "  + c);
 	    try {
@@ -269,10 +293,10 @@ public class HTTPUploader implements Runnable {
 		break;
 	    // System.out.println("after first try/catch");
 	    try {
-		//  if (_ostream == null)
-//  		    System.out.println("ostream is null");
+		if (_ostream == null)
+  		    System.out.println("ostream is null");
 		// _ostream.write(buf, 0, c);
-		_out.write(c);
+		_ostream.write(c);
 
 	    }		
 	    catch (IOException e) {
