@@ -61,8 +61,7 @@ public class QueryRequest extends Message implements Serializable{
 		Collections.unmodifiableSet(new HashSet());
 
 	/**
-	 * Creates a new requery for the specified SHA1 value and the specified
-	 * firewall boolean.
+	 * Creates a new requery for the specified SHA1 value.
 	 *
 	 * @param sha1 the <tt>URN</tt> of the file to search for
 	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
@@ -76,6 +75,27 @@ public class QueryRequest extends Message implements Serializable{
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
         return new QueryRequest(newQueryGUID(true), (byte)6, "\\", "", 
+                                UrnType.SHA1_SET, sha1Set, null,
+                                !RouterService.acceptedIncomingConnection(),
+								false);
+
+	}
+
+	/**
+	 * Creates a new query for the specified SHA1 value.
+	 *
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
+	 *  is <tt>null</tt>
+	 */
+	public static QueryRequest createQuery(URN sha1) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
+        }
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+        return new QueryRequest(newQueryGUID(false), (byte)6, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
 								false);
@@ -150,6 +170,8 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		return new QueryRequest(newQueryGUID(false), query);
 	}
+
+
 
 	/**
 	 * Creates a new query for the specified file name, with no XML.
