@@ -20,7 +20,7 @@ public final class QueryUnicaster {
 
     /** The number of Endpoints where you should start sending pings to them.
      */
-    public static final int MIN_ENDPOINTS = 10;
+    public static final int MIN_ENDPOINTS = 25;
 
     /** The max number of unicast pongs to store.
      */
@@ -326,13 +326,7 @@ public final class QueryUnicaster {
     private boolean notMe(InetAddress address, int port) {
         boolean retVal = true;
 
-        SettingsManager sm = SettingsManager.instance();
-        if (sm.getForceIPAddress()) {
-            if (port == sm.getForcedPort() &&
-				address.getHostAddress().equals(sm.getForcedIPAddressString()))
-				retVal = false;
-        }
-        else if ((port == RouterService.getPort()) &&
+        if ((port == RouterService.getPort()) &&
 				 Arrays.equals(address.getAddress(), 
 							   RouterService.getAddress())) {			
 			retVal = false;
@@ -396,7 +390,7 @@ public final class QueryUnicaster {
         debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
             debug("QueryUnicaster.getUnicastHost(): obtained lock.");
-            if (_queryHosts.isEmpty()) {
+            while (_queryHosts.isEmpty()) {
                 if ((System.currentTimeMillis() - _lastPingTime) >
                     20000) { // don't sent too many pings..
                     // first send a Ping, hopefully we'll get some pongs....
