@@ -2,6 +2,7 @@ package com.limegroup.gnutella.guess;
 
 import junit.framework.*;
 import java.util.*;
+import java.net.*;
 
 public class QueryKeyTest extends TestCase {
     public QueryKeyTest(String name) {
@@ -37,4 +38,21 @@ public class QueryKeyTest extends TestCase {
         assertTrue(key1.equals(key2));
         assertTrue(key1.hashCode() == key2.hashCode());
     }
+
+    public void testSimpleGeneration() {
+        QueryKey.SecretKey key = QueryKey.generateSecretKey();
+        QueryKey.SecretPad pad = QueryKey.generateSecretPad();
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getByName("www.limewire.com");
+        }
+        catch (Exception ignored) {
+            assertTrue(false);
+        }
+        int port = 6346;
+        QueryKey qk1 = QueryKey.getQueryKey(ip, port, key, pad);
+        QueryKey qk2 = QueryKey.getQueryKey(ip, port, key, pad);
+        assertTrue(qk1.equals(qk2));
+    }
+
 }
