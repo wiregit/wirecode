@@ -804,7 +804,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
         } else {
             try {
-                if(manager.sendQuery(this, newRequery(numQueries))) {
+                QueryRequest qr = newRequery(numQueries);
+                if(manager.sendQuery(this, qr)) {
                     lastQuerySent = System.currentTimeMillis();
                     numQueries++;
                     setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
@@ -1478,6 +1479,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * If the downloader was waiting for the user, a requery is sent.
      */
     public boolean resume() {
+        boolean sendRequery = false;
         synchronized(this) {
             //Ignore request if already in the download cycle.
             if (!isInactive())
@@ -1486,7 +1488,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // if we were waiting for the user to start us, then try to send the
             // requery.
             if(getState() == WAITING_FOR_USER)
-                sendRequery();
+                sendRequery = true;
             // also retry any hosts that we have leftover.
             initializeFiles();
             
@@ -1496,8 +1498,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 ((RemoteFileDesc)i.next()).setRetryAfter(0);
         }
         
+        // sending of the requery must be outside this' lock, else
+        // deadlock could occur.
+        if(sendRequery)
+            sendRequery();
+        
         // Notify the manager that we want to resume.
         // It will start us if we're allowed to start.
+        // This must be outside this' lock, else deadlock could occur.
         manager.requestStart(this);
         return true;
     }
