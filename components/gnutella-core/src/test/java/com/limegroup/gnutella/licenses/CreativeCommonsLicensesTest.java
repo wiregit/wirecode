@@ -24,7 +24,7 @@ public class CreativeCommonsLicensesTest
             ccl = new AttributionLicense();
             assertTrue(ccl.requiresAttribution());
             assertTrue(!ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -32,7 +32,7 @@ public class CreativeCommonsLicensesTest
             ccl = new AttributionNoDerivsLicense();
             assertTrue(ccl.requiresAttribution());
             assertTrue(!ccl.prohibitsCommercialUse());
-            assertTrue(ccl.disallowsDerivativeWorks());
+            assertTrue(!ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -40,7 +40,7 @@ public class CreativeCommonsLicensesTest
             ccl = new AttributionNoDerivsNonCommercialLicense();
             assertTrue(ccl.requiresAttribution());
             assertTrue(ccl.prohibitsCommercialUse());
-            assertTrue(ccl.disallowsDerivativeWorks());
+            assertTrue(!ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -48,7 +48,7 @@ public class CreativeCommonsLicensesTest
             ccl = new AttributionNonCommercialLicense();
             assertTrue(ccl.requiresAttribution());
             assertTrue(ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -56,7 +56,7 @@ public class CreativeCommonsLicensesTest
             ccl = new AttributionNonCommercialShareAlikeLicense();
             assertTrue(ccl.requiresAttribution());
             assertTrue(ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(ccl.isShareAlike());
         }
 
@@ -64,7 +64,7 @@ public class CreativeCommonsLicensesTest
             ccl = new AttributionShareAlikeLicense();
             assertTrue(ccl.requiresAttribution());
             assertTrue(!ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(ccl.isShareAlike());
         }
 
@@ -72,7 +72,7 @@ public class CreativeCommonsLicensesTest
             ccl = new NoDerivsLicense();
             assertTrue(!ccl.requiresAttribution());
             assertTrue(!ccl.prohibitsCommercialUse());
-            assertTrue(ccl.disallowsDerivativeWorks());
+            assertTrue(!ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -80,7 +80,7 @@ public class CreativeCommonsLicensesTest
             ccl = new NoDerivsNonCommercialLicense();
             assertTrue(!ccl.requiresAttribution());
             assertTrue(ccl.prohibitsCommercialUse());
-            assertTrue(ccl.disallowsDerivativeWorks());
+            assertTrue(!ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -88,7 +88,7 @@ public class CreativeCommonsLicensesTest
             ccl = new NonCommercialLicense();
             assertTrue(!ccl.requiresAttribution());
             assertTrue(ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 
@@ -96,7 +96,7 @@ public class CreativeCommonsLicensesTest
             ccl = new NonCommercialShareAlikeLicense();
             assertTrue(!ccl.requiresAttribution());
             assertTrue(ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(ccl.isShareAlike());
         }
 
@@ -104,7 +104,7 @@ public class CreativeCommonsLicensesTest
             ccl = new ShareAlikeLicense();
             assertTrue(!ccl.requiresAttribution());
             assertTrue(!ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(ccl.isShareAlike());
         }
 
@@ -112,7 +112,7 @@ public class CreativeCommonsLicensesTest
             ccl = new PublicDomainLicense();
             assertTrue(!ccl.requiresAttribution());
             assertTrue(!ccl.prohibitsCommercialUse());
-            assertTrue(!ccl.disallowsDerivativeWorks());
+            assertTrue(ccl.allowsDerivativeWorks());
             assertTrue(!ccl.isShareAlike());
         }
 

@@ -54,10 +54,12 @@ public abstract class CreativeCommonsLicense {
      */
     public boolean prohibitsCommercialUse() { return _prohibitsCommercialUse; }
 
-    /** @return true if You let others copy, distribute, display, and perform 
-     *  only verbatim copies of your work, not derivative works based upon it. 
+    /** @return false if You let others copy, distribute, display, and perform 
+     *  only verbatim copies of your work, not derivative works based upon it,
+     *  true if you allow others to distribute, display, and perform derivative
+     *  and verbatim copies.
      */
-    public boolean disallowsDerivativeWorks() { return _disallowsDerivateWorks; }
+    public boolean allowsDerivativeWorks() { return !_disallowsDerivateWorks; }
 
     /** @return true if You allow others to distribute derivative works only 
      *  under a license identical to the license that governs your work. 
