@@ -10,7 +10,6 @@ import org.w3c.dom.*;
 
 /**
  * @author  Sumeet Thadani
- * @version
  * A LimeXMLDocument is basically a hashmap that maps a
  * Names of fields to the values as per a XML document.
  */

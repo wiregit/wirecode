@@ -18,7 +18,6 @@ import org.xml.sax.InputSource;
 /**
  * Contains utility methods
  * @author  asingla
- * @version
  */
 public class LimeXMLUtils
 {

@@ -37,7 +37,6 @@ import org.w3c.dom.Element;
  * beyond the scope of current project to implement a parser that works with
  * all the schemas.
  * @author  asingla
- * @version
  */
 class LimeXMLSchemaFieldExtractor
 {

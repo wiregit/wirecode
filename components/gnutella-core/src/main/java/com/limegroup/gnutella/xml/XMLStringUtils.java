@@ -25,7 +25,6 @@ import java.util.*;
  * with __ (double underscore).
  * So element.attribute ==> element__attribute__
  * @author  asingla
- * @version
  */
 public class XMLStringUtils
 {

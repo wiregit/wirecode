@@ -12,7 +12,6 @@ import java.io.*;
  * Stores and provides access to various XML schemas that me might have.
  * Singleton class
  * @author  asingla
- * @version
  */
 public class LimeXMLSchemaRepository
 {

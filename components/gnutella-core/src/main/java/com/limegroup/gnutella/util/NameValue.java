@@ -10,7 +10,6 @@ package com.limegroup.gnutella.util;
  * Holds a name value pair. The name is an instance of String, the value can
  * be any object. 
  * @author  asingla
- * @version
  */
 public class NameValue
 {

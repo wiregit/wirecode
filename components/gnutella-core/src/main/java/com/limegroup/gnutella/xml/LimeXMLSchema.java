@@ -23,7 +23,6 @@ import org.xml.sax.EntityResolver;
  * Stores a XML schema, and provides access to various components
  * of schema
  * @author asingla
- * @version
  */
 public class LimeXMLSchema 
 {
