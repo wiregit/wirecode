@@ -491,27 +491,6 @@ public abstract class Message
         return 23+length;
     }
 
-    /** Returns the ip (given in BIG-endian) format as standard
-     *  dotted-decimal, e.g., 192.168.0.1<p> */
-     public static final String ip2string(byte[] ip) {
-         return ip2string(ip, 0);
-     }
-         
-    /** Returns the ip (given in BIG-endian) format of
-     *  buf[offset]...buf[offset+3] as standard dotted-decimal, e.g.,
-     *  192.168.0.1<p> */
-    static final String ip2string(byte[] buf, int offset) {
-        StringBuffer sbuf=new StringBuffer(16);   //xxx.xxx.xxx.xxx => 15 chars
-        sbuf.append(ByteOrder.ubyte2int(buf[offset]));
-        sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(buf[offset+1]));
-        sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(buf[offset+2]));
-        sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(buf[offset+3]));
-        return sbuf.toString();
-    }
-
     /** @modifies this
      *  @effects increments hops, decrements TTL if > 0, and returns the
      *   OLD value of TTL.
