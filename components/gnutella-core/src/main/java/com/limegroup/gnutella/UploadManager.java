@@ -136,6 +136,19 @@ public final class UploadManager implements BandwidthTracker {
                 
                 String fileName = line._fileName;
                 
+                //if this is atleast the second time through --
+                //if this isn't a browse host --
+                //if we're now processing a new file --
+                // then remove the old uploader from the gui.
+                //NOTE: This MUST be done before the new uploader
+                //      is created.  Otherwise the GUI won't
+                //      be able to remove it.
+                if ( uploader != null 
+                  && uploader.getState() != Uploader.BROWSE_HOST
+                  && !oldFileName.equalsIgnoreCase(fileName) ) {
+                    RouterService.getCallback().removeUpload(uploader);
+                }
+                
                 uploader = new HTTPUploader(currentMethod, fileName, 
 											socket, line._index,uploader);
                 
@@ -195,6 +208,11 @@ public final class UploadManager implements BandwidthTracker {
                 if(found)
                     uploader.setState(Uploader.INTERRUPTED);
             }
+
+            //ensure the uploader is removed from the GUI
+            if (uploader.getState() != uploader.BROWSE_HOST)
+                RouterService.getCallback().removeUpload(uploader);            
+            
             debug("closing socket");
             //close the socket
             close(socket);
@@ -305,8 +323,8 @@ public final class UploadManager implements BandwidthTracker {
                 reportUploadSpeed(finishTime-startTime,
                                   uploader.amountUploaded());
             removeFromList(uploader);
-            if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
-                RouterService.getCallback().removeUpload(uploader);
+           // if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
+           //     RouterService.getCallback().removeUpload(uploader);
             return queued;
         }
     }
