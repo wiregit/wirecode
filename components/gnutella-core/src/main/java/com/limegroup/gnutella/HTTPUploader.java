@@ -388,15 +388,14 @@ public class HTTPUploader implements Runnable {
             str = "Content-length:"+ _sizeOfFile + "\r\n";
             _ostream.write(str.getBytes());
 
-          //    int end;
-    //          if (_uploadEnd != 0)
-    //          end = _uploadEnd;
-    //          else
-    //          end = _sizeOfFile;
-
-            str = "Content-range: bytes=" + _uploadBegin  +
-            "-" + ( _sizeOfFile - 1 )+ "/" + _sizeOfFile + "\r\n";
-
+			// Version 0.5 of limewire misinterpreted Content-range
+			// to be 1 - n instead of 0 - (n-1), but because this is
+			// an optional field in the regular case, we don't need
+			// to send it.
+			if (_uploadBegin != 0) {
+				str = "Content-range: bytes=" + _uploadBegin  +
+				"-" + ( _sizeOfFile - 1 )+ "/" + _sizeOfFile + "\r\n";
+			}
 
             _ostream.write(str.getBytes());
 

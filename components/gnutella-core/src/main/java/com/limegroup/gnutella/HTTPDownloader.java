@@ -690,6 +690,10 @@ public class HTTPDownloader implements Runnable {
 				int dash;
 				int slash;
 				int resumeInit;
+
+				String beforeSlash;
+				int numBeforeSlash;
+
                 try {
 					str = str.substring(21);
 					dash=str.indexOf('-');
@@ -698,6 +702,9 @@ public class HTTPDownloader implements Runnable {
                     sub=str.substring(0, dash);
 					sub = sub.trim();
 					sub_two = sub_two.trim();
+
+					beforeSlash = str.substring(dash+1, slash);
+
                 } catch (IndexOutOfBoundsException e) {
                     // _state = ERROR;
 					return;
@@ -705,11 +712,29 @@ public class HTTPDownloader implements Runnable {
 				try {
 					tempSize = java.lang.Integer.parseInt(sub_two);
                     resumeInit = java.lang.Integer.parseInt(sub);
+                    numBeforeSlash = java.lang.Integer.parseInt(beforeSlash);
                 }
                 catch (NumberFormatException e) {
                     // _state = ERROR;
                     return;
                 }
+
+
+				// In order to be backwards compatible with
+				// LimeWire 0.5, which sent broken headers like:
+				// Content-range: bytes=1-67818707/67818707
+				//
+				// If the number preceding the '/' is equal 
+				// to the number after the '/', then we want
+				// to decrement the first number and the number
+				// before the '/'.
+				if (numBeforeSlash == tempSize) {
+					resumeInit--;
+					numBeforeSlash--;
+					System.out.println("This is limewire 0.5");
+				}
+				
+
 				_amountRead = resumeInit;
 
                 _resume = true;
