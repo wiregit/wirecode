@@ -85,32 +85,43 @@ public class StatisticVendorMessage extends VendorMessage {
             for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
                 ManagedConnection c = (ManagedConnection)iter.next();
                 buff.append(c.toString());
-                buff.append(" bandwidth ");
+                buff.append(" messages count ");
                 if(incoming) {
                     buff.append("(incoming) :");
-                    buff.append(c.getMeasuredDownstreamBandwidth());
+                    buff.append(c.getNumMessagesReceived());
+                    buff.append(DELIMITER);
+                    buff.append("(dropped incoming) :");
+                    buff.append(c.getNumReceivedMessagesDropped());
                 }
                 else {
                     buff.append("(outgoing) :");
-                    buff.append(c.getMeasuredUpstreamBandwidth());
+                    buff.append(c.getNumMessagesSent());
+                    buff.append(DELIMITER);
+                    buff.append("(dropped outgoing) :");
+                    buff.append(c.getNumSentMessagesDropped());
                 }
                 buff.append(DELIMITER);
             }
             return buff.toString().getBytes();
         }
         else if(control == GiveStatsVendorMessage.ALL_CONNECTIONS_STATS) {
-            float bandwidth = -1;
+            int messages = -1;
+            int dropped = -1;
             for(Iterator iter = conns.iterator(); iter.hasNext() ; ) {
                 ManagedConnection c = (ManagedConnection)iter.next();
-                bandwidth += incoming ? c.getMeasuredDownstreamBandwidth() : 
-                                               c.getMeasuredUpstreamBandwidth();
+                messages += incoming ? c.getNumMessagesReceived() : 
+                                               c.getNumMessagesSent();
+                dropped += incoming ? c.getNumReceivedMessagesDropped() :
+                                               c.getNumSentMessagesDropped();
             }
-            buff.append("All connections bandwidth ");
-            if(incoming)
+            buff.append("All connections message count ");
+            if(incoming) 
                 buff.append("(incoming) :");
             else
                 buff.append("(outgoing) :");
-            buff.append(bandwidth);
+            buff.append(messages);
+            buff.append(" (dropped): ");
+            buff.append(dropped);
             return buff.toString().getBytes();
         }
         else if(control == GiveStatsVendorMessage.UP_CONNECTIONS_STATS) {
@@ -119,14 +130,20 @@ public class StatisticVendorMessage extends VendorMessage {
                 if(!c.isSupernodeConnection())
                     continue;
                 buff.append(c.toString());
-                buff.append(" bandwidth ");
+                buff.append(" messages count ");
                 if(incoming) {
                     buff.append("(incoming) :");
-                    buff.append(c.getMeasuredDownstreamBandwidth());
+                    buff.append(c.getNumMessagesReceived());
+                    buff.append(DELIMITER);
+                    buff.append("(dropped incoming) :");
+                    buff.append(c.getNumReceivedMessagesDropped());
                 }
                 else {
                     buff.append("(outgoing) :");
-                    buff.append(c.getMeasuredUpstreamBandwidth());
+                    buff.append(c.getNumMessagesSent());
+                    buff.append(DELIMITER);
+                    buff.append("(dropped outgoing) :");
+                    buff.append(c.getNumSentMessagesDropped());
                 }
                 buff.append(DELIMITER);
             }
@@ -138,14 +155,20 @@ public class StatisticVendorMessage extends VendorMessage {
                 if(!c.isLeafConnection())
                     continue;
                 buff.append(c.toString());
-                buff.append(" bandwidth ");
+                buff.append(" messages count ");
                 if(incoming) {
                     buff.append("(incoming) :");
-                    buff.append(c.getMeasuredDownstreamBandwidth());
+                    buff.append(c.getNumMessagesReceived());
+                    buff.append(DELIMITER);
+                    buff.append("(dropped incoming) :");
+                    buff.append(c.getNumReceivedMessagesDropped());
                 }
                 else {
                     buff.append("(outgoing) :");
-                    buff.append(c.getMeasuredUpstreamBandwidth());
+                    buff.append(c.getNumMessagesSent());
+                    buff.append(DELIMITER);
+                    buff.append("(dropped outgoing) :");
+                    buff.append(c.getNumSentMessagesDropped());
                 }
                 buff.append(DELIMITER);
             }

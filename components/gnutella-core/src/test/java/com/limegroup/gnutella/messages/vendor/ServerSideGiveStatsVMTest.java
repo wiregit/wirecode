@@ -11,6 +11,7 @@ import com.limegroup.gnutella.routing.*;
 
 import junit.framework.*;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -527,29 +528,36 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         QueryReply reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_1.send(reply1);
+        LEAF_1.flush();
+
         Response[] r1 = {new Response(0l, 12l, "ashish.txt") };
         resps = r1;
         QueryReply reply2 = new QueryReply(GUID2.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_1.send(reply2);
+        LEAF_1.flush();
 
         Response[] r2 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r2;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_2.send(reply1);
+        LEAF_2.flush();
         
         Response[] r3 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r3;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         LEAF_3.send(reply1);
+        LEAF_3.flush();
+
 
         Response[] r4 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r4;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         ULTRAPEER_1.send(reply1);
+        ULTRAPEER_1.flush();
 
         //Leaf 1 final score incoming queries = 2, query replies = 2
         //Leaf 2 final score incoming queries = 2, query replies = 1
@@ -575,11 +583,150 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
                                                                Class.forName(
             "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
         
-        System.out.println("Sumeet:" +statsAck);
-        
         String returnedStats = new String(statsAck.getPayload());
-        //TODO 1 make sure this is what is expected. 
-        System.out.println(returnedStats);        
+        //TODO:1 make sure this is what is expected. 
+        //System.out.println(returnedStats);               
+
+        StringTokenizer tok = new StringTokenizer(returnedStats,":|");
+        
+        String token = tok.nextToken();//ignore
+        token = tok.nextToken();//ignore
+        token = tok.nextToken(); // UP2 sent -- should be 0
+        //System.out.println("****Sumeet***:"+token);
+
+        int val = Integer.parseInt(token.trim());//(Integer.valueOf(token)).intValue();
+
+        assertEquals("UP2 sent no messages", 0, val);
+        tok.nextToken();//ignore
+        token = tok.nextToken(); //UP1 sent -- should be 3
+        assertEquals("UP2 dropped 0 messages",0,Integer.parseInt(token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("UP1 sent 3 messages", 3, Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("UP1 dropped 1 sent message", 1, Integer.parseInt(
+                                                                token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_1 sent 4 messages",4,Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_1 dropped no message", 0, Integer.parseInt(
+                                                                 token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_2 sent 3 messages",3,Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Lead_2 dropped no message",0,Integer.parseInt(
+                                                                 token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_3 sent 3 messages",3,Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Lead_3 dropped no message",0,Integer.parseInt(
+                                                                token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_4 sent no messages", 0, Integer.parseInt(
+                                                                 token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Lead_4 dropped no message", 0, Integer.parseInt(
+                                                                token.trim()));
+
+
+
+        GiveStatsVendorMessage statsVM2 = new GiveStatsVendorMessage(
+                             GiveStatsVendorMessage.PER_CONNECTION_STATS,
+                             GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC,
+                             Message.N_TCP);
+        TCP_TEST_LEAF.send(statsVM2);
+        TCP_TEST_LEAF.flush();
+
+        statsAck = 
+        (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
+                                                               Class.forName(
+            "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
+        
+        returnedStats = new String(statsAck.getPayload());
+
+        tok = new StringTokenizer(returnedStats,":|");
+        
+        token = tok.nextToken();//ignore
+        token = tok.nextToken();//ignore
+        token = tok.nextToken(); // UP2 sent -- should be 0
+        //System.out.println("****Sumeet***:"+token);
+
+        val = Integer.parseInt(token.trim());
+
+        assertEquals("UP2 received 14 messages", 14, val);
+        tok.nextToken();//ignore
+        token = tok.nextToken(); //UP1 received -- should be 14
+        assertEquals("UP2 dropped 0 sent messages",0,Integer.parseInt(token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("UP1 received 15 messages", 15, Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("UP1 dropped 0 sent message", 0, Integer.parseInt(
+                                                                token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_1 received 3 messages", 3, Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_1 dropped no message", 0, Integer.parseInt(
+                                                                 token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_2 received 3 messages",3,Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Lead_2 dropped no message",0,Integer.parseInt(
+                                                                 token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_3 received 2 messages",2,Integer.parseInt(token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Lead_3 dropped no message",0,Integer.parseInt(
+                                                                token.trim()));
+
+        tok.nextToken();//ignore
+        tok.nextToken();//ignore
+        token = tok.nextToken();
+        assertEquals("Leaf_4 received 1 message", 1, Integer.parseInt(
+                                                                 token.trim()));
+        tok.nextToken(); //ignore
+        token = tok.nextToken();
+        assertEquals("Lead_4 dropped no message", 0, Integer.parseInt(
+                                                                token.trim()));
+
+
+        //TODO:1 make sure this is what is expected. 
+        //System.out.println(returnedStats);       
+
     }
 
    
