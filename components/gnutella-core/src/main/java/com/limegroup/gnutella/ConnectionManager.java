@@ -451,8 +451,8 @@ public class ConnectionManager {
     public void measureBandwidth() {
         List connections=getInitializedConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            mc.measureBandwidth();
+            Connection conn = (Connection)iter.next();
+            conn.stats().measureBandwidth();
         }
     }
 
@@ -465,8 +465,8 @@ public class ConnectionManager {
         float sum=0.f;
         List connections=getInitializedConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            sum+=mc.getMeasuredUpstreamBandwidth();
+            Connection conn = (Connection)iter.next();
+            sum += conn.stats().getMeasuredUpstreamBandwidth();
         }
         return sum;
     }
@@ -480,8 +480,8 @@ public class ConnectionManager {
         float sum=0.f;
         List connections=getInitializedConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            sum+=mc.getMeasuredDownstreamBandwidth();
+            Connection conn = (Connection)iter.next();
+            sum += conn.stats().getMeasuredDownstreamBandwidth();
         }
         return sum;
     }
