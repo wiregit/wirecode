@@ -25,6 +25,7 @@ public class TestUploader {
 
 	private AlternateLocationCollection storedAltLocs;
 	private AlternateLocationCollection incomingAltLocs;
+	private URN                         sha1;
 
 
     /** 
@@ -101,6 +102,13 @@ public class TestUploader {
         return incomingAltLocs;
     }
     
+    /** 
+     * Get the alternate locations that this uploader has read from headers
+     */
+    public URN getReportedSHA1() {
+        return sha1;
+    }
+    
 
     /**
      * Repeatedly accepts connections and handles them.
@@ -167,6 +175,9 @@ public class TestUploader {
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
 				readAlternateLocations(line, incomingAltLocs);
             }        
+			if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(line)) {
+				sha1 = readContentUrn(line);
+			}
 
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
@@ -352,5 +363,28 @@ public class TestUploader {
 				continue;
 			}
 		}
+	}
+
+	/**
+	 * This method parses the "X-Gnutella-Content-URN" header, as specified
+	 * in HUGE v0.93.  This assigns the requested urn value for this 
+	 * upload, which otherwise remains null.
+	 *
+	 * @param contentUrnStr the string containing the header
+	 * @return a new <tt>URN</tt> instance for the request line, or 
+	 *  <tt>null</tt> if there was any problem creating it
+	 */
+	private static URN readContentUrn(final String contentUrnStr) {
+		String urnStr = HTTPUtils.extractHeaderValue(contentUrnStr);
+		
+		// return null if the header value could not be extracted
+		if(urnStr == null) return null;
+		try {
+			return URN.createSHA1Urn(urnStr);
+		} catch(IOException e) {
+			// this will be thrown if the URN string was invalid for any
+			// reason -- just return null
+			return null;
+		}		
 	}
 }

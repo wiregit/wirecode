@@ -437,7 +437,14 @@ public class DownloadTester {
 
     private static void testSimpleAlternateLocations() {  
         System.out.print("-Testing AlternateLocation write...");
-        RemoteFileDesc rfd1=newRFD(6346, 100);
+		com.sun.java.util.collections.Set set = 
+		  new com.sun.java.util.collections.HashSet();
+		try {
+		    set.add(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+		} catch(Exception e) {
+		    System.err.println("SHA1 not created for :"+file);
+		}
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, set);
         RemoteFileDesc[] rfds = {rfd1};
 
         testGeneric(rfds);
@@ -454,9 +461,15 @@ public class DownloadTester {
 		}
         AlternateLocationCollection adiff = 
 		  ashould.diffAlternateLocationCollection(alt1); 
+
+		URN sha1 = rfd1.getSHA1Urn();
+		URN uSHA1 = uploader1.getReportedSHA1();
+		boolean sha1Matches = 
+		  (sha1 != null && uSHA1 != null && sha1.equals(uSHA1));
         
         check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
         check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
+        check(sha1Matches, "SHA1 test failed");
     }
 
     private static void testTwoAlternateLocations() {  
@@ -729,6 +742,14 @@ public class DownloadTester {
                                   0, file.getName(),
                                   TestFile.length(), new byte[16],
                                   speed, false, 4, false, null, null);
+    }
+
+    private static RemoteFileDesc newRFDWithURN(int port, int speed, 
+		com.sun.java.util.collections.Set set) {
+        return new RemoteFileDesc("127.0.0.1", port,
+                                  0, file.getName(),
+                                  TestFile.length(), new byte[16],
+                                  speed, false, 4, false, null, set);
     }
 
     /** Waits for the given download to complete. */
