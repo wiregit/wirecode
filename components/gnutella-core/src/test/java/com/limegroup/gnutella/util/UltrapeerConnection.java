@@ -1,5 +1,4 @@
 package com.limegroup.gnutella.util;
-import com.limegroup.gnutella.routing.*;
 
 /**
  * Specialized class that uses special keywords for Ultrapeer routing
@@ -8,11 +7,11 @@ import com.limegroup.gnutella.routing.*;
 public final class UltrapeerConnection extends NewConnection {   
 
     public UltrapeerConnection() {
-        super(15);
+        super(15, false);
     }
 
     public UltrapeerConnection(String[] keywords) {
-        super(15);
+        super(15, false);
         for(int i=0; i<keywords.length; i++) {
             QRT.add(keywords[i]);
         }
