@@ -60,6 +60,8 @@ public class HTTPDownloader implements Runnable {
 
 	URLConnection conn;
 
+	port = 1111; // For Testing.
+
 	String furl = "/get/" + String.valueOf(index) + "/" + file;
 
 	try {
@@ -68,12 +70,17 @@ public class HTTPDownloader implements Runnable {
 	    conn = url.openConnection();
 	}
 	catch (java.net.MalformedURLException e) {
+	    System.out.println("Catching Malformed URL Exception");
 	    sendPushRequest(host, port, index, guid);
 	    _callback.error(ActivityCallback.ERROR_5);
 	    return;
 	}
 	catch (IOException e) {
+
+	    System.out.println("Catching IO Exception");
+	    sendPushRequest(host, port, index, guid);
 	    _callback.error(ActivityCallback.ERROR_6);
+
 	    return;
 	}
 	try {
@@ -82,7 +89,10 @@ public class HTTPDownloader implements Runnable {
 	    _in = new BufferedReader(isr);
 	}
 	catch (IOException e) {
-	    _callback.error(ActivityCallback.ERROR_4);
+	    sendPushRequest(host, port, index, guid);
+	    // _callback.error(ActivityCallback.ERROR_4);
+	    return;
+
 	}
 
     }
@@ -102,16 +112,27 @@ public class HTTPDownloader implements Runnable {
 	int d1 = Integer.parseInt(d);
 	byte[] ip = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
 
-	byte[] guid = _manager.ClientId.getBytes();                      
+	byte[] guid = GUID.fromHexString(_manager.ClientId);
+
+	System.out.println("The length of the manager guid " + guid.length);
 
 	// last 16 bytes of the query reply message...
 	byte[] clientGUID = cguid;
 
+	System.out.println("The length of the guid " + cguid.length);
+
 	byte ttl = SettingsManager.instance().getTTL();
 
-	PushRequest push = new PushRequest(guid, ttl, clientGUID, 
+	// am i passing the right guid's? 
+
+	//  PushRequest push = new PushRequest(guid, ttl, clientGUID, 
+//  					   index, ip, port);
+
+	PushRequest push = new PushRequest(clientGUID, ttl, guid,  
 					   index, ip, port);
 	try {
+
+	    System.out.println("Sending push Request");
 	    _manager.sendToAll(push);
 	}
 	catch (IOException e) {
@@ -174,7 +195,8 @@ public class HTTPDownloader implements Runnable {
 	catch (Exception e) {
 	    
 	    _callback.error(ActivityCallback.ERROR_8);
-System.out.println("E :"+e+":");
+	    System.out.println("E :"+e+":");
+
 	}
 
     }
@@ -188,15 +210,15 @@ System.out.println("E :"+e+":");
 	    while (true) {
 		
 		str = _in.readLine();
-System.out.println("DH :"+str+":");
-		
+		System.out.println("DH :"+str+":");
+ 
 		if (str.indexOf("Content-length:") != -1) {
 
 		    String sub = str.substring(16);
 		    sub.trim();
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
 		    str = _in.readLine();
-System.out.println("DH2 :"+str+":");
+		    System.out.println("DH2 :"+str+":");
 		    break;
 		    
 		}

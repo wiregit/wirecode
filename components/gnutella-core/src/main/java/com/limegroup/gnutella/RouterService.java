@@ -290,6 +290,7 @@ public class RouterService
 
         HTTPDownloader down = new
             HTTPDownloader("http", ip, port, index, fname, manager, bguid);
+
 	Thread t = new Thread(down);
 	t.setDaemon(true);
 	t.start();

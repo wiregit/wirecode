@@ -43,17 +43,27 @@ public class HTTPUploader implements Runnable {
 	_fdesc = null;
 	
 	try {	                         /* look for the file */
+	    System.out.println("THe # of files " + _fmanager._files.size());
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
+	    System.out.println("A");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 	/* check to see if the index */
 	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
-	    doNoSuchFile();
-  	    return;
-  	}
+  	    System.out.println("filename: " + _filename.trim());
+  	    System.out.println("name: " + _fdesc._name);
+
+  	    System.out.println(((FileDesc)_fmanager._files.get(_index-1))._name);
+  	    System.out.println(((FileDesc)_fmanager._files.get(_index+1))._name);
+
+
+  	    System.out.println("B");
+  	    doNoSuchFile();
+    	    return;
+    	}
 	
 	_sizeOfFile = _fdesc._size;
 	
@@ -92,11 +102,13 @@ public class HTTPUploader implements Runnable {
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
+	    System.out.println("The Error is here: array index out of bounds");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 	/* check to see if the index */
 	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
+	    System.out.println("The Error is here: index != filename");
 	    doNoSuchFile();
   	    return;
   	}
@@ -227,6 +239,7 @@ public class HTTPUploader implements Runnable {
 	    uploadError("Unable to write out to the socket");
 	}
     }
+    
 
     public void shutdown()
     {

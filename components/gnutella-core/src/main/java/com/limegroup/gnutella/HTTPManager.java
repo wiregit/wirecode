@@ -48,7 +48,8 @@ public class HTTPManager {
 
 	    String parse[] = HTTPUtil.stringSplit(command, '/'); 
 	                                       /* and the index, but i'm */
-
+	
+	                                       /* upset this is way hackey */
 
 	    _filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP"));
 	    //String parse_two[] = HTTPUtil.stringSplit(parse[2], 'H'); 
@@ -57,6 +58,7 @@ public class HTTPManager {
 	    //  So is the whole concept here
 	    //_filename = parse_two[0];
 	
+
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 
@@ -76,25 +78,31 @@ public class HTTPManager {
 		Thread t = new Thread(downloader);
 		t.setDaemon(true);
 		 t.start();
+
 	    }
 
 	}
 
 	else {
+
 	    throw new IOException();
+
 	}
     }    
 
     public void shutdown() {
+
 	try {
 	    _socket.close();
 	}
+
 	catch (IOException e) {
 	    System.out.println("Could not close the socket");
 	    e.printStackTrace();
 	}
-	 
+	
     }
+
 
 }
 

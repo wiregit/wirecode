@@ -424,8 +424,13 @@ public class Connection implements Runnable {
 				long speed = SettingsManager.instance().getConnectionSpeed();
 				byte[] clientGUID = manager.ClientId.getBytes();
 
-				QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+				// changing the port here to test push:
+			//  	QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+//  								   speed, responses, clientGUID);
+
+				QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
 								   speed, responses, clientGUID);
+
 				send(qreply);
 				if(manager.stats == true)
 				    manager.QRepCount++;//keep stats if stats is turned on
@@ -468,22 +473,44 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PushRequest){
+
+		    System.out.println("Requested a push");
+
 		    if (manager.stats==true)
 			manager.pushCount++;//keeps stats if stats turned on
 		    PushRequest req = (PushRequest)m;
+
+		    byte[] req_guid = req.getClientGUID();
+
 		    String DestinationId = new String(req.getClientGUID());
 		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
+
+
+		    byte[] client_id = GUID.fromHexString(manager.ClientId);
+		    String client_str = new String(client_id);
+
 		    if (nextHost!=null && routeFilter.allow(m)){//we have a place to route this message
+			System.out.println("Sending a message to a host");
 			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
 			nextHost.send(m); //send the message to appropriate host
 		    }
-		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
+		    
+		    // This comparison doesn't work:
+		    // // if (manager.ClientId.equals(DestinationId) ){
+		      //I am the destination
+		    else if (client_str.equals(DestinationId)) {
+			// else
+			
 			//unpack message
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
+			System.out.println("Establishing HTTP");
+			
+
 		    }
 		    else{// the message has arrived in error
 			//System.out.println("Sumeet: Message arrived in error");
+		    System.out.println("Droppoing message");
 			//do nothing.....drop the message
 			dropped++;
 		    }
