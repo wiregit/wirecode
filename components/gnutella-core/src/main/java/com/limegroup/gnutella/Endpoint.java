@@ -5,7 +5,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.*;
 
@@ -171,7 +171,7 @@ com.sun.java.util.collections.Comparable
             {
                 throw new IllegalArgumentException();
             }
-			if(!MessageUtils.isValidPort(getPort())) {
+			if(!CommonUtils.isValidPort(getPort())) {
 			    throw new IllegalArgumentException("invalid port");
 		    }	
         }

@@ -132,7 +132,7 @@ public class PingReply extends Message implements Serializable {
         if (payload.length<STANDARD_PAYLOAD_SIZE)
             throw new BadPacketException();
         this.payload=payload;
- 		if(!MessageUtils.isValidPort(getPort()))
+ 		if(!CommonUtils.isValidPort(getPort()))
 			throw new BadPacketException("invalid port");
     }
      
