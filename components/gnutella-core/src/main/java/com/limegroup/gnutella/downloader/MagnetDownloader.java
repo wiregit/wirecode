@@ -15,7 +15,10 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.SpeedConstants;
@@ -98,9 +101,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 
         this._textQuery=textQuery;
         this._urn=urn;
-        downloadSHA1 = urn;
         this._filename=filename;
         this._defaultURLs=defaultURLs;
+    }
+    
+    public void initialize(DownloadManager manager, FileManager fileManager, 
+            ActivityCallback callback) {
+        downloadSHA1 = _urn;
+        super.initialize(manager,fileManager,callback);
     }
     
     /**

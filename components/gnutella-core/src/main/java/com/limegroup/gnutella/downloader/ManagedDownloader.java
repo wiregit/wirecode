@@ -929,8 +929,18 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     private void initializeVerifyingFile() throws IOException {
-        Assert.that(incompleteFile != null);
-
+        
+        if (incompleteFile != null)
+            return;
+        
+        incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
+        
+        if (incompleteFile == null) {
+            if (allFiles == null || allFiles.length == 0)
+                return;
+            incompleteFile = incompleteFileManager.getFile(allFiles[0]);
+        }
+        
         int completedSize = 
            (int)IncompleteFileManager.getCompletedSize(incompleteFile);
 
@@ -1853,7 +1863,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occured, 
      * CONNECTING if we're ready to connect
      */
-    private int initializeDownload() {
+    protected int initializeDownload() {
         RemoteFileDesc firstDesc = null;
         synchronized (this) {
             if (rfds.size()==0)
@@ -1862,6 +1872,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         try {
+            initializeVerifyingFile();
             openVerifyingFile();
         } catch (IOException iox) {
             return DISK_PROBLEM;
@@ -1979,7 +1990,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         String fileName = getFileName();
         
         try {
-            incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
             saveDir = SharingSettings.getSaveDirectory();
             completeFile = new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();
@@ -1988,7 +1998,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (!savePath.equals(completeFileParentPath))
                 throw new IOException();
         } catch (IOException e) {
-            ErrorService.error(e, "incomplete: " + incompleteFile);
+            ErrorService.error(e);
             throw e;
         }
     }
