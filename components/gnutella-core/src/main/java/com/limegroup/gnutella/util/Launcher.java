@@ -324,9 +324,9 @@ public class Launcher {
 			}
 			break;
 		case WINDOWS_9x:
-			File f = new File(path);
-			if(f.isFile()) {			
-				FileInputStream fis = new FileInputStream(f);
+			File fi = new File(path);
+			if(fi.isFile()) {			
+				FileInputStream fis = new FileInputStream(fi);
 				String hex = Integer.toHexString(fis.read());
 				hex += Integer.toHexString(fis.read());
 
