@@ -8,7 +8,9 @@ import java.security.*;
  * This class represents an individual Uniform Resource Name (URN), as
  * specified in RFC 2141.  This also provides public constants for 
  * standard URN strings and URN strings that have been agreed upon by
- * the Gnutella Developers Forum (GDF).
+ * the Gnutella Developers Forum (GDF).<p>
+ *
+ * This class is immutable.
  */
 public final class URN {
 
@@ -18,7 +20,7 @@ public final class URN {
 	 * should be used in a case-insensitive manner in compliance with
 	 * the URN specification (RFC 2141).
 	 */
-	private static final String URN_STRING = "urn:";
+	private static final String URN_NS_ID = "urn:";
 
 	/**
 	 * The identifier for a SHA1 Namespace Identifier string.  This
@@ -36,7 +38,7 @@ public final class URN {
 	 * Constant for the URN identifier constant combined with the
 	 * SHA1 identifier constant.  This is used to identify SHA1 URNs.
 	 */
-	public static final String URN_SHA1 = URN_STRING+SHA1;
+	public static final String URN_SHA1 = URN_NS_ID+SHA1;
 
 	/**
 	 * Constant code for a SHA1 URN.
@@ -46,7 +48,7 @@ public final class URN {
 	/**
 	 * The string representation of the URN.
 	 */
-	private final String _urnString;
+	private final String URN_STRING;
   
 
 	/**
@@ -63,7 +65,7 @@ public final class URN {
 	public URN(final File FILE, final int URN_TYPE) throws IOException {
 		switch(URN_TYPE) {
 		case SHA1_URN:
-			_urnString = createSHA1String(FILE);
+			this.URN_STRING = URN.createSHA1String(FILE);
 			break;
 		default:
 			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED");
@@ -82,7 +84,21 @@ public final class URN {
 		if(!URN.isValidURN(URN_STRING)) {
 			throw new IOException("INVALID URN STRING");
 		}
-		_urnString = URN_STRING;
+		this.URN_STRING = URN_STRING;
+	}
+
+	/**
+	 * Returns the URN type string for this URN.  For example, if the
+	 * String for this URN is:<p>
+	 * 
+	 * urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB <p>
+	 *
+	 * then this method will return: <p>
+	 *
+	 * urn:sha1:
+	 */
+	public String getTypeString() {
+		return URN_STRING.substring(0,URN_STRING.indexOf(':',4)+1);		
 	}
 
 	/**
@@ -107,25 +123,11 @@ public final class URN {
 	 */
 	public static boolean isURNType(String urnString) {
 		final String URN_STRING = urnString.toLowerCase();
-		if(URN_STRING.equals(URN.URN_STRING) || 
+		if(URN_STRING.equals(URN.URN_NS_ID) || 
 		   URN_STRING.equals(URN.URN_SHA1 + ":")) {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Returns the URN type string for this URN.  For example, if the
-	 * String for this URN is:<p>
-	 * 
-	 * urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB <p>
-	 *
-	 * then this method will return: <p>
-	 *
-	 * urn:sha1:
-	 */
-	public String getTypeString() {
-		return _urnString.substring(0,_urnString.indexOf(':',4)+1);		
 	}
 
 	/**
@@ -203,7 +205,7 @@ public final class URN {
 		int colon2Index = URN_STRING.indexOf(":", colon1Index+1);
 		
 		if((colon2Index == -1) || 
-		   !urnStr.equalsIgnoreCase(URN.URN_STRING) ||
+		   !urnStr.equalsIgnoreCase(URN.URN_NS_ID) ||
 		   !isValidNID(URN_STRING.substring(colon1Index+1, colon2Index)) ||
 		   !isValidNSS(URN_STRING.substring(colon2Index+1))) {
 			return false;
@@ -258,7 +260,7 @@ public final class URN {
 	 *  has been assigned
 	 */
 	public String getURNString() {
-		return _urnString;
+		return URN_STRING;
 	}
 
 	/**
@@ -268,7 +270,7 @@ public final class URN {
 	 * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
 	 */
 	public boolean isSHA1() {
-		return _urnString.startsWith(URN_SHA1);
+		return URN_STRING.startsWith(URN_SHA1);
 	}
 
 	/**
@@ -282,7 +284,7 @@ public final class URN {
 		if(!(urn instanceof URN)){
 			return false;
 		}
-		return ((URN)urn).getURNString().equals(_urnString);
+		return ((URN)urn).getURNString().equals(URN_STRING);
 	}
 
 	/**
@@ -291,7 +293,7 @@ public final class URN {
 	 * @return the string representation of the URN
 	 */
 	public String toString() {
-		return _urnString;
+		return URN_STRING;
 	}
 
 	
@@ -375,7 +377,7 @@ public final class URN {
 		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
 		encounteredFailure = false;
 		System.out.println(); 
-		System.out.println("TESTING SHA1 URN CONSTRUCTION AND ASSOCIATED METHODS"); 
+		System.out.println("TESTING SHA1 URN CONSTRUCTION AND ASSOCIATED METHODS..."); 
 		
 
 		File[] testFiles = new File("C:\\My Music").listFiles();
@@ -406,8 +408,6 @@ public final class URN {
 						System.out.println("ERROR IN EQUALS OR URN CONSTRUCTION FOR: "+
 										   urn); 
 				}
-				System.out.println("type string: "+urn.getTypeString()); 
-				System.out.println("urn: "+urn); 
 			}
 		} catch(IOException e) {
 			encounteredFailure = true;
@@ -421,7 +421,7 @@ public final class URN {
 		// TEST FOR isURNType method
 		encounteredFailure = false;
 		System.out.println(); 
-		System.out.println("TESTING isURNType METHOD");
+		System.out.println("TESTING isURNType METHOD...");
 		String[] validURNTypes = {
 			"urn:",
 			"urn:sha1:",
