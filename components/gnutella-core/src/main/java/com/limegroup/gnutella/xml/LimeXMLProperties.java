@@ -199,7 +199,7 @@ public class LimeXMLProperties
      * name of the property that denotes the 
      * number of query dispatcher threads to be created
      */
-    private static final int NUM_QUERY_DISPATCHER_THREADS_DEF = 5;
+    private static final int NUM_QUERY_DISPATCHER_THREADS_DEF = 50;
     
     
     /**
