@@ -248,9 +248,9 @@ public class Connection implements Runnable {
 		else if (m instanceof QueryReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
-			System.out.println("Sumeet:found connection");
+			//System.out.println("Sumeet:found connection");
 			pushRouteTable.put(this, m);//first store this in pushRouteTable
-			System.out.println("Sumeet: stored reply in push route table");
+			//System.out.println("Sumeet: stored reply in push route table");
 			if (outConnection.equals(this)){ //I am the destination
 			    //TODO1: This needs to be interfaced with Rob
 			    //Unpack message
@@ -260,9 +260,9 @@ public class Connection implements Runnable {
 			    // interface with GUI client 
 			}
 			else {//message needs to be routed.
-			    System.out.println("Sumeet:About to route reply");
+			    //System.out.println("Sumeet:About to route reply");
 			    outConnection.send(m);//send the message along on its route
-			    System.out.println("Sumeet:Sent query reply");
+			    //System.out.println("Sumeet:Sent query reply");
 			}
 		    }
 		    else{//route table does not know what to do this message
@@ -270,14 +270,18 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PushRequest){
-		    System.out.println("Sumeet:We have a push request");
-		    Connection nextHost = pushRouteTable.get(m);
+		    //System.out.println("Sumeet:We have a push request");
+		    Connection nextHost = pushRouteTable.get(m);//this is the problem
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
+		    //System.out.println("Sumeet: push request goes to"+nextHost.toString());
+		    //System.out.println("Sumeet: Destination ID" + DestinationId);
 		    if (nextHost!=null){//we have a place to route this message
+			//System.out.println("Sumeet : We have a host to route push to..");
 			nextHost.send(m); //send the message to appropriate host
 		    }
 		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
+			//System.out.println("Sumeet:I am the destination"); 
 			//unpack message
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
@@ -288,8 +292,10 @@ public class Connection implements Runnable {
 		}// else if		
 	    }//while
 	}//try
-	catch (Throwable t){
-	    System.out.println("Error in Connection thread");
+	catch (IOException e){
+	    System.out.println("IO Excpetion in Connection thread");
+	    System.out.println("removing this connection...");
+	    manager.remove(this);
 	}
     }//run
 

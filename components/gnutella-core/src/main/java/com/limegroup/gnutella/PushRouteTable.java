@@ -39,7 +39,7 @@ public class PushRouteTable{
 	PushRequest mess = (PushRequest)m;
 	String DestinationGuid = new String(mess.getClientGUID());
 	String key = ReplyGuid+"|"+ DestinationGuid;
-	return (Connection) hasher.get(key);
+	return (Connection)hasher.get(key);
     }
     
     /**This function is used to store a which connection a particular message came  from
