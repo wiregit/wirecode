@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
 import java.io.*;
+import com.limegroup.gnutella.GUID;
 
 public class VendorMessagePayloadTest extends TestCase {
     public VendorMessagePayloadTest(String name) {
@@ -71,7 +72,9 @@ public class VendorMessagePayloadTest extends TestCase {
 
     public void testGetSpecificVMPs() {
         TCPConnectBackVMP tcp = new TCPConnectBackVMP(6346);
-        UDPConnectBackVMP udp = new UDPConnectBackVMP(6346);
+        UDPConnectBackVMP udp = 
+            new UDPConnectBackVMP(6346, 
+                                  new GUID(GUID.makeGuid()));
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
