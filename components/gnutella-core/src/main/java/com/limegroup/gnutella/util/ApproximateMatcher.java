@@ -7,127 +7,72 @@ import com.limegroup.gnutella.Assert;
  * "approximately equal" if one can be transformed into the other
  * through some series of inserts, deletes, and substitutions.<p>
  *
- * The approximate matcher has options to ignore case and whitespace.
- * It also has switches to make it perform better by comparing strings
- * backwards and reusing a buffer.  The latter breaks thread safety and
- * modularity but yields significant performance gains.
+ * The approximate matcher has options to ignore case and whitespace.  It also
+ * has switches to make it perform better by comparing strings backwards and
+ * reusing a buffer.  <b>However, this class is not thread safe.</b>
  */
-public class ApproximateMatcher
+final public class ApproximateMatcher
 {
-    private String s1;
-    private String s2;
+    private boolean ignoreCase=false;
+    private boolean ignoreWhitespace=false;
+    private boolean compareBackwards=false;
     
     /** For avoiding allocations.  This can only be used by one thread at a
      *  time.  INVARIANT: buffer!=null => buffer is a bufSize by bufSize array.
      */
-    private static volatile int[][] buffer;
-    private static volatile int bufSize=0;
+    private volatile int[][] buffer;
+    private volatile int bufSize;
     
-
-    /** 
-     * Creates a new matcher to match s1 against s2.
-     *
-     * @param ignoreWhitespace true iff the characters ' ' and '_'
-     *  should be ignored when matching
-     * @param ignoreCase true iff case should be ignored when matching
-     * @param compareBackwards true iff the comparison should be done backwards.
-     *  This is solely an optimization if you expect more differences at the
-     *  end of the word than the beginning.
+    /*
+     * Creates a new approximate matcher that compares respects case and
+     * whitespace, and compares forwards.  Compared to ApproximateMatcher(int),
+     * This constructor is useful if the matcher is used infrequently and memory
+     * is at a premium.  
      */
-    public ApproximateMatcher(String s1, String s2,
-                              boolean ignoreWhitespace,
-                              boolean ignoreCase,
-                              boolean compareBackwards) {
-        //Preprocess s1 and s2, reversing, removing whitespace, and changing
-        //case as needed.  This code could be factored if desired.
-        if (compareBackwards) {
-            StringBuffer buf=null;
-            //Process s1
-            buf=new StringBuffer(s1.length());
-            for (int i=0; i<s1.length(); i++) {
-                char c=s1.charAt(s1.length()-i-1);
-                if (ignoreCase)
-                    c=Character.toLowerCase(c);
-                if (ignoreWhitespace) 
-                    if (c==' ' || c=='_')
-                        continue;
-                buf.append(c);
-            }
-            s1=buf.toString();
-            //Process s2
-            buf=new StringBuffer(s2.length());
-            for (int i=0; i<s2.length(); i++) {
-                char c=s2.charAt(s2.length()-i-1);
-                if (ignoreCase)
-                    c=Character.toLowerCase(c);
-                if (ignoreWhitespace) 
-                    if (c==' ' || c=='_')
-                        continue;
-                buf.append(c);
-            }
-            s2=buf.toString();
-        } else {                  //Exactly like above, but forward.
-            StringBuffer buf=null;
-            //Process s1
-            buf=new StringBuffer(s1.length());
-            for (int i=0; i<s1.length(); i++) {
-                char c=s1.charAt(i);
-                if (ignoreCase)
-                    c=Character.toLowerCase(c);
-                if (ignoreWhitespace) 
-                    if (c==' ' || c=='_')
-                        continue;
-                buf.append(c);
-            }
-            s1=buf.toString();
-            //Process s2
-            buf=new StringBuffer(s2.length());
-            for (int i=0; i<s2.length(); i++) {
-                char c=s2.charAt(i);
-                if (ignoreCase)
-                    c=Character.toLowerCase(c);
-                if (ignoreWhitespace) 
-                    if (c==' ' || c=='_')
-                        continue;
-                buf.append(c);
-            }
-            s2=buf.toString();            
-        }
-
-        //Store into instance variable.  Ensure s1.length<=s2.
-        if (s1.length()<=s2.length()) {
-            this.s1=s1;
-            this.s2=s2;
-        } else {
-            this.s2=s1;
-            this.s1=s2;
-        }
+    public ApproximateMatcher() {
+        this.buffer=null;
     }
 
     /**
-     * Allocates a buffer for use in subsequent calls to match and matches.  The
-     * strings to be matched must be less than length size for the buffer to be
-     * used.  This method is provided solely for efficiency reasons if you must
-     * match lots of strings.  <b>Only one thread may be using an
-     * ApproximateMatcher after a call to setBuffer.</b> The buffer can be
-     * released by releaseBuffer.
-     *
-     * @modifies all ApproximateMatcher classes, though this isn't observable
-     * @requires only one ApproximateMatcher used at a time until releaseBuffer.
+     * Like ApproximateMatcher() except that the new matcher can compare strings
+     * of the given size without any significant allocations.  This is a useful
+     * optimization if you need to make many comparisons with one matcher.  The
+     * matcher will still be able to compare larger strings, but it will require
+     * an allocation.  The buffer is not released until this is garbage
+     * collected.  
      */
-    public static void setBuffer(int size) {
+    public ApproximateMatcher(int size) {
         bufSize=size+1;
         buffer=new int[bufSize][bufSize]; //need "margins" of 1 on each side
     }
-
-    /** 
-     * Releases any storage allocated by setBuffer.
-     *
-     * @modifies all ApproximateMatcher classes, though this isn't observable
+    
+    /*
+     * @param ignoreCase true iff case should be ignored when matching.  Default
+     * value is false.
      */
-    public static void releaseBuffer() {
-        buffer=null;
+    public void setIgnoreCase(boolean ignoreCase) {
+        this.ignoreCase=ignoreCase;
     }
+
+    /*
+     * @param ignoreWhitespace true iff the characters ' ' and '_' should be
+     * ignored when matching. Default value is false.
+     */
+    public void setIgnoreWhitespace(boolean ignoreWhitespace) {
+        this.ignoreWhitespace=ignoreWhitespace;
+    }
+
+    /*
+     * @param compareBackwards true iff the comparison should be done backwards.
+     * This is solely an optimization if you expect more differences at the end
+     * of the word than the beginning.  Default value is false.
+     */
+    public void setCompareBackwards(boolean compareBackwards) {
+        this.compareBackwards=compareBackwards;
+    }
+    
+
+    ///////////////////////// Public Matching Methods //////////////////////////
 
     /*
      * Returns the edit distance between s1 and s2.  That is, returns the number
@@ -135,12 +80,12 @@ public class ApproximateMatcher
      * s2.  A value of 0 means the strings match exactly.  Case is ignored if
      * ignoreCase==true.  
      */
-    public final int match() {
+    public final int match(String s1, String s2) {
         //Let m=s1.length(), n=s2.length(), and k be the edit difference between
         //s1 and s2.  It's possible to reduce the time from O(mn) time to O(kn)
         //time by repeated iterations of the the k-difference algorithm.  But
         //this is a bit complicated.
-        return matchInternal(Integer.MAX_VALUE);
+        return matchInternal(s1, s2, Integer.MAX_VALUE);
     }
 
     /**
@@ -150,8 +95,8 @@ public class ApproximateMatcher
      * is ignored if ignoreCase==true.  This method is generally more efficient
      * than match(..) if you only care whether two strings approximately match.
      */
-    public final boolean matches(int maxOps) {
-        return matchInternal(maxOps)<=maxOps;
+    public final boolean matches(String s1, String s2, int maxOps) {
+        return matchInternal(s1, s2, maxOps)<=maxOps;
     }
 
     /** 
@@ -162,42 +107,77 @@ public class ApproximateMatcher
      *
      * @requires 0.<=match<=1.  
      */
-    public final boolean matches(float precision) {
+    public final boolean matches(String s1, String s2, float precision) {
         int s1n=s1.length();
         int n=(int)(precision*((float)s1n));  //number UNchanged
         int maxOps=s1n-n;                     //number changed
-        return matches(maxOps);
+        return matches(s1, s2, maxOps);
     }
-    
-
-//      /**
-//       * If the edit distance between s1 and s2 is less than or equal to maxOps,
-//       * returns the edit distance.  Otherwise returns some number greater than
-//       * maxOps.
-//       */
-//      private final int matchInternal(final int maxOps) {
-//          //Optimization: a crude "exclusion method".  First we check if the two
-//          //strings are identical.  If not, we use the more expensive dynamic
-//          //programming algorithm on the parts of the strings that don't match.
-//          int i=diff(s1, s2);
-//          if (i<0)
-//              return 0;
-//          else
-//              return matchInternal(maxOps,
-//                                   s1.substring(i),
-//                                   s2.substring(i));
-//      }
-
+        
 
     /**
      * If the edit distance between s1 and s2 is less than or equal to maxOps,
      * returns the edit distance.  Otherwise returns some number greater than
      * maxOps.
+     */    
+    private int matchInternal(String s1, String s2, int maxOps) {
+        //Remove whitespace, etc.
+        s1=process(s1);
+        s2=process(s2);
+
+        //Call matchInternal.  Swap if necessary to ensure |s1|<=|s2|.
+        if (s1.length()<=s2.length()) 
+            return matchInternalProcessed(s1, s2, maxOps);
+        else 
+            return matchInternalProcessed(s2, s1, maxOps);
+    }
+
+    /** 
+     * Returns a version of s1 suitable for passing to matchInternal.  This
+     * means that s1 could be stripped of whitespace, lower-cased, or reversed.  
      */
-    private int matchInternal(final int maxOps) {
+    private String process(String s) {
+        //Optimize for special case.
+        if (! (ignoreCase || compareBackwards || ignoreWhitespace))
+            return s;
+
+        StringBuffer buf=new StringBuffer(s.length());
+        if (compareBackwards) {
+            for (int i=0; i<s.length(); i++) {
+                char c=s.charAt(s.length()-i-1);
+                if (ignoreCase)
+                    c=Character.toLowerCase(c);
+                if (ignoreWhitespace) 
+                    if (c==' ' || c=='_')
+                        continue;
+                buf.append(c);
+            }
+        } else {                  //Exactly like above, but forward.
+            for (int i=0; i<s.length(); i++) {
+                char c=s.charAt(i);
+                if (ignoreCase)
+                    c=Character.toLowerCase(c);
+                if (ignoreWhitespace) 
+                    if (c==' ' || c=='_')
+                        continue;
+                buf.append(c);
+            }
+        }
+        return buf.toString();
+    }
+
+    ///////////////////////////// Core algorithm //////////////////////////
+
+
+    /**
+     * Same as matchInternal, but with weaker precondition.
+     *     @requires s1 and s2 have been processed, |s1|<=|s2|
+     */
+    private int matchInternalProcessed(
+            String s1, String s2, final int maxOps) {
         //A classic implementation using dynamic programming.  d[i,j] is the
         //edit distance between s1[0..i-1] and s2[0..j-1] and is defined
-        //recursively.  Note that there is are "margins" of 1 on the left and
+        //recursively.  Note that there are "margins" of 1 on the left and
         //top of this matrix.  See Chapter 11 of _Algorithms on Strings, Trees,
         //and Sequences_ by Dan Gusfield for a complete discussion.
         //
@@ -231,7 +211,7 @@ public class ApproximateMatcher
         if (buffer!=null
                 && (bufSize >= Math.max(s1n+1, s2n+1)))
             d=buffer; 
-        else
+        else 
             d=new int[s1n+1][s2n+1];               //Note d[0][0]==0
         int diagonals=2*Math.min(s1n+1, s2n+1)-1
                          +Math.min(s2n-s1n, maxOps);
@@ -336,13 +316,15 @@ public class ApproximateMatcher
         return( Math.min( n1, Math.min( n2, n3 ) ) );
     }
 
+
+    ////////////////////////////////////////////////////////////////////////
+
+
     /** Unit test */
-    /*
     public static void main(String[] args) {
         ApproximateMatcher matcher=null;
 
         //1. Basic tests.  Try with and without compareBackwards.
-        ApproximateMatcher.setBuffer(7);
         test("vintner", "writers", 5);
         test("", "", 0); 
         test("a", "", 1);
@@ -353,91 +335,81 @@ public class ApproximateMatcher
         test("abcd", "abcd", 0);
         test("k", "abcdefghiklmnopqrst", 18);
         test("l", "abcdefghiklmnopqrst", 18);
-        ApproximateMatcher.releaseBuffer();
 
         //2. Case insensitive tests.
-        matcher=new ApproximateMatcher("AbcD", "ABcdx",
-                                       false,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==3);
-        matcher=new ApproximateMatcher("AbcD", "ABcdx",
-                                       false,
-                                       true,
-                                       false);
-        Assert.that(matcher.match()==1);
+        matcher=new ApproximateMatcher();
+        Assert.that(matcher.match("AbcD", "ABcdx")==3);
+        matcher.setIgnoreCase(true);
+        Assert.that(matcher.match("AbcD", "ABcdx")==1);
         
         //3. Fractional matching.
-        matcher=new ApproximateMatcher("abcd", "abxy",
-                                       false, false, false);
-        Assert.that(matcher.matches(0.f));
-        Assert.that(matcher.matches(0.5f));
-        Assert.that(! matcher.matches(1.f));
-        matcher=new ApproximateMatcher("01234567890123456789",    
-                                       "01234X67890123456789",
-                                       false, false, false);
-        Assert.that(matcher.matches(0.f));
-        Assert.that(matcher.matches(0.9f));
-        Assert.that(! matcher.matches(1.f));     
+        matcher=new ApproximateMatcher();
+        Assert.that(matcher.matches("abcd", "abxy", 0.f));
+        Assert.that(matcher.matches("abcd", "abxy", 0.5f));
+        Assert.that(! matcher.matches("abcd", "abxy", 1.f));
+        Assert.that(matcher.matches("01234567890123456789",    
+                                    "01234X67890123456789",
+                                    0.5f));
+        Assert.that(matcher.matches("01234567890123456789",    
+                                    "01234X67890123456789",
+                                    0.9f));
+        Assert.that(! matcher.matches("01234567890123456789",    
+                                      "01234X67890123456789",
+                                      1.f));     
 
         //4. Whitespace
-        matcher=new ApproximateMatcher(" a_", "_a ",
-                                       false,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==2);
-        matcher=new ApproximateMatcher(" a_", "_a ",
-                                       true,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==0);
-        matcher=new ApproximateMatcher("a b", "ab",
-                                       false,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==1);
-        matcher=new ApproximateMatcher("a b", "ab",
-                                       true,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==0);
-        matcher=new ApproximateMatcher("ab", "a_b",
-                                       false,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==1);
-        matcher=new ApproximateMatcher("ab", "a_b",
-                                       true,
-                                       false,
-                                       false);
-        Assert.that(matcher.match()==0);
+        matcher=new ApproximateMatcher();
+        Assert.that(matcher.match(" a_", "_a ")==2);
+        matcher.setIgnoreWhitespace(true);
+        Assert.that(matcher.match(" a_", "_a ")==0);
+
+        matcher=new ApproximateMatcher();
+        Assert.that(matcher.match("a b", "ab")==1);
+        matcher.setIgnoreWhitespace(true);
+        Assert.that(matcher.match("a b", "ab")==0);
+
+        matcher=new ApproximateMatcher();
+        Assert.that(matcher.match("ab", "a_b")==1);
+        matcher.setIgnoreWhitespace(true);
+        Assert.that(matcher.match("ab", "a_b")==0);
+
+        //5. Speed test.
+        matcher=new ApproximateMatcher(100);
+        matcher.setCompareBackwards(true);
+        matcher.setIgnoreWhitespace(true);
+        matcher.setIgnoreCase(true);
+
+        long start=System.currentTimeMillis();
+        String s1="   Some long string Britney spears.mp3 extr garbage";
+        String s2="Some long string Bratney spars.mp3 extra garbage_____";
+        System.out.println("Starting benchmark...");
+        for (int i=0; i<10000; i++) {
+            Assert.that(matcher.matches(s1, s2, 3));
+        }
+        long elapsed=System.currentTimeMillis()-start;
+        System.out.println("Done in "+elapsed+" msec");
+            
     }
 
 
     private static void test(String s1, String s2, int expected) {
         //Match forward and backwards
         ApproximateMatcher matcher=null;
-        matcher=new ApproximateMatcher(s1, s2,
-                                        false,
-                                        false,
-                                        true);
-        Assert.that(matcher.match()==expected);
-        matcher=new ApproximateMatcher(s1, s2,
-                                        false,
-                                        false,
-                                        false);
-        Assert.that(matcher.match()==expected);
+        matcher=new ApproximateMatcher(5);  //reuse buffer for some,not all
+        matcher.setCompareBackwards(true);
+        Assert.that(matcher.match(s1, s2)==expected);
+        matcher.setCompareBackwards(false);
+        Assert.that(matcher.match(s1, s2)==expected);
 
         //Bounded match
         for (int i=-1; i<expected; i++) {
-            Assert.that(! matcher.matches(i),
+            Assert.that(! matcher.matches(s1, s2, i),
                         "i="+i+
                         ", expected="+expected+
-                        " match="+matcher.match());
+                        " match="+matcher.match(s1, s2));
         }
-        Assert.that(matcher.matches(expected));
-        Assert.that(matcher.matches(expected+1));
+        Assert.that(matcher.matches(s1, s2, expected));
+        Assert.that(matcher.matches(s1, s2, expected+1));
     }
-    */
 }
 
