@@ -368,7 +368,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         for (int i = 0; (i < ULTRAPEERS.length); i++)
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
 
-        assertTrue(nQuery == null);
+        assertNull(nQuery);
         
     }
 
@@ -418,7 +418,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         for (int i = 0; (i < ULTRAPEERS.length); i++)
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
 
-        assertTrue(nQuery == null);
+        assertNull(nQuery);
     }
 
 
@@ -473,7 +473,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         for (int i = 0; (i < ULTRAPEERS.length); i++)
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
 
-        assertTrue(nQuery == null);
+        assertNull(nQuery);
     }
 
 
@@ -543,7 +543,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         for (int i = 0; (i < ULTRAPEERS.length); i++)
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
 
-        assertTrue(nQuery == null);
+        assertNull(nQuery);
     }
 
 
