@@ -260,16 +260,15 @@ public class HostCatcher {
     public boolean add(PingReply pr, ReplyHandler receivingConnection) {
         //Convert to endpoint
         ExtendedEndpoint endpoint;
-        boolean supportsUnicast = false;
-        try {
-			supportsUnicast = pr.supportsUnicast();
+        
+        if(pr.getDailyUptime() != -1) {
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
 											pr.getDailyUptime());
-        } catch (BadPacketException e) {
+        } else {
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort());
         }
 
-        if(supportsUnicast) {
+        if(pr.supportsUnicast()) {
             try {
                 UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
                                              pr.getPort());
