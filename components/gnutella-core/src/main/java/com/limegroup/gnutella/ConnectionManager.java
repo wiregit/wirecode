@@ -428,8 +428,7 @@ public class ConnectionManager {
      *
      * @return true if this is probably connected to <tt>host</tt> 
      */
-    boolean isConnectedTo(Endpoint host) {        
-        String hostName=host.getAddress();
+    boolean isConnectedTo(String hostName) {
         //A clone of the list of all connections, both initialized and
         //uninitialized, leaves and unrouted.  If Java could be prevented from
         //making certain code transformations, it would be safe to replace the
@@ -1776,7 +1775,7 @@ public class ConnectionManager {
                 do {
                     endpoint = _catcher.getAnEndpoint();
                 } while ( !IPFilter.instance().allow(endpoint.getAddress()) || 
-                          isConnectedTo(endpoint) );                      
+                          isConnectedTo(endpoint.getAddress()) );                      
     
                 Assert.that(endpoint != null);
                 _connectionAttempts++;

@@ -11,6 +11,9 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.sun.java.util.collections.Arrays;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -21,6 +24,9 @@ import com.sun.java.util.collections.Arrays;
  * info.
  */
 public class Acceptor implements Runnable {
+
+    private static final Log LOG = LogFactory.getLog(Acceptor.class);
+
     /**
      * The socket that listens for incoming connections. Can be changed to
      * listen to new ports.
@@ -208,7 +214,7 @@ public class Acceptor implements Runnable {
      *  called even while run() is being called.  
      */
     public void setListeningPort(int port) throws IOException {
-        debug("Acceptor.setListeningPort(): entered.");
+        LOG.trace("Acceptor.setListeningPort(): entered.");
         //1. Special case: if unchanged, do nothing.
         if (_socket!=null && _port==port)
             return;
@@ -219,7 +225,7 @@ public class Acceptor implements Runnable {
         //while holding the lock.  Also note that port
         //will not have changed before we grab the lock.
         else if (port==0) {
-            debug("Acceptor.setListeningPort(): shutting off service.");
+            LOG.trace("Acceptor.setListeningPort(): shutting off service.");
             //Close old socket (if non-null)
             if (_socket!=null) {
                 try {
@@ -237,7 +243,7 @@ public class Acceptor implements Runnable {
             //Shut off MulticastServier too!
             MulticastService.instance().setListeningSocket(null);            
 
-            debug("Acceptor.setListeningPort(): service OFF.");
+            LOG.trace("Acceptor.setListeningPort(): service OFF.");
             return;
         }
         //3. Normal case.  See note about locking above.
@@ -254,12 +260,14 @@ public class Acceptor implements Runnable {
          */
         else {
             
-            debug("Acceptor.setListeningPort(): changing port to " + port);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Acceptor.setListeningPort(): changing port to " +
+                          port);
 
             DatagramSocket udpServiceSocket = 
                 UDPService.instance().newListeningSocket(port);
 
-            debug("Acceptor.setListeningPort(): UDP Service is ready.");
+            LOG.trace("Acceptor.setListeningPort(): UDP Service is ready.");
             
             MulticastSocket mcastServiceSocket = null;
             try {
@@ -270,10 +278,11 @@ public class Acceptor implements Runnable {
                     MulticastService.instance().newListeningSocket(
                         ConnectionSettings.MULTICAST_PORT.getValue(), mgroup
                     );
-                debug("Acceptor.setListeningPort(): Multicast Service is ready.");
+                LOG.trace("Acceptor.setListeningPort(): Multicast Service is ready.");
             } catch(IOException e) {
                 mcastServiceSocket = null;
-                debug("Acceptor.setListeningPort(): Unable to start multicast service.");
+                LOG.debug("Acceptor.setListeningPort(): Unable to start multicast service.",
+                          e);
             }
             
         
@@ -301,7 +310,7 @@ public class Acceptor implements Runnable {
                 SOCKET_LOCK.notify();
             }
 
-            debug("Acceptor.setListeningPort(): I am ready.");
+            LOG.trace("Acceptor.setListeningPort(): I am ready.");
 
             // Commit UDPService's new socket
             UDPService.instance().setListeningSocket(udpServiceSocket);
@@ -313,7 +322,9 @@ public class Acceptor implements Runnable {
                 );
             }
 
-            debug("Acceptor.setListeningPort(): listening UDP/TCP on " + _port);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Acceptor.setListeningPort(): listening UDP/TCP on " + 
+                          _port);
         }
     }
 
@@ -434,13 +445,12 @@ public class Acceptor implements Runnable {
 
 				// we have accepted an incoming socket -- only record
                 // that we've accepted incoming if it's definitely
-                // not from our local subnet
-                if((!NetworkUtils.isCloseIP(address.getAddress(), 
-                                            getAddress(false)) &&
-                    !NetworkUtils.isLocalAddress(address)) ||
-                   !ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+                // not from our local subnet and we aren't connected to
+                // the host already.
+                if(!_acceptedIncoming && isOutsideConnection(address)) {
                     _acceptedIncoming = true;
-                    ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
+                    ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(
+                        _acceptedIncoming);
                 }
                 
                 //Dispatch asynchronously.
@@ -458,6 +468,26 @@ public class Acceptor implements Runnable {
             }
         }
     }
+    
+    /**
+     * Determines whether or not this INetAddress is found an outside
+     * source, so as to correctly set "acceptedIncoming" to true.
+     *
+     * This ignores connections from private or local addresses,
+     * ignores those who may be on the same subnet, and ignores those
+     * who we are already connected to.
+     */
+    private boolean isOutsideConnection(InetAddress addr) {
+        // short-circuit for tests.
+        if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            return true;
+    
+        String host = addr.getHostAddress();
+        byte[] bytes = addr.getAddress();
+        return !RouterService.getConnectionManager().isConnectedTo(host) &&
+               !NetworkUtils.isCloseIP(bytes, getAddress(false)) &&
+               !NetworkUtils.isLocalAddress(addr);
+	}
 
     /**
      * Specialized class for dispatching incoming TCP connections to their
@@ -592,13 +622,4 @@ public class Acceptor implements Runnable {
     public boolean isBannedIP(String ip) {        
         return !IPFilter.instance().allow(ip);
     }
-
-    
-    private static final boolean debug = false;
-    private static void debug(String out) {
-        if (debug)
-            System.out.println(out);
-    }
-
-
 }

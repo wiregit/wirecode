@@ -1083,7 +1083,7 @@ public abstract class MessageRouter {
         // whole point of redirect after all....
         Endpoint endPoint = new Endpoint(addrToContact.getAddress(),
                                          portToContact);
-        if (_manager.isConnectedTo(endPoint)) return;
+        if (_manager.isConnectedTo(endPoint.getAddress())) return;
 
         // keep track of who you tried connecting back too, don't do it too
         // much....
@@ -1193,7 +1193,7 @@ public abstract class MessageRouter {
         // only connect back if you aren't connected to the host - that is the
         // whole point of redirect after all....
         Endpoint endPoint = new Endpoint(addrToContact, portToContact);
-        if (_manager.isConnectedTo(endPoint)) return;
+        if (_manager.isConnectedTo(endPoint.getAddress())) return;
 
         // keep track of who you tried connecting back too, don't do it too
         // much....
