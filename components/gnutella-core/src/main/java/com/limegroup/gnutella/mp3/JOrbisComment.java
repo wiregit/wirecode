@@ -94,10 +94,11 @@ class JOrbisComment {
     write(out);
     
     //rename fails on some rare filesystem setups
-    LOG.debug("about to rename ogg file");
-    
-    tempFile.renameTo(file);
-  	}finally {
+    if (!tempFile.renameTo(file)){
+    	//TODO: come up with solution
+    	throw new IOException("couldn't rename file");
+    }
+    }finally {
   		if (out!=null)
   		try {out.close(); }catch(IOException ignored){}
   		if (in!=null)
