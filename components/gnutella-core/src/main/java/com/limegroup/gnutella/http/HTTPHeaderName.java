@@ -41,7 +41,7 @@ public class HTTPHeaderName {
      * Header for failed Alternate locations to be added to mesh
      */
     public static final HTTPHeaderName NALTS = 
-        new HTTPHeaderName("X-N-AltLocs");
+        new HTTPHeaderName("X-NAlts");
     
 
 	/**

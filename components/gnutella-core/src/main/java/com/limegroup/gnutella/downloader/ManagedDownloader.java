@@ -2143,7 +2143,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	public int getNumberOfAlternateLocations() {
 	    if ( validAlts == null ) return 0;
-	    return validAlts.getNumberOfAlternateLocations();
+	    return validAlts.getAltLocsSize();
     }
     
     /**

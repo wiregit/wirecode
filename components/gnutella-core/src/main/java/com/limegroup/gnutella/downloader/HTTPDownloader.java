@@ -269,16 +269,35 @@ public class HTTPDownloader implements BandwidthTracker {
         if(supportQueueing) 
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
+        // Add ourselves to the mesh if:
+        //  This rfd has a SHA1,
+        //  We are allowing partial sharing,
+        //  The VerifyingFile is not corrupted,
+        //  We have downloaded a large enough portion of the file,
+        //  and We have accepted incoming during this session.
+        if(_rfd.getSHA1Urn()!=null && 
+           UploadSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+           !_outIsCorrupted &&
+           RouterService.acceptedIncomingConnection() &&
+           _incompleteFile.length() > _minPartialFileSize) {
+            AlternateLocation me = AlternateLocation.create(_rfd.getSHA1Urn());
+            addSuccessfulAltLoc(me);
+        }
+
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
 		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,sha1,out);
 
         //write altLocs and n-alt-locs
-        HTTPUtils.writeHeader
-        (HTTPHeaderName.ALT_LOCATION,_sendLocsManager.getGoodAltLocs(),out);
+        if( _sendLocsManager.goodSize() > 0) 
+            HTTPUtils.writeHeader
+            (HTTPHeaderName.ALT_LOCATION,_sendLocsManager.getGoodAltLocs(),out);
+
         //write-nalts
-        HTTPUtils.writeHeader
-        (HTTPHeaderName.NALTS,_sendLocsManager.getFailedAltLocs(),out);
+        if( _sendLocsManager.badSize() > 0) 
+            HTTPUtils.writeHeader
+            (HTTPHeaderName.NALTS,_sendLocsManager.getFailedAltLocs(),out);
+
         //clear the collections
         _sendLocsManager.clear();
 

@@ -254,7 +254,7 @@ public final class AlternateLocationCollection
 
     // Implements AlternateLocationCollector interface -- 
     // inherit doc comment
-	public synchronized int getNumberOfAlternateLocations() { 
+	public synchronized int getAltLocsSize() { 
 		return LOCATIONS.size();
     }
     

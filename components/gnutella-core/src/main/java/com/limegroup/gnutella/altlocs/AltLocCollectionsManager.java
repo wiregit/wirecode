@@ -71,6 +71,14 @@ public class AltLocCollectionsManager {
         return _failedAltLocs;
     }
 
+    public int goodSize() {
+        return _validAltLocs.getAltLocsSize();
+    }
+
+    public int badSize() {
+        return _failedAltLocs.getAltLocsSize();
+    }
+
     public void clear() {
         _validAltLocs.clear();
         _failedAltLocs.clear();

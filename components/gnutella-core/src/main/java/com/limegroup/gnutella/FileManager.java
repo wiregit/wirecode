@@ -1292,7 +1292,7 @@ public class FileManager {
                             "unexpected null in FileManager for query:\n"+
                             request);
             } if(!busy || 
-                 desc.getNumberOfAlternateLocations() < 10) {
+                 desc.getAltLocsSize() < 10) {
                 desc.incrementHitCount();
                 if ( _callback != null )
                     _callback.handleSharedFileUpdate(desc.getFile());
