@@ -7,12 +7,15 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import com.limegroup.gnutella.bootstrap.FetchObserver;
+import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.connection.InternetObserver;
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.filters.IPFilter;
 
@@ -55,7 +58,9 @@ import org.apache.commons.logging.Log;
  * ConnectionManager has methods to get up and downstream bandwidth, but it 
  * doesn't quite fit the BandwidthTracker interface.
  */
-public class ConnectionManager {
+public class ConnectionManager implements InternetObserver,
+                                          FetchObserver, 
+                                          HostObserver {
     
     /**
      * Timestamp for the last time the user selected to disconnect.
@@ -68,6 +73,22 @@ public class ConnectionManager {
      * time.
      */
     private volatile long _automaticConnectTime = 0;
+    
+    /**
+     * Flag for whether or not we have a basic internet connection.
+     */
+    private volatile boolean _hasInternetConnection = false;
+    
+    /**
+     * Flag for whether or not GWebCache's have been contacted & finished.
+     */
+    private volatile boolean _gwebCachesFinished = false;
+    
+    /**
+     * Flag for whether or not we've notified the user about them being
+     * firewalled.
+     */
+    private volatile boolean _notifiedAboutFirewall = false;
 
     /**
      * Flag for whether or not the auto-connection process is in effect.
@@ -233,6 +254,8 @@ public class ConnectionManager {
      */
     public void initialize() {
         _catcher = RouterService.getHostCatcher();
+        _catcher.setHostObserver(this);
+        BootstrapServerManager.instance().setEndpointFetchObserver(this);
     }
 
 
@@ -1134,6 +1157,9 @@ public class ConnectionManager {
         _connectionAttempts = 0;
         _lastConnectionCheck = 0;
         _lastSuccessfulConnect = 0;
+        _hasInternetConnection = false;
+        _gwebCachesFinished = false;
+        _notifiedAboutFirewall = false;
         
 
         //Tell the HostCatcher to retrieve more bootstrap servers
@@ -1796,7 +1822,8 @@ public class ConnectionManager {
                     _connectionAttempts = 0;
                     _lastConnectionCheck = curTime;
                     LOG.debug("checking for live connection");
-                    ConnectionChecker.checkForLiveConnection();
+                    ConnectionChecker.checkForLiveConnection(
+                        ConnectionManager.this);
                 }
                 
                 //Try to connect, recording success or failure so HostCatcher
@@ -1835,14 +1862,71 @@ public class ConnectionManager {
             return "ConnectionFetcher";
         }
 	}
+	
+	/**
+	 * Notification that all possible hosts have been used.
+	 *
+	 * If the gwebCaches have been contacted, we aren't connected
+	 * and the internet is alive, then we inform the user that
+	 * a firewall may be blocking them.
+	 */
+	public void noHostsToUse() {
+	    if(LOG.isDebugEnabled())
+	        LOG.debug("No more hosts to use." + 
+	                "  GWebCache's Used: " + _gwebCachesFinished +
+	                ", Has Internet: " + _hasInternetConnection +
+	                ", Is Connected: " + isConnected() +
+	                ", Notified About Firewall: " + _notifiedAboutFirewall);
+        
+        if(!_notifiedAboutFirewall && _gwebCachesFinished && !isConnected() &&
+           _hasInternetConnection && _lastSuccessfulConnect == 0) {
+            _notifiedAboutFirewall = true;
+	        // Notify the user that they are able to contact websites,
+	        // but unable to contact to connect to the Gnutella network.
+	        MessageService.showError("NO_GNUTELLA_INTERNET");
+        }
+    }
+	
+	/**
+	 * Notification that we have finished contacting GWebCaches.
+	 *
+	 * If some endpoints were added, we wait until later to notify that
+	 * the user may not have a connection.  However, if no responses were found
+	 * then we immediately tell the user (as HostCatcher will not have any
+	 * hosts to tell us about).
+	 *
+	 * Used so we can correctly notify users that we can't make an
+	 * internet connection later on.
+	 */
+    public void endpointFetchFinished(int numAdded) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Fetch Finished, num added: " + numAdded);
+        _gwebCachesFinished = true;
+        
+        // If no hosts were added, we have to tell ourselves that no hosts
+        // are available.
+        if(numAdded == 0) {
+            noHostsToUse();
+        }            
+    }        
 
     /**
-     * This method notifies the connection manager that the user does not have
-     * a live connection to the Internet to the best of our determination.
+     * Notification that the user does not have a live connection to the
+     * Internet to the best of our determination.
+     *
      * In this case, we notify the user with a message and maintain any 
      * Gnutella hosts we have already tried instead of discarding them.
      */
-    public void noInternetConnection() {
+    public void setInternetStatus(boolean up) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("setInternetStatus called with: " + up);
+        
+        _hasInternetConnection = up;
+        
+        // If the internet can be accessed, we don't need to do anything else
+        // just yet...
+        if(up)
+            return;
         
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're

@@ -62,6 +62,11 @@ public class BootstrapServerManager {
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
     private boolean _hostFetchInProgress=false;
+    
+    /**
+     * The Observer that will be notified when the HostFile request finishes.
+     */
+    private FetchObserver _fetchObserver;
 
     /**
      * Constant instance of the boostrap server.
@@ -83,6 +88,14 @@ public class BootstrapServerManager {
      * Creates a new <tt>BootstrapServerManager</tt>.  Protected for testing.
      */
     protected BootstrapServerManager() {}
+    
+    /**
+     * Sets the observer that will be notified when endpoint fetching
+     * finishes.
+     */
+    public void setEndpointFetchObserver(FetchObserver fo) {
+        _fetchObserver = fo;
+    }
 
     /**
      * Adds server to this.
@@ -123,6 +136,11 @@ public class BootstrapServerManager {
      * them in the HostCatcher.  Stops after getting "enough" endpoints or
      * exhausting all caches.  Does nothing if another endpoint request is in
      * progress.  Uses the "hostfile=1" message.
+     *
+     * @return Whether or not the fetch was scheduled.  If a fetch was in
+     *         progress already, then a new fetch will not be scheduled.
+     *         Also returns false if the USE_GWEBCACHE ConnectionSetting is
+     *         set to false.
      */
     public synchronized void fetchEndpointsAsync() {
 		if(!ConnectionSettings.USE_GWEBCACHE.getValue()) return;
@@ -197,12 +215,13 @@ public class BootstrapServerManager {
         protected String parameters() {
             return "hostfile=1";
         }
+        
         protected void handleResponseData(BootstrapServer server, String line) {
             try {
                 //Only accept numeric addresses.  (An earlier version of this
                 //did not do strict checking, possibly resulting in HTML in the
                 //gnutella.net file!)
-                Endpoint host=new Endpoint(line, true);
+                Endpoint host = new Endpoint(line, true);
                 //We don't know whether the host is an ultrapeer or not, but we
                 //need to force a higher priority to prevent repeated fetching.
                 //(See HostCatcher.expire)
@@ -220,6 +239,8 @@ public class BootstrapServerManager {
         }
         protected void done() {
             _hostFetchInProgress=false;
+            if(_fetchObserver != null)
+                _fetchObserver.endpointFetchFinished(responses);
         }
     }
 

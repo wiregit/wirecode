@@ -13,8 +13,8 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * connection.
  */
 public class ConnectionCheckerTest extends BaseTestCase {
-
-    private final static TestManager MANAGER = new TestManager();
+    
+    private final static CallbackCatcher CALLBACK = new CallbackCatcher();
     
     private static final Object LOCK = new Object();
 
@@ -29,11 +29,6 @@ public class ConnectionCheckerTest extends BaseTestCase {
         return buildTestSuite(ConnectionCheckerTest.class);
     }
     
-    public static void globalSetUp() throws Exception {
-        new RouterService(new ActivityCallbackStub());
-        PrivilegedAccessor.setValue(RouterService.class, "manager", MANAGER);
-    }
-    
     /**
      * Tests to make sure that the method for checking for a live internet
      * connection is working properly.
@@ -43,10 +38,17 @@ public class ConnectionCheckerTest extends BaseTestCase {
     public void testForLiveConnection() throws Exception {
 
         // We should quickly connect to one of our hosts.
-        ConnectionChecker checker = ConnectionChecker.checkForLiveConnection();
-        Thread.sleep(10000);
+        ConnectionChecker checker =
+            ConnectionChecker.checkForLiveConnection(CALLBACK);
+        synchronized(LOCK) {
+            LOCK.wait(10000);
+        }
+        assertTrue("should have received callback", 
+            CALLBACK.hasReceivedCallback());             
         assertTrue("should have successfully connected", 
             checker.hasConnected());
+        assertTrue("status should be true",
+            CALLBACK.getStatus());
         
         // Now, we "pretend" we're disconnected by just trying to connect to
         // hosts that don't exist, which is effectively the same as not 
@@ -62,34 +64,40 @@ public class ConnectionCheckerTest extends BaseTestCase {
 
         PrivilegedAccessor.setValue(ConnectionChecker.class, 
             "STANDARD_HOSTS", dummyHosts);    
-        checker = ConnectionChecker.checkForLiveConnection();
+        checker = ConnectionChecker.checkForLiveConnection(CALLBACK);
         synchronized(LOCK) {
             LOCK.wait(10000);
         }
-        //Thread.sleep(2000);
         assertTrue("should not have successfully connected", 
             !checker.hasConnected());   
         assertTrue("should have received callback", 
-            MANAGER.hasReceivedCallback());     
+            CALLBACK.hasReceivedCallback());
+        assertTrue("status should be false",
+            !CALLBACK.getStatus());
     }
 
     /**
      * Helper class that receives the callback notifying us when there's no
      * available internet connection.
      */
-    private static class TestManager extends ConnectionManager {
+    private static class CallbackCatcher implements InternetObserver {
 
         private boolean _receivedCallback;
-
-        public TestManager() {
-            super(null);
-        }
+        private boolean _status;
         
-        public void noInternetConnection() {
+        public void setInternetStatus(boolean up) {
             _receivedCallback = true;
+            _status = up;
             synchronized(LOCK) {
                 LOCK.notify();
             }
+        }
+        
+        /**
+         * Determines the status of the callback.
+         */
+        public boolean getStatus() {
+            return _status;
         }
         
         /**

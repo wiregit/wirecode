@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
+import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.sun.java.util.collections.*;
 
 import java.io.*;
@@ -211,6 +212,11 @@ public class HostCatcher implements HostListener {
      */
     public static final int EXPIRED_HOSTS_SIZE = 500;
     
+    /**
+     * An observer of host consumption.
+     */
+    private HostObserver _hostObserver;
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
 	 * for the host file location.
@@ -286,6 +292,13 @@ public class HostCatcher implements HostListener {
         // Recover hosts on probation every minute.
         RouterService.schedule(probationRestorer, 
             PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
+    }
+    
+    /**
+     * Sets the HostObserver.
+     */
+    void setHostObserver(HostObserver who) {
+        _hostObserver = who;
     }
 
     /**
@@ -479,7 +492,7 @@ public class HostCatcher implements HostListener {
      * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
      */
     public boolean add(Endpoint host, int priority) {
-        LOG.trace("adding host");
+//        LOG.trace("adding host");
         return add(new ExtendedEndpoint(host.getAddress(), host.getPort()), 
             priority);
     }
@@ -649,6 +662,7 @@ public class HostCatcher implements HostListener {
                 //Give up and use GWebCache.
                 else {
                     LOG.debug("fetching more endpoints");
+                    _hitCaches = true;
                     gWebCache.fetchEndpointsAsync();
                     nextAllowedFetchTime=Long.MAX_VALUE;
                 }
@@ -745,6 +759,8 @@ public class HostCatcher implements HostListener {
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
         } else
+            if(_hostObserver != null)
+                _hostObserver.noHostsToUse();
             throw new NoSuchElementException();
     }
 

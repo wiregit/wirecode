@@ -24,6 +24,12 @@ import com.sun.java.util.collections.List;
  * to the Internet.
  */
 public final class ConnectionChecker implements Runnable {
+    
+    /**
+     * The observer that will be notified of whether or not the internet
+     * can be accessed.
+     */
+    private final InternetObserver _observer;
 
     /**
      * Flag for whether or not we know for sure that we're connected from
@@ -111,7 +117,9 @@ public final class ConnectionChecker implements Runnable {
      * Private constructor ensures that only this class can create instances of
      * itself.
      */
-    private ConnectionChecker() {}
+    private ConnectionChecker(InternetObserver observer) {
+        _observer = observer;
+    }
 
     /**
      * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
@@ -121,10 +129,11 @@ public final class ConnectionChecker implements Runnable {
      * 
      * @return a new <tt>ConnectionChecker</tt> instance
      */
-    public static ConnectionChecker checkForLiveConnection() {
+    public static ConnectionChecker checkForLiveConnection(
+      InternetObserver observer) {
         LOG.trace("checking for live connection");
 
-        ConnectionChecker checker = new ConnectionChecker();
+        ConnectionChecker checker = new ConnectionChecker(observer);
         Thread connectionThread = 
             new Thread(checker, "check for live connection");
         connectionThread.setDaemon(false);
@@ -151,6 +160,7 @@ public final class ConnectionChecker implements Runnable {
                 // connected -- we only need to successfully connect to one host
                 // to know for sure that we're up.
                 if(_connected) {
+                    _observer.setInternetStatus(true);
                     return;
                 }
                 
@@ -159,7 +169,7 @@ public final class ConnectionChecker implements Runnable {
                 // sure the user's connection is down.  If it is down, trying
                 // multiple times adds no load to the test servers.
                 if(_unsuccessfulAttempts > 2) {
-                    RouterService.getConnectionManager().noInternetConnection(); 
+                    _observer.setInternetStatus(false);
                     return;   
                 }
             }
