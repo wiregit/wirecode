@@ -553,9 +553,6 @@ public class HostCatcher {
                (!RouterService.isConnected() && _failures>200 && !_hitCaches)) {
                 LOG.debug("getNumHosts() == 0, fetching endpoints");
                 _hitCaches = true;
-                
-                // Reset the failures to zero to start counting again.
-                _failures = 0;
                 gWebCache.fetchEndpointsAsync();
             }
             //If there are no good, fresh ultrapeer pongs--these exclude
