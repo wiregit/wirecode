@@ -10,6 +10,14 @@ public final class ConnectionSettings extends LimeProps {
     private ConnectionSettings() {}
         
 	/**
+     * Constants for proxy settings
+     */
+    public static final int C_NO_PROXY = 0;
+    public static final int C_SOCKS4_PROXY = 4;
+    public static final int C_SOCKS5_PROXY = 5;
+    public static final int C_HTTP_PROXY = 1;
+    
+	/**
 	 * Settings for whether or not an incoming connection has ever been
 	 * accepted.
 	 */
@@ -189,6 +197,55 @@ public final class ConnectionSettings extends LimeProps {
     public static final BooleanSetting USE_NIO =
         FACTORY.createBooleanSetting("USE_NIO", true);
           
+    /**
+     * Setting for the address of the proxy
+     */
+    public static final StringSetting PROXY_HOST = 
+        FACTORY.createStringSetting("PROXY_HOST", "");
+
+    /**
+     * Setting for the port of the proxy
+     */
+    public static final IntSetting PROXY_PORT = 
+        FACTORY.createIntSetting("PROXY_PORT", 0);
+
+    /**
+     * Setting for whether to use the proxy for private ip addresses
+     */
+    public static final BooleanSetting USE_PROXY_FOR_PRIVATE = 
+        FACTORY.createBooleanSetting("USE_PROXY_FOR_PRIVATE", false);
+    
+    /**
+     * Setting for which proxy type to use or if any at all 
+     */
+    public static final IntSetting CONNECTION_METHOD = 
+        FACTORY.createIntSetting("CONNECTION_TYPE", C_NO_PROXY);
+    
+    /**
+     * Setting for whether or not to authenticate at the remote proxy
+     */
+    public static final BooleanSetting PROXY_AUTHENTICATE = 
+        FACTORY.createBooleanSetting("PROXY_AUTHENTICATE", false);
+    
+    /**
+     * Setting for whether or not to use the proxy settings for HttpClient 
+     * connections
+     */
+    public static final BooleanSetting PROXY_SIMPLE_HTTP_CONNECTIONS = 
+    	FACTORY.createBooleanSetting("PROXY_SIMPLE_HTTP_CONNECTIONS", false);
+
+    /**
+     * Setting for the username to use for the proxy
+     */
+    public static final StringSetting PROXY_USERNAME = 
+        FACTORY.createStringSetting("PROXY_USERNAME", "");
+    
+    /**
+     * Setting for the password to use for the proxy
+     */
+    public static final StringSetting PROXY_PASS = 
+        FACTORY.createStringSetting("PROXY_PASS", "");
+
     /**
      * Helper method left from Settings Manager
      *

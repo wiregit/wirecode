@@ -12,6 +12,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.auth.HttpAuthenticator;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 
 import java.io.IOException;
@@ -90,6 +91,12 @@ public class HttpClientManager {
             client = new HttpClient(MANAGER); // use the same manager.
         client.setConnectionTimeout(connectTimeout);
         client.setTimeout(soTimeout);
+        if (ConnectionSettings.PROXY_SIMPLE_HTTP_CONNECTIONS.getValue()) {
+			// use the user's proxy settings. He brought it on himself!
+			client.getHostConfiguration().setProxy(
+				ConnectionSettings.PROXY_HOST.getValue(),
+				ConnectionSettings.PROXY_PORT.getValue());
+		}
         return client;
     }
     
