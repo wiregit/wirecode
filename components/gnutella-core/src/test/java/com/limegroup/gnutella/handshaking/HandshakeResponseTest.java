@@ -78,14 +78,50 @@ public final class HandshakeResponseTest extends BaseTestCase {
 			(String)m.invoke(HandshakeResponse.class, new Object[] {leaves});	
 		
 		List leavesFromString = createListFromIPPortString(leafStr);
-		assertEquals(leaves, leavesFromString);
+		assertAllConnectionsAreEqual(leaves, leavesFromString);
 		
 		String ultrapeerStr =
 					(String)m.invoke(HandshakeResponse.class, new Object[] {ultrapeers});	
 		List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
-		assertEquals(ultrapeers, ultrapeersFromString);
+		assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);
 		
 	}
+	
+	/**
+	 * Asserts that two lists of connections are equal as per having
+	 * the same host/ip.
+	 */
+	private void assertAllConnectionsAreEqual(List one, List two) {
+	    Connection c1, c2;
+	    boolean found;
+	    
+	    assertEquals("wrong sizes", one.size(), two.size());
+	    
+	    for(Iterator a = one.iterator(); a.hasNext(); ) {
+	        found = false;
+            c1 = (Connection)a.next();
+            for(Iterator b = two.iterator(); b.hasNext();) {
+                c2 = (Connection)b.next();
+                if( c1.getIPString().equals(c2.getIPString()) &&
+                  c1.getListeningPort() == c2.getListeningPort() )
+                    found = true;
+            }
+            assertTrue("missing " + c1 + " from list two", found);
+        }
+        
+	    for(Iterator a = two.iterator(); a.hasNext(); ) {
+	        found = false;
+            c1 = (Connection)a.next();
+            for(Iterator b = one.iterator(); b.hasNext();) {
+                c2 = (Connection)b.next();
+                if( c1.getIPString().equals(c2.getIPString()) &&
+                  c1.getListeningPort() == c2.getListeningPort() )
+                    found = true;
+            }
+            assertTrue("missing " + c1 + " from list one", found);
+        }
+    }
+	        
 	
 	/**
 	 * Helper method for creating a list from a string of ip/port pairs separated
@@ -136,8 +172,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		Properties headers = hr.props();
 		String leaves = headers.getProperty(HeaderNames.LEAVES);
 		String ultrapeers = headers.getProperty(HeaderNames.PEERS);
-		System.out.println("leaves: "+leaves);
-		System.out.println("ultrapeers: "+ultrapeers);
+		//System.out.println("leaves: "+leaves);
+		//System.out.println("ultrapeers: "+ultrapeers);
 		List leafList = createListFromIPPortString(leaves);
 		List ultrapeerList = createListFromIPPortString(ultrapeers);
 		assertTrue("leaf list should not be empty", !leafList.isEmpty());
