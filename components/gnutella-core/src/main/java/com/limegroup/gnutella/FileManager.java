@@ -1367,10 +1367,11 @@ public abstract class FileManager {
         });
     }
 
-    /** Returns true if filename has a shared extension.  Case is ignored. */
-    private static boolean hasExtension(String filename) {
+    /** Returns true if file has a shareable extension.  Case is ignored. */
+    public static boolean hasShareableExtension(File file) {
+        if(file == null) return false;
+        String filename = file.getName();
         int begin = filename.lastIndexOf(".");
-
         if (begin == -1)
             return false;
 
@@ -1397,9 +1398,14 @@ public abstract class FileManager {
         	return false;
         
         if (file.isDirectory() || !file.canRead() || file.isHidden() ) 
-            return false;        
+            return false;
+        
+        //  Short-circuit if file is specially shared 
+        if (Arrays.asList(SharingSettings.SPECIAL_FILES_TO_SHARE.getValue()).contains(file))
+            return true;
+            
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
-            !hasExtension(file.getName())) {
+            !hasShareableExtension(file)) {
         	return false;
         }        
         return true;

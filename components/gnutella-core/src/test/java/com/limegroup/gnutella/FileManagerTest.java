@@ -658,6 +658,44 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     /**
+     * Tests whether specially shared files are indeed shared despite having
+     * an extension that is not on the list of shareable extensions.
+     */
+    public void testSpecialSharingWithNonShareableExtension() throws Exception {
+        //  create "shared" file out of shared directory
+        File tmp = createNewNamedTestFile(10, "tmp", _sharedDir.getParentFile());
+        File shared = new File(tmp.getParentFile(), "shared.badextension");
+        boolean success = tmp.renameTo(shared);
+                
+        //  Add "shared" to special shared files
+        File[] specialFiles = SharingSettings.SPECIAL_FILES_TO_SHARE.getValue();
+        File[] newSpecialFiles = new File[specialFiles.length + 1];
+        System.arraycopy(specialFiles, 0, newSpecialFiles, 0, specialFiles.length);
+        newSpecialFiles[specialFiles.length] = shared;
+        SharingSettings.SPECIAL_FILES_TO_SHARE.setValue(newSpecialFiles);
+        waitForLoad();
+
+        //  assert that "shared" file does not have a shareable extension
+        assertFalse("shared file should not have a shareable extension", fman.hasShareableExtension(shared));
+        
+        //  assert that "shared" is not in shared directories
+        assertFalse("shared should be specially shared, not shared in a shared directory", fman.isFileInSharedDirectories(shared));
+        
+        //  assert that "shared" is shared
+        FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
+        assertNotNull("no shared files, even though just added a specially shared file", sharedFiles);
+        boolean found = false;
+        for(int i = 0; i < sharedFiles.length; i++) {
+            FileDesc fd = sharedFiles[i];
+            if(fd == null) continue;
+            if(fd.getFile().equals(shared)) {
+                found = true;
+            }
+        }
+        assertTrue("specially shared file not found in list of shared files", found);
+    }
+
+    /**
      * Tests whether a directory placed on the non-recursive share list
      * successfully does not share files in its subdirectories. 
      */
@@ -708,7 +746,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         assertFalse("file not intended to be shared found in list of shared files", found);
     }
-
+    
     //helper function to create queryrequest with I18N
     private QueryRequest get_qr(File f) {
         String norm = I18NConvert.instance().getNorm(f.getName());
