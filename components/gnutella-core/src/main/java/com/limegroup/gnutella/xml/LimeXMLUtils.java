@@ -20,6 +20,10 @@ import com.limegroup.gnutella.util.NameValue;
 
 import org.xml.sax.InputSource;
 
+// for compression
+import java.util.zip.*;
+import com.limegroup.gnutella.Assert;
+
 /**
  * Contains utility methods
  * @author  asingla
@@ -448,5 +452,61 @@ public class LimeXMLUtils
         index += XMLStringUtils.DELIMITER.length();
         return capitalizeFirst(colName.substring(index));
     }
-    
+
+
+
+    /** Returns a GZIP'ed version of data. */
+    public static byte[] compress(byte[] data) {
+        try {
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            DeflaterOutputStream gos=new DeflaterOutputStream(baos);
+            gos.write(data, 0, data.length);
+            gos.flush();
+            gos.close();                      //flushes bytes
+            System.out.println("compression savings: " +
+                               ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
+            return baos.toByteArray();
+        } catch (IOException e) {
+            //This should REALLY never happen because no devices are involved.
+            //But could we propogate it up.
+            Assert.that(false, "Couldn't write to byte stream");
+            return null;
+        }
+    }
+ 
+
+    /** Returns the uncompressed version of the given GZIP'ed bytes.  Throws
+     *  IOException if the data is corrupt. */
+    public static byte[] uncompress(byte[] data) throws IOException {
+        ByteArrayInputStream bais=new ByteArrayInputStream(data);
+        InflaterInputStream gis=new InflaterInputStream(bais);
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        while (true) {
+            int b=gis.read();
+            if (b==-1)
+                break;
+            baos.write(b);
+        }
+        return baos.toByteArray();
+    }
+
+    /*
+    public static void main(String argv[]) {
+        String dataSource = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\" ><audio album=\"Steve&apos;s ALbum\" artist=\"S. Cho / A. Kim\" bitrate=\"156\" comments=\"Live Concert 10/26/97\" genre=\"Chamber Music\" index=\"0\" title=\"Schumann Fantasiestucke - I.m\" year=\"2001\"/></audios>";
+        byte[] dataBytes = dataSource.getBytes();
+        byte[] dataCompressedBytes = compress(dataSource.getBytes());
+        Assert.that(dataCompressedBytes.length<dataBytes.length);
+        try {
+            // pure byte tests...
+            byte[] dataUncompressedBytes = uncompress(dataCompressedBytes);
+            Assert.that(Arrays.equals(dataBytes, dataUncompressedBytes),
+                        "Compress/uncompress loop failed 1");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false, "Bad GZIP data.");
+        }
+    }
+    */
+
 }
