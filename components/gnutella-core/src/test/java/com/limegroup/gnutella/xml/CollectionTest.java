@@ -309,7 +309,9 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         map.put(getHash(test1), doc);
         doc = ID3Reader.readDocument(test2);
         map.put(getHash(test2), doc);
-        ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"audio.collection"), map);
+        File marker = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
+        marker = marker.getParentFile();
+        ms = new LimeXMLReplyCollection.MapSerializer(new File(marker, "audio.collection"), map);
         ms.commit();
         // made video.collection
         List nameVals = new ArrayList();
@@ -327,7 +329,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         doc.setIdentifier(mason.getCanonicalPath());
         doc.getXMLString();
         map.put(getHash(mason), doc);
-        ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"video.collection"), map);
+        ms = new LimeXMLReplyCollection.MapSerializer(new File(marker, "video.collection"), map);
         ms.commit();
     }
     
