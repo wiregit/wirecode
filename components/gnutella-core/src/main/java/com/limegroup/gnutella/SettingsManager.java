@@ -1133,11 +1133,12 @@ public final class SettingsManager {
                     if( theClass == String.class )
                         theValue = (String)fields[i].get(this);
                     else if (theClass == Boolean.TYPE )
-                        theValue = Boolean.toString(fields[i].getBoolean(this));
+                        theValue = 
+                            new Boolean(fields[i].getBoolean(this)).toString();
                     else if (theClass == Byte.TYPE )
                         theValue = Byte.toString(fields[i].getByte(this));
                     else if (theClass == Character.TYPE )
-                        theValue = Character.toString(fields[i].getChar(this));
+                        theValue = new Character(fields[i].getChar(this)).toString();
                     else if (theClass == Double.TYPE )
                         theValue = Double.toString(fields[i].getDouble(this));
                     else if (theClass == Float.TYPE )
