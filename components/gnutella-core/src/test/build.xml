@@ -62,16 +62,15 @@
   </path>
   
   <!-- CLOVER SETUP TASKS -->
-  
-  <taskdef resource="clovertasks"/>
-  
   <target name="with.clover" depends="prepare">
+     <taskdef resource="clovertasks"/>
+     <available file="${cloverjar}" property="has.clover"/>
      <clover-setup initString="${cloverdir}/limeCloverCoverage.db">
        <fileset dir="${coredir}" defaultexcludes="yes"/>
      </clover-setup>
   </target>
   
-  <target name="clover.html" depends="with.clover">
+  <target name="clover.html" depends="with.clover" if="has.clover">
      <tstamp>
        <format property="clover.time"
                pattern="EEE, MMM d, yyyy hh:mm a"/>
@@ -84,11 +83,11 @@
      </clover-report>
   </target>
   
-  <target name="clover.history.point" depends="with.clover">
+  <target name="clover.history.point" depends="with.clover" if="has.clover">
     <clover-historypoint historyDir="${cloverdir}/history"/>
   </target>
   
-  <target name="clover.history.html" depends="with.clover">
+  <target name="clover.history.html" depends="with.clover" if="has.clover">
      <tstamp>
        <format property="clover.time"
                pattern="EEE, MMM d, yyyy hh:mm a"/>
@@ -114,7 +113,7 @@
     <delete dir="${cloverdir}/html"/>
   </target>
   
-  <target name="clover.all" depends="clean, with.clover">
+  <target name="clover.all" depends="clean, with.clover" if="has.clover">
     <antcall target="test all" inheritRefs="true"/>
     <antcall target="clover.html" inheritRefs="true"/>
     <antcall target="clover.history.point" inheritRefs="true"/>
