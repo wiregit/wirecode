@@ -31,7 +31,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	/**
 	 * A constant invalid URN that classes can use to represent an invalid URN.
 	 */
-	public static final URN INVALID = new URN("invalid", UrnType.INVALID);
+	public static final URN INVALID = new URN("bad:bad", UrnType.INVALID);
 
 	/**
 	 * Cached constant to avoid making unnecessary string allocations
@@ -221,7 +221,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *  instance, such as SHA1_URN
 	 */
 	private URN(final String urnString, final UrnType urnType) {
-		this._urnString = urnString;
+        int lastColon = urnString.lastIndexOf(":");
+        String nameSpace = urnString.substring(0,lastColon+1);
+        String hash = urnString.substring(lastColon+1);
+		this._urnString = nameSpace.toLowerCase() + hash.toUpperCase();
 		this._urnType = urnType;
 	}
 
