@@ -1003,7 +1003,7 @@ public class UDPConnectionProcessor {
                 // Extend the windowStart to 8 bytes the same as the 
                 // sequenceNumber (except that it is remote here)
                 amsg.extendWindowStart(
-                  _extender.extendSequenceNumber(amsg.getWindowStart()) );
+                  _localExtender.extendSequenceNumber(amsg.getWindowStart()) );
 
                 long          seqNo  = amsg.getSequenceNumber();
                 long          wStart = amsg.getWindowStart();
