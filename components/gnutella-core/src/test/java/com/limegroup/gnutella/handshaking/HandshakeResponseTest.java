@@ -17,6 +17,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnectionManager;
+import com.sun.java.util.collections.Collection;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
@@ -83,11 +84,11 @@ public final class HandshakeResponseTest extends BaseTestCase {
         Method m = 
             PrivilegedAccessor.getMethod(HandshakeResponse.class, 
                                          "addXTryUltrapeers",
-                                         new Class[]{Iterator.class, 
+                                         new Class[]{Collection.class, 
                                                      Properties.class});
         
         Properties headers = new Properties();
-        m.invoke(null, new Object[] {hosts.iterator(), headers});
+        m.invoke(null, new Object[] {hosts, headers});
         
         // Make sure the returned list of hosts is what we expect.
         assertEquals(desiredHeader, 
@@ -95,6 +96,41 @@ public final class HandshakeResponseTest extends BaseTestCase {
         
         IpPort[] hostArray = (IpPort[])hosts.toArray(new IpPort[0]);
         makeSureHeadersMatch(hostArray, headers);
+    }
+    
+    public void testDefaultCreateEndpointString() throws Exception {
+        List leaves = new LinkedList();
+        List ultrapeers = new LinkedList();
+        String leafAddress = "10.254.0.";
+        String ultrapeerAddress = "20.23.0.";
+        Properties props = new Properties();
+        UltrapeerHandshakeResponder UHR = 
+            new UltrapeerHandshakeResponder("20.34.90.1");
+        for(int i=0; i<10; i++) {
+            Connection conn = 
+                new Connection(leafAddress+i, 6346, props, UHR);
+            leaves.add(conn);
+            conn = 
+                new Connection(ultrapeerAddress+i, 6346, props, UHR);
+            ultrapeers.add(conn);
+        }
+        Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                "createEndpointString", 
+                new Class[] {Collection.class});
+        
+        String leafStr =
+            (String)m.invoke(HandshakeResponse.class, 
+                new Object[] {leaves});  
+        
+        List leavesFromString = createListFromIPPortString(leafStr);
+        assertAllConnectionsAreEqual(leaves, leavesFromString);
+        
+        String ultrapeerStr =
+            (String)m.invoke(HandshakeResponse.class, 
+                new Object[] {ultrapeers});  
+        List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
+        assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);        
     }
     
 	/**
@@ -122,12 +158,12 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		Method m = 
 			PrivilegedAccessor.getMethod(HandshakeResponse.class, 
 				"createEndpointString", 
-                new Class[] {Iterator.class, Integer.TYPE});
+                new Class[] {Collection.class, Integer.TYPE});
         
         int limit = leaves.size();
 		String leafStr =
 			(String)m.invoke(HandshakeResponse.class, 
-                new Object[] {leaves.iterator(), new Integer(limit)});	
+                new Object[] {leaves, new Integer(limit)});	
 		
 		List leavesFromString = createListFromIPPortString(leafStr);
 		assertAllConnectionsAreEqual(leaves, leavesFromString);
@@ -135,7 +171,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         limit = ultrapeers.size();
 		String ultrapeerStr =
 		    (String)m.invoke(HandshakeResponse.class, 
-                new Object[] {ultrapeers.iterator(), new Integer(limit)});	
+                new Object[] {ultrapeers, new Integer(limit)});	
 		List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
 		assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);
 		
