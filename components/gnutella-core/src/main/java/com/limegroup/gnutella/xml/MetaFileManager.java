@@ -189,14 +189,8 @@ public class MetaFileManager extends FileManager {
                     currDoc = ID3Reader.fixCorruption(currDoc);
                 collection.addReplyWithCommit(file, fd, currDoc);
                 
-                //add XMLKeyWords to qrp
-                Iterator iterKeys = collection.getKeyWords().iterator();
-                while(iterKeys.hasNext()) 
-                    _queryRouteTable.add((String)iterKeys.next());
             }
             
-            // add indivisible
-            _queryRouteTable.addIndivisible(uri);
         }
         
         return fd;

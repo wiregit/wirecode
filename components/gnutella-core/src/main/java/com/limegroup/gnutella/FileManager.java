@@ -197,7 +197,7 @@ public abstract class FileManager {
      * qrt
      */
     protected static QueryRouteTable _queryRouteTable;
-    private static boolean _doneInitialLoad = false;
+    protected static boolean _needRebuild = true;
 
     /**
      * Characters used to tokenize queries and file names.
@@ -561,7 +561,6 @@ public abstract class FileManager {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
 						RouterService.getCallback().fileManagerLoaded();
-                        buildQRT();
 					} catch(Throwable t) {
 						ErrorService.error(t);
 					}
@@ -780,9 +779,7 @@ public abstract class FileManager {
         else 
             fd = null;
         synchronized(this) { _numPendingFiles--; }
-        if(_doneInitialLoad && fd != null) {
-            addToQRT(fd);
-        }
+
         return fd;
 	}
 
@@ -1146,6 +1143,10 @@ public abstract class FileManager {
     }
     
     public QueryRouteTable getQRT() {
+        if(_needRebuild) {
+            buildQRT();
+            _needRebuild = false;
+        }
         return _queryRouteTable;
     }
 
@@ -1155,6 +1156,7 @@ public abstract class FileManager {
      * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
     protected void buildQRT() {
+        System.out.println("build QRT");
         _queryRouteTable = new QueryRouteTable();
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) 
