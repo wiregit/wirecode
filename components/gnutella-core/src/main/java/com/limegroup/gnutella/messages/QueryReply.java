@@ -221,10 +221,7 @@ public class QueryReply extends Message implements Serializable{
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
-              11 +                             // 11 bytes of header
-              rLength(responses) +             // file records size
-              qhdLength(includeQHD, xmlBytes, supportsBH, isMulticastReply) + 
-                                               // conditional xml-style QHD len
+              0,                               // length, update later
               16);                             // 16-byte footer
         // you aren't going to send this.  it will throw an exception above in
         // the appropriate constructor....
@@ -242,87 +239,89 @@ public class QueryReply extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid num responses: "+n);
 		}
 
-        payload=new byte[getLength()];
-        //Write beginning of payload.
-        //Downcasts are ok, even if they go negative
-        payload[0]=(byte)n;
-        ByteOrder.short2leb((short)port,payload,1);
-        payload[3]=ip[0];
-        payload[4]=ip[1];
-        payload[5]=ip[2];
-        payload[6]=ip[3];
-        ByteOrder.int2leb((int)speed,payload,7);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        //Write each response at index i
-        int i=11;
-        for (int left=n; left>0; left--) {
-            Response r=responses[n-left];
-            i = r.writeToArray(payload,i);
+        try {
+            //Write beginning of payload.
+            //Downcasts are ok, even if they go negative
+            baos.write(n);
+            ByteOrder.short2leb((short)port, baos);
+            baos.write(ip, 0, ip.length);
+            ByteOrder.int2leb((int)speed, baos);
+            
+            //Write each response
+            for (int left=n; left>0; left--) {
+                Response r=responses[n-left];
+                r.writeToStream(baos);
+            }
+            
+            //Write QHD if desired
+            if (includeQHD) {
+                //a) vendor code.  This is hardcoded here for simplicity,
+                //efficiency, and to prevent character decoding problems.  If you
+                //change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
+                //well.
+                baos.write(76); //'L'
+                baos.write(73); //'I'
+                baos.write(77); //'M'
+                baos.write(69); //'E'
+                
+                //b) payload length
+                baos.write(COMMON_PAYLOAD_LEN);
+                
+                // size of standard, no options, ggep block...
+                int ggepLen=_ggepUtil.getQRGGEP(false, false).length;
+                
+                //c) PART 1: common area flags and controls.  See format in
+                //parseResults2.
+                byte flags=(byte)((needsPush ? PUSH_MASK : 0) 
+                                  | BUSY_MASK 
+                                  | UPLOADED_MASK 
+                                  | SPEED_MASK
+                                  | GGEP_MASK);
+                byte controls=(byte)(PUSH_MASK
+                                     | (isBusy ? BUSY_MASK : 0) 
+                                     | (finishedUpload ? UPLOADED_MASK : 0)
+                                     | (measuredSpeed ? SPEED_MASK : 0)
+                                     | (supportsBH || isMulticastReply ? 
+                                        GGEP_MASK:(ggepLen>0?GGEP_MASK:0)));
+                baos.write(flags);
+                baos.write(controls);
+                
+                //d) PART 2: size of xmlBytes + 1.
+                int xmlSize = xmlBytes.length + 1;
+                if (xmlSize > XML_MAX_SIZE)
+                    xmlSize = XML_MAX_SIZE;  // yes, truncate!
+                ByteOrder.short2leb(((short) xmlSize), baos);
+                
+                //e) private area: one byte with flags 
+                //for chat support
+                byte chatSupport=(byte)(supportsChat ? CHAT_MASK : 0);
+                baos.write(chatSupport);
+                
+                //f) the GGEP block
+                byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
+                                                       isMulticastReply);
+                baos.write(ggepBytes, 0, ggepBytes.length);
+                
+                //g) actual xml.
+                baos.write(xmlBytes, 0, xmlBytes.length);
+                
+                // write null after xml, as specified
+                baos.write(0);
+            }
+
+            //Write footer
+            baos.write(clientGUID, 0, 16);
+            
+            // setup payload params
+            payload = baos.toByteArray();
+            updateLength(payload.length);
+        }
+        catch (IOException reallyBad) {
+            reallyBad.printStackTrace();
         }
 
-        //Write QHD if desired
-        if (includeQHD) {
-            //a) vendor code.  This is hardcoded here for simplicity,
-            //efficiency, and to prevent character decoding problems.  If you
-            //change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
-            //well.
-            payload[i++]=(byte)76; //'L'
-            payload[i++]=(byte)73; //'I'
-            payload[i++]=(byte)77; //'M'
-            payload[i++]=(byte)69; //'E'
-
-            //b) payload length
-            payload[i++]=(byte)COMMON_PAYLOAD_LEN;
-
-            // size of standard, no options, ggep block...
-            int ggepLen = _ggepUtil.getQRGGEP(false, false).length;
-
-            //c) PART 1: common area flags and controls.  See format in
-            //parseResults2.
-            payload[i++]=(byte)((needsPush ? PUSH_MASK : 0) 
-                | BUSY_MASK 
-                | UPLOADED_MASK 
-                | SPEED_MASK
-                | GGEP_MASK);
-            payload[i++]=(byte)(PUSH_MASK
-                | (isBusy ? BUSY_MASK : 0) 
-                | (finishedUpload ? UPLOADED_MASK : 0)
-                | (measuredSpeed ? SPEED_MASK : 0)
-                | (supportsBH || isMulticastReply ? 
-                   GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
-
-
-            //d) PART 2: size of xmlBytes + 1.
-            int xmlSize = xmlBytes.length + 1;
-            if (xmlSize > XML_MAX_SIZE)
-                xmlSize = XML_MAX_SIZE;  // yes, truncate!
-            ByteOrder.short2leb(((short) xmlSize), payload, i);
-            i += 2;
-
-            //e) private area: one byte with flags 
-            //for chat support
-            payload[i++]=(byte)(supportsChat ? CHAT_MASK : 0);
-
-            //f) the GGEP block
-            byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
-                                                   isMulticastReply);
-            System.arraycopy(ggepBytes, 0,
-                             payload, i, ggepBytes.length);
-            i += ggepBytes.length;
-
-            //g) actual xml.
-            System.arraycopy(xmlBytes, 0, 
-                             payload, i, xmlSize-1);
-            // adjust i...
-            i += xmlSize-1;
-            // write null after xml, as specified
-            payload[i++] = (byte)0;
-        }
-
-        //Write footer at payload[i...i+16-1]
-        for (int j=0; j<16; j++) {
-            payload[i+j]=clientGUID[j];
-        }
 		setAddress();
     }
 

@@ -139,6 +139,16 @@ public class ByteOrder {
     }
 
     /**
+     * Int to little-endian bytes: writes x to given stream
+     */
+    public static void int2leb(int x, OutputStream os) throws IOException {
+        os.write((byte)(x & 0x000000FF));
+        os.write((byte)((x>>8) & 0x000000FF));
+        os.write((byte)((x>>16) & 0x000000FF));
+        os.write((byte)((x>>24) & 0x000000FF));
+    }
+
+    /**
      * Returns the minimum number of bytes needed to encode x in little-endian 
      * format, assuming x is non-negative.  Note that leb2int(int2leb(x))==x.
      * @param x a non-negative integer
