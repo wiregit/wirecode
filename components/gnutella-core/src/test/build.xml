@@ -101,7 +101,8 @@
  <target name="test package" if="package">
     <antcall target="batchunit">
         <param name="unit" value="com/limegroup/gnutella/${package}/*Test.class"/>
-        <param name="halt" value="no"/>
+        <param name="haltonfailure" value="no"/>
+        <param name="haltonerror" value="no"/>
     </antcall>
     <antcall target="html"/>
  </target>
@@ -115,7 +116,8 @@
  <target name="test" if="class">
     <antcall target="batchunit">
         <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
-        <param name="halt" value="yes"/>
+        <param name="haltonfailure" value="yes"/>
+        <param name="haltonerror" value="yes"/>
     </antcall>
     <antcall target="html"/>
  </target> 
@@ -124,7 +126,8 @@
  <!-- To be used internally by 'test all', 'test package' & 'test' -->
  <target name="batchunit" if="unit" depends="clean reports, prepare, build"> 
         <junit printsummary="withOutAndErr"
-               haltonfailure="${halt}"
+               haltonfailure="${haltonfailure}"
+               haltonerror="${haltonerror}"
                failureproperty="testfailed"
                showoutput="true"
                fork="on"
