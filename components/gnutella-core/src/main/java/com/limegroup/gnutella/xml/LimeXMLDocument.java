@@ -369,6 +369,17 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
+     * Returns the description of the schema URI.
+     */
+    public String getSchemaDescription() {
+        LimeXMLSchema schema = getSchema();
+        if(schema != null)
+            return schema.getDescription();
+        else
+            return LimeXMLSchema.getDisplayString(schemaUri);
+    }
+    
+    /**
      * Returns the name of the file that the data in this XML document 
      * corresponds to. If the meta-data does not correspond to any file
      * in the file system, this method will rerurn a null.
