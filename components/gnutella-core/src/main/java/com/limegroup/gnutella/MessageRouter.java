@@ -31,7 +31,7 @@ public abstract class MessageRouter {
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
 	 * this node.
 	 */
-    private ReplyHandler _forMeReplyHandler;
+    private final ReplyHandler FOR_ME_REPLY_HANDLER = new ForMeReplyHandler();
 
     /**
      * The lock to hold before updating or propogating tables.  TODO3: it's 
@@ -49,11 +49,6 @@ public abstract class MessageRouter {
      */
     private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
     private int MAX_ROUTE_TABLE_SIZE=50000;        //actually 100,000 entries
-
-    /** The maximum number of QueryReply bytes to route for any given query GUID. 
-     *  Provides a primitive form of flow control by cutting off run-away replies. 
-     *  Assuming 100 bytes per result, this allows 500 results.  */
-    public static final int MAX_REPLY_ROUTE_BYTES = 50 * 1000; //50k
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
@@ -107,7 +102,6 @@ public abstract class MessageRouter {
      */
     public void initialize() {
         _manager = RouterService.getConnectionManager();
-		_forMeReplyHandler = new ForMeReplyHandler();
     }
 
     public String getPingRouteTableDump() {
@@ -211,7 +205,8 @@ public abstract class MessageRouter {
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
-            handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
+			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
+												  handler, datagram);
 		} else if(msg instanceof PingReply) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
@@ -226,7 +221,7 @@ public abstract class MessageRouter {
 	/**
 	 * Sends an ack back to the GUESS client node.  
 	 */
-	private void sendAcknowledgement(DatagramPacket datagram, byte[] guid) {
+	protected void sendAcknowledgement(DatagramPacket datagram, byte[] guid) {
 		ConnectionManager manager = RouterService.getConnectionManager();
 		Endpoint host = manager.getConnectedGUESSUltrapeer();
 		PingReply reply;
@@ -292,11 +287,10 @@ public abstract class MessageRouter {
      * ManagedConnection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
-    final void handleUDPPingRequestPossibleDuplicate(                                                     
-        PingRequest pingRequest, ReplyHandler handler) {
-
-        // TODO: we should probably handle duplicates in some regard
-        handleUDPPingRequest(pingRequest, handler);
+    final void handleUDPPingRequestPossibleDuplicate(													 
+        PingRequest pingRequest, ReplyHandler handler, DatagramPacket datagram) {
+        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(), handler))
+            handleUDPPingRequest(pingRequest, handler, datagram);
     }
 
     /**
@@ -330,8 +324,7 @@ public abstract class MessageRouter {
 	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
 	 */
 	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
-													  ReplyHandler handler) 
-	{
+													  ReplyHandler handler)  {
         if(_queryRouteTable.tryToRouteReply(request.getGUID(), handler)) {
             handleQueryRequest(request, handler);
 		} else {
@@ -382,8 +375,9 @@ public abstract class MessageRouter {
      *      handling framework and just customize responses.
      */
     protected void handleUDPPingRequest(PingRequest pingRequest,
-										ReplyHandler handler) {
-        respondToUDPPingRequest(pingRequest);
+										ReplyHandler handler, 
+										DatagramPacket datagram) {
+        respondToUDPPingRequest(pingRequest, datagram);
     }
     
 
@@ -400,7 +394,7 @@ public abstract class MessageRouter {
 		// TODO: are we sure we want to do this?
         // notify neighbors of new unicast endpoint...
         Iterator guessUltrapeers = 
-        _manager.getConnectedGUESSUltrapeers().iterator();
+			_manager.getConnectedGUESSUltrapeers().iterator();
         while (guessUltrapeers.hasNext()) {
             ManagedConnection currMC = 
 				(ManagedConnection) guessUltrapeers.next();
@@ -454,7 +448,7 @@ public abstract class MessageRouter {
      */
     public void sendPingRequest(PingRequest request,
                                 ManagedConnection connection) {
-        _pingRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
+        _pingRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
 
@@ -464,7 +458,7 @@ public abstract class MessageRouter {
      */
     public void sendQueryRequest(QueryRequest request,
                                  ManagedConnection connection) {
-        _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
+        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
 
@@ -473,7 +467,7 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void broadcastPingRequest(PingRequest pingRequest) {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
+        _pingRouteTable.routeReply(pingRequest.getGUID(), FOR_ME_REPLY_HANDLER);
         broadcastPingRequest(pingRequest, null, _manager);
     }
 
@@ -482,7 +476,7 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void broadcastQueryRequest(QueryRequest request) {
-        _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
+        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         //if (RouterService.isGUESSCapable()) {
 		//  unicastQueryRequest(request, null);
 		//} else {
@@ -526,7 +520,7 @@ public abstract class MessageRouter {
 	 * @param request the query to forward
 	 * @param handler the <tt>ReplyHandler</tt> that responds to the
 	 *  request appropriately
-s	 * @param manager the <tt>ConnectionManager</tt> that provides
+	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 *  access to any leaf connections that we should forward to
 	 */
 	protected void forwardQueryRequestToLeaves(QueryRequest request,
@@ -662,10 +656,9 @@ s	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 * that also support UDP messaging.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
-	 * @param handler the <tt>ReplyHandler</tt> that will handle 
-	 *  sending the replies
 	 */
-    protected abstract void respondToUDPPingRequest(PingRequest request);
+    protected abstract void respondToUDPPingRequest(PingRequest request, 
+													DatagramPacket datagram);
 
 
     /**
@@ -764,10 +757,7 @@ s	 * @param manager the <tt>ConnectionManager</tt> that provides
 			// TODO: What happens if we get a TTL=0 query that's not intended
 			// for us?  At first glance, it looks like we keep forwarding it!
             if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
-			   rrp.getReplyHandler()==_forMeReplyHandler) {
-            
-				//if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
-                //rrp.getReplyHandler()==_forMeReplyHandler) {
+			   rrp.getReplyHandler()==FOR_ME_REPLY_HANDLER) {
                 rrp.getReplyHandler().handleQueryReply(queryReply,
                                                        handler);
                 // also add to the QueryUnicaster for accounting - basically,
@@ -880,7 +870,7 @@ s	 * @param manager the <tt>ConnectionManager</tt> that provides
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
-                                       _forMeReplyHandler);
+                                       FOR_ME_REPLY_HANDLER);
             rrp.getReplyHandler().handleQueryReply(queryReply, null);
         }
         else
