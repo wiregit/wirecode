@@ -118,11 +118,48 @@ log2("Got an exception:"+e);
     }
 
     /**
-     *  Throw away n bytes of data.  I think I just wont do this for now.
-     *  TODO: Needed?
+     *  Throw away n bytes of data.  Return the true amount of bytes skipped.
+     *  Note that I am downgrading the long input to an int.
      */
-    public long skip(long n) {
-        return 0;
+    public long skip(long n) 
+      throws IOException  {
+        int len     = (int) n;
+        int origLen = len;
+        int wlength;
+
+        // Just like reading a chunk of data above but the bytes get ignored
+        synchronized(_processor) {  // Lock on the ConnectionProcessor
+            while (true) {
+                // Try to fetch some data if necessary
+                checkForData();
+
+                if ( _activeChunk != null && _activeChunk.length > 0 ) {
+
+                    // Load some data
+                    wlength = Math.min(_activeChunk.length, len);
+                    len                 -= wlength;
+                    _activeChunk.start  += wlength;
+                    _activeChunk.length -= wlength;
+                    if ( len <= 0 ) 
+                        return origLen;
+
+                } else if ( _activeChunk == null && _processor.isConnected() ) {
+
+                    // Wait for some data to become available
+                    waitOnData();
+
+                } else if ( origLen != len ){
+
+                    // Return whatever was available
+                    return(origLen - len);
+
+                } else {
+
+                    // This connection is closed
+                    return 0;
+                }
+            }
+        }
     }
 
     /**

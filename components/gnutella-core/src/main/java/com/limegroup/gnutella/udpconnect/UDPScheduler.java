@@ -138,6 +138,12 @@ public class UDPScheduler extends ManagedThread {
             UDPTimerEvent evt;
             ArrayList localList;
             while (true) {
+               // Make sure that there is some idle time in the event updating
+               // Otherwise, it will burn cpu
+               try {
+                    Thread.sleep(1);
+               } catch(InterruptedException e) {}
+
                 // Clone list for safe unlocked access
                 synchronized(_list) {
                     localList = (ArrayList) _list.clone();
