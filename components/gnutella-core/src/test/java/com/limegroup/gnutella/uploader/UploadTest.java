@@ -47,7 +47,7 @@ public class UploadTest extends TestCase {
   		} catch(UnknownHostException e) {
   			assertTrue("unexpected exception: "+e, false);
   		}
-		port = 6346;
+		port = 6668;
         //This assumes we're running in the limewire/tests directory
 		File testDir = new File("com/limegroup/gnutella/uploader/data");
 		if(!testDir.isDirectory()) {
@@ -73,6 +73,7 @@ public class UploadTest extends TestCase {
 		RouterService router = new RouterService(callback, mr, fm, 
 												 new ServerAuthenticator());
 		router.initialize();
+        assertEquals(port, SettingsManager.instance().getPort());
 
         //System.out.println(
         //    "Please make sure your client is listening on port "+port+"\n"
@@ -88,6 +89,10 @@ public class UploadTest extends TestCase {
     public void testAll() {
         try {
             boolean passed;
+
+            //UploadTest works fine in isolation, but this sleep seems to be
+            //needed to work as part of AllTests.  I'm not sure why.
+            try {Thread.sleep(200); } catch (InterruptedException e) { }
             
             ///////////////////push downloads with HTTP1.0///////////
             passed = downloadPush(file, null,alphabet);

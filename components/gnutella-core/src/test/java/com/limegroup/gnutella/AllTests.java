@@ -9,6 +9,8 @@ import com.limegroup.gnutella.xml.*;
 public class AllTests {
     public static Test suite() {
         TestSuite suite=new TestSuite("All LimeWire tests");
+
+        //Unit tests
         suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.util.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.filters.AllTests.suite());
@@ -21,7 +23,12 @@ public class AllTests {
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
+
+        //End-to-end integration tests (includes some unit tests too)
+        suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());
+        suite.addTest(com.limegroup.gnutella.uploader.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.downloader.AllTests.suite());
+
         return suite;
     }
 

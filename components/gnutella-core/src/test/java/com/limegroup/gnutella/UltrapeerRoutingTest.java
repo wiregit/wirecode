@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.tests;
+package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
@@ -12,22 +12,23 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 
 /**
- * Out-of-process test to check whether ultrapeers handle query routing, normal
- * routing, routing of marked pongs, etc.
+ * The most important end-to-end message routing test.  Checks whether
+ * ultrapeers handle query routing, normal routing, routing of marked pongs,
+ * etc.
  */
-public class UltrapeerTester extends TestCase {
+public class UltrapeerRoutingTest extends TestCase {
     static final int PORT=6667;
     static final int TIMEOUT=500;
     static Connection leaf;
     static Connection ultrapeer;
     static Connection old;
 
-    public UltrapeerTester(String name) {
+    public UltrapeerRoutingTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return new TestSuite(UltrapeerTester.class);
+        return new TestSuite(UltrapeerRoutingTest.class);
     }    
    
 
@@ -57,6 +58,7 @@ public class UltrapeerTester extends TestCase {
         rs.initialize();
         rs.clearHostCatcher();
         rs.connect();
+        assertEquals(PORT, settings.getPort());
 
         //Start actual tests.
         try {
