@@ -119,10 +119,13 @@ class LicenseCache {
                         i.remove();
                     }
                 }
-            }
+            } else 
+            	map = new HashMap();
+            
             licenses = map;
             
-            data = (Map)ois.readObject();            
+            data = (Map)ois.readObject();
+            removeOldEntries();
         } catch(Throwable t) {
             LOG.error("Can't read licenses", t);
         } finally {
@@ -160,7 +163,6 @@ class LicenseCache {
      * Write cache so that we only have to calculate them once.
      */
     public synchronized void persistCache() {
-        removeOldEntries();
 
         ObjectOutputStream oos = null;
         try {
