@@ -266,6 +266,18 @@ public class Buffer implements Cloneable {
         return ret;
     }
 
+    /**
+     * @effects returns true if this contains x
+     */
+    public boolean contains(Object x) {
+        //TODO: avoid allocation by avoiding iterator
+        //TODO: add indexOf method for completeness
+        for (Iterator iter=iterator(); iter.hasNext(); ) {
+            if (iter.next().equals(x))
+                return true;
+        }
+        return false;
+    }
 
     /**
      * @modifies this
