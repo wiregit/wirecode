@@ -10,7 +10,6 @@ import java.nio.channels.SocketChannel;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.MessageReadErrorStat;
 
