@@ -16,7 +16,7 @@ public class WriteRegulator {
     private static final int   MIN_START_WINDOW     = 40;
 
     /** When the window space hits this size, it is low */
-    private static final int   LOW_WINDOW_SPACE     = 6;
+    private static final int   LOW_WINDOW_SPACE     = 4;
 
     /** Cap the quick sending of blocks at this number */
     private static final int   MAX_SKIP_LIMIT       = 14;
@@ -111,17 +111,15 @@ public class WriteRegulator {
         // Want to ideally achieve a steady state location in writing and 
         // reading window.  Don't want to get too far ahead or too far behind
         //
-        int sleepTime  = ((usedSpots+1) * baseWait);
-        int minTime    = 0;
-        int gettingSlow= 0;
+        int sleepTime    = ((usedSpots+1) * baseWait);
+        int minTime      = 0;
+        int gettingSlow  = 0;
 
-        if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
-            sleepTime += 1;
-            sleepTime = 7 * (LOW_WINDOW_SPACE + 1 - receiverWindowSpace) *
-              sleepTime / 5;  
-        }
+        int   rto        = _sendWindow.getRTO();
+        float rttvar     = _sendWindow.getRTTVar();
+        float srtt       = _sendWindow.getSRTT();
 
-        // Ensure the sleep time is fairly distributed
+        // Ensure the sleep time is fairly distributed in the normal case
         if ( sleepTime < windowSize ) {
             double pct = (double) sleepTime / (double) windowSize;
             if ( Math.random() < pct )
@@ -132,9 +130,14 @@ public class WriteRegulator {
             sleepTime      = sleepTime / windowSize;
         }
 
-        int   rto        = _sendWindow.getRTO();
-        float rttvar     = _sendWindow.getRTTVar();
-        float srtt       = _sendWindow.getSRTT();
+        // Create a sleeptime specific to having almost no room left to send
+        // more data
+        if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
+            // Scale up the sleep time to a full timeout as you approach 
+            // zero space for writing
+            int multiple = LOW_WINDOW_SPACE / Math.max(1, receiverWindowSpace);
+            sleepTime = (((int)srtt) * multiple) / (LOW_WINDOW_SPACE - 1);
+        }
 
         if(LOG.isDebugEnabled())  
             LOG.debug(
