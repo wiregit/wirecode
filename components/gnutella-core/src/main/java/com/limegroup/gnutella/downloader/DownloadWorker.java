@@ -1191,8 +1191,8 @@ public class DownloadWorker implements Runnable {
      */
     void interrupt() {
         _interrupted = true;
-        if (getDownloader()!= null)
-            getDownloader().stop();
+        if (_downloader != null)
+            _downloader.stop();
         if (_myThread != null)
             _myThread.interrupt();
     }

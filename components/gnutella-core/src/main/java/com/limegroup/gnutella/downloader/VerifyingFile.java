@@ -27,10 +27,9 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  * 
  *   1. available for download 
  *   2. currently being downloaded 
- *   3. written on disk, but impossible to verify yet
- *   4. waiting to be verified
- *   5. verified 
- *         or if it doesn't verify back to
+ *   3. waiting to be written.
+ *   4. written (and immediately into, if possible..)
+ *   5. verified, or if it doesn't verify back to
  *   1. available for download   
  *   
  * In order to maintain these constraints, the only possible operations are:
@@ -43,9 +42,9 @@ public class VerifyingFile {
     private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
     
     /**
-     * The thread that does the actual verification
+     * The thread that does the actual verification & writing
      */
-    private static final ProcessingQueue CHUNK_VERIFIER = new ProcessingQueue("chunk verifier");
+    private static final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF");
     
     /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
@@ -93,7 +92,12 @@ public class VerifyingFile {
     private IntervalSet partialBlocks;
     
     /**
-     * Ranges which are written and pending verification.
+     * Ranges that are discarded (but verification was attempted)
+     */
+    private IntervalSet discardedBlocks;
+    
+    /**
+     * Ranges which are pending writing & verification.
      */
     private IntervalSet pendingBlocks;
     
@@ -106,6 +110,11 @@ public class VerifyingFile {
      * Whether we are actually verifying chunks
      */
     private boolean discardBad = true;
+    
+    /**
+     * The IOException, if any, we got while writing.
+     */
+    private IOException storedException;
     
     /**
      * Constructs a new VerifyingFile, without a given completion size.
@@ -126,6 +135,8 @@ public class VerifyingFile {
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
         partialBlocks = new IntervalSet();
+        discardedBlocks = new IntervalSet();
+        storedException = null;
     }
     
     /**
@@ -159,15 +170,14 @@ public class VerifyingFile {
         partialBlocks.add(interval);
     }
 
-    public void writeBlock(long pos,byte[] data) throws DiskException{
+    public void writeBlock(long pos,byte[] data) {
         writeBlock(pos,data.length,data);
     }
     
     /**
      * Writes bytes to the underlying file.
      */
-    public synchronized void writeBlock(long currPos, int length, byte[] buf)
-                                                    throws DiskException{
+    public synchronized void writeBlock(long currPos, int length, byte[] buf) {
         
         if (LOG.isDebugEnabled())
             LOG.debug(" trying to write block at offset "+currPos+" with size "+length);
@@ -175,7 +185,7 @@ public class VerifyingFile {
         if(buf.length==0) //nothing to write? return
             return;
         if(fos == null)
-            throw new DiskException("no file?");
+            throw new IllegalStateException("no fos!");
 		
 		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
 		
@@ -186,104 +196,29 @@ public class VerifyingFile {
         }
 		
 		
-		if (verifiedBlocks.contains(intvl) || 
-				partialBlocks.contains(intvl) ||
-				pendingBlocks.contains(intvl)) {
+		if (verifiedBlocks.contains(intvl) || partialBlocks.contains(intvl) ||
+            discardedBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
             Assert.silent(false,"trying to write an interval "+intvl+
                     " that was already written"+dumpState());
 		}
 		
-		////////////
-        saveToDisk(currPos,length,buf);
-		
-        // 4. if write went ok, add this interval to the partial blocks
-        if (LOG.isDebugEnabled())
-            LOG.debug("adding chunk "+intvl+" to partialBlocks");
+		// Remove from lease, put in pending for writing.
         leasedBlocks.delete(intvl);
-        partialBlocks.add(intvl);
-
-		//5. verify chunks
-        if (hashTree != null)
-            checkVerifyableChunks();
+        pendingBlocks.add(intvl);
+        
+        saveToDisk(buf, intvl);
     }
 
 	/**
 	 * Saves the given interval to disk. 
 	 */
-	private void saveToDisk(long currPos, int length, byte [] buf) 
-	throws DiskException{
-		try {
-            //2. get the fp back to the position we want to write to.
-			synchronized(fos) {
-				fos.seek(currPos);
-				//3. Write to disk.
-				fos.write(buf, 0, length);
-			}
-        }catch(IOException diskIO) {
-            throw new DiskException(diskIO);
-        }
-	}
-    
-	/**
-	 * Schedules those chunks that can be verified against the hash tree
-	 * for verification.
-	 */
-	private void checkVerifyableChunks() {
-        // if we have a tree, see if there is a completed chunk in the partial list
-        for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
-            Interval i = (Interval) iter.next();
-            partialBlocks.delete(i);
-            pendingBlocks.add(i);
-            if (LOG.isDebugEnabled())
-                LOG.debug("will schedule for verification "+i);
-            CHUNK_VERIFIER.add(new ChunkVerifier(i,hashTree));
-        }
-	}
-	
-    /**
-     * iterates through the pending blocks and checks if the recent write has created
-     * some (verifiable) full chunks.  Its not possible to verify more than two chunks
-     * per method call unless the downloader is being deserialized from disk
-     */
-    private List findVerifyableBlocks() {
-        if (LOG.isDebugEnabled())
-            LOG.debug("trying to find verifyable blocks out of "+partialBlocks);
-        
-        List verifyable = new ArrayList(2);
-        List partial = partialBlocks.getAllIntervalsAsList();
-        int chunkSize = getChunkSize();
-        int lastChunkOffset = completedSize - (completedSize % chunkSize);
-        
-        for (int i = 0; i < partial.size() ; i++) {
-            Interval current = (Interval)partial.get(i);
-            
-            // find the beginning of the first chunk offset
-            int lowChunkOffset = current.low - current.low % chunkSize;
-            if (current.low % chunkSize != 0)
-                lowChunkOffset += chunkSize;
-            while (current.high >= lowChunkOffset+chunkSize-1) {
-                Interval complete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
-                verifyable.add(complete);
-                lowChunkOffset += chunkSize;
-            }
-        }
-        
-        // special case for the last chunk
-        if (!partial.isEmpty()) {
-            Interval last = (Interval) partial.get(partial.size() - 1);
-            if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
-                if(LOG.isDebugEnabled())
-                    LOG.debug("adding the last chunk for verification");
-                
-                verifyable.add(new Interval(lastChunkOffset, last.high));
-            }
-        }
-        
-        return verifyable;
+	private void saveToDisk(byte [] buf, Interval invtl) {
+	    QUEUE.add(new ChunkHandler(buf, invtl));
     }
     
     public String dumpState() {
         return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
+            "\ndiscarded:"+discardedBlocks+
         	"\npending:"+pendingBlocks+"\nleased:"+leasedBlocks;
     }
     
@@ -296,6 +231,7 @@ public class VerifyingFile {
         IntervalSet freeBlocks = verifiedBlocks.invert(completedSize);
         freeBlocks.delete(leasedBlocks);
         freeBlocks.delete(partialBlocks);
+        freeBlocks.delete(discardedBlocks);
         freeBlocks.delete(pendingBlocks);
         Interval ret = freeBlocks.removeFirst();
         if (LOG.isDebugEnabled())
@@ -382,6 +318,7 @@ public class VerifyingFile {
         List l = new ArrayList();
         l.addAll(verifiedBlocks.getAllIntervalsAsList());
         l.addAll(partialBlocks.getAllIntervalsAsList());
+        l.addAll(discardedBlocks.getAllIntervalsAsList());
         l.addAll(pendingBlocks.getAllIntervalsAsList());
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = l.iterator();iter.hasNext();)
@@ -402,6 +339,7 @@ public class VerifyingFile {
     public synchronized int getBlockSize() {
         return verifiedBlocks.getSize() +
         	partialBlocks.getSize() +
+        	discardedBlocks.getSize() +
         	pendingBlocks.getSize();
     }
     
@@ -423,21 +361,23 @@ public class VerifyingFile {
      * Determines if all blocks have been written to disk and verified
      */
     public synchronized boolean isComplete() {
-        if (discardBad && hashTree != null)
-            return (verifiedBlocks.getSize() == completedSize);
-        else 
-            return (verifiedBlocks.getSize() + partialBlocks.getSize() == completedSize);
+        return verifiedBlocks.getSize() + discardedBlocks.getSize() == completedSize;
     }
     
     /**
-     * If the last remaining chunks of the file are currently pending verification,
+     * If the last remaining chunks of the file are currently pending writing & verification,
      * wait until it finishes.
      */
-    public synchronized void waitForPendingIfNeeded() throws InterruptedException{
+    public synchronized void waitForPendingIfNeeded() throws InterruptedException, DiskException {
+        if(storedException != null)
+            throw new DiskException(storedException);
+        
         while (!isComplete() &&
-                verifiedBlocks.getSize() + pendingBlocks.getSize()  == completedSize) {
+                verifiedBlocks.getSize() + discardedBlocks.getSize() + pendingBlocks.getSize()  == completedSize) {
+            if(storedException != null)
+                throw new DiskException(storedException);
             if (LOG.isDebugEnabled())
-                LOG.debug("waiting for a pending chunk to verify..");
+                LOG.debug("waiting for a pending chunk to verify or write..");
             wait();
         }
     }
@@ -457,6 +397,7 @@ public class VerifyingFile {
         return  completedSize - (verifiedBlocks.getSize() + 
                 leasedBlocks.getSize() +
                 partialBlocks.getSize() +
+                discardedBlocks.getSize() +
                 pendingBlocks.getSize()); 
     }
     
@@ -522,7 +463,7 @@ public class VerifyingFile {
     }
     
     public synchronized HashTree getHashTree() {
-            return hashTree;
+        return hashTree;
     }
     
     /**
@@ -541,62 +482,143 @@ public class VerifyingFile {
         return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
     }
     
-    /**
-     * a Runnable that verifies chunks without locking the VerifyingFile during
-     * intensive cpu or i/o operations. After verification, the completed regions 
-     * are added either as black or white.
-     */
-    private class ChunkVerifier implements Runnable {
-        private final Interval _interval;
-        private final HashTree _tree;
-        public ChunkVerifier(Interval i, HashTree tree) {
-            _interval = i;
-            _tree = tree;
-        }
-        public void run() {
-            // heavy i/o here
-            boolean good = verifyChunk(_interval,_tree);
-            
-            synchronized(VerifyingFile.this) {
-                pendingBlocks.delete(_interval);
-                if (good) 
-                    verifiedBlocks.add(_interval);
-                else if (!discardBad)
-                    partialBlocks.add(_interval);
-                else
-                    lostSize += (_interval.high - _interval.low + 1);
+
+    
+	/**
+	 * Schedules those chunks that can be verified against the hash tree
+	 * for verification.
+	 */
+	private void verifyChunks() {
+	    HashTree tree = getHashTree(); // capture the tree.
+	    if(tree != null) {
+            // if we have a tree, see if there is a completed chunk in the partial list
+            for (Iterator iter = findVerifyableBlocks().iterator(); iter.hasNext();)  {
+                Interval i = (Interval)iter.next();
+                boolean good = verifyChunk(i, tree);
                 
-                VerifyingFile.this.notify(); // the ManagedDownloader thread.
+                synchronized(this) {
+                    partialBlocks.delete(i);
+                    if(good)
+                        verifiedBlocks.add(i);
+                    else {
+                        if(!discardBad)
+                            discardedBlocks.add(i);
+                        lostSize += (i.high - i.low + 1);
+                    }
+                }
+            }
+        }
+    }
+        
+    /**
+     * @return whether this chunk is corrupt according to the given hash tree
+     */
+    private boolean verifyChunk(Interval i, HashTree tree) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("verifying interval "+i);
+        
+        byte []b = new byte[i.high - i.low+1];
+        // read the interval from the file
+        long pos = -1;
+        try {
+			synchronized(fos) {
+				fos.seek(i.low);
+				fos.readFully(b);
+			}
+        } catch (IOException bad) {
+            // we failed reading back from the file - assume block is corrupt
+            // and it will have to be re-downloaded
+            return false;
+        }
+        
+        boolean corrupt = tree.isCorrupt(i,b);
+        
+        if (LOG.isDebugEnabled() && corrupt)
+            LOG.debug("block corrupt!");
+        
+        return !corrupt;
+    }	
+	
+    /**
+     * iterates through the pending blocks and checks if the recent write has created
+     * some (verifiable) full chunks.  Its not possible to verify more than two chunks
+     * per method call unless the downloader is being deserialized from disk
+     */
+    private synchronized List findVerifyableBlocks() {
+        if (LOG.isDebugEnabled())
+            LOG.debug("trying to find verifyable blocks out of "+partialBlocks);
+        
+        List verifyable = new ArrayList(2);
+        List partial = partialBlocks.getAllIntervalsAsList();
+        int chunkSize = getChunkSize();
+        int lastChunkOffset = completedSize - (completedSize % chunkSize);
+        
+        for (int i = 0; i < partial.size() ; i++) {
+            Interval current = (Interval)partial.get(i);
+            
+            // find the beginning of the first chunk offset
+            int lowChunkOffset = current.low - current.low % chunkSize;
+            if (current.low % chunkSize != 0)
+                lowChunkOffset += chunkSize;
+            while (current.high >= lowChunkOffset+chunkSize-1) {
+                Interval complete = new Interval(lowChunkOffset, lowChunkOffset+chunkSize -1); 
+                verifyable.add(complete);
+                lowChunkOffset += chunkSize;
             }
         }
         
-        /**
-         * @return whether this chunk is corrupt according to the downloader's hash tree
-         */
-        private boolean verifyChunk(Interval i, HashTree tree) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("verifying interval "+i);
-            
-            byte []b = new byte[i.high - i.low+1];
-            // read the interval from the file
-            long pos = -1;
-            try {
-				synchronized(fos) {
-					fos.seek(i.low);
-					fos.readFully(b);
-				}
-            }catch (IOException bad) {
-                // we failed reading back from the file - assume block is corrupt
-                // and it will have to be re-downloaded
-                return false;
+        // special case for the last chunk
+        if (!partial.isEmpty()) {
+            Interval last = (Interval) partial.get(partial.size() - 1);
+            if (last.high == completedSize-1 && last.low <= lastChunkOffset ) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("adding the last chunk for verification");
+                
+                verifyable.add(new Interval(lastChunkOffset, last.high));
             }
-            
-            boolean corrupt = tree.isCorrupt(i,b);
-            
-            if (LOG.isDebugEnabled() && corrupt)
-                LOG.debug("block corrupt!");
-            
-            return !corrupt;
         }
+        
+        return verifyable;
     }
+    
+    /**
+     * Runnable that writes chunks to disk & verifies partial blocks.
+     */
+    private class ChunkHandler implements Runnable {
+        private final byte[] buf;
+        private final Interval intvl;
+        
+        public ChunkHandler(byte[] buf, Interval intvl) {
+           this.buf = new byte[buf.length];
+           System.arraycopy(buf, 0, this.buf, 0, buf.length);
+           this.intvl = intvl;
+        }
+        
+        public void run() {
+    		try {
+    		    if(LOG.isDebugEnabled())
+    		        LOG.debug("Writing intvl: " + intvl);
+    		        
+    			synchronized(fos) {
+    				fos.seek(intvl.low);
+    				fos.write(buf, 0, intvl.high - intvl.low + 1);
+    			}
+    			
+    			synchronized(VerifyingFile.this) {
+    			    pendingBlocks.delete(intvl);
+    			    partialBlocks.add(intvl);
+    			}
+    			
+    			verifyChunks();
+            } catch(IOException diskIO) {
+                synchronized(VerifyingFile.this) {
+                    storedException = diskIO;
+                }
+            } finally {
+                synchronized(VerifyingFile.this) {
+                    VerifyingFile.this.notify();
+                }
+            }
+        }
+	}
 }

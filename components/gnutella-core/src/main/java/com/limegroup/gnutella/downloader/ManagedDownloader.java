@@ -1431,7 +1431,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.warn("MANAGER: no thread to interrupt");
         }
     }
-    
+
+    /**
+     * Kills all workers.
+     */    
     private void killAllWorkers() {
         for (Iterator iter = _workers.iterator(); iter.hasNext();) {
             DownloadWorker doomed = (DownloadWorker) iter.next();
@@ -2315,7 +2318,16 @@ public class ManagedDownloader implements Downloader, Serializable {
             
             // are we just about to finish downloading the file?
             
-            commonOutFile.waitForPendingIfNeeded();
+            LOG.debug("About to wait for pending if needed");
+            
+            try {            
+                commonOutFile.waitForPendingIfNeeded();
+            } catch(DiskException dio) {
+                stop();
+                return DISK_PROBLEM;
+            }
+            
+            LOG.debug("Finished waiting for pending");
             
             // Finished.
             if (commonOutFile.isComplete()) {
