@@ -48,17 +48,17 @@ public class HostCatcher {
      *  before resorting to GWebCache HOSTFILE requests. */
     public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
 
-    /** The number of ultrapeer pongs to store. */
-    static final int GOOD_SIZE=400;
-    /** The number of normal pongs to store. 
+    /** The number of ultrapeer pongs to store. 
      *  This should be large enough to store all permanent addresses. */
-    static final int NORMAL_SIZE=1000;
+    static final int GOOD_SIZE=1000;
+    /** The number of normal pongs to store. */
+    static final int NORMAL_SIZE=400;
     /** The number of private IP pongs to store. */
     static final int BAD_SIZE=15;
 
 
     /** The number of permanent locations to store in gnutella.net */
-    static final int PERMANENT_SIZE=NORMAL_SIZE;
+    static final int PERMANENT_SIZE=GOOD_SIZE;
 
     static final int GOOD_PRIORITY=2;
     static final int NORMAL_PRIORITY=1;
