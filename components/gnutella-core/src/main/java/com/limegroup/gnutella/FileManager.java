@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FileComparator;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.IntSet;
@@ -298,6 +299,51 @@ public class FileManager {
     public synchronized boolean isValidIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
+    
+    /**
+     * Returns a list of all FileDescs that match this URN.
+     * Does not list unshared or incomplete files.
+     */
+    public synchronized List getMatchingFileDescs(URN urn) {
+        IntSet hits = (IntSet)_urnIndex.get(urn);
+        if( hits == null )
+            return DataUtils.EMPTY_LIST;
+
+        // double-check hits to be defensive (not strictly needed)
+        List ret = new ArrayList();
+        IntSet.IntSetIterator iter = hits.iterator();
+        while(iter.hasNext()) {
+            FileDesc fd = (FileDesc)_files.get(iter.next());
+		    // If the file is unshared or an incomplete file
+		    // DO NOT SEND IT.
+		    if(fd == null || fd instanceof IncompleteFileDesc)
+			    continue;
+            if(fd.containsUrn(urn)) {
+                ret.add(fd);
+            } 
+        }
+        return ret;
+    }
+    
+    /**
+     * Returns the first FileDesc that matches both this URN and File.
+     */
+    public synchronized FileDesc getMatchingFileDesc(URN urn, File f) {
+        IntSet hits = (IntSet)_urnIndex.get(urn);
+        if( hits == null )
+            return null;
+
+        // double-check hits to be defensive (not strictly needed)
+        IntSet.IntSetIterator iter = hits.iterator();
+        while(iter.hasNext()) {
+            FileDesc fd = (FileDesc)_files.get(iter.next());
+            if( fd == null ) // unshared.
+                continue;
+            if(fd.containsUrn(urn) && fd.getFile().equals(f))
+                return fd;
+        }
+        return null;
+    }    
 
 	/**
 	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
@@ -323,25 +369,21 @@ public class FileManager {
 		}
         return ret;
 	}
-
+	
 	/**
-     * Returns the FileDesc matching the passed-in path and size, if any,
-     * null otherwise. Kind of silly, definitely inefficient, but only
-     * needed rarely, from library view, because there's no sharing of
-     * data structures for local files
-     */
-    public synchronized FileDesc getFileDescMatching(File file) {
-		// linear probe. thankfully it's rare
-		Iterator iter = _files.iterator();
-		while(iter.hasNext()) {
-			FileDesc candidate = (FileDesc)iter.next();
-			if (candidate==null) continue;
-			if(file.equals(candidate.getFile())) {
-				return candidate;
-			}
-		}
-        // none found
-        return null;
+	 * Returns an IncompleteFileDesc matching f.
+	 */
+	public synchronized FileDesc getMatchingIncompleteFileDesc(File f) {
+	    IntSet.IntSetIterator iter = _incompletesShared.iterator();
+	    for(; iter.hasNext(); ) {
+	        int index = iter.next();
+	        FileDesc fd = (FileDesc)_files.get(index);
+	        if( fd == null )
+	            continue;
+	        if(fd.getFile().equals(f))
+	            return fd;
+	    }
+	    return null;
 	}
 	
 	/**
@@ -783,20 +825,23 @@ public class FileManager {
      *  directory and has a shared extension.  Returns true iff the file
      *  was actually added.  <b>WARNING: this is a potential security 
      *  hazard.</b> 
+     *
+     * @return -1 if the file was not added.  Otherwise the index of the
+     * newly added file.
      */
-	public boolean addFileIfShared(File file) {
+	public int addFileIfShared(File file) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
             f=getCanonicalFile(file);
             if (!f.exists()) 
-                return false;
+                return -1;
         } catch (IOException e) {
-            return false;
+            return -1;
 		}
         File dir = getParentFile(file);
         if (dir==null) 
-            return false;
+            return -1;
 
         //TODO: if overwriting an existing, take special care.
         boolean directoryShared;
@@ -804,11 +849,11 @@ public class FileManager {
             directoryShared=_sharedDirectories.containsKey(dir);
             _numPendingFiles++;
         }
-        boolean retval;
+        int retval;
         if (directoryShared)
             retval = addFile(file);
         else 
-            retval = false;
+            retval = -1;
         synchronized(this) { _numPendingFiles--; }
         return retval;
 	}
@@ -819,8 +864,11 @@ public class FileManager {
      *  in the given XML documents.  metadata may be null if there is no data.
      *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
      *  security hazard.</b> 
+     *
+     * @return -1 if the file was not added.  Otherwise the index of the newly
+     * added file.
      */
-	public boolean addFileIfShared(File file,
+	public int addFileIfShared(File file,
                                    LimeXMLDocument[] metadata) {
         return addFileIfShared(file);
         //This implementation does nothing with metadata.  See MetaFileManager.
@@ -832,13 +880,16 @@ public class FileManager {
      * @effects adds the given file to this if it is of the proper extension and
      *  not too big (>~2GB).  Returns true iff the file was actually added.
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
-     *  file is in the shared directory.</b> 
+     *  file is in the shared directory.</b>
+     *
+     * @return -1 if the file was not added.  Otherwise the index of the newly
+     * added file.
      */
-    private boolean addFile(File file) {
+    private int addFile(File file) {
         repOk();
         long fileLength = file.length();
         if( !isFileShareable(file, fileLength) )
-            return false;
+            return -1;
         
         //Calculate hash OUTSIDE of lock.
         
@@ -848,18 +899,18 @@ public class FileManager {
         } catch(IOException e) {
             // there was an IO error calculating the hash, so we can't
             // add the file
-            return false;
+            return -1;
         } catch(InterruptedException e) {
             // the hash calculation was interrupted, so we can't add
             // the file -- should get reloaded
-            return false;
+            return -1;
         }
         if (loadThreadInterrupted()) 
-            return false;
+            return -1;
         
         if(urns.size() == 0) {
             // the URN was not calculated correctly for some reason
-            return false;
+            return -1;
         }
 
         synchronized (this) {
@@ -899,7 +950,7 @@ public class FileManager {
             this.updateUrnIndex(fileDesc);
 		
             repOk();
-            return true;
+            return fileIndex;
         }
     }
 
@@ -980,6 +1031,35 @@ public class FileManager {
 		}
     }
     
+    /**
+     * Notification that a file has changed and new hashes should be
+     * calculated.
+     * Returns the index of the changed file.  Returns -1 if hashing
+     * failed or no matching FileDesc could be found.
+     */
+    protected int fileChanged(File f, URN oldHash) {
+        FileDesc fd = getMatchingFileDesc(oldHash, f);
+        if( fd == null )
+            return -1;
+        // remove the indexes for this fd
+        synchronized(this) {
+            removeUrnIndex(fd);
+        }
+        // calculate hash OUTSIDE of lock.
+        try {
+            fd.recalculateAndCacheURN();
+        } catch(IOException e) {
+            // oh well, can't do much about it.
+            return -1;
+        } catch(InterruptedException e) {
+            return -1;
+        }
+        // add the new urns.
+        synchronized(this) {
+            updateUrnIndex(fd);
+        }
+        return fd.getIndex();
+    }
 
     /**
      * @modifies this
@@ -1097,8 +1177,8 @@ public class FileManager {
             boolean removed=removeFileIfShared(oldName);
             if (! removed)
                 return false;
-            boolean added=addFileIfShared(newName);
-            if (! added)
+            int added=addFileIfShared(newName);
+            if (added == -1)
                 return false;
             return true;
         } finally {
@@ -1320,19 +1400,6 @@ public class FileManager {
         Response[] retArray = new Response[responses.size()];
         return (Response[])responses.toArray(retArray);
     }
-
-    public synchronized FileDesc file2index(String fullName) {  
-        // TODO1: precompute and store in table.
-        for (int i = 0; i < _files.size(); i++) {
-            FileDesc fd = (FileDesc)_files.get(i);
-            if (fd==null) //unshared
-                continue;
-            else if (fd.getPath().equals(fullName))
-                return fd;
-        }
-        return null;//The file with this name was not found.
-    }
-    
 
     /**
      * Returns a set of indices of files matching q, or null if there are no
