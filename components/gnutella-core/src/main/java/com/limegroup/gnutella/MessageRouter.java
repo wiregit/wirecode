@@ -240,7 +240,8 @@ public class MessageRouter
     /**
      * Uses the query route table to route a query reply.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
-     * the QueryReply count is incremented.
+     * the QueryReply count is incremented, and a routing is created for
+     * subsequent PushRequests
      */
     public void routeQueryReply(QueryReply queryReply,
                                 ManagedConnection receivingConnection)
@@ -251,6 +252,11 @@ public class MessageRouter
         if(replyHandler != null)
         {
             _numQueryReplies++;
+            // Prepare a routing for a PushRequest, which works
+            // here like a QueryReplyReply
+            // Note the use of getClientGUID() here, not getGUID()
+            _pushRouteTable.routeReply(queryReply.getClientGUID(),
+                                       receivingConnection);
             replyHandler.handleQueryReply(queryReply,
                                           receivingConnection,
                                           this,
@@ -369,20 +375,9 @@ public class MessageRouter
                                ManagedConnection connection)
         throws IOException
     {
-        sendQueryReply(queryReply, connection, _pushRequestHandler);
-    }
-
-    /**
-     * Sends the query reply to the designated connection,
-     * setting up the routing to the designated PushRequestHandler.
-     */
-    public void sendQueryReply(QueryReply queryReply,
-                               ManagedConnection connection,
-                               PushRequestHandler replyHandler)
-        throws IOException
-    {
         // Note the use of getClientGUID() here, not getGUID()
-        _pushRouteTable.routeReply(queryReply.getClientGUID(), replyHandler);
+        _pushRouteTable.routeReply(queryReply.getClientGUID(),
+                                   _pushRequestHandler);
         connection.send(queryReply);
     }
 

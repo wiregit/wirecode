@@ -436,21 +436,13 @@ public class ManagedConnection
      * This method is called when a reply is received for a QueryRequest
      * originating on this Connection.  So, just adjust the hops and send it
      * back.  If the sending fails, the calls fails silently.
-     *
-     * Note that we delegate the sending to the MessageRouter so that
-     * it can properly set up a routing for PushRequest sent in reply to
-     * the QueryReply.  PushRequests are odd this way; they are
-     * QueryReplyReplies
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ManagedConnection receivingConnection,
                                  MessageRouter router,
                                  ActivityCallback callback) {
         queryReply.hop();
-        try {
-            router.sendQueryReply(queryReply, this, receivingConnection);
-        } catch(IOException e) {
-        }
+        send(queryReply);
     }
 
     /**
