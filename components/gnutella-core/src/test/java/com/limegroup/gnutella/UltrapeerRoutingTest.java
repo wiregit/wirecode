@@ -192,12 +192,18 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("test");
         qrt.add("susheel");
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             LEAF.send((RouteTableMessage)iter.next());
 			LEAF.flush();
         }
 
-		
+        // for Ultrapeer 1
+        qrt.add("susheel is a cool dude"); 
+        for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
+            ULTRAPEER_1.send((RouteTableMessage)iter.next());
+			ULTRAPEER_1.flush();
+        }
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
@@ -288,13 +294,48 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		
 	}
 
-// 	public void testUrnQueryBetweenUltrapeers() throws Exception {
-//         urnTest(ULTRAPEER_1, ULTRAPEER_2, LEAF);
-// 	}
 
-// 	public void testUrnQueryBetweenUltrapeers2() throws Exception {
-//         urnTest(ULTRAPEER_2, ULTRAPEER_1, LEAF);
-// 	}
+	/**
+	 * Tests URN queries from the leaf.
+	 */
+	public void testUrnQueryToLeaf() throws Exception {
+		QueryRequest qr = 
+			QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1);
+
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+		
+		Message m = LEAF.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+	}
+
+
+    public void testLastHopQueryRouting() throws Exception {
+        // first make sure it gets through on NOT last hop...
+        QueryRequest qr = QueryRequest.createQuery("junkie junk", (byte)3);
+        
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+
+		Message m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+        
+        // now make sure it doesn't get through on last hop
+        qr = QueryRequest.createQuery("junkie junk", (byte)2);
+        
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+
+        assertTrue(!drain(ULTRAPEER_1));
+    }
 
 
 	/**
