@@ -291,8 +291,9 @@ public class BrowseHostHandler {
             } else {
                 if(m instanceof QueryReply) {
                     _currentLength += m.getTotalLength();
-                    LOG.trace("BHH.browseExchange(): read a QR");        
+                    LOG.trace("BHH.browseExchange(): read QR:" + m);        
                     QueryReply reply = (QueryReply)m;
+                    reply.setBrowseHostReply(true);
                     reply.setGUID(_guid);
 					
 					RouterService.getSearchResultHandler().handleQueryReply(reply);
