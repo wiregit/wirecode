@@ -226,7 +226,7 @@ public class UDPPushTest extends BaseTestCase {
 		
 		socket = new Socket(InetAddress.getLocalHost(),10000);
 		other = serversocket.accept();
-		
+		socket.setSoTimeout(1000);
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
 		RouterService.getDownloadManager().acceptDownload(socket);
 		socket.close();
