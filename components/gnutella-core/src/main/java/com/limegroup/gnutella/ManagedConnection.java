@@ -869,7 +869,7 @@ public class ManagedConnection
         LazyProperties(MessageRouter router) {
             this.router=router;
             if (router!=null) {
-                setProperty(ConnectionHandshakeHeaders.MY_ADDRESS, "");  
+                setProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS, "");  
                 //just temporary!
             }
         }
@@ -879,7 +879,7 @@ public class ManagedConnection
         //superclass.
         public String getProperty(String key, String defaultValue) {
             if (router!=null && key.equals(
-                ConnectionHandshakeHeaders.MY_ADDRESS)) {
+                ConnectionHandshakeHeaders.X_MY_ADDRESS)) {
                 Endpoint e=new Endpoint(router.getAddress(), router.getPort());
                 return e.getHostname()+":"+e.getPort();
             } else {
@@ -889,7 +889,7 @@ public class ManagedConnection
         
         public String getProperty(String key) {
             if (router!=null && key.equals(
-                ConnectionHandshakeHeaders.MY_ADDRESS)) {
+                ConnectionHandshakeHeaders.X_MY_ADDRESS)) {
                 Endpoint e=new Endpoint(router.getAddress(), router.getPort());
                 return e.getHostname()+":"+e.getPort();
             } else {
@@ -906,8 +906,8 @@ public class ManagedConnection
         public SupernodeProperties(MessageRouter router){
             super(router);
             //set supernode property
-            setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
-            setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+            setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         }
     }
     
@@ -919,8 +919,8 @@ public class ManagedConnection
         public ClientProperties(MessageRouter router){
             super(router);
             //set supernode property
-            setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
-            setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+            setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         }
     }
 
@@ -943,26 +943,22 @@ public class ManagedConnection
             //on outgoing connection, we have already sent headers. Send
             //the heaaders on incoming only
             if(!outgoing){
-                ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
+                ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
                 ret.setProperty(
-                    ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+                    ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
                 
                 //guide the incoming connection to be a supernode/clientnode
-                ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE_NEEDED,
+                ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
                     (new Boolean(_manager.supernodeNeeded())).toString());
                 
                 //give own IP address
-                ret.setProperty(ConnectionHandshakeHeaders.MY_ADDRESS,
+                ret.setProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS,
                     _manager.getSelfAddress().getHostname() + ":"
                     + _manager.getSelfAddress().getPort());
                     
                 
                 //also add some host addresses in the response 
                 addHostAddresses(ret, _manager);
-//                String hostAddresses = getHostAddresses(_manager);
-//                //set the property
-//                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
-//                    hostAddresses);
             }
             return new HandshakeResponse(ret);
         }
@@ -986,8 +982,8 @@ public class ManagedConnection
             
             //set common properties
             Properties ret=new Properties();
-            ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
-            ret.setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+            ret.setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
             
             //do stuff specific to connection direction
             if(!outgoing){
@@ -998,10 +994,6 @@ public class ManagedConnection
                 
                 //also add some host addresses in the response
                 addHostAddresses(ret, _manager);
-//                String hostAddresses = getHostAddresses(_manager);
-//                //set the property
-//                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
-//                    hostAddresses);
             }
             
             return new HandshakeResponse(code, message, ret);

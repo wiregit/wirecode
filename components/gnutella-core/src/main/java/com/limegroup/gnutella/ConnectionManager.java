@@ -908,7 +908,7 @@ public class ConnectionManager {
         
         //set client/supernode flag for the connection
         String supernodeStr = headers.getProperty(
-            ConnectionHandshakeHeaders.SUPERNODE);
+            ConnectionHandshakeHeaders.X_SUPERNODE);
         if(supernodeStr != null){
             boolean isSupernode = (new Boolean(supernodeStr)).booleanValue();
             if(isSupernode)
@@ -919,7 +919,7 @@ public class ConnectionManager {
         
         //get remote address
         String remoteAddress 
-            = headers.getProperty(ConnectionHandshakeHeaders.MY_ADDRESS);
+            = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
         if(remoteAddress != null)
         {
             try
@@ -937,13 +937,13 @@ public class ConnectionManager {
         
         //check Supernode-Needed header
         String supernodeNeededStr = headers.getProperty(
-            ConnectionHandshakeHeaders.SUPERNODE_NEEDED);
+            ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
         if(supernodeNeededStr != null){
             boolean supernodeNeeded 
                 = (new Boolean(supernodeNeededStr)).booleanValue();
             //take appropriate action
             gotSupernodeNeededGuidance(supernodeNeeded, 
-                headers.getProperty(ConnectionHandshakeHeaders.MY_ADDRESS));
+                headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS));
         }
     }
    
