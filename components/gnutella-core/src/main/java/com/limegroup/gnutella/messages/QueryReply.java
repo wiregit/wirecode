@@ -761,15 +761,13 @@ public class QueryReply extends Message implements Serializable{
                 throw new BadPacketException("Common payload length imprecise!");
 
             //c) extract push and busy bits from common payload
-            //Note: technically, you should look at the second byte [sic] to
-            //see if the push flag of the first byte is set.  (Again note
-            //that this is the reverse of the other bits.)  However, older
-            //LimeWire's don't set this.  So we always assume that the push
-            //bit is defined.
-            pushFlagT = (payload[i]&PUSH_MASK)==1 ? TRUE : FALSE;
+            // REMEMBER THAT THE PUSH BIT IS SET OPPOSITE THAN THE OTHERS.
+            // (The 'I understand' is the second bit, the Yes/No is the first)
             if (length > 1) {   //BearShare 2.2.0+
                 byte control=payload[i];
                 byte flags=payload[i+1];
+                if ((flags & PUSH_MASK)!=0)
+                    pushFlagT = (control&PUSH_MASK)==1 ? TRUE : FALSE;                
                 if ((control & BUSY_MASK)!=0)
                     busyFlagT = (flags&BUSY_MASK)!=0 ? TRUE : FALSE;
                 if ((control & UPLOADED_MASK)!=0)

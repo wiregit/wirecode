@@ -363,7 +363,7 @@ public class Acceptor implements Runnable {
                 // not from our local subnet
                 if(!NetworkUtils.isCloseIP(address.getAddress(), 
                                            getAddress(false)) ||
-                   ConnectionSettings.LOCAL_IS_PRIVATE.getValue() == false) {
+                   !ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
                     _acceptedIncoming = true;
                     ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(_acceptedIncoming);
                 }

@@ -1728,7 +1728,7 @@ public abstract class MessageRouter {
 			boolean busy = um.isBusy();
             boolean uploaded = um.hadSuccesfulUpload();
 
-			// see if we have ever accepted an incoming connection
+			// see if we have accepted an incoming connection during this session
 			boolean incoming = RouterService.acceptedIncomingConnection();
 
 			boolean chat = SettingsManager.instance().getChatEnabled();

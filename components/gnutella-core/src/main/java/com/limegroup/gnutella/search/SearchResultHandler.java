@@ -148,10 +148,9 @@ public final class SearchResultHandler {
             if(data.isFirewalled() && 
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!RouterService.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
-                ConnectionSettings.LOCAL_IS_PRIVATE.getValue()
+                NetworkUtils.isPrivateAddress(RouterService.getAddress()))
                )  {
-                return false;
+               return false;
             }
         }
 
