@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 
 /** Handles all stuff necessary for browsing of networks hosts. 
     Has a instance component, one per browse host, and a static Map of instances
@@ -214,7 +215,8 @@ public class BrowseHostHandler {
      */
     private static int needsPush(String host, int port) {
         //Return true if rfd is private or unreachable
-        if ((new Endpoint(host, port)).isPrivateAddress())
+        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+            (new Endpoint(host, port)).isPrivateAddress())
             return 1;
         else
             return 0;
