@@ -46,9 +46,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *  instance, such as SHA1_URN
 	 * @throws <tt>IllegalArgumentException</tt> if the URN type specified
 	 *  is invalid
+	 * @throws <tt>IOException</tt> if the URN could not be calculated from
+	 *  the specified file
 	 */
-	public URN(final File file, final UrnType urnType) throws IOException {
-		if(urnType == UrnType.SHA1) {
+	URN(final File file, final UrnType urnType) throws IOException {
+		if(urnType.equals(UrnType.SHA1)) {
 			this._urnString = URN.createSHA1String(file);
 			this._urnType = urnType;
 		} else {
@@ -62,9 +64,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * @param urnString the URN string to use for constructing this URN 
 	 *  instance
-	 * @throws <tt>IOException</tt> if the supplies URN string is not valid
+	 * @throws <tt>IOException</tt> if the supplied URN string is not valid
 	 */
-	public URN(final String urnString) throws IOException {
+	URN(final String urnString) throws IOException {
 		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("INVALID URN STRING");
 		}
