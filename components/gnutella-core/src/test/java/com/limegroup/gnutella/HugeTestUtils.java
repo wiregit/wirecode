@@ -64,17 +64,16 @@ public final class HugeTestUtils {
 	 * Array of query strings.
 	 */
 	public static final String[] QUERY_STRINGS = {
-		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"try this",
 		"file",
 		"different file",
 		"file.mp3",
-		"urn:",
-		"urn:sha1",
+		"urn",
+		"urnsha1",
 		"good file",
-		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"maybe this",
 		"this one too",
-		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFBCCC",
-		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYR",
+		"how about this one",
 		"file.file",
 		"the best file ever",
 		"big file",
