@@ -39,7 +39,8 @@ public class DownloadManagerStub extends DownloadManager {
     public void yieldSlot(ManagedDownloader downloader) { }
     public void remove(ManagedDownloader downloader, boolean success) { }
     public boolean sendQuery(ManagedDownloader requerier, QueryRequest query) { 
-        return false; 
+
+		return !GUID.isLimeRequeryGUID(query.getGUID());
     }
     public boolean sendPush(RemoteFileDesc file) { return false; }
     public synchronized void measureBandwidth() { }

@@ -24,6 +24,8 @@ public class ResumeDownloaderTest extends TestCase {
         VerifyingFile vf=new VerifyingFile(false);
         vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);
+		// Make sure that we don't wait for network on requery
+		ManagedDownloader.NO_DELAY = true;
     }
 
     public ResumeDownloaderTest(String name) {
@@ -58,7 +60,12 @@ public class ResumeDownloaderTest extends TestCase {
      *  This issue was reported by Sam Berlin. */
     public void testRequeryProgress() {
         ResumeDownloader downloader=newResumeDownloader();
-        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
+			if ( downloader.getState() != Downloader.QUEUED )
+                assertEquals(Downloader.WAITING_FOR_RESULTS, 
+				  downloader.getState());
+            try { Thread.sleep(200); } catch (InterruptedException e) { }
+		}
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
@@ -117,7 +124,7 @@ public class ResumeDownloaderTest extends TestCase {
             throws IOException, ClassNotFoundException {
         ObjectInputStream in=new ObjectInputStream(new FileInputStream(file));
         ResumeDownloader rd=(ResumeDownloader)in.readObject();
-        QueryRequest qr=rd.newRequery();
+        QueryRequest qr=rd.newRequery(0);
         assertEquals("filename.txt", qr.getQuery());
         if (expectHash) {
             assertEquals(1, qr.getQueryUrns().size());

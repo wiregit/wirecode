@@ -4,9 +4,11 @@ import com.limegroup.gnutella.RemoteFileDesc;
 
 /**
  * A remote file descriptor augmented with information about past connection
- * attempts, e.g., whether it was reachable.
+ * attempts, e.g., whether it was reachable.  RemoteFileDesc2 extends
+ * URLRemoteFileDesc because it may needs to store faked-up URLs for MAGNET
+ * default locations.
  */
-public class RemoteFileDesc2 extends RemoteFileDesc {
+public class RemoteFileDesc2 extends URLRemoteFileDesc {
     /** Set to false if a connection failed. */
     private boolean _isUnreachable;
     /** The time this was created, used for push authentication purposes. */
@@ -16,6 +18,10 @@ public class RemoteFileDesc2 extends RemoteFileDesc {
      *  but with the isUnreachable field set to false and the time field
      *  set to the current time. */
     public RemoteFileDesc2(RemoteFileDesc rfd, boolean isUnreachable) {
+        //Note that the runtime type of rfd may be either RemoteFileDesc or
+        //URLRemoteFileDesc.  In the former case, the URL stored in this is the
+        //value calculated on the fly by RemoteFileDesc.getUrl().  In the latter
+        //case, it's a copy of the value stored in URLRemoteFileDesc.
         super(rfd.getHost(),
               rfd.getPort(),
               rfd.getIndex(),
@@ -27,7 +33,8 @@ public class RemoteFileDesc2 extends RemoteFileDesc {
               rfd.getQuality(),
               rfd.browseHostEnabled(),
 			  rfd.getXMLDoc(),
-			  rfd.getUrns());
+			  rfd.getUrns(),
+              rfd.getUrl());
         this._isUnreachable=isUnreachable;
         this._timeStamp=System.currentTimeMillis();
     }

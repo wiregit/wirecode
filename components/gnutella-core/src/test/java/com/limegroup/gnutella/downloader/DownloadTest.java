@@ -27,8 +27,9 @@ public class DownloadTest extends TestCase {
     static File testFile = null;
     static { 
         SettingsManager.instance().setLocalIsPrivate(false);
-    }
-    
+        // Don't wait for network connections for testing
+        ManagedDownloader.NO_DELAY = true;	
+    } 
     
     public DownloadTest(String name) {
         super(name);

@@ -12,6 +12,7 @@ import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.updates.*;
+import com.limegroup.gnutella.browser.*;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -165,6 +166,7 @@ public final class RouterService {
 		router.initialize();
 		manager.initialize();	   
 		downloader.initialize(); 
+	    new HTTPAcceptor(callback);	
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
 													 manager);
@@ -588,6 +590,42 @@ public final class RouterService {
 //          return( router.getNumRouteErrors() );
 //      }
 
+
+    /**
+     * Count up all the messages on active connections
+     */
+    public static int getActiveConnectionMessages() {
+		int count = 0;
+
+        // Count the messages on initialized connections
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            count += c.getNumMessagesSent();
+            count += c.getNumMessagesReceived();
+        }
+		return count;
+    }
+
+    /**
+     * Count how many connections have already received N messages
+     */
+    public static int countConnectionsWithNMessages(int messageThreshold) {
+		int count = 0;
+		int msgs; 
+
+        // Count the messages on initialized connections
+        for (Iterator iter=manager.getInitializedConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            msgs = c.getNumMessagesSent();
+            msgs += c.getNumMessagesReceived();
+			if ( msgs > messageThreshold )
+				count++;
+        }
+		return count;
+    }
+
     /**
      *  Returns the number of good hosts in my horizon.
      */
@@ -808,6 +846,13 @@ public final class RouterService {
 		return manager.getNumConnections();
     }
 
+    /**
+     *  Returns the number of initialized messaging connections.
+     */
+    public static int getNumInitializedConnections() {
+		return manager.getNumInitializedConnections();
+    }
+
 	/**
 	 * Returns whether or not this client currently has any initialized 
 	 * connections.
@@ -915,6 +960,31 @@ public final class RouterService {
 		return downloader.download(files, overwrite);
 	}
 
+    /*
+     * Creates a new MAGNET downloader.  Immediately tries to download from
+     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
+     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
+     * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
+     * <tt>filename</tt> is specified, it will be used as the name of the
+     * complete file; otherwise it will be taken from any search results or
+     * guessed from <tt>defaultURL</tt>.
+     *
+     * @param urn the hash of the file (exact topic), or null if unknown
+     * @param textQuery requery keywords (keyword topic), or null if unknown
+     * @param filename the final file name, or null if unknown
+     * @param defaultURLs the initial locations to try (exact source), or null 
+     *  if unknown
+     *
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception IllegalArgumentException both urn and textQuery are null 
+     */
+    public static synchronized Downloader download(
+            URN urn, String textQuery, String filename, String [] defaultURL) 
+            throws IllegalArgumentException, AlreadyDownloadingException { 
+        return downloader.download(urn, textQuery, filename, defaultURL);
+    }
+
    /**
      * Starts a resume download for the given incomplete file.
      * @exception AlreadyDownloadingException couldn't download because the
@@ -922,7 +992,7 @@ public final class RouterService {
      * @exception CantResumeException incompleteFile is not a valid 
      *  incomplete file
      */ 
-    public Downloader download(File incompleteFile)
+    public static Downloader download(File incompleteFile)
             throws AlreadyDownloadingException, CantResumeException {
         return downloader.download(incompleteFile);
     }
@@ -938,7 +1008,7 @@ public final class RouterService {
      * @param guid The guid associated with this query request.
      * @param type The mediatype associated with this search.
      */
-    public Downloader download(String query, String richQuery,
+    public static Downloader download(String query, String richQuery,
                                byte[] guid, MediaType type) 
         throws AlreadyDownloadingException {
         return downloader.download(query, richQuery, guid, type);

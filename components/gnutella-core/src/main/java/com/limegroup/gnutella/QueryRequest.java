@@ -376,13 +376,20 @@ public class QueryRequest extends Message implements Serializable{
     }
 
     public String toString() {
-		return "QueryRequest:\r\n"+ 
-		       "query:             "+getQuery()+"\r\n"+
-		       "rich query:        "+getRichQuery()+"\r\n"+
-		       "requestedUrnTypes: "+getRequestedUrnTypes()+"\r\n"+
-		       "query urns:        "+getQueryUrns().size()+"\r\n"+
-		       "min speed:         "+getMinSpeed();
+		return "<query: \""+getQuery()+"\", "+
+		       "meta: \""+getRichQuery()+"\", "+
+		       "types: "+getRequestedUrnTypes().size()+","+
+		       "urns: "+getQueryUrns().size()+">";
     }
+
+//      public String toString() {
+//  		return "QueryRequest:\r\n"+ 
+//  		       "query:             "+getQuery()+"\r\n"+
+//  		       "rich query:        "+getRichQuery()+"\r\n"+
+//  		       "requestedUrnTypes: "+getRequestedUrnTypes()+"\r\n"+
+//  		       "query urns:        "+getQueryUrns()+"\r\n"+
+//  		       "min speed:         "+getMinSpeed();
+//      }
 }
 
 

@@ -223,7 +223,8 @@ public class DownloadManager implements BandwidthTracker {
      * immediately, unless it is queued.  It stops after any of the files
      * succeeds.
      *
-     *     @modifies this, disk */
+     *     @modifies this, disk 
+     */
     public synchronized Downloader download(RemoteFileDesc[] files,
                                             boolean overwrite) 
             throws FileExistsException, AlreadyDownloadingException, 
@@ -268,6 +269,52 @@ public class DownloadManager implements BandwidthTracker {
         return downloader;
     }   
     
+    /*
+     * Creates a new MAGNET downloader.  Immediately tries to download from
+     * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
+     * not provide alternate locations, issues a requery with <tt>textQuery</tt>
+     * and </tt>urn</tt>, as provided.  (At least one must be non-null.)  If
+     * <tt>filename</tt> is specified, it will be used as the name of the
+     * complete file; otherwise it will be taken from any search results or
+     * guessed from <tt>defaultURLs</tt>.
+     *
+     * @param urn the hash of the file (exact topic), or null if unknown
+     * @param textQuery requery keywords (keyword topic), or null if unknown
+     * @param filename the final file name, or null if unknown
+     * @param defaultURLs the initial locations to try (exact source), or null 
+     *  if unknown
+     *
+     * @exception AlreadyDownloadingException couldn't download because the
+     *  another downloader is getting the file
+     * @exception IllegalArgumentException both urn and textQuery are null */
+    public synchronized Downloader download(
+            URN urn, String textQuery, String filename, String [] defaultURL) 
+            throws IllegalArgumentException, AlreadyDownloadingException {         
+        if (textQuery==null && urn==null)
+            throw new IllegalArgumentException("Need something for requeries");
+
+        //Check for conflicts.  
+        //TODO: refactor to make less like conflicts().
+
+        //Instantiate downloader, validating incompleteFile first.
+        MagnetDownloader downloader = new MagnetDownloader(this,
+                                              fileManager,
+                                              incompleteFileManager,
+                                              callback,
+                                              urn,
+                                              textQuery,
+                                              filename,
+                                              defaultURL);
+        downloader.initialize(this, fileManager, callback);
+
+        //Add download to appropriate lists and write snapshot.  
+        //TODO: factor to make less like getFiles().
+        waiting.add(downloader);
+        callback.addDownload(downloader);
+        writeSnapshot();
+        return downloader;
+    }
+
     /**
      * Starts a resume download for the given incomplete file.
      * @exception AlreadyDownloadingException couldn't download because the
@@ -332,10 +379,6 @@ public class DownloadManager implements BandwidthTracker {
         waiting.add(downloader);
         callback.addDownload(downloader);
         writeSnapshot();
-
-        //Start a requery immediately, bypassing the rate-limited requerying
-        //of sendQuery, as called from ManagedDownloader.tryAllDownloads.
-        router.broadcastQueryRequest(downloader.newRequery());
         return downloader;
     }
 
@@ -588,7 +631,9 @@ public class DownloadManager implements BandwidthTracker {
      * more sources to download.  May not actually send the requery if it doing
      * so would exceed the maximum requery rate.
      * 
-     * @param query the requery to send, which should have a marked GUID
+     * @param query the requery to send, which should have a marked GUID.
+     *  Queries are subjected to global rate limiting iff they have marked 
+     *  requery GUIDs.
      * @param requerier the downloader requesting more sources.  Needed to 
      *  ensure fair requery scheduling.  This MUST be in the waiting list,
      *  i.e., it MUST NOT have a download slot.
@@ -604,9 +649,11 @@ public class DownloadManager implements BandwidthTracker {
         Assert.that(waiting.contains(requerier),
                     "Unknown or non-waiting MD trying to send requery.");
 
-        //Disallow if global time limits exceeded.
-        if (System.currentTimeMillis()-lastRequeryTime
-                <= TIME_BETWEEN_REQUERIES) {
+        //Disallow if global time limits exceeded.  These limits don't apply to
+        //queries that are requeries.
+        boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
+        long elapsed=System.currentTimeMillis()-lastRequeryTime;
+        if (isRequery && elapsed<=TIME_BETWEEN_REQUERIES) {
             return false;
         }
 

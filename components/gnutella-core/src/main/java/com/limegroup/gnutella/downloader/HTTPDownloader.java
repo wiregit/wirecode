@@ -183,6 +183,7 @@ public class HTTPDownloader implements BandwidthTracker {
     public void connectHTTP(int start, int stop, boolean supportQueueing) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
                NotSharingException, QueuedException {
+
         _amountToRead = stop-start;
         _amountRead = 0;
 		_initialReadingPoint = start;
@@ -193,11 +194,11 @@ public class HTTPDownloader implements BandwidthTracker {
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.1\r\n");
-        out.write("Host: "+_host+":"+_port+"\r\n");
+        out.write("GET "+_rfd.getUrl().getFile()+" HTTP/1.1\r\n");
+        out.write("HOST: "+_host+":"+_port+"\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
-        if(supportQueueing)
+        if(supportQueueing) 
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
 		// Create a light-weight copy of AlternateLocations to avoid blocking

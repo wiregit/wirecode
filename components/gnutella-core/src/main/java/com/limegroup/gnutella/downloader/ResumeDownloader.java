@@ -99,7 +99,20 @@ public class ResumeDownloader extends ManagedDownloader
         return _size;
     }
 
-    public QueryRequest newRequery() {
+    /** 
+     * Overrides ManagedDownloader to ensure that the first requery happens as
+     * soon as necessary.
+     */
+    protected long nextRequeryTime(int requeries) {
+        if (requeries==0)
+            return System.currentTimeMillis();   //now!
+        else
+            return super.nextRequeryTime(requeries);        
+    }
+
+    /** Overrides ManagedDownloader to use the filename and hash (if present) of
+     *  the incomplete file. */
+    protected QueryRequest newRequery(int numRequeries) {
         Set queryUrns=null;
         if (_hash!=null) {
             queryUrns=new HashSet(1);
@@ -108,11 +121,13 @@ public class ResumeDownloader extends ManagedDownloader
         //TODO: we always include the file name since HUGE specifies that
         //results should be sent if the name OR the hashes match.  But
         //ultrapeers may insist that all keywords are in the QRP tables.
-        return new QueryRequest(QueryRequest.newQueryGUID(true), //requery GUID
-                                (byte)7, 0,        //TTL, speed
+        boolean isRequery=numRequeries!=0;
+        return new QueryRequest(QueryRequest.newQueryGUID(isRequery),
+                                SettingsManager.instance().getTTL(),
+                                0,                 //speed
                                 getFileName(),     //query string
                                 null,              //metadata
-                                true,              //is requery
+                                isRequery,         //is requery
                                 null,              //requested types
                                 queryUrns,         //requested urns (if any)
                                 // firewalled status....

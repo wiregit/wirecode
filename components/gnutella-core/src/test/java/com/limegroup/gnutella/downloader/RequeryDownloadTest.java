@@ -32,6 +32,12 @@ public class RequeryDownloadTest extends TestCase {
     /** The uploader */
     TestUploader uploader;
 
+    static { // Don't wait for network connections for testing
+        ManagedDownloader.NO_DELAY = true;	
+    }
+
+
+
     class TestMessageRouter extends MessageRouterStub {
         List /* of QueryMessage */ broadcasts=new LinkedList();
         public void broadcastQueryRequest(QueryRequest queryRequest) {
@@ -63,7 +69,7 @@ public class RequeryDownloadTest extends TestCase {
         SettingsManager.instance().setKeepAlive(0);
         SettingsManager.instance().setConnectOnStartup(false);
         SettingsManager.instance().setLocalIsPrivate(false);
-        SettingsManager.instance().setPort(0);
+        SettingsManager.instance().setPort(6399);
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
         } catch (IOException e) {
@@ -181,7 +187,13 @@ public class RequeryDownloadTest extends TestCase {
         } catch (CantResumeException e) {
             fail("Invalid incomplete file.");
         }                                
-        try { Thread.sleep(200); } catch (InterruptedException e) { }        
+		// Make sure that you are through the QUEUED state.
+        while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
+			if ( downloader.getState() != Downloader.QUEUED )
+                assertEquals(Downloader.WAITING_FOR_RESULTS, 
+				  downloader.getState());
+            try { Thread.sleep(200); } catch (InterruptedException e) { }
+		}
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         //Check that we can get query of right type.
@@ -190,7 +202,7 @@ public class RequeryDownloadTest extends TestCase {
         Object m=router.broadcasts.get(0);
         assertTrue(m instanceof QueryRequest);
         QueryRequest qr=(QueryRequest)m;
-        assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
         assertEquals(filename, qr.getQuery());
         assertTrue(qr.getRequestedUrnTypes()==null
                    || qr.getRequestedUrnTypes().size()==0);
@@ -226,7 +238,11 @@ public class RequeryDownloadTest extends TestCase {
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.
             while (downloader.getState()!=Downloader.COMPLETE) {            
-                assertEquals(Downloader.DOWNLOADING, downloader.getState());
+			    if ( downloader.getState() != Downloader.CONNECTING &&
+			         downloader.getState() != Downloader.WAITING_FOR_RESULTS &&
+			         downloader.getState() != Downloader.HASHING &&
+			         downloader.getState() != Downloader.DOWNLOADING )
+                    assertEquals(Downloader.DOWNLOADING, downloader.getState());
                 try { Thread.sleep(200); } catch (InterruptedException e) { }
             }
         } else {
@@ -265,7 +281,8 @@ public class RequeryDownloadTest extends TestCase {
         Object m=router.broadcasts.get(0);
         assertTrue(m instanceof QueryRequest);
         QueryRequest qr=(QueryRequest)m;
-        assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+		// First query is not counted as requery
+        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
         assertEquals("file name", qr.getQuery());
         assertTrue(qr.getRequestedUrnTypes()==null
                    || qr.getRequestedUrnTypes().size()==0);
@@ -306,9 +323,14 @@ public class RequeryDownloadTest extends TestCase {
         router.handleQueryReply(reply, stubConnection);
 
         //Make sure the downloader does the right thing with the response.
-        try { Thread.sleep(500); } catch (InterruptedException e) { }
+        try { Thread.sleep(400); } catch (InterruptedException e) { }
         while (downloader.getState()!=Downloader.COMPLETE) {            
-            assertEquals(Downloader.DOWNLOADING, downloader.getState());
+			if ( downloader.getState() != Downloader.CONNECTING &&
+			     downloader.getState() != Downloader.WAITING_FOR_RESULTS &&
+			     downloader.getState() != Downloader.HASHING &&
+			     downloader.getState() != Downloader.SAVING &&
+			     downloader.getState() != Downloader.DOWNLOADING )
+                assertEquals(Downloader.DOWNLOADING, downloader.getState());
             try { Thread.sleep(200); } catch (InterruptedException e) { }
         }
     }
@@ -320,16 +342,22 @@ public class RequeryDownloadTest extends TestCase {
 
         Downloader downloader1=null;
         Downloader downloader2=null;
+		byte [] guid1 = GUID.makeGuid();
+		byte [] guid2 = GUID.makeGuid();
         try {
-            downloader1=mgr.download("xxxxx", null, GUID.makeGuid(), null);
-            downloader2=mgr.download("yyyyy", null, GUID.makeGuid(), null);
+            downloader1=mgr.download("xxxxx", null, guid1, null);
+            downloader2=mgr.download("yyyyy", null, guid2, null);
         } catch (AlreadyDownloadingException e) {
             fail("Already downloading.");
         }
 
         //Got right number of requeries?
+		// Note that the first query will kick off immediately now
         List broadcasts=router.broadcasts;
         try { Thread.sleep(8000); } catch (InterruptedException e) { }
+		downloader1.stop();
+		downloader2.stop();
+//System.out.println("size="+broadcasts.size());
         assertTrue(broadcasts.size()>=7);    //should be 8, plus fudge factor
         assertTrue(broadcasts.size()<=9);
         //Are they balanced?  Check for approximate fairness.
@@ -344,7 +372,10 @@ public class RequeryDownloadTest extends TestCase {
             else
                 fail("Invalid query: "+qr);
         }
+		// This test is looser than it use to be.  There is no delay on the 
+		// first requery now so it is possible that xxxxx can get 2 extra 
+		// queries in before yyyyy does.
         assertTrue("Unbalanced: "+xCount+"/"+yCount, 
-                   Math.abs(xCount-yCount)<=1);
+                   Math.abs(xCount-yCount)<=2);
     }
 }

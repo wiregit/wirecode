@@ -9,6 +9,8 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.browser.ExternalControl;
+
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -290,9 +292,7 @@ public class Acceptor extends Thread {
                 //Check if IP address of the incoming socket is in _badHosts
 				
 				InetAddress address = client.getInetAddress();
-				byte[] addressBytes = address.getAddress();
-                if (isBannedIP(address.getHostAddress()) ||
-					(settings.getLocalIsPrivate() && (addressBytes[0] == 127))) {
+                if (isBannedIP(address.getHostAddress())) {
                     client.close();
                     continue;
                 }
@@ -355,6 +355,17 @@ public class Acceptor extends Thread {
                 String word=IOUtils.readWord(in,8);
                 _socket.setSoTimeout(0);
 
+				// Only selectively allow localhost connections
+				if ( !word.equals("MAGNET") ) {
+					InetAddress address = _socket.getInetAddress();
+					byte[] addressBytes = address.getAddress();
+					if (SettingsManager.instance().getLocalIsPrivate() && 
+					    (addressBytes[0] == 127)) {
+						_socket.close();
+						return;
+					}
+				}
+
                 //1. Gnutella connection.  If the user hasn't changed the
                 //   handshake string, we accept the default ("GNUTELLA 
                 //   CONNECT/0.4") or the proprietary limewire string
@@ -390,8 +401,10 @@ public class Acceptor extends Thread {
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);
-
 				}
+			    else if (word.equals("MAGNET")) {
+                    ExternalControl.fireMagnet(_socket);
+                }	
                 //4. Unknown protocol
                 else {
                     throw new IOException();
@@ -404,6 +417,7 @@ public class Acceptor extends Thread {
 			}
         }
     }
+
 
     /** 
      * Updates this IP filter.  Added to fix bug where banned IP added is not

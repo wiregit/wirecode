@@ -46,7 +46,7 @@ public class ManagedDownloaderTest extends TestCase {
             QueryRequest qr=downloader.newRequery2();
             assertEquals("daswani susheel",  //"susheel daswani" also ok
                          qr.getQuery());
-            assertEquals(0, qr.getMinSpeed());
+            assertEquals(131, qr.getMinSpeed());
             assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
             assertEquals("", qr.getRichQuery());
             Set urns=qr.getQueryUrns();
@@ -143,7 +143,7 @@ public class ManagedDownloaderTest extends TestCase {
                                   new FileManagerStub(),
                                   new ActivityCallbackStub());
             //Wait for it to download until error.
-            try { Thread.sleep(2000); } catch (InterruptedException e) { }
+            try { Thread.sleep(4000); } catch (InterruptedException e) { }
             assertEquals(Downloader.WAITING_FOR_RESULTS, 
                          downloader.getState());
             assertEquals(100, 
@@ -194,6 +194,6 @@ class TestManagedDownloader extends ManagedDownloader {
     }
 
     public QueryRequest newRequery2() throws CantResumeException {
-        return super.newRequery();
+        return super.newRequery(0);
     }
 }

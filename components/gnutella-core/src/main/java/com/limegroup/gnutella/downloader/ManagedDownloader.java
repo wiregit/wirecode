@@ -21,10 +21,11 @@ import java.net.*;
  * swarmed downloads, the ability to download copies of the same file from
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
- * Subclasses may refine the requery behavior by overriding the
- * newRequery(), allowAddition(..), and addDownload(..) methods.
- * ResumeDownloader overrides the initialize() method to guarantee 
- * that progress is initially non-zero.<p>
+ * Subclasses may refine the requery behavior by overriding the nextRequeryTime,
+ * newRequery(n), allowAddition(..), and addDownload(..)  methods.
+ * MagnetDownloader also redefines the tryAllDownloads(..) method to handle
+ * default locations, and the getFileName() method to specify the completed
+ * file name.<p>
  * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -172,7 +173,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * should be done.  */
     private ActivityCallback callback;
     /** The complete list of files passed to the constructor.  Must be
-     *  maintained in memory to support resume. */
+     *  maintained in memory to support resume.  allFiles may only contain
+     *  elements of type RemoteFileDesc and URLRemoteFileDesc--no 
+     *  RemoteFileDesc2's are stored in the array. */
     private RemoteFileDesc[] allFiles;
 
     ///////////////////////// Policy Controls ///////////////////////////
@@ -212,6 +215,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int REQUERY_ATTEMPTS = 60;
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
+
+	/** The value of an unknown filename - potentially overridden in 
+      * subclasses */
+	protected static final String UNKNOWN_FILENAME = "";  
+
     /** This is used for matching of filenames.  kind of big so we only want
      *  one. */
     private static ApproximateMatcher matcher = 
@@ -271,7 +279,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private List /* of RemoteFileDesc2 */ busy;
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
-    private List /*of RemoteFileDesc */ files;
+    private List /*of RemoteFileDesc2 */ files;
     /** keeps a count of worker threads that are queued on uploader, useful 
      * for setting the state correctly*/
     private volatile int queuedCount;
@@ -531,9 +539,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
      * of all hashes.
      *
+     * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
      */
-    protected synchronized QueryRequest newRequery() throws CantResumeException { 
+    protected synchronized QueryRequest newRequery(int numRequeries) 
+                                                   throws CantResumeException {
         if (allFiles.length<0)                  //TODO: what filename?
             throw new CantResumeException("");  //      maybe another exception?
         return new QueryRequest(QueryRequest.newQueryGUID(true),
@@ -729,7 +739,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized boolean addDownload(RemoteFileDesc rfd) {
         if (! allowAddition(rfd))
             return false;
+        return addDownloadForced(rfd);
+    }
 
+    /** Like addDownload, but doesn't call allowAddition(..). 
+     *  @return true, since download always allowed */
+    protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd) {
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
@@ -915,15 +930,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * of moving file from incomplete directory to save directory and adding
      * file to the library.  Called from dloadManagerThread.  
      */
-    private void tryAllDownloads() {     
+    protected void tryAllDownloads() {     
         // the number of requeries i've done...
         int numRequeries = 0;
         // the time to next requery.  We don't want to send the first requery
         // until a few minutes after the initial download attempt--after all,
         // the user just started a query.  Hence initialize nextRequeryTime to
         // System.currentTimeMillis() plus a few minutes.
-        long nextRequeryTime = System.currentTimeMillis()
-                             + TIME_BETWEEN_REQUERIES;
+        long nextRequeryTime = nextRequeryTime(numRequeries);
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -992,13 +1006,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 final long currTime = System.currentTimeMillis();
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
+					waitForStableConnections();
                     // yeah, it is about time and i've not sent too many...
                     try {
-                        if (manager.sendQuery(this, newRequery()))
+                        if (manager.sendQuery(this, newRequery(numRequeries)))
                             numRequeries++;
                     } catch (CantResumeException ignore) { }
                     // set time for next requery...
-                    nextRequeryTime = currTime + TIME_BETWEEN_REQUERIES;
+                    nextRequeryTime = nextRequeryTime(numRequeries);
                 }
 
 
@@ -1054,6 +1069,45 @@ public class ManagedDownloader implements Downloader, Serializable {
         }                 
     }
 
+
+	private static final int MIN_NUM_CONNECTIONS      = 2;
+	private static final int MIN_CONNECTION_MESSAGES  = 6;
+	private static final int MIN_TOTAL_MESSAGES       = 45;
+	private static final int CONNECTION_DELAY         = 500;
+	        static boolean   NO_DELAY				  = false; // For testing
+    /**
+     *  Try to wait for good, stable, connections with some amount of reach
+	 *  or message flow.
+     */
+    private static void waitForStableConnections() 
+      throws InterruptedException {
+
+		if ( NO_DELAY )  return;  // For Testing without network connection
+
+		// TODO: Note that on a private network, these conditions might
+		//       be too strict.
+
+		// Wait till your connections are stable enough to get the minimum 
+		// number of messages
+		while 
+		( (RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
+			  < MIN_NUM_CONNECTIONS) &&
+		  (RouterService.getActiveConnectionMessages() < MIN_TOTAL_MESSAGES) 
+        ) {
+			Thread.sleep(CONNECTION_DELAY); 
+		}
+    }
+
+
+    /** Returns the next system time that we can requery.  Subclasses may
+     *  override to customize this behavior.  Note that this is still 
+     *  subject to global requery limits in DownloadManager.
+     *  @param requeries the number of requeries that have happened so far
+     *  @return an absolute system time of the next allowed requery */
+    protected long nextRequeryTime(int requeries) {
+        return System.currentTimeMillis()+TIME_BETWEEN_REQUERIES;
+    }
+
     /** Returns the amount of time to wait in milliseconds before retrying,
      *  based on tries.  This is also the time to wait for * incoming pushes to
      *  arrive, so it must not be too small.  A value of * tries==0 represents
@@ -1094,19 +1148,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
         //1. Verify it's safe to download.  Filename must not have "..", "/",
-        //   etc.  We check this by looking where the downloaded file will
-        //   end up.
-        RemoteFileDesc rfd=null;
-        synchronized (this) {
-            rfd=(RemoteFileDesc)files.get(0);
-        }
-        int fileSize=rfd.getSize(); 
-        String filename=rfd.getFileName(); 
-        incompleteFile=incompleteFileManager.getFile(rfd);
+        //etc.  We check this by looking where the downloaded file will end up.
+        //The completed filename is chosen somewhat arbitrarily from the first
+        //file of the bucket; see case (b) of getFileName() and
+        //MagnetDownloader.getFileName().
+        //    incompleteFile is picked using an arbitrary RFD from the bucket, since
+        //IncompleteFileManager guarantees that any "same" files will get the
+        //same temporary file.
+        incompleteFile=incompleteFileManager.getFile(
+                                                  (RemoteFileDesc)files.get(0));
         File sharedDir;
         try {
             sharedDir=SettingsManager.instance().getSaveDirectory();
-            completeFile=new File(sharedDir, filename);
+            completeFile=new File(sharedDir, getFileName());
             String sharedPath = sharedDir.getCanonicalPath();		
             String completeFileParentPath = 
             new File(completeFile.getParent()).getCanonicalPath();
@@ -1152,6 +1206,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }  
 			}
         }
+		
         
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
@@ -2151,22 +2206,35 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized String getFileName() {        
-        //If we're not actually downloading, we just pick some random value.
-        if (dloaders.size()==0)
-            return allFiles[0].getFileName();
-        else 
-            //Could also use currentFileName, but this works.
+        //Return the most specific information possible.  Case (b) is critical
+        //for picking the downloaded file name; see tryAllDownloads2.  See also
+        //http://core.limewire.org/issues/show_bug.cgi?id=122.
+        
+        //a) Return names of one of the active downloaders.
+        if (dloaders.size()>0)
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getFileName();
+        //b) Return name of first element of current download bucket.
+        else if (files!=null && files.size()>0)
+            return ((RemoteFileDesc)files.get(0)).getFileName();
+        //c) Return name of some arbitrary RFD;
+        else if (allFiles.length > 0)
+            return allFiles[0].getFileName();
+        //d) Give up.  Note that subclass may take action.
+        else
+            return UNKNOWN_FILENAME;  
     }
 
     public synchronized int getContentLength() {
         //If we're not actually downloading, we just pick some random value.
         //TODO: this can also mean we've FINISHED the download.  Luckily it
         //doesn't really matter.
-        if (dloaders.size()==0)
-            return allFiles[0].getSize();
-        else 
+        if (dloaders.size()==0) {
+			if (allFiles.length > 0)
+                return allFiles[0].getSize();
+			else 
+				return -1;
+        } else 
             //Could also use currentFileSize, but this works.
             return ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getSize();
