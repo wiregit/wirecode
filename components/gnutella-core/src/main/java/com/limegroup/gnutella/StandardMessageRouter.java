@@ -184,6 +184,7 @@ public class StandardMessageRouter extends MessageRouter {
         // capable (being GUESS capable implies that you can receive 
         // incoming TCP) and not firewalled
         if (query.desiresOutOfBandReplies() && (query.getHops() > 1) &&
+            !query.isFirewalledSource() &&
             RouterService.isGUESSCapable() && 
             RouterService.acceptedIncomingConnection()) {
             
