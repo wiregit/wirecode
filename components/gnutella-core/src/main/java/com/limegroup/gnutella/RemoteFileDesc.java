@@ -33,6 +33,7 @@ public class RemoteFileDesc implements Serializable {
 	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
+    private final boolean _replyToMulticast;
 
     /** RemoteFileDesc can only be constructed with a single piece of metadata.
      *  However, historically RemoteFileDesc stored an array of metadata.  Hence
@@ -53,6 +54,18 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
+		
+    
+    /**
+     * Creates a RemoteFileDesc that isn't a response to a multicast query.
+     */
+    public RemoteFileDesc(String host, int port, long index, String filename,
+						  int size, byte[] clientGUID, int speed, 
+						  boolean chat, int quality, boolean browseHost, 
+						  LimeXMLDocument xmlDoc, Set urns) {
+        this(host, port, index, filename, size, clientGUID, speed,
+             chat, quality, browseHost, xmlDoc, urns, false);
+    }
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
@@ -72,6 +85,7 @@ public class RemoteFileDesc implements Serializable {
 	 *  browse host
 	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
+	 * @param replyToMulticast true if its from a reply to a multicast query
 	 *
 	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
 	 *  not valid
@@ -79,7 +93,8 @@ public class RemoteFileDesc implements Serializable {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns) {
+						  LimeXMLDocument xmlDoc, Set urns,
+						  boolean replyToMulticast) {
 		if((port & 0xFFFF0000) != 0) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -108,6 +123,7 @@ public class RemoteFileDesc implements Serializable {
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
+		_replyToMulticast = replyToMulticast;
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
@@ -259,6 +275,10 @@ public class RemoteFileDesc implements Serializable {
 			return null;
 		}
 	}
+	
+	public final boolean isReplyToMulticast() {
+	    return _replyToMulticast;
+    }
 
 	public final boolean isPrivate() {
 		if (_host == null) return true;
@@ -304,6 +324,7 @@ public class RemoteFileDesc implements Serializable {
         return  ("<"+getHost()+":"+getPort()+", "
 				 +getFileName()+"/"+getSize()+", "
 				 +getSpeed()+", "
-				 +getSHA1Urn()+", "+getQuality()+">");
+				 +getSHA1Urn()+", "+getQuality()
+				 +", mcast: " + _replyToMulticast +">");
     }
 }

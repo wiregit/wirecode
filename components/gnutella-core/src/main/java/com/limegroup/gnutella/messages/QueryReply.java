@@ -895,7 +895,9 @@ public class QueryReply extends Message implements Serializable{
         final byte[] clientGUID = getClientGUID();
         boolean supportsChat = false;
         boolean supportsBrowseHost = false;
+        boolean isReplyToMulticast = false;
         try {
+            isReplyToMulticast = isReplyToMulticastQuery();
             supportsChat = getSupportsChat();
             supportsBrowseHost = getSupportsBrowseHost();
         }
@@ -913,7 +915,8 @@ public class QueryReply extends Message implements Serializable{
                                                    qual,
 												   supportsBrowseHost,
 												   currResp.getDocument(),
-												   currResp.getUrns());
+												   currResp.getUrns(),
+												   isReplyToMulticast);
         }
         
         return retArray;

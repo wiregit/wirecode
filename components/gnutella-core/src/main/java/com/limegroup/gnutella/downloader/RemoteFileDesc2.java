@@ -34,6 +34,7 @@ public class RemoteFileDesc2 extends URLRemoteFileDesc {
               rfd.browseHostEnabled(),
 			  rfd.getXMLDoc(),
 			  rfd.getUrns(),
+			  rfd.isReplyToMulticast(),
               rfd.getUrl());
         this._isUnreachable=isUnreachable;
         this._timeStamp=System.currentTimeMillis();

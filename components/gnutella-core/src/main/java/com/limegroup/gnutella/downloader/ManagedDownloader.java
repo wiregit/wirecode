@@ -1682,15 +1682,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         miniRFDToLock.put(mrfd,threadLock);
 
         synchronized(threadLock) {
-            manager.sendPush(rfd);        
-            //No loop is actually needed here, assuming spurious
-            //notify()'s don't occur.  (They are not allowed by the Java
-            //Language Specifications.)  Look at acceptDownload for
-            //details.
-            try {
-                threadLock.wait(PUSH_CONNECT_TIME);  
-            } catch(InterruptedException e) {//
-                return null;
+            // only wait if we actually were able to send the push
+            if ( manager.sendPush(rfd) ) {                    
+                //No loop is actually needed here, assuming spurious
+                //notify()'s don't occur.  (They are not allowed by the Java
+                //Language Specifications.)  Look at acceptDownload for
+                //details.
+                try {
+                    threadLock.wait(PUSH_CONNECT_TIME);  
+                } catch(InterruptedException e) {//
+                    return null;
+                }
             }
         }
         //Done waiting or were notified.
@@ -2098,10 +2100,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Returns true iff rfd should be attempted by push download, either 
      *  because it is a private address or was unreachable in the past. */
     private static boolean needsPush(RemoteFileDesc rfd) {
-        String host=rfd.getHost();
-        int port=rfd.getPort();
+        // if replying to multicast, don't push
+        if ( rfd.isReplyToMulticast() )
+            return false;
         //Return true if rfd is private or unreachable
-        if ((new Endpoint(host, port)).isPrivateAddress())
+        if (rfd.isPrivate())
             return true;
         else if (rfd instanceof RemoteFileDesc2)
             return ((RemoteFileDesc2)rfd).isUnreachable();

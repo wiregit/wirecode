@@ -1058,7 +1058,7 @@ public final class UploadManager implements BandwidthTracker {
 	}	
     
     private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean log = false;
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
