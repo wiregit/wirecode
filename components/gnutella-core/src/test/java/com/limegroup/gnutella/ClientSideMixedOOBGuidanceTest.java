@@ -56,10 +56,6 @@ public class ClientSideMixedOOBGuidanceTest
     }
     
     private static void doSettings() {
-        //Setup LimeWire backend.  For testing other vendors, you can skip all
-        //this and manually configure a client in leaf mode to listen on port
-        //6669, with no slots and no connections.  But you need to re-enable
-        //the interactive prompts below.
         ConnectionSettings.PORT.setValue(PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
@@ -93,30 +89,13 @@ public class ClientSideMixedOOBGuidanceTest
         Thread.sleep(1000);
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
-        connect(rs);
     }        
     
     public void setUp() throws Exception  {
         doSettings();
     }
-    
-    public static void globalTearDown() throws Exception {
-        shutdown();
-    }
-
-     ////////////////////////// Initialization ////////////////////////
-
-     private static void connect(RouterService rs) 
-     throws IOException, BadPacketException {
-         debug("-Establish connections");
-         //Ugh, there is a race condition here from the old days when this was
-         //an interactive test.  If rs connects before the listening socket is
-         //created, the test will fail.
-
-         //System.out.println("Please establish a connection to localhost:6350\n");
-     }
      
-     private static Connection connect(RouterService rs, int port, 
+    private static Connection connect(RouterService rs, int port, 
                                        boolean ultrapeer) 
          throws Exception {
          ServerSocket ss=new ServerSocket(port);
@@ -138,6 +117,7 @@ public class ClientSideMixedOOBGuidanceTest
          }
          Connection con = new Connection(socket, responder);
          con.initialize();
+         assertTrue("should be open", con.isOpen());
          replyToPing(con, ultrapeer);
          return con;
      }
@@ -208,7 +188,9 @@ public class ClientSideMixedOOBGuidanceTest
 
         for (int i = 0; i < testUPs.length; i++) {
             testUPs[i] = connect(rs, 6355+i, true);
-            drain(testUPs[i]);
+            assertTrue("not open", testUPs[i].isOpen());
+            assertTrue("not up->leaf", testUPs[i].isSupernodeClientConnection());
+            drain(testUPs[i], 500);
             if ((i==2)) { // i'll send 0 later....
                 testUPs[i].send(MessagesSupportedVendorMessage.instance());
                 testUPs[i].flush();
@@ -315,6 +297,9 @@ public class ClientSideMixedOOBGuidanceTest
         // we should now be guess capable and tcp incoming capable....
         assertTrue(rs.isGUESSCapable());
         assertTrue(rs.acceptedIncomingConnection());
+        
+        // get rid of any messages that are stored up.
+        drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(rs.newQueryGUID());
@@ -325,8 +310,8 @@ public class ClientSideMixedOOBGuidanceTest
 
         // some connected UPs should get a OOB query
         for (int i = 0; i < testUPs.length; i++) {
-            QueryRequest qr = getFirstQueryRequest(testUPs[i]);
-            assertNotNull(qr);
+            QueryRequest qr = getFirstQueryRequest(testUPs[i], TIMEOUT);
+            assertNotNull("up " + i + " didn't get query", qr);
             assertEquals(new GUID(qr.getGUID()), queryGuid);
             if ((i==0) || (i==2))
                 assertTrue(qr.desiresOutOfBandReplies());
@@ -385,14 +370,6 @@ public class ClientSideMixedOOBGuidanceTest
 
     private void drainAll() throws Exception {
         drainAll(testUPs);
-    }
-
-    private static void shutdown() throws IOException {
-        //System.out.println("\nShutting down.");
-        debug("-Shutting down");
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) { }
     }
     
     private static byte[] myIP() {
