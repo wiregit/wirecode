@@ -19,6 +19,11 @@ public class EndpointData extends Endpoint implements Cloneable,
 {
 
 /**
+* serial version
+*/
+static final long serialVersionUID = 5045818571228406227L;    
+    
+/**
 * Speed in kilobytes of the host this endpoint refers to
 */
 private long speed = 56;
