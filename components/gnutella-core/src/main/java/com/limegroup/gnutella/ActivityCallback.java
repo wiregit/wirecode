@@ -138,10 +138,9 @@ public interface ActivityCallback
 	public void clearSharedFiles();
 	
 	/**
-	 * Notification that an update is available.
+	 * Notification that an update became available.
 	 */
 	public void updateAvailable(UpdateInformation info);
-
 
 	/**
 	 * Sets the enabled/disabled state of file annotation.

@@ -281,6 +281,7 @@ class UpdateCollection {
         String id = getAttributeText(attr, "id");
         String button1 = getAttributeText(attr, "button1");
         String button2 = getAttributeText(attr, "button2");
+        String title = getAttributeText(attr, "title");
         String msg = lang.getTextContent();
         
         if(id == null || msg == null || msg.equals("")) {
@@ -292,6 +293,7 @@ class UpdateCollection {
         data.setButton1Text(button1);
         data.setButton2Text(button2);
         data.setUpdateText(msg);
+        data.setUpdateTitle(title);
         
         // A-Okay -- we've got a good UpdateData.
         updateDataList.add(data);

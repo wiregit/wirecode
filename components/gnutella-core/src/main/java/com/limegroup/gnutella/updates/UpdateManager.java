@@ -129,24 +129,6 @@ public class UpdateManager {
     public boolean isValid() {
         return isValid;
     }
-    
-    /**
-     * Prompts the user about an update if one is available.
-     */
-    public boolean displayUpdate() {
-        String myVersion = CommonUtils.getLimeWireVersion();
-        if(latestVersion.equals(SPECIAL_VERSION))
-            return false;
-        if(myVersion.equalsIgnoreCase(latestVersion)) //are we equal?
-            return false;
-        if(!isGreaterVersion(latestVersion,myVersion))
-            return false;
-        //OK. myVersion < latestVersion
-        String guiMessage = latestVersion + ". " + message;
-        //RouterService.getCallback().
-            //notifyUserAboutUpdate(guiMessage, CommonUtils.isPro(), usesLocale);
-        return true;
-    }
 
     public void checkAndUpdate(Connection connection) {
 		String nv = connection.getVersion();

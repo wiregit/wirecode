@@ -172,7 +172,7 @@ public class UpdateHandler {
     /**
      * Determines if we should notify about there being new information.
      */
-    private void notifyAboutInfo(long timestamp, boolean fromDisk) {
+    private void notifyAboutInfo(long timestamp, final boolean fromDisk) {
         if(_updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
@@ -185,26 +185,33 @@ public class UpdateHandler {
         final int id = _lastId;
         if(now < then) {
             if(LOG.isInfoEnabled())
-                LOG.info("Delaying update for: " + (then-now) + "msecs.");
+                LOG.info("Delaying Update." +
+                         "\nNow    : " + now + 
+                         "\nStamp  : " + timestamp +
+                         "\nDelay  : " + delay + 
+                         "\nRandom : " + random + 
+                         "\nThen   : " + then +
+                         "\nDiff   : " + (then-now));
 
             RouterService.schedule(new Runnable() {
                 public void run() {
                     // only run if the ids weren't updated while we waited.
                     if(id == _lastId)
-                        showUpdate(_updateInfo);
+                        showUpdate(_updateInfo, fromDisk);
                 }
             }, then - now, 0);
         } else {
-            showUpdate(_updateInfo);
+            showUpdate(_updateInfo, fromDisk);
         }
     }
     
     /**
      * Sends off an update message to the GUI.
      */
-    private void showUpdate(UpdateInformation update) {
+    private void showUpdate(UpdateInformation update, boolean fromDisk) {
         _updateAvailable = true;
-        RouterService.getCallback().updateAvailable(update);
+        if(!fromDisk)
+            RouterService.getCallback().updateAvailable(update);
     }
     
     /**

@@ -51,6 +51,9 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** The text of button2. */
     private String button2Text;
     
+    /** The text of the update title. */
+    private String updateTitle;
+    
     /**
      * Constructs a new UpdateData object.
      */
@@ -64,7 +67,7 @@ class UpdateData implements Cloneable, UpdateInformation {
             "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
             ", pro: " + isPro + ", free: " + isFree + ", url: " + updateURL + ", style: " + updateStyle +
             ", javaFrom: " + fromJava + ", javaTo: " + toJava + ", osList: " + OS.toString(osList) +
-            ", language: " + language + ", text: " + updateText + "}";
+            ", language: " + language + ", text: " + updateText + ", title: " + updateTitle + "}";
     }
     
     /** Sets the from */
@@ -109,6 +112,9 @@ class UpdateData implements Cloneable, UpdateInformation {
     /** Sets the button2 text */
     void setButton2Text(String t) { button2Text = t; }
     
+    /** Sets the text of the title */
+    void setUpdateTitle(String t) { updateTitle = t; }
+    
     /** Gets the language. */
     String getLanguage() { return language; }
     
@@ -131,6 +137,9 @@ class UpdateData implements Cloneable, UpdateInformation {
     
     /** Gets the button2 text. */
     public String getButton2Text() { return button2Text; }
+    
+    /** Gets the update title. */
+    public String getUpdateTitle() { return updateTitle; }
     
     /**
      * Determines if this matches (on all except language).

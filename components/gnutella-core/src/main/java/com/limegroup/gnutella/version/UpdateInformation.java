@@ -15,6 +15,8 @@ public interface UpdateInformation {
     
     public String getUpdateText();
     
+    public String getUpdateTitle();
+    
     public String getUpdateVersion();
     
     public String getButton1Text();
