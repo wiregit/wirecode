@@ -43,9 +43,8 @@ public final class AlternateLocationTest extends TestCase {
 		"2002-04",
 		"2002-04-30T",
 		"2002-04-30T08:31:21.45TZD",
-		"2000-04-30T08:31:21.45Z",
 		"2002-04-40T08:31:21.45Z",
-		"2002-12-30T08:31:21.45Z",
+		"2002-13-30T08:31:21.45Z",
 		"2002-04-30T08:31:21.45",
 		"2002-04-30T08:31:60Z",
 		"2002-04-30T08:60:21Z",
@@ -344,8 +343,6 @@ public final class AlternateLocationTest extends TestCase {
 	 * not meet the appropriate syntax to make sure they fail.
 	 */
 	public void testAlternateLocationConstructorWithInvalidDates() {
-		// make sure that alternate locations with the same urls and different
-		// timestamps are considered different
 		for(int i=0; i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
 			String nonTSloc = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
 
