@@ -436,7 +436,9 @@ public class IncompleteFileManager implements Serializable {
     public synchronized void addEntry(File incompleteFile, VerifyingFile vf) 
       throws IOException {
         // We must canonicalize the file.
-        incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+        try {
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+        } catch(IOException ignored) {}
 
         blocks.put(incompleteFile,vf);
         
