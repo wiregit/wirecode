@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
+
 import com.sun.java.util.collections.*;
 
 /**
@@ -56,6 +57,20 @@ public class FileUtils
             if(in != null)
                 in.close();
         }    
+    }
+
+    /** Same as the f.listFiles() in JDK1.3. */
+    public static File[] listFiles(File f) {
+        String[] children=f.list();
+        if (children==null)
+            return null;
+    
+        File[] ret = new File[children.length];
+        for (int i=0; i<children.length; i++) {
+            ret[i] = new File(f, children[i]);
+        }
+    
+        return ret;
     }
     
 }
