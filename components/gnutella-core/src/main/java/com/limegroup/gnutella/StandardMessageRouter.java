@@ -165,13 +165,17 @@ public class StandardMessageRouter extends MessageRouter {
 
         // This is a special What is Query - we can only answer queries which
         // have version numbers at or below our supported version
-        if ((queryRequest.getCapabilitySelector() > 0) &&
-            (queryRequest.getCapabilitySelector() > 
-             CapabilitiesVM.CAPABILITY_MAX_SELECTOR)) return false;
+        if (queryRequest.getCapabilitySelector() < 
+                                   CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR)
+            return false;
+
+        if(queryRequest.getCapabilitySelector() > 
+                                   CapabilitiesVM.FEATURE_SEARCH_MAX_SELECTOR) 
+           return false;
 
         if (queryRequest.isWhatIsNewRequest())
             ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
-    
+                                                
         // Only send results if we're not busy.  Note that this ignores
         // queue slots -- we're considered busy if all of our "normal"
         // slots are full.  This allows some spillover into our queue that

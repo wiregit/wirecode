@@ -16,8 +16,14 @@ public final class StringSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultStr the default value to use for the setting
 	 */
-	StringSetting(Properties defaultProps, Properties props, String key, String defaultStr) {
-		super(defaultProps, props, key, defaultStr);
+	StringSetting(Properties defaultProps, Properties props, String key, 
+                                       String defaultStr) {
+		super(defaultProps, props, key, defaultStr, null);
+	}
+
+	StringSetting(Properties defaultProps, Properties props, String key, 
+                   String defaultStr, String simppKey) {
+		super(defaultProps, props, key, defaultStr, simppKey);
 	}
         
 	/**
@@ -45,5 +51,4 @@ public final class StringSetting extends Setting {
     protected void loadValue(String sValue) {
         value = sValue;
     }
-    
 }

@@ -345,6 +345,17 @@ public class Connection implements IpPort {
     }
 
     /**
+     * Call this method if you want to send your neighbours a message with your
+     * updated capabilities.
+     */
+    protected void sendUpdatedCapabilities() {
+        try {
+            if(_headers.supportsVendorMessages())
+                send(CapabilitiesVM.instance());
+        } catch (IOException iox) { }
+    }
+
+    /**
      * Call this method when you want to handle us to handle a VM.  We may....
      */
     protected void handleVendorMessage(VendorMessage vm) {
@@ -1440,7 +1451,7 @@ public class Connection implements IpPort {
      */
     public int getRemoteHostCapabilitySelector() {
         if (_capabilities != null)
-            return _capabilities.supportsCapabilityQueries();
+            return _capabilities.supportsFeatureQueries();
         return -1;
     }
 
@@ -1827,10 +1838,21 @@ public class Connection implements IpPort {
 		return _headers.supportsGGEP();
     }
 
+    /**
+     * Sends the StatisticVendorMessage down the connection
+     */
     public void handleStatisticVM(StatisticVendorMessage svm) 
                                                             throws IOException {
         send(svm);
     }
+
+    /**
+     * Sends the SimppVM down the connection
+     */
+    public void handleSimppVM(SimppVM simppVM) throws IOException {
+        send(simppVM);
+    }
+
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */

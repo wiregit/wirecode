@@ -117,6 +117,17 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         								F_ULTRAPEER_LIST,
 										UDPCrawlerPong.VERSION);
         hashSet.add(smp);
+        //Simpp Request message
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+                                        F_SIMPP_REQ,
+                                        SimppRequestVM.VERSION);
+        hashSet.add(smp);
+        //Simpp Message
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+                                        F_SIMPP,
+                                        SimppVM.VERSION);
+        hashSet.add(smp);
+        
     }
 
 

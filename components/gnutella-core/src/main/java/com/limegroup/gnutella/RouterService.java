@@ -16,6 +16,7 @@ import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.updates.*;
+import com.limegroup.gnutella.simpp.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
 import com.limegroup.gnutella.search.*;
@@ -280,6 +281,15 @@ public class RouterService {
             UpdateManager.instance();//initialize
             LOG.trace("STOP UpdateManager.instance");
             
+            LOG.trace("START SimppManager.instance");
+            callback.componentLoading("SIMPP_MANAGER");
+            SimppManager.instance();//initialize
+            LOG.trace("STOP SimppManager.instance");
+            
+            //Note: this MUST be after SimppManager is initialized
+            SimppSettingsManager.instance();
+
+
             LOG.trace("START QueryUnicaster");
             callback.componentLoading("QUERY_UNICASTER");
     		QueryUnicaster.instance().start();

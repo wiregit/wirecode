@@ -11,6 +11,7 @@ public final class ColorSetting extends Setting {
     
     private Color value;
 
+    
 	/**
 	 * Creates a new <tt>ColorSetting</tt> instance with the specified
 	 * key and defualt value.
@@ -19,10 +20,18 @@ public final class ColorSetting extends Setting {
 	 * @param defaultColor the default value to use for the setting
 	 */
 	static ColorSetting createColorSetting(Properties defaultProps, 
-										   Properties props, 
-										   String key, Color defaultColor) {	  
+										   Properties props, String key, 
+                                           Color defaultColor ) { 
 		return new ColorSetting(defaultProps, props, key, 
-            formatColor(defaultColor));
+                                                 formatColor(defaultColor));
+	}
+
+
+	static ColorSetting createColorSetting(Properties defaultProps, 
+										   Properties props, String key, 
+                                         Color defaultColor, String simppKey) { 
+		return new ColorSetting(defaultProps, props, key, 
+                                formatColor(defaultColor), simppKey);
 	}
 
 	/**
@@ -35,10 +44,16 @@ public final class ColorSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param value the default value to use for the setting
 	 */
-	private ColorSetting(Properties defaultProps, Properties props, 
-						 String key, String value) {
-		super(defaultProps, props, key, value);
+	private ColorSetting(Properties defaultProps, Properties props, String key, 
+						                       String value) {
+		super(defaultProps, props, key, value, null);
 	}
+
+	private ColorSetting(Properties defaultProps, Properties props, String key, 
+                         String value, String simppKey) {
+		super(defaultProps, props, key, value, simppKey);
+	}
+
 
         
 	/**

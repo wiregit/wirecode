@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for an float setting.
  */
-public final class FloatSetting extends Setting {
+public final class FloatSetting extends AbstractNumberSetting {
     
     private float value;
 
@@ -16,8 +16,16 @@ public final class FloatSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultFloat the default value to use for the setting
 	 */
-	FloatSetting(Properties defaultProps, Properties props, String key, float defaultFloat) {
-		super(defaultProps, props, key, String.valueOf(defaultFloat));
+	FloatSetting(Properties defaultProps, Properties props, String key, 
+                                                         float defaultFloat) {
+		super(defaultProps, props, key, String.valueOf(defaultFloat), 
+                                                             null, null, null);
+	}
+
+	FloatSetting(Properties defaultProps, Properties props, String key, 
+                 float defaultFloat, String simppKey, float max, float min) {
+		super(defaultProps, props, key, String.valueOf(defaultFloat), 
+              simppKey, new Float(max), new Float(min) );
 	}
         
 	/**
@@ -49,4 +57,12 @@ public final class FloatSetting extends Setting {
             revertToDefault();
         }
     }
+
+    protected boolean isInRange(String value) {
+        float max = ((Float)MAX_VALUE).floatValue();
+        float min = ((Float)MIN_VALUE).floatValue();
+        float val = Float.parseFloat(value);
+        return (val <= max && val >= min);
+    }
+
 }

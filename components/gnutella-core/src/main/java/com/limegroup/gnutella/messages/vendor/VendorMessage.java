@@ -31,8 +31,12 @@ public abstract class VendorMessage extends Message {
     protected static final int F_STATISTICS = 15;
     protected static final int F_GIVE_ULTRAPEER = 5;
     protected static final int F_ULTRAPEER_LIST = 6;
+    protected static final int F_SIMPP_REQ = 16;
+    protected static final int F_SIMPP = 17;
     protected static final int F_UDP_HEAD_PING = 23;
     protected static final int F_UDP_HEAD_PONG = 24;
+
+
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
@@ -322,8 +326,12 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_STATISTICS) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
-        
-
+        if((selector == F_SIMPP_REQ) &&
+           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new SimppRequestVM(guid, ttl, hops, version, restOf);
+        if((selector == F_SIMPP) && 
+           (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new SimppVM(guid, ttl, hops, version, restOf);
         if ((selector == F_GIVE_ULTRAPEER) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
         	return new UDPCrawlerPing(guid,ttl,hops,version,restOf);

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.simpp.*;
 import com.limegroup.gnutella.upelection.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
@@ -391,7 +392,12 @@ public abstract class MessageRouter {
         	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, receivingConnection);
         }
-        
+        else if(msg instanceof SimppRequestVM) {
+            handleSimppRequest((SimppRequestVM)msg, receivingConnection);
+        }
+        else if(msg instanceof SimppVM) {
+            handleSimppVM((SimppVM)msg);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
@@ -1590,7 +1596,7 @@ public abstract class MessageRouter {
         // sure that the remote host can answer the query....
         if ((query.getCapabilitySelector() > 0) &&
             (ultrapeer.getRemoteHostCapabilitySelector() <
-             CapabilitiesVM.CAPABILITY_MIN_SELECTOR)) return;
+             CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR)) return;
 
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
@@ -1695,7 +1701,7 @@ public abstract class MessageRouter {
         // sure that the remote host can answer the query....
         if ((query.getCapabilitySelector() > 0) &&
             (mc.getRemoteHostCapabilitySelector() < 
-             CapabilitiesVM.CAPABILITY_MIN_SELECTOR)
+             CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR)
             ) return false;
         mc.originateQuery(query);
         return true;
@@ -1965,6 +1971,35 @@ public abstract class MessageRouter {
             statHandler.start();
         }
     }
+
+    /**
+     *  If we get and SimppRequest, get the payload we need from the
+     *  SimppManager and send the simpp bytes the the requestor in a SimppVM. 
+     */
+    private void handleSimppRequest(final SimppRequestVM simppReq, 
+                                                  final ReplyHandler handler ) {
+        if(simppReq.getVersion() > SimppRequestVM.VERSION)
+            return; //we are not going to deal with these types of requests. 
+        byte[] simppBytes = SimppManager.instance().getSimppBytes();
+        SimppVM simppVM = new SimppVM(simppBytes);
+        try {
+            handler.handleSimppVM(simppVM);
+        } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
+            return;
+        }
+    }
+    
+
+    /**
+     * Passes on the SimppVM to the SimppManager which will authenticate it and
+     * make sure we it's newer than the one we know about, and then make changes
+     * to the settings as necessary, and cause new CapabilityVMs to be sent down
+     * all connections.
+     */
+    private void handleSimppVM(final SimppVM simppVM) {
+        SimppManager.instance().checkAndUpdate(simppVM.getPayload());
+    }
+
 
     /**
      * The default handler for PushRequests received in

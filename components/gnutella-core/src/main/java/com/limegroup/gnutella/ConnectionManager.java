@@ -1237,6 +1237,17 @@ public class ConnectionManager {
     }
 
     /**
+     * Iterates over all the connections and sends the updated CapabilitiesVM
+     * down every one of them.
+     */
+    public void sendUpdatedCapabilities() {        
+        for(Iterator iter = getConnections().iterator(); iter.hasNext(); ) {
+            Connection c = (Connection)iter.next();
+            c.sendUpdatedCapabilities();
+        }
+    }
+
+    /**
      * Disconnects from the network.  Closes all connections and sets
      * the number of connections to zero.
      */

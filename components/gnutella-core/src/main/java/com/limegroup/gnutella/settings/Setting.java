@@ -35,6 +35,15 @@ public abstract class Setting {
 	 * Value for whether or not this setting should always save.
 	 */
 	private boolean _alwaysSave = false;
+
+
+    /**
+     * The string which will be used to identify the setting the simpp message
+     * is trying to set. For non-simppable setting this value must be null, for
+     * simppable settings the setting must have a value which will NEVER change
+     */
+    private final String SIMPP_KEY;
+
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -43,17 +52,21 @@ public abstract class Setting {
 	 *
 	 * @param key the key for the setting
 	 * @param defaultValue the defaultValue for the setting
+     * @param simppKey the string used to identify a simpp setting. This must
+     * have a valid value for simppable settings and must be null for
+     * non-simppable settings.
 	 * @throws <tt>IllegalArgumentException</tt> if the key for this 
 	 *  setting is already contained in the map of default settings
 	 */
-	protected Setting(Properties defaultProps, Properties props, String key, String defaultValue) {
+	protected Setting(Properties defaultProps, Properties props, String key, 
+                String defaultValue, String simppKey) {
 		DEFAULT_PROPS = defaultProps;
 		PROPS = props;
 		KEY = key;
+        SIMPP_KEY = simppKey;
 		DEFAULT_VALUE = defaultValue;
-		if(DEFAULT_PROPS.containsKey(key)) {
+		if(DEFAULT_PROPS.containsKey(key)) 
 			throw new IllegalArgumentException("duplicate setting key");
-		}
 		DEFAULT_PROPS.put(KEY, defaultValue);
         loadValue(defaultValue);
 	}
@@ -121,16 +134,24 @@ public abstract class Setting {
     
     /**
      * Set new property value
-     * @param value new property value
+     * @param value new property value 
+     *
+     * Note: This is the method used by SimmSettingsManager to load the setting
+     * with the value specified by Simpp 
      */
     protected void setValue(String value) {
         PROPS.put(KEY, value);
         loadValue(value);
     }
 
+    public boolean isSimppEnabled() {
+        return (SIMPP_KEY != null);
+    }
+
     /**
      * Load value from property string value
      * @param sValue property string value
      */
-    abstract protected void loadValue(String sValue);
+    abstract protected void loadValue(String sValue);    
+
 }

@@ -19,9 +19,17 @@ public class StringArraySetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
 	 */
-	StringArraySetting(Properties defaultProps, Properties props, String key, String[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue));
+	StringArraySetting(Properties defaultProps, Properties props, String key, 
+                                                       String[] defaultValue) {
+		super(defaultProps, props, key, decode(defaultValue), null);
 	}
+
+	StringArraySetting(Properties defaultProps, Properties props, String key, 
+                       String[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(defaultValue), simppKey);
+	}
+
+
         
 	/**
 	 * Accessor for the value of this setting.
@@ -79,4 +87,5 @@ public class StringArraySetting extends Setting {
             
         return buffer.toString();
     }
+
 }

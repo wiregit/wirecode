@@ -2,6 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.util.*;
 import java.util.Properties;
+import com.sun.java.util.collections.*;
 import java.io.*;
 
 
@@ -95,5 +96,33 @@ public abstract class AbstractSettings {
      */
     public boolean getShouldSave() {
         return _shouldSave;
+    }
+
+
+    /**
+     * Used to find any setting based on the key in the appropriate props file
+     */
+    public Setting getSetting(String key) {
+        synchronized(FACTORY) {
+            Iterator iter = FACTORY.iterator();
+            while(iter.hasNext()) {
+                Setting currSetting = (Setting)iter.next();
+                if(currSetting.getKey().equals(key))
+                    return currSetting;
+            }
+        }
+        return null; //unable the find the setting we are looking for
+    }
+
+    /**
+     * Delegates the lookup for the setting based on simppkey to the factory
+     * which is keeping track of simpp settings as they are being loaded.
+     * <p> 
+     * If this method returns null it means that the Factory has not loaded the
+     * setting yet. In this case the caller of this method will have to handle
+     * it by forcing that setting to be loaded. 
+     */
+    public Setting getSimppSetting(String simppKey) {
+        return FACTORY.getSettingForSimppKey(simppKey);
     }
 }

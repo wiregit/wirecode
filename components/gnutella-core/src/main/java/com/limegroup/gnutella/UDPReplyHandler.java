@@ -239,6 +239,14 @@ public final class UDPReplyHandler implements ReplyHandler {
         UDPService.instance().send(m, IP, PORT);
     }
     
+    /**
+     * As of now there is no need to send SimppMessages via UDP, 
+     */ 
+    public void handleSimppVM(SimppVM simppVM) {
+        //This should never happen. But if it does, ignore it and move on
+        return;
+    }
+    
 
 
     // inherit doc comment

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
 import org.xml.sax.*;
+import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
 
 /**
@@ -67,21 +68,11 @@ public class UpdateMessageVerifier {
                 }
             }       
         }
-        try {            
-            //initialize the verifier
-            Signature verifier = Signature.getInstance("DSA");
-            verifier.initVerify(pubKey);//initialize the signaure
-            verifier.update(xmlMessage,0,xmlMessage.length);
-            //verify
-            return verifier.verify(signature);
-        } catch (NoSuchAlgorithmException nsax) {
-            ErrorService.error(nsax);
-            return false;
-        } catch (InvalidKeyException ikx) {
-            return false;
-        } catch (SignatureException sx) {
-            return false;
-        }
+        
+        SignatureVerifier verifier = 
+                    new SignatureVerifier(xmlMessage,signature, pubKey, "DSA");
+        
+        return verifier.verifySignature();
     }
 
     private boolean parse() {
@@ -96,7 +87,12 @@ public class UpdateMessageVerifier {
         //now i is at the first | delimiter and j is at the second | delimiter
         byte[] temp = new byte[i];
         System.arraycopy(data,0,temp,0,i);
-        String base32 = new String(temp);
+        String base32 = null;
+        try {
+            base32 = new String(temp, "UTF-8");
+        } catch(UnsupportedEncodingException usx) {
+            ErrorService.error(usx);
+        }
         signature = Base32.decode(base32);
         xmlMessage = new byte[data.length-1-j];
         System.arraycopy(data,j+1,xmlMessage,0,data.length-1-j);

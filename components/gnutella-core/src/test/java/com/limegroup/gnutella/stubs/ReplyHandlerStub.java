@@ -95,6 +95,8 @@ public class ReplyHandlerStub implements ReplyHandler {
 
     public void handleStatisticVM(StatisticVendorMessage svm) { }
 
+    public void handleSimppVM(SimppVM svm) { }
+
     public boolean isStable() {
         return true;
     }

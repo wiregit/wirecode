@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for a byte setting.
  */
-public final class ByteSetting extends Setting {
+public final class ByteSetting extends AbstractNumberSetting {
     
     private byte value;
 
@@ -16,8 +16,17 @@ public final class ByteSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultByte the default value to use for the setting
 	 */
-	ByteSetting(Properties defaultProps, Properties props, String key, byte defaultByte) {
-		super(defaultProps, props, key, String.valueOf(defaultByte));
+	ByteSetting(Properties defaultProps, Properties props, String key, 
+                                                             byte defaultByte) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), 
+                                                             null, null, null);
+	}
+
+
+	ByteSetting(Properties defaultProps, Properties props, String key, 
+                byte defaultByte, String simppKey, byte max, byte min) {
+		super(defaultProps, props, key, String.valueOf(defaultByte), 
+              simppKey, new Byte(max), new Byte(min) );
 	}
         
 	/**
@@ -48,5 +57,12 @@ public final class ByteSetting extends Setting {
         } catch(NumberFormatException nfe) {
             revertToDefault();
         }
+    }
+
+    protected boolean isInRange(String value) {
+        byte max = ((Byte)MAX_VALUE).byteValue();
+        byte min = ((Byte)MIN_VALUE).byteValue();
+        byte val = Byte.parseByte(value);
+        return (val <= max && val >= min);
     }
 }

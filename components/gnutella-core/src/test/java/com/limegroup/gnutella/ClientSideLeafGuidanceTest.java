@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 import junit.framework.Test;
 
+import java.io.*;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -37,7 +39,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private static QueryStatusResponse getFirstQueryStatus(Connection c) {
+    private static QueryStatusResponse getFirstQueryStatus(Connection c) 
+                                        throws BadPacketException, IOException {
         return (QueryStatusResponse)
             getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }

@@ -11,6 +11,7 @@ public final class FileSetting extends Setting {
     private File value;
     private String absolutePath;
 
+
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
 	 * key and defualt value.
@@ -18,9 +19,17 @@ public final class FileSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultFile the default value to use for the setting
 	 */
-	FileSetting(Properties defaultProps, Properties props, String key, File defaultFile) {
-		super(defaultProps, props, key, defaultFile.getAbsolutePath());
+	FileSetting(Properties defaultProps, Properties props, String key, 
+                                                         File defaultFile) {
+		super(defaultProps, props, key, defaultFile.getAbsolutePath(), null); 
 	}
+
+
+	FileSetting(Properties defaultProps, Properties props, String key, 
+                File defaultFile, String simppKey) {
+		super(defaultProps, props, key, defaultFile.getAbsolutePath(), simppKey);
+	}
+
         
 	/**
 	 * Accessor for the value of this setting.
@@ -49,4 +58,5 @@ public final class FileSetting extends Setting {
         value = new File(sValue);
         absolutePath = value.getAbsolutePath();
     }
+
 }

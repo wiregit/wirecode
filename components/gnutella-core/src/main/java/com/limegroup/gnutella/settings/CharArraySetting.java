@@ -24,17 +24,22 @@ public final class CharArraySetting extends Setting {
 	 */
     static CharArraySetting 
         createCharArraySetting(Properties defaultProps, Properties props, 
-                               String key, 
-                               char[] defaultValue) {
+                               String key, char[] defaultValue) {
         return new CharArraySetting(defaultProps, props, key, 
-                                    new String(defaultValue));
+                                           new String(defaultValue));
     }
 
 	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                     String defaultValue) {
-		super(defaultProps, props, key, defaultValue);
+                                                          String defaultValue) {
+		super(defaultProps, props, key, defaultValue, null);
 	}
-        
+     
+	CharArraySetting(Properties defaultProps, Properties props, String key, 
+                 char[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, new String(defaultValue), simppKey);
+	}
+
+   
 	/**
 	 * Accessor for the value of this setting.
 	 * 
@@ -60,4 +65,5 @@ public final class CharArraySetting extends Setting {
     protected void loadValue(String sValue) {
         value = sValue.trim().toCharArray();
     }
+
 }

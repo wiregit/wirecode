@@ -168,6 +168,11 @@ public interface ReplyHandler {
      */
     public void handleUDPCrawlerPong(UDPCrawlerPong m);
 
+    /**
+     * Handles SimppVM
+     */
+    public void handleSimppVM(SimppVM simppVM) throws IOException;
+
 }
 
 

@@ -20,10 +20,17 @@ public class FileArraySetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
 	 */
-	FileArraySetting(Properties defaultProps, Properties props, String key, File[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue));
+	FileArraySetting(Properties defaultProps, Properties props, String key, 
+                                                         File[] defaultValue) {
+		super(defaultProps, props, key, decode(defaultValue), null);
 	}
         
+	FileArraySetting(Properties defaultProps, Properties props, String key, 
+                     File[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(defaultValue), simppKey);
+    }
+
+
 	/**
 	 * Accessor for the value of this setting.
 	 * 
@@ -86,4 +93,5 @@ public class FileArraySetting extends Setting {
             
         return buffer.toString();
     }
+
 }

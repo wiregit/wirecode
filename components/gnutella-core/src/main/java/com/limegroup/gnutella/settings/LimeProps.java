@@ -28,4 +28,5 @@ public class LimeProps extends AbstractSettings {
      * Returns the only instance of this class.
      */
     public static LimeProps instance() { return INSTANCE; }
+
 }
