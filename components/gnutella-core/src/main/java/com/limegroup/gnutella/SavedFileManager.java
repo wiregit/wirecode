@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.settings.SharingSettings;
 
@@ -27,8 +28,8 @@ public final class SavedFileManager implements Runnable {
     private static SavedFileManager INSTANCE = new SavedFileManager();
     public static SavedFileManager instance() { return INSTANCE; }
     private SavedFileManager() {
-        // Run the task every minute, starting in 10 seconds.
-        RouterService.schedule(this, 10 * 1000, 1 * 60 * 1000);
+        // Run the task every three minutes, starting in 10 seconds.
+        RouterService.schedule(this, 10 * 1000, 3 * 60 * 1000);
     }
     
     
@@ -56,7 +57,7 @@ public final class SavedFileManager implements Runnable {
     /**
      * Whether or not we are currently loading the saved files.
      */
-    private boolean _loading = false;
+    private volatile boolean _loading = false;
         
     /**
      * Adds a new Saved File with the given URNs.
@@ -78,19 +79,42 @@ public final class SavedFileManager implements Runnable {
     }
     
     /**
+     * Returns true if this is already loading or if FileManager
+     * is still loading.
+     */
+    public synchronized boolean isLoading() {
+        return _loading || !RouterService.getFileManager().isLoadFinished();
+    }
+    
+    /**
+     * Attempts to load the saved files.
+     */
+    public void run() {
+        synchronized(this) {
+            if(!isLoading()) {
+                _loading = true;
+                Thread t = new ManagedThread(new Runnable() {
+                    public void run() {
+                        try {
+                            load();
+                        } finally {
+                            _loading = false;
+                        }
+                    }
+                }, "SavedFileProcessor");
+                t.setDaemon(true);
+                t.start();
+            }
+        }
+    }    
+    
+    /**
      * Resets the map to contain all the files in the saved directory.
      *
      * Does nothing if this is already loading, or if FileManager
      * is still loading.
      */
     private void load() {
-        synchronized(this) {
-            if(_loading || !RouterService.getFileManager().isLoadFinished()) {
-                LOG.trace("Ignoring load, already loading.");
-                return;
-            }
-            _loading = true;
-        }
         LOG.trace("Loading Saved Files");
         Set urns = new HashSet();
         Set names = new TreeSet(Comparators.caseInsensitiveStringComparator());
@@ -120,15 +144,7 @@ public final class SavedFileManager implements Runnable {
             // replace the old ones.
             _names = names;
             _urns = urns;
-            _loading = false;
-            LOG.trace("Finished loading");
         }
+        LOG.trace("Finished loading saved Files.");
     }
-    
-    /**
-     * Attempts to load the saved files.
-     */
-    public void run() {
-        load();
-    }
-}    
+}

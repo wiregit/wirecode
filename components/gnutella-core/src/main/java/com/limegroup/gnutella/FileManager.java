@@ -595,6 +595,8 @@ public abstract class FileManager {
 						ErrorService.error(t);
 					}
 					_loadFinished = true;
+					// make sure SavedFileManager starts its processing ASAP
+					SavedFileManager.instance().run();
                 }
             };
             _loadThread.start();
