@@ -128,17 +128,29 @@ public final class SearchResultHandler {
     private boolean handleReply(final QueryReply qr) {
 		SettingsManager settings = SettingsManager.instance();
 		HostData data = new HostData(qr);
-
-		// note that the minimum search quality will always be greater
-		// than -1, so -1 qualities (the impossible case) are never
-		// displayed
-		if(data.getQuality() < settings.getMinimumSearchQuality()) return false;
-		if(data.getSpeed() < settings.getMinimumSearchSpeed()) return false;
-        if(data.isFirewalled() && 
-           (!RouterService.acceptedIncomingConnection() ||
-            (NetworkUtils.isPrivateAddress(RouterService.getAddress())
-            && !NetworkUtils.isVeryCloseIP(qr.getIPBytes())))) {
-            return false;
+        
+        // always handle reply to multicast queries.
+        if( !data.isReplyToMulticastQuery() ) {
+            // note that the minimum search quality will always be greater
+            // than -1, so -1 qualities (the impossible case) are never
+            // displayed
+            if(data.getQuality() < settings.getMinimumSearchQuality()) {
+                return false;
+            }
+            if(data.getSpeed() < settings.getMinimumSearchSpeed()) {
+                return false;
+            }
+            // if the other side is firewalled AND
+            // (we are firewalled OR 
+            //     (we are a private IP AND
+            //      the other side isn't very close to us)
+            // ) then drop the reply.
+            if(data.isFirewalled() && 
+            (!RouterService.acceptedIncomingConnection() ||
+                (NetworkUtils.isPrivateAddress(RouterService.getAddress())
+                && !NetworkUtils.isVeryCloseIP(qr.getIPBytes())))) {
+                return false;
+            }
         }
 
         List results = null;

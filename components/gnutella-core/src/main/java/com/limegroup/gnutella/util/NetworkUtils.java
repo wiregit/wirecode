@@ -54,21 +54,20 @@ public final class NetworkUtils {
 
     /**
      * Returns whether or not the two ip addresses share the same
-     * first three octets in their address -- the most common
+     * first two octets in their address -- the most common
      * indication that they may be on the same network.
+     *
+     * Private networks are NOT CONSIDERED CLOSE.
      *
      * @param addr0 the first address to compare
      * @param addr1 the second address to compare
      */
     public static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
-        // if one is a private address, check three bytes for closeness
+        // if 0 is not a private address but 1 is, then the next
+        // check will fail anyway, so this is okay.
         if( isPrivateAddress(addr0) )
-            return 
-                addr0[0] == addr1[0] &&
-                addr0[1] == addr1[1] &&
-                addr0[2] == addr1[2];
-        // otherwise, check only two bytes.
-        else
+            return false;
+        else 
             return
                 addr0[0] == addr1[0] &&
                 addr0[1] == addr1[1];
