@@ -220,15 +220,18 @@ public class RouterService {
             _started = true;
     
             LOG.trace("START Acceptor");
+            callback.componentLoading("ACCEPTOR");
     		acceptor.start();
     		LOG.trace("STOP Acceptor");
     		
     		// Now, link all the pieces together, starting the various threads.
             LOG.trace("START MessageRouter");
+            callback.componentLoading("MESSAGE_ROUTER");
     		router.initialize();
     		LOG.trace("STOPMessageRouter");
     		
     		LOG.trace("START ConnectionManager");
+    		callback.componentLoading("CONNECTION_MANAGER");
     		manager.initialize();
     		LOG.trace("STOP ConnectionManager");
     		
@@ -246,6 +249,7 @@ public class RouterService {
             // THIS MUST BE BEFORE THE CONNECT (below)
             // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
             LOG.trace("START HostCatcher.initialize");
+            callback.componentLoading("HOST_CATCHER");
     		catcher.initialize();
     		LOG.trace("STOP HostCatcher.initialize");
     
@@ -261,36 +265,44 @@ public class RouterService {
             // Asynchronously load files now that the GUI is up, notifying
             // callback.
             LOG.trace("START FileManager");
+            callback.componentLoading("FILE_MANAGER");
             fileManager.start();
             LOG.trace("STOP FileManager");
     
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");
+            callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
             downloader.postGuiInit();
             LOG.trace("STOP DownloadManager.postGuiInit");
             
             LOG.trace("START UpdateManager.instance");
+            callback.componentLoading("UPDATE_MANAGER");
             UpdateManager.instance();//initialize
             LOG.trace("STOP UpdateManager.instance");
             
             LOG.trace("START QueryUnicaster");
+            callback.componentLoading("QUERY_UNICASTER");
     		QueryUnicaster.instance().start();
     		LOG.trace("STOP QueryUnicaster");
     		
     		LOG.trace("START HTTPAcceptor");
+            callback.componentLoading("HTTPACCEPTOR");
             httpAcceptor = new HTTPAcceptor();  
             httpAcceptor.start();
             LOG.trace("STOP HTTPAcceptor");
             
             LOG.trace("START Pinger");
+            callback.componentLoading("PINGER");
             Pinger.instance().start();
             LOG.trace("STOP Pinger");
             
             LOG.trace("START ConnectionWatchdog");
+            callback.componentLoading("CONNECTION_WATCHDOG");
             ConnectionWatchdog.instance().start();
             LOG.trace("STOP ConnectionWatchdog");
             
             LOG.trace("START SavedFileManager");
+            callback.componentLoading("SAVED_FILE_MANAGER");
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
             

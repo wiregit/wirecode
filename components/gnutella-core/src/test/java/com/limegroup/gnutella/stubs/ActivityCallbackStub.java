@@ -25,6 +25,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     //if corruptness was queried
     public static boolean corruptChecked = false;
 
+    public void componentLoading(String component) {}
     public void connectionInitializing(Connection c) { }
     public void connectionInitialized(Connection c) { }
     public void connectionClosed(Connection c) { }

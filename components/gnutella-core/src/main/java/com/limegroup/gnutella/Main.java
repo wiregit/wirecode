@@ -269,5 +269,9 @@ public class Main implements ActivityCallback, ErrorCallback {
     public boolean isQueryAlive(GUID guid) {
         return false;
     }
+    
+    public void componentLoading(String component) {
+        System.out.println("Loading component: " + component);
+    }
 
 }

@@ -183,4 +183,9 @@ public interface ActivityCallback
     public String getHostValue(String key);
 
     public void indicateNewVersion();
+    
+    /**
+     * Indicates a component is loading.
+     */
+    public void componentLoading(String component);
 }
