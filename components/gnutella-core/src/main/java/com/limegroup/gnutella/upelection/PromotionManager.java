@@ -213,19 +213,21 @@ public class PromotionManager {
 	
 	/**
 	 * expires the partner if we don't get an ACK.
-	 * interrupt to cancel.
+	 * call cancel() to cancel this task.
 	 * 
 	 */
 	private class Expirer implements Runnable {
 		
 		boolean _cancelled = false;
 		
+		/**
+		 * cancels the execution of this task
+		 */
 		public void cancel() {
 			_cancelled = true;
 		}
 		/**
-		 * creates a new expiring thread which interrupts
-		 * any currently running expiring threads.
+		 * creates a new expiring task which cancels any previous such tasks
 		 */
 		public Expirer(long timeout) {
 			
