@@ -22,7 +22,24 @@ public final class PongCacher implements Runnable {
      */
     private static BucketQueue _pongs;
 
-    private static Set _cachedPongs;
+    /**
+     * Variable for the <tt>Set</tt> of the best cached pongs currently 
+     * available.
+     */
+    private static Set _cachedPongs = 
+        Collections.unmodifiableSet(new HashSet());
+
+    /**
+     * Constant for the number of pongs to store at each hop.
+     */
+    private static final int PONGS_PER_HOP = 20;
+
+    /**
+     * Flag for whether or not we've received a new pong -- allows slight
+     * optimization where we don't rebuild the cached pong set when no new
+     * pongs have come in.
+     */
+    private static volatile boolean _newPong = false;
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -49,8 +66,9 @@ public final class PongCacher implements Runnable {
     public void run() {
         try {
             while(true) {
-                if(RouterService.isSupernode()) {
+                if(RouterService.isSupernode() && _newPong) {
                     _cachedPongs = Collections.unmodifiableSet(updatePongs());
+                    _newPong = false;
                 }
                 Thread.sleep(600);
             }
@@ -82,11 +100,12 @@ public final class PongCacher implements Runnable {
 
         // lazily construct the queue
         if(_pongs == null) {
-            _pongs = new BucketQueue(8, 20);
+            _pongs = new BucketQueue(8, PONGS_PER_HOP);
         }
         synchronized(_pongs) {
             _pongs.insert(pr, pr.getHops());
         }
+        _newPong = true;
     }
 
     /**
