@@ -76,7 +76,12 @@ public class HttpClientManager {
     }
     
     /**
-     * Returns a new HttpClient with the appropriate manager and parameters
+     * Returns a new HttpClient with the appropriate manager and parameters.
+     * 
+     * @param connectTimeout the number of milliseconds to wait to establish
+     *  a TCP connection with the remote host
+     * @param soTimeout the socket timeout -- the number of milliseconds to 
+     *  wait for data before closing an established socket
      */
     public static HttpClient getNewClient(int connectTimeout, int soTimeout) {
         HttpClient client = new HttpClient(MANAGER);
