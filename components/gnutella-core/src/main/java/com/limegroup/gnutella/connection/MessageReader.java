@@ -30,6 +30,15 @@ public interface MessageReader {
         throws BadPacketException, IOException;
         
     /**
+     * Creates new messages from the data read in from the key's channel and 
+     * routes those messages appropriately.
+     * 
+     * @param key the <tt>SelectionKey</tt> obtained from the selector, which
+     *  contains the connection as an attachment from which data is read
+     */
+    void handleMessage(SelectionKey key);
+        
+    /**
      * Notifies the <tt>MessageReader</tt> that it should start reading
      * messages.
      * 

@@ -75,6 +75,8 @@ public class NIOMessageReader extends AbstractMessageReader {
 		throws IOException, BadPacketException {
         return createMessage(key, Message.N_TCP);
 	}
+    
+        
 
 	/**
 	 * Creates a new <tt>Message</tt> instance from the specified 
@@ -281,6 +283,31 @@ public class NIOMessageReader extends AbstractMessageReader {
             throw new IllegalStateException("this method should not be called");
         }    
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageReader#handleMessage(java.nio.channels.SelectionKey)
+     */
+    public void handleMessage(SelectionKey key) {
+        try {
+            Message msg = createMessageFromTCP(key);
+                    
+            if(msg == null) {
+                // the message was not read completely -- we'll get
+                // another read event on the channel and keep reading
+                return;
+            }
+    
+            routeMessage(msg);
+        } catch (BadPacketException e) {
+            MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+        } catch (IOException e) {
+            key.cancel();
+            // remove the connection if we got an IOException
+            RouterService.removeConnection((Connection)key.attachment());
+            MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
+        }
+        
     }
 }
 
