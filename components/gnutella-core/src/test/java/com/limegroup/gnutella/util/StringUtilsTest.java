@@ -205,4 +205,56 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 			assertEquals("unexpected string", _testString+new_strs[i], str);
 		}
 	}
+    
+    //tests method contains with non-ascii chars... (japanese to be exact)
+    public void testContainsNonAscii() throws Exception {
+        String miyamoto = "\u5bae\u672c\u6b66\u8535\u69d8";
+        
+        assertTrue(StringUtils.contains(miyamoto, "\u5bae\u672c"));
+        assertFalse(StringUtils.contains(miyamoto, "\uff2e"));
+        assertTrue(StringUtils.contains(miyamoto, "\u672c+\u8535"));
+        assertTrue(StringUtils.contains(miyamoto, "\u5bae*\u69d8"));
+        assertTrue(StringUtils.contains(miyamoto, "\u672c \u8535"));
+        assertFalse(StringUtils.contains(miyamoto, "\uff2d \u8535"));
+        assertTrue(StringUtils.contains(miyamoto, "\u5bae \u6b66+\u69d8"));
+
+    }
+
+    //tests the collator comparisions...
+    public void testCompareFullPrimary() throws Exception {
+        String s1 = "cafe";
+        String s2 = "caf\u00e9";
+        
+        assertEquals("these should be considered the same",
+                     0,
+                     StringUtils.compareFullPrimary(s1, s2));
+        
+        String s3 = "limewire";
+        String s4 = "\uff2c\uff29\uff2d\uff25\uff37\uff29\uff32\uff25";
+        
+        assertEquals("these should be considered the same",
+                     0,
+                     StringUtils.compareFullPrimary(s3, s4));
+        
+        String a1 = "test";
+        String a2 = "tist";
+        String a3 = "\uff34\uff29\uff33\uff34"; //tist in FULLWIDTH
+        
+        //comparing ascii so should be same as compareIgnoreCase
+        //the important thing is that they are both negative, or positive
+        assertEquals("expected to be the same as compareIignoreCase",
+                     StringUtils.compareIgnoreCase(a1, a2) < 0,
+                     StringUtils.compareFullPrimary(a1, a2) < 0);
+        
+        assertEquals("expected to be the same (FULLWIDTH)",
+                      StringUtils.compareFullPrimary(a1, a2),
+                      StringUtils.compareFullPrimary(a1, a3));
+        
+        assertEquals("should of returned zero",
+                     0,
+                     StringUtils.compareFullPrimary(a2, a3));
+        
+    }
+
 }
+
