@@ -30,6 +30,7 @@
     <fileset dir="${testslib}" includes="*.jar"/>
     <pathelement location="${messagebundles}" />
     <pathelement location="${builddir}" />
+    <pathelement location="${datadir}" />
   </path>
   
   <!-- CLOVER SETUP TASKS -->
