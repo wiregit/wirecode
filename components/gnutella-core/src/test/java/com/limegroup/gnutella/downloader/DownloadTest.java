@@ -832,6 +832,69 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertGreaterThan("u2 did no work", 0, u2);
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
+    
+    public void testPartialSourceNotAddedWithCorruption() throws Exception {
+        
+        // change the minimum required bytes so it'll be added.
+        PrivilegedAccessor.setValue(HTTPDownloader.class,
+            "MIN_PARTIAL_FILE_BYTES", new Integer(TestFile.length()/2) );
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            "_acceptedIncoming", Boolean.TRUE );
+            
+        debug("-Testing that downloader does not add to mesh if corrupt");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+        
+        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
+        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+                    
+        // neither uploader knows any alt locs.
+        assertNull(u1Alt);
+        assertNull(u2Alt);
+
+        // the rate must be absurdly slow for the incomplete file.length()
+        // check in HTTPDownloader to be updated.
+        final int RATE=50;
+        final int STOP_AFTER = TestFile.length()/3;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader1.setCorruption(true);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        tGenericCorrupt(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //both uploaders should know that this downloader is an alt loc.
+        u1Alt = uploader1.getAlternateLocations();
+        u2Alt = uploader2.getAlternateLocations();
+        assertNotNull(u1Alt);
+        assertNotNull(u2Alt);
+        Collection u1Locs = u1Alt.values();
+        Collection u2Locs = u2Alt.values();
+        AlternateLocation al =
+            AlternateLocation.createAlternateLocation(TestFile.hash());
+        assertTrue( !u1Locs.contains(al) );
+        assertTrue( !u2Locs.contains(al) );        
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertGreaterThan("u2 did no work", 0, u2);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }    
 
 	// no longer in use, as alternate locations should always have SHA1s
 	/*
@@ -1033,6 +1096,28 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertNull("verifying file should be null", vf);
         }
     }
+    
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     */
+    private static void tGenericCorrupt(RemoteFileDesc[] rfds) throws Exception {
+        Downloader download=null;
+
+        download=dm.download(rfds, false);
+
+        waitForComplete(false);
+        if (isComplete())
+            fail("should be corrupt");
+        else
+            debug("pass");
+        
+        IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        for (int i=0; i<rfds.length; i++) {
+            File incomplete=ifm.getFile(rfds[i]);
+            VerifyingFile vf=ifm.getEntry(incomplete);
+            assertNull("verifying file should be null", vf);
+        }
+    }    
 
 	/*
     private static URL rfdURL(RemoteFileDesc rfd) {
