@@ -30,12 +30,6 @@ public class NormalUploadState implements UploadState {
     private int _uploadEnd;
 
 	/**
-	 * The <tt>URN</tt> instance for this upload, which could always
-	 * remain null.
-	 */
-	private URN _urn;
-
-	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
 	 */
 	private FileDesc _fileDesc;
@@ -45,6 +39,11 @@ public class NormalUploadState implements UploadState {
      * the request or not.
 	 */
     private boolean _closeConnection = false;
+
+	/**
+	 * Constant for the MIME type to return.
+	 */
+	private final String MIME_TYPE = "application/binary";
     
 	/**
 	 * This class implements a succesful upload version
@@ -64,7 +63,6 @@ public class NormalUploadState implements UploadState {
             _amountRead = _uploader.amountUploaded();
             _uploadBegin =  _uploader.getUploadBegin();
             _uploadEnd =  _uploader.getUploadEnd();
-			_urn = _uploader.getUrn();
 			_fileDesc = _uploader.getFileDesc();
             
             //guard clause
@@ -142,7 +140,6 @@ public class NormalUploadState implements UploadState {
      */
     private void uploadThrottled() throws IOException {
         while (true) {
-            // int max = _uploader.getManager().calculateBurstSize();
             int max = _uploader.getManager().calculateBandwidth();
             int burstSize=max*CYCLE_TIME;
 
@@ -202,11 +199,11 @@ public class NormalUploadState implements UploadState {
 	 */
 	private void writeHeader() throws IOException {
 		String str;
-		str = "HTTP 200 OK \r\n";
+		str = "HTTP/1.1 200 OK\r\n";
 		_ostream.write(str.getBytes());
 		str = "Server: "+CommonUtils.getHttpServer()+"\r\n";
 		_ostream.write(str.getBytes());
-		String type = getMimeType();       /* write this method later  */
+		String type = getMimeType();       // write this method later  
 		str = "Content-Type: " + type + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Length: "+ (_uploadEnd - _uploadBegin) + "\r\n";
@@ -256,7 +253,6 @@ public class NormalUploadState implements UploadState {
 		       "File Name:  "+_fileName+"\r\n"+
 		       "File Size:  "+_fileSize+"\r\n"+
 		       "File Index: "+_index+"\r\n"+
-		       "URN:        "+_urn+"\r\n"+
 		       "File Desc:  "+_fileDesc;
 	}
 
