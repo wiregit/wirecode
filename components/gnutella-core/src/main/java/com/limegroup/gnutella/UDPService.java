@@ -28,21 +28,22 @@ public final class UDPService implements Runnable {
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
      * before sending.  Moreover, only one thread should be wait()ing on one of
      * these locks at a time or results cannot be predicted.
-	 * The socket that handles sending and receiving messages over UDP.
+	 * This is the socket that handles sending and receiving messages over 
+	 * UDP.
 	 */
 	private volatile DatagramSocket _socket;
 	
     /**
      * Used for synchronized RECEIVE access to the UDP socket.  Should only be
-     * used by the _udpThread.
+     * used by the UDP_THREAD.
      */
-    private Object _receiveLock = new Object();
+    private final Object _receiveLock = new Object();
 
     /**
      * Used for synchronized SEND access to the UDP socket.  Should only be used
      * in the send method.
      */
-    private Object _sendLock = new Object();
+    private final Object _sendLock = new Object();
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
@@ -57,12 +58,10 @@ public final class UDPService implements Runnable {
 	 */
 	private boolean _isGUESSCapable = false;
 
-	//private final int SOCKET_TIMEOUT = 2*1000;
-
 	/**
 	 * The thread for listening of incoming messages.
 	 */
-	private Thread _udpThread = new Thread(this);
+	private final Thread UDP_THREAD = new Thread(this);
 
 	/**
 	 * Cached <tt>QueryUnicaster</tt> instnace.
@@ -113,9 +112,10 @@ public final class UDPService implements Runnable {
 	void setListeningSocket(DatagramSocket datagramSocket) {
         // we used to check if we were GUESS capable according to the
         // SettingsManager.  but in general we want to have the SERVER side of
-        // GUESS active always.  the client side should be shut off from MessageRouter.
-        if (!_udpThread.isAlive())
-            _udpThread.start();
+        // GUESS active always.  the client side should be shut off from 
+		// MessageRouter.
+        if (!UDP_THREAD.isAlive())
+            UDP_THREAD.start();
 
         //a) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
@@ -180,7 +180,7 @@ public final class UDPService implements Runnable {
                 if(message == null) continue;
                 if (message instanceof QueryRequest)
                     sendAcknowledgement(datagram, message.getGUID());
-                router.handleUDPMessage(message, datagram);
+                router.handleUDPMessage(message, datagram);				
             }
             catch (IOException e) {
                 continue;
