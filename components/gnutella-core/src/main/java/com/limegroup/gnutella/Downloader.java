@@ -18,6 +18,10 @@ public interface Downloader extends BandwidthTracker {
     public static final int WAITING_FOR_RETRY = 3;
     public static final int COMPLETE          = 4;
     public static final int ABORTED           = 5;
+    /** When a downloader is in the GAVE_UP state, it can still try downloading
+     *  if matching results pour in.  So you should 'stop' downloaders that are
+     *  in the GAVE_UP state.
+     */
     public static final int GAVE_UP           = 6;
     public static final int COULDNT_MOVE_TO_LIBRARY = 7;
     public static final int WAITING_FOR_RESULTS = 8;

@@ -194,7 +194,7 @@ public class DownloadManager implements BandwidthTracker {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
                 waiting.add(downloader);                                 //1
-                downloader.initialize(this, this.fileManager, callback); //2
+                downloader.initialize(this, this.fileManager, callback, true);//2
                 callback.addDownload(downloader);                        //3
             }
             return true;
@@ -260,7 +260,7 @@ public class DownloadManager implements BandwidthTracker {
         //active if it can.
         ManagedDownloader downloader =
 			new ManagedDownloader(files, incompleteFileManager);
-        downloader.initialize(this, fileManager, callback);
+        downloader.initialize(this, fileManager, callback, false);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.
@@ -304,7 +304,7 @@ public class DownloadManager implements BandwidthTracker {
                                               textQuery,
                                               filename,
                                               defaultURL);
-        downloader.initialize(this, fileManager, callback);
+        downloader.initialize(this, fileManager, callback, false);
 
         //Add download to appropriate lists and write snapshot.  
         //TODO: factor to make less like getFiles().
@@ -368,7 +368,7 @@ public class DownloadManager implements BandwidthTracker {
                                               incompleteFile,
                                               name,
                                               size);
-            downloader.initialize(this, fileManager, callback);
+            downloader.initialize(this, fileManager, callback, false);
         } catch (IllegalArgumentException e) {
             throw new CantResumeException(incompleteFile.getName());
         }
@@ -415,7 +415,7 @@ public class DownloadManager implements BandwidthTracker {
 
         RequeryDownloader downloader=
             new RequeryDownloader(incompleteFileManager,add);
-        downloader.initialize(this, fileManager, callback);
+        downloader.initialize(this, fileManager, callback, false);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.

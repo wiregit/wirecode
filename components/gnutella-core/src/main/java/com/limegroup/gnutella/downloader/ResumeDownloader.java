@@ -60,9 +60,10 @@ public class ResumeDownloader extends ManagedDownloader
      *  non-zero and file previewing works. */
     public void initialize(DownloadManager manager, 
                            FileManager fileManager, 
-                           ActivityCallback callback) {
+                           ActivityCallback callback,
+                           boolean deserialized) {
         initializeIncompleteFile(_incompleteFile);
-        super.initialize(manager, fileManager, callback);
+        super.initialize(manager, fileManager, callback, deserialized);
     }
 
     /**

@@ -30,7 +30,7 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         RequeryDownloader downloader=new RequeryDownloader(ifm, details);
         downloader.initialize(new DownloadManager(), 
                               new FileManager(),
-                              new ActivityCallbackStub());
+                              new ActivityCallbackStub(), false);
         File tmp=File.createTempFile("RequeryDownloader_test", "dat");
         ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
         out.writeObject(downloader);
