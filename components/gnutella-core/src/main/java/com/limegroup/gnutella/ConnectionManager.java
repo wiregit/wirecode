@@ -28,6 +28,32 @@ import com.limegroup.gnutella.handshaking.*;
  * doesn't quite fit the BandwidthTracker interface.
  */
 public class ConnectionManager {
+    
+    /*********** IMPORTANT NOTE ABOUT THIS CLASS *************
+     * The acceptConnection() method is a template method, and the behaviour
+     * is modified in the subclasses by providing alternate implementations 
+     * for the 'protected' methods called from this method, as well as from the
+     * methods invoked from this method.
+     *
+     * Therefore, please be lenient while thinking of changing the method names
+     * of the 'protected' methods of this class, as well as their use. The
+     * implementation of these methods can be changed (as long as the
+     * specifications are not changed.
+     *
+     * NOTE: Note that we could have used Template Design Pattern over here,
+     * and could move the algorithm to the abstract class, but after 
+     * discussions with other developers, it was observed that the subclasses
+     * of this class dont really wanna provide a different implementation,
+     * but want to handle special cases, and fall back on the implementations 
+     * in this class for normal cases. Also, most of the methods depend a
+     * lot on the private variables. Therefore having abstract class wont
+     * necessarily help too much.
+     * 
+     * Please send an email to asingla@limewire.com, if and when you plan to 
+     * change the behaviour of these methods.
+     **********************************************************
+     */
+    
     /* List of all connections.  This is implemented with two data structures:
      * a list for fast iteration, and a set for quickly telling what we're
      * connected to.
@@ -359,7 +385,7 @@ public class ConnectionManager {
     public int getNumConnections() {
         return _connections.size();
     }
-
+    
     /**
      * @return the number of initialized connections, which is less than or equals
      *  to the number of connections.
@@ -608,6 +634,18 @@ public class ConnectionManager {
         _connections=newConnections;
     }
 
+    /**
+     * Adds an incoming connection to the list of connections. Note that
+     * the incoming connection has already been initialized before 
+     * this method is invoked.
+     * Should only be called from a thread that has this' monitor.
+     * This is called from initializeExternallyGeneratedConnection, for 
+     * incoming connections
+     */
+    protected void connectionInitializingIncoming(ManagedConnection c) {
+        connectionInitializing(c);
+    }
+    
     /**
      * Marks a connection fully initialized, but only if that connection wasn't
      * removed from the list of open connections during its initialization.
@@ -1185,7 +1223,7 @@ public class ConnectionManager {
         //this was done at the top of the method.  See note there.
         if (! c.isOutgoing()) {
             synchronized(this) {
-                connectionInitializing(c);
+                connectionInitializingIncoming(c);
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
