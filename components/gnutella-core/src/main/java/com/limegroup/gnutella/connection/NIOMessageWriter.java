@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.NIOBandwidthThrottle;
 
 /**
  * Writes Gnutella messages to SocketChannel.  Used by Connnection to send
@@ -56,6 +57,11 @@ public final class NIOMessageWriter implements MessageWriter {
      */
     private boolean _closed = false;
 	
+    /**
+     * Throttle that makes sure we don't send any more data than desired.
+     */
+    private static final NIOBandwidthThrottle THROTTLE = 
+        NIOBandwidthThrottle.createThrottle(8*1024);
     
     /**
      * Factory method for creating <tt>MessageWriter</tt> instances for 
@@ -102,7 +108,7 @@ public final class NIOMessageWriter implements MessageWriter {
         // pending messages indicate that the TCP upstream buffer has filled,
         // so we should start our application-level buffering of messages to
         // make sure we prioritize certain traffic over others
-        if(hasPendingMessage()) {
+        if(hasPendingMessage()) {// || !(QUEUE.size() == 0)) {
             QUEUE.add(msg);
                 
             // should already be registered, but just in case...    
