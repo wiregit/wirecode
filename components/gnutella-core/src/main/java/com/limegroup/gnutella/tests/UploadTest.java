@@ -1,160 +1,187 @@
 package com.limegroup.gnutella.tests;
 
+import junit.framework.*;
+import junit.extensions.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.*;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
- * called "alphabet.txt" containing the lowercase characters a-z.
+ * containing the lowercase characters a-z.
  */
-public class UploadTest {
+public class UploadTest extends TestCase {
     private static String address;
     private static int port;
     private static String file="alphabet test file#2.txt";
     private static String encodedFile="alphabet%20test+file%232.txt";
+	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
     private static final int index=0;
     /** Our listening port for pushes. */
     private static int callbackPort=6350;
 
+	/**
+	 * Creates a new UploadTest with the specified name.
+	 */
+	public UploadTest(String name) {
+		super(name);
+	}
 
-    public static void main(String args[]) {
-        try {
-            address=args[0];
-            port=Integer.parseInt(args[1]);
-        } catch (Exception e) {
-            System.out.println("Syntax: UploadTest <address> <port>");
-        }
-        
+	/**
+	 * Allows this test to be run as a set of suites.
+	 */
+	public static Test suite() {
+		return new TestSuite(UploadTest.class);
+	}
+
+	public static void main(String args[]) {
+		junit.textui.TestRunner.run(suite());
+	}
+
+	protected void setUp() {
+		try {
+  			address = InetAddress.getLocalHost().getHostAddress();
+  		} catch(UnknownHostException e) {
+  			assertTrue("unexpected exception: "+e, false);
+  		}
+		//address = "10.254.0.22";
+		port = 6346;
         System.out.println(
             "Please make sure your client is listening on port "+port+"\n"
             +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
             +"with at least one incoming messaging slot.  Also, nothing\n"
-            +"may be listening to port "+callbackPort+"\n");
-        
+            +"may be listening to port "+callbackPort+".\n"
+			+"Finally, the file must contain all lower-case characters in\n" 
+			+"the alphabet, exactly like the following:\n\n"
+			+"abcdefghijklmnopqrstuvwxyz");
+		System.out.println(); 
+	}
+
+    public void testAll() {
         try {
             boolean passed;
             
             ///////////////////push downloads with HTTP1.0///////////
-            passed = downloadPush(file, null,"abcdefghijklmnopqrstuvwxyz");
-            test("Push download",passed);
+            passed = downloadPush(file, null,alphabet);
+            assertTrue("Push download",passed);
             
-            passed=downloadPush(encodedFile, null,
-                                "abcdefghijklmnopqrstuvwxyz");
-            test("Push download, encoded file name",passed);
+            passed=downloadPush(encodedFile, null,alphabet);
+            assertTrue("Push download, encoded file name",passed);
 
             passed=downloadPush(file, "Range: bytes=2-5","cdef");
-            test("Push download, middle range, inclusive",passed);
+            assertTrue("Push download, middle range, inclusive",passed);
 
-            ///////////////////push downloads with HTTP1.1///////////////
-            
-            passed = downloadPush1(file, null,"abcdefghijklmnopqrstuvwxyz");
-            test("Push download with HTTP1.1",passed);
+            ///////////////////push downloads with HTTP1.1///////////////            
+            passed = downloadPush1(file, null, alphabet);
+            assertTrue("Push download with HTTP1.1",passed);
             
             passed=downloadPush1(encodedFile, null,
                                 "abcdefghijklmnopqrstuvwxyz");
-            test("Push download, encoded file name with HTTP1.1",passed);
+            assertTrue("Push download, encoded file name with HTTP1.1",passed);
 
             passed=downloadPush1(file, "Range: bytes=2-5","cdef");
-            test("Push download, middle range, inclusive with HTTP1.1",passed);
+            assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
             
 
             //////////////normal downloads with HTTP 1.0//////////////
-
             passed=download(file, null,"abcdefghijklmnopqrstuvwxyz");
-            test("No range header",passed);
+            assertTrue("No range header",passed);
             
             passed=download(file, "Range: bytes=2-", 
                             "cdefghijklmnopqrstuvwxyz");
-            test("Standard range header",passed);
+            assertTrue("Standard range header",passed);
 
 
             passed=download(file, "Range: bytes 2-", 
                             "cdefghijklmnopqrstuvwxyz");
-            test("Range missing \"=\".  (Not legal HTTP, but common.)",
-                 passed);
+            assertTrue("Range missing \"=\".  (Not legal HTTP, but common.)",
+					   passed);
 
 
             passed=download(file, "Range: bytes=2-5","cdef",
                             "Content-range: bytes 2-5/26");
-            test("Middle range, inclusive",passed);
+            assertTrue("Middle range, inclusive",passed);
 
         
             passed=download(file, "Range:bytes 2-",
                             "cdefghijklmnopqrstuvwxyz",
                             "Content-length:24");
-            test("No space after \":\".  (Legal HTTP.)",passed);
+            assertTrue("No space after \":\".  (Legal HTTP.)",passed);
 
             passed=download(file, "Range: bytes=-5","vwxyz");
-            test("Last bytes of file",passed);
+            assertTrue("Last bytes of file",passed);
 
             passed=download(file, "Range: bytes=-30",
                             "abcdefghijklmnopqrstuvwxyz");
-            test("Too big negative range request",passed);
+            assertTrue("Too big negative range request",passed);
 
 
             passed=download(file, "Range:   bytes=  2  -  5 ", "cdef");
-            test("Lots of extra space",passed);
+            assertTrue("Lots of extra space",passed);
 
 
-            Assert.that(URLDecoder.decode(encodedFile).equals(file),
-                        "Unexpected: "+URLDecoder.decode(encodedFile));
+			assertEquals("Unexpected: "+URLDecoder.decode(encodedFile), file,
+						 URLDecoder.decode(encodedFile));
+            //Assert.that(URLDecoder.decode(encodedFile).equals(file),
+			//          "Unexpected: "+URLDecoder.decode(encodedFile));
             passed=download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
-            test("URL encoded",passed);
+            assertTrue("URL encoded",passed);
 
 
             ////////////normal download with HTTP 1.1////////////////
 
             passed=download1(file, null,"abcdefghijklmnopqrstuvwxyz");
-            test("No range header with HTTP1.1",passed);
+            assertTrue("No range header with HTTP1.1",passed);
 
             passed=download1(file, "Range: bytes=2-", 
                             "cdefghijklmnopqrstuvwxyz");
-            test("Standard range header with HTTP1.1",passed);
+            assertTrue("Standard range header with HTTP1.1",passed);
 
 
             passed=download1(file, "Range: bytes 2-", 
                             "cdefghijklmnopqrstuvwxyz");
-            test("Range missing \"=\". (Not legal HTTP, but common.)"+
+            assertTrue("Range missing \"=\". (Not legal HTTP, but common.)"+
                  "with HTTP1.1", passed);
 
 
             passed=download1(file, "Range: bytes=2-5","cdef");
-            test("Middle range, inclusive with HTTP1.1",passed);
+            assertTrue("Middle range, inclusive with HTTP1.1",passed);
 
         
             passed=download1(file, "Range:bytes 2-",
                             "cdefghijklmnopqrstuvwxyz");
-            test("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
+            assertTrue("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
 
             passed=download1(file, "Range: bytes=-5","vwxyz");
-            test("Last bytes of file with HTTP1.1",passed);
+            assertTrue("Last bytes of file with HTTP1.1",passed);
 
 
             passed=download1(file, "Range:   bytes=  2  -  5 ", "cdef");
-            test("Lots of extra space with HTTP1.1",passed);
+            assertTrue("Lots of extra space with HTTP1.1",passed);
 
 
-            Assert.that(URLDecoder.decode(encodedFile).equals(file),
-                        "Unexpected: "+URLDecoder.decode(encodedFile));
+			assertEquals("Unexpected: "+URLDecoder.decode(encodedFile),
+						 file, URLDecoder.decode(encodedFile));
+            //Assert.that(URLDecoder.decode(encodedFile).equals(file),
+			//          "Unexpected: "+URLDecoder.decode(encodedFile));
             passed=download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
-            test("URL encoded with HTTP1.1",passed);
+            assertTrue("URL encoded with HTTP1.1",passed);
             
             //////////////////Pipelining tests with HTTP1.1////////////// 
             passed = pipelineDownloadNormal(file, null, 
                                             "abcdefghijklmnopqrstuvwxyz");
-            test("piplining with normal download",passed);
+            assertTrue("piplining with normal download",passed);
             
             passed = pipelineDownloadPush(file,null, 
                                           "abcdefghijklmnopqrstuvwxyz");
-            test("piplining with push download",passed);
+            assertTrue("piplining with push download",passed);
             
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.that(false, "Unexpected exception");
+			assertTrue("unexpected exception: "+e, false);
         } catch (BadPacketException e) {
             e.printStackTrace();
-            Assert.that(false, "Bad packet");
+			assertTrue("unexpected BadPacketException: "+e, false);
         }
     }
 
@@ -217,8 +244,8 @@ public class UploadTest {
     }
 
     private static boolean downloadPush1(String file, String header, 
-                                       String expResp) 
-            throws IOException, BadPacketException {
+										 String expResp) 
+		throws IOException, BadPacketException {
         //Establish push route
         Connection c=new Connection(address, port);
         c.initialize();
@@ -249,15 +276,19 @@ public class UploadTest {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
-        in.readLine();  //skip GIV        
-        in.readLine();  //skip blank line
+
+		in.readLine(); //skip GIV
+		in.readLine(); //skip blank line
 
         //Download from the (incoming) TCP connection.
         String retStr=downloadInternal1(file, header, out, in,expResp.length());
+		assertEquals("unexpected HTTP response message body", expResp, retStr);
         boolean ret = retStr.equals(expResp);
-        retStr = "";//reset it
-        
+
+        // reset string variable
         retStr = downloadInternal1(file, header, out, in,expResp.length());
+		assertEquals("unexpected HTTP response message body in second request", 
+					 expResp, retStr);
         
         ret = ret && retStr.equals(expResp);
 
@@ -272,7 +303,7 @@ public class UploadTest {
 
 
     private static boolean downloadPush(String file, String header, 
-                                       String expResp) 
+										String expResp) 
             throws IOException, BadPacketException {
         //Establish push route
         Connection c=new Connection(address, port);
@@ -288,6 +319,7 @@ public class UploadTest {
                 break;
             } 
         }
+		assertNotNull("reply should not be null", reply);
         PushRequest push=new PushRequest(GUID.makeGuid(),
             (byte)5,
             reply.getClientGUID(),
@@ -304,16 +336,19 @@ public class UploadTest {
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
-        in.readLine();  //skip GIV        
-        in.readLine();  //skip blank line
+		in.readLine(); //skip GIV
+		in.readLine(); //skip blank line
 
         //Download from the (incoming) TCP connection.
         String retStr=downloadInternal(file, header, out, in);
-
+		assertNotNull("string returned from download should not be null", retStr);
+		assertTrue("should not have received the empty string", !retStr.equals(""));
+		
         //Cleanup
         c.close();
         s.close();
-        ss.close();        
+        ss.close();    
+		assertEquals("message body should be equal to expected string", expResp, retStr);
         return retStr.equals(expResp);
     }
 
@@ -359,9 +394,10 @@ public class UploadTest {
                        equals(canonicalizeHeader(requiredHeader)))
                    foundHeader = true;
         }
-        if (requiredHeader!=null)
+        if (requiredHeader!=null) {
             //TODO: convey this to the caller gently so it can print "FAILED"
-            Assert.that(foundHeader, "Didn't find header");
+			assertTrue("Didn't find header", foundHeader);
+		}
         
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();
@@ -392,17 +428,17 @@ public class UploadTest {
      * content.  Doesn't close in or out.
      */
     private static String downloadInternal1(String file,
-                                              String header,
-                                              BufferedWriter out,
-                                              BufferedReader in,
-                                              int expectedSize) 
+											String header,
+											BufferedWriter out,
+											BufferedReader in,
+											int expectedSize) 
         throws IOException {
         //Assert.that(out!=null && in!=null,"socket closed my server");
         //1. Send request
         out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
-        out.write("Connection:Keep-Alive\r\n");
+        out.write("Connection: Keep-Alive\r\n");
         out.write("\r\n");
         out.flush();
         
@@ -414,7 +450,6 @@ public class UploadTest {
             int c = in.read();
             buf.append((char)c);
         }
-        //System.out.println("Sumeet: about to return value " + buf);
         return buf.toString();
     }
 
@@ -539,12 +574,5 @@ public class UploadTest {
             buf.append((char)c1);
         }
         return ret && buf.toString().equals(expResp);
-    }
-
-
-    private static void test(String testName, boolean passed) {
-        System.out.println((passed?"passed":"FAILED")+" : "+testName);
-        if (!passed)
-            System.out.println("unexpected output:");
     }
 }
