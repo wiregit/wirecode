@@ -360,7 +360,7 @@ public class HeadPong extends VendorMessage {
     		GGEP ggep = new GGEP(true);
     		
     		//put in our supported features with metadata
-    		addGGEPProperties(ggep);
+    		GGEPHeadConstants.addDefaultGGEPProperties(ggep);
 			
 		} catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -701,27 +701,6 @@ public class HeadPong extends VendorMessage {
 			caos.write(altbytes);
 			return true;
 		}
-	}
-	
-	/**
-	 * writes a ggep field to the given stream with values depending on the features
-	 * byte.
-	 */
-	private static void addGGEPProperties(GGEP dest) {
-	    
-	    // add the features we understand
-	    byte [] supportedFeatures = new byte[] {(byte)
-	            (GGEPHeadConstants.GGEP_BLOOM |
-	            GGEPHeadConstants.GGEP_PUSH_BLOOM |
-	            GGEPHeadConstants.GGEP_MYPE |
-	            GGEPHeadConstants.RANGES |
-	            GGEPHeadConstants.ALTLOCS |
-	            GGEPHeadConstants.PUSHLOCS)};
-	    dest.put(GGEPHeadConstants.GGEP_PROPS,supportedFeatures);
-	    
-	    //also say that we support only the list of 32-bit ranges format.
-	    dest.put((char)GGEPHeadConstants.RANGES+"m",GGEPHeadConstants.RANGE_LIST);
-	    
 	}
 	
 	

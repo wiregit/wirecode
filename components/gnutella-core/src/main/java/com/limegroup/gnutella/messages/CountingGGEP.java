@@ -49,5 +49,6 @@ public class CountingGGEP extends GGEP {
     public CountingGGEP(byte[] messageBytes, int beginOffset, int[] endOffset)
             throws BadGGEPBlockException {
         super(messageBytes, beginOffset, endOffset);
+        _counter = endOffset[0] - beginOffset;
     }
 }

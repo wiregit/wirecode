@@ -226,15 +226,18 @@ public class HeadPing extends VendorMessage {
 		features |= GGEP_PING;
 		
 		// we always support bloom filters, even if we don't carry one
-		ggep.put(GGEPHeadConstants.GGEP_PROPS, 
-		        new byte[]{(byte)(GGEPHeadConstants.GGEP_BLOOM | GGEPHeadConstants.GGEP_PUSH_BLOOM)});
+		GGEPHeadConstants.addDefaultGGEPProperties(ggep);
 		
 		// if we have any filters, serialize them
 		if (filter != null && filter.length > 1) {
-		    if (filter[0] != null)
-		        ggep.put(new String((char)GGEPHeadConstants.GGEP_BLOOM+"d"), filter[0].toBytes());
-		    if (filter[1] != null)
-		        ggep.put(new String((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+"d"), filter[1].toBytes());
+		    if (filter[0] != null) {
+		        ggep.put(new String((char)GGEPHeadConstants.GGEP_BLOOM+GGEPHeadConstants.DATA), 
+		                filter[0].toBytes());
+		    }
+		    if (filter[1] != null) {
+		        ggep.put(new String((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+GGEPHeadConstants.DATA), 
+		                filter[1].toBytes());
+		    }
 		}
 		
 		// is this a push ping?
@@ -321,7 +324,8 @@ public class HeadPing extends VendorMessage {
 	    if (_ggep != null) {
 	        //see if there is an altloc digest
 	        try {
-	            byte [] data = _ggep.getBytes((char)GGEPHeadConstants.GGEP_BLOOM+"d");
+	            byte [] data = 
+	                _ggep.getBytes((char)GGEPHeadConstants.GGEP_BLOOM+GGEPHeadConstants.DATA);
 	            _digest = AltLocDigest.parseDigest(data,0,data.length);
 	        } catch (BadGGEPPropertyException noBloom){}
 	        catch(IOException badBloom) {} //ignore it?
@@ -332,7 +336,8 @@ public class HeadPing extends VendorMessage {
 	    if (_ggep != null) {
 	        // see if there is a pushloc digest
 	        try {
-	            byte [] data = _ggep.getBytes((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+"d");
+	            byte [] data = 
+	                _ggep.getBytes((char)GGEPHeadConstants.GGEP_PUSH_BLOOM+GGEPHeadConstants.DATA);
 	            _pushDigest = AltLocDigest.parseDigest(data,0,data.length);
 	        } catch (BadGGEPPropertyException noBloom){}
 	        catch(IOException badBloom) {} //ignore it?
@@ -361,6 +366,17 @@ final class GGEPHeadConstants {
 	static final String GGEP_PROPS = "P";
 	
 	/**
+	 * suffix for a key whose value is actual data carried to the other side
+	 */
+	static final String DATA = "d";
+	
+	/**
+	 * suffix for a key whose value is metadata describing what data the client
+	 * can understand.
+	 */
+	static final String META = "m";
+	
+	/**
 	 * a flag whose presence in the GGEP_PROPS value indicates the sender supports bloom filters.
 	 * The value of this key would be the serialized bloom filter in pings. 
 	 */
@@ -373,6 +389,7 @@ final class GGEPHeadConstants {
 	 * contain an updated PE for the sender.  Pings should contain this in order to allow the
 	 * remote host to ping them back, and pongs may contain it if they want to update the pinger
 	 * about their current set of proxies.  
+	 * (not supported yet)
 	 */
 	static final int GGEP_MYPE = 0x1 << 2;
 	
@@ -403,4 +420,24 @@ final class GGEPHeadConstants {
 	 */
 	static final int ALT_MESH_STAT = 0x1 << 6;
 	static final int PUSH_MESH_STAT = 0x1 << 7;
+	
+    /**
+     * Writes a set of default properties and metadata about what we can support.
+     * Similar to the various X-.. headers.
+     */
+    static void addDefaultGGEPProperties(GGEP dest) {
+        
+        // add the features we understand
+        byte [] supportedFeatures = new byte[] {(byte)
+                (GGEP_BLOOM |
+                GGEP_PUSH_BLOOM |
+                RANGES |
+                ALTLOCS |
+                PUSHLOCS)};
+        dest.put(GGEP_PROPS,supportedFeatures);
+        
+        //also say that we support only the list of 32-bit ranges format.
+        dest.put((char)RANGES+META,RANGE_LIST);
+        
+    }
 }
