@@ -36,6 +36,8 @@ import com.sun.java.util.collections.List;
  * @author Gregorio Roper
  */
 public final class HashTree implements HTTPHeaderValue, Serializable {
+    
+    private static final long serialVersionUID = -5752974896215224469L;    
 
     private static transient final Log LOG = LogFactory.getLog(HashTree.class);
 
