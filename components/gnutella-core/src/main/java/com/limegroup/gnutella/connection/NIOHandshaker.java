@@ -8,12 +8,8 @@ import java.util.Properties;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
-import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.http.HTTPHeader;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
 
 /**
  * This class performs non-blocking handshaking, responding to read and write
@@ -24,8 +20,6 @@ public class NIOHandshaker extends AbstractHandshaker {
     private ByteBuffer _responseBuffer;
 
     private ByteBuffer _requestBuffer;
-
-    private boolean _registered;
 
 
     private boolean _handshakeComplete;
@@ -113,9 +107,9 @@ public class NIOHandshaker extends AbstractHandshaker {
     public boolean handshake() throws IOException, NoGnutellaOkException {
         // lazily initialize the readers and writers to make sure the sockets
         // and IO streams are initialized        
-        if(_headerWriter == null) {
-            _headerWriter = NIOHeaderWriter.createWriter(CONNECTION); 
-        }
+        //if(_headerWriter == null) {
+          //  _headerWriter = NIOHeaderWriter.createWriter(CONNECTION); 
+        //}
         if(_headerReader == null)  {
             _headerReader = NIOHeaderReader.createReader(CONNECTION); 
         }
@@ -196,7 +190,7 @@ public class NIOHandshaker extends AbstractHandshaker {
     private boolean writeBuffer(ByteBuffer buffer) throws IOException  {
         CONNECTION.getSocket().getChannel().write(buffer);
         if(buffer.hasRemaining())  {
-            if(!_registered)  {
+            if(!CONNECTION.writeRegistered())  {
                 NIODispatcher.instance().addWriter(CONNECTION);
             } 
                 
@@ -217,13 +211,6 @@ public class NIOHandshaker extends AbstractHandshaker {
         return _handshakeComplete;
     }    
 
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#setWriteRegistered(boolean)
-     */
-    public synchronized void setWriteRegistered(boolean registered) {
-        _registered = registered;
-    }
 
     /**
      * Interface for executing the current handshake state for writing data
@@ -256,9 +243,13 @@ public class NIOHandshaker extends AbstractHandshaker {
      */
     private abstract class AbstractHandshakeWriteState  
         implements HandshakeWriteState {
-    
+        
+        /**
+         * Flag for weather or not this write state has more data to write.
+         */
         protected boolean _hasRemaining;
         
+        // inherit doc comment
         public boolean hasRemaining()   {
             return _hasRemaining;
         }     
@@ -280,6 +271,9 @@ public class NIOHandshaker extends AbstractHandshaker {
             if(writeBuffer(_requestBuffer))  {
                 return new OutgoingResponseWriteState();
             }
+            
+            // we have more to write in this state, so set the flag
+            _hasRemaining = true;
             
             // We will be notified of the read by the selector.
             return this;
@@ -317,6 +311,7 @@ public class NIOHandshaker extends AbstractHandshaker {
                     //a) Terminate normally if we wrote "200 OK".
                     // We're all done writing in this case
                     _hasRemaining = false;
+                    _handshakeComplete = true;
                     return null;
                 } else {
                     //b) Continue loop if we wrote "200 AUTHENTICATING".
