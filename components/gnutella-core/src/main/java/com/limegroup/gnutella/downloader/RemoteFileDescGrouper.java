@@ -10,17 +10,44 @@ import java.io.*;
  * implement swarmed downloads.  Oddly, this relies heavily on
  * IncompleteFileManager to decide if two files "same".  This class is
  * synchronized, but that is generally not sufficient for many contexts.  (The
- * add(..) method can modify a bucket that is being used externally.)  
+ * add(..) method can modify a bucket that is being used externally.)<p>
+ *
+ * Currently this algorithm ensures that all elements of a bucket have the 
+ * same name and size, and no elements of a bucket have differing hashes.
+ * It does NOT guarantee that two elements with the same hash are in the same
+ * bucket (for example, they may have differing names and sizes).  Nor does it
+ * guarantee that all elements of a bucket actually have a hash.  While risky,
+ * this policy maximizes swarming benefits from older clients.  In the future,
+ * we may strengthen this policy.
  */
 class RemoteFileDescGrouper implements Serializable {
     /** The actual buckets, each a list of same RemoteFileDesc's. */
-    private List /* of List of RemoteFileDesc2 */ buckets;   
+    private List /* of List of RemoteFileDesc2 */ buckets=new ArrayList();
+   
     /** The corresponding incomplete files for the buckets.  This is needed
      *  to implement addFile when all the elements of a bucket are removed.
      *  INVARIANT: for all i, j, 
      *     incompleteFileManager.getFile(buckets[i][j])=incompletes[i] 
-     *  COROLLARY: buckets.size()==incompletes.size(); */
-    private List /* of File */ incompletes;
+     *  COROLLARY: buckets.size()==incompletes.size(); 
+     *  COROLLARY: all elements of buckets[i] have same name and size
+     */
+    private List /* of File */ incompletes=new ArrayList();
+
+    /** The corresponding SHA1 hashes for the buckets, if known.  This is needed
+     *  to implement addFile when all the elements of a bucket are removed.
+     *  We use an array because List's sometimes have trouble with null elements.
+     *  INVARIANT: for all i, sha1s[i]==null || sha1s[i].isSHA1()
+     *  INVARIANT: for all i, j, S=buckets[i][j].getSHA1Urn(),
+     *     S!=null ==> sha1s[i].equals(S)
+     *  INVARIANT: for all i, 
+     *     (for all j, buckets[i][j].getSHA1Urn()==null)    [no element has a hash]
+     *     ==> sha1s[i]==null
+     *  COROLLARY: buckets.size()==incompletes.size(); 
+     *  COROLLARY: no elements of buckets[i] have differing hashes.  This does
+     *     NOT imply that two elements with the same hash are in the same 
+     *     bucket. */
+    private URN[] /* of URN */ sha1s=new URN[0];
+
     /** Used to calculate incomplete file lengths. */
     private IncompleteFileManager incompleteFileManager;
     /** The minimum quality considered likely to work.  Value of two corresponds
@@ -39,36 +66,24 @@ class RemoteFileDescGrouper implements Serializable {
     RemoteFileDescGrouper(RemoteFileDesc[] rfds,
                           IncompleteFileManager incompleteFileManager) {
         this.incompleteFileManager=incompleteFileManager;
-        //This code is taken from the old bucket(..) method of
-        //ManagedDownloader.  It runs in O(n lg n) time, where n==rfds.length.
-        //Note that it is not equivalent to just call add(rfds[i]) on each
-        //element, as add(..) does not reorder buckets.
-        
-        //1. Bucket the requested files.  
-        Map /* File -> List<RemoteFileDesc> */ bucketMap=new HashMap();         
-        for (int i=0; i<rfds.length; i++) {
-            RemoteFileDesc rfd=new RemoteFileDesc2(rfds[i], false);
-            File incompleteFile=incompleteFileManager.getFile(rfd);
-            List siblings=(List)bucketMap.get(incompleteFile);
-            if (siblings==null) {
-                siblings=new ArrayList();
-                bucketMap.put(incompleteFile, siblings);
-            }
-            siblings.add(rfd);
-        }
 
-        //2. Now for each file, estimate remaining download time.  This assumes
-        //that we'll be able to download a file from all (only) three and
-        //four-star locations in parallel at exactly the advertised speed.  Fat
-        //chance that will happen, but it's probably a good enough heuristic.
-        //Still, we may want to preference buckets with more quality loctions
-        //even if the total bandwidth is lower.
-        FilePair[] pairs=new FilePair[bucketMap.keySet().size()];
-        int i=0;
-        for (Iterator iter=bucketMap.keySet().iterator(); iter.hasNext(); i++) {
-            File incompleteFile=(File)iter.next();
-            List /* of RemoteFileDesc */ files=
-                (List)bucketMap.get(incompleteFile);
+        //1. Bucket the requested files by repeatedly calling add(..).  This
+        //runs in O(N^2) time.  It's possible to optimize.
+        for (int i=0; i<rfds.length; i++) 
+            add(rfds[i]);
+
+
+        //2.  Now we need to rearrange the buckets according to download time.
+        //We do this using another array.  First estimate remaining download
+        //time.  This assumes that we'll be able to download a file from all
+        //(only) three and four-star locations in parallel at exactly the
+        //advertised speed.  Fat chance that will happen, but it's probably a
+        //good enough heuristic.  Still, we may want to preference buckets with
+        //more quality loctions even if the total bandwidth is lower.
+        FilePair[] pairs=new FilePair[buckets.size()];
+        for (int i=0; i<buckets.size(); i++) {
+            File incompleteFile=(File)incompletes.get(i);
+            List /* of RemoteFileDesc */ files=(List)buckets.get(i);
             int size=((RemoteFileDesc)files.get(0)).getSize()
                         - incompleteFileManager.getBlockSize(incompleteFile);
             int bandwidth=1; //prevent divide by zero
@@ -80,24 +95,17 @@ class RemoteFileDescGrouper implements Serializable {
 				}
             }
             float time=(float)size/(float)bandwidth;
-            pairs[i]=new FilePair(incompleteFile, time);
+            pairs[i]=new FilePair(files, incompleteFile, sha1s[i], time);
         }
         
-        //3. Sort by download time and copy corresponding lists of files to new
-        //array.
+        //3. Sort by download time and overwrite elements of buckets,
+        //incompletes, and sha1s.
         Arrays.sort(pairs);
-        buckets=new ArrayList(pairs.length);
-        for (i=0; i<pairs.length; i++)
-            buckets.add((List)bucketMap.get(pairs[i].file));
-
-        //4. Build incompletes list by mapping getFile on first element of all
-        //buckets.
-        incompletes=new ArrayList(buckets.size());        
-        for (Iterator iter=buckets.iterator(); iter.hasNext(); ) {
-            List bucket=(List)iter.next();
-            Assert.that(bucket.size()>0, "Empty bucket");
-            RemoteFileDesc rfd=(RemoteFileDesc)bucket.get(0); //all same
-            incompletes.add(incompleteFileManager.getFile(rfd));
+        for (int i=0; i<pairs.length; i++) {
+            FilePair pair=pairs[i];
+            buckets.set(i, pair.bucket);
+            incompletes.set(i, pair.incompleteFile);
+            sha1s[i]=pair.sha1;
         }
     }
 
@@ -116,15 +124,22 @@ class RemoteFileDescGrouper implements Serializable {
         }
     }
 
-    /** File/time pair to help implement constructor. */
+    /** Bucket/incomplete/sha1/time pair to help implement constructor. */
     private static class FilePair
             implements com.sun.java.util.collections.Comparable {
-        float time;     //TODO: does this work with 1.1.8?
-        File file;
+        List /* of RemoteFileDesc */ bucket;
+        File incompleteFile;
+        URN sha1;
+        float time;
 
-        public FilePair(File file, float time) {
+        public FilePair(List /* of RemoteFileDesc */ bucket, 
+                        File incompleteFile, 
+                        URN sha1, 
+                        float time) {
+            this.bucket=bucket;;
+            this.incompleteFile=incompleteFile;
+            this.sha1=sha1;
             this.time=time;
-            this.file=file;
         }
 
         public int compareTo(Object o) {
@@ -162,9 +177,15 @@ class RemoteFileDescGrouper implements Serializable {
         for (int i=0; i<n; i++) {
             //This bucket may be empty, so we look at the incompleteFile.
             File otherIncompleteFile=(File)incompletes.get(i);
-            if (otherIncompleteFile.equals(incompleteFile)) {
+            if (otherIncompleteFile.equals(incompleteFile)
+                    && hashEquals(rfd2.getSHA1Urn(), sha1s[i])) {
                 //"Same" file, append to existing bucket.  TODO: insert into
-                //appropriate place of bucket based on speed.
+                //appropriate place of bucket based on speed?
+                //Note: The URNs could have matched if sha1s[i]==null but
+                //rfd2.getSHA1Urn()!=null. In this case, we set 
+                //sha1s[i] == rfd2.getSHA1Urn().
+                if(sha1s[i]==null && rfd2.getSHA1Urn()!=null)
+                    sha1s[i]=rfd2.getSHA1Urn();
                 List bucket=(List)buckets.get(i);
                 bucket.add(rfd2);
                 return true;
@@ -176,7 +197,27 @@ class RemoteFileDescGrouper implements Serializable {
         bucket.add(rfd2);
         buckets.add(bucket);
         incompletes.add(incompleteFile);
+        //note: we need to be careful while adding to sha1s, since some elements
+        //may be set to null, so we cannot simply append to the end of the list.
+        int p = incompletes.size();
+        URN[] newArray = new URN[p];
+        System.arraycopy(sha1s,0,newArray,0,sha1s.length);
+        newArray[p-1] = rfd.getSHA1Urn();   //may be null
+        sha1s = newArray;
         return false;
+    }
+
+    /**
+     * True if the URNS are equals.
+     * @param urn1 a SHA1 URN, or null
+     * @param urn2 a SHA1 URN, or null
+     * @return false if urn1 and urn2 have differing hashes, true otherwise.
+     *  Hence if urn1 or urn2 is null, this always returns true.
+     */
+    private static boolean hashEquals(URN urn1, URN urn2) {
+        if (urn1==null || urn2==null)
+            return true;
+        return urn1.equals(urn2);
     }
 
     /** 
