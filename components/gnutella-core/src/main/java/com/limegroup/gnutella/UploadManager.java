@@ -145,16 +145,9 @@ public class UploadManager implements BandwidthTracker {
                     // the GET line was wrong, just exit.
                     return;
                 }
-                //create an uploader depending on whether or not it's a URN
-				//request
-				if(line.isUrnGet()) {
-					uploader = new HTTPUploader(line._fileName, socket, line._index, 
-												this, _fileManager, line._urn);
-				}
-				else {
-					uploader = new HTTPUploader(line._fileName, socket, line._index, 
-												this, _fileManager);
-				}
+                //create an uploader 
+				uploader = new HTTPUploader(line._fileName, socket, line._index, 
+											this, _fileManager);	 
                 //do the upload
                 doSingleUpload(uploader, 
                     socket.getInetAddress().getHostAddress(), line._index);
@@ -688,7 +681,7 @@ public class UploadManager implements BandwidthTracker {
             boolean http11 = false;
             if(GET_LINE.endsWith("1.1"))
                 http11 = true;
-			return new GETLine(index, fileName, http11, null);
+			return new GETLine(index, fileName, http11);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -722,7 +715,7 @@ public class UploadManager implements BandwidthTracker {
 		}
 		String fileName = desc._name;
 		boolean isHTTP11 = this.isHTTP11Request(GET_LINE);
-		return new GETLine(fileIndex, fileName, isHTTP11, urn);		
+		return new GETLine(fileIndex, fileName, isHTTP11);		
 	}
 
 	/**
@@ -745,37 +738,17 @@ public class UploadManager implements BandwidthTracker {
         /** flag indicating if the protocol is HTTP1.1 */
         private final boolean _http11;
 
-        /**
-		 * Constant for whether this is a URN GET request or a "normal" 
-		 * request.
-		 */
-		private final boolean _isUrnGet;
-
-		/**
-		 * Constant for the <tt>URN</tt> for this get request, which will
-		 * remain null when the request is not by URN.
-		 */
-		private final URN _urn;
-
 		/**
 		 * Constructs a new <tt>GETLine</tt> instance.
 		 *
 		 * @param index the index for the file to get
 		 * @param fileName the name of the file to get
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
-		 * @param isUrnGet specifies whether or not this is a URN GET request
 		 */
-		private GETLine(int index, String fileName, boolean http11, URN urn) {
+		private GETLine(int index, String fileName, boolean http11) {
   			_index = index;
   			_fileName = fileName;
             _http11 = http11;
-			_urn = urn;
-			if(_urn == null) {
-				_isUrnGet = false;
-			}
-			else {
-				_isUrnGet = true;
-			}
   		}
         
 		/**
@@ -787,17 +760,6 @@ public class UploadManager implements BandwidthTracker {
         private boolean isHTTP11() {
             return _http11;
         }
-
-		/**
-		 * Accessor for whether this is a URN GET request or a classic Gnutella
-		 * get request.
-		 *
-		 * @return <tt>true</tt> if this is a URN GET request, <tt>false</tt>
-		 *  otherwise
-		 */
-		private boolean isUrnGet() {
-			return _isUrnGet;
-		}
   	}
 
 	/**
