@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.ByteOrder;
 
@@ -13,6 +14,9 @@ import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2Exception;
 import de.vdheide.mp3.ID3v2Frame;
 import de.vdheide.mp3.NoID3v2TagException;
+
+import com.limegroup.gnutella.licenses.CCConstants;
+import com.limegroup.gnutella.licenses.CreativeCommonsLicense;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -234,6 +238,16 @@ public class MP3MetaData extends AudioMetaData {
                     setGenre(MP3MetaData.getGenreString((short)genreCode));
                 else 
                     setGenre(frameContent);
+            }
+            else if (CCConstants.CC_LICENSE_ID.equals(frameID)) {
+                // parse the TCOP frame and record the license
+                StringTokenizer st = new StringTokenizer(frameContent);
+                String license = null;
+                while ((license == null) && st.hasMoreTokens()) {
+                    String currToken = st.nextToken();
+                    if (currToken.startsWith("http"))
+                        license = currToken;
+                }
             }
         }
         

@@ -16,7 +16,7 @@ public class CCConstants {
     /** This is the ID for the license field in xml schemas.
      */
     public static final String
-        AUDIO_LICENSE_NAME = "audios__audio__license__";
+        AUDIO_LICENSE_NAME = "license";
 
     /** This is the shortened version of AUDIO_LICENSE_NAME.
      */
@@ -25,5 +25,8 @@ public class CCConstants {
     /** This is what we display to the user in the search screen drop down box.
      */
     public static final String CC_LICENSE_STRING = "Creative Commons";
+
+    /** The name of the ID3v2 frame with the copyright info. */
+    public static final String CC_LICENSE_ID = "TCOP";
 
 }
