@@ -26,16 +26,19 @@ public class HTTPDownloader implements Runnable {
     private ConnectionManager _manager;
     private ActivityCallback _callback;
     private Socket _socket;
+    private String _downloadDir;
 
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
-			  	
+			
 	_filename = file;
 	_amountRead = 0;
 	_sizeOfFile = -1;
 	_socket = s;
 	_manager = m;
 	_callback = _manager.getCallback();
+	_downloadDir = "";
+
 
 	try {
 	    _istream = s.getInputStream();
@@ -60,6 +63,7 @@ public class HTTPDownloader implements Runnable {
 	_socket = null;
 	_manager = m;
 	_callback = _manager.getCallback();
+	_downloadDir = "";
 
 	URLConnection conn;
 
@@ -117,12 +121,8 @@ public class HTTPDownloader implements Runnable {
 
 	byte[] guid = GUID.fromHexString(_manager.ClientId);
 
-	System.out.println("The length of the manager guid " + guid.length);
-
 	// last 16 bytes of the query reply message...
 	byte[] clientGUID = cguid;
-
-	System.out.println("The length of the guid " + cguid.length);
 
 	byte ttl = SettingsManager.instance().getTTL();
 
@@ -144,6 +144,10 @@ public class HTTPDownloader implements Runnable {
 	    return;
 	}
 
+    }
+
+    public void setDownloadDirectory(String path) {
+	_downloadDir = path;
     }
 
     public String getFileName() {
@@ -190,6 +194,9 @@ public class HTTPDownloader implements Runnable {
 		while (true) {
 		    
 		    int buf_size = _istream.available();
+
+		    System.out.println("THe amount available: " + buf_size);
+
 		    byte[] buf = new byte[buf_size];
 		    c = _istream.read(buf);
 		    if (c == -1) 

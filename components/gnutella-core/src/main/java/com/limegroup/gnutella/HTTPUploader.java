@@ -13,6 +13,8 @@ import java.net.*;
 
 public class HTTPUploader implements Runnable {
 
+    private int BUFFSIZE = 1024;
+
     private OutputStream _ostream;
     private BufferedWriter _out;
     
@@ -212,19 +214,37 @@ public class HTTPUploader implements Runnable {
 	
 	int c = -1;
 	
+	char[] buff = new char[BUFFSIZE];
+	
 	try {
-	    while ( (c = _fin.read())  != -1) {
-		_out.write(c);
-		_amountRead++;
+	    while (true){
+		c = _fin.read(buff);
+		if (c == -1)
+		    break;
+		_out.write(buff);
+		_amountRead += c;
 	    }
 	    _out.flush();
 	}
-	
 	catch (Exception e) {
 	    uploadError("Unable to read from the file");
 	    return;
-	    
 	}
+	
+
+//  	try {
+//  	    while ( (c = _fin.read())  != -1) {
+//  		_out.write(c);
+//  		_amountRead++;
+//  	    }
+//  	    _out.flush();
+//  	}
+	
+//  	catch (Exception e) {
+//  	    uploadError("Unable to read from the file");
+//  	    return;
+	    
+//  	}
     }
     
     private String getMimeType() {         /* eventually this method should */
