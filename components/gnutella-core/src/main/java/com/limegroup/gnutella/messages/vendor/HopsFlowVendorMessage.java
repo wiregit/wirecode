@@ -62,4 +62,14 @@ public final class HopsFlowVendorMessage extends VendorMessage {
     public void recordDrop() {
         super.recordDrop();
     }
+    
+    /**
+     * Overridden to provide more information about this class.
+     * 
+     * @return a description of this class
+     */
+    public String toString() {
+        return "HopsFlowVendorMessage::VERSION: "+VERSION+
+            " hop value: "+getHopValue();
+    }
 }

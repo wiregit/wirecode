@@ -247,7 +247,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             hashCode += 37*version;
             hashCode += 37*selector;
             for (int i = 0; i < vendorID.length; i++)
-                hashCode += (int) 37*vendorID[i];
+                hashCode += 37*vendorID[i];
             return hashCode;
         }
     }
@@ -266,6 +266,15 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         super.recordDrop();
     }
 
+    /**
+     * Overridden to provide more information about this class.
+     * 
+     * @return a description of this class
+     */
+    public String toString() {
+        return "MessagesSupportedVendorMessage::VERSION: "+VERSION+
+            " SUPPORTED: "+_messagesSupported;
+    }
 }
 
 
