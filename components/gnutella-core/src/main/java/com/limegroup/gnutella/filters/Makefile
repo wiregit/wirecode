@@ -1,6 +1,7 @@
 javac=javac -O
 
-classes = DuplicateFilter.class KeywordFilter.class
+classes = DuplicateFilter.class KeywordFilter.class CompositeFilter.class \
+	BlackListFilter.class
 
 all : $(classes)
 
