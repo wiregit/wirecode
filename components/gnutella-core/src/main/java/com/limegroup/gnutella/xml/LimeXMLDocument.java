@@ -38,11 +38,11 @@ public class LimeXMLDocument{
     
     //constructor
     public LimeXMLDocument(String XMLString){
-        DocumentBuilderFactory documentBuilderFactory = 
-        DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         
-        documentBuilderFactory.setValidating(true);
-        documentBuilderFactory.setNamespaceAware(true);
+        //TODO2: make sure that the schema actually validates documents
+        //documentBuilderFactory.setValidating(true);
+        //documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder =null;
         try{
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -62,39 +62,21 @@ public class LimeXMLDocument{
     
     //
     public LimeXMLDocument(File f){
-        String XMLString="";
-        String buffer="";
-        String xmlStruct="";
-        InputSource schema;
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(f));
-            while(buffer!=null){
-                buffer=br.readLine();
-                if (buffer!=null){
-                    buffer=buffer.trim();
-                    xmlStruct = xmlStruct+buffer;
-                }
-            }
-            xmlStruct = xmlStruct.trim();
-        }catch(IOException e){
-            e.printStackTrace();
-        }
         //this(xmlStruct);
-        DocumentBuilderFactory documentBuilderFactory = 
-        DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         
-        documentBuilderFactory.setValidating(true);
-        documentBuilderFactory.setNamespaceAware(true);
+        //TODO2: make sure that the schema actually validates documents
+        //documentBuilderFactory.setValidating(true);
+        //documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder=null;
         try{
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
         }catch(ParserConfigurationException e){
             e.printStackTrace();
         }
-        InputSource doc = new InputSource(new StringReader(XMLString));
         Document document = null;
         try{
-            document = documentBuilder.parse(doc);
+            document = documentBuilder.parse(f);
         }catch (SAXException e){
             e.printStackTrace();
         } catch (IOException e){
@@ -141,3 +123,5 @@ public class LimeXMLDocument{
         LimeXMLDocument l = new LimeXMLDocument(f);
     }
 }
+
+
