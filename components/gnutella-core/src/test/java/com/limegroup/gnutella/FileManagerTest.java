@@ -13,6 +13,15 @@ public class FileManagerTest extends TestCase {
         return new TestSuite(FileManagerTest.class);
     }
 
+    File directory=null;
+    public void setUp() {        
+        directory=new File("FileManagerTest_dir");
+        directory.mkdirs();
+    }
+
+    public void tearDown() {
+        directory.delete();
+    }
 
     /** Unit test.  REQUIRES JAVA2 FOR createTempFile Note that many tests are
      *  STRONGER than required by the specifications for simplicity.  For
@@ -45,7 +54,10 @@ public class FileManagerTest extends TestCase {
             f2=createNewTestFile(3);
             f3=createNewTestFile(11);
 
-            assertTrue(fman.getNumFiles()+"", fman.getNumFiles()==1);
+            //files=fman.getSharedFiles(null);
+            //for (int i=0; i<files.length; i++)
+            //    System.out.println(files[i]);
+            assertEquals(1, fman.getNumFiles());
             assertTrue(fman.getSize()+"", fman.getSize()==1);
             Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit"));
             assertTrue(responses.length==1);
@@ -157,9 +169,10 @@ public class FileManagerTest extends TestCase {
         }
     }
 
-    static File createNewTestFile(int size) {
+    File createNewTestFile(int size) {
         try {
-            File file=File.createTempFile("FileManager_unit_test",".XYZ");
+            File file=File.createTempFile("FileManager_unit_test",
+                                          ".XYZ", directory); 
             OutputStream out=new FileOutputStream(file);
             out.write(new byte[size]);
             out.flush();
@@ -176,7 +189,7 @@ public class FileManagerTest extends TestCase {
 
     /** Same a createNewTestFile but doesn't actually allocate the requested
      *  number of bytes on disk.  Instead returns a subclass of File. */
-    static File createFakeTestFile(long size) {
+    File createFakeTestFile(long size) {
         File real=createNewTestFile(1);
         return new HugeFakeFile(real.getParentFile(), real.getName(), size);       
     }
