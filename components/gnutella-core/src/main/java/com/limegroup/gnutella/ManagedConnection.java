@@ -1126,6 +1126,8 @@ public class ManagedConnection
 			if(isSupernodeConnection()) return 6;
 			return 0;
 		}
+		
+		// TODO: use something else here!!!
 		return Integer.valueOf(connections).intValue();
 	}
 
