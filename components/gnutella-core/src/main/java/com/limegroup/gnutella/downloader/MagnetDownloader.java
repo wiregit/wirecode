@@ -101,7 +101,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 				//we must force ManagedDownloader to accept this RFD in case 
 				//it has no hash and a name that doesn't match the search 
 				//keywords.
-				boolean added=super.addDownloadForced(defaultRFD);
+				boolean added=super.addDownloadForced(defaultRFD,true);
 				Assert.that(added, "Download rfd not accepted "+defaultRFD);
 			}
 		}

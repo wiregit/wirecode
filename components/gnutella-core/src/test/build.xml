@@ -133,7 +133,7 @@
 
  
  <!-- To be used internally by 'test all', 'test package' & 'test' -->
- <target name="batchunit" if="unit" depends="clean reports, clean testData, prepare, build"> 
+ <target name="batchunit" if="unit" depends="clean testData, prepare, build"> 
         <junit printsummary="withOutAndErr"
                haltonfailure="${haltonfailure}"
                haltonerror="${haltonerror}"

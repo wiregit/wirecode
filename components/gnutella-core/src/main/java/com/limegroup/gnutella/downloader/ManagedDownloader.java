@@ -739,15 +739,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @return true if rfd has been added.  In this case, the caller should
      *  not offer rfd to another ManagedDownloaders.
      */
-    public synchronized boolean addDownload(RemoteFileDesc rfd) {
+    public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
         if (! allowAddition(rfd))
             return false;
-        return addDownloadForced(rfd);
+        return addDownloadForced(rfd, cache);
     }
 
     /** Like addDownload, but doesn't call allowAddition(..). 
      *  @return true, since download always allowed */
-    protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd) {
+    protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd,
+                                                           boolean cache) {
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
@@ -761,17 +762,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         if (buckets != null)
             buckets.add(rfd);
-        //...append to allFiles for resume purposes...
-        RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
-        System.arraycopy(allFiles, 0, newAllFiles, 0, allFiles.length);
-        newAllFiles[newAllFiles.length-1]=rfd;
-        allFiles=newAllFiles;
-        //...and notify manager to look for new workers.  You might be tempted
-        //to just call dloaderManagerThread.interrupt(), but that causes
-        //spurious interrupts to happen when establishing connections (push or
-        //otherwise).  So instead we target the two cases we're interested:
-        //waiting for downloaders to complete (by waiting on this) or waiting
-        //for retry (by sleeping).
+        if(cache) {
+            //...append to allFiles for resume purposes...
+            RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
+            System.arraycopy(allFiles, 0, newAllFiles, 0, allFiles.length);
+            newAllFiles[newAllFiles.length-1]=rfd;
+            allFiles=newAllFiles;
+            //...and notify manager to look for new workers.  You might be
+            //tempted to just call dloaderManagerThread.interrupt(), but that
+            //causes spurious interrupts to happen when establishing connections
+            //(push or otherwise).  So instead we target the two cases we're
+            //interested: waiting for downloaders to complete (by waiting on
+            //this) or waiting for retry (by sleeping).
+        }
         if ((state==Downloader.WAITING_FOR_RETRY) ||
             (state==Downloader.WAITING_FOR_RESULTS))
             reqLock.release();
@@ -1828,7 +1831,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 		AlternateLocation    value;
 		while (iter.hasNext()) {
 			value = (AlternateLocation) iter.next();
-			addDownload(value.createRemoteFileDesc(rfd.getSize()));
+            //don't cache
+			addDownload(value.createRemoteFileDesc(rfd.getSize()), false);
 		}
 	}
 

@@ -403,7 +403,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Start one location, wait a bit, then add another.
         download=dm.download(new RemoteFileDesc[] {rfd1}, false);
-        ((ManagedDownloader)download).addDownload(rfd2);
+        ((ManagedDownloader)download).addDownload(rfd2,true);
 
         waitForComplete(download);
         if (isComplete())
