@@ -78,8 +78,6 @@ public class SimppSettingsManager {
      */
     public void activateSimppSettings() {
         LOG.debug("activating new settings");
-        if(!_isDefault) //we are already activated...
-            return;
         synchronized(_simppProps) {
             Set set = _simppProps.entrySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
@@ -102,7 +100,6 @@ public class SimppSettingsManager {
                     LOG.debug("setting:"+simppSetting);
                     LOG.debug("simpp value:"+simppValue);
                 }
-
                 if(!simppSetting.isSimppEnabled())
                     continue;
                 //get the default/current value and cache it                
@@ -113,7 +110,7 @@ public class SimppSettingsManager {
                 //we never want to write this setting out
                 simppSetting.setAlwaysSave(false);
                 //set the setting to the value that simpp says
-                simppSetting.loadValue(simppValue);
+                simppSetting.setValue(simppValue);
             }
         }//end of synchronized block
         _isDefault = false;
@@ -124,6 +121,8 @@ public class SimppSettingsManager {
      * activateSimppSettings method set
      */
     public void revertToDefaults() {
+        if(_isDefault) //we are already at default values
+            return;
         synchronized(_simppProps) {
             Set set = _simppProps.keySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
