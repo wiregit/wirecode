@@ -139,7 +139,7 @@ public class MediaType implements Serializable {
             });
         MediaType audio = new MediaType(SCHEMA_AUDIO, AUDIO,
             new String[] {
-                "mp3", "mpa", "ogg",
+                "mp3", "mpa", "ogg", "wma",
                 "ra", "rm", "ram", "rmj", "lqt",
                 "wav", "au", "snd",
                 "aif", "aiff", "aifc"

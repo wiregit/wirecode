@@ -386,7 +386,7 @@ public final class SettingsManager {
      * Default file extensions.
      */
     private final String  DEFAULT_EXTENSIONS =
-		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;wma;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
 		"bin;dmg;jve";
