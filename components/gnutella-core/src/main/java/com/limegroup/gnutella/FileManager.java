@@ -8,6 +8,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileComparator;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.KeyValue;
@@ -390,7 +391,7 @@ public abstract class FileManager {
     /**
      * Returns a list of all shared file descriptors.
      */
-    public FileDesc[] getAllSharedFileDescriptors() {
+    public synchronized FileDesc[] getAllSharedFileDescriptors() {
         // Instead of using _files.toArray, use
         // _fileToFileDesc.values().toArray.  This is because
         // _files will still contain null values for removed
@@ -440,7 +441,7 @@ public abstract class FileManager {
      * shared but contains no files.  This method is not recursive; files in 
      * any of the directory's children are not returned.
      */    
-    public FileDesc[] getSharedFileDescriptors(File directory) {
+    public synchronized FileDesc[] getSharedFileDescriptors(File directory) {
         if( directory == null )
             throw new NullPointerException("null directory");
         
@@ -1202,20 +1203,6 @@ public abstract class FileManager {
   			//if the exception occurs, simply return null
   			return null;
   		}
-    }
-    
-    /** Same as the f.listFiles() in JDK1.3. */
-    public static File[] listFiles(File f) {
-        String[] children=f.list();
-        if (children==null)
-            return null;
-
-        File[] ret = new File[children.length];
-        for (int i=0; i<children.length; i++) {
-            ret[i] = new File(f, children[i]);
-        }
-
-        return ret;
     }
     
     /**
