@@ -25,7 +25,9 @@ public class Stat implements Runnable{
 	    pr = new PrintWriter(new BufferedWriter(new FileWriter("stats.log",true)));
 	}
 	catch(Exception e){
-	    System.out.println("Failed to open file in stat thread");
+	    ActivityCallback callback=cm.getCallback();
+	    if (callback!=null)
+		callback.error("Could not create output file for statistics logging.");
 	}
     }
    
@@ -36,7 +38,6 @@ public class Stat implements Runnable{
 		//System.out.println("Sumeet: thread waking up");
 	    }
 	    catch (Exception e){
-		System.out.println("Error in statistical thread");
 	    }
 
 	    Date d = cal.getTime();
@@ -50,14 +51,16 @@ public class Stat implements Runnable{
 		pr.println("Query requests : " + man.QReqCount + " (" + ((man.QReqCount*100)/man.total) +"%)" );
 		pr.println("Query replies : " + man.QRepCount + " (" + ((man.QRepCount*100)/man.total) +"%)" );
 		pr.println("Push requests : " + man.pushCount + " (" + ((man.pushCount*100)/man.total) +"%)" );
-		pr.println("Total files : " + man.totalFiles );
-		pr.println("Total size : " + man.totalSize );
 		pr.println("-------------------------------------------------" );
 		pr.flush();
 	    }
-	    catch (Exception e){
-		System.out.println("Error in writing file");
+	    catch (Exception e) {
+	    ActivityCallback callback=man.getCallback();
+	    if (callback!=null)
+		callback.error("Could not write statistics data to log.");		
 	    }
 	}
     }
 }
+
+

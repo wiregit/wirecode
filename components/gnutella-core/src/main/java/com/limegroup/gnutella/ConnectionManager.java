@@ -173,7 +173,7 @@ public class ConnectionManager implements Runnable {
 	try {
 	    sock=new ServerSocket(port);
 	} catch (IOException e) {
-	    ConnectionManager.error("Couldn't bind server socket to port");
+	    error("Couldn't bind server socket to port");
 	    return;
 	}
 	// start the statistics thread
@@ -183,8 +183,8 @@ public class ConnectionManager implements Runnable {
 	    if (stats==true)
 		stat.start();
 	}
-	catch(Exception e){
-	    ConnectionManager.error("Error in Statistics thread!");
+	catch (Exception e){
+	    error("Could not start statistics gatherer.");
 	}
 	while (true) {
 	    try {
@@ -225,8 +225,7 @@ public class ConnectionManager implements Runnable {
 		    }
 		} catch (IOException e) { 
 		    //handshake failed: try to close connection.
-		    error("Could not establish incoming connection from "+
-			  client.getInetAddress().toString()+"; recovering.");
+		    failedToConnect(getHostName(client.getInetAddress()), client.getPort());
 		    try { client.close(); } catch (IOException e2) { }
 		    continue;
 		}
@@ -258,8 +257,10 @@ public class ConnectionManager implements Runnable {
 	throw new IOException();       	    
     }
 
-    public static void error(String msg) {
-	System.err.println(msg);
+    private void error(String msg) {
+	ActivityCallback callback=getCallback();
+	if (callback!=null)
+	    callback.error(msg);
     }
 
     /** 
@@ -506,7 +507,7 @@ class ConnectionFetcher extends Thread {
 	    } catch (NoSuchElementException e) {
 		//give up
 		//Manager.error("Host catcher is empty");
-		System.out.println("HOST CATCHER IS EMPTY");
+
 		return;
 	    }
 	}

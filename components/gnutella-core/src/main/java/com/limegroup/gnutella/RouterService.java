@@ -76,20 +76,18 @@ public class RouterService
     public void connectToHost( String host, int port ) throws IOException
     {
 	try {
-	    System.out.println("connectToHost trying...");
+	    manager.tryingToConnect(host,port,false);
 	    Connection c=new Connection(host, port);
 	    c.connect();
 	    c.setManager(manager);
-	    manager.add(c);
+	    manager.add(c); //calls ActivityCallback.updateConnection
 	    PingRequest pr=new PingRequest(Const.TTL);
 	    manager.fromMe(pr);
 	    c.send(pr);
-	    System.out.println("Connection established.");
 	    Thread tc=new Thread(c);
 	    tc.setDaemon(true);
 	    tc.start();
 	} catch (IOException e) {
-	    System.out.println("Couldn't establish connection.");
 	    manager.failedToConnect(host, port);
 	    throw e;
 	}
@@ -101,7 +99,6 @@ public class RouterService
     public void removeConnection( String host, int port )
     {
 	Connection conn = findConnection( host, port );
-System.out.println("removeConnection("+host+","+port+"): "+conn);
 	conn.shutdown();
 	if ( conn != null )
 	    manager.remove(conn);
@@ -120,7 +117,6 @@ System.out.println("removeConnection("+host+","+port+"): "+conn);
 	    conn = (Connection) iter.next();
 	    if ( conn.getPort() != port )
 		continue;
-System.out.println("iter :"+conn.getInetAddress().getHostAddress());
 	    if ( host.equals( conn.getInetAddress().getHostAddress() ) )
 		return( conn );
 	}
@@ -133,7 +129,6 @@ System.out.println("iter :"+conn.getInetAddress().getHostAddress());
     public void setActivityCallback( ActivityCallback callback )
     {
         manager.setActivityCallback( callback );
-System.out.println("RouterService init");
     }
 
     public void shutdown()

@@ -111,7 +111,6 @@ public class Connection implements Runnable {
 	//Handshake
 	sendString(CONNECT);
 	expectString(OK);
-  	System.out.println("Established outgoing connection on "+sock.toString());
     }
 
     /** 
@@ -132,8 +131,6 @@ public class Connection implements Runnable {
 	//Handshake
 	expectString(CONNECT_WITHOUT_FIRST_WORD);
 	sendString(OK);
-
-  	System.out.println("Established incoming connection on "+sock.toString());
     }    
 
     protected synchronized void sendString(String s) throws IOException {
@@ -406,7 +403,6 @@ public class Connection implements Runnable {
 	    }//while
 	}//try
 	catch (IOException e){
-	    ConnectionManager.error("Connection closed: "+sock.toString());
 	    manager.remove(this);
 	}
     }//run

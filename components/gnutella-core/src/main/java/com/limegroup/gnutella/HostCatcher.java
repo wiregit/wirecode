@@ -175,9 +175,7 @@ public class HostCatcher {
 		if (! iter.hasNext()) 
 		    throw new NoSuchElementException();
 		e=(Endpoint)iter.next();
-		candidates.remove(e);
-		System.out.print("Establishing outgoing connection on "
-				  +e.toString()+"...");
+		candidates.remove(e);	
 	    }
 	    //2. Now--without the lock--try to establish connection. If
 	    //   successful, add the endpoint to the elected set so we 
@@ -213,8 +211,6 @@ public class HostCatcher {
 		    	throw new NoSuchElementException();
 		e=(Endpoint)iter.next();
 		candidates.remove(e);
-		System.out.print("Establishing outgoing connection on "
-				  +e.toString()+"...");
     	}
 
 	return e;
