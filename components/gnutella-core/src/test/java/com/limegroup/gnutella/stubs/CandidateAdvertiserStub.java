@@ -9,6 +9,10 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * Stub which won't start the Candidate advertiser in a different thread.
  */
 public class CandidateAdvertiserStub extends CandidateAdvertiser {
+	
+	public CandidateAdvertiserStub() {
+		super(false);
+	}
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.util.ManagedThread#managedRun()
 	 */

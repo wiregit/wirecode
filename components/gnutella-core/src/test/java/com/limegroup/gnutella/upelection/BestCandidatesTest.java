@@ -18,7 +18,7 @@ public class BestCandidatesTest extends BaseTestCase {
 	
 	
 	
-
+	private static BestCandidates _bestCandidates;
 	
 	//couple of candidates
 	private static RemoteCandidate goodCandidate, badCandidate, mediocreCandidate,
@@ -45,21 +45,21 @@ public class BestCandidatesTest extends BaseTestCase {
 
 		
 		//in the set up, replace the advertising thread with a stub.
-		BestCandidates instance = null;
+		
 		Candidate [] array = null;
 		try {
-			instance = (BestCandidates) 
+			_bestCandidates = (BestCandidates) 
 				PrivilegedAccessor.getValue(BestCandidates.class,"instance");
-			PrivilegedAccessor.setValue(instance,"_best", new Candidate[3]);
+			PrivilegedAccessor.setValue(_bestCandidates,"_best", new Candidate[3]);
 			
-			array = (Candidate []) PrivilegedAccessor.getValue(instance, "_best");
+			array = (Candidate []) PrivilegedAccessor.getValue(_bestCandidates, "_best");
 			
-			Thread oldAdvertiser = (Thread)
-				PrivilegedAccessor.getValue(instance,"_advertiser");
-			oldAdvertiser.interrupt();
+			CandidateAdvertiser oldAdvertiser = (CandidateAdvertiser)
+				PrivilegedAccessor.getValue(_bestCandidates,"_advertiser");
+			oldAdvertiser.cancel();
 			
 			_advertiserThread = new CandidateAdvertiserStub();
-			PrivilegedAccessor.setValue(instance,"_advertiser", _advertiserThread);
+			PrivilegedAccessor.setValue(_bestCandidates,"_advertiser", _advertiserThread);
 			
 			//also set some stubs in routerservice.
 			PrivilegedAccessor.setValue(RouterService.class,"router",new MessageRouterStub());
@@ -120,9 +120,9 @@ public class BestCandidatesTest extends BaseTestCase {
 		array[0]=mediocreCandidate;
 		
 		//test if we have only one candidate
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNull(BestCandidates.getCandidates()[1]);
-		assertNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNull(_bestCandidates.getCandidates()[1]);
+		assertNull(_bestCandidates.getCandidates()[2]);
 	}
 	
 	/**
@@ -135,7 +135,7 @@ public class BestCandidatesTest extends BaseTestCase {
 		assertTrue(_advertiserThread.getMsg().getBestCandidates()[0].isSame(mediocreCandidate));
 		assertNull(_advertiserThread.getMsg().getBestCandidates()[1]);
 	
-		assertTrue(mediocreCandidate.isSame(BestCandidates.getBest()));
+		assertTrue(mediocreCandidate.isSame(_bestCandidates.getBest()));
 		
 		//update with the worse candidate at ttl 1.  It should enter the table but
 		//the best overall candidate should still be our previous candidate.
@@ -143,15 +143,15 @@ public class BestCandidatesTest extends BaseTestCase {
 		update[0] =badCandidate;
 		update[1] =null;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNull(_bestCandidates.getCandidates()[2]);
 		
-		assertTrue(mediocreCandidate.isSame(BestCandidates.getBest()));
-		assertTrue(mediocreCandidate.isSame(BestCandidates.getCandidates()[0]));
-		assertTrue(badCandidate.isSame(BestCandidates.getCandidates()[1]));
+		assertTrue(mediocreCandidate.isSame(_bestCandidates.getBest()));
+		assertTrue(mediocreCandidate.isSame(_bestCandidates.getCandidates()[0]));
+		assertTrue(badCandidate.isSame(_bestCandidates.getCandidates()[1]));
 		
 		
 		assertTrue(mediocreCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[0]));
@@ -162,15 +162,15 @@ public class BestCandidatesTest extends BaseTestCase {
 		
 		update[0]=goodCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNull(_bestCandidates.getCandidates()[2]);
 		
-		assertTrue(mediocreCandidate.isSame(BestCandidates.getCandidates()[0]));
-		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[1]));
-		assertTrue(goodCandidate.isSame(BestCandidates.getBest()));
+		assertTrue(mediocreCandidate.isSame(_bestCandidates.getCandidates()[0]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getCandidates()[1]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getBest()));
 		
 		assertTrue(mediocreCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[0]));
 		assertTrue(goodCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[1]));
@@ -178,15 +178,15 @@ public class BestCandidatesTest extends BaseTestCase {
 		//now try to update again with a not-so-good candidate.  the table should not be changed.
 		update[0]=mediocreCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNull(_bestCandidates.getCandidates()[2]);
 		
-		assertTrue(mediocreCandidate.isSame(BestCandidates.getCandidates()[0]));
-		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[1]));
-		assertTrue(goodCandidate.isSame(BestCandidates.getBest()));
+		assertTrue(mediocreCandidate.isSame(_bestCandidates.getCandidates()[0]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getCandidates()[1]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getBest()));
 		assertTrue(mediocreCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[0]));
 		assertTrue(goodCandidate.isSame(_advertiserThread.getMsg().getBestCandidates()[1]));
 		
@@ -203,17 +203,17 @@ public class BestCandidatesTest extends BaseTestCase {
 		update[0]=badCandidate;
 		update[1]=goodCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
 		//all ranges should be full
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNotNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNotNull(_bestCandidates.getCandidates()[2]);
 		
 		//and the best one should be at ttl 2
 		
-		assertEquals(BestCandidates.getBest().getInetAddress(),
-				BestCandidates.getCandidates()[2].getInetAddress());
+		assertEquals(_bestCandidates.getBest().getInetAddress(),
+				_bestCandidates.getCandidates()[2].getInetAddress());
 	}
 	
 	/**
@@ -226,32 +226,32 @@ public class BestCandidatesTest extends BaseTestCase {
 		update[0]= mediocreCandidate;
 		update[1]=update[0];
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
 		//all ranges should be full
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNotNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNotNull(_bestCandidates.getCandidates()[2]);
 		
 		//and the best candidate should be the same as all others
-		Candidate best = BestCandidates.getBest();
+		Candidate best = _bestCandidates.getBest();
 		assertEquals(best.getInetAddress(),
-				BestCandidates.getCandidates()[0].getInetAddress());
+				_bestCandidates.getCandidates()[0].getInetAddress());
 		assertEquals(best.getInetAddress(),
-				BestCandidates.getCandidates()[1].getInetAddress());
+				_bestCandidates.getCandidates()[1].getInetAddress());
 		assertEquals(best.getInetAddress(),
-				BestCandidates.getCandidates()[2].getInetAddress());
+				_bestCandidates.getCandidates()[2].getInetAddress());
 		
 		//now update the ttl 1 and 2 candidates to a better guy
 		update[0]=goodCandidate;
 		update[1]=update[0];
 		
 		//and the best candidate should be identical for ttl 1 and 2
-		best = BestCandidates.getBest();
+		best = _bestCandidates.getBest();
 		assertEquals(best.getInetAddress(),
-				BestCandidates.getCandidates()[1].getInetAddress());
+				_bestCandidates.getCandidates()[1].getInetAddress());
 		assertEquals(best.getInetAddress(),
-				BestCandidates.getCandidates()[2].getInetAddress());
+				_bestCandidates.getCandidates()[2].getInetAddress());
 	}
 	
 	
@@ -263,7 +263,7 @@ public class BestCandidatesTest extends BaseTestCase {
 		
 		
 		//give myself a bad candidate
-		BestCandidates.getCandidates()[0] = badCandidate;
+		_bestCandidates.getCandidates()[0] = badCandidate;
 		propagateChange();
 		
 		//advertise candidate at ttl 1 from advertiser1
@@ -272,19 +272,19 @@ public class BestCandidatesTest extends BaseTestCase {
 		RemoteCandidate [] update = new RemoteCandidate[2];
 		update[0] = goodCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertEquals(goodCandidate.getInetAddress(),BestCandidates.getBest().getInetAddress());
+		assertEquals(goodCandidate.getInetAddress(),_bestCandidates.getBest().getInetAddress());
 		
 		//now the same advertiser changes his mind about his best candidate
 		mediocreCandidate.setAdvertiser(advertiser1);
 		
 		update[0]=mediocreCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
 		//the new best candidate should be mediocreCandidate.
-		assertTrue(mediocreCandidate.isSame(BestCandidates.getBest()));
+		assertTrue(mediocreCandidate.isSame(_bestCandidates.getBest()));
 	}
 	
 	/**
@@ -297,20 +297,21 @@ public class BestCandidatesTest extends BaseTestCase {
 		update[0]=goodCandidate;
 		update[1]=badCandidate;
 		
-		BestCandidates.update(update);
-		Candidate []updated = BestCandidates.getCandidates();
+		_bestCandidates.update(update);
+		Candidate []updated = _bestCandidates.getCandidates();
 		assertNotNull(updated[0]);
 		assertNotNull(updated[1]);
 		assertNotNull(updated[2]);
 		
 		//then make the value in the advertiser null
 		_advertiserThread.setMsg(null);
+		assertNull(_advertiserThread.getMsg());
 		
 		//purge and update the advertiser
-		BestCandidates.purge();
+		_bestCandidates.purge();
 		propagateChange();
 		
-		updated = BestCandidates.getCandidates();
+		updated = _bestCandidates.getCandidates();
 		assertNull(updated[0]);
 		assertNull(updated[1]);
 		assertNull(updated[2]);
@@ -321,19 +322,19 @@ public class BestCandidatesTest extends BaseTestCase {
 	 * tests the call to the initialize() method.
 	 */
 	public void testInitialize() throws Exception {
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNull(BestCandidates.getCandidates()[1]);
-		assertNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNull(_bestCandidates.getCandidates()[1]);
+		assertNull(_bestCandidates.getCandidates()[2]);
 		
-		assertTrue(BestCandidates.getBest().isSame(mediocreCandidate));
+		assertTrue(_bestCandidates.getBest().isSame(mediocreCandidate));
 		
 		Candidate [] update = new Candidate[2];
 		update[0]=goodCandidate;
 		update[1]=veryGoodCandidate;
-		BestCandidates.update(update);
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNotNull(BestCandidates.getCandidates()[2]);
+		_bestCandidates.update(update);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNotNull(_bestCandidates.getCandidates()[2]);
 		
 		//add leaf conns to connection manager
 		ConnectionManager manager = RouterService.getConnectionManager();
@@ -345,13 +346,13 @@ public class BestCandidatesTest extends BaseTestCase {
 		
 		// after this call we should have only one candidate and it should be
 		// bestLeaf
-		BestCandidates.initialize();
+		_bestCandidates.initialize();
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNull(BestCandidates.getCandidates()[1]);
-		assertNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNotNull(_bestCandidates.getCandidates()[2]);
 		
-		assertTrue(BestCandidates.getBest().isSame(bestLeaf));
+		assertTrue(_bestCandidates.getBest().isSame(veryGoodCandidate));
 		
 	}
 	
@@ -365,38 +366,38 @@ public class BestCandidatesTest extends BaseTestCase {
 		update[0]=goodCandidate;
 		update[1]=badCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
 		//1 an endpoint we don't have in the table and an insane ttl
 		IpPort ip = new IpPortPair("9.9.9.9",20);
 		
-		Connection ret = BestCandidates.getRoute(ip,5);
+		Connection ret = _bestCandidates.getRoute(ip,5);
 		
 		assertNull(ret);
 		
 		//2 an endpoint we have, but at negative ttl
 		
 		ip = goodCandidate;
-		ret = BestCandidates.getRoute(ip,-2);
+		ret = _bestCandidates.getRoute(ip,-2);
 		
 		assertNull(ret);
 		
 		//3 an endpoint we have, but not at the request ttl
 		
-		ret = BestCandidates.getRoute(ip,0);
+		ret = _bestCandidates.getRoute(ip,0);
 		
 		assertNull(ret);
 		
 		//4 an endpoint we have and it is within the request ttl
 		
-		ret = BestCandidates.getRoute(ip,2);
+		ret = _bestCandidates.getRoute(ip,2);
 		
 		assertNotNull(ret);
 		assertTrue(goodCandidate.getAdvertiser().isSame(ret));
 		
 		//5 one more we have, at ttl 0
 		ip = mediocreCandidate;
-		ret = BestCandidates.getRoute(ip,0);
+		ret = _bestCandidates.getRoute(ip,0);
 		
 		assertNotNull(ret);
 		assertTrue(mediocreCandidate.getAdvertiser().isSame(ret));
@@ -419,20 +420,22 @@ public class BestCandidatesTest extends BaseTestCase {
 		
 		assertEquals(2,manager.getNumInitializedClientConnections());
 		
-		assertTrue(mediocreCandidate.equals(BestCandidates.getBest()));
-		assertTrue(mediocreCandidate.equals(BestCandidates.getCandidates()[0]));
+		assertTrue(mediocreCandidate.equals(_bestCandidates.getBest()));
+		assertTrue(mediocreCandidate.equals(_bestCandidates.getCandidates()[0]));
 		//now fail our best candidate. sigh
-		BestCandidates.routeFailed(mediocreCandidate.getAdvertiser());
+		_bestCandidates.routeFailed(mediocreCandidate.getAdvertiser());
 		
 		//at this point, the BestCandidate class should have checked all our leaf connections
 		//and should have elected the new leaf.
-		assertTrue(goodLeaf.isSame(BestCandidates.getBest()));
+		assertTrue(goodLeaf.isSame(_bestCandidates.getBest()));
 		
 		//lets add the two better leaves now.
 		newCons.add(betterLeaf);
 		newCons.add(bestLeaf);
 		PrivilegedAccessor.setValue(manager, "_initializedClientConnections",newCons);
 		assertEquals(4, manager.getNumInitializedClientConnections());
+		
+		PrivilegedAccessor.setValue(manager,"_bestCandidates",_bestCandidates);
 		
 		//calling ConnectionManager.remove should trigger an update.
 
@@ -442,12 +445,12 @@ public class BestCandidatesTest extends BaseTestCase {
 		assertEquals(3,manager.getNumInitializedClientConnections());
 		
 		//after the update, the best leaf should be selected.
-		assertTrue(bestLeaf.isSame(BestCandidates.getBest()));
+		assertTrue(bestLeaf.isSame(_bestCandidates.getBest()));
 		
 		//lets remove the best leaf, the better one shoudl remain
 		manager.remove((ManagedConnection)bestLeaf);
 		
-		assertTrue(betterLeaf.isSame(BestCandidates.getBest()));
+		assertTrue(betterLeaf.isSame(_bestCandidates.getBest()));
 		
 	}
 	
@@ -462,10 +465,10 @@ public class BestCandidatesTest extends BaseTestCase {
 		update[0]=goodCandidate;
 		update[1]=badCandidate;
 		
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertNotNull(BestCandidates.getCandidates()[2]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertNotNull(_bestCandidates.getCandidates()[2]);
 		
 		//connect the advertisers to the connection manager.
 		List list = new LinkedList();
@@ -494,10 +497,10 @@ public class BestCandidatesTest extends BaseTestCase {
 		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
 		
 		//the candidate at ttl1 should not change because we do not check it.
-		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[1]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getCandidates()[1]));
 		
 		//at ttl2 we had goodCandidate.. so now we have it twice ;)
-		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getCandidates()[2]));
 		
 		//CURRRENT STATE: TTL1: goodCandidate  TTL2: goodCandidate.
 		
@@ -507,18 +510,18 @@ public class BestCandidatesTest extends BaseTestCase {
 		manager.remove(advertiser3);
 		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
 		
-		assertTrue(badCandidate.isSame(BestCandidates.getCandidates()[1]));
-		assertTrue(veryGoodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		assertTrue(badCandidate.isSame(_bestCandidates.getCandidates()[1]));
+		assertTrue(veryGoodCandidate.isSame(_bestCandidates.getCandidates()[2]));
 		
 		//CURRRENT STATE: TTL1: badCandidate  TTL2: veryGoodCandidate.
 		
 		//both of these candidates are better than the ones advertiser3 has.
 		//lets edit the table directly.
 		update[1]=null;
-		BestCandidates.update(update);
+		_bestCandidates.update(update);
 		
-		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[1]));
-		assertTrue(veryGoodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		assertTrue(goodCandidate.isSame(_bestCandidates.getCandidates()[1]));
+		assertTrue(veryGoodCandidate.isSame(_bestCandidates.getCandidates()[2]));
 		
 		//CURRENT STATE: TTL1: goodCandidate  TTL2: veryGoodCandidate
 		
@@ -526,17 +529,17 @@ public class BestCandidatesTest extends BaseTestCase {
 		manager.remove(advertiser3);
 		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
 		
-		assertTrue(badCandidate.isSame(BestCandidates.getCandidates()[1]));
-		assertTrue(veryGoodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		assertTrue(badCandidate.isSame(_bestCandidates.getCandidates()[1]));
+		assertTrue(veryGoodCandidate.isSame(_bestCandidates.getCandidates()[2]));
 		//CURRENT STATE: TTL1: badCandidate TTL2: veryGoodCandidate
 		
 	}
 	/**
-	 * uses PrivilegedAccessor to call this method from BestCandidates
+	 * uses PrivilegedAccessor to call this method from _bestCandidates
 	 */
 	private static void propagateChange() throws Exception{
-		PrivilegedAccessor.invokeAllStaticMethods(
-				BestCandidates.class,"propagateChange", new Object[0]);
+		PrivilegedAccessor.invokeMethod(
+				_bestCandidates,"propagateChange", new Object[0]);
 	}
 	
 	

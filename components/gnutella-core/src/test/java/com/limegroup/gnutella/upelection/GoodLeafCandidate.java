@@ -18,10 +18,26 @@ import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
 		final short _uptime;
 		final int _filesShared;
 		
+		CandidateHandler _handler;
+		
 		public GoodLeafCandidate(String host, int port, short uptime, int filesShared) {
 			super(host,port);
 			_uptime = uptime;
 			_filesShared = filesShared;
+			_handler = new CandidateHandler(this) {
+				public int getFileShared() {
+					return _filesShared;
+				}
+			};
+			
+		}
+		
+		public CandidateHandler getCandidateHandler() {
+			return _handler;
+		}
+		
+		public boolean isGoodCandidate() {
+			return true;
 		}
 		
 		/* (non-Javadoc)
@@ -30,24 +46,7 @@ import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
 		public boolean isOpen() {
 			return true;
 		}
-		/* (non-Javadoc)
-		 * @see com.limegroup.gnutella.Connection#getBandwidth()
-		 */
-		public int getBandwidth() {
-			return 20;
-		}
-		/* (non-Javadoc)
-		 * @see com.limegroup.gnutella.Connection#getJVM()
-		 */
-		public String getJVM() {
-			return "1.5.0";
-		}
-		/* (non-Javadoc)
-		 * @see com.limegroup.gnutella.Connection#getOS()
-		 */
-		public String getOS() {
-			return "nachos";
-		}
+		
 		/* (non-Javadoc)
 		 * @see com.limegroup.gnutella.Connection#isGoodLeaf()
 		 */
@@ -60,24 +59,7 @@ import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
 		public int remoteHostSupportsBestCandidates() {
 			return BestCandidatesVendorMessage.VERSION;
 		}
-		/* (non-Javadoc)
-		 * @see com.limegroup.gnutella.Connection#getFileShared()
-		 */
-		public int getFileShared() {
-			return _filesShared;
-		}
-		/* (non-Javadoc)
-		 * @see com.limegroup.gnutella.Connection#isTCPCapable()
-		 */
-		public boolean isTCPCapable() {
-			return true;
-		}
-		/* (non-Javadoc)
-		 * @see com.limegroup.gnutella.Connection#isUDPCapable()
-		 */
-		public boolean isUDPCapable() {
-			return true;
-		}
+		
 		/* (non-Javadoc)
 		 * @see com.limegroup.gnutella.Connection#isSupernodeClientConnection()
 		 */
