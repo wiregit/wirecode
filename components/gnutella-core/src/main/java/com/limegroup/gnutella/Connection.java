@@ -153,12 +153,14 @@ public class Connection implements Candidate {
     /**
      * The possibly non-null VendorMessagePayload which describes what
      * features the guy on the other side of this connection supports.
+     * LOCKING: _advertisementLock
      */
     protected FeaturesVendorMessage _features = null;
     
     /**
      * The possibly non-null VendorMessagePayload which describes what
      * candidates the guy on the other side of this connection advertises.
+     * LOCKING: _advertisementLock
      */
     protected BestCandidatesVendorMessage _candidatesReceived = null;
     
@@ -170,6 +172,7 @@ public class Connection implements Candidate {
     
     /**
      * the last time we received an advertisement on this connection
+     * LOCKING: _advertisementLock
      */
     private long _lastReceivedAdvertisementTime;
     
@@ -192,7 +195,8 @@ public class Connection implements Candidate {
     private boolean _needsAdvertisement;
     
     /**
-     * lock for the BestCandidates instance and the timers.
+     * LOCKS: _candidatesReceived, _candidatesSent, _features,
+     * _lastReceivedAdvertisementTime, _lastSentAdvertisementTime
      */
     private Object _advertisementLock = new Object();
     
@@ -403,8 +407,11 @@ public class Connection implements Candidate {
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
         if (vm instanceof CapabilitiesVM)
             _capabilities = (CapabilitiesVM) vm;
+        
         if (vm instanceof FeaturesVendorMessage)
-        	_features = (FeaturesVendorMessage) vm;
+        	synchronized(_advertisementLock) {
+        		_features = (FeaturesVendorMessage) vm;
+        	}
         
         //if we are receiving a BestCandidatesVendorMessage
         //we need to do some extra processing.
@@ -415,17 +422,26 @@ public class Connection implements Candidate {
         	if (!RouterService.isSupernode() || !isGoodUltrapeer())
         		return;
         	
-        	//make sure they aren't advertising too soon.
-        	if (System.currentTimeMillis() - _lastReceivedAdvertisementTime <
-        			ADVERTISEMENT_INTERVAL)
-        		return;
         	
-        	//update the values
-        	_lastReceivedAdvertisementTime = System.currentTimeMillis();
-        	_candidatesReceived = (BestCandidatesVendorMessage)vm;
+
+        	 // it is not possible for two threads to try and set this, but it is
+        	 // possible for the message parsing thread to set this while the advertising
+        	// thread is trying to read it.
+        	 
+        	synchronized(_advertisementLock) {
+        	//make sure they aren't advertising too soon.
+        		if (System.currentTimeMillis() - _lastReceivedAdvertisementTime <
+        			ADVERTISEMENT_INTERVAL)
+        			return;
+        	
+        		//update the values
+        		_lastReceivedAdvertisementTime = System.currentTimeMillis();
+        		_candidatesReceived = (BestCandidatesVendorMessage)vm;
+        	}
         	
         	//then add a ref of the advertiser to each candidate received
         	Candidate [] candidates = _candidatesReceived.getBestCandidates();
+        	
         	
         	candidates[0].setAdvertiser(this);
         	if (candidates[1]!=null)
@@ -2198,10 +2214,55 @@ public class Connection implements Candidate {
 		return _features !=null ? _features.getBandidth() : -1;
 	}
 	/**
-	 * @return Returns the candidates the remote host advertised.
+	 * @return Returns a copy of the candidates the remote host advertised.
 	 */
 	public Candidate [] getCandidates() {
-		return _candidatesReceived == null ? null : _candidatesReceived.getBestCandidates();
+		if (_candidatesReceived == null)
+			return null;
+		
+		Candidate [] ret = new Candidate[2];
+		
+		synchronized(_advertisementLock) {
+			ret[0] = _candidatesReceived.getBestCandidates()[0];
+			ret[1] = _candidatesReceived.getBestCandidates()[1];
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * determines whether this connection is a good candidate for an ultrapeer.
+	 * 
+	 * Any candidates that cannot receive incoming TCP and UDP traffic, have less
+	 * than 16kb outgoing bandwith available or run on old operating systems or 
+	 * runtime environments are filtered.
+	 * 
+	 * @return whether the leaf on the other side of this connection should be
+	 * considered for election
+	 */
+	public boolean isGoodCandidate() {
+		synchronized (_advertisementLock) {
+			if (!
+				( isTCPCapable() && //incoming TCP
+				isUDPCapable() && //unsolicited UDP
+				isGoodLeaf() &&
+				getBandwidth() > 16 &&
+				getJVM().indexOf("1.4.0") == -1))
+					return false;
+			
+			//filter out non-32 bit windowses
+			if (getOS().startsWith("windows") && 
+					getOS().indexOf("xp") ==-1 &&
+					getOS().indexOf("2000") ==-1)
+					return false;
+			
+			//and mac os 9
+			if (getOS().startsWith("mac os") &&
+					!getOS().endsWith("x"))
+				return false;
+			
+			return true;
+		}
 	}
 	
 	/**

@@ -131,6 +131,8 @@ public class FeaturesVendorMessage extends VendorMessage {
 		ret.setProperty(FILES_SHARED,""+RouterService.getFileManager().getNumFiles());
 		ret.setProperty(INCOMING_TCP,""+RouterService.acceptedIncomingConnection());
 		ret.setProperty(INCOMING_UDP,""+RouterService.isOOBCapable());
+		
+		//FIXME: decide which parameter to use for the available bandwith.
 		ret.setProperty(BANDWIDTH,""+(int)RouterService.getConnectionManager().
 					getMeasuredUpstreamBandwidth());
 		//add more here

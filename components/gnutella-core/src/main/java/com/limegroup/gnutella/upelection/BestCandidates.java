@@ -171,36 +171,12 @@ public class BestCandidates {
 				getInitializedClientConnections().iterator();iter.hasNext();) {
 			
 				ManagedConnection current = (ManagedConnection)iter.next();
-				if (current.isGoodLeaf() && 
-						current.remoteHostSupportsBestCandidates() >=1 &&
-						current.isUDPCapable() && //unsolicited udp
-						current.isTCPCapable() ) //incoming tcp
-						//add more criteria here
-					{
-						//filter out any old windowses
-						if (current.getOS().startsWith("windows") && 
-							current.getOS().indexOf("xp") ==-1 &&
-							current.getOS().indexOf("2000") ==-1)
-							continue;
-						
-						//and mac os 9
-						if (current.getOS().startsWith("mac os") &&
-								!current.getOS().endsWith("x"))
-							continue;
-						
-						//also, jre 1.4.0 is really really bad
-						if (current.getJVM().indexOf("1.4.0") != -1)
-							continue;
-						
-						//filter people on slow connections
-						if (current.getBandwidth() < 16)
-							continue;
-					
+				
+				if (current.remoteHostSupportsBestCandidates() >=1 &&
+						current.isGoodCandidate() &&
+						_leafComparator.compare(current,best) > 0)
 						//get the best connection.	
-						if (_leafComparator.compare(current,best) > 0)
-								best = current;
-						
-					}
+							best = current;				
 			}
 		
 		else 
