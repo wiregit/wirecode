@@ -7,6 +7,7 @@ import java.io.*;
 import java.security.*;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.HashMap;
+import java.net.*;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as
@@ -120,6 +121,38 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
+	 * Convenience method for creating a SHA1 <tt>URN</tt> from a <tt>URL</tt>.
+	 * For the url to work, its getFile method must return the SHA1 urn
+	 * in the form:<p> 
+	 * 
+	 *  /uri-res/N2R?urn:sha1:SHA1URNHERE
+	 * 
+	 * @param url the <tt>URL</tt> to extract the <tt>URN</tt> from
+	 * @throws <tt>IOException</tt> if there is an error reading the URN from
+	 *  the URL
+	 */
+	public static URN createSHA1UrnFromURL(final URL url) 
+		throws IOException {
+		return createSHA1UrnFromUriRes(url.getFile());
+	}
+
+	/**
+	 * Convenience method for creating a <tt>URN</tt> instance from a string
+	 * in the form:<p>
+	 *
+	 * /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB
+	 */
+	public static URN createSHA1UrnFromUriRes(String sha1String) 
+		throws IOException {
+		sha1String.trim();
+		if(isValidUriResSHA1Format(sha1String)) {
+			return createSHA1UrnFromString(sha1String.substring(13));
+		} else {
+			throw new IOException("could not parse string format: "+sha1String);
+		}
+	}
+
+	/**
 	 * Creates a URN instance from the specified HTTP request line.
 	 * The request must be in the standard from, as specified in
 	 * RFC 2169.  Note that com.limegroup.gnutella.Acceptor parses out
@@ -129,6 +162,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *  RFC 2169, for example:<p>
 	 * 
 	 * 	/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
+	 *
 	 * @return a new <tt>URN</tt> instance from the specified request, or 
 	 *  <tt>null</tt> if no <tt>URN</tt> could be created
 	 *
@@ -137,7 +171,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public static URN createSHA1UrnFromHttpRequest(final String requestLine) 
 		throws IOException {
 		if(!URN.isValidUrnHttpRequest(requestLine)) {
-			throw new IOException("IVVALID URN HTTP REQUEST");
+			throw new IOException("INVALID URN HTTP REQUEST");
 		}
 		String urnString = URN.extractUrnFromHttpRequest(requestLine);
 		if(urnString == null) {
@@ -269,6 +303,24 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	}
 
 	/**
+	 * This.method checks whether or not the specified string fits the
+	 * /uri-res/N2R?urn:sha1: format.  It does so by checking the start of the
+	 * string as well as verifying the overall length.
+	 *
+	 * @param sha1String the string to check
+	 * @return <tt>true</tt> if the string follows the proper format, otherwise
+	 *  <tt>false</tt>
+	 */
+	private static boolean isValidUriResSHA1Format(final String sha1String) {
+		String copy = sha1String.toLowerCase();		
+		if(copy.startsWith("/uri-res/n2r?urn:sha1:")) {
+			// just check the length
+			return sha1String.length() == 54;
+		} 
+		return false;
+	}
+
+	/**
 	 * Returns a <tt>String</tt> containing the URN for the http request.  For
 	 * a typical SHA1 request, this will return a 41 character URN, including
 	 * the 32 character hash value.
@@ -297,7 +349,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if the reques is valid, <tt>false</tt> otherwise
 	 */
 	private static boolean isValidUrnHttpRequest(final String requestLine) {
-		return (URN.isValidSize(requestLine) &&
+		return (URN.isValidLength(requestLine) &&
 				URN.isValidUriRes(requestLine) &&
 				URN.isValidResolutionProtocol(requestLine) && 
 				URN.isValidHTTPSpecifier(requestLine));				
@@ -311,7 +363,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if the size of the request line is valid, 
 	 *  <tt>false</tt> otherwise
 	 */
-	private static final boolean isValidSize(final String requestLine) {
+	private static final boolean isValidLength(final String requestLine) {
 		int size = requestLine.length();
 		if((size != 63) && (size != 107)) {
 			return false;

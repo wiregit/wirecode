@@ -40,6 +40,12 @@ public final class AlternateLocation
 	private final long TIME;
 
 	/**
+	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
+	 * can be <tt>null</tt>.
+	 */
+	private final URN SHA1_URN;
+
+	/**
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile int hashCode = 0;
@@ -82,26 +88,41 @@ public final class AlternateLocation
                                       location);
 			}
 		}
-		return new AlternateLocation(url, date);
+
+		URN sha1 = null;
+		try {
+			sha1 = URN.createSHA1UrnFromURL(url);
+		} catch(IOException e) {
+			// don't accept if there's no SHA1, as SHA1 is all we currently
+			// understand
+			throw new IOException("no SHA1 in url: "+url);
+		}
+		return new AlternateLocation(url, date, sha1);
 	}
 
 
 	/**
-	 * Creates a new <tt>AlternateLocation</tt> instance for the givel 
+	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
 	 * <tt>URL</tt> instance.  This constructor creates an alternate
 	 * location with the current date and time as its timestamp.
 	 * This can be used, for example, for newly uploaded files.
 	 *
 	 * @param url the <tt>URL</tt> instance for the resource
-	 * @throws <tt>MalformedURLException</tt> if a <tt>URL</tt> instance
-	 *  could not be succussfully constructed from the supplied arguments
 	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument is 
 	 *  <tt>null</tt>
+	 * @throws <tt>MalformedURLException</tt> if a copy of the supplied 
+	 *  <tt>URL</tt> instance cannot be successfully created
+	 * @throws <tt>IOException</tt> if the url argument is not a
+	 *  valid location for any reason
 	 */
 	public static AlternateLocation createAlternateLocation(final URL url) 
-		throws MalformedURLException {
+		throws MalformedURLException, IOException {
 		if(url == null) {
 			throw new NullPointerException("cannot accept null URL");
+		}
+
+		if((url.getPort() & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("invalid port: "+url.getPort());
 		}
 		// create a new URL instance from the data for the given url
 		// and the urn
@@ -109,7 +130,15 @@ public final class AlternateLocation
 							  url.getFile());
 		// make the date the current time
 		Date date = new Date();
-		return new AlternateLocation(tempUrl, date);
+		URN sha1 = null;
+		try {
+			sha1 = URN.createSHA1UrnFromURL(tempUrl);
+		} catch(IOException e) {
+			// don't accept if there's no SHA1, as SHA1 is all we currently
+			// understand
+			throw new IOException("no SHA1 in url: "+url);
+		}
+		return new AlternateLocation(tempUrl, date, sha1);
 	}
 
 	/**
@@ -132,13 +161,15 @@ public final class AlternateLocation
 		}
 		URN urn = rfd.getSHA1Urn();
 		if(urn == null) {
-			throw new IOException("no SHA1 in RFD");
+			throw new IllegalArgumentException("no SHA1 in RFD");
 		}
-		String urlStr = ("http://"+rfd.getHost()+":"+rfd.getPort()+
-						 "/get/"+String.valueOf(rfd.getIndex())+
-						 "/"+URLEncoder.encode(rfd.getFileName()));
-		URL url = new URL(urlStr);
-		return new AlternateLocation(url, new Date());
+		int port = rfd.getPort();
+		if((port & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("invalid port: "+port);
+		}		
+		URL url = new URL("http", rfd.getHost(), port,						  
+						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+		return new AlternateLocation(url, new Date(), urn);
 	}
 
 	/**
@@ -149,9 +180,10 @@ public final class AlternateLocation
 	 * @param date the <tt>Date</tt> timestamp for the 
 	 *  <tt>AlternateLocation</tt>
 	 */
-	private AlternateLocation(final URL url, final Date date) {
-		this.URL = url;
-		this.TIME = date.getTime();
+	private AlternateLocation(final URL url, final Date date, final URN sha1) {
+		this.URL       = url;
+		this.TIME      = date.getTime();
+		this.SHA1_URN  = sha1;
 		if(TIME == 0) {
 			this.OUTPUT_DATE_TIME = null;
 		} else {
@@ -179,6 +211,26 @@ public final class AlternateLocation
 			// nevertheless
 			return null;
 		}
+	}
+
+	/**
+	 * Returns whether or not this <tt>AlternateLocation</tt> has a SHA1 urn.
+	 *
+	 * @return <tt>true</tt> if there is a SHA1 urn, otherwise <tt>false</tt>
+	 */
+	public boolean hasSHA1Urn() {
+		return SHA1_URN != null;
+	}
+
+	/**
+	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
+	 * 
+	 * @return the SHA1 urn for the this <tt>AlternateLocation</tt>, or 
+	 *  <tt>null</tt> if there is none
+	 */
+	public URN getSHA1Urn() {
+		// can be null
+		return SHA1_URN;
 	}
 
 	/**
@@ -436,10 +488,22 @@ public final class AlternateLocation
             String urlStr = AlternateLocation.removeTimestamp(locationHeader);
             URL url = new URL(urlStr);
             String host = url.getHost();
+            int    port = url.getPort();
             if(host == null || host.equals("")) {
                 throw new IOException("invalid host in alternate location: "+
                                       "host: "+host+"header: "+locationHeader);
             }
+			// Handle bad merged alternate locations minus the spaces
+			if(test.lastIndexOf("http://") > 4) {
+                throw new IOException("messy alternate location: "+
+                                      locationHeader);
+			}
+			// Handle bad ports in alternate locations 
+			if((port & 0xFFFF0000) != 0) {
+				throw new IOException("invalid port in alternate location: "+
+									  "port: "+port+"header: "+locationHeader);
+			}
+
             // check for private addresses if it appears to be in dotted quad 
             // format..
             if(Character.isDigit(host.charAt(0))) {
@@ -450,7 +514,7 @@ public final class AlternateLocation
                 } 
             }
             if(url.getPort()==-1)
-                url = new URL("HTTP",url.getHost(),80,url.getFile());
+                url = new URL("http",url.getHost(),80,url.getFile());
 			return url;
 		} else {
 			// we could not understand the beginning of the alternate location
@@ -609,6 +673,11 @@ public final class AlternateLocation
 	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
 	public RemoteFileDesc createRemoteFileDesc(int size, Set urns) {
+		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
+								  0, URL.getFile(), size,  
+								  GUID.makeGuid(), 1000,
+								  true, 3, false, null, urns);
+		/*
 		RemoteFileDesc ret = null;
 
 		// Determine if this is a classic Gnutella location 
@@ -634,6 +703,7 @@ public final class AlternateLocation
 			}
 		}
 		return ret;
+		*/
 	}
 
 	/**
