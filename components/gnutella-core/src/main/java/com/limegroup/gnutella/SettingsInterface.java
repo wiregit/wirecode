@@ -6,19 +6,19 @@ import java.io.IOException;
 
 /**
  *  This class sets up an interface for the SettingsManager
- *  It's designed to make life simpler, so hopefully it 
+ *  It's designed to make life simpler, so hopefully it
  *  will!  This contains all of the default properties
  *  for the program.  If you want to change any defaults,
- *  change them here.  This also contains all of the 
- *  accessor and mutator methods that you can call on the 
+ *  change them here.  This also contains all of the
+ *  accessor and mutator methods that you can call on the
  *  properties manager.
- * 
+ *
  *  @author Adam Fisk
  */
 
 public interface SettingsInterface
-{    
-    // Accessor methods 
+{
+    // Accessor methods
     public byte       getTTL();
     public byte       getSoftMaxTTL();
     public byte       getMaxTTL();
@@ -29,7 +29,6 @@ public interface SettingsInterface
     public int        getPort();
     public int        getConnectionSpeed();
     public byte       getSearchLimit();
-    public boolean    getStats();
     public String     getClientID();
     public int        getMaxConn();
     public String     getSaveDirectory();
@@ -65,74 +64,68 @@ public interface SettingsInterface
     public String getPath();
 
     /** set the user time to live */
-    public void setTTL(byte ttl) 
-		throws IllegalArgumentException;
+    public void setTTL(byte ttl)
+        throws IllegalArgumentException;
 
     /** set the soft maximum time to live (TTLs above this are readjusted) */
     public void setSoftMaxTTL(byte smaxttl)
-    	throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** set the hard maximum time to live (TTLs above this are dropped) */
-    public void setMaxTTL(byte maxttl) 
-		throws IllegalArgumentException;
-   
+    public void setMaxTTL(byte maxttl)
+        throws IllegalArgumentException;
+
     /** set the maximum length of packets */
     public void setMaxLength(int maxLength)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** set the timeout */
     public void setTimeout(int timeout)
-		throws IllegalArgumentException;
-    
+        throws IllegalArgumentException;
+
     /** set the keep alive */
     public void setKeepAlive(int keepAlive)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** set the port */
     public void setPort(int port)
-		throws IllegalArgumentException;
-    
+        throws IllegalArgumentException;
+
     /** set the network connection speed */
     public void setConnectionSpeed(int speed)
-	throws IllegalArgumentException;
+    throws IllegalArgumentException;
 
     /** set the maximum number of searches */
     public void setSearchLimit(byte limit)
-		throws IllegalArgumentException;
-
-    /** set the boolean specifying whether 
-     *  the stats file exists 
-     */
-    public void setStats(boolean stats)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** set the client (gu) id */
     public void setClientID(String clientID)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** set the maximum number of connections */
     public void setMaxConn(int maxConn)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** sets the directory for saving files*/
     public void setSaveDirectory(String dir)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
     /** sets the default directory for saving files*/
     public void setSaveDefault(String dir)
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
     /** sets the string list of directories*/
     public void setDirectories(String directories)
-		throws IllegalArgumentException;
-    
+        throws IllegalArgumentException;
+
     /** sets the string of extensions*/
     public void setExtensions(String extensions)
-		throws IllegalArgumentException;
-   
-    public void setBannedIps(String[] ips) 
-		throws IllegalArgumentException;
+        throws IllegalArgumentException;
 
-    /** Set the list of words to ban in queries. 
+    public void setBannedIps(String[] ips)
+        throws IllegalArgumentException;
+
+    /** Set the list of words to ban in queries.
      *  If words is not a semicolon-separated list of white-space
      *  free words, throws IllegalArgumentException. */
     public void setBannedWords(String[] words)
@@ -141,7 +134,7 @@ public interface SettingsInterface
     /** Sets whether duplicate packets should be ignored. */
     public void setFilterDuplicates(boolean b);
 
-    /** Sets whether queries that are not 
+    /** Sets whether queries that are not
      *  family-friendly should be ignored. */
     public void setFilterAdult(boolean b);
     public void setFilterVbs(boolean b);
@@ -162,12 +155,11 @@ public interface SettingsInterface
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
 
-
-    /** specialized method for writing the 
+    /** specialized method for writing the
      *  properties file for the network discoverer
      */
     public void writeNDProps();
-	public void setWrite(boolean b);
+    public void setWrite(boolean b);
 
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
@@ -185,7 +177,7 @@ public interface SettingsInterface
     public static final String  DEFAULT_FILE_NAME      = "limewire.props";
     /** Default name for the network discovery properties */
     public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
-    /** Default value for the keep alive */    
+    /** Default value for the keep alive */
     public static final int     DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
@@ -196,8 +188,6 @@ public interface SettingsInterface
     /** Default client/gu id */
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
-    /** Default boolean for stats file */
-    public static final boolean DEFAULT_STATS          = false;
     /** Default maximum number of connections */
     public static final int     DEFAULT_MAX_CONN       = 5;
     /** Default directories for file searching */
@@ -205,12 +195,12 @@ public interface SettingsInterface
     /** Default directories for file searching */
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
-    public static final String  DEFAULT_EXTENSIONS     = 
-	"html;htm;xml;txt;pdf;ps;rtf;doc;tex;"+
-	"mp3;wav;au;aif;aiff;ra;ram;"+
-	"mpg;mpeg;asf;qt;mov;avi;mpe;"+
-	"gif;jpg;jpeg;jpe;png;tif;tiff;"+
-	"exe;zip;gz;gzip;hqx;tar;tgz;z";
+    public static final String  DEFAULT_EXTENSIONS     =
+    "html;htm;xml;txt;pdf;ps;rtf;doc;tex;"+
+    "mp3;wav;au;aif;aiff;ra;ram;"+
+    "mpg;mpeg;asf;qt;mov;avi;mpe;"+
+    "gif;jpg;jpeg;jpe;png;tif;tiff;"+
+    "exe;zip;gz;gzip;hqx;tar;tgz;z";
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
     public static final String[] DEFAULT_BANNED_WORDS   = {};
@@ -223,10 +213,10 @@ public interface SettingsInterface
     /** Use quick connect hosts instead of gnutella.net? */
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
     /** List of hosts to try on quick connect */
-    public static final String[] DEFAULT_QUICK_CONNECT_HOSTS 
-	= {"gnutellahosts.com:6346", "gnet.ath.cx:6346",
-	   "gnet1.ath.cx:6346","gnet2.ath.cx:6346","gnet3.ath.cx:6346",
-	   "gnet4.ath.cx:6346"};
+    public static final String[] DEFAULT_QUICK_CONNECT_HOSTS
+    = {"gnutellahosts.com:6346", "gnet.ath.cx:6346",
+       "gnet1.ath.cx:6346","gnet2.ath.cx:6346","gnet3.ath.cx:6346",
+       "gnet4.ath.cx:6346"};
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
@@ -235,7 +225,7 @@ public interface SettingsInterface
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
     public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
 
-    // The property key name constants 
+    // The property key name constants
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
     public static final String MAX_TTL        = "MAX_TTL";
@@ -246,7 +236,6 @@ public interface SettingsInterface
     public static final String SPEED          = "CONNECTION_SPEED";
     public static final String SEARCH_LIMIT   = "SEARCH_LIMIT";
     public static final String CLIENT_ID      = "CLIENT_ID";
-    public static final String STATS          = "STATS";
     public static final String MAX_CONN       = "MAXIMUM_NUMBER_OF_CONNECTIONS";
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
@@ -267,7 +256,7 @@ public interface SettingsInterface
     public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
-    public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";    
+    public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
 }
 
 

@@ -153,6 +153,7 @@ public class HostCatcher {
     //We could also get ip addresses from query hits and push
     //requests, but then we have to guess the ports for incoming
     //connections.  (These only give ports for HTTP.)
+
     if (! (m instanceof PingReply))
         return;
 
@@ -179,62 +180,6 @@ public class HostCatcher {
     addKnownHost(e);
     }
 
-
-    /**
-     * @modifies this
-     * @effects returns a new outgoing, connected connection to some
-     *  host in this and removes it from this (atomically).  If manager is non-null,
-     *  it is (almost) guaranteed that we do not return any hosts we are connected to.
-     *  If no such host is found, blocks until a host is added.  If manager is non-null
-     *  and this connection is no longer needed, returns null.  (Hack!) This method <i>is</i>
-     *  thread-safe, but it is cleverly synchronized so that multiple invocations can run
-     *  at the same time.  Note that an initial ping is no sent on the returned connection,
-     *  nor is the connection added to manager.<p>
-     *
-     *  Note: because this method interacts so tightly with ConnectionManager, it should
-     *  probably be moved into ConnectionFetcher.run.  It is sufficient for HostCatcher
-     *  to only provide the atomic chooseEndpoint method.
-     */
-    public Connection choose() {
-        while (true) {
-            //Wait for an endpoint, checking every now and then that we actually
-            //still need the connection.
-            Endpoint e=null;
-            synchronized (this) {
-                while (e==null) {
-                    //Return if the manager has enough.
-                    //Note that we execute this every few seconds because of
-                    //the timeout below.
-                    if ( manager != null && !manager.needsMoreConnections() )
-                        return null;
-                    try {
-                        e=getAnEndpoint();
-                    } catch (NoSuchElementException exc) {
-                        try {
-                            this.wait(2000);  //2 sec
-                        } catch (InterruptedException exc2) { }
-                    }
-                }
-            }
-
-            // Skip anything we are connected to.
-            if (manager != null && manager.isConnected(e))
-                continue;
-            Connection ret = null;
-            try {
-                ret = new Connection(e.hostname,e.port);
-                if (manager!=null) {
-                    manager.tryingToConnect(ret, false);
-                }
-                ret.connect();
-                return ret;
-            } catch (IOException exc) {
-                if (manager!=null)
-                    manager.failedToConnect(ret);
-                continue;
-            }
-        }
-    }
 
     /**
      * @modifies this

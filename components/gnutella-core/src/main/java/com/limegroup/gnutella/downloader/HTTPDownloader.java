@@ -374,7 +374,7 @@ public class HTTPDownloader implements Runnable {
 
         try {
             //ROUTE the push to the appropriate connection, if possible.
-            Connection c=_manager.pushRouteTable.get(clientGUID);
+            Connection c=_manager.getPushRouteTable().get(clientGUID);
             if (c!=null)
                 c.send(push);
             else {
@@ -404,7 +404,7 @@ public class HTTPDownloader implements Runnable {
         int d1 = Integer.parseInt(d);
         byte[] ip = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
 
-        byte[] guid = _manager.ClientId.bytes();
+        byte[] guid = _manager.getClientGUID();
 
         // last 16 bytes of the query reply message...
         byte[] clientGUID = cguid;

@@ -27,7 +27,7 @@ public class ConnectionManager implements Runnable {
      *  listen to new ports.
      *
      * LOCKING: obtain socketLock before modifying either.  Notify socketLock when done.
-     * INVARIANT: port==socket.getLocalPort() if socket!=null,  port==0 <==> socket==null 
+     * INVARIANT: port==socket.getLocalPort() if socket!=null,  port==0 <==> socket==null
      */
     private int port=0;
     private volatile ServerSocket socket=null;
@@ -35,27 +35,37 @@ public class ConnectionManager implements Runnable {
     private byte[] ip;
 
     /** Routing information.  ME_CONNECTION is a hack described in Connection. */
-    public RouteTable routeTable=new RouteTable(2048); //tweak as needed
-    public RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
-    static final Connection ME_CONNECTION=new Connection("",0);
+    private  RouteTable routeTable=new RouteTable(2048); //tweak as needed
+    private  RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
+    static final Connection ME_CONNECTION = new Connection();
 
-    /* List of all connections.  This is implemented with two data structures: a list
-     * for fast iteration, and a set for quickly telling what we're connected to.
+    /* List of all connections.  This is implemented with two data structures:
+     * a list for fast iteration, and a set for quickly telling what we're
+     * connected to.
      *
-     * LOCKING: connections and endpoints must NOT BE MUTATED.  Instead they should be
-     *          replaced as necessary with new copies.  Before replacing the structures,
-     *          obtain this' monitor.
-     *         
-     * INVARIANT: "connections" contains no duplicates, and "endpoints" contains exactly
-     * those endpoints that could be made from the elements of "connections".
+     * INVARIANT: "connections" contains no duplicates, and "endpoints" contains
+     * exactly those endpoints that could be made from the elements of
+     * "connections".
+     *
+     * INVARIANT: numFetchers = max(0, keepAlive - connections.size())
+     *            Number of fetchers equals number of connections needed, unless
+     *            that number is less than zero.
+     *
+     * LOCKING: connections and endpoints must NOT BE MUTATED.  Instead they
+     *          should be replaced as necessary with new copies.  Before
+     *          replacing the structures, obtain this' monitor.  Also obtain
+     *          this' monitor to change keepAlive or the fetchers list.
+     *          *** All four of the following members should only be modified
+     *              from threads that have this' monitor ***
      */
     private volatile List /* of Connection */ connections=new ArrayList();
     private volatile Set /* of Endpoint */ endpoints=new HashSet();
-    /** List of all connection fetchers.  This is synchronized. */
-    List /* of ConnectionFetcher */ fetchers=
-        Collections.synchronizedList(new ArrayList());
+    private List /* of ConnectionFetcher */ fetchers =
+        new ArrayList();
+    private int keepAlive=0;
+
     public HostCatcher catcher;
-    
+
     /** Queued up entries to send to each */
     static class MessagePair {
         Message m;
@@ -65,33 +75,31 @@ public class ConnectionManager implements Runnable {
     private static final int MESSAGE_QUEUE_SIZE=500;
     private Buffer /* of MessagePair */ messageQueue=new Buffer(MESSAGE_QUEUE_SIZE);
 
-    private int keepAlive=0;
     private ActivityCallback callback;
-    public GUID ClientId;
-    private int   activeAttempts = 0;
-    public boolean stats;
+    private GUID clientId;
 
     /** Variables for statistical purposes */
     /*NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT BE 100% ACCURATE. */
     public int total; //total number of messages sent and received
-    public  int PReqCount; //Ping Request count
+    public int PReqCount; //Ping Request count
     public int PRepCount; //Ping Reply count
     public int QReqCount; //Query Request count
     public int QRepCount; //Query Reply count
     public int pushCount; //Push request count
     public int totDropped; //Total dropped messages
     public int totRouteError; //Total misrouted messages
-    
+
     private Vector badHosts = new Vector();
 
     /** Creates a manager that tries to listen to incoming connections
      * on the given port.  If this is a bad port, the port will be
      * changed when run is called and SettingsManager will be updated.
      * If that fails, ActivityCallback.error will be called.  A port
-     * of 0 means do not accept incoming connections. 
+     * of 0 means do not accept incoming connections.
      */
-    public ConnectionManager(int port) {
+    public ConnectionManager(int port, ActivityCallback callback) {
         this.port=port;
+        this.callback = callback;
         try {
             ip=InetAddress.getLocalHost().getAddress();
         } catch (Exception e) {
@@ -106,18 +114,18 @@ public class ConnectionManager implements Runnable {
         if (quickConnect)
             catcher=new HostCatcher(this);
         else
-            catcher=new HostCatcher(this,SettingsManager.instance().getHostList());     
+            catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
 
         Thread t=new Thread(new MessageBroadcaster());
         t.setDaemon(true);
-        t.start();    
+        t.start();
     }
-    
+
     /** Creates a manager that listens on the default port. Equivalent to
      *  ConnectionManager(SettingsManager.instance().getPort()) */
-    public ConnectionManager() {
-        this(SettingsManager.instance().getPort());
-    }  
+    public ConnectionManager(ActivityCallback callback) {
+        this(SettingsManager.instance().getPort(), callback);
+    }
 
     /**
      * Returns the port at which the Connection Manager listens for incoming connections
@@ -138,7 +146,7 @@ public class ConnectionManager implements Runnable {
     /**
      * @requires only one thread is calling this method at a time
      * @modifies this
-     * @effects sets the port on which the ConnectionManager is listening. 
+     * @effects sets the port on which the ConnectionManager is listening.
      *  If that fails, this is <i>not</i> modified and IOException is thrown.
      *  If port==0, tells this to stop listening to incoming connections.
      *  This is properly synchronized and can be called even while run() is
@@ -167,7 +175,7 @@ public class ConnectionManager implements Runnable {
                 socketLock.notifyAll();
             }
             return;
-        } 
+        }
         //3. Normal case.  See note about locking above.
         else {
             //a) Try new port.
@@ -214,7 +222,7 @@ public class ConnectionManager implements Runnable {
             setListeningPort(suggestedPort);
             return suggestedPort;
         }
-    
+
         //1. Try suggested port.
         try {
             setListeningPort(suggestedPort);
@@ -233,36 +241,32 @@ public class ConnectionManager implements Runnable {
         //3. Everything failed; give up!
         throw new IOException();
     }
-    
-    public void propertyManager(){
+
+    public void propertyManager() {
         boolean ok=true;
         try {
-            ClientId = new GUID(GUID.fromHexString(SettingsManager.instance().getClientID()));
-            if (ClientId==null)
+            clientId = new GUID(GUID.fromHexString(
+                SettingsManager.instance().getClientID()));
+            if (clientId==null)
                 ok=false;
         } catch (IllegalArgumentException e) {
             ok=false;
         }
         if (!ok) {
             //This should never happen! But if it does, we can recover.
-            ClientId=new GUID(Message.makeGuid());
+            clientId=new GUID(Message.makeGuid());
         }
 
-        boolean statVal = SettingsManager.instance().getStats();
-        if(statVal)
-            stats = true;
-        else
-            stats = false;
         String[] allHosts = SettingsManager.instance().getBannedIps();
         for (int i=0; i<allHosts.length; i++)
             badHosts.add(allHosts[i]);
-    }     
+    }
 
-    /** 
+    /**
      * Associate a GUID with this host
-     * 
+     *
      * @modifies route table
-     * @effects notifies the route table that m is a request originating from 
+     * @effects notifies the route table that m is a request originating from
      *  this host and I expect replies, i.e.,
      *  <pre>
      *      routeTable.put(m.getGUID(), ME_CONNECTION);
@@ -289,21 +293,21 @@ public class ConnectionManager implements Runnable {
         }
         if (dropped!=null) {
             //TODO: increment dropped message count if returned value
-            //of add(..) is not null, i.e., if buffer capacity is reached.      
+            //of add(..) is not null, i.e., if buffer capacity is reached.
         }
     }
 
-    /** 
+    /**
      *  @modifies network
      *  @effects sends the message m to all connections.  This
-     *   is useful for intiating a ping or query. 
+     *   is useful for intiating a ping or query.
      */
     public void sendToAll(Message m) {
         sendToAllExcept(m, null);
     }
 
     /** Broadcasts queued messages to connections. */
-    class MessageBroadcaster implements Runnable {          
+    class MessageBroadcaster implements Runnable {
         public void run() {
             while (true) {
                 //Get a MessagePair from the messageQueue. (Wait if empty.)
@@ -317,7 +321,7 @@ public class ConnectionManager implements Runnable {
                 }
                 Message m=pair.m;
                 Connection except=pair.except;
-        
+
                 List connectionsSnapshot=connections;
                 int n=connectionsSnapshot.size();
                 for (int i=0; i<n; i++) {
@@ -331,8 +335,8 @@ public class ConnectionManager implements Runnable {
                 }
             }
         }
-    }    
-    
+    }
+
     /**
      *  Return the total number of messages sent and received
      */
@@ -346,42 +350,22 @@ public class ConnectionManager implements Runnable {
      *   in order to accept incoming connections, SettingsManager is
      *   changed accordingly.
      */
-    public void run() { 
-        //1. Start background threads to fetch the desired number of
-        //   connections.  These run in parallel until each has launched
-        //   a connection--or there are no connections left to try.
-        for (int i=0; i<keepAlive; i++) {       
-            ConnectionFetcher fetcher=new ConnectionFetcher(this,1);
-            fetcher.start();
-            fetchers.add(fetcher);
-        }
-        //2. Create the server socket, bind it to a port, and listen for
-        //   incoming connections.  If there are problems, we can continue
-        //   onward.
+    public void run() {
+        // Create the server socket, bind it to a port, and listen for
+        // incoming connections.  If there are problems, we can continue
+        // onward.
         try {
             int oldPort=port;
             setListeningPort(port,true);
             if (port!=oldPort) {
                 SettingsManager.instance().setPort(port);
-                if (callback!=null)
-                    callback.setPort(port);
+                callback.setPort(port);
             }
         } catch (IOException e) {
             error(ActivityCallback.ERROR_0);
         }
 
-        //3. Start the statistics thread
-        //      try{
-        //          Stat s = new Stat(this);
-        //          Thread stat = new Thread(s);
-        //          if (stats==true)
-        //          stat.start();
-        //      }
-        //      catch (Exception e){
-        //          error(ActivityCallback.ERROR_1);
-        //      }
         while (true) {
-            Connection c = null;
             try {
                 //Accept an incoming connection, make it into a
                 //Connection object, handshake, and give it a thread
@@ -392,8 +376,8 @@ public class ConnectionManager implements Runnable {
                 Socket client=null;
                 synchronized (socketLock) {
                     if (socket!=null) {
-                        try { 
-                            client=socket.accept(); 
+                        try {
+                            client=socket.accept();
                         } catch (IOException e) {
                             continue;
                         }
@@ -411,52 +395,45 @@ public class ConnectionManager implements Runnable {
                     InputStream in=client.getInputStream();
                     String word=readWord(in);
 
-                    c = null;
-
                     if (word.equals(SettingsManager.instance().getConnectStringFirstWord())) {
                         //a) Gnutella connection
 
-                        if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//
-                            c = new Connection( getHostName(client.getInetAddress() ), 
-                                                client.getPort(), true);
-                            tryingToConnect(c, true);
-                            c.initIncoming(client); 
-                            c.setManager(this);
-                            add(c);      
-                            Thread t=new Thread(c);
-                            t.setDaemon(true);
-                            t.start();
+                        if(getNumConnections() <
+                                SettingsManager.instance().getMaxConn()) {
+                            // This constructor kicks off a thread.
+                            Connection c = new ManagedConnection(client, this);
+                            synchronized(this) {
+                                add(c);
+                                adjustConnectionFetchers();
+                            }
                         }
                         else{// we have more connections than we can handle
-                            RejectConnection rc = new RejectConnection(client);
-                            rc.setManager(this);
-                            Thread t = new Thread(rc);
-                            t.setDaemon(true);
-                            t.start();
+                            // This constructor kicks off a thread.
+                            // No need to manage it -- it will complete after an
+                            // appropriate wait to send pongs
+                            new RejectConnection(client, catcher);
                         }
 
-                    } 
+                    }
                     //Incoming file transfer connection: normal HTTP and push.
                     else if (word.equals("GET")) {
                         HTTPManager mgr = new HTTPManager(client, this, false);
-                    } 
+                    }
                     else if (word.equals("GIV")) {
                         HTTPManager mgr = new HTTPManager(client, this, true);
                     }
                     else {
                         throw new IOException();
                     }
-                } catch (IOException e) { 
+                } catch (IOException e) {
                     //handshake failed: try to close connection.
-                    if ( c != null )
-                        failedToConnect(c);
-                    try { client.close(); } catch (IOException e2) { }          
+                    try { client.close(); } catch (IOException e2) { }
                     continue;
                 }
             } catch (IOException e) {
                 error(ActivityCallback.ERROR_2);
                 return;
-            } catch (SecurityException e) { 
+            } catch (SecurityException e) {
                 error(ActivityCallback.ERROR_3);
                 return;
             } catch (Exception e) {
@@ -480,39 +457,32 @@ public class ConnectionManager implements Runnable {
             }
             buf[i]=(char)got;
         }
-        throw new IOException();            
+        throw new IOException();
     }
 
     private void error(int msg) {
-        ActivityCallback callback=getCallback();
-        if (callback!=null)
-            callback.error(msg);
+        callback.error(msg);
     }
 
     private void error(int msg, Throwable t) {
-        ActivityCallback callback=getCallback();
-        if (callback!=null)
-            callback.error(msg, t);
+        callback.error(msg, t);
     }
 
-    /** 
-     *  Start passing on connection events
-     */
-    public void setActivityCallback(ActivityCallback connection) {
-        callback = connection;
+    public ManagedConnection createConnection(String hostname, int portnum)
+            throws IOException {
+        ManagedConnection c = new ManagedConnection(hostname, portnum, this);
+        synchronized(this) {
+            add(c);
+            adjustConnectionFetchers();
+        }
+        return c;
     }
 
-    /** 
-     *  Adds a connection.
-     * 
-     *  @requires c in the connected state
-     *  @modifies this
-     *  @effects if c already in this, does nothing; otherwise, adds c to this.
+    /**
+     * Adds a connection.  Should only be called from a thread that has this'
+     * monitor.
      */
-    public synchronized void add(Connection c) {
-        if (connections.contains(c))
-            return;
-
+    private void add(Connection c) {
         //REPLACE connections with the list connections+[c]
         List newConnections=new ArrayList();
         newConnections.addAll(connections);
@@ -522,50 +492,14 @@ public class ConnectionManager implements Runnable {
         //REPLACE endpoints with the set endpoints+{c}
         Set newEndpoints=new HashSet();
         newEndpoints.addAll(endpoints);
-        newEndpoints.add(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
+        newEndpoints.add(new Endpoint(c.getInetAddress().getHostAddress(),
+                                      c.getPort()));
         endpoints=newEndpoints;
-
-        // Tell the listener that this connection is okay.
-        if ( callback != null )
-            callback.updateConnection(
-                                      c,
-                                      callback.STATUS_CONNECTED);
     }
 
-    /** 
-     *  @effects passes connecting information to ActivityCallback
-     */
-    public void tryingToConnect(Connection c, boolean incoming) {
-        // Tell the listener that this connection is connecting.
-        if ( callback != null )
-            callback.addConnection(
-                                   c,
-                                   (incoming ? callback.CONNECTION_INCOMING :
-                                    callback.CONNECTION_OUTGOING), 
-                                   callback.STATUS_CONNECTING);
-
-        // Maintain a count of attempted outgoing connections
-        if ( ! incoming ) 
-        {
-            activeAttempts++;
-        }
-    }
-
-    /** 
-     *  @effects passes failed connect information to ActivityCallback
-     */
-    public void failedToConnect(Connection c) {
-        // Remove this connection
-        if ( callback != null )
-            callback.removeConnection( c );
-
-        // Maintain a count of attempted outgoing connections
-        activeAttempts--;
-    }
-    
-    /** 
+    /**
      * @modifies this, route table
-     * @effects removes c from this' connection list and
+     * @effects closes c and removes it from this' connection list and
      *  all corresponding errors from the route table.  If
      *  c is not in the connection list, does nothing.  May
      *  try to establish a new outgoing connection to replace
@@ -579,7 +513,7 @@ public class ConnectionManager implements Runnable {
             newConnections.addAll(connections);
             newConnections.remove(c);
             connections=newConnections;
-        
+
             //REPLACE endpoints with the set endpoints+{c}
             Set newEndpoints=new HashSet();
             newEndpoints.addAll(endpoints);
@@ -589,94 +523,75 @@ public class ConnectionManager implements Runnable {
             //Clean up route tables.
             routeTable.remove(c);
             pushRouteTable.remove(c);
-            c.shutdown();//ensure that the connection is closed
-            int need = keepAlive - getNumConnections() - fetchers.size();
-            for (int j=0; j<need; j++) {
-                //Asynchronously fetch a connection to replace c
-                ConnectionFetcher t=new ConnectionFetcher(this,1);
-                t.start();
-                fetchers.add(t);
-            }
+            c.shutdown();//ensure that the connection is closed.
+                         //Also Notifies the listener
 
-            // Tell the listener that this connection is removed.
-            if ( callback != null )
-                callback.removeConnection( c );
-        }   
-    }
-    
-    public ActivityCallback getCallback()
-    {
-        return( callback );
+            adjustConnectionFetchers();
+        }
     }
 
-    public int getActiveAttempts()
-    {
-        return(activeAttempts--);
+    public ActivityCallback getCallback() {
+        return callback;
     }
 
-    private static String getHostName( InetAddress ia )
-    {
-        String host = ia.getHostAddress();
-    
-        return(host);
+    public HostCatcher getCatcher() {
+        return catcher;
+    }
+
+    public RouteTable getRouteTable() {
+        return routeTable;
+    }
+
+    public RouteTable getPushRouteTable() {
+        return pushRouteTable;
     }
 
     /**
-     *  Returns the number of connections 
+     *  Returns the number of connections
      */
     public int getNumConnections() {
-        List connectionsSnapshot=connections;
-        return connectionsSnapshot.size();
+        return connections.size();
     }
 
     /**Returns true if the given ClientID matches the ClientID of this host
      *else returns false.
-     *This method will be called when a push request is being made and a 
+     *This method will be called when a push request is being made and a
      *host which receives the messages is unable to direct the message any further.
-     *The host then needs to check if it is the final destination. 
+     *The host then needs to check if it is the final destination.
      *If this method returns true, then it is the final destination.
      */
-    public boolean isClient(byte[] ClientId){
+    public boolean isClient(byte[] clientId){
         //get the client ID from the gnutella.ini file.
-        return this.ClientId.equals(new GUID(ClientId));
+        return this.clientId.equals(new GUID(clientId));
+    }
+
+    public byte[] getClientGUID() {
+        return clientId.bytes();
     }
 
     /**
-     * returns true if there is a connection to the given host. 
+     * returns true if there is a connection to the given host.
      */
     public boolean isConnected(Endpoint host) {
-        Set endpointsSnapshot=endpoints;
-        return endpointsSnapshot.contains(host);
-    }   
-    
+        return endpoints.contains(host);
+    }
+
     /** Returns an iterator of a clone of this' connections.
      *  The iterator yields items in any order.  It <i>is</i> permissible
      *  to modify this while iterating through the elements of this, but
      *  the modifications will not be visible during the iteration.
      */
     public Iterator connections() {
-        List connectionsSnapshot=connections;
-        List clone=new ArrayList(); 
-        clone.addAll(connectionsSnapshot);
+        List clone=new ArrayList();
+        clone.addAll(connections);
         return clone.iterator();
-    }
-
-    /**
-     * @requires x>=0, run() not called
-     * @modifies this
-     * @effects tells this to try to keep at least x active connections.
-     *  You must call this before starting the run() method.
-     */
-    public void setKeepAlive(int x) {
-        Assert.that(x>=0);
-        this.keepAlive=x;
     }
 
     /**
      * Get the number of connections wanted to be maintained
      */
     public int getKeepAlive() {
-        return( keepAlive );
+        return keepAlive;
     }
 
     /**
@@ -685,28 +600,38 @@ public class ConnectionManager implements Runnable {
      *  adding or removing connections while this is deciding whether
      *  to add more threads.
      */
-    public synchronized void adjustKeepAlive(int newKeep)
-    {
+    public synchronized void setKeepAlive(int newKeep) {
         keepAlive = newKeep;
-        if (keepAlive > 0) {
-            int need = keepAlive - getNumConnections() - fetchers.size();
-            //Asynchronously fetch connections to maintain keepAlive connections
-            for ( int i=0; i < need; i++ )
-            {
-                ConnectionFetcher t=new ConnectionFetcher(this, 1);
-                t.start();
-                fetchers.add(t);
-            }
-        }
+        adjustConnectionFetchers();
     }
 
     /**
-     *  Returns true if this needs more connections.  This is NOT synchronized;
-     *  grab this' monitor before calling if you need atomicity.
+     * Starts or stops connection fetchers to maintain the invariant
+     * that numConnections + numFetchers >= keepAlive
+     *
+     * This method is called from createConnection() [externally started outgoing
+     * connection], run() [incoming connection], remove(Connection),
+     * and setKeepAlive.  It should only be called from a thread that has
+     * the ConnectionManager monitor. All four of the above mentioned
+     * methods synchronize properly, so this precondition holds.
      */
-    boolean needsMoreConnections()
-    {
-        return( getNumConnections() < getKeepAlive() );
+    private void adjustConnectionFetchers() {
+        int need = keepAlive - getNumConnections() - fetchers.size();
+
+        // Start connection fetchers as necessary
+        for(int i = 0; i < need; i++) {
+            new ConnectionFetcher(); // This kicks off a thread and registers
+                                     // the fetcher in the list
+        }
+
+        // Stop connection fetchers as necessary, but it's possible there
+        // aren't enough fetchers to stop.
+        int last = fetchers.size();
+        for(int i = 0; i > need && last > 0; i--) {
+            ConnectionFetcher fetcher = (ConnectionFetcher)
+                fetchers.remove(--last);
+            fetcher.interrupt();
+        }
     }
 
     /**
@@ -719,97 +644,92 @@ public class ConnectionManager implements Runnable {
         } catch (IOException e) { }
     }
 
-    //      public static void main(String args[]) {
-    //      try {
-    //          ConnectionManager cm=new ConnectionManager();
-    //          Connection c1=new Connection("localhost", 3333);
-    //          c1.connect();
-    //          Connection c2=new Connection("localhost", 3333);
-    //          c2.connect();
-
-    //          //Note that modifications are not reflected in the iterator.
-    //          cm.add(c1);
-    //          Iterator iter=cm.connections();     
-    //          cm.remove(c1);
-    //          cm.add(c2);
-    //          Assert.that(iter.next()==c1);
-    //          Assert.that(! iter.hasNext());
-
-    //          //You should be able to remove elements not in there, and add
-    //          //elements already in there (without duplicates)
-    //          cm.remove(c1);
-    //          cm.add(c2);
-    //          iter=cm.connections();
-    //          Assert.that(iter.next()==c2);
-    //          Assert.that(! iter.hasNext());
-    //      } catch (IOException e) {
-    //          System.out.println("Couldn't connect to host.  Try again.");
-    //      }
-    //      }
-}
-
-/** Asynchronously fetches new connections from hostcatcher.  */
-class ConnectionFetcher extends Thread {
-    private ConnectionManager manager;
-    private int n;
-
-    /** 
-     * Tries to add N connections to the manager.  This
-     * is always a Daemon thread.  Often N=1, and multiple
-     * threads of this are running; this gives parallelism. 
+    /**
+     * Asynchronously fetches a connection from hostcatcher.  This process
+     * is admittedly complicated, but it result is the intuitively desirable
+     * behavior, and that behavior is inherently difficult to achieve.
+     *
+     * The ConnectionFetcher is responsible for recording its instantiation
+     * by adding itself to the fetchers list.  It is responsible  for recording
+     * its death by removing itself from the fetchers list only if it
+     * "interrupts itself", that is, only if the run method completes when it
+     * establishes a connection If the thread is interrupted externally, the
+     * interrupting thread is responsible for recording the death.
      */
-    public ConnectionFetcher(ConnectionManager manager, int n) {
-        this.manager=manager;
-        this.n=n;
-        setDaemon(true);
-    }
+    private class ConnectionFetcher
+            extends Thread {
+        /**
+         * Tries to add a connection.  Should only be called from a thread
+         * that has the enclosing ConnectionManager's monitor.  This method
+         * is only called from adjustConnectionFetcher's, which has the same
+         * locking requirement.
+         */
+        public ConnectionFetcher() {
+            // Record the fetcher creation
+            fetchers.add(this);
 
-    public void run() {
-        while ( n > 0 && 
-                manager.needsMoreConnections() ) {
+            // Kick off the thread.
+            setDaemon(true);
+            start();
+        }
 
-            Connection c=manager.catcher.choose();
-            // If the connection came back null then your not needed.
-            if ( c == null ) {
-                manager.fetchers.remove(this);
-                return;
-            }
-            try {
-                //Send initial ping request.  HACK: use routeTable to
-                //designate that replies are for me.  Do this *before*
-                //sending message.
-                PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
-                manager.fromMe(pr);
-                c.send(pr); 
-            } catch (IOException e) {
-                //Try again!
-                c.shutdown();
-                continue;
-            }
-            c.setManager(manager);
-            //It's entirely possible that this connection is no longer needed because
-            //KEEP_ALIVE was changed above.  Therefore I must check again whether
-            //the connection is really needed.  Grab the manager's mutex before doing so.
-            synchronized(manager) {
-                if (manager.needsMoreConnections())
-                    manager.add(c);
-                else {
-                    //My result is no longer needed.
-                    c.shutdown();
-                    manager.failedToConnect(c);
-                    manager.fetchers.remove(this);
+        // Try to connect repeatedly until one of two things happens:
+        //   1. A connection is successfully created.
+        //   2. The fetcher is interrupted  (We check for this at various points).
+        public void run() {
+            while(!isInterrupted()) {
+                // Wait for an endpoint.
+                Endpoint endpoint = null;
+                synchronized(catcher) {
+                    while(endpoint == null) {
+                        try {
+                            endpoint = catcher.getAnEndpoint();
+                        } catch (NoSuchElementException exc) {
+                            try {
+                                catcher.wait();
+                            } catch (InterruptedException exc2) {
+                                // Externally generated interrupt.
+                                // The interrupting thread has recorded the
+                                // death of the fetcher, so just return.
+                                return;
+                            }
+                        }
+
+                        // Only connect to currently unconnected endpoints.
+                        if(isConnected(endpoint))
+                            endpoint = null;  // and go around again.
+                    }
+                }
+
+                Assert.that(endpoint != null);
+
+                if(isInterrupted())
+                    // Externally generated interrupt.
+                    // The interrupting thread has recorded the
+                    // death of the fetcher, so just return.
                     return;
+
+                try {
+                    Connection c = new ManagedConnection(
+                        endpoint.hostname, endpoint.port,
+                        ConnectionManager.this);
+
+                    synchronized(ConnectionManager.this) {
+                        // If the connection is longer needed, shut it down.
+                        if(isInterrupted())
+                            c.shutdown();
+                        // Otherwise, add the connection and "self-interrupt"
+                        else {
+                            add(c);
+                            fetchers.remove(this);
+                            return;
+                        }
+                    }
+                } catch (IOException exc) {
+                    // The connection failed.
+                    // Go around to look for another connection.
                 }
             }
-            Thread t=new Thread(c);
-            t.setDaemon(true);
-            t.start();
-            //Manager.error("Asynchronously established outgoing connection.");
-            n--;
-
-        } //end while
-        manager.fetchers.remove(this);
-    }       
-
+        }
+    }
 }
-

@@ -1,35 +1,26 @@
 package com.limegroup.gnutella;
 
 /**
- *  Interface for connection events to be fed from the router into the 
+ *  Interface for connection events to be fed from the router into the
  *  visual world.
  */
 public interface ActivityCallback
-{   
-    /**  Flag an outgoing connection type */
-    public static final int CONNECTION_OUTGOING = 1;
-    /**  Flag an incoming connection type */
-    public static final int CONNECTION_INCOMING = 2;
-
-    /**  The connection is being setup */
-    public static final int STATUS_CONNECTING = 1;
-    /**  The connection is established */
-    public static final int STATUS_CONNECTED = 2;
-
+    extends ConnectionListener
+{
     /**
      *  Handle a new connection.
      */
-    public void addConnection(Connection c, int type, int status);
+    public void connectionInitializing(Connection c);
+
+    /**
+     *  Mark a connection as initialized
+     */
+    public void connectionInitialized(Connection c);
 
     /**
      *  Handle a removed connection.
      */
-    public void removeConnection(Connection c);
-
-    /**
-     *  Change the status of a connection
-     */
-    public void updateConnection(Connection c, int status);
+    public void connectionClosed(Connection c);
 
     /**
      *  Add a known host/port
@@ -74,25 +65,25 @@ public interface ActivityCallback
      * @effects displays one the predefined error message
      *  corresponding to errorCode.  If t!=null, also displays the
      *  stack trace of t; in this case, the associated error message
-     *  should explain the stack trace to the user.  
+     *  should explain the stack trace to the user.
      */
     public void error(int errorCode, Throwable t);
-    
+
 
     /**
-     * @requires a 
+     * @requires a
 
     /** Constants for the various errors
-     *  See GUIStyles.java for the 
+     *  See GUIStyles.java for the
      *  associated messages */
-    
+
     //maybe use this array instead?  we'll see
     public static final int[] ERROR_MESSAGES = {0,1,2,3,4,
                                                 5,6,7,8,9,
                                                 10,11,12};
 
     /** list of errors reported in the GUI
-     *  the associated strings for these 
+     *  the associated strings for these
      *  errors can be found in the GUIStyles
      *  interface */
     /** error on port */
@@ -125,7 +116,7 @@ public interface ActivityCallback
     public static final int ERROR_13 = 13;
     /** internal error */
     public static final int ERROR_20 = 20;
-    
+
 }
 
 
