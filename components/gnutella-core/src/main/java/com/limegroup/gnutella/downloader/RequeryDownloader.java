@@ -70,6 +70,22 @@ public class RequeryDownloader extends ManagedDownloader
                getMediaType().toString().equals(add.getMediaType().toString()));
     }
 
+
+    /* We need special handling of the initial failed state so this overrides
+     * the super class when necessary.
+     */
+    protected long[] getFailedState(boolean deserialized, 
+                                   long timeSpentWaiting) {
+        final int maxTimeToWait = 5*60*1000; // 5 minutes
+        if (!deserialized && (timeSpentWaiting < maxTimeToWait)) {
+            long retLongs[] = new long[2];
+            retLongs[0] = Downloader.WAITING_FOR_RESULTS;
+            retLongs[1] = maxTimeToWait - timeSpentWaiting;
+            return retLongs;
+        }
+        return super.getFailedState(deserialized, timeSpentWaiting);
+    }
+
     /** Overrides ManagedDownloader to use the original search keywords. */
     protected QueryRequest newRequery(int numRequeries) 
 		throws CantResumeException {
