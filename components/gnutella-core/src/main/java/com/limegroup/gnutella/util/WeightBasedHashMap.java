@@ -26,6 +26,8 @@ import com.sun.java.util.collections.*;
 * supported operations in the class are O(1). This has been achieved by 
 * amortizing the operation to find victim. And the time complexity can be 
 * proved easily.
+* Note: The instances of this class are not thread safe. Therefore access to
+* it should be externally snchronized, if required
 * @see Weighable
 */
 public class WeightBasedHashMap
@@ -99,7 +101,7 @@ public WeightBasedHashMap(int maxSize)
 * @return true, if the entry was present as count got incremented, 
 * false otherwise
 */
-public synchronized boolean incrementWeight(Object key)
+public boolean incrementWeight(Object key)
 {
     int oldWeight = 0;
     Weighable weighable = null;
@@ -125,13 +127,27 @@ public synchronized boolean incrementWeight(Object key)
     }    
 }
 
+
+/**
+* Returns the value to which this map maps the specified key
+* Note: The weight associated with the returned Weighable value
+* shouldnt be altered externally
+* @param key key whose associated value is to be returned
+* @return the value to which this map maps the specified key
+*/
+public Weighable get(Object key)
+{
+    //return from the underlying hashMap
+    return (Weighable)hashMap.get(key);
+}
+
 /**
 * Removes the mapping for this key from this map if present.
 * @param key The key whose mapping to be removed
 * @return previous value associated with specified key, 
 * or null if there was no mapping for key.
 */
-public synchronized Weighable reomve(Object key)
+public Weighable remove(Object key)
 {
     //remove the entry and store the value the removed key mapped to
     Weighable value = (Weighable)hashMap.remove(key);
@@ -158,7 +174,7 @@ public synchronized Weighable reomve(Object key)
 * @return The entry(key) removed to make space for this new key, null
 * otherwise
 */
-public synchronized Object add(Object key, Weighable value)
+public Object add(Object key, Weighable value)
 {
     Object entryRemoved = null;
     
@@ -229,7 +245,38 @@ private Object removeSomeLessWeightedEntry()
 }
 
 
+/**
+* Checks if the given query is frequent enough
+* @param value The Weighable to be tested for weight
+* @return true, if the object has enough weigh (more than 
+* average + some constant), false
+* otherwise
+*/
+public boolean isWeightedEnough(Weighable value)
+{
+    //get the average
+    int average = (int)( sumOfWeights / numOfEntries) ;
+    
+    //give some margin over average
+    if(value.getWeight() > average + 5)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
+/**
+ * checks if the hash Map is full or not 
+ * @return true if the map is full, false otherwise
+ */
+public boolean isFull()
+
+{
+    return numOfEntries >= maxEntries;
+}
 
 
 /**
@@ -269,13 +316,21 @@ private void fillProbableRemovableEntries()
     
 }
 
-
+/**
+* Returns a collection view of the mappings contained in this map. 
+* Each element in the returned collection is a Map.Entry
+* @return A collection view of the mappings contained in this map. 
+*/
+public Set entrySet()
+{
+    return hashMap.entrySet();
+}
 
 /**
 * Returns the string representation of mapping
 * @return The string representation of this
 */
-public synchronized String toString()
+public String toString()
 {
    return hashMap.toString();
 }
