@@ -8,7 +8,6 @@ import java.io.*;
 
 public class QueuedUploadState implements HTTPMessage {
 
-    private boolean closeConnection = false;
     private FileDesc FILE_DESC;
     private int position;
 
@@ -56,9 +55,4 @@ public class QueuedUploadState implements HTTPMessage {
     public void writeMessageBody(OutputStream ostream) throws IOException {
         //this method should MUST NOT do anything.
     }
-    
-    public boolean getCloseConnection() {
-        return closeConnection;
-    }
-
 }

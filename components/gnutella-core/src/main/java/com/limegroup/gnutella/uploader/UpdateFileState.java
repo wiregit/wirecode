@@ -44,11 +44,5 @@ public class UpdateFileState implements HTTPMessage {
     public void writeMessageBody(OutputStream ostream) throws IOException  {
         ostream.write(updateContents); 
         _uploader.setAmountUploaded(updateContents.length);
-        _uploader.setState(Uploader.COMPLETE);
-    }    
-    
-    public boolean getCloseConnection() {
-        return true;
     }
-    
 }

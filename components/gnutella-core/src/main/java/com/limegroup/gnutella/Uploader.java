@@ -16,7 +16,6 @@ public interface Uploader extends BandwidthTracker {
 	public static final int UPLOADING        = 3;
 	public static final int COMPLETE         = 4;
 	public static final int INTERRUPTED      = 5;
-	public static final int PUSH_FAILED      = 6;
 	public static final int FILE_NOT_FOUND   = 7;
     public static final int BROWSE_HOST      = 8;
     public static final int QUEUED           = 9;
@@ -80,17 +79,23 @@ public interface Uploader extends BandwidthTracker {
 	public String getHost();
 
     /**
-     * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
-     * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP
+     * Returns the current state of this uploader.
      */
     public int getState();
+    
+    /**
+     * Returns the last transfer state of this uploader.
+     * Transfers states are all states except INTERRUPTED, COMPLETE,
+     * and CONNECTING.
+     */
+    public int getLastTransferState();
 
 	/**
 	 * Sets the state of this uploader.
 	 */
 	public void setState(int state);
 
-	public void writeResponse();
+	public void writeResponse() throws IOException;
 
 	/**
 	 * returns true if chat for the host is on, false if it is not.

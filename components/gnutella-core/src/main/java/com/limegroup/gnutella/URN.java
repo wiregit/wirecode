@@ -27,6 +27,11 @@ import java.util.Locale;
 public final class URN implements HTTPHeaderValue, Serializable {
 
 	private static final long serialVersionUID = -6053855548211564799L;
+	
+	/**
+	 * A constant invalid URN that classes can use to represent an invalid URN.
+	 */
+	public static final URN INVALID = new URN("invalid", UrnType.INVALID);
 
 	/**
 	 * Cached constant to avoid making unnecessary string allocations
@@ -214,10 +219,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @param file the <tt>File</tt> instance to construct the URN from
 	 * @param urnType the type of URN to construct for the <tt>File</tt>
 	 *  instance, such as SHA1_URN
-	 * @throws <tt>IOException</tt> if the URN could not be calculated from
-	 *  the specified file
 	 */
-	private URN(final String urnString, final UrnType urnType) throws IOException {
+	private URN(final String urnString, final UrnType urnType) {
 		this._urnString = urnString;
 		this._urnType = urnType;
 	}

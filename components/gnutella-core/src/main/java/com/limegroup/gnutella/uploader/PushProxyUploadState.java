@@ -11,8 +11,7 @@ import com.bitzi.util.Base32;
 
 /**
  * An implementaiton of the UploadState interface
- * when the request is to browse the host
- * @author Anurag Singla
+ * when the request is to PushProxy
  */
 public final class PushProxyUploadState implements HTTPMessage {
     
@@ -86,19 +85,8 @@ public final class PushProxyUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
         _uploader.setAmountUploaded(BAOS.size());
-        _uploader.setState(_uploader.COMPLETE);
         debug("PPUS.doUpload(): returning.");
 	}
-
-    /**
-     * Tells if the upload state doesnt allow the connection to receive
-     * another request on the same connection. This state doesnt allow
-     * next request
-     * @return always true
-     */
-    public boolean getCloseConnection() {
-        return true;
-    }
 
     private final static boolean debugOn = false;
     private final void debug(String out) {

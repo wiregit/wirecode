@@ -20,6 +20,11 @@ public class UrnType implements Serializable {
 	public static final String SHA1_STRING = "sha1:";
 
 
+    /**
+     * The <tt>UrnType</tt> for an invalid UrnType.
+     */
+    public static final UrnType INVALID = new UrnType("invalid");
+
 	/**
 	 * The <tt>UrnType</tt> for SHA1 hashes.
 	 */
