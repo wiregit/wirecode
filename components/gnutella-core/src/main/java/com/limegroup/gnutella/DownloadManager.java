@@ -1069,8 +1069,7 @@ public class DownloadManager implements BandwidthTracker {
                         LOG.info("Succesful push proxy: " + connectTo);
                     if (shouldDoFWTransfer)
                         startFWIncomingThread(file);
-                    // push proxy succeeded!
-                    return true;
+                    return true; // push proxy succeeded!
                 } else {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Invalid push proxy: " + connectTo +
@@ -1132,40 +1131,38 @@ public class DownloadManager implements BandwidthTracker {
             !NetworkUtils.isValidPort(port) )
             return;
         
-        final byte []guid = GUID.makeGuid();
+        final byte[] guid = GUID.makeGuid();
         
+        // If multicast worked, try nothing else.
     	if (sendPushMulticast(file,guid))
     		return;
     	
-    	//remember that we are waiting a push from this host 
-        //for the specific file.
-        byte[] key = file.getClientGUID();
-        
         // if we can't accept incoming connections, we can only try
         // using the TCP push proxy, which will do fw-fw transfers.
         if(!RouterService.acceptedIncomingConnection()) {
             sendPushTCP(file, guid);
             return;
         }
-            
         
+    	//remember that we are waiting a push from this host 
+        //for the specific file.
+        byte[] key = file.getClientGUID();
         synchronized(UDP_FAILOVER) {
         	Set files = (Set)UDP_FAILOVER.get(key);
-        	
         	if (files==null)
         		files = new HashSet();
-        	
         	files.add(file.getFileName());
-        	
         	UDP_FAILOVER.put(key,files);
         }
         	
-        // schedule the failover tcp pusher
+        // schedule the failover tcp pusher, which will run
+        // if we don't get a response from the UDP push
+        // within the UDP_PUSH_FAILTIME timeframe
         RouterService.schedule(new Runnable(){
         	public void run() {
         		FAILOVERS.add(new PushFailoverRequestor(file,guid));
         	}},UDP_PUSH_FAILTIME,0);
-        
+
     	sendPushUDP(file,guid);
     }
 
