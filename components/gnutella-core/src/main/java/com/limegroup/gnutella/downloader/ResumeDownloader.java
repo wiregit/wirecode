@@ -103,6 +103,19 @@ public class ResumeDownloader extends ManagedDownloader
         return _name;
     }
 
+    /*
+     * @param numRequeries The number of requeries sent so far.
+     */
+    protected boolean pauseForRequery(int numRequeries) {
+        if (numRequeries > 0)
+            return super.pauseForRequery(numRequeries);
+        else
+            // don't wait the first time!!  we want to immediately start a new
+            // query
+            return false; 
+    }
+ 
+
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
