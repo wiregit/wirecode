@@ -334,20 +334,6 @@ public final class ThemeFileHandler {
 	public static final ColorSetting NOT_SHARING_LABEL_COLOR =
 		FACTORY.createColorSetting("NOT_SHARING_LABEL_COLOR", 
 								   new Color(208, 0, 5));
-	
-	/**
-	 * Setting for the search fade Color.
-	 */
-	public static final ColorSetting SEARCH_FADE_COLOR =
-		FACTORY.createColorSetting("SEARCH_FADE_COLOR", 
-								   new Color(135,146,185));
-
-	/**
-	 * Setting for the search button Color.
-	 */
-	public static final ColorSetting SEARCH_BUTTON_COLOR =
-		FACTORY.createColorSetting("SEARCH_BUTTON_COLOR", 
-								   new Color(255,255,255));
 
 	/**
 	 * Setting for the search result speed Color.
@@ -377,6 +363,13 @@ public final class ThemeFileHandler {
 								   new Color(255, 0, 0));
 
     /**
+     * Setting for the top of the filter title color.
+     */
+    public static final ColorSetting FILTER_TITLE_TOP_COLOR =
+        FACTORY.createColorSetting("SEARCH_FILTER_TITLE_TOP_COLOR",
+                                  new Color(0xFF, 0xCC, 0));
+
+    /**
      * Setting for the filter title color.
      */
     public static final ColorSetting FILTER_TITLE_COLOR =
@@ -389,6 +382,20 @@ public final class ThemeFileHandler {
     public static final ColorSetting SEARCH_GRID_COLOR = 
         FACTORY.createColorSetting("SEARCH_GRID_COLOR",
                             new Color(0, 0, 0));
+                            
+    /**
+     * Setting for the top search panel background color.
+     */
+    public static final ColorSetting SEARCH_PANEL_BG_1 =
+        FACTORY.createColorSetting("SEARCH_PANEL_BG_1",
+            TABLE_HEADER_BACKGROUND_COLOR.getValue());
+            
+    /**
+     * Setting for the bottom search panel background color.
+     */
+    public static final ColorSetting SEARCH_PANEL_BG_2 =
+        FACTORY.createColorSetting("SEARCH_PANEL_BG_2",
+            TABLE_HEADER_BACKGROUND_COLOR.getValue());                 
 
 	/*
 	public static void main(String[] args) {
