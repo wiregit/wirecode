@@ -28,10 +28,6 @@ public class ManagedConnectionTest extends TestCase {
         return new TestSuite(ManagedConnectionTest.class);
     }    
 
-	public static void main(String[] args) {
-		junit.textui.TestRunner.run(suite());
-	}
-
     static {
 		AbstractSettings.revertToDefault();
         SettingsManager.instance().setPort(6444);
