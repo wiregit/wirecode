@@ -553,6 +553,9 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
+        MessageListener ml = 
+            (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
+        if (ml != null) ml.processMessage(msg);
     }
 
 
