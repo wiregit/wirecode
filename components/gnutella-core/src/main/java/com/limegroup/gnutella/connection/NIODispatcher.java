@@ -262,6 +262,7 @@ public final class NIODispatcher implements Runnable {
             if(sc.finishConnect()) {
                 key.cancel();
                 
+                //TODO: shouldn't we deregister for connect events?
                 // now that we're fully connected, finish the connection 
                 // handshaking
                 addReader(conn);
