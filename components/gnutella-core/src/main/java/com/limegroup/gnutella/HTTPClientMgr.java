@@ -24,6 +24,7 @@ public class HTTPClientMgr implements Runnable {
     private FileManager _fmanager;
     private FileDesc _fdesc;
     private ConnectionManager _manager;
+    private ActivityCallback _callback;
     
     public HTTPClientMgr(Socket s, String filename, 
 			 int index, ConnectionManager m) {
@@ -52,18 +53,19 @@ public class HTTPClientMgr implements Runnable {
 
 	_sizeOfFile = _fdesc._size;
 
+	System.out.println("In the client.. sizeOfFile = " + _sizeOfFile);
 
     }
 
     public void run() {
 
-	ActivityCallback callback = _manager.getCallback();
+	_callback = _manager.getCallback();
 
-	callback.addUpload(this);
+	_callback.addUpload(this);
 
 	upload();
 
-	callback.removeUpload(this);
+	_callback.removeUpload(this);
 
     }
 
@@ -94,7 +96,7 @@ public class HTTPClientMgr implements Runnable {
 	}							  
 
   	catch (IOException e) {
-	    e.printStackTrace();
+	    _callback.error("Unable to create an outputstream from the socket");
   	    return;
   	}
 
@@ -109,6 +111,7 @@ public class HTTPClientMgr implements Runnable {
   	    fin = new BufferedReader(new FileReader(file));
 
   	} 
+
 	catch (FileNotFoundException e) {
 
   	    doNoSuchFile();
@@ -127,11 +130,11 @@ public class HTTPClientMgr implements Runnable {
 	}
 
 	catch (Exception e) {
-	    e.printStackTrace();
+	    _callback.error("Unable to write out to the socket");
+
+	    return;
 	}
 	                               
-	//  	char[] buf = new char[BUFFSIZE];   	
-
 	int c = -1;
 	
 	try {
@@ -141,37 +144,15 @@ public class HTTPClientMgr implements Runnable {
 	    }
 	    _out.flush();
 	}
+
 	catch (Exception e) {
-	    e.printStackTrace();
+	    _callback.error("Unable to read from the file");
+
+	    return;
+
 	}
 
     }
-
-    public void doDownload() {
-
-	try {                      /* upload the header infornation first */
-	    _out.write("HTTP 200 OK \r\n");
-	    _out.write("Server: Gnutella \r\n");
-	    String type = getMimeType();       /* write this method later  */
-	    _out.write("Content-type:" + type + "\r\n"); 	
-	    _out.write("Content-length: "+ _sizeOfFile + "\r\n");
-	    _out.write("\r\n");
-	}
-	catch (Exception e) {
-	    e.printStackTrace();
-	}
-	
-
-    }
-
-    public void resume() {
-
-    }
-
-    public void abort() {
-
-    }
-
 
     private String getMimeType() {         /* eventually this method should */
 	String mimetype;                /* determine the mime type of a file */
@@ -191,6 +172,7 @@ public class HTTPClientMgr implements Runnable {
 	}
 
 	catch (Exception e) {
+	    _callback.error("Unable to write out to the socket");
 	}
     }
 }
