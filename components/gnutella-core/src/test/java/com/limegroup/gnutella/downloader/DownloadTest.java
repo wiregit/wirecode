@@ -162,7 +162,7 @@ public class DownloadTest extends BaseTestCase {
             }
         };
         RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
-        rs.start();
+            rs.start();
     } 
     
     public DownloadTest(String name) {
@@ -1611,7 +1611,7 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
-    public void testPartialSourceIsAddedAfterPortion() throws Exception {
+    public void testAddSelfToMeshWithTree() throws Exception {
         
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
@@ -1619,7 +1619,7 @@ public class DownloadTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             
-        LOG.debug("-Testing that downloader adds itself to the mesh");
+        LOG.debug("-Testing that downloader adds itself to the mesh if it has a tree");
         
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
@@ -1635,10 +1635,12 @@ public class DownloadTest extends BaseTestCase {
         // the rate must be absurdly slow for the incomplete file.length()
         // check in HTTPDownloader to be updated.
         final int RATE=50;
-        final int STOP_AFTER = TestFile.length()/3;
+        final int STOP_AFTER = TestFile.length()/2;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader1.stopAfter(STOP_AFTER);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
@@ -1666,7 +1668,66 @@ public class DownloadTest extends BaseTestCase {
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are started at different times.
 
-        assertEquals("u1 did too much work", STOP_AFTER, u1);
+        assertLessThanOrEquals("u1 did too much work", STOP_AFTER, u1);
+        assertGreaterThan("u2 did no work", 0, u2);
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
+    }
+    
+    public void testNotAddSelfToMeshIfNoTree() throws Exception {
+        // change the minimum required bytes so it'll be added.
+        PrivilegedAccessor.setValue(HTTPDownloader.class,
+            "MIN_PARTIAL_FILE_BYTES", new Integer(1) );
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+            "_acceptedIncoming", Boolean.TRUE );
+            
+        LOG.debug("-Testing that downloader adds itself to the mesh if it has a tree");
+        
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
+            SpeedConstants.MODEM_SPEED_INT);
+        
+        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
+        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
+                    
+        // neither uploader knows any alt locs.
+        assertNull(u1Alt);
+        assertNull(u2Alt);
+
+        // the rate must be absurdly slow for the incomplete file.length()
+        // check in HTTPDownloader to be updated.
+        final int RATE=50;
+        final int STOP_AFTER = TestFile.length()/2;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.fullRequestsUploaded();
+        int u2 = uploader2.fullRequestsUploaded();
+        LOG.debug("\tu1: "+u1+"\n");
+        LOG.debug("\tu2: "+u2+"\n");
+        LOG.debug("\tTotal: "+(u1+u2)+"\n");
+        
+        //both uploaders should know that this downloader is an alt loc.
+        u1Alt = uploader1.getAlternateLocations();
+        u2Alt = uploader2.getAlternateLocations();
+        assertNotNull(u1Alt);
+        assertNotNull(u2Alt);
+
+        AlternateLocation al = AlternateLocation.create(TestFile.hash());
+        assertFalse( u1Alt.contains(al) );
+        assertFalse( u2Alt.contains(al) );        
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertLessThanOrEquals("u1 did too much work", STOP_AFTER, u1);
         assertGreaterThan("u2 did no work", 0, u2);
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
@@ -1974,7 +2035,6 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
         final int RATE = 200;
-        final int FUDGE_FACTOR = RATE*1024;
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
         uploader2.setRate(RATE);
@@ -1987,17 +2047,17 @@ public class DownloadTest extends BaseTestCase {
         ManagedDownloader downloader = null;        
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
         Thread.sleep(2500);
-        int swarm = downloader.getNumDownloaders();
+        int swarm = downloader.getActiveWorkers().size();
         int queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",0, queued);
 
         //try to add a third
         downloader.addDownloadForced(rfd3, true);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         
         //make sure we did not kill anybody
-        swarm = downloader.getNumDownloaders();
+        swarm = downloader.getActiveWorkers().size();
         queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not replaced ",0, queued);
@@ -2032,7 +2092,7 @@ public class DownloadTest extends BaseTestCase {
         int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(
                                             SpeedConstants.MODEM_SPEED_INT);
-        final int RATE = 200;
+        final int RATE = 100;
         final int FUDGE_FACTOR = RATE*1024;
         uploader1.setRate(RATE);
         uploader3.setRate(RATE);
@@ -2041,16 +2101,17 @@ public class DownloadTest extends BaseTestCase {
         uploader2.unqueue = false; //never unqueue this uploader.
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1};//one good and one queued
+        RemoteFileDesc[] rfds = {rfd1,rfd2};//one good and one queued
         
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
         ManagedDownloader downloader = null;
         
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(2000);
-        downloader.addDownload(rfd2,false);
-        Thread.sleep(2000);
+        //Thread.sleep(1000);
+        //downloader.addDownloadForced(rfd2,false);
+        Thread.sleep(2500);
+        LOG.debug("about to check swarming");
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);

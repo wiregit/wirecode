@@ -269,6 +269,7 @@ public class TestUploader extends AssertComparisons {
     }
 
     public void stopThread() {
+        LOG.debug("stopping thread");
         try {
             if ( server != null )
                 server.close();
@@ -714,6 +715,7 @@ public class TestUploader extends AssertComparisons {
 
     private void send(OutputStream out, int start, int stop) 
         throws IOException {
+        LOG.debug("starting to send data "+start+"-"+stop);
         totalAmountToUpload += stop - start;
         //Write header, stolen from NormalUploadState.writeHeader()
         long t0 = System.currentTimeMillis();
