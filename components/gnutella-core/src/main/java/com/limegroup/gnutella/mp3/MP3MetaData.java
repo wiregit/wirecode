@@ -68,32 +68,39 @@ public class MP3MetaData extends AudioMetaData {
             // We have an ID3 Tag, now get the parts
 
             randomAccessFile.readFully(buffer, 0, 30);
-            setTitle(getString(buffer, 30));
+            if (getTitle() == null || getTitle().equals(""))
+            	setTitle(getString(buffer, 30));
             
             randomAccessFile.readFully(buffer, 0, 30);
-            setArtist(getString(buffer, 30));
+            if (getArtist() == null || getArtist().equals(""))
+            	setArtist(getString(buffer, 30));
 
             randomAccessFile.readFully(buffer, 0, 30);
-            setAlbum(getString(buffer, 30));
+            if (getAlbum() == null || getAlbum().equals(""))
+            	setAlbum(getString(buffer, 30));
             
             randomAccessFile.readFully(buffer, 0, 4);
-            setYear(getString(buffer, 4));
+            if (getYear() == null || getYear().equals(""))
+            	setYear(getString(buffer, 4));
             
             randomAccessFile.readFully(buffer, 0, 30);
             int commentLength;
-            if(buffer[28] == 0) {
-                setTrack((short)ByteOrder.ubyte2int(buffer[29]));
-                commentLength = 28;
-            } else {
-                setTrack((short)0);
-                commentLength = 3;
+            if (getTrack()==0 || getTrack()==-1){
+            	if(buffer[28] == 0) {
+            		setTrack((short)ByteOrder.ubyte2int(buffer[29]));
+            		commentLength = 28;
+            	} else {
+            		setTrack((short)0);
+            		commentLength = 3;
+            	}
+            	if (getComment()==null || getComment().equals(""))
+            		setComment(getString(buffer, commentLength));
             }
-            setComment(getString(buffer, commentLength));
-            
             // Genre
             randomAccessFile.readFully(buffer, 0, 1);
-            setGenre(
-                MP3MetaData.getGenreString((short)ByteOrder.ubyte2int(buffer[0])));
+            if (getGenre() ==null || getGenre().equals(""))
+            	setGenre(
+            			MP3MetaData.getGenreString((short)ByteOrder.ubyte2int(buffer[0])));
         } catch(IOException ignored) {
         } finally {
             if( randomAccessFile != null )
