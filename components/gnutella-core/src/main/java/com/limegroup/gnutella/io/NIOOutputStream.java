@@ -75,8 +75,11 @@ class NIOOutputStream {
                 
             // if we were able to write everything, we're not interested in more writing.
             // otherwise, we are interested.
-            if(buffer.position() == 0)
-                sk.interestOps(sk.interestOps() & ~SelectionKey.OP_WRITE);
+            if(buffer.position() == 0) {
+                synchronized(channel.blockingLock()) {
+                    sk.interestOps(sk.interestOps() & ~SelectionKey.OP_WRITE);
+                }
+            }
         }
     }
     

@@ -80,8 +80,11 @@ class NIOInputStream {
     
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
-            if(!buffer.hasRemaining())
-                sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
+            if(!buffer.hasRemaining()) {
+                synchronized(channel.blockingLock()) {
+                    sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
+                }
+            }
         }
     }
     
