@@ -6,56 +6,35 @@ import java.io.*;
 
 
 /**
- * This class is the superclass for all LimeWire "general" settings classes.
- * General settings are all stored in limewire.props in the appropriate
- * platform-specific directory.  This class allows settings to be conveniently
- * grouped into subclasses by setting type.  For example, a "DownloadSettings"
- * subclass could contain any settings specifically for downloads.
+ * Abstract Settings class that all settings classes should extend.
+ * Provides basic functionality for all settings classes.
  */
 public abstract class AbstractSettings {
-   
-
-    /**
-	 * Default name for the properties file.
-	 */
-    private static final String PROPS_NAME = "limewire.props";
-    
+        
     /**
      * properties file
      */
-    private static final File PROPS_FILE;
-    
-    /**
-     * Default name for configuration file.
-     */
-    private static final String CONFIG_NAME = "config.props";
+    private final File PROPS_FILE;
     
 	/**
 	 * Constant for the <tt>SettingsFactory</tt> that subclasses can use
 	 * to create new settings which will be stored in the properties file.
-     * This should be reserved for settings taht are user maintained or 
-     * otherwise record a state that should be carried forward from one 
-     * session to the next.
 	 */
-	protected static final SettingsFactory FACTORY;
-    
-    /**
-     * Constant for the <tt>SettingsFactory</tt> that subclasses can use
-     * to create new settings which are not user maintained are read from
-     * the LimeWire configuration file instead of the property file.
-     */
-    protected static final SettingsFactory CFG_FACTORY;
+	private final SettingsFactory FACTORY;
     
     /**
      * Value for whether or not settings should be saved to file.
      */
-    protected static boolean _shouldSave = true;
+    private boolean _shouldSave = true;
     
-    static {
+    /**
+     * Basic constructor that creates the FACTORY and PROPS_FILE.
+     */
+    protected AbstractSettings(String fileName, String header) {
         File settingsDir = CommonUtils.getUserSettingsDir();
-        PROPS_FILE = new File(settingsDir, PROPS_NAME);
-        FACTORY = new SettingsFactory(PROPS_FILE, "LimeWire properties file");
-        CFG_FACTORY = new SettingsFactory(new File(settingsDir, CONFIG_NAME));
+        PROPS_FILE = new File(settingsDir, fileName);
+        FACTORY = new SettingsFactory(PROPS_FILE, header);
+        SettingsHandler.addSettings(this);
     }
 
     /**
@@ -63,52 +42,58 @@ public abstract class AbstractSettings {
      *
      * @return the <tt>Properties</tt> instance for storing settings
      */
-	public static Properties getProperties() {
+	public Properties getProperties() {
         return FACTORY.getProperties();
 	}
     
     /**
      * Accessor for the <tt>File</tt> instance taht stores all properties
      */
-    public static File getPropertiesFile() {
+    public File getPropertiesFile() {
         return PROPS_FILE;
+    }
+    
+    /**
+     * Accessor for the <tt>SettingsFactory</tt> instance that stores the properties.
+     */
+    public SettingsFactory getFactory() {
+        return FACTORY;
     }
     
     /**
      * reload settings from both the property and configuration files
      */
-    public static void reload() {
+    public void reload() {
         FACTORY.reload();
-        CFG_FACTORY.reload();
     }
     
     /**
      * Save property settings to the property file
      */
-    public static void save() {
-        if ( _shouldSave)
+    public void save() {
+        if ( _shouldSave) {
             FACTORY.save();
+        }
     }
     
     /**
      * Revert all settings to their default value
      */
-    public static void revertToDefault() {
+    public void revertToDefault() {
         FACTORY.revertToDefault();
-        CFG_FACTORY.revertToDefault();
     }
     
     /**
      * Mutator for shouldSave
      */
-    public static void setShouldSave(boolean shouldSave) {
+    public void setShouldSave(boolean shouldSave) {
         _shouldSave = shouldSave;
     }
     
     /**
      * Access for shouldSave
      */
-    public static boolean getShouldSave() {
+    public boolean getShouldSave() {
         return _shouldSave;
     }
 }

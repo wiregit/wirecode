@@ -3,7 +3,9 @@ package com.limegroup.gnutella.settings;
 /**
  * Settings for programs LimeWire should open to view files on unix.
  */
-public final class URLHandlerSettings extends AbstractSettings {
+public final class URLHandlerSettings extends LimeProps {
+    
+    private URLHandlerSettings() {}
 
 	/**
      * Setting for which browser to use

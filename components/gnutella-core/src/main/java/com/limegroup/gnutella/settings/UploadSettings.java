@@ -4,7 +4,10 @@ package com.limegroup.gnutella.settings;
 /**
  * Settings for uploads.
  */
-public final class UploadSettings extends AbstractSettings {
+public final class UploadSettings extends LimeProps {
+    
+    private UploadSettings() {}
+    
 
 	/**
 	 * Setting for the number of kilobytes/second to allow for all uploads.

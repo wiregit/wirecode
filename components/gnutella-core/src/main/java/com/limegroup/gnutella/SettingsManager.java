@@ -29,7 +29,7 @@ public final class SettingsManager {
     /**
 	 * Constant member variable for the main <tt>Properties</tt> instance.
 	 */
-    private static final Properties PROPS = Settings.getProperties();
+    private static final Properties PROPS = LimeProps.instance().getProperties();
 
 	/**
 	 * Default name of the shared directory.
@@ -44,7 +44,7 @@ public final class SettingsManager {
     /**
      * Constant <tt>File</tt> instance for the properties file
      */
-    private final File PROPS_FILE = Settings.getPropertiesFile();
+    private final File PROPS_FILE = LimeProps.instance().getPropertiesFile();
     
     /**
      * Stored default values learned from reflecting upon the class.
@@ -2955,7 +2955,7 @@ public final class SettingsManager {
 	 * get called once when the program shuts down.
      */
     public void writeProperties() {
-        Settings.save();
+        SettingsHandler.save();
 	}
 
     private static final String STRING_DELIMETER=";";

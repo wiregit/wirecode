@@ -16,8 +16,10 @@ import java.io.*;
  * for your setting name -- otherwise there will be conflicts, and a runtime
  * exception will be thrown.
  */
-public final class ThemeSettings extends AbstractSettings {
+public final class ThemeSettings extends LimeProps {
     
+    private ThemeSettings() {}
+            
     /**
      * The extension for theme packs to allow people to search for them --
      * stands for "LimeWire Theme Pack".
@@ -121,7 +123,7 @@ public final class ThemeSettings extends AbstractSettings {
      * Setting for the default theme file to use for LimeWire display.
      */
     public static final FileSetting THEME_DEFAULT =
-		CFG_FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
+		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
 									  DEFAULT_OSX_THEME_FILE :
 									  DEFAULT_THEME_FILE);
 	
@@ -129,7 +131,7 @@ public final class ThemeSettings extends AbstractSettings {
 	 * Setting for the default theme directory to use in LimeWire display.
 	 */
 	public static final FileSetting THEME_DEFAULT_DIR =
-        CFG_FACTORY.createFileSetting("THEME_DEFAULT_DIR",
+        FACTORY.createFileSetting("THEME_DEFAULT_DIR",
 									  CommonUtils.isMacOSX() ?
 									  new File(THEME_DIR_FILE,
 											   "default_osx_theme") :
@@ -147,6 +149,6 @@ public final class ThemeSettings extends AbstractSettings {
 	 * Setting for the file name of the theme directory.
 	 */
 	public static final FileSetting THEME_DIR =
-		CFG_FACTORY.createFileSetting("THEME_DIR",
+		FACTORY.createFileSetting("THEME_DIR",
 									  THEME_DEFAULT_DIR.getValue());
 }
