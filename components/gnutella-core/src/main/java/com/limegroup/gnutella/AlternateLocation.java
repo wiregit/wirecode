@@ -44,14 +44,6 @@ public final class AlternateLocation
 	private volatile int hashCode = 0;
 
 	/**
-	 * Cached array of characters considered whitespace in HTTP.
-	 */
-	private static final char[] WHITESPACE_CHARS = {
-		' ', '\t', '\n', '\r'
-	};
-	
-
-	/**
 	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
 	 * specified string argument.  
 	 *
@@ -126,7 +118,11 @@ public final class AlternateLocation
 	private AlternateLocation(final URL url, final Date date) {
 		this.URL = url;
 		this.TIME = date.getTime();
-		this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(date);
+		if(TIME == 0) {
+			this.OUTPUT_DATE_TIME = null;
+		} else {
+			this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(date);
+		}
 	}
 
 	/**
@@ -203,41 +199,105 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if the string represents a valid date 
 	 *  according to our critetia, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidDate(final String date) {
-		int length = date.length();
-		final String DASH = "-";
-		final String COLON = ":";
-		// if the date length is less than ten, then the date does not contain
-		// information for the day, as defined in the subset of ISO 8601, as 
-	    // defined at: http://www.w3.org/TR/NOTE-datetime, and we consider it
-		// invalid
-		if(length < 10) return false;
+	private static boolean isValidTimestamp(final String timestamp) {
+		StringTokenizer st = new StringTokenizer(timestamp, "T");
+		int numToks = st.countTokens();
+		if(numToks == 1) {
+			return isValidDate(timestamp);
+		} else if(numToks == 2) {
+			String date = st.nextToken();
+			String time = st.nextToken();
+			return (isValidDate(date) && isValidTime(time));		
+		} else {
+			return false;
+		}
+	}
 
-		// if the date is not one of our valid lengths, return false
-		// this requires that the date use UTC time, as designated by the
-		// trailing "Z"
-		if((length != 10) && (length != 17) && (length != 20) && (length != 22)) {
-			return false;
-		}
-		// the date must be in this millenium
-		if(!date.startsWith("2")) {
-			return false;
-		}
-		int firstDashIndex  = date.indexOf(DASH);
-		int secondDashIndex = date.indexOf(DASH, firstDashIndex+1);
-		if((firstDashIndex == -1) || (secondDashIndex == -1)) {
-			return false;
-		}
+	
+	/**
+	 * Checks to see if the time specified in the given string is a valid time
+	 * according to the date-time formate specified at:<p>
+	 * 
+	 * http://www.w3.org/TR/NOTE-datetime
+	 *
+	 * @param time the time to check
+	 * @return <tt>true</tt> if the time fits the standard, <tt>false</tt> 
+	 *  otherwise
+	 */
+	private static boolean isValidTime(final String time) {
+		if(!time.endsWith("Z")) return false;
+		String timeStr = time.substring(0, time.length()-1);
+		StringTokenizer st = new StringTokenizer(timeStr, ":");
+		int tokens = st.countTokens();
 
-		if(length == 10) return true;
- 
-		int firstColonIndex  = date.indexOf(COLON);
-		int secondColonIndex = date.indexOf(COLON, firstColonIndex+1);
-		if((firstColonIndex != 13) || (secondColonIndex != 16)) {
+		// at least the hours and minutes must be specified if the time is
+		// specified at all, according to the specification
+		if(tokens < 2 || tokens > 3) {
+			return false;
+		}
+		try {
+			int hh = Integer.parseInt(st.nextToken());
+			if(hh < 0 || hh > 23) {
+				return false;
+			}
+			if(st.hasMoreTokens()) {
+				int mm = Integer.parseInt(st.nextToken());
+				if(mm < 0 || mm > 59) {
+					return false;
+				}
+			}
+			if(st.hasMoreTokens()) {
+				// get the first two characters of the seconds field, 
+				// ignoring fractions of a second
+				String ssStr = st.nextToken().substring(0, 2);				
+				int ss = Integer.parseInt(ssStr);
+				if(ss < 0 || ss > 59) {
+					return false;
+				}
+			}
+		} catch(NumberFormatException e) {
 			return false;
 		}
 		return true;
 	}
+
+	/**
+	 * Checks to see if the date specified in the given string is a valid date
+	 * according to the date-time formate specified at:<p>
+	 * 
+	 * http://www.w3.org/TR/NOTE-datetime
+	 *
+	 * @param date the date to check
+	 * @return <tt>true</tt> if the date fits the standard, <tt>false</tt> 
+	 *  otherwise
+	 */
+	private static boolean isValidDate(final String date) {
+		StringTokenizer dateTokenizer = new StringTokenizer(date, "-");		
+
+		
+		// we require that the date have the year, month, and day
+		if(dateTokenizer.countTokens() != 3) {
+			return false;
+		}
+		String YYYYStr = dateTokenizer.nextToken();
+		String MMStr   = dateTokenizer.nextToken();
+		String DDStr   = dateTokenizer.nextToken();		
+		try {
+			int YYYY = Integer.parseInt(YYYYStr);
+			int MM   = Integer.parseInt(MMStr);
+			int DD   = Integer.parseInt(DDStr);
+			
+			// no one implemented HUGE before 2001 and no one likely will past 4000
+			if(YYYY < 2001 || YYYY > 4000) return false;
+			if(MM < 1 || MM > 12) return false;
+			if(DD < 1 || DD > 31) return false;
+		} catch(NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+
+	
 
 
 	/**
@@ -252,45 +312,59 @@ public final class AlternateLocation
 	 *  where no timestamp data could be successfully created
 	 */
 	private static Date createDateInstance(final String dateTimeString) {
-		int dateTimeSepIndex = dateTimeString.indexOf("T");
-
-		// if there's no "T", or it f
-		if((dateTimeSepIndex == -1) || 
-		   ((dateTimeSepIndex+1) >= dateTimeString.length())) {
+		StringTokenizer st = new StringTokenizer(dateTimeString, "T");
+		int tokens = st.countTokens();
+		if(tokens < 1 || tokens > 2) {
 			return new Date(0);
 		}
-		String YYYYMMDD = dateTimeString.substring(0, dateTimeSepIndex);
-		String hhmmss = 
-		    dateTimeString.substring(dateTimeSepIndex+1, 
-									 dateTimeString.length()-1);
+		String YYYYMMDD = st.nextToken();
 		StringTokenizer stdate = new StringTokenizer(YYYYMMDD, "-");
 		if(stdate.countTokens() != 3) {
-			return null;
+			return new Date(0);
 		}
 		String YYYYStr = stdate.nextToken();
 		String MMStr   = stdate.nextToken();
 		String DDStr   = stdate.nextToken();
 		int YYYY = Integer.parseInt(YYYYStr);
 
-		// we subtract 1 because the Calendar class uses 0 for January,
-		// whereas the ISO 8601 subset we're using uses 1 for January
-		int MM   = Integer.parseInt(MMStr)-1; 
-		int DD   = Integer.parseInt(DDStr);		
- 
-		StringTokenizer sttime = new StringTokenizer(hhmmss, ":");
-		if(sttime.countTokens() != 3) {
+		try {
+			// we subtract 1 because the Calendar class uses 0 for January,
+			// whereas the ISO 8601 subset we're using uses 1 for January
+			int MM = Integer.parseInt(MMStr)-1; 
+			int DD = Integer.parseInt(DDStr);		
+			
+			if(!st.hasMoreTokens()) {
+				Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+				cal.set(YYYY, MM, DD);
+				return cal.getTime();
+			}
+			String hhmmss = st.nextToken();
+			if(!hhmmss.endsWith("Z")) {
+				return new Date(0);
+			}
+			hhmmss = hhmmss.substring(0, hhmmss.length()-1);
+			StringTokenizer sttime = new StringTokenizer(hhmmss, ":");
+			int numToks = sttime.countTokens();
+			if(numToks < 2 || numToks > 3) {
+				return new Date(0);
+			}
+			String hhStr = sttime.nextToken();
+			String mmStr = sttime.nextToken();
+			int hh = Integer.parseInt(hhStr);
+			int mm = Integer.parseInt(mmStr);
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+			if(sttime.hasMoreTokens()) {
+				String ssStr = sttime.nextToken().substring(0, 2);
+				int ss = Integer.parseInt(ssStr);		
+				cal.set(YYYY, MM, DD, hh, mm, ss);
+			} else {
+				cal.set(YYYY, MM, DD, hh, mm);
+			}
+			return cal.getTime();
+		} catch(NumberFormatException e) {
+			// a number could not be parsed, so consider it unstamped
 			return new Date(0);
 		}
-		String hhStr = sttime.nextToken();
-		String mmStr = sttime.nextToken();
-		String ssStr = sttime.nextToken();
-		int hh = Integer.parseInt(hhStr);
-		int mm = Integer.parseInt(mmStr);
-		int ss = Integer.parseInt(ssStr);		
-
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-		cal.set(YYYY, MM, DD, hh, mm, ss);
-		return cal.getTime();
 	}
 
 	/**
@@ -336,14 +410,21 @@ public final class AlternateLocation
 	 *  be extracted, is invalid, or does not exist
 	 */
 	private static String extractTimestamp(final String location) {
-		int dateIndex = getTimestampIndex(location);
-		if(dateIndex == -1) return null;
-
-		String dateTimeString = location.substring(dateIndex).trim(); 
-		if(AlternateLocation.isValidDate(dateTimeString)) {
-			return dateTimeString; 
-		} else {
+		StringTokenizer st = new StringTokenizer(location);
+		int numToks = st.countTokens();
+		if(numToks != 2 && numToks != 3) {
 			return null;
+		}
+		else {
+			String curTok = null;
+			for(int i=0; i<numToks; i++) {
+				curTok = st.nextToken();
+			}
+			if(AlternateLocation.isValidTimestamp(curTok)) {
+				return curTok;
+			} else {
+				return null;
+			}
 		}
 	}
 
@@ -359,36 +440,15 @@ public final class AlternateLocation
 	 *  argument, but with the timestamp removed
 	 */
 	private static String removeTimestamp(final String locationHeader) {
-		int timestampIndex= getTimestampIndex(locationHeader);
-		if(timestampIndex != -1) {
-			return locationHeader.substring(0, timestampIndex);
+		StringTokenizer st = new StringTokenizer(locationHeader);
+		int numToks = st.countTokens();
+		if(numToks == 1 || numToks == 2 || numToks == 3) {
+			return st.nextToken();
+		} else {
+			return null;
 		}
-
-		// there was no timestamp, so just return the trimmed original
-		return locationHeader.trim();
 	}
 
-	/**
-	 * Obtains the index in the string for the beginning of the timestamp.
-	 *
-	 * @param locationHeader the full header or header value containing a 
-	 *  timestamp
-	 * @return the index of the start of the timestamp, or -1 if no 
-	 *  timetamp could be found
-	 */
-	private static int getTimestampIndex(final String locationHeader) {
-		int length = locationHeader.length();
-		for(int i=0; i<WHITESPACE_CHARS.length; i++) {
-			if(!Character.isWhitespace(WHITESPACE_CHARS[i])) {
-				return -1;
-			}
-			int dateIndex = locationHeader.lastIndexOf(WHITESPACE_CHARS[i]);
-			if(dateIndex != -1 && (length - dateIndex) <= 21) {
-				return dateIndex+1;
-			}
-		}					
-		return -1;
-	}
 
 	/**
 	 * Returns whether or not this <tt>AlternateLocation</tt> instance 
@@ -428,9 +488,12 @@ public final class AlternateLocation
 		AlternateLocation al = (AlternateLocation)obj;		
 		if(URL.equals(al.URL)) {
 			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
-		}
+		} 
 		if(isTimestamped() && al.isTimestamped()) {
-			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? -1 : -1));
+			if(this.TIME == al.TIME) {
+				return URL.toString().compareTo(al.URL.toString());
+			}
+			return (this.TIME<al.TIME ? 1 : -1);
 		}
 		if(isTimestamped()) {
 			return -1;
