@@ -224,14 +224,17 @@ public final class UDPService implements Runnable {
      *
 	 * @param msg  the <tt>Message</tt> to send
 	 * @param ip   the <tt>InetAddress</tt> to send to
-	 * @param port the <tt>port</tt> to send to
+	 * @param port the port to send to
 	 */
     public synchronized void send(Message msg, InetAddress ip, int port) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             msg.write(baos);
         } catch(IOException e) {
-            e.printStackTrace();
+            // this should not happen -- we should always be able to write
+            // to this output stream in memory
+            ErrorService.error(e);
+
             // can't send the hit, so return
             return;
         }
@@ -245,9 +248,11 @@ public final class UDPService implements Runnable {
             try {
                 _socket.send(dg);
             } catch(IOException e) {
+                // this should not happen -- could mean we're having trouble
+                // getting an address
+                ErrorService.error(e);                
                 System.err.println("ip: "+ip);
                 System.err.println("port: "+port); 
-                e.printStackTrace();
             }
         }
 	}
