@@ -9,9 +9,7 @@ import com.sun.java.util.collections.*;
  * Despite the name, this does NOT implement the BandwidthTracker
  * interface itself.
  */
-public class BandwidthTrackerImpl implements Serializable {
-    static final long serialVersionUID = 7694080781117787305L;
-    
+public class BandwidthTrackerImpl {
     //Keep 10 clicks worth of data 
     Buffer snapShots = new Buffer(10);
     

@@ -259,7 +259,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-		stream.writeObject(new BandwidthTrackerImpl());
+        //We used to write BandwidthTrackerImpl here. For backwards compatibility,
+        //we write null as a place-holder.  It is ignored when reading.
+		stream.writeObject(null);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -271,7 +273,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException, ClassNotFoundException {        
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
-		//BandwidthTrackerImpl which we are going to throw away
+		//Old versions used to read BandwidthTrackerImpl here.  Now we just use null as
+        //a place holder.
         stream.readObject();
 
         //The following is needed to prevent NullPointerException when reading
@@ -1665,11 +1668,35 @@ public class ManagedDownloader implements Downloader, Serializable {
         Assert.that(list.contains(rf4));
         Assert.that(stub.removeBest(list)==rf4);  
         Assert.that(list.size()==0);
+
+        //Test serialization
+        ManagedDownloader downloader=new ManagedDownloader();  //test constructor
+        downloader.allFiles=new RemoteFileDesc[1];
+        downloader.allFiles[0]=new RemoteFileDesc("127.0.0.1", 6346, 0l, "test.txt", 10,
+                                                  new byte[16], 56, true, 2);
+        downloader.incompleteFileManager=new IncompleteFileManager();
+        downloader.incompleteFileManager.addBlock(new File("T-10-test.txt"), 10, 20);
+        try {
+            File tmp=File.createTempFile("ManagedDownloader_test", "dat");
+            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
+            out.writeObject(downloader);
+            out.close();
+            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
+            ManagedDownloader downloader2=(ManagedDownloader)in.readObject();
+            in.close();
+            Assert.that(downloader.allFiles.length==1);   //weak test
+            tmp.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false, "Unexpected IO problem.");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Assert.that(false, "Unexpected class cast problem.");
+        }
     }
     
     //Stub constructor for above test.
     private ManagedDownloader() {
     }
     */
-
 }
