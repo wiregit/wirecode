@@ -18,7 +18,7 @@ public class UPListVendorMessage extends VendorMessage {
 	
 	public static final int VERSION = 1;
 	
-	List _endpoints;
+	List _ultrapeers, _leaves;
 	
 	
 
@@ -33,28 +33,47 @@ public class UPListVendorMessage extends VendorMessage {
 	
 	private static byte [] derivePayload(GiveUPVendorMessage request) {
 		
-		//get a list of all ultrapeers we have connections to
-		List endpoints = new LinkedList();
+		//get a list of all ultrapeers and leafs we have connections to
+		List endpointsUP = new LinkedList();
+		List endpointsLeaf = new LinkedList();
 		
 		Iterator iter = RouterService.getConnectionManager()
 			.getInitializedConnections().iterator();
 		
+		//add only good ultrapeers
 		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
-			if (c.isGoodUltrapeer())
-				endpoints.add( new Endpoint(c.getAddress(), c.getPort()));
+			if (c.isGoodUltrapeer()) 
+				endpointsUP.add( new Endpoint(c.getAddress(), c.getPort()));
 		}
 		
-		//then see how many the client requested, if necessary trim
-		if (request.getNumber() != request.ALL && 
-				request.getNumber() < endpoints.size())
-			endpoints = endpoints.subList(0,request.getNumber());
+		iter = RouterService.getConnectionManager()
+			.getInitializedClientConnections().iterator();
+		
+		//add all leaves.. or not?
+		while(iter.hasNext()) {
+			Connection c = (Connection)iter.next();
+			//if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
+				endpointsLeaf.add( new Endpoint(c.getAddress(), c.getPort()));
+		}
+		
+		//then see how many of each kind the client requested, if necessary trim
+		if (request.getNumberUP() != request.ALL && 
+				request.getNumberUP() < endpointsUP.size())
+			endpointsUP = endpointsUP.subList(0,request.getNumberUP());
+		if (request.getNumberLeaves() != request.ALL && 
+				request.getNumberLeaves() < endpointsLeaf.size())
+			endpointsLeaf = endpointsLeaf.subList(0,request.getNumberLeaves());
+		
+		//cat the two lists
+		endpointsUP.addAll(endpointsLeaf);
 		
 		//serialize the Endpoints to a byte []
-		iter = endpoints.iterator();
 		StringBuffer res = new StringBuffer();
 		synchronized(res) {
-			res.append((byte)endpoints.size());
+			res.append((byte)endpointsUP.size());
+			res.append((byte)endpointsLeaf.size());
+			iter = endpointsUP.iterator();
 			while (iter.hasNext()) {
 				Endpoint e = (Endpoint) iter.next();
 				res.append(packIPAddress(e.getInetAddress(),e.getPort()));
@@ -90,25 +109,42 @@ public class UPListVendorMessage extends VendorMessage {
 		super(guid, ttl, hops, vendorID, selector, version, payload);
 		
 		// check if the payload is legal length
-		byte number = payload[0];
-		if (payload.length!= number*6+1) //evil evil
+		byte numberUP = payload[0];
+		byte numberLeaves = payload[1];
+		if (payload.length!= (numberUP+numberLeaves)*6+2) //evil evil
 			throw new BadPacketException();
 		
-		//parse the ip addresses
-		for (int i = 1;i<payload.length;i+=6) {
+		//parse the up ip addresses
+		for (int i = 2;i<numberUP*6;i+=6) {
 			byte [] current = new byte[6];
 			System.arraycopy(payload,i,current,0,6);
 			QueryReply.IPPortCombo combo = 
 	            QueryReply.IPPortCombo.getCombo(current);
-			_endpoints.add(new Endpoint(combo.getAddress(),combo.getPort()));
+			_ultrapeers.add(new Endpoint(combo.getAddress(),combo.getPort()));
+		}
+		
+		//parse the leaf ip addresses
+		for (int i = numberUP*6+2;i<payload.length;i+=6) {
+			byte [] current = new byte[6];
+			System.arraycopy(payload,i,current,0,6);
+			QueryReply.IPPortCombo combo = 
+	            QueryReply.IPPortCombo.getCombo(current);
+			_leaves.add(new Endpoint(combo.getAddress(),combo.getPort()));
 		}
 		
 		//leave the check whether we got as many UPs as requested elsewhere.
 	}
 	/**
-	 * @return Returns the Endpoints contained in the message.
+	 * @return Returns the List of Ultrapeers contained in the message.
 	 */
-	public List getEndpoints() {
-		return _endpoints;
+	public List getUltrapeers() {
+		return _ultrapeers;
+	}
+	
+	/**
+	 * @return Returns the List of Leaves contained in the message.
+	 */
+	public List getLeaves() {
+		return _leaves;
 	}
 }

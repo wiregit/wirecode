@@ -16,55 +16,67 @@ public class GiveUPVendorMessage extends VendorMessage {
 	public static final int VERSION = 1;
 	
 	public static final int ALL=-1;
+	
 	/**
 	 * the number of requested ultrapeer results.  
 	 */
-	private int _number;
+	private int _numberUP;
+	
+	/**
+	 * the number of requested leaf results.  
+	 */
+	private int _numberLeaves;
 	
 	/**
 	 * constructs a new ultrapeer request message.
 	 * @param guid the guid of the message
 	 * @param number the number of ultrapeers desired
 	 */
-	public GiveUPVendorMessage(GUID guid, int number) {
+	public GiveUPVendorMessage(GUID guid, int numberUP, int numberLeaves) {
 	      super(F_LIME_VENDOR_ID, F_GIVE_ULTRAPEER, VERSION,
-	            derivePayload(number));
+	            derivePayload(numberUP,numberLeaves));
 	      setGUID(guid);
-	      _number = number;
+	      _numberUP = numberUP;
+	      _numberLeaves = numberLeaves;
 	}
 	
 	
 	
 	/**
 	 * constructs a new ultrapeer request message, asking for
-	 * all ultrapeers of the other guy.
+	 * all ultrapeers and leafs of the other guy.
 	 * @param guid the guid of the message
 	 */
 	public GiveUPVendorMessage(GUID guid) {
-	      this(guid,ALL);
+	      this(guid,ALL,ALL);
 	}
 	
-	private static byte [] derivePayload(int number) {
+	private static byte [] derivePayload(int numberUP, int numberLeaves) {
 		//we don't expect to have more than 255 UP connections soon
-		byte [] payload = new byte[1];
-		payload[0] = (byte)number;
+		byte [] payload = new byte[2];
+		payload[0] = (byte)numberUP;
+		payload[1] = (byte)numberLeaves;
 		return payload;
 	}
 	
 	/**
 	 * see superclass comment
 	 * 
+	 * note this does not have upper limit to the number of requested results 
+	 * (other than the 255 byte limit).  One day we may have many more connections..
 	 */
 	public GiveUPVendorMessage(byte[] guid, byte ttl, byte hops,
 			byte[] vendorID, int selector, int version, byte[] payload)
 			throws BadPacketException {
 		super(guid, ttl, hops, vendorID, selector, version, payload);
+		
 		//see if the payload is valid
-		if (payload == null || payload.length != 1)
+		if (payload == null || payload.length != 2)
 			throw new BadPacketException();
 		
-		_number = payload[0];
-		if (_number < ALL) //corrupted packet
+		_numberUP = payload[0];
+		_numberLeaves = payload[1];
+		if (_numberUP < ALL || _numberLeaves < ALL) //corrupted packet
 			throw new BadPacketException();
 		
 	}
@@ -74,7 +86,15 @@ public class GiveUPVendorMessage extends VendorMessage {
 	 * @return Returns the number of UP neighbor addresses that were requested
 	 * with this message.
 	 */
-	public int getNumber() {
-		return _number;
+	public int getNumberUP() {
+		return _numberUP;
+	}
+	
+	/**
+	 * @return Returns the number of Leaf neighbor addresses that were requested
+	 * with this message.
+	 */
+	public int getNumberLeaves() {
+		return _numberLeaves;
 	}
 }
