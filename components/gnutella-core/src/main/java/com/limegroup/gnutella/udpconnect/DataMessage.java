@@ -62,6 +62,7 @@ public class DataMessage extends UDPConnectionMessage {
     }
 
 	public String toString() {
-		return "DataMessage len:"+getDataLength()+" seq:"+getSequenceNumber();
+		return "DataMessage DestID:"+getConnectionID()+" len:"+
+          getDataLength()+" seq:"+getSequenceNumber();
 	}
 }

@@ -32,6 +32,6 @@ public class FinMessage extends UDPConnectionMessage {
     }
 
 	public String toString() {
-		return "FinMessage";
+		return "FinMessage DestID:"+getConnectionID();
 	}
 }

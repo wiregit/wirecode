@@ -82,6 +82,7 @@ public class KeepAliveMessage extends UDPConnectionMessage {
     }
 
 	public String toString() {
-		return "KeepAliveMessage start:"+_windowStart+" space:"+_windowSpace;
+		return "KeepAliveMessage DestID:"+getConnectionID()+
+          " start:"+_windowStart+" space:"+_windowSpace;
 	}
 }
