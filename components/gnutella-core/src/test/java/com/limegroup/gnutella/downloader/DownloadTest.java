@@ -38,6 +38,7 @@ import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -1129,11 +1130,11 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=500;
         
         TestUploader first = new TestUploader("first pusher");
-        first.setRate(RATE);
-        first.stopAfter(600000);
+        first.setRate(RATE/2);
+        first.stopAfter(700000);
         
         TestUploader second = new TestUploader("second pusher");
-        second.setRate(RATE/2);
+        second.setRate(RATE);
         second.stopAfter(500000);
         second.setInterestedInFalts(true);
         
@@ -1154,7 +1155,7 @@ public class DownloadTest extends BaseTestCase {
         PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
                 savedFile.getName(),second);
         
-        RemoteFileDesc []rfd ={firstLoc.createRemoteFileDesc(TestFile.length())};
+        RemoteFileDesc []rfd ={newRFDPush(PPORT_1)};
         
         tGeneric(rfd);
         
@@ -1197,7 +1198,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
-        RemoteFileDesc pushRFD = pushLoc.createRemoteFileDesc(TestFile.length());
+        RemoteFileDesc pushRFD = newRFDPush(PPORT_1);
         
         assertFalse(pushRFD.supportsFWTransfer());
         assertTrue(pushRFD.needsPush());
@@ -1264,7 +1265,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
-        RemoteFileDesc pushRFD2 = pushLocFWT.createRemoteFileDesc(TestFile.length());
+        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2);
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
         
@@ -2396,9 +2397,22 @@ public class DownloadTest extends BaseTestCase {
                                   speed, false, 4, false, null, set,
                                   false, false,"",0,null, -1);
     }
+    
+    private static RemoteFileDesc newRFDPush(int port) throws Exception{
+        PushAltLoc al = (PushAltLoc)AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+port,TestFile.hash());
+        
+        Set urns = new HashSet();
+        urns.add(TestFile.hash());
+        
+        return new RemoteFileDesc("127.0.0.1", 6346, 0, savedFile.getName(),
+                TestFile.length(),100,false,1,false, 
+                null,urns,false,
+                true,"ALT",0,0,al.getPushAddress());
+    }
 
     /** Returns true if the complete file exists and is complete */
-    private static boolean isComplete() {
+    private static boolean isComplete() {LOG.debug(savedFile.getPath());
         if ( savedFile.length() < TestFile.length() ) {
             LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()) );
             return false;
