@@ -13,11 +13,9 @@ import java.net.*;
  * Reports all changes to a DownloadManager.  This class is thread safe.<p>
  *
  * Smart downloads can use many policies, and these policies are free to change
- * as allowed by the Downloader specification.  This implementation tries the N
- * fastest hosts in parallel.  The first host to connect is declared the winner,
- * and the others are terminated.  The whole process is repeated until all hosts
- * are unreachable.  Note that the whole process will be repeated as long as we
- * get the busy signal from a host.<p>
+ * as allowed by the Downloader specification.  This implementation provides
+ * swarmed downloads, the ability to download copies of the same file from
+ * multiple hosts.  See the accompanying white paper for details.<p>
  *
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -73,7 +71,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private boolean stopped;
     
     /** The lock for pushes (see below).  Used intead of THIS to prevent missing
-     *  notify's. */
+     *  notify's.  See readObject for note on serialization. */
     private Object pushLock=new Object();
     /** The name of the push file we are waiting for, or NULL if none */
     private String pushFile;        
@@ -93,6 +91,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The time as returned by Date.getTime() that this entered the current
         state.  Should be modified only through setState. */
     private long stateTime;
+    /** If in the wait state, the number of retries we're waiting for.
+     *  Otherwise undefined. */
+    private int retriesWaiting;
 
 
     /**
@@ -117,6 +118,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** See note on serialization at top of file */
     private void writeObject(ObjectOutputStream stream)
             throws IOException {
+        //TODO: serialize to disk
         stream.writeObject(allFiles);
         stream.writeObject(incompleteFileManager);
     }
@@ -127,6 +129,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException, ClassNotFoundException {        
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
+        //The following is needed to prevent NullPointerException when reading
+        //serialized object from disk.  This can't be done in the constructor or
+        //initializer statements, as they're not executed.  Nor should it be
+        //done in initialize, as that could cause problems in resume().
+        pushLock=new Object(); 
     }
 
     /** 
@@ -303,10 +310,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int NO_MORE_LOCATIONS=-2;      
 
     /** 
-     * Actually does the download, trying all locations, resuming, waiting, and
-     * retrying as necessary.  Also takes care of moving file from incomplete
-     * directory to save directory and adding file to the library.  Called from
-     * dloadManagerThread. 
+     * Actually does the download, finding duplicate files, trying all
+     * locations, resuming, waiting, and retrying as necessary.  Also takes care
+     * of moving file from incomplete directory to save directory and adding
+     * file to the library.  Called from dloadManagerThread.  
      */
     private void tryAllDownloads() {     
         List[] /* of File */ buckets=bucket(allFiles, incompleteFileManager);
@@ -316,6 +323,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         while (true) {
             try {
                 //Try each group, returning on success.
+                //TODO: use downloadManager's queue, releasing during busy wait
                 boolean waitForRetry=false;
                 for (int i=0; i<buckets.length; i++) {     
                     int status=tryAllDownloads2(buckets[i]);
@@ -330,6 +338,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             
                 //Wait or abort.
                 if (waitForRetry) {
+                    synchronized (this) {
+                        retriesWaiting=0;
+                        for (int i=0; i<buckets.length; i++)
+                            retriesWaiting+=buckets[i].size();
+                    }
                     setState(WAITING_FOR_RETRY);
                     Thread.sleep(calculateWaitTime());
                 } else {
@@ -349,11 +362,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
     /**
-     * Tries one round of downloading.  Downloads from all locations until all
-     * locations fail, some locations succeeds, or one location is interrupted.
+     * Tries one round of downloading of the given files.  Downloads from all
+     * locations until all locations fail or some locations succeed.  Moves
+     * incomplete file to the library on success.
      * 
      * @param files a list of files to pick from, all of which MUST be
-     *  "identical" instances of RemoteFileDesc. 
+     *  "identical" instances of RemoteFileDesc.  Unreachable locations
+     *  are removed from files.
      * @return SUCCESS if a file was successfully downloaded
      *         WAIT_FOR_RETRY if no file was downloaded, but it makes sense 
      *             to try again later because some hosts reported busy.
@@ -415,6 +430,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }   
 
 
+    /** Like tryDownloads2, but does not deal with the library. */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
         setState(CONNECTING);
@@ -468,7 +484,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         
             //2. Wait for them to finish.
-            System.out.println("MANAGER: waiting for complete");
+            //System.out.println("MANAGER: waiting for complete");
             synchronized (this) {
                 if (stopped) throw new InterruptedException();
                 while (terminated.size()==0 && dloaders.size()!=0) {
@@ -493,16 +509,21 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /** 
-     * Increases parallelism. 
+     * Increases parallelism by assigning a block (possibly from another
+     * downloader) to a new downloader.
      * 
      * @param files a list of files to pick from, all of which MUST be
      *  "identical" instances of RemoteFileDesc.  Elements are removed
-     *  from this.
-     * @param needed a list of Intervals needed, possibly empty
+     *  from this as they are tried.
+     * @param needed a list of Intervals needed, possibly empty.  Used
+     *  to construct range headers.
      * @param busy a list where busy hosts should be added during 
      *  connection attempts
      * @param terminated a list where a host should be added when a 
      *  download completes.  
+     * @exception NoSuchElementException no locations could connect
+     * @exception InterruptedException this thread was interrupted while
+     *  waiting to connect
      */
     private void startBestDownload(final List /* of RemoteFileDesc */ files,
                                    final List /* of Interval */ needed,
@@ -537,7 +558,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //TODO: account for speed
             //TODO: there is a minor race condition where biggest and 
             //      dloader could write to the same region of the file
-            //      I think it's ok.
+            //      I think it's ok, though it could result in >100% in the GUI
             HTTPDownloader biggest=null;
             synchronized (this) {
                 for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
@@ -561,9 +582,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
                 
         //2) Asynchronously do download
-        System.out.println("MANAGER: downloading from "
-             +dloader.getInitialReadingPoint()+" to "+
-             +(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
+        //System.out.println("MANAGER: downloading from "
+        //     +dloader.getInitialReadingPoint()+" to "+
+        //     +(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
         setState(DOWNLOADING);
         synchronized (this) {
             if (stopped)
@@ -580,7 +601,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         worker.start();
     }
 
-    /** Returns a connectable downloader */
+    /** 
+     * Returns an initialized connectable downloader from the given list
+     * of locations.
+     *
+     * @param files a list of files to pick from, all of which MUST be
+     *  "identical" instances of RemoteFileDesc.  Elements are removed
+     *  from this as they are tried.
+     * @param start the starting byte offset of the download
+     * @param stop the ending byte offset of the download plus one
+     * @param busy a list where busy hosts should be added during 
+     *  connection attempts
+     * @exception NoSuchElementException no locations could connect
+     * @exception InterruptedException this thread was interrupted while
+     *  waiting to connect
+     */
     private HTTPDownloader findConnectable(List /* of RemoteFileDesc */ files,
                                            int start, int stop,
                                            List busy) 
@@ -595,6 +630,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             File incompleteFile=incompleteFileManager.getFile(rfd);
             HTTPDownloader ret;
             if (needsPush(rfd)) {
+                System.out.println("MANAGER: trying push to "+rfd);
                 //Send push message, wait for response with timeout.
                 synchronized (pushLock) {
                     manager.sendPush(rfd);
@@ -602,7 +638,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                     pushIndex=rfd.getIndex();
                     pushClientGUID=rfd.getClientGUID();
                     
-                    pushLock.wait(CONNECT_TIME);  //TODO: need a loop?
+                    //No loop is actually needed here, assuming spurious
+                    //notify()'s don't occur.  (They are not allowed by the Java
+                    //Language Specifications.)  Look at acceptDownload for
+                    //details.
+                    pushLock.wait(CONNECT_TIME);  
                     if (pushSocket==null)
                         continue;
 
@@ -611,14 +651,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                     pushClientGUID=null;
                     ret=new HTTPDownloader(pushSocket, rfd, incompleteFile,
                                            start, stop);
+                    pushSocket=null;
                 }
             } else {             
                 //Establish normal downloader.
                 ret=new HTTPDownloader(rfd, incompleteFile, start, stop);
+                System.out.println("MANAGER: trying connect to "+rfd);
             }
 
             try {
-                System.out.println("MANAGER: trying connect to "+rfd);
                 ret.connect(CONNECT_TIME);
                 return ret;
             } catch (TryAgainLaterException e) {
@@ -640,14 +681,15 @@ public class ManagedDownloader implements Downloader, Serializable {
      * 
      * @param downloader the normal or push downloader to use for the transfer,
      *  which MUST be initialized (i.e., downloader.connect() has been called)
-     * @param rfd the file to download.  This MUST match the name, index,
-     *  address, etc. of downloader.  
+     * @param files the list of files where downloader's RemoteFileDesc should
+     *  be added when the download is terminated, so that this location can
+     *  be reused if needed
      * @param terminated the list to which downloader should be added on
      *  termination
      */
     private void tryOneDownload(HTTPDownloader downloader, 
-                                List files,
-                                List terminated) {
+                                List /* of RemoteFileDesc */ files,
+                                List /* of HTTPDownloader */ terminated) {
         try {
             downloader.doDownload();
         } catch (IOException e) {
@@ -745,7 +787,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** 
      * Removes and returns the RemoteFileDesc with the smallest estimated
-     * remaining download time in filesLeft.  
+     * remaining download time in filesLeft. 
      *     @requires !filesLeft.isEmpty()
      *     @modifies filesLeft
      */
@@ -780,6 +822,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         return ret;
     }
 
+    /** Returns true iff rfd should be attempted by push download, either 
+     *  because it is a private address or was unreachable in the past. */
     private static boolean needsPush(RemoteFileDesc rfd) {
         String host=rfd.getHost();
         int port=rfd.getPort();
@@ -833,9 +877,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         return (int)Math.max(remaining, 0)/1000;
     }
     
-    //TODO: re-enable the folllowing fields
 
 	public synchronized boolean chatEnabled() {
+        //TODO: re-enable by OR'ing all connections.
         return false;
 //  		if (dloader == null)
 //  			return false;
@@ -879,10 +923,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
         
     public synchronized String getHost() {
+        //TODO: this is fine for the GUI, but not fine for chats!
         return dloaders.size()+" locations";
     }
 
 	public synchronized int getPort() {
+        //TODO: this is fine for the GUI, but not fine for chats!
 //  		if (dloader != null)
 //  			return dloader.getPort();
 //  		else
@@ -890,13 +936,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 	}
 
     public synchronized int getPushesWaiting() {
+        //This doesn't have any meaning any more.  TODO: strip from Downloader.
         return 0;
-//          return pushFiles.size();
     }
 
     public synchronized int getRetriesWaiting() {
-        return 0;
-//          return files.size();
+        return retriesWaiting;
     }
 
     /*
