@@ -76,6 +76,11 @@ public class Connection {
     public static final String LF="\n";
     
     /**
+     * Time to wait for inut from user at the remote end. (in milliseconds)
+     */
+    public static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
+    
+    /**
      * The number of times we will respond to a given challenge 
      * from the other side, or otherwise, during connection handshaking
      */
@@ -395,8 +400,17 @@ public class Connection {
                 }
                     
                 //read the response from the other side
-                String connectLine = readLine();  
-                readHeaders();
+                String connectLine;
+                //if we asked the other side to authenticate, give more time
+                //so as to receive user input
+                if(ourResponse.getStatusCode() 
+                    == HandshakeResponse.UNAUTHORIZED_CODE){
+                    connectLine = readLine(USER_INPUT_WAIT_TIME);  
+                    readHeaders(USER_INPUT_WAIT_TIME); 
+                }else{
+                    connectLine = readLine();  
+                    readHeaders();
+                }
                 
                 //if our response was full OK
                 if(ourResponseOK){
@@ -473,10 +487,24 @@ public class Connection {
      *     @modifies network 
      */
     private void readHeaders() throws IOException {
+        readHeaders(SETTINGS.getTimeout());
+    }
+    
+    /**
+     * Reads the properties from the network into _propertiesRead, throwing
+     * IOException if there are any problems. 
+     * @param timeout The time to wait on the socket to read data before 
+     * IOException is thrown
+     * @return The line of characters read
+     * @modifies network
+     * @exception IOException if the characters cannot be read within 
+     * the specified timeout
+     */
+    private void readHeaders(int timeout) throws IOException {
         //TODO: limit number of headers read
         while (true) {
             //This doesn't distinguish between \r and \n.  That's fine.
-            String line=readLine();
+            String line=readLine(timeout);
             if (line==null)
                 throw new IOException();   //unexpected EOF
             if (line.equals(""))
@@ -500,20 +528,39 @@ public class Connection {
         _out.write(bytes);
         _out.flush();
     }
-
+    
     /**
      * Reads and returns one line from the network.  A line is defined as a
      * maximal sequence of characters without '\n', with '\r''s removed.  If the
      * characters cannot be read within TIMEOUT milliseconds (as defined by the
      * property manager), throws IOException.  This includes EOF.
-     *
+     * @return The line of characters read
      * @requires _socket is properly set up
      * @modifies network
+     * @exception IOException if the characters cannot be read within 
+     * the specified timeout
      */
     private String readLine() throws IOException {
+        return readLine(SETTINGS.getTimeout());
+    }
+
+    /**
+     * Reads and returns one line from the network.  A line is defined as a
+     * maximal sequence of characters without '\n', with '\r''s removed.  If the
+     * characters cannot be read within the specified timeout milliseconds,
+     * throws IOException.  This includes EOF.
+     * @param timeout The time to wait on the socket to read data before 
+     * IOException is thrown
+     * @return The line of characters read
+     * @requires _socket is properly set up
+     * @modifies network
+     * @exception IOException if the characters cannot be read within 
+     * the specified timeout
+     */
+    private String readLine(int timeout) throws IOException {
         int oldTimeout=_socket.getSoTimeout();
         try {
-            _socket.setSoTimeout(SettingsManager.instance().getTimeout());
+            _socket.setSoTimeout(timeout);
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException();
