@@ -45,7 +45,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
 	 * is immutable.
 	 */
-    private final Set /* of URNS */ URNS; 
+    private volatile Set /* of URNS */ _urns; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -71,7 +71,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *
 	 * @param file the <tt>File</tt> instance to use for constructing the
 	 *  <tt>FileDesc</tt>
-	 * @param urns the <tt>Set</tt> of URNs for this <tt>FileDesc</tt>
+	 * @param index the index of the file in the file manager
      */
     public FileDesc(File file, int index) {	
 		if((file == null)) {
@@ -89,18 +89,30 @@ public final class FileDesc implements AlternateLocationCollector {
         _name = FILE.getName();
         _path = FILE.getAbsolutePath(); //TODO: right method?
         _size = (int)FILE.length();
-        _modTime = FILE.lastModified();
-		
-		Set urns = UrnCache.instance().getUrns(FILE);
-		if(urns.size() == 0) {			
-			// expensive the first time a new file is added
-			URNS = Collections.unmodifiableSet(calculateUrns(FILE));
-			UrnCache.instance().addUrns(FILE, URNS);
-		}
-		else {
-			URNS = urns;
-		}
+        _modTime = FILE.lastModified();		
+		_urns = UrnCache.instance().getUrns(FILE);
     }
+
+	/**
+	 * Calculates urns for this <tt>FileDesc</tt> if it doesn't already
+	 * contain them.
+	 */
+	public void calculateUrns() {
+		if(_urns.isEmpty()) {
+			_urns = Collections.unmodifiableSet(calculateUrns(FILE));
+			UrnCache.instance().addUrns(FILE, _urns);
+		}
+	}
+
+	/**
+	 * Returns whether or not this <tt>FileDesc</tt> has any urns.
+	 *
+	 * @return <tt>true</tt> if this <tt>FileDesc</tt> has urns,
+	 *  <tt>false</tt> otherwise
+	 */
+	public boolean hasUrns() {
+		return _urns.isEmpty();
+	}
 
 	/**
 	 * Returns the index of this file in our file data structure.
@@ -146,7 +158,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  otherwise
      */
     public URN getSHA1Urn() {
-        Iterator iter = URNS.iterator(); 
+        Iterator iter = _urns.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
             if(urn.isSHA1()) {
@@ -176,7 +188,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  <tt>FileDesc</tt>
 	 */
 	public Set getUrns() {
-		return URNS;
+		return _urns;
 	}
 
 
@@ -246,7 +258,7 @@ public final class FileDesc implements AlternateLocationCollector {
      */
     public boolean containsUrn(URN urn) {
         // now check if given urn matches
-        Iterator iter = URNS.iterator();
+        Iterator iter = _urns.iterator();
         while(iter.hasNext()){
             if (urn.equals((URN)iter.next())) {
                 return true;
@@ -277,7 +289,7 @@ public final class FileDesc implements AlternateLocationCollector {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+URNS+"\r\n"+
+				"urns:     "+_urns+"\r\n"+
 				"alt locs: "+_altLocs+"\r\n");
 	}
 }
