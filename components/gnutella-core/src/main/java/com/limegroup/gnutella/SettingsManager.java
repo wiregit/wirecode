@@ -354,6 +354,11 @@ public final class SettingsManager {
 	 * is installed on this machine.
 	 */
 	private final boolean DEFAULT_CYDOOR_INSTALLER_CALLED = false;
+
+	/**
+	 * Constant for the default ads version.
+	 */
+	private final String DEFAULT_AD_VERSION = "1.0";
     
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -528,6 +533,11 @@ public final class SettingsManager {
 	 */
 	private final String CYDOOR_INSTALLER_CALLED = "CYDOOR_INSTALLER_CALLED";
  
+	/**
+	 * Constant for the key for the current ads version.
+	 */
+	private final String AD_VERSION = "AD_VERSION";
+
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
     private volatile byte[]   _forcedIPAddress;
@@ -1106,6 +1116,9 @@ public final class SettingsManager {
 				else if(key.equals(CYDOOR_INSTALLER_CALLED)) {
 					setCydoorInstalled((new Boolean(p)).booleanValue());
 				}
+				else if(key.equals(AD_VERSION)) {
+					setAdVersion(p);
+				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -1224,6 +1237,7 @@ public final class SettingsManager {
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
 
 		setCydoorInstalled(DEFAULT_CYDOOR_INSTALLER_CALLED);
+		setAdVersion(DEFAULT_AD_VERSION);
     }
 
     /**
@@ -1828,26 +1842,26 @@ public final class SettingsManager {
 		return getBooleanValue(EVER_ACCEPTED_INCOMING);
 	}
   
-        /**
-         * Returns the classpath string used for loading jar files on startup.
-         *
-         * @return the classpath <tt>String</tt> used for loading jar files on
-         *         startup.
-         */
-        public String getClassPath() {
-                return PROPS.getProperty(CLASSPATH);
-        }
-
-        /**
-         * Returns the main class to load on startup.
-         *
-         * @return a <tt>String</tt> specifying the main class to load on
-         *         startup
-         */
-        public String getMainClass() {
-                return PROPS.getProperty(MAIN_CLASS);
-        }
-
+	/**
+	 * Returns the classpath string used for loading jar files on startup.
+	 *
+	 * @return the classpath <tt>String</tt> used for loading jar files on
+	 *         startup.
+	 */
+	public String getClassPath() {
+		return PROPS.getProperty(CLASSPATH);
+	}
+	
+	/**
+	 * Returns the main class to load on startup.
+	 *
+	 * @return a <tt>String</tt> specifying the main class to load on
+	 *         startup
+	 */
+	public String getMainClass() {
+		return PROPS.getProperty(MAIN_CLASS);
+	}
+	
 	/**
 	 * Returns a <tt>String</tt> instance specifying the language to use
 	 * for the application.
@@ -1961,23 +1975,22 @@ public final class SettingsManager {
 		return getBooleanValue(CONNECT_ON_STARTUP);
 	}
     
-     /**
+	/**
      * Returns The time when we last expired accumulated information
-      * @return The time when we last expired accumulated information
+	 * @return The time when we last expired accumulated information
      */
     public long getLastExpireTime(){
         return getLongValue(LAST_EXPIRE_TIME);
     }
     
-    /******************************************************
-     **************  END OF ACCESSOR METHODS **************
-     ******************************************************/
-
-
-    /******************************************************
-     *************  START OF MUTATOR METHODS **************
-     ******************************************************/
-
+	/**
+	 * Returns the version of the ads LimeWire is currently displaying.
+	 *
+	 * @return the version of the ads LimeWire is currently displaying
+	 */
+	public String getAdVersion() {
+		return getStringValue(AD_VERSION);
+	}
 
 	/** 
 	 * Updates the average, total, and current update settings based on
@@ -3135,9 +3148,14 @@ public final class SettingsManager {
 		setBooleanValue(CYDOOR_INSTALLER_CALLED, INSTALLED);
 	}
     
-    /******************************************************
-     ***************  END OF MUTATOR METHODS **************
-     ******************************************************/
+	/**
+	 * Sets the ad version in use -- only read in from the props file.
+	 *
+	 * @param VERSION the ad version to set
+	 */
+	public void setAdVersion(final String VERSION) {
+		setStringValue(AD_VERSION, VERSION);
+	}
 
 	/**
 	 * Sets the <tt>boolean</tt> value for the specified key as a
