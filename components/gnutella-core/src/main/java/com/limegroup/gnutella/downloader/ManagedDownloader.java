@@ -912,8 +912,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         // See if we have already tried and failed with this location
         // This is only done if the location we're trying is an alternate..
         if (other.isFromAlternateLocation() && 
-            invalidAlts.contains(other.getRemoteHostData()))
+            invalidAlts.contains(other.getRemoteHostData())) {
             return false;
+        }
         
 
         // get other info...
@@ -1005,11 +1006,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (! allowAddition(rfd)) {
             return false;
         }
-        if (addDownloadForced(rfd, cache)) {
-            LOG.trace("added rfd: " + rfd);
-            return true;
-        } else
-            return false;
+        
+        return addDownloadForced(rfd, cache);
     }
 
     /**
@@ -1075,6 +1073,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //interested: waiting for downloaders to complete (by waiting on
         //this) or waiting for retry (by sleeping).
         if ( added ) {
+            if(LOG.isTraceEnabled())
+                LOG.trace("added rfd: " + rfd);
             if ((state==Downloader.WAITING_FOR_RETRY) ||
                 (state==Downloader.WAITING_FOR_RESULTS) || 
                 (state==Downloader.GAVE_UP) || 
