@@ -182,10 +182,20 @@ public final class RouterService {
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
   		RouterService.router = router;
+  	}
+
+	/**
+	 * Starts various threads and tasks once all core classes have
+	 * been constructed.
+	 */
+	public void start() {
+        _started = true;
 
 		// Now, link all the pieces together, starting the various threads.
+		RESULT_HANDLER.start();
+
 		router.initialize();
-		manager.initialize();	   
+		manager.initialize();
 		downloader.initialize(); 
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
@@ -198,18 +208,8 @@ public final class RouterService {
 			if ( outgoing > 0 ) 
 				connect();
 		}
-  	}
-
-	/**
-	 * Starts various threads and tasks once all core classes have
-	 * been constructed.
-	 */
-	public void start() {
-        _started = true;
-
-		// start up the UDP server thread
 		catcher.initialize();
-		acceptor.initialize();		
+		acceptor.start();			   
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         fileManager.initialize();
@@ -219,7 +219,6 @@ public final class RouterService {
         
         UpdateManager updater = UpdateManager.instance();//initialize
         updater.postGuiInit(callback);
-		RESULT_HANDLER.start();
 		QueryUnicaster.instance().start();
 	    new HTTPAcceptor().start();	
 	}
@@ -375,7 +374,8 @@ public final class RouterService {
         } catch(UnknownHostException e) {
             return;
         }
-        if ((cIP[0] == 127) && (portnum==acceptor.getPort())) {
+        if ((cIP[0] == 127) && (portnum==acceptor.getPort()) &&
+			ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
 			return;
         } else {
             byte[] managerIP=acceptor.getAddress();
