@@ -114,8 +114,10 @@ public final class UDPService implements Runnable {
         // SettingsManager.  but in general we want to have the SERVER side of
         // GUESS active always.  the client side should be shut off from 
 		// MessageRouter.
-        if (!UDP_THREAD.isAlive())
+        if (!UDP_THREAD.isAlive()) {
+			UDP_THREAD.setDaemon(true);
             UDP_THREAD.start();
+		}
 
         //a) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
