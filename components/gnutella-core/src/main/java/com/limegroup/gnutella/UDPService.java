@@ -270,7 +270,6 @@ public class UDPService implements Runnable {
                             GUID guid = new GUID(message.getGUID());
                             if(isValidForIncoming(SOLICITED_PING_GUID, guid,
                                                   datagram))
-System.out.println("Accepting solicited");
                                 _acceptedSolicitedIncoming = true;
                         }
                     }
