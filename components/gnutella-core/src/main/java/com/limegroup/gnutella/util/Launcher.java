@@ -67,13 +67,10 @@ public class Launcher {
 	 *  the initialization process. */
 	private static String _errorMessage;
 
-	private static NativeLauncher _nativeLauncher;
 
 	/** initialization block that determines the operating 
 	 *  system and loads the necessary runtime data. */
 	static {		
-		// really only necessary for Windows right now, but...
-		_nativeLauncher = new NativeLauncher();
 		if(Utilities.isMac()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
@@ -104,7 +101,7 @@ public class Launcher {
 	 *  @effects launches the given file on Windows
 	 */
 	private static void launchFileWindows(String path) {
-		_nativeLauncher.launchFileWindows(path);
+		NativeLauncher.launchFileWindows(path);
 	}
 
 	/** 
