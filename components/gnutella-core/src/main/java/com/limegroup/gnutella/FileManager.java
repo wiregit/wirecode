@@ -166,7 +166,7 @@ public class FileManager {
 	 * @return the index corresponding to the requested urn, or
 	 *  -1 if not matching index could be found
 	 */
-	public int getFileIndexForURN(String urn) {
+	public int getFileIndexForURN(URN urn) {
         Iterator iter = _files.iterator();
 		int count = 0;
         while(iter.hasNext()) {
@@ -190,7 +190,7 @@ public class FileManager {
 	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
 	 *  <tt>null</tt> if not matching <tt>FileDesc</tt> could be found
 	 */
-	public FileDesc getFileDescForURN(String urn) {
+	public FileDesc getFileDescForURN(URN urn) {
         Iterator iter = _files.iterator();
         while(iter.hasNext()) {
             FileDesc candidate = (FileDesc)iter.next();
@@ -673,7 +673,7 @@ public class FileManager {
         if (fileDesc._urns != null) {
             Iterator iter = fileDesc._urns.iterator();
             while (iter.hasNext()) {
-                String urn = (String)iter.next();
+                URN urn = (URN)iter.next();
                 IntSet indices=(IntSet)_urnIndex.get(urn);
                 if (indices==null) {
                     indices=new IntSet();
@@ -1000,7 +1000,7 @@ public class FileManager {
     protected IntSet urnSearch(Iterator urnsIter,IntSet priors) {
         IntSet ret = priors;
         while(urnsIter.hasNext()) {
-            String urn = (String)urnsIter.next();
+            URN urn = (URN)urnsIter.next();
             // TODO (eventually): case-normalize URNs as appropriate
             // for now, though, prevalent practice is same as local: 
             // lowercase "urn:<type>:", uppercase Base32 SHA1
