@@ -27,7 +27,8 @@ public final class QueryUnicaster {
 
     /** The max number of unicast pongs to store.
      */
-    public static final int MAX_ENDPOINTS = 2000;
+    //public static final int MAX_ENDPOINTS = 2000;
+    public static final int MAX_ENDPOINTS = 30;
 
     /** One hour in milliseconds.
      */
