@@ -205,7 +205,7 @@ public class UpdateManager {
             throw new IOException();
     }
     
-    private boolean debug = true;
+    private boolean debug = false;
     
     private void debug(String str) {
         if(debug)

@@ -178,7 +178,6 @@ public final class UploadManager implements BandwidthTracker {
                     return;
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
-            ioe.printStackTrace();
             debug("IOE thrown, closing socket");
         } finally {
             synchronized(this) {
@@ -839,7 +838,6 @@ public final class UploadManager implements BandwidthTracker {
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
-                System.out.println("Sumeet: Uploader got Upgrade request");
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information
@@ -1022,8 +1020,8 @@ public final class UploadManager implements BandwidthTracker {
         return averageBandwidth;
 	}	
     
-    private final boolean debugOn = true;
-    private final boolean log = true;    
+    private final boolean debugOn = false;
+    private final boolean log = false;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
