@@ -1,4 +1,5 @@
-javac=javac -g
+#Makefile for LimeWire
+javac=javac -O
 
 classes = Main.class ConnectionManager.class RouteTable.class \
 	Connection.class BadPacketException.class GUID.class \
@@ -10,13 +11,16 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	SettingsInterface.class SettingsManager.class \
 
 
-all : $(classes)
+all : $(classes) gui networkdiscoverer
 
 $(classes) : %.class: %.java
 	$(javac) $<
 
+#Recursively call make
+.PHONY: gui
+gui:
+	$(MAKE) -C gui
+# .PHONY: doc
 # doc:
 # 	cd ../../..
 # 	javadoc170 -d doc/api com.limegroup.gnutella"
-
-# skip:
