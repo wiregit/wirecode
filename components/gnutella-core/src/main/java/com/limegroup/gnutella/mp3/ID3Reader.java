@@ -229,8 +229,6 @@ public final class ID3Reader {
         try {
             id3v2Parser = new ID3v2(file);
         } catch (ID3v2Exception idvx) { //can't go on
-            if(idvx instanceof ID3v2BadParsingException)
-                ErrorService.error(idvx); //we want to know about OutOfMemorys
             return data;
         } catch (IOException iox) {
             return data;
