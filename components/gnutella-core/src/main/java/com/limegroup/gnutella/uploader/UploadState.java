@@ -30,6 +30,36 @@ public abstract class UploadState implements HTTPMessage {
 			FILE_DESC=null;
 	}
 	
+	protected void writeAlts(Writer os) throws IOException {
+		if(FILE_DESC != null) {
+			// write the URN in case the caller wants it
+			URN sha1 = FILE_DESC.getSHA1Urn();
+			if(sha1 != null) {
+				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
+									  sha1,
+									  os);
+                Set alts = UPLOADER.getNextSetOfAltsToSend();
+				if(alts.size() > 0) {
+					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+                                          new HTTPHeaderValueCollection(alts),
+                                          os);
+				}
+				
+				if (UPLOADER.wantsFAlts()) {
+					alts = UPLOADER.getNextSetOfPushAltsToSend();
+					if (alts.size()>0)
+						HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+	                                     new HTTPHeaderValueCollection(alts),
+	                                     os);
+					
+					
+				}
+				
+			}
+
+		}
+    }
+	
 	protected void writeAlts(OutputStream os) throws IOException {
 		if(FILE_DESC != null) {
 			// write the URN in case the caller wants it
@@ -60,6 +90,17 @@ public abstract class UploadState implements HTTPMessage {
 		}
 	}
 	
+	protected void writeRanges(Writer os) throws IOException {
+		if (FILE_DESC !=null && FILE_DESC instanceof IncompleteFileDesc){
+			URN sha1 = FILE_DESC.getSHA1Urn();
+			if (sha1!=null) {
+				IncompleteFileDesc iFILE_DESC = (IncompleteFileDesc)FILE_DESC;
+				HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
+                                  iFILE_DESC, os);
+			}
+		}
+	}	
+	
 	protected void writeRanges(OutputStream os) throws IOException {
 		if (FILE_DESC !=null && FILE_DESC instanceof IncompleteFileDesc){
 			URN sha1 = FILE_DESC.getSHA1Urn();
@@ -70,6 +111,40 @@ public abstract class UploadState implements HTTPMessage {
 			}
 		}
 	}
+	
+	/**
+	 * writes out the X-Push-Proxies header as specified by 
+	 * section 4.2 of the Push Proxy proposal, v. 0.7
+	 */
+	protected void writeProxies(Writer os) throws IOException {
+	    
+	    if (RouterService.acceptedIncomingConnection())
+	        return;
+	    
+	    
+	    Set proxies = RouterService.getConnectionManager().getPushProxies();
+	    
+	    StringBuffer buf = new StringBuffer();
+	    int proxiesWritten =0;
+	    for (Iterator iter = proxies.iterator();
+	    	iter.hasNext() && proxiesWritten <4 ;) {
+	        PushProxyInterface current = (PushProxyInterface)iter.next();
+	        buf.append(current.getPushProxyAddress().getHostAddress())
+	        	.append(":")
+	        	.append(current.getPushProxyPort())
+	        	.append(",");
+	        
+	        proxiesWritten++;
+	    }
+	    
+	    if (proxiesWritten >0)
+	        buf.deleteCharAt(buf.length()-1);
+	    else
+	        return;
+	    
+	    HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,buf.toString(),os);
+	    
+	}	
 	
 	
 	/**

@@ -130,9 +130,9 @@ public final class NormalUploadState extends UploadState {
 			    ostream.write("Content-Range: bytes " + _uploadBegin  +
 				    "-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n");
 			}
-			writeAlts(network);
-			writeRanges(network);
-			writeProxies(network);
+			writeAlts(ostream);
+			writeRanges(ostream);
+			writeProxies(ostream);
 			if(FILE_DESC != null) {
 				URN urn = FILE_DESC.getSHA1Urn();
 				

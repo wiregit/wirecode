@@ -675,21 +675,21 @@ public class UploadTest extends BaseTestCase {
         assertEquals(0,FD.getAltLocsSize());
         URN urn = URN.createSHA1Urn(hash);
         
-        Map m =(Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
         PushAltLoc abc = (PushAltLoc)AlternateLocation.create(
                 g.toHexString()+";1.1.1.1:1;2.2.2.2:2;3.3.3.3:3",
                 urn);
-        
         String abcHttp = abc.httpStringValue();
         
         PushAltLoc bcd=(PushAltLoc)AlternateLocation.create(
                 g.toHexString()+";2.2.2.2:2;3.3.3.3:3;4.4.4.4:4",
                 urn);
+        bcd.updateProxies(true);
         
         String bcdHttp = bcd.httpStringValue();
         
         FD.add(bcd);
         assertEquals(1,FD.getAltLocsSize());
+        
         
         passed=download("/uri-res/N2R?" + hash,
                 "X-NFAlt: " + abcHttp,
@@ -698,7 +698,7 @@ public class UploadTest extends BaseTestCase {
         assertTrue("alt failed", passed);
         
         //two of the proxies of bcd should be gone
-        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
         assertEquals("wrong # proxies",1,bcd.getPushAddress().getProxies().size());
         
         
@@ -1648,11 +1648,16 @@ public class UploadTest extends BaseTestCase {
         if( requiredHeader != null )
             expectedHeader = new Header(requiredHeader);
             
+        boolean firstLine = true;
         while (true) { 
             String line = readLine(in);
+            if(firstLine && (line == null || !line.startsWith("HTTP/1.1")))
+                fail("bad first response line: " + line);
+            firstLine = false;
+            
             if( line == null)
                 throw new InterruptedIOException("connection closed");
-            //System.out.println("<< " + line);
+            System.out.println("<< " + line);
                 
             if (line.equals(""))
                 break;
@@ -1834,6 +1839,10 @@ public class UploadTest extends BaseTestCase {
         
         
         //2. Read (and ignore!) response code and headers.  TODO: verify.
+        String firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+                    
         while(!in.readLine().equals("")){ }
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();
@@ -1873,6 +1882,10 @@ public class UploadTest extends BaseTestCase {
         int expectedSize = expResp.length();
         
         //read...ignore response headers
+        String firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+        
         while(!in.readLine().equals("")){ }
         //read first response
         StringBuffer buf=new StringBuffer();        
@@ -1927,6 +1940,10 @@ public class UploadTest extends BaseTestCase {
         int expectedSize = expResp.length();
         
         //read...ignore response headers
+        String firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+            
         while(!in.readLine().equals("")){ }
         //read first response
         StringBuffer buf=new StringBuffer();        
@@ -1936,7 +1953,12 @@ public class UploadTest extends BaseTestCase {
         }
         ret = buf.toString().equals(expResp);
         buf = new StringBuffer();
+        
         //ingore second header
+        firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+        
         while(!in.readLine().equals("")){ }
         //read Second response
         for(int i=0; i<expectedSize; i++){
