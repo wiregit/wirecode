@@ -51,11 +51,11 @@ public class LimitReachedUploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN,
 									  sha1,
 									  ostream);
-			}
-			if(FILE_DESC.hasAlternateLocations()) {
-				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-									  FILE_DESC.getAlternateLocationCollection(),
-									  ostream);
+				if(FILE_DESC.hasAlternateLocations()) {
+					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+										  FILE_DESC.getAlternateLocationCollection(),
+										  ostream);
+				}
 			}
 		}
 		str = "\r\n";
