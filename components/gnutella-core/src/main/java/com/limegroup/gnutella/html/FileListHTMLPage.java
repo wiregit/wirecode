@@ -45,7 +45,8 @@ public class FileListHTMLPage {
         FileDesc[] sharedFiles = fm.getAllSharedFileDescriptors();
         for (int i = 0; i < sharedFiles.length; i++) {
             File currFile = sharedFiles[i].getFile();
-            sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
+            sb.append(beginURL + sharedFiles[i].getIndex() + "/" +
+                      UploadManager.FV_PASS + "/" +
                       StringUtils.replace(URLEncoder.encode(currFile.getName()),
                                           "+", "%20") + ">" + 
                       currFile.getName() + "</a><br>");

@@ -273,7 +273,8 @@ public final class UploadManager implements BandwidthTracker {
 						    			        socket,
 							    		        line._index,
 							    		        line.getParameters(),
-								    	        watchdog);
+								    	        watchdog,
+                                                line.hadPassword());
                 }
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
@@ -1265,6 +1266,7 @@ public final class UploadManager implements BandwidthTracker {
             String fileInfoPart = st.nextToken().trim();
 			String fileName = null;
 			Map parameters = null;
+            boolean hadPassword = false;
 			
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
@@ -1347,13 +1349,22 @@ public final class UploadManager implements BandwidthTracker {
 				} catch(IllegalArgumentException e) {
 					fileName = requestLine.substring( (d+1), f);
 				}
+                // if this is a request from a file-view, trim the fileName
+                // and remember if it had the correct password
+                final String password = FV_PASS+"/";
+                if (fileName.startsWith(password)) {
+                    fileName = fileName.substring(password.length(),
+                                                  fileName.length());
+                    hadPassword = true;
+                }
                 if( RECORD_STATS )
                     UploadStat.TRADITIONAL_GET.incrementStat();				
             }
             //check if the protocol is HTTP1.1.
             //Note that this is not a very strict check.
             boolean http11 = isHTTP11Request(requestLine);
-			return new HttpRequestLine(index, fileName, http11, parameters);
+			return new HttpRequestLine(index, fileName, http11, parameters,
+                                       hadPassword);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -1402,7 +1413,7 @@ public final class UploadManager implements BandwidthTracker {
         if( RECORD_STATS )
 		    UploadStat.URN_GET.incrementStat();
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
-								   isHTTP11Request(requestLine), params);
+								   isHTTP11Request(requestLine), params, false);
 	}
 
 	/**
@@ -1466,6 +1477,11 @@ public final class UploadManager implements BandwidthTracker {
          */
         final Map _params;
         
+        /**
+         * Flag for whether or not the get request had the correct password.
+         */
+        final boolean _hadPass;
+
 		/**
 		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
 		 *
@@ -1474,7 +1490,7 @@ public final class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
 		HttpRequestLine(int index, String fileName, boolean http11) {
-		    this(index, fileName, http11, DataUtils.EMPTY_MAP);
+		    this(index, fileName, http11, DataUtils.EMPTY_MAP, false);
   		}
   		
 		/**
@@ -1485,7 +1501,8 @@ public final class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 * @param params a map of params in this request line
 		 */
-  		HttpRequestLine(int index, String fName, boolean http11, Map params) {
+  		HttpRequestLine(int index, String fName, boolean http11, Map params,
+                        boolean hadPass) {
   			_index = index;
   			_fileName = fName;
             _http11 = http11;
@@ -1493,6 +1510,7 @@ public final class UploadManager implements BandwidthTracker {
                 _params = DataUtils.EMPTY_MAP;
             else
                 _params = params;
+            _hadPass = hadPass;
         }
         
 		/**
@@ -1510,6 +1528,13 @@ public final class UploadManager implements BandwidthTracker {
          */
         Map getParameters() {
             return _params;
+        }
+
+        /**
+         * @return true if the get request had a matching password
+         */
+        boolean hadPassword() {
+            return _hadPass;
         }
   	}
 
