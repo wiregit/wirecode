@@ -184,7 +184,7 @@ public class ConnectionManager {
              } catch(IOException e) {
              } catch(Exception e) {
                  //Internal error!
-                 _callback.error(ActivityCallback.ERROR_20, e);
+                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
              } finally {
                  synchronized (_incomingConnectionsLock) {
                      _incomingConnections--;
@@ -624,7 +624,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }
@@ -676,7 +676,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -744,7 +744,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }

@@ -442,6 +442,12 @@ public class SettingsManager implements SettingsInterface {
                         break;
 					setInstalled(install);
 				}
+				else if(key.equals(APP_WIDTH)) {
+					setAppWidth(Integer.parseInt(p));
+				}
+				else if(key.equals(APP_HEIGHT)) {
+					setAppHeight(Integer.parseInt(p));
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -523,6 +529,8 @@ public class SettingsManager implements SettingsInterface {
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setSessions(DEFAULT_SESSIONS);
 		setInstalled(DEFAULT_INSTALLED);
+		setAppWidth(DEFAULT_APP_WIDTH);
+		setAppHeight(DEFAULT_APP_HEIGHT);
     }
 
 
@@ -723,6 +731,20 @@ public class SettingsManager implements SettingsInterface {
 	 */
 	public boolean getInstalled() {
 		return installed_;
+	}
+
+	/**
+	 * returns the width that the application should be sized to.
+	 */
+	public int getAppWidth() {
+		return Integer.parseInt(props_.getProperty(APP_WIDTH));
+	}
+
+	/**
+	 * returns the height that the application should be sized to.
+	 */
+	public int getAppHeight() {
+		return Integer.parseInt(props_.getProperty(APP_HEIGHT));
 	}
 
     /******************************************************
@@ -1449,7 +1471,7 @@ public class SettingsManager implements SettingsInterface {
         filterBearShare_ = yes;
         Boolean b = new Boolean(yes);
         String s = b.toString();
-        props_.put(SettingsInterface.FILTER_BEARSHARE_QUERIES, s);
+        props_.put(FILTER_BEARSHARE_QUERIES, s);
     }
 
     public synchronized void setUseQuickConnect(boolean useQuickConnect) {
@@ -1549,6 +1571,25 @@ public class SettingsManager implements SettingsInterface {
             }
         }
     }
+
+	/**
+	 * sets the width that the application should be.
+	 * @requires the width must be greater than zero.
+	 */
+	public void setAppWidth(int width) {
+        String s = Integer.toString(width);
+		props_.put(APP_WIDTH, s);
+	}
+
+	/**
+	 * sets the height that the application should be.
+	 * @requires the height must be greater than zero.
+	 */
+	public void setAppHeight(int height) {
+        String s = Integer.toString(height);
+		props_.put(APP_HEIGHT, s);
+	}
+
 
     /******************************************************
      ***************  END OF MUTATOR METHODS **************

@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
-import com.limegroup.gnutella.gui.Utilities;
+import com.limegroup.gnutella.gui.MessageService;
 
 import NativeLauncher;
 
@@ -156,7 +156,7 @@ public class Launcher {
 		else {
 			String msg = "LimeWire will not launch the specified "+
 			"file for security reasons.";
-			Utilities.showError(msg);
+			MessageService.showError(msg);
 		}
 		return -1;
 	}

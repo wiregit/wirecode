@@ -99,6 +99,8 @@ public interface SettingsInterface {
 	public static final long    DEFAULT_TOTAL_UPTIME = 0;
 	public static final int     DEFAULT_SESSIONS = 1;
 	public static final boolean DEFAULT_INSTALLED = false;
+	public static final int     DEFAULT_APP_WIDTH = 640;
+	public static final int     DEFAULT_APP_HEIGHT = 620;
 
     // The property key name constants
 	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
@@ -156,6 +158,8 @@ public interface SettingsInterface {
     public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
     public static final String SESSIONS           = "SESSIONS";
 	public static final String INSTALLED          = "INSTALLED";
+	public static final String APP_WIDTH          = "APP_WIDTH";
+	public static final String APP_HEIGHT         = "APP_HEIGHT";
 }
 
 

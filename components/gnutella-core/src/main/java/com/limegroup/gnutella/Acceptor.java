@@ -239,7 +239,7 @@ public class Acceptor extends Thread {
 
             // If we still don't have a socket, there's an error
             if(_socket == null)
-                _callback.error(ActivityCallback.ERROR_0);
+                _callback.error(ActivityCallback.PORT_ERROR);
         }
 
         if (_port!=oldPort) {
@@ -288,11 +288,11 @@ public class Acceptor extends Thread {
                 new ConnectionDispatchRunner(client);
 
             } catch (SecurityException e) {
-                _callback.error(ActivityCallback.ERROR_3);
+                _callback.error(ActivityCallback.SOCKET_ERROR);
                 return;
             } catch (Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }

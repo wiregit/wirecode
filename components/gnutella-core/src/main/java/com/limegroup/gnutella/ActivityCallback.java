@@ -45,11 +45,7 @@ public interface ActivityCallback
 
     public void addUpload(Uploader u);
 
-    public void removeUpload(Uploader u);
-
-    /** Temp function until we rewrite HTTPManager for counting connections */
-    public int getNumUploads();
-    
+    public void removeUpload(Uploader u);    
 
     /**
      * Notifies the GUI that the given directory has been shared.  This method
@@ -94,48 +90,13 @@ public interface ActivityCallback
     public void error(int errorCode, Throwable t);
 
 
-    /** Constants for the various errors
-     *  See GUIStyles.java for the
-     *  associated messages */
-
-    //maybe use this array instead?  we'll see
-    public static final int[] ERROR_MESSAGES = {0,1,2,3,4,
-                                                5,6,7,8,9,
-                                                10,11,12};
-
-    /** list of errors reported in the GUI
-     *  the associated strings for these
-     *  errors can be found in the GUIStyles
-     *  interface */
     /** error on port */
-    public static final int ERROR_0  = 0;
-    /** error on statistics gatherer start */
-    public static final int ERROR_1  = 1;
-    /** error while accepting incoming connections */
-    public static final int ERROR_2  = 2;
+	public static final int PORT_ERROR = 0;
+
     /** error on listening to socket*/
-    public static final int ERROR_3  = 3;
-    /** error on opening an inpute stream */
-    public static final int ERROR_4  = 4;
-    /** error on a bad url */
-    public static final int ERROR_5  = 5;
-    /** error opening connection */
-    public static final int ERROR_6  = 6;
-    /** error sending push request */
-    public static final int ERROR_7  = 7;
-    /** error writing to file */
-    public static final int ERROR_8  = 8;
-    /** error reading header information */
-    public static final int ERROR_9  = 9;
-    /** error reading gnutella.net file */
-    public static final int ERROR_10 = 10;
-    /** error creating file for statistics logs */
-    public static final int ERROR_11 = 11;
-    /** error writing data to log */
-    public static final int ERROR_12 = 12;
-    /** error finding the router host */
-    public static final int ERROR_13 = 13;
+	public static final int SOCKET_ERROR = 1;
+
     /** internal error */
-    public static final int ERROR_20 = 20;
+	public static final int INTERNAL_ERROR = 2;
 
 }

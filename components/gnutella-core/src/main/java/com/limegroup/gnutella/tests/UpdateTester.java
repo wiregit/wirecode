@@ -1,7 +1,5 @@
 /**
- * file: UpdateTester.java
- * auth: afisk
- * desc: This class constructs a small gui to test updates.
+ * This class constructs a small gui to test updates.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
