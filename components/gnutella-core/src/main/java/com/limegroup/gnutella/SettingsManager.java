@@ -242,10 +242,32 @@ public final class SettingsManager {
 	private final int     DEFAULT_APP_WIDTH           = 640;
 	private final int     DEFAULT_APP_HEIGHT          = 620;
 	private final boolean DEFAULT_RUN_ONCE            = false;
-	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
-	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = true;
-	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = false;
-	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
+
+        /**
+         * Default value for whether or not the application is minimized
+         * to the SystemTray when the user exits.  This flag is initialized
+         * to true only if the user platform supports the SystemTray, making
+         * minimize to tray the default shutdown behavior on tray enabled 
+         * systems.  DEFAULT_MINIMIZE_TO_TRAY is the logical complement of 
+         * DEFAULT_SHUTDOWN_AFTER_TRANSFERS insuring that only one default 
+         * shutdown operation is set.
+         */ 
+	private final boolean DEFAULT_MINIMIZE_TO_TRAY = 
+            CommonUtils.supportsTray();
+        
+        /**
+         * Default value for whether or not the application waits until
+         * transfers in progress are complete before shutting down.  This 
+         * flag is initialized to true only if the user platform does not 
+         * support the system tray, making shutdown after transfers the 
+         * default shutdown behavior on systems which DO NOT support the 
+         * SystemTray.  DEFAULT_SHUTDOWN_AFTER_TRANSFERS is the logical 
+         * complement of DEFAULT_MINIMIZE_TO_TRAY insuring that only one 
+         * default shutdown operation is set.
+         */ 
+        private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
+            !DEFAULT_MINIMIZE_TO_TRAY;
+        
 	public static final String  DEFAULT_CLASSPATH           
 		= "LimeWire.jar" + File.pathSeparator + 
 		"collections.jar" + File.pathSeparator + 
@@ -385,10 +407,8 @@ public final class SettingsManager {
 	private final String RUN_ONCE              = "RUN_ONCE";
 	private final String WINDOW_X              = "WINDOW_X";
 	private final String WINDOW_Y              = "WINDOW_Y";
-	private final String SHOW_TRAY_DIALOG      = "SHOW_TRAY_DIALOG";
 	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
 	private final String SHUTDOWN_AFTER_TRANSFERS   = "SHUTDOWN_AFTER_TRANSFERS";
-	private final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
 	private final String CLASSPATH             = "CLASSPATH";
 	private final String MAIN_CLASS            = "MAIN_CLASS";
 
@@ -950,12 +970,7 @@ public final class SettingsManager {
 				else if(key.equals(WINDOW_Y)) {
 					setWindowY(Integer.parseInt(p));
 				}
-
-				else if(key.equals(SHOW_TRAY_DIALOG)) {
-					Boolean showTrayDialog = new Boolean(p);
-					setShowTrayDialog(showTrayDialog.booleanValue());
-				}
-
+                
 				else if(key.equals(MINIMIZE_TO_TRAY)) {
 					Boolean minimize = new Boolean(p);
 					setMinimizeToTray(minimize.booleanValue());
@@ -966,10 +981,6 @@ public final class SettingsManager {
 					setShutdownAfterTransfers(afterTransfers.booleanValue());
 				}
 
-				else if(key.equals(SHOW_CLOSE_DIALOG)) {
-					Boolean showCloseDialog = new Boolean(p);
-					setShowCloseDialog(showCloseDialog.booleanValue());
-				}
                 else if(key.equals(CLASSPATH)){
                     setClassPath(p);
                 }
@@ -1096,10 +1107,8 @@ public final class SettingsManager {
         setServantType(DEFAULT_SERVANT_TYPE);
 		setInstalled(DEFAULT_INSTALLED);
 		setRunOnce(DEFAULT_RUN_ONCE);
-		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
 		setShutdownAfterTransfers(DEFAULT_SHUTDOWN_AFTER_TRANSFERS);
-		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
 		setClassPath(DEFAULT_CLASSPATH);
 		setMainClass(DEFAULT_MAIN_CLASS);
 
@@ -1676,20 +1685,6 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Returns a boolean specifying whether or not the tray
-	 * dialog window should be shown.
-	 *
-	 * @return <tt>true</tt> if the dialog box prompting the user for
-	 *         whether or not they would like to reduce the application
-	 *         to the system tray should be shown, <tt>false</tt>
-	 *         otherwise
-	 */
-	public boolean getShowTrayDialog() {
-		Boolean b = Boolean.valueOf(PROPS.getProperty(SHOW_TRAY_DIALOG));
-		return b.booleanValue();	
-	}
-
-	/**
 	 * Returns a boolean specifying whether or not to minimize 
 	 * the application to the system tray.
 	 *
@@ -1731,38 +1726,26 @@ public final class SettingsManager {
 	public boolean getEverAcceptedIncoming() {
 		return getBooleanValue(EVER_ACCEPTED_INCOMING);
 	}
-
-	/**
-	 * Returns a boolean specifying whether or not the close
-	 * dialog window should be shown.
-	 *
-	 * @return <tt>true</tt> if the dialog box prompting the user for
-	 *         whether or not they are sure they want to close the
-	 *         application should be shown, <tt>false</tt> otherwise
-	 */
-	public boolean getShowCloseDialog() {
-		return getBooleanValue(SHOW_CLOSE_DIALOG);
-	}
   
-    /**
-     * Returns the classpath string used for loading jar files on startup.
-	 *
-	 * @return the classpath <tt>String</tt> used for loading jar files on 
-	 *         startup.
-     */
-    public String getClassPath() {
-        return PROPS.getProperty(CLASSPATH);
-    }
+        /**
+         * Returns the classpath string used for loading jar files on startup.
+         *
+         * @return the classpath <tt>String</tt> used for loading jar files on
+         *         startup.
+         */
+        public String getClassPath() {
+                return PROPS.getProperty(CLASSPATH);
+        }
 
-    /**
-     * Returns the main class to load on startup.
-	 *
-	 * @return a <tt>String</tt> specifying the main class to load on
-	 *         startup
-     */
-    public String getMainClass() {
-        return PROPS.getProperty(MAIN_CLASS);
-    }
+        /**
+         * Returns the main class to load on startup.
+         *
+         * @return a <tt>String</tt> specifying the main class to load on
+         *         startup
+         */
+        public String getMainClass() {
+                return PROPS.getProperty(MAIN_CLASS);
+        }
 
 	/**
 	 * Returns a <tt>String</tt> instance specifying the language to use
@@ -2792,16 +2775,6 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Sets the flag for whether or not the tray dialog window should be shown.
-	 *
-	 * @param showDialog <tt>boolean</tt> for whether or not the tray dialog
-	 *                   should be shown in the future
-	 */
-	public void setShowTrayDialog(final boolean showDialog) {
-		setBooleanValue(SHOW_TRAY_DIALOG, showDialog);
-	}
-
-	/**
 	 * Sets the flag for whether or not the application should be minimized 
 	 * to the system tray on windows.
 	 *
@@ -2844,18 +2817,6 @@ public final class SettingsManager {
 	 */
 	public void setEverAcceptedIncoming(final boolean acceptedIncoming) {
 		setBooleanValue(EVER_ACCEPTED_INCOMING, acceptedIncoming);
-	}
-
-	/**
-	 * Sets the flag for whether or not the close dialog window should be 
-	 * shown again.
-	 *
-	 * @param showDialog <tt>boolean</tt> for whether or not the dialog
-	 *                   window should be shown again
-	 */
-	public void setShowCloseDialog(final boolean showDialog) {
-		Boolean b = new Boolean(showDialog);
-		PROPS.put(SHOW_CLOSE_DIALOG, b.toString());
 	}
     
     /**
