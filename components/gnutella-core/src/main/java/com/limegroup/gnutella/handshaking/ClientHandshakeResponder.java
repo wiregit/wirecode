@@ -11,7 +11,7 @@ import java.io.IOException;
 public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
 {
     
-    private ConnectionManager _manager;   
+    private final ConnectionManager _manager;   
     
     /**
      * Creates a new instance of ClientHandshakeResponder
@@ -41,7 +41,7 @@ public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
             Properties props=new ClientProperties(getRemoteIP());
             addHostAddresses(props, _manager);
             
-            if (_manager.hasClientSupernodeConnection())
+            if (_manager.isLeaf())
             {
                 //b) Incoming, with supernode connection: reject (redirect)
                 return new HandshakeResponse(
