@@ -47,6 +47,15 @@ public class XMLStringUtils
      * MIN value in the xml queries
      */
     public static final String MIN_ENDING = "_MIN";
+
+
+    /**
+     * Theh minimal part of the the string that is used as a ademiliter
+     * between xml documents, when stored in a file.
+     */
+    public static final String XML_DOC_START_IDENTIFIER = "<?xml";
+
+
     
     /**
      * Breaks the given string (which confirms to the pattern defined above
@@ -60,6 +69,7 @@ public class XMLStringUtils
      * most structural element, and the last one the actual field/attribute
      * name
      */ 
+
     public static List split(String canonicalizedField)
     {
         //form a blank list
