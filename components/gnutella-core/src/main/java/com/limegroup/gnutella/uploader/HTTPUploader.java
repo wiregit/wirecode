@@ -593,27 +593,10 @@ public class HTTPUploader implements Uploader {
 	 *  <tt>null</tt> if there was any problem creating it
 	 */
 	private static URN readContentUrn(final String contentUrnStr) {
-		int offset = contentUrnStr.indexOf(":");
-		int spaceIndex = contentUrnStr.indexOf(" ");
-		if(offset == -1) {
-			return null;
-		}
-		if(spaceIndex == -1) {
-			// this means that there's no space after the colon
-			offset++;
-		}
-		else if((spaceIndex - offset) == 1) {
-			// this means that there is a space after the colon,
-			// so the urn is offset by one more index
-			offset += 2;
-		}
-		else {
-			// otherwise, the request is of an unknown form, so just 
-			// return null
-			return null;
-		}
+		String urnStr = HTTPUtils.extractHeaderValue(contentUrnStr);
 		
-		String urnStr = contentUrnStr.substring(offset);
+		// return null if the header value could not be extracted
+		if(urnStr == null) return null;
 		try {
 			return URNFactory.createSHA1Urn(urnStr);
 		} catch(IOException e) {
@@ -637,6 +620,7 @@ public class HTTPUploader implements Uploader {
 	private static void readAlternateLocations(final String altHeader,
 											   final AlternateLocationCollector alc) {
 		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
