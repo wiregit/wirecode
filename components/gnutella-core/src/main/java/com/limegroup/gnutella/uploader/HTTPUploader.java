@@ -453,15 +453,17 @@ public final class HTTPUploader implements Uploader {
         		// read the line in from the socket.
                 String str = br.readLine();
 
-				if(!CommonUtils.isJava118()) 
+                if ( (str==null) || (str.equals("")) ) 
+                    break;
+
+                if(!CommonUtils.isJava118()) 
 					BandwidthStat.
                         HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 debug("HTTPUploader.readHeader(): str = " +  str);
                 
         		// break out of the loop if it is null or blank
-                if ( (str==null) || (str.equals("")) ) 
-                    break;
-        		else if ( readChatHeader(str)        ) ;
+
+                if      ( readChatHeader(str)        ) ;
                 else if ( readRangeHeader(str)       ) ;
                 else if ( readUserAgentHeader(str)   ) ;
                 else if ( readContentURNHeader(str)  ) ;
