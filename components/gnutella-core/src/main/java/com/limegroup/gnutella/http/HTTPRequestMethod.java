@@ -46,6 +46,8 @@ public abstract class HTTPRequestMethod {
 			    throws IOException {
 				response.writeMessageHeaders(os);
 				response.writeMessageBody(os);
+				os.flush();
+				os.close();
 			}
 		};
 
@@ -57,6 +59,8 @@ public abstract class HTTPRequestMethod {
 			public void writeHttpResponse(HTTPMessage response, OutputStream os) 
 			    throws IOException {
 				response.writeMessageHeaders(os);
+				os.flush();
+				os.close();
 			}
 		};
 }
