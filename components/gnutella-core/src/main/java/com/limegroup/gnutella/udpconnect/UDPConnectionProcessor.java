@@ -72,8 +72,11 @@ public class UDPConnectionProcessor {
         keep the connection alive (and firewalls open).  
  		Note: in an idle state, this affects data writing if the 
 		receivers window is full. */
-	//private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
-	private static final long KEEPALIVE_WAIT_TIME     = (200);
+	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+
+    /** Schedule the keepalive in such a way that it can do some other 
+        work when it kicks in. */
+	private static final long KEEPALIVE_SCHEDULE_TIME = (200);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
@@ -292,7 +295,7 @@ public class UDPConnectionProcessor {
     private synchronized void scheduleKeepAlive() {
         // Create event with initial time
         _keepaliveEvent  = 
-          new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_WAIT_TIME);
+          new KeepAliveTimerEvent(_lastSendTime + KEEPALIVE_SCHEDULE_TIME);
 
         // Register keepalive event for future event callbacks
         _scheduler.register(_keepaliveEvent);
@@ -333,7 +336,6 @@ public class UDPConnectionProcessor {
 		}
 	}
 
-	// TODO synchronization deadlock
     /**
      *  Activate writing if we were waiting for data to write
      */
@@ -347,6 +349,9 @@ public class UDPConnectionProcessor {
 		}
 	}
 
+    // TODO: This can likely be converted to a direct reschedule safely.
+    //       That would take the slow dependency off of keepalive (and allow
+    //       it to go back to the full wait time). 
     /**
      *  Set a flag that will eventually restart the writeEvent
      */
@@ -470,8 +475,18 @@ log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
         // Record the second chunk of the message for the next read.
         _trailingChunk = dmsg.getData2Chunk();
 
+        // Record how much space was previously available in the receive window
+        int priorSpace = _receiveWindow.getWindowSpace();
+
 		// Remove this record from the receiving window
 		_receiveWindow.clearEarlyWrittenBlocks();	
+
+        // If the receive window opened up then send a special 
+        // KeepAliveMessage so that the window state can be 
+        // communicated.
+        if ( priorSpace == 0 ) {
+            sendKeepAlive();
+        }
 
         // Return the first small chunk of data from the GUID
         return dmsg.getData1Chunk();
@@ -903,7 +918,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             // Don't wait for next write if there is no chunk available.
             // Writes will get rescheduled if a chunk becomes available.
             synchronized(_input) {
-    log("calling getPending");
+log("calling getPending");
                 if ( _input.getPendingChunks() == 0 ) {
                     scheduleWriteDataEvent(Long.MAX_VALUE);
                     _waitingForDataAvailable = true;
@@ -980,7 +995,7 @@ log("sendKeepAlive");
             }
 
             // Reschedule keepalive timer
-            _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
+            _eventTime = _lastSendTime + KEEPALIVE_SCHEDULE_TIME;
             _scheduler.scheduleEvent(this);
 log2("end keepalive: "+ System.currentTimeMillis());
         }

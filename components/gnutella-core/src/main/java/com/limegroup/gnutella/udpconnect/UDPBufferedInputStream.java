@@ -73,7 +73,8 @@ log2("Got an exception:"+e);
     }
 
     /**
-     * 
+     * Read the next len byte of data from the input source. Return how much
+     * was really read.  
      */
     public int read(byte b[], int off, int len)
       throws IOException  {
@@ -206,7 +207,6 @@ log2("Got an exception:"+e);
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             if ( _activeChunk == null || _activeChunk.length <= 0 ) {
                 _activeChunk = _processor.getIncomingChunk();
-log("Fetched incoming chunk");
             }
         }
     }
@@ -217,13 +217,10 @@ log("Fetched incoming chunk");
     private void waitOnData() throws SocketTimeoutException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
-log("waiting ...");
                 _processor.wait(_processor.getReadTimeout()); 
-log("done waiting ...");
             } catch(InterruptedException e) {
                 throw new SocketTimeoutException(); 
             } 
-log("exit waiting ...");
         }
     }
 
@@ -233,7 +230,6 @@ log("exit waiting ...");
     void wakeup() {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             // Wakeup any read operation waiting for data
-    log("wakeup ...");
             _processor.notify();  
         }
     }

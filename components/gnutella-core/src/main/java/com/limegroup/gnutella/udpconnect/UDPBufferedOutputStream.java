@@ -59,7 +59,6 @@ public class UDPBufferedOutputStream extends OutputStream {
             if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
 				// Add to the current chunk
                 activeChunk[activeCount] = (byte) b;
-//log("adding: "+b);
                 activeCount++;
                 return;
             } else {
@@ -167,7 +166,6 @@ public class UDPBufferedOutputStream extends OutputStream {
 		// Wakeup any write operation waiting for space
 		notify();
 
-log("chunk: "+rChunk);
 		return rChunk;
     }
 
