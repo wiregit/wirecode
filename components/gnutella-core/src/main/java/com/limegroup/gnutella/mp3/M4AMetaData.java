@@ -113,8 +113,6 @@ public class M4AMetaData extends AudioMetaData {
 		
 		//the genre is byte encoded the same way as with id3 tags
 		//except that the table is shifted one position
-		//for some reason the atom is much larger than a scalar type, 
-		//and the actual value is held at the end... oh well.
 		current = (byte []) _metaData.get(new Integer(GENRE_ATOM));
 		short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
 		setGenre(MP3MetaData.getGenreString(genreShort));
@@ -130,6 +128,13 @@ public class M4AMetaData extends AudioMetaData {
 				year = year.substring(0,4);
 			setYear(year);
 		}
+		
+		//get the track # & total # of tracks on album
+		current = (byte []) _metaData.get(new Integer(TRACK_ATOM));
+		short trackShort = ByteOrder.beb2short(current,current.length-6);
+		setTrack(trackShort);
+		short trackTotal = ByteOrder.beb2short(current,current.length-4);
+		setTotalTracks(trackTotal);
 		
 		//TODO: add more fields as we discover their meaning.
 	}

@@ -26,6 +26,7 @@ public abstract class AudioMetaData extends MetaData {
     private String genre;
     private int bitrate = -1;
     private int length = -1;
+    private short totalTracks =-1;
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
@@ -86,6 +87,7 @@ public abstract class AudioMetaData extends MetaData {
     public String getYear() { return year; }
     public String getComment()  { return comment; }
     public short getTrack() { return track; }
+    public short getTotalTracks() {return totalTracks;}
     public String getGenre() { return genre; }
     public int getBitrate() { return bitrate; }
     public int getLength() { return length; }
@@ -112,6 +114,10 @@ public abstract class AudioMetaData extends MetaData {
     
     void setTrack(short track) {
         this.track = track;
+    }
+    
+    void setTotalTracks(short total) {
+    	totalTracks = total;
     }
     
     void setGenre(String genre) {
