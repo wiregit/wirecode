@@ -241,7 +241,17 @@ public abstract class MessageRouter {
 		} else if (msg instanceof QueryReply) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
-            handleQueryReply((QueryReply)msg, receivingConnection);
+            // if someone sent a TCP QueryReply with the MCAST header,
+            // that's bad, so ignore it.
+            QueryReply qmsg = (QueryReply)msg;
+            boolean repToMCast;            
+            try {
+                repToMCast = qmsg.isReplyToMulticastQuery();
+            } catch(BadPacketException bpe) {
+                repToMCast = false;
+            }
+            if( !repToMCast )
+                handleQueryReply(qmsg, receivingConnection);            
 		} else if (msg instanceof PushRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
@@ -317,7 +327,7 @@ public abstract class MessageRouter {
             }
             if(RECORD_STATS)
                 ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
-		} else if (msg instanceof QueryReply) {			
+		} else if (msg instanceof QueryReply) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, handler);
@@ -352,8 +362,13 @@ public abstract class MessageRouter {
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
     
-        Assert.that(msg.isMulticast(),
-           "non multicast message in handleMulticastMessage: " + msg);
+        // Use this assert for testing only -- it is a dangerous assert
+        // to have in the field, as not all messages currently set the
+        // network int appropriately.
+        // If someone sends us messages we're not prepared to handle,
+        // this could cause widespreaad AssertFailures
+        //Assert.that(msg.isMulticast(),
+        //   "non multicast message in handleMulticastMessage: " + msg);
     
         // no multicast messages should ever have been
         // set with a TTL greater than 1.
@@ -1723,6 +1738,7 @@ public abstract class MessageRouter {
 			if ( mcast ) {
 			    ip = RouterService.getNonForcedAddress();
 			    port = RouterService.getNonForcedPort();
+                ttl = 1; // not strictly necessary, but nice.
             }
 
             List replies =
