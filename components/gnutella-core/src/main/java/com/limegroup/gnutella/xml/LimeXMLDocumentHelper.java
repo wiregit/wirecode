@@ -175,7 +175,7 @@ public class LimeXMLDocumentHelper{
                 // upon the last iteration, close outer....
                 if (!trees.hasNext()) 
                     retStringBuffer.append("</"+
-                                           LimeXMLUtils.encodeXML(currTree.getNodeName())+
+                                           currTree.getNodeName()+
                                            ">");
             }
         }
@@ -190,11 +190,12 @@ public class LimeXMLDocumentHelper{
         int z = attributes.size();
         for(int i=0;i<z;i++){
             Node att = (Node)attributes.get(i);
-            String attName = att.getNodeName().toLowerCase();
+            String attName = LimeXMLUtils.encodeXML(
+                                                    att.getNodeName().toLowerCase());
             String attVal = att.getNodeValue();
             retString = retString+" "+attName+"=\""+attVal+"\"";
         }
-        String val = node.getNodeValue();
+        String val = LimeXMLUtils.encodeXML(node.getNodeValue());
         List children=LimeXMLUtils.getElements(node.getChildNodes());
         int y=children.size();
         boolean hasValue;
