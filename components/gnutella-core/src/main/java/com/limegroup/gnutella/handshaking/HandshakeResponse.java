@@ -570,8 +570,18 @@ public final class HandshakeResponse {
      * @return <tt>true</tt> if this node uses dynamic querying, otherwise
      *  <tt>false</tt>
      */
-    public boolean usesDynamicQuerying() {
+    public boolean isDynamicQueryConnection() {
         return isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+    }
+
+    /**
+     * Returns whether or not this connection uses the X-Max-TTL header.
+     *
+     * @return <tt>true</tt> if the X-Max-TTL header is present, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean isMaxTTLConnection() {
+        return headerExists(HEADERS, HeaderNames.X_MAX_TTL);
     }
 
     /**
