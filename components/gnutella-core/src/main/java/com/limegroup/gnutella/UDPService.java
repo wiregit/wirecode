@@ -134,8 +134,7 @@ public final class UDPService implements Runnable {
         RouterService.schedule(new IncomingValidator(), 
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
-        if (CommonUtils.isWindowsXP())
-            RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
+        RouterService.schedule(new PeriodicPinger(), 0, PING_PERIOD);
     }
 	
 	/**
