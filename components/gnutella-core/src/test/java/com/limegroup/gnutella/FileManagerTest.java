@@ -287,6 +287,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	public void testThatUrnsAreReturnedWhenNotRequested() throws Exception {
 	    addFilesToLibrary();
 	    
+	    boolean checked = false;
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
@@ -294,13 +295,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			QueryRequest qr = QueryRequest.createQuery(fd.getName());
 			Response[] responses = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, responses);
-			assertEquals("need just one response", 1, responses.length);
+			// we can only do this test on 'unique' names, so if we get more than
+			// one response, don't test.
+			if ( responses.length != 1 ) continue;
+			checked = true;
 			assertEquals("responses should be equal", testResponse, responses[0]);
 			Set urnSet = responses[0].getUrns();
 			URN[] responseUrns = (URN[])urnSet.toArray(new URN[0]);
 			// this is just a sanity check
 			assertEquals("urns should be equal", urn, responseUrns[0]);		
 		}
+		assertTrue("wasn't able to find any unique classes to check against.", checked);
 	}	
 	
 	private void addFilesToLibrary() throws Exception {
