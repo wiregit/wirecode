@@ -28,7 +28,8 @@ filters:
 	$(MAKE) -C $@
 
 # clean and then make again
-again:  clean all
+again:  clean
+	$(JAVAC) *.java
 
 # clean up after making - remove core, ~ files, and .bak files
 clean:
