@@ -69,6 +69,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** the size of the approx matcher 2d buffer...
      */
     private static final int MATCHER_BUF_SIZE = 120;
+    /** this is used for matching of filenames.  kind of big so we only want
+     *  one.
+     */
+    private static ApproximateMatcher matcher = 
+        new ApproximateMatcher(MATCHER_BUF_SIZE);
     
 
     ////////////////////////// Core Variables /////////////////////////////
@@ -185,7 +190,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         //done in initialize, as that could cause problems in resume().
         pushLock=new Object();
         reqLock=new RequeryLock();
-        matcher=new ApproximateMatcher(MATCHER_BUF_SIZE);
     }
 
     /** 
@@ -273,7 +277,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    private ApproximateMatcher matcher =new ApproximateMatcher(MATCHER_BUF_SIZE);
     private final boolean namesClose(final String one, 
                                      final String two) {
         boolean retVal = false;
