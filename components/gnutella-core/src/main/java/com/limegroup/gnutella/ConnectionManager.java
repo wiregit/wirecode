@@ -32,6 +32,12 @@ public class ConnectionManager implements Runnable {
     private LimeProperties lp = new  LimeProperties("Neutella.props",true).getProperties();
     public String ClientId;
 
+
+
+    public int totalSize;
+    public int totalFiles;
+
+
     /** Creates a manager that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
      * call run. */

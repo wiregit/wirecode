@@ -202,10 +202,16 @@ public class Connection implements Runnable {
 			    routeTable.put(m.getGUID(),this);//add to Reply Route Table
 			    manager.sendToAllExcept(m, this);//broadcast to other hosts
 			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-			    Message pingReply = new PingReply(m.getGUID(),m.getTTL(),manager.getListeningPort(),
-							      ip,
-							      0, //I think we will get this value from Rob's code
-							      0); //Kilobytes also from Robs code
+
+			    FileManager fm = FileManager.getFileManager();
+			    
+			    int kilobytes = fm.getSize();
+			    int num_files = fm.getNumFiles();
+
+			    Message pingReply = new PingReply(m.getGUID(),m.getTTL(),
+							      sock.getLocalPort(),
+							      ip, num_files, kilobytes);
+
 			    send(pingReply);
 			}
 			else{//TTL is zero
@@ -222,6 +228,10 @@ public class Connection implements Runnable {
 			if (outConnection.equals(this)){ //I am the destination
 			    manager.catcher.spy(m);//update hostcatcher
 			    //TODO2: So what else do we have to do here??
+
+			    manager.totalSize += m.getKbytes();
+			    manager.totalFiles += m.getFiles();
+			    
 			}
 			else{//message needs to routed
 			    outConnection.send(m);
@@ -238,10 +248,28 @@ public class Connection implements Runnable {
 			if (m.hop()!=0){
 			    routeTable.put(m.getGUID(),this); //add to Reply Route Table
 			    manager.sendToAllExcept(m,this); //broadcast to other hosts
+			 
 			    //TODO3: Rob does the search
+			    FileManager fm = FileManager.getFileManager();
+			    Response[] responses = fm.query((QueryRequest)m);
 			    //TODO3: Make the Query Reply message and send it out.
+
+			    byte[] guid = m.getGUID();
+			    byte ttl = Const.TTL;
+			    int port = sock.getLocalPort();
+			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
+			    long speed = ((QueryRequest)m).getMinSpeed();
+			    byte[] clientGUID = manager.ClientId.getBytes();
+			    // byte[] clientGUID = null;
+			    QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+					   speed, responses, clientGUID);
+			    
 			    //Don't forget the client ID!
 			    //send the packet
+			    send(qreply);
+
+
+
 			}
 			else{//TTL is zero
 			    //do nothing(drop the message)
