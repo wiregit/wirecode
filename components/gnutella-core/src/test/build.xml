@@ -41,6 +41,7 @@
 	<pathelement location="${mac}" />
 	<pathelement location="${quicktime}"/>
 	<pathelement location="lib/junit.jar"/>
+	<pathelement location="lib/logicrypto.jar"/>
   </path>
 
   <!-- Initialization stuff -->
