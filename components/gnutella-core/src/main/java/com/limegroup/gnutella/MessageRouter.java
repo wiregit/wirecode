@@ -509,13 +509,13 @@ public abstract class MessageRouter {
 
 		// TODO: are we sure we want to do this?
         // notify neighbors of new unicast endpoint...
-        Iterator guessUltrapeers = 
-			_manager.getConnectedGUESSUltrapeers().iterator();
-        while (guessUltrapeers.hasNext()) {
-            ManagedConnection currMC = 
-				(ManagedConnection) guessUltrapeers.next();
-			currMC.handlePingReply(reply, handler);
-        }
+//         Iterator guessUltrapeers = 
+// 			_manager.getConnectedGUESSUltrapeers().iterator();
+//         while (guessUltrapeers.hasNext()) {
+//             ManagedConnection currMC = 
+// 				(ManagedConnection) guessUltrapeers.next();
+// 			currMC.handlePingReply(reply, handler);
+//         }
         
         // normal pong processing...
         handlePingReply(reply, handler);
