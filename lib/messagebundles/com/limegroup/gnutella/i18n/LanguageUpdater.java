@@ -285,33 +285,41 @@ class LanguageUpdater {
     }
     
     /**
-     * Returns a string suitable for insertion into a Properties file.
+     * Returns a string suitable for insertion into a UTF-8
+     * encoded Properties file. Some characters will always
+     * be escaped.
      */
     private String escape(String s) {
         final int n = s.length();
         StringBuffer sb = new StringBuffer(n);
         for (int i = 0; i < n; i++) {
             int cp;
-            switch (cp = s.codePointAt(i)) {
-            // TODO: don't use hard-coded points and instead use generic lookup
-            case 0x00a0:
-            case 0x2007:
-            case 0x202F:
-                sb.append(hexUnicode(cp));
-                break;
-            default:
-                if (Character.isISOControl(cp) ||
-                    Character.isWhitespace(cp)) {
-                    switch (cp) {
-                    case ' ': sb.append(' '); break;
-                    case '\n': sb.append("\\n"); break;
-                    case '\t': sb.append("\\t"); break;
-                    case '\f': sb.append("\\f"); break;
-                    case '\r': sb.append("\\r"); break;
-                    default: sb.append(hexUnicode(cp));
-                    }
-                } else
-                    sb.appendCodePoint(cp);
+        	if (Character.isSupplementaryCodePoint(cp = s.codePointAt(i)))
+        	    i++;
+        	//TODO: use switch(getType(cp)) for more generic handling.
+        	//Whitespace's include all Spacechar's but not non-breaking spaces;
+        	//Spacechar's include all Whitespace's but not C0 controls.
+            if (Character.isWhitespace(cp) ||
+                Character.isSpaceChar(cp) ||
+                Character.isISOControl(cp) ||
+                // treat isolated surrogates like controls
+                !Character.isSupplementaryCodePoint(cp)
+                && (Character.isLowSurrogate((char)cp) ||
+                    Character.isHighSurrogate((char)cp))
+                ) {
+                switch (cp) {
+                // only ASCII regular SPACE can be left unchanged;
+                case ' ': sb.append(' '); break;
+                // all other whitespaces and controls must be escaped.
+                case '\n': sb.append("\\n"); break;
+                case '\t': sb.append("\\t"); break;
+                case '\f': sb.append("\\f"); break;
+                case '\r': sb.append("\\r"); break;
+                default: sb.append(hexUnicode(cp));
+                }
+            } else {
+                // valid non-controls non-whitespaces can be left unchanged.
+                sb.appendCodePoint(cp);
             }
         }
         return sb.toString();
@@ -325,10 +333,10 @@ class LanguageUpdater {
         final StringBuffer sb = new StringBuffer(n * 5);
         for (int i = 0; i < n; i++) {
             int p = s.codePointAt(i);
-            if (p < 0x0020 || // C0 controls
-                p > 0x007e && p < 0x00a1 || // DEL and C1 controls
-                p == 0x00ad || // SHY
-                p > 0x00ff) // not Latin1
+            if (p > 0x00ff || // not Latin-1
+                p <= 0x001f || // C0 controls
+                p >= 0x007f && p <= 0x00a0 || // DEL, C1 controls, NBSP
+                p == 0x00ad) // SHY (Soft Hyphen)
                 sb.append(hexUnicode(p));
             else
                 sb.appendCodePoint(p);
@@ -343,7 +351,6 @@ class LanguageUpdater {
      */
     private String hexUnicode(final int cp) {
         if (cp <= 0xffff) {
-            
 	        final String hex = Integer.toHexString(cp);
 	        final StringBuffer sb = new StringBuffer(6);
 	        sb.append("\\u");
