@@ -255,8 +255,7 @@ public class ConnectionManager implements Runnable {
      *      routeTable.put(m.getGUID(), ME_CONNECTION);
      *  </pre>
      */
-    public void fromMe(Message m) {
-        routeTable.put(m.getGUID(), ME_CONNECTION);
+    public void fromMe(Message m) {        routeTable.put(m.getGUID(), ME_CONNECTION);
     }
 
     /**
@@ -314,6 +313,7 @@ public class ConnectionManager implements Runnable {
             fetcher.start();
             fetchers.add(fetcher);
         }
+
         //2. Create the server socket, bind it to a port, and listen for
         //   incoming connections.  If there are problems, we can continue
         //   onward.
@@ -328,6 +328,13 @@ public class ConnectionManager implements Runnable {
         } catch (IOException e) {
             error(ActivityCallback.ERROR_0);
         }
+
+        //3. Start thread to police connections.  
+        //   Perhaps this should use a low priority?
+        Thread watchdog=new Thread(new ConnectionWatchdog(this));
+        watchdog.setDaemon(true);
+        watchdog.start();
+
 
         //3. Start the statistics thread
         //      try{

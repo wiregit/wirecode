@@ -13,7 +13,8 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	SpamFilter.class \
 	RouterService.class ResponseVerifier.class \
 	MediaType.class \
-	FileManager.class RejectConnection.class
+	FileManager.class RejectConnection.class \
+	ConnectionWatchdog.class
 
 subpackages = util gui filters networkdiscoverer
 
