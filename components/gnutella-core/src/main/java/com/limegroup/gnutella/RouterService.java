@@ -1,8 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
@@ -914,6 +913,33 @@ public class RouterService
 	public Chatter createChat(String host, int port) {
 		Chatter chatter = ChatManager.instance().request(host, port);
 		return chatter;
+	}
+    
+    /**
+	 * Browses the passed host
+     * @param host The host to browse
+     * @param port The port at which to browse
+     * @exception IOException in case any I/O error occurs while 
+     * connecting/reading/writing from the host
+	 */
+	public void doBrowseHost(String host, int port) throws IOException{
+        try {
+            URLConnection conn 
+                = (new URL("http://"+host+":"+port)).openConnection();
+            InputStream in = conn.getInputStream();
+            
+            while(true) {
+                Message m = Message.read(in);
+
+                if(m == null) {
+                    //we are finished reading the stream
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            //TODO take it out after testing
+            e.printStackTrace();
+        }
 	}
 
     /**
