@@ -14,6 +14,16 @@ import com.limegroup.gnutella.util.*;
 public class PingReply extends Message implements Serializable {
 
     /**
+     * Constant for the number of ultrapeer slots for this host.
+     */
+    private final int FREE_ULTRAPEER_SLOTS;
+
+    /**
+     * Constant for the number of free leaf slots for this host.
+     */
+    private final int FREE_LEAF_SLOTS;
+
+    /**
      * Constant for the standard size of the pong payload.
      */
     public static final int STANDARD_PAYLOAD_SIZE = 14;
@@ -450,7 +460,12 @@ public class PingReply extends Message implements Serializable {
         String vendor = "";
         int vendorMajor = -1;
         int vendorMinor = -1;
+        
+        int freeLeafSlots = -1;
+        int freeUltrapeerSlots = -1;
         QueryKey key = null;
+        
+        // TODO: the exceptions thrown here are messy
         if(ggep != null) {
             if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
                 try {
@@ -503,6 +518,20 @@ public class PingReply extends Message implements Serializable {
                     // simply don't assign it
                 }
             }
+            
+            if(ggep.hasKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_UP_SUPPORT);
+                    if(bytes.length == 3) {
+                        freeLeafSlots = bytes[1];
+                        freeUltrapeerSlots = bytes[2];
+                    }
+                } catch(IllegalArgumentException e) {
+                    // simply don't assign it
+                } catch (BadGGEPPropertyException e) {
+                    // simply don't assign it
+                }
+            }
         }
 
         HAS_GGEP_EXTENSION = ggep != null;
@@ -512,7 +541,8 @@ public class PingReply extends Message implements Serializable {
         VENDOR_MAJOR_VERSION = vendorMajor;
         VENDOR_MINOR_VERSION = vendorMinor;
         QUERY_KEY = key;
-        
+        FREE_LEAF_SLOTS = freeLeafSlots;
+        FREE_ULTRAPEER_SLOTS = freeUltrapeerSlots;
     }
 
 
@@ -563,7 +593,13 @@ public class PingReply extends Message implements Serializable {
         }
     }
 
-
+    /**
+     * Adds the ultrapeer GGEP extension to the pong.  This has the version of
+     * the Ultrapeer protocol that we support as well as the number of free
+     * leaf and Ultrapeer slots available.
+     * 
+     * @param ggep the <tt>GGEP</tt> instance to add the extension to
+     */
     private static void addUltrapeerExtension(GGEP ggep) {
         byte[] payload = new byte[3];
         // put version
@@ -578,8 +614,8 @@ public class PingReply extends Message implements Serializable {
     }
 
     /** puts major as the high order bits, minor as the low order bits.
-     *  @exception IllegalArgumentException thrown if major/minor is greater than
-     *  15 or less than 0.
+     *  @exception IllegalArgumentException thrown if major/minor is greater 
+     *  than 15 or less than 0.
      */
     private static byte convertToGUESSFormat(int major, int minor) 
         throws IllegalArgumentException {
@@ -594,6 +630,40 @@ public class PingReply extends Message implements Serializable {
         return (byte) retInt;
     }
 
+    /**
+     * Returns whether or not this pong is reporting any free slots on the 
+     * remote host, either leaf or ultrapeer.
+     * 
+     * @return <tt>true</tt> if the remote host has any free leaf or ultrapeer
+     *  slots, otherwise <tt>false</tt>
+     */
+    public boolean hasFreeSlots() {
+        return FREE_LEAF_SLOTS > 0 || FREE_ULTRAPEER_SLOTS > 0;    
+    }
+    
+    /**
+     * Accessor for the number of free leaf slots reported by the remote host.
+     * This will return -1 if the remote host did not include the necessary 
+     * GGEP block reporting slots.
+     * 
+     * @return the number of free leaf slots, or -1 if the remote host did not
+     *  include this information
+     */
+    public int getNumLeafSlots() {
+        return FREE_LEAF_SLOTS;
+    }
+
+    /**
+     * Accessor for the number of free ultrapeer slots reported by the remote 
+     * host.  This will return -1 if the remote host did not include the  
+     * necessary GGEP block reporting slots.
+     * 
+     * @return the number of free ultrapeer slots, or -1 if the remote host did 
+     *  not include this information
+     */    
+    public int getNumUltrapeerSlots() {
+        return FREE_ULTRAPEER_SLOTS;
+    }
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
