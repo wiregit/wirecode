@@ -133,14 +133,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      thread per HTTPDownloader instance.  The call graph of ManagedDownloader's
      "master" thread is as follows:
 
-                             tryAllDownloads
-                                    |
-                              tryAllDownloads2
-                                    |
-                                  tryAllDownloads3
-                                    | 
-                    (asynchronously start workers)
-                                    
+       performDownload:
+           initializeDownload    
+           fireDownloadWorkers (asynchronously start workers)    
+           verifyAndSave
 
       DownloadManager notifies a ManagedDownloader when it should start
       tryAllDownloads.  An inactive download (waiting for a busy host,
@@ -149,8 +145,8 @@ public class ManagedDownloader implements Downloader, Serializable {
       The 'master thread' of a ManagedDownloader is recreated every time
       DownloadManager moves the download from inactive to active.
       
-      The core downloading loop is done by tryAllDownloads3.
-      connectAndDownload (which is started asynchronously in tryAllDownloads3),
+      The core downloading loop is done by fireDownloadWorkers.
+      connectAndDownload (which is started asynchronously in fireDownloadWorkers),
       does the three step ennumerated above.
             
       All downloads start QUEUED.
@@ -325,7 +321,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * we can check in this datastructure to ensure that an RFD is not
      * connected to twice.
      *
-     * Initialized in tryAllDownloads3.
+     * Initialized in fireDownloadWorkers.
      */
     private List currentRFDs;
 
@@ -347,7 +343,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     /**
      * A List of worker threads in progress.  Used to make sure that we do
-     * not terminate (in tryAllDownloads3) without hope if threads are
+     * not terminate (in fireDownloadWorkers) without hope if threads are
      * connecting to hosts (i.e., removed from files) but not have not yet been
      * added to _activeWorkers.
      * Also, if the download completes and any of the threads are sleeping 
@@ -1341,7 +1337,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(isInactive() || dloaderManagerThread == null)
                 receivedNewSources = true;
             else
-                this.notify();                      //see tryAllDownloads3
+                this.notify();                      //see fireDownloadWorkers
         }
 
         return true;
@@ -1781,7 +1777,26 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         int status = GAVE_UP;
         try {
-            status = tryAllDownloads2();
+            
+            status = initializeDownload();
+            
+            if ( status == CONNECTING) {
+                try {
+                    //2. Do the download
+                    status = fireDownloadWorkers();//Exception may be thrown here.
+                } catch (InterruptedException e) { }
+                
+                if (status == -1) //InterruptedException from fireDownloadWorkers
+                    throw new InterruptedException();
+                
+                if (status != COMPLETE) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("stopping early with status: " + status);
+                    
+                } else 
+                    status = verifyAndSave();
+            }
+            
         } catch (InterruptedException e) {
             // nothing should interrupt except for a stop
             if (!stopped && !paused)
@@ -1859,30 +1874,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    /**
-     * Tries one round of downloading of the given files.  Downloads from all
-     * locations until all locations fail or some locations succeed.  Moves
-     * incomplete file to the library on success.
-     * 
-     * @return COMPLETE if a file was successfully downloaded.  This can
-     *             happen even if the file is corrupt, if the user explicitly
-     *             approved.
-     *         CORRUPT_FILE a bytes mismatched when checking overlapping
-     *             regions of resume or swarm, and the user decided they'
-     *             did not want the download fragment, which is now
-     *             quarantined.
-     *         COULDNT_MOVE_TO_LIBRARY the download completed but the
-     *             temporary file couldn't be moved to the library OR
-     *             the download couldn't be written to the incomplete file
-     *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
-     *             to try again later because some hosts reported busy.
-     *             The caller should usually wait before retrying.
-     *         GAVE_UP the download attempt failed, and there are 
-     *             no more locations to try.
-     * @exception InterruptedException if the user stop()'ed this download. 
-     *  (Calls to resume() do not result in InterruptedException.)
-     */
-    private int tryAllDownloads2() throws InterruptedException {
+    private int initializeDownload() {
         RemoteFileDesc firstDesc = null;
         synchronized (this) {
             if (rfds.size()==0)
@@ -1898,21 +1890,16 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // Create a new validAlts for this sha1.
         // initialize the HashTree
-		if( downloadSHA1 != null ) {
-		    validAlts = AlternateLocationCollection.create(downloadSHA1);
-		    initializeHashTree();
+        if( downloadSHA1 != null ) {
+            validAlts = AlternateLocationCollection.create(downloadSHA1);
+            initializeHashTree();
         }
         
-        URN fileHash;
-        int status;
-        
-        status = -1;  //TODO: is this equal to COMPLETE etc?            
-        try {
-            //2. Do the download
-            status = tryAllDownloads3();//Exception may be thrown here.
-        } catch (InterruptedException e) { }
-        
-        //Close the file controlled by commonOutFile.
+        return CONNECTING;
+    }
+    
+    private int verifyAndSave() throws InterruptedException{
+//      Close the file controlled by commonOutFile.
         commonOutFile.close();
         
         // if the user hasn't answered our corrupt question yet, wait.
@@ -1923,17 +1910,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             return CORRUPT_FILE;
         }            
         
-        if (status == -1) //InterruptedException from tryAllDownloads3
-            throw new InterruptedException();
-        if (status != COMPLETE) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("stopping early with status: " + status);
-            return status;
-        }
-        
         //3. Find out the hash of the file and verify that its the same
         // as our hash.
-        fileHash = scanForCorruption();
+        URN fileHash = scanForCorruption();
         if (corruptState == CORRUPT_STOP_STATE) {
             cleanupCorrupt(incompleteFile, completeFile.getName());
             return CORRUPT_FILE;
@@ -2374,8 +2353,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  a corruption was detected and they chose to kill and discard the
      *  download.  Calls to resume() do not result in InterruptedException.
      */
-    private synchronized int tryAllDownloads3() throws InterruptedException {
-        LOG.trace("MANAGER: entered tryAllDownloads3");
+    private synchronized int fireDownloadWorkers() throws InterruptedException {
+        LOG.trace("MANAGER: entered fireDownloadWorkers");
 
         //The current RFDs that are being connected to.
         currentRFDs = new LinkedList();

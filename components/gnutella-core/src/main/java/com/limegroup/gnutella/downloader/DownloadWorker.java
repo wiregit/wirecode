@@ -878,42 +878,7 @@ public class DownloadWorker implements Runnable {
     NotSharingException , QueuedException, NoSuchRangeException,
     NoSuchElementException {
         //Assign "white" (unclaimed) interval to new downloader.
-        //TODO2: assign to existing downloader if possible, without
-        //      increasing parallelis
-        Interval interval = null;
-        
-        // If it's not a partial source, take the first chunk.
-        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
-            if(http11) {
-                int chunkSize = _manager.getChunkSize();
-                int free = _commonOutFile.hasFreeBlocksToAssign(); 
-                if (free <= chunkSize && _manager.getPossibleHostCount() > 1) 
-                    chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
-                interval = _commonOutFile.leaseWhite(chunkSize);
-            }else
-                interval = _commonOutFile.leaseWhite();
-        }
-        
-        // If it is a partial source, extract the first needed/available range
-        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        else {
-            try {
-                IntervalSet availableRanges =
-                    _downloader.getRemoteFileDesc().getAvailableRanges();
-                if(http11)
-                    interval =
-                        _commonOutFile.leaseWhite(availableRanges, _manager.getChunkSize());
-                else
-                    interval = _commonOutFile.leaseWhite(availableRanges);
-                
-            } catch(NoSuchElementException nsee) {
-                // if nothing satisfied this partial source, don't throw NSEE
-                // because that means there's nothing left to download.
-                // throw NSRE, which means that this particular source is done.
-                throw new NoSuchRangeException();
-            }
-        }
+        Interval interval = pickAvailableInterval(http11);
 
         //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
@@ -929,25 +894,80 @@ public class DownloadWorker implements Runnable {
         //was different, and was HIGHER than the low point.        
         int newLow = _downloader.getInitialReadingPoint();
         int newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
+        
         if(newLow > low) {
             if(LOG.isDebugEnabled())
                 LOG.debug("WORKER:"+
                         " Host gave subrange, different low.  Was: " +
                           low + ", is now: " + newLow);
+            
             _commonOutFile.releaseBlock(new Interval(low, newLow-1));
         }
+        
         if(newHigh < high) {
             if(LOG.isDebugEnabled())
                 LOG.debug("WORKER:"+
                         " Host gave subrange, different high.  Was: " +
                           high + ", is now: " + newHigh);
+            
             _commonOutFile.releaseBlock(new Interval(newHigh+1, high));
         }
         
-        if(LOG.isDebugEnabled())
+        if(LOG.isDebugEnabled()) {
             LOG.debug("WORKER:"+
                     " assigning white " + newLow + "-" + newHigh +
                       " to " + _downloader);
+        }
+    }
+    
+    /**
+     * picks an unclaimed interval from the verifying file
+     * 
+     * @param http11 whether the downloader is http 11
+     * 
+     * @throws NoSuchRangeException if the remote host is partial and doesn't 
+     * have the ranges we need
+     */
+    private Interval pickAvailableInterval(boolean http11) throws NoSuchRangeException{
+        Interval interval = null;
+        //If it's not a partial source, take the first chunk.
+        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
+        if( !_downloader.getRemoteFileDesc().isPartialSource() ) {
+            if(http11) {
+                int chunkSize = _manager.getChunkSize();
+                int free = _commonOutFile.hasFreeBlocksToAssign();
+                
+                // if we have less than one free chunk, take half of that
+                if (free <= chunkSize && _manager.getPossibleHostCount() > 1) 
+                    chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
+                
+                interval = _commonOutFile.leaseWhite(chunkSize);
+            } else
+                interval = _commonOutFile.leaseWhite();
+        }
+        
+        // If it is a partial source, extract the first needed/available range
+        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
+        else {
+            try {
+                IntervalSet availableRanges =
+                    _downloader.getRemoteFileDesc().getAvailableRanges();
+                
+                if(http11) {
+                    interval =
+                        _commonOutFile.leaseWhite(availableRanges, _manager.getChunkSize());
+                } else
+                    interval = _commonOutFile.leaseWhite(availableRanges);
+                
+            } catch(NoSuchElementException nsee) {
+                // if nothing satisfied this partial source, don't throw NSEE
+                // because that means there's nothing left to download.
+                // throw NSRE, which means that this particular source is done.
+                throw new NoSuchRangeException();
+            }
+        }
+        
+        return interval;
     }
 
 
@@ -971,10 +991,90 @@ public class DownloadWorker implements Runnable {
 
         //Split largest "gray" interval, i.e., steal another
         //downloader's region for a new downloader.  
+        HTTPDownloader biggest = findBiggestDownloader();
+                        
+        if (biggest==null) {//Not using this downloader...but RFD maybe useful
+
+	    // Note: there is a rare scenario where if there are no
+	    // active downloaders but there are some connecting ones
+	    // who have already leased the entire file we will lose
+	    // this downloader.  
+	    // How much is this an issue with 99.9% of the network http1.1?
+            throw new NoSuchElementException();
+        }
+
+		if (!shouldSteal(biggest))
+            throw new NoSuchElementException();
+		
+        //replace (bad boy) biggest if possible
+        int start,stop;
+        synchronized(biggest) {
+            start = Math.max(biggest.getInitialReadingPoint() + biggest.getAmountRead(),
+                    biggest.getInitialWritingPoint());
+            
+            stop = biggest.getInitialReadingPoint() + biggest.getAmountToRead();
+        }
+        
+        //Note: we are not interested in being queued at this point this
+        //line could throw a bunch of exceptions (not queuedException)
+        _downloader.connectHTTP(start, stop, false);
+        
+        int newLow = _downloader.getInitialReadingPoint();
+        int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
+        
+        // If the stealer isn't going to give us everything we need,
+        // there's no point in stealing, so throw an exception and
+        // don't steal.
+        if( newHigh < stop ) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("WORKER: not stealing because stealer " +
+                        "gave a subrange.  Expected low: " + start +
+                        ", high: " + stop + ".  Was low: " + newLow +
+                        ", high: " + newHigh);
+            }
+            
+            throw new IOException("bad stealer.");
+        }
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("WORKER:"+
+                    " picking stolen grey "
+                    +start+"-"+stop+" from "+biggest+" to "+_downloader);
+        }
+        
+        // stop the victim
+        int newStart;
+        synchronized(biggest) {
+            biggest.stopAt(stop);
+            biggest.setVictim();
+            
+            // free up whatever the victim wrote while we were connecting
+            // unless that data is already verified or pending verification
+            newStart = biggest.getInitialReadingPoint() + biggest.getAmountRead();
+        }
+        
+        // the victim may have even completed their download while we were
+        // connecting
+        if (stop <= newStart)
+            throw new NoSuchElementException();
+        
+        if (newStart > start && LOG.isDebugEnabled()) {
+            LOG.debug("victim managed to download "+(newStart - start)
+                    +" bytes while stealer was connecting");
+        }
+        
+        _downloader.startAt(newStart);
+		
+	}
+    
+    /**
+     * @return the httpdownloader that has leased the biggest chunk of the file
+     */
+    private HTTPDownloader findBiggestDownloader() {
         HTTPDownloader biggest = null;
         List workers = _manager.getActiveWorkers();
         
-        for (Iterator iter=workers.iterator(); iter.hasNext();) {
+        for (Iterator iter=_manager.getActiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
             
             // If this guy isn't downloading, don't steal from him.
@@ -994,124 +1094,54 @@ public class DownloadWorker implements Runnable {
                 if( hLeft > 0 && hLeft > bLeft )
                     biggest = h;
             }
-        }                
-        
-        if (biggest==null) {//Not using this downloader...but RFD maybe useful
-
-	    // Note: there is a rare scenario where if there are no
-	    // active downloaders but there are some connecting ones
-	    // who have already leased the entire file we will lose
-	    // this downloader.  
-	    // How much is this an issue with 99.9% of the network http1.1?
-            throw new NoSuchElementException();
         }
-
-        //Note that getAmountToRead() and getInitialReadingPoint() are
-        //constant.  getAmountRead() is not, so we "capture" it into a
-        //variable.
-        int amountRead = biggest.getAmountRead();
-        int left = biggest.getAmountToRead()-amountRead;
         
-        //check if we need to steal from a slow downloader.
-		float bandwidthVictim = -1;
-		float bandwidthStealer = -1;
-		
-		try {
-			bandwidthVictim = biggest.getAverageBandwidth();
-			biggest.getMeasuredBandwidth(); // trigger IDE.
-		} catch (InsufficientDataException ide) {
-			LOG.debug("victim does not have datapoints", ide);
-			bandwidthVictim = -1;
-		}
+        return biggest;
+    }
+    
+    /**
+     * If this downloader is faster than the victim
+     * OR
+     * If we don't know how fast is this downloader but the victim is slow,
+     * let this steal.
+     * 
+     * @return whether our downloader should steal from the given downloader
+     */
+    private boolean shouldSteal(HTTPDownloader biggest) {
+        // check if we need to steal from a slow downloader.
+        float bandwidthVictim = -1;
+        float bandwidthStealer = -1;
         
-		try {
-			bandwidthStealer = _downloader.getAverageBandwidth();
-			_downloader.getMeasuredBandwidth(); // trigger IDE.
-		} catch(InsufficientDataException ide) {
-			LOG.debug("stealer does not have datapoints", ide);
-			bandwidthStealer = -1;
-		}
-		
-		if(LOG.isDebugEnabled()) {
-			LOG.debug("WORKER: "+
-					_downloader + " attempting to steal from " + 
-					biggest + ", stealer speed [" + bandwidthStealer +
-					"], victim speed [ " + bandwidthVictim + "]");
+        try {
+            bandwidthVictim = biggest.getAverageBandwidth();
+            biggest.getMeasuredBandwidth(); // trigger IDE.
+        } catch (InsufficientDataException ide) {
+            LOG.debug("victim does not have datapoints", ide);
+            bandwidthVictim = -1;
         }
-		
-		// If this downloader is faster than the victim
-		// OR
-		// If we don't know how fast is this downloader but the victim is slow,
-        // let this steal.
-		if (bandwidthStealer > bandwidthVictim ||
-				(bandwidthVictim != -1 &&
-						bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
-						bandwidthStealer == -1))
-		{
-			//replace (bad boy) biggest if possible
-			int start = biggest.getInitialReadingPoint() + amountRead;
-            start = Math.max(start, biggest.getInitialWritingPoint());
-            
-			final int stop = biggest.getInitialReadingPoint() + biggest.getAmountToRead();
-			
-			// If we happened to finish off the download, throw NSEX
-			// and so we don't download any more.
-			if(stop <= start)
-				throw new NoSuchElementException();
-			
-			//Note: we are not interested in being queued at this point this
-			//line could throw a bunch of exceptions (not queuedException)
-			_downloader.connectHTTP(start, stop, false);
-			
-			int newLow = _downloader.getInitialReadingPoint();
-			int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
-			
-			// If the stealer isn't going to give us everything we need,
-			// there's no point in stealing, so throw an exception and
-			// don't steal.
-			if( newHigh < stop ) {
-				if(LOG.isDebugEnabled()) {
-					LOG.debug("WORKER: not stealing because stealer " +
-							"gave a subrange.  Expected low: " + start +
-							", high: " + stop + ".  Was low: " + newLow +
-							", high: " + newHigh);
-                }
-                
-				throw new IOException("bad stealer.");
-			}
-            
-			if(LOG.isDebugEnabled()) {
-				LOG.debug("WORKER:"+
-						" picking stolen grey "
-						+start+"-"+stop+" from "+biggest+" to "+_downloader);
-            }
-            
-			// stop the victim
-			int newStart;
-			synchronized(biggest) {
-				biggest.stopAt(stop);
-				biggest.setVictim();
-				
-				// free up whatever the victim wrote while we were connecting
-				// unless that data is already verified or pending verification
-				newStart = biggest.getInitialReadingPoint() + biggest.getAmountRead();
-				
-				// the victim may have even completed their download while we were
-				// connecting
-				if (stop <= newStart)
-					throw new NoSuchElementException();
-                
-                if (newStart > start && LOG.isDebugEnabled())
-                    LOG.debug("victim managed to download "+(newStart - start)
-                            +" bytes while stealer was connecting");
-			}
-			
-			_downloader.startAt(newStart);
-		}
-		else { //less than MIN_SPLIT_SIZE...but we are doing fine...
-			throw new NoSuchElementException();
-		}
-	}
+        
+        try {
+            bandwidthStealer = _downloader.getAverageBandwidth();
+            _downloader.getMeasuredBandwidth(); // trigger IDE.
+        } catch(InsufficientDataException ide) {
+            LOG.debug("stealer does not have datapoints", ide);
+            bandwidthStealer = -1;
+        }
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("WORKER: "+
+                    _downloader + " attempting to steal from " + 
+                    biggest + ", stealer speed [" + bandwidthStealer +
+                    "], victim speed [ " + bandwidthVictim + "]");
+        }
+        
+        
+        return biggest.getAmountRead() < biggest.getAmountToRead() && 
+                bandwidthStealer > bandwidthVictim ||
+                    (bandwidthVictim != -1 &&
+                            bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
+                            bandwidthStealer == -1);
+    }
     
     ////// various handlers for failure states of the assign process /////
     
