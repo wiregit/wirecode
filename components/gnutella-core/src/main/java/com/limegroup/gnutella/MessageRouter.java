@@ -451,6 +451,8 @@ public abstract class MessageRouter {
                                            qkToDeliver);
             UDPService.instance().send(pRep, datagram.getAddress(),
                                        datagram.getPort());
+            if (RECORD_STATS)
+                SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pRep);
         }
     }
 
