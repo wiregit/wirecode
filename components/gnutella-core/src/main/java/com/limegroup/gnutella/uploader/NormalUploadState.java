@@ -37,7 +37,7 @@ public final class NormalUploadState implements HTTPMessage {
      * reset during the upload if the rate changes.
      */
     private static final BandwidthThrottle THROTTLE = 
-        new BandwidthThrottle(UploadSettings.UPLOAD_SPEED.getValue());        
+        new BandwidthThrottle(getUploadSpeed());        
 
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
