@@ -282,18 +282,17 @@ public class UPListVendorMessage extends VendorMessage {
 				throw new BadPacketException("parsing of ip:port failed. "+
 						" dump of current byte block: "+current);
 			
-			ExtendedEndpoint result; 
+			//store the result in an ExtendedEndpoint
+			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
 			
-			if(_connectionTime) 
-				result= new ExtendedEndpoint(combo.getAddress(),
-								combo.getPort(),
-								ByteOrder.leb2short(payload,i+6));
-			else 
-				result= new ExtendedEndpoint(combo.getAddress(),
-						combo.getPort());
+			//add connection lifetime
+			if(_connectionTime)   
+				result.setDailyUptime(ByteOrder.leb2short(payload,i+6));
 			
+			//add locale info.
 			if (_localeInfo) {
-				//add the locale info to the extendedEndpoint
+				String langCode = new String(payload, i+8,2);
+				result.setClientLocale(langCode);
 			}
 			 _leaves.add(result);
 		}
