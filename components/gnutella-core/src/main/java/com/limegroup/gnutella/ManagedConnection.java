@@ -257,7 +257,7 @@ public class ManagedConnection extends Connection
      * (Compare with _querySourceTable of MessageRouter, which helps filter
      * duplicate queries and decide where to send responses.)  
      */
-    private final ManagedConnectionQueryInfo queryInfo = 
+    private final ManagedConnectionQueryInfo QUERY_INFO = 
         new ManagedConnectionQueryInfo();
 
     /** The next time I should send a query route table to this connection.
@@ -1259,11 +1259,15 @@ public class ManagedConnection extends Connection
 		return _isKillable;
 	}
     
-    /** Returns the query route state associated with this, or null if no
-     *  such state. 
+    /** 
+     * Accessor for the query route state associated with this.  This is
+     * guaranteed to be non-null, but it may not yet contain any data.
+     *
+     * @return the <tt>ManagedConnectionQueryInfo</tt> instance containing
+     *  query route table data for this connection
      */
     public ManagedConnectionQueryInfo getQueryRouteState() {
-        return queryInfo;
+        return QUERY_INFO;
     }
     
     /** 
