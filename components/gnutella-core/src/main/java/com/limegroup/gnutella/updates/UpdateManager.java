@@ -191,7 +191,7 @@ public class UpdateManager {
                         //without necessarily telling them what the new version
                         //is. So a small indicator on the GUI will do just fine.
 
-                        //RouterService.getCallback().indicateNewVersion();
+                        RouterService.getCallback().indicateNewVersion();
                     }
                 } catch(MalformedURLException mfux) {
                     //MalformedURLException - while creating URL
