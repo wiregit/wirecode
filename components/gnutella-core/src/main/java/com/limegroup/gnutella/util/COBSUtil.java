@@ -16,37 +16,38 @@ public class COBSUtil {
      */
     public static byte[] cobsEncode(byte[] src) throws IOException {
         final int srcLen = src.length;
-        int code =  1;
+        int code = 1;
         int currIndex = 0;
-        ByteArrayOutputStream sink = new ByteArrayOutputStream();
-        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        // COBS encoding adds no more than one byte of overhead for every 254
+        // bytes of packet data
+        final int maxEncodingLen = src.length + ((src.length+1)/254) + 1;
+        ByteArrayOutputStream sink = new ByteArrayOutputStream(maxEncodingLen);
+        // 254 is the max size of a temporary block
+        ByteArrayOutputStream temp = new ByteArrayOutputStream(254);
 
         while (currIndex < srcLen) {
-            if (src[currIndex] == 0) {
-                sink.write(code);
-                sink.write(temp.toByteArray());
-                temp.reset();
-                code = (byte) 0x01;
-            }
+            if (src[currIndex] == 0)
+                code = finishBlock(code, sink, temp);
             else {
                 temp.write((int)src[currIndex]);
                 code++;
-                if (code == 0xFF) {
-                    sink.write(code);
-                    sink.write(temp.toByteArray());
-                    temp.reset();
-                    code = (byte) 0x01;
-                }
+                if (code == 0xFF) 
+                    code = finishBlock(code, sink, temp);
             }
             currIndex++;
         }
 
-        sink.write(code);
-        sink.write(temp.toByteArray());
+        finishBlock(code, sink, temp);
         return sink.toByteArray();
     }
 
-
+    private static int finishBlock(int code, ByteArrayOutputStream sink, 
+                            ByteArrayOutputStream temp) throws IOException {
+        sink.write(code);
+        sink.write(temp.toByteArray());
+        temp.reset();
+        return (byte) 0x01;
+    }
 
     /** Decode a COBS-encoded byte array.  The non-allowable byte value is 0.
      *  PRE: src is not null.
