@@ -33,6 +33,8 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         XMLStringUtils.DELIMITER;
     private final String TRACK_KEY =    KEY_PREFIX + "track" + 
         XMLStringUtils.DELIMITER;
+    private final String BITRATE_KEY =  KEY_PREFIX + "bitrate" +
+        XMLStringUtils.DELIMITER;
         
 
     public CollectionTest(String name) {
@@ -202,7 +204,22 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
                          0,  results.size());
-
+                         
+        // test matching on numeric value ...
+        nameVals.clear();
+        nameVals.add(new NameValue(BITRATE_KEY, "64"));
+        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        results = collection.getMatchingReplies(searchDoc);
+        assertEquals("Not the correct amount of results",
+                        2, results.size());
+                        
+        // test things don't match on partial numeric value...
+        nameVals.clear();
+        nameVals.add(new NameValue(BITRATE_KEY, "6"));
+        searchDoc = new LimeXMLDocument(nameVals, schemaURI);
+        results = collection.getMatchingReplies(searchDoc);
+        assertEquals("Not the correct amount of results",
+                        0, results.size());
     }
 
 

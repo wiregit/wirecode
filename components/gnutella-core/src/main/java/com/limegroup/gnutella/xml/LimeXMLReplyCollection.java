@@ -287,6 +287,10 @@ public class LimeXMLReplyCollection {
     
     /**
      * Adds the keywords of this LimeXMLDocument into the index Trie.
+     *
+     * This purposely does not use the getKeyWords method of LimeXMLDocument,
+     * as that method strips out numeric values.  We DO want numeric values
+     * listed in the Trie, otherwise no numeric searches would ever suceed.
      */
     private void addKeywords(LimeXMLDocument doc) {
         synchronized(mainMap) {
