@@ -18,54 +18,35 @@ import java.io.*;
  */
 public final class Settings extends AbstractSettings {
 
-	
-	private static final File THEME_DIR_FILE =
-		new File(CommonUtils.getUserSettingsDir(), "themes");
-
-	private static final String DEFAULT_THEME_NAME = 
-		"default_theme.zip";
-
-	private static final File DEFAULT_THEME_FILE = 
-		new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
-
-	/**
-	 * The array of all theme files that should be copied by default
-	 * from the themes jar file.
-	 */
-	private static final String[] THEMES = {
-		DEFAULT_THEME_NAME,
-		"black_theme.zip",
-	}; 
-
-	static {
-		for(int i=0; i<THEMES.length; i++) { 
-			CommonUtils.copyResourceFile(THEMES[i], 
-										 new File(THEME_DIR_FILE, THEMES[i]));
-		}
-	}
-
 	/**
 	 * Setting for the default theme file to use for LimeWire display.
 	 */
 	public static final FileSetting THEME_DEFAULT = 
-		FACTORY.createFileSetting("THEME_DEFAULT", DEFAULT_THEME_FILE); 
+		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ? 
+								  ThemeSettings.DEFAULT_OSX_THEME_FILE : 
+								  ThemeSettings.DEFAULT_THEME_FILE); 
 
 	/**
 	 * Setting for the default theme directory to use in LimeWire display.
 	 */
 	public static final FileSetting THEME_DEFAULT_DIR = 
-		FACTORY.createFileSetting("THEME_DEFAULT_DIR",  
-								  new File(THEME_DIR_FILE, "default_theme"));
+		FACTORY.createFileSetting("THEME_DEFAULT_DIR", CommonUtils.isMacOSX() ?
+								  new File(ThemeSettings.THEME_DIR_FILE, 
+										   "default_osx_theme") :
+								  new File(ThemeSettings.THEME_DIR_FILE, 
+										   "default_theme"));
 
 	/**
 	 * Setting for the file name of the theme file.
 	 */
 	public static final FileSetting THEME_FILE =
-		FACTORY.createFileSetting("THEME_FILE", THEME_DEFAULT.getValue());
+		FACTORY.createFileSetting("THEME_FILE", 
+								  THEME_DEFAULT.getValue());
 
 	/**
 	 * Setting for the file name of the theme directory.
 	 */
 	public static final FileSetting THEME_DIR =
-		FACTORY.createFileSetting("THEME_DIR", THEME_DEFAULT_DIR.getValue());
+		FACTORY.createFileSetting("THEME_DIR", 
+								  THEME_DEFAULT_DIR.getValue());
 }
