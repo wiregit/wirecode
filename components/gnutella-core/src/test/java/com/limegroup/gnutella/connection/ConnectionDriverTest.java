@@ -19,6 +19,24 @@ public class ConnectionDriverTest extends TestCase {
         //return ret;
     }
 
+//     public static void main(String args[]) {
+//         ConnectionDriverTest test=new ConnectionDriverTest("test test");
+//         test.setUp();
+//         System.out.println("Set up");
+//         try { Thread.sleep(100); } catch (InterruptedException e) { }
+//         test.tearDown();
+//         System.out.println("Tear down");
+
+//         try { Thread.sleep(10000); } catch (InterruptedException e) { }
+
+//         test.setUp();
+//         System.out.println("Set up");
+//         try { Thread.sleep(100); } catch (InterruptedException e) { }
+
+//         test.tearDown();
+//         System.out.println("Tear down");
+//     }
+
     /*
      * in1  <--> out1
      * in2  <--> out2
@@ -39,8 +57,8 @@ public class ConnectionDriverTest extends TestCase {
             in1=acceptor.accept();
             assertTrue(in1!=null);
 
-            acceptor=new MiniAcceptor(driver, null, PORT);
-            out2=new Connection("127.0.0.1", PORT);
+            acceptor=new MiniAcceptor(driver, null, PORT+1);
+            out2=new Connection("127.0.0.1", PORT+1);
             out2.initialize(driver);
             in2=acceptor.accept();
             assertTrue(in2!=null);
@@ -116,7 +134,7 @@ public class ConnectionDriverTest extends TestCase {
     }
 }
 
-class TestConnectionDriver extends ConnectionDriver {
+class TestConnectionDriver extends NonBlockingConnectionDriver {
     List /* of ReadPair */ reads=Collections.synchronizedList(new LinkedList());
     
     public void initialize() {
