@@ -63,6 +63,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The number of times to requery the network.
      */
     private static final int REQUERY_ATTEMPTS = 60;
+    /** The number of times to retry a set of RFDs (per query);
+     */
+    private static final int RETRY_ATTEMPTS = 4;
+
     /** Lock used to communicate between addDownload and tryAllDownloads.
      */
     private RequeryLock reqLock = new RequeryLock();
@@ -499,7 +503,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private void tryAllDownloads() {     
 
+        // the number of requeries i've done...
         int numRequeries = 0;
+        // per query, the number of waits i've allowed...
+        int numRetries = 0;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
@@ -552,7 +559,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 manager.yieldSlot(this);
 
                 //Wait or abort.
-                if (waitForRetry) {
+                if (waitForRetry &&
+                    (numRetries++ < RETRY_ATTEMPTS)) {
                     synchronized (this) {
                         retriesWaiting=0;
                         for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
@@ -572,7 +580,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     else if (numRequeries++ < REQUERY_ATTEMPTS) {
                         setState(REQUERYING_NETWORK);
                         manager.sendQuery(allFiles);
-
+                        // reset numRetries for next iteration...
+                        numRetries = 0;
+                        
                         int waitTime = getMinutesToWaitForRequery(numRequeries);
                         waitTime *= (60 * 1000);                        
 
