@@ -490,9 +490,11 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         }
         
         // and a collection of pushlocs
+        GUID g1 = new GUID(GUID.makeGuid());
+        GUID g2 = new GUID(GUID.makeGuid());
         AlternateLocationCollection push = AlternateLocationCollection.create(FileDescStub.DEFAULT_SHA1);
-        PushEndpoint pe = new PushEndpoint(FileDescStub.DEFAULT_SHA1.httpStringValue()+";1:2.2.2.2;1.1.1.1:2");
-        PushEndpoint pe2 = new PushEndpoint(FileDescStub.DEFAULT_SHA1.httpStringValue()+";2:3.3.3.3;2.2.2.2:3");
+        PushEndpoint pe = new PushEndpoint(g1.toHexString()+";1:2.2.2.2;1.1.1.1:2");
+        PushEndpoint pe2 = new PushEndpoint(g2.toHexString()+";2:3.3.3.3;2.2.2.2:3");
         PushAltLoc pa = new PushAltLoc(pe,FileDescStub.DEFAULT_SHA1);
         PushAltLoc pa2 = new PushAltLoc(pe2,FileDescStub.DEFAULT_SHA1);
         push.add(pa);

@@ -178,7 +178,6 @@ public class AltLocDigestTest extends BaseTestCase {
 	    assertTrue(Arrays.equals(toByte,stream));
 	    
 	    digest = AltLocDigest.parseDigest(toByte,0,toByte.length);
-	    digest.setDirect();
 	    assertTrue(digest.containsAll(_alternateLocations));
 	}
 	

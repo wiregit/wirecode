@@ -43,7 +43,7 @@ public class AltLocDigest implements BloomFilter {
     private final HashFunction PUSH = new PushLocHasher();
     
     /**
-     * default size for each element
+     * default size for each element.
      */
     private static final int DEFAULT_ELEMENT_SIZE = 12;
     
@@ -58,15 +58,7 @@ public class AltLocDigest implements BloomFilter {
      */
     private static final int MAX_ELEMENT_SIZE = 24;
     
-    /**
-     * constructor with default values.
-     */
-    public AltLocDigest(boolean push) {
-        this();
-        _hash = push ? PUSH : DIRECT;
-    }
-    
-    private AltLocDigest() {
+    public AltLocDigest() {
         _values = new BitSet();
         setElementSize(DEFAULT_ELEMENT_SIZE);
     }
@@ -89,33 +81,14 @@ public class AltLocDigest implements BloomFilter {
      */
     private int _mask;
     
-    /**
-     * the actual hashing function.  Acts differently on altlocs than pushlocs.
-     * range is [0, 2^_elementSize)
-     */
-    private HashFunction _hash;
-    
-    /**
-     * tells this digest to use the hash function for direct altlocs.
-     * takes effect on the next add/check.
-     */
-    public void setDirect() {
-        _hash = DIRECT;
-    }
-
-    /**
-     * tells this digest to use the hash function for push altlocs.
-     * takes effect on the next add/check.
-     */
-    public void setPush() {
-        _hash = PUSH;
-    }
-    
     public void add(Object o) {
         if (! (o instanceof AlternateLocation))
             throw new IllegalArgumentException ("trying to add a non-altloc to an altloc digest");
         AlternateLocation loc = (AlternateLocation)o;
-        _values.set(_hash.hash(loc));
+        if (loc instanceof DirectAltLoc)
+            _values.set(DIRECT.hash(loc));
+        else
+            _values.set(PUSH.hash(loc));
     }
 
     /* (non-Javadoc)
@@ -134,7 +107,10 @@ public class AltLocDigest implements BloomFilter {
             return false;
         AlternateLocation loc = (AlternateLocation)o;
         
-        return _values.get(_hash.hash(loc));
+        if (loc instanceof DirectAltLoc)
+            return _values.get(DIRECT.hash(loc));
+        else
+            return _values.get(PUSH.hash(loc));
     }
 
     /* (non-Javadoc)

@@ -105,7 +105,7 @@ public class HeadPing extends VendorMessage {
 	/**
 	 * The bloom filter carried by this ping, if any
 	 */
-	private final AltLocDigest _digest,_pushDigest;
+	private AltLocDigest _digest,_pushDigest;
 	
 	/**
 	 * Whether the pinger supports bloom filters.
@@ -159,8 +159,6 @@ public class HeadPing extends VendorMessage {
 		GUID clientGuid = null;
 		boolean supportsBloom = false;
 		boolean supportsPushBloom = false;
-		AltLocDigest direct = null;
-		AltLocDigest push = null;
 		if (_ggep != null) {
 		    
 		    // see if there is a client guid
@@ -177,27 +175,11 @@ public class HeadPing extends VendorMessage {
 			    if ((propSet & GGEP_PUSH_BLOOM) == GGEP_PUSH_BLOOM)
 			        supportsPushBloom = true;
 			} catch (BadGGEPPropertyException bloomNotSupported) {}
-			
-			// see if there is an altloc digest
-			try {
-			    byte [] data = _ggep.getBytes((char)GGEP_BLOOM+"d");
-			    direct = AltLocDigest.parseDigest(data,0,data.length);
-			} catch (BadGGEPPropertyException noBloom){}
-			catch(IOException badBloom) {} //ignore it?
-			
-			// see if there is a pushloc digest
-			try {
-			    byte [] data = _ggep.getBytes((char)GGEP_PUSH_BLOOM+"d");
-			    push = AltLocDigest.parseDigest(data,0,data.length);
-			} catch (BadGGEPPropertyException noBloom){}
-			catch(IOException badBloom) {} //ignore it?
         } 
 		
         _clientGUID=clientGuid;
         _supportsBloom = supportsBloom;
         _supportsPushBloom = supportsPushBloom;
-		_digest = direct;
-		_pushDigest = push;
 	}
 	
 	/**
@@ -330,6 +312,8 @@ public class HeadPing extends VendorMessage {
 	 * @return the altloc digest contained in this ping.  null if none
 	 */
 	public AltLocDigest getDigest() {
+	    if (_digest == null)
+	        parseDigest();
 	    return _digest; 
 	}
 	
@@ -337,7 +321,31 @@ public class HeadPing extends VendorMessage {
 	 * @return the pushloc digest contained in this ping.  null if none
 	 */
 	public AltLocDigest getPushDigest() {
-	    return _digest; 
+	    if (_pushDigest == null)
+	        parsePushDigest();
+	    return _pushDigest; 
+	}
+	
+	private void parseDigest() {
+	    if (_ggep != null) {
+	        //see if there is an altloc digest
+	        try {
+	            byte [] data = _ggep.getBytes((char)GGEP_BLOOM+"d");
+	            _digest = AltLocDigest.parseDigest(data,0,data.length);
+	        } catch (BadGGEPPropertyException noBloom){}
+	        catch(IOException badBloom) {} //ignore it?
+	    }
+	}
+	
+	private void parsePushDigest() {
+	    if (_ggep != null) {
+	        // see if there is a pushloc digest
+	        try {
+	            byte [] data = _ggep.getBytes((char)GGEP_PUSH_BLOOM+"d");
+	            _pushDigest = AltLocDigest.parseDigest(data,0,data.length);
+	        } catch (BadGGEPPropertyException noBloom){}
+	        catch(IOException badBloom) {} //ignore it?
+	    }
 	}
 
 }

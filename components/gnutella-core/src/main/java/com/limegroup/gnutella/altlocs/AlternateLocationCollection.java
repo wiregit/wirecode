@@ -416,7 +416,7 @@ public final class AlternateLocationCollection
     }
     
     public AltLocDigest getDigest() {
-        AltLocDigest digest = new AltLocDigest(false);
+        AltLocDigest digest = new AltLocDigest();
         FixedSizeSortedSet clone;
     	
     	
@@ -437,7 +437,7 @@ public final class AlternateLocationCollection
     }
     
     public AltLocDigest getPushDigest() {
-        AltLocDigest digest = new AltLocDigest(true);
+        AltLocDigest digest = new AltLocDigest();
         FixedSizeSortedSet clone;
     	
     	
