@@ -4,6 +4,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.*;
 import org.xml.sax.*;
 import java.net.*;
 
@@ -45,8 +46,17 @@ public class RemoteFileDesc implements Serializable {
 	 */
     private LimeXMLDocument[] _xmlDocs;
 	private Set _urns;
+
+    /**
+     * Boolean indicating whether or not the remote host has browse host 
+     * enabled.
+     */
 	private boolean _browseHostEnabled;
-    private PushProxyInterface[] _proxies;
+
+    /**
+     * The <tt>Set</tt> of proxies for this host -- can be empty.
+     */
+    private Set _proxies;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -57,13 +67,14 @@ public class RemoteFileDesc implements Serializable {
 		Collections.unmodifiableSet(new HashSet());
 		
     
+
     /**
      * Creates a RemoteFileDesc that isn't a response to a multicast query.
      */
     public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns) {
+						  LimeXMLDocument xmlDoc, Set urns) {        
         this(host, port, index, filename, size, clientGUID, speed,
              chat, quality, browseHost, xmlDoc, urns, false, null);
     }
@@ -90,13 +101,15 @@ public class RemoteFileDesc implements Serializable {
 	 *
 	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
 	 *  not valid
+     * @throws <tt>NullPointerException</tt> if the host argument is 
+     *  <tt>null</tt> or if the file name is <tt>null</tt>
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns,
-						  boolean replyToMulticast, PushProxyInterface[] proxies) {
-		if((port & 0xFFFF0000) != 0) {
+						  boolean replyToMulticast, Set proxies) {
+		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
 		if((speed & 0xFFFFFFFF00000000L) != 0) {
@@ -114,6 +127,9 @@ public class RemoteFileDesc implements Serializable {
 		if((index & 0xFFFFFFFF00000000L) != 0) {
 			throw new IllegalArgumentException("invalid index: "+index);
 		}
+        if(host == null) {
+            throw new NullPointerException("null host");
+        }
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -125,7 +141,11 @@ public class RemoteFileDesc implements Serializable {
         _quality = quality;
 		_browseHostEnabled = browseHost;
 		_replyToMulticast = replyToMulticast;
-        _proxies = proxies;
+        if(proxies == null) {
+            _proxies = EMPTY_SET;
+        } else {
+            _proxies = Collections.unmodifiableSet(proxies);
+        }
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
@@ -147,7 +167,9 @@ public class RemoteFileDesc implements Serializable {
         if(_urns == null) {
             _urns = EMPTY_SET;
             _browseHostEnabled= false;
-            _proxies = null;
+        }
+        if(_proxies == null) {
+            _proxies = EMPTY_SET;
         }
 		// preserve the invariant that the LimeXMLDocument array either be
 		// null or have at least one element
@@ -157,9 +179,9 @@ public class RemoteFileDesc implements Serializable {
     }
     
 	/**
-	 * Accessor for the host ip with this file, which can be <tt>null</tt>.
+	 * Accessor for the host ip with this file.
 	 *
-	 * @return the host ip with this file, which can be <tt>null</tt>
+	 * @return the host ip with this file
 	 */
 	public final String getHost() {return _host;}
 
@@ -281,18 +303,43 @@ public class RemoteFileDesc implements Serializable {
 		}
 	}
 	
+    /**
+     * Determines whether or not this RFD was a reply to a multicast query.
+     *
+     * @return <tt>true</tt> if this RFD was in reply to a multicast query,
+     *  otherwise <tt>false</tt>
+     */
 	public final boolean isReplyToMulticast() {
 	    return _replyToMulticast;
     }
 
+    /**
+     * Determines whether or not this host reported a private address.
+     *
+     * @return <tt>true</tt> if the address for this host is private,
+     *  otherwise <tt>false</tt>.  If the address is unknown, returns
+     *  <tt>true</tt>
+     *
+     * TODO:: use InetAddress in this class for the host so that we don't 
+     * have to go through the process of creating one each time we check
+     * it it's a private address
+     */
 	public final boolean isPrivate() {
-		if (_host == null) return true;
-		Endpoint e = new Endpoint(_host, _port);
-		return e.isPrivateAddress();
+        try {
+            return NetworkUtils.isPrivateAddress(_host);
+        } catch(UnknownHostException e) {
+            return true;
+        }
 	}
 
-    
-    public PushProxyInterface[] getPushProxies() {
+    /**
+     * Accessor for the <tt>Set</tt> of <tt>PushProxyInterface</tt>s for this
+     * file -- can be empty, but is guaranteed to be non-null.
+     *
+     * @return the <tt>Set</tt> of proxy hosts that will accept push requests
+     *  for this host -- can be empty
+     */
+    public final Set getPushProxies() {
         return _proxies;
     }
 
@@ -327,7 +374,8 @@ public class RemoteFileDesc implements Serializable {
 				(getXMLDoc() == null ? other.getXMLDoc() == null :
 				  getXMLDoc().equals(other.getXMLDoc())) &&
 				(_urns == null ? other._urns == null :
-				 _urns.equals(other._urns)));		
+				 _urns.equals(other._urns)) &&
+                (_proxies.equals(other._proxies)));		
     }
 
 	//TODO:: ADD HASHCODE OVERRIDE
