@@ -108,6 +108,8 @@ public final class NIOMessageWriter implements MessageWriter {
         //Copy m to a ByteBuffer.  TODO: avoid allocating ByteBuffer each time.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
+            // TODO:: add a method to message that writes directly to a 
+            // ByteBuffer
             msg.write(baos);
         } catch (IOException e) {
             Assert.that(false, "IO problem from ByteArrayOutputStream");
