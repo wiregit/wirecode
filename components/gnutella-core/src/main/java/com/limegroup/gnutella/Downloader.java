@@ -95,10 +95,19 @@ public interface Downloader extends BandwidthTracker {
      * addresses.  Result meaningful only in the DOWNLOADING state.
      */
     public Iterator /* of Endpoint */ getHosts();
+	
+	/**
+	 * Returns a chat-enabled <tt>Endpoint</tt> instance for this
+	 * <tt>Downloader</tt>.
+	 */
+	public Endpoint getChatEnabledHost();
 
-    /**
-     * Returns the subset of getHosts that supports chat, if any. 
-     * Result meaningful only in the DOWNLOADING state.
-     */
-    public Iterator /* of Endpoint */ getChattableHosts();
+	/**
+	 * Returns whether or not there is a chat-enabled host available for
+	 * this <tt>Downloader</tt>.
+	 *
+	 * @return <tt>true</tt> if there is a chat-enabled host for this 
+	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
+	 */
+	public boolean hasChatEnabledHost();
 }
