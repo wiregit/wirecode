@@ -1180,7 +1180,7 @@ public class ConnectionManager {
             processConnectionHeaders(mc);
         }
         
-        completeConnectionInitialization(mc);
+        completeConnectionInitialization(mc, true);
     }
 
     /** 
@@ -1398,17 +1398,25 @@ public class ConnectionManager {
             RouterService.getCallback().connectionInitializing(c);
         }
 
-        completeConnectionInitialization(c);
+        completeConnectionInitialization(c, false);
     }
 
     /**
      * Performs the steps necessary to complete connection initialization.
      *
      * @param mc the <tt>ManagedConnection</tt> to finish initializing
+     * @param fetched Specifies whether or not this connection is was fetched
+     *  by a connection fetcher.  If so, this removes that connection from 
+     *  the list of fetched connections being initialized, keeping the
+     *  connection fetcher data in sync
      */
-    private void completeConnectionInitialization(ManagedConnection mc) {
+    private void completeConnectionInitialization(ManagedConnection mc, 
+                                                  boolean fetched) {
         boolean connectionOpen = false;
         synchronized(this) {
+            if(fetched) {
+                _initializingFetchedConnections.remove(mc);
+            }
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
             connectionOpen = connectionInitialized(mc);
