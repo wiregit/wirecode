@@ -61,7 +61,7 @@ public final class LeafHandshakeResponder
             }
         }
         
-        if(!response.isGoodUltrapeer()) {
+        if(!_manager.allowConnection(response)) {
             HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }

@@ -1388,6 +1388,27 @@ public class ConnectionManager {
         // 5) Clean up Unicaster
         QueryUnicaster.instance().purgeQuery(c);
     }
+    
+    /**
+     * Stabilizes connections by removing extraneous ones.
+     *
+     * This will remove the connections that we've been connected to
+     * for the shortest amount of time.
+     */
+    private void stabilizeConnections() {
+        while(getNumInitializedConnections() > _preferredConnections) {
+            ManagedConnection newest = null;
+            for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
+                ManagedConnection c = (ManagedConnection)i.next();
+                if(newest == null || 
+                   c.getConnectionTime() > newest.getConnectionTime())
+                    newest = c;
+            }
+            if(newest != null)
+                remove(newest);
+        }
+        adjustConnectionFetchers();
+    }    
 
     /**
      * Starts or stops connection fetchers to maintain the invariant
@@ -1817,33 +1838,8 @@ public class ConnectionManager {
         else
             _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
 
-        if(oldPreferred != _preferredConnections) {
-            adjustConnectionFetchers();
-            // if we decreased the amount we want to keep,
-            // remove some connections.
-            if(oldPreferred > _preferredConnections)
-                stabilizeConnections();
-        }
-    }
-
-    /**
-     * Stabilizes connections by removing extraneous ones.
-     *
-     * This will remove the connections that we've been connected to
-     * for the shortest amount of time.
-     */
-    private void stabilizeConnections() {
-        while(getNumInitializedConnections() > _preferredConnections) {
-            ManagedConnection newest = null;
-            for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
-                ManagedConnection c = (ManagedConnection)i.next();
-                if(newest == null ||
-                   c.getConnectionTime() > newest.getConnectionTime())
-                    newest = c;
-            }
-            if(newest != null)
-                remove(newest);
-        }
+        if(oldPreferred != _preferredConnections)
+            stabilizeConnections();
     }
 
     /**
