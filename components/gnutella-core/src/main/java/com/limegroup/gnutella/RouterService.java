@@ -159,7 +159,7 @@ public class RouterService {
 	 *  making callbacks
 	 */
   	public RouterService(ActivityCallback callback) {
-        this(callback, new StandardMessageRouter(fileManager));
+        this(callback, new StandardMessageRouter());
     }
 
     public RouterService(ActivityCallback ac, MessageRouter mr, FileManager fm) {

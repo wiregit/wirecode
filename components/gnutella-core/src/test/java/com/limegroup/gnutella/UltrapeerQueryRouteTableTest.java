@@ -71,7 +71,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 
         CALLBACK = new TestCallback();
         FMAN = new MetaFileManager();
-        MESSAGE_ROUTER = new TestMessageRouter(FMAN);
+        MESSAGE_ROUTER = new TestMessageRouter();
         ROUTER_SERVICE = new RouterService(
             CALLBACK, MESSAGE_ROUTER, FMAN);
         ROUTER_SERVICE.start();
@@ -143,8 +143,8 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
     }
     
     private static class TestMessageRouter extends StandardMessageRouter {
-        public TestMessageRouter(FileManager f) {
-            super(f);
+        public TestMessageRouter() {
+            super();
         }
         
         public void originateQuery(QueryRequest r, ManagedConnection c) {

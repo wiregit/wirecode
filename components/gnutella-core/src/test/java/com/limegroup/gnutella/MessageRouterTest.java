@@ -7,7 +7,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.NewConnection;
@@ -54,8 +53,7 @@ public final class MessageRouterTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         //TestConnectionManager tcm = new TestConnectionManager(4);
         //PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        ROUTER = new StandardMessageRouter( 
-                                           new FileManagerStub());
+        ROUTER = new StandardMessageRouter();
         ROUTER.initialize();
     }
 

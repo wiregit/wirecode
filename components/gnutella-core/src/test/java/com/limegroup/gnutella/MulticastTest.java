@@ -79,7 +79,7 @@ public class MulticastTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
         FMAN = new MetaFileManager();
-        MESSAGE_ROUTER = new MulticastMessageRouter(FMAN);
+        MESSAGE_ROUTER = new MulticastMessageRouter();
         ROUTER_SERVICE = new RouterService(
             CALLBACK, MESSAGE_ROUTER, FMAN);
     
@@ -319,8 +319,8 @@ public class MulticastTest extends BaseTestCase {
     
     private static class MulticastMessageRouter extends StandardMessageRouter {
 
-        MulticastMessageRouter(FileManager fm) {
-            super(fm);
+        MulticastMessageRouter() {
+            super();
         }
 
         List multicasted = new LinkedList();

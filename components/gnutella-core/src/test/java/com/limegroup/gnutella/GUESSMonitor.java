@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.util.*;
 import java.io.*;
@@ -30,8 +29,7 @@ public class GUESSMonitor extends BaseTestCase {
         setStandardSettings();
         // make my own MessageRouter....            
         ActivityCallback stub = new ActivityCallbackStub();
-        FileManager staticFM = RouterService.getFileManager();
-        _messageRouter = new MyMessageRouter(stub, staticFM);
+        _messageRouter = new MyMessageRouter();
         _backend = new RouterService(stub, _messageRouter);
         //_backend = Backend.createLongLivedBackend(stub, _messageRouter);
         _backend.start();
@@ -42,19 +40,19 @@ public class GUESSMonitor extends BaseTestCase {
     public void shutdown() {
         _messageRouter.shutdown();
         _messageRouter.join();
-        _backend.shutdown();
+        RouterService.shutdown();
     }
 
     public void connect() {
         //_backend.getRouterService().connect();
         //_backend.getRouterService().forceKeepAlive(5);
-        _backend.connect();
+        RouterService.connect();
         RouterService.forceKeepAlive(5);
     }
 
     public void disconnect() {
     //_backend.getRouterService().disconnect();
-        _backend.disconnect();
+        RouterService.disconnect();
     }
 
     public static void main(String argv[]) throws Exception {
@@ -112,8 +110,8 @@ public class GUESSMonitor extends BaseTestCase {
             catch (Exception ignored) {}
         }
 
-        public MyMessageRouter(ActivityCallback ac, FileManager fm) {
-            super(fm);
+        public MyMessageRouter() {
+            super();
             _pongLoop = new Thread() {
                     public void run() {
                         guessPongLoop();
@@ -169,7 +167,7 @@ public class GUESSMonitor extends BaseTestCase {
                     float averageTime = ((Float)retObjs[2]).floatValue();
                     float successRate = (numGot/numSent)*100;
 
-                    tallyStats(numGot, numSent, averageTime, successRate);
+                    tallyStats(numGot, averageTime, successRate);
                     // also keep track of unique tests done....
                     if (!_uniqueHosts.contains(currPong.getIP())) {
                         _uniqueHosts.add(currPong.getIP());
@@ -202,7 +200,7 @@ public class GUESSMonitor extends BaseTestCase {
     private float overallLatency = 0;
     private float goodGUESSers = 0;
 
-    private synchronized void tallyStats(float numGot, float numSent, 
+    private synchronized void tallyStats(float numGot,
                                     float averageTime, float successRate) {
         if (numGot > 0) {
             numSuccessTests++;
