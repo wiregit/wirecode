@@ -39,5 +39,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting CORRUPT_DOWNLOAD =
         FACTORY.createIntSetting("CORRUPT_DOWNLOAD", 0);
+        
+    /**
+     * Setting for whether or not to display a browse host failed
+     */
+    public static final BooleanSetting BROWSE_HOST_FAILED =
+        FACTORY.createBooleanSetting("BROWSE_HOST_FAILED", false);
     
 }
