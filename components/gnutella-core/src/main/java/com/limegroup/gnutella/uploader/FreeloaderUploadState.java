@@ -43,7 +43,7 @@ public class FreeloaderUploadState implements UploadState {
 		String str;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getVendor() + "\r\n";
+		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Type: text/html\r\n";
 		_ostream.write(str.getBytes());

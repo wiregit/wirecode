@@ -26,7 +26,7 @@ public class LimitReachedUploadState implements UploadState {
 		String errMsg = "Server busy.  Too many active uploads.";
 		str = "HTTP/1.1 503 Service Unavailable\r\n";
 		ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getVendor() + "\r\n";
+		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		ostream.write(str.getBytes());
