@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.statistics;
 
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.lang.reflect.*;
@@ -20,22 +21,14 @@ public abstract class AbstractStatistic implements Statistic {
 		StatisticsManager.instance();
 
 	/**
-	 * List of all statistics stored over intervals for this
-	 * specific <tt>Statistic</tt> instance.
+	 * <tt>IntBuffer</tt> for recording stats data.
 	 */
-	private final List STAT_HISTORY = new LinkedList();
+	private IntBuffer _buffer;
 
 	/**
 	 * Long for the statistic currently being added to.
 	 */
 	protected volatile int _current = 0;
-
-	/**
-	 * Variable for the array of <tt>Integer</tt> instances for the
-	 * history of statistics for this message.  Each 
-	 * <tt>Integer</tt> stores the statistic for one time interval.
-	 */
-	private volatile Integer[] _statHistory;
 
 	/**
 	 * Variable for the total number of messages received for this 
@@ -60,14 +53,14 @@ public abstract class AbstractStatistic implements Statistic {
 	private int _numWriters = 0;
 
 	/**
-	 * Constructs a new <tt>Statistic</tt> instance with 0 for all 
-	 * historical data fields.
+	 * Lock for accessing the <tt>IntBuffer</tt>.
 	 */
-	protected AbstractStatistic() {
-		for(int i=0; i<HISTORY_LENGTH; i++) {
-			STAT_HISTORY.add(new Integer(0));
-		}			
-	}
+	private final Object BUFFER_LOCK = new Object(); 
+
+	/**
+	 * Constructs a new <tt>Statistic</tt> instance.
+	 */
+	protected AbstractStatistic() {}
 
 	// inherit doc comment
 	public double getTotal() {
@@ -97,19 +90,19 @@ public abstract class AbstractStatistic implements Statistic {
 	}
 		
 	// inherit doc comment
-	public Integer[] getStatHistory() {
-        synchronized(STAT_HISTORY) {
-            _statHistory = (Integer[])STAT_HISTORY.toArray(new Integer[0]); 
-        }
-		return _statHistory;
+	public IntBuffer getStatHistory() {
+		synchronized(BUFFER_LOCK) {
+			initializeBuffer();
+			return _buffer;
+		}
 	}
 
 	// inherit doc comment
 	public void storeCurrentStat() {
-        synchronized(STAT_HISTORY) {
-            STAT_HISTORY.remove(0);
-            STAT_HISTORY.add(new Integer(_current));
-        }
+ 		synchronized(BUFFER_LOCK) {
+			initializeBuffer();
+ 			_buffer.addLast(_current);
+ 		}
 		if(_current > _max) {
 			_max = _current;
 		}
@@ -174,6 +167,19 @@ public abstract class AbstractStatistic implements Statistic {
 		if(_numWriters == 0) {
 			_writeStat = false;
 			_writer = null;
+		}
+	}
+
+	/**
+	 * Constructs the <tt>IntBuffer</tt> with 0 for all values if it is
+	 * not already constructed.
+	 */
+	private void initializeBuffer() {
+		if(_buffer == null) {
+			_buffer = new IntBuffer(HISTORY_LENGTH);
+			for(int i=0; i<HISTORY_LENGTH; i++) {
+				_buffer.addLast(0);
+			}
 		}
 	}
 }
