@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.mp3.ID3Reader;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
@@ -68,6 +69,44 @@ public class MetaFileManager extends FileManager {
             return;
         if( docs.size() == 1 )
             response.setDocument((LimeXMLDocument)docs.get(0));
+    }
+    
+    /**
+     * Notification that a file has changed.
+     * This implementation is different than FileManager's
+     * in that it maintains the XML.
+     *
+     * Important note: This method is called AFTER the file has
+     * changed.  It is possible that the metadata we wanted to write
+     * did not get written out completely.  We should NOT attempt
+     * to add the old metadata again, because we may end up
+     * recursing infinitely trying to write this metadata.
+     * However, it isn't very robust to blindly assume that the only
+     * metadata associated with this file was audio metadata.
+     * So, we make use of the fact that addFileIfShared will only
+     * add one type of metadata per file.  We read the ID3 tags off
+     * the file and insert it first into the list, ensuring
+     * that the existing metadata is the one that's added, short-circuiting
+     * any infinite loops.
+     */
+    public FileDesc fileChanged(File f) {
+        FileDesc fd = getFileDescForFile(f);
+        if( fd == null )
+            return null;
+        List xmlDocs = new LinkedList();
+        if( LimeXMLUtils.isMP3File(f) ) {
+            try {
+                xmlDocs.add(ID3Reader.readDocument(f));
+            } catch(IOException e) {
+                // if we were unable to read this document,
+                // then simply add the file without metadata.
+                return super.fileChanged(f);
+            }
+        }
+        xmlDocs.addAll(fd.getLimeXMLDocuments());
+        FileDesc removed = removeFileIfShared(f);        
+        Assert.that(fd == removed, "did not remove valid fd.");
+        return addFileIfShared(f, xmlDocs);
     }
     
     /**
