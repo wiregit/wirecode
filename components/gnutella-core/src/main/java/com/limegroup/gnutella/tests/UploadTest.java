@@ -17,6 +17,7 @@ public class UploadTest {
     /** Our listening port for pushes. */
     private static int callbackPort=6350;
 
+
     public static void main(String args[]) {
         try {
             address=args[0];
@@ -32,64 +33,94 @@ public class UploadTest {
             +"may be listening to port "+callbackPort+"\n");
         
         try {
-            String output;
-
-            output=downloadPush(file, null);
-            test("Push download",
-                 output.equals("abcdefghijklmnopqrstuvwxyz"),
-                 output);
+            boolean passed;
             
-            output=downloadPush(encodedFile, null);
-            test("Push download, encoded file name",
-                 output.equals("abcdefghijklmnopqrstuvwxyz"),
-                 output);
+            ///////////////////push downloads with HTTP1.0///////////
+            passed = downloadPush(file, null,"abcdefghijklmnopqrstuvwxyz");
+            test("Push download",passed);
+            
+            passed=downloadPush(encodedFile, null,
+                                "abcdefghijklmnopqrstuvwxyz");
+            test("Push download, encoded file name",passed);
 
-            output=downloadPush(file, "Range: bytes=2-5");
-            test("Push download, middle range, inclusive",
-                 output.equals("cdef"),
-                 output);
+            passed=downloadPush(file, "Range: bytes=2-5","cdef");
+            test("Push download, middle range, inclusive",passed);
 
-            output=download(file, null);
-            test("No range header",
-                 output.equals("abcdefghijklmnopqrstuvwxyz"),
-                 output);
+            //////////////normal downloads with HTTP 1.0//////////////
 
-            output=download(file, "Range: bytes=2-");
-            test("Standard range header",
-                 output.equals("cdefghijklmnopqrstuvwxyz"),
-                 output);
+            passed=download(file, null,"abcdefghijklmnopqrstuvwxyz");
+            test("No range header",passed);
+            
+            passed=download(file, "Range: bytes=2-", 
+                            "cdefghijklmnopqrstuvwxyz");
+            test("Standard range header",passed);
 
-            output=download(file, "Range: bytes 2-");
+
+            passed=download(file, "Range: bytes 2-", 
+                            "cdefghijklmnopqrstuvwxyz");
             test("Range missing \"=\".  (Not legal HTTP, but common.)",
-                 output.equals("cdefghijklmnopqrstuvwxyz"),
-                 output);
+                 passed);
 
-            output=download(file, "Range: bytes=2-5");
-            test("Middle range, inclusive",
-                 output.equals("cdef"),
-                 output);
+
+            passed=download(file, "Range: bytes=2-5","cdef");
+            test("Middle range, inclusive",passed);
+
         
-            output=download(file, "Range:bytes 2-");
-            test("No space after \":\".  (Legal HTTP.)",
-                 output.equals("cdefghijklmnopqrstuvwxyz"),
-                 output);
+            passed=download(file, "Range:bytes 2-",
+                            "cdefghijklmnopqrstuvwxyz");
+            test("No space after \":\".  (Legal HTTP.)",passed);
 
-            output=download(file, "Range: bytes=-5");
-            test("Last bytes of file",
-                 output.equals("vwxyz"),
-                 output);
+            passed=download(file, "Range: bytes=-5","vwxyz");
+            test("Last bytes of file",passed);
 
-            output=download(file, "Range:   bytes=  2  -  5 ");
-            test("Lots of extra space",
-                 output.equals("cdef"),
-                 output);
+
+            passed=download(file, "Range:   bytes=  2  -  5 ", "cdef");
+            test("Lots of extra space",passed);
+
 
             Assert.that(URLDecoder.decode(encodedFile).equals(file),
                         "Unexpected: "+URLDecoder.decode(encodedFile));
-            output=download(encodedFile, null);
-            test("URL encoded",
-                 output.equals("abcdefghijklmnopqrstuvwxyz"),
-                 output);            
+            passed=download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+            test("URL encoded",passed);
+
+
+            ////////////normal download with HTTP 1.1////////////////
+
+            passed=download1(file, null,"abcdefghijklmnopqrstuvwxyz");
+            test("No range header with HTTP1.1",passed);
+
+            passed=download1(file, "Range: bytes=2-", 
+                            "cdefghijklmnopqrstuvwxyz");
+            test("Standard range header with HTTP1.1",passed);
+
+
+            passed=download1(file, "Range: bytes 2-", 
+                            "cdefghijklmnopqrstuvwxyz");
+            test("Range missing \"=\". (Not legal HTTP, but common.)"+
+                 "with HTTP1.1", passed);
+
+
+            passed=download1(file, "Range: bytes=2-5","cdef");
+            test("Middle range, inclusive with HTTP1.1",passed);
+
+        
+            passed=download1(file, "Range:bytes 2-",
+                            "cdefghijklmnopqrstuvwxyz");
+            test("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
+
+            passed=download1(file, "Range: bytes=-5","vwxyz");
+            test("Last bytes of file with HTTP1.1",passed);
+
+
+            passed=download1(file, "Range:   bytes=  2  -  5 ", "cdef");
+            test("Lots of extra space with HTTP1.1",passed);
+
+
+            Assert.that(URLDecoder.decode(encodedFile).equals(file),
+                        "Unexpected: "+URLDecoder.decode(encodedFile));
+            passed=download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+            test("URL encoded with HTTP1.1",passed);
+
         } catch (IOException e) {
             e.printStackTrace();
             Assert.that(false, "Unexpected exception");
@@ -105,11 +136,39 @@ public class UploadTest {
      * Do not include new line or carriage return in header.  Throws IOException
      * if there is a problem, without cleaning up. 
      */
-    private static String download(String file, String header) 
+    private static boolean download1(String file,String header,String expResp) 
             throws IOException {
         //Unfortunately we can't use URLConnection because we need to test
         //malformed and slightly malformed headers
 
+        //1. Write request
+        boolean ret = true;
+        Socket s = new Socket(address, port);
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        //first request with the socket
+        String value=downloadInternal1(file,header,out,in,expResp.length());
+        //System.out.println("Sumeet: first return value "+value);
+        ret = value.equals(expResp);//first request seccessful?
+        //make second requst on same socket
+        value = "";//reset
+        value = downloadInternal1(file, header, out, in, expResp.length());
+        //System.out.println("Sumeet: first return value "+value);
+        ret = ret && value.equals(expResp);//both reqests successful?
+        in.close();
+        out.close();
+        s.close();
+        return ret;
+    }
+
+
+    private static boolean download(String file,String header,String expResp)
+        throws IOException {
+        //Unfortunately we can't use URLConnection because we need to test
+        //malformed and slightly malformed headers
+        
         //1. Write request
         Socket s = new Socket(address, port);
         BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -121,10 +180,11 @@ public class UploadTest {
         in.close();
         out.close();
         s.close();
-        return ret;
+        return ret.equals(expResp);
     }
 
-    private static String downloadPush(String file, String header) 
+    private static boolean downloadPush(String file, String header, 
+                                       String expResp) 
             throws IOException, BadPacketException {
         //Establish push route
         Connection c=new Connection(address, port);
@@ -160,13 +220,13 @@ public class UploadTest {
         in.readLine();  //skip blank line
 
         //Download from the (incoming) TCP connection.
-        String ret=downloadInternal(file, header, out, in);
+        String retStr=downloadInternal(file, header, out, in);
 
         //Cleanup
         c.close();
         s.close();
         ss.close();        
-        return ret;
+        return retStr.equals(expResp);
     }
 
     /** 
@@ -200,10 +260,49 @@ public class UploadTest {
         return buf.toString();
     }
     
+    /** 
+     * Sends a get request to out, reads the response from in, and returns the
+     * content.  Doesn't close in or out.
+     */
+    private static String downloadInternal1(String file,
+                                              String header,
+                                              BufferedWriter out,
+                                              BufferedReader in,
+                                              int expectedSize) 
+        throws IOException {
+        //Assert.that(out!=null && in!=null,"socket closed my server");
+        //1. Send request
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        if (header!=null)
+            out.write(header+"\r\n");
+        out.write("Connection:Keep-Alive\r\n");
+        out.write("\r\n");
+        out.flush();
+        
+        //2. Read (and ignore!) response code and headers.  TODO: verify.
+        while(!in.readLine().equals("")){ }
+        //3. Read content.  Obviously this is designed for small files.
+        StringBuffer buf=new StringBuffer();
+        for(int i=0; i<expectedSize; i++){
+            int c = in.read();
+            buf.append((char)c);
+        }
+        /*
+        while (true) {
+            int c=in.read();
+            if (c<0)
+                break;
+            buf.append((char)c);
+        }
+        */
+        //System.out.println("Sumeet: about to return value " + buf);
+        return buf.toString();
+    }
 
-    private static void test(String testName, boolean passed, String output) {
+
+    private static void test(String testName, boolean passed) {
         System.out.println((passed?"passed":"FAILED")+" : "+testName);
         if (!passed)
-            System.out.println("    unexpected output: \""+output+"\"");
+            System.out.println("unexpected output:");
     }
 }
