@@ -16,11 +16,16 @@ sending out queries.
 
 --------------------------------------------------------------------------------
 Date Posted: 9/30/02
-Date Resolved: 
+Date Resolved: 10/01/02 (see notes)
 
 Confirm that the GUESS setting in limewire.props controls all handling of
 UDP traffic appropriately, i.e. if it is false no UDP traffic should be
 accepted.
+
+Notes:
+This was completed but there is one outstanding item.  The QueryUnicaster
+accepts hosts as long as the *possibility* of becoming unicast-enabled
+exists.  Is this a good idea?  For now I think it is OK.
 
 ********************************************************************************
 
