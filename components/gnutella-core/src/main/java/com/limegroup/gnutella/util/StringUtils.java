@@ -162,6 +162,10 @@ public class StringUtils {
         Assert.that(StringUtils.contains("aBcDd", "bCD", false) == false);
         Assert.that(StringUtils.contains("....", "..", true) == true);
         Assert.that(StringUtils.contains("....", "..", false) == true);
+
+        //Clip2 compatibility      
+        Assert.that(StringUtils.contains("abcd", " ") == true);
+        Assert.that(StringUtils.contains("abcd", "    ") == true);
                                          
         //Unit tests for split in HTTPUtil.
     }
