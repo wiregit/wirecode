@@ -632,8 +632,10 @@ public class PingReply extends Message implements Serializable, IpPort {
             if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                    locale = new String(bytes, 0, 2);
-                    slots = ByteOrder.ubyte2int(bytes[2]);
+                    if(bytes.length >= 2)
+                        locale = new String(bytes, 0, 2);
+                    if(bytes.length >= 4)
+                        slots = ByteOrder.ubyte2int(bytes[2]);
                 }
                 catch(BadGGEPPropertyException e) {
                     //ignore. we won't assign it.
