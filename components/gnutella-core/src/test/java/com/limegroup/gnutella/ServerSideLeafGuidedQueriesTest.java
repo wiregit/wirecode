@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
@@ -347,12 +348,28 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         LEAF.flush();
 
         // one or more of the UPs should get it....
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         QueryRequest nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++)
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+        for (int i = 0; (i < ULTRAPEERS.length); i++)
+            if (nQuery == null)
+                nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
 
         assertTrue(nQuery != null);
+
+        // now tell the main UP that you have got enough results
+        QueryStatusResponse sResp = 
+             new QueryStatusResponse(new GUID(query.getGUID()), 250);
+        LEAF.send(sResp);
+        LEAF.flush();
+
+        // UPs should not get any more queries
+        Thread.sleep(3000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length); i++)
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+
+        assertTrue(nQuery == null);
+        
     }
     
 
