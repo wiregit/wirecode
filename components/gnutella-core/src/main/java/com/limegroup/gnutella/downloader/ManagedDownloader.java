@@ -316,9 +316,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Otherwise null. */
     private volatile Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
-    volatile boolean stopped;
+    private volatile boolean stopped;
     /** True iff this has been paused.  */
-    volatile boolean paused;
+    private volatile boolean paused;
 
     
     /** 
@@ -409,9 +409,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The vendor the of downloader we're queued from.
      */
     private String queuedVendor;
-    /** The name of the last location we tried to connect to. (We may be
-     *  downloading from multiple other locations. */
-    private String currentLocation;
+
     /** If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
      *  this is less than corruptFile.length() if there are holes. */
     private volatile int corruptFileBytes;
@@ -1853,6 +1851,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
+    /**
+     * Tries to initialize the download location and the verifying file. 
+     * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occured, 
+     * CONNECTING if we're ready to connect
+     */
     private int initializeDownload() {
         RemoteFileDesc firstDesc = null;
         synchronized (this) {
@@ -1878,6 +1881,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         return CONNECTING;
     }
     
+    /**
+     * Verifies the completed file against the SHA1 hash and saves it.  If
+     * there is corruption, it asks the user whether to discard or keep the file 
+     * @return COMPLETE if all went fine, DISK_PROBLEM if not.
+     * @throws InterruptedException if we get interrupted while waiting for user
+     * response.
+     */
     private int verifyAndSave() throws InterruptedException{
         
         // Find out the hash of the file and verify that its the same
@@ -1957,6 +1967,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         return fileHash;        
     }
 
+    /**
+     * initialize the directory where the file is to be saved.
+     */
     private void initializeFilesAndFolders(RemoteFileDesc firstDesc) throws IOException{
         
         //1. Verify it's safe to download.  Filename must not have "..", "/",
@@ -1969,7 +1982,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //same temporary file.
         
         File saveDir;
-        String fileName = getFileName();
+        String fileName = getFileName();fileName.indexOf("1");
         try {
             incompleteFile = incompleteFileManager.getFile(firstDesc);
             saveDir = SharingSettings.getSaveDirectory();
@@ -1987,7 +2000,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     /**
      * checks the TT cache and if a good tree is present loads it 
-     * and sets the verifying file to not do overlap checking.
      */
     private void initializeHashTree() {
 		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
@@ -2717,15 +2729,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return ourFile == null ? 0 : ourFile.getBlockSize();                
     }
      
-    public String getAddress() {
-        return currentLocation;
-    }
-    
-    synchronized void setAddress(String s) {
-        currentLocation = s;
-    }
-    
-                                 
     public synchronized Iterator /* of Endpoint */ getHosts() {
         return getHosts(false);
     }

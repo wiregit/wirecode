@@ -125,12 +125,6 @@ public interface Downloader extends BandwidthTracker {
     public int getAmountRead();
     
     /**
-     * Returns the last address that this tried to connect to, or null if it
-     * hasn't tried any.  Useful primarily for CONNECTING.  
-     */
-    public String getAddress();
-    
-    /**
      * Returns the locations from which this is currently downloading, as an
      * iterator of Endpoint.  If this is swarming, may return multiple
      * addresses.  Result meaningful only in the DOWNLOADING state.

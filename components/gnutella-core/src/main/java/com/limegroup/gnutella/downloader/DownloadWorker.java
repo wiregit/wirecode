@@ -504,7 +504,6 @@ public class DownloadWorker implements Runnable {
         
         
         synchronized (_manager) {
-            _manager.setAddress(_rfd.getHost());
             int state = _manager.getState();
             //If we're just increasing parallelism, stay in DOWNLOADING
             //state.  Otherwise the following call is needed to restart
