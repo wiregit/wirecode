@@ -191,8 +191,8 @@ public class Response {
             if (urns != null ) {
                 Iterator iter = urns.iterator();
                 while (iter.hasNext()) {
-                    String urn = (String)iter.next();
-                    baos.write(urn.getBytes());
+                    URN urn = (URN)iter.next();
+                    baos.write(urn.getURNString().getBytes());
                     if (iter.hasNext()) {
                         baos.write(0x1c);
                     }
