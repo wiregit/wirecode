@@ -1,32 +1,104 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import com.limegroup.gnutella.message.*;
+import com.sun.java.util.collections.*;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable{
-    //WARNING: see note in Message about IP addresses
-
+public class PingReply extends Message implements Serializable {
+    private static final int STANDARD_PAYLOAD_SIZE=14;
+    
     /** All the data.  We extract the port, ip address, number of files,
      *  and number of kilobytes lazily. */
     private byte[] payload;
     /** The IP string as extracted from payload[2..5].  Cached to avoid
      *  allocations.  LOCKING: obtain this' monitor. */
-    private String ip;
+    private volatile String ip;
+    /** The GGEP block from payload[14...].  Cached to avoid allocations.  Null
+     *  if the GGEP data has not been parsed, this has no GGEP data, or the GGEP
+     *  data is corrupt.  LOCKING: obtain this' monitor. */
+    private volatile GGEP ggep;
 
     /**
-     * Create a new unmarked PingReply from scratch
+     * Creates a new ping from scratch.
      *
-     * @requires ip.length==4 and ip is in <i>BIG-endian</i> byte order,
-     *  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
-     *  0 < files and kbytes < 2^32 (i.e., can fit in 4 unsigned bytes)
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
      */
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes) {
-        super(guid, Message.F_PING_REPLY, ttl, (byte)0, 14);
-        this.payload=new byte[14];
+        this(guid, ttl, port, ip, files, kbytes, false);
+    }
+
+    /**
+     * Creates a new ping from scratch with ultrapeer extension data.
+     *
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kbytes to the nearest power of 2 not less than 8.
+     */
+    public PingReply(byte[] guid, byte ttl,
+             int port, byte[] ip, long files, long kbytes, 
+             boolean isUltrapeer) { 
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1);
+    }
+
+    /**
+     * Creates a new ping from scratch with ultrapeer and daily uptime extension
+     * data.
+     *
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kbytes to the nearest power of 2 not less than 8.
+     * @param dailyUptime my average daily uptime, in seconds, e.g., 
+     *  3600 for one hour per day.  Negative values mean "don't know".
+     *  GGEP extension blocks are allocated if dailyUptime is non-negative.  
+     */
+    public PingReply(byte[] guid, byte ttl,
+             int port, byte[] ip, long files, long kbytes,
+             boolean isUltrapeer, int dailyUptime) {
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
+             dailyUptime>=0 ? newGGEP(dailyUptime) : null);
+    }
+     
+    /** Internal constructor used to bind the encoded GGEP payload, avoiding the
+     *  need to construct it more than once.  
+     *  @param extension the encoded GGEP payload, or null if none */
+    private PingReply(byte[] guid, byte ttl, 
+             int port, byte[] ip, long files, long kbytes,
+             boolean isUltrapeer, byte[] extensions) {    
+        super(guid, Message.F_PING_REPLY, ttl, (byte)0, 
+            STANDARD_PAYLOAD_SIZE + (extensions==null ? 0 : extensions.length));
+        this.payload=new byte[getLength()];
         //It's ok if casting port, files, or kbytes turns negative.
         ByteOrder.short2leb((short)port, payload, 0);
         //Payload stores IP in BIG-ENDIAN
@@ -35,19 +107,39 @@ public class PingReply extends Message implements Serializable{
         payload[4]=ip[2];
         payload[5]=ip[3];
         ByteOrder.int2leb((int)files, payload, 6);
-        ByteOrder.int2leb((int)kbytes, payload, 10);
+        ByteOrder.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), 
+                          payload, 
+                          10);
+        
+        //Encode GGEP block if included.
+        if (extensions!=null) {
+            System.arraycopy(extensions, 0, 
+                             payload, STANDARD_PAYLOAD_SIZE, 
+                             extensions.length);
+        }            
     }
 
-    /**
-     * Exactly like PingReply(guid, ttl, port, ip, files, kbytes), except that
-     * the message is "marked" if marked==true.  If the message is marked, the
-     * files or kbytes values may be adjusted.  
-     */
-    public PingReply(byte[] guid, byte ttl,
-             int port, byte[] ip, long files, long kbytes, 
-             boolean marked) { 
-        this(guid, ttl, port, ip, files,
-             marked ? mark(kbytes) : kbytes);
+    /** Returns the GGEP payload bytes to encode the given uptime */
+    private static byte[] newGGEP(int dailyUptime) {
+        //TODO2: this all seems very inefficient.  So many allocations!
+        Map m=new HashMap(1);
+        m.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, new Integer(dailyUptime));
+        try {
+            GGEP ggep=new GGEP(m);
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            ggep.write(baos);
+            return baos.toByteArray();
+        } catch (BadGGEPPropertyException e) {
+            //This should never happen.  Arguably one could program defensively
+            //around this by returning null, but I think better to give
+            //debugging information.
+            Assert.that(false, "Couldn't encode uptime");
+            return null;
+        } catch (IOException e) {
+            //See above.
+            Assert.that(false, "Couldn't encode uptime");
+            return null;
+        }
     }
 
     /**
@@ -108,6 +200,57 @@ public class PingReply extends Message implements Serializable{
         return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,10));
     }
 
+    /** Returns the average daily uptime in seconds from the GGEP payload.
+     *  @exception BadPacketException if the uptime is not known or corrupt. */
+    public synchronized int getDailyUptime() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP blocking");
+        String v=ggep.getData(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME);
+        if (v==null)
+            throw new BadPacketException("No uptime in GGEP block");
+        try {
+            return Integer.parseInt(v);
+        } catch (NumberFormatException e) {
+            throw new BadPacketException("Couldn't parse \""+v+"\"");
+        }
+    }
+
+    public synchronized boolean hasGGEPExtension() {
+        parseGGEP();
+        return ggep!=null;
+    }
+    
+    /** Ensure GGEP data parsed...if possible. */
+    private synchronized void parseGGEP() {
+        //Return if we've already parsed the data or this is a plain pong
+        //without space for GGEP.  If this has bad GGEP data, multiple calls to
+        //parseGGEP will result in multiple parse attempts.  While this is
+        //inefficient, it is sufficiently rare to not justify a parsedGGEP
+        //variable.
+        if (ggep!=null || getLength()<=STANDARD_PAYLOAD_SIZE)
+            return;
+    
+        try {
+            ggep=new GGEP(payload, STANDARD_PAYLOAD_SIZE, null);
+        } catch (BadGGEPBlockException e) { }
+    }
+
+    /** 
+     * Returns a version of this with 
+     */
+    public PingReply stripGGEP() {
+        //TODO: if this is too slow, we can alias parts of this, as as the
+        //payload.  In fact we could even return a subclass of PingReply that
+        //simply delegates to this.
+        byte[] newPayload=new byte[STANDARD_PAYLOAD_SIZE];
+        System.arraycopy(payload, 0,
+                         newPayload, 0,
+                         STANDARD_PAYLOAD_SIZE);
+        return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
+                             newPayload);
+    }
+
 
     ////////////////////////// Pong Marking //////////////////////////
 
@@ -121,7 +264,7 @@ public class PingReply extends Message implements Serializable{
         return isPowerOf2(ByteOrder.long2int(kb));
     }
 
-    private static boolean isPowerOf2(int x) {
+    public static boolean isPowerOf2(int x) {  //package access for testability
         if (x<=0)
             return false;
         else
@@ -200,104 +343,5 @@ public class PingReply extends Message implements Serializable{
             return 1073741824; //1<<30
     }
 
-
-    /** Unit test */
-    /*
-      public static void main(String args[]) {
-      long u4=0x00000000FFFFFFFFl;
-      int u2=0x0000FFFF;
-      byte[] ip={(byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x1};
-      PingReply pr=new PingReply(new byte[16], (byte)0,
-      u2, ip, u4, u4);
-      Assert.that(pr.getPort()==u2);
-      Assert.that(pr.getFiles()==u4);
-      long kbytes=pr.getKbytes();
-      Assert.that(kbytes==u4, Long.toHexString(kbytes));
-      String ip2=pr.getIP();
-      Assert.that(ip2.equals("255.0.0.1"), ip2);
-      Assert.that(pr.ip!=null);  //Looking at private data
-      ip2=pr.getIP();
-      Assert.that(ip2.equals("255.0.0.1"), ip2);
-      Assert.that(! pr.isMarked());
-      
-      Assert.that(! isPowerOf2(-1));
-      Assert.that(! isPowerOf2(0));
-      Assert.that(isPowerOf2(1));
-      Assert.that(isPowerOf2(2));
-      Assert.that(! isPowerOf2(3));
-      Assert.that(isPowerOf2(4));
-      Assert.that(isPowerOf2(16));
-      Assert.that(! isPowerOf2(18));
-      Assert.that(isPowerOf2(64));
-      Assert.that(! isPowerOf2(71));
-      
-      pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-      0, 0, false);
-      Assert.that(! pr.isMarked());        
-      pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-      0, 0, true);
-      Assert.that(pr.isMarked());
-      pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-      5, 2348, false);        
-      Assert.that(! pr.isMarked());
-      Assert.that(pr.getKbytes()==2348);
-      pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-      5, 2348, true);
-      Assert.that(pr.isMarked());
-      pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-      5, 345882, false);
-      Assert.that(! pr.isMarked());
-      pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-      5, 345882, true);
-      Assert.that(pr.isMarked());
-      doBigPongTest();
-      }
-      
-      private static void doBigPongTest() {
-      byte[] payload = new byte[14+2];
-      //add the port
-      payload[0] = 0x0F;
-      payload[1] = 0x00;//port 
-      
-      payload[2] = 0x10;
-      payload[3] = 0x10;
-      payload[4] = 0x10;
-      payload[5] = 0x10;//ip = 16.16.16.16
-      
-      payload[6] = 0x0F;//
-      payload[7] = 0x00;//
-      payload[8] = 0x00;//
-      payload[9] = 0x00;//15 files shared
-      
-      payload[10] = 0x0F;//
-      payload[11] = 0x00;//
-      payload[12] = 0x00;//
-      payload[13] = 0x00;//15 KB
-      //OK Now for the big pong part
-      payload[14] = (byte) 65;
-      payload[15] = (byte) 66;
-      PingReply pr = new PingReply(new byte[4], (byte)2, (byte)4, payload);
-      //Start testing
-      Assert.that(pr.getPort() == 15, "wrong port");
-      String ip = pr.getIP();
-      Assert.that(ip.equals("16.16.16.16"),"wrong IP");
-      Assert.that(pr.getFiles() == 15, "wrong files");
-      Assert.that(pr.getKbytes() == 15, "Wrong share size");
-      ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      try{
-      pr.writePayload(stream);
-      }catch(IOException ioe){
-      ioe.printStackTrace();
-      Assert.that(false, "problem with writing out big pong");
-      }
-      byte[] op = stream.toByteArray();
-      byte[] big = new byte[2];
-      big[0] = op[op.length-2];
-      big[1] = op[op.length-1];
-      String out = new String(big);
-      Assert.that(out.equals("AB"), "Big part of pong lost");
-      //come this far means its OK
-      System.out.println("Passed");
-      }
-    */
+    //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
 }
