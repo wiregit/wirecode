@@ -48,7 +48,7 @@ public class CollectionTester extends TestCase {
         files.add(swing);
     }
 
-    public void testBasic() {
+    public void testAudio() {
         // test construction
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
@@ -81,8 +81,36 @@ public class CollectionTester extends TestCase {
         
     }
 
+
+    public void testVideo() {
+        // test construction
+        LimeXMLReplyCollection collection = 
+        new LimeXMLReplyCollection(files, schemaURI, mfm, !audio);
+        Assert.assertTrue("LimeXMLCollection count wrong!  Count is " + 
+                          collection.getCount(),
+                          (collection.getCount() == 0));
+
+        // test assocation
+        LimeXMLDocument doc = null;
+        doc = collection.getDocForHash(mfm.readFromMap(mason));
+        Assert.assertTrue("Mason should not have a doc!",
+                          doc == null);
+        doc = collection.getDocForHash(mfm.readFromMap(vader));
+        Assert.assertTrue("Vader should not have a doc!",
+                          doc == null);
+        doc = collection.getDocForHash(mfm.readFromMap(swing));
+        Assert.assertTrue("Swing should not have a doc!",
+                          doc == null);
+
+        // test keyword generation
+        List keywords = collection.getKeyWords();
+        Assert.assertTrue("Keywords should have 4, instead " + keywords.size(),
+                          (keywords.size() == 0));
+    }
+
+
     
-    public void testAdvanced() {
+    public void testMatching() {
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
 
