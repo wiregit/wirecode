@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,6 +70,19 @@ public class LegacyRankerTest extends BaseTestCase {
         assertTrue(ranker.hasMore());
         ranker.getBest();
         assertFalse(ranker.hasMore());
+    }
+    
+    public void testGetShareable() throws Exception {
+        RemoteFileDesc rfd1, rfd2;
+        rfd1 = newRFD("1.2.3.4",3);
+        rfd2 = newRFDWithURN("1.2.3.4",3);
+        ranker.addToPool(rfd1);
+        ranker.addToPool(rfd2);
+        
+        Collection c = ranker.getShareableHosts();
+        assertTrue(c.contains(rfd1));
+        assertTrue(c.contains(rfd2));
+        assertEquals(2,c.size());
     }
     
     // TODO: add more tests, although this ranker will be used rarely. 

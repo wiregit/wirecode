@@ -4,6 +4,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
@@ -26,6 +28,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
@@ -66,10 +69,11 @@ public class PingRankerTest extends BaseTestCase {
         pinger.messages.clear();
         pinger.hosts.clear();
         ranker = new PingRanker(pinger);
+        DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
     }
     
     /**
-     * Tests that the ranker sends out a HeadPing requesting ranges to given hosts.
+     * Tests that the ranker sends out a HeadPing requesting ranges and alts to given hosts.
      */
     public void testPingsNewHosts() throws Exception {
         for (int i =1;i <= 10;i++) 
@@ -84,8 +88,75 @@ public class PingRankerTest extends BaseTestCase {
             pinger.hosts.contains(newRFDWithURN("1.2.3."+i,3));
             HeadPing ping = (HeadPing) pinger.messages.get(i);
             assertTrue(ping.requestsRanges());
-            assertFalse(ping.requestsAltlocs());
+            assertTrue(ping.requestsAltlocs());
         }
+    }
+    
+    /**
+     * Tests that the ranker stops looking for new hosts once it has found enough.
+     */
+    public void testStopsPinging() throws Exception {
+        DownloadSettings.MAX_VERIFIED_HOSTS.setValue(1);
+        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
+        Thread.sleep(100);
+        assertEquals(1,pinger.hosts.size());
+        
+        // get a reply from that host
+        MockPong pong = new MockPong(true,true,-1,false,false,true,null,null,null);
+        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        
+        // add some more hosts
+        for (int i =1;i <= 10;i++) 
+            ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
+        
+        
+        // no more pings should have been sent out.
+        Thread.sleep(100);
+        assertEquals(1,pinger.hosts.size());
+        
+        // consume the host we know about
+        ranker.getBest();
+        
+        // we should send out some more pings
+        Thread.sleep(100);
+        assertGreaterThan(1,pinger.hosts.size());
+    }
+    
+    /**
+     * Tests that the ranker learns about new hosts from altlocs
+     */
+    public void testLearnsFromAltLocs() throws Exception {
+        RemoteFileDesc original = newRFDWithURN("1.2.3.4",3); 
+        ranker.addToPool(original);
+        Thread.sleep(100);
+        assertEquals(1,pinger.hosts.size());
+        pinger.hosts.clear();
+        
+        // send one altloc 
+        IpPort ip = new IpPortImpl("1.2.3.5",1);
+        Set alts = new HashSet();
+        alts.add(ip);
+        
+        //and one push loc
+        PushEndpoint pe =new PushEndpoint((new GUID(GUID.makeGuid())).toHexString()+";1.2.3.6:7");
+        Set push = new HashSet();
+        push.add(pe);
+        
+        MockPong pong = new MockPong(true,true,1,false,false,false,null,alts,push);
+        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        
+        // now the ranker should know about more than one host.
+        // the best host should be the one that actually replied.
+        RemoteFileDesc best = ranker.getBest();
+        assertEquals(original,best);
+        
+        // the ranker should have more available hosts, even if we haven't
+        // pinged any.
+        assertTrue(ranker.hasMore());
+        
+        // after a while, the ranker should have pinged the other two hosts.
+        Thread.sleep(100);
+        assertEquals(2,pinger.hosts.size());
     }
     
     /**
@@ -153,7 +224,7 @@ public class PingRankerTest extends BaseTestCase {
         assertTrue(pinger.hosts.contains(new IpPortImpl("1.3.3.3",4)));
         
         // receive one pong from each proxy
-        MockPong pong = new MockPong(true,true,-1,false,false,true,null,null,null);
+        MockPong pong = new MockPong(true,true,-1,true,false,true,null,null,null);
         ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.3.3.3"),4));
         ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.2.2"),3));
         
@@ -303,6 +374,46 @@ public class PingRankerTest extends BaseTestCase {
         assertEquals("1.2.3.7",best.getHost()); // full, open, one slot
         best = ranker.getBest();
         assertEquals("1.2.3.4",best.getHost()); // full, no slots
+    }
+    
+    /**
+     * Tests that the ranker passes on to other rankers all the hosts it has been
+     * told or learned about.
+     */
+    public void testGetShareable() throws Exception {
+        RemoteFileDesc rfd1, rfd2;
+        rfd1 = newRFD("1.2.3.4",3);
+        rfd2 = newRFDWithURN("1.2.3.5",3);
+        ranker.addToPool(rfd1);
+        ranker.addToPool(rfd2);
+        
+        Collection c = ranker.getShareableHosts();
+        assertTrue(c.contains(rfd1));
+        assertTrue(c.contains(rfd2));
+        assertEquals(2,c.size());
+        
+        Thread.sleep(100);
+        
+        // tell the ranker about some altlocs through a headpong
+        IpPort ip1, ip2;
+        ip1 = new IpPortImpl("1.2.3.6",3);
+        ip2 = new IpPortImpl("1.2.3.7",3);
+        Set alts = new HashSet();
+        alts.add(ip1);
+        alts.add(ip2);
+        MockPong oneFreeOpen= new MockPong(true,true,-1,false,false,true,null,alts,null);
+        ranker.processMessage(oneFreeOpen,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),7));
+        
+        // the ranker should pass on the altlocs it discovered as well.
+        c = ranker.getShareableHosts();
+        assertEquals(4,c.size());
+        TreeSet s = new TreeSet(IpPort.COMPARATOR);
+        s.addAll(c);
+        assertEquals(4,s.size());
+        assertTrue(s.contains(ip1));
+        assertTrue(s.contains(ip2));
+        assertTrue(s.contains(rfd1));
+        assertTrue(s.contains(rfd2));
     }
     
     
