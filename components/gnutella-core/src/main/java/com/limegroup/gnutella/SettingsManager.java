@@ -634,7 +634,7 @@ public class SettingsManager implements SettingsInterface
                 if (keepAlive>8)
                     throw new IllegalArgumentException2(
                                 new Object[] {new Integer(8)});
-            } else {
+            } else if (speed<=1000) {
                 if (keepAlive>14)
                     throw new IllegalArgumentException2(
                                 new Object[] {new Integer(14)});
@@ -757,7 +757,7 @@ public class SettingsManager implements SettingsInterface
                 if (maxConn>12)
                     throw new IllegalArgumentException2(
                                 new Object[] {new Integer(12)});
-            } else {
+            } else if (speed<=1000) {
                 if (maxConn>20)
                     throw new IllegalArgumentException2(
                                 new Object[] {new Integer(20)});
