@@ -62,12 +62,22 @@ public class HTTPUploader implements Uploader {
 	 */
 
 	// Regular upload
-	public HTTPUploader(String file, Socket s, int index, UploadManager m,
-                        FileManager fm) {
-		_socket = s;
+	/**
+	 * Consructor for a "normal" non-push upload.  Note that this can
+	 * still be a URN get request.
+	 *
+	 * @param fileName the name of the file
+	 * @param socket the <tt>Socket</tt> instance to serve the upload over
+	 * @param index the index of the file in the set of shared files
+	 * @param um a reference to the <tt>UploadManager</tt> instance 
+	 * @param fm a reference to the <tt>FileManager</tt> instance
+	 */
+	public HTTPUploader(String fileName, Socket socket, int index, 
+						UploadManager um, FileManager fm) {
+		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
-		_filename = file;
-		_manager = m;
+		_filename = fileName;
+		_manager = um;
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
@@ -81,6 +91,7 @@ public class HTTPUploader implements Uploader {
 			_ostream = _socket.getOutputStream();
 			desc = _fileManager.get(_index);
 			_fileSize = desc._size;
+			_urn = desc.getSHA1Urn();
 		} catch (IndexOutOfBoundsException e) {
 			// this is an unlikely case, but if for
 			// some reason the index is no longer valid.
@@ -120,23 +131,6 @@ public class HTTPUploader implements Uploader {
 			setState(PUSH_FAILED);
 		}
 	}
-
-	/**
-	 * Constructor that takes a <tt>URN</tt> argument for uploading files
-	 * that we have URN data for.
-	 *
-	 * @param fileName the name of the file
-	 * @param socket the <tt>Socket</tt> instance to serve the upload over
-	 * @param index the index of the file in the set of shared files
-	 * @param um a reference to the <tt>UploadManager</tt> instance 
-	 * @param fm a reference to the <tt>FileManager</tt> instance
-	 * @param urn the <tt>URN</tt> instance for the upload
-	 */
-	public HTTPUploader(String fileName, Socket socket, int index, UploadManager um,
-                        FileManager fm, URN urn) {
-		this(fileName, socket, index, um, fm);
-		_urn = urn;
-	}	
 
 	// This method must be called in the case of a push.
 	public void connect() throws IOException {
