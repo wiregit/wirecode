@@ -95,19 +95,19 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	private void buildConnections() {
 	    LEAF =
 			new Connection("localhost", PORT, 
-						   new LeafProperties(),
+						   new ClientProperties("localhost"),
 						   new EmptyResponder()
 						   );
         
         ULTRAPEER_1 = 
 			new Connection("localhost", PORT,
-						   new UltrapeerProperties(),
+						   new SupernodeProperties("localhost"),
 						   new EmptyResponder()
 						   );
 
         ULTRAPEER_2 = 
 			new Connection("localhost", PORT,
-						   new UltrapeerProperties(),
+						   new SupernodeProperties("localhost"),
 						   new EmptyResponder()
 						   );
     }
@@ -197,6 +197,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 			LEAF.flush();
         }
 
+		
+
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 		assertTrue("LEAF should be connected", LEAF.isOpen());
@@ -205,9 +207,24 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 		sleep();
 		drainAll();
 		//sleep();
-		//drainAll();
+		drainAll();
 		sleep();
     }
+
+	/**
+	 * Tests to make sure that the passing of query routing tables between
+	 * Ultrapeers is working correctly.
+	 */
+	public void testUltrapeerQueryRouting() throws Exception {
+		QueryRequest qr = QueryRequest.createQuery("crap", (byte)2);
+
+		
+		ULTRAPEER_1.send(qr);
+		ULTRAPEER_1.flush();
+
+		assertTrue("Ultrapeer 2 should not have received the query",
+				   !drain(ULTRAPEER_2));
+	}
 
 	/**
 	 * Tests a query sent from the leaf.  The query should be received by both
@@ -215,20 +232,15 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * other one.
 	 */
     public void testBroadcastFromLeaf() throws Exception {
-
-		//System.out.println(
-		//   "-Testing normal broadcast from leaf, with replies and pushes");
-		//drain(ULTRAPEER_2);
-		//drain(ULTRAPEER_1);
 		
 		//1. Check that query broadcasted to ULTRAPEER_2 and ultrapeer
-		QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
+		QueryRequest qr = QueryRequest.createQuery("crap");
 		LEAF.send(qr);
 		LEAF.flush();
 		
 		//Message m;
 		Message m = ULTRAPEER_2.receive(TIMEOUT);
-		assertTrue("message not a QueryRequest", m instanceof QueryRequest);
+		assertQuery(m);
 		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
 		assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
 		
@@ -237,7 +249,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
 		
 		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertTrue("message not a QueryRequest", m instanceof QueryRequest);
+		assertQuery(m);
 		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
 		assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
 		
@@ -346,7 +358,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         //drain(ULTRAPEER_1);
         //drain(LEAF);
 
-        QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
+        //QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
+		QueryRequest qr = QueryRequest.createQuery("crap");
         ULTRAPEER_2.send(qr);
         ULTRAPEER_2.flush();
               
@@ -370,7 +383,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         //drain(ULTRAPEER_1);
         //drain(LEAF);
 
-        QueryRequest qr = new QueryRequest(TTL, 0, "test", false);
+        //QueryRequest qr = new QueryRequest(TTL, 0, "test", false);
+        QueryRequest qr = QueryRequest.createQuery("test");
         ULTRAPEER_2.send(qr);
         ULTRAPEER_2.flush();
               
@@ -399,7 +413,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         //drain(LEAF);
         //drain(ULTRAPEER_2);
 
-        QueryRequest qr=new QueryRequest(TTL, 0, "susheel test", false);
+        //QueryRequest qr=new QueryRequest(TTL, 0, "susheel test", false);
+        QueryRequest qr= QueryRequest.createQuery("susheel test");
         ULTRAPEER_1.send(qr);
         ULTRAPEER_1.flush();
               
@@ -463,8 +478,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
              throws Exception {
         //System.out.println("-Testing big ping broadcast from leaf connnection"
         //                   +", no payload forwarding to ULTRAPEER_2, with big reply");
-        drain(ULTRAPEER_2);
-        drain(ULTRAPEER_1);
+        //drain(ULTRAPEER_2);
+        //drain(ULTRAPEER_1);
 
         //1a. Send big ping (not GGEP...which should be ok)
         byte[] payload= new byte[16];
@@ -631,18 +646,11 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
 
-    /** This test makes sure that query's with no query string but with
-     *  specified urn's get through to leaves, etc.
+    /** This test makes sure that querys with no query string but with
+     *  specified urn get through to leaves, etc.
      */ 
     public void testNullQueryURNRequest() 
         throws Exception {
-        //System.out.println("-Testing null query string with non-null URN" +
-        //                   " QR routing.");
-        
-        // drain all connections
-        drain(ULTRAPEER_1);
-        drain(LEAF);
-        drain(ULTRAPEER_2);
 
         // make sure it gets through with all combinations of one sender and two
         // receivers.
@@ -665,28 +673,27 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // build the null QR
         GUID guid = new GUID(GUID.makeGuid());
-        QueryRequest qr = new QueryRequest(guid.bytes(),
-                                           TTL, 0, "", "", false,
-                                           currUrnTypeSet, currUrnSet,
-                                           false);
+        QueryRequest qr = 
+			new QueryRequest(guid.bytes(), TTL, 0, "", "", false,
+							 currUrnTypeSet, currUrnSet, false);
         
         // send the QR - FROM sndr
         sndr.send(qr);
         sndr.flush();
 
 		Message m = rcv1.receive(TIMEOUT);
-		assertTrue("message not a QueryRequest", m instanceof QueryRequest);		
-		
+		assertQuery(m);
+
         // did recv1 get everything a-ok?
         QueryRequest reqRead=(QueryRequest)m;
         assertTrue("guids should be equal",
 				   Arrays.equals(guid.bytes(), reqRead.getGUID()));
-        assertNotNull("query urns should not be null",reqRead.getQueryUrns());
+        assertNotNull("query urns should not be null", reqRead.getQueryUrns());
         assertEquals("urn sets should be equal",currUrnSet, reqRead.getQueryUrns());
 
         // did recv2 get everything a-ok?
         m = rcv2.receive(TIMEOUT);
-		assertTrue("message not a QueryRequest", m instanceof QueryRequest);		
+		assertQuery(m);
 		reqRead = (QueryRequest)m;
         assertTrue("guids should be equal", Arrays.equals(guid.bytes(), reqRead.getGUID()));
         assertNotNull("query urns should not be null",reqRead.getQueryUrns());
@@ -705,7 +712,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
 
         //Send query request from leaf, received by ultrapeer (and ULTRAPEER_2)
-        QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
+        //QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
+        QueryRequest qr = QueryRequest.createQuery("crap");
         LEAF.send(qr);
         LEAF.flush();
         
@@ -751,6 +759,19 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
             }
         }
     }
+
+	/**
+	 * Asserts that the given message is a query, printing out the 
+	 * message and failing if it's not.
+	 *
+	 * @param m the <tt>Message</tt> to check
+	 */
+	private void assertQuery(Message m) {
+		if(m instanceof QueryRequest) return;
+
+		System.out.println(m); 
+		assertTrue("message not a QueryRequest", m instanceof QueryRequest);			
+	}
 }
 
 class LeafProperties extends Properties {
