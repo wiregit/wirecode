@@ -68,6 +68,22 @@ public class FileViewRequestTest extends ClientSideTestCase {
         assertEquals(bytes, output.getBytes());
     }
 
+    public void testDownloadFileRequest() throws Exception {
+        FileDesc fd = RouterService.getFileManager().get(0);
+        assertNotNull(fd);
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          "get/0/" + UploadManager.FV_PASS + "/" +
+                          fd.getFile().getName());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        InputStream is = conn.getInputStream();
+        byte[] bytes = new byte[conn.getContentLength()];
+        is.read(bytes);
+        byte[] fBytes = new byte[(int)fd.getFile().length()];
+        FileInputStream fis = new FileInputStream(fd.getFile());
+        fis.read(fBytes);
+        assertEquals(bytes, fBytes);
+    }
+
     public void testHammeringNotAllowed() throws Exception {
 
         final String output = FileListHTMLPage.instance().getSharedFilePage();
