@@ -3,6 +3,7 @@ package com.limegroup.gnutella.routing;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.Assert;
 import com.sun.java.util.collections.*;
 
 /** 
@@ -19,17 +20,12 @@ public class HashFunction {
     private static final long TWO_31=0x80000000l;
     //private static final int A_INT=(int)(A*TWO_31); //=1327217884
     private static final int A_INT=0x4F1BBCDC;
-    
-    /*
-     * Implementation note: we special case the algorith depending on 
-     * whether the hash table size is a power of two.
+        
+    /**
+     * Returns the n-<b>bit</b> hash of x, where n="bits".  That is, the
+     * returned value value can fit in "bits" unsigned bits, and is
+     * between 0 and (2^bits)-1.
      */
-    
-//      /**
-//       * Returns the n-<b>bit</b> hash of x, where n="bits".  That is, the
-//       * returned value value can fit in "bits" unsigned bits.
-//       *     @requires n is a power of two.
-//       */
     private static int hashFast(int x, byte bits) {
         //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
         long prod= (long)x * (long)A_INT;
@@ -38,45 +34,56 @@ public class HashFunction {
         return (int)ret;
     }
 
-//    /**
-//     * Returns the hash of x.  The returned value is greater than 0 and
-//     * less than n.
-//     */
-//    private static int hashSlow(int x, int n) {
-//        //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
-//        double prod=A*x;
-//        double scale=prod-Math.floor(prod);
-//        return (int)Math.floor(((float)n) * scale);
-//    }
-
-    /**
-     * Returns the hash of x.  The returned value is greater than 0 and
-     * less than n.
-     *     @requires 1<=bits<=32 
+    /*
+     * Returns the n-<b>bit</b> hash of x.toLowerCase(), where n="bits".  That
+     * is, the returned value value can fit in "bits" unsigned bits, and is
+     * between 0 and (2^bits)-1.
+     *
+     * @param x the string to hash
+     * @param bits the number of bits to use in the resulting answer
+     * @return the hash value
      */    
     public static int hash(String x, byte bits) {
-        //TODO2: can you do this without allocations?
-
-        //Get the bytes of x, padding with zeroes so length is a multiple of 4.
-        byte[] bytes=x.getBytes();        
-        byte[] bytes4=null;
-        if (bytes.length%4==0)
-            bytes4=bytes;
-        else {
-            bytes4=new byte[bytes.length+(4-(bytes.length%4))];
-            System.arraycopy(bytes, 0, bytes4, 0, bytes.length);
-        }
-        //XOR every 4 bytes together.
-        int xor=0;
-        for (int i=0; i<bytes4.length; i+=4)
-            xor=xor^ByteOrder.leb2int(bytes4, i);
-        //And fit number to n.
-        return hashFast(xor, bits);
+        return hash(x, 0, x.length(), bits);
     }       
+
+    /**
+     * Returns the same value as hash(x.substring(start, end), bits),
+     * but tries to avoid allocations.  Note that x is lower-cased
+     * when hashing.
+     *
+     * @param x the string to hash
+     * @param bits the number of bits to use in the resulting answer
+     * @param start the start offset of the substring to hash
+     * @param end just PAST the end of the substring to hash
+     * @return the hash value 
+     */   
+    public static int hash(String x, int start, int end, byte bits) {
+        //1. First turn x[start...end-1] into a number by treating all 4-byte
+        //chunks as a little-endian quadword, and XOR'ing the result together.
+        //We pad x with zeroes as needed. 
+        //    To avoid having do deal with special cases, we do this by XOR'ing
+        //a rolling value one byte at a time, taking advantage of the fact that
+        //x XOR 0==x.
+        int xor=0;  //the running total
+        int j=0;    //the byte position in xor.  INVARIANT: j==(i-start)%4
+        for (int i=start; i<end; i++) {
+            //TODO: internationalization be damned?
+            int b=Character.toLowerCase(x.charAt(i)) & 0xFF; 
+            b=b<<(j*8);
+            xor=xor^b;
+            j=(j+1)%4;
+        }
+        //2. Now map number to range 0 - (2^bits-1).
+        return hashFast(xor, bits);
+    }
+
 
     /** 
      * Returns a list of canonicalized keywords in the given query, suitable
-     * for passing to hash(String,int).
+     * for passing to hash(String,int).  The returned keywords are
+     * lower-cased, though that is not strictly needed as hash ignores
+     * case.
      */
     public static String[] keywords(String query) {
         //TODO1: this isn't a proper implementation.  It should really be
@@ -89,10 +96,48 @@ public class HashFunction {
         return StringUtils.split(query.toLowerCase(), FileManager.DELIMETERS);
     }
 
+    /** 
+     * Returns the index of the keyword starting at or after the i'th position
+     * of query, or -1 if no such luck.
+     */
+    public static int keywordStart(String query, int i) {
+        //Search for the first character that is not a delimiterer TODO3: we can
+        //make this O(|DELIMETERS|) times faster by converting
+        //FileManager.DELIMETERS into a Set in this' static initializer.  But
+        //then we have to allocate Strings here.  Can work around the problem,
+        //but it's trouble.
+        final String DELIMETERS=FileManager.DELIMETERS;
+        for ( ; i<query.length() ; i++) {
+            char c=query.charAt(i);
+            //If c not in DELIMETERS, declare success.
+            if (DELIMETERS.indexOf(c)<0)
+                return i;
+        }
+        return -1;
+    }   
+
+    /** 
+     * Returns the index just past the end of the keyword starting at the i'th
+     * position of query, or query.length() if no such index.
+     */
+    public static int keywordEnd(String query, int i) {
+        //Search for the first character that is a delimiterer.  
+        //TODO3: see above
+        final String DELIMETERS=FileManager.DELIMETERS;
+        for ( ; i<query.length() ; i++) {
+            char c=query.charAt(i);
+            //If c in DELIMETERS, declare success.
+            if (DELIMETERS.indexOf(c)>=0)
+                return i;
+        }
+        return query.length();
+    }    
+        
+
     /**
      * @return an array of strings with the original strings and prefixes
      */
-    public static String[]  getPrefixes(String[] words){
+    public static String[] getPrefixes(String[] words){
         ArrayList l = new ArrayList();
         for(int i=0;i<words.length;i++){
             //add the string itself
@@ -111,38 +156,52 @@ public class HashFunction {
         return retArray;
     }
 
+    /*
     public static void main(String args[]) {
-        //TODO: we should verify the scaling property described in the header
-        //above.
-        System.out.println("Informal scaling tests:");
-        System.out.println(hash("Hello", (byte)16));
-        System.out.println(hash("Hallo", (byte)16));
-        System.out.println(hash("Hellu", (byte)16));
-        System.out.println();
-        System.out.println(hash("Hello", (byte)16));
-        System.out.println(hash("Hallo", (byte)16));
-        System.out.println(hash("Hellu", (byte)16));
-        System.out.println();                           
-        System.out.println(hash("Hello", (byte)16));
-        System.out.println(hash("Hallo", (byte)16));
-        System.out.println(hash("Hellu", (byte)16));
-        System.out.println();                           
+        //1. Basic hash tests.  These unit tests were generated by the reference
+        //implementation of HashFunction.  Some I've checked manually.
+        Assert.that(hash("", (byte)13)==0);
+        Assert.that(hash("eb", (byte)13)==6791);
+        Assert.that(hash("ebc", (byte)13)==7082);
+        Assert.that(hash("ebck", (byte)13)==6698);
+        Assert.that(hash("ebckl", (byte)13)==3179);
+        Assert.that(hash("ebcklm", (byte)13)==3235);
+        Assert.that(hash("ebcklme", (byte)13)==6438);
+        Assert.that(hash("ebcklmen", (byte)13)==1062);
+        Assert.that(hash("ebcklmenq", (byte)13)==3527);
+        Assert.that(hash("", (byte)16)==0);
+        Assert.that(hash("n", (byte)16)==65003);
+        Assert.that(hash("nd", (byte)16)==54193);
+        Assert.that(hash("ndf", (byte)16)==4953);
+        Assert.that(hash("ndfl", (byte)16)==58201);
+        Assert.that(hash("ndfla", (byte)16)==34830);
+        Assert.that(hash("ndflal", (byte)16)==36910);
+        Assert.that(hash("ndflale", (byte)16)==34586);
+        Assert.that(hash("ndflalem", (byte)16)==37658);
+        Assert.that(hash("ndflaleme", (byte)16)==45559);
+        Assert.that(hash("ol2j34lj", (byte)10)==318);
+        Assert.that(hash("asdfas23", (byte)10)==503);
+        Assert.that(hash("9um3o34fd", (byte)10)==758);
+        Assert.that(hash("a234d", (byte)10)==281);
+        Assert.that(hash("a3f", (byte)10)==767);
+        Assert.that(hash("3nja9", (byte)10)==581);
+        Assert.that(hash("2459345938032343", (byte)10)==146);
+        Assert.that(hash("7777a88a8a8a8", (byte)10)==342);
+        Assert.that(hash("asdfjklkj3k", (byte)10)==861);
+        Assert.that(hash("adfk32l", (byte)10)==1011);
+        Assert.that(hash("zzzzzzzzzzz", (byte)10)==944);
 
-        System.out.println("Testing keywords:");
-        test("Music");
-        test("Real");
-        test("Nixon");
-        test("");
-        test("A");
-        test("AB");
-        test("abc");
+        //2. Offset tests.
+        Assert.that(hash("ndfl", 0, 4, (byte)16)==58201);
+        Assert.that(hash("_ndfl_", 1, 1+4, (byte)16)==58201);
+        Assert.that(hash("__ndfl__", 2, 2+4, (byte)16)==58201);
+        Assert.that(hash("___ndfl___", 3, 3+4, (byte)16)==58201);
+
+        //3. Case tests.
+        Assert.that(hash("3nja9", (byte)10)==581);
+        Assert.that(hash("3NJA9", (byte)10)==581);
+        Assert.that(hash("3nJa9", (byte)10)==581);
     }
-
-    private static void test(String s) {
-        System.out.println(s+": "+hash(s, (byte)16));
-        s=s.toLowerCase();
-        System.out.println(s+": "+hash(s, (byte)16));
-    }
-
+    */
 
 }
