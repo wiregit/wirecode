@@ -311,6 +311,22 @@ public class ManagedConnection extends Connection
 			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
 			  (HandshakeResponder)new LeafHandshakeResponder(host)));
     }
+    
+    /**
+     * factory method which allows the creation of Ultrapeer2Ultrapeer connection
+     * even if we are leaf.  Useful for promoting to ultrapeer.
+     * @param host the host to connect to
+     * @param port the port the host is listening on
+     * @param forcedUP whether to forcefully make this connection an UP2UP
+     * @return the new connection object.
+     */
+    public static ManagedConnection forceConnection (String host, int port, boolean forcedUP) {
+    	if (forcedUP)
+    		return new ManagedConnection(host, port, 
+    				new UltrapeerHeaders(host), new UltrapeerHandshakeResponder(host));
+    	else
+    		return new ManagedConnection(host,port);
+    }
 
 	/**
 	 * More customizable constructor used for testing.
