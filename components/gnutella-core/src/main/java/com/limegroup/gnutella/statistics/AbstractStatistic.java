@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.statistics;
 
 import com.sun.java.util.collections.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.StringTokenizer;
 
 /**
  * This class provides a default implementation of the <tt>Statistic</tt>
@@ -49,6 +52,12 @@ public abstract class AbstractStatistic implements Statistic {
 	 * The maximum value ever recorded for any time period.
 	 */
 	protected double _max = 0;
+
+	private Writer _writer;
+
+	private boolean _writeStat = false;
+	
+	private int _numWriters = 0;
 
 	/**
 	 * Constructs a new <tt>Statistic</tt> instance with 0 for all 
@@ -101,10 +110,69 @@ public abstract class AbstractStatistic implements Statistic {
 		if(_current > _max) {
 			_max = _current;
 		}
+		if(_writeStat) {
+			if(_writer != null) {
+				try {
+					_writer.write(Integer.toString(_current));
+					_writer.write(",");
+					_writer.flush();
+				} catch(IOException e) {
+					e.printStackTrace();
+					// not much to do
+				}
+			}
+		}
 		_current = 0;
 		_totalStatsRecorded++;
 	}
 
+	// inherit doc comment
+	public synchronized void setWriteStatToFile(boolean write) {
+		if(write) {
+			_numWriters++;
+			_writeStat = true;
+			if(_numWriters == 1) {
+				try {
+					Class superclass = getClass().getSuperclass();
+					Class declaringClass = getClass().getDeclaringClass();
+					List fieldsList = new LinkedList();
+					if(superclass != null) {
+						fieldsList.addAll(Arrays.asList(superclass.getFields()));
+					}
+					if(declaringClass != null) {
+						fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
+					}
+					fieldsList.addAll(Arrays.asList(getClass().getFields()));
+					Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
+					String name = "";
+					for(int i=0; i<fields.length; i++) {
+						try {
+							Object fieldObject = fields[i].get(null);
+							if(fieldObject.equals(this)) {
+								StringTokenizer st = 
+							        new StringTokenizer(fields[i].toString());
+								while(st.hasMoreTokens()) {
+									name = st.nextToken();
+								}
+								name = name.substring(34);
+							}
+						} catch(IllegalAccessException e) {
+							continue;
+						}
+					}
+					_writer = new FileWriter(name, false);
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} else if(_numWriters != 0) {
+			_numWriters--;
+		} 
+		if(_numWriters == 0) {
+			_writeStat = false;
+			_writer = null;
+		}
+	}
 
 	/**
 	 * Stores the accumulated statistics for all messages into
