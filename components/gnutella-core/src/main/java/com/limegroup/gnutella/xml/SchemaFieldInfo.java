@@ -43,7 +43,7 @@ public class SchemaFieldInfo
         this._type = type;
     }   
     
-    protected String getType()
+    String getType()
     {
         return _type;
     }
@@ -51,7 +51,7 @@ public class SchemaFieldInfo
     /**
      * Adds the passed value to the list of enumeration values
      */
-    protected void addEnumerationValue(String value)
+    void addEnumerationValue(String value)
     {
         //create a new list, if doesnt exist
         if(_enumerationList == null)
@@ -77,7 +77,7 @@ public class SchemaFieldInfo
      * sets the canonicalized field name for which this object stores the
      * information
      */
-    protected void setCanonicalizedFieldName(String canonicalizedFieldName)
+    void setCanonicalizedFieldName(String canonicalizedFieldName)
     {
         this._canonicalizedFieldName = canonicalizedFieldName;
     }
