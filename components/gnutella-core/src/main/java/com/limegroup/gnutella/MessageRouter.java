@@ -82,6 +82,9 @@ import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 
 /**
  * One of the three classes that make up the core of the backend.  This
@@ -90,6 +93,8 @@ import com.limegroup.gnutella.util.ProcessingQueue;
  * maintains a list of connections.
  */
 public abstract class MessageRouter {
+    
+    private static final Log LOG = LogFactory.getLog(MessageRouter.class);
 	
     /**
      * Handle to the <tt>ConnectionManager</tt> to access our TCP connections.
@@ -1276,10 +1281,15 @@ public abstract class MessageRouter {
                     OutputStream os = sock.getOutputStream();
                     os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Succesful connectback to: " + addrToContact);
                     try {
                         Thread.sleep(500); // let the other side get it.
-                    } catch(InterruptedException ignored) {}
+                    } catch(InterruptedException ignored) {
+                        LOG.warn("Interrupted connectback", ignored);
+                    }
                 } catch (IOException ignored) {
+                    LOG.warn("IOX during connectback", ignored);
                 } catch (Throwable t) {
                     ErrorService.error(t);
                 } finally {

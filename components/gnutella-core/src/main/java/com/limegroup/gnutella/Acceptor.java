@@ -462,6 +462,7 @@ public class Acceptor implements Runnable {
                         try {
                             client=_socket.accept();
                         } catch (IOException e) {
+                            LOG.error("IOX while accepting", e);
                             continue;
                         }
                     } else {
@@ -481,6 +482,8 @@ public class Acceptor implements Runnable {
 				
 				InetAddress address = client.getInetAddress();
                 if (isBannedIP(address.getAddress())) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Ignoring banned host: " + address);
                     HTTPStat.BANNED_REQUESTS.incrementStat();
                     client.close();
                     continue;
@@ -586,7 +589,8 @@ public class Acceptor implements Runnable {
 					InetAddress address = _socket.getInetAddress();
 					byte[] addressBytes = address.getAddress();
 					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-					    (addressBytes[0] == 127)) {
+					  (addressBytes[0] == 127)) {
+					    LOG.trace("Killing localhost connection with non-magnet.");
 						_socket.close();
 						return;
 					}
@@ -646,6 +650,7 @@ public class Acceptor implements Runnable {
                     IOUtils.close(_socket);
                 }
             } catch (IOException e) {
+                LOG.error("IOX while dispatching", e);
                 IOUtils.close(_socket);
             } catch(Throwable e) {
 				ErrorService.error(e);
@@ -694,8 +699,9 @@ public class Acceptor implements Runnable {
                     Runnable resetter = new Runnable() {
                         public void run() {
                             synchronized (Acceptor.class) {
-                                if (_lastIncomingTime < currTime)
+                                if (_lastIncomingTime < currTime) {
                                     _acceptedIncoming = false;
+                                }
                             }
                         }
                     };

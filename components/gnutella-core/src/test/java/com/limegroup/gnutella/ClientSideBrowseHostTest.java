@@ -53,12 +53,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     // 2. that the client makes a correct push proxy connection if necessary
     // 3. if all else fails the client sends a PushRequest
 
-    public static void globalSetUp() {
-        try {
-            PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
-        }catch(Exception bad) {
-            ErrorService.error(bad);
-        }
+    public static void globalSetUp() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming", Boolean.TRUE);
     }
     public void testHTTPRequest() throws Exception {
         callback = (MyActivityCallback) getCallback();
@@ -206,7 +202,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         // wait for the incoming PushProxy request
         // increase the timeout since we send udp pushes first
-        ss.setSoTimeout(6000);
+        ss.setSoTimeout(7000);
         Socket httpSock = ss.accept();
         assertNotNull(httpSock);
         

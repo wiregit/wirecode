@@ -380,26 +380,31 @@ public class ConnectionManager {
     }
 
     /**
-     * Tells whether the node is gonna be an Ultrapeer or not
-     * @return true, if Ultrapeer, false otherwise
+     * True if this is currently or wants to be a supernode,
+     * otherwise false.
      */
     public boolean isSupernode() {
-        // If we are currently supernode to any connections,
-        // OR
-        // we could be a Supernode
-        return ( _initializedClientConnections.size() > 0 ) ||
-               isSupernodeCapable();
+        return isActiveSupernode() || isSupernodeCapable();
     }
-
+    
     /** Return true if we are not a private address, have been ultrapeer capable
      *  in the past, and are not being shielded by anybody, AND we don't have UP
      *  mode disabled.
      */
     public boolean isSupernodeCapable() {
-        return (!NetworkUtils.isPrivate() &&
-                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
-                !isShieldedLeaf()) &&
+        return !NetworkUtils.isPrivate() &&
+               UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
+               !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue();
+    }
+    
+    /**
+     * Tells whether or not we're actively being a supernode to anyone.
+     */
+    public boolean isActiveSupernode() {
+        return !isShieldedLeaf() &&
+               (_initializedClientConnections.size() > 0 ||
+                _initializedConnections.size() > 0);
     }
 
     /**
@@ -776,12 +781,16 @@ public class ConnectionManager {
         if (!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
             _preferredConnections <=0 ) {
             return false;
-		} else if (RouterService.isShieldedLeaf()) {
+        //If a leaf (shielded or not), check rules as such.
+		} else if (isShieldedLeaf() || !isSupernode()) {
+		    // require ultrapeer.
+		    if(!hr.isUltrapeer())
+		        return false;
 		    
-		    // If it's not good, never allow it.
-		    // the first few attempts allow only Limewires.
-		    if(Sockets.getAttempts() < limeAttempts ? 
-		            !hr.isLimeWire() : !hr.isGoodUltrapeer()) {
+		    // If it's not good, or it's the first few attempts & not a LimeWire, 
+		    // never allow it.
+		    if(!hr.isGoodUltrapeer() || 
+		      Sockets.getAttempts() < limeAttempts && !hr.isLimeWire()) {
 		        return false;
 		    // if we have slots, allow it.
 		    } else if (_shieldedConnections < _preferredConnections) {
@@ -789,7 +798,12 @@ public class ConnectionManager {
 		        // anymore.
 		        if(checkLocale(hr.getLocalePref()))
 		            _needPref = false;
-		        return true;
+
+                // while idle, only allow LimeWire connections.
+                if (isIdle()) 
+                    return hr.isLimeWire();
+
+                return true;
             } else {
                 // if we were still trying to get a locale connection
                 // and this one matches, allow it, 'cause no one else matches.
@@ -801,12 +815,13 @@ public class ConnectionManager {
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
+		    // no leaf connections if we're a leaf.
+		    if(isShieldedLeaf() || !isSupernode())
+		        return false;
 
-            if(!allowUltrapeer2LeafConnection(hr)) {
+            if(!allowUltrapeer2LeafConnection(hr))
                 return false;
-            }
 
-            // Leaf. As the spec. says, this assumes we are an ultrapeer.
             int leaves = getNumInitializedClientConnections();
             int nonLimeWireLeaves = _nonLimeWireLeaves;
 
@@ -852,33 +867,6 @@ public class ConnectionManager {
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             int locale_num = 0;
-
-            // Actually, this code is always called when we get our first
-            // established connection. Therefore, it is essential that it allows
-            // the first good ultrapeer regardless of locale or vendor.  Although,
-            // for the first few attempts we allow only good Limewires.
-            
-            // Exception1:  if the user has specified they want ALL their slots to be 
-            // preferenced we only allow connection with proper locale;
-            // its their problem if they can't connect that way
-            
-            // Exception2: if we are idle and have lost our only connection, we
-            // accept only Limewire ultrapeers for that one connection.
-            
-            if (peers==0 && 
-                    (Sockets.getAttempts() < limeAttempts ?
-                    (hr.isLimeWire() && hr.isGoodUltrapeer()) :
-                    hr.isGoodUltrapeer())) {
-                
-                if (isIdle()) 
-                    return hr.isLimeWire();
-
-                if (!ConnectionSettings.USE_LOCALE_PREF.getValue() ||
-                    _preferredConnections > 
-                    ConnectionSettings.NUM_LOCALE_PREF.getValue())
-                return true;
-                
-            }
             
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
                 return false;
@@ -901,7 +889,6 @@ public class ConnectionManager {
                 locale_num =
                     getNumLimeWireLocalePrefSlots();
             }
-
 
             // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
             // for non-limewire peers to ensure that the network
@@ -1296,10 +1283,14 @@ public class ConnectionManager {
      * down every one of them.
      */
     public void sendUpdatedCapabilities() {        
-        for(Iterator iter = getConnections().iterator(); iter.hasNext(); ) {
+        for(Iterator iter = getInitializedConnections().iterator(); iter.hasNext(); ) {
             Connection c = (Connection)iter.next();
             c.sendUpdatedCapabilities();
         }
+        for(Iterator iter = getInitializedClientConnections().iterator(); iter.hasNext(); ) {
+            Connection c = (Connection)iter.next();
+            c.sendUpdatedCapabilities();
+        }        
     }
 
     /**
@@ -1550,22 +1541,30 @@ public class ConnectionManager {
 
         // If we have not accepted incoming, fetch 3 times
         // as many connections as we need.
-        if( !RouterService.acceptedIncomingConnection() ) {
+        // We must also check if we're actively being a Ultrapeer because
+        // it's possible we may have turned off acceptedIncoming while
+        // being an Ultrapeer.
+        if( !RouterService.acceptedIncomingConnection() && !isActiveSupernode() ) {
             multiple = 3;
         }
         // Otherwise, if we're not ultrapeer capable,
         // or have not become an Ultrapeer to anyone,
         // also fetch 3 times as many connections as we need.
+        // It is critical that active ultrapeers do not use a multiple of 3
+        // without reducing neededConnections, otherwise LimeWire would
+        // continue connecting and rejecting connections forever.
         else if( !isSupernode() || getNumUltrapeerConnections() == 0 ) {
             multiple = 3;
         }
         // Otherwise (we are actively Ultrapeering to someone)
         // If we needed more than connections, still fetch
         // 2 times as many connections as we need.
+        // It is critical that 10 is greater than RESERVED_NON_LIMEWIRE_PEERS,
+        // else LimeWire would try connecting and rejecting connections forever.
         else if( neededConnections > 10 ) {
             multiple = 2;
         }
-        // Otherwise, if we need less than 10 connections,
+        // Otherwise, if we need less than 10 connections (and we're an Ultrapeer), 
         // decrement the amount of connections we need by 5,
         // leaving 5 slots open for newcomers to use,
         // and decrease the rate at which we fetch to
@@ -1727,19 +1726,12 @@ public class ConnectionManager {
     public boolean allowLeafDemotion() {
 		_leafTries++;
 
-        //if is a ultrapeer, and have other connections (client or ultrapeer),
-        //or the ultrapeer status is forced, dont change mode
-        int connections = getNumInitializedConnections()
-			+ getNumInitializedClientConnections();
-
-        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue()
-            || (isSupernode() && connections > 0)) {
+        if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
             return false;
-		} else if(SupernodeAssigner.isTooGoodToPassUp() &&
-				  _leafTries < _demotionLimit) {
+        else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < _demotionLimit)
 			return false;
-		}
-		return true;
+        else
+		    return true;
     }
 
 

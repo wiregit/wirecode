@@ -45,8 +45,8 @@ public final class LeafHandshakeResponder
     private HandshakeResponse 
         respondToOutgoing(HandshakeResponse response) {
 
-        // leaves should never accept connections to other leaves
-        if(response.isLeaf()) {
+        // only connect to ultrapeers.
+        if(!response.isUltrapeer()) {
             HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
@@ -91,6 +91,12 @@ public final class LeafHandshakeResponder
 		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
 			return HandshakeResponse.createCrawlerResponse();
 		}
+		
+        //if not an ultrapeer, reject.
+        if(!hr.isUltrapeer()) {
+            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
+            return HandshakeResponse.createLeafRejectOutgoingResponse();
+        }		
         
         Properties ret = new LeafHeaders(getRemoteIP());
         
