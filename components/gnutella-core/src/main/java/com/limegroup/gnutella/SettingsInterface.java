@@ -165,7 +165,7 @@ public interface SettingsInterface
     public void writeNDProps();
 
     /** Default setting for the time to live */
-    public static final byte    DEFAULT_TTL            = (byte)7;
+    public static final byte    DEFAULT_TTL            = (byte)5;
     /** Default setting for the soft maximum time to live */
     public static final byte    DEFAULT_SOFT_MAX_TTL   = (byte)10;
     /** Default setting for the hard maximum time to live */
