@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.connection;
 
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.HorizonCounter;
+import com.limegroup.gnutella.messages.PingReply;
 
 /**
  * This class keeps track of statistics for a single Gnutella connection.
@@ -74,6 +76,11 @@ public final class ConnectionStats {
      * connection is closed.
      */
     private volatile long _compressedBytesReceived;
+    
+    /**
+     * Whether or not horizon counting is enabled from this connection.
+     */
+    private boolean _horizonEnabled = true;
     
     /**
      * Constant for the <tt>Connection</tt> instance that this stat handler
@@ -294,5 +301,32 @@ public final class ConnectionStats {
     public float getReadSavedFromCompression() {
         if (!CONNECTION.isReadDeflated() || _bytesReceived == 0 ) return 0;
         return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
+    }
+    
+    /** 
+     * @modifies this
+     * @effects enables or disables updateHorizon. Typically this method
+     *  is used to temporarily disable horizon statistics before sending a 
+     *  ping with a small TTL to make sure a connection is up.
+     */
+    public synchronized void setHorizonEnabled(boolean enable) {
+        _horizonEnabled=enable;
+    }
+
+    /**
+     * This method is called when a reply is received by this connection for a
+     * PingRequest that originated from LimeWire.
+     * 
+     * @modifies this 
+     * @effects adds the statistics from pingReply to this' horizon statistics,
+     *  unless horizon statistics have been disabled via setHorizonEnabled(false).
+     *  It's possible that the horizon statistics will not actually be updated
+     *  until refreshHorizonStats is called.
+     */
+    public synchronized void updateHorizonStats(PingReply pingReply) {
+        if (! _horizonEnabled)
+            return;
+        
+        HorizonCounter.instance().addPong(pingReply);
     }
 }
