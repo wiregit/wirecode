@@ -1081,6 +1081,8 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             if ( isConnected() ) {
                 writeDataActivation();
             }
+            _eventTime = Long.MAX_VALUE;
+            _scheduler.scheduleEvent(this);
 //log2("write wakeup timeout: "+ System.currentTimeMillis());
         }
     }
