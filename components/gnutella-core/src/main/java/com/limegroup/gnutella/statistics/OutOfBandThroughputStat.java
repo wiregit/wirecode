@@ -17,24 +17,13 @@ public class OutOfBandThroughputStat extends AdvancedStatistic {
 	 */
 	private OutOfBandThroughputStat() {}
 
-	/**
-	 * Private class for keeping track of the number of responses requested via
-     * the out-of-band protocol.
-	 */
-	public static class ResponsesRequestedStat extends OutOfBandThroughputStat {
-        public void incrementStat(int times) {
-            for (int i = 0; i < times; i++)
-                super.incrementStat();
-        }
-	}
-
 
 	/**
 	 * <tt>Statistic</tt> for Gnutella Hits requested over the UDP out-of-band
      * protocol.
 	 */
-	public static final ResponsesRequestedStat RESPONSES_REQUESTED =
-	    new ResponsesRequestedStat();
+	public static final Statistic RESPONSES_REQUESTED =
+	    new OutOfBandThroughputStat();
 
 
 	/**
@@ -42,6 +31,6 @@ public class OutOfBandThroughputStat extends AdvancedStatistic {
      * protocol.
 	 */
 	public static final Statistic RESPONSES_RECEIVED = 
-	    new ResponsesRequestedStat();
+	    new OutOfBandThroughputStat();
 
 }

@@ -837,7 +837,7 @@ public abstract class MessageRouter {
             UDPService.instance().send(ack, datagram.getAddress(),
                                        datagram.getPort());
             if (RECORD_STATS)
-                OutOfBandThroughputStat.RESPONSES_REQUESTED.incrementStat(reply.getNumResults());
+                OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
         }
         catch (BadPacketException terrible) {
             ErrorService.error(terrible);
