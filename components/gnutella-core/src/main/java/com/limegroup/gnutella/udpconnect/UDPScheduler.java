@@ -35,10 +35,15 @@ public class UDPScheduler extends ManagedThread {
 
     private boolean             _started;
 
+    /** Maintain a handle to the main event processing thread */
     private Thread              _myThread;
 
 	/** Keep track of a singleton instance */
     private static UDPScheduler _instance    = null;
+
+    /** For offloading the synchronization issues, maintain a second thread
+        for updating events */
+    UpdateThread                _updateThread;
 
     /**
      *  Return the UDPScheduler singleton.
@@ -60,6 +65,7 @@ public class UDPScheduler extends ManagedThread {
 		_scheduledEvent      = NO_EVENT;
 		_waiting             = true;
         _started             = false;
+        _updateThread        = null;
     }
 
     /**
@@ -91,25 +97,79 @@ public class UDPScheduler extends ManagedThread {
      *  Notify the scheduler that a connection has a new scheduled event
      */
 	public void scheduleEvent(UDPTimerEvent evt) {
-        // This is a shortcut test for a fix of synchronization here.
-        EThread ethread = new EThread(evt);
-        ethread.start();
+
+        // Fire up the update thread if it isn't running
+        if ( _updateThread == null ) {
+            _updateThread = new UpdateThread();
+            _updateThread.start();
+        }
+
+        // Pass the event update to the update thread.
+        _updateThread.addEvent(evt);
 	}
 
     /**
      *  Shortcut test for a second thread to deal with the new schedule handoff
      */
-    class EThread extends Thread {
-        UDPTimerEvent evt;
+    class UpdateThread extends Thread {
+        ArrayList _list;
 
-        public EThread(UDPTimerEvent evt) {
-            this.evt = evt;
+        /**
+         *  Initialize the list of pending event updates
+         */
+        public UpdateThread() {
+            _list = new ArrayList();
+        }
+
+        /**
+         *  Schedule an event for update in the main event list
+         */
+        public void addEvent(UDPTimerEvent evt) {
+            synchronized(_list) {
+                _list.add(evt);
+                _list.notify();
+            }
         }
         
+        /**
+         *  Process incoming event updates by interacting with the main thread.
+         */
         public void run() {
+            UDPTimerEvent evt;
+            ArrayList localList;
+            while (true) {
+                // Clone list for safe unlocked access
+                synchronized(_list) {
+                    localList = (ArrayList) _list.clone();
+                }
+
+                // Update events in the main event list
+                for (int i=0; i < localList.size(); i++) {
+                    evt = (UDPTimerEvent) localList.get(i);
+                    updateSchedule(evt);
+                }
+
+                // Wait for more event updates
+                synchronized(_list) {
+                    if (_list.size() > 0)
+                        continue;
+                    try {
+                        _list.wait();
+                    } catch(InterruptedException e) {}
+                }
+            }
+        }
+
+        /**
+         *  Process the updating of an event
+         */
+        private void updateSchedule(UDPTimerEvent evt) {
             synchronized(UDPScheduler.this) {
                 if ( evt.getEventTime() < _scheduledEvent.getEventTime() ) {
                     _scheduledEvent      = evt;
+                    
+                    // Interrupt the main event processing thread 
+                    // if it is waiting
                     if (_waiting) {
                         _myThread.interrupt();
                     }
