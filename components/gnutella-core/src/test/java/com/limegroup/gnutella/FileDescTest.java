@@ -87,8 +87,8 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	/**
 	 * Tests the FileDesc construcotor.
 	 */
-	public void testConstructor() {
-		File file = new File("build.xml");
+	public void testConstructor() throws Exception {
+		File file = CommonUtils.getResourceFile("build.xml");
 
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
@@ -102,8 +102,8 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	/**
 	 * Tests the calculateAndCacheURN method
 	 */
-	public void testCalculateAndCacheURN() {
-		File file = new File("nonexistentfile");
+	public void testCalculateAndCacheURN() throws Exception {
+		File file = new File(getSaveDirectory(), "nonexistentfile");
 		if(file.exists()) file.delete();
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
@@ -124,7 +124,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * added to a <tt>FileDesc</tt>.
 	 */
 	public void testAddingAlternateLocations() throws Exception{
-		File file = new File("build.xml");
+		File file = CommonUtils.getResourceFile("build.xml");
 		Set urns = FileDesc.calculateAndCacheURN(file);
 		FileDesc fd = new FileDesc(file, urns, 0);
 		URN sha1 = fd.getSHA1Urn();
@@ -139,8 +139,8 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * Tests that alternate locations with the different SHA1 values cannot be
 	 * added to a <tt>FileDesc</tt>.
 	 */
-	public void testAddingDifferentAlternateLocations() {
-		File file = new File("build.xml");
+	public void testAddingDifferentAlternateLocations() throws Exception {
+		File file = CommonUtils.getResourceFile("build.xml");
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
 			FileDesc fd = new FileDesc(file, urns, 0);
