@@ -11,7 +11,7 @@ public class UnicastSimulator {
 
     public static final int NUM_LISTENERS = 400;
     public static final int PORT_RANGE_BEGIN = 7070;
-    public static final int GNUTELLA_PORT = 7000;
+    public static final int GNUTELLA_PORT = 9000;
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
@@ -30,6 +30,12 @@ public class UnicastSimulator {
     private Random rand = new Random();
 
     public UnicastSimulator() throws Exception {
+        this(InetAddress.getLocalHost().getHostAddress());
+    }
+
+
+    public UnicastSimulator(String externalAddress) throws Exception {
+        _localAddress = InetAddress.getByName(externalAddress).getAddress();
         // create pings to return...
         createPongs();
         // create unicast listeners
@@ -41,7 +47,6 @@ public class UnicastSimulator {
 
     private void createPongs() throws Exception {
         _pongs = new PingReply[NUM_LISTENERS];
-        _localAddress = InetAddress.getLocalHost().getAddress();
         for (int i = 0; i < NUM_LISTENERS; i++) {
             _pongs[i] = new PingReply(GUID.makeGuid(), (byte) 5, 
                                       PORT_RANGE_BEGIN+i, _localAddress, 
@@ -236,7 +241,13 @@ public class UnicastSimulator {
 
     
     public static void main(String argv[]) throws Exception {
-        UnicastSimulator simulator = new UnicastSimulator();
+        if (argv.length > 0) {
+            UnicastSimulator simulator = new UnicastSimulator(argv[0]);
+        }
+        else {
+            UnicastSimulator simulator = new UnicastSimulator();
+        }
+        
     }
 
 }
