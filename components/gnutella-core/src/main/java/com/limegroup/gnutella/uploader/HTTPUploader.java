@@ -13,7 +13,8 @@ import java.net.*;
 import java.util.Date;
 import com.sun.java.util.collections.*;
 
-public class HTTPUploader implements Runnable {
+public class HTTPUploader implements Runnable, 
+                    com.sun.java.util.collections.Comparable {
     /**
      * The list of all files that we've tried unsuccessfully to upload
      * via pushes.  (Here successful means we were able to connect.
@@ -46,6 +47,26 @@ public class HTTPUploader implements Runnable {
     private boolean       uploadCountIncremented = false;
     private boolean       limitExceeded  = false;
     private boolean       _isPushAttempt = false;
+
+
+	/**
+	 * A Map of all the uploads in progress.  If the number
+	 * of uploads by a single user exceeds the SettingsManager's
+	 * uploadsPerPerson_ variable, then the upload is denied, 
+	 * and the used gets a Try Again Later message.
+     *
+     * LOCKING: obtain _uploadsInProgress' monitor before modifying
+     */
+	private static Map /* String -> Integer */ _uploadsInProgress =
+		new HashMap();
+
+
+	/**
+	 * A SortedSet of the full uploads in progress.  
+	 * This is used to shutdown "Gnutella" uploads as needed.
+	 */
+	private static List _fullUploads = new LinkedList();
+
 
 
     //////////// Initialized in Constructors ///////////
@@ -103,6 +124,10 @@ public class HTTPUploader implements Runnable {
     private int BUFFSIZE = 1024;
     private int _sizeOfFile;
 
+	// The User-Agent for the request.  Used to prioritize newer clients
+	private String  _userAgent   = null;
+	// A cleanup boolean for the main run loop
+	private boolean _cleanupDone = false;
 
     /**
      * Prepares a server-side upload.  The file
@@ -135,10 +160,11 @@ public class HTTPUploader implements Runnable {
         _priorAmountRead = 0;
         _socket = s;
         try {
+            //The try-catch below is a work-around for JDK bug 4091706.
             _ostream = s.getOutputStream();
         } catch (IOException e) {
             _state = ERROR;
-        }
+        } 
         _filename = file;
     }
 
@@ -254,9 +280,23 @@ public class HTTPUploader implements Runnable {
         //   It should really be factored into some method.
         //   TODO2:  range headers.
         try {
-            ByteReader in=new ByteReader(_socket.getInputStream());
+            //The try-catch below is a work-around for JDK bug 4091706.
+            ByteReader in=null;
+            try {                
+                in=new ByteReader(_socket.getInputStream());
+            } catch (Exception e) {
+                throw new IOException();
+            }
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             String line=in.readLine();
+
+			//  TODO1:  Once this code has been out long enough, we need to 
+			//  revisit this code and get the pushed UserAgent.  
+			//  Currently, we do not depreferenced pushed "Gnutella"
+			//  Because we were sending Gnutella back ourselves.
+			//String line2=in.readLine();
+			//
+
             _socket.setSoTimeout(0);
             if (line==null)
                 throw new IOException();
@@ -286,11 +326,15 @@ public class HTTPUploader implements Runnable {
             throw new IOException();
 
             //2. Check for upload overload
-            if ( limitExceeded = testAndIncrementUploadCount() )
+            while ( limitExceeded = testAndIncrementUploadCount() )
             {
-                //send 503 Limit Exceeded Headers
-                doLimitReachedAfterConnect();
-                throw new IOException();
+				// If you can't blow away a "Gnutella" upload
+				if ( ! HTTPUploader.checkForLowPriorityUpload(_userAgent) )
+				{
+                    //send 503 Limit Exceeded Headers
+                    doLimitReachedAfterConnect();
+                    throw new IOException();
+				}
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -422,6 +466,11 @@ public class HTTPUploader implements Runnable {
         }
 
         try {
+			_cleanupDone = false;
+			synchronized(_fullUploads) {
+			    _fullUploads.add(this);  // Add to the User-Agent priority queue
+			}
+            boolean uplimit = testAndIncrementNumUploads();
             _callback.addUpload(this);
             //1. For push requests only, establish the connection.
             if (! _isServer) {
@@ -445,13 +494,39 @@ public class HTTPUploader implements Runnable {
                 _state = CONNECTED;
             }
 
+
+			// TODO: This code should be combined with the other 
+			// limit exceeded code.  Unfortunately, I'm not really
+			// understanding what is going on with it right now,
+			// and I guess speed is critical here.  Basically, 
+			// the block of code above with the if (! _isServer) 
+			// should establish a connection for pushes.  After
+			// that, if the upload limit per person has been reached
+			// then we want to send a 503 error. I'm also not sure
+			// if I should be calling doLimitReachedAfterConnect
+			// or doLimitReached, since that latter seems to be called
+			// after connect has been called also.  
+			if (!uplimit) {
+				//send 503 Limit Exceeded Headers
+				_stateString = "Try Again Later";
+				doLimitReached(_socket);
+				throw new IOException();
+			} 
+
+
             //2. Check for upload room for non-pushes
-            if ( ! uploadCountIncremented ) // Pushes have already been handled
+			// Pushes have already been handled
+            if ( ! uploadCountIncremented ) 
             {
-                if ( testAndIncrementUploadCount() )
+                while ( testAndIncrementUploadCount() )
                 {
-                    doLimitReached(_socket);//send 503 Limit Exceeded Headers
-                    throw new IOException();
+					// If you can't blow away a "Gnutella" upload
+					if ( ! HTTPUploader.checkForLowPriorityUpload(_userAgent) )
+					{
+						//send 503 Limit Exceeded Headers
+                        doLimitReached(_socket);
+                        throw new IOException();
+					}
                 }
             }
 
@@ -464,14 +539,30 @@ public class HTTPUploader implements Runnable {
         } catch (IOException e) {
             _state = ERROR;
         } finally {
-            if ( uploadCountIncremented )
-                synchronized(uploadCountLock) { uploadCount--; }
-            if ( _isPushAttempt )
-                cleanupAttemptedPush();
-            shutdown();
-            _callback.removeUpload(this);
+			doCleanup();
         }
     }
+
+	/**
+	 *  Cleanup after an upload.  This should only be called from the finally 
+     *  clause in run or a forced cleanup.
+	 */
+	public synchronized void doCleanup()
+	{
+		if ( _cleanupDone )
+			return;
+		synchronized(_fullUploads) {
+		    _fullUploads.remove(this);
+		}
+		decrementNumUploads();
+		if ( uploadCountIncremented )
+			synchronized(uploadCountLock) { uploadCount--; }
+		if ( _isPushAttempt )
+			cleanupAttemptedPush();
+		shutdown();
+		_callback.removeUpload(this);
+		_cleanupDone = true;
+	}
 
     private void cleanupAttemptedPush()
     {
@@ -587,6 +678,7 @@ public class HTTPUploader implements Runnable {
         }
 
         _state = COMPLETE;
+
     }
 
     /**
@@ -621,6 +713,164 @@ public class HTTPUploader implements Runnable {
         }
         return(limitExceeded);
     }
+
+
+	/**
+	 * In this version of the HTTPUploader, we've decided
+	 * to limit the total number of uploads at any given 
+	 * time by a particilar host.  As a result, we've added
+	 * a variable in the SettingsManager for the maximum
+	 * number of uploads per person.
+	 *
+	 * To keep track of the number of uploads per host, 
+	 * we have added a hashmap, and every time an upload
+	 * is initiated, it is inserted into the map.  however,
+	 * if the map already contains more that the allowed
+	 * number of uploads per person, we return the boolean
+	 * false.  If the limit has not been exceeded, true
+	 * is returned. 
+	 * 
+	 */
+	private boolean testAndIncrementNumUploads() {
+		// throws IOException {
+		/* the ip address will be the key for the map */
+		String ip = getInetAddress().getHostAddress();
+		
+		Integer value;
+		int numUploads = 0;
+        
+        synchronized (_uploadsInProgress) {
+            /* check to see if the IP address is already in the map */
+            if (_uploadsInProgress.containsKey(ip) == true) {
+                /* if it is, get the number of uploads */
+                value = (Integer)_uploadsInProgress.get(ip);
+                numUploads = value.intValue();
+            }
+
+            /* add the current upload to the total number of uploads */
+            numUploads++;
+
+            /* get the number of uploads per person allowed */
+            int numAllowed = SettingsManager.instance().getUploadsPerPerson();
+
+            /* insert the new value back into the map */ 
+            _uploadsInProgress.put(ip, new Integer(numUploads));
+
+            /* if there are more uploads than allowed */
+            /* then throw an exception */		
+            if (numAllowed < numUploads) {
+                // doLimitReachedAfterConnect();
+				return false;
+                // throw new IOException("Too Many Uploads in Progress");
+            }
+			
+			return true;
+        }
+	}
+
+	/**
+	 * as explained above, we now limit the number of uploads
+	 * allowed per host, at a ny given time.  once an upload
+	 * has been succesful, this method removes the reference 
+	 * to it in the map, which is really just a key/value pair 
+	 * of a string for the host ip address, and an intereger
+	 * for the number of uploads in progress.  
+	 *
+	 */
+	private void decrementNumUploads() {
+		/* the ip address that is the key for the map */
+		String ip = getInetAddress().getHostAddress();		
+		
+        synchronized (_uploadsInProgress) {
+            Integer value;
+            int numUploads;
+            /* this test shouldn't be necessary, the ip address */
+            /* should be there, but i'll do it just to be safe */
+            if (_uploadsInProgress.containsKey(ip) == true) {
+                value = (Integer)_uploadsInProgress.get(ip);
+                numUploads = value.intValue();
+                numUploads--;
+                if (numUploads <= 0)
+                    _uploadsInProgress.remove(ip);
+                else 
+                    _uploadsInProgress.put(ip, new Integer(numUploads));
+            }
+        }
+	}
+
+	/**
+     *  Set the User-Agent for client prioritization
+	 */
+	public void setUserAgent(String userAgent) {
+		this._userAgent = userAgent;
+	}
+	
+	/**
+     *  Get the User-Agent for sorting by priority
+	 */
+	public String getUserAgent() {
+		return( _userAgent );
+	}
+
+	/**
+     *  Sort the uploads based on user agent.
+	 *  If both are equal then sort on amountRead in "this" session.
+	 */
+	public int compareTo(Object o) {
+		HTTPUploader up      = (HTTPUploader) o;
+		String       otherUA = up.getUserAgent();
+
+		// Straight equality
+		if ( _userAgent == otherUA || 
+			 (_userAgent != null && _userAgent.equals(otherUA)) )
+		{
+			
+    		if ( _amountRead > up.getAmountRead() ) {
+				return 1;
+			} 
+			else if ( _amountRead < up.getAmountRead() ) {
+				return -1;
+			}
+			return 0;
+		}
+
+		// Only case where other > is if other not Gnutella and this is.
+		if ( ! "Gnutella".equals(otherUA) &&
+			 "Gnutella".equals(_userAgent) )
+			return -1;
+
+		// If they are both anything other than Gnutella => equivalent
+		if ( ! "Gnutella".equals(otherUA) &&
+			 ! "Gnutella".equals(_userAgent) )
+			return 0;
+
+		// Your left with _userAgent > otherUA
+		return 1;
+	}
+
+	/**
+     *  Check to see if you can and should shutdown a Gutella upload
+	 *  if yes, do it.  
+	 */
+	public static boolean checkForLowPriorityUpload(String agent) {
+		if ( "Gnutella".equals(agent) )
+			return false;
+
+		synchronized(_fullUploads) {
+			if (_fullUploads.isEmpty())
+				return false;
+
+			HTTPUploader first = (HTTPUploader)Collections.min(_fullUploads); 
+			if ( "Gnutella".equals(first.getUserAgent()) )
+			{
+				first.doCleanup();  
+				first.setStateString("Bumped old client");
+				return true;
+			}
+		}
+		return false;
+	}
+
 
     private String getMimeType() {         /* eventually this method should */
         String mimetype;                /* determine the mime type of a file */
@@ -659,6 +909,38 @@ public class HTTPUploader implements Runnable {
             str = "Server: " + "LimeWire" + "\r\n";
             ostream.write(str.getBytes());
             str = "Content-Type: text/plain\r\n";
+            ostream.write(str.getBytes());
+            str = "Content-Length: " + errMsg.length() + "\r\n";
+            ostream.write(str.getBytes());
+            str = "\r\n";
+            ostream.write(str.getBytes());
+            ostream.write(errMsg.getBytes());
+            ostream.flush();
+        } catch (Exception e) {
+        }
+        try {
+            ostream.close();
+            s.close();
+        } catch (Exception e) {
+        }
+    }
+
+    /**
+     *   Handle a web based freeloader
+     */
+    public static void doFreeloaderResponse(Socket s) {
+        OutputStream ostream = null;
+        /* Sends a 402 Browser Request Denied message */
+        try {
+            ostream = s.getOutputStream();
+            /* is this the right format? */
+            String str;
+            String errMsg = HTTPPage.responsePage;
+            str = "HTTP 200 OK \r\n";
+            ostream.write(str.getBytes());
+            str = "Server: " + "LimeWire" + "\r\n";
+            ostream.write(str.getBytes());
+            str = "Content-Type: text/html\r\n";
             ostream.write(str.getBytes());
             str = "Content-Length: " + errMsg.length() + "\r\n";
             ostream.write(str.getBytes());
@@ -721,8 +1003,19 @@ public class HTTPUploader implements Runnable {
         return _state;
     }
 
+
+	/**
+	 *  Retrieve what is normally a text error state
+	 */
     public String getStateString() {
         return _stateString;
+    }
+
+	/**
+	 *  Set what is normally a text error state
+	 */
+    public void setStateString( String stateString ) {
+        _stateString = stateString;
     }
 
     ///** Unit test for timestamp stuff. */
