@@ -1,12 +1,12 @@
-﻿################################################################################
-# Messages Bundle for LimeWire 2.8.5
+################################################################################
+# Messages Bundle for LimeWire 4.1.19
 # Specialization for: Czech - Czech Republik
 # Dummy resources bundle for missing translation.
 ################################################################################
 LOCALE_LANGUAGE_CODE=cs
 LOCALE_LANGUAGE_NAME=Čeština
 LOCALE_COUNTRY_CODE=
-LOCALE_COUNTRY_NAME=Česká republika
+LOCALE_COUNTRY_NAME=Česká Republika
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Latn
