@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.LeafConnection;
@@ -111,12 +112,15 @@ public final class MessageRouterTest extends BaseTestCase {
      * <tt>Response</tt> arrays.
      */
     public void testResponsesToQueryReplies() throws Exception {
+        
+        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+        
         Class[] paramTypes = new Class[] {
             Response[].class, 
             QueryRequest.class,
             Integer.TYPE,
         };
-
+        
 		Method m = 
             PrivilegedAccessor.getMethod(ROUTER, 
                                          "responsesToQueryReplies",
