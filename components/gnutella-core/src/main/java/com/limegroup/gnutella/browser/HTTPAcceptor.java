@@ -126,17 +126,21 @@ public class HTTPAcceptor implements Runnable {
         try {
             setListeningPort(_port);
         } catch (IOException e) {
+			boolean error = true;
             //2. Try 10 different ports
             for (int i=0; i<10; i++) {
     			_port=i+45100;
                 try {
                     setListeningPort(_port);
+					error = false;
                     break;
                 } catch (IOException e2) { }
             }
 
-            // If we still don't have a socket, there's an error
-			ErrorService.error(e);
+			if(error) {
+				// If we still don't have a socket, there's an error
+				ErrorService.error(e);
+			}
         }
 
         while (true) {
