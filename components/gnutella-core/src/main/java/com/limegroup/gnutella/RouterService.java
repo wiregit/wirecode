@@ -13,11 +13,11 @@ import com.limegroup.gnutella.util.*;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
- * communicating with the backend.  RouterService plays a key role in
- * constructing the backend components.  Typical use is as follows:
+ * communicating with the backend.  RouterService constructs the backend 
+ * components.  Typical use is as follows:
  *
  * <pre>
- * RouterService rs = new RouterService();
+ * RouterService rs = new RouterService(ActivityCallback);
  * rs.start();
  * rs.query(...);
  * rs.download(...);
@@ -46,7 +46,9 @@ import com.limegroup.gnutella.util.*;
  */
 public final class RouterService {
 
-
+	/**
+	 * <tt>FileManager</tt> instance that manages access to shared files.
+	 */
     private static final FileManager fileManager = new MetaFileManager();
 
     /**
@@ -54,8 +56,15 @@ public final class RouterService {
      */
     private static Authenticator authenticator = new ServerAuthenticator();
 
+	/**
+	 * Timer similar to java.util.Timer, which was not available on 1.1.8.
+	 */
     private static final SimpleTimer timer = new SimpleTimer(true);
 
+	/**
+	 * <tt>Acceptor</tt> instance for accepting new connections, HTTP
+	 * requests, etc.
+	 */
     private static final Acceptor acceptor = new Acceptor();
 
 	/**
@@ -64,14 +73,34 @@ public final class RouterService {
     private static final ConnectionManager manager =
 		new ConnectionManager(authenticator);
 
+	/**
+	 * <tt>HostCatcher</tt> that handles Gnutella pongs.
+	 */
     private static final HostCatcher catcher = new HostCatcher();
+	
+	/**
+	 * <tt>DownloadManager</tt> for handling HTTP downloading.
+	 */
     private static final DownloadManager downloader = new DownloadManager();
+
+	/**
+	 * <tt>UploadManager</tt> for handling HTTP uploading.
+	 */
     private static final UploadManager uploadManager = 
 		new UploadManager(fileManager);
+
+	
     private static final ResponseVerifier verifier = new ResponseVerifier();
 
 	//keep the reference around...prevent class GC
+	/**
+	 * <tt>ChatManager</tt> for managing all chat sessions.
+	 */
     private static final ChatManager chatManager = ChatManager.instance();
+
+	/**
+	 * <tt>Statistics</tt> class for managing statistics.
+	 */
 	private static final Statistics statistics = Statistics.instance();
 
 	/**
@@ -106,6 +135,9 @@ public final class RouterService {
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
 	 * the backend.
+	 *
+	 * @param callback the <tt>ActivityCallback</tt> instance to use for
+	 *  making callbacks
 	 */
   	public RouterService(ActivityCallback callback) {
 		RouterService.callback = callback;
@@ -130,20 +162,6 @@ public final class RouterService {
   	}
 
 	/**
-	 * Static method that sets the <tt>ActivityCallback</tt> instance.  This
-	 * is a significant hack, as this MUST be called before the call
-	 * to RouterService.instance when the application is first being
-	 * constructed.  If it isn't, null pointers will be thrown.  Note that
-	 * this is not an issue at all once the program is up and running.
-	 *
-	 * @param callback the <tt>ActivityCallback</tt> instance for 
-	 *  visual display
-	 */
-	public static void setCallback(ActivityCallback callback) {
-		RouterService.callback = callback;
-	}
-
-	/**
 	 * Starts various threads and tasks once all core classes have
 	 * been constructed.
 	 */
@@ -163,11 +181,28 @@ public final class RouterService {
 	}
 
     /**
-     * Returns the ActivityCallback passed to this' constructor.
+     * Returns the <tt>ActivityCallback</tt> passed to this' constructor.
+	 *
+	 * @return the <tt>ActivityCallback</tt> passed to this' constructor --
+	 *  this is one of the few accessors that can be <tt>null</tt> -- this 
+	 *  will be <tt>null</tt> in the case where the <tt>RouterService</tt>
+	 *  has not been constructed
      */ 
     public static ActivityCallback getCallback() {
         return RouterService.callback;
     }
+
+	/**
+	 * Accessor for the <tt>MessageRouter</tt> instance.
+	 *
+	 * @return the <tt>MessageRouter</tt> instance in use --
+	 *  this is one of the few accessors that can be <tt>null</tt> -- this 
+	 *  will be <tt>null</tt> in the case where the <tt>RouterService</tt>
+	 *  has not been constructed
+	 */
+	public static MessageRouter getMessageRouter() {
+		return router;
+	}
     
 	/**
 	 * Accessor for the <tt>FileManager</tt> instance in use.
@@ -194,15 +229,6 @@ public final class RouterService {
 	 */
 	public static UDPAcceptor getUdpAcceptor() {
 		return udpAcceptor;
-	}
-
-	/**
-	 * Accessor for the <tt>MessageRouter</tt> instance.
-	 *
-	 * @return the <tt>MessageRouter</tt> instance in use
-	 */
-	public static MessageRouter getMessageRouter() {
-		return router;
 	}
 
 	/**
@@ -311,100 +337,6 @@ public final class RouterService {
         if (!acceptor.isBannedIP(hostname))
             manager.createConnectionAsynchronously(hostname, portnum);
     }
-
-
-    /**
-     * Attempts to connect to the given group.  Removes your current
-     * connections and blocks until the group server has been contacted.
-     * If the group server is not reachable, restores connection settings
-     * and silently fails.
-     */
-    //public void connectToGroup(String group) {
-	// groupConnect(group);
-    //}
-
-    /**
-     * Connect to remote host (establish outgoing connection).
-     * Blocks until connection established but send a GroupPingRequest
-     */
-    /**private ManagedConnection groupConnectToHostBlocking(
-      String hostname, int portnum, String group)
-            throws IOException {
-
-        SettingsManager settings=SettingsManager.instance();
-        group += ":"+settings.getConnectionSpeed();
-
-        GroupPingRequest pingRequest =
-          router.createGroupPingRequest(group);
-
-        return manager.createGroupConnectionBlocking(hostname, portnum,
-          pingRequest);
-    }
-	*/
-
-    /**
-     * Connects to router and sends a GroupPingRequest.
-     * Block until connected.
-     */
-    /**private void groupConnect(String group) {
-        SettingsManager settings=SettingsManager.instance();
-
-        // Store the quick connect value.
-        boolean useQuickConnect = settings.getUseQuickConnect();
-        settings.setUseQuickConnect(false);
-
-        // Ensure the keep alive is at least 1.
-        if (settings.getKeepAlive()<1)
-            settings.setKeepAlive(settings.DEFAULT_KEEP_ALIVE);
-        int oldKeepAlive = settings.getKeepAlive();
-
-        // Build an endpoint of the group server
-        String host= "router.limewire.com:6349";
-        Endpoint e;
-        try {
-            e=new Endpoint(host);
-        } catch (IllegalArgumentException exc) {
-            return;
-        }
-
-        // Disconnect from current connections.
-        disconnect();
-
-        // Clear host catcher.
-        catcher.silentClear();
-
-        // Kickoff the Group Connect fetch of PingReplies
-        try {
-            groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
-        } catch (IOException exc) {
-            settings.setUseQuickConnect(useQuickConnect);
-            return;
-        }
-
-        // Reset the KeepAlive to greater than 1
-        //oldKeepAlive;
-
-        //Ensure settings are positive
-        int outgoing=settings.getKeepAlive();
-        if (outgoing<1) {
-            outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);
-        }
-        //int incoming=settings.getMaxIncomingConnections();
-        ///if (incoming<1 && outgoing!=0) {
-		// incoming = outgoing/2;
-		//  settings.setMaxIncomingConnections(incoming);
-        //}
-
-		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
-			//manager.activateUltraFastConnectShutdown();
-		}
-        setKeepAlive(outgoing);
-        settings.setUseQuickConnect(useQuickConnect);
-    }
-	*/
 
     /**
      * Connects to the network.  Ensures the number of messaging connections
@@ -1045,5 +977,4 @@ public final class RouterService {
 	public static int getPort() {
 		return acceptor.getPort();
 	}
-
 }
