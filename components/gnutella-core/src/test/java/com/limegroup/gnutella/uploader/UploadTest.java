@@ -478,6 +478,141 @@ public class UploadTest extends BaseTestCase {
         assertEquals(al, alc.iterator().next());
     }
     
+    //Tests that headers the downloader gives are used.
+    public void testMiniNewHeaderIsUsed() throws Exception {
+        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
+        
+        // Add a simple marker alt so we know it only contains that
+        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al = AlternateLocation.create(loc);
+        FD.add(al);
+        boolean passed = false;
+        passed = download("/uri-res/N2R?" + hash, null,
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc );
+        assertTrue("alt failed", passed);
+        
+        // Add a header that gives a new location.
+        String sendLoc = "http://2.2.2.2:2/uri-res/N2R?" + hash;
+        AlternateLocation sendAl = AlternateLocation.create(sendLoc);
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-Alt: 2.2.2.2:2",
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc);
+        assertTrue("alt failed", passed);
+        // Make sure the FD has that loc now.
+        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        List alts = new LinkedList();
+        for(Iterator i = alc.iterator(); i.hasNext(); )
+            alts.add(i.next());
+        assertTrue( alts.contains(al) );
+        assertTrue( alts.contains(sendAl) );
+        
+        //Make sure a request will give us both locs now.
+        passed = download("/uri-res/N2R?" + hash,
+                          null,
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + sendLoc + ", " + loc);
+        assertTrue("alt failed", passed);
+        
+        //Demote the location (don't remove)
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-NAlt: 2.2.2.2:2",
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc);
+        assertTrue("alt failed", passed);
+        // Should still have it.
+        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        alts = new LinkedList();
+        for(Iterator i = alc.iterator(); i.hasNext(); )
+            alts.add(i.next());
+        assertTrue( alts.contains(al) );
+        assertTrue( alts.contains(sendAl) );
+        
+        //Now remove (try interchanging with old header)
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-NAlt: " + sendLoc,
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc);
+        assertTrue("alt failed", passed);
+        // Now is removed.
+        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals(al, alc.iterator().next());
+        
+        //Now try a header without a port, should be 6346.
+        sendLoc = "http://2.3.4.5:6346/uri-res/N2R?" + hash;
+        sendAl = AlternateLocation.create(sendLoc);
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-Alt: 2.3.4.5",
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc);
+        assertTrue("alt failed", passed);
+        // Make sure the FD has that loc now.
+        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        alts = new LinkedList();
+        for(Iterator i = alc.iterator(); i.hasNext(); )
+            alts.add(i.next());
+        assertTrue( alts.contains(al) );
+        assertTrue( alts.contains(sendAl) );        
+    }
+    
+    // Tests that headers with multiple values in them are
+    // read correctly
+    public void testMultipleAlternates() throws Exception {
+        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
+        
+        // Add a simple marker alt so we know it only contains that
+        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al = AlternateLocation.create(loc);
+        FD.add(al);
+        boolean passed = false;
+        passed = download("/uri-res/N2R?" + hash, null,
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc );
+        assertTrue("alt failed", passed);
+        
+        // Add a header that gives a new location.
+        String send1 = "http://1.2.3.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al1 = AlternateLocation.create(send1);
+        String send2 = "http://1.2.3.2:2/uri-res/N2R?" + hash;
+        AlternateLocation al2 = AlternateLocation.create(send2);
+        String send3 = "http://1.2.3.4:6346/uri-res/N2R?" + hash;
+        AlternateLocation al3 = AlternateLocation.create(send3);
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-Alt: " + send1 + ", " + send2 + ", 1.2.3.4",
+                          "abcdefghijklmnopqrstuvwxyz",
+                          "X-Alt: " + loc);
+        assertTrue("alt failed", passed);
+        // Make sure the FD has that loc now.
+        assertEquals("wrong # locs", 4, FD.getAltLocsSize());
+        List alts = new LinkedList();
+        for(Iterator i = alc.iterator(); i.hasNext(); )
+            alts.add(i.next());
+        assertTrue( alts.contains(al) );
+        assertTrue( alts.contains(al1) );
+        assertTrue( alts.contains(al2) );
+        assertTrue( alts.contains(al3) );
+        
+        //Demote.
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-NAlt: 1.2.3.1:1, " + send2 + ", " + send3,
+                          "abcdefghijklmnopqrstuvwxyz",
+                          null);
+        assertTrue("alt failed", passed);
+        // Should still have it.
+        assertEquals("wrong # locs", 4, FD.getAltLocsSize());
+        
+        //Remove
+        passed = download("/uri-res/N2R?" + hash,
+                          "X-NAlt: " + send1 + ", 1.2.3.2:2, " + send3,
+                          "abcdefghijklmnopqrstuvwxyz",
+                          null);
+        assertTrue("alt failed", passed);
+        // Now is removed.
+        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals(al, alc.iterator().next());
+    }        
+    
     // unfortunately we can't test with private addresses
     // because all these connections require that local_is_private
     // is false, which turns off isPrivateAddress checking.
@@ -526,7 +661,7 @@ public class UploadTest extends BaseTestCase {
         assertEquals("wrong # locs: " + alc, 1, FD.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
         
-        invalidPort = "http://1.2.3.4:-1/uri-res/N2R?" + hash;
+        invalidPort = "http://1.2.3.4:-2/uri-res/N2R?" + hash;
         passed = download("/uri-res/N2R?" + hash,
                           "X-Alt: " + invalidPort,
                           "abcdefghijklmnopqrstuvwxyz",
@@ -1152,7 +1287,6 @@ public class UploadTest extends BaseTestCase {
             String line = in.readLine();
             if( line == null )
                 throw new InterruptedIOException("connection closed");
-            System.out.println(line);
             if (line.equals(""))
                 break;
             if (requiredHeader != null) {

@@ -250,6 +250,76 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 			// this is what we're expecting
 		}
 	}
+	
+	/**
+	 * Tests the location/urn constructor for success.
+	 */
+	public void testStringUrnConstructor() throws Exception {
+	    ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+	    URN urn =
+	        URN.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
+	    
+	    // First test with old-style locs.
+		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
+			AlternateLocation al = AlternateLocation.create(
+			    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn);
+		}
+		
+		// Now make sure that the URN-mismatch works
+		urn = URN.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTD");
+		for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
+			try {
+				AlternateLocation al = AlternateLocation.create(
+				    HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i], urn);
+                fail("IOException expected");
+			} catch(IOException expected) {}
+		}
+		
+		// Now try the new-style values
+		for(int i = 1; i < 254; i++) {
+	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
+	        AlternateLocation al = AlternateLocation.create(ip + ":50", urn);
+	        Endpoint ep = al.getHost();
+	        assertEquals(ip, ep.getHostname());
+	        assertEquals(50, ep.getPort());
+	        assertEquals(urn, al.getSHA1Urn());
+        }
+        
+        // Try without a port.
+		for(int i = 1; i < 254; i++) {
+	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
+	        AlternateLocation al = AlternateLocation.create(ip, urn);
+	        Endpoint ep = al.getHost();
+	        assertEquals(ip, ep.getHostname());
+	        assertEquals(6346, ep.getPort());
+	        assertEquals(urn, al.getSHA1Urn());
+        }
+        
+        // Try with bad values.
+		for(int i = 1; i < 254; i++) {
+		    try {
+	            String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100)+".1";
+	            AlternateLocation al =
+	                AlternateLocation.create(ip + ":50", urn);
+                fail("IOException expected");
+            } catch(IOException expected) {}
+        }
+        
+        try {
+            AlternateLocation.create("0.1.2.3", urn);
+            fail("IOException expected");
+        } catch(IOException expected) {}
+
+        try {
+            AlternateLocation.create("1.2.3.4/25", urn);
+            fail("IOException expected");
+        } catch(IOException expected) {}
+
+        try {
+            AlternateLocation.create("limewire.org", urn);
+            fail("IOException expected");
+        } catch(IOException expected) {}
+    }
 
     public void testDemotedEquals() throws Exception {
         AlternateLocation loc1 = AlternateLocation.create(equalLocs[0]);
