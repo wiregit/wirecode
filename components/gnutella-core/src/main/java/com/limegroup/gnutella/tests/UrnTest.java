@@ -56,6 +56,52 @@ public final class UrnTest extends TestCase {
 	private static URN[] urns;
 	private static URN[] sha1Urns;
 
+	private final String [] VALID_URN_HTTP_STRINGS = {
+		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/URI-RES/N2R?urn:sha1:WLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/n2R?urn:sha1:RLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2r?urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/n2r?urn:sha1:GLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
+		"/uri-res/N2R?UrN:sha1:LLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2R?urn:sHa1:VLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"/uri-res/N2R?urn:sha1:OLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
+		"/uri-res/N2R?urn:sha1:ULSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HtTP/1.0"
+	};
+
+	private final URN[] VALID_URNS_HTTP = new URN[VALID_URN_HTTP_STRINGS.length];
+	
+	private final String [] invalidURNStrings = {
+		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
+		"GET /urires/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
+		"/uri-es/N2R?urn:sha1:PLSTHIPQGSSZTS5FJcdirnZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
+		"GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
+		"GET/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urn:bitprint::PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
+		"GET /uri-res/N2R?urn:sha1::PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
+		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
+		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPF HTTP/1.0",
+		"GET /uri-res/N2R?ur:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R? urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?  urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?                                                    "+
+		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/ N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urnsha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urn:sa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
+		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0 ",
+		" GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0 ",
+		" ",
+		"GET",
+		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC HTTP/1.0",
+	};
+
 	public UrnTest(String name) {
 		super(name);
 	}
@@ -72,7 +118,7 @@ public final class UrnTest extends TestCase {
 		urns = new URN[VALID_URNS.length];
 		for(int i=0; i<urns.length; i++) {
 			try {
-				urns[i] = URNFactory.createSHA1Urn(VALID_URNS[i]);
+				urns[i] = URN.createSHA1Urn(VALID_URNS[i]);
 				assertNotNull("urn should not be null",urns[i]);
 				assertTrue("should be SHA1", urns[i].isSHA1());
 				assertTrue("urn should not have the empty string", 
@@ -84,13 +130,20 @@ public final class UrnTest extends TestCase {
 		sha1Urns = new URN[VALID_SHA1_URNS.length];
 		for(int i=0; i<sha1Urns.length; i++) {
 			try {
-				sha1Urns[i] = URNFactory.createSHA1Urn(VALID_SHA1_URNS[i]);
+				sha1Urns[i] = URN.createSHA1Urn(VALID_SHA1_URNS[i]);
 				assertNotNull("urn should not be null",sha1Urns[i]);
 				assertTrue("urn should not have the empty string", 
 						   !sha1Urns[i].toString().equals(""));
 			} catch(IOException e) {
 				assertTrue("unexpected exception: "+e, false);
 			}		
+		}
+		for(int i=0; i<VALID_URN_HTTP_STRINGS.length; i++) {
+			try {
+				VALID_URNS_HTTP[i] = URN.createSHA1UrnFromHttpRequest(VALID_URN_HTTP_STRINGS[0]);
+			} catch(IOException e) {
+				assertTrue("could not create urns for URNTest setup: "+e, false);
+			}
 		}
 	}
 
@@ -100,7 +153,7 @@ public final class UrnTest extends TestCase {
 	public void testValidUrns() {
 		for(int i=0; i<VALID_URNS.length; i++) {
 			try {
-				URN urn = URNFactory.createSHA1Urn(VALID_URNS[i]);
+				URN urn = URN.createSHA1Urn(VALID_URNS[i]);
 			} catch(IOException e) {
 				assertTrue(false);				
 			}
@@ -116,7 +169,7 @@ public final class UrnTest extends TestCase {
 		boolean encounteredFailure = false;
 		for(int i=0; i<INVALID_URNS.length; i++) {
 			try {
-				URN urn = URNFactory.createSHA1Urn(INVALID_URNS[i]);
+				URN urn = URN.createSHA1Urn(INVALID_URNS[i]);
 				assertTrue(false);
 			} catch(IOException e) {
 			}
@@ -136,12 +189,12 @@ public final class UrnTest extends TestCase {
 				if(!curFile.isFile()) {
 					continue;
 				}
-				URN urn = URNFactory.createSHA1Urn(curFile);
+				URN urn = URN.createSHA1Urn(curFile);
 				assertTrue(urn.isSHA1());
 				assertTrue(urn.isUrn(urn.toString()));
 				assertTrue(urn.getUrnType() == UrnType.SHA1);
 				try {
-					URN newURN = URNFactory.createSHA1Urn(urn.toString());
+					URN newURN = URN.createSHA1Urn(urn.toString());
 					assertTrue(newURN.equals(urn));
 				} catch(IOException e) {
 					assertTrue(false);
@@ -149,6 +202,48 @@ public final class UrnTest extends TestCase {
 			}
 		} catch(IOException e) {
 			assertTrue(false);
+		}
+	}
+
+
+	/**
+	 * Test the constructor that constructs a URN from a URN HTTP request.
+	 */
+	public void testUrnHttpConstructor() {
+		for(int i=0; i<VALID_URN_HTTP_STRINGS.length; i++) {
+			try {
+				URN.createSHA1UrnFromHttpRequest(VALID_URN_HTTP_STRINGS[i]);
+			} catch(IOException e) {
+				assertTrue("construction of an URN from a valid get request failed: "+e,
+						   false);
+			}
+		}
+		for(int i=0; i<invalidURNStrings.length; i++) {
+			try {
+				URN.createSHA1UrnFromHttpRequest(invalidURNStrings[i]);
+				assertTrue("construction of a URN from an invalid get request succeeded: "+
+						   invalidURNStrings[i],
+						   false);				
+			} catch(IOException e) {
+				continue;
+			}			
+		}
+	}
+
+	/**
+	 * Test the URN constructor that takes only a file parameter.
+	 */
+	public void testCreateSHA1Urn() {
+		File gnutellaDir = new File("c:/work/lime/core/com/limegroup/gnutella");
+		File[] files = gnutellaDir.listFiles();
+		for(int i=0; i<files.length; i++) {
+			if(!files[i].isFile()) continue;
+			try {
+				URN.createSHA1Urn(files[i]);
+			} catch(IOException e) {
+				assertTrue("could not create a SHA1 URN from a valid file: "+
+						   e, false);
+			}
 		}
 	}
 
@@ -191,7 +286,7 @@ public final class UrnTest extends TestCase {
 		int[] hashCodes = new int[VALID_URNS.length];
 		for(int i=0; i<VALID_URNS.length; i++) {
 			try {
-				hashCodes[i] = URNFactory.createSHA1Urn(VALID_URNS[i]).hashCode();
+				hashCodes[i] = URN.createSHA1Urn(VALID_URNS[i]).hashCode();
 			} catch(IOException e) {
 				assertTrue(false);
 			}
@@ -217,7 +312,7 @@ public final class UrnTest extends TestCase {
 			for(int j=0; j<urns.length; j++) {
 				if(i == j) {
 					try {
-						URN tempUrn = URNFactory.createSHA1Urn(urns[j].toString());
+						URN tempUrn = URN.createSHA1Urn(urns[j].toString());
 						assertEquals("urns should be equal", curUrn, tempUrn);
 					} catch(IOException e) {
 						assertTrue("unexpected exception: "+e, false);
