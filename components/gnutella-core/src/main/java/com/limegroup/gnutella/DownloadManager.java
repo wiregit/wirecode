@@ -79,7 +79,11 @@ public class DownloadManager implements BandwidthTracker {
                 new FileOutputStream(
                     SettingsManager.instance().getDownloadSnapshotFile()));
             out.writeObject(buf);
-            out.writeObject(incompleteFileManager);
+            //Blocks can be written to incompleteFileManager from other threads
+            //while this downloader is being serialized, so lock is needed.
+            synchronized (incompleteFileManager) {
+                out.writeObject(incompleteFileManager);
+            }
             out.flush();
             out.close();
             return true;

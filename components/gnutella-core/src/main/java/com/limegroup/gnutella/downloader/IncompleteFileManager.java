@@ -103,7 +103,8 @@ public class IncompleteFileManager implements Serializable {
     /** 
      * Returns an unmodifiable iterator of the complete blocks of the given
      * file, each as a half-open Interval.  If nothing is known of the file,
-     * returns an empty iterator.
+     * returns an empty iterator.  <b>Be sure to synchronize on this when using
+     * the Iterator in a multithreaded environment.</b>
      *
      * @param incompleteFile a fully qualified temporary file, i.e., the result
      *  of getFile
@@ -204,7 +205,8 @@ public class IncompleteFileManager implements Serializable {
 
     /**
      * Returns the blocks in this that are not written.  This assumes that no
-     * downloaders are currently writing to the file.
+     * downloaders are currently writing to the file.  <b>Be sure to synchronize
+     * on this when using the Iterator in a multithreaded environment.</b>
      * 
      * @param incompleteFile a fully qualified temporary file, i.e., the result
      *  of getFile

@@ -136,10 +136,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /** See note on serialization at top of file */
-    private void writeObject(ObjectOutputStream stream)
+    private synchronized void writeObject(ObjectOutputStream stream)
             throws IOException {
         stream.writeObject(allFiles);
-        stream.writeObject(incompleteFileManager);
+        //Blocks can be written to incompleteFileManager from other threads
+        //while this downloader is being serialized, so lock is needed.
+        synchronized (incompleteFileManager) {
+            stream.writeObject(incompleteFileManager);
+        }
 		stream.writeObject(bandwidthTracker);
     }
 
@@ -332,13 +336,15 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized int amountForPreview(File incompleteFile) {
         int last=0;
         //This is tricky. First we search if a previous downloader wrote a block
-        //starting at byte zero.     
-        for (Iterator iter=incompleteFileManager.getBlocks(incompleteFile); 
-                iter.hasNext() ; ) {
-            Interval interval=(Interval)iter.next();
-            if (interval.low==0) {
-                last=interval.high;
-                break;
+        //starting at byte zero.   
+        synchronized (incompleteFileManager) {
+            for (Iterator iter=incompleteFileManager.getBlocks(incompleteFile);
+                     iter.hasNext() ; ) {
+                Interval interval=(Interval)iter.next();
+                if (interval.low==0) {
+                    last=interval.high;
+                    break;
+                }
             }
         }
 
@@ -512,10 +518,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         List /* of Interval */ needed=new ArrayList(); {
             RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
             File incompleteFile=incompleteFileManager.getFile(rfd);
-            Iterator iter=incompleteFileManager.
-                 getFreeBlocks(incompleteFile, rfd.getSize());
-            while (iter.hasNext()) 
-                needed.add((Interval)iter.next());
+            synchronized (incompleteFileManager) {
+                Iterator iter=incompleteFileManager.
+                    getFreeBlocks(incompleteFile, rfd.getSize());
+                while (iter.hasNext()) 
+                    needed.add((Interval)iter.next());
+            }
         }
 
         //The locations that were busy, for trying later.
