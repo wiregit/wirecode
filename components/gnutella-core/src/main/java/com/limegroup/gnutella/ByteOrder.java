@@ -188,6 +188,72 @@ public class ByteOrder {
             throw new IllegalArgumentException("No bytes specified");
         }
     }
+    
+    /**
+     * Big-endian bytes to long.  This version can read fewer than 8 bytes.
+     * If n &lt; 8, the returned value is never negative.
+     *
+     * @param x the source of the bytes
+     * @param offset the index to start reading bytes
+     * @param n the number of bytes to read, which must be between 1 and 8,
+     *   inclusive
+     * @return the value of x[offset .. offset + N] as an long, assuming x is
+     *   interpreted as an unsigned big-endian number (i.e., x[offset] is MSB).
+     * @exception IllegalArgumentException if n is less than 1 or greater than 8
+     * @exception IndexOutOfBoundsException if offset &lt; 0 or
+     *   offset + n &gt; x.length
+     */
+    public static long beb2long(final byte[] x, final int offset, final int n)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        switch (n) {
+        case 1:
+            return   (long)x[offset    ] & 0xFF        ;
+        case 2:
+            return (((long)x[offset    ] & 0xFF) <<  8) |
+                   ( (long)x[offset + 1] & 0xFF       );
+        case 3:
+            return (((long)x[offset    ] & 0xFF) << 16) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   ( (long)x[offset + 2] & 0xFF       );
+        case 4:
+            return (((long)x[offset    ] & 0xFF) << 24) |
+                   (((long)x[offset + 1] & 0xFF) << 16) |
+                   (((long)x[offset + 2] & 0xFF) <<  8) |
+                   ( (long)x[offset + 3] & 0xFF       );
+        case 5:
+            return (((long)x[offset    ] & 0xFF) << 32) |
+                   (((long)x[offset + 1] & 0xFF) << 24) |
+                   (((long)x[offset + 2] & 0xFF) << 16) |
+                   (((long)x[offset + 3] & 0xFF) <<  8) |
+                   ( (long)x[offset + 4] & 0xFF       );
+        case 6:
+            return (((long)x[offset    ] & 0xFF) << 40) |
+                   (((long)x[offset + 1] & 0xFF) << 32) |
+                   (((long)x[offset + 2] & 0xFF) << 24) |
+                   (((long)x[offset + 3] & 0xFF) << 16) |
+                   (((long)x[offset + 4] & 0xFF) <<  8) |
+                   ( (long)x[offset + 5] & 0xFF       );
+        case 7:
+            return (((long)x[offset    ] & 0xFF) << 48) |
+                   (((long)x[offset + 1] & 0xFF) << 40) |
+                   (((long)x[offset + 2] & 0xFF) << 32) |
+                   (((long)x[offset + 3] & 0xFF) << 24) |
+                   (((long)x[offset + 4] & 0xFF) << 16) |
+                   (((long)x[offset + 5] & 0xFF) <<  8) |
+                   ( (long)x[offset + 6] & 0xFF       );
+        case 8:
+            return ( (long)x[offset    ]         << 56) |
+                   (((long)x[offset + 1] & 0xFF) << 48) |
+                   (((long)x[offset + 2] & 0xFF) << 40) |
+                   (((long)x[offset + 3] & 0xFF) << 32) |
+                   (((long)x[offset + 4] & 0xFF) << 24) |
+                   (((long)x[offset + 5] & 0xFF) << 16) |
+                   (((long)x[offset + 6] & 0xFF) <<  8) |
+                   ( (long)x[offset + 7] & 0xFF       );
+        default:
+            throw new IllegalArgumentException("No bytes specified");
+        }
+    }
 
     /**
      * Short to little-endian bytes: writes x to buf[offset .. ].
@@ -245,6 +311,51 @@ public class ByteOrder {
         buf[offset + 1] = (byte)(x >> 16);
         buf[offset + 2] = (byte)(x >>  8);
         buf[offset + 3] = (byte) x       ;
+    }
+    
+
+    
+    /**
+     * Int to big-endian bytes: writes x to buf[offset], writing only
+     * the up to n bytes.
+     *
+     * @requires x fits in n bytes, else the stored value will be incorrect.
+     *           n may be larger than the value required
+     *           to store x, in which case this will pad with 0.
+     *
+     * @param buf the buffer of bytes to write into
+     * @param x the little-endian byte to convert
+     * @param offset the index to start writing into buf
+     * @param n the number of bytes to write, which must be between 1 and 4,
+     *   inclusive
+     * @exception IllegalArgumentException if n is less than 1 or greater than 8
+     * @exception IndexOutOfBoundsException if offset &lt; 0 or
+     *   offset + n &gt; x.length
+     */
+    public static void int2beb(final int x, final byte[] buf,
+                               final int offset, final int n) {
+        switch(n) {
+        case 1:
+            buf[offset    ] = (byte) x      ;
+            break;
+        case 2:
+            buf[offset    ] = (byte)(x >> 8);
+            buf[offset + 1] = (byte) x      ;
+            break;            
+        case 3:
+            buf[offset    ] = (byte)(x >> 16);
+            buf[offset + 1] = (byte)(x >>  8);
+            buf[offset + 2] = (byte) x       ;
+            break;
+        case 4:
+            buf[offset    ] = (byte)(x >> 24);
+            buf[offset + 1] = (byte)(x >> 16);
+            buf[offset + 2] = (byte)(x >>  8);
+            buf[offset + 3] = (byte) x       ;
+            break;
+        default:
+            throw new IllegalArgumentException("invalid n: " + n);
+        }
     }
 
     /**

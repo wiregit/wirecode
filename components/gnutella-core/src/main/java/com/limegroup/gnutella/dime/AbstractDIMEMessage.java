@@ -14,6 +14,8 @@ import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.Set;
 
+import com.limegroup.gnutella.ByteOrder;
+
 /**
  * @author Gregorio Roper
  * 
@@ -131,22 +133,22 @@ public abstract class AbstractDIMEMessage {
         if ((header[0] & VERSION) != VERSION)
             throw new DIMEMessageException("unknown DIMEVersion" + header[0]);
         // bytes 2 & 3 contain the optionsLength in BIG ENDIAN format
-        int optionsLength = getIntBigEndian(header, 2, 2);
+        int optionsLength = ByteOrder.beb2int(header, 2, 2);
 
         // bytes 4 & 5 contain the idLength in BIG ENDIAN format
-        int idLength = getIntBigEndian(header, 4, 2);
+        int idLength = ByteOrder.beb2int(header, 4, 2);
         if (idLength < 0)
             throw new IOException("illegal data field in DIME message");
 
         // bytes 6 & 7 contain the typeLength in BIG ENDIAN format
-        int typeLength = getIntBigEndian(header, 6, 2);
+        int typeLength = ByteOrder.beb2int(header, 6, 2);
         if (typeLength < 0)
             throw new IOException("illegal data field in DIME message");
 
         // bytes 8 - 11 contain the dataLength in BIG ENDIAN format
         // possibly dangerous cast, but I don't expect messages that are longer
         // than Integer.MAX_VALUE
-        int dataLength = (int) getLongBigEndian(header, 8, 4);
+        int dataLength = (int) ByteOrder.beb2long(header, 8, 4);
 
         if (dataLength < 0)
             throw new IOException("illegal data field in DIME message");
@@ -263,12 +265,8 @@ public abstract class AbstractDIMEMessage {
             // data lengh and padded elementData
             byte[] element = new byte[4 + elementDataLength];
             System.arraycopy(key, 0, element, 0, 2);
-            System.arraycopy(
-                getBytesBigEndian(elementDataLength, 2),
-                0,
-                element,
-                2,
-                2);
+            ByteOrder.int2beb(elementDataLength, element,
+                              2, 2);
             System.arraycopy(padData(value), 0, element, 4, elementDataLength);
 
             // save the element in the optionsSet for now.
@@ -330,16 +328,16 @@ public abstract class AbstractDIMEMessage {
             header[1] |= TYPE_UNCHANGED_MASK;
 
         // add options length BIG ENDIAN in bytes 2 & 3 of header
-        System.arraycopy(getBytesBigEndian(optionsLength, 2), 0, header, 2, 2);
+        ByteOrder.int2beb(optionsLength, header, 2, 2);
 
         // add id length BIG ENDIAN in bytes 4 & 5 of header
-        System.arraycopy(getBytesBigEndian(idLength, 2), 0, header, 4, 2);
+        ByteOrder.int2beb(idLength, header, 4, 2);
 
         // add type length BIG ENDIAN in bytes 6 & 7 of header
-        System.arraycopy(getBytesBigEndian(typeLength, 2), 0, header, 6, 2);
+        ByteOrder.int2beb(typeLength, header, 6, 2);
 
         // add data length BIG ENDIAN in bytes 8-11 of header
-        System.arraycopy(getBytesBigEndian(dataLength, 4), 0, header, 8, 4);
+        ByteOrder.int2beb(dataLength, header, 8, 4);
 
         return header;
     }
@@ -365,49 +363,6 @@ public abstract class AbstractDIMEMessage {
         return ret;
     }
 
-    static byte[] getBytesBigEndian(long number, int byteCount) {
-        byte[] ret = new byte[byteCount];
-        for (int i = byteCount - 1; i >= 0; i--) {
-            ret[i] = (byte) (0xFF & number);
-            number >>>= 8;
-        }
-        return ret;
-    }
-
-    static int getIntBigEndian(byte[] bytes, int index, int length) {
-        int ret = 0;
-        for (int i = index; i < index + length; i++) {
-            ret <<= 8;
-            ret |= getUnsignedByte(bytes[i]);
-        }
-        return ret;
-    }
-
-    static int getIntLittleEndian(byte[] bytes, int index, int length) {
-        int ret = 0;
-        for (int i = index + length - 1; i >= length; i--) {
-            ret <<= 8;
-            ret |= getUnsignedByte(bytes[i]);
-        }
-        return ret;
-    }
-
-    static long getLongBigEndian(byte[] bytes, int index, int length) {
-        long ret = 0;
-        for (int i = index; i < index + length; i++) {
-            ret <<= 8;
-            ret |= getUnsignedByte(bytes[i]);
-        }
-        return ret;
-    }
-
-    static int getUnsignedByte(byte b) {
-        if (b < 0)
-            return (256 + b);
-        else
-            return b;
-    }
-
     static void skipPaddedData(InputStream is, int dataLength)
         throws IOException {
         int paddedLength = calculatePaddedDataLength(dataLength);
@@ -418,8 +373,11 @@ public abstract class AbstractDIMEMessage {
         throws IOException {
         int offset = 0;
         while (offset < buf.length) {
-            buf[offset] = (byte)is.read();
-            offset ++;
+            int read = is.read(buf, offset, buf.length - offset);
+            if(read == -1)
+                throw new IOException("eof");
+            else
+                offset += read;
         }
         return offset;
     }

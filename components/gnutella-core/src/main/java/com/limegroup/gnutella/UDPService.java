@@ -61,7 +61,6 @@ public final class UDPService implements Runnable {
      */
     private boolean _socketSetOnce = false;
 
-
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.

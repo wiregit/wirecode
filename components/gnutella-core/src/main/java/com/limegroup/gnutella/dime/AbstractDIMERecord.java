@@ -8,6 +8,8 @@ import com.limegroup.gnutella.Assert;
 import com.sun.java.util.collections.HashMap;
 import com.sun.java.util.collections.Map;
 
+import com.limegroup.gnutella.ByteOrder;
+
 /**
  * @author Gregorio Roper
  * 
@@ -207,8 +209,7 @@ public abstract class AbstractDIMERecord {
             }
             offset += 2;
 
-            int valueLength =
-                AbstractDIMEMessage.getIntBigEndian(options, offset, 2);
+            int valueLength = ByteOrder.beb2int(options, offset, 2);
             offset += 2;
 
             if (options.length - offset < valueLength)
