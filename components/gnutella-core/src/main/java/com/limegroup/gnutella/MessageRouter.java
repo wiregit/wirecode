@@ -242,7 +242,7 @@ public abstract class MessageRouter
         //send back pongs
         if (_pongCache.size() > pingInfo.getTotalNeeded())
             sendSomePongs(receivingConnection, pingInfo);
-        else
+        else if (_pongCache.size() > 0) //only send if some entries in cache
             sendAllPongs(receivingConnection, pingInfo);
     }
 
@@ -356,7 +356,7 @@ public abstract class MessageRouter
     private PingReply getAPingReply(ManagedConnection receivingConnection, 
                                     ManagedConnectionPingInfo pingInfo, int hops)
     {
-        PingReplyCacheEntry entry = _pongCache.getEntry(hops-1);
+        PingReplyCacheEntry entry = _pongCache.getEntry(hops);
         byte[] guid = pingInfo.getLastGUID();
 
         if (entry == null)
@@ -379,10 +379,9 @@ public abstract class MessageRouter
 
     /**
      * Sends out the Ping Replies of all the neighbors that we are connected to.
-     * (i.e., Ping Replies that we received with a TTL of 1, or Hosts that are
-     * a TTL of 1 (and hop of 1) away from us.  Since a crawler might send back
-     * a dummy PingReply when we send a PingRequest to it, we have to make 
-     * sure, we don't send back the dummy PingReply
+     * (i.e., Ping Replies that we received that are 1 hop away from us.  Since
+     *  a crawler might send back a dummy PingReply when we send a PingRequest 
+     * to it, we have to make sure, we don't send back the dummy PingReply
      *
      * @requires - sending the pings to a crawler connection (i.e., a Gnutella
      *             crawler connected to us and wants pongs of all of our 

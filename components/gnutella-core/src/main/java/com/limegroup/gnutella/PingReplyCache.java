@@ -130,7 +130,7 @@ public class PingReplyCache
     {
         if (size() <= 0) 
             return null;
-
+        
         if (hops > pingReplies.length)
             return null;
         
@@ -246,16 +246,31 @@ public class PingReplyCache
 
         public boolean hasNext()
         {
+            //make sure entries in the cache
+            if (size() == 0)
+                return false;
+
             //if we've gone through the entire cache, then we're done.
             if (hopsIndex >= MessageRouter.MAX_TTL_FOR_CACHE_REFRESH)
                 return false;
-            
+   
             if (origHopsIndex > 0) //returning entries for only one hops.
             {
                 if (hopsIndex > origHopsIndex) 
                     return false;
             }
-
+            else
+            {
+                //check to make sure not all entries have been used up (i.e., 
+                //returned)
+                while (pingReplies[hopsIndex].size() == 0)
+                {
+                    hopsIndex++;
+                    if (hopsIndex >= MessageRouter.MAX_TTL_FOR_CACHE_REFRESH)
+                        return false;
+                }
+            }
+            
             return true;
         }
 

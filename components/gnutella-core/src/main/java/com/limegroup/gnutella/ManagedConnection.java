@@ -6,11 +6,11 @@ import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
 
 /**
- * A Connection managed by a connection managed.  Includes a loopForMessages
- * method that runs forever (or until an IOException occurs), receiving and
- * replying to Gnutella messages.
+ * A Connection that is managed.  Includes a loopForMessages method that runs
+ * forever (or until an IOException occurs), receiving and replying to Gnutella 
+ * messages.
  *
- * This class implements PingReplyHandler to route PingReplies that originated
+ * This class implements ReplyHandler to route Queries and pushes that originated
  * from it.
  *
  * @author Ron Vogl

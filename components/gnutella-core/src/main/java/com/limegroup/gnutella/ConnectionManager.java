@@ -85,6 +85,8 @@ public class ConnectionManager {
     public void initialize(MessageRouter router, HostCatcher catcher) {
         _router = router;
         _catcher = catcher;
+        //notify host catcher that its' okay to create router connections now.
+        _catcher.setConnectionManagerInitialized();
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
@@ -471,7 +473,7 @@ public class ConnectionManager {
      */
     private void adjustConnectionFetchers() {
         int need = _keepAlive - getNumConnections() - _fetchers.size();
-
+        
         // Start connection fetchers as necessary
         while(need > 0) {
             new ConnectionFetcher(); // This kicks off a thread and registers
@@ -483,6 +485,7 @@ public class ConnectionManager {
         // aren't enough fetchers to stop.  In this case, close some of the
         // connections started by ConnectionFetchers.
         int lastFetcherIndex = _fetchers.size();
+
         while((need < 0) && (lastFetcherIndex > 0)) {
             ConnectionFetcher fetcher = (ConnectionFetcher)
                 _fetchers.remove(--lastFetcherIndex);
@@ -743,6 +746,15 @@ public class ConnectionManager {
             PingReplyCache pongCache = PingReplyCache.instance();
             PingReplyCacheEntry entry = null;
             PingReply pr = null;
+            
+            //if neither the pong cache, nor the reserve cache contains any
+            //endpoints, then return, allowing for the recording of the death
+            //of the fetcher.
+            if ((pongCache.size() == 0) && 
+                (_catcher.getNumReserveHosts() == 0)) {
+                _fetchers.remove(this);
+                return;                        
+            }
 
             do {
                 try {
@@ -750,7 +762,7 @@ public class ConnectionManager {
                         (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
                     entry = pongCache.getEntry(hops+1);
                     //if nothing in the cache, then try from the reserve cache
-                    if (entry == null) { 
+                    if (entry == null) {
                         endpoint = _catcher.getAnEndpoint();
                     }
                     else {
@@ -761,6 +773,7 @@ public class ConnectionManager {
                     //If we get here, it means that even the reserve cache has
                     //either no elements (or only private IPs), so just return
                     //and record the death of the fetcher.
+                    _fetchers.remove(this);
                     return;
                 }               
             } while ((endpoint == null) || (isConnected(endpoint)));

@@ -77,6 +77,15 @@ public class HostCatcher {
     private boolean needRouterConnection=true;
     private Object needRouterConnectionLock=new Object();
 
+    /* True iff ConnectionManager has been initialized.  We need to do this
+     * so we don't try to connect to the router before the Connection Manager
+     * has been initialized, otherwise a potential race condition could occur
+     * (NullPointerException before initialization race condition).
+     * LOCKING: obtain mangerInitializedLock
+     */
+    private boolean managerInitialized = false;
+    private Object managerInitializedLock=new Object();
+
     /** The number of MILLISECONDS a server's pong is valid for. */
     private static final int STALE_TIME=90*60*1000; //90 minutes
     /** The number of MILLISECONDS to wait before retrying quick-connect. */
@@ -91,6 +100,8 @@ public class HostCatcher {
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
+        routerConnectorThread=new RouterConnectorThread();
+        routerConnectorThread.start();
     }
 
     /**
@@ -99,8 +110,6 @@ public class HostCatcher {
     public void initialize(Acceptor acceptor, ConnectionManager manager) {
         this.acceptor = acceptor;
         this.manager = manager;
-        routerConnectorThread=new RouterConnectorThread();
-        routerConnectorThread.start();
     }
 
     /**
@@ -121,7 +130,6 @@ public class HostCatcher {
         } catch (IOException e) {
         }
     }
-
 
     /**
      * Reads in endpoints from the given file
@@ -193,18 +201,22 @@ public class HostCatcher {
             writeInternal(out, e);
         }
 
-        //2.) Write out the connections in the Ping Reply cache.
-//          PingReplyCache pongCache = PingReplyCache.instance();
-//          for (Iterator iter=pongCache.iterator(); iter.hasNext(); ) {
-//              PingReply pr = ((PingReplyCacheEntry)iter.next()).getPingReply();
-//              Endpoint e = new Endpoint(pr.getIP(), pr.getPort());
-//              if (connections.contains(e))
-//                  continue;
-//              connections.add(e);
-//              writeInternal(out, e);
-//          }
+        //2.) Write out the connections in the Ping Reply cache if any
+        PingReplyCache pongCache = PingReplyCache.instance();
+        if (pongCache.size() > 0) {
+            for (Iterator iter=pongCache.iterator(); iter.hasNext(); ) {
+                PingReply pr = ((PingReplyCacheEntry)iter.next()).
+                    getPingReply();
+                Endpoint e = new Endpoint(pr.getIP(), pr.getPort());
+                if (connections.contains(e))
+                    continue;
+                connections.add(e);
+                writeInternal(out, e);
+            }
+        }
 
-        //2.) Write hosts in reserve cache that are not in connections--in order.
+        //2.) Write hosts in reserve cache that are not in connections--in 
+        //order.
         for (int i=reserveCacheQueue.size()-1; i>=0; i--) {
             Endpoint e=(Endpoint)reserveCacheQueue.extractMax();
             if (connections.contains(e))
@@ -329,6 +341,18 @@ public class HostCatcher {
         /** Repeatedly contacts the pong server at most every STALE_TIME
          *  milliseconds. */
         public void run() {
+            //first, wait until manager is initialized before trying to create
+            //connections to a GNUTELLA router.
+            synchronized(managerInitializedLock) {
+                while (!managerInitialized) {
+                    try {
+                        managerInitializedLock.wait();
+                    }
+                    catch(InterruptedException ie) {
+                        continue; //try again
+                    }
+                }
+            }
             while(true) {
                 //if not enough values in the reserve cache, then connect to 
                 //router right away, to fill up the reserve cache.
@@ -385,6 +409,7 @@ public class HostCatcher {
                         manager.createRouterConnection(e.getHostname(),
                                                        e.getPort());
                     } catch (IOException exc) {
+                        System.out.println("Caught exception");
                         continue;
                     }
 
@@ -580,6 +605,17 @@ public class HostCatcher {
 
     public String toString() {
         return reserveCacheQueue.toString();
+    }
+
+    /** 
+     * Sets the manager intialized flag to true and wakes up the router thread
+     * who is waiting for the connection manager to be initialized.
+     */
+    public void setConnectionManagerInitialized() {
+        synchronized(managerInitializedLock) {
+            managerInitialized = true;
+            managerInitializedLock.notify();
+        }
     }
 
 //      /** Unit test: just calls tests.HostCatcherTest, since it
