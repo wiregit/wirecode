@@ -375,5 +375,36 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         QueryReply reply = (QueryReply) m;
         assertTrue(reply.getSupportsBrowseHost());
     }
+
+    public void testHTTPRequest() throws Exception {
+        Message m = null;
+        String result = null;
+
+        Socket s = new Socket("localhost", PORT);
+        ByteReader in = new ByteReader(s.getInputStream());
+        BufferedWriter out = 
+            new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+
+        // first test a GET
+        out.write("GET /  HTTP/1.1\r\n");
+        out.write("Accept: application/x-gnutella-packets\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        // check opcode
+        result = in.readLine();
+        assertGreaterThan(result, -1, result.indexOf("200"));
+
+        // get to the replies....
+        String currLine = null;
+        do {
+            currLine = in.readLine();
+        } while ((currLine != null) && !currLine.equals(""));
+
+        QueryReply qr = (QueryReply) Message.read(s.getInputStream());
+        assertEquals(2, qr.getResultCount());
+
+        assertNull(in.readLine());
+    }
     
 }
