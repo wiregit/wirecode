@@ -97,13 +97,20 @@ public class UpdateManager {
                     
                     InputStream in = connection.getInputStream();
                     int len = connection.getContentLength();
+                    System.out.println("Sumeet: content len "+len);
                     data = new byte[len];
-                    for(int i=0; i<len; i++) {
-                        //TODO2: more efficient if I read a chunk at a time
-                        int a = in.read();
+                    int BUF_LEN = 1024;//buffer size
+                    byte[] buf = new byte[BUF_LEN];
+                    int iters = len%BUF_LEN==0 ? len/BUF_LEN : (len/BUF_LEN)+1;
+                    ByteReader byteReader = new ByteReader(in);
+                    int totalRead = 0;
+                    for(int i=0; i<iters; i++) {
+                        int left = len - totalRead;
+                        int a = byteReader.read(buf,0,Math.min(BUF_LEN,left));
                         if(a==-1)
-                        break;
-                        data[i] = (byte)a;
+                            break;
+                        System.arraycopy(buf,0,data,totalRead,a);
+                        totalRead += a;
                     }
                     UpdateMessageVerifier verifier=new 
                                                    UpdateMessageVerifier(data);
