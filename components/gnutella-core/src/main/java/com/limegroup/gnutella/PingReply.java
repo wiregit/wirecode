@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
 /**
@@ -87,7 +88,7 @@ public class PingReply extends Message implements Serializable {
              int port, byte[] ip, long files, long kbytes,
              boolean isUltrapeer, int dailyUptime) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             ((dailyUptime>=0) || isUltrapeer)? newGGEP(dailyUptime, isUltrapeer) : null);
+             newGGEP(dailyUptime, isUltrapeer));
     }
 
     /**
@@ -136,18 +137,26 @@ public class PingReply extends Message implements Serializable {
     }
 
     /** Returns the GGEP payload bytes to encode the given uptime */
-    private static byte[] newGGEP(int dailyUptime, boolean udpSupported) {
+    private static byte[] newGGEP(int dailyUptime, boolean isUltrapeer) {
         try {
             GGEP ggep=new GGEP(true);
-            // one of the following, if not both, if statements will evaluate
-            // to true.
+
             if (dailyUptime >= 0)
                 ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
-            if (udpSupported) {
-                // the version number is 0.1
+
+            if (isUltrapeer) { 
+                // indicate guess support
                 byte[] vNum = {(byte) 1}; // high nibble is 0, low nibble is 1
                 ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+
+                // indicate UP support
+                
             }
+
+            // all pongs should have vendor info
+            addVendorExtension(ggep);
+
+            // actually write the badboy
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
@@ -157,6 +166,27 @@ public class PingReply extends Message implements Serializable {
             return null;
         }
     }
+
+
+    private static void addVendorExtension(GGEP ggep) {
+        byte[] payload = new byte[5];
+        // set 'LIME'
+        System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
+                         0, payload, 0,
+                         CommonUtils.QHD_VENDOR_NAME.getBytes().length);
+
+        {   // set vendor version 
+            int version = CommonUtils.getMajorVersionNumber();
+            version = version << 4;  // major set
+            // set minor
+            version |= CommonUtils.getMinorVersionNumber(); 
+            payload[4] = (byte) version;
+        }
+
+        // add it
+        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);
+    }
+
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
@@ -226,6 +256,58 @@ public class PingReply extends Message implements Serializable {
             throw new BadPacketException("Missing GGEP block");
         return ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
     }
+
+
+    /** Returns the 4-character vendor string associated with this Pong.
+     *  @exception BadPacketException if the vendor is not known or corrupt.
+     */
+    public synchronized String getVendor() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        try {
+            return new String(ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO),
+                              0, 4);
+        }
+        catch (BadGGEPPropertyException corrupt) {
+            throw new BadPacketException("Corrupt GGEP block");
+        }
+    }
+
+
+    /** Returns the Major Version number of this pong.
+     *  @exception BadPacketException if the version is not known or corrupt.
+     */
+    public synchronized int getVendorMajorVersion() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        try {
+            byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+            return (bytes[4] >> 4);
+        }
+        catch (BadGGEPPropertyException corrupt) {
+            throw new BadPacketException("Corrupt GGEP block");
+        }
+    }
+
+    /** Returns the Minor Version number of this pong.
+     *  @exception BadPacketException if the version is not known or corrupt.
+     */
+    public synchronized int getVendorMinorVersion() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        try {
+            byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+            return (bytes[4] & 15);
+        }
+        catch (BadGGEPPropertyException corrupt) {
+            throw new BadPacketException("Corrupt GGEP block");
+        }
+    }
+
+
 
     public synchronized boolean hasGGEPExtension() {
         parseGGEP();

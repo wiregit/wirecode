@@ -25,6 +25,10 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
     /** The extension header (key) for unicast protocol support. */
     public static final String GGEP_HEADER_UNICAST_SUPPORT = "GUE";
+    /** The extension header (key) for vendor info. */
+    public static final String GGEP_HEADER_VENDOR_INFO = "VC";
+    /** The extension header (key) for Ultrapeer support. */
+    public static final String GGEP_HEADER_UP_SUPPORT = "UP";
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
