@@ -261,7 +261,7 @@ public final class CommonUtils {
     }
 
     static int getMajorVersionNumberInternal(String version) {
-        if (!version.equals("@version@")) {
+        if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
                 String majorStr = version.substring(0, firstDot);
@@ -295,7 +295,7 @@ public final class CommonUtils {
     }
 
     static int getMinorVersionNumberInternal(String version) {
-        if (!version.equals("@version@")) {
+        if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
                 String minusMajor = version.substring(firstDot+1);
