@@ -518,15 +518,15 @@ public final class HandshakeResponseTest extends BaseTestCase {
         // Test once with deflate support & once without.
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
-        runUltrapeerHeadersTest(hr);
+            HandshakeResponse.createRejectIncomingResponse();
+        runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
         
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createRejectIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
-        runUltrapeerHeadersTest(hr);
+        hr = HandshakeResponse.createRejectIncomingResponse();
+        runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
@@ -543,15 +543,15 @@ public final class HandshakeResponseTest extends BaseTestCase {
         // Test once with deflate support & once without.
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);        
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectIncomingResponse(new LeafHeaders("32.9.8.9"));
-        runLeafHeadersTest(hr);
+            HandshakeResponse.createRejectIncomingResponse();
+        runRejectHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptIncomingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createRejectOutgoingResponse(new LeafHeaders("32.9.8.9"));
-        runLeafHeadersTest(hr);
+        hr = HandshakeResponse.createRejectOutgoingResponse();
+        runRejectOutgoingLeafHeadersTest(hr);
 
         hr = HandshakeResponse.createAcceptOutgoingResponse(new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
@@ -585,6 +585,30 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("should be an Ultrapeer connection", hr.isUltrapeer());
         assertTrue("should not be a leaf connection", !hr.isLeaf());
         assertTrue("should be a GUESS Ultrapeer", hr.isGUESSUltrapeer());        
+    }
+
+    /**
+     * Makes sure that we only pass the expected headers when we
+     * reject a connection -- in particular, make sure we only
+     * pass the X-Try-Ultrapeers header.
+     */
+    private static void runRejectHeadersTest(HandshakeResponse hr) {
+        Properties props = hr.props();
+        assertEquals("unexpected props size", 1, props.size());
+        assertTrue("should have X try Ultrapeer header", 
+                   hr.hasXTryUltrapeers());
+    }
+
+    /**
+     * Makes sure that we don't pass any headers in the odd case that
+     * we're a leaf and we reject the connection that we initiated.
+     */
+    private static void runRejectOutgoingLeafHeadersTest(HandshakeResponse hr) {
+        Properties props = hr.props();
+
+        // if we're a leaf rejecting a connection that we initiated, we 
+        // should not pass any headers.
+        assertEquals("unexpected props size",0, props.size());
     }
     
     /**
