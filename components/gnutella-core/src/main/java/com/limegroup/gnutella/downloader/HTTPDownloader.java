@@ -276,6 +276,10 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void initThree() {
+
+		// Reset any error message
+		_stateString = null;
+
         SettingsManager set = SettingsManager.instance();
         _downloadDir = set.getSaveDirectory();
         String pathname = _downloadDir + _filename;
@@ -283,6 +287,7 @@ public class HTTPDownloader implements Runnable {
 
         if (!myFile.exists()) {
             // allert an error
+			_stateString = "Resumed File Not Found";
             _state = ERROR;
             return;
         }
@@ -304,6 +309,7 @@ public class HTTPDownloader implements Runnable {
             _br = new ByteReader(_istream);
         }
         catch (Exception e) {
+			_stateString = "Resumed Connection Failed";
             _state = ERROR;
             return;
         }
@@ -472,6 +478,7 @@ public class HTTPDownloader implements Runnable {
         if ((myTest.exists()) && (!_resume)) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
+			    _stateString = "File Already Exists";
                 _state = ERROR;
                 return;
             }
@@ -533,15 +540,16 @@ public class HTTPDownloader implements Runnable {
         }
 
         if ( _amountRead == _sizeOfFile ) {
-	    String pname = _downloadDir + _filename;
-	    myFile.renameTo(new File(pname));
-		_state = COMPLETE;
-		FileManager.getFileManager().addFile(pname);
-			
-	}
+	        String pname = _downloadDir + _filename;
+	        myFile.renameTo(new File(pname));
+		    _state = COMPLETE;
+		    FileManager.getFileManager().addFile(pname);
+	    }
 
         else
+		{
             _state = ERROR;
+		}
     }
 
     public void readHeader() {
@@ -551,21 +559,28 @@ public class HTTPDownloader implements Runnable {
         boolean foundRangeInitial = false;
         boolean foundRangeFinal = false;
         int     tempSize = -1;
+		int     lineNumber = -1;
 
         while (true) {
             try {
                 str = _br.readLine();
+				lineNumber++;
             } catch (IOException e) {
                 _state = ERROR;
                 return;
 			}
 
-			System.out.println("Header: " + str);
-
             //EOF?
             if (str==null || str.equals(""))
                 break;
 
+			// Handle a 503 error from Gnotella
+            if ( lineNumber == 0 && str.equals("3") )
+			{
+				_stateString = "Try Again Later";
+                _state = ERROR;
+                return;
+            }
 
             if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
 
@@ -585,13 +600,14 @@ public class HTTPDownloader implements Runnable {
                     return;
                 }
 
-                foundLength = true;;
+                foundLength = true;
             }
 
             if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
     //          System.out.println("Content-range line:");
     //          System.out.println(str);
                 _resume = true;
+                foundLength = true;
             }
         }
 
