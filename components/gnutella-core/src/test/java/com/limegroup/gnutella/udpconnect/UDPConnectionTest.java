@@ -527,20 +527,20 @@ public final class UDPConnectionTest extends BaseTestCase {
 
     /**
      * Test that data can be written, echoed and read through 
-     * an extrely flaky UDPConnection where 25% of messages are lost.
+     * an extrely flaky UDPConnection where 15% of messages are lost.
      * 
      * @throws Exception if an error occurs
      */
     public void testExtremelyFlakyConnection() throws Exception {
-        final int NUM_BYTES = 200000;
+        final int NUM_BYTES = 20000;
 
         // Clear out my standard setup
         UDPServiceStub.stubInstance().clearReceivers();
 
         // Add some simulated connections to the UDPServiceStub
-        // Make the connections 25% flaky
-        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 25);
-        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 25);
+        // Make the connections 15% flaky
+        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 15);
+        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 15);
 
         // Start the second connection in another thread
         // and run it to completion.

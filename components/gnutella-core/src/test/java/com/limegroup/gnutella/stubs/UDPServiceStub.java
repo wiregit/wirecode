@@ -159,6 +159,8 @@ public final class UDPServiceStub extends UDPService {
                         int num = _random.nextInt(100);
                         if (num < _pctFlaky) {
                             msg = null;  
+                            _messages.remove(0);
+                            continue;
                         } else {
                             break;
                         }
