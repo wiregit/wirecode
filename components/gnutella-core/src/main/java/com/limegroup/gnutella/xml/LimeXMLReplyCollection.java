@@ -251,7 +251,7 @@ public class LimeXMLReplyCollection {
      */
     private LimeXMLDocument constructDocument(File file) {
         if (LimeXMLUtils.isSupportedFormatForSchema(file,schemaURI)) { 
-            try{    
+            try {
             	return MetaDataReader.readDocument(file);
             } catch (IOException ignored) { 
             	return null; 
@@ -378,11 +378,8 @@ public class LimeXMLReplyCollection {
             mainMap.put(hash,replyDoc);
             addKeywords(replyDoc);
         }
+        
         fd.addLimeXMLDocument(replyDoc);
-        try {
-            String identifier = fd.getFile().getCanonicalPath();
-            replyDoc.setIdentifier(identifier);
-        } catch(IOException ignored) {}
     }
 
 
@@ -460,6 +457,7 @@ public class LimeXMLReplyCollection {
         synchronized(mainMap) {
             for(Iterator i = query.getNameValueSet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
+
                 // Get the name of the particular field being queried for.
                 final String name = (String)entry.getKey();
                 // Lookup the matching Trie for that field.
@@ -646,20 +644,11 @@ public class LimeXMLReplyCollection {
                                                         boolean checkBetter) {
         
         MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
-        
         //if this call returned null, we should store the data in our
         //xml repository only.
         if (newValues == null)
         	return null;
-        
-        String newXML = null;
-
-        try {
-            newXML = doc.getXMLStringWithIdentifier();
-        } catch(SchemaNotFoundException snfe) {
-            return null;
-        }
-        newValues.populateFromString(newXML);
+        newValues.populate(doc);
         
         // Now see if the file already has the same info ...
         MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
@@ -669,14 +658,7 @@ public class LimeXMLReplyCollection {
         } catch(IOException e) {
             return null;
         }
-        String existingXML = null;
-        try {
-            existingXML = existingDoc.getXMLStringWithIdentifier();
-        } catch(SchemaNotFoundException snfe) {
-            return null;
-        }
-        existing.populateFromString(existingXML);
-        
+        existing.populate(existingDoc);
         
         if(!checkBetter) { //if we are not required to choose better tags
             if(newValues.equals(existing)) // The ID3 tags are same do nothing.

@@ -98,15 +98,11 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		if(handler != null && handler.isPersonalSpam(reply)) return;
 		
 		// Drop if it's a reply to mcast and conditions aren't met ...
-		try {
-            if( reply.isReplyToMulticastQuery() ) {
-                if( reply.isTCP() )
-                    return; // shouldn't be on TCP.
-                if( reply.getHops() != 1 || reply.getTTL() != 0 )
-                    return; // should only have hopped once.
-            }
-        } catch(BadPacketException bpe) {
-            return;
+        if( reply.isReplyToMulticastQuery() ) {
+            if( reply.isTCP() )
+                return; // shouldn't be on TCP.
+            if( reply.getHops() != 1 || reply.getTTL() != 0 )
+                return; // should only have hopped once.
         }
         
         if (reply.isUDP()) {

@@ -11,8 +11,9 @@ import com.limegroup.gnutella.util.StringUtils;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, IpPort
-{
+public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
+
+    static final long serialVersionUID = 4686711693494625070L; 
     
     private String hostname = null;
     int port = 0;
@@ -20,6 +21,9 @@ public class Endpoint implements Cloneable, IpPort
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
     private long kbytes=-1;
+    
+    // so subclasses can serialize.
+    protected Endpoint() { }
 
     /**
      * Returns a new Endpoint from a Gnutella-style host/port pair:

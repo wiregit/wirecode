@@ -39,7 +39,7 @@ public class PingRequest extends Message {
     /**
      * The GGEP blocks carried in this ping - parsed when necessary
      */
-    private GGEP [] _ggeps;
+    private GGEP _ggep;
     
     /////////////////Constructors for incoming messages/////////////////
     /**
@@ -210,19 +210,15 @@ public class PingRequest extends Message {
      private void addGGEPs(List /* of NameValue */ ggeps) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            if (_ggeps==null)
-                _ggeps=new GGEP[1];
-            if (_ggeps[0]==null)
-                _ggeps[0]=new GGEP(true);
+            if (_ggep == null)
+                _ggep = new GGEP(true);
 
-            _ggeps[0].putAll(ggeps);
-            _ggeps[0].write(baos);
-            baos.write(0);
-            
+            _ggep.putAll(ggeps);
+            _ggep.write(baos);
+            baos.write(0);            
             payload = baos.toByteArray();
             updateLength(payload.length);
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             ErrorService.error(e);
         }
     }
@@ -231,25 +227,16 @@ public class PingRequest extends Message {
      * get locale of this PingRequest 
      */
     public String getLocale() {
-        if(payload != null) { //payload can be null
+        if(payload != null) {
             try {
-                
-                if (_ggeps==null)
-                    _ggeps = GGEP.read(payload,0);
-                
-                for (int i = 0;i<_ggeps.length;i++) 
-                    if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
-                    	return _ggeps[i].getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                    
-                
-                return ApplicationSettings.DEFAULT_LOCALE.getValue();
-            }
-            catch(BadGGEPBlockException ignored) {}
-            catch(BadGGEPPropertyException ignoredToo) {}
-            return ApplicationSettings.DEFAULT_LOCALE.getValue();
+                parseGGEP();
+                if(_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
+                	return _ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+            } catch(BadGGEPBlockException ignored) {
+            } catch(BadGGEPPropertyException ignoredToo) {}
         }
-        else 
-            return ApplicationSettings.DEFAULT_LOCALE.getValue();
+        
+        return ApplicationSettings.DEFAULT_LOCALE.getValue();
     }
     
     /**
@@ -259,12 +246,8 @@ public class PingRequest extends Message {
     public boolean supportsCachedPongs() {
         if(payload != null) {
             try {
-                if(_ggeps == null)
-                    _ggeps = GGEP.read(payload, 0);
-                for(int i = 0; i < _ggeps.length; i++) {
-                    if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS))
-                        return true;
-                }
+                parseGGEP();
+                return _ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
             } catch(BadGGEPBlockException ignored) {}
         }
         return false;
@@ -276,24 +259,21 @@ public class PingRequest extends Message {
      * size is returned.
     */
     public byte[] getSupportsCachedPongData() {
-        if(payload == null)
-            return null;
-        
         byte[] ret = null;
-        try {
-            if(_ggeps == null)
-                _ggeps = GGEP.read(payload, 0);
-            for(int i = 0; i < _ggeps.length; i++) {
-                if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
+
+        if(payload != null) {
+            try {
+                parseGGEP();
+                if(_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
                     ret = DataUtils.EMPTY_BYTE_ARRAY;
                     // this may throw, which is why we first set it to an empty value.
-                    ret = _ggeps[i].getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
-                    return ret;
+                    return _ggep.getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
                 }
+            } catch(BadGGEPBlockException ignored) {
+            } catch(BadGGEPPropertyException ignored) {
             }
         }
-        catch(BadGGEPBlockException ignored) {}
-        catch(BadGGEPPropertyException ignored) {}
+
         return ret;
     }
 
@@ -301,17 +281,13 @@ public class PingRequest extends Message {
         if (!(getTTL() == 0) || !(getHops() == 1))
             return false;
 
-        if (payload == null)
-            return false;
+        if(payload != null) {
+            try {
+                parseGGEP();
+                return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+            } catch (BadGGEPBlockException ignored) {}
+        }
 
-        try {
-            if(_ggeps == null)
-                _ggeps = GGEP.read(payload, 0);
-            for(int i = 0; i < _ggeps.length; i++)
-                if (_ggeps[i].hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) 
-                    return true;
-        } catch (BadGGEPBlockException ignored) {}
-        
         return false;
     }
     
@@ -319,20 +295,18 @@ public class PingRequest extends Message {
      * @return whether this ping wants a reply carrying IP:Port info.
      */
     public boolean requestsIP() {
-       if (payload==null)
-           return false;
-       
-       try{
-           if (_ggeps==null)
-               _ggeps = GGEP.read(payload,0);
-           for (int i=0;i<_ggeps.length;i++) 
-               if (_ggeps[i].hasKey(GGEP.GGEP_HEADER_IPPORT))
-                   return true;
-           
-       }catch(BadGGEPBlockException ignored) {}
-       
+       if(payload != null) {
+           try {
+               parseGGEP();
+               return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
+           } catch(BadGGEPBlockException ignored) {}
+        }
+
        return false;
-       
     }
-    //Unit tests: tests/com/limegroup/gnutella/messages/PingRequestTest.java
+    
+    private void parseGGEP() throws BadGGEPBlockException {
+        if(_ggep == null)
+            _ggep = new GGEP(payload, 0, null);
+    }
 }

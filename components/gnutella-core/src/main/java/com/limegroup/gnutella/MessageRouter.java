@@ -555,15 +555,10 @@ public abstract class MessageRouter {
             QueryReply qr = (QueryReply) msg;
 			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             int numResps = qr.getResultCount();
-            try {
-                // only account for OOB stuff if this was response to a 
-                // OOB query, multicast stuff is sent over UDP too....
-                if (!qr.isReplyToMulticastQuery())
-                    OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-            }
-            catch (BadPacketException bpe) {
-                return;
-            }
+            // only account for OOB stuff if this was response to a 
+            // OOB query, multicast stuff is sent over UDP too....
+            if (!qr.isReplyToMulticastQuery())
+                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
 			
             handleQueryReply(qr, handler);
             

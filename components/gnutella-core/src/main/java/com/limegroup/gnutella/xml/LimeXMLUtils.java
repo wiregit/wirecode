@@ -27,16 +27,10 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
@@ -110,81 +104,6 @@ public class LimeXMLUtils
     }
     
     /**
-     * Returns an instance of org.w3c.dom.Document after parsing the
-     * passed xml file
-     * @param file The file from where to read
-     * @return The instance of org.w3c.dom.Document after parsing the
-     * passed xml file
-     * @exception IOException If file doesnt get opened or other I/O problems
-     * @exception ParserConfigurationException if problem in getting parser
-     * @exception SAXException If any problem in parsing
-     */
-    public static Document getDocument(File file) throws IOException, 
-        ParserConfigurationException, SAXException
-    {
-        //get an input source out of it for parsing
-        InputSource inputSource = 
-            LimeXMLUtils.getInputSource(file);
-
-        //get a document builder
-        DocumentBuilder documentBuilder = 
-            DocumentBuilderFactory.newInstance().newDocumentBuilder();
-
-        // Parse the xml file and create a  document
-        Document document = documentBuilder.parse(inputSource);
-        
-        //return the document
-        return document;
-    }
-    
-    
-    /**
-     * Returns the value of the specified attribute
-     * @param attributes attribute nodes in which to search for the 
-     * specified attribute
-     * @param soughtAttribute The attribute whose value is sought
-     * @return the value of the specified attribute, or null if the specified
-     * attribute doesnt exist in the passed set of attributes
-     */
-    public static String getAttributeValue(NamedNodeMap  attributes, String
-        soughtAttribute)
-    {
-        //get the required attribute node
-        Node requiredNode = attributes.getNamedItem(soughtAttribute);
-        
-        //if the attribute node is null, return null
-        if(requiredNode == null)
-            return null;
-        
-        //get the value of the required attribute, and return that
-        return requiredNode.getNodeValue();
-    }
-    
-        /**
-     * Extracts only the Element nodes from a NodeList.  This is useful when
-     * the DTD guarantees that the node list's parent contains only elements.
-     * Unfortunately, the node list can contain comments and whitespace.
-     */
-    public static List getElements(NodeList nodeList) {
-        List elements = new ArrayList(nodeList.getLength());
-        for(int i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            if(node.getNodeType() == Node.ELEMENT_NODE)
-                elements.add(node);
-        }
-        return elements;
-    }
-    
-    public static List getAttributes(NamedNodeMap nodeMap){
-        List attributes = new ArrayList(nodeMap.getLength());
-        for (int i = 0; i< nodeMap.getLength(); i++){
-            Node node = nodeMap.item(i);
-            attributes.add(node);
-        }
-        return attributes;
-    }
-
-    /**
      * Collapses a list of CDATASection, Text, and predefined EntityReference
      * nodes into a single string.  If the list contains other types of nodes,
      * those other nodes are ignored.
@@ -242,18 +161,6 @@ public class LimeXMLUtils
     }
     
     /**
-     * Creates a Response instance from the passed xml string
-     */
-    public static Response createResponse(String xml)
-    {
-        //create a new response using default values and return it
-        return new Response(
-            LimeXMLProperties.DEFAULT_NONFILE_INDEX,
-                xml.length(), "xml result", xml);
-    }
-
-    
-    /**
      * Reads all the bytes from the passed input stream till end of stream
      * reached.
      * @param in The input stream to read from
@@ -303,10 +210,11 @@ public class LimeXMLUtils
             Map.Entry entry = (Map.Entry)i.next();
             String currFieldName = (String)entry.getKey();
             String queryValue = (String)entry.getValue();
-            Assert.that( queryValue != null, "null value");            
+            Assert.that( queryValue != null, "null value");
             if (queryValue.equals(""))
                 continue; // "" matches everything!!
             String replyDocValue = replyDoc.getValue(currFieldName);
+            
             if((replyDocValue == null) || replyDocValue.equals(""))
                 nullCount++;
             else {
@@ -322,15 +230,13 @@ public class LimeXMLUtils
                             matchedBitrate = true;
                     }
                     continue;
-                }
-                catch (NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                     // just roll through and try to do a normal test...
                 } 
                 // we used to do a .equalsIgnoreCase, but that is a little too
                 // rigid.  so do a ignore case prefix match.
                 String queryValueLC = queryValue.toLowerCase(Locale.US);
-                String replyDocValueLC = 
-                              I18NConvert.instance().getNorm(replyDocValue);
+                String replyDocValueLC = I18NConvert.instance().getNorm(replyDocValue);
                 if(replyDocValueLC.startsWith(queryValueLC))
                     matchCount++;
             }
@@ -475,47 +381,6 @@ public class LimeXMLUtils
     
     public static boolean isSupportedFormatForSchema(File file, String schemaURI) {
     	return getSchemaURI(file).equals(schemaURI);
-    }
-    
-    /**
-      * Converts the given list of xml documents to an array of responses
-      * @param xmlDocuments List (of LimeXMLDocument) of xml documentst that
-      * need to be converted to instances of Response class
-      * @return Array of responses after converting passed xml documents  
-      */
-    public static Response[] getResponseArray(List xmlDocuments)
-    {
-        //create new Response array of required size
-        Response[] responseArray = new Response[xmlDocuments.size()]; 
-        
-        //iterate over the xml documents to generate Responses
-        int i=0;
-        Iterator iterator = xmlDocuments.iterator();
-        while(iterator.hasNext() && i < responseArray.length)
-        {
-            String responseString = "";
-            
-            try {
-                responseString = 
-                ((LimeXMLDocument)iterator.next()).getXMLString();            
-//                System.out.println("response = " + responseString);
-            }
-            catch (SchemaNotFoundException snfe) {
-                ErrorService.error(snfe);
-            }
-
-            //make response out of the string
-            //use the length of the string as size
-            //and whole string as the file name
-            //using dummy index of 0. The choice is arbitray at this point, might
-            //get standardized later
-            responseArray[i] = LimeXMLUtils.createResponse(responseString);
-            //increment the index
-            i++;
-        }
-        
-        //return the response array
-        return responseArray;
     }
     
     /**

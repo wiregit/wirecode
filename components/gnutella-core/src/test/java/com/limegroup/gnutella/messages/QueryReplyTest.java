@@ -193,13 +193,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             iter=qr.getResults();
             Response r = (Response)iter.next();
-            assertEquals("sumeet test a", 1, r.getNameBytesSize());
-            assertEquals("sumeet test b", 0, r.getMetaBytesSize());
-            byte[] name = r.getNameBytes();
-            assertEquals("sumeet test c", 'A', name[0]);
             assertEquals("Sumeet test1", "A",  r.getName());
-            assertEquals("unexpected xml bytes",
-						 "SUSH", (new String(qr.getXMLBytes())));
+            assertNull("bad xml", r.getDocument());
         }catch(BadPacketException e){
             fail("metaResponse not created well!", e);
         }
@@ -254,11 +249,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(vendor, "LLME", vendor);
         assertFalse(qr.getNeedsPush());
 
-        try {
-            qr.getSupportsChat();
-            fail("qr should have been invalid");
-        } catch (BadPacketException e) {
-        }
+        assertFalse(qr.getSupportsChat());
 
         //Weird case.  No common data.  (Don't allow.)
         payload=new byte[11+11+(4+1+2)+16];
@@ -393,11 +384,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertFalse(qr.getIsBusy());
         assertFalse(qr.getIsMeasuredSpeed());
         assertFalse(qr.getHadSuccessfulUpload());
-
-        try {
-            qr.getSupportsChat();
-            fail("LiME!=LIME when looking at private area");
-        } catch (BadPacketException e) { }
+        assertFalse("LiME!=LIME when looking at private area", qr.getSupportsChat());
 
         //Create extended QHD from scratch
         responses=new Response[2];
@@ -715,8 +702,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         }
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
         assertEquals(numHeaders, testGGEP.getHeaders().size());
-        Set retProxies = 
-            _ggepUtil.getPushProxies(new GGEP[] { testGGEP });
+        Set retProxies = _ggepUtil.getPushProxies(testGGEP);
         assertEquals(4, retProxies.size());
 
         PushProxyInterface[] array1 = 
@@ -740,7 +726,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
     public void testBadPushProxyInput() throws Exception {
         byte[] badBytes = new byte[6];
-        GGEP ggep[] = new GGEP[1];
+        GGEP ggep = null;
         // test a bad ip
         // 0.0.0.0 is a bad address
 
@@ -748,19 +734,19 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             PushProxyInterface proxy = 
                 new QueryReply.PushProxyContainer("0.0.0.0", 6346);
-        }
-        catch (IllegalArgumentException expected) {}
+            fail("allowed bad PPI");
+        } catch (IllegalArgumentException expected) {}
 
         // from the network
-        ggep[0] = new GGEP();
+        ggep = new GGEP();
         badBytes[0] = (byte) 0;
         badBytes[1] = (byte) 0;
         badBytes[2] = (byte) 0;
         badBytes[3] = (byte) 0;
         badBytes[4] = (byte) 3;
         badBytes[5] = (byte) 4;
-        ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
-        assertTrue(_ggepUtil.getPushProxies(ggep).isEmpty());
+        ggep.put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
+        assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
 
         // test a bad port
 
@@ -768,18 +754,18 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             PushProxyInterface proxy = 
                 new QueryReply.PushProxyContainer("0.0.0.0", 634600);
-        }
-        catch (IllegalArgumentException expected) {}
+            fail("allowed bad PPI");
+        } catch (IllegalArgumentException expected) {}
 
         // this should work fine...
-        ggep[0] = new GGEP();
+        ggep = new GGEP();
         badBytes[0] = (byte) 1;
         badBytes[1] = (byte) 1;
         badBytes[2] = (byte) 2;
         badBytes[3] = (byte) 2;
         badBytes[4] = (byte) 0;
         badBytes[5] = (byte) 0;
-        ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
+        ggep.put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
         assertNotNull(_ggepUtil.getPushProxies(ggep));
 
 
@@ -797,8 +783,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                     badBytes[j] = (byte)i;
                 }
             }
-            ggep[0] = new GGEP();
-            ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
+            ggep = new GGEP();
+            ggep.put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
             if (i == 0)
                 assertEquals(0, _ggepUtil.getPushProxies(ggep).size());
             else if (i < 6) 
@@ -817,7 +803,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
     public void testManualPushProxyInput() throws Exception {
         Random rand = new Random();
-        GGEP ggep[] = new GGEP[1];
+        GGEP ggep = null;
         for (int i = 0; i < 10; i++) {
             byte[] bytes = new byte[6*(i+1)];
             rand.nextBytes(bytes);
@@ -828,8 +814,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             }
 
             // from the network
-            ggep[0] = new GGEP();
-            ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, bytes);
+            ggep = new GGEP();
+            ggep.put(GGEP.GGEP_HEADER_PUSH_PROXY, bytes);
 
             Set proxies = _ggepUtil.getPushProxies(ggep);
             assertNotNull(proxies);
@@ -898,30 +884,19 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
             // test read from network            
             Set retProxies = readQR.getPushProxies();
-            assertTrue(retProxies != null);
+            assertNotNull(retProxies);
             assertTrue(retProxies != proxies);
-            Iterator iter1 = retProxies.iterator();
-            Iterator iter2 = proxies.iterator();
-            while(iter1.hasNext() && iter2.hasNext()) {
-                assertEquals((PushProxyInterface)iter1.next(), 
-                             (PushProxyInterface)iter2.next());
-            }
-            //for (int i = 0; i < retProxies.length; i++)
-            //  assertTrue(retProxies[i].equals(proxies[i]));
+            assertEquals(retProxies.size(), proxies.size());
+            assertEquals(retProxies, proxies);
+            assertEquals(proxies, retProxies);
 
             // test simple accessor
             retProxies = qr.getPushProxies();
-            assertTrue(retProxies != null);
+            assertNotNull(retProxies);
             assertTrue(retProxies != proxies);
-            iter1 = retProxies.iterator();
-            iter2 = proxies.iterator();
-            while(iter1.hasNext() && iter2.hasNext()) {
-                assertEquals((PushProxyInterface)iter1.next(), 
-                             (PushProxyInterface)iter2.next());
-            }
-            //for (int i = 0; i < retProxies.length; i++)
-            //  assertTrue(retProxies[i].equals(proxies[i]));
-
+            assertEquals(retProxies.size(), proxies.size());
+            assertEquals(retProxies, proxies);
+            assertEquals(proxies, retProxies);
         }
     }
     

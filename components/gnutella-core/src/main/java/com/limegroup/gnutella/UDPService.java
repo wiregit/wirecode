@@ -175,6 +175,13 @@ public class UDPService implements Runnable {
         UDP_RECEIVE_THREAD = new ManagedThread(this, "UDPService-Receiver");
         UDP_RECEIVE_THREAD.setDaemon(true);
         SEND_QUEUE = new ProcessingQueue("UDPService-Sender");
+        scheduleServices();
+    }
+    
+    /**
+     * Schedules IncomingValidator & PeriodicPinger for periodic use.
+     */
+    protected void scheduleServices() {
         RouterService.schedule(new IncomingValidator(), 
                                Acceptor.TIME_BETWEEN_VALIDATES,
                                Acceptor.TIME_BETWEEN_VALIDATES);
@@ -315,10 +322,10 @@ public class UDPService implements Runnable {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
-                    if(message == null) continue;                    
-                    
-                    updateState(message,datagram);
-                    router.handleUDPMessage(message, datagram);
+                    if(message == null)
+                        continue;
+                        
+                    processMessage(message, datagram, router);
                 }
                 catch (IOException e) {
                     continue;
@@ -332,6 +339,14 @@ public class UDPService implements Runnable {
             ErrorService.error(t);
         }
 	}
+	
+	/**
+	 * Processes a single message.
+	 */
+    protected void processMessage(Message message, DatagramPacket datagram, MessageRouter router) {
+        updateState(message,datagram);
+        router.handleUDPMessage(message, datagram);
+    }
 	
 	private void updateState(Message message,DatagramPacket datagram) {
 	    if (!isGUESSCapable()) {
