@@ -20,4 +20,6 @@ public class ConnectionHandshakeHeaders
     public static final String SUPERNODE_NEEDED = "Supernode-Needed";
     public static final String USERNAME         = "Login";
     public static final String PASSWORD         = "Password";
+    public static final String DOMAINS_AUTHENTICATED = 
+        "Domains-Authenticated";
 }
