@@ -825,6 +825,8 @@ public class Connection {
      */
     private String readLine(int timeout) throws IOException {
         int oldTimeout=_socket.getSoTimeout();
+        // _in.read can throw an NPE if we closed the connection,
+        // so we must catch NPE and throw the CONNECTION_CLOSED.
         try {
             _socket.setSoTimeout(timeout);
             String line=(new ByteReader(_in)).readLine();
@@ -835,6 +837,8 @@ public class Connection {
 				    line.length());
             }
             return line;
+        } catch(NullPointerException npe) {
+            throw CONNECTION_CLOSED;
         } finally {
             //Restore socket timeout.
             _socket.setSoTimeout(oldTimeout);
