@@ -202,7 +202,7 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6667,"3.6.3",OLD); 
+            conn = new TestConnection(6667,"3.6.3",NEW); 
         } catch(IOException iox) {
             fail("could not set up test");
         }
@@ -246,7 +246,7 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6669, "2.9.3", DEF_SIGNATURE);
+            conn = new TestConnection(6669, "2.9.3", NEW);
         } catch(IOException iox) {
             fail("could not set test up");
         }
@@ -268,7 +268,7 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6670, "2.3.3", DEF_SIGNATURE);
+            conn = new TestConnection(6670, "2.3.3", NEW);
         } catch(IOException iox) {
             fail("could not set test up");
         }
@@ -290,7 +290,7 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6671, "2.9.5", DEF_SIGNATURE);
+            conn = new TestConnection(6671, "2.9.5", NEW);
         } catch(IOException iox) {
             fail("could not set test up");
         }
@@ -329,43 +329,85 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
 
-//      /**
-//       * Tests that we will request the update file even our version is the same
-//       * as the version advertised, but our version file is older than the version
-//       * file advertised by the other guy
-//       */
-//      public void testNewerVersionFileWithSameVersionRequested() {
-//          updateVersion = OLD;
-//          changeUpdateFile();
-//          TestConnection conn = null;
-//          try { //header says same as me, but my version file is older, 
-//              conn = new TestConnection(6666, "3.2.2", NEW);
-//          } catch(IOException iox) {
-//              fail("could not set test up");
-//          }
-//          conn.setTestUpdateNotRequested(true);
-//          conn.start();
-//          try {
-//              Thread.sleep(300);
-//          } catch(Exception e) {}
-//          UpdateManager man = UpdateManager.instance();
-//          assertEquals("Update should have got new version",
-//                                                      "3.6.3", man.getVersion());
-//      }
+    /**
+     * Tests that we will request the update file even our version is the same
+     * as the version advertised, but our version file is older than the version
+     * file advertised by the other guy
+     */
+    public void testNewerVersionFileWithSameVersionRequested() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try { //header says same as me, but my version file is older, 
+            conn = new TestConnection(6673, "3.2.2", NEW);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.start();
+        try {
+            Thread.sleep(300);
+        } catch(Exception e) {}
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update should have got new version",
+                                                    "3.6.3", man.getVersion());
+    }
 
 
 
-//     public void testBadMessageFailsOnNetwork() {
+    public void testBadMessageFailsOnNetwork() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try { //header says same as me, but my version file is older, 
+            conn = new TestConnection(6674, "3.6.3", DEF_MESSAGE);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.start();
+        try {
+            Thread.sleep(300);
+        } catch(Exception e) {}
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update should have got new version",
+                                                    "2.9.3", man.getVersion());
+    }
 
-//      }
+    public void testBadXMLFailsOnNetwork() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try { //header says same as me, but my version file is older, 
+            conn = new TestConnection(6675, "3.6.3", BAD_XML);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.start();
+        try {
+            Thread.sleep(300);
+        } catch(Exception e) {}
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update should have got new version",
+                                                    "2.9.3", man.getVersion());
+    }
 
+    public void testGarbageDataFailsOnNetwork() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try { //header says same as me, but my version file is older, 
+            conn = new TestConnection(6676, "3.6.3", RANDOM_BYTES);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.start();
+        try {
+            Thread.sleep(300);
+        } catch(Exception e) {}
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update should have got new version",
+                                                    "2.9.3", man.getVersion());
+    }
 
-
-
-
-//      public void testIOXCausesNonAcceptance() {
-
-//      }
 
 //      public void testFileReadVerifiedWithJava118() {
 
