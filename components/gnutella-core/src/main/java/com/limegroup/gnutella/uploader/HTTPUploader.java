@@ -16,7 +16,7 @@ import com.limegroup.gnutella.util.URLDecoder;
 
 
 public class HTTPUploader implements Uploader {
-    //See accessors for documentation
+
 	protected OutputStream _ostream;
 	protected InputStream _fis;
 	protected Socket _socket;
@@ -32,14 +32,17 @@ public class HTTPUploader implements Uploader {
 	protected int _stateNum = CONNECTING;
 
 	private UploadState _state;
-	private UploadManager _manager;
+	private final UploadManager _manager;
 	
 	private boolean  _chatEnabled;
 	private String  _chatHost;
 	private int _chatPort;
-    private FileManager _fileManager;
 
-    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
+	private URN _urn = null;
+    private final FileManager _fileManager;
+
+    private final BandwidthTrackerImpl bandwidthTracker=
+		new BandwidthTrackerImpl();
 
 	/****************** Constructors ***********************/
 	/**
@@ -95,6 +98,7 @@ public class HTTPUploader implements Uploader {
 			setState(CONNECTING);
 	}
 		
+
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
 						String guid, UploadManager m, FileManager fm) {
@@ -116,6 +120,23 @@ public class HTTPUploader implements Uploader {
 			setState(PUSH_FAILED);
 		}
 	}
+
+	/**
+	 * Constructor that takes a <tt>URN</tt> argument for uploading files
+	 * that we have URN data for.
+	 *
+	 * @param fileName the name of the file
+	 * @param socket the <tt>Socket</tt> instance to serve the upload over
+	 * @param index the index of the file in the set of shared files
+	 * @param um a reference to the <tt>UploadManager</tt> instance 
+	 * @param fm a reference to the <tt>FileManager</tt> instance
+	 * @param urn the <tt>URN</tt> instance for the upload
+	 */
+	public HTTPUploader(String fileName, Socket socket, int index, UploadManager um,
+                        FileManager fm, URN urn) {
+		this(fileName, socket, index, um, fm);
+		_urn = urn;
+	}	
 
 	// This method must be called in the case of a push.
 	public void connect() throws IOException {
@@ -201,7 +222,7 @@ public class HTTPUploader implements Uploader {
 	}
 
     
-	/*
+	/**
 	 * Is called by the thread.  makes the
 	 * actual call upload the file or appropriate
 	 * error information.
@@ -299,6 +320,15 @@ public class HTTPUploader implements Uploader {
 	public boolean chatEnabled() {return _chatEnabled;}
 	public String getChatHost() {return _chatHost;}
 	public int getChatPort() {return _chatPort;}
+
+	/**
+	 * Accessor for the <tt>URN</tt> instance for this uploader to report
+	 * in the upload headers.
+	 *
+	 * @return the <tt>URN</tt> instance for this upload, which can be
+	 *  <tt>null</tt> if no URN has been assigned
+	 */
+	public URN getUrn() {return _urn;}
 	/****************** private methods *******************/
 
 
