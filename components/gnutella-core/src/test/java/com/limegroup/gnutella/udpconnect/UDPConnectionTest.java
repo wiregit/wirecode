@@ -6,8 +6,10 @@ import java.io.*;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.UDPServiceStub;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ByteReader;
 
@@ -633,19 +635,19 @@ public final class UDPConnectionTest extends BaseTestCase {
      *  Startup a second UDPConnection in a thread since two connections will
      *  block if started in one thread.
      */
-    class ConnStarter extends Thread {
+    class ConnStarter extends ManagedThread {
         UDPConnection uconn2;
 
         public ConnStarter() {
         }
 
-        public void run() {
+        public void managedRun() {
             yield();
             try {
                 uconn2 = 
                   new UDPConnection("127.0.0.1",6348);
-                
-            } catch(Throwable e) {
+            } catch (IOException ioe) {
+                ErrorService.error(ioe);
             }
         }
 
