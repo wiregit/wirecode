@@ -302,6 +302,13 @@ public class LimeXMLReplyCollection{
     }
     
     /**
+     * Returns whether or not this reply collection is for audio files.
+     */
+    public boolean isAudio() {
+        return audio;
+    }
+    
+    /**
      * may return null if the hash is not found
      */
     public LimeXMLDocument getDocForHash(URN hash){
