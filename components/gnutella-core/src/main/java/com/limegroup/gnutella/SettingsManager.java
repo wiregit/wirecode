@@ -37,6 +37,7 @@ public class SettingsManager implements SettingsInterface
     private static String   saveDirectory_;
     private static String   directories_;
     private static String   extensions_;
+    private static String   bannedIps_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -248,6 +249,12 @@ public class SettingsManager implements SettingsInterface
 			try {setExtensions(p);}
 			catch (IllegalArgumentException ie){}
 		    }
+	       
+		else if(key.equals(SettingsInterface.BANNED_IPS))
+		    {
+			try {setBannedIps(p);}
+			catch (IllegalArgumentException ie){}
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -273,6 +280,7 @@ public class SettingsManager implements SettingsInterface
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
 	setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
+	setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){
 	    setSaveDirectory(System.getProperty("user.home"));
@@ -328,6 +336,9 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
+
+    /** returns the string of file extensions*/
+    public String getBannedIps(){return bannedIps_;}
 
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** returns the Network Discovery specialized properties file */
@@ -569,6 +580,19 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    public void setBannedIps(String bannedIps)
+    {
+	if(bannedIps == null)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		bannedIps_ = bannedIps;
+		props_.setProperty(SettingsInterface.BANNED_IPS, bannedIps);
+		writeProperties();
+	    }
+    }
+
+
     /**
      *  Sets the pathname String for the file that 
      *  lists the default hosts.  This is a unique
@@ -595,6 +619,7 @@ public class SettingsManager implements SettingsInterface
 		}		
 	    }
     }
+
 
     /** writes out the Network Discovery specialized 
      *  properties file
