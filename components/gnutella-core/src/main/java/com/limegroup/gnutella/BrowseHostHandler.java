@@ -395,7 +395,8 @@ public class BrowseHostHandler {
 
     /** @return true if the Push was handled by me.
      */
-    public static boolean handlePush(int index, GUID serventID, Socket socket) 
+    public static boolean handlePush(int index, GUID serventID, 
+                                     final Socket socket) 
         throws IOException {
         boolean retVal = false;
         LOG.trace("BHH.handlePush(): entered.");
@@ -407,7 +408,16 @@ public class BrowseHostHandler {
             prd = (PushRequestDetails) _pushedHosts.remove(serventID);
         }
         if (prd != null) {
-            prd.bhh.browseExchange(socket);
+            final PushRequestDetails finalPRD = prd;
+            Thread runLater = new ManagedThread() {
+                    public void managedRun() {
+                        try {
+                            finalPRD.bhh.browseExchange(socket);
+                        }
+                        catch (IOException ohWell) {}
+                    }
+                };
+            runLater.start();
             retVal = true;
         }
         else
