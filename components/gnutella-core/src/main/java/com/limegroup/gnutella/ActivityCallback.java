@@ -72,9 +72,6 @@ public interface ActivityCallback
     public void error(int errorCode, Throwable t);
 
 
-    /**
-     * @requires a
-
     /** Constants for the various errors
      *  See GUIStyles.java for the
      *  associated messages */
@@ -120,16 +117,3 @@ public interface ActivityCallback
     public static final int ERROR_20 = 20;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
