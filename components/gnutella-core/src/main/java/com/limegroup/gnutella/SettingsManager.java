@@ -281,6 +281,7 @@ public final class SettingsManager {
     private final boolean DEFAULT_MONITOR_VIEW_ENABLED = true;
     private final boolean DEFAULT_CONNECTION_VIEW_ENABLED = false;
     private final boolean DEFAULT_LIBRARY_VIEW_ENABLED = true;
+    private final boolean DEFAULT_SHOPPING_VIEW_ENABLED = true;
 
 	/**
 	 * Constant default value for whether or not an incoming connection
@@ -488,6 +489,11 @@ public final class SettingsManager {
 	private final String LIBRARY_VIEW_ENABLED = "LIBRARY_VIEW_ENABLED";
 
 	/**
+	 * Constant key for whether or not the Shopping Tab is enabled.
+	 */
+	private final String SHOPPING_VIEW_ENABLED = "SHOPPING_VIEW_ENABLED";
+
+	/**
 	 * Constant key for the language we're currently using.
 	 */
 	private final String LANGUAGE = "LANGUAGE";
@@ -633,6 +639,7 @@ public final class SettingsManager {
     private volatile boolean  _monitorViewEnabled;
     private volatile boolean  _connectionViewEnabled;
     private volatile boolean  _libraryViewEnabled;
+    private volatile boolean  _shoppingViewEnabled;
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -908,6 +915,16 @@ public final class SettingsManager {
                     else
                         break;
                     setLibraryViewEnabled(bs);
+				}
+				else if(key.equals(SHOPPING_VIEW_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setShoppingViewEnabled(bs);
 				}
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
@@ -1262,6 +1279,7 @@ public final class SettingsManager {
         setMonitorViewEnabled(DEFAULT_MONITOR_VIEW_ENABLED);
         setConnectionViewEnabled(DEFAULT_CONNECTION_VIEW_ENABLED);
         setLibraryViewEnabled(DEFAULT_LIBRARY_VIEW_ENABLED);
+        setShoppingViewEnabled(DEFAULT_SHOPPING_VIEW_ENABLED);
 
 		setLanguage(DEFAULT_LANGUAGE);
 		setCountry(DEFAULT_COUNTRY);
@@ -1418,9 +1436,14 @@ public final class SettingsManager {
         return _connectionViewEnabled;
     }
 
-	/** Returns true if the Connection Tab should be enabled */
+	/** Returns true if the Library Tab should be enabled */
 	public boolean getLibraryViewEnabled() {
         return _libraryViewEnabled;
+    }
+
+	/** Returns true if the Shopping Tab should be enabled */
+	public boolean getShoppingViewEnabled() {
+        return _shoppingViewEnabled;
     }
 
 
@@ -2630,6 +2653,17 @@ public final class SettingsManager {
 		_libraryViewEnabled = libraryEnabled;
 		String s = String.valueOf(libraryEnabled);
 		PROPS.put(LIBRARY_VIEW_ENABLED, s);
+	}
+
+	/**
+	 * Sets whether or not Shopping Tab should be enabled.
+	 *
+	 * @param shoppingEnabled specified whether or not Shopping Tab is enabled.
+	 */
+	public void setShoppingViewEnabled(boolean shoppingEnabled) {
+		_shoppingViewEnabled = shoppingEnabled;
+		String s = String.valueOf(shoppingEnabled);
+		PROPS.put(SHOPPING_VIEW_ENABLED, s);
 	}
 
 	/**
