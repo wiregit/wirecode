@@ -67,6 +67,7 @@ public class Connection {
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
+    public static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
     public static final String _200_OK     = " 200 OK";
     public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
@@ -80,6 +81,11 @@ public class Connection {
      */
     public static final int MAX_HANDSHAKE_ATTEMPTS = 5;
     
+    /**
+	 * Constant handle to the <tt>SettingsManager</tt> for accessing
+	 * various properties.
+	 */
+	private final SettingsManager SETTINGS = SettingsManager.instance();
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.4 connection.
@@ -290,11 +296,22 @@ public class Connection {
                 + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.getHeaders());
 
-            //if our response was 200 OK, return from the method, we are
-            //done with the handshaking
+            //if our response was 200 OK, (or an error code) 
+            //return from the method, we are
+            //done with the handshaking. 
+            //Continue in case response was 200 xxxxx (where xxxxx != OK)
             if(ourResponse.getStatusCode() == HandshakeResponse.OK){
-                return;
+                if(ourResponse.getStatusMessage().equals(
+                    HandshakeResponse.OK_MESSAGE)){
+                    //done with handshaking. Return    
+                    return;
+                }
             }
+            else{
+                //our response was non-OK, return with exception
+                throw new IOException("Handshake Failed");
+            }
+                
         }
             
         //if we didnt successfully return out of the method, throw an 
@@ -312,7 +329,8 @@ public class Connection {
         //or "CONNECT/0.6".  As a dirty hack, we use String.endsWith.  This
         //means we will accidentally allow crazy things like "0.4".  Oh well!
         String line=readLine();  
-        if (GNUTELLA_CONNECT_04.endsWith(line)) {
+        if ( !SETTINGS.acceptAuthenticatedConnectionsOnly()
+            && GNUTELLA_CONNECT_04.endsWith(line)) {
             //a) Old style
             if (! readLine().equals(""))  //Get second \n
                 throw new IOException("Bad connect string"); 
@@ -323,12 +341,41 @@ public class Connection {
         } else if (notLessThan06(line)) {
             //b) New style
             _propertiesRead=new Properties();
-            //1. Read GNUTELLA CONNECT
+            //1. Read GNUTELLA CONNECT and headers
             readHeaders();
-            //2. Send our response and headers
+            
+            //conclude the handshake (This may involve exchange of 
+            //information multiple times with the host at the other end).
+            concludeIncomingHandshake();
+        } else {
+            throw new IOException("Unexpected connect string");
+        }
+    }
+
+    
+    /**
+     * Responds to the handshake from the host on the other
+     * end of the connection, till a conclusion reaches. Handshaking may
+     * involve multiple steps.
+     * @exception IOException Thrown for variety of reasons, including 
+     * I/O error reading/writing
+     * over the connection, bad response from the other side, and
+     * unreachable conclusion
+     */
+    private void concludeIncomingHandshake() throws IOException
+    {
+        //flag indicating if our response was GNUTELLA_OK_06
+        boolean ourResponseOK = false;
+        //respond to the handshake
+        //2.a) This step may involve handshaking multiple times so as
+        //to support challenge/response kind of behaviour
+        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
+            //Send our response and headers
             if (_propertiesWrittenR==null){
                 sendString(GNUTELLA_OK_06+CRLF);
                 sendString(CRLF);  //no headers specified ==> blank line
+                //set the flag
+                ourResponseOK = true;
             }
             else{
                 HandshakeResponse ourResponse = _propertiesWrittenR.respond(
@@ -337,24 +384,50 @@ public class Connection {
                     + ourResponse.getStatusLine() + CRLF);
                 sendHeaders(ourResponse.getHeaders());   
                 
-                //if our response was not OK, throw an exception so as to
-                //signal the caller to close the connection.
-                //(Needed to accomodate bad clients, who may not close the
-                //connection, even if they dont receive 200 OK
-                if(ourResponse.notOKStatusCode()){
-                    throw new IOException(
-                        "We didnt return OK code during Connection Handshake");
+                //if our response was OK, set the flag
+                if(ourResponse.getStatusCode() == HandshakeResponse.OK){
+                    ourResponseOK = true;
+                }
+                else if(ourResponse.getStatusCode() !=
+                    HandshakeResponse.UNAUTHORIZED_CODE){
+                    throw new IOException("Our response: " 
+                        + ourResponse.getStatusLine());
+                }
+                    
+                //read the response from the other side
+                String connectLine = readLine();  
+                readHeaders();
+                
+                //if our response was full OK
+                if(ourResponseOK){
+                    //In this case, we must have received full OK from 
+                    //other side, else drop the connection
+                    if(!connectLine.startsWith(GNUTELLA_OK_06)){
+                        throw new IOException("Response from other side: " 
+                        + connectLine);
+                    }else{
+                        //else we are done with a successful handshake, 
+                        //and therefore, return
+                        return;
+                    }
+                }
+                else{
+                    //if the connectLine doesnt start with GNUTELLA_06_200,
+                    //thats an unexpected response, and so drop the conection
+                    if(!connectLine.startsWith(GNUTELLA_06_200))
+                        throw new IOException("Response from other side: " 
+                            + connectLine);
                 }
             }
-            //3. Read GNUTELLA/200 OK, and any private vendor headers.
-            if (! readLine().equals(GNUTELLA_OK_06))
-                throw new IOException("Bad connect string");
-            readHeaders();
-        } else {
-            throw new IOException("Unexpected connect string");
         }
+            
+        //if we didnt successfully return out of the method, throw an 
+        //I/O Exception to indicate that handshaking didnt reach any
+        //conclusion
+        throw new IOException("Too much handshaking, no conclusion");
     }
-
+    
+    
     /** Returns true iff line ends with "CONNECT/N", where N
      *  is a number greater than or equal "0.6". */
     private static boolean notLessThan06(String line) {
