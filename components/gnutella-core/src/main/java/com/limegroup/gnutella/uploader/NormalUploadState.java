@@ -62,8 +62,7 @@ public final class NormalUploadState implements HTTPMessage {
     
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 		try {
-			_uploader.setState(_uploader.UPLOADING);
-
+			_uploader.setState(Uploader.UPLOADING);
 			_fis =  _uploader.getInputStream();
 			_amountRead = _uploader.amountUploaded();
 			_uploadBegin =  _uploader.getUploadBegin();
@@ -115,15 +114,17 @@ public final class NormalUploadState implements HTTPMessage {
 			
 			str = "\r\n";
 			ostream.write(str.getBytes());
+			_uploader.setState(_uploader.COMPLETE);
 		} catch(IOException e) {
             //set the connection to be closed, in case of IO exception
             _closeConnection = true;
             throw e;
-		}
+		} 
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         try {            
+			_uploader.setState(Uploader.UPLOADING);
             // write the file to the socket 
             int c = -1;
             byte[] buf = new byte[1024];
@@ -143,6 +144,7 @@ public final class NormalUploadState implements HTTPMessage {
                 uploadThrottled(ostream);
             }
         } catch(IOException e) {
+			// TODO: set to a state other than UPLOADING????
             //set the connection to be closed, in case of IO exception
             _closeConnection = true;
             throw e;
