@@ -321,6 +321,10 @@ public class UploadManager implements BandwidthTracker {
 	 * available.  
      */
 	public synchronized boolean isBusy() {
+		// return true if Limewire is shutting down
+		if (RouterService.instance().getIsShuttingDown())
+		    return true;
+		
 		// testTotalUploadLimit returns true is there are
 		// slots available, false otherwise.
 		return (! testTotalUploadLimit());
@@ -356,12 +360,11 @@ public class UploadManager implements BandwidthTracker {
 		insertIntoMapAndList(uploader, host);
 
 		if ( (! testPerHostLimit(host) ) ||
-			 ( ! testTotalUploadLimit() ) ) {
+			 ( this.isBusy() ) ) {
 			 uploader.setState(Uploader.LIMIT_REACHED);
              return false;
 		}
         return true;
-
 	}
 
     /** Increments the count of uploads in progress for host. 
