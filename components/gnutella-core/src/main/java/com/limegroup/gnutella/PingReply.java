@@ -60,7 +60,7 @@ public class PingReply extends Message implements Serializable {
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes, 
              boolean isUltrapeer) { 
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1);
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, 0);
     }
 
     /**
