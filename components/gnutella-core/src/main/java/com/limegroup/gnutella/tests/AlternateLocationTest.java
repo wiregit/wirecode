@@ -51,17 +51,6 @@ public final class AlternateLocationTest extends TestCase {
 				    AlternateLocation.createAlternateLocation(url1);
 				AlternateLocation al2 = 
 				    AlternateLocation.createAlternateLocation(url2);
-				Date date = new Date();
-				String alStr = ("http://"+HugeTestUtils.URL_STRINGS[i] + ":6346"+
-								"/uri-res/N2R?"+urn.httpStringValue()+
-								" "+AlternateLocation.convertDateToString(date));
-				AlternateLocation al3 = 
-				    AlternateLocation.createAlternateLocation(alStr);
-
-				alStr = ("http://"+HugeTestUtils.URL_STRINGS[i] + "/test.htm"+
-						 " "+AlternateLocation.convertDateToString(date));
-				AlternateLocation al4 = 
-				    AlternateLocation.createAlternateLocation(alStr);
 			}
 		} catch(IOException e) {
 			// this also catches MalformedURLException
@@ -79,10 +68,6 @@ public final class AlternateLocationTest extends TestCase {
 			for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
 				AlternateLocation al = 
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
-				if(!AlternateLocation.isTimestamped(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i])) {
-					assertTrue("test failed -- alternate location string not "+
-							   "considered stamped", false);
-				}
 				if(!al.isTimestamped()) {
 					assertTrue("test failed -- alternate location string not "+
 							   "considered stamped", false);
@@ -127,18 +112,6 @@ public final class AlternateLocationTest extends TestCase {
 	}
 
 	/**
-	 * Test the date-related methods.
-	 */
-	public void testDateMethods() {
-		Date date = new Date();
-		String dateStr = AlternateLocation.convertDateToString(date);
-		if(!AlternateLocation.isValidDate(dateStr)) {
-			assertTrue("test failed: valid date not considered valid\r\ndate: "+date+
-					   "\r\ndate string: "+dateStr, false);
-		}	   
-	}
-
-	/**
 	 * Test the equals method.
 	 */
 	public void testAlternateLocationEquals() {
@@ -164,9 +137,10 @@ public final class AlternateLocationTest extends TestCase {
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				AlternateLocation al1 = 
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
+				assertTrue("alternate location should have a timestamp", al0.isTimestamped());
+				assertTrue("alternate location should have a timestamp", al1.isTimestamped());
 				timeStampedAltLocs0.put(al0, al0);
 				testMap.put(al1, al1);
-				//timeStampedAltLocs0.add(al);
 			} catch(IOException e) {
 				assertTrue("unexpected exception: "+e, false);
 			}
