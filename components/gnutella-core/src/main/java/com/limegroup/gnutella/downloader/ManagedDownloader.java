@@ -813,7 +813,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // Added a bunch of asserts to catch bugs.  There is some form of
         // input we are not considering in our algorithms....
-        Assert.that(retString.length() <= MAX_LEN);
+        Assert.that(retString.length() <= MAX_LEN, 
+                    "Original filename: " + allFiles[0].getFileName() +
+                    ", converted: " + retString);
         Assert.that(!retString.equals(""), 
                     "Original filename: " + allFiles[0].getFileName());
         Assert.that(retString != null, 
