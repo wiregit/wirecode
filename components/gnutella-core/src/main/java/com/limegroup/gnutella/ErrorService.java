@@ -49,6 +49,7 @@ public final class ErrorService {
 		 */
 		public void error(Throwable t) {
 			t.printStackTrace();
+			throw new RuntimeException(t.getMessage());
 		}
 	}
 }
