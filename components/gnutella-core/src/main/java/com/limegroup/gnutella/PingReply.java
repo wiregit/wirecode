@@ -15,8 +15,8 @@ public class PingReply extends Message {
      * Create a new PingReply from scratch 
      *
      * @requires ip.length==4 and ip is in <i>little-endian</i> byte order,
-     *  0&<; port &<;2^16 (i.e., can fit in 2 unsigned bytes),
-     *  0&<; files and kbytes &<;2^32 (i.e., can fit in 4 unsigned bytes)
+     *  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
+     *  0 < files and kbytes < 2^32 (i.e., can fit in 4 unsigned bytes)
      */
     public PingReply(byte[] guid, byte ttl, 
 		     int port, byte[] ip, long files, long kbytes) {
