@@ -233,12 +233,13 @@ public class BestCandidates {
 	 */
 	public static Connection getRoute(IpPort c, int ttl) {
 		
+		if (ttl<0) return null;
 		
 		synchronized(instance){
 			if (instance._best==null)
 				return null;
 			
-			int size = Math.max(ttl, instance._best.length-1);
+			int size = Math.min(ttl, instance._best.length-1);
 			
 			for (int i =0;i<=size;i++)
 				if (c.isSame(instance._best[i]))
