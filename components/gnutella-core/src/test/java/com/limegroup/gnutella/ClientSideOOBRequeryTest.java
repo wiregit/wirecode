@@ -63,15 +63,18 @@ public class ClientSideOOBRequeryTest
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        File mp3 = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -641,6 +644,163 @@ public class ClientSideOOBRequeryTest
         }
         
         rs.stopQuery(new GUID(guid));
+
+        {
+            // now we should make sure MessageRouter clears the map
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
+
+    }
+
+
+    public void testDownloadInProgressQueryStoppedShouldNotPurge() 
+        throws Exception {
+
+        keepAllAlive(testUPs);
+        // clear up any messages before we begin the test.
+        drainAll();
+
+        // luckily there is hacky little way to go through the download paces -
+        // download from yourself :) .
+
+        Message m = null;
+
+        byte[] guid = rs.newQueryGUID();
+        rs.query(guid, "metadata");
+        callback.setGUID(new GUID(guid));
+        
+        QueryRequest qr = 
+            (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
+                                                         QueryRequest.class);
+        assertNotNull(qr);
+        assertTrue(qr.desiresOutOfBandReplies());
+
+        // just return ONE real result and the rest junk
+        Response resp = null;
+        QueryReply reply = null;
+        {
+            // get a correct response object
+            QueryRequest qrTemp = QueryRequest.createQuery("metadata");
+            testUPs[0].send(qrTemp);
+            testUPs[0].flush();
+
+            reply = (QueryReply) getFirstInstanceOfMessageType(testUPs[0],
+                                                               QueryReply.class);
+            assertNotNull(reply);
+            resp = (Response) (reply.getResultsAsList()).get(0);
+
+        }
+        assertNotNull(reply);
+        assertNotNull(resp);
+        Response[] res = new Response[] { resp };
+
+        // this isn't really needed but just for completeness send it back to 
+        // the test Leaf
+        m = new QueryReply(guid, (byte) 1, PORT, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        testUPs[0].send(m);
+        testUPs[0].flush();
+
+        // send back a lot of results via TCP so you konw the UDP one will be
+        // bypassed
+        for (int i = 0; i < testUPs.length; i++) {
+            res = new Response[75];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
+            m = new QueryReply(guid, (byte) 1, testUPs[0].getListeningPort(), 
+                               myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+
+        // allow for processing
+        Thread.sleep(3000);
+
+        {
+            // now we should make sure MessageRouter has not bypassed anything
+            // yet
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
+        
+        // send back a UDP response and make sure it was saved in bypassed...
+        {
+            ReplyNumberVendorMessage vm = 
+                new ReplyNumberVendorMessage(new GUID(guid), 1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
+                                                     baos.toByteArray().length,
+                                                     testUPs[0].getInetAddress(),
+                                                     PORT);
+            UDP_ACCESS[0].send(pack);
+        }
+
+        // allow for processing
+        Thread.sleep(500);
+
+        {
+            // all the UDP ReplyNumberVMs should have been bypassed
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
+            assertNotNull(endpoints);
+            assertEquals(1, endpoints.size());
+        }
+        
+        // now do the download, wait for it to finish, and then bypassed results
+        // should be empty again
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData());
+        
+        assertFalse("file should not be saved yet", 
+            new File( _savedDir, "metadata.mp3").exists());
+        assertTrue("file should be shared",
+            new File(_sharedDir, "metadata.mp3").exists());
+        
+        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        UploadSettings.UPLOAD_SPEED.setValue(5);
+
+        rs.stopQuery(new GUID(guid));
+        callback.clearGUID();
+
+        {
+            // download still in progress, don't purge
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
+            assertNotNull(endpoints);
+            assertEquals(1, endpoints.size());
+        }
+
+        UploadSettings.UPLOAD_SPEED.setValue(100);
+
+        // sleep to make sure the download starts 
+        Thread.sleep(10000);
+        
+        assertTrue("file should saved", 
+            new File( _savedDir, "metadata.mp3").exists());
+        assertTrue("file should be shared",
+            new File(_sharedDir, "metadata.mp3").exists());
 
         {
             // now we should make sure MessageRouter clears the map
