@@ -98,6 +98,10 @@ public class ReplyHandlerStub implements ReplyHandler {
     public boolean isStable() {
         return true;
     }
+    public boolean canBeOOBProxied() {
+        return false;
+    }
+
 }
 
 
