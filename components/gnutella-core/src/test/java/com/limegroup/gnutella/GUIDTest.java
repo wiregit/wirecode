@@ -245,10 +245,14 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("hashcodes should be same", g1.hashCode(), g2.hashCode());
         //System.out.println("Hash: "+Integer.toHexString(g1.hashCode()));
 
-        b2[7]+=1;
+        //make sure we don't rollover, killing the below tests.
+        if(b2[7]==255)
+            b1[7]--;
+        else
+            b2[7]+=1;
         g2=new GUID(b2);
         assertLessThan("g1 vs g2",
-            0, g1.compareTo(g2));  //TODO: this occasionally fails. Why?
+            0, g1.compareTo(g2));
         assertLessThan("g1 vs g2",
             0, (new GUID.GUIDComparator()).compare(g1, g2));
         assertGreaterThan("g2 vs g1", 
