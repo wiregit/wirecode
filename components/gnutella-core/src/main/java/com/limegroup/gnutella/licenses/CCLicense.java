@@ -72,7 +72,7 @@ class CCLicense implements License, Serializable, Cloneable {
     /**
      * The license information for each Work.
      */
-    private Map /* URN -> Work */ allWorks;
+    private Map /* URN -> Details */ allWorks;
     
     /**
      * Constructs a new CCLicense.
@@ -99,11 +99,11 @@ class CCLicense implements License, Serializable, Cloneable {
      * Retrieves the license deed for the given URN.
      */
     public URL getLicenseDeed(URN urn) {
-        Work work = getWork(urn);
-        if(work == null || work.licenseURL == null)
+        Details details = getDetails(urn);
+        if(details == null || details.licenseURL == null)
             return guessLicenseDeed();
         else
-            return work.licenseURL;
+            return details.licenseURL;
     }
     
     public long getLastVerifiedTime() {
@@ -125,7 +125,7 @@ class CCLicense implements License, Serializable, Cloneable {
      * Determines if the CC License is valid with this URN.
      */
     public boolean isValid(URN urn) {
-        return getWork(urn) != null;
+        return getDetails(urn) != null;
     }
     
     /**
@@ -161,11 +161,11 @@ class CCLicense implements License, Serializable, Cloneable {
         List permitted = Collections.EMPTY_LIST;
         List prohibited = Collections.EMPTY_LIST;
         List required = Collections.EMPTY_LIST;
-        Work work = getWork(urn);
-        if(work != null) {
-            permitted = work.permitted;
-            prohibited = work.prohibited;
-            required = work.required;
+        Details details = getDetails(urn);
+        if(details != null) {
+            permitted = details.permitted;
+            prohibited = details.prohibited;
+            required = details.required;
         }
         
         StringBuffer sb = new StringBuffer();
@@ -246,11 +246,11 @@ class CCLicense implements License, Serializable, Cloneable {
         }
     }
     
-    ///// WORK CODE ///
+    ///// WORK & DETAILS CODE ///
     
     
     /**
-     * Adds the given work URN.
+     * Adds the given a work with the appropriate details to allWorks.
      */
     private void addWork(URN urn, String licenseURL) {
         URL url = null;
@@ -261,77 +261,77 @@ class CCLicense implements License, Serializable, Cloneable {
         }
         
         //See if we can refocus an existing licenseURL.
-        Work work = getWork(urn);
-        if(work != null) {
+        Details details = getDetails(urn);
+        if(details != null) {
             if(LOG.isDebugEnabled())
-                LOG.debug("Found existing work item for URN: " + urn);
+                LOG.debug("Found existing details item for URN: " + urn);
             if(url != null) {
                 URL guessed = guessLicenseDeed();
                 if(guessed != null && guessed.equals(url)) {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Updating license URL to be: " + url);
-                    work.licenseURL = url;
+                    details.licenseURL = url;
                 }
             }
                 
             // Otherwise, not much else we can do.
-            // We already have a Work for this URN and it has
+            // We already have a Details for this URN and it has
             // a licenseURL already.
             return;
         }
         
-        // There's no existing work for this item, so lets add one.
-        work = new Work(url);
+        // There's no existing details for this item, so lets add one.
+        details = new Details(url);
         if(LOG.isDebugEnabled())
-            LOG.debug("Adding new " + work + " for urn: " + urn);
+            LOG.debug("Adding new " + details + " for urn: " + urn);
 
         if(allWorks == null)
-            allWorks = new HashMap();
-        allWorks.put(urn, work); // it is fine if urn is null.
+            allWorks = new HashMap(1); // assume it's small.
+        allWorks.put(urn, details); // it is fine if urn is null.
     }   
     
     /**
-     * Locates a work for a given URN.
+     * Locates a details for a given URN.
      */
-    private Work getWork(URN urn) {
+    private Details getDetails(URN urn) {
         if(allWorks == null)
             return null;
         
-        // First see if there's a work that matches exactly.
-        Work work = (Work)allWorks.get(urn);
-        if(work != null)
-            return work;
+        // First see if there's a details that matches exactly.
+        Details details = (Details)allWorks.get(urn);
+        if(details != null)
+            return details;
             
         // Okay, nothing matched.
         
         // If we want a specific URN, we can only give back the 'null' one.
         if(urn != null)
-            return (Work)allWorks.get(null);
+            return (Details)allWorks.get(null);
         
         // We must have wanted the null one.  Give back the first one we find.
-        return (Work)allWorks.values().iterator().next();
+        return (Details)allWorks.values().iterator().next();
     }
     
     /**
-     * Locates all works that use the given License URL.
+     * Locates all details that use the given License URL.
      */
-    private List getWorksForLicenseURL(URL url) {
+    private List getDetailsForLicenseURL(URL url) {
         if(allWorks == null || url == null)
             return Collections.EMPTY_LIST;
         
-        List works = new LinkedList();
+        List details = new LinkedList();
         for(Iterator i = allWorks.values().iterator(); i.hasNext(); ) {
-            Work work = (Work)i.next();
-            if(work.licenseURL != null && url.equals(work.licenseURL))
-                works.add(work);
+            Details detail = (Details)i.next();
+            if(detail.licenseURL != null && url.equals(detail.licenseURL))
+                details.add(detail);
         }
-        return works;
+        return details;
     }
     
     /**
-     * A single work.
+     * A single details.
      */
-    private static class Work implements Serializable {
+    private static class Details implements Serializable {
         private static final long serialVersionUID =  -1719502030054241350L;
                 
         URL licenseURL;
@@ -340,9 +340,9 @@ class CCLicense implements License, Serializable, Cloneable {
         List prohibited;
         
         // for de-serializing.
-        Work() { }
+        Details() { }
         
-        Work(URL url) {
+        Details(URL url) {
             licenseURL = url;
         }
         
@@ -351,7 +351,7 @@ class CCLicense implements License, Serializable, Cloneable {
         }
         
         public String toString() {
-            return "work:: license: " + licenseURL;
+            return "details:: license: " + licenseURL;
         }
     }   
     
@@ -427,12 +427,11 @@ class CCLicense implements License, Serializable, Cloneable {
                 parseLicenseItem(child);
         }
             
-        // so long as we found a valid work item, we're good.
         return;
     }
     
     /**
-     * Ensures the 'work' item exists and retrieves the URN, if it exists.
+     * Parses the 'Work' item.
      */
     protected void parseWorkItem(Node work) {
         if(LOG.isTraceEnabled())
@@ -476,18 +475,18 @@ class CCLicense implements License, Serializable, Cloneable {
         // Get the license URL. 
         NamedNodeMap attributes = license.getAttributes();
         Node about = attributes.getNamedItem("rdf:about");
-        List works = Collections.EMPTY_LIST;
+        List details = Collections.EMPTY_LIST;
         if(about != null) {
             String value = about.getNodeValue();
             try {
-                works = getWorksForLicenseURL(new URL(value));
+                details = getDetailsForLicenseURL(new URL(value));
             } catch(MalformedURLException murl) {
                 LOG.warn("Unable to create license URL for: " + value, murl);
             }
         }
         
-        // Optimization:  If no works, exit early.
-        if(!works.iterator().hasNext())
+        // Optimization:  If no details, exit early.
+        if(!details.iterator().hasNext())
             return;
         
         List required = null;
@@ -514,14 +513,14 @@ class CCLicense implements License, Serializable, Cloneable {
             }
         }
         
-        // Okay, now iterate through each work and set the lists.
-        for(Iterator i = works.iterator(); i.hasNext(); ) {
-            Work work = (Work)i.next();
+        // Okay, now iterate through each details and set the lists.
+        for(Iterator i = details.iterator(); i.hasNext(); ) {
+            Details detail = (Details)i.next();
             if(LOG.isDebugEnabled())
-                LOG.debug("Setting license details for " + work);
-            work.required = required;
-            work.prohibited = prohibited;
-            work.permitted = permitted;
+                LOG.debug("Setting license details for " + details);
+            detail.required = required;
+            detail.prohibited = prohibited;
+            detail.permitted = permitted;
         }
         
         return;
@@ -556,30 +555,30 @@ class CCLicense implements License, Serializable, Cloneable {
     
     /**
      * Updates the license details, potentially retrieving information
-     * from the licenseURL in each Work.
+     * from the licenseURL in each Details.
      */
     private void updateLicenseDetails() {
         if(allWorks == null)
             return;
         
         for(Iterator i = allWorks.values().iterator(); i.hasNext(); ) {
-            Work work = (Work)i.next();
-            if(!work.isDescriptionAvailable() && work.licenseURL != null) {
+            Details details = (Details)i.next();
+            if(!details.isDescriptionAvailable() && details.licenseURL != null) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("Updating licenseURL for work: " + work);
+                    LOG.debug("Updating licenseURL for :" + details);
                 
-                String url = work.licenseURL.toExternalForm();
+                String url = details.licenseURL.toExternalForm();
                 // First see if we have cached details.
-                Object details = LicenseCache.instance().getDetails(url);
+                Object data = LicenseCache.instance().getData(url);
                 String body = null;
-                if(details != null && details instanceof String) {
+                if(data != null && data instanceof String) {
                     if(LOG.isDebugEnabled())
-                        LOG.debug("Using cached details for url: " + url);
-                    body = (String)details;
+                        LOG.debug("Using cached data for url: " + url);
+                    body = (String)data;
                 } else {
                     body = locateRDF(getBody(url));
                     if(body != null)
-                        LicenseCache.instance().addDetails(url, body);
+                        LicenseCache.instance().addData(url, body);
                     else
                         LOG.debug("Couldn't retrieve license details from url: " + url);
                 }

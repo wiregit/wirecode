@@ -47,10 +47,10 @@ class LicenseCache {
     private Map /* URI -> License */ licenses;
     
     /**
-     * An extra map of details that Licenses can use
+     * An extra map of data that Licenses can use
      * to cache info.  This information lasts forever.
      */
-    private Map /* Object -> Object */ details;
+    private Map /* Object -> Object */ data;
 
     private static final LicenseCache INSTANCE = new LicenseCache();
     private LicenseCache() { deserialize(); }
@@ -64,10 +64,10 @@ class LicenseCache {
     }
     
     /**
-     * Adds details.
+     * Adds data.
      */
-    synchronized void addDetails(Object key, Object value) {
-        details.put(key, value);
+    synchronized void addData(Object key, Object value) {
+        data.put(key, value);
     }
     
     /**
@@ -85,8 +85,8 @@ class LicenseCache {
     /**
      * Gets details.
      */
-    synchronized Object getDetails(Object key) {
-        return details.get(key);
+    synchronized Object getData(Object key) {
+        return data.get(key);
     } 
     
     /**
@@ -122,7 +122,7 @@ class LicenseCache {
             }
             licenses = map;
             
-            details = (Map)ois.readObject();            
+            data = (Map)ois.readObject();            
         } catch(Throwable t) {
             LOG.error("Can't read licenses", t);
         } finally {
@@ -136,8 +136,8 @@ class LicenseCache {
             
             if(licenses == null)
                 licenses = new HashMap();
-            if(details == null)
-                details = new HashMap();
+            if(data == null)
+                data = new HashMap();
         }
     }
     
@@ -167,7 +167,7 @@ class LicenseCache {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
             oos.writeObject(licenses);
-            oos.writeObject(details);
+            oos.writeObject(data);
             oos.flush();
         } catch (IOException e) {
             ErrorService.error(e);
