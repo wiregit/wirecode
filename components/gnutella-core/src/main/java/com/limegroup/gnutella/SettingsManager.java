@@ -568,9 +568,7 @@ public class SettingsManager implements SettingsInterface
     public String getSaveDirectory() {
         File file = new File(saveDirectory_);
         if(!file.isDirectory()) {
-            boolean dirsMade = file.mkdirs();
-            if(!dirsMade)
-                return "";
+			setSaveDirectory(saveDirectory_);
         }
         return saveDirectory_;
     }
