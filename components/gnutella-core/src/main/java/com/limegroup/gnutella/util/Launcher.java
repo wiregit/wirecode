@@ -48,13 +48,21 @@ public class Launcher {
 	private static final String NETSCAPE_REMOTE_PARAMETER = "-remote";
 	private static final String NETSCAPE_OPEN_PARAMETER_START = "openURL(";
 	private static final String NETSCAPE_OPEN_PARAMETER_END = ")";
+	   
+	/**
+	 * Launcher class for opening applications on windows.
+	 */
+	private static WindowsLauncher _windowsLauncher;
    
 
 	/** 
 	 * Loads the necessary Mac classes if running on Mac.
 	 */
 	static {
-		if(CommonUtils.isMacClassic()) {
+		if(CommonUtils.isWindows()) {
+			_windowsLauncher = new WindowsLauncher();
+		}
+		else if(CommonUtils.isMacClassic()) {
 			try {
 				loadMacClasses();		
 			} catch(IOException ioe) {
@@ -83,10 +91,13 @@ public class Launcher {
 	 */
 	public static int openURL(String url) throws IOException {	   
 		if(CommonUtils.isWindows()) {
-			return launchFileWindows(url);
+			return openURLWindows(url);
 		}	   
 		else if(CommonUtils.isMacClassic()) {
 			openURLMacClassic(url);
+		}
+		else if(CommonUtils.isMacOSX()) {
+			launchFileMacOSX(url);
 		}
 		else if(CommonUtils.isUnix()) {
 			launchFileUnix(url);
@@ -94,6 +105,17 @@ public class Launcher {
 		return -1;
 	}
 
+	/**
+	 * Opens the default web browser on windows, passing it the specified
+	 * url.
+	 *
+	 * @param url the url to open in the browser
+	 * @return the error code of the native call, -1 if the call failed
+	 *  for any reason
+	 */
+	private static int openURLWindows(String url) throws IOException {
+		return new WindowsLauncher().openURL(url);
+	}
 	
 	/**
 	 * Opens the specified url in the default browser on the Mac.
@@ -127,7 +149,7 @@ public class Launcher {
 
 	/**
 	 * Launches the file whose abstract path is specified in the 
-	 * <code>File</code> parameter.  This method will not launch any file
+	 * <tt>File</tt> parameter.  This method will not launch any file
 	 * with .exe, .vbs, .lnk, .bat, .sys, or .com extensions, diplaying 
 	 * an error if one of the file is of one of these types.
 	 *
@@ -152,6 +174,9 @@ public class Launcher {
 			else if(CommonUtils.isMacClassic()) {
 				launchFileMacClassic(file);
 			}
+			else if(CommonUtils.isMacOSX()) {
+				launchFileMacOSX(path);
+			}
 			else if(CommonUtils.isUnix()) {
 				launchFileUnix(path);
 			}
@@ -165,13 +190,12 @@ public class Launcher {
 	/**
 	 * Launches the given file on Windows.
 	 *
-	 * @param path The path of the file to launch
+	 * @param path the path of the file to launch
 	 *
-	 * @return An int for the exit code of the native method
+	 * @return an int for the exit code of the native method
 	 */
 	private static int launchFileWindows(String path) throws IOException {		
-		WindowsLauncher wl = new WindowsLauncher();
-		return wl.launchFile(path);
+		return new WindowsLauncher().launchFile(path);
 	}
 
 	/** 
@@ -191,6 +215,21 @@ public class Launcher {
 			Runtime.getRuntime().exec(new String[] {appPath, filePath});
 		} catch(SecurityException se) {
 		}
+	}
+
+	/**
+	 * Launches a file on OSX, appending the full path of the file to the
+	 * "open" command that opens files in their associated applications
+	 * on OSX.
+	 *
+	 * @param file the <tt>File</tt> instance denoting the abstract pathname
+	 *  of the file to launch
+	 * @throws IOException if an I/O error occurs in making the runtime.exec()
+	 *  call or in getting the canonical path of the file
+	 */
+	private static void launchFileMacOSX(final String file) throws IOException {
+		String command = "open "+"\"file\"";
+		Runtime.getRuntime().exec(command);
 	}
 
 	/**
