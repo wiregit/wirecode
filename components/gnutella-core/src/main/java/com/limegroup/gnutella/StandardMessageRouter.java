@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -299,7 +300,7 @@ public class StandardMessageRouter extends MessageRouter {
         }
         
         // get the *latest* push proxies
-        PushProxyInterface[] proxies = 
+        Set proxies = 
             (notIncoming ? _manager.getPushProxies() : null);
         
         // it may be too big....
@@ -328,7 +329,7 @@ public class StandardMessageRouter extends MessageRouter {
                     if ((currXML != null) && (!currXML.equals("")))
                         xmlCompressed = LimeXMLUtils.compress(currXMLBytes);
                     else //there is no XML
-                        xmlCompressed = new byte[0];
+                        xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
                     
                     // create the new queryReply
                     queryReply = new QueryReply(guid, ttl, port, ip, speed, 
@@ -349,7 +350,7 @@ public class StandardMessageRouter extends MessageRouter {
                 xmlCompressed = 
                     LimeXMLUtils.compress(xmlBytes);
             else //there is no XML
-                xmlCompressed = new byte[0];
+                xmlCompressed = DataUtils.EMPTY_BYTE_ARRAY;
             
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
