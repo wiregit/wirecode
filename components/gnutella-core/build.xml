@@ -9,6 +9,7 @@
 <property name="DEBUG" value="yes"/>  
 <property name="OPTIMIZE" value="no"/>  
 <property name="DEPRECATION" value="yes"/>
+<property name="NOWARN" value="yes"/>
 
 <!-- default classpath for javac.  it is set as the user's CLASSPATH
      environment with the jar files necessary for compilation appended. -->
@@ -29,7 +30,7 @@
 <target name="all" depends="init">
 	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
 		srcdir="${basedir}" destdir="${basedir}"
-		excludes="${unused}/**"
+        nowarn="${NOWARN}" excludes="${unused}/**"
 	>
       <classpath refid="default.classpath" />
     </javac>
@@ -42,6 +43,7 @@
            deprecation="${DEPRECATION}"
 		   srcdir="${basedir}" 
            destdir="${basedir}"
+           nowarn="${NOWARN}"
            excludes="${tests}/**"
            target="1.1"
     >

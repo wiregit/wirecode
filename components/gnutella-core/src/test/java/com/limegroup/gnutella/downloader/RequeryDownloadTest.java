@@ -145,20 +145,26 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
 
     /////////////////////////// Actual Tests /////////////////////////////
 
-    /** Gets response with exact match, starts downloading. */
+    /* The requery-expunge-branch pretty much invalidates testExactMatch, 
+       testHashMatch, and testNoMatch.  So lets get rid of them for now....
+
+    /** Gets response with exact match, starts downloading. 
     public void testExactMatch() throws Exception {
         doTest(filename, hash, true);
     }
 
-    /** Gets response with same hash, different name, starts downloading. */
+    /** Gets response with same hash, different name, starts downloading. 
     public void testHashMatch() throws Exception {
         doTest("different name.txt", hash, true);
     }
 
-    /** Gets a response that doesn't match--can't download. */
+    /** Gets a response that doesn't match--can't download. 
     public void testNoMatch() throws Exception {
         doTest("some other file.txt", null, false);
     }
+
+    */
+
 
     /**
      * Skeleton method for all tests.
@@ -253,36 +259,25 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
     public void testRequeryDownload() throws Exception {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=5*1000; //5 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=5*1000;
+        RequeryDownloader.MAX_WAIT_TIME=5*1000;
 
+        byte[] guidToUse = GUID.makeGuid();
         //Start a download for the given incomplete file.  Give the thread time
         //to start up, then make sure nothing has been sent initially.
         Downloader downloader=null;
         downloader=mgr.download("file name", 
                                 null, 
-                                GUID.makeGuid(),
+                                guidToUse,
                                 null);
         Thread.sleep(200);
         assertEquals("nothing should have been sent to start", 
             0, router.broadcasts.size());
 
-        //Now wait a few seconds and make sure a requery of right type was sent.
+        //Now wait a few seconds and make sure a requery was NOT sent.
         Thread.sleep(6*1000);
-        assertEquals("unexpected router.broadcasts size", 1, router.broadcasts.size());
-        Object m=router.broadcasts.get(0);
-        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
-        QueryRequest qr=(QueryRequest)m;
-		// First query is not counted as requery
-        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("unexpected query", "file name", qr.getQuery());
-        assertNotNull("expected any type of urn", qr.getRequestedUrnTypes());
-        assertEquals("only one (any) urn type expected",
-            1, qr.getRequestedUrnTypes().size());
-        assertNotNull("should have sent atleast an empty length urn set",
-            qr.getQueryUrns() );
-        assertEquals("wishlist has no URN",
-            0, qr.getQueryUrns().size() );
-        assertEquals("downloader should be waiting for results", 
-            Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals("unexpected router.broadcasts size", 0, router.broadcasts.size());
+        assertEquals("downloader should still have given up,yet wanting results",
+            Downloader.GAVE_UP, downloader.getState());
 
         //Send a mismatching response to the query, making sure it is ignored.
         //Give the downloader time to start up first.
@@ -290,7 +285,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             0l, TestFile.length(), "totally different.txt",
             null, null, null, null);
         byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply reply=new QueryReply(qr.getGUID(), 
+        QueryReply reply=new QueryReply(guidToUse,
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
@@ -298,8 +293,8 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             false, false);//supports chat, is multicast response
         router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
         Thread.sleep(400);
-        assertEquals("downloader should still be waiting for results",
-            Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals("downloader should still have given up,yet wanting results",
+            Downloader.GAVE_UP, downloader.getState());
 
         //Send a good response to the query.
         response=new Response(0l,   //index
@@ -308,7 +303,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
                               null,  //metadata
                               null,  //URNs
                               null, null); //metadata
-        reply=new QueryReply(qr.getGUID(), 
+        reply=new QueryReply(guidToUse,
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
@@ -334,7 +329,10 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             Downloader.COMPLETE, downloader.getState() );
     }
     
-    /** Tests that requeries are sent fairly and at appropriate rate. */
+    /* No more requeries as of the requery-expunge-branch, so no need to
+     * the requery rate.
+
+    /** Tests that requeries are sent fairly and at appropriate rate. 
     public void testRequeryScheduling() throws Exception {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=200; //0.1 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=1000;   //1 second
@@ -372,4 +370,6 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         assertLessThanOrEquals("Unbalanced x/y count: "+xCount+"/"+yCount, 
                    2, Math.abs(xCount-yCount));
     }
+
+    */
 }

@@ -230,7 +230,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 
     /** Tests that the progress is not 0% when resume button is hit while
      *  requerying.  This was caused by the call to cleanup() from
-     *  tryAllDownloads3() and was reported by Sam Berlin. */
+     *  tryAllDownloads3() and was reported by Sam Berlin. 
+     *  Changed after requeries have been shut off (requery-expunge-branch).
+     */
     public void testRequeryProgress() throws Exception {
         TestUploader uploader=null;
         ManagedDownloader downloader=null;
@@ -248,7 +250,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             //Wait for it to download until error.
             try { Thread.sleep(6000); } catch (InterruptedException e) { }
             assertEquals("should be waiting for results",
-                         Downloader.WAITING_FOR_RESULTS, 
+                         Downloader.GAVE_UP, 
                          downloader.getState());
             assertEquals("should have read 100 bytes", 100, 
                          downloader.getAmountRead());
@@ -259,7 +261,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                 fail("No other downloads!", e);
             }
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
-            assertEquals(Downloader.WAITING_FOR_RESULTS, 
+            assertEquals(Downloader.GAVE_UP, 
                          downloader.getState());
             assertEquals(100, 
                          downloader.getAmountRead());

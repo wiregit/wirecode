@@ -28,6 +28,7 @@
   <property name="DEBUG" value="yes" />
   <property name="OPTIMIZE" value="no" />
   <property name="DEPRECATION" value="yes" />
+  <property name="NOWARN" value="yes"/>
 
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
@@ -81,7 +82,7 @@
  <target name="build" depends="prepare">
    <javac debug="on" optimize="off" deprecation="off"
 	      srcdir="${coredir}:${guidir}:${basedir}"
-	      destdir="${builddir}"
+	      destdir="${builddir}" nowarn="${NOWARN}"
 		  excludes="${tests}**, ${settings}, **.gif,**.class,**.bat,**.sh,**.jar, **.xml">
 
      <classpath refid="default.classpath" />
