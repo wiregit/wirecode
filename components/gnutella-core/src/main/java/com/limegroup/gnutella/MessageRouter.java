@@ -465,10 +465,7 @@ public abstract class MessageRouter {
         // if (counter == null) the query has been seen before, few subcases... 
         else if ((counter == null) && !isProbeQuery) {// probe extension?
 
-            // only allow extension of TTL 1's, not in general.
-            if ((request.getTTL() > 0) && 
-                _queryRouteTable.getAndSetTTL(request.getGUID(), (byte)1, 
-                                              (byte)(request.getTTL()+1))) 
+            if (wasProbeQuery(request))
                 // rebroadcast out but don't locally evaluate....
                 handleQueryRequest(request, receivingConnection, counter, 
                                    false);
@@ -481,6 +478,19 @@ public abstract class MessageRouter {
             tallyDupQuery(request);
     }
 	
+    private boolean wasProbeQuery(QueryRequest request) {
+        // if the current TTL is large enough and the old TTL was 1, then this
+        // was a probe query....
+        // NOTE: that i'm setting the ttl to be the actual ttl of the query.  i
+        // could set it to some max value, but since we only allow TTL 1 queries
+        // to be extended, it isn't a big deal what i set it to.  in fact, i'm
+        // setting the ttl to the correct value if we had full expanding rings
+        // of queries.
+        return ((request.getTTL() > 0) && 
+                _queryRouteTable.getAndSetTTL(request.getGUID(), (byte)1, 
+                                              (byte)(request.getTTL()+1)));
+    }
+
     private void tallyDupQuery(QueryRequest request) {
         if(RECORD_STATS)
             ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
