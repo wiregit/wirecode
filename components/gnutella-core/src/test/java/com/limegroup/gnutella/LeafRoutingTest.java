@@ -52,11 +52,8 @@ public class LeafRoutingTest extends TestCase {
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.KEEP_ALIVE.setValue(0);
-        //settings.setConnectOnStartup(false);
-        //settings.setEverSupernodeCapable(false);
-        //settings.setDisableSupernodeMode(true);
-        //settings.setForceSupernodeMode(false);
-        //settings.setKeepAlive(0);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         MessageRouter router=new MessageRouterStub();
@@ -273,7 +270,8 @@ public class LeafRoutingTest extends TestCase {
         Message m=old2.receive(500);
         assertTrue(((QueryRequest)m).getQuery().equals("crap"));
         assertTrue(m.getHops()==(byte)1);
-        assertTrue(m.getTTL()==(byte)6);         
+        // we adjust all TTLs down to 6....
+        assertTrue(m.getTTL()==(byte)5);         
     }
 
     /** Converts the given X-Try[-Ultrapeer] header value to
