@@ -313,11 +313,34 @@ public class ClientSideOutOfBandReplyTest
                                       testUPs[0].getInetAddress(), cbPort);
             UDP_ACCESS.send(pack);
         }
+
+        // you also have to set up TCP incoming....
+        {
+            Socket sock = null;
+            OutputStream os = null;
+            try {
+                sock = Sockets.connect(InetAddress.getLocalHost().getHostAddress(), 
+                                       PORT, 12);
+                os = sock.getOutputStream();
+                os.write("\n\n".getBytes());
+            } catch (IOException ignored) {
+            } catch (SecurityException ignored) {
+            } catch (Throwable t) {
+                ErrorService.error(t);
+            } finally {
+                if(sock != null)
+                    try { sock.close(); } catch(IOException ignored) {}
+                if(os != null)
+                    try { os.close(); } catch(IOException ignored) {}
+            }
+        }        
+
         // ----------------------------------------
 
         Thread.sleep(250);
-        // we should now be guess capable
+        // we should now be guess capable and tcp incoming capable....
         assertTrue(rs.isGUESSCapable());
+        assertTrue(rs.acceptedIncomingConnection());
 
         // first of all, we should confirm that we are sending out a OOB query.
         GUID queryGuid = new GUID(rs.newQueryGUID());
