@@ -57,7 +57,7 @@ public class FileManager{
 	// _extensions = new String[0];
     }
 
-    public Response[] query(QueryRequest request) {
+    public synchronized Response[] query(QueryRequest request) {
 	String str = request.getQuery();
 	ArrayList list = search(str);
 	int size = list.size();
@@ -150,27 +150,31 @@ public class FileManager{
     /** subclasses must override this method */
     protected ArrayList search(String query) {
 	ArrayList response_list = new ArrayList();
-	try {
 	try{
-	    pattern = compiler.compile(query);}
-	catch(MalformedPatternException e){
-	    //If we catch and expression we seacrh without regular expressions
-	    for(int i=0; i < _numFiles; i++) {
-		FileDesc desc = (FileDesc)_files.get(i);
+	    try{
+		pattern = compiler.compile(query);}
+	    catch(MalformedPatternException e){
+		//If we catch and expression we seacrh without regular expressions
+		for(int i=0; i < _numFiles; i++) {
+		    FileDesc desc = (FileDesc)_files.get(i);
+		    //System.out.println("Rob:"+query);
+		    String file_name = desc._name;
+		    if (file_name.indexOf(query) != -1) 
+			response_list.add(_files.get(i));
+		}
+		return response_list;
+	    }
+	    for(int i=0; i < _numFiles; i++){
+		FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
+		//System.out.println("Sumeet: "+query);
 		String file_name = desc._name;
-		if (file_name.indexOf(query) != -1) 
+		input = new PatternMatcherInput(file_name);
+		if (matcher.contains(input,pattern))
 		    response_list.add(_files.get(i));
 	    }
 	}
-	for(int i=0; i < _numFiles; i++){
-	    FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
-	    String file_name = desc._name;
-	    input = new PatternMatcherInput(file_name);
-	    if (matcher.contains(input,pattern))
-		response_list.add(_files.get(i));
-	}
-	} catch (Exception e2) {
-	    System.out.println("Exception:"+ e2);
+	catch (Exception e){
+	    e.printStackTrace();
 	}
 	return response_list;
     }    
