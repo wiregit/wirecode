@@ -29,7 +29,7 @@ public class FileManager{
     private Pattern pattern;
     private PatternMatcherInput input;
     // For our enhancements of RegEx.
-    private final String EscapeChars = "./(){}\"\\";
+    private static final String EscapeChars = "./(){}\"\\";
 
 
     private static FileManager _myFileManager;
@@ -174,14 +174,18 @@ public class FileManager{
 		addFile(file_list[i].getAbsolutePath());  /* addFile method */
 	}
     }
-    /** subclasses must override this method */
-    protected ArrayList search(String q) {
-	ArrayList response_list = new ArrayList();
+
+    /** 
+     * Translates the given wildcard search into a Perl5 regular
+     * expression.  For example, "*.mp3" gets translated into the
+     * regexp ".*\.mp3".  
+     */
+    static String wildcard2regexp(String q) {
 	StringBuffer sb = new StringBuffer();
 	for(int i=0; i<q.length();i++){
 	    if (EscapeChars.indexOf(q.charAt(i)) < 0){
 		//the particular char is an normal except for *
-		if(q.charAt(i)=='*'||q.charAt(i)=='+'){ //special cases
+		if(q.charAt(i)=='*'||q.charAt(i)=='+'||q.charAt(i)==' '){ //special cases
 		    sb = sb.append(".");
 		    sb = sb.append("*"); //+ and * replaced with .*
 		}
@@ -193,7 +197,15 @@ public class FileManager{
 		sb = sb.append(q.charAt(i));
 	    }
 	}//for
-	String query = sb.toString().toLowerCase();
+	return sb.toString();
+    }
+	
+    
+    /** subclasses must override this method */
+    protected ArrayList search(String q) {
+	ArrayList response_list = new ArrayList();
+
+	String query = wildcard2regexp(q).toLowerCase();
 	try{
 	    pattern = compiler.compile(query);}
 	catch(MalformedPatternException e){
