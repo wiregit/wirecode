@@ -4,6 +4,12 @@ import java.io.*;
 import java.util.*;
 import com.limegroup.gnutella.util.StringUtils;
 
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.HashMap;
+import com.sun.java.util.collections.TreeMap;
+import com.sun.java.util.collections.Iterator;
+
+
 /**
  * this class is used to create the data files required by
  * I18NConvert and I18NData classes...

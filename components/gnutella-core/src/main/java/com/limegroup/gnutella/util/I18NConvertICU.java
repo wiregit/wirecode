@@ -7,6 +7,9 @@ import java.util.*;
 import com.limegroup.gnutella.ErrorService;
 import com.ibm.icu.text.Normalizer;
 
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.HashMap;
+
 final class I18NConvertICU extends AbstractI18NConverter {
 
     /** excluded codepoints (like accents) */
