@@ -43,7 +43,7 @@ public class Acceptor extends Thread {
      */
     private static byte[] _address=new byte[4];
 
-    private Vector _badHosts = new Vector();
+    private Vector /* of String */ _badHosts = new Vector();
 
     private ConnectionManager _connectionManager;
     private DownloadManager _downloadManager;
@@ -275,7 +275,7 @@ public class Acceptor extends Thread {
                 }
 
                 //Check if IP address of the incoming socket is in _badHosts
-                if (_badHosts.contains(
+                if (isBannedIP(
                         client.getInetAddress().getHostAddress())) {
                     client.close();
                     continue;
@@ -387,7 +387,42 @@ public class Acceptor extends Thread {
         throw new IOException();
     }
 
+    /** Added to fix bug where banned IP added is not effective until restart
+     *  (Bug 62001).
+     *  Allows a new host to be dynamically added to the Banned IPs list (via a
+     *  reload from SettingsManager).
+     */
+    public void refreshBannedIPs() {
 
+        // synch to ensure no concurrent access by Acceptor thread, as this will
+        // always be called by the gui thread.....
+        synchronized (_badHosts) {
+            // reset list
+            _badHosts.removeAllElements();
+            
+            // reload list
+            String[] allHosts = SettingsManager.instance().getBannedIps();
+            for (int i=0; i<allHosts.length; i++)
+                _badHosts.add(allHosts[i]);
+        }
+
+        // kill any connections that may now be banned.....
+        // this method isn't too inefficient, as the normal connections per
+        // client is about 4.
+        final List connections = _connectionManager.getConnections();
+        for (int i = 0; i < connections.size(); i++) {
+            ManagedConnection curr = (ManagedConnection) connections.get(i);
+            if (isBannedIP(curr.getOrigHost()))
+                _connectionManager.remove(curr);                
+        }
+    }
+
+    /** @return true if the input dotted address (i.e. 'W.X.Y.Z') is banned,
+     *  else false.
+     */
+    public boolean isBannedIP(String ip) {
+        return _badHosts.contains(ip);
+    }
 
 
 }
