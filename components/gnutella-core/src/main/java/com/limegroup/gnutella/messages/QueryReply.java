@@ -1000,6 +1000,8 @@ public class QueryReply extends Message implements Serializable{
          * this method, take a look at isFirewalledQuality! */
 		if(Arrays.equals(_address, RouterService.getAddress())) {
 			return 3;       // same address -- display it
+        } else if (isMCastReply) {
+            return 4;       // multicast, maybe busy (but doesn't matter)
         } else if (iFirewalled && heFirewalled==YES) {
             return -1;      //     both firewalled; transfer impossible
         } else if (busy==MAYBE || heFirewalled==MAYBE) {
@@ -1012,9 +1014,7 @@ public class QueryReply extends Message implements Serializable{
                 return 1;   //**   busy, direct connect
         } else if (busy==NO) {
             Assert.that(heFirewalled==NO || !iFirewalled);
-            if ( isMCastReply )
-                return 4;
-            else if (heFirewalled==YES)
+            if (heFirewalled==YES)
                 return 2;   //***  not busy, push
             else
                 return 3;   //**** not busy, direct connect
