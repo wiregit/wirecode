@@ -2652,8 +2652,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(!problem && !http11)
                     files.add(rfd);
                 if(!problem && rfd.isAltLocCapable()) {
-                    //Sumeet:TODO:Until IncompleteFileDesc and ManagedDownloader
-                    //do not share a common AlternateLocation, they should get
+                    //TODO3:Until IncompleteFileDesc and ManagedDownloader do
+                    //not share a common AlternateLocation, they should get
                     //separate copies of AlternateLocations
                     AlternateLocation loc=null;
                     AlternateLocation loc2=null;
@@ -2663,15 +2663,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                     } catch (Exception e) {}
                     if(loc!=null) {
                         informMesh(rfd,true);
-                        FileDesc[] descs = 
-                        fileManager.getIncompleteFileDescriptors();
-                        //Sumeet:TODO1:get from FileManager rather than iterate
-                        for(int i=0; i<descs.length; i++) {
-                            if(this.incompleteFile.equals(descs[i].getFile()))
-                                descs[i].add(loc);
-                        }
-                        //Sumeet:TODO1:IncompleteFileDesc and this should share
-                        //a AlternateLocationCollection
+                        FileDesc desc=
+                             fileManager.getFileDescForFile(incompleteFile);
+                        if(desc!=null) 
+                            desc.add(loc);
+                        //TODO3:IncompleteFileDesc and this should share a
+                        //AlternateLocationCollection
                         addAlternateLocation(loc2);
                     }
                 }
