@@ -7,9 +7,9 @@ import com.limegroup.gnutella.*;
  * Blocks messages and hosts based on IP address.  Formerly know as
  * BlackListFilter.  Immutable.  
  */
-public class IPFilter extends SpamFilter {
-    private IPList badHosts = new IPList();
-    private IPList goodHosts = new IPList();
+public final class IPFilter extends SpamFilter {
+    private final IPList badHosts = new IPList();
+    private final IPList goodHosts = new IPList();
 
     /** Constructs a new BlackListFilter containing the addresses listed
      *  in the SettingsManager. */
