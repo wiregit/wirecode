@@ -72,7 +72,7 @@ public class WriteRegulator {
         }
 
         int rto        = _sendWindow.getRTO();
-System.err.println(
+log(
 "sleepTime:"+sleepTime+
 " uS:"+usedSpots+
 " smoothRTT:"+smoothRTT+
@@ -99,7 +99,7 @@ System.err.println(
         if ( rtt != 0 && baseWait != 0 && 
              (windowDelay < rtt || rtt > maxRTT) ) {
 //if ( _sendWindow.getWindowStart() % 5 == 0 )
-System.err.println("RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
+log("RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
 " rtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
 " lRTT:"+_sendWindow.lowRoundTripTime()+
 " sWait:"+sentWait+
@@ -120,12 +120,12 @@ System.err.println("RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
         if ( !_limitHit ) {
             if (_sendWindow.getWindowStart()%_sendWindow.getWindowSize() == 0) {
                 _skipLimit++;
-System.err.println("UPP sL:"+_skipLimit);
+log("UPP sL:"+_skipLimit);
             }
         } else {
             _limitCount++;
             if (_limitCount >= _limitReset) {
-System.err.println("UPP reset:"+_skipLimit);
+log("UPP reset:"+_skipLimit);
                 _limitCount = 0;
                 _limitHit = false;
             }
@@ -134,4 +134,8 @@ System.err.println("UPP reset:"+_skipLimit);
         return (long) sleepTime;
         //------------- Sleep ------------------------
     }
+
+	private static void log(String str) {
+		//System.err.println(str);
+	}
 }
