@@ -200,7 +200,9 @@ public class FileViewRequestTest extends ClientSideTestCase {
         assertEquals(output.length, conn.getContentLength());
         byte[] bytes = new byte[output.length];
         is.readFully(bytes);
-        assertTrue(Arrays.equals(bytes, output));
+        String bytesS = new String(bytes,"US-ASCII");
+        String outputS = new String(output, "US-ASCII");
+        assertEquals(outputS,bytesS);
         assertTrue((conn.getResponseCode() >= 200) &&
                    (conn.getResponseCode() < 300));
     }
