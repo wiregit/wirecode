@@ -15,10 +15,10 @@ import java.util.*;
 public class HTTPDownloader implements Runnable {
 
 
-    private int NOT_CONNECTED = 0;
-    private int CONNECTED = 1;
-    private int ERROR = 2;
-    private int COMPLETE = 3;
+    public static final int NOT_CONNECTED = 0;
+    public static final int CONNECTED = 1;
+    public static final int ERROR = 2;
+    public static final int COMPLETE = 3;
 
     private int BUFFSIZE = 1024;
     private int MIN_BUFF = 1024;
@@ -222,6 +222,8 @@ public class HTTPDownloader implements Runnable {
 
     public void run() {
 
+	_callback.addDownload(this);
+
 	if (_mode == 1)
 	    initOne();
 	else if (_mode ==2)
@@ -230,7 +232,6 @@ public class HTTPDownloader implements Runnable {
 	    return;
 
 	 if (_okay) {
-	    _callback.addDownload(this);
 	    doDownload();
 	    _callback.removeDownload(this);
 	 }
@@ -341,7 +342,11 @@ public class HTTPDownloader implements Runnable {
 	    _state = ERROR;
 	    return;
 	}
-	
+
+	if ( _amountRead == _sizeOfFile )
+	    _state = COMPLETE;
+	else
+	    _state = ERROR;
 	
     }
 
@@ -432,6 +437,14 @@ public class HTTPDownloader implements Runnable {
     
     public void shutdown()
     {
+	try {
+	    _istream.close();
+	} catch (Exception e) {
+	}
+	try {
+	    _fos.close();
+	} catch (Exception e) {
+	}
 	try {
 	    _socket.close();
 	} catch (Exception e) {

@@ -44,6 +44,7 @@ public interface SettingsInterface
     public String[]   getQuickConnectHosts();
     public int        getParallelSearchMax();
     public int        getMaxSimDownload();
+    public boolean    getClearCompletedUpload();
     public boolean    getClearCompletedDownload();
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
@@ -140,6 +141,7 @@ public interface SettingsInterface
     public void setQuickConnectHosts(String[] hosts);
     public void setParallelSearchMax(int max);
     public void setMaxSimDownload(int max);
+    public void setClearCompletedUpload(boolean b);
     public void setClearCompletedDownload(boolean b);
     public void setSearchAnimationTime(int seconds);
 
@@ -205,6 +207,7 @@ public interface SettingsInterface
 	   "gnet4.ath.cx:6346"};
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 2;
+    public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
 
@@ -234,6 +237,7 @@ public interface SettingsInterface
     public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
     public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
     public static final String MAX_SIM_DOWNLOAD="MAX_SIM_DOWNLOAD";
+    public static final String CLEAR_UPLOAD   = "CLEAR_UPLOAD";
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
 

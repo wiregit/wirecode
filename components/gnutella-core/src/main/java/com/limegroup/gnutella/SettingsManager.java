@@ -46,6 +46,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  useQuickConnect_;
     private static String[] quickConnectHosts_;
     private static int      parallelSearchMax_;
+    private static boolean  clearCompletedUpload_;
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
     private static int      searchAnimationTime_;
@@ -389,6 +390,7 @@ public class SettingsManager implements SettingsInterface
 	setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
 	setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
 	setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
+	setClearCompletedUpload(SettingsInterface.DEFAULT_CLEAR_UPLOAD);
 	setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
 	setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
 	setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
@@ -457,6 +459,7 @@ public class SettingsManager implements SettingsInterface
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}    
     public int getParallelSearchMax(){return parallelSearchMax_;}    
     public int getMaxSimDownload(){return parallelSearchMax_;}    
+    public boolean getClearCompletedUpload(){return clearCompletedUpload_;} 
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
     public int getSearchAnimationTime(){ return searchAnimationTime_; }
 
@@ -848,6 +851,19 @@ public class SettingsManager implements SettingsInterface
 		maxSimDownload_ = max;
 		String s = String.valueOf(max);
 		props_.setProperty(SettingsInterface.MAX_SIM_DOWNLOAD, s);
+		writeProperties();	
+	    }
+    }
+
+    public synchronized void setClearCompletedUpload(boolean b)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		clearCompletedUpload_ = b;
+		String s = String.valueOf(b);
+		props_.setProperty(SettingsInterface.CLEAR_UPLOAD, s);
 		writeProperties();	
 	    }
     }

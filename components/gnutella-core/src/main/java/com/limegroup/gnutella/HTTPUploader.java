@@ -14,10 +14,10 @@ import java.net.*;
 public class HTTPUploader implements Runnable {
 
 
-    private int NOT_CONNECTED = 0;
-    private int CONNECTED = 1;
-    private int ERROR = 2;
-    private int COMPLETE = 3;
+    public static final int NOT_CONNECTED = 0;
+    public static final int CONNECTED = 1;
+    public static final int ERROR = 2;
+    public static final int COMPLETE = 3;
 
     private int BUFFSIZE = 1024;
 
@@ -330,6 +330,14 @@ public class HTTPUploader implements Runnable {
 
     public void shutdown()
     {
+	try {
+	    _fis.close();
+	} catch (Exception e) {
+	}
+	try {
+	    _ostream.close();
+	} catch (Exception e) {
+	}
 	try {
 	    _socket.close();
 	} catch (Exception e) {
