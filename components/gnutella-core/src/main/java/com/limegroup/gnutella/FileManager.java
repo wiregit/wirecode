@@ -16,8 +16,11 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.gml.GMLDocument;
 import com.limegroup.gnutella.gml.GMLParseException;
+import com.limegroup.gnutella.gml.GMLReplyCollection;
+import com.limegroup.gnutella.gml.GMLReplyRepository;
+import com.limegroup.gnutella.gml.GMLTemplateRepository;
 import com.limegroup.gnutella.gml.TemplateNotFoundException;
-import com.limegroup.gnutella.gml.repository.SimpleTemplateRepository;
+import org.xml.sax.InputSource;
 
 public class FileManager{
     /** the total size of all files, in bytes.
@@ -32,6 +35,8 @@ public class FileManager{
      *  LOCKING: obtain this before modifying. */
     private List /* of FileDesc */ _files;
     private String[] _extensions;
+    private GMLTemplateRepository _templateRepository;
+    private GMLReplyRepository _replyRepository;
 
     private static FileManager _instance = new FileManager();
 
@@ -47,6 +52,9 @@ public class FileManager{
         _files = new ArrayList();
         _extensions = new String[0];
         _sharedDirectories = new HashSet();
+        // These two variables are cleared, not overwritten
+        _templateRepository = new GMLTemplateRepository();
+        _replyRepository = new GMLReplyRepository();
 
         // Launch a thread to asynchronously scan directories to load files
         Thread loadSettingsThread =
@@ -63,6 +71,49 @@ public class FileManager{
 
     public static FileManager instance() {
         return _instance;
+    }
+
+    public GMLTemplateRepository getTemplateRepository() {
+        return _templateRepository;
+    }
+
+    /**
+     * @return a copy of the collection of GML replies stored in the reply
+     *         repository for the given file.  Does not include the mp3 reply,
+     *         if there is one.
+     */
+    public GMLReplyCollection getReplyCollection(File file) {
+        String id = getReplyCollectionIdentifier(file);
+        GMLReplyCollection replyCollection =
+            _replyRepository.getReplyCollection(id);
+        return replyCollection.createClone();
+    }
+
+    /**
+     * Set the Reply Collection associated with <CODE>file</CODE>.
+     * @throws IOException if the reply repository can't be written to disk
+     */
+    public void setReplyCollection(GMLReplyCollection replyCollection,
+                                   File file) throws IOException {
+        String id = getReplyCollectionIdentifier(file);
+        _replyRepository.setReplyCollection(replyCollection, id);
+        String replyFileName = SettingsManager.instance().getGMLReplyFile();
+        FileWriter replyFileWriter = new FileWriter(replyFileName);
+        _replyRepository.write(replyFileWriter);
+        replyFileWriter.close();
+    }
+
+    /**
+     * @return the identifier used for getting the file's metadata out of
+     * the reply repository
+     */
+    private static String getReplyCollectionIdentifier(File file) {
+        // Get the canoncial path, using the absolute path as a backup.
+        try {
+            return file.getCanonicalPath();
+        } catch(IOException e) {
+            return file.getAbsolutePath();
+        }
     }
 
     /** Returns the size of all files, in <b>bytes</b>. */
@@ -123,7 +174,6 @@ public class FileManager{
             }
         }
         return false;
-
     }
 
     /**
@@ -145,7 +195,11 @@ public class FileManager{
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
 
-            _files.add(new FileDesc(_files.size(), myFile));
+            _files.add(new FileDesc(_files.size(),
+                                    myFile,
+                                    getReplyCollectionIdentifier(myFile),
+                                    _templateRepository,
+                                    _replyRepository));
             _numFiles++;
         }
     }
@@ -180,8 +234,6 @@ public class FileManager{
             return;
 
         addFile(path);
-
-
     }
 
     /**
@@ -234,64 +286,93 @@ public class FileManager{
         _sharedDirectories = new HashSet();
 
         // Load the settings info
+        String templateDirectoryName =
+            SettingsManager.instance().getGMLTemplateDirectory();
+        String replyFileName =
+            SettingsManager.instance().getGMLReplyFile();
+        String extensions = SettingsManager.instance().getExtensions();
         String dir_names = SettingsManager.instance().getDirectories();
-        dir_names.trim();
+
+        // Reset the GML template repository and load the templates
+        _templateRepository.clear();
+        File templateDirectory = new File(templateDirectoryName);
+        // Set up the DTD File
+        File dtdFile = new File(templateDirectory, "gml-template.dtd");
+        // Go through each file in the directory, attempting to load it
+        // as a GML Template.  On failure, just skip the file.
+        String[] templateNames = templateDirectory.list();
+        for(int i = 0; i < templateNames.length; i++)
+        {
+            // Set up the DTD InputSource
+            InputSource dtdSource = null;
+            try
+            {
+                dtdSource = new InputSource(new FileInputStream(dtdFile));
+            } catch(IOException e) {
+                // If we're unable to read the DTD, leave dtdSource as null so
+                // that the default resolution happens
+            }
+
+            // Load the template into the repository using the DTD InputSource
+            try
+            {
+                _templateRepository.loadTemplate(
+                    new InputSource(new FileInputStream(
+                        new File(templateDirectory, templateNames[i]))),
+                    dtdSource);
+            } catch(FileNotFoundException e) {
+            } catch(GMLParseException e) {
+            }
+        }
+
+        // Reset the GML reply repository and load the reply metadata
+        _replyRepository.clear();
+        try
+        {
+            _replyRepository.loadReplies(
+                new InputSource(new FileInputStream(replyFileName)),
+                _templateRepository);
+        } catch(GMLParseException e) {
+            // TODO: We should probably report the error somehow.  This
+            // happens when the reply repository is corrupt.
+        } catch(FileNotFoundException e) {
+            // TODO: We should probably report the error somehow.  This
+            // happens when the reply repository is missing.
+        }
+
+        // Tokenize the extensions
+        _extensions = HTTPUtil.stringSplit(extensions, ';');
+
+        // Load the directories into the shared directories set
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
-        _extensions =  HTTPUtil.stringSplit(
-            SettingsManager.instance().getExtensions(), ';');
-
-        // need to see if there are duplicated directories...
         int size = names.length;
-
-        File f;  // temporary file for testing existence
-        String p;  // for the canonical path of a file
-        String name;  //the semi colon deliminated string
-
         for (int i = 0; i < size; i++) {
+            File file = new File(names[i]);
 
-            name = names[i];
-
-            f = new File(name);
-
-            if (!f.isDirectory())
-                continue;
-            try {
-                p = f.getCanonicalPath();
-            }
-            catch (Exception e) {
-                continue;
-            }
-            _sharedDirectories.add(p);
+            if (file.isDirectory())
+                try {
+                    _sharedDirectories.add(file.getCanonicalPath());
+                } catch(IOException e) {
+                    // Just skip the directory if we can't get a canonical path
+                }
         }
 
-        int hashsize = _sharedDirectories.size();
-
-        String[] dirs = new String[hashsize];
-
-        int j=0;
-
-        for(Iterator iter = _sharedDirectories.iterator(); iter.hasNext() ;) {
-            dirs[j++] = (String)iter.next();
-        }
-
-        for (int i=0; i < hashsize; i++) {
-            addDirectory(dirs[i]);
-        }
-
+        // Do another pass to actually process the directory.  This way,
+        // we won't process a directory twice, even if it's specified twice in
+        // the setting.
+        for(Iterator iter = _sharedDirectories.iterator(); iter.hasNext();  )
+            addDirectory((String)iter.next());
     }
 
     /**
      *  Build the equivalent of the File.listFiles() utility in jdk1.2.2
      */
-    private File[] listFiles(File dir)
-    {
+    private File[] listFiles(File dir) {
         String [] fnames   = dir.list();
         File   [] theFiles = new File[fnames.length];
 
         for ( int i = 0; i < fnames.length; i++ )
-        {
             theFiles[i] = new File(dir, fnames[i]);
-        }
 
         return theFiles;
     }
@@ -342,18 +423,14 @@ public class FileManager{
         GMLDocument gmlDocument = null;
         if(!richQuery.equals(""))
         {
-            try {
-                gmlDocument =
-                    SimpleTemplateRepository.instance().parseRequest(richQuery);
-                // If the document isn't a format FileDesc understands,
-                // discard it.
-                if(!FileDesc.isGMLDocumentUnderstandable(gmlDocument))
-                    gmlDocument = null;
-            }
             // Do nothing on exceptions.  Just leave gmlDocument as null.
             // This will happen whenever a query carries non-GML metadata
-            catch(TemplateNotFoundException e) {}
-            catch(GMLParseException e) {}
+            try {
+                gmlDocument =
+                    _templateRepository.parseRequest(richQuery);
+            } catch(TemplateNotFoundException e) {
+            } catch(GMLParseException e) {
+            }
         }
 
         // Scan the files list looking for matches
@@ -362,7 +439,6 @@ public class FileManager{
             FileDesc desc = (FileDesc)iterFiles.next();
             if (desc==null)
                 continue;
-            String file_name = desc.getPath();  //checking the path too..
             if(desc.isTextQueryMatch(textQuery) ||
                ((gmlDocument != null) &&
                 desc.isGMLDocumentMatch(gmlDocument))) {

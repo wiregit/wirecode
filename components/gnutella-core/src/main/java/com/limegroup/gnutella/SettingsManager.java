@@ -53,6 +53,7 @@ public class SettingsManager implements SettingsInterface
     private static String   extensions_;
     private static String   incompleteDirectory_;
     private static String   gmlTemplateDirectory_;
+    private static String   gmlReplyFile_;
     private static String[] bannedIps_;
     private static String[] bannedWords_;
     private static boolean  filterDuplicates_;
@@ -276,6 +277,9 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(GML_TEMPLATE_DIR)) {
                     setGMLTemplateDirectory(p);
                 }
+                else if(key.equals(GML_REPLY_FILE)) {
+                    setGMLReplyFile(p);
+                }
                 else if(key.equals(BANNED_IPS)) {
                     setBannedIps(decode(p));
                 }
@@ -460,6 +464,7 @@ public class SettingsManager implements SettingsInterface
         setSaveDefault(home_);
         setIncompleteDirectory(home_);
         setGMLTemplateDirectory(home_);
+        setGMLReplyFile(home_ + "\\replies.gmlr");
         //setInstallDir("");
         setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
@@ -564,6 +569,11 @@ public class SettingsManager implements SettingsInterface
                 return "";
         }
         return gmlTemplateDirectory_;
+    }
+
+    /** returns the GML reply file*/
+    public String getGMLReplyFile() {
+        return gmlReplyFile_;
     }
 
     /** returns the default save directory */
@@ -862,6 +872,11 @@ public class SettingsManager implements SettingsInterface
             gmlTemplateDirectory_ = dir;
             props_.put(SettingsInterface.GML_TEMPLATE_DIR, dir);
         }
+    }
+
+    public synchronized void setGMLReplyFile(String filename) {
+        gmlReplyFile_ = filename;
+        props_.put(SettingsInterface.GML_REPLY_FILE, filename);
     }
 
     /** sets the hard maximum time to live */

@@ -38,6 +38,7 @@ public interface SettingsInterface
     public String     getExtensions();
     public String     getIncompleteDirectory();
     public String     getGMLTemplateDirectory();
+    public String     getGMLReplyFile();
     public String[]   getBannedIps();
     public String[]   getBannedWords();
     public boolean    getFilterDuplicates();
@@ -297,6 +298,7 @@ public interface SettingsInterface
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
     public static final String INCOMPLETE_DIR = "INCOMPLETE_FILE_DIRECTORY";
     public static final String GML_TEMPLATE_DIR = "GML_TEMPLATE_DIRECTORY";
+    public static final String GML_REPLY_FILE = "GML_REPLY_FILE";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
     public static final String BANNED_IPS     = "BLACK_LISTED_IP_ADDRESSES";

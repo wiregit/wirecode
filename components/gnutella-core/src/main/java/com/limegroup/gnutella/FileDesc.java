@@ -1,6 +1,10 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.gml.GMLDocument;
+import com.limegroup.gnutella.gml.GMLReplyCollection;
+import com.limegroup.gnutella.gml.GMLReplyRepository;
+import com.limegroup.gnutella.gml.GMLTemplateRepository;
+import com.limegroup.gnutella.gml.TemplateNotFoundException;
 import com.limegroup.gnutella.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
@@ -13,20 +17,34 @@ import java.io.IOException;
 public final class FileDesc {
     private int _index;
     private File _file;
-    private ID3Tag _id3Tag;
+    private GMLReplyCollection _replyCollection;
 
     /**
      * @param index index of the file
      * @param file the file
      */
-    public FileDesc(int index, File file) {
+    public FileDesc(int index, File file, String fileIdentifier,
+                    GMLTemplateRepository templateRepository,
+                    GMLReplyRepository replyRepository) {
         _index = index;
         _file = file;
+
+        // Construct the reply collection from the repository metadata and
+        // the ID3 metadata
+        _replyCollection = new GMLReplyCollection();
+        _replyCollection.merge(
+            replyRepository.getReplyCollection(fileIdentifier));
         try {
-            _id3Tag = ID3Tag.read(file);
-        }
-        catch(IOException e) {
-            Assert.that(false, "IOException looking for ID3 tag");
+            GMLDocument id3Reply = ID3DocumentFactory.createID3Document(
+                file, templateRepository);
+            if(id3Reply != null)
+                _replyCollection.addReply(id3Reply);
+        } catch(IOException e) {
+            // If we encounter an error reading the file, just leave
+            // out the ID3 Reply, as if we couldn't find any ID3 metadata
+        } catch(TemplateNotFoundException e) {
+            // If we can't find the template, just out the ID3 Reply,
+            // as if we couldn't find any ID3 metadata
         }
     }
 
@@ -47,10 +65,7 @@ public final class FileDesc {
     }
 
     public final String getMetadata() {
-        if(_id3Tag != null)
-            return _id3Tag.getGMLString();
-        else
-            return "";
+        return _replyCollection.getXMLString();
     }
 
     /**
@@ -63,8 +78,9 @@ public final class FileDesc {
         // Match path
         if(StringUtils.contains(_file.getPath(), textQuery, true))
             return true;
+
         // Match metadata
-        return ((_id3Tag != null) && (_id3Tag.isTextQueryMatch(textQuery)));
+        return _replyCollection.hasMatch(textQuery);
     }
 
     /**
@@ -74,22 +90,7 @@ public final class FileDesc {
      * @return true iff gmlDocument matches this file.
      */
     public final boolean isGMLDocumentMatch(GMLDocument gmlDocument) {
-        return ((_id3Tag != null) && (_id3Tag.isGMLDocumentMatch(gmlDocument)));
-    }
-
-    /**
-     * This method encapsulates decision of whether a GML Request is understood
-     * by our FileDesc system.  Right now, this is just a pass-through to
-     * the ID3Tag method of the same name, but the idea is, when we add
-     * other sorts of metadata, we can just modify the body of this method, and
-     * not touch FileManager.
-     *
-     * @return true iff gmlDocument is defined by a GML template understood
-     *         by our system.
-     */
-    public static final boolean isGMLDocumentUnderstandable(
-        GMLDocument gmlDocument)
-    {
-        return ID3Tag.isGMLDocumentUnderstandable(gmlDocument);
+        // Match metadata
+        return _replyCollection.hasMatch(gmlDocument);
     }
 }
