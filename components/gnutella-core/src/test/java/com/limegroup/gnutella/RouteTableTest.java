@@ -171,10 +171,10 @@ public final class RouteTableTest extends BaseTestCase {
         byte[] g2=new byte[16]; g2[0]=(byte)2;
         byte[] g3=new byte[16]; g3[0]=(byte)3;
         byte[] g4=new byte[16]; g4[0]=(byte)4;
-        ReplyHandler c1=new StubReplyHandler();
-        ReplyHandler c2=new StubReplyHandler();
-        ReplyHandler c3=new StubReplyHandler();
-        ReplyHandler c4=new StubReplyHandler();
+        ReplyHandler c1=new ReplyHandlerStub();
+        ReplyHandler c2=new ReplyHandlerStub();
+        ReplyHandler c3=new ReplyHandlerStub();
+        ReplyHandler c4=new ReplyHandlerStub();
 
         // test setTTL and getAndSetTTL
         rt.setTTL(rt.tryToRouteReply(g2, c2), (byte)2);
@@ -248,68 +248,4 @@ public final class RouteTableTest extends BaseTestCase {
             return 0;
         }
     }
-
-    private static class StubReplyHandler implements ReplyHandler {
-        public boolean isOpen() {
-            return true;
-        }
-        public void handlePingReply(PingReply pingReply, 
-                                    ReplyHandler receivingConnection) {
-        }
-        public void handlePushRequest(PushRequest pushRequest, 
-                                      ReplyHandler receivingConnection) {
-        }
-        public void handleQueryReply(QueryReply queryReply, 
-                                     ReplyHandler receivingConnection) {
-        }
-        public int getNumMessagesReceived() {
-            return 0;
-        }
-        public void countDroppedMessage() {
-        }
-        public Set getDomains() {
-            return null;
-        }
-        public boolean isPersonalSpam(Message m) {
-            return false;
-        }
-        public boolean isOutgoing() {
-            return false;
-        }
-        public boolean isKillable() {
-            return false;
-        }
-        public boolean isSupernodeClientConnection() {
-            return false;
-        }
-        public boolean isLeafConnection() {
-            return false;
-        }
-        public boolean isHighDegreeConnection() {
-            return false;
-        }
-
-        public boolean isUltrapeerQueryRoutingConnection() {
-            return false;
-        }
-
-        public boolean isGoodUltrapeer() {
-            return true;
-        }
-
-        public boolean isGoodLeaf() {
-            return true;
-        }
-
-        public boolean supportsPongCaching() {
-            return true;
-        }
-
-        public boolean allowNewPings() {
-            return true;
-        }
-
-        public void updatePingTime() {}
-    }
-
 }
