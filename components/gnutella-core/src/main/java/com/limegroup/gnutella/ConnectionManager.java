@@ -169,8 +169,9 @@ public class ConnectionManager {
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
-        new OutgoingConnector(c, false);
-
+        Thread conn = new Thread(new OutgoingConnector(c, false));
+        conn.setDaemon(true);
+        conn.start();
         return c;
     }
 
@@ -1454,7 +1455,6 @@ public class ConnectionManager {
 				if(_doInitialization) {
 					initializeExternallyGeneratedConnection(_connection);
 				}
-
 				startConnection(_connection);
             } catch(IOException e) {
             } catch(Throwable e) {
@@ -1479,7 +1479,6 @@ public class ConnectionManager {
 	private void startConnection(ManagedConnection conn) throws IOException {	
 		// Send ping...possibly group ping.
 		sendInitialPingRequest(conn);
-
 		if(conn.isGUESSUltrapeer()) {
 			int port = conn.getOrigPort();
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),

@@ -53,7 +53,7 @@ import com.limegroup.gnutella.search.*;
  *      getNumPendingShared
  * </ul> 
  */
-public final class RouterService {
+public class RouterService {
 
 	/**
 	 * <tt>FileManager</tt> instance that manages access to shared files.
@@ -169,6 +169,11 @@ public final class RouterService {
   	public RouterService(ActivityCallback callback) {
         this(callback, 
 		    new StandardMessageRouter(callback, fileManager));
+    }
+
+    public RouterService(ActivityCallback ac, MessageRouter mr, FileManager fm) {
+        this(ac,mr);
+        this.fileManager = fm;
     }
 
 	/**

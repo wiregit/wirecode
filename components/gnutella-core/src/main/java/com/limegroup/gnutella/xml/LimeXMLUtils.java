@@ -221,15 +221,14 @@ public class LimeXMLUtils
     /**
      * Creates a Response instance from the passed xml string
      */
-	/*
-    private static Response createResponse(String xml)
+    public static Response createResponse(String xml)
     {
         //create a new response using default values and return it
         return new Response(
             LimeXMLProperties.DEFAULT_NONFILE_INDEX,
                 xml.length(), "xml result", xml);
     }
-	*/
+
     
     /**
      * Reads all the bytes from the passed input stream till end of stream
@@ -388,7 +387,6 @@ public class LimeXMLUtils
       * need to be converted to instances of Response class
       * @return Array of responses after converting passed xml documents  
       */
-	/*
     public static Response[] getResponseArray(List xmlDocuments)
     {
         //create new Response array of required size
@@ -425,7 +423,6 @@ public class LimeXMLUtils
         //return the response array
         return responseArray;
     }
-	*/
     
     /**
      * Parses the passed string, and encodes the special characters (used in

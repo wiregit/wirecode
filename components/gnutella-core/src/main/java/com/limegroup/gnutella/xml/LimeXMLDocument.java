@@ -45,10 +45,19 @@ public class LimeXMLDocument implements Serializable {
      * meta-data corresponds to. It can be null if the data is pure meta-data
      */
     private String identifier;
+    private String action="";
+
     public void setIdentifier(String id) {
         identifier = id;
     }
-    private String action="";
+    
+    /**
+     * This method is used by Lime Peer Server
+     */
+    public void setSchemaURI(String uri) {
+        schemaUri = uri;
+    }
+
 
     //constructor
     public LimeXMLDocument(String XMLStr) throws SAXException, 
