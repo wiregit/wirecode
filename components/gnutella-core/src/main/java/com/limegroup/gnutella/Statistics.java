@@ -7,7 +7,168 @@ package com.limegroup.gnutella;
  */
 public class Statistics {
     private static Statistics _instance=new Statistics();
+
+	/**
+	 * Variable for the total number of pings received over TCP.
+	 */
+	private static int _totalTCPPingRequests = 0;
+
+	/**
+	 * Variable for the total number of pongs received over TCP.
+	 */
+	private static int _totalTCPPingReplies = 0;
+
+	/**
+	 * Variable for the total number of queries received over TCP.
+	 */
+	private static int _totalTCPQueryRequests = 0;
+
+	/**
+	 * Variable for the total number of replies received over TCP.
+	 */
+	private static int _totalTCPQueryReplies = 0;
+
+	/**
+	 * Variable for the total number of push requests received over TCP.
+	 */
+	private static int _totalTCPPushRequests = 0;
+
+	/**
+	 * Variable for the total number of route table messages received 
+	 * over TCP.
+	 */
+	private static int _totalTCPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the current number of pings received over TCP.
+	 */
+	private static int _currentTCPPingRequests = 0;
+
+	/**
+	 * Variable for the current number of pongs received over TCP.
+	 */
+	private static int _currentTCPPingReplies = 0;
+
+	/**
+	 * Variable for the current number of queries received over TCP.
+	 */
+	private static int _currentTCPQueryRequests = 0;
+
+	/**
+	 * Variable for the current number of replies received over TCP.
+	 */
+	private static int _currentTCPQueryReplies = 0;
+
+	/**
+	 * Variable for the current number of push requests received over TCP.
+	 */
+	private static int _currentTCPPushRequests = 0;
+
+	/**
+	 * Variable for the current number of route table messages received 
+	 * over TCP.
+	 */
+	private static int _currentTCPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the current number of messages filtered over TCP.
+	 */
+	private static int _currentFilteredTCPMessages = 0;
+
+	/**
+	 * Variable for the total number of messages received over TCP
+	 * that have been filtered.
+	 */
+	private static int _totalFilteredTCPMessages = 0;
+
+	/**
+	 * Variable for the total number of TCP messages received.
+	 */
+	private static long _totalTCPMessages = 0;
+
+	/**
+	 * Variable for the total number of pings received over UDP.
+	 */
+	private static int _totalUDPPingRequests = 0;
+
+	/**
+	 * Variable for the total number of pongs received over UDP.
+	 */
+	private static int _totalUDPPingReplies = 0;
+
+	/**
+	 * Variable for the total number of queries received over UDP.
+	 */
+	private static int _totalUDPQueryRequests = 0;
+
+	/**
+	 * Variable for the total number of replies received over UDP.
+	 */
+	private static int _totalUDPQueryReplies = 0;
+
+	/**
+	 * Variable for the total number of push requests received over UDP.
+	 */
+	private static int _totalUDPPushRequests = 0;
+
+	/**
+	 * Variable for the total number of route table messages received 
+	 * over UDP.
+	 */
+	private static int _totalUDPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the total number of messages received over UDP
+	 * that have been filtered.
+	 */
+	private static int _totalFilteredUDPMessages = 0;
+
+	/**
+	 * Variable for the current number of pings received over UDP.
+	 */
+	private static int _currentUDPPingRequests = 0;
+
+	/**
+	 * Variable for the current number of pongs received over UDP.
+	 */
+	private static int _currentUDPPingReplies = 0;
+
+	/**
+	 * Variable for the current number of queries received over UDP.
+	 */
+	private static int _currentUDPQueryRequests = 0;
+
+	/**
+	 * Variable for the current number of replies received over UDP.
+	 */
+	private static int _currentUDPQueryReplies = 0;
+
+	/**
+	 * Variable for the current number of push requests received over UDP.
+	 */
+	private static int _currentUDPPushRequests = 0;
+
+	/**
+	 * Variable for the current number of route table messages received 
+	 * over UDP.
+	 */
+	private static int _currentUDPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the current number of messages filtered over UDP.
+	 */
+	private static int _currentFilteredUDPMessages = 0;
+
+	/**
+	 * Variable for the total number of UDP messages received.
+	 */
+	private static long _totalUDPMessages = 0;
     
+	/**
+	 * Variable for the total number of messages received.
+	 */
+	private static long _totalMessages = 0;
+
     /** "PROTECTED" FOR TESTING PURPOSES ONLY! */
     protected Statistics() {
     }
@@ -111,4 +272,149 @@ public class Statistics {
     protected long now() {
         return System.currentTimeMillis();
     }
+
+
+	/**
+	 * Adds a new TCP ping request to the message statistics.
+	 */
+	public void addTCPPingRequest() {
+		_totalTCPPingRequests++;
+		_currentTCPPingRequests++;
+		addTCPMessage();
+	}
+
+	/**
+	 * Adds a new TCP ping reply to the message statistics.
+	 */
+	public void addTCPPingReply() {
+		_totalTCPPingReplies++;
+		_currentTCPPingReplies++;
+		addTCPMessage();
+	}
+
+	/**
+	 * Adds a new TCP query request to the message statistics.
+	 */
+	public void addTCPQueryRequest() {
+		_totalTCPQueryRequests++;
+		_currentTCPQueryRequests++;
+		addTCPMessage();
+	}
+
+	/**
+	 * Adds a new TCP query reply to the message statistics.
+	 */
+	public void addTCPQueryReply() {
+		_totalTCPQueryReplies++;
+		_currentTCPQueryReplies++;
+		addTCPMessage();
+	}
+
+
+	/**
+	 * Adds a new TCP push request to the message statistics.
+	 */
+	public void addTCPPushRequest() {
+		_totalTCPPushRequests++;
+		_currentTCPPushRequests++;
+		addTCPMessage();
+	}
+	
+	/**
+	 * Adds a new TCP route table message to the message statistics.
+	 */
+	public void addTCPRouteTableMessage() {
+		_totalTCPRouteTableMessages++;
+		_currentTCPRouteTableMessages++;
+		addTCPMessage();
+	}
+
+	/**
+	 * Adds a filtered TCP message to the message statistics.
+	 */
+	public void addFilteredTCPMessage() {
+		_totalFilteredTCPMessages++;
+		_currentFilteredTCPMessages++;
+		addTCPMessage();
+	}
+
+	/**
+	 * Adds a TCP message to the data.
+	 */
+	private void addTCPMessage() {
+		_totalTCPMessages++;
+		_totalMessages++;
+	}
+
+	/**
+	 * Adds a new UDP ping request to the message statistics.
+	 */
+	public void addUDPPingRequest() {
+		_totalUDPPingRequests++;
+		_currentUDPPingRequests++;
+		addUDPMessage();
+	}
+
+	/**
+	 * Adds a new UDP ping reply to the message statistics.
+	 */
+	public void addUDPPingReply() {
+		_totalUDPPingReplies++;
+		_currentUDPPingReplies++;
+		addUDPMessage();
+	}
+
+	/**
+	 * Adds a new UDP query request to the message statistics.
+	 */
+	public void addUDPQueryRequest() {
+		_totalUDPQueryRequests++;
+		_currentUDPQueryRequests++;
+		addUDPMessage();
+	}
+
+	/**
+	 * Adds a new UDP query reply to the message statistics.
+	 */
+	public void addUDPQueryReply() {
+		_totalUDPQueryReplies++;
+		_currentUDPQueryReplies++;
+		addUDPMessage();
+	}
+
+
+	/**
+	 * Adds a new UDP push request to the message statistics.
+	 */
+	public void addUDPPushRequest() {
+		_totalUDPPushRequests++;
+		_currentUDPPushRequests++;
+		addUDPMessage();
+	}
+	
+	/**
+	 * Adds a new UDP route table message to the message statistics.
+	 */
+	public void addUDPRouteTableMessage() {
+		_totalUDPRouteTableMessages++;
+		_currentUDPRouteTableMessages++;
+		addUDPMessage();
+	}
+
+	/**
+	 * Adds a filtered UDP message to the message statistics.
+	 */
+	public void addFilteredUDPMessage() {
+		_totalFilteredUDPMessages++;
+		_currentFilteredUDPMessages++;
+		addUDPMessage();
+	}
+
+	/**
+	 * Adds a UDP message to the data.
+	 */
+	private void addUDPMessage() {
+		_totalUDPMessages++;
+		_totalMessages++;
+	}
 }
