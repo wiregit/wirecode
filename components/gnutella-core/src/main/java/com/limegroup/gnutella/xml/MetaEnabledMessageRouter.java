@@ -97,7 +97,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
 
             // get the xml collection string...
             String xmlCollectionString = 
-            (new LimeXMLDocumentHelper()).getAggregrateString(res);
+            (new LimeXMLDocumentHelper()).getAggregateString(res);
             if (xmlCollectionString == null)
                 xmlCollectionString = "";
             debug ("MetaEnabledMessageRouter.sendResponses(): " +
