@@ -1257,6 +1257,10 @@ public abstract class MessageRouter {
      * Sends the passed query request, received on handler, 
      * to the passed sendConnection, only if the handler and
      * the sendConnection are authenticated to a common domain
+     *
+     * To only send it the route table has a hit, use
+     * sendRoutedQueryToHost.
+     *
      * @param queryRequest Query Request to send
      * @param sendConnection The connection on which to send out the query
      * @param handler The connection on which we originally
@@ -1275,8 +1279,6 @@ public abstract class MessageRouter {
 			throw new NullPointerException("null reply handler");
 		}
 
-		//TODO:: make sure to look at query routing tables!!!
-
         //send the query over this connection only if any of the following
         //is true:
         //1. The query originated from our node 
@@ -1291,6 +1293,21 @@ public abstract class MessageRouter {
 										 sendConnection.getDomains()))) {
             sendConnection.send(request);
 		}		
+    }
+    
+    /**
+     * Originates a new query request to the ManagedConnection.
+     *
+     * @param request The query to send.
+     * @param mc The ManagedConnection to send the query along
+     */
+    public void originateQuery(QueryRequest query, ManagedConnection mc) {
+        if( query == null )
+            throw new NullPointerException("null query");
+        if( mc == null )
+            throw new NullPointerException("null connection");
+        
+        mc.originateQuery(query);
     }
     
 
@@ -1744,7 +1761,7 @@ public abstract class MessageRouter {
 			    port = RouterService.getNonForcedPort();
                 ttl = 1; // not strictly necessary, but nice.
             }
-
+            
             List replies =
                 createQueryReply(guid, ttl, port, ip, speed, res, 
                                  _clientGUID, !incoming, busy, uploaded, 
