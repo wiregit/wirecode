@@ -242,7 +242,7 @@ public class ConnectionManager {
      * removing this connection from routing tables and modifying active 
      * connection fetchers accordingly.
      *
-     * @param mc the <tt>Connection</tt> instance to remove
+     * @param conn the <tt>Connection</tt> instance to remove
      */
     public void remove(Connection conn) {
 		// removal may be disabled for tests
@@ -366,9 +366,9 @@ public class ConnectionManager {
         //(Remember that _connections is never mutated.)
         List connections=getConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
-            Connection mc = (Connection)iter.next();
+            Connection conn = (Connection)iter.next();
  
-            if (mc.getIPString().equals(hostName))
+            if (conn.getIPString().equals(hostName))
                 return true;
         }
         return false;
@@ -685,8 +685,8 @@ public class ConnectionManager {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            Connection mc=(Connection)iter.next();
-            if (mc.isSupernodeConnection())
+            Connection conn = (Connection)iter.next();
+            if (conn.isSupernodeConnection())
                 ret++;
         }
         return ret;
@@ -700,8 +700,8 @@ public class ConnectionManager {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            Connection mc=(Connection)iter.next();
-            if (mc.isSupernodeSupernodeConnection())
+            Connection conn = (Connection)iter.next();
+            if (conn.isSupernodeSupernodeConnection())
                 ret++;
         }
         return ret;     
@@ -713,8 +713,8 @@ public class ConnectionManager {
 		// technically, we can allow old connections.
 		int ret = 0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
-            Connection mc=(Connection)iter.next();
-            if (!mc.isSupernodeConnection())
+            Connection conn = (Connection)iter.next();
+            if (!conn.isSupernodeConnection())
                 ret++;
         }
         return ret;
@@ -1204,7 +1204,7 @@ public class ConnectionManager {
      *  the connection during handshaking, etc. 
      * @see com.limegroup.gnutella.Connection#initialize(int)
      */
-    private void initializeFetchedConnection(Connection mc,
+    private void initializeFetchedConnection(Connection conn,
                                              ConnectionFetcher fetcher)
             throws NoGnutellaOkException, BadHandshakeException, IOException {
         synchronized(this) {
@@ -1216,28 +1216,28 @@ public class ConnectionManager {
                 throw new IOException("connection fetcher");
             }
 
-            _initializingFetchedConnections.add(mc);
+            _initializingFetchedConnections.add(conn);
             _fetchers.remove(fetcher);
-            connectionInitializing(mc);
+            connectionInitializing(conn);
             // No need to adjust connection fetchers here.  We haven't changed
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        RouterService.getCallback().connectionInitializing(mc);
+        RouterService.getCallback().connectionInitializing(conn);
 
         try {
-            mc.initialize();
+            conn.initialize();
         } catch(IOException e) {
-            remove(mc);
+            remove(conn);
             throw e;
         }
         finally {
             //if the connection received headers, process the headers to
             //take steps based on the headers
-            processConnectionHeaders(mc);
+            processConnectionHeaders(conn);
         }
         
-        completeConnectionInitialization(mc, true);
+        completeConnectionInitialization(conn, true);
     }
 
     /** 
@@ -1469,28 +1469,28 @@ public class ConnectionManager {
      *  the list of fetched connections being initialized, keeping the
      *  connection fetcher data in sync
      */
-    private void completeConnectionInitialization(Connection mc, 
+    private void completeConnectionInitialization(Connection conn, 
                                                   boolean fetched) {
         boolean connectionOpen = false;
         synchronized(this) {
             if(fetched) {
-                _initializingFetchedConnections.remove(mc);
+                _initializingFetchedConnections.remove(conn);
             }
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            connectionOpen = connectionInitialized(mc);
+            connectionOpen = connectionInitialized(conn);
             if(connectionOpen) {
                 // check to see if this is the first leaf to ultrapeer 
                 // connection we've made.  if it is, then we're a leaf,
                 // and we'll switch the keep alive to the number of 
                 // Ultrapeer connections to maintain as a leaf
-                if(mc.isClientSupernodeConnection()) {
+                if(conn.isClientSupernodeConnection()) {
                     gotShieldedClientSupernodeConnection();
                 }
             }
 
             if(connectionOpen) {
-                RouterService.getCallback().connectionInitialized(mc);
+                RouterService.getCallback().connectionInitialized(conn);
             }
         }
     }
