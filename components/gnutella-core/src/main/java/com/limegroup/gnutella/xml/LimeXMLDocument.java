@@ -206,7 +206,7 @@ public class LimeXMLDocument implements Serializable {
     private void initialize(InputSource doc) throws SchemaNotFoundException,
                             IOException, SAXException {
         
-        XMLParsingUtils.Result result = XMLParsingUtils.parse(doc);
+        XMLParsingUtils.ParseResult result = XMLParsingUtils.parse(doc);
         
         if (result.canonicalAttributeMaps.isEmpty())
             throw new IOException("No element present");
