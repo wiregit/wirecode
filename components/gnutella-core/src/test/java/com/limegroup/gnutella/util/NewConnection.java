@@ -10,20 +10,21 @@ import com.limegroup.gnutella.messages.*;
  */
 public class NewConnection extends TestConnection {    
 
-    /**
-     * Constant for the <tt>QueryRouteTable</tt> for this
-     * connection -- can be used by subclasses.
-     */
-    protected final QueryRouteTable QRT;
+   
 
-    protected NewConnection(int connections) {
-        this(connections, new QueryRouteTable());
+    protected NewConnection(int connections, boolean b) {
+        this(connections, new QueryRouteTable(), b);
+    }
+
+    protected NewConnection(int connections, 
+                            QueryRouteTable qrt, boolean b) {
+        super(connections, b);
+        QRT = qrt;
     }
 
     protected NewConnection(int connections, 
                             QueryRouteTable qrt) {
-        super(connections);
-        QRT = qrt;
+        this(connections, qrt, false);
     }
 
     /**
