@@ -906,9 +906,18 @@ public class FileManager {
 
     /** @return A List of KeyWords from the FS that one does NOT want broken
      *  upon hashing into a QRT.  Initially being used for schema hashing.
+     *  We add all the hashes of the files we share so queries with hashes
+     *  can be checked for potential positives against a QRT.
      */
     public List getIndivisibleKeyWords() {
-        return new ArrayList();
+        File[] files = getSharedFiles(null);
+        ArrayList retList = new ArrayList();
+        UrnCache urnCache = UrnCache.instance();
+        for (int i = 0; i < files.length; i++) {
+            Set urnsForCurrFile = urnCache.getUrns(files[i]);
+            retList.add(urnsForCurrFile);
+        }
+        return retList;
     }
 
     /** Same as f.getCanonicalFile() in JDK1.3. */
