@@ -1855,7 +1855,7 @@ public class ConnectionManager {
             // Notify the user that they have no internet connection and that
             // we will automatically retry
             MessageService.showError("NO_INTERNET_RETRYING",
-                QuestionsHandler.NO_INTERNET);
+                QuestionsHandler.NO_INTERNET_RETRYING);
             
             // Try to reconnect in 10 seconds, and then every minute after
             // that.
