@@ -1,15 +1,21 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.sun.java.util.collections.Collections;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 /**
  * This class handles the use of non-blocking sockets for systems using
@@ -23,8 +29,6 @@ public final class NIODispatcher implements Runnable {
 	 * Constant instance of NIOSocketDispatcher following singleton.
 	 */
 	private static NIODispatcher INSTANCE = new NIODispatcher();
-	
-	private ByteBuffer BUFFER = ByteBuffer.allocateDirect(1024);
 	
 	/**
 	 * Constant <tt>Selector</tt> for demultiplexing incoming traffic.
