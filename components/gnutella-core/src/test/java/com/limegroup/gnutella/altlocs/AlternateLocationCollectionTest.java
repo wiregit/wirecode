@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.PushEndpoint;
@@ -19,6 +20,7 @@ import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;
 import com.limegroup.gnutella.util.IpPortImpl;
@@ -469,6 +471,44 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		set.retainAll(peSet);
 		
 		assertEquals(3,set.size());
+    }
+    
+    /**
+     * tests the creation of bloom filters
+     */
+    public void testGetFilter() throws Exception {
+        AltLocDigest digest = _alCollection.getDigest();
+        for (Iterator iter = _alCollection.iterator();iter.hasNext();) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            assertTrue(digest.contains(loc));
+        }
+        // the push digest should be empty, so no chance of false positives
+        digest = _alCollection.getPushDigest();
+        for (Iterator iter = _alCollection.iterator();iter.hasNext();) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            assertFalse(digest.contains(loc));
+        }
+        
+        // and a collection of pushlocs
+        AlternateLocationCollection push = AlternateLocationCollection.create(FileDescStub.DEFAULT_SHA1);
+        PushEndpoint pe = new PushEndpoint(FileDescStub.DEFAULT_SHA1.httpStringValue()+";1:2.2.2.2;1.1.1.1:2");
+        PushEndpoint pe2 = new PushEndpoint(FileDescStub.DEFAULT_SHA1.httpStringValue()+";2:3.3.3.3;2.2.2.2:3");
+        PushAltLoc pa = new PushAltLoc(pe,FileDescStub.DEFAULT_SHA1);
+        PushAltLoc pa2 = new PushAltLoc(pe2,FileDescStub.DEFAULT_SHA1);
+        push.add(pa);
+        push.add(pa2);
+        
+        digest = push.getDigest();
+        for (Iterator iter = push.iterator();iter.hasNext();) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            assertFalse(digest.contains(loc));
+        }
+        
+        digest = push.getPushDigest();
+        for (Iterator iter = push.iterator();iter.hasNext();) {
+            AlternateLocation loc = (AlternateLocation)iter.next();
+            assertTrue(digest.contains(loc));
+        }
     }
 }
 

@@ -74,6 +74,11 @@ public class HeadPing extends VendorMessage {
 	private final GUID _clientGUID;
 	
 	/**
+	 * The bloom filter carried by this ping, if any
+	 */
+	private final Object _filter;
+	
+	/**
 	 * creates a message object with data from the network.
 	 */
 	protected HeadPing(byte[] guid, byte ttl, byte hops,
@@ -126,6 +131,8 @@ public class HeadPing extends VendorMessage {
 		
 		_clientGUID=clientGuid;
 		
+		//TODO: parse bloom
+		_filter = null;
 	}
 	
 	/**
@@ -135,16 +142,17 @@ public class HeadPing extends VendorMessage {
 	 */
 
 	public HeadPing(URN sha1, int features) {
-		this (sha1, null, features);
+		this (sha1, null, null, features);
 	}
 	
 	
-	public HeadPing(URN sha1, GUID clientGUID, int features) {
+	public HeadPing(URN sha1, GUID clientGUID, Object filter, int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(sha1, clientGUID, features));
+		 		derivePayload(sha1, clientGUID, filter, features));
 		_features = (byte)(features & FEATURE_MASK);
 		_urn = sha1;
 		_clientGUID = clientGUID;
+		_filter = filter;
 	}
 
 	
@@ -157,7 +165,7 @@ public class HeadPing extends VendorMessage {
 	
 
 	
-	private static byte [] derivePayload(URN urn, GUID clientGUID, int features) {
+	private static byte [] derivePayload(URN urn, GUID clientGUID, Object filter, int features) {
 
 		features = features & FEATURE_MASK;
 
@@ -217,5 +225,12 @@ public class HeadPing extends VendorMessage {
 		return _clientGUID;
 	}
 	
+	public boolean supportsBloom() {
+	    return true; //STUB
+	}
+	
+	public Object getFilter() {
+	    return _filter; //STUB
+	}
 
 }

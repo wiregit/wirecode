@@ -650,7 +650,7 @@ public final class MessageRouterTest extends BaseTestCase {
     	
     	// try a HeadPing 
     	URN urn = FileDescStub.DEFAULT_SHA1;
-    	HeadPing ping = new HeadPing(urn, clientGUID, 0xFF);
+    	HeadPing ping = new HeadPing(urn, clientGUID,null, 0xFF);
     	
     	DatagramPacket pack = new DatagramPacket(new byte[0],0, InetAddress.getLocalHost(),10);
     	ROUTER.handleUDPMessage(ping,pack);

@@ -9,6 +9,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.util.BloomFilter;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;
 
 /**
@@ -411,5 +412,13 @@ public final class AlternateLocationCollection
     	}
     	
     	return baos.toByteArray();
+    }
+    
+    public AltLocDigest getDigest() {
+        return null;
+    }
+    
+    public AltLocDigest getPushDigest() {
+        return null;
     }
 }

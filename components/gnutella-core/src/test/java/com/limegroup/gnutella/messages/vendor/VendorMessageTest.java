@@ -453,6 +453,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
     	assertFalse(ping.requestsPushLocs());
+    	assertTrue(ping.supportsBloom());
+    	assertNull(ping.getFilter());
     	
    		ping = new HeadPing(urn, 0xFF & ~HeadPing.GGEP_PING);
     	assertTrue(ping.requestsPushLocs());
@@ -470,7 +472,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	testWrite(ping);
     	
     	GUID g = new GUID(GUID.makeGuid());
-    	ping = new HeadPing(urn, g, 0xFF);
+    	ping = new HeadPing(urn, g,null, 0xFF);
     	
     	//parse it once, verify guids the same
     	baos = new ByteArrayOutputStream();
@@ -489,6 +491,12 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	ping2 = (HeadPing) Message.read(bais);
     		fail("parsed a ping which claimed to have a clientguid but didn't");
     	}catch(BadPacketException expected) {}
+    	
+    	//test a ping which carries bloom filter
+    	ping = new HeadPing(urn,null,new Object(),HeadPing.GGEP_PING);
+    	assertTrue(ping.supportsBloom());
+    	assertNotNull(ping.getFilter());
+    	
     }
     
     
