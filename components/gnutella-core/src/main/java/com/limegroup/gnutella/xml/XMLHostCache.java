@@ -102,26 +102,6 @@ public class XMLHostCache {
         return retHosts;
     }
 
-    /** Adds a host for the given schema to the 'db'.
-     */
-    private void cacheHostForURI(String schemaURI, String host) {
-        String hosts = getHostsForSchema(schemaURI);
-        if (hosts != null) {
-            hosts = hosts + HOSTS_DELIM + host;
-        }
-        else
-            hosts = host;
-        try {
-            if (setHostsForSchema(schemaURI, hosts)) {
-                OutputStream os = new FileOutputStream(_dbFile);
-                _props.save(os,null);
-            }
-        }
-        catch (Exception ignored) {
-        }
-    }
-
-
     public static void main(String argv[]) throws Exception {
         XMLHostCache xmlhc = new XMLHostCache();
         
