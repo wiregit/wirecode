@@ -5,9 +5,7 @@ import java.util.StringTokenizer;
 import java.util.Locale;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.URN;
 import org.apache.xerces.parsers.DOMParser;
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.mp3.ID3Reader;
 import org.xml.sax.*;
 import org.w3c.dom.*;
@@ -143,7 +141,7 @@ public class LimeXMLDocument implements Serializable {
         //documentBuilderFactory.setValidating(true);
         //documentBuilderFactory.setNamespaceAware(true);
         Document document = null;
-        synchronized(this.parser) {
+        synchronized(LimeXMLDocument.parser) {
             parser.parse(doc);
             document=parser.getDocument();
         }
