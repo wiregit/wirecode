@@ -171,6 +171,11 @@ public interface Downloader extends BandwidthTracker {
     public int getNumberOfAlternateLocations();
     
     /**
+     * Return the number of invalid alternate locations for this download
+     */
+    public int getNumberOfInvalidAlternateLocations();
+    
+    /**
      * @return the number of possible hosts for this download
      */
     public int getPossibleHostCount();

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
+import com.bitzi.util.Base32;
 import java.net.*;
 
 import org.apache.commons.logging.LogFactory;
@@ -110,6 +111,10 @@ public class RemoteFileDesc implements Serializable {
      * The earliest time to retry this host in milliseconds since 01-01-1970
      */
     private transient long _earliestRetryTime = 0;
+
+    private transient int _hashCode = 0;
+
+    private transient RemoteHostData _hostData = null;
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -504,6 +509,15 @@ public class RemoteFileDesc implements Serializable {
     }
 
     /**
+     * Creates the _hostData lazily and uses as necessary
+     */ 
+    public final RemoteHostData getRemoteHostData() {
+        if(_hostData == null)
+            _hostData = new RemoteHostData(_host, _port, _clientGUID);
+        return _hostData;
+    }
+
+    /**
      * @return true if I am not (firewalled, multicast host, have private IP)
      *         and i do have a valid port & address.
      */
@@ -549,21 +563,49 @@ public class RemoteFileDesc implements Serializable {
         if (_urns.isEmpty() && other._urns.isEmpty())
             return nullEquals(_filename, other._filename);
         else
-            return nullEquals(_urns, other._urns);
+            return urnSetEquals(_urns, other._urns);
     }
     
     private boolean nullEquals(Object one, Object two) {
         return one == null ? two == null : one.equals(two);
     }
     
+    private boolean urnSetEquals(Set one, Set two) {
+        for (Iterator iter = one.iterator(); iter.hasNext(); ) {
+            if (two.contains(iter.next())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean byteArrayEquals(byte[] one, byte[] two) {
         return one == null ? two == null : Arrays.equals(one, two);
     }
 
-	//TODO:: ADD HASHCODE OVERRIDE
+	/**
+	 * Overrides the hashCode method of Object to meet the contract of 
+	 * hashCode.  Since we override equals, it is necessary to also 
+	 * override hashcode to ensure that two "equal" RemoteFileDescs
+	 * return the same hashCode, less we unleash unknown havoc on the
+	 * hash-based collections.
+	 *
+	 * @return a hash code value for this object
+	 */
+	public int hashCode() {
+	   if(_hashCode == 0) {
+            int result = 17;
+            result = (37* result)+_host.hashCode();
+            result = (37* result)+_port;
+			result = (37* result)+_size;
+            result = (37* result)+_urns.hashCode();
+            _hashCode = result;
+        }
+		return _hashCode;
+	}
 
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
-				 +getFileName()+">");
+				 +getFileName().toLowerCase()+">");
     }
 }

@@ -272,8 +272,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** This is used for matching of filenames.  kind of big so we only want
      *  one. */
     private static ApproximateMatcher matcher = 
-        new ApproximateMatcher(MATCHER_BUF_SIZE);
-    
+        new ApproximateMatcher(MATCHER_BUF_SIZE);    
 
     ////////////////////////// Core Variables /////////////////////////////
     /** The buckets of "same" files, each a list of RemoteFileDesc. One by one,
@@ -358,11 +357,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 	
 	/**
 	 * A list of the most recent failed locations, so we don't try them again.
-	 *
-	 * TODO: Use a Set and FixedsizeForgetfulHashSet
 	 */
-	private Map invalidAlts;
+	private Set invalidAlts;
 
+    /**
+     * Cache the most recent failed locations. 
+     * Holds <tt>AlternateLocation</tt> instances
+     */
+    private Set recentInvalidAlts;
+    
     private VerifyingFile commonOutFile;
     
     ////////////////datastructures used only for pushes//////////////
@@ -571,7 +574,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptStateLock=new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
-        invalidAlts = new FixedsizeForgetfulHashMap(500);
+        // stores up to 1000 locations for up to an hour each
+        invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
+        // stores up to 10 locations for up to 10 minutes
+        recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
             if(shouldInitAltLocs(deserialized)) {
@@ -904,7 +910,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // See if we have already tried and failed with this location
         // This is only done if the location we're trying is an alternate..
-        if (other.isFromAlternateLocation() && invalidAlts.containsKey(other))
+        if (other.isFromAlternateLocation() && 
+            invalidAlts.contains(other.getRemoteHostData()))
             return false;
         
 
@@ -997,7 +1004,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (! allowAddition(rfd)) {
             return false;
         }
-        return addDownloadForced(rfd, cache);
+        if (addDownloadForced(rfd, cache)) {
+            LOG.trace("added rfd: " + rfd);
+            return true;
+        } else
+            return false;
     }
 
     /**
@@ -1232,7 +1243,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             validAlts.remove(loc);
             if( ifd != null )
                 ifd.remove(forFD);
-            invalidAlts.put(rfd, rfd);
+            invalidAlts.add(rfd.getRemoteHostData());
+            recentInvalidAlts.add(loc);
         }
     }
 
@@ -2249,6 +2261,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     dloader.addSuccessfulAltLoc((AlternateLocation)iter.next());
                     count++;
                 }
+                iter = recentInvalidAlts.iterator();
+                while(iter.hasNext()) {
+                    dloader.addFailedAltLoc((AlternateLocation)iter.next());
+                }
             }
         }
         
@@ -2834,6 +2850,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 	public int getNumberOfAlternateLocations() {
 	    if ( validAlts == null ) return 0;
 	    return validAlts.getAltLocsSize();
+    }
+
+    /**
+     * Returns the number of invalid alternate locations that this download is
+     * using.
+     */
+    public int getNumberOfInvalidAlternateLocations() {
+        if ( invalidAlts == null ) return 0;
+        return invalidAlts.size();
     }
     
     /**
