@@ -175,13 +175,24 @@ public class StandardMessageRouter extends MessageRouter {
 
 
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
-                                         byte[] clientGUID) {
+                                            byte[] clientGUID) {
+                                                
+        // Only send results if we're not busy.  Note that this ignores
+        // queue slots -- we're considered busy if all of our "normal"
+        // slots are full.  This allows some spillover into our queue that
+        // is necessary because we're always returning more total hits than
+        // we have slots available.
+        if(RouterService.getUploadManager().isBusy())  {
+            return false;
+        }
+                                                
+                                                
         // Ensure that we have a valid IP & Port before we send the response.
         // Otherwise the QueryReply will fail on creation.
         if( !NetworkUtils.isValidPort(RouterService.getPort()) ||
             !NetworkUtils.isValidAddress(RouterService.getAddress()))
             return false;
-                                            
+                                                     
         // Run the local query
         Response[] responses = 
             RouterService.getFileManager().query(queryRequest);
