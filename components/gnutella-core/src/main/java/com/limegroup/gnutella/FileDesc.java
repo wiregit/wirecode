@@ -270,7 +270,8 @@ public class FileDesc implements AlternateLocationCollector {
 
 	/**
 	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
-	 * <tt>FileDesc</tt>.  The collection could be empty or <tt>null</tt>.
+	 * <tt>FileDesc</tt>.  The collection will always have this location
+	 * added to it.
 	 *
 	 * @return the <tt>AlternateLocationCollection</tt> for this 
 	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
@@ -286,6 +287,19 @@ public class FileDesc implements AlternateLocationCollector {
 		}
 		return ALT_LOCS;
 	}
+	
+	/**
+	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
+	 * <tt>FileDesc</tt>.  The collection could be empty.
+	 *
+	 * @return the <tt>AlternateLocationCollection</tt> for this 
+	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
+	 *  if it is not initialized
+	 */
+	public AlternateLocationCollection
+	  getAlternateLocationCollectionWithoutSelf() {
+		return ALT_LOCS;
+	}	
 
 	/** 
 	 * Implements <tt>AlternateLocationCollector</tt> interface.

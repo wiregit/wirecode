@@ -504,15 +504,46 @@ public class ManagedDownloader implements Downloader, Serializable {
         dloaderManagerThread.start();       
     }
 
-    /** If incompleteFile has already been set, i.e., because a download is in
+    /**
+     *  If incompleteFile has already been set, i.e., because a download is in
      *  progress, does nothing.  Otherwise sets incompleteFile and
      *  commonOutFile.  Subclasses may override this to force the initial
-     *  progress to be non-zero. */
+     *  progress to be non-zero.
+     */
     protected void initializeIncompleteFile(File incompleteFile) {
         if (this.incompleteFile!=null)
             return;
         this.incompleteFile=incompleteFile;
         this.commonOutFile=incompleteFileManager.getEntry(incompleteFile);
+    }
+    
+    /**
+     * Adds alternate locations that may have been stored in the
+     * IncompleteFileDesc for this download.
+     * This should be called after the incomplete file has been initialized
+     * and added to the incomplete file manager.
+     */
+    protected void initializeAlternateLocations() {
+        Assert.that( incompleteFile != null, "null incomplete file");
+            
+        // Locate the hash for this incomplete file, to retrieve the 
+        // IncompleteFileDesc.
+        URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
+        if( hash != null ) {
+            long size = incompleteFileManager.getCompletedSize(incompleteFile);
+            // Create our AlternateLocationCollection if we haven't already.
+            if( totalAlternateLocations == null )
+                totalAlternateLocations =
+                    AlternateLocationCollection.createCollection(hash);
+            
+            // Find any matching file-desc for this URN.
+            FileDesc fd = fileManager.getFileDescForUrn(hash);
+            // Retrieve the alternate locations (without adding ourself)
+            AlternateLocationCollection alc =
+                fd.getAlternateLocationCollectionWithoutSelf();
+            // Add the collection of locations to our files.
+            addAlternateLocations(alc, (int)size);
+        }
     }
 
     /**
@@ -1185,7 +1216,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     return;
                 }
             }
-        }                 
+        }
     }
 
 
@@ -1287,14 +1318,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw new InvalidPathException();  
         } catch (IOException e) {
             return COULDNT_MOVE_TO_LIBRARY;
-        }           
-
-		// Prepare a fresh set of alternate locations for these file
-		//totalAlternateLocations=AlternateLocationCollection.createCollection();
+        }
 
 		// null out the alternate locations so we can create a new set
-		// for these files
-		totalAlternateLocations = null;  
+		// for these files, ideally we could also call
+		// initializeAlternateLocations here, but because IncompleteFileManager
+		// may not yet have an 'entry' added to it, we do not.
+		totalAlternateLocations = null;		
 		RemoteFileDesc tempRFD;
 		String rfdStr;
 		URL    rfdURL;
@@ -1533,6 +1563,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                     incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
                 }
+                
+                //Now that the entry is in incompleteFM, add any
+                //alternate locations that may be stored in the
+                //IncompleteFileDesc from partial file sharing.
+                initializeAlternateLocations();
+                                
                 //need to get the VerifyingFile ready to write
                 try {
                     commonOutFile.open(incompleteFile,this);
@@ -1579,7 +1615,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 incompleteFile);
                         Assert.that(
                             !commonOutFile.getFreeBlocks(doneSize).hasNext(),
-                            "file is incomplete, but needed.sie() == 0" );
+                            "file is incomplete, but needed.size() == 0" );
                             
                         //Finished. Interrupt all worker threads
                         for(int i=threads.size();i>0;i--) {
@@ -2008,18 +2044,32 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }                    
                 }
                 return 1;
+            } catch(ProblemReadingHeaderException prhe) {
+                if(RECORD_STATS)
+                    DownloadStat.PRH_EXCEPTION.incrementStat();
+                debug("prhe thrown in assignAndRequest "+dloader);
+                removeAlternateLocation(dloader.getRemoteFileDesc());
+                return 0; //discard the rfd of dloader
+            } catch(UnknownCodeException uce) {
+                if(RECORD_STATS)
+                    DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
+                debug("uce (" + uce.getCode() + ") thrown in assignAndRequest "
+                      + dloader);
+                removeAlternateLocation(dloader.getRemoteFileDesc());
+                return 0; //discard the rfd of dloader
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
                 debug("iox thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());                
+                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0; //discard the rfd of dloader
             } finally {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
                 synchronized(this) {
                     addAlternateLocations(dloader.getAlternateLocations(),
-                                          dloader.getRemoteFileDesc() );
+                                          dloader.getRemoteFileDesc().getSize()
+                                         );
                 }
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
@@ -2064,7 +2114,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * QueryReplies.
      */
 	private void addAlternateLocations(AlternateLocationCollection alts,					   
-	  RemoteFileDesc rfd) {  
+	  int completeSize) {  
 		if (alts == null || !alts.hasAlternateLocations()  )
 			return;
 
@@ -2090,7 +2140,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		while (iter.hasNext()) {
 			value = (AlternateLocation) iter.next();
             //don't cache
-			addDownload(value.createRemoteFileDesc(rfd.getSize()), false);
+			addDownload(value.createRemoteFileDesc(completeSize), false);
 		}
 	}
 	
@@ -2166,7 +2216,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // set the high end of the interval to
                 // request. put the rest back.
                 if ( available.high < ret.high ) {
-                    needed.add( i, new Interval(
+                    addToNeeded( new Interval(
                         available.high + 1, ret.high ) );
                     ret = new Interval( 
                         ret.low, available.high );
@@ -2175,7 +2225,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // set the low end of the interval 
                 // to request. Put the rest back.
                 if ( available.low > ret.low ) {
-                    needed.add( i, new Interval( 
+                    addToNeeded( new Interval(
                         ret.low, available.low -1 ) );
                     ret = new Interval( 
                         available.low, ret.high);
@@ -2635,7 +2685,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             needed.clear();
         busy = null;
         files = null;
-    }
+    }    
 
     /////////////////////////////Display Variables////////////////////////////
 

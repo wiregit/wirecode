@@ -98,18 +98,30 @@ public class FileManager {
      * INVARIANT: for any key k with value v in _sharedDirectories, 
      * for all i in v,
      *       _files[i]._path==k+_files[i]._name.
-     *  Likewise, for all i s.t. _files[i]!=null,
+     *  Likewise, for all i s.t.
+     *  _files[i]!=null and !(_files[i] instanceof IncompleteFileDesc),
      *       _sharedDirectories.get(
      *            _files[i]._path-_files[i]._name).contains(i).
      * Here "==" is shorthand for file path comparison and "a-b" is short for
      * string 'a' with suffix 'b' removed.  INVARIANT: all keys in this are
      * canonicalized files, sorted by a FileComparator.
+     *
+     * Incomplete shared files are NOT stored in this data structure, but are
+     * instead in the _incompletesShared IntSet.
      */
     private Map /* of File -> IntSet */ _sharedDirectories;
     
     /**
      * The IntSet for incomplete shared files.
-     * This is not strictly needed for correctness, but it allows
+     * 
+     * INVARIANT: for all i in _incompletesShared,
+     *       _files[i]._path == the incomplete directory.
+     *       _files[i] instanceof IncompleteFileDesc
+     *  Likewise, for all i s.t.
+     *    _files[i] != null and _files[i] instanceof IncompleteFileDesc,
+     *       _incompletesShared.contains(i)
+     * 
+     * This structure is not strictly needed for correctness, but it allows
      * others to retrieve all the incomplete-shared files, which is
      * a relatively useful feature.
      */
@@ -883,49 +895,50 @@ public class FileManager {
      * @param size the completed size of this incomplete file
      * @param vf the VerifyingFile containing the ranges for this inc. file
      */
-    public void addIncompleteFile(File incompleteFile, Set urns, String name,
-                           int size, VerifyingFile vf) {
-        synchronized(this) {
-            
-            // We want to ensure that incomplete files are never added twice.
-            // This may happen if IncompleteFileManager is deserialized before
-            // FileManager finishes loading ...
-            // So, every time an incomplete file is added, we check to see if
-            // it already was... and if so, ignore it.
-    		Iterator iter = urns.iterator();
-    		while (iter.hasNext()) {
-                // if there were indices for this URN, exit.
-                IntSet shared = (IntSet)_urnIndex.get(iter.next());
-                // nothing was shared for this URN, look at another
-                if( shared == null )
+    public synchronized void addIncompleteFile(File incompleteFile,
+                                               Set urns,
+                                               String name,
+                                               int size,
+                                               VerifyingFile vf) {
+        // We want to ensure that incomplete files are never added twice.
+        // This may happen if IncompleteFileManager is deserialized before
+        // FileManager finishes loading ...
+        // So, every time an incomplete file is added, we check to see if
+        // it already was... and if so, ignore it.
+        // This is somewhat expensive, but it is called very rarely, so it's ok
+		Iterator iter = urns.iterator();
+		while (iter.hasNext()) {
+            // if there were indices for this URN, exit.
+            IntSet shared = (IntSet)_urnIndex.get(iter.next());
+            // nothing was shared for this URN, look at another
+            if( shared == null )
+                continue;
+                
+            IntSet.IntSetIterator isIter = shared.iterator();
+            for ( ; isIter.hasNext(); ) {
+                int i = isIter.next();
+                FileDesc desc = (FileDesc)_files.get(i);
+                // unshared, keep looking.
+                if(desc == null)
                     continue;
-                    
-                IntSet.IntSetIterator isIter = shared.iterator();
-                for ( ; isIter.hasNext(); ) {
-                    int i = isIter.next();
-                    FileDesc desc = (FileDesc)_files.get(i);
-                    // unshared, keep looking.
-                    if(desc == null)
-                        continue;
-                    // the files are the same, exit.
-                    if( incompleteFile.equals(desc.getFile()) )
-                        return;
-                }
+                // the files are the same, exit.
+                if( incompleteFile.equals(desc.getFile()) )
+                    return;
             }
-            
-            // no indices were found for any URN associated with this
-            // IncompleteFileDesc... add it.
-            int fileIndex = _files.size();
-            _incompletesShared.add(fileIndex);
-            IncompleteFileDesc ifd = new IncompleteFileDesc(
-                incompleteFile, urns, fileIndex, name, size, vf);            
-            _files.add(ifd);
-            this.updateUrnIndex(ifd);
-            _numIncompleteFiles++;
-            if (_callback != null) {
-                File parent = getParentFile(incompleteFile);
-                _callback.addSharedFile(ifd, parent);
-            }
+        }
+        
+        // no indices were found for any URN associated with this
+        // IncompleteFileDesc... add it.
+        int fileIndex = _files.size();
+        _incompletesShared.add(fileIndex);
+        IncompleteFileDesc ifd = new IncompleteFileDesc(
+            incompleteFile, urns, fileIndex, name, size, vf);            
+        _files.add(ifd);
+        this.updateUrnIndex(ifd);
+        _numIncompleteFiles++;
+        if (_callback != null) {
+            File parent = getParentFile(incompleteFile);
+            _callback.addSharedFile(ifd, parent);
         }
     }
 

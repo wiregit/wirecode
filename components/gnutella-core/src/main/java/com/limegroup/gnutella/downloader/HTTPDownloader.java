@@ -354,7 +354,7 @@ public class HTTPDownloader implements BandwidthTracker {
             if (str.toUpperCase().startsWith("CONTENT-RANGE:")) {
 				int startOffset=parseContentRangeStart(str);
                 if (startOffset!=_initialReadingPoint)
-                    throw new IOException(
+                    throw new ProblemReadingHeaderException(
                         "Unexpected start offset; too dumb to recover");
             }
 
@@ -407,7 +407,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // else if ( (code >= 400) && (code < 600) ) 
             }
 			else // unknown or unimportant
-				throw new IOException();			
+				throw new UnknownCodeException(code);			
 		}        
     }
 

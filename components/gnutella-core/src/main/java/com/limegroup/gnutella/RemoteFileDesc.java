@@ -48,7 +48,22 @@ public class RemoteFileDesc implements Serializable {
 	private Set _urns;
 	private boolean _browseHostEnabled;
     private PushProxyInterface[] _proxies;
-    private boolean _http11;    
+    
+    /**
+     * Whether or not the remote host supports HTTP/1.1
+     * This is purposely NOT IMMUTABLE.  Before we connect,
+     * we can only assume the remote host supports HTTP/1.1 by
+     * looking at the set of URNs.  If any exist, we assume
+     * HTTP/1.1 is supported (because URNs were added to Gnutella
+     * after HTTP/1.1).  Once we connect, this value is set to
+     * be whatever the host reports in the response line.
+     *
+     * When deserializing, this value may be wrong for older download.dat
+     * files.  (Older versions will always set this to false, because
+     * the field did not exist.)  To counter that, when deserializing,
+     * if this is false, we set it to true if any URNs are present.
+     */
+    private boolean _http11;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -60,6 +75,14 @@ public class RemoteFileDesc implements Serializable {
 		
     /**
      * The List of available ranges.  Should not be serialized.
+     * This is not an IntervalSet for a reason:
+     * We do not want to compact overlapping ranges into a single range,
+     * because the remote host may not understand them as such.
+     * We must act off the ranges as they're listed to us.
+     * For LimeWires, the ranges will always be as compact as possible,
+     * but for other vendors this is unknown.
+     *
+     * This is NOT SERIALIZED.
      */
     private transient List _availableRanges = null;
 		

@@ -104,6 +104,19 @@ public class DownloadStat extends AdvancedStatistic {
         new DownloadStat();
         
     /**
+     * Statistic for the number of ProblemReadingHeader exceptions
+     * while downloading.
+     */
+    public static final Statistic PRH_EXCEPTION =
+        new DownloadStat();
+        
+    /**
+     * Statistic for the number of Unknown Codes from download responses.
+     */
+    public static final Statistic UNKNOWN_CODE_EXCEPTION =
+        new DownloadStat();
+        
+    /**
      * Statistic for the number of IOExceptions while downloading.
      */
     public static final Statistic IO_EXCEPTION =
