@@ -145,6 +145,19 @@ public final class UrnHttpRequestTest extends TestCase {
 	}
 
 	/**
+	 * Tests to make sure that invalid traditional Gnutella get requests with
+	 * matching X-Gnutella-Content-URN header values also fail with 404.
+	 */
+	public void testInvalidTraditionalGetWithValidContentUrn() {
+		for(int i=0; i<_fileManager.getNumFiles(); i++) {
+			FileDesc fd = _fileManager.get(i);
+			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
+			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn();
+			sendRequestThatShouldFail(request, fd);
+		}				
+	}
+
+	/**
 	 * Sends an HTTP request that should succeed and send back all of the
 	 * expected headers.
 	 */
