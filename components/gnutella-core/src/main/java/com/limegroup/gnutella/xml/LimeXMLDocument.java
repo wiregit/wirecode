@@ -20,6 +20,9 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_ID_ATTRIBUTE_STRING = "identifier";
     public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
 
+    /** The parser to be used for all XML Docs.  No use carrying one per
+     *  instance.  Instances should synchronize on use.
+     */
     private static DOMParser parser = new DOMParser();
 
 	/**
@@ -54,25 +57,6 @@ public class LimeXMLDocument implements Serializable {
         InputSource doc = new InputSource(new StringReader(XMLStr));
         initialize(doc);
         this.xmlString = ripIdentifier(XMLStr);
-    }
-    
-    /** expunges the 'identifier' tag from the xml string, if present....
-     */
-    private static String ripIdentifier(String xmlWithID) {
-        String retString = xmlWithID;
-
-        int indexOfID = xmlWithID.indexOf(XML_ID_ATTRIBUTE_STRING);
-        if (indexOfID > -1) {
-            final String quote = "\"";
-            int indexOfEndQuote = xmlWithID.indexOf(quote, indexOfID+1);
-            indexOfEndQuote = xmlWithID.indexOf(quote, indexOfEndQuote+1);
-            String begin = xmlWithID.substring(0, indexOfID);
-            String end = xmlWithID.substring(indexOfEndQuote+1);
-            retString = begin + end;
-        }
-        if (retString.indexOf(XML_HEADER) < 0)
-            retString = XML_HEADER + retString;
-        return retString;
     }
     
     
@@ -114,6 +98,34 @@ public class LimeXMLDocument implements Serializable {
         }
     }
     
+
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+        // we may want to do special stuff in the future....
+        in.defaultReadObject();
+    }
+ 
+
+    /** expunges the 'identifier' tag from the xml string, if present....
+     */
+    private static String ripIdentifier(String xmlWithID) {
+        String retString = xmlWithID;
+
+        int indexOfID = xmlWithID.indexOf(XML_ID_ATTRIBUTE_STRING);
+        if (indexOfID > -1) {
+            final String quote = "\"";
+            int indexOfEndQuote = xmlWithID.indexOf(quote, indexOfID+1);
+            indexOfEndQuote = xmlWithID.indexOf(quote, indexOfEndQuote+1);
+            String begin = xmlWithID.substring(0, indexOfID);
+            String end = xmlWithID.substring(indexOfEndQuote+1);
+            retString = begin + end;
+        }
+        if (retString.indexOf(XML_HEADER) < 0)
+            retString = XML_HEADER + retString;
+        return retString;
+    }
+    
+
     private void initialize(InputSource doc) throws SchemaNotFoundException,
                             IOException, SAXException {
         //TODO1: make sure that the schema actually validates documents
@@ -223,7 +235,7 @@ public class LimeXMLDocument implements Serializable {
             }catch(NumberFormatException e){
                 number = false;
             }
-            if(!number)
+            if(!number && (val != null) && (!val.equals("")))
                 retList.add(val);
         }
         return retList;

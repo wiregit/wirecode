@@ -3,6 +3,8 @@ package com.limegroup.gnutella.mp3;
 import java.io.*;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -14,16 +16,123 @@ public final class ID3Reader {
     private static final String schemaURI = 
          "http://www.limewire.com/schemas/audio.xsd";
 
+    private final String KEY_PREFIX = "audios" + XMLStringUtils.DELIMITER +
+        "audio" + XMLStringUtils.DELIMITER;
+
+    private final String TRACK_KEY =    KEY_PREFIX + "track" + 
+        XMLStringUtils.DELIMITER;
+    private final String ARTIST_KEY =   KEY_PREFIX + "artist" + 
+        XMLStringUtils.DELIMITER;
+    private final String ALBUM_KEY =    KEY_PREFIX + "album" + 
+        XMLStringUtils.DELIMITER;
+    private final String TITLE_KEY =    KEY_PREFIX + "title" + 
+        XMLStringUtils.DELIMITER;
+    private final String GENRE_KEY =    KEY_PREFIX + "genre" + 
+        XMLStringUtils.DELIMITER;
+    private final String YEAR_KEY =     KEY_PREFIX + "year" + 
+        XMLStringUtils.DELIMITER;
+    private final String COMMENTS_KEY = KEY_PREFIX + "comments" + 
+        XMLStringUtils.DELIMITER;
+    private final String BITRATE_KEY =  KEY_PREFIX + "bitrate" + 
+        XMLStringUtils.DELIMITER;
+    private final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
+        XMLStringUtils.DELIMITER;
+
+
     /**
      * Attempts to read an ID3 tag from the specified file.
      * @return an null if the document has no ID3 tag
      */
     public String readDocument(File file,boolean solo) throws IOException{
+        Object[] info = parseFile(file);
+        String title = (String) info[0], artist = (String) info[1], 
+        album = (String) info[2], year = (String) info[3], 
+        comment = (String) info[5];
+        short track = ((Short) info[4]).shortValue(), 
+        gen = ((Short) info[6]).shortValue();
+        int bitrate = ((Integer) info[7]).intValue(),
+        seconds = ((Integer) info[8]).intValue();
+
+        StringBuffer strB = new StringBuffer();
+        if(solo){
+            appendStrings("<audios noNamespaceSchemaLocation=\"",
+                          this.schemaURI,
+                          strB);
+            strB.append("><audio ");
+            String filename = file.getCanonicalPath();
+            //str = str+"\""+" identifier=\""+filename+"\">";
+            appendStrings(" identifier=\"", filename, strB);
+        }
+        //end of head
+        if(!title.equals(""))
+            appendStrings(" title=\"", title, strB);
+        if(!artist.equals(""))
+            appendStrings(" artist=\"", artist, strB);
+        if(!album.equals(""))
+            appendStrings(" album=\"", album, strB);
+        if(track>0)
+            appendStrings(" track=\"", ""+track, strB);
+        String genre = getGenreString(gen);
+        if(!genre.equals(""))
+            appendStrings(" genre=\"", genre, strB);
+        if(!year.equals(""))
+            appendStrings(" year=\"", year, strB);
+        if(!comment.equals(""))
+            appendStrings(" comments=\"", comment, strB);
+        if(bitrate > 0)
+            appendStrings(" bitrate=\"", ""+bitrate, strB);
+        if(seconds > 0)
+            appendStrings(" seconds=\"", ""+seconds, strB);
+        if(solo){
+            //str = str+"</audio>";
+            strB.append("/>");
+            strB.append("</audios>");
+        }
+        
+        return strB.toString();
+    }
+
+
+    public LimeXMLDocument readDocument(File file) throws IOException {
+        Object[] info = parseFile(file);
+        short track = ((Short) info[4]).shortValue(), 
+        gen = ((Short) info[6]).shortValue();
+        int bitrate = ((Integer) info[7]).intValue(),
+        seconds = ((Integer) info[8]).intValue();
+
+        List nameValList = new ArrayList();
+        nameValList.add(new NameValue(TITLE_KEY, info[0]));
+        nameValList.add(new NameValue(ARTIST_KEY, info[1]));
+        nameValList.add(new NameValue(ALBUM_KEY, info[2]));
+        nameValList.add(new NameValue(YEAR_KEY, info[3]));
+        nameValList.add(new NameValue(COMMENTS_KEY, info[5]));
+        nameValList.add(new NameValue(TRACK_KEY, ""+track));
+        nameValList.add(new NameValue(GENRE_KEY, ""+gen));
+        nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
+        nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
+
+        return new LimeXMLDocument(nameValList, schemaURI);
+    }
+
+    /** @return a Object[] with the following order: title, artist, album, year,
+       track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
+       Strings.  Indices 4 and 6 are Shorts.  Indices 7 and 8 are Integers.  
+     */
+    private Object[] parseFile(File file) throws IOException {
+        Object[] retObjs = new Object[9];
+
+        // default vals...
+        retObjs[0] = "";
+        retObjs[1] = "";
+        retObjs[2] = "";
+        retObjs[3] = "";
+        retObjs[5] = "";
+        retObjs[4] = new Short((short)-1);
+        retObjs[6] = new Short((short)-1);
+
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         long length = randomAccessFile.length();
 
-        String title = "", artist = "", album = "", year = "", comment = "";
-        short track = -1, gen = -1;
         // short circuit to bitrate if not ID3 tag can be properly read...
         // We need to read at least 128 bytes
         if(length >= 128) {
@@ -35,104 +144,67 @@ public final class ID3Reader {
             randomAccessFile.readFully(buffer, 0, 3);
             String tag = new String(buffer, 0, 3);
             
-            if(tag.equals("TAG")) {
+            if (tag.equals("TAG")) {
             
                 // We have an ID3 Tag, now get the parts
                 // Title
                 randomAccessFile.readFully(buffer, 0, 30);
-                title = new String(buffer, 0, 
-                                   getTrimmedLength(buffer, 30));
+                retObjs[0] = new String(buffer, 0, 
+                                           getTrimmedLength(buffer, 30));
                 
                 // Artist
                 randomAccessFile.readFully(buffer, 0, 30);
-                artist = new String(buffer, 0, 
-                                    getTrimmedLength(buffer, 30));
+                retObjs[1] = new String(buffer, 0, 
+                                           getTrimmedLength(buffer, 30));
                 
                 // Album
                 randomAccessFile.readFully(buffer, 0, 30);
-                album = new String(buffer, 0, 
-                                   getTrimmedLength(buffer, 30));
+                retObjs[2] = new String(buffer, 0, 
+                                           getTrimmedLength(buffer, 30));
                 
                 // Year
                 randomAccessFile.readFully(buffer, 0, 4);
-                year = new String(buffer, 0, 
-                                  getTrimmedLength(buffer, 4));
+                retObjs[3] = new String(buffer, 0, 
+                                           getTrimmedLength(buffer, 4));
                 
                 // Comment and track
                 randomAccessFile.readFully(buffer, 0, 30);
                 int commentLength;
                 if(buffer[28] == 0)
                 {
-                    track = (short)ByteOrder.ubyte2int(buffer[29]);
+                    retObjs[4] = new Short((short)ByteOrder.ubyte2int(buffer[29]));
                     commentLength = 28;
                 }
                 else
                 {
-                    track = 0;
-                    commentLength = 30;
+                    retObjs[4] = new Short((short)0);
+                    commentLength = 3;
                 }
-                comment = new String(buffer, 0,
-                                     getTrimmedLength(buffer, 
-                                                      commentLength));
+                retObjs[5] = new String(buffer, 0,
+                                           getTrimmedLength(buffer, 
+                                                            commentLength));
                 
                 // Genre
                 randomAccessFile.readFully(buffer, 0, 1);
-                gen = (short)ByteOrder.ubyte2int(buffer[0]);
-
-            }            
+                retObjs[6] = new Short((short)ByteOrder.ubyte2int(buffer[0]));
+            }
         }
 
         MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
         // Bitrate
-        int bitrate = mp3Info.getBitRate();
+        retObjs[7] = new Integer(mp3Info.getBitRate());
         // Length
-        int seconds  = (int) mp3Info.getLengthInSeconds();
-        
-        String str = "";
-        if(solo){
-            str = str+ "<audios noNamespaceSchemaLocation=\""+this.schemaURI;
-            str = str+"\"";
-            str = str+"><audio ";
-            String filename = file.getCanonicalPath();
-            //str = str+"\""+" identifier=\""+filename+"\">";
-            str = str+" identifier=\""+filename+"\"";
-        }
-        //end of head
-        if(!title.equals(""))
-            //str=str+"<title>"+title+"</title>";
-            str=str+" title=\""+title+"\"";
-        if(!artist.equals(""))
-            //str = str+"<artist>"+artist+"</artist>";
-            str = str+" artist=\""+artist+"\"";
-        if(!album.equals(""))
-            //str = str+"<album>"+album+"</album>";
-            str = str+" album=\""+album+"\"";
-        if(track>0)
-            //str = str+"<track>"+track+"</track>";
-            str = str+" track=\""+track+"\"";
-        String genre = getGenreString(gen);
-        if(!genre.equals(""))
-            //str = str+"<genre>"+genre+"</genre>";
-            str = str+" genre=\""+genre+"\"";
-        if(!year.equals(""))
-            //str = str+"<year>"+year+"</year>";
-            str = str+" year=\""+year+"\"";
-        if(!comment.equals(""))
-            //str = str+"<comments>"+comment+"</comments>";
-            str = str+" comments=\""+comment+"\"";
-        if(bitrate > 0)
-            str = str+" bitrate=\""+bitrate+"\"";
-        if(seconds > 0)
-            str = str+" seconds=\""+seconds+"\"";
-        if(solo){
-            //str = str+"</audio>";
-            str = str+"/>";
-            str=str+"</audios>";
-        }
-        
+        retObjs[8] = new Integer((int) mp3Info.getLengthInSeconds());
+
         randomAccessFile.close();
-        //System.out.println("SumeetID3Reader XMLString="+str);
-        return str;
+        return retObjs;
+    }
+
+
+    private void appendStrings(String key, String value,StringBuffer appendTo) {
+        appendTo.append(key);
+        appendTo.append(value);
+        appendTo.append("\"");
     }
 
     /**

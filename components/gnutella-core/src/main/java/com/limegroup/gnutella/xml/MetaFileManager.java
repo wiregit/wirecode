@@ -13,21 +13,13 @@ public class MetaFileManager extends FileManager {
     boolean initialized = false;
     
     /**
-     * keeps a hash of Hashes of files to files, for all .mp3 files
+     * keeps a hash of files -> hash of files (file -> string)
      * <p>
      * <b>You must use the synchronized method in this class to read
      *  or write from this map
      * </b>
      */
-    private HashMap mp3FileToHash = new HashMap();
-    /**
-     * keeps a hash of Hashes of files to files, for all non-mp3 file
-     * <p>
-     * <b>You must use the synchronized method in this class to read
-     *  or write from this map
-     * </b>
-     */
-    private HashMap nonMP3FileToHash = new HashMap();
+    private Map fileToHash = new HashMap();
 
     //constructor
     public MetaFileManager(){
@@ -67,7 +59,7 @@ public class MetaFileManager extends FileManager {
                 if (hash == null)
                     throw new Exception();
                 // add to the file manager
-                writeToMap(file, hash, LimeXMLUtils.isMP3File(file));
+                writeToMap(file, hash);
             }
             catch (Exception hashFailed) {
                 //TODO: get rid of blanket catch.  Problem is with hashFile.
@@ -108,9 +100,9 @@ public class MetaFileManager extends FileManager {
         for(int i=0;i<z;i++){
             FileDesc f = get((int)responses[i].getIndex());
             File file = new File(f._path);
-            String hash=readFromMap(file,true);
+            String hash=readFromMap(file);
             if(hash==null)//not an mp3 file
-                hash = readFromMap(file, false);
+                hash = readFromMap(file);
             LimeXMLDocument doc = coll.getDocForHash(hash);
             if(doc==null)
                 continue;
@@ -123,38 +115,21 @@ public class MetaFileManager extends FileManager {
      * The rule is that to either read or write to/from this
      * map you have to obtain a lock on it
      */    
-    public String readFromMap(Object file,boolean mp3){
+    public String readFromMap(Object file){
         String hash = null;
-        if(mp3){//synch mp3FileToHash
-            synchronized(mp3FileToHash){
-                hash = (String)mp3FileToHash.get(file);
-            }
-            return hash;
+        synchronized (fileToHash) {
+            hash = (String) fileToHash.get(file);
         }
-        else{
-            synchronized(nonMP3FileToHash){
-                hash = (String)nonMP3FileToHash.get(file);
-            }
-            return hash;
+        return hash;
+    }
+
+    
+    public void writeToMap(Object file, Object hash) {
+        synchronized (fileToHash) {
+            fileToHash.put(file, hash);
         }
     }
 
-    /**
-     * The rule is that to either read or write to/from this
-     * map you have to obtain a lock on it
-     */    
-    public void writeToMap(Object file, Object hash, boolean mp3){
-        if(mp3){
-            synchronized(mp3FileToHash){
-                mp3FileToHash.put(file,hash);
-            }
-        }
-        else{
-            synchronized(nonMP3FileToHash){
-                nonMP3FileToHash.put(file,hash);
-            }
-        }
-    }
 
     /**
      * Looks at the  LimeXMlReplyCollections other than the one passed as
@@ -178,7 +153,7 @@ public class MetaFileManager extends FileManager {
                 if(d!=null){//we have a value...must replace
                     coll.removeDoc(oldHash);
                     coll.addReply(newHash,d);
-                    coll.toDisk("");
+                    coll.write();
                 }//affected collection done
             }
         }
@@ -202,6 +177,10 @@ public class MetaFileManager extends FileManager {
             return;
         synchronized(metaLocker){
             if (!initialized){//do this only on startup
+                //clear out the HashMap, don't want to have old and potentially
+                //unshared hashes around anymore.
+                fileToHash.clear();
+                // now recreate the hashes
                 createFileToHashMaps();
                 SchemaReplyCollectionMapper mapper = 
                       SchemaReplyCollectionMapper.instance();
@@ -224,12 +203,16 @@ public class MetaFileManager extends FileManager {
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
                     if (s.equalsIgnoreCase("audio")){
                         //Map nameToFile = getAllMP3FilesRecursive();
-                        collection=new LimeXMLReplyCollection
-                        (schemas[i],mp3FileToHash,this);
+                        collection = 
+                        new LimeXMLReplyCollection(fileToHash.keySet(), 
+                                                   schemas[i],
+                                                   this, true);
                     }
                     else
-                        collection = new LimeXMLReplyCollection
-                                       (nonMP3FileToHash,schemas[i],this);
+                        collection = 
+                        new LimeXMLReplyCollection(fileToHash.keySet(),
+                                                   schemas[i],
+                                                   this, false);
                     //Note: the collection may have size==0!
                     mapper.add(schemas[i],collection);
                 }                
@@ -295,21 +278,14 @@ public class MetaFileManager extends FileManager {
             int z = subFiles.length;
             for(int j=0;j<z;j++){
                 File f = new File(currDir,subFiles[j]);
-                if(f.isDirectory()){
+                if(f.isDirectory())
                     dirs.add(f);
-                    /*
-                      try {
-                      String newDir = f.getCanonicalPath();                  
-                      dirs.add(newDir);
-                      } catch (IOException ignored) {
-                      continue;
-                      }
-                    */
-                }
             }
             //check files in this dir for .mp3 files.
             File[] files = getSharedFiles(currDir);
-            int size = files.length;
+            int size = 0;
+            if (files != null)
+                size = files.length;
             for(int i=0;i<size;i++){
                     String name="";
                     String hash="";
@@ -319,7 +295,7 @@ public class MetaFileManager extends FileManager {
                     }catch(Exception e){
                         continue;
                     }
-                    writeToMap(files[i],hash,LimeXMLUtils.isMP3File(name));
+                    writeToMap(files[i],hash);
             }
         }
     }
@@ -373,10 +349,10 @@ public class MetaFileManager extends FileManager {
      */
     public LimeXMLDocument getDocument(String schemaURI, File f){
         String hash = null;
-        hash = readFromMap(f,true);//try mp3 first
+        hash = readFromMap(f);//try mp3 first
         if(hash == null){//not mp3...try non mp3
             //System.out.println("Sumeet hashNot found with mp3");
-            hash = readFromMap(f, false);
+            hash = readFromMap(f);
         }
         if (hash==null){//still null? return null
             //System.out.println("Sumeet hashNot found...returning");
