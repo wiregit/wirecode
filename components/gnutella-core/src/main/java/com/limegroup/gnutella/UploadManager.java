@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
 /**
  * The list of all the uploads in progress.
  */
-public class UploadManager implements BandwidthTracker {
+public final class UploadManager implements BandwidthTracker {
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
     /** The message router to use for pushes. */
@@ -158,7 +158,7 @@ public class UploadManager implements BandwidthTracker {
                     return;
                 
                 //read the first word of the next request
-                //and proceed only if "GET" request
+                //and proceed only if "GET" or "HEAD" request
                 try {
                     int oldTimeout = socket.getSoTimeout();
                     socket.setSoTimeout(SettingsManager.instance(
@@ -167,8 +167,10 @@ public class UploadManager implements BandwidthTracker {
                     //as we will handle only the next "GET" request
                     String word=IOUtils.readWord(socket.getInputStream(), 3);
                     socket.setSoTimeout(oldTimeout);
-                    if(!word.equalsIgnoreCase("GET"))
+                    if(!word.equalsIgnoreCase("GET") &&
+					   !word.equalsIgnoreCase("HEAD")) {
                         return;
+					}
                 } catch (IOException ioe) {
 					// should the socket really not be closed here?
                     return;
