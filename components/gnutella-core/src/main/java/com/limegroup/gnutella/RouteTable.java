@@ -68,9 +68,14 @@ public class RouteTable {
 	    if (guid==null) //it shouldn't be!
 		continue;
 	    if (map.get(guid).equals(c)) {
-		map.remove(guid);
+		
+                iter.remove();
+                
+                //anu commented out the following lines and instead used the remove method 
+                //in iterator interface top remove entry from the underlying collection
+                //map.remove(guid);
 		//musn't remove keys while iterating over set
-		iter=map.keySet().iterator();
+		//iter=map.keySet().iterator();
 	    }
 	}
     }	
