@@ -334,7 +334,10 @@
 		  This change impacts the latency of search results.  If a
 		  given search is sent to 10,000 UltraPeers with an interval
 		  between individual UltraPeer queries of 100, the complete search 
-		  will take 1,000 seconds or over 15 minutes.  
+		  will take 1,000 seconds, or over 15 minutes.  This may be
+		  impractical.  Due to these limitations, developers MAY choose
+		  to decrease the interval between searches as more UltraPeers
+		  are searched.
 		</t>
 	  </section>
 	</section>
@@ -372,10 +375,13 @@
 		  to their cache.  This is made possible because the host sending the
 		  query has to be listening on the same port stored in the
 		  datagram.  The same is true for any pings received over UDP.  
-		  This built-in distribution of host information can
-		  dramatically reduce the need for any pings and pongs at 
-		  all -- so much so that UltraPeers MUST store the IP and port 
-		  from all UDP queries they receive.
+		  While these incoming messages will only supply the IP address and 
+		  port of hosts supporting GUESS without the additional data 
+		  contained in normal pongs, the IP address and port are really all 
+		  that are necessary for our purposes.  This built-in distribution 
+		  of host information can dramatically reduce the need for 
+		  any pings and pongs at all -- so much so that UltraPeers 
+		  MUST store the IP and port from all UDP queries they receive.
 		  
 		  <vspace/>
 		  <vspace/>
@@ -400,8 +406,8 @@
 		  Using these techniques, UltraPeers also MUST maintain
 		  a full cache of other UltraPeers to query.  
 		  Because leaves always query the network via their
-		  UltraPeer, leaves do not have to maintain a set of
-		  UltraPeers to query -- this is the UltraPeer's 
+		  UltraPeer, leaves do not have to maintain any of this 
+		  information -- this is the UltraPeer's 
 		  responsibility.		  
 		  <vspace/>
 		  <vspace/>
@@ -551,7 +557,7 @@
 			that it allows anyone to easily execute a DDOS attack
 			on any target machine.  This concern has been based on the
 			assumption that queries would require an extension listing
-			the UDP IP address and port to reply to, however.  In this
+			the IP address and UDP port to reply to, however.  In this
 			proposal, this extension is not required, as responses are
 			always sent directly back to the node that sent them, 
 			rendering such an attack impossible.
