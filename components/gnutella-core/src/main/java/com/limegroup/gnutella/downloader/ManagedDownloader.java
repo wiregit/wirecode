@@ -967,17 +967,17 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int tryAllDownloads3() throws InterruptedException {
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
-        synchronized(this) {
-            needed=new ArrayList(); 
-            {//all variables in this block have limited scope
-                RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
-                File incompleteFile=incompleteFileManager.getFile(rfd);
-                synchronized (incompleteFileManager) {
-                    Iterator iter=incompleteFileManager.
-                    getFreeBlocks(incompleteFile, rfd.getSize());
-                    while (iter.hasNext())
-                        needed.add((Interval)iter.next());
-                }
+        needed=new ArrayList(); 
+        //Note: The code in this block is executed by only 1 thread. Its
+        //executed before we spawn the threads we want
+        {//all variables in this block have limited scope
+            RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
+            File incompleteFile=incompleteFileManager.getFile(rfd);
+            synchronized (incompleteFileManager) {
+                Iterator iter=incompleteFileManager.
+                getFreeBlocks(incompleteFile, rfd.getSize());
+                while (iter.hasNext())
+                    needed.add((Interval)iter.next());
             }
         }
 
@@ -987,7 +987,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         //While there is still an unfinished region of the file...
         while (true) {
-            synchronized (this) {
+            synchronized (downloaderLock) {
                 if (stopped) {
                     throw new InterruptedException();
                 } else if (dloaders.size()==0 && needed.size()==0) {
@@ -1417,26 +1417,27 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-    private synchronized RemoteFileDesc removeBest(List filesLeft) {
-        //Lock is needed here because filesLeft can be modified by
-        //tryOneDownload in worker thread.
-        Iterator iter=filesLeft.iterator();
-        //The best rfd found so far
-        RemoteFileDesc ret=(RemoteFileDesc)iter.next();
-        
-        //Find max of each (remaining) ret...
-        while (iter.hasNext()) {
-            RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
-            if (rfd.getQuality() > ret.getQuality())
-                ret=rfd;
-            else if (rfd.getQuality() == ret.getQuality()) {
-                if (rfd.getSpeed() > ret.getSpeed())
-                    ret=rfd;
-            }            
-        }
+    private RemoteFileDesc removeBest(List filesLeft) {
+        synchronized(downloaderLock) {
+            //Lock is needed because filesLeft can be modified by worker thread.
+            Iterator iter=filesLeft.iterator();
+            //The best rfd found so far
+            RemoteFileDesc ret=(RemoteFileDesc)iter.next();
             
-        filesLeft.remove(ret);
-        return ret;
+            //Find max of each (remaining) ret...
+            while (iter.hasNext()) {
+                RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
+                if (rfd.getQuality() > ret.getQuality())
+                    ret=rfd;
+                else if (rfd.getQuality() == ret.getQuality()) {
+                    if (rfd.getSpeed() > ret.getSpeed())
+                        ret=rfd;
+                }            
+            }
+            
+            filesLeft.remove(ret);
+            return ret;
+        }
     }
 
     /** Returns true iff rfd should be attempted by push download, either 
