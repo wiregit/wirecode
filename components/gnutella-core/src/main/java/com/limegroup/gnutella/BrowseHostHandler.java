@@ -93,7 +93,7 @@ public class BrowseHostHandler {
             } 
             else {
                 RemoteFileDesc fakeRFD = 
-                    new RemoteFileDesc(host, port, SPECIAL_INDEX, "", 0, 
+                    new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
                                        _serventID.bytes(), 0, false, 0, false,
                                        null, null, false, proxies);
                 // register with the map so i get notified about a response to my
