@@ -51,56 +51,13 @@ import com.sun.java.util.collections.Map;
  *
  *  The leaf must be connected in the first test.
  */
-public final class ServerSidePushProxyTest extends BaseTestCase {
-
-	/**
-	 * The port that the central Ultrapeer listens on, and that the other nodes
-	 * connect to it on.
-	 */
-    private static final int PORT = 6667;
+public final class ServerSidePushProxyTest extends ServerSideTestCase {
 
 	/**
 	 * The timeout value for sockets -- how much time we wait to accept 
 	 * individual messages before giving up.
 	 */
     private static final int TIMEOUT = 2000;
-
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 3;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
-
-    /**
-     * Leaf connection to the Ultrapeer.
-     */
-    private static Connection LEAF;
-
-    /**
-     * Ultrapeer connection.
-     */
-    private static Connection ULTRAPEER_1;
-
-    /**
-     * Ultrapeer 1 UDP connection.
-     */
-    private static DatagramSocket UDP_ACCESS;
-
-    /**
-	 * Second Ultrapeer connection
-     */
-    private static Connection ULTRAPEER_2;
 
     /**
      * the client guid of the LEAF - please set in the first test.
@@ -111,12 +68,6 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
      * the client GUID of the leaf as a GUID.
      */
     private static GUID leafGUID = null;
-
-	/**
-	 * The central Ultrapeer used in the test.
-	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
 
     public ServerSidePushProxyTest(String name) {
         super(name);
@@ -129,132 +80,28 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+    public static Integer numUPs() {
+        return new Integer(1);
+    }
+
+    public static Integer numLeaves() {
+        return new Integer(1);
+    }
 	
-	private static void buildConnections() throws Exception {
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-
-        UDP_ACCESS = new DatagramSocket();
-
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+    public static ActivityCallback getActivityCallback() {
+        return new ActivityCallbackStub();
     }
 
-    public static void setSettings() {
-        //Setup LimeWire backend.  For testing other vendors, you can skip all
-        //this and manually configure a client to listen on port 6667, with
-        //incoming slots and no connections.
-        //To keep LimeWire from connecting to the outside network, we filter out
-        //all addresses but localhost and 18.239.0.*.  The latter is used in
-        //pongs for testing.  TODO: it would be nice to have a way to prevent
-        //BootstrapServerManager from adding defaults and connecting.
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(4);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-    }
-
-	public static void globalSetUp() throws Exception {
-        setSettings();
-
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-
-		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
-		connect();
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-	}
-
-    
-    public void setUp() {
-        setSettings();
-    }
-
-
-	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
-		sleep();
-		ULTRAPEER_1.close();
-		ULTRAPEER_2.close();
-		sleep();
-	}
-
-	private static void sleep() {
-		try {Thread.sleep(300);}catch(InterruptedException e) {}
-	}
-
-	/**
-	 * Drains all messages 
-	 */
- 	private static void drainAll() throws Exception {
- 		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
- 		}
- 		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
- 		if((LEAF != null) && LEAF.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
- 	}
-
-	/**
-	 * Connects all of the nodes to the central test Ultrapeer.
-	 */
-    private static void connect() throws Exception {
-		buildConnections();
-        //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
-
-        //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
-        
+    public static void setUpQRPTables() throws Exception {
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flush();
+            ULTRAPEER[0].send((RouteTableMessage)iter.next());
+			ULTRAPEER[0].flush();
         }
-
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
-
-		// make sure we get rid of any initial ping pong traffic exchanges
-		sleep();
-		drainAll();
-		//sleep();
-		drainAll();
-		sleep();
     }
 
     // BEGIN TESTS
@@ -268,33 +115,33 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         clientGUID = GUID.makeGuid();
         leafGUID = new GUID(clientGUID);
 
-        LEAF = new Connection("localhost", PORT, new LeafHeaders("localhost"),
+        LEAF[0] = new Connection("localhost", PORT, new LeafHeaders("localhost"),
                               new EmptyResponder());
         // routed leaf, with route table for "test"
-        LEAF.initialize();
+        LEAF[0].initialize();
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
-			LEAF.flush();
+            LEAF[0].send((RouteTableMessage)iter.next());
+			LEAF[0].flush();
         }
 
         // make sure UP is advertised proxy support
         do {
-            m = LEAF.receive(TIMEOUT);
+            m = LEAF[0].receive(TIMEOUT);
         } while (!(m instanceof MessagesSupportedVendorMessage)) ;
         assertTrue(((MessagesSupportedVendorMessage)m).supportsPushProxy() > 0);
 
         // send proxy request
         PushProxyRequest req = new PushProxyRequest(new GUID(clientGUID));
-        LEAF.send(req);
-        LEAF.flush();
+        LEAF[0].send(req);
+        LEAF[0].flush();
 
         // wait for ack
         do {
-            m = LEAF.receive(TIMEOUT);
+            m = LEAF[0].receive(TIMEOUT);
         } while (!(m instanceof PushProxyAcknowledgement)) ;
         assertTrue(Arrays.equals(m.getGUID(), clientGUID));
         assertEquals(PORT, ((PushProxyAcknowledgement)m).getListeningPort());
@@ -420,7 +267,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
             // leaf NOT expecting PushRequest.
             try {
                 do {
-                    m = LEAF.receive(TIMEOUT);
+                    m = LEAF[0].receive(TIMEOUT);
                     assertTrue(!(m instanceof PushRequest));
                 } while (true) ;
             }
@@ -428,7 +275,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         } else {
             // leaf should get PushRequest
             do {
-                m = LEAF.receive(TIMEOUT);
+                m = LEAF[0].receive(TIMEOUT);
             } while (!(m instanceof PushRequest)) ;
             PushRequest pr = (PushRequest) m;
             int idx = 0;
