@@ -1035,14 +1035,18 @@ public class DownloadManager implements BandwidthTracker {
         // if push proxies failed, but we need a fw-fw transfer, give up.
         if(shouldDoFWTransfer && !RouterService.acceptedIncomingConnection())
             return false;
+            
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if(!NetworkUtils.isValidAddressAndPort(addr, port))
+            return false;
 
         PushRequest pr = 
         	new PushRequest(guid,
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
-                            RouterService.getAddress(),
-                            RouterService.getPort());
+                            addr, port);
         if(LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
         try {

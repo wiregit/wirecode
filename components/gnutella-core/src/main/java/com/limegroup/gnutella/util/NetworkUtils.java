@@ -56,6 +56,14 @@ public final class NetworkUtils {
      * Ensure that this class cannot be constructed.
      */
     private NetworkUtils() {}
+    
+    /**
+     * Determines if the given addr or port is valid.
+     * Both must be valid for this to return true.
+     */
+    public static boolean isValidAddressAndPort(byte[] addr, int port) {
+        return isValidAddress(addr) && isValidPort(port);
+    }
 
 	/**
 	 * Returns whether or not the specified port is within the valid range of
