@@ -250,7 +250,7 @@ public abstract class Message implements Serializable{
         }
         while(iter.hasNext()) {
             addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
-												   (String)(iter.next()));
+												   iter.next().toString());
         }
         return addPrefixDelimiter; // will be true is anything at all was written 
     }
