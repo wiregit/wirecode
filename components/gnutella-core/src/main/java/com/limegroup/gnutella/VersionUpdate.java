@@ -20,7 +20,6 @@ import java.awt.event.*;
 import com.limegroup.gnutella.gui.Main;
 import com.limegroup.gnutella.gui.Utilities;
 import com.limegroup.gnutella.gui.UpdateHandler;
-import com.limegroup.gnutella.gui.UpdateTimedOutException;
 import com.limegroup.gnutella.downloader.*;
 
 public class VersionUpdate
