@@ -18,7 +18,7 @@ public class LimeXMLDocument{
     //TODO2: Need to build in the ability to work with multiple instances
     //of some fields. 
     
-    protected Map fieldToValue;
+    protected Map fieldToValue = new TreeMap();
     protected String schemaUri;
     //protected String XMLString;//this is what is sent back on the wire.
     /** 
@@ -61,8 +61,9 @@ public class LimeXMLDocument{
         //set the schema URI
         this.schemaUri = schemaURI;
         
-        //initialize the field mapping map
-        fieldToValue = new HashMap();
+        //anu commented out
+//        //initialize the field mapping map
+//        fieldToValue = new HashMap();
         
         //iterate over the passed list of fieldnames & values
         for(Iterator iterator = nameValueList.iterator();
@@ -116,7 +117,10 @@ public class LimeXMLDocument{
      */
     private void grabDocInfo(Node docElement,boolean root)
         throws SchemaNotFoundException{
-        fieldToValue = new HashMap();
+            
+            //anu commented out
+//        fieldToValue = new HashMap();
+            
         //Element docElement = doc.getDocumentElement();
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
@@ -285,8 +289,9 @@ public class LimeXMLDocument{
     }
 
     public String getValue(String fieldName){
-        String value = (String)fieldToValue.get(fieldName.trim());
-        return value;
+
+        fieldName = fieldName.trim();
+        return (String)fieldToValue.get(fieldName);
     }
     
     /**
