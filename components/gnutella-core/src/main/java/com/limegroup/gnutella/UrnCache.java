@@ -17,6 +17,9 @@ import java.util.Set;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
  * across sessions.
@@ -28,6 +31,8 @@ import com.limegroup.gnutella.util.ConverterObjectInputStream;
  * @see URN
  */
 public final class UrnCache {
+    
+    private static final Log LOG = LogFactory.getLog(UrnCache.class);
     
     /**
      * File where urns (currently SHA1 urns) for files are stored.
@@ -142,23 +147,10 @@ public final class UrnCache {
                     new BufferedInputStream(
                         new FileInputStream(file)));
 			result = (Map)ois.readObject();
-        } catch (IOException e) {
-            result = null;
-        } catch (ClassCastException e) {
-            result = null;
-        } catch (ClassNotFoundException e) {
-            result = null;
-        } catch(ArrayStoreException e) {
-            result = null;
-        } catch(IndexOutOfBoundsException e) {
-            result = null;
-        } catch(NegativeArraySizeException e) {
-            result = null;
-        } catch(IllegalStateException e) {
-            result = null;
-        } catch(SecurityException e) {
-            result = null;
-        } finally {
+	    } catch(Throwable t) {
+	        LOG.error("Unable to read UrnCache", t);
+	        result = null;
+	    } finally {
             if(ois != null) {
                 try {
                     ois.close();

@@ -23,6 +23,9 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * This class contains a systemwide File creation time cache that persists these
  * times across sessions.  Very similar to UrnCache but less complex.
@@ -46,6 +49,8 @@ import com.limegroup.gnutella.util.ConverterObjectInputStream;
  * lock before grabbing my lock.  Please keep doing that as you add code.
  */
 public final class CreationTimeCache {
+    
+    private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
     
     /**
      * File where creation times for files are stored.
@@ -386,19 +391,10 @@ public final class CreationTimeCache {
             ois = new ConverterObjectInputStream(new BufferedInputStream(
                             new FileInputStream(CTIME_CACHE_FILE)));
 			return (Map)ois.readObject();
-		} catch(FileNotFoundException e) {
-			return new HashMap();
-		} catch(IOException e) {
-            return new HashMap();
-        } catch(ClassNotFoundException e) {
-            return new HashMap();
-        } catch(ClassCastException e) {
-            return new HashMap();
-        } catch(IndexOutOfBoundsException ioobe) {
-            return new HashMap();
-        } catch(SecurityException se) {
-            return new HashMap();
-        } finally {
+	    } catch(Throwable t) {
+	        LOG.error("Unable to read creation time file", t);
+	        return new HashMap();
+	    } finally {
             if(ois != null) {
                 try {
                     ois.close();

@@ -12,11 +12,16 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Provides static methods, which accept an InputStream and use the 
  * LimeWire public key to verify that the contents are authentic.
  */
 public class UpdateMessageVerifier {
+    
+    private static final Log LOG = LogFactory.getLog(UpdateMessageVerifier.class);
 
     private byte[] data;
     private byte[] signature;
@@ -51,9 +56,8 @@ public class UpdateMessageVerifier {
             fis = new FileInputStream(file);
             ois = new ObjectInputStream(fis);
             pubKey = (PublicKey)ois.readObject();
-        } catch (ClassNotFoundException cnfx) {
-            return false;
-        } catch (IOException iox) { //could not read public key?
+        } catch(Throwable t) {
+            LOG.error("Unable to read public key", t);
             return false;
         } finally {
             if(ois != null) {

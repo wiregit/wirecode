@@ -23,12 +23,15 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * @author Gregorio Roper
  * 
  * This class maps SHA1_URNs to TigerTreeCache
  */
-public final class TigerTreeCache implements Serializable {
+public final class TigerTreeCache {
 
     /**
      * TigerTreeCache instance variable.
@@ -41,7 +44,7 @@ public final class TigerTreeCache implements Serializable {
     private static final ProcessingQueue QUEUE = 
         new ProcessingQueue("TreeHashTread");
 
-    private static transient final Log LOG =
+    private static final Log LOG =
         LogFactory.getLog(TigerTreeCache.class);
 
     /**
@@ -138,25 +141,8 @@ public final class TigerTreeCache implements Serializable {
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));
             return (Map) ois.readObject();
-        } catch (IOException e) {
-            return new HashMap();
-        } catch (ClassCastException e) {
-            return new HashMap();
-        } catch (ClassNotFoundException e) {
-            return new HashMap();
-        } catch (ArrayStoreException e) {
-            return new HashMap();
-        } catch (IndexOutOfBoundsException e) {
-            return new HashMap();
-        } catch (NegativeArraySizeException e) {
-            return new HashMap();
-        } catch (IllegalStateException e) {
-            return new HashMap();
-        } catch (SecurityException e) {
-            return new HashMap();
-        } catch(NoClassDefFoundError e) {
-            return new HashMap();
-        } catch(NullPointerException npe) {
+        } catch(Throwable t) {
+            LOG.error("Can't read tiger trees", t);
             return new HashMap();
         } finally {
             if (ois != null) {
@@ -208,7 +194,7 @@ public final class TigerTreeCache implements Serializable {
         try {
             oos = new ObjectOutputStream(new FileOutputStream(CACHE_FILE));
             oos.writeObject(TREE_MAP);
-        } catch (Exception e) {
+        } catch (IOException e) {
             ErrorService.error(e);
         } finally {
             if(oos != null) {

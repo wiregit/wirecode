@@ -787,21 +787,10 @@ public class LimeXMLReplyCollection {
                       LOG.debug("read " + ent.getKey() + ", " +ent.getValue());
                   }
                 }
-            } catch (ClassCastException e) {
+            } catch(Throwable t) {
+                LOG.error("Unable to read LimeXMLCollection", t);
                 throw new IOException();
-            } catch (ClassNotFoundException e) {
-                throw new IOException();
-            } catch(ArrayStoreException e) {
-                throw new IOException();
-            } catch(IndexOutOfBoundsException e) {
-                throw new IOException();
-            } catch(NegativeArraySizeException e) {
-                throw new IOException();
-            } catch(IllegalStateException e) {
-                throw new IOException();
-            } catch(SecurityException e) {
-                throw new IOException();
-            }  finally {
+            } finally {
                 if( is != null ) {
                     try {
                         is.close();

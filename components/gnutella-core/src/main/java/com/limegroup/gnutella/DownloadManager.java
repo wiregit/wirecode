@@ -393,29 +393,8 @@ public class DownloadManager implements BandwidthTracker {
             //This doesn't really cause an errors, however.
             buf=(List)in.readObject();
             incompleteFileManager=(IncompleteFileManager)in.readObject();
-        } catch (IOException e) {
-            LOG.debug(e);
-            return false;
-        } catch (ClassCastException e) {
-            LOG.debug(e);
-            return false;
-        } catch (ClassNotFoundException e) {
-            LOG.debug(e);
-            return false;
-        } catch(ArrayStoreException e) {
-            LOG.debug(e);
-            return false;
-        } catch(IndexOutOfBoundsException e) {
-            LOG.debug(e);
-            return false;
-        } catch(NegativeArraySizeException e) {
-            LOG.debug(e);
-            return false;
-        } catch(IllegalStateException e) {
-            LOG.debug(e);
-            return false;
-        } catch(SecurityException e) {
-            LOG.debug(e);
+        } catch(Throwable t) {
+            LOG.error("Unable to read download file", t);
             return false;
         }
         
