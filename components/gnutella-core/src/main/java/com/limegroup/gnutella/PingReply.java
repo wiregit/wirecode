@@ -87,7 +87,23 @@ public class PingReply extends Message implements Serializable {
              int port, byte[] ip, long files, long kbytes,
              boolean isUltrapeer, int dailyUptime) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             dailyUptime>=0 ? newGGEP(dailyUptime) : null);
+             ((dailyUptime>=0) || isUltrapeer)? newGGEP(dailyUptime, isUltrapeer) : null);
+    }
+
+    /**
+     * Wrap a PingReply around stuff snatched from the network.
+     * <p>
+     * Initially this method required that payload.lenghth == 14. But now we
+     * support for big pings and pongs. 
+     *
+     * @exception BadPacketException payload is too small
+     */
+    public PingReply(byte[] guid, byte ttl, byte hops,
+             byte[] payload) throws BadPacketException {
+        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
+        if (payload.length<STANDARD_PAYLOAD_SIZE)
+            throw new BadPacketException();
+        this.payload=payload;
     }
      
     /** Internal constructor used to bind the encoded GGEP payload, avoiding the
@@ -120,34 +136,26 @@ public class PingReply extends Message implements Serializable {
     }
 
     /** Returns the GGEP payload bytes to encode the given uptime */
-    private static byte[] newGGEP(int dailyUptime) {
+    private static byte[] newGGEP(int dailyUptime, boolean udpSupported) {
         try {
             GGEP ggep=new GGEP(true);
-            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+            // one of the following, if not both, if statements will evaluate
+            // to true.
+            if (dailyUptime >= 0)
+                ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+            if (udpSupported) {
+                // the version number is 0.1
+                byte[] vNum = {(byte) 1}; // high nibble is 0, low nibble is 1
+                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+            }
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
         } catch (IOException e) {
             //See above.
-            Assert.that(false, "Couldn't encode uptime");
+            Assert.that(false, "Couldn't encode uptime or udp");
             return null;
         }
-    }
-
-    /**
-     * Wrap a PingReply around stuff snatched from the network.
-     * <p>
-     * Initially this method required that payload.lenghth == 14. But now we
-     * support for big pings and pongs. 
-     *
-     * @exception BadPacketException payload is too small
-     */
-    public PingReply(byte[] guid, byte ttl, byte hops,
-             byte[] payload) throws BadPacketException {
-        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
-        if (payload.length<STANDARD_PAYLOAD_SIZE)
-            throw new BadPacketException();
-        this.payload=payload;
     }
 
     protected void writePayload(OutputStream out) throws IOException {
@@ -201,12 +209,22 @@ public class PingReply extends Message implements Serializable {
     public synchronized int getDailyUptime() throws BadPacketException {
         parseGGEP();
         if (ggep==null)
-            throw new BadPacketException("Missing GGEP blocking");
+            throw new BadPacketException("Missing GGEP block");
         try {
             return ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME);
         } catch (BadGGEPPropertyException e) {
             throw new BadPacketException("Couldn't find uptime extension.");
         }
+    }
+
+
+    /** Returns the average daily uptime in seconds from the GGEP payload.
+     *  @exception BadPacketException if the uptime is not known or corrupt. */
+    public synchronized boolean supportsUnicast() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        return ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
     }
 
     public synchronized boolean hasGGEPExtension() {

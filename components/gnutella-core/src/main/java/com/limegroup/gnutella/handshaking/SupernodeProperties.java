@@ -8,9 +8,9 @@ import com.limegroup.gnutella.*;
 public class SupernodeProperties extends LazyProperties
 {
     
-    public SupernodeProperties(MessageRouter router, String remoteIP)
+    public SupernodeProperties(String remoteIP)
     {
-        super(router, remoteIP);
+        super(remoteIP);
         //set supernode property
         put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
         addCommonProperties(this);

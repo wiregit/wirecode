@@ -11,9 +11,7 @@ import java.io.IOException;
 public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
 {
     
-    ConnectionManager _manager;
-    
-    MessageRouter _router;
+    private ConnectionManager _manager;   
     
     /**
      * Creates a new instance of ClientHandshakeResponder
@@ -24,11 +22,10 @@ public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
      * @param host The host with whom we are handshaking
      */
     public ClientHandshakeResponder(ConnectionManager manager, 
-        MessageRouter router, String host)
+        String host)
     {
         super(manager, host);
         this._manager = manager;
-        this._router = router;
     }
     
     //inherit doc comment
@@ -41,7 +38,7 @@ public class ClientHandshakeResponder extends AuthenticationHandshakeResponder
             return new HandshakeResponse(new Properties());
         } else
         {
-            Properties props=new ClientProperties(_router, getRemoteIP());
+            Properties props=new ClientProperties(getRemoteIP());
             addHostAddresses(props, _manager);
             
             if (_manager.hasClientSupernodeConnection())

@@ -248,8 +248,7 @@ public abstract class AuthenticationHandshakeResponder
         //cookie, then get the information interactively from user
         if(user == null)
         {
-            user = _manager.getCallback()
-            .getUserAuthenticationInfo(_host);
+            user = RouterService.getCallback().getUserAuthenticationInfo(_host);
         }
         
         //return the user information

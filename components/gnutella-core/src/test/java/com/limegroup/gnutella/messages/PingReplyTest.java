@@ -54,11 +54,14 @@ public class PingReplyTest extends TestCase {
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 345882, true);
         assertTrue(pr.isMarked());
-        assertTrue(! pr.hasGGEPExtension());
+        // after added unicast support, all Ultrapeer Pongs have GGEP extensions
+        assertTrue(pr.hasGGEPExtension());
         try {
             pr.getDailyUptime();
             assertTrue(false);
-        } catch (BadPacketException e) { }
+        } 
+        catch (BadPacketException e) { 
+        }
     }
       
     public void testPowerOf2() {
@@ -139,7 +142,7 @@ public class PingReplyTest extends TestCase {
     public void testGGEPEncodeDecode() {
         //Create pong
         PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   0l, 0l, false, 523);        
+                                   0l, 0l, true, 523);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
             pr.write(baos);
@@ -148,23 +151,33 @@ public class PingReplyTest extends TestCase {
         }
 
         //Encode and check raw bytes.
+        //UDP is the last extension, so it is DUPTIME and then UDP.  should take
+        //this into account....
         byte[] bytes=baos.toByteArray(); 
         int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
+        int udpLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
                       +idLength //ID
                       +1   //data length
-                      +2;  //data bytes
+                      +2   //data bytes
+                      +1   //"UDP" extension flags
+                      +udpLength // ID
+                      +1   //data length
+                      +1;  //data bytes
         assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
         int offset=23+14;                              //GGEP offset
         assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
         assertTrue("Got: "+(0xFF&bytes[offset+1]), 
-                   bytes[offset+1]==(byte)(0x80 | idLength)); //extension flags
+                   bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
         assertTrue(bytes[offset+2]==(byte)'D');
         assertTrue(bytes[offset+3]==(byte)'U');
+        assertTrue(bytes[offset+2+idLength+4]==(byte)'G');
+        assertTrue(bytes[offset+2+idLength+5]==(byte)'U');
+        assertTrue(bytes[offset+2+idLength+6]==(byte)'E');
                      //...etc.
-        assertTrue(bytes[bytes.length-2]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1]==(byte)0x02); //big byte of 523
+        assertTrue(bytes[bytes.length-2-(3+udpLength)]==(byte)0x0B); //little byte of 523
+        assertTrue(bytes[bytes.length-1-(3+udpLength)]==(byte)0x02); //big byte of 523
 
 
         //Decode and check contents.
@@ -175,6 +188,7 @@ public class PingReplyTest extends TestCase {
             assertTrue(pong.getPort()==6349);
             assertTrue(pong.hasGGEPExtension());
             assertTrue(pong.getDailyUptime()==523);
+            assertTrue(pong.supportsUnicast()==true);
         } catch (BadPacketException e) {
             fail("Couldn't extract uptime");
         } catch (IOException e) {

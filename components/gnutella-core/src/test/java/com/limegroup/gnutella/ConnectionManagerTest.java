@@ -28,10 +28,9 @@ public class ConnectionManagerTest extends TestCase {
     public void setUp() {
         SettingsManager.instance().setKeepAlive(0);
         SettingsManager.instance().setConnectOnStartup(false);
-        cm=new ConnectionManager(new ActivityCallbackStub(),
-                                 new DummyAuthenticator());
+        cm=new ConnectionManager(new DummyAuthenticator());
         hc=new TestHostCatcher();
-        cm.initialize(new MessageRouterStub(), hc);        
+        cm.initialize();        
     }
 
     public void tearDown() {
@@ -102,7 +101,7 @@ class TestHostCatcher extends HostCatcher {
     volatile int connectFailures=0;
 
     TestHostCatcher() {
-        super(new ActivityCallbackStub());
+        super();
     }
 
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {

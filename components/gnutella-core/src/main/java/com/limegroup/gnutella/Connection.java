@@ -686,7 +686,7 @@ public class Connection {
      *  message is available.  A half-completed message
      *  results in InterruptedIOException.
      */
-    public Message receive() throws IOException, BadPacketException {
+    protected Message receive() throws IOException, BadPacketException {
         //On the Macintosh, sockets *appear* to return the same ping reply
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note

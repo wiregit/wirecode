@@ -5,7 +5,7 @@ import com.limegroup.gnutella.*;
 /** An acceptor that doesn't accept incoming connections. */
 public class AcceptorStub extends Acceptor {
     public AcceptorStub() {
-        super(0, new ActivityCallbackStub());
+        super();
     }
     
     public boolean acceptedIncoming=true;

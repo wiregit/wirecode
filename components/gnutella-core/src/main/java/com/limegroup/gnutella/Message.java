@@ -47,6 +47,17 @@ public abstract class Message
     /** Time this was created.  Not written to network. */
     private long creationTime=System.currentTimeMillis();
 
+	/**
+	 * Constant byte buffer for storing the GUID for incoming messages --
+	 * an easy optimization.
+	 */
+	//private final static byte[] GUID_BUF = new byte[16];
+
+	/**
+	 * Cached reference to <tt>SettingsManager</tt>.
+	 */
+	private static final SettingsManager SETTINGS = SettingsManager.instance();
+   
     /** Rep. invariant */
     protected void repOk() {
         Assert.that(guid.length==16);
@@ -98,7 +109,7 @@ public abstract class Message
      *    </ul>
      */
     public static Message read(InputStream in)
-            throws BadPacketException, IOException {
+		throws BadPacketException, IOException {
         return Message.read(in, new byte[23]);
     }
 
@@ -110,7 +121,7 @@ public abstract class Message
      *  but the contents are not guaranteed to contain any useful data.  
      */
     static Message read(InputStream in, byte[] buf)
-            throws BadPacketException, IOException {
+		throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
         //   exception.
@@ -338,7 +349,7 @@ public abstract class Message
 
     /** Returns the ip (given in BIG-endian) format as standard
      *  dotted-decimal, e.g., 192.168.0.1<p> */
-     static final String ip2string(byte[] ip) {
+     public static final String ip2string(byte[] ip) {
          return ip2string(ip, 0);
      }
          

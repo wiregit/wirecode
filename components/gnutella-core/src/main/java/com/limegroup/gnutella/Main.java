@@ -11,18 +11,10 @@ import com.limegroup.gnutella.security.User;
  */
 public class Main implements ActivityCallback {
     public static void main(String args[]) {
-		//Start thread to accept connections.  Optional first arg is the
-		//listening port number.
-		RouterService service;
 		ActivityCallback callback = new Main();
-    
-		FileManager fm = new FileManager();
-		service=new RouterService(callback,
-								  (new StandardMessageRouter(callback,fm)),fm,
-								  new DummyAuthenticator());
-    
-		service.initialize();
-		service.postGuiInit();    
+		//RouterService.setCallback(callback);
+		RouterService service = new RouterService(callback);
+		service.start();    
 
 
 		System.out.println("For a command list type help.");

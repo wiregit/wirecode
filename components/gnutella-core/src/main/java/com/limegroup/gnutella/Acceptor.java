@@ -8,12 +8,15 @@ import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
  * handle those connections.  Currently supports Gnutella messaging, HTTP, and
- * chat connections over TCP; more may be supported in the
- * future.<p> 
+ * chat connections over TCP; more may be supported in the future.<p> 
+ * This class has a special relationship with UDPService and should really be
+ * the only class that intializes it.  See setListeningPort() for more
+ * info.<p>
  */
 public class Acceptor extends Thread {
     /**
@@ -24,7 +27,7 @@ public class Acceptor extends Thread {
      * when done.
      */
     private volatile ServerSocket _socket=null;
-    private int _port=0;
+    private volatile int _port=-1;
     private Object _socketLock=new Object();
 
     /**
@@ -46,16 +49,10 @@ public class Acceptor extends Thread {
      *
      * LOCKING: obtain Acceptor.class' lock 
      */
-    private static byte[] _address=new byte[4];
+    private static byte[] _address = new byte[4];
 
     private IPFilter _filter=new IPFilter();;
     
-    private ConnectionManager _connectionManager;
-    private DownloadManager _downloadManager;
-    private UploadManager _uploadManager;
-    private MessageRouter _router;
-    private ActivityCallback _callback;
-
 	private volatile boolean _acceptedIncoming = false;
 
 
@@ -66,44 +63,21 @@ public class Acceptor extends Thread {
 	 *  to get around JDK bug #4073539, as well as to try to handle the case 
 	 *  of a computer whose IP address keeps changing.
 	 */
-	public static synchronized void setAddress(byte[] addr) {
+	public static synchronized void setAddress(byte[] address) {
         //Ignore localhost.
-        if (addr[0]==(byte)127)
+        if (address[0]==(byte)127)
             return;
 
-	    _address = addr; 
+		_address = address;
 	}
 
-    
-
     /**
-     * Creates an acceptor that tries to listen to incoming connections
-     * on the given port.  If this is a bad port, the port will be
-     * changed when run is called and SettingsManager will be updated.
-     * If that fails, ActivityCallback.error will be called.  A port
-     * of 0 means do not accept incoming connections.
+     * Launches the port monitoring thread.
      */
-    public Acceptor(int port, ActivityCallback callback) {
-        _port = port;
-        _callback = callback;
-    }
-
-    /**
-     * Links the HostCatcher up with the other back end pieces and launches
-     * the port monitoring thread
-     */
-    public void initialize(ConnectionManager connectionManager,
-                           MessageRouter router,
-                           DownloadManager downloadManager,
-                           UploadManager uploadManager) {
-        _connectionManager = connectionManager;
-        _router = router;
-        _downloadManager = downloadManager;
-        _uploadManager = uploadManager;
-		
+	public void initialize() { 
         setDaemon(true);
         start();
-    }
+	}
 
     /**
      * Returns this' address to use for ping replies, query replies,
@@ -131,13 +105,15 @@ public class Acceptor extends Thread {
     /**
      * @requires only one thread is calling this method at a time
      * @modifies this
-     * @effects sets the port on which the ConnectionManager is listening.
-     *  If that fails, this is <i>not</i> modified and IOException is thrown.
-     *  If port==0, tells this to stop listening to incoming connections.
-     *  This is properly synchronized and can be called even while run() is
-     *  being called.
+     * @effects sets the port on which the ConnectionManager AND the UDPService
+     *  is listening.  If either service CANNOT bind TCP/UDP to the port,
+     *  <i>neither<i> service is modified and a IOException is throw.
+     *  If port==0, tells this to stop listening for incoming GNUTELLA TCP AND
+     *  UDP connections/messages.  This is properly synchronized and can be 
+     *  called even while run() is being called.  
      */
     public void setListeningPort(int port) throws IOException {
+        debug("Acceptor.setListeningPort(): entered.");
         //1. Special case: if unchanged, do nothing.
         if (_socket!=null && _port==port)
             return;
@@ -148,6 +124,7 @@ public class Acceptor extends Thread {
         //while holding the lock.  Also note that port
         //will not have changed before we grab the lock.
         else if (port==0) {
+            debug("Acceptor.setListeningPort(): shutting off service.");
             //Close old socket (if non-null)
             if (_socket!=null) {
                 try {
@@ -159,17 +136,43 @@ public class Acceptor extends Thread {
                 _port=0;
                 _socketLock.notify();
             }
+
+            //Shut off UDPService also!
+            UDPService.instance().setListeningSocket(null);
+
+            debug("Acceptor.setListeningPort(): service OFF.");
             return;
         }
         //3. Normal case.  See note about locking above.
+        /* Since we want the UDPService to bind to the same port as the 
+         * Acceptor, we need to be careful about this case.  Essentially, we 
+         * need to confirm that the port can be bound by BOTH UDP and TCP 
+         * before actually acceping the port as valid.  To effect this change,
+         * we first attempt to bind the port for UDP traffic.  If that fails, a
+         * IOException will be thrown.  If we successfully UDP bind the port 
+         * we keep that bound DatagramSocket around and try to bind the port to 
+         * TCP.  If that fails, a IOException is thrown and the valid 
+         * DatagramSocket is closed.  If that succeeds, we then 'commit' the 
+         * operation, setting our new TCP socket and UDP sockets.
+         */
         else {
+            
+            debug("Acceptor.setListeningPort(): changing port to " + port);
+
+            DatagramSocket udpServiceSocket = 
+                UDPService.instance().newListeningSocket(port);
+
+            debug("Acceptor.setListeningPort(): UDP Service is ready.");
+        
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
                 newSocket=new ServerSocket(port);
             } catch (IOException e) {
+                udpServiceSocket.close();
                 throw e;
             } catch (IllegalArgumentException e) {
+                udpServiceSocket.close();
                 throw new IOException();
             }
             //b) Close old socket (if non-null)
@@ -184,6 +187,13 @@ public class Acceptor extends Thread {
                 _port=port;
                 _socketLock.notify();
             }
+
+            debug("Acceptor.setListeningPort(): I am ready.");
+
+            // Commit UDPService's new socket
+            UDPService.instance().setListeningSocket(udpServiceSocket);
+
+            debug("Acceptor.setListeningPort(): listening UDP/TCP on " + _port);
             return;
         }
     }
@@ -208,6 +218,9 @@ public class Acceptor extends Thread {
      *   changed accordingly.
      */
     public void run() {
+		int tempPort = SettingsManager.instance().getPort();
+		ActivityCallback callback = RouterService.getCallback();
+
         //0. Get local address.  This must be done here--not in the static
         //   initializer--because it can block under certain conditions.
         //   See the notes for _address.
@@ -221,22 +234,24 @@ public class Acceptor extends Thread {
         // incoming connections.  If there are problems, we can continue
         // onward.
         //1. Try suggested port.
-        int oldPort = _port;
+		int oldPort = tempPort;
         try {
-            setListeningPort(_port);
+			setListeningPort(tempPort);
+			_port = tempPort;
         } catch (IOException e) {
             //2. Try 10 different ports
             for (int i=0; i<10; i++) {
-                _port=i+6346;
+				tempPort = i+6346;
                 try {
-                    setListeningPort(_port);
+                    setListeningPort(tempPort);
+					_port = tempPort;
                     break;
                 } catch (IOException e2) { }
             }
 
             // If we still don't have a socket, there's an error
             if(_socket == null)
-                _callback.error(ActivityCallback.PORT_ERROR);
+                callback.error(ActivityCallback.PORT_ERROR);
         }
 
         if (_port!=oldPort) {
@@ -286,11 +301,11 @@ public class Acceptor extends Thread {
                 new ConnectionDispatchRunner(client);
 
             } catch (SecurityException e) {
-                _callback.error(ActivityCallback.SOCKET_ERROR);
+                callback.error(ActivityCallback.SOCKET_ERROR);
                 return;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }
@@ -314,6 +329,10 @@ public class Acceptor extends Thread {
         }
 
         public void run() {
+			ActivityCallback callback = RouterService.getCallback();
+			ConnectionManager cm      = RouterService.getConnectionManager();
+			UploadManager um          = RouterService.getUploadManager();
+			DownloadManager dm        = RouterService.getDownloadManager();
             try {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
@@ -339,21 +358,23 @@ public class Acceptor extends Thread {
 
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
-                    _connectionManager.acceptConnection(_socket);
+                    cm.acceptConnection(_socket);
                 }
                 else if (useDefaultConnect && word.equals("LIMEWIRE")) {
-                    _connectionManager.acceptConnection(_socket);
+                    cm.acceptConnection(_socket);
                 }
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
-					_uploadManager.acceptUpload(HTTPRequestMethod.GET, _socket);
+					HTTPStat.HTTP_GET_REQUESTS.incrementStat();
+					um.acceptUpload(HTTPRequestMethod.GET, _socket);
                 }
 				else if (word.equals("HEAD")) {
-					_uploadManager.acceptUpload(HTTPRequestMethod.HEAD, _socket);
+					HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
+					um.acceptUpload(HTTPRequestMethod.HEAD, _socket);
 				}
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
-                    _downloadManager.acceptDownload(_socket);
+                    dm.acceptDownload(_socket);
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);
@@ -366,8 +387,8 @@ public class Acceptor extends Thread {
             } catch (IOException e) {
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
-            } catch(Exception e) {
-				_callback.error(ActivityCallback.INTERNAL_ERROR, e);
+            } catch(Throwable e) {
+				callback.error(ActivityCallback.INTERNAL_ERROR, e);
 			}
         }
     }
@@ -388,6 +409,13 @@ public class Acceptor extends Thread {
      */
     public boolean isBannedIP(String ip) {        
         return !_filter.allow(ip);
+    }
+
+    
+    private static final boolean debug = false;
+    private static void debug(String out) {
+        if (debug)
+            System.out.println(out);
     }
 
 

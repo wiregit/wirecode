@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.http;
 
 import com.limegroup.gnutella.http.*;
 import junit.framework.*;

@@ -9,6 +9,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -54,8 +55,8 @@ public class ManagedConnection
      *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
 
-    private MessageRouter _router;
-    private ConnectionManager _manager;
+    private final MessageRouter _router;
+    private final ConnectionManager _manager;
 
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
@@ -290,15 +291,15 @@ public class ManagedConnection
               isRouter ? 
                   null :
                   (manager.isSupernode() ? 
-                      (Properties)(new SupernodeProperties(router, host)) : 
-                      (Properties)(new ClientProperties(router, host))),
+                      (Properties)(new SupernodeProperties(host)) : 
+                      (Properties)(new ClientProperties(host))),
               isRouter ? 
                   null : 
                   (manager.isSupernode() ?
                       (HandshakeResponder)
-                      (new SupernodeHandshakeResponder(manager, router, host)) :
+                      (new SupernodeHandshakeResponder(manager, host)) :
                       (HandshakeResponder)
-                      (new ClientHandshakeResponder(manager, router, host))),
+                      (new ClientHandshakeResponder(manager, host))),
               !isRouter);
         
         _router = router;
@@ -320,9 +321,9 @@ public class ManagedConnection
         super(socket, 
             manager.isSupernode() ? 
             (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
-                router, socket.getInetAddress().getHostAddress())) : 
+                socket.getInetAddress().getHostAddress())) : 
             (HandshakeResponder)(new ClientHandshakeResponder(manager,
-                router, socket.getInetAddress().getHostAddress())));
+                socket.getInetAddress().getHostAddress())));
         _router = router;
         _manager = manager;
     }
@@ -383,7 +384,7 @@ public class ManagedConnection
             throw e;
         }
         _numMessagesReceived++;
-        _router.countMessage();
+		
         return m;
     }
 
@@ -403,7 +404,6 @@ public class ManagedConnection
             throw e;
         }
         _numMessagesReceived++;
-        _router.countMessage();
         return m;
     }
 
@@ -430,7 +430,6 @@ public class ManagedConnection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-        _router.countMessage();
         int priority=calculatePriority(m);        
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
@@ -548,6 +547,8 @@ public class ManagedConnection
                         if (m==null)
                             break;
                     }
+
+					// TODO:: THIS SEND IS NOT CURRENTLY RECORDED IN STATISTICS
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
@@ -645,6 +646,8 @@ public class ManagedConnection
                     PingReply pr = new PingReply(m.getGUID(),(byte)1,
                         bestEndPoint.getPort(),
                         bestEndPoint.getHostBytes(), 0, 0);
+					
+					SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
                     // the ttl is 1; and for now the number of files
                     // and kbytes is set to 0 until chris stores more
                     // state in the hostcatcher
@@ -732,7 +735,8 @@ public class ManagedConnection
             
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
-            
+
+            SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
             //send the message
             super.send(pr);
         }
@@ -758,8 +762,7 @@ public class ManagedConnection
      *         or route messages are silently swallowed, allowing the message
      *         loop to continue.
      */
-    void loopForMessages()
-            throws IOException {
+    void loopForMessages() throws IOException {
         while (true) {
             Message m=null;
             try {
@@ -774,29 +777,13 @@ public class ManagedConnection
 
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
-                _router.countFilteredMessage();
+				ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
                 _numReceivedMessagesDropped++;
                 continue;
             }
 
             //call MessageRouter to handle and process the message
-            _router.handleMessage(m, this);
-            
-//            // Increment hops and decrease TTL
-//            m.hop();
-//
-//            if(m instanceof PingRequest)
-//                _router.handlePingRequestPossibleDuplicate(
-//                    (PingRequest)m, this);
-//            else if (m instanceof PingReply)
-//                _router.handlePingReply((PingReply)m, this);
-//            else if (m instanceof QueryRequest)
-//                _router.handleQueryRequestPossibleDuplicate(
-//                    (QueryRequest)m, this);
-//            else if (m instanceof QueryReply)
-//                _router.handleQueryReply((QueryReply)m, this);
-//            else if (m instanceof PushRequest)
-//                _router.handlePushRequest((PushRequest)m, this);
+            _router.handleMessage(m, this);            
         }
     }
 
@@ -810,7 +797,7 @@ public class ManagedConnection
      * connection has no routing path.
      */
     public void countDroppedMessage() {
-        _numReceivedMessagesDropped++;
+		_numReceivedMessagesDropped++;
     }
 
     /**
@@ -905,7 +892,8 @@ public class ManagedConnection
      * by null.
      */
     public void handlePingReply(PingReply pingReply,
-                                ManagedConnection receivingConnection) {
+                                ReplyHandler receivingConnection) {
+		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pingReply);
         send(pingReply);
     }
 
@@ -916,7 +904,8 @@ public class ManagedConnection
      * by null.
      */
     public void handleQueryReply(QueryReply queryReply,
-                                 ManagedConnection receivingConnection) {
+                                 ReplyHandler receivingConnection) {
+		SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(queryReply);
         send(queryReply);
     }
 
@@ -927,7 +916,8 @@ public class ManagedConnection
      * by null.
      */
     public void handlePushRequest(PushRequest pushRequest,
-                                  ManagedConnection receivingConnection) {
+                                  ReplyHandler receivingConnection) {
+		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(pushRequest);
         send(pushRequest);
     }
 
@@ -1177,10 +1167,10 @@ public class ManagedConnection
     }
 
     /** Returns true iff the connection is a supernode and I am a leaf, i.e., if
-     *  I wrote "Supernode: false", this connection wrote "Supernode: true" (not
-     *  necessarily in that order).  <b>Does NOT require that QRP is enabled</b>
-     *  between the two; the supernode could be using reflector indexing, for
-     *  example. */
+     *  I wrote "X-Ultrapeer: false", this connection wrote "X-Ultrapeer: true" 
+	 *  (not necessarily in that order).  <b>Does NOT require that QRP is 
+	 *  enabled</b> between the two; the supernode could be using reflector 
+	 *  indexing, for example. */
     public boolean isClientSupernodeConnection() {
         if(_isClientSupernodeConnection == null) {
             _isClientSupernodeConnection = 
@@ -1203,6 +1193,40 @@ public class ManagedConnection
             return !Boolean.valueOf(value).booleanValue();
     }
 
+	/**
+	 * Returns whether or not this connection is to a client supporting
+	 * GUESS.
+	 *
+	 * @return <tt>true</tt> if the node on the other end of this 
+	 *  connection supports GUESS, <tt>false</tt> otherwise
+	 */
+	public boolean isGUESSUltrapeer() {
+		int version = getGUESSVersion();
+		if(version == -1) return false;
+		else if(version < 20 && version > 0) return true;
+		return false;
+	}
+
+	/**
+	 * Returns the version of the GUESS search scheme supported by the node
+	 * at the other end of the connection.  This returns the version in
+	 * whole numbers.  So, if the supported GUESS version is 0.1, this 
+	 * will return 1.  If the other client has not sent an X-Guess header
+	 * this returns -1.
+	 *
+	 * @return the version of GUESS supported, reported as a whole number,
+	 *  or -1 if GUESS is not supported
+	 */
+	public int getGUESSVersion() {
+		String value = super.getProperty(ConnectionHandshakeHeaders.X_GUESS);
+		if(value == null) return -1;
+		else {
+			float version = Float.parseFloat(value);
+			version *= 10;
+			return (int)version;
+		}
+	}
+
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
     public boolean isTempConnection() {
@@ -1217,8 +1241,8 @@ public class ManagedConnection
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
-     *  false, and <b>both support query routing</b>. */
+     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
+	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
         if(_isSupernodeClientConnection == null) {
             _isSupernodeClientConnection = 
@@ -1228,8 +1252,8 @@ public class ManagedConnection
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
-     *  false, and <b>both support query routing</b>. */
+     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
+	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
         if (! isClientConnection())

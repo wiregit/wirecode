@@ -122,9 +122,9 @@ public class FileManager {
      *  callback to be "callback", and notifies "callback" of all file loads.
      *      @modifies this
      *      @see loadSettings */
-    public void initialize(ActivityCallback callback) {
-        this._callback=callback;
-        loadSettings(false);
+    public void initialize() {
+		this._callback = RouterService.getCallback();
+		loadSettings(false);
     }
 
     ////////////////////////////// Accessors ///////////////////////////////

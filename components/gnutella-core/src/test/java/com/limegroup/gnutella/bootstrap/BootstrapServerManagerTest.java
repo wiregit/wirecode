@@ -354,7 +354,7 @@ class TestHostCatcher extends HostCatcher {
     List /* of Endpoint */ list=new ArrayList(20);
 
     public TestHostCatcher() {
-        super(new ActivityCallbackStub());
+        super();
     }
 
     public boolean add(Endpoint e, boolean forceHighPriority) {

@@ -94,10 +94,19 @@ public class HostCatcher {
     /** The GWebCache bootstrap system. */
     private BootstrapServerManager gWebCache=new BootstrapServerManager(this);
     
+    /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
+     * router.limewire.com.  We try these hosts serially (starting with the
+     * head) until we get some good endpoints, e.g. size(GOOD_SIZE)>0.  */
+    private LinkedList /* of Endpoint */ bootstrapHosts=new LinkedList();
+    /** The bootstrap host we're trying to connect from, or null if none.
+     * Prevents us from connecting to more than one bootstrap host at a time.
+     * This value is set when removing entries from bootstrapHosts.  It's
+     * cleared in doneWithEndpoint(). */
+    private Endpoint bootstrapHostInProgress=null;
 
-    private Acceptor acceptor;
-    private ConnectionManager manager;
-    private ActivityCallback callback;
+	/**
+	 * Constant for the <tt>SettingsManager</tt>.
+	 */
     private SettingsManager settings=SettingsManager.instance();
 
     /**
@@ -108,26 +117,10 @@ public class HostCatcher {
      */
     private boolean alwaysNotifyKnownHost=false;
 
-
-    /**
-     * Creates an empty host catcher.  Must call initialize before using.
-     */
-    public HostCatcher(ActivityCallback callback) {
-        this.callback=callback;
-    }
-
-    /**
-     * Links the HostCatcher up with the other back end pieces
-     * @param acceptor used to get the list of banned addresses, and to
-     *  find out my address of GWebCache purposes
-     * @param manager used to find out if I'm an ultrapeer for GWebCache
-     * @param rs used to schedule GWebCache updates
-     */
-    public void initialize(Acceptor acceptor, 
-                           ConnectionManager manager, 
-                           RouterService rs) {
-        initialize(acceptor, manager, rs, null);
-    }
+	/**
+	 * Constant for the <tt>QueryUnicaster</tt> instance.
+	 */
+	private final QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
@@ -137,12 +130,8 @@ public class HostCatcher {
      * empty.  The file is expected to contain a sequence of lines in the format
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
-    public void initialize(final Acceptor acceptor, 
-                           final ConnectionManager manager,
-                           final RouterService rs,
-                           final String filename) {
-        this.acceptor = acceptor;
-        this.manager = manager;
+    public void initialize() {
+		String filename = settings.getHostList();
 
         //Read gnutella.net
         try {
@@ -158,17 +147,18 @@ public class HostCatcher {
         //Gnucleus says otherwise.
         Runnable updater=new Runnable() {
             public void run() {
-                if (acceptor.acceptedIncoming() && manager.isSupernode()) {
-                    Endpoint e=new Endpoint(acceptor.getAddress(),
-                                            acceptor.getPort());
+                if (RouterService.acceptedIncomingConnection() && 
+					RouterService.isSupernode()) {
+                    Endpoint e=new Endpoint(RouterService.getAddress(),
+                                            RouterService.getPort());
                     //This spawn another thread, so blocking is not an issue.
                     gWebCache.sendUpdatesAsync(e);
                 }
             }
         };
-        rs.schedule(updater, 
-                    BootstrapServerManager.UPDATE_DELAY_MSEC, 
-                    BootstrapServerManager.UPDATE_DELAY_MSEC);
+        RouterService.schedule(updater, 
+							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
+							   BootstrapServerManager.UPDATE_DELAY_MSEC);
     }
 
 
@@ -246,21 +236,36 @@ public class HostCatcher {
      *  the pong.
      * @return true iff pr was actually added 
      */
-    public boolean add(PingReply pr, ManagedConnection receivingConnection) {
+    public boolean add(PingReply pr, ReplyHandler receivingConnection) {
         //Convert to endpoint
-        ExtendedEndpoint e;
+        ExtendedEndpoint endpoint;
+        boolean supportsUnicast = false;
         try {
-            e=new ExtendedEndpoint(pr.getIP(), pr.getPort(), pr.getDailyUptime());
+			supportsUnicast = pr.supportsUnicast();
+            endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
+											pr.getDailyUptime());
         } catch (BadPacketException bpe) {
-            e=new ExtendedEndpoint(pr.getIP(), pr.getPort());
+            endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort());
+        }
+
+        if(supportsUnicast) {
+            try {
+                UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
+                                             pr.getPort());
+            } catch(UnknownHostException e) {
+                // nothing we can do if the host is not recognized -- this
+                // should never happen for raw IP addresses, as there is
+                // no DNS lookup anyway after Java 1.1 (1.1.8 does NOT
+                // do a DNS lookup).
+            }
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
         //supernode.
         if (pr.isMarked())
-            return add(e, GOOD_PRIORITY);
+            return add(endpoint, GOOD_PRIORITY);
         else
-            return add(e, priority(e));
+            return add(endpoint, priority(endpoint));
     }
 
     /**
@@ -308,7 +313,7 @@ public class HostCatcher {
             return false;
 
         //Skip if this host is banned.
-        if (acceptor.isBannedIP(e.getHostname()))
+        if (RouterService.getAcceptor().isBannedIP(e.getHostname()))
             return false;
 
         //Skip if this is the router.
@@ -352,8 +357,9 @@ public class HostCatcher {
         //view and use.  The second situation occurs the majority of times and
         //only in special cases such as a SimplePongCacheServer would the first 
         //situation occur.
-        if (alwaysNotifyKnownHost || notifyGUI) 
-            callback.knownHost(e);
+        if (alwaysNotifyKnownHost || notifyGUI) {
+            RouterService.getCallback().knownHost(e);
+		}
         repOk();
         return ret;
     }
@@ -614,11 +620,11 @@ public class HostCatcher {
         }
 
         if (cIP[0]==(byte)127) {
-            return port == acceptor.getPort();
+            return port == RouterService.getPort();
         } else {
-            byte[] managerIP = acceptor.getAddress();
+            byte[] managerIP = RouterService.getAddress();
             return (Arrays.equals(cIP, managerIP) &&
-                    (port==acceptor.getPort()));
+                    (port==RouterService.getPort()));
         }
     }
 

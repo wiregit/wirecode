@@ -246,6 +246,7 @@ public class ExtendedEndpointTest extends TestCase {
         assertTrue(comparator.compare(bad, good)<0);
         assertTrue(comparator.compare(good, bad)>0); 
     }
+
 }
 
 /** Fakes the system time. */

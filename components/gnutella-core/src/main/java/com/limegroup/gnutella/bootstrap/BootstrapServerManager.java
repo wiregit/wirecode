@@ -268,7 +268,7 @@ public class BootstrapServerManager {
                     requestBlocking(request);
                 } catch (Throwable e) {
                     //Internal error!  Display to GUI for debugging.
-                    RouterService.instance().getActivityCallback().error(e);
+                    RouterService.getCallback().error(e);
                 } finally {
                     request.done();
                 }

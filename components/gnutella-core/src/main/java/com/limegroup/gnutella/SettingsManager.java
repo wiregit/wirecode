@@ -276,6 +276,7 @@ public final class SettingsManager {
 	public static final String DEFAULT_CLASSPATH = DEFAULT_JAR_NAME;
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
+	private final boolean DEFAULT_GUESS_ENABLED       = false;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
     private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
@@ -295,6 +296,7 @@ public final class SettingsManager {
 
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
+
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
 
     //authentication settings
@@ -477,6 +479,11 @@ public final class SettingsManager {
 	 * Constant key for whether or not chat is enabled.
 	 */
 	private final String CHAT_ENABLED = "CHAT_ENABLED";
+
+	/**
+	 * Constant key for whether or not GUESS is enabled.
+	 */
+	private final String GUESS_ENABLED = "GUESS_ENABLED";
 
 	/**
 	 * Constant key for whether or not the internal player is enabled.
@@ -909,6 +916,16 @@ public final class SettingsManager {
                         break;
                     setChatEnabled(bs);
 				}
+				else if(key.equals(GUESS_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setGuessEnabled(bs);
+				}
 				else if(key.equals(PLAYER_ENABLED)) {
 					boolean bs;
                     if (p.equals("true"))
@@ -1311,6 +1328,7 @@ public final class SettingsManager {
 		setAppHeight(DEFAULT_APP_HEIGHT);
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
+        setGuessEnabled(DEFAULT_GUESS_ENABLED);
 		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
 		setBrowser(getDefaultBrowser());
 
@@ -1457,6 +1475,9 @@ public final class SettingsManager {
 
 	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
+
+	/** Returns true if GUESS is enabled */
+	public boolean getGuessEnabled() {return getBooleanValue(GUESS_ENABLED);}
 
 	/** Returns true if the player is enabled */
 	public boolean getPlayerEnabled() {
@@ -2707,6 +2728,16 @@ public final class SettingsManager {
 		_chatEnabled = chatEnabled;
 		String s = String.valueOf(chatEnabled);
 		PROPS.put(CHAT_ENABLED, s);
+	}
+
+
+	/**
+	 * Sets whether or not guess should be enabled.
+	 *
+	 * @param guessEnabled specified whether or not GUESS is enabled
+	 */
+	public void setGuessEnabled(boolean guessEnabled) {
+		setBooleanValue(GUESS_ENABLED, guessEnabled);
 	}
 
 

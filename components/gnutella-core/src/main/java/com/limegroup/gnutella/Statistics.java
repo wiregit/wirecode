@@ -7,10 +7,175 @@ package com.limegroup.gnutella;
  */
 public class Statistics {
     private static Statistics _instance=new Statistics();
+
+	/**
+	 * Variable for the total number of pings received over TCP.
+	 */
+	private static int _totalTCPPingRequests = 0;
+
+	/**
+	 * Variable for the total number of pongs received over TCP.
+	 */
+	private static int _totalTCPPingReplies = 0;
+
+	/**
+	 * Variable for the total number of queries received over TCP.
+	 */
+	private static int _totalTCPQueryRequests = 0;
+
+	/**
+	 * Variable for the total number of replies received over TCP.
+	 */
+	private static int _totalTCPQueryReplies = 0;
+
+	/**
+	 * Variable for the total number of push requests received over TCP.
+	 */
+	private static int _totalTCPPushRequests = 0;
+
+	/**
+	 * Variable for the total number of route table messages received 
+	 * over TCP.
+	 */
+	private static int _totalTCPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the current number of pings received over TCP.
+	 */
+	private static int _currentTCPPingRequests = 0;
+
+	/**
+	 * Variable for the current number of pongs received over TCP.
+	 */
+	private static int _currentTCPPingReplies = 0;
+
+	/**
+	 * Variable for the current number of queries received over TCP.
+	 */
+	private static int _currentTCPQueryRequests = 0;
+
+	/**
+	 * Variable for the current number of replies received over TCP.
+	 */
+	private static int _currentTCPQueryReplies = 0;
+
+	/**
+	 * Variable for the current number of push requests received over TCP.
+	 */
+	private static int _currentTCPPushRequests = 0;
+
+	/**
+	 * Variable for the current number of route table messages received 
+	 * over TCP.
+	 */
+	private static int _currentTCPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the current number of messages filtered over TCP.
+	 */
+	private static int _currentFilteredTCPMessages = 0;
+
+	/**
+	 * Variable for the total number of messages received over TCP
+	 * that have been filtered.
+	 */
+	private static int _totalFilteredTCPMessages = 0;
+
+	/**
+	 * Variable for the total number of TCP messages received.
+	 */
+	private static long _totalTCPMessages = 0;
+
+	/**
+	 * Variable for the total number of pings received over UDP.
+	 */
+	private static int _totalUDPPingRequests = 0;
+
+	/**
+	 * Variable for the total number of pongs received over UDP.
+	 */
+	private static int _totalUDPPingReplies = 0;
+
+	/**
+	 * Variable for the total number of queries received over UDP.
+	 */
+	private static int _totalUDPQueryRequests = 0;
+
+	/**
+	 * Variable for the total number of replies received over UDP.
+	 */
+	private static int _totalUDPQueryReplies = 0;
+
+	/**
+	 * Variable for the total number of push requests received over UDP.
+	 */
+	private static int _totalUDPPushRequests = 0;
+
+	/**
+	 * Variable for the total number of route table messages received 
+	 * over UDP.
+	 */
+	private static int _totalUDPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the total number of messages received over UDP
+	 * that have been filtered.
+	 */
+	private static int _totalFilteredUDPMessages = 0;
+
+	/**
+	 * Variable for the current number of pings received over UDP.
+	 */
+	private static int _currentUDPPingRequests = 0;
+
+	/**
+	 * Variable for the current number of pongs received over UDP.
+	 */
+	private static int _currentUDPPingReplies = 0;
+
+	/**
+	 * Variable for the current number of queries received over UDP.
+	 */
+	private static int _currentUDPQueryRequests = 0;
+
+	/**
+	 * Variable for the current number of replies received over UDP.
+	 */
+	private static int _currentUDPQueryReplies = 0;
+
+	/**
+	 * Variable for the current number of push requests received over UDP.
+	 */
+	private static int _currentUDPPushRequests = 0;
+
+	/**
+	 * Variable for the current number of route table messages received 
+	 * over UDP.
+	 */
+	private static int _currentUDPRouteTableMessages = 0;
+
+	/**
+	 * Variable for the current number of messages filtered over UDP.
+	 */
+	private static int _currentFilteredUDPMessages = 0;
+
+	/**
+	 * Variable for the total number of UDP messages received.
+	 */
+	private static long _totalUDPMessages = 0;
     
+	/**
+	 * Variable for the total number of messages received.
+	 */
+	private static long _totalMessages = 0;
+
+	/**
+	 * Variable for the total number of routing errors.
+	 */
+	private static int _totalRouteErrors = 0;
+
     /** "PROTECTED" FOR TESTING PURPOSES ONLY! */
-    protected Statistics() {
-    }
+    protected Statistics() {}
     
     /** Returns the single Statistics instance. */
     public static Statistics instance() {
@@ -111,4 +276,6 @@ public class Statistics {
     protected long now() {
         return System.currentTimeMillis();
     }
+
+
 }

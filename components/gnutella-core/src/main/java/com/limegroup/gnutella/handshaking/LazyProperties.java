@@ -7,16 +7,11 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class LazyProperties extends Properties
 {
     
-    private MessageRouter router;
-    
-    protected LazyProperties(MessageRouter router, String remoteIP)
+    protected LazyProperties(String remoteIP)
     {
-        this.router=router;
-        if (router!=null)
-        {
-            put(ConnectionHandshakeHeaders.LISTEN_IP, "");
-            //just temporary!
-        }
+		put(ConnectionHandshakeHeaders.LISTEN_IP, "");
+		//just temporary!
+
         if (remoteIP!=null)
         {
             put(ConnectionHandshakeHeaders.REMOTE_IP, remoteIP);
@@ -25,10 +20,10 @@ public class LazyProperties extends Properties
     
     public String getProperty(String key, String defaultValue)
     {
-        if (router!=null && key.equals(
-        ConnectionHandshakeHeaders.LISTEN_IP))
+        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP))
         {
-            Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+            Endpoint e=new Endpoint(RouterService.getAddress(), 
+									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
         } else
         {
@@ -38,10 +33,10 @@ public class LazyProperties extends Properties
     
     public String getProperty(String key)
     {
-        if (router!=null && key.equals(
-        ConnectionHandshakeHeaders.LISTEN_IP))
+        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP))
         {
-            Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+            Endpoint e=new Endpoint(RouterService.getAddress(), 
+									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
         } else
         {
@@ -52,12 +47,11 @@ public class LazyProperties extends Properties
     /** Sets the common properties in props, like Query-Routing and
      *  User-Agent.*/
     protected void addCommonProperties(Properties props) {
-        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING,
-                          "0.1");
+        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
         props.put(ConnectionHandshakeHeaders.USER_AGENT,
-                          CommonUtils.getVendor());       
-        props.put(ConnectionHandshakeHeaders.GGEP, 
-                          "0.5");
+				  CommonUtils.getHttpServer());       
+        props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
+		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
     }
     
 }

@@ -1,15 +1,15 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.net.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 
-public class StandardMessageRouter
-    extends MessageRouter
+public class StandardMessageRouter extends MessageRouter
 {
     private ActivityCallback _callback;
     private FileManager _fileManager;
-    private DownloadManager _downloader;
 
     public StandardMessageRouter(ActivityCallback callback, FileManager fm)
     {
@@ -21,7 +21,7 @@ public class StandardMessageRouter
      * Override of handleQueryRequest to send query strings to the callback.
      */
     protected void handleQueryRequest(QueryRequest queryRequest,
-                                      ManagedConnection receivingConnection)
+                                      ReplyHandler receivingConnection)
     {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
@@ -40,9 +40,7 @@ public class StandardMessageRouter
      * can currently accept incoming connections or the hops + ttl <= 2 (to allow
      * for crawler pings).
      */
-    protected void respondToPingRequest(PingRequest pingRequest,
-                                        Acceptor acceptor)
-    {
+    protected void respondToPingRequest(PingRequest pingRequest) {
         //If this wasn't a handshake or crawler ping, check if we can accept
         //incoming connection for old-style unrouted connections, ultrapeers, or
         //leaves.  TODO: does this mean leaves always respond to pings?
@@ -66,19 +64,19 @@ public class StandardMessageRouter
         if ( (hops+ttl) <=2)
             newTTL = 1;
         
-        int num_files = _fileManager.getNumFiles();
-        int kilobytes = _fileManager.getSize()/1024;
+        int num_files = RouterService.getNumSharedFiles();
+        int kilobytes = RouterService.getSharedFileSize()/1024;
 
         //We mark our ping replies if currently in the supernode state.
-        boolean markPong=_manager.isSupernode();
+        boolean markPong=RouterService.isSupernode();
         //Daily average uptime.  If too slow, use FRACTIONAL_UPTIME property.
         //This results in a GGEP extension, which will be stripped before
         //sending it to older clients.
         int dailyUptime=Statistics.instance().calculateDailyUptime();
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
-                                            acceptor.getPort(),
-                                            acceptor.getAddress(),
+                                            RouterService.getPort(),
+                                            RouterService.getAddress(),
                                             num_files,
                                             kilobytes,
                                             markPong,
@@ -90,6 +88,35 @@ public class StandardMessageRouter
         }
         catch(IOException e) {}
     }
+
+	/**
+	 * Responds to a ping request received over a UDP port.  This is
+	 * handled differently from all other ping requests.  Instead of
+	 * responding with a pong from this node, we respond with a pong
+	 * from other UltraPeers supporting UDP from our cache.  This method
+	 * should only be called if this host is an UltraPeer, as only UltaPeers
+	 * should accept messages over UDP.
+	 *
+	 * @param request the <tt>PingRequest</tt> to service
+	 */
+	protected void respondToUDPPingRequest(PingRequest request) {
+		List unicastEndpoints = UNICASTER.getUnicastEndpoints();
+		Iterator iter = unicastEndpoints.iterator();
+		while(iter.hasNext()) {
+			GUESSEndpoint host = (GUESSEndpoint)iter.next();
+			PingReply reply = new PingReply(request.getGUID(), (byte)1, 
+											host.getPort(),
+											host.getAddress().getAddress(), 
+											(long)0, (long)0, 
+											true);
+			try {
+				sendPingReply(reply);
+			} catch(IOException e) {					
+				// we can't do anything other than try to send it
+				continue;
+			}
+		}
+	}
 
     /**
      * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
@@ -130,11 +157,14 @@ public class StandardMessageRouter
     }
     
     protected void handlePingReply(PingReply pingReply,
-                                ManagedConnection receivingConnection)
+								   ReplyHandler receivingConnection)
     {
         //We override the super's method so the receiving connection's
         //statistics are updated whether or not this is for me.
-        receivingConnection.updateHorizonStats(pingReply);
+		if(receivingConnection instanceof ManagedConnection) {
+			ManagedConnection mc = (ManagedConnection)receivingConnection;
+			mc.updateHorizonStats(pingReply);
+		}
         super.handlePingReply(pingReply, receivingConnection);
     }
 
@@ -143,93 +173,29 @@ public class StandardMessageRouter
      */
     public GroupPingRequest createGroupPingRequest(String group)
     {
-        int num_files = _fileManager.getNumFiles();
-        int kilobytes = _fileManager.getSize()/1024;
+        int num_files = RouterService.getNumSharedFiles();
+        int kilobytes = RouterService.getSharedFileSize()/1024;
         
         //also append everSupernodeCapable flag to the group
         GroupPingRequest pingRequest =
           new GroupPingRequest(SettingsManager.instance().getTTL(),
-            _acceptor.getPort(), _acceptor.getAddress(),
+            RouterService.getPort(), RouterService.getAddress(),
             num_files, kilobytes, group + ":"
             + SettingsManager.instance().getEverSupernodeCapable());
         return( pingRequest );
     }
 
-    
-
-
-    /**
-     * Handles the PingReply by updating horizon stats.
-     */
-    protected void handlePingReplyForMe(
-        PingReply pingReply,
-        ManagedConnection receivingConnection)
-    {
-        SettingsManager settings=SettingsManager.instance();
-        //Kill incoming connections that don't share.  Note that we randomly
-        //allow some freeloaders.  (Hopefully they'll get some stuff and then
-        //share!)  Note that we only consider killing them on the first ping.
-        //(Message 1 is their ping, message 2 is their reply to our ping.)
-        if ((pingReply.getHops()<=1)
-               && (receivingConnection.getNumMessagesReceived()<=2)
-               && (! receivingConnection.isOutgoing())
-               && (receivingConnection.isKillable())
-               && (pingReply.getFiles()<settings.getFreeloaderFiles())
-               && ((int)(Math.random()*100.f) >
-                       settings.getFreeloaderAllowed())) {
-            _manager.remove(receivingConnection);
-        }
-    }
-
-    /**
-     * Responds to the QueryRequest by calling FileManager.query()
-     */
-  //    protected void respondToQueryRequest(QueryRequest queryRequest,
-//                                           Acceptor acceptor,
-//                                           byte[] clientGUID)
-//      {
-//          // Run the local query
-//          Response[] responses = FileManager.instance().query(queryRequest);
-//          // If we have responses, send back a QueryReply
-//          if (responses!=null && (responses.length>0))
-//          {
-//              byte[] guid = queryRequest.getGUID();
-//              byte ttl = (byte)(queryRequest.getHops() + 1);
-//              int port = acceptor.getPort();
-//              byte[] ip = acceptor.getAddress();
-//              long speed = SettingsManager.instance().getConnectionSpeed();
-//              if (responses.length > 255)
-//              {
-//                  Response[] res = new Response[255];
-//                  for(int i=0; i<255;i++)
-//                      res[i] = responses[i];
-//                  responses = res;
-//              }
-//              QueryReply queryReply = new QueryReply(guid, ttl, port, ip, speed,
-//                                                     responses, clientGUID);
-//              try
-//              {
-//                  sendQueryReply(queryReply);
-//              }
-//              catch(IOException e) {}
-//          }
-//      }
     protected void respondToQueryRequest(QueryRequest queryRequest,
-                                         Acceptor acceptor,
-                                         byte[] clientGUID)
-    {
-
+                                         byte[] clientGUID) {
         // Run the local query
-        //FileManager fm = FileManager.instance();
         Response[] responses = _fileManager.query(queryRequest);
 
-        sendResponses(responses, queryRequest, acceptor, clientGUID);
+        sendResponses(responses, queryRequest, clientGUID);
         
     }
 
     public void sendResponses(Response[] responses, 
 							  QueryRequest queryRequest,
-							  Acceptor acceptor,
 							  byte[] clientGUID) {
         // if either there are no responses or, the
         // response array came back null for some reason,
@@ -240,7 +206,8 @@ public class StandardMessageRouter
         // get the appropriate queryReply information
 
         //Return measured speed if possible, or user's speed otherwise.
-        long speed = _uploadManager.measuredUploadSpeed();
+        long speed = 
+		    RouterService.getUploadManager().measuredUploadSpeed();
         boolean measuredSpeed=true;
         if (speed==-1) {
             speed=SettingsManager.instance().getConnectionSpeed();
@@ -277,80 +244,5 @@ public class StandardMessageRouter
           for (int i=0; i<files.length; i++)
             qrt.add(files[i].getAbsolutePath());
         */
-    }
-
-    /**
-     * Handles the QueryReply by starting applying the personal filter and then
-     * displaying the result.
-     */
-    protected void handleQueryReplyForMe(
-        QueryReply queryReply,
-        ManagedConnection receivingConnection)
-    {
-        if (_downloader == null) 
-            if (RouterService.instance() != null)
-                _downloader = RouterService.instance().getDownloadManager();
-
-        if (!receivingConnection.isPersonalSpam(queryReply)) {
-            _callback.handleQueryReply(queryReply);
-            _downloader.handleQueryReply(queryReply);
-        }
-    }
-
-    /**
-     * Handles the PushRequest by starting an HTTPUploader
-     */
-    protected void handlePushRequestForMe(
-        PushRequest pushRequest,
-        ManagedConnection receivingConnection)
-    {
-        //Ignore push request from banned hosts.
-        if (receivingConnection.isPersonalSpam(pushRequest))
-            return;
-
-        // Ignore excess upload requests
-        //if (_callback.getNumUploads() >=
-/*
-        if (HTTPUploader.getUploadCount() >=
-                SettingsManager.instance().getMaxUploads())
-            return;
-*/
-		
-        // Unpack the message
-        byte[] ip = pushRequest.getIP();
-        StringBuffer buf = new StringBuffer();
-        buf.append(ByteOrder.ubyte2int(ip[0])+".");
-        buf.append(ByteOrder.ubyte2int(ip[1])+".");
-        buf.append(ByteOrder.ubyte2int(ip[2])+".");
-        buf.append(ByteOrder.ubyte2int(ip[3])+"");
-        String h = buf.toString();
-        int port = pushRequest.getPort();
-        int index = (int)pushRequest.getIndex();
-        String req_guid_hexstring =
-            (new GUID(pushRequest.getClientGUID())).toString();
-
-        FileDesc desc;
-        try
-        {
-            desc = _fileManager.get(index);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            //You could connect and send 404 file
-            //not found....but why bother?
-            return;
-        }
-
-        String file = desc.getName();
-
-        if (!_acceptor.isBannedIP(h))	
-            _uploadManager.acceptPushUpload(file, h, port, 
-                                            index, req_guid_hexstring);
-
-//          HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
-//                                             _callback);
-//          Thread t=new Thread(up);
-//          t.setDaemon(true);
-//          t.start();
     }
 }

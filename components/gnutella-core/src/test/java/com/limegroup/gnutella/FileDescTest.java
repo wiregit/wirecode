@@ -9,7 +9,7 @@ import java.io.*;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class FileDescTester extends TestCase {
+public final class FileDescTest extends TestCase {
 
 	private final String [] containedURNStrings = {
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
@@ -42,12 +42,12 @@ public final class FileDescTester extends TestCase {
 	private File[] _fileArray;
 	private FileDesc[] _fileDescArray;
 
-	public FileDescTester(String name) {
+	public FileDescTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return new TestSuite(FileDescTester.class);
+		return new TestSuite(FileDescTest.class);
 	}
 
 	public static void main(String[] args) {

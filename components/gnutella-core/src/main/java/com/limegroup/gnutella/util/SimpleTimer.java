@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.RouterService;
 import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.ArrayList;
 
@@ -38,20 +39,17 @@ public class SimpleTimer {
      * Creates a new active SimpleTimer.
      * @param isDaemon true if this' thread should be a daemon.
      */
-    public SimpleTimer(boolean isDaemon) {
-        this(isDaemon, null);
-    }
+    //public SimpleTimer(boolean isDaemon) {
+	//  this(isDaemon);
+    //}
 
     /**
      * Creates a new active SimpleTimer with a callback for internal errors.
      * @param isDaemon true if this' thread should be a daemon.
-     * @param callback if non-null, calls callback.error(..) if any scheduled
-     *  tasks throws an uncaught exception
      */
-    public SimpleTimer(boolean isDaemon, ActivityCallback callback) {
+    public SimpleTimer(boolean isDaemon) {
         _runner=new TimerRunnerThread(isDaemon);
         _runner.start();
-        _callback=callback;
     }
     
     /**
@@ -75,9 +73,11 @@ public class SimpleTimer {
             throw new IllegalArgumentException("Negative period: "+period);
 
         long now=System.currentTimeMillis();
+
+		ActivityCallback callback = RouterService.getCallback();
         SimpleTimerTask ttask=new SimpleTimerTask(task,
                                                   period, now+delay, 
-                                                  _callback);
+                                                  callback);
         synchronized(_queue) {
             Object discarded=_queue.insert(ttask);
             Assert.that(discarded==null, "heap didn't resize");

@@ -8,6 +8,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class HostCatcherTest extends TestCase {  
     private HostCatcher hc;
+    private RouterService rs;
 
     public HostCatcherTest(String name) {
         super(name);
@@ -21,13 +22,14 @@ public class HostCatcherTest extends TestCase {
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {
         HostCatcher.DEBUG=true;
-        //This creates an acceptor thread.  We should probably use an Acceptor
-        //stub or write a tearDown() method.
-        hc=new HostCatcher(new ActivityCallbackStub());
-        hc.initialize(new Acceptor(6346, null),
-                      new ConnectionManager(null, null),
-                      new RouterService(null, null, null, null));
+		rs = new RouterService(new ActivityCallbackStub());
+
+        hc = new HostCatcher();
+		hc.initialize();		
     }
+
+	public void tearDown() {
+	}
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
      *  priority but different ip's.  This was a problem at one point. */
@@ -52,7 +54,8 @@ public class HostCatcherTest extends TestCase {
         //Endpoints.
         setUp();
         hc.add(new Endpoint("192.168.0.1"), false);
-        assertTrue(hc.getNumUltrapeerHosts()==0);
+        assertEquals("should not be any Ultrapeer hosts in catcher",
+					 0,hc.getNumUltrapeerHosts());
         assertTrue(hc.getNumNormalHosts()==0);
         assertTrue(hc.getNumPrivateHosts()==1);
 
@@ -140,7 +143,7 @@ public class HostCatcherTest extends TestCase {
     }
 
     public void testPermanent() {
-        //System.out.println("-Testing write of permanent nodes to Gnutella.net");
+        //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
         try {
             //1. Create HC, add entries, write to disk.
             hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345

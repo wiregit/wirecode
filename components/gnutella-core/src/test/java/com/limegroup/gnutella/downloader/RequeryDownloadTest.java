@@ -70,14 +70,8 @@ public class RequeryDownloadTest extends TestCase {
         createSnapshot();
         mgr=new DownloadManager();
         router=new TestMessageRouter();
-        mgr.initialize(new ActivityCallbackStub(),
-                       router,
-                       new AcceptorStub(),
-                       new FileManagerStub());
-        router.initialize(null, 
-                          new ConnectionManagerStub(),
-                          null,   //HostCatcher
-                          null);  //UploadManager
+        mgr.initialize();
+        router.initialize();
         boolean ok=mgr.readSnapshot(snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         uploader=new TestUploader("uploader 6666", 6666);

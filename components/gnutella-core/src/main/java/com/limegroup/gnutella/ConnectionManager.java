@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -73,7 +74,6 @@ public class ConnectionManager {
     /* Sister backend classes. */
     private MessageRouter _router;
     private HostCatcher _catcher;
-    private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 
@@ -128,15 +128,12 @@ public class ConnectionManager {
      */
     private Authenticator _authenticator;
 
-
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      * @param authenticator Authenticator instance for authenticating users
      */
-    public ConnectionManager(ActivityCallback callback, 
-        Authenticator authenticator) {
-        _callback = callback;		
-        this._authenticator = authenticator; 
+    public ConnectionManager(Authenticator authenticator) {
+        _authenticator = authenticator; 
 		_settings = SettingsManager.instance(); 
     }
 
@@ -144,9 +141,9 @@ public class ConnectionManager {
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
-    public void initialize(MessageRouter router, HostCatcher catcher) {
-        _router = router;
-        _catcher = catcher;
+    public void initialize() {
+        _router = RouterService.getMessageRouter();//router;
+        _catcher = RouterService.getHostCatcher();//catcher;
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
@@ -211,7 +208,7 @@ public class ConnectionManager {
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
              if(connection != null){
-                    connection.close();
+				 connection.close();
              }
              return;
          }
@@ -225,12 +222,12 @@ public class ConnectionManager {
              if(connection.isSupernodeClientConnection())
                 ensureConnectionsForSupernode();
              
-             sendInitialPingRequest(connection);
-             connection.loopForMessages();
+			 startConnection(connection);
+			 
          } catch(IOException e) {
          } catch(Exception e) {
              //Internal error!
-             _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+             RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
          } finally {
             //if we were leaf to a supernode, reconnect to network 
             if (connection.isClientSupernodeConnection())
@@ -576,13 +573,6 @@ public class ConnectionManager {
             || useragentHeader.startsWith("Swapper");
     }
         
-    /**
-     * Provides handle to the activity callback
-     * @return Handle to the activity callback
-     */
-    public ActivityCallback getCallback(){
-        return _callback;
-    }
 
     /** Returns the number of connections to other ultrapeers.  Caller MUST hold
      *  this' monitor. */
@@ -721,14 +711,44 @@ public class ConnectionManager {
         }
         return retSet;
     }
+
+	/**
+	 * Returns the <tt>Endpoint</tt> for an Ultrapeer connected via TCP, 
+	 * if available.
+	 *
+	 * @return the <tt>Endpoint</tt> for an Ultrapeer connected via TCP if
+	 *  there is one, otherwise returns <tt>null</tt>
+	 */
+	public Endpoint getConnectedGUESSUltrapeer() {
+		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
+			ManagedConnection connection = (ManagedConnection)iter.next();
+			if(connection.isSupernodeConnection() && 
+			   connection.isGUESSUltrapeer()) {				
+				return new Endpoint(connection.getInetAddress().getAddress(),
+									connection.getOrigPort());
+			}
+		}
+		return null;
+	}
     
-    /**
-     * @return Returns endpoint representing its own address and port
+
+    /** Returns a <tt>List<tt> of Ultrapeers connected via TCP that are GUESS
+     *  enabled.
+     *
+     * @return A non-null List of GUESS enabled, TCP connected Ultrapeers.  The
+     * are represented as ManagedConnections.
      */
-    public Endpoint getSelfAddress()
-    {
-       return new Endpoint(_router.getAddress(), _router.getPort()); 
-    }
+	public List getConnectedGUESSUltrapeers() {
+        List retList = new ArrayList();
+		for(Iterator iter=_initializedConnections.iterator(); iter.hasNext();) {
+			ManagedConnection connection = (ManagedConnection)iter.next();
+			if(connection.isSupernodeConnection() && 
+               connection.isGUESSUltrapeer()) 
+				retList.add(connection);
+		}
+		return retList;
+	}
+
     
     /**
      * Adds an initializing connection.
@@ -802,7 +822,7 @@ public class ConnectionManager {
             if (c.isSupernodeConnection()) {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
                     c.getPort()), true);
-            }
+            }   
         }
     }
 
@@ -940,7 +960,10 @@ public class ConnectionManager {
         _router.removeConnection(c);
 
         // 4) Notify the listener
-        _callback.connectionClosed(c); 
+        RouterService.getCallback().connectionClosed(c); 
+
+        // 5) Clean up Unicaster
+        QueryUnicaster.instance().purgeQuery(c);
     }
 
     /**
@@ -1038,7 +1061,8 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        _callback.connectionInitializing(c);
+		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+        RouterService.getCallback().connectionInitializing(c);
 
         try {
             c.initialize();
@@ -1070,7 +1094,7 @@ public class ConnectionManager {
         }
         if(connectionOpen)
         {
-            _callback.connectionInitialized(c);
+            RouterService.getCallback().connectionInitialized(c);
             //check if we are a client node, and now opened a connection 
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
@@ -1231,6 +1255,7 @@ public class ConnectionManager {
             _catcher.add(e, goodPriority);
         }
     }
+
     
     /**
      * Initializes an outgoing connection created by createConnection or any
@@ -1251,7 +1276,8 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
-            _callback.connectionInitializing(c);
+			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+            RouterService.getCallback().connectionInitializing(c);
         }
             
         try {
@@ -1285,7 +1311,8 @@ public class ConnectionManager {
                 // We've added a connection, so the need for connections went down.
                 adjustConnectionFetchers();
             }
-            _callback.connectionInitializing(c);
+			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+            RouterService.getCallback().connectionInitializing(c);
         }
 
         boolean connectionOpen = false;
@@ -1299,7 +1326,7 @@ public class ConnectionManager {
         }
         if(connectionOpen)
         {
-            _callback.connectionInitialized(c);
+            RouterService.getCallback().connectionInitialized(c);
             //check if we are a client node, and now opened a connection 
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
@@ -1343,17 +1370,15 @@ public class ConnectionManager {
         }
 
         public void run() {
-            try {               
+            try { 
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
-				// Send ping...possibly group ping.
-                sendInitialPingRequest(_connection);
-                _connection.loopForMessages();
+				startConnection(_connection);
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1361,6 +1386,28 @@ public class ConnectionManager {
             }
         }
     }
+
+	/**
+	 * Runs standard calls that should be made whenever a connection if fully
+	 * established and should wait for messages.
+	 *
+	 * @param conn the <tt>ManagedConnection</tt> instance to start
+	 * @throws <tt>IOException</tt> if there is an excpetion while looping
+	 *  for messages
+	 */
+	private void startConnection(ManagedConnection conn) throws IOException {	
+		// Send ping...possibly group ping.
+		sendInitialPingRequest(conn);
+
+		if(conn.isGUESSUltrapeer()) {
+			int port = conn.getOrigPort();
+			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
+														 port);
+		}
+
+		// this can throw IOException
+		conn.loopForMessages();		
+	}
 
     //------------------------------------------------------------------------
 //     /**
@@ -1399,8 +1446,7 @@ public class ConnectionManager {
      * This thread does the message loop for ManagedConnections created
      * through createGroupConnectionBlocking
      */
-    private class GroupOutgoingConnectionThread
-            extends Thread {
+    private class GroupOutgoingConnectionThread extends Thread {
         private ManagedConnection _connection;
         private PingRequest       _specialPing;
 
@@ -1423,7 +1469,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1501,13 +1547,12 @@ public class ConnectionManager {
                     _catcher.doneWithConnect(endpoint, false);
                     throw e;
                 }
-                //Handle messages.
-                sendInitialPingRequest(connection);
-                connection.loopForMessages();
+
+				startConnection(connection);
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
                 if (connection.isClientSupernodeConnection())

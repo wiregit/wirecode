@@ -28,12 +28,6 @@ public final class UploadManager implements BandwidthTracker {
     public static final int MIN_POLL_TIME = 45000; //45 sec, same as Shareaza
     public static final int MAX_POLL_TIME = 120000; //120 sec, same as Shareaza
     
-
-	/** The callback for notifying the GUI of major changes. */
-    private ActivityCallback _callback;
-    /** The message router to use for pushes. */
-    private MessageRouter _router;
-
 	/**
 	 * LOCKING: obtain this' monitor before modifying any 
 	 * of the data structures
@@ -98,34 +92,12 @@ public final class UploadManager implements BandwidthTracker {
      *  KB/s.  See testTotalUploadLimit. */
     private static final float MINIMUM_UPLOAD_SPEED=3.0f;
     
-    private FileManager _fileManager;
-    
     /** 
      * The file index used in this structure to indicate a browse host
      * request
      */
     public static final int BROWSE_HOST_FILE_INDEX = -1;
 
-
-	//////////////////////// Main Public Interface /////////////////////////
-	
-	/**
-	 * Constructs a new <tt>UploadManager</tt> instance, establishing its
-	 * invariants.
-	 *
-     * @param callback the UI callback to notify of download changes
-     * @param router the message router to use for sending push requests
-     * @param acceptor used to get my IP address and port for pushes	 
-	 * @param fileManager the file manager for accessing data about uploading
-	 *  files
-	 */
-	public UploadManager(ActivityCallback callback,
-						 MessageRouter router,
-						 FileManager fileManager) {
-        _fileManager = fileManager;
-        _callback = callback;
-        _router = router;
-	}
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
@@ -152,8 +124,8 @@ public final class UploadManager implements BandwidthTracker {
                 
                 String fileName = line._fileName;
                 
-                uploader=new HTTPUploader(currentMethod, fileName, 
-                              socket, line._index, this, _fileManager, _router);
+                uploader = new HTTPUploader(currentMethod, fileName, 
+											socket, line._index);
                 
                 uploader.readHeader();
                 
@@ -245,11 +217,11 @@ public final class UploadManager implements BandwidthTracker {
             //We are going to notify the gui about the new upload, and let
             //it decide what to do with it - will act depending on it's
             //state
-            _callback.addUpload(uploader);
+            RouterService.getCallback().addUpload(uploader);
 			FileDesc fd = uploader.getFileDesc();
 			if(fd != null) {
 				fd.incrementAttemptedUploads();
-				_callback.handleSharedFileUpdate(fd.getFile());
+				RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
 			}
         }
         
@@ -300,7 +272,7 @@ public final class UploadManager implements BandwidthTracker {
                 FileDesc fd = uploader.getFileDesc();
 				if(fd != null) {
 					fd.incrementCompletedUploads();
-					_callback.handleSharedFileUpdate(fd.getFile());            
+					RouterService.getCallback().handleSharedFileUpdate(fd.getFile());            
 				}
             }
         }
@@ -316,7 +288,7 @@ public final class UploadManager implements BandwidthTracker {
                                   uploader.amountUploaded());
             removeFromList(uploader);
             if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
-                _callback.removeUpload(uploader);
+                RouterService.getCallback().removeUpload(uploader);
             return queued;
         }
     }
@@ -362,8 +334,7 @@ public final class UploadManager implements BandwidthTracker {
 											  final int index, 
                                               final String guid) { 
 		final HTTPUploader GIVuploader = new HTTPUploader
-                         (file, host, port, index, guid, this, _fileManager,
-                          _router);
+                         (file, host, port, index, guid);
         //Note: GIVuploader is just used to connect, and while connecting, 
         //the GIVuploader uploads the GIV message.
 
@@ -394,7 +365,7 @@ public final class UploadManager implements BandwidthTracker {
                         insertFailedPush(host, index);  
                     }
                 } catch(Exception e) {
-					_callback.error(e);
+					RouterService.error(e);
 				}
                 finally {
                     //close the socket
@@ -419,7 +390,7 @@ public final class UploadManager implements BandwidthTracker {
      */
 	public synchronized boolean isBusy() {
 		// return true if Limewire is shutting down
-		if (RouterService.instance().getIsShuttingDown())
+		if (RouterService.getIsShuttingDown())
 		    return true;
 		
 		// testTotalUploadLimit returns true is there are
@@ -555,7 +526,7 @@ public final class UploadManager implements BandwidthTracker {
 
 		// Enable auto shutdown
 		if( _activeUploadList.size()== 0)
-			_callback.uploadsComplete();
+			RouterService.getCallback().uploadsComplete();
   	}
 	
     /**
@@ -896,7 +867,7 @@ public final class UploadManager implements BandwidthTracker {
 	private HttpRequestLine parseURNGet(final String requestLine) 
 		throws IOException {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
-		FileDesc desc = _fileManager.getFileDescForUrn(urn);
+		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
 			throw new IOException("NO MATCHING FILEDESC FOR URN");
 		}		

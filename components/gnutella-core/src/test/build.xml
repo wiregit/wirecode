@@ -69,7 +69,11 @@
 
   <!-- tests all classes -->
   <target name="test all" depends="build tests">
-    <junit printsummary="withOutAndErr" haltonfailure="yes" fork="yes">
+    <junit printsummary="withOutAndErr" 
+           haltonfailure="yes"
+	       showoutput="true"
+		   fork="on"
+    >
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.AllTests" />
 	  <classpath>
@@ -82,7 +86,11 @@
 
   <!-- tests individual class -->
   <target name="test class" if="class" depends="build tests">
-    <junit printsummary="withOutAndErr" haltonfailure="yes" fork="yes">
+    <junit printsummary="withOutAndErr" 
+	       haltonfailure="yes"
+	       showoutput="true"
+		   fork="on"
+    >
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.${class}" />
 	  <classpath>
@@ -93,4 +101,47 @@
 	</junit>
   </target>
 
+  <!-- tests GUESS code -->
+  <target name="test guess" depends="build tests">
+    <parallel>
+	  <antcall target="run server"/>
+
+      <sequential>
+        <sleep seconds="5"/>
+		<antcall target="test class">
+		  <param name="class" value="UDPServiceTest"/>
+		</antcall>
+      </sequential>
+
+    </parallel>
+  </target>
+
+  
+  <!-- runs all tests, starting a backend server on 6346 -->  
+  <target name="all" depends="build tests">
+    <parallel>
+	  <antcall target="run server"/>
+
+      <sequential>
+        <sleep seconds="10"/>
+		<antcall target="test all"/>
+      </sequential>
+    </parallel>
+  </target>
+
+  <!-- runs a backend server on 6346 for testing -->
+  <target name="run server" depends="build tests">
+	<java classname="com.limegroup.gnutella.Backend"
+		  failonerror="true"
+	      fork="true"
+	>
+	  <classpath>
+	    <pathelement location="${builddir}"/>
+	    <pathelement location="${collections}"/>
+		<pathelement location="${xerces}"/>
+	    <pathelement location="${skins}"/>
+	    <pathelement location="${lib}"/>
+	  </classpath>	  
+    </java>  
+  </target>
 </project>
