@@ -366,17 +366,22 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		PushEndpoint o = (PushEndpoint)other;
 		
+		// create a local ref to the two sets in case we compare
+		// against a PushEndpointForSelf
+		Set myProxies = getProxies();
+		Set otherProxies = o.getProxies();
+		
 		//same guid
 		boolean ret = Arrays.equals(_clientGUID,o.getClientGUID());
 		
 		//same # of push proxies
-		ret = ret & getProxies().size() == o.getProxies().size();
+		ret = ret & myProxies.size() == otherProxies.size();
 		
 		//and the same proxies
-		HashSet temp = new HashSet(getProxies());
-		temp.retainAll(o.getProxies());
+		HashSet temp = new HashSet(myProxies);
+		temp.retainAll(otherProxies);
 		
-		ret = ret & temp.size() ==getProxies().size();
+		ret = ret & temp.size() ==myProxies.size();
 		
 		return ret;
 	}

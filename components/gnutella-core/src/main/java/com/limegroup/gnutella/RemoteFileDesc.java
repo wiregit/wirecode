@@ -731,6 +731,35 @@ public class RemoteFileDesc implements Serializable {
     }
     
     /**
+     * merges the proxies of the two RFDs.  The rfds need to differ only
+     * in the push proxies they have.
+     */
+    public static RemoteFileDesc mergeProxies(RemoteFileDesc a, RemoteFileDesc b) {
+        
+        if (!a.equals(b))
+            throw new IllegalArgumentException( " different rfds ");
+        
+        if (! Arrays.equals(a.getClientGUID(),b.getClientGUID()))
+            throw new IllegalArgumentException(" different pes");
+        
+        PushEndpoint pea = a.getPushAddr();
+        PushEndpoint peb = b.getPushAddr();
+        
+        if (pea.getFeatures()!=peb.getFeatures() ||
+                pea.supportsFWTVersion() != peb.supportsFWTVersion())
+            throw new IllegalArgumentException(" different pes");
+        
+        Set newSet = new HashSet(pea.getProxies());
+        newSet.addAll(peb.getProxies());
+        PushEndpoint merged = new PushEndpoint(pea.getClientGUID(),
+                newSet,
+                pea.getFeatures(),
+                pea.supportsFWTVersion());
+        
+        return new RemoteFileDesc(a,merged); 
+    }
+    
+    /**
      * 
      * @return the push address.
      */
@@ -762,12 +791,6 @@ public class RemoteFileDesc implements Serializable {
             return false;
         RemoteFileDesc other=(RemoteFileDesc)o;
         if (! (nullEquals(_host, other._host) && (_port==other._port)) )
-            return false;
-
-        if( _firewalled && 
-                other._firewalled &&
-                _pushAddr!=null && 
-                !_pushAddr.equals(other._pushAddr) )
             return false;
 
         if (_size != other._size)
