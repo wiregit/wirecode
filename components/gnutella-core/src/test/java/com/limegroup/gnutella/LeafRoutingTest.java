@@ -467,4 +467,6 @@ public class LeafRoutingTest extends BaseTestCase {
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }}

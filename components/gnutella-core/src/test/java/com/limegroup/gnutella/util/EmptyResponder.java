@@ -11,4 +11,6 @@ public final class EmptyResponder implements HandshakeResponder {
                                      boolean outgoing) throws IOException {
         return HandshakeResponse.createResponse(new Properties());
     }
+    
+    public void setLocalePreferencing(boolean b) {}
 }

@@ -4,6 +4,8 @@ import java.io.StringWriter;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.settings.ApplicationSettings;
+
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Iterator;
 
@@ -103,7 +105,9 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         StringWriter out=new StringWriter();
         e.write(out);
         //Window time is hard-coded below.
-        assertEquals("127.0.0.1:6346,3492,1,100,86400113;113\n",
+        assertEquals("127.0.0.1:6346,3492,1,100,86400113;113,"
+                     + ApplicationSettings.DEFAULT_LOCALE.getValue() 
+                     + "\n",
                      out.toString());
     }
 
@@ -134,7 +138,9 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         StringWriter out=new StringWriter();
         e.write(out);
         //Window time is hard-coded below.
-        assertEquals("127.0.0.1:6346,,"+timeString+",,\n",
+        assertEquals("127.0.0.1:6346,,"+timeString+",,"
+                     + "," + ApplicationSettings.DEFAULT_LOCALE.getValue()
+                     + "\n",
                      out.toString());
     }
 

@@ -352,6 +352,8 @@ public class ManagedConnectionTest extends BaseTestCase {
             props.put("GGEP", "0.6"); 
             return HandshakeResponse.createResponse(props);
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }
 
     class EmptyResponder implements HandshakeResponder {
@@ -360,6 +362,8 @@ public class ManagedConnectionTest extends BaseTestCase {
             Properties props = new Properties();
             return HandshakeResponse.createResponse(props);
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }
 
     /**

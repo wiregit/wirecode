@@ -204,6 +204,11 @@ public final class HandshakeResponse {
      */
     private final boolean IS_OLD_LIMEWIRE;
 
+    
+    /**
+     */
+    private final String LOCALE_PREF;
+
     /**
      * Constant for the number of hosts to return in X-Try-Ultrapeer headers.
      */
@@ -275,6 +280,12 @@ public final class HandshakeResponse {
                 toLowerCase().startsWith("limewire");
         IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
         oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
+
+        String loc  = extractStringHeaderValue(headers, 
+                                               HeaderNames.X_LOCALE_PREF);
+        LOCALE_PREF = (loc.equals(""))?
+            ApplicationSettings.DEFAULT_LOCALE.getValue():
+            loc;
     }
     
     /**
@@ -977,7 +988,7 @@ public final class HandshakeResponse {
      * access the locale pref. advertised by the client
      */
     public String getLocalePref() {
-        return HEADERS.getProperty(HeaderNames.X_LOCALE_PREF);
+        return LOCALE_PREF;
     }
 
     /**

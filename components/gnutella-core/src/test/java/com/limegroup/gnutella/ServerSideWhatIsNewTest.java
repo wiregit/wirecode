@@ -883,6 +883,8 @@ public class ServerSideWhatIsNewTest
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }
 
 
@@ -892,6 +894,8 @@ public class ServerSideWhatIsNewTest
             Properties props=new Properties();
             return HandshakeResponse.createResponse(props);
         }
+
+        public void setLocalePreferencing(boolean b) {}
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {

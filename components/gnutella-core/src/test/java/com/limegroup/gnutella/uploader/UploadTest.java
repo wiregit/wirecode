@@ -1744,6 +1744,8 @@ public class UploadTest extends BaseTestCase {
                                          boolean outgoing) throws IOException {
             return HandshakeResponse.createResponse(new Properties());
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }
     
     private static class FManCallback extends ActivityCallbackStub {
