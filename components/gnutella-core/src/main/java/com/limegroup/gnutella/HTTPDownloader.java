@@ -187,7 +187,7 @@ public class HTTPDownloader implements Runnable {
 		
 		while ( (c = _istream.read() ) != -1) {
 		    myFile.write(c);
-		    _amountRead += c;
+		    _amountRead++;
 		    count++;
 		}
 		    
