@@ -258,12 +258,16 @@ public abstract class Message
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
-        else if ((hops >= softMax) && (func != F_QUERY_REPLY)) {
+        else if ((hops >= softMax) && 
+                 (func != F_QUERY_REPLY) &&
+                 (func != F_PING_REPLY)) {
             throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
         }
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
-        else if ((ttl+hops > softMax) && (func != F_QUERY_REPLY)) {
+        else if ((ttl+hops > softMax) && 
+                 (func != F_QUERY_REPLY) &&
+                 (func != F_PING_REPLY)) {
             ttl=(byte)(softMax - hops);  //overzealous client;
                                          //readjust accordingly
             Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
