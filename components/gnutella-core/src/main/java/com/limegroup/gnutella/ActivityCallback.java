@@ -112,7 +112,13 @@ public interface ActivityCallback
 	 * The list of shared files has been emptied.
 	 */
 	public void clearSharedFiles();           
-        
+
+
+	/**
+	 * Sets the enabled/disabled state of file annotation.
+	 */
+	public void setAnnotateEnabled(boolean enabled);
+
      /** 
       * Notifies the GUI that all active downloads have been completed.
       */   
