@@ -63,10 +63,10 @@ public class IncompleteFileManager implements Serializable {
     private static final boolean isOld(File file) {
         //Inlining this method allows some optimizations--not that they matter.
         long lastModified=file.lastModified();
-        int days=SettingsManager.instance().getIncompletePurgeTime();
+        long days=SettingsManager.instance().getIncompletePurgeTime();
         //Back up a couple days. 
         //24 hour/day * 60 min/hour * 60 sec/min * 1000 msec/sec
-        long purgeTime=System.currentTimeMillis()-days*24*60*60*1000;
+        long purgeTime=System.currentTimeMillis()-days*24l*60l*60l*1000l;
         return lastModified<purgeTime;            
     }
 
@@ -419,7 +419,26 @@ public class IncompleteFileManager implements Serializable {
         Assert.that(iter.next().equals(new Interval(2, 8)));
         Assert.that(! iter.hasNext());   
 
-        TODO: test removeBlocks
+        SettingsManager.instance().setIncompletePurgeTime(26);
+        File young=new FakeTimedFile(25);
+        File old=new FakeTimedFile(27);
+        Assert.that(! IncompleteFileManager.isOld(young));
+        Assert.that(IncompleteFileManager.isOld(old));
+
+        //TODO: test removeBlocks
+    }
+
+    static class FakeTimedFile extends File {
+        private long days;
+        FakeTimedFile(int days) {
+            super("whatever.txt");
+            this.days=days;
+        }
+
+        public long lastModified() {
+            //30 days ago
+            return System.currentTimeMillis()-days*24l*60l*60l*1000l;
+        }
     }
     */
 }
