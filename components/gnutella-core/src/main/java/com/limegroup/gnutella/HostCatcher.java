@@ -98,6 +98,7 @@ public class HostCatcher {
 	    Endpoint e = new Endpoint(host, port);	    
 	    if (! set.contains(e)) {
 		queue.add(0,e); //add e to the head.  Order matters!
+		//no need to call notify since nothing can be waiting on this.
 		set.add(e);
 	    }
 	}	
@@ -163,6 +164,7 @@ public class HostCatcher {
 	    if (! (set.contains(e))) {
 		set.add(e);
 		queue.add(e);  //add to tail of the queue.  Order matters!
+		this.notify(); //notify anybody waiting for a connection
 	    }
 	}
 
@@ -175,17 +177,38 @@ public class HostCatcher {
      * @effects returns a new outgoing, connected connection to some
      *  host in this and removes it from this (atomically).  If manager is non-null, 
      *  it is (almost) guaranteed that we do not return any hosts we are connected to.  
-     *  Does not modify manager.  If no such host can be found, throws
-     *  NoSuchElementException.  This method <i>is</i> thread-safe, but
-     *  it is cleverly synchronized so that multiple invocations can run
-     *  at the same time.
+     *  If no such host is found, blocks until a host is added.  If manager is non-null
+     *  and this connection is no longer needed, returns null.  (Hack!) This method <i>is</i> 
+     *  thread-safe, but it is cleverly synchronized so that multiple invocations can run 
+     *  at the same time.  Note that an initial ping is no sent on the returned connection,
+     *  nor is the connection added to manager.<p>
+     *
+     *  Note: because this method interacts so tightly with ConnectionManager, it should
+     *  probably be moved into ConnectionFetcher.run.  It is sufficient for HostCatcher
+     *  to only provide the atomic chooseEndpoint method.
      */
-    public Connection choose() throws NoSuchElementException {
+    public Connection choose() {
 	while (true) {
-	    // Return if the manager has enough
-	    if ( manager != null && !manager.doYouWishToContinue() )
-		return null;
-	    Endpoint e=getAnEndpoint();	
+	    //Wait for an endpoint, checking every now and then that we actually
+	    //still need the connection.
+	    Endpoint e=null;
+	    synchronized (this) {
+		while (e==null) {
+		    //Return if the manager has enough.
+		    //Note that we execute this every few seconds because of the
+		    //timeout below.
+		    if ( manager != null && !manager.needsMoreConnections() )
+			return null;		    
+		    try {
+			e=getAnEndpoint();
+		    } catch (NoSuchElementException exc) {
+			try { 
+			    this.wait(2000);  //2 sec 
+			} catch (InterruptedException exc2) { }
+		    }
+		}
+	    }
+		    
 	    // Skip anything we are connected to.
 	    if (manager != null && manager.isConnected(e))
 		continue;
@@ -234,10 +257,8 @@ public class HostCatcher {
      * This can be modified while iterating through the result, but 
      * the modifications will not be observed.
      */
-    public Iterator getHosts() {
-	synchronized(queue) {
-	    return getBestHosts(queue.size());
-	}
+    public synchronized Iterator getHosts() {
+	return getBestHosts(queue.size());
     }
 
     /** 
@@ -245,18 +266,16 @@ public class HostCatcher {
      * @effects returns an iterator that yields up the best n endpoints of this.
      *  It's not guaranteed that these are reachable.
      */ 
-    public Iterator getBestHosts(int n) {
+    public synchronized Iterator getBestHosts(int n) {
 	Assert.that(n>=0);
 	//Note that we have to add things to everything is REVERSE ORDER
 	//so that they will be yielded from highest priority to lowest.
 	List everything=new ArrayList();
-	synchronized (queue) {
-	    int length=queue.size();
-	    int last=(length > n) ? (length-n) : 0; //queue[last] is last host yielded
-	    for (int i=length-1; i>=last; i--) {
-		Endpoint e=(Endpoint)queue.get(i);
-		everything.add(e);
-	    }
+	int length=queue.size();
+	int last=(length > n) ? (length-n) : 0; //queue[last] is last host yielded
+	for (int i=length-1; i>=last; i--) {
+	    Endpoint e=(Endpoint)queue.get(i);
+	    everything.add(e);
 	}
 	return( everything.iterator() );
     }

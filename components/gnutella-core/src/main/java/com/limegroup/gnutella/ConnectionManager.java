@@ -533,10 +533,10 @@ public class ConnectionManager implements Runnable {
     }
 
     /**
-     *  Tell a ConnectionFetcher/HostCatcher whether I want more threads
-     *  in total.
+     *  Returns true if this needs more connections.  This is NOT synchronized;
+     *  grab this' monitor before calling if you need atomicity.
      */
-    public boolean doYouWishToContinue()
+    boolean needsMoreConnections()
     {
 	return( getNumConnections() < getKeepAlive() );
     }
@@ -594,8 +594,8 @@ class ConnectionFetcher extends Thread {
 
     public void run() {
 	while ( n > 0 && 
-    		manager.doYouWishToContinue() ) {
-	    try {
+    		manager.needsMoreConnections() ) {
+
 		Connection c=manager.catcher.choose();
 		// If the connection came back null then your not needed.
 		if ( c == null ) {
@@ -615,20 +615,27 @@ class ConnectionFetcher extends Thread {
 		    continue;
 		}
 		c.setManager(manager);
-		manager.add(c);
+		//It's entirely possible that this connection is no longer needed because
+		//KEEP_ALIVE was changed above.  Therefore I must check again whether
+		//the connection is really needed.  Grab the manager's mutex before doing so.
+		synchronized(manager) {
+		    if (manager.needsMoreConnections())
+			manager.add(c);
+		    else {
+			//My result is no longer needed.
+			c.shutdown();
+			manager.failedToConnect(c);
+			manager.fetchers.remove(this);
+			return;
+		    }
+		}
 		Thread t=new Thread(c);
 		t.setDaemon(true);
 		t.start();
 		//Manager.error("Asynchronously established outgoing connection.");
 		n--;
-	    } catch (NoSuchElementException e) {
-		//give up
-		//Manager.error("Host catcher is empty");
-		manager.fetchers.remove(this);
 
-		return;
-	    }
-	}
+	} //end while
 	manager.fetchers.remove(this);
     }		
 
