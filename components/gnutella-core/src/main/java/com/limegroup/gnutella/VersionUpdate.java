@@ -257,7 +257,9 @@ public class VersionUpdate implements Runnable
 		String msg = "You are currently running version " +
 		oldV + " of LimeWire.  Version " + newV + 
 		" is now available for download at " + 
-		"http://www.limewire.com/download/";
+		"http://www.limewire.com/download/. \n" +
+		"If using Windows or Unix, you may also"+
+		" run the auto-update feature from your LimeWire folder.";
 		
 		Utilities.showVersionMessage(msg);
 		// SettingsManager.instance().setCheckAgain(response);
