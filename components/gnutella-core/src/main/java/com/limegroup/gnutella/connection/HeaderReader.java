@@ -40,20 +40,19 @@ public interface HeaderReader {
     boolean headersComplete();
 
     /**
-     * Specialized method for reading the Gnutella connect string.  The connect
-     * string is different from other headers in that it ends in \n\n instead
-     * of \r\n.
-     *
+     * Specialized method for reading the Gnutella connect string.  This 
+     * differs from the raw readHeader method in that it does not provide the 
+     * convenience of the HTTPHeader typing, since this is not an HTTP header 
+     * with a key and a value.
+     * 
      * @return the connect string read from the remote host
      */
     String readConnect() throws IOException;
 
     /**
-     * Specialized method for reading the Gnutella connect string.  The connect
-     * string is different from other headers in that it ends in \n\n instead
-     * of \r\n.  Like readConnect() with no arguments, except that this method
-     * will abort reading if no data is read within the specified number of 
-     * milliseconds.
+     * Specialized method for reading the Gnutella connect string.  Like 
+     * readConnect() with no arguments, except that this method will abort 
+     * reading if no data is read within the specified number of milliseconds.
      *
      * @param timeout the number of milliseconds to wait for data before
      *  closing the connection
