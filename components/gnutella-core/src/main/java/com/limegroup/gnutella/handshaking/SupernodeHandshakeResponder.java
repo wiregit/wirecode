@@ -11,7 +11,6 @@ import java.io.IOException;
 public class SupernodeHandshakeResponder 
     extends AuthenticationHandshakeResponder
 {
-    
     private ConnectionManager _manager;
     
     /**
@@ -45,8 +44,8 @@ public class SupernodeHandshakeResponder
             
             //give own IP address
             ret.put(ConnectionHandshakeHeaders.LISTEN_IP,
-            _manager.getSelfAddress().getHostname() + ":"
-            + _manager.getSelfAddress().getPort());
+					Message.ip2string(RouterService.getAddress())+":"
+					+ RouterService.getPort());
             
             //also add some host addresses in the response
             addHostAddresses(ret, _manager);
