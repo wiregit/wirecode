@@ -128,6 +128,12 @@ public class AltLocDigest implements BloomFilter {
      * two altlocs.
      */
     public byte [] toBytes() {
+        int maxElement = _values.length();
+        
+        // make sure we can represent all the values in the bitset
+        while (1 << _elementSize <= maxElement)
+            _elementSize++; 
+        
         // create the output array
         int bitSize = _values.cardinality() * _elementSize;
         int size = bitSize  / 8;
@@ -138,9 +144,13 @@ public class AltLocDigest implements BloomFilter {
         ret[0] = (byte)_elementSize;
         ByteOrder.short2leb((short)_values.cardinality(),ret,1);
         
-        // if the elements are the default size of 12 bits, serialize them the fast way
-        //TODO: write out optimized versions for the various powers of 2
-        if (_elementSize == DEFAULT_ELEMENT_SIZE ) {
+        // the two most common sizes will be 8 and 12 bits, so optimize those.
+        if (_elementSize == 8) {
+            int index =3;
+            for(int i=_values.nextSetBit(0); i>=0;i=_values.nextSetBit(i+1))
+                ret[index++]=(byte)i;
+            
+        } else if (_elementSize == 12) {
             int index = 3;
             boolean first = true;
             for(int i=_values.nextSetBit(0); i>=0;i=_values.nextSetBit(i+1)){
@@ -155,7 +165,7 @@ public class AltLocDigest implements BloomFilter {
                 }
             }
         } else {
-            // otherwise, the slow way 
+            // if its not 8 or 12 bits, serialize the slow way. 
             BitSet tmp = new BitSet((ret.length-3)*8);
             
             int [] values = new int[_values.cardinality()];
@@ -212,8 +222,8 @@ public class AltLocDigest implements BloomFilter {
     
     /**
      * parses a digest contained in the given InputStream.  The resulting
-     * bloom filter does not have an associated hash function with it, so use
-     * setPush or setDirect before using it.
+     * bloom filter does not have an associated hash function with it, so 
+     * make sure you check against the proper type of altlocs.
      * 
      * @throws IOException if input was invalid.
      */

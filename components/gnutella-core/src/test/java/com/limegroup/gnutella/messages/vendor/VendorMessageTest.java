@@ -451,7 +451,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	HeadPing ping = new HeadPing(urn);
     	
-    	assertEquals(HeadPing.PLAIN, ping.getFeatures());
+    	assertEquals(HeadPing.PLAIN | HeadPing.GGEP_PING, ping.getFeatures());
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
     	assertFalse(ping.requestsPushLocs());
