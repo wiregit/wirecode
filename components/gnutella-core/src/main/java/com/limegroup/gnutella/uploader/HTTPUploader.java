@@ -288,6 +288,7 @@ public class HTTPUploader implements Uploader {
 	public int amountUploaded() {return _amountRead;}
 	public void setAmountUploaded(int amount) {_amountRead = amount;}
 	public int getUploadBegin() {return _uploadBegin;}
+    public int getUploadEnd() {return _uploadEnd;}
 	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
 	public UploadManager getManager() {return _manager;}
