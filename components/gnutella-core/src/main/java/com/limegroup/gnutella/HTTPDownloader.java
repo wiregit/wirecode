@@ -14,6 +14,12 @@ import java.util.*;
 
 public class HTTPDownloader implements Runnable {
 
+
+    private int NOT_CONNECTED = 0;
+    private int CONNECTED = 1;
+    private int ERROR = 2;
+    private int COMPLETE = 3;
+
     private int BUFFSIZE = 1024;
     private int MIN_BUFF = 1024;
     private int MAX_BUFF = 64 * 1024;
@@ -29,23 +35,21 @@ public class HTTPDownloader implements Runnable {
     private BufferedInputStream _bis;
     private FileOutputStream _fos;
 
-
     String _protocol;
     String _host;
     int _port;
     int _index;
     byte[] _guid;    
-
     private ByteReader _br;
-
     private boolean _okay;
-
     private int _mode;
 
+    private int _state;
 
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
 	
+	_state = NOT_CONNECTED;
 	_okay = false;
 	_mode = 1;
 	_filename = file;
@@ -64,8 +68,11 @@ public class HTTPDownloader implements Runnable {
 	    _br = new ByteReader(_istream);
 	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
+
+	_state = CONNECTED;
 
 	_okay = true;
 	
@@ -80,6 +87,7 @@ public class HTTPDownloader implements Runnable {
 			  int port, int index, String file, 
 			  ConnectionManager m, byte[] guid ) {
 			
+	_state = NOT_CONNECTED;
 	_okay = false;
 	_mode = 2;
 	_filename = file;
@@ -118,6 +126,7 @@ public class HTTPDownloader implements Runnable {
 	    return;
 	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
   	try {
@@ -125,6 +134,7 @@ public class HTTPDownloader implements Runnable {
 	    _br = new ByteReader(_istream);
   	}
 	catch (NoRouteToHostException e) {
+	    _state = ERROR;
 	    return;
 	}
   	catch (IOException e) {
@@ -133,12 +143,19 @@ public class HTTPDownloader implements Runnable {
 
   	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
+
+	_state = CONNECTED;
 	_okay = true;
 
     }
     
+    public void getState() {
+	return _state;
+    }
+
     public void sendPushRequest(String hostname, int index, 
 				int port, byte[] cguid) {
 
@@ -170,6 +187,7 @@ public class HTTPDownloader implements Runnable {
 	    _manager.sendToAll(push);
 	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
 
@@ -211,6 +229,8 @@ public class HTTPDownloader implements Runnable {
 	    doDownload();
 	    _callback.removeDownload(this);
 	 }
+
+	 
     }
 
     
@@ -226,9 +246,11 @@ public class HTTPDownloader implements Runnable {
 	    _fos = new FileOutputStream(pathname);
 	}
 	catch (FileNotFoundException e) {
+	    _state = ERROR;
 	    return;
   	}
 	catch (Exception e) {
+	    _state = ERROR;
 	    return;
 	}
 	
@@ -244,6 +266,7 @@ public class HTTPDownloader implements Runnable {
 		c = _br.read(buf);
 	    }
 	    catch (Exception e) {
+		_state = ERROR;
 		 return;
 	    }
 
@@ -254,6 +277,7 @@ public class HTTPDownloader implements Runnable {
 		_fos.write(buf, 0, c);
 	    }
 	    catch (Exception e) {
+		_state = ERROR;
 		break;
 	    }
 
@@ -266,7 +290,11 @@ public class HTTPDownloader implements Runnable {
 	    _fos.close();
 	}
 	catch (IOException e) {
+	    _state = ERROR;
+	    return;
 	}
+
+	_state = COMPLETE;
     }
 
 
@@ -298,9 +326,9 @@ public class HTTPDownloader implements Runnable {
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
 		}
 		catch (NumberFormatException e) {
+		    _state = ERROR;
 		    return;
 		}
-		flag = 1;
 		str = _br.readLine();
 	
 		break;
@@ -308,7 +336,7 @@ public class HTTPDownloader implements Runnable {
 	}
 
 	if (flag == 0) {
-	    
+	    _state = ERROR;
 	}
 
     }
