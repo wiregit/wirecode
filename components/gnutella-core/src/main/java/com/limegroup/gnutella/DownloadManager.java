@@ -393,7 +393,9 @@ public class DownloadManager implements BandwidthTracker {
         //
         // non-philosphical answer - once you find conflictsLAX to be true,
         // break out of the loop.  only one downloader needs be notified
-        for (int i = 0; i < rfds.length; i++) 
+        for (int i = 0; i < rfds.length; i++) { 
+			// the array can contain null values
+			if(rfds[i] == null) continue;
             for (int j = 0; j < downloaders.size(); j++) {
                 ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
                 if (currD.conflictsLAX(rfds[i])) {
@@ -401,6 +403,7 @@ public class DownloadManager implements BandwidthTracker {
                     break;
                 }
             }
+		}
     }
 
 
