@@ -474,7 +474,9 @@ public class PingReply extends Message implements Serializable {
 
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    vendorMajor = (bytes[4] >> 4);
+                    if(bytes.length > 4) {
+                        vendorMajor = (bytes[4] >> 4);
+                    }
                 } catch (BadGGEPPropertyException e) {
                     // simply don't assign it
                 }
