@@ -13,6 +13,7 @@ public class SystemUtils {
     
 	private static final Log LOG = LogFactory.getLog(SystemUtils.class);
 	
+	//	BITFIELD values for ICF staus
 	public static final int ST_NONE					=	0x0000;
 	
 	//	FW STATUS
@@ -142,7 +143,7 @@ public class SystemUtils {
     	
     	char c=isFirewallWarningImminent("c:\\Program Files\\LimeWire\\LimeWire.exe");
     	System.out.println("Imminent: " + ( (c&0x0008)>0?("true"):("false") ) );
-    	System.out.println("Return Value: " + (short)c );
+    	System.out.println("Return Value: 0x" + Integer.toHexString(c).toUpperCase() );
     }
             
     

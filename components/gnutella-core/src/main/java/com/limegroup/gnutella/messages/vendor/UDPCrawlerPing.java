@@ -40,7 +40,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	public static final byte LOCALE_INFO = 0x2;
 	public static final byte NEW_ONLY = 0x4;
 	public static final byte USER_AGENT = 0x8;
-	//public static final byte SAMPLE_FEATURE = 0x10; //its a bitmask, so the next feature would be 0x16, etc.
+	//public static final byte SAMPLE_FEATURE = 0x10; //its a bitmask, so the next feature would be 16, etc.
 	
 	//all features OR'd.
 	public static final byte FEATURE_MASK = 0xF; 
