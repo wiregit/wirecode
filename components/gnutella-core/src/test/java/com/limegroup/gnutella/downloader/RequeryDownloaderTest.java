@@ -32,9 +32,9 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         AutoDownloadDetails details=new AutoDownloadDetails(
             "test", "", new byte[16], new MediaType("", "", "", new String[0]));
         IncompleteFileManager ifm=new IncompleteFileManager();
-        VerifyingFile vf = new VerifyingFile(true);
+        VerifyingFile vf = new VerifyingFile(true, 100);
         vf.addInterval(new Interval(10,20));
-        ifm.addEntry(new File("T-10-test.txt"), vf);
+        ifm.addEntry(new File("T-100-test.txt"), vf);
         RequeryDownloader downloader=new RequeryDownloader(ifm, details, null);
         downloader.initialize(new DownloadManager(), 
                               new SimpleFileManager(),

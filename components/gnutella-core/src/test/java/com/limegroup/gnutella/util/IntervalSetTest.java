@@ -306,6 +306,36 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(11, interval.low);
         assertEquals(19, interval.high);
         assertTrue(!iter.hasNext());
+        // test delete() method
+        iSet.clear();
+        iSet.add(new Interval(0,4));
+        iSet.add(new Interval(8,12));
+        iSet.add(new Interval(16,20));
+        iSet.add(new Interval(24));
+        iSet.add(new Interval(28,32));
+        iSet.add(new Interval(36,40));
+        iSet.delete(new Interval(5,7));
+        iSet.delete(new Interval(12,16));
+        iSet.delete(new Interval(24,25));
+        iSet.delete(new Interval(29,30));
+        iSet.delete(new Interval(35,41));
+        iter = iSet.getAllIntervals();
+        interval = getIntervalAt(0);
+        assertEquals("delete broken", interval.low, 0);
+        assertEquals("delete broken", interval.high, 4);
+        interval = getIntervalAt(1);
+        assertEquals("delete broken", interval.low, 8);
+        assertEquals("delete broken", interval.high, 11);
+        interval = getIntervalAt(2);
+        assertEquals("delete broken", interval.low, 17);
+        assertEquals("delete broken", interval.high, 20);
+        interval = getIntervalAt(3);
+        assertEquals("delete broken", interval.low, 28);
+        assertEquals("delete broken", interval.high, 28);
+        interval = getIntervalAt(4);
+        assertEquals("delete broken", interval.low, 31);
+        assertEquals("delete broken", interval.high, 32);
+        assertEquals("delete broken", numIntervals(), 5);
     }
 
 

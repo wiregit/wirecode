@@ -304,6 +304,9 @@ public final class HTTPUploader implements Uploader {
         case BANNED_GREEDY:
         	_state = new BannedUploadState();
         	break;
+        case THEX_REQUEST:
+        	_state = new THEXUploadState(this);
+        	break;
 		case COMPLETE:
 		case INTERRUPTED:
 		case CONNECTING:
@@ -447,6 +450,12 @@ public final class HTTPUploader implements Uploader {
     public boolean supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();
 	}
+	
+	public boolean isTHEXRequest() {
+		return HTTPConstants.NAME_TO_THEX.equals(
+				_parameters.get(UploadManager.SERVICE_ID));
+	}
+    	
     
     /**
      * Returns an AlternateLocationCollection of alternates that

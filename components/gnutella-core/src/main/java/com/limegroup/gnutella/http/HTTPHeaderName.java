@@ -168,6 +168,12 @@ public class HTTPHeaderName {
      */
     public static final HTTPHeaderName X_NODE = new HTTPHeaderName("X-Node");
 
+    /**
+     * Header for sending the THEX URI. 
+     * Expected form: "<URI>,<TigerTree root in Base32 format>"
+     */
+    public static final HTTPHeaderName X_THEX_URI = new HTTPHeaderName("X-Thex-URI");
+
 	/**
 	 * Returns whether or not the start of the passed in string matches the 
 	 * string representation of this HTTP header, ignoring case.

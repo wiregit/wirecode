@@ -19,6 +19,10 @@ public class UrnType implements Serializable {
 	 */
 	public static final String SHA1_STRING = "sha1:";
 
+    /**
+     * Identifier string for the BITPRINT type.
+     */
+    public static final String BITPRINT_STRING = "bitprint:";
 
     /**
      * The <tt>UrnType</tt> for an invalid UrnType.

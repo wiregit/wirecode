@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.http.*;
@@ -107,6 +108,16 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public boolean addVerified(AlternateLocation al) {
         return super.add(al);
     }
+    
+	/**
+     * Returns null, overrides super.getHashTree to prevent us from offering
+     * HashTrees for incomplete files.
+     * @return null
+     */
+    public HashTree getHashTree() {
+        return null;
+    }
+
     
 	/**
      * Adds the alternate locations to this FileDesc and also notifies the

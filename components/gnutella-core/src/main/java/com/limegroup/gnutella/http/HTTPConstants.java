@@ -38,12 +38,24 @@ public final class HTTPConstants {
 	 * service identifier, as specified in RFC 2169.
 	 */
 	public static final String NAME_TO_RESOURCE = "N2R?"; 	
+ 	
+ 	/**
+     * Constant for the "Name to THEX", or "N2X?" resolution 
+     * service identifier, as specified in the PFSP proposal.
+     */
+    public static final String NAME_TO_THEX = "N2X?";	
 
 	/**
 	 * Constant for the "uri-res" uri resolution specifier, followed by
 	 * the standard "/" and the resolution service id, in our case "N2R?".
 	 */
 	public static final String URI_RES_N2R = "/"+URI_RES+"/"+NAME_TO_RESOURCE;
+	
+    /**
+     * Constant for the "uri-res" uri resolution specifier, followed by
+     * the standard "/" and the resolution service id, in this case "N2X?".
+     */
+    public static final String URI_RES_N2X = "/"+URI_RES+"/"+NAME_TO_THEX;	
 
 	/**
 	 * constant strings for the X-Feature header

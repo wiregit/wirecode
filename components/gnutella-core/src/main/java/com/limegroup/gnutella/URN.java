@@ -58,6 +58,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	private static final String TWO = "2";
 
 	/**
+     * Cached constant to avoid making unnecessary string allocations
+     * in validating input.
+     */
+    private static final String DOT = ".";
+
+    /**
 	 * The string representation of the URN.
 	 */
 	private transient String _urnString;
@@ -124,7 +130,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1Urn(final String urnString) 
 		throws IOException {
+        if (urnString.indexOf(UrnType.SHA1_STRING) >= 0)
 		return createSHA1UrnFromString(urnString);
+        else if (urnString.indexOf(UrnType.BITPRINT_STRING) >= 0)
+            return createSHA1UrnFromBitprint(urnString);
+        else
+            throw new IOException("unsupported or malformed URN");
 	}
 
 	/**
@@ -211,6 +222,26 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		return new URN(urnString, type);
 	}
 
+	/**
+     * Constructs a new SHA1 URN from a bitprint URN
+     * 
+     * @param bitprintString
+     *            the string for the bitprint
+     * @return a new <tt>URN</tt> built from the specified string
+     * @throws <tt>IOException</tt> if there is an error
+     */
+    private static URN createSHA1UrnFromBitprint(final String bitprintString)
+        throws IOException {
+        // extract the BASE32 encoded SHA1 from the bitprint
+        String str =
+            bitprintString.substring(
+                bitprintString.indexOf(UrnType.BITPRINT_STRING) + 9,
+                bitprintString.indexOf(DOT));
+
+        return createSHA1UrnFromString(
+            UrnType.URN_NAMESPACE_ID + UrnType.SHA1_STRING + str);
+    }
+    
 	/**
 	 * Constructs a new URN based on the specified <tt>File</tt> instance.
 	 * The constructor calculates the SHA1 value for the file, and is a
@@ -417,10 +448,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		if(nIndex == -1) {
 			return false;
 		}
-		String n2r = requestLine.substring(nIndex-1, nIndex+3);
+		String n2s = requestLine.substring(nIndex-1, nIndex+3);
 
 		// we could add more protocols to this check
-		if(!n2r.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)) {
+		if(!n2s.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)
+           && !n2s.equalsIgnoreCase(HTTPConstants.NAME_TO_THEX)) {
 			return false;
 		}
 		return true;

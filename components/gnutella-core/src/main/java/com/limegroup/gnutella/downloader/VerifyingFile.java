@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit
@@ -26,15 +27,29 @@ public class VerifyingFile {
     private volatile boolean isCorrupted;
 
     private ManagedDownloader managedDownloader; 
+    
+    private int completedSize;
+    
     /**
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
      * to disk and find out which blocks to check before writing to disk
      */
     private IntervalSet writtenBlocks;
     
-    public VerifyingFile(boolean checkOverlap) {
+    /**
+     * Ranges that are currently being written by the ManagedDownloader. 
+     * 
+     * Replaces the IntervalSet of needed ranges previously stored in the 
+     * ManagedDownloader but which could get out of sync with the writtenBlocks
+     * IntervalSet and is therefore replaced by a more failsafe implementation.
+     */
+    private IntervalSet leasedBlocks;
+    
+    public VerifyingFile(boolean checkOverlap, int completedSize) {
+        this.completedSize = completedSize;
         this.checkOverlap = checkOverlap;
         writtenBlocks = new IntervalSet();
+        leasedBlocks = new IntervalSet();
     }
     
     public void open(File file, ManagedDownloader md) throws IOException {
@@ -47,6 +62,8 @@ public class VerifyingFile {
         }
         FileUtils.setWriteable(file);
         this.fos =  new RandomAccessFile(file,"rw");
+        // cleanup leased blocks
+        leasedBlocks = new IntervalSet();
     }
 
     /**
@@ -107,6 +124,52 @@ public class VerifyingFile {
             writtenBlocks.add(intvl);
     }
 
+    public synchronized Interval leaseWhite() {
+        IntervalSet freeBlocks = writtenBlocks.invert(completedSize);
+        freeBlocks.delete(leasedBlocks);
+        Interval ret = freeBlocks.removeFirst();
+        leaseBlock(ret);
+        return ret;
+    }
+    
+    public synchronized Interval leaseWhite(int chunkSize) {
+        Interval temp = leaseWhite();
+        if (temp == null)
+            return temp;
+        return fixIntervalForChunk(temp, chunkSize);
+    }
+    
+    public synchronized Interval leaseWhite(IntervalSet ranges) {
+        ranges.delete(writtenBlocks);
+        ranges.delete(leasedBlocks);
+        Interval temp = ranges.removeFirst();
+        
+        // damn you, overlap checking!
+        while (temp != null 
+               && temp.high - temp.low <= ManagedDownloader.OVERLAP_BYTES)
+            temp = ranges.removeFirst();
+        
+        if (temp == null)
+            return null;
+        
+        Interval ret = new Interval(temp.low+ManagedDownloader.OVERLAP_BYTES, 
+            temp.high);
+        leaseBlock(ret);
+        return ret;
+    }
+    
+    public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize) {
+        Interval temp = leaseWhite(ranges);
+        if (temp == null)
+            return temp;
+        return fixIntervalForChunk(temp, chunkSize);
+    }
+
+    public synchronized void releaseBlock(Interval in) {
+        if (in != null)
+            leasedBlocks.delete(in);
+    }
+    
     public synchronized Iterator getBlocks() {
         return writtenBlocks.getAllIntervals();
     }
@@ -123,6 +186,26 @@ public class VerifyingFile {
         return writtenBlocks.getSize();
     }
   
+    public synchronized boolean isComplete() {
+        return (writtenBlocks.getSize() == completedSize);
+    }
+    
+    public synchronized boolean hasFreeBlocksToAssign() {
+        return ( writtenBlocks.getSize() + leasedBlocks.getSize() < completedSize); 
+    }
+    
+    synchronized void deleteCorruptedBlocks (HashTree tree, File file) throws IOException {
+        InputStream is = new FileInputStream(file);
+        try {
+            List corruptRanges = tree.getCorruptRanges(is);
+            for (Iterator iter = corruptRanges.iterator(); iter.hasNext(); )
+                writtenBlocks.delete((Interval)iter.next());
+            isCorrupted = false;
+        } finally {
+            is.close();
+        }
+    }
+        
     /**
      * Closes the file output stream.
      */
@@ -173,5 +256,30 @@ public class VerifyingFile {
         else //interval.low > low
             return interval.low - (int)low;
             
+    }
+    
+    /**
+     * Returns a new chunk that is less than chunkSize.
+     * This reduces the high value of the interval.
+     * removes what was cut from leasedBlocks.
+     *
+     * @return a new (smaller) interval up to chunkSize.
+     */
+    private synchronized Interval fixIntervalForChunk(Interval temp, int chunkSize) {
+        Interval interval;
+        if((temp.high-temp.low+1) > chunkSize) {
+            int max = temp.low+chunkSize-1;
+            interval = new Interval(temp.low, max);
+            temp = new Interval(max+1,temp.high);
+            releaseBlock(temp);
+        } else { //temp's size <= chunkSize
+            interval = temp;
+}
+        return interval;
+    }
+
+    private synchronized void leaseBlock(Interval in) {
+        if (in != null)
+            leasedBlocks.add(in);
     }
 }

@@ -157,6 +157,13 @@ public final class NormalUploadState implements HTTPMessage {
                              new HTTPHeaderValueCollection(features),
                                           ostream);
                 }
+
+                // write X-Thex-URI header with root hash if we have already 
+                // calculated the tigertree
+                if (FILE_DESC.getHashTree()!=null)
+                    HTTPUtils.writeHeader(HTTPHeaderName.X_THEX_URI,
+                                          FILE_DESC.getHashTree(),
+                                          ostream);                                   
             }
             
 			ostream.write("\r\n");

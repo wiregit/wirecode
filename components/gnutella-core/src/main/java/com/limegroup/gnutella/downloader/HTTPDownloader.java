@@ -4,8 +4,10 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -129,6 +131,9 @@ public class HTTPDownloader implements BandwidthTracker {
 	private boolean _chatEnabled = false; // for now
     private boolean _browseEnabled = false; // also for now
     private String _server = "";
+    
+    private String _thexUri = null;
+    private String _root32 = null;    
 
     /** For implementing the BandwidthTracker interface. */
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
@@ -429,6 +434,71 @@ public class HTTPDownloader implements BandwidthTracker {
         readHeaders();
 	}
 	
+    /**
+     * @return HashTree for this file or null
+     */
+    public HashTree requestHashTree() {
+            if (LOG.isDebugEnabled())
+        LOG.debug("requesting HashTree for " + _thexUri + " from " +_host + ":" + _port);
+        try {
+            OutputStream os = _socket.getOutputStream();
+            String str;
+            str = "GET " + _thexUri +" HTTP/1.1\r\n";
+            os.write(str.getBytes());
+            str = "HOST: "+_host+":"+_port+"\r\n";
+            os.write(str.getBytes());
+            str = "User-Agent: "+CommonUtils.getHttpServer()+"\r\n";
+            os.write(str.getBytes());
+            str = "\r\n";
+            os.write(str.getBytes());
+        } catch (IOException ioe) {
+            if (LOG.isDebugEnabled())
+            LOG.debug("connection failed during sending hashtree request"); 
+            // connection failed.
+            return null;
+        }
+        InputStream is;
+        try {
+            is = _socket.getInputStream();
+            readHeaders();
+            // We don't handle busy replies, queueing or whatever. 
+            // We won't wait in a queue for a couple of KB.
+        } catch (QueuedException qe) {
+            if (LOG.isDebugEnabled())
+            LOG.debug("hashtree request returned queued"); 
+            _rfd.setTHEXFailed(); 
+            return null;
+        } catch (TryAgainLaterException tale) {
+            if (LOG.isDebugEnabled())
+            LOG.debug("hashtree request returned busy"); 
+            _rfd.setTHEXFailed(); 
+            return null;
+        } catch (UnknownCodeException uce) {
+            if (LOG.isDebugEnabled())
+            LOG.debug("hashtree request returned unknown code"); 
+            _rfd.setTHEXFailed(); 
+            return null;
+        } catch (IOException ioe) {
+            if (LOG.isDebugEnabled())
+            LOG.debug("hashtree request returned ioe" + ioe.toString()); 
+            // any other replies that can possibly cause an exception
+            // (404, 410) will cause the host to fall through in the
+            // ManagedDownloader anyway.
+            // if it was just a connection failure, we may retry.
+            return null;
+        }
+
+        HashTree hashTree = HashTree.createHashTree(is, _rfd.getSHA1Urn().toString(), _root32, (long)_rfd.getSize());
+        // Get somebody else to THEX me up! I don't want to download a hash
+        // tree from a host that sent me an illegal THEX reply.  
+        if (hashTree == null) {
+            if (LOG.isDebugEnabled())
+            LOG.debug("hashtree from " + _host + ":" + _port + "was null"); 
+            _rfd.setTHEXFailed();
+        }
+        return hashTree;
+    }	
+	
 
     /*
      * Reads the headers from this, setting _initialReadingPoint and
@@ -500,6 +570,15 @@ public class HTTPDownloader implements BandwidthTracker {
                 parseCreationTimeHeader(str, _rfd);
             else if (HTTPHeaderName.X_FEATURES.matchesStartOfString(str))
             	parseFeatureHeader(str);
+            else if (HTTPHeaderName.X_THEX_URI.matchesStartOfString(str))
+                parseTHEXHeader(str);
+            else if (str.indexOf("urn:bitprint:") > -1) { 
+                // REMOVEME this is a hack for testing because Shareaza doesn't comply
+                // with the PFSP proposal which we require. And I don't see any necessity
+                // not to require the TigerTree root hash in the X-Thex-Uri header when
+                // it's obviously required by the protocol!
+                _root32 = str.substring(str.lastIndexOf(".")+1).trim();
+            }            	
         }
 
 
@@ -846,7 +925,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private static void parseAvailableRangesHeader(String line, 
                                                    RemoteFileDesc rfd) 
         throws IOException {
-        List availableRanges = new ArrayList();
+        IntervalSet availableRanges = new IntervalSet();
         
         line = line.toLowerCase();
         // start parsing after the word "bytes"
@@ -982,6 +1061,22 @@ public class HTTPDownloader implements BandwidthTracker {
                 _browseEnabled = true;
         }
     }
+
+    /**
+     * Method for reading the X-Thex-Uri header.
+     */
+    private void parseTHEXHeader (String str) {
+        if(LOG.isDebugEnabled())
+            LOG.debug(_host + ":" + _port +">" + str);
+
+        str = HTTPUtils.extractHeaderValue(str);
+        if (str.indexOf(";") > 0) {
+            StringTokenizer tok = new StringTokenizer(str, ";");
+            _thexUri = tok.nextToken();
+            _root32 = tok.nextToken();
+        } else
+            _thexUri = str;
+    }    
       
     /////////////////////////////// Download ////////////////////////////////
 
@@ -1119,6 +1214,10 @@ public class HTTPDownloader implements BandwidthTracker {
     public boolean isHTTP11() {
         return _rfd.isHTTP11();
     }
+    
+    public boolean hasHashTree() {
+        return (_thexUri != null && _root32 != null && !_rfd.hasTHEXFailed());
+    }    
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {
