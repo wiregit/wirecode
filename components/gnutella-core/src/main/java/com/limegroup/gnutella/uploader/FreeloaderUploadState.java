@@ -6,15 +6,11 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- *  an implementaiton of the UploadState interface
- *  that sends an error message for a freeloader
- *  trying toUpload from us. 
+ * Since the uploader is considered a freeloader, this ploads an html page 
+ * to them with more information on Gnutella and with more information on 
+ * obtaining a client.
  */
-
 public class FreeloaderUploadState implements UploadState {
-	
-	private HTTPUploader _uploader;
-	private OutputStream _ostream;	
 
     public static final String RESPONSE_PAGE =
 		"<html>\r\n"+
@@ -33,26 +29,24 @@ public class FreeloaderUploadState implements UploadState {
 	/**
 	 * This class implements a failed upload 
 	 * due to a freeloader making an upload attempt.
-	 */
-	
+	 */	
 	public void doUpload(HTTPUploader uploader) throws IOException {
-		/* Sends a 402 Browser Request Denied message */
-		_uploader = uploader;
-		_ostream = uploader.getOutputStream();
+		// Sends a 402 Browser Request Denied message 
+		OutputStream os = uploader.getOutputStream();
 
 		String str;
 		str = "HTTP 200 OK \r\n";
-		_ostream.write(str.getBytes());
+		os.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
-		_ostream.write(str.getBytes());
+		os.write(str.getBytes());
 		str = "Content-Type: text/html\r\n";
-		_ostream.write(str.getBytes());
+		os.write(str.getBytes());
 		str = "Content-Length: " + RESPONSE_PAGE.length() + "\r\n";
-		_ostream.write(str.getBytes());
+		os.write(str.getBytes());
 		str = "\r\n";
-		_ostream.write(str.getBytes());
-		_ostream.write(RESPONSE_PAGE.getBytes());
-		_ostream.flush();
+		os.write(str.getBytes());
+		os.write(RESPONSE_PAGE.getBytes());
+		os.flush();
 
 	}
     
@@ -63,8 +57,7 @@ public class FreeloaderUploadState implements UploadState {
      * @return true, if the upload state doesnt allow the connection to receive
      * another request on the same connection, false otherwise
      */
-    public boolean getCloseConnection()
-    {
+    public boolean getCloseConnection() {
         return true;
     }    
 
