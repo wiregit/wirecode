@@ -189,8 +189,7 @@ public class ConnectionManager {
      * Create a new connection, allowing it to initialize and loop for messages
      * on a new thread.
      */
-    public void createConnectionAsynchronously(
-            String hostname, int portnum) {
+    public void createConnectionAsynchronously(String hostname, int portnum) {
 
 		Runnable outgoingRunner = 
 			new OutgoingConnector(new Connection(hostname, portnum), true);
@@ -1458,35 +1457,6 @@ public class ConnectionManager {
             //take steps based on the headers
             processConnectionHeaders(conn);
         }
-
-        // if we're using NIO, we'll be notified when to handle connection
-        // initialization
-		//if(ConnectionSettings.USE_NIO.getValue()) return;
-        
-        //handleConnectionInitialization(conn);
-        
-        //If there's not space for the connection, reject it.  This mechanism
-        //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
-        //connections.  Sometimes Connections are handled by headers
-        //directly.
-//        if (!conn.isOutgoing() && !allowConnection(conn)) {
-//            //No need to remove, since it hasn't been added to any lists.
-//            throw new IOException("No space for connection");
-//        }
-//
-//        //For incoming connections, add it to the GUI.  For outgoing connections
-//        //this was done at the top of the method.  See note there.
-//        if (! conn.isOutgoing()) {
-//            synchronized(this) {
-//                connectionInitializingIncoming(conn);
-//                // We've added a connection, so the need for connections went 
-//                // down.
-//                adjustConnectionFetchers();
-//            }
-//            RouterService.getCallback().connectionInitializing(conn);
-//        }
-//
-//        completeConnectionInitialization(conn);
     }
     
     // TODO: threading issues????
