@@ -214,7 +214,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
                                        responseName,
                                        null,  //metadata
                                        responseURNs,
-                                       null); //metadata
+                                       null, null); //metadata
         byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply reply=new QueryReply(qr.getGUID(), 
             (byte)6, 6666, ip, 0l, 
@@ -288,7 +288,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         //Give the downloader time to start up first.
         Response response=new Response(
             0l, TestFile.length(), "totally different.txt",
-            null, null, null);
+            null, null, null, null);
         byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply reply=new QueryReply(qr.getGUID(), 
             (byte)6, 6666, ip, 0l, 
@@ -307,7 +307,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
                               "some file name.txt",
                               null,  //metadata
                               null,  //URNs
-                              null); //metadata
+                              null, null); //metadata
         reply=new QueryReply(qr.getGUID(), 
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
