@@ -42,13 +42,16 @@ public class OGGMetaData extends AudioMetaData{
 	
 		//throw new Error("not implemented");
 		//read the 0 byte header
-		VorbisFile vfile;
+		VorbisFile vfile=null;
 		Comment [] comments;
 		
 		try {
 			vfile = new VorbisFile(file.getAbsolutePath());
 		}catch (JOrbisException failed) {
 			throw new IOException (failed.getMessage());
+		}finally {
+			if (vfile!=null)
+				try{vfile.close();}catch(IOException ignored){}
 		}
 		
 		
@@ -56,6 +59,7 @@ public class OGGMetaData extends AudioMetaData{
 		setLength((int)vfile.time_total(-1));
 		
 		comments = vfile.getComment();
+		
 		if (comments.length > 0 && comments[0]!=null) {
 			
 			

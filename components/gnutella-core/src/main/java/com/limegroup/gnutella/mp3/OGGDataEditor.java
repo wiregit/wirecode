@@ -5,7 +5,7 @@ import java.io.*;
 
 import com.jcraft.jorbis.*;
 import com.jcraft.jogg.*;
-
+ 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 
@@ -23,11 +23,13 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 	 * @see com.limegroup.gnutella.mp3.MetaDataEditor#commitMetaData(java.lang.String)
 	 */
 	public int commitMetaData(String filename) {
-		
+		VorbisFile vfile = null;
 		try{
 			_file = new File(filename);
-			VorbisFile vfile = new VorbisFile(filename);
+			vfile = new VorbisFile(filename);
 			Comment [] comments = vfile.getComment();
+			
+			
 			
 			
 			//do things the hard way (grr)
@@ -90,6 +92,12 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 			return LimeXMLReplyCollection.RW_ERROR;
 		}catch(IOException failed){
 			return LimeXMLReplyCollection.RW_ERROR;
+		} 
+		finally {
+			try {
+				if (vfile!=null)
+				vfile.close();
+			}catch(IOException ignored){};
 		}
 		
 		return LimeXMLReplyCollection.NORMAL;
