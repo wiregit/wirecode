@@ -135,14 +135,14 @@ public final class ConnectionSettings extends LimeProps {
      * that are compressed via deflate.
      */
     public static final BooleanSetting ACCEPT_DEFLATE =
-        FACTORY.createBooleanSetting("ACCEPT_DEFLATE", true);
+        FACTORY.createBooleanSetting("ACCEPT_GNUTELLA_DEFLATE", true);
     
     /**
      * Setting for whether or not we'll encode outgoing connections
      * via deflate.
      */
     public static final BooleanSetting ENCODE_DEFLATE =
-        FACTORY.createBooleanSetting("ENCODE_DEFLATE", true);
+        FACTORY.createBooleanSetting("ENCODE_GNUTELLA_DEFLATE", true);
     
     /**
 	 * The time to live.
