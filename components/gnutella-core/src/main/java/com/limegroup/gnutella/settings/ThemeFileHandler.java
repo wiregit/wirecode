@@ -86,8 +86,52 @@ public final class ThemeFileHandler {
 			FACTORY = new SettingsFactory(file);				
 		} else {
 		    FACTORY.changeFile(file);
+		    fixFontSettings();
 		}
+    }
+		
+    /**
+     * Fixes the font settings.
+     */
+    private static void fixFontSettings() {
+		// Fix some of the font settings to not be small bold & verdana
+		checkFontSetting(CONTROL_TEXT_FONT_NAME,
+		                 CONTROL_TEXT_FONT_STYLE,
+		                 CONTROL_TEXT_FONT_SIZE);
+		                 
+		checkFontSetting(SYSTEM_TEXT_FONT_NAME,
+		                 SYSTEM_TEXT_FONT_STYLE,
+		                 SYSTEM_TEXT_FONT_SIZE);
+		                 
+		checkFontSetting(USER_TEXT_FONT_NAME,
+		                 USER_TEXT_FONT_STYLE,
+		                 USER_TEXT_FONT_SIZE);
+		                 
+		checkFontSetting(MENU_TEXT_FONT_NAME,
+		                 MENU_TEXT_FONT_STYLE,
+		                 MENU_TEXT_FONT_SIZE);
+		                 
+		checkFontSetting(WINDOW_TITLE_FONT_NAME,
+		                 WINDOW_TITLE_FONT_STYLE,
+		                 WINDOW_TITLE_FONT_SIZE);
+		                 
+		checkFontSetting(SUB_TEXT_FONT_NAME,
+		                 SUB_TEXT_FONT_STYLE,
+		                 SUB_TEXT_FONT_SIZE);
 	}
+	
+	private static void checkFontSetting(FontNameSetting font, 
+	                                     IntSetting style,
+	                                     IntSetting size) {
+        if(font.getValue().toLowerCase().equals("verdana") &&
+           style.getValue() == 1 &&
+           size.getValue() == 10) {
+            font.setValue("dialog");
+            style.setValue(0);
+            size.setValue(11);
+        }
+    }
+           
 
 	/////////////////// FONTS //////////////////////
 	/**
@@ -421,6 +465,10 @@ public final class ThemeFileHandler {
      */
     public static final IntSetting VERSION = 
         FACTORY.createIntSetting("THEME_VERSION", 0);
+        
+    static {
+        fixFontSettings();
+    }
 
 	/*
 	public static void main(String[] args) {
