@@ -3,6 +3,7 @@ package com.limegroup.gnutella.connection;
 import java.util.Properties;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.http.HTTPHeader;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -92,6 +93,24 @@ public abstract class AbstractHandshaker implements Handshaker {
     protected HeaderReader _headerReader;
     
     /**
+     * Protected flag for whether or not the connection handshake reading
+     * is complete.
+     */
+    protected boolean _readComplete;
+
+    /**
+     * Protected flag for whether or not the connection handshake writing
+     * is complete.
+     */    
+    protected boolean _writeComplete;
+
+    /**
+     * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
+     */
+    protected HandshakeResponse _headers = 
+        HandshakeResponse.createEmptyResponse(); 
+    
+    /**
      * Creates a new <tt>AbstractHandshaker</tt> with the specified headers 
      * for the specified connection.
      * 
@@ -105,6 +124,7 @@ public abstract class AbstractHandshaker implements Handshaker {
         REQUEST_HEADERS = requestHeaders;
         RESPONSE_HEADERS = responseHeaders;
     }
+    
 
     /**
      * Returns the value of the given outgoing (written) connection header, or
@@ -127,6 +147,16 @@ public abstract class AbstractHandshaker implements Handshaker {
     // inherit doc comment
     public Properties getHeadersWritten() {
         return HEADERS_WRITTEN;
+    }
+    
+    // inherit doc comment
+    public boolean readComplete()  {
+        return _readComplete;
+    }
+    
+    // inherit doc comment
+    public boolean writeComplete()  {
+        return _writeComplete;
     }
     
     /**
