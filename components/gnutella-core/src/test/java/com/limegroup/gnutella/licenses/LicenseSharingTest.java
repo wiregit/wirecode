@@ -82,7 +82,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 
         final int upIndex = testUP.length - 1;
         QueryRouteTable qrt = new QueryRouteTable();
-        assertEquals(0.0, qrt.getPercentFull());
+        assertEquals(0.0, qrt.getPercentFull(), 0);
         // need to wait for QRP table to be sent
         Thread.sleep(15000);
         try {
