@@ -10,9 +10,9 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	Endpoint.class \
 	SettingsInterface.class SettingsManager.class \
 	HTTPClientMgr.class HTTPMgr.class HTTPServerMgr.class HTTPUtil.class \
-	SpamFilter.class DuplicateFilter.class
+	SpamFilter.class
 
-subpackages = util gui
+subpackages = util gui filters
 
 all : $(classes) $(subpackages)
 
@@ -27,6 +27,10 @@ gui:
 .PHONY: util
 util:
 	$(MAKE) -C util
+
+.PHONY: filters
+filters:
+	$(MAKE) -C filters
 
 # .PHONY: doc
 # doc:
