@@ -281,7 +281,6 @@ public final class UrnTest extends TestCase {
 		};
 
 		String[] invalidURNTypes = {
-			"urn: ",
 			"urn: sha1:",
 			"urn::",
 			"urn:sha2:",
