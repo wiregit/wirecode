@@ -211,19 +211,13 @@ public class ConnectionManager {
 			 connection.close();
              return;
          }
-         
-         //update the connection count
-         try {   
-             //keep handling the messages on the connection
-
-             //if a leaf connected to us, ensure that we have enough non-leaf
-             //connections opened
-             if(connection.isSupernodeClientConnection())
-                ensureConnectionsForSupernode();
              
-			 startConnection(connection);
-			 
+         try {   
+			 startConnection(connection);			 
          } catch(IOException e) {
+             // we could not start the connection for some reason --
+             // this can easily happen, for example, if the connection
+             // just drops
          } catch(Exception e) {
              //Internal error!
              ErrorService.error(e);
@@ -288,19 +282,6 @@ public class ConnectionManager {
     public synchronized void setKeepAlive(int newKeep) {        
         _keepAlive = newKeep;
         adjustConnectionFetchers();
-    }
-    
-    /**
-     * Ensures that if a node is acting as ultrapeer, it has at least 
-     * some minimum number of connections opened
-     */ 
-    public synchronized void ensureConnectionsForSupernode(){
-        //Note: not holding the _incomingConnectionsLock as just reading the 
-        //volatile value
-        if(getNumInitializedClientConnections() > 0 
-            && _keepAlive < ULTRAPEER_CONNECTIONS){
-            setKeepAlive(ULTRAPEER_CONNECTIONS);
-        }
     }
     
     /**
