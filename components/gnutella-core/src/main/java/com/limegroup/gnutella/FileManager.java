@@ -300,30 +300,6 @@ public class FileManager {
         return (i >= 0 && i < _files.size());
     }
     
-    /**
-     * Returns a list of all FileDescs that match this URN.
-     * Does not list unshared or incomplete files.
-     */
-    public synchronized List getMatchingFileDescs(URN urn) {
-        IntSet hits = (IntSet)_urnIndex.get(urn);
-        if( hits == null )
-            return DataUtils.EMPTY_LIST;
-
-        // double-check hits to be defensive (not strictly needed)
-        List ret = new ArrayList();
-        IntSet.IntSetIterator iter = hits.iterator();
-        while(iter.hasNext()) {
-            FileDesc fd = (FileDesc)_files.get(iter.next());
-		    // If the file is unshared or an incomplete file
-		    // DO NOT SEND IT.
-		    if(fd == null || fd instanceof IncompleteFileDesc)
-			    continue;
-            if(fd.containsUrn(urn)) {
-                ret.add(fd);
-            } 
-        }
-        return ret;
-    }
     
     /**
      * Returns the first FileDesc that matches both this URN and File.
