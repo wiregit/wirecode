@@ -357,8 +357,13 @@ public class FileDesc implements AlternateLocationCollector {
 	 * This should be called whenever the address changes.
 	 */
     public void addUrnsForSelf() {
-        if(SharingSettings.ADD_ALTERNATE_FOR_SELF.getValue())
-            ALT_LOCS.add(AlternateLocation.create(SHA1_URN));
+        if(SharingSettings.ADD_ALTERNATE_FOR_SELF.getValue()) {
+        	AlternateLocation alt = AlternateLocation.create(SHA1_URN);
+        	if (alt instanceof DirectAltLoc)
+        		ALT_LOCS.add(alt);
+        	else
+        		PUSH_ALT_LOCS.add(alt);
+        }
     }
 	
 
