@@ -150,6 +150,13 @@ public abstract class MessageRouter {
      */
     private RouteTable _pushRouteTable = 
         new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
+    
+    /**
+     * Maps HeadPong guids to the originating pingers.  Short-lived since
+     * we expect replies from our leaves quickly.
+     */
+    private RouteTable _headPongRouteTable = 
+    	new RouteTable(10, MAX_ROUTE_TABLE_SIZE);
 
     /** How long to buffer up out-of-band replies.
      */
@@ -473,7 +480,10 @@ public abstract class MessageRouter {
         }
         else if(msg instanceof SimppVM) {
             handleSimppVM((SimppVM)msg);
-        }
+        } 
+        else if (msg instanceof HeadPong) {  
+            handleHeadPongTCP((HeadPong)msg); 
+        } 
         else if (msg instanceof VendorMessage) {
             receivingConnection.handleVendorMessage((VendorMessage)msg);
         }
@@ -2680,10 +2690,62 @@ public abstract class MessageRouter {
     	InetAddress host = datagram.getAddress();
     	int port = datagram.getPort();
     	if (_udpHeadRequests.add(host)) {
-    		HeadPong pong = new HeadPong(ping);
-    		UDPService.instance().send(pong, host, port);
+    		
+    		if (ping.getClientGuid() != null)
+    			routeHeadPing(ping,datagram);
+    		else {
+    			HeadPong pong = new HeadPong(ping);
+    			UDPService.instance().send(pong, host, port);
+    		}
     	}
     }
+    
+    /**
+     * routes a HeadPing the same way push requests are routed, remembering
+     * where the ping came from.
+     */
+    private void routeHeadPing(HeadPing ping, DatagramPacket datagram) { 
+        
+       InetAddress host = datagram.getAddress(); 
+       int port = datagram.getPort(); 
+        
+       ReplyHandler pingee =  
+           _pushRouteTable.getReplyHandler(ping.getClientGuid().bytes()); 
+        
+       //drop the ping if no entry 
+       if (pingee == null) 
+           return; 
+       
+       // strip the forward feature
+       ping = HeadPing.createForwardPing(ping);
+       
+       //don't bother routing if this is intended for me. 
+       if (pingee instanceof ForMeReplyHandler)  
+           handleHeadPing(ping,datagram); 
+        
+       //remember where to send the pong to. 
+       //the pong will have the same GUID as the ping. 
+       UDPReplyHandler pinger = new UDPReplyHandler(host,port); 
+       _headPongRouteTable.routeReply(ping.getGUID(),pinger); 
+        
+       //and send off the routed ping 
+       pinger.reply(ping); 
+   } 
+    
+    
+    /** 
+     * for now just sends the pong back to the pinger. 
+     */ 
+    private void handleHeadPongTCP(HeadPong pong) { 
+        ReplyHandler handler =  
+            _headPongRouteTable.getReplyHandler(pong.getGUID()); 
+         
+        // if this pong is for me, process it as usual (not implemented yet)
+        if (handler != null && !(handler instanceof ForMeReplyHandler)) { 
+            handler.reply(pong); 
+            _headPongRouteTable.removeReplyHandler(handler); 
+        } 
+    } 
     
         
     /**
@@ -2695,10 +2757,8 @@ public abstract class MessageRouter {
      * 
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
-        if (_udpHeadRequests.add(conn.getInetAddress())){
-    		HeadPong pong = new HeadPong(ping);
-    		conn.send(pong);
-    	}
+    	HeadPong pong = new HeadPong(ping);
+    	conn.send(pong);
     }
     
     

@@ -204,5 +204,9 @@ public class HeadPing extends VendorMessage {
 		return _features;
 	}
 	
+	public GUID getClientGuid() {
+		return _clientGUID;
+	}
+	
 
 }
