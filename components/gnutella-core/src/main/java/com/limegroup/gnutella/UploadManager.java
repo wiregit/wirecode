@@ -129,7 +129,7 @@ public final class UploadManager implements BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
     public void acceptUpload(HTTPRequestMethod method, Socket socket) {
-        debug("accepting upload");
+        debug(" accepting upload");
 		try {
             //do uploads
             while(true) {
@@ -143,12 +143,12 @@ public final class UploadManager implements BandwidthTracker {
 					// client request
 					return;
 				}
-                debug("successfully parsed request");
+                debug(" successfully parsed request");
 
                 HTTPUploader uploader=new HTTPUploader(method, line._fileName, 
                               socket, line._index, this, _fileManager, _router);
 
-                debug("HTTPUploader created");
+                debug(uploader+" HTTPUploader created");
 
                 boolean queued = false;
                 try {
@@ -166,7 +166,7 @@ public final class UploadManager implements BandwidthTracker {
                     return;
                 //read the first word of the next request
                 //and proceed only if "GET" or "HEAD" request
-                debug("waiting for next request");
+                debug(uploader+" waiting for next request with socket ");
                 try {
                     int oldTimeout = socket.getSoTimeout();
                     if(!queued) {
@@ -176,7 +176,7 @@ public final class UploadManager implements BandwidthTracker {
                     //dont read a word of size more than 3 
                     //as we will handle only the next "GET" request
                     String word=IOUtils.readWord(socket.getInputStream(),3);
-                    debug("next request arrived");
+                    debug(uploader+" next request arrived ");
                     socket.setSoTimeout(oldTimeout);
                     if(!word.equalsIgnoreCase("GET") &&
                        !word.equalsIgnoreCase("HEAD")) {
@@ -187,6 +187,7 @@ public final class UploadManager implements BandwidthTracker {
                 }
             }//end of while
         } finally {
+            debug("shutting down");
             //close the socket
             close(socket);
         }
@@ -200,7 +201,7 @@ public final class UploadManager implements BandwidthTracker {
     private boolean doSingleUpload(Uploader uploader, Socket socket, 
                                    String host, int index) throws IOException {
         long startTime=-1;
-        debug("starting single upload");
+        debug(uploader+ " starting single upload");
         // note if this is a Browse Host Upload...
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
 
@@ -210,7 +211,7 @@ public final class UploadManager implements BandwidthTracker {
         boolean ret = false;
         if(!isBHUploader) { //testing and book-keeping only if !browse host
             queued = insertAndTest(uploader, host, socket);//can throw IOEx
-            debug("insert and test returned "+queued);
+            debug(uploader+ " insert and test returned "+queued);
             Assert.that(queued!=-1);
             //We are going to notify the gui about the new upload, and let
             //it decide what to do with it - will act depending on it's
@@ -240,7 +241,7 @@ public final class UploadManager implements BandwidthTracker {
         // way to handle it?
         startTime=System.currentTimeMillis();
         uploader.writeResponse();
-        debug("Uploader wrote response");
+        debug(uploader+" Uploader wrote response");
         // check the state of the upload once the
         // start method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE)
@@ -388,6 +389,8 @@ public final class UploadManager implements BandwidthTracker {
      *  Corollary: wontAccept is true iff hasQueue is true
      *  Corollary: (hasQueue==false) => (wontaccept==false)
      *  Corollary: (hasQueue==false) => posInQueue == -1
+     *  INVARIANT : QUEUE_CAPACITY >= 1, otherwise we cannot use the queue to 
+     *  buffer uploaders before they are picked up even is slots are available
      *      @modifies uploader, _callback 
      * @exception if an uploader gets a request too soon, we are going to throw
      * an IOException, which will cause the socket to be closed. 
@@ -404,34 +407,35 @@ public final class UploadManager implements BandwidthTracker {
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
         
         if(posInQueue == -1) {//this uploader is not in the queue already
-            debug("Uploader not in queue");
+            debug(uploader+"Uploader not in que(capacity:"+QUEUE_CAPACITY+")");
             if(limitReached || wontAccept) { 
-                debug("limited? "+limitReached+" wontAccept? "+wontAccept);
+                debug(uploader+" limited? "+limitReached+" wontAccept? "
+                      +wontAccept);
                 uploader.setState(Uploader.LIMIT_REACHED);
                 return 0; //we rejected this uploader
             }
             addToQueue(socket);
             posInQueue = size;//the index of the uploader in the queue
             ret = 1;//we have queued it now
-            debug("new uploader added to queue");
+            debug(uploader+" new uploader added to queue");
         }
         else {//we are alreacy in queue, update it
             KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
             Long prev=(Long)kv.getValue();
             if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
                 _queuedUploads.remove(posInQueue);
-                debug("queued uploader flooding - throwing exception");
+                debug(uploader+" queued uploader flooding - throwing exception");
                 throw new IOException();
             }
             kv.setValue(new Long(System.currentTimeMillis()));
-            debug("updated queued uploader");
+            debug(uploader+" updated queued uploader");
             ret = 1;//queued
         }
-        debug("checking if given uploader is can be accomodated ");
+        debug(uploader+" checking if given uploader is can be accomodated ");
         //If uploader can and should be in queue, it is at this point.
         if(!this.isBusy() && posInQueue==0) {//I have a slot &&  uploader is 1st
             ret = 2;
-            debug("accepting upload");
+            debug(uploader+" accepting upload");
             //remove this uploader from queue, and get its time
             _queuedUploads.remove(0);
         }

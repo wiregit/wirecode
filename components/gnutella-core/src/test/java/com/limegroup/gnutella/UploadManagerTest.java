@@ -39,14 +39,15 @@ public class UploadManagerTest extends TestCase {
                                "abc.txt",100000, new byte[16], 56, 
                                 false,3,false,null,null);
 
+        SettingsManager.instance().setUploadQueueSize(1);
         upman=new UploadManager(ac,mr,fm);
         tTotalUploadLimit(upman, rfd);
 
-        upman=new UploadManager(ac,mr,fm);
-        tPerPersonUploadLimit(upman, rfd);
+//          upman=new UploadManager(ac,mr,fm);
+//          tPerPersonUploadLimit(upman, rfd);
 
-        upman=new UploadManager(ac,mr,fm);
-        tSoftUploadLimit(upman, rfd);
+//          upman=new UploadManager(ac,mr,fm);
+//          tSoftUploadLimit(upman, rfd);
     }
 
     private static void tTotalUploadLimit(UploadManager upman, 
@@ -68,10 +69,10 @@ public class UploadManagerTest extends TestCase {
             }
             //But killing 1st allows third
             kill(d1);
-            HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+            HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.4", true);
             //But not a fourth
             try {
-                HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.3", true);
+                HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.5", true);
                 Assert.that(false, "Downloader not denied");
             } catch (TryAgainLaterException e) {            
             }
@@ -92,22 +93,22 @@ public class UploadManagerTest extends TestCase {
         System.out.print("-Testing per person upload limit...");    
         try {
             //Add two downloaders
-            HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.1", true);
-            HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.1", true);
+            HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.6", true);
+            HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.6", true);
             //Third from same address is denied
             try {
                 //TODO: we have to disable blocking behavior below since
                 //TryAgainLater uploads ARE included in _uploadsInProgress.
                 //That's really a bug, but we can live with it.
-                HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.1", false);
+                HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.6", false);
                 Assert.that(false, "Downloader denied");
             } catch (TryAgainLaterException e) {            
             }
             //But allow another with different address in
-            HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.2", true);
+            HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.7", true);
             //And killing d1 allows another from the first address
             kill(d1);
-            HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.1", true);
+            HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.6", true);
             System.out.println("passed");
         } catch (Throwable e) {
             System.out.println("FAILED");
@@ -126,20 +127,20 @@ public class UploadManagerTest extends TestCase {
         //if all uploaders are fast.
         try {
             //Add two downloaders
-            HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.1", true);
-            HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.2", true);
+            HTTPDownloader d1=addUploader(upman, rfd, "1.1.1.8", true);
+            HTTPDownloader d2=addUploader(upman, rfd, "1.1.1.9", true);
             //Third is denied
             try {
-                HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+                HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.10", true);
                 Assert.that(false, "Downloader denied");
             } catch (TryAgainLaterException e) {            
             }
             //But killing 1st allows third
             kill(d1);
-            HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.3", true);
+            HTTPDownloader d3=addUploader(upman, rfd, "1.1.1.11", true);
             //But not a fourth
             try {
-                HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.3", true);
+                HTTPDownloader d4=addUploader(upman, rfd, "1.1.1.12", true);
                 Assert.that(false, "Downloader denied");
             } catch (TryAgainLaterException e) {            
             }

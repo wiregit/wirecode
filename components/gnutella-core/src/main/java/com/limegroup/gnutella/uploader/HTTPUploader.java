@@ -692,12 +692,13 @@ public class HTTPUploader implements Uploader {
 
 	// overrides Object.toString
 	public String toString() {
-		return "HTTPUploader:\r\n"+
-		       "File Name: "+_fileName+"\r\n"+
-		       "Host Name: "+_hostName+"\r\n"+
-		       "Port:      "+_port+"\r\n"+
-		       "File Size: "+_fileSize+"\r\n"+
-		       "State:     "+_state;
+        return "<"+_hostName+":"+_port+", "+_fileName+">";
+//  		return "HTTPUploader:\r\n"+
+//  		       "File Name: "+_fileName+"\r\n"+
+//  		       "Host Name: "+_hostName+"\r\n"+
+//  		       "Port:      "+_port+"\r\n"+
+//  		       "File Size: "+_fileSize+"\r\n"+
+//  		       "State:     "+_state;
 		
 	}
 }
