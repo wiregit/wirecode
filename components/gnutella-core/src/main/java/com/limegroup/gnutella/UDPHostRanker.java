@@ -63,11 +63,27 @@ public class UDPHostRanker {
             }
             waits++;
         }
-        PingRequest ping = new PingRequest((byte)1);
+        final PingRequest ping = new PingRequest((byte)1);
+        final GUID pingGUID = new GUID(ping.getGUID());
+        
+        // Add the mapping for the new GUID.
+        UDPService.instance().addListener(pingGUID, LISTENER);
         Iterator iter = hosts.iterator();
         while(iter.hasNext()) {
             IpPort host = (IpPort)iter.next();
-            UDPService.instance().send(ping, host, LISTENER);
+            UDPService.instance().send(ping, host);
         }
+        
+        // Now schedule a runnable that will remove the mapping for the GUID
+        // of the above ping after 20 seconds so that we don't store it 
+        // indefinitely in memory for no reason.
+        Runnable udpPingPurger = new Runnable() {
+            public void run() {
+                UDPService.instance().removeListener(pingGUID);
+            }
+        };
+        
+        // Purge after 20 seconds.
+        RouterService.schedule(udpPingPurger, (long)(20*1000), 0);
     }
 }
