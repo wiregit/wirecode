@@ -40,7 +40,7 @@ public final class NormalUploadState implements HTTPMessage {
      * reset during the upload if the rate changes.
      */
     private static final BandwidthThrottle THROTTLE = 
-        new BandwidthThrottle(getUploadSpeed(), true);
+        new BandwidthThrottle(getUploadSpeed(), false);
 
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
@@ -63,6 +63,10 @@ public final class NormalUploadState implements HTTPMessage {
 		_amountWritten = 0;
 		_stalledChecker = watchdog; //new StalledUploadWatchdog();
  	}
+ 	
+ 	public static void setThrottleSwitching(boolean on) {
+ 	    THROTTLE.setSwitching(on);
+    }
     
 	public void writeMessageHeaders(OutputStream network) throws IOException {
 		try {

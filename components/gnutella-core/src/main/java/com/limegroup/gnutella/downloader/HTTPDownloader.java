@@ -69,7 +69,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * we only download every other second, not for true throttling.
      */
     private static final BandwidthThrottle THROTTLE =
-        new BandwidthThrottle(Float.MAX_VALUE, true);
+        new BandwidthThrottle(Float.MAX_VALUE, false);
 
     /**
      * The smallest possible file to be shared with partial file sharing.
@@ -1377,6 +1377,10 @@ public class HTTPDownloader implements BandwidthTracker {
 
     public String toString() {
         return "<"+_host+":"+_port+", "+getFileName()+">";
+    }
+    
+    public static void setThrottleSwitching(boolean on) {
+        THROTTLE.setSwitching(on);
     }
     
 	private HTTPDownloader(String str) {

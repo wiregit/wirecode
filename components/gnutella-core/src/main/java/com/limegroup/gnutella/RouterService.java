@@ -7,6 +7,7 @@ import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.ServerAuthenticator;
@@ -162,6 +163,11 @@ public class RouterService {
 	 * Long for the last time this host originated a query.
 	 */
 	private static long _lastQueryTime = 0L;
+	
+	/**
+	 * Whether or not we are running at full power.
+	 */
+	private static boolean _fullPower = true;
 
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
@@ -305,6 +311,17 @@ public class RouterService {
      */ 
     public static ActivityCallback getCallback() {
         return RouterService.callback;
+    }
+    
+    /**
+     * Sets full power mode.
+     */
+    public static void setFullPower(boolean newValue) {
+        if(_fullPower != newValue) {
+            _fullPower = newValue;
+            NormalUploadState.setThrottleSwitching(!newValue);
+            HTTPDownloader.setThrottleSwitching(!newValue);
+        }
     }
 
 	/**
