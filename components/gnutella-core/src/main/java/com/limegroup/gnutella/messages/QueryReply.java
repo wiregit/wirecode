@@ -416,6 +416,15 @@ public class QueryReply extends Message implements Serializable{
         return NetworkUtils.ip2string(_address); //takes care of signs
     }
 
+    /**
+     * Accessor the IP address in byte array form.
+     *
+     * @return the IP address for this query hit as an array of bytes
+     */
+    public byte[] getIPBytes() {
+        return _address;
+    }
+
     public long getSpeed() {
         return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,7));
     }
