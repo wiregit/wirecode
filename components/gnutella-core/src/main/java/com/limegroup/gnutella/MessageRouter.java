@@ -1370,8 +1370,8 @@ public abstract class MessageRouter {
             replyHandler.handlePingReply(reply, handler);
         }
         else {
-			if(RECORD_STATS) 
-				RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
+            if(RECORD_STATS) 
+                RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
 
@@ -1388,9 +1388,9 @@ public abstract class MessageRouter {
             for (int i=0; i<list.size(); i++) {
                 ManagedConnection c = (ManagedConnection)list.get(i);
                 if (c!=handler && c!=replyHandler && c.allowNewPongs()) {
-					c.handlePingReply(reply, handler);
+                    c.handlePingReply(reply, handler);
                     c.updatePongTime();
-				}
+                }
             }
         }
     }
@@ -1534,7 +1534,6 @@ public abstract class MessageRouter {
      * Uses the ping route table to send a PingReply to the appropriate
      * connection.  Since this is used for PingReplies orginating here, no
      * stats are updated.
-     * @throws IOException if no appropriate route exists.
      */
     protected void sendPingReply(PingReply pong, ReplyHandler handler) {
         if(pong == null) {
@@ -1544,7 +1543,7 @@ public abstract class MessageRouter {
         if(handler == null) {
             throw new NullPointerException("null reply handler");
         }
-
+ 
         handler.handlePingReply(pong, null);
     }
 
