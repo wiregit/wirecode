@@ -8,6 +8,7 @@ import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.zip.*;
 import java.io.*;
+import org.xml.sax.*;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 
@@ -175,9 +176,12 @@ public class QueryRouteTable {
             int hash = HashFunction.hash(docSchemaURI, bits);
             if (!contains(hash))//don't know the URI? can't answer query
                 return false;
-        } catch(Exception e) {//malformed XML
-            //TODO: avoid generic catch(Exception)
-            return true;//coz leaf can answer based on normal query
+        } catch(IOException e) {
+            return true; // leaf can answer based on normal query
+        } catch(SAXException e) {
+            return true; // leaf can answer based on normal query
+        } catch(SchemaNotFoundException e) {
+            return true; // leaf can answer based on normal query
         }
             
         //3. Finally check that "enough" of the metainformation keywords are in
