@@ -92,6 +92,10 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         initializeDone(u1);
         assertTrue("should still be supernode", mgr.isSupernode());
         assertTrue("should still not be leaf", !mgr.isShieldedLeaf());
+        mgr.remove(u1);
+        assertTrue("should still be supernode", mgr.isSupernode());
+        assertTrue("should still not be leaf", !mgr.isShieldedLeaf());
+        
         
         // add a leaf -> supernode connection
         initializeStart(l1);
