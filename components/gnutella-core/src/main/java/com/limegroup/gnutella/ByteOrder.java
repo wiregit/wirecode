@@ -63,6 +63,14 @@ public class ByteOrder {
 	buf[offset+3]=(byte)((x>>24) & 0x000000FF);
     }
 
+    /**
+     * Interprets the value of b as an unsigned byte, and returns 
+     * it as integer.  For example, ubyte2int(0xFF)==255, not -1.
+     */
+    public static int ubyte2int(byte b) {
+	return ((int)b) & 0x000000FF;
+    }
+
     /** Unit test */
     public static void main(String args[]) {
 	byte[] x1={(byte)0x2, (byte)0x1};  //{x1[0], x1[1]}
@@ -81,5 +89,13 @@ public class ByteOrder {
 	int2leb(result2, x2b, 0);
 	for (int i=0; i<4; i++) 
 	    Assert.that(x2b[i]==x2[i]);
+
+	byte in=(byte)0xFF; //255 if unsigned, -1 if signed.
+	int out=(int)in;
+	Assert.that(out==-1, out+"");
+	out=ubyte2int(in);
+	Assert.that(out==255, out+"");
+	out=ubyte2int((byte)1);
+	Assert.that(out==1, out+"");
     }
 }
