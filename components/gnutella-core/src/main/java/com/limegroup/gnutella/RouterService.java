@@ -723,6 +723,8 @@ public class RouterService {
             if(!isStarted())
                 return;
             
+            getAcceptor().haltUPnP();
+            
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             
@@ -763,6 +765,7 @@ public class RouterService {
             UrnCache.instance().persistCache();
             CreationTimeCache.instance().persistCache();
             TigerTreeCache.instance().persistCache();
+            
         } catch(Throwable t) {
             ErrorService.error(t);
         }

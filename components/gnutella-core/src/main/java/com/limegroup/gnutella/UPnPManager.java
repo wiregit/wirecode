@@ -1,14 +1,10 @@
 package com.limegroup.gnutella;
 
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -16,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cybergarage.upnp.Action;
 import org.cybergarage.upnp.Argument;
-import org.cybergarage.upnp.ArgumentList;
 import org.cybergarage.upnp.ControlPoint;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.DeviceList;
@@ -24,8 +19,7 @@ import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 
@@ -72,6 +66,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  */
 public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	
+	/** some schemas */
 	private static final String ROUTER_DEVICE= 
 		"urn:schemas-upnp-org:device:InternetGatewayDevice:1";
 	private static final String WAN_DEVICE = 
@@ -90,10 +85,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	private static final UPnPManager INSTANCE = new UPnPManager();
 	
 	private static final Log LOG = LogFactory.getLog(UPnPManager.class);
-	static {
-		if (!CommonUtils.isJava14OrLater())
-			LOG.warn("loading UPnPManager on jvm that doesn't support it!");
-	}
 	
 	public static UPnPManager instance() {
 		return INSTANCE;
@@ -110,13 +101,11 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 */
 	private Service _service;
 	
-	/**
-	 * existing port mappings. LOCKING: this
-	 */
-	private Map _mappings;
-	
 	/** whether we are currently performing any UPnP operations */
 	private volatile boolean _running;
+	
+	/** The tcp and udp mappings created this session */
+	private Mapping _tcp, _udp;
 	
 	private UPnPManager() {
 		super();
@@ -133,6 +122,13 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		return _router != null && _service != null;
 	}
 
+	/**
+	 * @return whether we have created mappings this session
+	 */
+	public synchronized boolean mappingsExist() {
+		return _tcp != null && _udp != null;
+	}
+	
 	/**
 	 * @return the external address the NAT thinks we have.  Blocking.
 	 * null if we can't find it.
@@ -183,30 +179,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			_router=null;
 		} else
 			LOG.debug("found service");
-		
-		// get the existing mappings
-		try {
-			Map m = getExistingMappings();
-			synchronized(this) {
-				_mappings = m;
-			}
-			if (LOG.isDebugEnabled())
-				LOG.debug("mappings on startup: "+_mappings);
-		}catch(NumberFormatException bad) {
-			//the router returned invalid port values, it must be malfunctioning.
-			LOG.debug("removing broken router",bad);
-			_router = null;
-			_service = null;
-			return;
-		}
-		
-		// delete any previous mappings for this client if they exist
-		Mapping tcp = (Mapping)_mappings.remove(TCP_PREFIX + GUID_SUFFIX);
-		Mapping udp = (Mapping)_mappings.remove(UDP_PREFIX + GUID_SUFFIX);
-		if (tcp != null)
-			removeMapping(tcp);
-		if (udp != null)
-			removeMapping(udp);
 	}
 	
 	/**
@@ -240,84 +212,86 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	}
 	
 	/**
-	 * @param port the port that we wish to forward
-	 * @return whether the port is available or not
-	 */
-	public synchronized boolean portAvailable(int port) {
-		// if no nat, its always available
-		if (!NATPresent())
-			return true;
-		
-		for (Iterator iter = _mappings.values().iterator();iter.hasNext();) {
-			Mapping m = (Mapping)iter.next();
-			if (m._externalPort == port)
-				return false;
-		}
-		return true;
-	}
-	
-	/**
 	 * adds a mapping on the router to the specified port
-	 * @param port
+	 * @return the external port that was actually mapped. 0 if failed
 	 */
-	public void mapPort(int port) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("existing mappings: "+_mappings);
+	public int mapPort(int port) {
+		
+		Random gen=null;
 		
 		String localAddress = NetworkUtils.ip2string(
 				RouterService.getAcceptor().getAddress(false));
-		
-		Mapping tcp = new Mapping("",
-				""+port,
-				localAddress,
-				""+port,
-				"TCP",
-				TCP_PREFIX + GUID_SUFFIX);
+		int localPort = port;
+	
+		// try adding new mappings with the same port
 		Mapping udp = new Mapping("",
 				""+port,
 				localAddress,
-				""+port,
+				""+localPort,
 				"UDP",
 				UDP_PREFIX + GUID_SUFFIX);
 		
 		// add udp first in case it gets overwritten.
-		if (addMapping(udp))
-			_mappings.put(udp._description,udp);
-		if (addMapping(tcp))
-			_mappings.put(tcp._description,tcp);
-	}
-	
-	private Map /*String description->Mapping */ getExistingMappings() 
-		throws NumberFormatException {
-		Map ret = new HashMap();
-		Action check;
-		synchronized(this){
-			check = _service.getAction("GetGenericPortMappingEntry");
-		}
-		for (int i=0;;i++) {
-			
-			check.setArgumentValue("NewPortMappingIndex",i);
-			if (!check.postControlAction()) 
+		// if we can't add, update or find an appropriate port
+		// give up after 20 tries
+		int tries = 20;
+		while (!addMapping(udp)) {
+			if (tries<0)
 				break;
+			tries--;
 			
-			ArgumentList l = check.getOutputArgumentList();
-			Mapping m = new Mapping(
-					l.getArgument("NewRemoteHost").getValue(),
-					l.getArgument("NewExternalPort").getValue(),
-					l.getArgument("NewInternalClient").getValue(),
-					l.getArgument("NewInternalPort").getValue(),
-					l.getArgument("NewProtocol").getValue(),
-					l.getArgument("NewPortMappingDescription").getValue());
-			
-			ret.put(m._description,m);
-			
+			// try a random port
+			if (gen == null)
+				gen = new Random();
+			port = gen.nextInt(50000)+2000;
+			udp = new Mapping("",
+					""+port,
+					localAddress,
+					""+localPort,
+					"UDP",
+					UDP_PREFIX + GUID_SUFFIX);
 		}
-		return ret;
+		
+		if (tries < 0) {
+			LOG.debug("couldn't map a port :(");
+			return 0;
+		}
+		
+		// at this stage, the variable port will point to the port the UDP mapping
+		// got mapped to.  Since we have to have the same port for UDP and tcp,
+		// we can't afford to change the port here.  So if mapping to this port on tcp
+		// fails, we give up and clean up the udp mapping.
+		Mapping tcp = new Mapping("",
+				""+port,
+				localAddress,
+				""+localPort,
+				"TCP",
+				TCP_PREFIX + GUID_SUFFIX);
+		if (!addMapping(tcp)) {
+			LOG.debug(" couldn't map tcp to whatever udp was mapped. cleaning up...");
+			port = 0;
+			tcp = null;
+			udp = null;
+		}
+		
+		// save a ref to the mappings
+		synchronized(this) {
+			_tcp = tcp;
+			_udp = udp;
+		}
+		
+		// we're good - start a thread to clean up any potentially stale mappings
+		Thread staleCleaner = new ManagedThread(new StaleCleaner());
+		staleCleaner.setDaemon(false);
+		staleCleaner.setName("Stale Mapping Cleaner");
+		staleCleaner.start();
+		
+		return port;
 	}
 	
 	/**
 	 * @param m Port mapping to send to the NAT
-	 * @return whether it worked or not
+	 * @return the error code
 	 */
 	private boolean addMapping(Mapping m) {
 		
@@ -363,12 +337,38 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	}
 
 	/**
-	 * halts any UPnP operations.  Not called stop() because there 
-	 * exists a stop() in the parent class which is (ab)used frequently
+	 * halts any UPnP operations.  There are few internal threads which
+	 * can be killed if we know we're not going to be using UPnP anymore.
 	 */
 	public void halt() {
 		if (stop()) 
 			_running=false;
+	}
+
+	/**
+	 * schedules a shutdown hook which will clear the mappings created
+	 * this session. 
+	 */
+	public void clearMappingsOnShutdown() {
+		final Mapping tcp, udp;
+		synchronized(this) {
+			tcp = _tcp;
+			udp = _udp;
+		}
+		
+		Runnable cleaner = new Runnable() {
+			public void run() {
+				LOG.debug("start cleaning");
+				removeMapping(tcp);
+				removeMapping(udp);
+				LOG.debug("done cleaning");
+			}
+		};
+		
+		Thread remover = new ManagedThread(cleaner);
+		remover.setDaemon(false);
+		remover.setName("shutdown mapping cleaner");
+		Runtime.getRuntime().addShutdownHook(remover);
 	}
 	
 	public void finalize() {
@@ -409,14 +409,92 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 		
 	}
 	
+	/**
+	 * This thread reads all the existing mappings on the NAT and if it finds
+	 * a mapping which appears to be created by us but points to a different
+	 * address (i.e. is stale) it removes the mapping.
+	 * 
+	 * It can take several minutes to finish, depending on how many mappings there are.  
+	 */
+	private class StaleCleaner implements Runnable {
+		public void run() {
+			Set mappings = new HashSet();
+			Action getGeneric;
+			synchronized(UPnPManager.this) {
+				getGeneric = _service.getAction("GetGenericPortMappingEntry");
+			}
+			
+			// get all the mappings
+			try {
+				for (int i=0;;i++) {
+					getGeneric.setArgumentValue("NewPortMappingIndex",i);
+					
+					if (!getGeneric.postControlAction())
+						break;
+					
+					mappings.add(new Mapping(
+							getGeneric.getArgumentValue("NewRemoteHost"),
+							getGeneric.getArgumentValue("NewExternalPort"),
+							getGeneric.getArgumentValue("NewInternalClient"),
+							getGeneric.getArgumentValue("NewInternalPort"),
+							getGeneric.getArgumentValue("NewProtocol"),
+							getGeneric.getArgumentValue("NewPortMappingDescription")));
+				}
+			}catch(NumberFormatException bad) {
+				//router broke.. can't do anything.
+				return;
+			}
+			
+			if (LOG.isDebugEnabled())
+				LOG.debug("Stale cleaner found "+mappings.size()+ " total mappings");
+			
+			// iterate and clean up
+			for (Iterator iter = mappings.iterator();iter.hasNext();) {
+				Mapping current = (Mapping)iter.next();
+				
+				// does it have our description?
+				if (current._description.equals(TCP_PREFIX+GUID_SUFFIX) ||
+						current._description.equals(UDP_PREFIX+GUID_SUFFIX)) {
+					
+					// is it not the same as the mappings we created this session?
+					synchronized(this) {
+						
+						if (_tcp != null && _udp != null &&
+								current._externalPort == _tcp._externalPort &&
+								current._internalAddress.equals(_tcp._internalAddress) &&
+								current._internalPort == _tcp._internalPort)
+							continue;
+					}
+					
+					// remove it.
+					if (LOG.isDebugEnabled())
+						LOG.debug("mapping "+current+" appears to be stale");
+					removeMapping(current);
+				}
+			}
+		}
+	}
+	
+	public void test() {
+		Mapping m = new Mapping("",
+				6346+"",
+				"192.168.1.100",
+				6346+"",
+				"UDP",
+				"test");
+		removeMapping(m);
+		/*m = new Mapping("",
+				6346+"",
+				"192.168.1.101",
+				6346+"",
+				"TCP",
+				"test");
+		addMapping(m);*/
+	}
 	public static void main(String[] args) throws Exception {
-		final UPnPManager cp = new UPnPManager();
+		final UPnPManager cp = UPnPManager.instance();
 		Thread.sleep(4000);
-		LOG.debug("start");
-		LOG.debug("found "+cp.getNATAddress());
-		Map m = cp.getExistingMappings();
-		for (Iterator iter = m.values().iterator();iter.hasNext();) 
-			cp.removeMapping((Mapping)iter.next());
+		cp.test();
 		synchronized(cp)  {
 			cp.wait();
 		}

@@ -402,10 +402,6 @@ public class Acceptor implements Runnable {
         } catch (SecurityException e) {
         }
 
-        // 0.5 if we have jre14+ but no nat, halt the UPnP Manager
-        if (UPNP_MANAGER != null && !UPNP_MANAGER.NATPresent())
-        	UPNP_MANAGER.halt();
-        
         // Create the server socket, bind it to a port, and listen for
         // incoming connections.  If there are problems, we can continue
         // onward.
@@ -413,11 +409,6 @@ public class Acceptor implements Runnable {
 		int oldPort = tempPort;
         Exception socketError = null;
         try {
-        	// if we have a NAT and the default port is not available, lets try
-        	// another one
-        	if (UPNP_MANAGER != null && !UPNP_MANAGER.portAvailable(tempPort))
-        		throw new IOException();
-        	
 			setListeningPort(tempPort);
 			_port = tempPort;
         } catch (IOException e) {
@@ -427,10 +418,10 @@ public class Acceptor implements Runnable {
             // 2000 and 52000
             // for each port first check if its available on the NAT (if a NAT exists)
             // and then check if its available locally.
-            int numToTry = 40;
+            int numToTry = 20;
             Random gen = null;
             for (int i=0; i<numToTry; i++) {
-                if(i < 20)
+                if(i < 10)
                     tempPort = i+6346;
                 else {
                     if(gen==null)
@@ -444,9 +435,6 @@ public class Acceptor implements Runnable {
 				    continue;
 				}
                 try {
-                	if (UPNP_MANAGER != null && 
-                			!UPNP_MANAGER.portAvailable(tempPort))
-                		continue;
                     setListeningPort(tempPort);
 					_port = tempPort;
                     break;
@@ -459,13 +447,31 @@ public class Acceptor implements Runnable {
             if(_socket == null) {
                 MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
             }
-        } finally {
-        	// if we created a socket and have a NAT, open the ports
-        	if (_socket != null && 
-        			UPNP_MANAGER != null && 
-					UPNP_MANAGER.NATPresent() &&
-					NetworkUtils.isValidPort(_port))
-        		UPNP_MANAGER.mapPort(_port);
+        }
+        
+        // if we created a socket and have a NAT, and the user is not 
+        // explicitly forcing a port, create the mappings 
+        if (_socket != null && 
+        		UPNP_MANAGER != null) {
+        	
+        	if(UPNP_MANAGER.NATPresent() &&
+				NetworkUtils.isValidPort(_port) &&
+				!ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+        	
+        		int mappedPort = UPNP_MANAGER.mapPort(_port);
+
+        		// if we couldn't map anything, halt
+        		// otherwise update our forced port status
+        		if (mappedPort == 0)
+        			UPNP_MANAGER.halt();
+        		else {
+        			ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        			ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        			// we could get our external address from the NAT but its too slow
+        		}
+        	}
+        	else 
+        		UPNP_MANAGER.halt(); // we have a nat but are not mapping
         }
         
         socketError = null;
@@ -703,6 +709,23 @@ public class Acceptor implements Runnable {
              System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
     }    
 
+    /**
+     * If we used UPnP Mappings this session, clean them up and revert
+     * any relevant settings.
+     */
+    public void haltUPnP() {
+    	if (UPNP_MANAGER == null || 
+    			!UPNP_MANAGER.NATPresent() || 
+				!UPNP_MANAGER.mappingsExist()) 
+    		return;
+   
+    	UPNP_MANAGER.clearMappingsOnShutdown();
+    	
+    	// reset the forced port values - must happen before we save them to disk
+    	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
+    	ConnectionSettings.FORCED_PORT.revertToDefault();
+    }
+    
     /**
      * (Re)validates acceptedIncoming.
      */
