@@ -200,7 +200,7 @@ public abstract class MessageRouter {
 	 *  the message was received
      */
     public void handleMessage(Message msg, 
-                              ManagedConnection receivingConnection) {
+                              Connection receivingConnection) {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
@@ -487,7 +487,7 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handleQueryRequest.
      */
     final void handleQueryRequestPossibleDuplicate(
-        QueryRequest request, ManagedConnection receivingConnection) {
+        QueryRequest request, Connection receivingConnection) {
 
         // With the new handling of probe queries (TTL 1, Hops 0), we have a few
         // new options:
@@ -888,7 +888,7 @@ public abstract class MessageRouter {
      * 2) Also cache the client's client GUID.
      */
     protected void handlePushProxyRequest(PushProxyRequest ppReq,
-                                          ManagedConnection source) {
+                                          Connection source) {
         if (source.isSupernodeClientConnection()) {
             try {
                 String stringAddr = 
@@ -1829,7 +1829,7 @@ public abstract class MessageRouter {
      *  table should be reset
      */
     private void handleResetTableMessage(ResetTableMessage rtm,
-                                         ManagedConnection mc) {
+                                         Connection mc) {
         // if it's not from a leaf or an Ultrapeer advertising 
         // QRP support, ignore it
         if(!isQRPConnection(mc)) return;
@@ -1855,7 +1855,7 @@ public abstract class MessageRouter {
      *  table should be patched
      */
     private void handlePatchTableMessage(PatchTableMessage ptm,
-                                         ManagedConnection mc) {
+                                         Connection mc) {
         // if it's not from a leaf or an Ultrapeer advertising 
         // QRP support, ignore it
         if(!isQRPConnection(mc)) return;

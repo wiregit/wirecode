@@ -10,7 +10,6 @@ import java.nio.channels.Selector;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -75,41 +74,41 @@ public final class NIODispatcher implements Runnable {
 	}
 	
 	/**
-	 * Adds the specified <tt>ManagedConnection</tt> as needing to be registered for 
-     * read events.  Read events occur whenever data comes in from the network 
-     * on that channel.
+	 * Adds the specified <tt>Connection</tt> as needing to be registered 
+     * for read events.  Read events occur whenever data comes in from the 
+     * network on that channel.
 	 * 
-	 * @param mc the <tt>ManagedConnection</tt> instance that will be reading data 
-     * from the network
+	 * @param conn the <tt>Connection</tt> instance that will be reading 
+     *  data from the network
      * @throws NullPointerException if the <tt>mc</tt> argument is 
      *  <tt>null</tt>
 	 */
-    public void addReader(ManagedConnection mc) {
-        if(mc == null) {
+    public void addReader(Connection conn) {
+        if(conn == null) {
             throw new NullPointerException("adding null connection");
         }
-		READERS.add(mc);
+		READERS.add(conn);
 		_selector.wakeup();
 	}
 	
 	/**
-	 * Adds the specified <tt>ManagedConnection</tt> as needing an additional write.  
-     * This is only called when a former call to write on the channel did not 
-     * write all of the requested data.  In that case, this method should be 
-     * called so that the connection registers itself for write events.  Write 
-     * events occur whenever there is room in the TCP buffers, allowing the 
-     * unwritten data to go through.
+	 * Adds the specified <tt>Connection</tt> as needing an additional 
+     * write.  This is only called when a former call to write on the channel 
+     * did not write all of the requested data.  In that case, this method 
+     * should be called so that the connection registers itself for write 
+     * events.  Write events occur whenever there is room in the TCP buffers, 
+     * allowing the unwritten data to go through.
 	 * 
-	 * @param mc the <tt>ManagedConnection</tt> instance containing a message that 
+	 * @param conn the <tt>Connection</tt> instance containing a message that 
      *  was not fully written
      * @throws NullPointerException if the <tt>mc</tt> argument is 
      *  <tt>null</tt>
 	 */
-	public void addWriter(ManagedConnection mc) {
-        if(mc == null) {
+	public void addWriter(Connection conn) {
+        if(conn == null) {
             throw new NullPointerException("adding null connection");
         }
-		WRITERS.add(mc);
+		WRITERS.add(conn);
 		
 		// we have not added this writer to the selector yet, as this call is 
         // made from a separate thread, so we need to wake up the selector so 
@@ -226,14 +225,14 @@ public final class NIODispatcher implements Runnable {
 			// ignore invalid keys
 			if(!key.isValid()) continue;
 			if(key.isReadable()) {
-                ManagedConnection mc = null;
+                Connection conn = null;
 				try {
-                    mc = (ManagedConnection)key.attachment();
-                    if(!mc.isOpen()) {
+                    conn = (Connection)key.attachment();
+                    if(!conn.isOpen()) {
                         // continue if the connection is no longer open
                         continue;
                     }
-					Message msg = mc.getReader().createMessageFromTCP(key);
+					Message msg = conn.getReader().createMessageFromTCP(key);
 					
 					if(msg == null) {
                         // the message was not read completely -- we'll get
@@ -241,24 +240,24 @@ public final class NIODispatcher implements Runnable {
 						continue;
 					}
 
-                    mc.stats().addReceived();
+                    conn.stats().addReceived();
                     // make sure this message isn't considered spam                    
-                    if(!mc.isSpam(msg)) {
+                    if(!conn.isSpam(msg)) {
                         // TODO:: don't use RouterService
                         RouterService.getMessageRouter().handleMessage(msg, 
-                            (ManagedConnection)key.attachment());
+                            (Connection)key.attachment());
                     } else {
                         if(!CommonUtils.isJava118()) {
                             ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
                                 addMessage(msg);
                         }
-                        mc.countDroppedMessage();
+                        conn.countDroppedMessage();
                     }
 				} catch (BadPacketException e) {
                     MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
 				} catch (IOException e) {
                     // remove the connection if we got an IOException
-                    RouterService.removeConnection(mc);
+                    RouterService.removeConnection(conn);
                     MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
 				}
 			}
@@ -278,12 +277,12 @@ public final class NIODispatcher implements Runnable {
 			keyIter.remove();
 			if(!key.isValid()) continue;
 			if(key.isWritable()) {
-				ManagedConnection conn = 
-                    (ManagedConnection)key.attachment();
+				Connection conn = 
+                    (Connection)key.attachment();
 				try {
                     if(conn.getWriter().write()) {
-                        // if the message was successfully written, switch it back 
-                        // to only being registered for read events
+                        // if the message was successfully written, switch it 
+                        // back to only being registered for read events
                         register(conn, SelectionKey.OP_READ);
                     }
                 } catch (IOException e) {
