@@ -92,7 +92,7 @@ APP_TITLE=LimeWire: 运行在 Gnutella 网络
 ABOUT_TITLE=关于 LimeWire
 ABOUT_LABEL_START=LimeWire 客户端, 版本
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_END=版权 所有 (c)2000-2003 Lime Wire LLC
+ABOUT_LABEL_END=版权 所有 (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=关于 LimeWire
 ABOUT_BUTTON_LABEL=确定
 ABOUT_BUTTON_TIP=关闭 关闭 窗口
@@ -253,7 +253,6 @@ SEARCH_STOP_BUTTON_TIP=停止 收集检索 结果
 SEARCH_PUBLIC_KILL_STRING=关闭 搜索
 SEARCH_PUBLIC_LAUNCH_STRING=运行
 SEARCH_PUBLIC_STOP_STRING=停止 搜索
-SEARCH_PUBLIC_GROUP_STRING=聚合
 SEARCH_PUBLIC_BROWSE_STRING=浏览 对方 主机
 SEARCH_PUBLIC_CHAT_STRING=和对方 聊天
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi 网 查找...
@@ -284,7 +283,6 @@ RESULT_PANEL_NAME=名称
 RESULT_PANEL_TYPE=类型
 RESULT_PANEL_SIZE=大小
 RESULT_PANEL_SPEED=速度
-RESULT_PANEL_SCORE=积分
 RESULT_PANEL_CHAT=聊天
 RESULT_PANEL_LOCATION=位置
 RESULT_PANEL_COUNT=#
@@ -363,9 +361,7 @@ DOWNLOAD_TIME_REMAINING_COLUMN=时间
 DOWNLOAD_SERVER_COLUMN=软件 / 版本
 DOWNLOAD_STATUS_QUEUED=等候
 DOWNLOAD_STATUS_CONNECTING=连接中...
-DOWNLOAD_STATUS_WAITING_START=等待
-DOWNLOAD_STATUS_WAITING_MIDDLE=秒 因为
-DOWNLOAD_STATUS_WAITING_END=繁忙
+DOWNLOAD_STATUS_WAITING=等待因为繁忙
 DOWNLOAD_STATUS_COMPLETE=完成
 DOWNLOAD_STATUS_ABORTED=放弃
 DOWNLOAD_STATUS_FAILED=下载 失败
@@ -378,7 +374,6 @@ DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=秒 返回 结果
 DOWNLOAD_HOSTS_LABEL=主机
 #??? DOWNLOAD_STATUS_REMOTE_QUEUED=Remotely queued at position 
 DOWNLOAD_STATUS_HASHING=核实中 这个 文件的 内容
-Verifying file contents...
 DOWNLOAD_STATUS_SAVING=保存中 文件...
 
 ###################################################################
@@ -680,11 +675,12 @@ MESSAGE_OVERWRITE_EXISTING_FILE=覆盖 已存在的 文件
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=因为安全的 原因, LimeWire 将不会运行指定的 文件.
 MESSAGE_CONFIRM_FILE_DELETE=你 确认要 删除 选中的 文件 吗?
 MESSAGE_UNABLE_TO_DELETE_FILE_START=不能 删除 此 文件
-MESSAGE_UNABLE_TO_DELETE_FILE_END=它可能 正在 被别的 程序 使用.
+MESSAGE_UNABLE_TO_DELETE_FILE_END=. 它可能 正在 被别的 程序 使用.
 MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=不能 删除 此 文件夹
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_END=. 它可能 正在 被别的 程序 使用.
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=不能 重命名 此 文件夹
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. 它可能 正在 被别的 程序 使用.
 MESSAGE_UNABLE_TO_RENAME_FILE_START=不能 重命名 此 文件
-MESSAGE_UNABLE_TO_RENAME_FILE_END=它可能 正在 被别的 程序 使用.
+MESSAGE_UNABLE_TO_RENAME_FILE_END=. 它可能 正在 被别的 程序 使用.
 MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire 不允许 你
 MESSAGE_INCOMPLETE_DIRECTORY_END=保留给未完全 下载的 文件夹.
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire 不能 够 使用 指定的 保存 文件夹. 请 选择 另 一个 文件夹.
@@ -698,6 +694,21 @@ MESSAGE_CONTINUE_DOWNLOAD=你 想继续 下载 吗?
 INVALID_SAVE_DIR_LABEL=保存 文件的 文件夹 非法. 请在 选择 新的 文件夹.
 
 ################################################################################
+# Key/Value pairs for internal error messages
+################################################################################
+#??? ERROR_INTERNAL_TITLE=Internal error
+#??? ERROR_INTERNAL_SERVLET=LimeWire 存在 一个 内部 错误. 但是, LimeWire 能 从 错误中 恢复并且应该正常执行. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
+#??? ERROR_INTERNAL_SEND=Send
+#??? ERROR_INTERNAL_REVIEW=Review
+#??? ERROR_INTERNAL_DISCARD=Discard
+#??? ERROR_INTERNAL_COPY=Copy report
+#??? ERROR_INTERNAL_OK=确定
+#??? ERROR_INTERNAL_ALWAYS_SEND=Always send immediately
+#??? ERROR_INTERNAL_ALWAYS_REVIEW=Always ask for review
+#??? ERROR_INTERNAL_ALWAYS_DISCARD=Always discard bugs
+#??? ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
+
+################################################################################
 # Key/Value pairs for error messages
 ################################################################################
 ERROR_PORT_UNAVAILABLE=端口 不可提供. 请 选择 一个 不同的 端口.
@@ -706,7 +717,6 @@ ERROR_TOO_LOW_FOR_ULTRAPEER=有叶节点的 超级 节点 需要 至少 6 个 �
 ERROR_TOO_HIGH_FOR_LEAF=叶子 节点 只 需要 一个 连接, 他们 连接 一 超级 节点.
 ERROR_PORT=不能 找到 一个 端口 为进来的 连接 使用.\n请 从 结构 窗口 指定 一个 端口.
 ERROR_INCOMING_CONNECTIONS=不能 为进来的 连接 监听 插口; 中止.
-ERROR_INTERNAL=LimeWire 存在 一个 内部 错误. 但是, LimeWire 能 从 错误中 恢复并且应该正常执行. 为了 帮助我们做调试, 请复制以下的 正文和电子邮件它给 bugs@limewire.com.
 ERROR_THREE_CHARACTER_SEARCH=你 必须键入至少 3 个字符, 从 而避免阻塞 网络.
 ERROR_NETWORK_FLOODING=这种 搜索 可能 会返回 许多 结果 从 而使 网络 变慢. 你 想继续 吗?
 ERROR_BROWSE_FAILED=不能 浏览 主机 文件. 此机器 不能 接 收过多的 连接.
@@ -757,7 +767,6 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=连接
 OPTIONS_SHUTDOWN_MAIN_TITLE=关闭
 OPTIONS_CHAT_MAIN_TITLE=聊天
 OPTIONS_PLAYER_MAIN_TITLE=播放器
-OPTIONS_BROWSER_MAIN_TITLE=浏览器
 #??? OPTIONS_APPS_MAIN_TITLE=Helper apps
 #??? OPTIONS_GUI_MAIN_TITLE=User interface
 #??? OPTIONS_POPUPS_MAIN_TITLE=Popups
@@ -875,7 +884,7 @@ OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=上载 带宽:
 OPTIONS_UPLOAD_MAX_TITLE=最大 上载 槽
 OPTIONS_UPLOAD_MAX_LABEL=不允许 超过 此 数目的 上载. 这个值 只 有在 带宽 足够时才能 达到.
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=最大 上载 槽:
-最多 下载 数:
+
 ################################################################################
 # Key/Value pairs for the options for the soft maximum number of uploads
 ################################################################################
@@ -1086,7 +1095,6 @@ OPTIONS_PORT_BOX_LABEL=监听 端口:
 OPTIONS_FORCE_IP_TITLE=强制 本地 IP
 OPTIONS_FORCE_IP_LABEL=如果 你 在 防火墙的 后面而想让其他 Gnutella 客户不 发送 “推” 请求的 话, 就请 你 强制 设置 你 地 IP 地址.
 OPTIONS_FORCE_IP_CHECK_BOX_LABEL=强制 IP
-OPTIONS_FORCE_IP_IP_LABEL=地址:
 OPTIONS_FORCE_IP_PORT_LABEL=端口 号:
 
 ################################################################################
@@ -1329,8 +1337,6 @@ SENT_MESSAGES=发送的 消息
 SENT_MESSAGE_NUMBER=消息 数
 SENT_MESSAGE_BYTES=KB
 SENT_LIMEWIRE=只 到 LimeWire 客户端
-SENT_ULTRAPEER=Ultrapeer
-SENT_LEAF=叶子
 
 LIME_SENT_MESSAGES_NUMBER=消息 数
 STATS_SENT_TCP=TCP 消息
@@ -1350,8 +1356,8 @@ STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP 消息
 #??? STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=All Gnutella messages sent over UDP, by message type.
 STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast 消息
 #??? STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=All Gnutella messages sent over Multicast, by message type.
-STATS_SENT_TCP_UDP_TITLE=TCP, UDP 或 Multicast
-#??? STATS_SENT_TCP_UDP_LABEL=Total Gnutella messages sent over TCP, UDP or Multicast.
+STATS_SENT_ALL_TITLE=TCP, UDP 或 Multicast
+#??? STATS_SENT_ALL_LABEL=Total Gnutella messages sent over TCP, UDP or Multicast.
 
 # number of kilobytes
 STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=总价
@@ -1362,8 +1368,8 @@ STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP 消息
 #??? STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast 消息
 #??? STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over Multicast, by message type.
-STATS_SENT_BYTES_TCP_UDP_TITLE=TCP, UDP 或 Multicast
-#??? STATS_SENT_BYTES_TCP_UDP_LABEL=Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast.
+STATS_SENT_BYTES_ALL_TITLE=TCP, UDP 或 Multicast
+#??? STATS_SENT_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast.
 
 # number of messages sent for LimeWire-specific stats -- TCP
 STATS_LIME_SENT_TCP_MESSAGES_TITLE=总价

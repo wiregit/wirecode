@@ -248,7 +248,6 @@ SEARCH_STOP_BUTTON_TIP=Kiválasztott címke keresési eredmémyek leállítása
 SEARCH_PUBLIC_KILL_STRING=Keresés bezárása
 SEARCH_PUBLIC_LAUNCH_STRING=Kció indítása
 SEARCH_PUBLIC_STOP_STRING=Keresés megállítása
-SEARCH_PUBLIC_GROUP_STRING=Csoportosítás
 SEARCH_PUBLIC_BROWSE_STRING=Kiszolgáló tallózása
 SEARCH_PUBLIC_CHAT_STRING=Csevegés a kiszolgálóval
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi honlap keresés
@@ -278,7 +277,6 @@ RESULT_PANEL_NAME=Név
 RESULT_PANEL_TYPE=Típus
 RESULT_PANEL_SIZE=Méret
 RESULT_PANEL_SPEED=Sebesség
-RESULT_PANEL_SCORE=Találat
 RESULT_PANEL_CHAT=Csevegés
 RESULT_PANEL_LOCATION=Elhelyezkedés
 RESULT_PANEL_COUNT=#
@@ -353,9 +351,7 @@ DOWNLOAD_SPEED_COLUMN=Sebesség
 DOWNLOAD_TIME_REMAINING_COLUMN=Idő
 DOWNLOAD_STATUS_QUEUED=Besorolva
 DOWNLOAD_STATUS_CONNECTING=Kapcsolódva...
-DOWNLOAD_STATUS_WAITING_START=Várakozás
-DOWNLOAD_STATUS_WAITING_MIDDLE=válaszra
-DOWNLOAD_STATUS_WAITING_END=foglalt
+DOWNLOAD_STATUS_WAITING=Várakozás válaszra foglalt
 DOWNLOAD_STATUS_COMPLETE=Kész
 DOWNLOAD_STATUS_ABORTED=Megszakítva
 DOWNLOAD_STATUS_FAILED=Nem lehet letölteni
@@ -667,10 +663,11 @@ MESSAGE_OVERWRITE_EXISTING_FILE=Meglévő file felülírása
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire nem indítja a megadott filet biztonsági okokból.
 MESSAGE_CONFIRM_FILE_DELETE=Biztosan törölni akarja a kijelölt file(oka)t?
 MESSAGE_UNABLE_TO_DELETE_FILE_START=File nem törölhető
-MESSAGE_UNABLE_TO_DELETE_FILE_END=Ezt egy másik program használja.
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Könyvtár nem törölhető 
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_END=. Ezt egy másik program használja.
-MESSAGE_UNABLE_TO_RENAME_FILE_START=File átnevezése nem lehetséges 
+MESSAGE_UNABLE_TO_DELETE_FILE_END=. Ezt egy másik program használja.
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Könyvtár nem törölhető
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Könyvtár átnevezése nem lehetséges
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. Ezt egy másik program használja.
+MESSAGE_UNABLE_TO_RENAME_FILE_START=File átnevezése nem lehetséges
 MESSAGE_UNABLE_TO_RENAME_FILE_END=. Ezt egy másik program használja.
 MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire nem engedi meg, hogy 
 MESSAGE_INCOMPLETE_DIRECTORY_END=ebben a folderben tartsa a nem komplett fileokat.
@@ -684,6 +681,8 @@ MESSAGE_CONTINUE_DOWNLOAD=Folytatni akarja a letöltést?
 ################################################################################
 #??? INVALID_SAVE_DIR_LABEL=The stored directory for saving files is not valid. Please enter a new directory in the directory chooser.
 
+ERROR_INTERNAL_SERVLET=A LimeWire futtatásakor belső hiba lépett fel. A program a hibán átlép és normálisan dolgozik tovább.
+
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
@@ -693,7 +692,6 @@ ERROR_TOO_LOW_FOR_ULTRAPEER=Az ultrapartner elágazással legalább hat kapcsola
 ERROR_TOO_HIGH_FOR_LEAF=Az elágazás csak egy kapcsolatot igényel, ha ezek ultrapartnerhez kapcsolódnak.
 ERROR_PORT=Nem található port a bejövő kapcsolatokhoz.\nKérem adjon meg egy portot a konfigurációs ablakból.
 ERROR_INCOMING_CONNECTIONS=Nem figyelhető a bejövő kapcsolati pont; megszakítás.
-ERROR_INTERNAL=A LimeWire futtatásakor belső hiba lépett fel. A program a hibán átlép és normálisan dolgozik tovább. Kérjük segítsen a hibát kijavítani, küldje el a hibaüzenetet a bugs@limewire.com címre emailben.
 ERROR_THREE_CHARACTER_SEARCH=Keresésnél legalább három karaktert adjon meg, mert a hálózatot túlterheli.
 ERROR_NETWORK_FLOODING=Ez a keresés igen sok eredményt adna és lelassulna a hálózat. Biztos, hogy folytatni akarja?
 ERROR_BROWSE_FAILED=A kívánt kiszolgálón nem böngészhet fileokat. Ez a gép valószínűleg nem fogad több bejövő kapcsolatot.
@@ -743,7 +741,7 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=Kapcsolatok
 OPTIONS_SHUTDOWN_MAIN_TITLE=Leállítás
 OPTIONS_CHAT_MAIN_TITLE=Csevegés
 OPTIONS_PLAYER_MAIN_TITLE=Lejátszó
-OPTIONS_BROWSER_MAIN_TITLE=Böngésző
+#??? OPTIONS_APPS_MAIN_TITLE=Helper apps
 #??? OPTIONS_THEME_MAIN_TITLE=Theme
 OPTIONS_SKIN_MAIN_TITLE=Bőr
 OPTIONS_SEARCH_MAIN_TITLE=Keresés
@@ -908,8 +906,6 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=A belső lejátszót, vagy a rendszerben lévőt
 OPTIONS_BROWSER_PREFERENCE_TITLE=Böngésző beállítások
 OPTIONS_BROWSER_PREFERENCE_LABEL=Megadhatja, melyik böngészőt akarja használni.
 OPTIONS_BROWSER_BOX_LABEL=Böngésző
-OPTIONS_BROWSER_DEFAULT_BUTTON_LABEL=Alapbeállítás használata
-OPTIONS_BROWSER_DEFAULT_BUTTON_TIP=Alapböngésző használata
 
 ################################################################################
 # Key/Value pairs for theme options
@@ -1036,7 +1032,6 @@ OPTIONS_PORT_BOX_LABEL=Figyelő port:
 OPTIONS_FORCE_IP_TITLE=Helyi IP cím kikényszerítése
 OPTIONS_FORCE_IP_LABEL=Saját IP kikényszerítése a tűzfal mögött, ha új gnutella klienst akar egy írási kérelem küldése nélkül.
 OPTIONS_FORCE_IP_CHECK_BOX_LABEL=IP kikényszerítése
-OPTIONS_FORCE_IP_IP_LABEL=IP Cím:
 OPTIONS_FORCE_IP_PORT_LABEL=Port:
 
 ################################################################################
@@ -1140,8 +1135,8 @@ STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP
 #??? STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=All Gnutella messages received over TCP, by message type.
 STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
 #??? STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=All Gnutella messages received over UDP, by message type.
-STATS_RECEIVED_TCP_UDP_TITLE=TCP vagy UDP
-#??? STATS_RECEIVED_TCP_UDP_LABEL=Total Gnutella messages received over TCP or UDP.
+STATS_RECEIVED_ALL_TITLE=TCP, UDP vagy Multicast
+#??? STATS_RECEIVED_ALL_LABEL=Total Gnutella messages received over TCP, UDP or Multicast.
 #??? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=Duplicate TCP queries
 #??? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=Number of duplicate queries received over TCP versus the total number of queries.
 # Advanced Gnutella Message hops/ttl for queries
@@ -1162,8 +1157,8 @@ STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_TITLE=TCP
 #??? STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over TCP, by message type.
 STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
 #??? STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over UDP, by message type.
-STATS_RECEIVED_BYTES_TCP_UDP_TITLE=TCP vagy UDP
-#??? STATS_RECEIVED_BYTES_TCP_UDP_LABEL=Total kilobytes for Gnutella messages received over TCP or UDP.
+STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP vagy Multicast
+#??? STATS_RECEIVED_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages received over TCP, UDP or Multicast.
 #??? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=Duplicate TCP queries
 #??? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=Total kilobytes in duplicate queries received over TCP versus the total number of queries.
 # Advanced Gnutella Message hops/ttl for queries in kilobytes
@@ -1258,8 +1253,8 @@ STATS_TOTAL_SENT_TCP_MESSAGES_TITLE=TCP
 #??? STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=All Gnutella messages sent over TCP, by message type.
 STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP
 #??? STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=All Gnutella messages sent over UDP, by message type.
-STATS_SENT_TCP_UDP_TITLE=TCP vagy UDP
-#??? STATS_SENT_TCP_UDP_LABEL=Total Gnutella messages sent over TCP or UDP.
+STATS_SENT_ALL_TITLE=TCP, UDP vagy Multicast
+#??? STATS_SENT_ALL_LABEL=Total Gnutella messages sent over TCP, UDP or Multicast.
 
 # number of kilobytes
 STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=Összes
@@ -1268,8 +1263,8 @@ STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
 #??? STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over TCP, by message type.
 STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
 #??? STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
-STATS_SENT_BYTES_TCP_UDP_TITLE=TCP vagy UDP
-#??? STATS_SENT_BYTES_TCP_UDP_LABEL=Total kilobytes for Gnutella messages sent over TCP or UDP.
+STATS_SENT_BYTES_ALL_TITLE=TCP, UDP vagy Multicast
+#??? STATS_SENT_BYTES_TCP_UDP_LABEL=Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast.
 
 # number of messages sent for LimeWire-specific stats -- TCP
 STATS_LIME_SENT_TCP_MESSAGES_TITLE=Összes

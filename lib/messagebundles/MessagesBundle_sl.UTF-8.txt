@@ -92,7 +92,7 @@ GENERAL_UNIT_KBPSEC=kB/s
 ABOUT_TITLE=O programu LimeWire
 ABOUT_LABEL_START=LimeWire odjemalec
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_END=Avtorske pravice ima (c)2000-2003 Lime Wire LLC
+ABOUT_LABEL_END=Avtorske pravice ima (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=O programu LimeWire
 ABOUT_BUTTON_LABEL=V redu
 ABOUT_BUTTON_TIP=Zapre okno.
@@ -103,7 +103,7 @@ ABOUT_FILE_NAME=about_sl.html
 ###################################################################
 # Key/value pairs for the Windows system tray -- Coming soon...
 ###################################################################
-TRAY_TOOL=LimeWire: Poganjam mrežo Gnutella
+TRAY_TOOLTIP=LimeWire: Poganjam mrežo Gnutella
 TRAY_RESTORE_LABEL=Povečaj
 TRAY_ABOUT_LABEL=O programu
 TRAY_EXIT_LATER_LABEL=Končaj po prenosih
@@ -253,7 +253,6 @@ SEARCH_STOP_BUTTON_TIP=Preneha iskati nove zadetke v izbranem zavihku.
 SEARCH_PUBLIC_KILL_STRING=Zapri iskanje
 SEARCH_PUBLIC_LAUNCH_STRING=Poženi
 SEARCH_PUBLIC_STOP_STRING=Prenehaj iskanje
-SEARCH_PUBLIC_GROUP_STRING=Združeno
 SEARCH_PUBLIC_BROWSE_STRING=Brskaj po gost.
 SEARCH_PUBLIC_CHAT_STRING=Klepetaj
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Spletni pregled Bitzi ...
@@ -284,7 +283,6 @@ RESULT_PANEL_NAME=Ime
 RESULT_PANEL_TYPE=Tip
 RESULT_PANEL_SIZE=Velikost
 RESULT_PANEL_SPEED=Hitrost
-RESULT_PANEL_SCORE=Rezultat
 RESULT_PANEL_CHAT=Klepet
 RESULT_PANEL_LOCATION=Mesto
 RESULT_PANEL_COUNT=#
@@ -363,9 +361,7 @@ DOWNLOAD_TIME_REMAINING_COLUMN=Čas
 DOWNLOAD_SERVER_COLUMN=Program/različico
 DOWNLOAD_STATUS_QUEUED=V vrsti
 DOWNLOAD_STATUS_CONNECTING=Povezujem se...
-DOWNLOAD_STATUS_WAITING_START=Čakam...
-DOWNLOAD_STATUS_WAITING_MIDDLE=s za
-DOWNLOAD_STATUS_WAITING_END=zasedeno
+DOWNLOAD_STATUS_WAITING=Čakam za zasedeno
 DOWNLOAD_STATUS_COMPLETE=Končano
 DOWNLOAD_STATUS_ABORTED=Preklicano
 DOWNLOAD_STATUS_FAILED=Ne morem prenesti
@@ -680,11 +676,12 @@ MESSAGE_OVERWRITE_EXISTING_FILE=Prepis obstoječe datoteke
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire takšnih datotek ne poganja iz varnostnih razlogov.
 MESSAGE_CONFIRM_FILE_DELETE=Ste prepričani, da želite zbrisati izbrano datoteko ali datoteke?
 MESSAGE_UNABLE_TO_DELETE_FILE_START=Datoteke ne morem zbrisati.
-MESSAGE_UNABLE_TO_DELETE_FILE_END=Morda jo uporablja drug program.
+MESSAGE_UNABLE_TO_DELETE_FILE_END=. Morda jo uporablja drug program.
 MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Imenika ne morem zbrisati.
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_END=. Morda ga uporablja drug program.
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Imenika ne morem preimenovati
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. Morda ga uporablja drug program.
 MESSAGE_UNABLE_TO_RENAME_FILE_START=Datoteke ne morem preimenovati
-MESSAGE_UNABLE_TO_RENAME_FILE_END=Morda jo uporablja drug program..
+MESSAGE_UNABLE_TO_RENAME_FILE_END=. Morda jo uporablja drug program..
 MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire ne more dovoliti
 MESSAGE_INCOMPLETE_DIRECTORY_END=imenika, rezerviranega za nedokončane datoteke.
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire ne more uporabljati izbranega imenika za shranjevanje datotek. Prosim, poskusite drug imenik.
@@ -697,6 +694,8 @@ MESSAGE_CONTINUE_DOWNLOAD=Želite ne glede na to nadaljevati prenos?
 ################################################################################
 INVALID_SAVE_DIR_LABEL=Shranjen imenik za shranjevanje datotek ni veljaven. Prosim, vnesite ime drugega imenika.
 
+ERROR_INTERNAL_SERVLET=Pri poganjanju programa LimeWire je prišlo do notranje napake. Vendar pa si lahko LimeWire od te napake opomore in še naprej teče.
+
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
@@ -706,7 +705,6 @@ ERROR_TOO_LOW_FOR_ULTRAPEER=Ultrapeeri z listnimi nodi potrebujejo vsaj šest po
 ERROR_TOO_HIGH_FOR_LEAF=Listi potrebujejo le eno povezavo, saj so povezani z Ultrapeerjem.
 ERROR_PORT=Ne najdem vrat, ki jih lahko uporabim za vhodne povezave.\nProsim, specificirajte vrata sami v konfiguraciji.
 ERROR_INCOMING_CONNECTIONS=Ne morem poslušati vtiča za vhodne povezave; prekinjam.
-ERROR_INTERNAL=Pri poganjanju programa LimeWire je prišlo do notranje napake. Vendar pa si lahko LimeWire od te napake opomore in še naprej teče. Prosimo pa vas, da bi bili tako prijazni in spodnje besedilo preko e-pošte poslali na naslov bugs@limewire.com, saj nam boste tako pomagali pri odstranjevanju napak v programu.
 ERROR_THREE_CHARACTER_SEARCH=Iskalni pogoj mora imeti vsaj tri znake, kajti drugače bi gotovo mašili mrežo.
 ERROR_NETWORK_FLOODING=To iskanje lahko dobi veliko zadetkov in lahko tako upočasni mrežo. Ste prepričani, da želite nadaljevati?
 ERROR_BROWSE_FAILED=Ne morem brskati po datotekah na zahtevanem gostitelju. Ta računalnik najbrž ne sprejema še več vhodnih povezav..
@@ -1086,7 +1084,6 @@ OPTIONS_PORT_BOX_LABEL=Poslušaj na vratih:
 OPTIONS_FORCE_IP_TITLE=Vsiljevanje lokalnega IP naslova
 OPTIONS_FORCE_IP_LABEL=Ta možnost vam omogoča vsiljevanje lastnega IP naslova, če ste za požarnim zidom, in želite, da bi se k vam drugi Gnutella odjemalci lahko povezali, ne da bi jim bilo potrebno poslati PUSH zahtevo.
 OPTIONS_FORCE_IP_CHECK_BOX_LABEL=Vsiljevanje IP naslova
-OPTIONS_FORCE_IP_IP_LABEL=Naslov:
 OPTIONS_FORCE_IP_PORT_LABEL=Vrata:
 
 ################################################################################
@@ -1329,8 +1326,6 @@ SENT_MESSAGES=Poslano
 SENT_MESSAGE_NUMBER=Število
 SENT_MESSAGE_BYTES=Kilobytei
 SENT_LIMEWIRE=Sporočila LimeWire
-SENT_ULTRAPEER=Ultrapeer
-SENT_LEAF=List
 
 LIME_SENT_MESSAGES_NUMBER=Število
 STATS_SENT_TCP=TCP

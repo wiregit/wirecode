@@ -264,7 +264,6 @@ SEARCH_STOP_BUTTON_TIP=Przerwij gromadzenie wyników poszukiwań dla wybranej za
 SEARCH_PUBLIC_KILL_STRING=Zamknij szukanie
 SEARCH_PUBLIC_LAUNCH_STRING=Rozpocznij czynność
 SEARCH_PUBLIC_STOP_STRING=Przerwij szukanie
-SEARCH_PUBLIC_GROUP_STRING=Zgrupowane
 SEARCH_PUBLIC_BROWSE_STRING=Przeglądanie hosta
 SEARCH_PUBLIC_CHAT_STRING=Rozpocznij czata z hostem
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Zajrzyj na Bitzi Web...
@@ -295,7 +294,6 @@ RESULT_PANEL_NAME=Nazwa pliku
 RESULT_PANEL_TYPE=Typ
 RESULT_PANEL_SIZE=Rozmiar
 RESULT_PANEL_SPEED=Łącze
-RESULT_PANEL_SCORE=Wynik
 RESULT_PANEL_CHAT=Czat
 RESULT_PANEL_LOCATION=Lokalizacja
 RESULT_PANEL_COUNT=#
@@ -374,9 +372,7 @@ DOWNLOAD_TIME_REMAINING_COLUMN=Czas
 DOWNLOAD_SERVER_COLUMN=Producent/wersja
 DOWNLOAD_STATUS_QUEUED=Skolejkowane
 DOWNLOAD_STATUS_CONNECTING=Łączenie...
-DOWNLOAD_STATUS_WAITING_START=Oczekiwanie 
-DOWNLOAD_STATUS_WAITING_MIDDLE=na 
-DOWNLOAD_STATUS_WAITING_END=zajętość
+DOWNLOAD_STATUS_WAITING=Oczekiwanie na zajętość
 DOWNLOAD_STATUS_COMPLETE=Zakończone
 DOWNLOAD_STATUS_ABORTED=Porzucone
 DOWNLOAD_STATUS_FAILED=Pobranie nie było możliwe
@@ -693,7 +689,8 @@ MESSAGE_CONFIRM_FILE_DELETE=Czy na pewno chcesz skasować?
 MESSAGE_UNABLE_TO_DELETE_FILE_START=Nie udało się skasować pliku 
 MESSAGE_UNABLE_TO_DELETE_FILE_END=. Być może jest używany przez inną aplikację.
 MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Nie udało się skasować katalogu 
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_END=. Być może jest używany przez inną aplikację.
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Nie udało się zmienić nazwy katalogu
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. Być może jest używany przez inną aplikację.
 MESSAGE_UNABLE_TO_RENAME_FILE_START=Nie udało się zmienić nazwy pliku 
 MESSAGE_UNABLE_TO_RENAME_FILE_END=. Być może jest używany przez inną aplikację.
 MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire nie pozwoli Ci na 
@@ -708,6 +705,8 @@ MESSAGE_CONTINUE_DOWNLOAD=Czy chcesz kontynuować pobieranie?
 ################################################################################
 INVALID_SAVE_DIR_LABEL=Wybrany katalog nie może zostać użyty do zapisu pobieranych plików. Prosimy wybrać inny katalog w oknie wyboru katalogu.
 
+ERROR_INTERNAL_SERVLET=Podczas pracy LimeWire wystąpił błąd wewnętrzny. Mimo to, LimeWire jest w stanie usunąć usterkę i kontynuować działanie.
+
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
@@ -717,7 +716,6 @@ ERROR_TOO_LOW_FOR_ULTRAPEER=UltraHosty z dołączonymi listkami wymagają minimu
 ERROR_TOO_HIGH_FOR_LEAF=Listki potrzebują tylko jednego połączenia, gdyż są zależne od UltraHosta. 
 ERROR_PORT=Prosimy podać numer portu, który posłuży do komunikacji z siecią.\nSłuży do tego jedno z pól w oknie konfiguracyjnym.
 ERROR_INCOMING_CONNECTIONS=Wystąpił problem z nasłuchiwaniem połączen przychodzących; program zakończył działanie.
-ERROR_INTERNAL=Podczas pracy LimeWire wystąpił błąd wewnętrzny. Mimo to, LimeWire jest w stanie usunąć usterkę i kontynuować działanie. Prosimy skopiować ten tekst i przesłać go na adres bugs@limewire.com, co ułatwi nam usunięcie tego błędu.
 ERROR_THREE_CHARACTER_SEARCH=Prosimy wprowadzić zapytanie o długości min. trzech znaków.
 ERROR_NETWORK_FLOODING=To zapytanie może wygenerować wiele trafień, których zebranie potrwa bardzo długo. Czy na pewno chcesz kontynuować?
 ERROR_BROWSE_FAILED=Przeglądnięcie plików na wybranym hoście nie było możliwe. Najprawdopodobniej osiągnięty został limit połączeń.
@@ -769,7 +767,7 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=Połączenia
 OPTIONS_SHUTDOWN_MAIN_TITLE=Zamykanie
 OPTIONS_CHAT_MAIN_TITLE=Czat
 OPTIONS_PLAYER_MAIN_TITLE=Odtwarzacz
-OPTIONS_BROWSER_MAIN_TITLE=Przeglądarka
+#??? OPTIONS_APPS_MAIN_TITLE=Helper apps
 #??? OPTIONS_GUI_MAIN_TITLE=View
 #??? OPTIONS_POPUPS_MAIN_TITLE=Popups
 #??? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete text
@@ -1106,7 +1104,6 @@ OPTIONS_PORT_BOX_LABEL=Nasłuchuj na porcie:
 OPTIONS_FORCE_IP_TITLE=Wymuszanie adresu IP
 OPTIONS_FORCE_IP_LABEL=Umożliwia wymuszenie adresu IP w sytuacji kiedy znajdujesz się za firewall-em, a chciałbyś uzyskać bezproblemowe połączenie z Gnutellą.
 OPTIONS_FORCE_IP_CHECK_BOX_LABEL=Wymuszaj IP
-OPTIONS_FORCE_IP_IP_LABEL=Adres:
 OPTIONS_FORCE_IP_PORT_LABEL=Port:
 
 ################################################################################
@@ -1349,8 +1346,6 @@ STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=The average size in kilobytes of 
 #??? SENT_MESSAGE_NUMBER=Number
 SENT_MESSAGE_BYTES=KB
 SENT_LIMEWIRE=Wiadomości LimeWire
-SENT_ULTRAPEER=UltraHost
-SENT_LEAF=Listek
 
 #??? LIME_SENT_MESSAGES_NUMBER=Number
 STATS_SENT_TCP=TCP

@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for Limewire 2.9.12
+# Messages Bundle for Limewire 4.1.6
 # Specialization for: Traditional Chinese - Taiwan, Hong Kong and Macao
 # Thanks to: Ciyuan Zou
 ################################################################################
@@ -57,6 +57,9 @@ OPTIONS_BUTTONS_CANCEL_LABEL=取消
 OPTIONS_BUTTONS_CANCEL_TIP=取消新的設置
 OPTIONS_BUTTONS_APPLY_LABEL=套用
 OPTIONS_BUTTONS_APPLY_TIP=套用新的設置
+#??? OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore defaults
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert all settings to the factory defaults.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -69,10 +72,12 @@ NO=否
 ################################################################################
 #??? GENERAL_AVERAGE_BANDWIDTH=Average bandwidth
 #??? GENERAL_ALTERNATE_LOCATIONS=Valid alternate locations
+#??? GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid alternate locations
 #??? GENERAL_STARTED_ON=Started on 
 #??? GENERAL_FINISHED_ON=Finished on 
 #??? GENERAL_TIME_SPENT=Time spent
 #??? GENERAL_REVERT_TO_DEFAULT=Revert to default
+GENERAL_MORE_OPTIONS=高級
 
 # StatusLine, Statistics and GUIUtils
 GENERAL_UNIT_TERABYTES=TB
@@ -94,11 +99,39 @@ ABOUT_LABEL_START=LimeWire 客戶端
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
 ABOUT_LABEL_END=版權所有 (c)2000-2002 Lime Wire LLC.
 ABOUT_LABEL_TITLE=關於 LimeWire
+#??? ABOUT_CREDITS_LABEL=Credits
+#??? ABOUT_CREDITS_TIP=Display credits information about LimeWire.
+#??? ABOUT_NOTICE_LABEL=Notice
+#??? ABOUT_NOTICE_TIP=Display distribution and contact information.
+#??? ABOUT_LICENSE_LABEL=License
+#??? ABOUT_LICENSE_TIP=Display the license agreement about this software.
 ABOUT_BUTTON_LABEL=確定
 ABOUT_BUTTON_TIP=關閉窗口
 ABOUT_SCROLL_CHECK_BOX_LABEL=自動滚動
+#Do not uncomment the following line without providing this translated HTML file!
 #ABOUT_FILE_NAME=about_zh_TW.html
-#Do not uncomment the above line without providing this translated HTML file!
+
+###################################################################
+# Key/value pairs for the tip of the day window (not the tips themselves)
+###################################################################
+#??? TOTD_TITLE=Tip of the day
+#??? TOTD_INTRODUCTION=Did you know...
+#??? TOTD_SHOW_AT_STARTUP=Show tips at startup
+#??? TOTD_NEXT=Next tip
+#??? TOTD_PREVIOUS=Previous tip
+TOTD_CLOSE=關閉
+
+###################################################################
+# Key/value pairs for the Getting Started image
+###################################################################
+#??? GETTING_STARTED_TITLE=Getting started
+#??? GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
+
+###################################################################
+# Key/value pairs for the Going Pro image.
+###################################################################
+#??? GOING_PRO_TITLE=The most advanced file sharing program on the planet!
+#??? GOING_PRO_DESCRIPTION=Better search results\nTurbo charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
 
 ###################################################################
 # Key/value pairs for the Windows system tray -- Coming soon...
@@ -187,9 +220,15 @@ MENU_NAV_LIB_ACCESSIBLE=顯示我的最愛窗口
 
 MENU_VIEW_TITLE=檢視(V)
 MENU_VIEW_TITLE_MNEMONIC=V
+#??? MENU_VIEW_SMALL_ICONS=Use small icons(S)
+MENU_VIEW_SMALL_ICONS_MNEMONIC=S
+#??? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use small icons.
+#??? MENU_VIEW_TEXT_WITH_ICONS=Show icon text(T)
+MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
+#??? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show text below icons.
 #??? MENU_VIEW_SHOW_HIDE_TITLE=Show/Hide(W)
 MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
-#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or hide individual tabs
+#??? MENU_VIEW_SHOW_HIDE_ACCESSIBLE=Show or hide individual tabs.
 MENU_VIEW_MONITOR=監視(M)
 MENU_VIEW_MONITOR_MNEMONIC=M
 MENU_VIEW_MONITOR_ACCESSIBLE=顯示監視窗口
@@ -197,16 +236,34 @@ MENU_VIEW_CONNECTIONS=網路芳鄰(C)
 MENU_VIEW_CONNECTIONS_MNEMONIC=C
 MENU_VIEW_CONNECTIONS_ACCESSIBLE=顯示網路芳鄰窗口
 MENU_VIEW_LIBRARY=我的最愛(B)
-MENU_VIEW_LIBRARY_MNEMONIC=L
+MENU_VIEW_LIBRARY_MNEMONIC=B
 MENU_VIEW_LIBRARY_ACCESSIBLE=顯示我的最愛窗口
 #??? MENU_VIEW_THEMES_TITLE=Apply themes(T)
-#??? MENU_VIEW_THEMES_TITLE_MNEMONIC=T
+MENU_VIEW_THEMES_TITLE_MNEMONIC=T
 #??? MENU_VIEW_THEMES_GET_MORE=Get more themes(G)
-#??? MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
-#??? MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more themes from limewire.com
+MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
+#??? MENU_VIEW_THEMES_GET_MORE_ACCESSIBLE=Find more themes from limewire.com.
+#??? MENU_VIEW_THEMES_REFRESH=Refresh skins(R)
+MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
+#??? MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Reload available skins from disk.
 #??? MENU_VIEW_THEMES_USE_DEFAULT=Use default(D)
-#??? MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
-#??? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default theme
+MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
+#??? MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=Use your default theme.
+MENU_VIEW_LANGS_TITLE=语言(H)
+MENU_VIEW_LANGS_TITLE_MNEMONIC=H
+#??? MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire(T)
+MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_MNEMONIC=T
+#??? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE_ACCESSIBLE=Help translate LimeWire into your language.
+#??? MENU_VIEW_SEARCH_TITLE=Search(S)
+MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
+#??? MENU_VIEW_SEARCH_ACCESSIBLE=Search tab options.
+#??? MENU_VIEW_SEARCH_FILTERS=Result filters(F)
+MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
+#??? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show search result filters.
+MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
+MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
+#??? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show the Magnetmix button.
 
 MENU_RESOURCES_TITLE=資源(R)
 MENU_RESOURCES_TITLE_MNEMONIC=R
@@ -228,6 +285,9 @@ MENU_HELP_TITLE_MNEMONIC=H
 MENU_HELP_USING_LIMEWIRE=使用 LimeWire(U)
 MENU_HELP_USING_LIMEWIRE_MNEMONIC=U
 MENU_HELP_USING_LIMEWIRE_ACCESSIBLE=使用 LimeWire 的說明
+#??? MENU_HELP_TOTD=Tip of the day(D)
+MENU_HELP_TOTD_MNEMONIC=D
+#??? MENU_HELP_TOTD_ACCESSIBLE=Show the "Tip of the day" window
 MENU_HELP_FAQ=常見疑難排解(F)
 MENU_HELP_FAQ_MNEMONIC=F
 MENU_HELP_FAQ_ACCESSIBLE=LimeWire 常見疑難排解
@@ -243,10 +303,21 @@ MENU_HELP_REVIEW_ACCESSIBLE=提交關於 LimeWire 的評論
 MENU_HELP_ABOUT=關於...(A)
 MENU_HELP_ABOUT_MNEMONIC=A
 MENU_HELP_ABOUT_ACCESSIBLE=關於 LimeWire 的信息
+#??? MENU_HELP_ERROR=Generate error(E)
+#??? MENU_HELP_ERROR_MNEMONIC=E
+#??? MENU_HELP_ERROR_ACCESSIBLE=Generate a popup error for testing
+
+################################################################################
+# Keys/value pairs for general tables info
+################################################################################
+#??? TABLES_USE_ROWSTRIPE=Stripe rows
+#??? TABLES_REAL_TIME_SORTING=Sort automatically
+#??? TABLES_DISPLAY_TOOLTIPS=Extended tooltips
 
 ################################################################################
 # Keys/value pairs for SearchView stuff....
 ################################################################################
+#??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
 SEARCH_DOWNLOAD_BUTTON_LABEL=下載
 SEARCH_DOWNLOAD_BUTTON_TIP=下載所有選中的文件
 SEARCH_WISHLIST_BUTTON_LABEL=新增到希望列表
@@ -264,10 +335,11 @@ SEARCH_STOP_BUTTON_TIP=停止收集檢索結果
 SEARCH_PUBLIC_KILL_STRING=關閉搜尋
 SEARCH_PUBLIC_LAUNCH_STRING=運行
 SEARCH_PUBLIC_STOP_STRING=停止搜尋
-SEARCH_PUBLIC_GROUP_STRING=分組
 SEARCH_PUBLIC_BROWSE_STRING=瀏覽對方主機
 SEARCH_PUBLIC_CHAT_STRING=和對方聊天
 SEARCH_PUBLIC_BITZI_LOOKUP_STRING=到 Bitzi 網搜尋...
+#??? SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet details for file
+#??? SEARCH_PUBLIC_HTTP_PAGE_STRING=Web page for file(s)
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=重新搜尋
 #??? SEARCH_PUBLIC_BLOCK_STRING=Block host
 SEARCH_RESULT_TABLE_LABEL=搜尋結果
@@ -278,8 +350,25 @@ SEARCH_VIRUS_MSG_THREE=確認要下載嗎?
 SEARCH_SHOW_MESSAGE_MSG=下次不再顯示此信息
 SEARCH_DOWNLOAD_DIALOG_CONFIRM=請求下載
 SEARCH_DEFAULT_FIELD_TITLE=文件名
+#??? SEARCH_MULTIPLE_HOSTS=Multiple
 AUTO_DL_CHECKBOX_STRING=自動下載
 AUTO_DL_CHECKBOX_TOOLTIP=LimeWire 將為你下載這些文件
+#??? SEARCH_TYPE_KEYWORD=Keyword
+#??? SEARCH_TYPE_WHATSNEW=What's new
+#??? SEARCH_TYPE_BROWSEHOST=Direct connect
+#??? SEARCH_BROWSEHOST_TITLE=Got friends?
+#??? SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
+#??? SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
+#??? SEARCH_BROWSEHOST_BUTTON=Direct connect
+SEARCH_WHATSNEW_HIDE_ADULT=忽略成人內容
+#??? SEARCH_WHATSNEW_TITLE_ONE=Don't know
+#??? SEARCH_WHATSNEW_TITLE_TWO=what to look for?
+#??? SEARCH_WHATSNEW_DESC=A "What's new" search will search for files that have been recently added to the network.
+#??? SEARCH_CURRENT_SEARCH=Current search:
+#??? SEARCH_WHATS_NEW_SMALL=New
+#??? SEARCH_SELECT_TYPE=Select type:
+#??? SEARCH_FILTER_RESULTS=Filter results:
+#??? SEARCH_BACK_TO_SEARCH=Back to search
 
 #Media Types
 MEDIA_ANY_TYPE=任何類型
@@ -295,16 +384,26 @@ RESULT_PANEL_NAME=名稱
 RESULT_PANEL_TYPE=類型
 RESULT_PANEL_SIZE=大小
 RESULT_PANEL_SPEED=速度
-RESULT_PANEL_SCORE=積分
 RESULT_PANEL_CHAT=聊天
 RESULT_PANEL_LOCATION=位置
 RESULT_PANEL_COUNT=#
-RESULT_PANEL_VENDOR=軟體/version
+RESULT_PANEL_VENDOR=軟體
+#??? RESULT_PANEL_ADDED=Created
 
+#Filter labels.
+#??? SEARCH_FILTER_ALL=All
+#??? SEARCH_FILTER_OPTION=Option
+#??? SEARCH_FILTER_OPTIONS=Options
+#??? SEARCH_FILTER_MEDIA=Media
+
+#??? DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
+#??? DOWNLOAD_LAUNCH_BUTTON_TIP=Preview the selected download
 DOWNLOAD_KILL_BUTTON_LABEL=取消下載
 DOWNLOAD_KILL_BUTTON_TIP=取消選中的下載
 DOWNLOAD_RESUME_BUTTON_LABEL=恢復下載
 DOWNLOAD_RESUME_BUTTON_TIP=重新嘗試下載
+#??? DOWNLOAD_SOURCES_BUTTON_LABEL=Find sources
+#??? DOWNLOAD_SOURCES_BUTTON_TIP=Try to find sources for failed download.
 DOWNLOAD_CLEAR_BUTTON_LABEL=清除停止的下載
 DOWNLOAD_CLEAR_BUTTON_TIP=移除不活動的下載
 
@@ -353,6 +452,23 @@ STATISTICS_FILES=文件
 STATISTICS_DISCONNECTED=離線的/沒有可用的文件
 STATISTICS_SHARING=共用
 STATISTICS_SHARING_TOOLTIP=你正在共用文件的數目.
+#??? STATISTICS_CONNECTION_DISCONNECTED=Disconnected
+#??? STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
+#??? STATISTICS_CONNECTION_CONNECTING=Connecting
+#??? STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network.
+#??? STATISTICS_CONNECTION_POOR=Poor
+#??? STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network.
+#??? STATISTICS_CONNECTION_FAIR=Fair
+#??? STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger.
+#??? STATISTICS_CONNECTION_GOOD=Good
+#??? STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection.
+#??? STATISTICS_CONNECTION_EXCELLENT=Excellent
+#??? STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED=TurboCharged
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience TurboCharged connections all the time with LimeWire Pro.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
+#??? STATISTICS_CONNECTION_QUALITY=Quality:
+#??? STATISTICS_CONNECTION_IDLE=Idle
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -374,23 +490,36 @@ DOWNLOAD_TIME_REMAINING_COLUMN=時間
 DOWNLOAD_SERVER_COLUMN=軟體/version
 DOWNLOAD_STATUS_QUEUED=等候
 DOWNLOAD_STATUS_CONNECTING=連接中...
-DOWNLOAD_STATUS_WAITING_START=等待
-DOWNLOAD_STATUS_WAITING_MIDDLE=秒 因為
-DOWNLOAD_STATUS_WAITING_END=繁忙
+DOWNLOAD_STATUS_WAITING=等待因為繁忙
 DOWNLOAD_STATUS_COMPLETE=完成
 DOWNLOAD_STATUS_ABORTED=放棄
 DOWNLOAD_STATUS_FAILED=下載失敗
 DOWNLOAD_STATUS_DOWNLOADING=正在下載從
 DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=移動到收藏時失敗
 DOWNLOAD_STATUS_CORRUPT_FILE=文件被破壞
+#??? DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering corrupted file
+#??? DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery failed
 DOWNLOAD_STATUS_REQUERYING=正在請求網路
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=請求已發出, 等待
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=秒 返回結果
+DOWNLOAD_STATUS_WAITING_FOR_USER=Need more sources
+DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for stable connections
 DOWNLOAD_HOSTS_LABEL=主機
+#??? DOWNLOAD_HOST_LABEL=host
 #??? DOWNLOAD_STATUS_REMOTE_QUEUED=Waiting in line, position 
 #??? DOWNLOAD_STATUS_HASHING=Verifying file contents...
 #??? DOWNLOAD_STATUS_SAVING=Saving file...
-#??? DOWNLOAD_AWAITING_SOURCES=Awaiting more sources...
+#??? DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
+#??? DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
+#??? DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
+#??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
+#??? DOWNLOAD_BUSY_HOSTS=Busy hosts
+#??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
+#??? DOWNLOAD_SEARCHING=Locating sources....
+#??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
+#??? DOWNLOAD_MAGNET_DIALOG=Would you like to download
+#??? DOWNLOAD_FROM=from
+#??? DOWNLOAD_MAGNET_DIALOG_END=?
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -402,6 +531,7 @@ UPLOAD_KILL_BUTTON_TIP=停止選中的上載
 UPLOAD_CLEAR_BUTTON_LABEL=清除不活動
 UPLOAD_CLEAR_BUTTON_TIP=清除不活動的上載
 UPLOAD_CHAT_BUTTON_LABEL=和對方聊天
+UPLOAD_CHAT_BUTTON_TIP=和選中的用戶聊天
 UPLOAD_TABLE_STRING_NAME=名稱
 UPLOAD_TABLE_STRING_HOST=主機
 UPLOAD_TABLE_STRING_SIZE=大小
@@ -417,10 +547,16 @@ UPLOAD_TABLE_STRING_LIMITREACHED=達到上載限制
 UPLOAD_TABLE_STRING_FREELOADER=吃白食者正在上載
 UPLOAD_TABLE_STRING_PUSHFAILED=不能連線
 UPLOAD_TABLE_STRING_INTERRUPTED=傳輸中斷
+#??? UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=Range Unavailable
+#??? UPLOAD_TABLE_STRING_MALFORMED_REQUEST=Malformed Request
 UPLOAD_TABLE_STRING_COMPLETE=完成
+#??? UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned greedy servent
+#??? UPLOAD_TABLE_STRING_HASH_TREE=Uploading hash tree
 UPLOAD_TABLE_STRING_FNF=沒有找到文件
 UPLOAD_TABLE_STRING_QUEUED=等候
 UPLOAD_STRING_KBPSEC=KB/s
+#??? UPLOAD_ACTIVE=active
+#??? UPLOAD_QUEUED=queued
 
 ###################################################################
 # Key/value pairs for MonitorView
@@ -441,6 +577,14 @@ T1_SPEED=T1
 T3_SPEED=T3 或更高
 MULTICAST_SPEED=Ethernet
 
+################################################################################
+# HTML Page stuff
+################################################################################
+#??? HTML_PAGE_TITLE=Download page
+# SPACE AT END NEEDS TO BE THERE!!!
+#??? HTML_PAGE_LISTING=File listing for 
+#??? HTML_PAGE_MAGNET=Magnet links for fast downloads (if you have LimeWire installed)
+
 ###################################################################
 # Key/value pairs for ConnectionView
 ###################################################################
@@ -455,6 +599,8 @@ CV_COLUMN_PROTOCOL=協議
 CV_COLUMN_VENDOR=軟體/version
 CV_COLUMN_TIME=時間
 #??? CV_COLUMN_COMPRESSION=Compressed (I/O)
+#??? CV_COLUMN_QRP_FULL=QRP (%)
+#??? CV_COLUMN_QRP_USED=QRP empty
 CV_BUTTON_REMOVE=删除
 CV_BUTTON_TOOLTIP_REMOVE=删除選中的連線
 CV_BUTTON_ADD=新增
@@ -462,9 +608,15 @@ CV_BUTTON_TOOLTIP_ADD=產生一個新的傳出連線
 CV_LABEL_KEEP_BEGIN=大約保持
 CV_LABEL_KEEP_END=個連線上
 CV_TABLE_STRING_CONNECTING=連線中...
+CV_TABLE_STRING_CONNECTINGS=connecting
 CV_TABLE_STRING_LEAF=葉子節點
+#??? CV_TABLE_STRING_LEAVES=leaves
 CV_TABLE_STRING_ULTRAPEER=Ultrapeer
+CV_TABLE_STRING_ULTRAPEERS=Ultrapeers
+#??? CV_TABLE_STRING_PEER=Peer
+#??? CV_TABLE_STRING_PEERS=Peers
 CV_TABLE_STRING_STANDARD=0.6
+#??? CV_TABLE_STRING_STANDARDS=Standard
 CV_TABLE_STRING_INCOMING=傳入
 CV_TABLE_STRING_OUTGOING=傳出
 #??? CV_TABLE_STRING_CONNECTED_ON=Connected on 
@@ -475,6 +627,7 @@ CV_TABLE_STRING_KBPSEC=KB/s
 ################################################################################
 # Key/value pairs for a strings in the library window
 ################################################################################
+#??? LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_NAME=名稱
 #??? LIBRARY_TABLE_TITLE=Title
 #??? LIBRARY_TABLE_ARTIST=Artist
@@ -488,6 +641,8 @@ LIBRARY_TREE_NEW_FOLDER_LABEL=新增資料夾
 LIBRARY_TREE_UNSHARE_FOLDER_LABEL=停止共用
 LIBRARY_TREE_RENAME_FOLDER_LABEL=更名
 LIBRARY_TREE_TO_PLAYLIST_FOLDER_LABEL=新增到播放列表
+#??? LIBRARY_TREE_SAVED_DIRECTORY=Saved files
+#??? LIBRARY_TREE_INCOMPLETE_DIRECTORY=Incomplete files
 
 ################################################################################
 # Key/value pairs for burn cd link
@@ -497,7 +652,7 @@ LIBRARY_BURN_LABEL=刻錄 CD...
 ###################################################################
 # Key/value pairs for PlayListGUI
 ###################################################################
-PLAYLIST_TITLE=MP3播放列表
+PLAYLIST_TITLE=MP3 播放列表
 PLAYLIST_TABLE_NAME=名稱
 PLAYLIST_TABLE_LENGTH=時长
 PLAYLIST_TABLE_BITRATE=比特率
@@ -507,24 +662,36 @@ PLAYLIST_OPTIONS_SHUFFLE=跳跃
 PLAYLIST_DIALOG_OPEN_TITLE=選擇播放列表 (.m3u)
 PLAYLIST_DIALOG_SAVE_TITLE=儲存播放列表到....
 PLAYLIST_DIALOG_SAVE_SAVE=儲存
+#??? PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
+#??? PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
+#??? PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
+#??? PLAYLIST_FILE_MISSING=. The file cannot be found.
+#??? PLAYLIST_FILE_CORRUPT=. The file is corrupt.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
 # if you don't have a limewire.props file
 ################################################################################
-SETUP_WELCOME_LABEL=歡迎使用 LimeWire 安裝精靈. LimeWire 将指導你透過一系列步骤配置 LimeWire, 達到最佳性能.
-SETUP_SAVE_LABEL=請選擇你希望儲存下載文件的資料夾. 此資料夾預設與其他 Gnutella 用戶共用.
-SETUP_SPEED_LABEL=請選擇你的因特網連線速度. 正確的设定此速度對於优化網路非常重要. 如果你不能確認你是何種網路連線類型或者網路類型沒有列出, 隻需简单地選擇看上去最合适的.
-SETUP_SCAN_LABEL=你想要 LimeWire 迅速為其他媒介文件扫描你的硬碟吗? 你将有機會確切说明當扫描完成時, 你想分享哪份資料夾.
-SETUP_WAIT_LABEL=LimeWire 正在扫描你的硬碟, 請等待...
-SETUP_CONFIRM_LABEL=我們認為這些資料夾下面的文件有共用的可能. 如果你想共用這些資料夾, 仅仅检查它相關的選擇框. 共用的資料夾的的子資料夾也将被共用.
-SETUP_FINISH_LABEL=LimeWire 安裝成功. 請按“完成”按钮, 開始使用 LimeWire.
+#??? SETUP_LANGUAGE_TITLE=Language options
+#??? SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 SETUP_WELCOME_TITLE=歡迎
+SETUP_WELCOME_LABEL=歡迎使用 LimeWire 安裝精靈. LimeWire 将指導你透過一系列步骤配置 LimeWire, 達到最佳性能.
+#??? SETUP_WELCOME_PARTIAL_LABEL=歡迎使用 LimeWire 安裝精靈. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
 SETUP_SAVE_TITLE=儲存資料夾
+SETUP_SAVE_LABEL=請選擇你希望儲存下載文件的資料夾. 此資料夾預設與其他 Gnutella 用戶共用.
 SETUP_SPEED_TITLE=連線速度
+SETUP_SPEED_LABEL=請選擇你的因特網連線速度. 正確的设定此速度對於优化網路非常重要. 如果你不能確認你是何種網路連線類型或者網路類型沒有列出, 隻需简单地選擇看上去最合适的.
+#??? SETUP_STARTUP_TITLE=System startup
+#??? SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
+#??? SETUP_STARTUP_CHECKBOX=Start automatically
 SETUP_SCAN_TITLE=扫描文件
+SETUP_SCAN_LABEL=你想要 LimeWire 迅速為其他媒介文件扫描你的硬碟吗? 你将有機會確切说明當扫描完成時, 你想分享哪份資料夾.
 SETUP_WAIT_TITLE=正在扫描硬碟
+SETUP_WAIT_LABEL=LimeWire 正在扫描你的硬碟, 請等待...
 SETUP_CONFIRM_TITLE=確認扫描
+SETUP_CONFIRM_LABEL=我們認為這些資料夾下面的文件有共用的可能. 如果你想共用這些資料夾, 仅仅检查它相關的選擇框. 共用的資料夾的的子資料夾也将被共用.
+#??? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
+SETUP_FINISH_LABEL=LimeWire 安裝成功. 請按“完成”按钮, 開始使用 LimeWire.
 SETUP_FINISH_TITLE=安裝完成
 
 ################################################################################
@@ -554,6 +721,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=使用預設資料夾
 ################################################################################
 PRO_TITLE=升級到增強版
 PRO_LABEL_THANKS=LimeWire 軟體是由 7 個程式员全职工作历時两年編寫完成的. 如果你认為 LimeWire 是值得的, 請對 LimeWire 升級. 你的購買将使我們能一直改進 LimeWire.
+
 PRO_LABEL_QUESTION=升級到 LimeWire 增強版?
 GO_PRO_TIP=现在就要 LimeWire 增強版
 WHYGOPRO=為何有增強版?
@@ -582,6 +750,37 @@ VIEW_CHOOSER_OK_BUTTON_LABEL=確定
 VIEW_CHOOSER_CANCEL_BUTTON_LABEL=取消
 #IndentingPanel
 XML_SEARCH_MORE_OPTIONS_LABEL=更多搜尋選項
+
+#??? META_EDITOR_INFO_TAB_LABEL=Info
+META_EDITOR_OK_BUTTON_LABEL=確定
+META_EDITOR_CANCEL_BUTTON_LABEL=取消
+META_EDITOR_ADVANCED_BUTTON_LABEL=高級
+#??? META_EDITOR_RESET_LABEL=Reset
+
+META_EDITOR_AUDIO_LABEL=音頻
+#??? META_EDITOR_TITLE_LABEL=Title:
+#??? META_EDITOR_ARTIST_LABEL=Artist:
+#??? META_EDITOR_ALBUM_LABEL=Album:
+#??? META_EDITOR_GENRE_LABEL=Genre:
+#??? META_EDITOR_YEAR_LABEL=Year:
+#??? META_EDITOR_TYPE_LABEL=Type:
+#??? META_EDITOR_TRACK_LABEL=Track:
+#??? META_EDITOR_LANGUAGE_LABEL=Language:
+#??? META_EDITOR_SECONDS_LABEL=Length:
+#??? META_EDITOR_BITRATE_LABEL=Bitrate:
+#??? META_EDITOR_COMMENTS_LABEL=Comments:
+#??? META_EDITOR_SHA1_LABEL=SHA1:
+#??? META_EDITOR_PRICE_LABEL=Price:
+#??? META_EDITOR_LINK_LABEL=Link:
+#??? META_EDITOR_ACTION_LABEL=Action:
+#??? META_EDITOR_STARS_LABEL=Stars:
+
+#??? META_EDITOR_SIZE_LABEL=Size:
+#??? META_EDITOR_DATE_MODIFIED_LABEL=Date modified:
+#??? META_EDITOR_KIND_LABEL=Kind:
+META_EDITOR_MP3_KIND_LABEL=MPEG-1 音頻 Layer 3
+META_EDITOR_MP4_KIND_LABEL=MPEG-4 音頻
+META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
@@ -627,6 +826,7 @@ CHAT_YOU=你
 # Key/value pairs for splash screen status text
 ###################################################################
 SPLASH_STATUS_RESOURCE_MANAGER=加載資源...
+#??? SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
 SPLASH_STATUS_SEARCH_WINDOW=加載搜尋窗口...
 SPLASH_STATUS_OPTIONS_WINDOW=加載選項窗口...
 SPLASH_STATUS_USER_SETTINGS=加載用戶設置...
@@ -641,21 +841,38 @@ SPLASH_STATUS_MONITOR_WINDOW=加載監視窗口...
 SPLASH_STATUS_CONNECTION_WINDOW=加載連線窗口...
 SPLASH_STATUS_STATISTICS_WINDOW=加載統計窗口...
 SPLASH_STATUS_STATUS_WINDOW=加載狀態窗口...
+SPLASH_STATUS_PLAYLIST_WINDOW=加載 PlayList 窗口...
 SPLASH_STATUS_MENUS=加載菜单...
 SPLASH_STATUS_MESSAGE_SERVICE=加載消息...
+#??? SPLASH_STATUS_ICONS=Loading icons...
+#??? SPLASH_STATUS_I18N=Loading internationalization support...
+#??? SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
+#??? SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading connection listener...
+#??? SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Loading message router...
+#??? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading connection management...
+#??? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating peers...
+#??? SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading shared files...
+#??? SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Loading old downloads...
+#??? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
+#??? SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading directed querier...
+#??? SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading MAGNET listener...
+#??? SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading peer listener...
+#??? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading stale connection management...
+#??? SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Loading saved files...
+#??? SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Loading secure settings...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to 
 # support LimeWire through contributions.
 ##################################################################
-SUPPORT_Limewire_01=支援將來 LimeWire 的開發
-SUPPORT_Limewire_02=點擊這裡支援 LimeWire 開放的, 點對點網路的開發
-SUPPORT_Limewire_03=支援 LimeWire 開放網路平台的研究和開發
-SUPPORT_Limewire_04=點擊這裡成為研究 LimeWire 的支援者
-SUPPORT_Limewire_05=支援開放的網路
-SUPPORT_Limewire_06=點擊這裡支援開放資源和開放協議
-SUPPORT_Limewire_07=支援 LimeWire 開放資源的, 基於點對點的架構
-SUPPORT_Limewire_08=向開放資源的點對點網路作出貢獻
+SUPPORT_LIMEWIRE_01=支援將來 LimeWire 的開發
+SUPPORT_LIMEWIRE_02=點擊這裡支援 LimeWire 開放的, 點對點網路的開發
+SUPPORT_LIMEWIRE_03=支援 LimeWire 開放網路平台的研究和開發
+SUPPORT_LIMEWIRE_04=點擊這裡成為研究 LimeWire 的支援者
+SUPPORT_LIMEWIRE_05=支援開放的網路
+SUPPORT_LIMEWIRE_06=點擊這裡支援開放資源和開放協議
+SUPPORT_LIMEWIRE_07=支援 LimeWire 開放資源的, 基於點對點的架構
+SUPPORT_LIMEWIRE_08=向開放資源的點對點網路作出貢獻
 #??? SUPPORT_LIMEWIRE_09=Support a new distribution community for independent artists.
 #??? SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
 
@@ -665,6 +882,7 @@ SUPPORT_Limewire_08=向開放資源的點對點網路作出貢獻
 ################################################################################
 UPDATE_DIALOG_CAPTION=升級 LimeWire
 #??? UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
+#??? UPDATE_MESSAGE_SMALL=A newer version is available, update?
 UPDATE_SUCCEEDED_MESSAGE=LimeWire 升級完成. 請重啟 LimeWire, 使用新的版本.
 UPDATE_WEB_PAGE_ERROR_MESSAGE=開啟 LimeWire 主页, 執行升級時出现錯誤. 要完成升級, 請開啟你的瀏覽器瀏覽 http://www.limewire.com.
 UPDATE_ERROR_MESSAGE_START=你的 LimeWire 升級中遇到下列錯誤:
@@ -691,16 +909,18 @@ MESSAGE_OVERWRITE_EXISTING_FILE=覆盖已存在的文件
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=因為安全的原因, LimeWire 将不會運行指定的文件.
 MESSAGE_CONFIRM_FILE_DELETE=你確認要删除選中的文件吗?
 MESSAGE_UNABLE_TO_DELETE_FILE_START=不能删除此文件
-MESSAGE_UNABLE_TO_DELETE_FILE_END=它可能正在被别的程式使用.
+MESSAGE_UNABLE_TO_DELETE_FILE_END=. 它可能正在被别的程式使用.
 MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=不能删除此資料夾
-MESSAGE_UNABLE_TO_DELETE_DIRECTORY_END=. 它可能正在被别的程式使用.
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=不能更名此資料夾
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. 它可能正在被别的程式使用.
 MESSAGE_UNABLE_TO_RENAME_FILE_START=不能更名此文件
-MESSAGE_UNABLE_TO_RENAME_FILE_END=它可能正在被别的程式使用.
+MESSAGE_UNABLE_TO_RENAME_FILE_END=. 它可能正在被别的程式使用.
 MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire 不允許你
 MESSAGE_INCOMPLETE_DIRECTORY_END=保留給未完全下載的資料夾.
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire 不能够使用指定的儲存資料夾. 請選擇另一個資料夾.
 MESSAGE_FILE_CORRUPT=LimeWire 發現文件毁坏
 MESSAGE_CONTINUE_DOWNLOAD=你想繼續下載吗?
+#??? MESSAGE_LANG_CHANGE=Please note that you must restart limewire for the language to change. Also, make sure that you have the required fonts for the selected language.
 
 ################################################################################
 # Key/Value pairs for the invalid save directory window that is displayed
@@ -709,26 +929,81 @@ MESSAGE_CONTINUE_DOWNLOAD=你想繼續下載吗?
 INVALID_SAVE_DIR_LABEL=儲存文件的資料夾非法. 請選擇新的資料夾.
 
 ################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet
+################################################################################
+#??? NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire couldn't connect to the
+# internet and you haven't used your machine in awhile, so we'll automatically
+# keep trying.
+################################################################################
+#??? NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
+
+################################################################################
+# Key/value pair for the message shown when LimeWire is trying to connect
+# to too many GWebCaches for various reasons.
+################################################################################
+#??? GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#??? GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+
+################################################################################
+# Key/Value pairs for friendly error messages.
+# Every kind of error MUST be implemented for all types.
+# Currently, the only error is DISK_FULL and the only types are DOWNLOAD and GENERIC.
+################################################################################
+#??? ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
+#??? ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
+#??? ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.
+#??? ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
+#??? ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete directory. To continue using LimeWire, please choose a different Save Directory.
+#??? ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
+#??? ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the file name contains characters which are not supported by your operating system.
+#??? ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the file name contain characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
+
+################################################################################
+# Key/Value pairs for internal error messages
+################################################################################
+#??? ERROR_INTERNAL_TITLE=Internal Error
+ERROR_INTERNAL_SERVLET=LimeWire 存在一個內部錯誤. 但是, LimeWire 能從錯誤中恢復並且應該正常執行. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
+#??? ERROR_INTERNAL_SEND=Send
+#??? ERROR_INTERNAL_REVIEW=Review
+#??? ERROR_INTERNAL_DISCARD=Discard
+#??? ERROR_INTERNAL_COPY=Copy report
+ERROR_INTERNAL_OK=確定
+#??? ERROR_INTERNAL_ALWAYS_SEND=Always send immediately
+#??? ERROR_INTERNAL_ALWAYS_REVIEW=Always ask for review
+#??? ERROR_INTERNAL_ALWAYS_DISCARD=Always discard bugs
+#??? ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. To aid in debugging, please copy the following text and email it to bugs@limewire.com. Thank you.
+
+################################################################################
 # Key/Value pairs for error messages
 ################################################################################
+#??? ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
+#??? ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
 ERROR_PORT_UNAVAILABLE=連接埠不可提供. 請選擇一個不同的連接埠.
 ERROR_KEEP_ALIVE=當它造成網路阻塞, LimeWire 不允許你保持那麼多連線.
 ERROR_TOO_LOW_FOR_ULTRAPEER=有葉節点的超級節点需要至少 6 個連線.
 ERROR_TOO_HIGH_FOR_LEAF=葉子節点隻需要一個連線, 他們連線一超級節点.
 ERROR_PORT=不能找到一個連接埠為進來的連線使用.\n請從结构窗口指定一個連接埠.
 ERROR_INCOMING_CONNECTIONS=不能為進來的連線監听 Socket; 終止.
-ERROR_INTERNAL=LimeWire 存在一個內部錯誤. 但是, LimeWire 能從錯誤中恢復並且應該正常執行. 為了幫助我們做調試, 請復制以下的正文並用電子郵件發送給 bugs@limewire.com.
 ERROR_THREE_CHARACTER_SEARCH=你必须鍵入至少 3 個字符, 從而避免阻塞網路.
 ERROR_NETWORK_FLOODING=這種搜尋可能會返回許多结果從而使網路變慢. 你想繼續吗?
 ERROR_BROWSE_FAILED=不能瀏覽主機文件. 此機器不能接收過多的連線.
 ERROR_INVALID_SAVE_DIRECTORY=錯誤的儲存文件的資料夾. 請用另一個資料夾或者恢復到還原預設值.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=你的儲存資料夾不正確. 它可能被删除了, 你可能沒有寫的權限或者是其他問題. 請選擇另一個資料夾.
+#??? ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save directory is invalid. You may not have permissions to write to the selected directory. LimeWire will revert to your previously selected directory.
 ERROR_INVALID_SHARED_DIRECTORY=錯誤的共用資料夾. 請用另一個資料夾或者恢復到預設值.
 ERROR_FORCE_IP_PORT_RANGE=你必须輸入 1 到 65535 之間的數.
 ERROR_CONNECT_STRING=連線字符串长度至少為 1, 包含一個空格, 並且不能含有 'GIV', 'GET' 或者其他 HTTP 關鍵詞.
 ERROR_PORT_RANGE=請輸入 1 到 65535 的連接埠號.
 ERROR_INVALID_GROUP=你需要選擇一個正確的小組.
 ERROR_ALREADY_DOWNLOADING=你已經在下載了
+ERROR_ALREADY_EXISTS=You have already downloaded
+#??? NO_PREVIEW_BEGIN=There is nothing to preview for file
+#??? NO_PREVIEW_END=.
 #??? ERROR_CANT_RESUME_START=The file
 #??? ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
 ERROR_LOCATING_BROWSER_THEMES=LimeWire 不能定位你的瀏覽器. The LimeWire themes address is:\n"http://www.limewire.com".
@@ -750,7 +1025,20 @@ ERROR_SAVE_META_BAD=輸入了不正確的格式. 修改沒有儲存.
 ERROR_REMOVE_LAST_COL=你不能關掉所有列.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=不能瀏覽主機
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
+#??? ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
 #??? ERROR_INVALID_THEME_FILE=The theme file you selected does not exist or is invalid. Please choose another file, or use the default.
+#??? ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
+#??? ERROR_THEME_OUT_OF_DATE_TITLE=Invalid skin
+#??? ERROR_THEME_OUT_OF_DATE_GET_MORE=Get new skins
+#??? ERROR_THEME_OUT_OF_DATE_LATER=Later
+#??? ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
+#??? ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
+#??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
+#??? ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
+#??? ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -769,11 +1057,14 @@ OPTIONS_CONNECTIONS_MAIN_TITLE=連線
 OPTIONS_SHUTDOWN_MAIN_TITLE=關閉
 OPTIONS_CHAT_MAIN_TITLE=聊天
 OPTIONS_PLAYER_MAIN_TITLE=播放機
-OPTIONS_BROWSER_MAIN_TITLE=瀏覽器
+#??? OPTIONS_ITUNES_MAIN_TITLE=iTunes
+#??? OPTIONS_ITUNES_PREFERENCE_MAIN_TITLE=Importing
+#??? OPTIONS_ITUNES_DAAP_MAIN_TITLE=Sharing
+OPTIONS_APPS_MAIN_TITLE=Helper apps
+OPTIONS_BUGS_MAIN_TITLE=Bug reports
 #??? OPTIONS_GUI_MAIN_TITLE=View
 #??? OPTIONS_POPUPS_MAIN_TITLE=Popups
-#??? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete Text
-#??? OPTIONS_ROW_STRIPE_MAIN_TITLE=Row Stripes
+#??? OPTIONS_AUTOCOMPLETE_MAIN_TITLE=Autocomplete text
 OPTIONS_THEME_MAIN_TITLE=皮膚
 OPTIONS_SKIN_MAIN_TITLE=皮膚
 OPTIONS_SEARCH_MAIN_TITLE=搜尋
@@ -789,6 +1080,9 @@ OPTIONS_PREFERENCING_MAIN_TITLE=优先選擇
 OPTIONS_PORT_MAIN_TITLE=連接埠
 OPTIONS_FIREWALL_MAIN_TITLE=防火墙
 OPTIONS_PRIVATE_NET_MAIN_TITLE=私有網路
+#??? OPTIONS_STARTUP_MAIN_TITLE=System startup
+#??? OPTIONS_PROXY_MAIN_TITLE=Proxy
+#??? OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale preferencing
 
 ################################################################################
 # Key/value pairs for the localization options window item
@@ -850,6 +1144,13 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=如果你的计算機拥有快速的 Intern
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=設置超級節点為無效:
 
 ################################################################################
+# Key/Value pairs for disabling OOB support
+################################################################################
+#??? OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
+#??? OPTIONS_DISABLE_OOB_SEARCHING_LABEL=Out-Of-Band Searching results in faster result delivery to your client, though some internet connections may not work well with this feature.
+#??? OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Enable OOB Searching:
+
+################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
 # in the options window
 ################################################################################
@@ -864,6 +1165,15 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=最多下載數:
 OPTIONS_DOWNLOAD_CLEAR_TITLE=清除下載條目
 OPTIONS_DOWNLOAD_CLEAR_LABEL=你可以選擇是否自動清除已完成的下載條目.
 OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=自動清除已完成的下載條目:
+
+################################################################################
+# Key/Value pairs for the options for setting the bandwidth devoted
+# to downloads in the options window
+################################################################################
+OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=下載條目带寬
+OPTIONS_DOWNLOAD_BANDWIDTH_LABEL=你可以設置一定比例的下載條目带寬.
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_MAX_LABEL=無限的
+OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=下載條目带寬:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -881,6 +1191,14 @@ OPTIONS_UPLOAD_BANDWIDTH_TITLE=上載带寬
 OPTIONS_UPLOAD_BANDWIDTH_LABEL=你可以設置一定比例的上載带寬. 若要關閉上載, 請設置上載數至 0.
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=無限的
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=上載带寬:
+
+################################################################################
+# Key/Value pairs for the options for automatically sharing partially downloaded
+# files.
+################################################################################
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=Partial files
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=You can choose whether or not to automatically share partially downloaded files.
+#??? OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Allow partial sharing
 
 ################################################################################
 # Key/Value pairs for the options for the hard maximum number of uploads
@@ -934,6 +1252,27 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=播放機 選項
 OPTIONS_PLAYER_PREFERENCE_LABEL=你可以選用內部播放機或者系統預設的播放機.
 
 ################################################################################
+# Key/Value pairs for the iTunes options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
+#??? OPTIONS_ITUNES_PREFERENCE_TITLE=Importing
+#??? OPTIONS_ITUNES_PREFERENCE_LABEL=You can have LimeWire import newly downloaded songs into iTunes.
+
+################################################################################
+# Key/Value pairs for the iTunes/DAAP options in the options window
+################################################################################
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
+#??? OPTIONS_ITUNES_DAAP_PREFERENCE_LABEL=You can share your Music on the Local Area Network and make it accessible for iTunes and other Digital Audio Access Protocol (DAAP) enabled Players.\n\nEnable Compatability Mode if you experience problems with iTunes Sharing. This mode uses more resources and is slower, but may fix problems.
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_DAAP_ENABLED_LABEL=Share my Music:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_SERVICE_NAME_LABEL=Shared name:
+#??? OPTIONS_ITUNES_DAAP_SUPPORT_USE_BIO_LABEL=Compatability Mode
+
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_TITLE=Require password
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_LABEL=You can limit the access to this service with a password.
+#??? OPTIONS_ITUNES_DAAP_PASSWORD_CHECKBOX_LABEL=Require password:
+OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=密碼:
+
+################################################################################
 # Key/Value pairs for url handler options
 ################################################################################
 OPTIONS_BROWSER_PREFERENCE_TITLE=瀏覽選項
@@ -942,12 +1281,19 @@ OPTIONS_BROWSER_BOX_LABEL=瀏覽器
 #??? OPTIONS_IMAGE_VIEWER_PREFERENCE_TITLE=Image 選項
 #??? OPTIONS_IMAGE_VIEWER_PREFERENCE_LABEL=你可以選用何種 image viewer.
 #??? OPTIONS_IMAGE_VIEWER_BOX_LABEL=Image viewer
-#??? OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=Video 選項
-#??? OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=你可以選用何種 video 播放機.
-#??? OPTIONS_VIDEO_PLAYER_BOX_LABEL=Video 播放機
-#??? OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=Audio 選項
-#??? OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=你可以選用何種 audio 播放機.
-#??? OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio 播放機
+OPTIONS_VIDEO_PLAYER_PREFERENCE_TITLE=視頻 選項
+OPTIONS_VIDEO_PLAYER_PREFERENCE_LABEL=你可以選用何種 視頻 播放機.
+OPTIONS_VIDEO_PLAYER_BOX_LABEL=視頻 播放機
+OPTIONS_AUDIO_PLAYER_PREFERENCE_TITLE=音頻 選項
+OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=你可以選用何種 音頻 播放機.
+OPTIONS_AUDIO_PLAYER_BOX_LABEL=音頻 播放機
+
+################################################################################
+# Key/value pairs for asking whether or not to display message bug reports
+################################################################################
+#??? OPTIONS_BUGS_TITLE=Bug reports
+#??? OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard Bugs' will cause LimeWire to ignore all bugs (this is not recommended).
+#??? OPTIONS_BUGS_VIEW_EXAMPLE=View example
 
 ################################################################################
 # Key/value pairs for asking whether or not to display message popups
@@ -965,13 +1311,6 @@ OPTIONS_BROWSER_BOX_LABEL=瀏覽器
 #??? OPTIONS_AUTOCOMPLETE_TITLE=Autocomplete
 #??? OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields
 #??? OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable autocompletion of text fields
-
-################################################################################
-# Key/value pairs for the options pane used to enable and disable row striping
-################################################################################
-#??? OPTIONS_ROW_STRIPE_TITLE=Row striping
-#??? OPTIONS_ROW_STRIPE_LABEL=You can enable or disable the striping of rows in tables.
-#??? OPTIONS_ROW_STRIPE_DISPLAY_CHECK_BOX_LABEL=Enable row striping
 
 ################################################################################
 # Key/Value pairs for theme options
@@ -1106,7 +1445,6 @@ OPTIONS_PORT_BOX_LABEL=監听連接埠:
 OPTIONS_FORCE_IP_TITLE=強制本地 IP
 OPTIONS_FORCE_IP_LABEL=如果你在防火墙的後面而想讓其他 Gnutella 客戶不傳送 “推” 請求的话, 就請你強制設置你的 IP 地址.
 OPTIONS_FORCE_IP_CHECK_BOX_LABEL=強制 IP
-OPTIONS_FORCE_IP_IP_LABEL=地址:
 OPTIONS_FORCE_IP_PORT_LABEL=連接埠號:
 
 ################################################################################
@@ -1349,8 +1687,6 @@ STATS_QUERY_REPLY_TTL_BYTES_TITLE=TTL
 SENT_MESSAGE_NUMBER=數
 SENT_MESSAGE_BYTES=KB
 SENT_LIMEWIRE=LimeWire 消息
-SENT_ULTRAPEER=Ultrapeer
-SENT_LEAF=葉子節點
 
 LIME_SENT_MESSAGES_NUMBER=數
 STATS_SENT_TCP=TCP
