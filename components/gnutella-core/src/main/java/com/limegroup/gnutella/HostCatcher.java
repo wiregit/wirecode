@@ -766,16 +766,6 @@ public class HostCatcher implements HostListener {
     }
 
     /**
-     * Returns an iterator of the hosts in this, in order of priority.
-     * This can be modified while iterating through the result, but
-     * the modifications will not be observed.
-     */
-    public synchronized Iterator getHosts() {
-        //Clone the queue before iterating.
-        return (new BucketQueue(ENDPOINT_QUEUE)).iterator();
-    }
-
-    /**
      * Returns an iterator of this' "permanent" hosts, from worst to best.
      * This method exists primarily for testing.  THIS MUST NOT BE MODIFIED
      * WHILE ITERATOR IS IN USE.
@@ -784,28 +774,18 @@ public class HostCatcher implements HostListener {
         return permanentHosts.iterator();
     }
 
+    
     /**
-     *  Returns an iterator of the (at most) n best ultrapeer endpoints of this.
-     *  It's not guaranteed that these are reachable. This can be modified while
-     *  iterating through the result, but the modifications will not be
-     *  observed.  
+     * Accessor for the <tt>Collection</tt> of Ultrapeers that have advertised
+     * free Ultrapeer slots.  The returned <tt>Collection</tt> is a complete 
+     * copy of the hosts with free slots and can therefore be modified in any 
+     * way.
      * 
-     * @param n the number of hosts to return
-     * @return a <tt>Collection</tt> of the <tt>n</tt> best <tt>IpPort</tt> 
-     *  instances, or between 0 and <tt>n</tt> hosts if fewer than <tt>n</tt>
-     *  hosts are available
+     * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
+     *  that they have free ultrapeer slots
      */
-    public synchronized Collection getUltrapeerHosts(int n) {
-        
-        //Make n the # of hosts to return--never more than the # of ultrapeers.
-        n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
-        //Copy n best hosts into temporary buffer.
-        List /* of ExtendedEndpoint */ buf = new ArrayList(n);
-        for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); 
-             iter.hasNext(); )
-            buf.add(iter.next());
-        //And return iterator of contents.
-        return buf;
+    public synchronized Collection getUltrapeersWithFreeUltrapeerSlots() {
+        return new HashSet(FREE_ULTRAPEER_SLOTS_SET);
     }
 
     /**
@@ -816,10 +796,8 @@ public class HostCatcher implements HostListener {
      * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
      *  that they have free leaf slots
      */
-    public Collection getUltrapeersWithFreeLeafSlots() {
-        synchronized(this) {
-            return new HashSet(FREE_LEAF_SLOTS_SET);
-        }
+    public synchronized Collection getUltrapeersWithFreeLeafSlots() {
+        return new HashSet(FREE_LEAF_SLOTS_SET);
     }
 
     /**
