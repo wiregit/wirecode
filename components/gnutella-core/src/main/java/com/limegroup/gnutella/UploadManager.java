@@ -596,7 +596,7 @@ public class UploadManager implements BandwidthTracker {
 			// get the filename, which should be right after
 			// the "/", and before the next " ".
 			int f = str.indexOf( " HTTP/", d );
-			String file = str.substring( (d+1), f);
+			String file = URLDecoder.decode(str.substring( (d+1), f));
             //check if the protocol is HTTP1.1. Note that this is not a very 
             //strict check.
             boolean http11 = false;

@@ -420,7 +420,7 @@ public class DownloadManager implements BandwidthTracker {
             int j=command.indexOf("/", i);
             byte[] guid=GUID.fromHexString(command.substring(i+1,j));
             //c). Extract file name.
-            String filename=command.substring(j+1);    
+            String filename=URLDecoder.decode(command.substring(j+1));
 
             return new GIVLine(filename, index, guid);
         } catch (IndexOutOfBoundsException e) {

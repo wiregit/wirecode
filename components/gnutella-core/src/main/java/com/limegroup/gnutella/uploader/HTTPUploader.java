@@ -173,7 +173,7 @@ public class HTTPUploader implements Uploader {
 			//in the GIV request.  I guess it doesn't need
 			//to match technically, but we check to be safe.
 			int end = parse[2].lastIndexOf("HTTP") - 1;
-			String filename = parse[2].substring(0, end);
+			String filename = URLDecoder.decode(parse[2].substring(0, end));
 			// some safety checks - make sure name and index match.
 			if (! filename.equals(_filename))
 				throw new IOException();
