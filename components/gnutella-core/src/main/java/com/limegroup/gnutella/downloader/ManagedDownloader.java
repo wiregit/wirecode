@@ -2475,13 +2475,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * 
      * @param downloader the normal or push downloader to use for the transfer,
      * which MUST be initialized (i.e., downloader.connectTCP() and
-     * connectHTTP() have been called) 
-     * @param http11 used to determine when this downloader should be removed
-     * from the dloaders list. The general rule: never remove the downloader
-     * from dloaders if the uploader supports persistence, unless we get an
-     * exception - in which case we do not add it back to files.  If !http11,
-     * then we remove from the dloaders in the finally block and add to files as
-     * before if no problem was encountered.  
+     * connectHTTP() have been called)
      */
     private void doDownload(HTTPDownloader downloader) {
         debug("WORKER: about to start downloading "+downloader);
