@@ -99,7 +99,7 @@ public class IncompleteFileManager implements Serializable {
         //Remove any blocks for which the file doesn't exist.
         for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
             File file=(File)iter.next();
-            if (!file.exists() || isOld(file)) {
+            if (!file.exists() || (isOld(file) && initialPurge) ) {
                 ret=true;
                 RouterService.getFileManager().removeFileIfShared(file);
                 file.delete();  //always safe to call; return value ignored
