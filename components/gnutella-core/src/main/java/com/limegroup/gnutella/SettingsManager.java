@@ -8,6 +8,10 @@ import com.sun.java.util.collections.*;
 import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -167,6 +171,9 @@ public final class SettingsManager {
     private final int DEFAULT_UPLOADS_PER_PERSON=3;
 
     private final int DEFAULT_UPLOAD_QUEUE_SIZE = 10;
+    
+    /** Always consider 127.*.*.* is private in production*/
+    private final boolean DEFAULT_LOCAL_IS_PRIVATE = true;
 
     /** default banned ip addresses */
     private final String[] DEFAULT_BANNED_IPS     = {};
@@ -274,6 +281,7 @@ public final class SettingsManager {
 	public static final String DEFAULT_CLASSPATH = DEFAULT_JAR_NAME;
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
+	private final boolean DEFAULT_GUESS_ENABLED       = false;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
     private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
@@ -293,6 +301,7 @@ public final class SettingsManager {
 
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
+
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
 
     //authentication settings
@@ -448,6 +457,7 @@ public final class SettingsManager {
 
     private final String UPLOADS_PER_PERSON    = "UPLOADS_PER_PERSON";
     private final String UPLOAD_QUEUE_SIZE     = "UPLOAD_QUEUE_SIZE";
+    private final String LOCAL_IS_PRIVATE      = "LOCAL_IS_PRIVATE";
     private final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
     private final String TOTAL_UPTIME          = "TOTAL_UPTIME";
     private final String SESSIONS              = "SESSIONS";
@@ -474,6 +484,11 @@ public final class SettingsManager {
 	 * Constant key for whether or not chat is enabled.
 	 */
 	private final String CHAT_ENABLED = "CHAT_ENABLED";
+
+	/**
+	 * Constant key for whether or not GUESS is enabled.
+	 */
+	private final String GUESS_ENABLED = "GUESS_ENABLED";
 
 	/**
 	 * Constant key for whether or not the internal player is enabled.
@@ -651,6 +666,7 @@ public final class SettingsManager {
     private volatile int      _softMaxUploads;
     private volatile int      _uploadsPerPerson;
     private volatile int      _uploadQueueSize;
+    private volatile boolean  _localIsPrivate;
 
 	private volatile boolean  _chatEnabled;
 	private volatile boolean  _playerEnabled;
@@ -876,6 +892,9 @@ public final class SettingsManager {
                 else if(key.equals(UPLOAD_QUEUE_SIZE)) {
                     setUploadQueueSize(Integer.parseInt(p));
                 }
+                else if(key.equals(LOCAL_IS_PRIVATE)) {
+                    setLocalIsPrivate(Boolean.valueOf(p).booleanValue());
+                }
                 else if(key.equals(KEEP_ALIVE)) {
                     //Verified for real later.  See note below.
                     setKeepAlive(Integer.parseInt(p));
@@ -901,6 +920,16 @@ public final class SettingsManager {
                     else
                         break;
                     setChatEnabled(bs);
+				}
+				else if(key.equals(GUESS_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setGuessEnabled(bs);
 				}
 				else if(key.equals(PLAYER_ENABLED)) {
 					boolean bs;
@@ -1288,6 +1317,7 @@ public final class SettingsManager {
 
 		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
         setUploadQueueSize(DEFAULT_UPLOAD_QUEUE_SIZE);
+        setLocalIsPrivate(DEFAULT_LOCAL_IS_PRIVATE);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
         setLastShutdownTime(DEFAULT_LAST_SHUTDOWN_TIME);
@@ -1303,6 +1333,7 @@ public final class SettingsManager {
 		setAppHeight(DEFAULT_APP_HEIGHT);
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
+        setGuessEnabled(DEFAULT_GUESS_ENABLED);
 		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
 		setBrowser(getDefaultBrowser());
 
@@ -1411,6 +1442,8 @@ public final class SettingsManager {
     /** Returns the size of the upload queue */
     public int getUploadQueueSize() {return  _uploadQueueSize;}
 
+    public boolean getLocalIsPrivate() { return _localIsPrivate;}
+
     /**
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the directory for saving files.
@@ -1447,6 +1480,9 @@ public final class SettingsManager {
 
 	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
+
+	/** Returns true if GUESS is enabled */
+	public boolean getGuessEnabled() {return getBooleanValue(GUESS_ENABLED);}
 
 	/** Returns true if the player is enabled */
 	public boolean getPlayerEnabled() {
@@ -2369,7 +2405,16 @@ public final class SettingsManager {
         PROPS.put(UPLOAD_QUEUE_SIZE , s);
 	}
 
-
+    /**
+     * Sets the _checkPrivateIp, if true, ManagedDownloader tries to connect
+     * directly
+     */
+    public void setLocalIsPrivate(boolean isPrivate) {
+        _localIsPrivate = isPrivate;
+        String s = (new Boolean(isPrivate)).toString();
+        PROPS.put(LOCAL_IS_PRIVATE, s);
+    }
+    
 
     public void setAdvancedInfoForQuery(int advancedInfo) {
         _advancedQueryInfo = advancedInfo;
@@ -2688,6 +2733,16 @@ public final class SettingsManager {
 		_chatEnabled = chatEnabled;
 		String s = String.valueOf(chatEnabled);
 		PROPS.put(CHAT_ENABLED, s);
+	}
+
+
+	/**
+	 * Sets whether or not guess should be enabled.
+	 *
+	 * @param guessEnabled specified whether or not GUESS is enabled
+	 */
+	public void setGuessEnabled(boolean guessEnabled) {
+		setBooleanValue(GUESS_ENABLED, guessEnabled);
 	}
 
 
@@ -3519,14 +3574,16 @@ public final class SettingsManager {
 			PROPS.save(ostream, "");
 			ostream.close();
 		}
-		catch (Exception e){
-            // TODO: we really should find a way to log this
+		catch (Throwable e){
+            showInternalError(e);
         }
 		finally {
 			try {
 				if(ostream != null) ostream.close();
 			}
-			catch(IOException io) {}
+			catch(IOException e) {
+                showInternalError(e);
+            }
 		}
 	}
 
@@ -3555,6 +3612,157 @@ public final class SettingsManager {
         String[] ret=new String[buf.size()];
         buf.copyInto(ret);
         return ret;
+    }
+
+	/**
+	 * Display a standardly formatted internal error message
+	 * coming from the backend.
+	 *
+	 * @param message the message to display to the user
+	 *
+	 * @param t the <tt>Throwable</tt> object containing information 
+	 *          about the error
+	 */	
+	private void showInternalError(Throwable t) {
+		t.printStackTrace();
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		pw.print("LimeWire version ");
+		pw.println(CommonUtils.getLimeWireVersion());            
+		pw.print("Java version ");
+		pw.print(CommonUtils.getJavaVersion());
+		pw.print(" from ");
+		pw.println(prop("java.vendor"));
+		pw.print(CommonUtils.getOS());
+		pw.print(" v. ");
+		pw.print(prop("os.version"));
+		pw.print(" on ");
+		pw.println(prop("os.arch"));
+		Runtime runtime = Runtime.getRuntime();
+		pw.println("Free/total memory: "
+				   +runtime.freeMemory()+"/"+runtime.totalMemory());
+		pw.println();
+		
+		t.printStackTrace(pw);
+
+		pw.println();
+
+		File propsFile = new File(CommonUtils.getUserSettingsDir(),
+								  "limewire.props");
+		Properties props = new Properties();
+		try {
+			FileInputStream fis = new FileInputStream(propsFile);
+			props.load(fis);
+			fis.close();
+			// list the properties in the PrintWriter.
+			props.list(pw);
+		} catch(FileNotFoundException fnfe) {
+		} catch(IOException ioe) {
+		}
+
+        pw.println("");
+        pw.println("");
+        pw.println("");
+		pw.println("FILES IN CURRENT DIRECTORY:");
+        File curDir = CommonUtils.getCurrentDirectory();
+        String[] files = curDir.list();
+        for(int i=0; i<files.length; i++) {
+            File curFile = new File(curDir, files[i]);
+            pw.println(curFile.toString());
+            pw.println("LAST MODIFIED: "+curFile.lastModified());
+            pw.println("SIZE: "+curFile.length());
+            pw.println();
+        }
+
+		pw.flush();
+		
+		displayError(sw.toString());
+
+        if(t instanceof ExceptionInInitializerError) {
+            showInternalError(((ExceptionInInitializerError)t).getException());
+        }
+	}
+
+    /** 
+	 * Returns the System property with the given name, or
+     * "?" if it is unknown. 
+	 */
+    private String prop(String name) {
+        String value = System.getProperty(name);
+        if (value == null) return "?";
+        else return value;
+    }
+
+
+	/**
+	 * Displays an internal error with specialized formatting.
+	 *
+	 * @param error the string containing the stack trace, properties, etc. 
+     *  for the error
+	 */
+	private void displayError(String error) {
+		final JDialog DIALOG = new JDialog();
+		final Dimension DIALOG_DIMENSION = new Dimension(260, 120);
+		final Dimension INNER_SIZE = new Dimension(220, 100);
+		DIALOG.setSize(DIALOG_DIMENSION);
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+
+
+        JLabel label = new JLabel("LimeWire has encountered an error.  "+
+                                  "If you would be so kind, please copy this "+
+                                  "message and send it to bugs@limewire.com.");
+		JPanel labelPanel = new JPanel();
+		JPanel innerLabelPanel = new JPanel();
+		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));		
+		innerLabelPanel.setLayout(new BoxLayout(innerLabelPanel, 
+                                                BoxLayout.Y_AXIS));
+		innerLabelPanel.add(label);
+		innerLabelPanel.add(Box.createVerticalStrut(6));
+		labelPanel.add(innerLabelPanel);
+		labelPanel.add(Box.createHorizontalGlue());
+
+        final JTextArea textArea = new JTextArea(error);
+        textArea.selectAll();
+        textArea.copy();
+        textArea.setColumns(50);
+        textArea.setEditable(false);
+        JScrollPane scroller = new JScrollPane(textArea);
+        scroller.setBorder(BorderFactory.createEtchedBorder());
+		scroller.setPreferredSize(INNER_SIZE);
+
+
+        JPanel buttonPanel = new JPanel();
+        JButton copyButton = new JButton("Copy Selection");
+        copyButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textArea.copy();
+			}
+		});
+        JButton quitButton = new JButton("Ok");
+        quitButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+				DIALOG.dispose();
+			}
+		});
+        buttonPanel.add(copyButton);
+        buttonPanel.add(quitButton);
+
+        mainPanel.add(labelPanel);
+        mainPanel.add(scroller);
+        mainPanel.add(buttonPanel);
+
+        DIALOG.getContentPane().add(mainPanel);
+		
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        DIALOG.setLocation((screenSize.width - DIALOG_DIMENSION.width)/2,
+                           (screenSize.height - DIALOG_DIMENSION.height)/2);
+        
+		DIALOG.pack();
+		DIALOG.show();
     }
 
 	// unit tests
