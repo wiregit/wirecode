@@ -47,12 +47,17 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 */
 	private final static byte TTL = 7;
 
+
 	/**
 	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 
-        ConnectionSettings.SOFT_MAX.getValue();
+	 * greater than this value have their TTLs automatically reduced.
+     *
+     * NOTE: This is now based on the X-Max-TTL header for these tests, 
+     * since our connectin pass this headers, and this is what the
+     * per-connection soft max is based on.
+	 */    
+    private static final byte SOFT_MAX = (byte)5; // X-Max-TTL+1
+
 
 	/**
 	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
@@ -220,6 +225,26 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		drainAll();
 		sleep();
         drainAll();
+    }
+
+	/**
+	 * Tests broadcasting of queries from ULTRAPEER_2.
+	 */
+    public void testBroadcastFromUltrapeer2() throws Exception  {
+		QueryRequest qr = QueryRequest.createQuery("crap");
+        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.flush();
+              
+        Message m = ULTRAPEER_1.receive(TIMEOUT);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
+        
+        QueryRequest qr2 = (QueryRequest)m;
+        assertEquals("unexpected query", "crap", qr2.getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
+
+		assertTrue("should not have drained leaf successfully", 
+				   !drain(LEAF));
     }
 
 	/**
@@ -461,28 +486,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		assertTrue("guids should be equal", 
 				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));         
     }
-
-
-	/**
-	 * Tests broadcasting of queries from ULTRAPEER_2.
-	 */
-    public void testBroadcastFromUltrapeer2() throws Exception  {
-		QueryRequest qr = QueryRequest.createQuery("crap");
-        ULTRAPEER_2.send(qr);
-        ULTRAPEER_2.flush();
-              
-        Message m = ULTRAPEER_1.receive(TIMEOUT);
-		assertInstanceof("expected a query request", QueryRequest.class, m);
-        
-        QueryRequest qr2 = (QueryRequest)m;
-        assertEquals("unexpected query", "crap", qr2.getQuery());
-        assertEquals("unexpected hops", (byte)1, m.getHops()); 
-        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
-
-		assertTrue("should not have drained leaf successfully", 
-				   !drain(LEAF));
-    }
-
 
 	/**
 	 * Tests to make sure that queries by URN are correctly forwarded
