@@ -955,7 +955,12 @@ public class DownloadManager implements BandwidthTracker {
         //and send the push to the node 
         try {
         	InetAddress address = InetAddress.getByName(file.getHost());
-        	udpService.send(pr, address, file.getPort());
+        	
+        	//don't bother sending direct push if the node reported invalid
+        	//address and port.
+        	if (NetworkUtils.isValidAddress(address) &&
+        			NetworkUtils.isValidPort(file.getPort()))
+        		udpService.send(pr, address, file.getPort());
         } catch(UnknownHostException notCritical) {
         	//We can't send the push to a host we don't know
         	//but we can still send it to the proxies.
