@@ -29,7 +29,8 @@ public class User implements Serializable
      */
     private Set /* of String */ _domains;
     
-    private static final String DEFAULT_DOMAIN = "DEFAULT";
+    public static final String DEFAULT_UNAUTHENTICATED_DOMAIN = 
+        "__DEFAULT_UNAUTHENTICATED_DOMAIN__";
     
     /**
      * creates a new user
@@ -64,7 +65,7 @@ public class User implements Serializable
     public static Set createDefaultDomainSet(){
         Set domainSet = new HashSet();
         //add the default domain to the list of domains
-        domainSet.add(DEFAULT_DOMAIN);
+        domainSet.add(DEFAULT_UNAUTHENTICATED_DOMAIN);
         return domainSet;
     }
     
