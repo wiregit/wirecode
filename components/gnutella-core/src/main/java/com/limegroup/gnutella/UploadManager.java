@@ -206,9 +206,13 @@ public final class UploadManager implements BandwidthTracker {
             //We are going to notify the gui about the new upload, and let it 
             //decide what to do with it - will act depending on it's state
             _callback.addUpload(uploader);
-            FileDesc fd = _fileManager.get(uploader.getIndex());
-            fd.incrementAttemptedUploads();
-            _callback.handleSharedFileUpdate(fd.getFile());
+            try {
+                FileDesc fd = _fileManager.get(uploader.getIndex());
+                fd.incrementAttemptedUploads();
+                _callback.handleSharedFileUpdate(fd.getFile());
+			} catch (IndexOutOfBoundsException e) {
+                // well, the file doesn't exist anyway -- so no need to update
+			}
         }
 
         
