@@ -349,20 +349,20 @@ public class VersionUpdate
 				String pathSeparator = System.getProperty("path.separator");
 				String line = br.readLine();
 				String curTok = "";
+				String endFlag = "update.jar"+pathSeparator;
 				while(line != null) {
 					if(line.startsWith(newClasspaths)) {
 						line = line.substring(15);
 						st = new StringTokenizer(line, pathSeparator);
-						curTok = st.nextToken()+pathSeparator;
-						while(st.hasMoreTokens()) {							
+						while(st.hasMoreTokens()) {
+							curTok = st.nextToken()+pathSeparator;							
 							if(curTok.startsWith("LimeWire")) {
-								if(!curTok.endsWith("update.jar"+pathSeparator)) {
+								if(!curTok.endsWith(endFlag)) {
 									_settings.setOldJARName(curTok);
 									curTok = newFileName+pathSeparator;
 								}
 							}
 							sb.append(curTok);
-							curTok = st.nextToken()+pathSeparator;
 						}
 						line = sb.toString();
 					}
