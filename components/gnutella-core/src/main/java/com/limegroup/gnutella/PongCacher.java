@@ -37,7 +37,7 @@ public final class PongCacher {
     /**
      * Constant for expiring locale specific pongs
      */
-    public static final int EXPIRE_TIME_LOC = 2*EXPIRE_TIME;
+    public static final int EXPIRE_TIME_LOC = 15*EXPIRE_TIME;
 
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.

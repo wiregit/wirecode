@@ -618,7 +618,7 @@ public final class HandshakeResponse {
             if(hosts.size() < 10) {
                 //list returned is unmmodifiable
                 conns =
-                    new ArrayList
+                    new LinkedList
                     (RouterService.getConnectionManager()
                      .getInitializedConnections());
                 //returned list may contain duplicates

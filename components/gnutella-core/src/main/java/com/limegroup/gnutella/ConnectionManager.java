@@ -909,7 +909,7 @@ public class ConnectionManager {
     /**
      */
     public List getInitializedConnectionsMatchLocale(String loc) {
-        List matches = new ArrayList();
+        List matches = new LinkedList();
         for(Iterator itr= _initializedConnections.iterator();
             itr.hasNext();) {
             Connection conn = (Connection)itr.next();
