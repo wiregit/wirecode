@@ -313,7 +313,7 @@ public final class QueryHandler {
         else {
             // otherwise, just send a normal query
             _theoreticalHostsQueried += 
-                sendQuery(this, _connectionManager.getInitializedConnections2());             
+                sendQuery(this, _connectionManager.getInitializedConnections());             
         }
     }
 
@@ -330,6 +330,7 @@ public final class QueryHandler {
      *  query iteration
      */
     private static int sendQuery(QueryHandler handler, List list) {
+        list.removeAll(QUERIED_HANDLERS);
 		int length = list.size();
         int newHosts = 0;
         for(int i=0; i<length; i++) {
@@ -341,17 +342,16 @@ public final class QueryHandler {
             if(!mc.isStable(handler._curTime)) continue;
                 
 			// if we've already queried this host, go to the next one
-			if(handler.QUERIED_HANDLERS.contains(mc)) continue;
+			//if(handler.QUERIED_HANDLERS.contains(mc)) continue;
 			
-			int hostsQueried = handler.QUERIED_HANDLERS.size();
+			//int hostsQueried = handler.QUERIED_HANDLERS.size();
 			
 			// assume there's minimal overlap between the connections
 			// we queried before and the new ones 
             
             // also, pretend we have fewer connections than we do
             // in case they go away
-			int remainingConnections = length - hostsQueried - 3;
-			remainingConnections = Math.max(remainingConnections, 1);
+			int remainingConnections = Math.max(length-3, 1);
 			
 			int results = handler.RESULT_COUNTER.getNumResults();
 			double resultsPerHost = 
@@ -374,12 +374,20 @@ public final class QueryHandler {
                 System.out.println("QueryHandler::sendQuery::"+
                                    "hosts to query: "+
                                    handler.QUERY.getQuery()+" "+
-                                   hostsToQuery); 
+                                   hostsToQuery+" remaining connections: "+
+                                   remainingConnections); 
             }
 
 			
 			int hostsToQueryPerConnection = 
 				hostsToQuery/remainingConnections;			
+
+            if(handler.QUERY.getHops() == 0) {
+                System.out.println("QueryHandler::sendQuery::"+
+                                   "hosts to query per connection: "+
+                                   handler.QUERY.getQuery()+" "+
+                                   hostsToQueryPerConnection); 
+            }
             byte maxTTL = mc.headers().getMaxTTL();
 
 			byte ttl = 
@@ -387,9 +395,12 @@ public final class QueryHandler {
                                 mc.getNumIntraUltrapeerConnections(),
                                 mc.headers().getMaxTTL());
 
+            
             // we know we're not going to get anything at TTL=1 if
             // it's not the connections route table, so go to TTL=2
-            if(ttl == 1 && !mc.hitsQueryRouteTable(handler.QUERY)) {
+            if(ttl == 1 && 
+               mc.isUltrapeerQueryRoutingConnection() &&
+               !mc.hitsQueryRouteTable(handler.QUERY)) {
                 ttl = 2;
             } else if(ttl == 1 && 
                       handler.TTL_1_PROBES_SENT.contains(mc)) {
@@ -469,7 +480,7 @@ public final class QueryHandler {
 
             // biased towards lower TTLs since the horizon expands so
             // quickly
-            int hosts = (int)(16.0*calculateNewHosts(degree, i));
+            int hosts = (int)(18.0*calculateNewHosts(degree, i));            
             if(hosts >= hostsToQueryPerConnection) {
                 return i;
             }
