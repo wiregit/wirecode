@@ -111,70 +111,11 @@ public class ManagedConnection extends Connection
     /** A lock for QRP activity on this connection */
     private final Object QRP_LOCK=new Object();
     /** A lock to protect _outputQueue. */
-    private Object _outputQueueLock=new Object();
-    /** The producer's queues, one priority per mesage type. 
-     *  INVARIANT: _outputQueue.length==PRIORITIES
-     *  LOCKING: obtain _outputQueueLock. */
-    private MessageQueue[] _outputQueue=new MessageQueue[PRIORITIES];
-    /** The number of queued messages.  Maintained for performance.
-     *  INVARIANT: _queued==sum of _outputQueue[i].size() 
-     *  LOCKING: obtain _outputQueueLock */
-    private int _queued=0;
-    /** True if the OutputRunner died.  For testing only. */
-    private boolean _runnerDied=false;
-    /** The priority of the last message added to _outputQueue. This is an
-     *  optimization to keep OutputRunner from iterating through all priorities.
-     *  This value is only a hint and can be legally set to any priority.  Hence
-     *  no locking is necessary.  Package-access for testing purposes only. */
-    int _lastPriority=0;
-    /** The size of the queue per priority. Larger values tolerate larger bursts
-     *  of producer traffic, though they waste more memory. This queue is 
-     *  slightly larger than the standard to accomodate higher priority 
-     *  messages, such as queries and query hits. */
-    private static final int BIG_QUEUE_SIZE = 100;
 
-    /** The size of the queue per priority. Larger values tolerate larger bursts
-     *  of producer traffic, though they waste more memory. This queue is
-     *  slightly smaller so that we don't waste too much memory on lower
-     *  priority messages. */
-    private static final int QUEUE_SIZE = 1;
-    /** The max time to keep reply messages and pushes in the queues, in
-     *  milliseconds. */
-    private static int BIG_QUEUE_TIME=10*1000;
-    /** The max time to keep queries, pings, and pongs in the queues, in
-     *  milliseconds.  Package-access for testing purposes only! */
-    static int QUEUE_TIME=5*1000;
-    /** The number of different priority levels. */
-    private static final int PRIORITIES = 8;
-    /** Names for each priority. "Other" includes QRP messages and is NOT
-     * reordered.  These numbers do NOT translate directly to priorities;
-     * that's determined by the cycle fields passed to MessageQueue. */
-    private static final int PRIORITY_WATCHDOG=0;
-    private static final int PRIORITY_PUSH=1;
-    private static final int PRIORITY_QUERY_REPLY=2;
-    private static final int PRIORITY_QUERY=3; //TODO: add requeries
-    private static final int PRIORITY_PING_REPLY=4;
-    private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;    
-    
-    /**
-     * Separate priority for queries that we originate.  These are very
-     * high priority because we don't want to drop queries that are
-     * originating from us -- we want to largely bypass the message
-     * queues when we are first sending a query out on the network.
-     */
-    private static final int PRIORITY_OUR_QUERY=7;
                                                             
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
         new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
-
-
-    /**
-     * The amount of time to wait for a handshake ping in reject connections, in
-     * milliseconds.     
-     */
-    private static final int REJECT_TIMEOUT=500;  //0.5 sec
 
 
     /**
@@ -240,6 +181,8 @@ public class ManagedConnection extends Connection
 
     /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
+     * 
+     * TODO:: use this again -- our sends no longer take this into account
      */
     private int softMaxHops = -1;
 
@@ -283,7 +226,7 @@ public class ManagedConnection extends Connection
 	/** 
 	 * Priority queue of messages to send. 
 	 */
-	private final CompositeQueue QUEUE = new CompositeQueue();
+	private final CompositeQueue QUEUE = CompositeQueue.createQueue();
 	
 	/** 
 	 * Locking to ensure that messages are not dropped if write() is called
@@ -378,7 +321,7 @@ public class ManagedConnection extends Connection
 		} else {
 			//BLOCKING IO: writing data could stall another reader thread.
 			//So queue it and notify write thread.
-			NIODispatcher.instance().addWriter(this);
+            // TODO:: we need to implement this!!!
 			return true;
 		}
 	}
@@ -393,6 +336,7 @@ public class ManagedConnection extends Connection
 	 * data is sent.
 	 */
 	public boolean write() {
+        System.out.println("ManagedConnection::write");
 		synchronized (WRITE_LOCK) {
 			//Terminate when either
 			//a) super cannot send any more data because its send
@@ -400,12 +344,15 @@ public class ManagedConnection extends Connection
 			//b) neither super nor this have any queued data
 			//c) the socket is closed
 			while (isOpen()) {
-				//Add more queued data to super if possible.
+                System.out.println("ManagedConnection::write::open");
+				// Add more queued data to super if possible.
 				if (! super.hasQueued()) {
 					Message m = null;
+                    System.out.println("ManagedConnection::write::open::about to get lock");
 					synchronized (this) {
+                        System.out.println("ManagedConnection::write::open::got LOCK!!");
 						m = QUEUE.removeNext();
-						if (m==null)
+						if (m == null)
 							return false;    //Nothing left to send (a)
 						_numSentMessagesDropped += QUEUE.resetDropped();
 					}
@@ -416,9 +363,10 @@ public class ManagedConnection extends Connection
 				//Otherwise write data from super.  Abort if this didn't
 				//complete.
 				else {
-					boolean hasUnsentData = super.write();
-					if (hasUnsentData)
-						return true;         //needs another write (b)
+                    return super.write();
+					//boolean hasUnsentData = super.write();
+					//if (hasUnsentData)
+					//	return true;         //needs another write (b)
 				}
 			}
 			return false;                    //socket closed (c)
