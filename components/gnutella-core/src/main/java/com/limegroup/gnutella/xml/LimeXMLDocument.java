@@ -233,7 +233,7 @@ public class LimeXMLDocument implements Serializable {
             }catch(NumberFormatException e){
                 number = false;
             }
-            if(!number)
+            if(!number && (val != null) && (!val.equals("")))
                 retList.add(val);
         }
         return retList;
