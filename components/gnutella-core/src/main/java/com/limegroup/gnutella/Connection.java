@@ -336,11 +336,12 @@ public class Connection implements Runnable {
 	//We won't wait more than TIMEOUT milliseconds for a half-completed message.
 	//However, we will wait as long as necessary for an incomplete message.
 	//See Message.read(..) for an explanation.
-	try {
-	    sock.setSoTimeout(SettingsManager.instance().getTimeout());
-	} catch (SocketException e) {
-	    //Ignore?
-	}
+//	Disabled 9/1/2000 by crohrs.
+//  	try {
+//  	    sock.setSoTimeout(SettingsManager.instance().getTimeout());
+//  	} catch (SocketException e) {
+//  	    //Ignore?
+//  	}
 	try {
 	    while (true) {
 		Message m=null;
