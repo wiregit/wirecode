@@ -71,8 +71,8 @@ public class ManagedConnection
      */
     private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
 
-    private final MessageRouter _router;
-    private final ConnectionManager _manager;
+    private MessageRouter _router;
+    private ConnectionManager _manager;
 
     private volatile SpamFilter _routeFilter = SpamFilter.newRouteFilter();
     private volatile SpamFilter _personalFilter =
@@ -263,12 +263,6 @@ public class ManagedConnection
      * The domain to which this connection is authenticated
      */
     private Set _domains = null;
-    
-    /**
-	 * Constant handle to the <tt>SettingsManager</tt> for accessing
-	 * various properties.
-	 */
-	private final SettingsManager SETTINGS = SettingsManager.instance();
 
     /** Use this if a HopsFlowVM instructs us to stop sending queries below
      *  this certain hops value....
@@ -291,25 +285,40 @@ public class ManagedConnection
      * already be translated.  This constructor exists only for the convenience
      * of implementation.
      */
-    public ManagedConnection(String host,
-							 int port,
-							 MessageRouter router,
-							 ConnectionManager manager) {
+    public ManagedConnection(String host, int port) {
         //If a router connection, connect as 0.4 by setting responders to null.
         //(Yes, it's a hack, but this is how Connection(String,int) is
         //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
         //the headers according to whether we're supernode capable.
-        super(host, port, 
-			  (manager.isSupernode() ? 
-			   (Properties)(new SupernodeProperties(host)) : 
-			   (Properties)(new ClientProperties(host))),
-			  (manager.isSupernode() ?
-			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
-			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)));
-        
-        _router = router;
-        _manager = manager;
+        this(host, port, 
+			 (RouterService.isSupernode() ? 
+			  (Properties)(new SupernodeProperties(host)) : 
+			  (Properties)(new ClientProperties(host))),
+			 (RouterService.isSupernode() ?
+			  (HandshakeResponder)new SupernodeHandshakeResponder(host) :
+			  (HandshakeResponder)new ClientHandshakeResponder(host)));
     }
+
+	/**
+	 * More customizable constructor used for testing.
+	 */
+	static ManagedConnection createTestConnection(String host, int port, 
+												  Properties props, 
+												  HandshakeResponder responder) {	
+		return new ManagedConnection(host, port, props, responder);
+	}
+
+	/**
+	 * Creates a new <tt>ManagedConnection</tt> with the specified 
+	 * handshake classes and the specified host and port.
+	 */
+	private ManagedConnection(String host, int port, 
+							  Properties props, 
+							  HandshakeResponder responder) {	
+        super(host, port, props, responder);        
+        _router = RouterService.getMessageRouter();
+        _manager = RouterService.getConnectionManager();		
+	}
 
     /**
      * Creates an incoming connection.
@@ -319,18 +328,17 @@ public class ManagedConnection
      * @effects wraps a connection around socket and does the rest of the
      *  Gnutella handshake.
      */
-    ManagedConnection(Socket socket,
-                      MessageRouter router,
-                      ConnectionManager manager) {
+    ManagedConnection(Socket socket) {
         super(socket, 
-			  manager.isSupernode() ? 
-			  (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
+			  RouterService.isSupernode() ? 
+			  (HandshakeResponder)(new SupernodeHandshakeResponder(
 			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new ClientHandshakeResponder(manager,
+			  (HandshakeResponder)(new ClientHandshakeResponder(
 				  socket.getInetAddress().getHostAddress())));
-        _router = router;
-        _manager = manager;
+        _router = RouterService.getMessageRouter();
+        _manager = RouterService.getConnectionManager();
     }
+
 
 
     public void initialize()
