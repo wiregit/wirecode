@@ -131,8 +131,8 @@ public class PromotionManager {
     	synchronized(_promotionLock) {
     		//check if we received the ACK from the right person
     		//also allow for loopback addresses for testing 
-    		if (!sender.isSame(_promotionPartner) && 
-    				!sender.getInetAddress().isLoopbackAddress())
+    		if (!sender.isSame(_promotionPartner)) //&& 
+    				//!sender.getInetAddress().isLoopbackAddress())
     			return;
     	}
     	

@@ -523,6 +523,11 @@ public abstract class MessageRouter {
         		;//TODO: add the statistics recording code
         	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
+        else if (msg instanceof PromotionACKVendorMessage) {
+        	if(RECORD_STATS)
+        		;//TODO: add the statistics recording code
+        	handlePromotionACKVendorMessage(datagram);
+        }
         notifyMessageListener(msg);
     }
     
@@ -2579,11 +2584,13 @@ public abstract class MessageRouter {
     	
     	if(!RouterService.isSupernode()) {
     		
+    		IpPortPair us = new IpPortPair(NetworkUtils.ip2string(RouterService.getAddress()),
+    				RouterService.getPort());
+    		
     		//make sure the promotion request was intended for us
-    		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
-    				RouterService.getAddress()) ||
-					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())  
-					//msg.getCandidate().getInetAddress().isLoopbackAddress()) //keep this one around
+    		if (msg.getCandidate().isSame(us) ||
+					//ConnectionSettings.LOCAL_IS_PRIVATE.getValue())  
+					msg.getCandidate().getInetAddress().isLoopbackAddress()) //keep this one around
     			//for testing purposes allows requests from localhost
     			
     			_promotionManager.initiatePromotion(msg); 
@@ -2591,7 +2598,7 @@ public abstract class MessageRouter {
     	//*********************
     	//we are an ultrapeer that needs to forward this query.
     	//*********************
-    	else if (msg.getDistance() >1)
+    	else if (msg.getDistance() >1) 
     		return;
     	else
     		forwardPromotionRequest(new PromotionRequestVendorMessage(msg));
@@ -2609,14 +2616,15 @@ public abstract class MessageRouter {
      * @param msg the PromotionRequestVendorMEssage to forward
      */
     public void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
-    	
+
     	Connection route = BestCandidates.getRoute(msg.getCandidate(), 
     			2-msg.getDistance());
-    	
+
     	if (route!=null && route.isOpen())
     		try  {
     			route.send(msg);
     		}catch(IOException tooBad) {}  //sending failed.  Not much we can do
+    	
     	 
     }
     
@@ -2625,11 +2633,11 @@ public abstract class MessageRouter {
      * delegates the call to promotion manager.
      * 
      */
-    private void handlePromotionACKVendorMessage(PromotionACKVendorMessage message, 
-    			ReplyHandler handler, DatagramPacket datagram) {
+    private void handlePromotionACKVendorMessage(DatagramPacket datagram) {
     	
     	_promotionManager.handleACK(
-    			new IpPortPair(datagram.getAddress(),datagram.getPort()));
+    			new IpPortPair(datagram.getAddress().getHostAddress(),
+    					datagram.getPort()));
     	
     }
     
