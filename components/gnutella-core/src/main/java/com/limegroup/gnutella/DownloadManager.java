@@ -108,17 +108,18 @@ public class DownloadManager implements BandwidthTracker {
         // Try once with the real file, then with the backup file.
         if( !readSnapshot(real) ) {
             // if backup succeeded, copy into real.
-            if( readSnapshot(backup) ) {
-                real.delete();
-                CommonUtils.copy(backup, real);
-            }       
+            if( readSnapshot(backup) )
+                copyBackupToReal();
         }
         
         Runnable checkpointer=new Runnable() {
             public void run() {
                 try {
-                    if (downloadsInProgress()>0) //optimization
-                        writeSnapshot();
+                    if (downloadsInProgress() > 0) { //optimization
+                        // If the write failed, move the backup to the real.
+                        if(!writeSnapshot())
+                            copyBackupToReal();
+                    }
                 } catch(Throwable t) {
                     ErrorService.error(t);
                 }
@@ -127,6 +128,17 @@ public class DownloadManager implements BandwidthTracker {
         RouterService.schedule(checkpointer, 
 							   SNAPSHOT_CHECKPOINT_TIME, 
 							   SNAPSHOT_CHECKPOINT_TIME);
+    }
+    
+    /**
+     * Copies the backup downloads.dat (downloads.bak) file to the
+     * the real downloads.dat location.
+     */
+    private synchronized void copyBackupToReal() {
+        File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();        
+        real.delete();
+        CommonUtils.copy(backup, real);
     }
     
     /**
