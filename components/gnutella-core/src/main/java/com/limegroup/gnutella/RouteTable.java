@@ -76,6 +76,8 @@ public final class RouteTable {
         private int bytesRouted;
         /** The number of replies already routed for this GUID. */
         private int repliesRouted;
+        /** The ttl associated with this RTE - meaningful only if > 0. */
+        private byte ttl = 0;
         /** Creates a new entry for the given ID, with zero bytes routed. */
         RouteTableEntry(int handlerID) {
             this.handlerID = handlerID;
@@ -83,6 +85,9 @@ public final class RouteTable {
 			this.repliesRouted = 0;
         }
 		
+        public void setTTL(byte ttl) { this.ttl = ttl; }
+        public byte getTTL() { return ttl; }
+
 		/** Accessor for the number of results for this entry. */
 		public int getNumResults() { return repliesRouted; }
     }
@@ -174,6 +179,43 @@ public final class RouteTable {
         }
     }
 
+    /** Optional operation - if you want to remember the TTL associated with a
+     *  message, in order to allow for extendable execution, you can set the TTL
+     *  a message (guid).
+     *  If the guid is not present (evicted or forgotten), this is a noop.
+     *  @param ttl should be greater than 0.
+     *  @exception IllegalArgumentException thrown if !(ttl > 0)
+     */
+    public void setTTL(byte[] guid, byte ttl) {
+        if (!(ttl > 0))
+            throw new IllegalArgumentException("Input TTL too small: " + ttl);
+
+        //Look up guid in _newMap. If not there, check _oldMap. 
+        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.get(guid);
+
+        if (entry==null)
+            ; // nothing to do
+        else
+            entry.setTTL(ttl);
+    }
+
+    /** Optional accessor - use this if you used setTTL(byte[]) to remember the
+     *  ttl of a message (guid).  If it returns 0, then it was never set.
+     *  @return 0 if the guid was never remembered, >0 if so.
+     */
+    public byte getTTL(byte[] guid) {
+        //Look up guid in _newMap. If not there, check _oldMap. 
+        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.get(guid);
+
+        if (entry==null)
+            return (byte) 0;
+        else 
+            return entry.getTTL();
+    }
 
     /**
      * Looks up the reply route for a given guid.

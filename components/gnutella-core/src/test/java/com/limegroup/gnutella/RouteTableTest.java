@@ -39,12 +39,19 @@ public final class RouteTableTest extends BaseTestCase {
         rt.routeReply(g1, c1);
         rt.routeReply(g2, c2);                    //old, new:
         rt.routeReply(g3, c3);                    //{}, {g1, g2, g3}
+        rt.setTTL(g3, (byte)1);
+        rt.setTTL(g2, (byte)2);
+        rt.setTTL(g1, (byte)3);
         assertSame(c1, rt.getReplyHandler(g1));
         assertSame(c2, rt.getReplyHandler(g2));
         assertSame(c3, rt.getReplyHandler(g3, 0, (short) 0).getReplyHandler());
         assertNull(rt.getReplyHandler(g4, 0, (short) 0));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         assertNotNull(rt.tryToRouteReply(g4, c4));  //{g1, g2, g3}, {g4}
+        assertTrue(rt.getTTL(g3) == (byte) 1);
+        assertTrue(rt.getTTL(g2) == (byte) 2);
+        assertTrue(rt.getTTL(g1) == (byte) 3);
+        assertTrue(rt.getTTL(g4) == (byte) 0);
         assertSame(c1, rt.getReplyHandler(g1));
         rt.routeReply(g1, c1);                    //{g2, g3}, {g1, g4}
         assertSame(c1, rt.getReplyHandler(g1));
@@ -53,6 +60,10 @@ public final class RouteTableTest extends BaseTestCase {
         assertSame(c4, rt.getReplyHandler(g4));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         rt.routeReply(g2, c3);                     //{g1, g4}, {g2}
+        assertTrue(rt.getTTL(g1) == (byte) 3);
+        assertTrue(rt.getTTL(g4) == (byte) 0);
+        assertTrue(rt.getTTL(g2) == (byte) 0);
+        rt.setTTL(g2, (byte)4);
         debug(rt.toString());
         assertSame(c1, rt.getReplyHandler(g1));
         assertSame(c3, rt.getReplyHandler(g2));
@@ -60,6 +71,7 @@ public final class RouteTableTest extends BaseTestCase {
         assertSame(c4, rt.getReplyHandler(g4));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         assertNull(rt.tryToRouteReply(g2, c2));  //{g2}, {}}
+        assertTrue(rt.getTTL(g2) == (byte) 4);
         assertNull(rt.getReplyHandler(g1));
         assertSame(c3, rt.getReplyHandler(g2));
         assertNull(rt.getReplyHandler(g3));
