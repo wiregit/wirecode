@@ -61,12 +61,15 @@ public class QueryUnicasterTest extends TestCase {
         }
 
         // add these endpoints....
-        for (int i = 0; i < NUM_UDP_LOOPS; i++) {
-            ExtendedEndpoint ee = new ExtendedEndpoint("127.0.0.1",
-                                                       5000 + i,
-                                                       0, true);
-            QueryUnicaster.instance().addUnicastEndpoint(ee);
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getByName("127.0.0.1");
         }
+        catch (Exception damn) {
+            assertTrue(false);
+        }
+        for (int i = 0; i < NUM_UDP_LOOPS; i++) 
+            QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
 
         // add a Query
         QueryRequest qr = new QueryRequest((byte)2, 0, "Susheel");
@@ -148,11 +151,15 @@ public class QueryUnicasterTest extends TestCase {
         QueryUnicaster.instance().addQuery(qr);
 
         // add these endpoints....
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getByName("127.0.0.1");
+        }
+        catch (Exception damn) {
+            assertTrue(false);
+        }
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
-            ExtendedEndpoint ee = new ExtendedEndpoint("127.0.0.1",
-                                                       5000 + i,
-                                                       0, true);
-            QueryUnicaster.instance().addUnicastEndpoint(ee);
+            QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
             if (i % 5 == 0) {
                 try {
                     // give some time for queries to get out...
