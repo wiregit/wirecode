@@ -11,6 +11,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.upelection.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -61,7 +62,7 @@ import org.apache.commons.logging.Log;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection implements IpPort {
+public class Connection implements Candidate {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -148,6 +149,34 @@ public class Connection implements IpPort {
      *  Capabilities the guy on the other side of this connection supports.
      */
     protected CapabilitiesVM _capabilities = null;
+    
+    /**
+     * The possibly non-null VendorMessagePayload which describes what
+     * features the guy on the other side of this connection supports.
+     */
+    protected FeaturesVendorMessage _features = null;
+    
+    /**
+     * The possibly non-null VendorMessagePayload which describes what
+     * candidates the guy on the other side of this connection advertises.
+     */
+    protected BestCandidatesVendorMessage _candidates = null;
+    
+    /**
+     * the last time we received an advertisement on this connection
+     */
+    private long _lastReceivedAdvertisementTime;
+    
+    /**
+     * the last time we sent an advertisement on this connection
+     */
+    private long _lastSentAdvertisementTime;
+    
+    /**
+     * we should not send or receive advertisements more often than this
+     * interval.  Not final so that tests can change it.
+     */
+    private static long ADVERTISEMENT_INTERVAL = 2 * Constants.MINUTE;  // 2 minutes?
     
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -356,6 +385,37 @@ public class Connection implements IpPort {
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
         if (vm instanceof CapabilitiesVM)
             _capabilities = (CapabilitiesVM) vm;
+        if (vm instanceof FeaturesVendorMessage)
+        	_features = (FeaturesVendorMessage) vm;
+        
+        //if we are receiving a BestCandidatesVendorMessage
+        //we need to do some extra processing.
+        
+        if (vm instanceof BestCandidatesVendorMessage) {
+        	
+        	//do nothing if we are a leaf or the connection is a leaf.
+        	if (!RouterService.isSupernode() || !isGoodUltrapeer())
+        		return;
+        	
+        	//make sure they aren't advertising too soon.
+        	if (System.currentTimeMillis() - _lastReceivedAdvertisementTime <
+        			ADVERTISEMENT_INTERVAL)
+        		return;
+        	
+        	//update the values
+        	_lastReceivedAdvertisementTime = System.currentTimeMillis();
+        	_candidates = (BestCandidatesVendorMessage)vm;
+        	
+        	//then add a ref of the advertiser to each candidate received
+        	Candidate [] candidates = _candidates.getBestCandidates();
+        	
+        	candidates[0].setAdvertiser(this);
+        	if (candidates[1]!=null)
+        		candidates[1].setAdvertiser(this);
+        	
+        	//and update our internal table
+        	BestCandidates.update(candidates);
+        }
     }
 
 
@@ -2036,5 +2096,77 @@ public class Connection implements IpPort {
 //              cp.in.close();
 //          if (cp.out!=null)
 //              cp.out.close();
-//      }    
+//      }
+    
+    
+	/** 
+	 * In the case of leaf connections, the route to the
+	 * leaf is this connection itself
+	 */
+	public Connection getAdvertiser() {
+		return this;
+	}
+	
+	/**
+	 * @return the uptime of this connection in minutes.
+	 */
+	public short getUptime() {
+		return (short) ((System.currentTimeMillis() -getConnectionTime()) / 
+				Constants.MINUTE);
+	}
+	
+	/**
+	 * ignored.
+	 */
+	public void setAdvertiser(Connection advertiser) {}
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.upelection.Candidate#toBytes()
+	 */
+	public byte[] toBytes() {
+		byte [] res = new byte[8];
+		System.arraycopy(getInetAddress().getAddress(),0,res,0,4);
+		ByteOrder.short2leb((short)getPort(),res,4);
+		ByteOrder.short2leb((short)getUptime(),res,6);
+		
+		return res;
+	}
+	
+	/**
+	 * @return the reported shared files.
+	 */
+	public int getFileShared() {
+		return _features!= null ? _features.getFileShared() : -1;
+	}
+	/**
+	 * @return the reported JVM version
+	 */
+	public String getJVM() {
+		return _features!= null ? _features.getJVM() : null;
+	}
+	/**
+	 * @return the reported OS version
+	 */
+	public String getOS() {
+		return _features!=null ? _features.getOS() : null;
+	}
+	/**
+	 * @return the reported incoming TCP capability
+	 */
+	public boolean isTCPCapable() {
+		return _features!= null ?_features.isTCPCapable() : false;
+	}
+	/**
+	 * @return the reported UDP capability
+	 */
+	public boolean isUDPCapable() {
+		return _features != null ? _features.isUDPCapable() : false;
+	}
+	
+	/**
+	 * @return the reported upstream bandwidth.
+	 */
+	public int getBandwidth() {
+		return _features !=null ? _features.getBandidth() : -1;
+	}
 }
