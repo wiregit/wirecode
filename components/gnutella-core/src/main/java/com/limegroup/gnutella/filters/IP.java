@@ -17,8 +17,8 @@ import com.limegroup.gnutella.ByteOrder;
 public class IP {
     private static final String MSG = "Could not parse: ";
 
-    private final long addr;
-    private final long mask;
+    private final int addr;
+    private final int mask;
     
     /**
      * Creates an IP object out of a four byte array of the IP in
@@ -27,8 +27,8 @@ public class IP {
     public IP(byte[] ip_bytes) throws IllegalArgumentException {
         if( ip_bytes.length != 4 )
             throw new IllegalArgumentException(MSG);
-        this.addr = bytesToLong(ip_bytes, 0);
-        this.mask = 0xFFFFFFFFL;
+        this.addr = bytesToInt(ip_bytes, 0);
+        this.mask = -1; /* 255.255.255.255 == 0xFFFFFFFF */
     }
 
     /**
@@ -38,18 +38,18 @@ public class IP {
      * @param ip_str a String of the format "0.0.0.0", "0.0.0.0/0.0.0.0",
      *               or "0.0.0.0/0" as an argument.
      */
-    public IP (final String ip_str) throws IllegalArgumentException {
-        int slash = ip_str.indexOf("/");
-        if ( slash == -1) { //assume a simple IP "0.0.*.*"
-            this.addr = stringToLong(ip_str);
+    public IP(final String ip_str) throws IllegalArgumentException {
+        int slash = ip_str.indexOf('/');
+        if (slash == -1) { //assume a simple IP "0.0.*.*"
             this.mask = createNetmaskFromWildChars(ip_str);
+            this.addr = stringToInt(ip_str);
         }
         // ensure that it isn't a malformed address like
         // 0.0.0.0/0/0
-        else if ( ip_str.lastIndexOf("/") == slash ) {
+        else if (ip_str.lastIndexOf('/') == slash) {
             // maybe an IP of the form "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
-            this.addr = stringToLong(ip_str.substring(0, slash));
-            this.mask = parseNetmask(ip_str.substring(slash+1));
+            this.mask = parseNetmask(ip_str.substring(slash + 1));
+            this.addr = stringToInt(ip_str.substring(0, slash)) & this.mask;
         } else
             throw new IllegalArgumentException(MSG + ip_str);
     }
@@ -59,45 +59,34 @@ public class IP {
      * a bitmask
      * @param mask String containing a netmask of the format "0.0.0.0" or
      *          containing an unsigned integer < 32 if this netmask uses the
-     *          simplified bsd syntax.
-     * @return long containing the subnetmask
+     *          simplified BSD syntax.
+     * @return int containing the subnetmask
      */
-    private static long parseNetmask (final String mask)
+    private static int parseNetmask(final String mask)
         throws IllegalArgumentException {
-
-        // assume simple syntax, an integer <= 32
-        if (mask.indexOf(".") == -1) {
-            try {
-                // if the String contains the number k, we should return a
-                // mask of k ones followed by (32 - k) zeroes
-                short k = Short.parseShort(mask);
-                if (k > 32 || k < 0)
-                    throw new IllegalArgumentException (MSG + mask);
-                else {
-                    long netmask = 0;
-                    for (int i = 0; i < k; i++) {
-                        // move the bit first because we want
-                        // the last 1 at position 0 of the long
-                        // variable
-                        netmask = netmask << 1;
-                        netmask++;
-                    }
-                    netmask = netmask << (32 - k);
-                    return netmask;
-                }
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException (MSG + mask);
-            }
-        } else
-            return stringToLong(mask);
+        if (mask.indexOf('.') != -1)
+            return stringToInt(mask);
+        // assume simple syntax, an integer in [0..32]
+        try {
+            // if the String contains the number k, we should return a
+            // mask of k ones followed by (32 - k) zeroes
+            int k = Integer.parseInt(mask);
+            if (k >= 0 && k <= 32)
+                // note: the >>> operator on 32-bit ints only considers the
+                // five lowest bits of the shift count, so 32 shifts would
+                // actually perform 0 shift!
+                return (k == 32) ? -1 : ~(-1 >>> k);
+        } catch (NumberFormatException e) {
+        }
+        throw new IllegalArgumentException(MSG + mask);
     }
     
     /**
-     * Converts a four byte array into a long.
+     * Converts a four byte array into a 32-bit int.
      */
-    private static long bytesToLong(byte[] ip_bytes, int offset) {
-        return ByteOrder.ubytes2long(ByteOrder.beb2int(ip_bytes, offset));
-    }   
+    private static int bytesToInt(byte[] ip_bytes, int offset) {
+        return ByteOrder.beb2int(ip_bytes, offset);
+    }
 
     /**
      * Convert String containing an ip_address or subnetmask to long
@@ -106,108 +95,84 @@ public class IP {
      * subnetmask.  A '*' will be converted to a '0'.
      * @return long containing a bit representation of the ip address
      */
-    private static long stringToLong (final String ip_str)
+    private static int stringToInt(final String ip_str)
         throws IllegalArgumentException {
-
-        long ip = 0;
+        int ip = 0;
         int numOctets = 0;
         int length = ip_str.length();
-
         // loop over each octet
-        for(int i = 0; i < length; i++, numOctets++) {
-            short octet = 0;
-            // loop over each character in the octet
-            for(int j = 0; i < length; i++, j++) {
+        for (int i = 0; i < length; i++, numOctets++) {
+            int octet = 0;
+            // loop over each character making the octet
+            for (int j = 0; i < length; i++, j++) {
                 char c = ip_str.charAt(i);
-                
-                // finished octet?
-                if ( c == '.' ) {
-                    if( j == 0 ) // cannot have 0..1.1
-                        throw new IllegalArgumentException(MSG + ip_str);
-                    else
-                        break;
-                }
-                    
-                // have we read more than 3 numeric characters?
-                if ( j > 2 )
-                    throw new IllegalArgumentException(MSG + ip_str);
-
-                // convert wildcard.
-                if( c == '*' ) {
-                    // wildcard be the only entry in an octet
-                    if( j != 0 )
-                        throw new IllegalArgumentException(MSG + ip_str);
-                    else // functionality equivilant to setting c to be '0' 
+                if (c == '.') { // finished octet?
+                    // can't be first in octet, and not ending 4th octet.
+                    if (j != 0 && numOctets < 3)
+                        break; // loop to next octet
+                } else if (c == '*') { // convert wildcard.
+                    // wildcard be the only character making an octet
+                    if (j == 0) // functionality equivalent to setting c to be '0'
                         continue;
-                } else if( c < '0' || c > '9' ) {
-                    throw new IllegalArgumentException(MSG + ip_str);
+                } else if (c >= '0' && c <= '9') {
+                    // check we read no more than 3 digits
+                    if (j <= 2) {
+                        octet = octet * 10 + c - '0';
+                        // check it's not a faulty addr.
+                        if (octet <= 255)
+                            continue;
+                   }
                 }
-
-                octet = (short)(octet * 10 + c - '0');
-                // faulty addr.
-                if( octet > 255 || octet < 0 )
-                    throw new IllegalArgumentException(MSG + ip_str);
+                throw new IllegalArgumentException(MSG + ip_str);
             }
-            ip = (ip << 8) + octet;
+            ip = (ip << 8) | octet;
         }
-
-        // if the address had less than 4 octets, push the ip over suitably..
-        for(; numOctets < 4; numOctets++)
-            ip <<= 8;
-
-        // ensure that the ip address had 4 octets.
-        if( numOctets != 4 )
-            throw new IllegalArgumentException(MSG + ip_str);
-
-         return ip;
+        // if the address had less than 4 octets, push the ip over suitably.
+        if (numOctets < 4)
+            ip <<= (4 - numOctets) * 8;
+        return ip;
     }
 
     /**
-     * Create new subnet mask from IP-address of the format 0.*.*.0
-     * @param String of the format W.X.Y.Z, W, X, Y and Z can be numbers or '*'
-     * @return long with a subnet mask
+     * Create new subnet mask from IP-address of the format "0.*.*.0".
+     * @param ip_str String of the format "W.X.Y.Z", W, X, Y and Z can be
+     *               numbers or '*'.
+     * @return a 32-bit int with a subnet mask.
      */
-    private static long createNetmaskFromWildChars (final String s)
+    private static int createNetmaskFromWildChars(final String ip_str)
         throws IllegalArgumentException {
-
-        long mask = 0;
+        int mask = 0;
         int numOctets = 0;
-        int length = s.length();
-
+        int length = ip_str.length();
         // loop over each octet
-        for(int i = 0; i < length; i++, numOctets++) {
-            short submask = 0;
+        for (int i = 0; i < length; i++, numOctets++) {
+            int submask = 255;
             // loop over each character in the octet
             // if we encounter a single non '*', mask it off.
-            for(int j = 0; i < length; i++, j++) {
-                char c = s.charAt(i);
-                if( c == '.' ) {
-                    if( j == 0 )
-                        throw new IllegalArgumentException(MSG + s);
-                    else
-                        break;
+            for (int j = 0; i < length; i++, j++) {
+                char c = ip_str.charAt(i);
+                if (c == '.') {
+                    // can't be first in octet, and not ending 4th octet.
+                    if (j != 0 && numOctets < 3)
+                        break; // loop to next octet
+                } else if (c == '*') {
+                    // wildcard be the only character making an octet
+                    if (j == 0) { // functionality equivalent to setting c to be '0'
+                        submask = 0;
+                        continue;
+                    }
+                } else if (c >= '0' && c <= '9') {
+                    // can't accept more than three characters.
+                    if (j <= 2)
+                        continue;
                 }
-                    
-                // can't accept more than three characters.
-                if( j > 2 )
-                    throw new IllegalArgumentException(MSG + s);
-
-                if( c != '*' )
-                    submask = 0xff;
-                else if ( j != 0 ) // canot accept wildcard past first char.
-                    throw new IllegalArgumentException(MSG + s);
+                throw new IllegalArgumentException(MSG + ip_str);
             }
-            mask = (mask << 8) + submask;
+            mask = (mask << 8) | submask;
         }
-
-        // if the address had less than 4 octets, push the ip over suitably..
-        for(; numOctets < 4; numOctets++)
-            mask <<= 8;
-
-        // ensure that the ip address had 4 octets.
-        if( numOctets != 4 )
-            throw new IllegalArgumentException(MSG + s);
-
+        // if the address had less than 4 octets, push the mask over suitably.
+        if (numOctets < 4)
+            mask <<= (4 - numOctets) * 8;
         return mask;
     }
 
@@ -218,26 +183,35 @@ public class IP {
     public boolean contains(IP ip) {
         //Example: let this=1.1.1.*=1.1.1.0/255.255.255.0
         //         let ip  =1.1.1.2=1.1.1.2/255.255.255.255
-        //      => ip.addr&this.mask=1.1.1.0
-        //      => this.addr&this.mask=1.1.1.0
-        return ((ip.addr & this.mask) == (this.addr & this.mask));
+        //      => ip.addr&this.mask=1.1.1.0   (equals this.addr)
+        //      => this.addr&this.mask=1.1.1.0 (equals this.mask)
+        return (ip.addr & this.mask) == (this.addr /* & this.mask*/) &&
+               (ip.mask & this.mask) == this.mask;
     }
 
     /**
      * Returns true if other is an IP with the same address and mask.  Note that
-     * "1.1.1.1/255.255.255.255" does not equal "2.2.2.2/255.255.255.255", even
-     * though they denote the same sets of addresses.
+     * "1.1.1.1/0.0.0.0" DOES equal "2.2.2.2/0.0.0.0", because they
+     * denote the same sets of addresses.  But:<ul>
+     * <li>"1.1.1.1/255.255.255.255" DOES NOT equal "2.2.2.2/255.255.255.255"
+     * (disjoined sets of addresses, intersection and difference is empty).</li>
+     * <li>"1.1.1.1/255.255.255.240" DOES NOT equal "1.1.1.1/255.255.255.255"
+     * (intersection is not empty, but difference is not empty)</li>
+     * </ul>
+     * To be equal, the two compared sets must have the same netmask, and their
+     * start address (computed from the ip and netmask) must be equal.
      */
     public boolean equals(Object other) {
         if (other instanceof IP) {
-            IP ip=(IP)other;
-            return this.addr==ip.addr && this.mask==ip.mask;
+            IP ip = (IP)other;
+            return this.mask == ip.mask &&
+                   (this.addr & this.mask) == (ip.addr & ip.mask);
         } else {
             return false;
         }
     }
 
     public int hashCode() {
-        return (int)(addr^mask);
+        return addr^mask;
     }
 }

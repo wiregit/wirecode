@@ -34,17 +34,6 @@
     <echo message="*******************************************************"/>
 </target>
 
-
-<!-- everything -->
-<target name="all" depends="init">
-	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
-		srcdir="${basedir}" destdir="${basedir}"
-        nowarn="${NOWARN}" excludes="${unused}/**"
-	>
-      <classpath refid="default.classpath" />
-    </javac>
-</target>
-
 <!-- Core -->
 <target name="core" depends="init">
 	<javac debug="${DEBUG}" 
