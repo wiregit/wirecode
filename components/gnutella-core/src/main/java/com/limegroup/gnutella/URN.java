@@ -368,7 +368,9 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * urn:sha1:
 	 */
 	private static String getTypeString(String fullUrnString) {
-		return fullUrnString.substring(0,fullUrnString.indexOf(':',4)+1);		
+		String protocol =
+		  fullUrnString.substring(0,fullUrnString.lastIndexOf(':')+1);		
+		return protocol.trim();
 	}
 
 	/**
@@ -411,7 +413,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// note that all URNs are case-insensitive for the "urn:<type>:" part,
 		// but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
 		// insensitive)
-		return UrnType.URN_NAMESPACE_ID+UrnType.SHA1_STRING+":"+Base32.encode(sha1);
+		return UrnType.URN_NAMESPACE_ID+UrnType.SHA1_STRING+Base32.encode(sha1);
 	}
 
 	/**
