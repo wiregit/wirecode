@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
+import java.util.Properties;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -212,7 +213,8 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager,
                       boolean isRouter) {
-        super(host, port);
+        super(host, port, new LazyProperties(router),
+            new AuthenticationHandshakeResponder(manager),true);
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
@@ -231,7 +233,7 @@ public class ManagedConnection
     ManagedConnection(Socket socket,
                       MessageRouter router,
                       ConnectionManager manager) {
-        super(socket);
+        super(socket, new AuthenticationHandshakeResponder(manager));
         _router = router;
         _manager = manager;
 
@@ -768,6 +770,76 @@ public class ManagedConnection
      */
     public boolean isKillable() {
         return _isKillable;
+    }
+    
+    private static class LazyProperties extends Properties {
+        private MessageRouter router;
+        
+        LazyProperties(MessageRouter router) {
+            this.router=router;
+            if (router!=null) {
+                setProperty(ConnectionHandshakeHeaders.MY_ADDRESS, "");  
+                //just temporary!
+            }
+        }
+        
+        //We don't define one method in terms of the other since that could
+        //cause infinite loops depending on the implementation of the
+        //superclass.
+        public String getProperty(String key, String defaultValue) {
+            if (router!=null && key.equals(
+                ConnectionHandshakeHeaders.MY_ADDRESS)) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key, defaultValue);
+            }
+        }
+        
+        public String getProperty(String key) {
+            if (router!=null && key.equals(
+                ConnectionHandshakeHeaders.MY_ADDRESS)) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key);
+            }
+        }
+    }
+    
+    /**
+     * A very simple responder to be used by client-nodes during the
+     * connection handshake while accepting incoming connections
+     */
+    private static class AuthenticationHandshakeResponder 
+        implements HandshakeResponder{
+        ConnectionManager _manager;
+        
+        public AuthenticationHandshakeResponder(ConnectionManager manager){
+            this._manager = manager;
+        }
+        
+        public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException{
+            int code = 200;
+            String message = "OK";
+            
+            //set common properties
+            Properties ret=new Properties();
+            ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
+            ret.setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            
+            //do stuff specific to connection direction
+            if(!outgoing){
+                //client should never accept the connection. Therefore, set the
+                //appropriate status
+                code = 503;
+                message = "I am a shielded client";
+ 
+            }
+            
+            return new HandshakeResponse(code, message, ret);
+        }
     }
 
     /** Unit test.  Only tests statistics methods. */
