@@ -1,6 +1,7 @@
 
 package com.limegroup.gnutella.upelection;
 
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.vendor.*;
@@ -11,7 +12,7 @@ import junit.framework.Test;
  * This test tests the logic in the <tt>Connection</tt> class which
  * handles BestCandidatesMessages
  * 
- * There are several scenarios:
+ * There are several scenarios when sending updates:
  * 
  * 1.  We have never sent a message on this connection before
  *     and are sending a new one.
@@ -33,6 +34,12 @@ import junit.framework.Test;
  * 	   for maintenance.
  * 10.  The minimum interval has not passed, update is needed and we are calling
  * 	   for maintenance.
+ * 
+ * And a few more when receiving them:
+ * 
+ * 1.  We receive an update from a leaf or we are a leaf
+ * 2.  We receive an update too soon
+ * 3.  We receive a proper update.
  */
 public class BCVMHandlingTest extends BaseTestCase {
 	
@@ -58,12 +65,14 @@ public class BCVMHandlingTest extends BaseTestCase {
 			Candidate [] candidates = new Candidate[2];
 			candidates[0] = new RemoteCandidate("1.2.3.4",15,(short)20);
 			candidates[1]=null;
+			candidates[0].setAdvertiser(new ManagedConnectionStub("10.10.10.10",15));
 			
 			_bcvm = new BestCandidatesVendorMessage(candidates);
 			
 			Candidate [] update = new Candidate[2];
 			update[0] = new RemoteCandidate("2.2.2.2",20,(short)20);
 			update[1] = null;
+			update[0].setAdvertiser(new ManagedConnectionStub("11.11.11.11",15));
 			
 			_bcvm2 = new BestCandidatesVendorMessage(update);
 			
@@ -76,7 +85,11 @@ public class BCVMHandlingTest extends BaseTestCase {
 			return;
 		}
 	}
-		
+	
+	//***********************
+	// PART I - SENDING UPDATES
+	//***********************
+	
 	/**
 	 *	1.  We have never sent a message on this connection before
 	 *      and are sending a new one. 
@@ -416,8 +429,85 @@ public class BCVMHandlingTest extends BaseTestCase {
 				_bcvm.isSame((BestCandidatesVendorMessage) _connection.getLastSent()));
 	}
 	
+	//********************************
+	//PART II - RECEIVING UPDATES
+	//********************************
+	
 	/**
-	 * a utility class with various getters.
+	 * 1.  We receive an update from a leaf or we are a leaf
+	 */
+	public void testReceiveLeaf() throws Exception {
+		//we are a leaf
+		assertFalse(RouterService.isSupernode());
+		
+		assertEquals(0,_connection.getLastReceivedAdvertisementTime());
+		assertNull(_connection.getCandidatesReceived());
+		
+		_connection.handleVendorMessage(_bcvm);
+		
+		//nothing should have changed.
+		assertEquals(0,_connection.getLastReceivedAdvertisementTime());
+		assertNull(_connection.getCandidatesReceived());
+		
+		
+		//now make ourselves an ultrapeer, but make the connection a leaf
+		ConnectionManagerStub liar = new ConnectionManagerStub();
+		liar.setSupernode(true);
+		PrivilegedAccessor.setValue(RouterService.class,"manager",liar);
+		assertTrue(RouterService.isSupernode());
+		
+		TestConnection leafConn = new NonUPConnection();
+		assertEquals(0,leafConn.getLastReceivedAdvertisementTime());
+		assertNull(leafConn.getCandidatesReceived());
+		
+		leafConn.handleVendorMessage(_bcvm);
+		
+		assertEquals(0,leafConn.getLastReceivedAdvertisementTime());
+		assertNull(leafConn.getCandidatesReceived());
+		
+	}
+	
+	/**
+	 * 2.  We receive an update too soon
+	 * and
+	 * 3.  We receive a proper update
+	 */
+	public void testReceiveTooSoon() throws Exception {
+		//first make ourselves an ultrapeer
+		ConnectionManagerStub liar = new ConnectionManagerStub();
+		liar.setSupernode(true);
+		PrivilegedAccessor.setValue(RouterService.class,"manager",liar);
+		assertTrue(RouterService.isSupernode());
+		
+		//the first message should go through
+		_connection.handleVendorMessage(_bcvm);
+		assertGreaterThan(0,_connection.getLastReceivedAdvertisementTime());
+		assertNotNull(_connection.getCandidatesReceived());
+		assertTrue(_bcvm.isSame(_connection.getCandidatesReceived()));
+		long firstReceive = _connection.getLastReceivedAdvertisementTime();
+		
+		//wait half of the interval
+		Thread.sleep(NEW_INTERVAL/2);
+		
+		//the second message should not.
+		_connection.handleVendorMessage(_bcvm2);
+		
+		assertEquals(firstReceive,_connection.getLastReceivedAdvertisementTime());
+		assertTrue(_bcvm.isSame(_connection.getCandidatesReceived()));
+		
+		//sleep some more time, past the interval
+		Thread.sleep(NEW_INTERVAL);
+		
+		//try the second message again, it should go through
+		_connection.handleVendorMessage(_bcvm2);
+		
+		assertGreaterThan(firstReceive,_connection.getLastReceivedAdvertisementTime());
+		assertTrue(_bcvm2.isSame(_connection.getCandidatesReceived()));
+	}
+	
+	/**
+	 * a utility class with various getters. 
+	 * it also exposes the handleVendorMessage method.
 	 */
 	static class TestConnection extends ManagedConnectionStub {
 		
@@ -425,11 +515,26 @@ public class BCVMHandlingTest extends BaseTestCase {
 			return _candidatesSent;
 		}
 		
+		public BestCandidatesVendorMessage getCandidatesReceived() {
+			return _candidatesReceived;
+		}
+		
 		public long getLastAdvertisementTime() {
 			Long last = null;
 			try{
 				last= (Long)
 					PrivilegedAccessor.getValue(this,"_lastSentAdvertisementTime");
+			}catch(Exception e) {
+				last = new Long(-1);
+			}
+			return last.longValue();
+		}
+		
+		public long getLastReceivedAdvertisementTime() {
+			Long last = null;
+			try{
+				last= (Long)
+					PrivilegedAccessor.getValue(this,"_lastReceivedAdvertisementTime");
 			}catch(Exception e) {
 				last = new Long(-1);
 			}
@@ -446,5 +551,18 @@ public class BCVMHandlingTest extends BaseTestCase {
 			}
 			return yes.booleanValue();
 		}
+		
+		public void handleVendorMessage(VendorMessage msg) {
+			super.handleVendorMessage(msg);
+		}
+		
+		public boolean isGoodUltrapeer() {return true;}
+	}
+	
+	/**
+	 * utility class claiming not to be an ultrapeer.
+	 */
+	static class NonUPConnection extends TestConnection {
+		public boolean isGoodUltrapeer() {return false;}
 	}
 }

@@ -43,6 +43,8 @@ public class ManagedConnectionStub extends ManagedConnection {
 	
     public ManagedConnectionStub() {
         super("1.2.3.4", 6346);
+		_host="1.2.3.4";
+		_port=6346;
 		
 		try {
             PrivilegedAccessor.setValue(this, "_manager", new ConnectionManagerStub());
@@ -52,6 +54,12 @@ public class ManagedConnectionStub extends ManagedConnection {
 		//_router = new MessageRouterStub(); 
         //_manager = new ConnectionManagerStub();
         _waitLock = new Object();
+        
+        try{
+    		_addr = InetAddress.getByName("1.2.3.4");
+    	}catch(Exception tough) {
+    		tough.printStackTrace();
+    	}
     }
     
     /**
@@ -65,7 +73,10 @@ public class ManagedConnectionStub extends ManagedConnection {
     	
     	try{
     		_addr = InetAddress.getByName(host);
-    	}catch(Exception tough) {}
+    	}catch(Exception tough) {
+    		tough.printStackTrace();
+    	}
+    	_waitLock = new Object();
     }
 
     /**
