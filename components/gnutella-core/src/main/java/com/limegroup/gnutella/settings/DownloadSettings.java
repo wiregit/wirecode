@@ -17,5 +17,5 @@ public class DownloadSettings extends LimeProps {
 	 * The maximum number of simultaneous downloads to allow.
 	 */
     public static final IntSetting MAX_SIM_DOWNLOAD =
-        FACTORY.createIntSetting("MAX_SIM_DOWNLOAD", 4); 
+        FACTORY.createIntSetting("MAX_SIM_DOWNLOAD", 10); 
 }
