@@ -32,6 +32,8 @@ public class ConnectionHandshakeHeaders
     public static final String GGEP                 = "GGEP";
     public static final String X_GUESS              = "X-Guess";
     public static final String X_VERSION            = "X-Version";
+    public static final String X_VENDOR_MESSAGE     = "Vendor-Message";
+    public static final String VM_VERSION           = "0.1";
 
     /** 
      * The true/false values for some headers.  Note that these are not the only

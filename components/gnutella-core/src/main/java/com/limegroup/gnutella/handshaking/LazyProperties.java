@@ -53,6 +53,8 @@ public class LazyProperties extends Properties
 				  CommonUtils.getHttpServer());       
         props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
 		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
+        props.put(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE,
+                  ConnectionHandshakeHeaders.VM_VERSION);
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
         if(!latestVersion.equals("@version@"))//don't send header for @version@
