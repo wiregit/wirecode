@@ -88,18 +88,13 @@ public class Sockets {
      * @param port the port to connect to
      * @param timeout the desired timeout for connecting, in milliseconds,
      *  or 0 for no timeout.
-     * @param emulate if true, and if this platform doesn't support socket
-     *  timeouts, emulates the timeout with threads.  If the platform supports 
-     *  native timeouts, always uses that.  Otherwise connects without a 
-     *  timeout.  
      * @return the connected Socket
      * @throws IOException the connections couldn't be made in the 
      *  requested time
 	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public static Socket connect(String host, int port, 
-                                 int timeout, boolean emulate) 
-                                 throws IOException {
+    public static Socket connect(String host, int port, int timeout) 
+		throws IOException {
 		if((port & 0xFFFF0000) != 0) {
 			throw new IllegalArgumentException("port out of range: "+port);
 		} 
@@ -137,7 +132,7 @@ public class Sockets {
             }
         }
      
-        if (emulate && timeout!=0) {
+        if (timeout!=0) {
             //b) Emulation using threads
             return (new SocketOpener(host, port)).connect(timeout);
         } else {
