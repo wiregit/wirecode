@@ -16,27 +16,36 @@ import java.io.*;
  */
 public final class Backend {
 
-	private static final Backend INSTANCE = new Backend();
-
-	private final ActivityCallback CALLBACK = new ActivityCallbackStub();
-
+	//private final ActivityCallback CALLBACK = new ActivityCallbackStub();
+	private static Backend _instance;// = new Backend(CALLBACK);
 	private final RouterService ROUTER_SERVICE;
 
 	private final File TEMP_DIR = new File("temp");
 
 
+	public static Backend createBackend(ActivityCallback callback) {
+		_instance = new Backend(callback);
+		return _instance;
+	}
+
 	/**
 	 * Instance accessor for the <tt>Backend</tt>.
 	 */
 	public static Backend instance() {
-		return INSTANCE;
+		if(_instance == null) {
+			_instance = new Backend(new ActivityCallbackStub());
+		}
+		return _instance;
 	}
 
 	/**
 	 * Constructs a new <tt>Backend</tt>.
 	 */
-	private Backend() {
+	private Backend(ActivityCallback callback) {
+
 		SettingsManager settings = SettingsManager.instance();
+		settings.setPort(6346);
+		settings.setKeepAlive(1);
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
 		File coreDir = new File("com/limegroup/gnutella");				
@@ -50,8 +59,7 @@ public final class Backend {
 		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
 		SettingsManager.instance().setExtensions("java");
 
-		//RouterService.setCallback(CALLBACK);
-		ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+		ROUTER_SERVICE = new RouterService(callback);
         ROUTER_SERVICE.start();
 		try {
 			// sleep to let the file manager initialize
@@ -68,7 +76,9 @@ public final class Backend {
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
 	public void shutdown() {
+		System.exit(0);
 		ROUTER_SERVICE.shutdown();
+		
 	}
 
 	/**
@@ -110,6 +120,11 @@ public final class Backend {
 				if(bos != null) bos.close();
 			} catch(IOException ioe) {}	// all we can do is try to close the streams
 		} 
+	}
+
+	public static void main(String[] args) {
+		System.out.println("STARTING BACKEND"); 
+		Backend.instance();
 	}
 }
 
