@@ -518,16 +518,6 @@ public final class CommonUtils {
 		    && !version.startsWith("1.1")  
 		    && !version.startsWith("1.0"); 
 	}
-	
-	/**
-	 * Returns whether or not the current JVM is earlier than 1.4.x
-	 *
-	 * @return <tt>true</tt> if we are running on a JVM earlier than
-	 *  1.4.x, <tt>false</tt> otherwise
-	 */
-	public static boolean isBelowJava14() {
-	    return (isJava118() || isJava13OrLater()) && !isJava14OrLater();
-    }
 
     /** 
 	 * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
