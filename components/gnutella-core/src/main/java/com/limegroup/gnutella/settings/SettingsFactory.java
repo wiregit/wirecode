@@ -130,6 +130,7 @@ public final class SettingsFactory {
             try {
                 PROPS.load(fis);
             } catch(IllegalArgumentException ignored) {
+            } catch(StringIndexOutOfBoundsException sioobe) {
             } catch(IOException iox) {
                 String msg = iox.getMessage();
                 if(StringUtils.indexOfIgnoreCase(msg,"corrupted") < 0)
