@@ -585,21 +585,22 @@ public class UploadManager implements BandwidthTracker {
 		
 	}
 
-
-	/**
-	 * Implements the <tt>BandwidthTracker</tt> interface.
-	 * 
-	 * Returns that bandwidth transferred in kilobytes per second since
-	 * the last time this call was made.
-	 */
-	public synchronized int getNewBytesTransferred() {
-		int newBytes = 0;
-		Iterator iter = _activeUploadList.iterator();
-		while(iter.hasNext()) {
+    /** Calls measureBandwidth on each uploader. */
+    public synchronized void measureBandwidth() {
+        for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
 			BandwidthTracker bt = (BandwidthTracker)iter.next();
-			newBytes += bt.getNewBytesTransferred();
+			bt.measureBandwidth();
 		}
-		return newBytes;
+    }
+
+    /** Returns the total upload throughput, i.e., the sum over all uploads. */
+	public synchronized float getMeasuredBandwidth() {
+        float sum=0;
+        for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
+			BandwidthTracker bt = (BandwidthTracker)iter.next();
+			sum+=bt.getMeasuredBandwidth();
+		}
+        return sum;
 	}
 
     /** Partial unit test. */

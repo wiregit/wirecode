@@ -108,16 +108,6 @@ public interface Downloader extends BandwidthTracker {
      */
     public LimeXMLDocument[] getXMLDocs();
 
-	/**
-	 * Inherited from the <tt>BandwidthTracker</tt> interface.
-	 * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
-	 * component since the last time this method was called.
-	 *
-	 * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
-	 *         component since the last time this method was called
-	 */
-	public int getNewBytesTransferred();
-
     /** call this method if you need to add a newly downloaded file to the
         FileManager repository.
     */
