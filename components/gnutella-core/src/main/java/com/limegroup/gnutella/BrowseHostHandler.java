@@ -222,7 +222,7 @@ public class BrowseHostHandler {
     private void browseExchangeInternal(Socket socket) throws IOException {
     	
     	//when/if we start reusing connections, remove this timeout
-    	socket.setSoTimeout(500);
+    	socket.setSoTimeout(5000);
 
         LOG.trace("BHH.browseExchange(): entered.");
         setState(EXCHANGING);
