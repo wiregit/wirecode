@@ -60,7 +60,7 @@
  <!-- builds all files, including tests, in the project to the specified directory-->
  <target name="build tests">
    <mkdir dir="build"/>
-   <javac debug="on" optimize="off" deprecation="on"
+   <javac debug="on" optimize="off" deprecation="off"
 	      srcdir="${coredir}:${guidir}:${basedir}"
 		  destdir="${builddir}"
 		  excludes="${tests}**, ${settings}, **.gif,**.class,**.bat,**.sh,**.jar, **.xml">
