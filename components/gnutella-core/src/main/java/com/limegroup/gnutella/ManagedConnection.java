@@ -828,6 +828,54 @@ public class ManagedConnection
         super("", 0);
     }
     */
+
+    //Old unit tests for message reordering.  These are from the days when
+    //buffering was done by Connection, not ManagedConnection.
+    /*
+    public static void main(String args[]) {
+        //1. Test replacement policies.
+        Message qr=new QueryRequest((byte)5, 0, "test");
+        Message qr2=new QueryRequest((byte)5, 0, "test2");
+        Message preq=new PingRequest((byte)5); preq.hop(); //from other
+        Message preq2=new PingRequest((byte)5);            //from me
+        Message prep=new PingReply(new byte[16], (byte)5, 6346,
+                                   new byte[4], 0, 0);
+
+        Connection c=new Connection("localhost", 6346);
+        try {
+            //   a') Regression test
+            c.send(qr);
+            c.send(qr2);
+            Assert.that(c._outputQueue.get(0)==qr2);
+            Assert.that(c._outputQueue.get(1)==qr);
+
+            for (int i=0; i<QUEUE_SIZE-2; i++) {
+                Assert.that(! c._outputQueue.isFull());
+                c.send(qr);
+            }
+            Assert.that(c._outputQueue.isFull());
+
+            //   a) No pings or pongs.  Boot oldest.
+            c.send(preq2);
+            Assert.that(c._outputQueue.isFull());
+            Assert.that(c._outputQueue.get(0)==preq2);
+
+            //   b) Old ping request in last position
+            c._outputQueue.set(QUEUE_SIZE-1, preq);
+            c.send(preq2);
+            Assert.that(c._outputQueue.get(QUEUE_SIZE-1)==preq2);
+
+            //   c) Old ping reply in second to last position.
+            c._outputQueue.set(QUEUE_SIZE-2, prep);
+            c.send(qr);
+            Assert.that(c._outputQueue.get(QUEUE_SIZE-1)==preq2);
+            Assert.that(c._outputQueue.get(QUEUE_SIZE-2)==qr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false, "IOException");
+        }
+    }
+    */
 }
 
 
