@@ -881,7 +881,8 @@ public class UploadManager implements BandwidthTracker {
 	
 	public synchronized boolean isConnectedTo(InetAddress addr) {
 	    for(Iterator i = _queuedUploads.iterator(); i.hasNext(); ) {
-	        Socket socket = (Socket)i.next();
+	        KeyValue next = (KeyValue)i.next();
+	        Socket socket = (Socket)next.getKey();
 	        if(socket != null && socket.getInetAddress().equals(addr))
 	            return true;
 	    }
