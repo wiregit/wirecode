@@ -228,7 +228,7 @@ public class Launcher {
 	 *  call or in getting the canonical path of the file
 	 */
 	private static void launchFileMacOSX(final String file) throws IOException {
-		String command = "open "+"\"file\"";
+		String command = "open "+"\""+file+"\"";
 		Runtime.getRuntime().exec(command);
 	}
 
