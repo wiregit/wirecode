@@ -7,7 +7,10 @@
 package com.limegroup.gnutella.xml;
 import java.util.*;
 import java.io.*;
-import com.limegroup.gnutella.xml.basic.*;
+
+import org.xml.sax.InputSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Stores a XML schema, and provides access to various components
@@ -23,10 +26,9 @@ public class LimeXMLSchema extends LimeXMLDocument{
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public LimeXMLSchema(File schemaFile) throws IOException{
-        //TODO
-        //open the file, read it, and derive the structure, store internally
-        
+    public LimeXMLSchema(File schemaFile) throws IOException
+    {
+        this(LimeXMLUtils.getInputSource(schemaFile));
     }
     
     //TODO anu
@@ -34,6 +36,34 @@ public class LimeXMLSchema extends LimeXMLDocument{
     public LimeXMLSchema()
     {
     }
+    
+    /** 
+     * Creates new LimeXMLSchema 
+     * @param inputSource The source representing the XML schema definition
+     * to be parsed
+     * @exception IOException If the specified schemaFile doesnt exist, or isnt
+     * a valid schema file
+     */
+    public LimeXMLSchema(InputSource inputSource) throws IOException
+    {
+        //TODO anu
+    }
+    
+    private void initializeSchema(InputSource inputSource)
+    {
+        //get an instance of DocumentBuilderFactory
+        DocumentBuilderFactory documentBuilderFactory =
+            DocumentBuilderFactory.newInstance();
+        //set validating, and namespace awareness
+        documentBuilderFactory.setValidating(true);
+        documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilder documentBuilder=null;
+            
+        //TODO anu
+            
+    }
+    
+    
     
     /**
      * Returns the unique identifier which identifies this particular schema
