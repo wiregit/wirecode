@@ -225,6 +225,12 @@ public class SettingsManager {
 	 * run on this machine.
 	 */
 	private final int DEFAULT_SESSIONS = 1;
+
+	/**
+	 * Default value for whether or not to connect to the Gnutella
+	 * network on startup.
+	 */
+	private boolean DEFAULT_CONNECT_ON_STARTUP = true;
     
 
     // The property key name constants
@@ -363,6 +369,11 @@ public class SettingsManager {
      * "supernode capable" across all sessions.
      */
     private final String EVER_SUPERNODE_CAPABLE = "EVER_SUPERNODE_CAPABLE";
+
+	/**
+	 * Constant key for whether or not to connect on startup.
+	 */
+	private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -863,22 +874,21 @@ public class SettingsManager {
                     setEverSupernodeCapable(b.booleanValue());
                 }
 				
-                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS))
-                {
+                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMaxShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS))
-                {
+                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMinShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(SUPERNODE_PROBATION_TIME))
-                {
+                else if(key.equals(SUPERNODE_PROBATION_TIME)) {
                     setSupernodeProbationTime((new Long(p)).longValue());
                 }
-                else if(key.equals(SUPERNODE_MODE))
-                {
+                else if(key.equals(SUPERNODE_MODE)) {
                     setSupernodeMode((new Boolean(p)).booleanValue());
                 }
+				else if(key.equals(CONNECT_ON_STARTUP)) {
+					setConnectOnStartup((new Boolean(p)).booleanValue());
+				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -999,6 +1009,8 @@ public class SettingsManager {
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
+
+		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
     }
 
     /**
@@ -1706,8 +1718,7 @@ public class SettingsManager {
      * Returns the probation time for s supernode, during which supernode
      * decides whether to swith to client mode or stay as supernode
      */
-    public long getSupernodeProbationTime()
-    {
+    public long getSupernodeProbationTime() {
         return _supernodeProbationTime;
     }
     
@@ -1715,8 +1726,7 @@ public class SettingsManager {
      * Tells whether the node is gonna be a supernode or not
      * @return true, if supernode, false otherwise
      */
-    public boolean isSupernode()
-    {
+    public boolean isSupernode() {
         return _supernodeMode;
     }
 
@@ -1727,10 +1737,21 @@ public class SettingsManager {
      * @return True, if the clientnode has connection to supernode,
      * false otherwise
      */
-    public boolean hasShieldedClientSupernodeConnection()
-    {
+    public boolean hasShieldedClientSupernodeConnection() {
         return _shieldedClientSupernodeConnection;
     }
+
+	/**
+	 * Returns whether or not we should connect to the Gnutella network
+	 * on startup.
+	 *
+	 * @return <tt>true</tt> if we should connect to the network on
+	 *  startup, <tt>false</tt> otherwise
+	 */
+	public boolean getConnectOnStartup() {
+		Boolean b = Boolean.valueOf(PROPS.getProperty(CONNECT_ON_STARTUP));
+		return b.booleanValue();
+	}
     
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -2068,15 +2089,15 @@ public class SettingsManager {
 	 * Adds one directory to the directory string only if
      * it is a directory and is not already listed. 
 	 *
-	 * @param dir  A <tt>File</tt> instance denoting the 
+	 * @param dir  a <tt>File</tt> instance denoting the 
 	 *             abstract pathname of the new directory 
-	 *             to add.
+	 *             to add
 	 *
 	 * @throws  IOException 
-	 *          If the directory denoted by the directory pathname
+	 *          if the directory denoted by the directory pathname
 	 *          String parameter did not exist prior to this method
 	 *          call and could not be created, or if the canonical
-	 *          path could not be retrieved from the file system.
+	 *          path could not be retrieved from the file system
 	 */
     public void addDirectory(File dir) throws IOException {
 		if(!dir.isDirectory()) throw new IOException();
@@ -2145,9 +2166,8 @@ public class SettingsManager {
     }
 
     /** 
-	 * Sets the connection speed.  throws an
-     * exception if you try to set the speed
-     * far faster than a T3 line or less than
+	 * Sets the connection speed.  throws an exception if you 
+	 * try to set the speed far faster than a T3 line or less than
      * 0.
 	 */
     public void setConnectionSpeed(int speed) {
@@ -2176,6 +2196,11 @@ public class SettingsManager {
         }
     }
 
+	/**
+	 * Sets the string for making gnutella connections.
+	 *
+	 * @param connect the connect string
+	 */
     public void setConnectString(String connect)
         throws IllegalArgumentException {
         int i=connect.indexOf(" ");
@@ -2214,6 +2239,11 @@ public class SettingsManager {
         PROPS.put(CONNECT_STRING, connect);
     }
 
+	/**
+	 * Sets the string for verifying Gnutella connections.
+	 *
+	 * @param ok the string for verifying Gnutella connections
+	 */
     public void setConnectOkString(String ok)
         throws IllegalArgumentException {
         if (ok.length()<1)
@@ -2223,6 +2253,11 @@ public class SettingsManager {
         PROPS.put(CONNECT_OK_STRING, ok);
     }
 
+	/**
+	 * Sets the maximum number of simultaneous searches to allow.
+	 *
+	 * @param max the maximum number of simultaneous searches
+	 */
     public void setParallelSearchMax(int max) {
         if(max<1)
             throw new IllegalArgumentException();
@@ -2771,8 +2806,7 @@ public class SettingsManager {
      * the supernode
      */
     public void setMaxShieldedClientConnections(
-        int maxShieldedClientConnections)
-    {
+        int maxShieldedClientConnections) {
         this._maxShieldedClientConnections = maxShieldedClientConnections;
         PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(maxShieldedClientConnections));
@@ -2785,8 +2819,7 @@ public class SettingsManager {
      * supernode to client-node.
      */
     public void setMinShieldedClientConnections(
-        int minShieldedClientConnections)
-    {
+        int minShieldedClientConnections) {
         this._minShieldedClientConnections = minShieldedClientConnections;
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
@@ -2796,8 +2829,7 @@ public class SettingsManager {
      * Sets the probation time for s supernode, during which supernode
      * decides whether to swith to client mode or stay as supernode
      */
-    public void setSupernodeProbationTime(long supernodeProbationTime)
-    {
+    public void setSupernodeProbationTime(long supernodeProbationTime) {
         this._supernodeProbationTime = supernodeProbationTime;
         PROPS.put(SUPERNODE_PROBATION_TIME, 
             Long.toString(supernodeProbationTime));
@@ -2806,8 +2838,7 @@ public class SettingsManager {
     /**
      * Sets whether the node is gonna be a supernode or not
      */
-    public void setSupernodeMode(boolean supernodeMode)
-    {
+    public void setSupernodeMode(boolean supernodeMode) {
         this._supernodeMode = supernodeMode;
         PROPS.put(SUPERNODE_MODE, 
             (new Boolean(supernodeMode)).toString());
@@ -2819,10 +2850,19 @@ public class SettingsManager {
      * for client nodes only
      * @param flag the flag value to be set
      */
-    public void setShieldedClientSupernodeConnection(boolean flag)
-    {
+    public void setShieldedClientSupernodeConnection(boolean flag) {
         _shieldedClientSupernodeConnection = flag;
     }
+
+	/**
+	 * Sets whether or not to connect to the Gnutella network when the
+	 * application starts up.
+	 *
+	 * @param connect specifies whether or not to connect on startup
+	 */
+	public void setConnectOnStartup(boolean connect) {
+		PROPS.put(CONNECT_ON_STARTUP, new Boolean(connect).toString());
+	}
     
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
