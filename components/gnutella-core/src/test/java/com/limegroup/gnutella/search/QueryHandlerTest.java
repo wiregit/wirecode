@@ -345,6 +345,13 @@ public final class QueryHandlerTest extends BaseTestCase {
             return CONNECTIONS;
         }
 
+        /**
+         * Override the stability check method -- assume we're always stable.
+         */
+        public boolean isStable(long time) {
+            return true;
+        }
+
         public void send(Message msg) {
             if(!(msg instanceof QueryRequest)) return;
 
