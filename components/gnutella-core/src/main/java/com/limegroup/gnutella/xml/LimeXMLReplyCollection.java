@@ -56,7 +56,7 @@ public class LimeXMLReplyCollection{
         // construct a backing store object (for serialization)
         MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXMLStr;
-        boolean shouldWrite = true;
+        boolean shouldWrite = false;
 
         //if File is invalid, ms== null
         if (ms == null) // create a dummy
@@ -126,9 +126,10 @@ public class LimeXMLReplyCollection{
             while(iter.hasNext()) {
                 File file = (File)iter.next();
                 String hash = metaFileManager.readFromMap(file, audio);
-                // you should remove them so the usual stuff doesn't duplicate
-                // the work.
-                Object xml = hashToXMLStr.remove(hash);
+                // ok,i thought i should remove them, but that seems to kill
+                // things.  i'm not sure why though - i'm going to investigate
+                // it and find out.  in the meantime, just 'get' it
+                Object xml = hashToXMLStr.get(hash);
                 try{
                     if (xml instanceof LimeXMLDocument) // NEW
                         doc = (LimeXMLDocument) xml;
