@@ -56,6 +56,13 @@ public class RemoteFileDesc implements Serializable {
     private LimeXMLDocument[] _xmlDocs;
 	private Set /* of URN*/  _urns;
 
+
+    /**
+     * The creation time of the file.  Not to be confused with
+     * file.lastModified().  If the value is negative, it is not to be trusted.
+     */
+    private long _creationTime;
+
     /**
      * Boolean indicating whether or not the remote host has browse host 
      * enabled.
@@ -244,6 +251,8 @@ public class RemoteFileDesc implements Serializable {
         // http11 must be set manually, because older clients did not have this
         // field but did have urns.
         _http11 = ( _http11 || !_urns.isEmpty() );
+        // creation time should be set to -1 until set by a downloader....
+        _creationTime = -1;
     }
     
     /** 
@@ -338,6 +347,24 @@ public class RemoteFileDesc implements Serializable {
             LOG.debug("setting retry after to be [" + seconds + 
                       "] seconds for " + this);        
         _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
+    }
+
+    /**
+     * Mutator for _creationTime.
+     * @param milliSeconds when this guy was created.
+     */
+    public void setCreationTime(long milliseconds) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("setting creation time r to be [" + milliseconds + 
+                      "] milliseconds for " + this);        
+        _creationTime = milliseconds;
+    }
+
+    /** @return time the underlying file represented by this RFD was created.
+     *  if negative, then not valid.
+     */
+    public long getCreationTime() {
+        return _creationTime;
     }
 
 	/**
