@@ -110,10 +110,13 @@ public class BestCandidates {
 	 * @param e an Endpoint representing the candidate
 	 */
 	public static void fail(Endpoint e) {
+		if (instance == null)
+			return;
 		InetAddress address = e.getInetAddress();
 		synchronized(instance) {
 			for (int i =0;i<instance._best.length;i++)
-				if (instance._best[i].getInetAddress().equals(address))
+				if (instance._best[i]!=null && 
+						instance._best[i].getInetAddress().equals(address))
 					instance._best[i]=null;
 		}
 	}
