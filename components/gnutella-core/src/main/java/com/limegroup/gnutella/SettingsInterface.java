@@ -25,7 +25,7 @@ public interface SettingsInterface
     public int        getKeepAlive();
     public int        getPort();
     public int        getConnectionSpeed();
-    public short      getSearchSpeed();
+    public byte       getSearchLimit();
     public boolean    getStats();
     public String     getClientID();
     public int        getMaxConn();
@@ -66,7 +66,7 @@ public interface SettingsInterface
 	throws IllegalArgumentException;
 
     /** set the maximum number of searches */
-    public void setSearchLimit(short limit)
+    public void setSearchLimit(byte limit)
 	throws IllegalArgumentException;
 
     /** set the boolean specifying whether 
@@ -98,7 +98,6 @@ public interface SettingsInterface
     public static final int     DEFAULT_TIMEOUT       = 4000;
     /** Default file path for the host list */
     public static final String  DEFAULT_HOST_LIST     = "gnutella.net";
-
     /** Default name for the properties file */
     public static final String  DEFAULT_FILE_NAME     = "limewire.props";
     /** Default name for the network discovery properties */
@@ -110,7 +109,7 @@ public interface SettingsInterface
     /** Default network connection speed */
     public static final int     DEFAULT_SPEED         = 56;
     /** Default limit for the number of searches */
-    public static final short   DEFAULT_SEARCH_LIMIT  = (short)64;
+    public static final byte    DEFAULT_SEARCH_LIMIT  = (byte)64;
     /** Default client/gu id */
     public static final String  DEFAULT_CLIENT_ID     = "A0B447F77853D411B05B0001023AF3D6";
     /** Default boolean for stats file */

@@ -26,10 +26,11 @@ public class SettingsManager implements SettingsInterface
     private static int      keepAlive_;
     private static int      port_;
     private static int      connectionSpeed_;
-    private static short    searchLimit_;
+    private static byte     searchLimit_;
     private static boolean  stats_;
     private static String   clientID_;
     private static int      maxConn_;
+    private static int      localIP_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -65,12 +66,12 @@ public class SettingsManager implements SettingsInterface
      */
     private SettingsManager()
     {
-	props_ = new Properties();
-	ndProps_ = new Properties();
-	fileName_ = System.getProperty("user.home");
-	fileName_ = fileName_ + System.getProperty("file.separator");
+	props_      = new Properties();
+	ndProps_    = new Properties();
+	fileName_   = System.getProperty("user.home");
+	fileName_   = fileName_ + System.getProperty("file.separator");
 	ndFileName_ = fileName_;
-	fileName_ = fileName_ + SettingsInterface.DEFAULT_FILE_NAME;
+	fileName_   = fileName_ + SettingsInterface.DEFAULT_FILE_NAME;
 	ndFileName_ = ndFileName_ + SettingsInterface.DEFAULT_ND_PROPS_NAME;
 	try {
 	    FileInputStream fis = new FileInputStream(ndFileName_);
@@ -79,8 +80,7 @@ public class SettingsManager implements SettingsInterface
 	    }
 	    catch(IOException ioe) {}
 	}
-	catch(FileNotFoundException fne){}
-	
+	catch(FileNotFoundException fne){}	
        	initSettings();
     }
 
@@ -186,7 +186,7 @@ public class SettingsManager implements SettingsInterface
 		else if(key.equals(SettingsInterface.SEARCH_LIMIT))
 		    {
 			try {
-			    short s = Short.parseShort(p);
+			    byte s = Byte.parseByte(p);
 			    try {setSearchLimit(s);}
 			    catch (IllegalArgumentException ie){}
 			}
@@ -265,7 +265,7 @@ public class SettingsManager implements SettingsInterface
     public int getConnectionSpeed(){return connectionSpeed_;}
 
     /** returns the client's search speed */
-    public short getSearchSpeed(){return searchLimit_;}
+    public byte getSearchLimit(){return searchLimit_;}
 
     /** returns the client id number */
     public String getClientID(){return clientID_;}
@@ -308,7 +308,7 @@ public class SettingsManager implements SettingsInterface
     public void setMaxTTL(byte maxttl)
 	throws IllegalArgumentException
     {
-	if(maxttl < 0)
+	if(maxttl < 0 || maxttl > 20)
 	    throw new IllegalArgumentException();
 	else
 	    {
@@ -368,7 +368,9 @@ public class SettingsManager implements SettingsInterface
     /** sets the port to connect on */
     public void setPort(int port)
     {
-	if(false)
+	// if the entered port is outside accepted 
+	// port numbers, throw the exception
+	if(port > 65536 || port < 0)
 	    throw new IllegalArgumentException();
 	else
 	    {
@@ -394,14 +396,14 @@ public class SettingsManager implements SettingsInterface
     }
 
     /** sets the limit for the number of searches */
-    public void setSearchLimit(short limit)
+    public void setSearchLimit(byte limit)
     {
 	if(false)
 	    throw new IllegalArgumentException();
 	else
 	    {
 		searchLimit_ = limit;
-		String s = Short.toString(searchLimit_);
+		String s = Byte.toString(searchLimit_);
 		props_.setProperty(SettingsInterface.SEARCH_LIMIT, s);
 		writeProperties();
 	    }
