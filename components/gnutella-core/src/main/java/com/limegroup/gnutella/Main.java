@@ -153,11 +153,10 @@ public class Main implements ActivityCallback, ErrorCallback {
 // 		}
 //     }
 
-	public void handleQueryResult(HostData data, Response response, 
-								  List docs) {
+	public void handleQueryResult(RemoteFileDesc rfd ,byte[] clientGUID) {
 		synchronized(System.out) {
-			System.out.println("Query hit from "+data.getIP()+":"+data.getPort()+":");
-			System.out.println("   "+response.getName());
+			System.out.println("Query hit from "+rfd.getHost()+":"+rfd.getPort()+":");
+			System.out.println("   "+rfd.getFileName());
 		}
 	}
 

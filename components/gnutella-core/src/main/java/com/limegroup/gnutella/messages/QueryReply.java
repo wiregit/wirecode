@@ -973,6 +973,10 @@ public class QueryReply extends Message implements Serializable{
 												   currResp.getDocument(),
 												   currResp.getUrns(),
 												   isReplyToMulticast,
+                                                   getNeedsPush(),
+                                                   0,//TODO:remove this?
+                                                   getVendor(),
+                                                   System.currentTimeMillis(),
                                                    _proxies);
         }
         

@@ -51,7 +51,10 @@ public class RemoteFileDesc implements Serializable {
     private String _vendor;
     private int _score;
     private long _timestamp;
-    
+    //TODO: Try to see if we can solve serialization issues without
+    //having to create all these different variables.
+    //instead, just hold a response and a host data object
+    private static boolean _isMeasured = false;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -213,6 +216,10 @@ public class RemoteFileDesc implements Serializable {
 	 *  <tt>null</tt>
 	 */
 	public final int getSpeed() {return _speed;}	
+    
+    public final String getVendor() {return _vendor;}
+
+    public final int getScore() {return _score;}
 
 	public final boolean chatEnabled() {return _chatEnabled;}
 	public final boolean browseHostEnabled() {return _browseHostEnabled;}
@@ -297,6 +304,12 @@ public class RemoteFileDesc implements Serializable {
 		Endpoint e = new Endpoint(_host, _port);
 		return e.isPrivateAddress();
 	}
+
+    
+    //Sumeet:TODO1: This method needs to be corrected.
+    public boolean getIsMeasured() {
+        return _isMeasured;
+    }
 
     
     public PushProxyInterface[] getPushProxies() {

@@ -256,6 +256,8 @@ public final class SearchResultHandler {
             //and choose the xml-document we want - see if we can optimize
             //the above block.
             RemoteFileDesc rfd = null;
+            LimeXMLDocument doc = docs==null||docs.size()==0?null
+                                                 :(LimeXMLDocument)docs.get(0);
             int intSize =  (int)size;//can't change type in rfd, it's serialized
             try {
             rfd = new RemoteFileDesc(data.getIP(),data.getPort(),
@@ -267,7 +269,7 @@ public final class SearchResultHandler {
                                                  data.isChatEnabled(),
                                                  data.getQuality(),
                                                  data.isBrowseHostEnabled(),
-                                                 (LimeXMLDocument)docs.get(0),
+                                                 doc,
                                                  response.getUrns(),
                                                  data.isReplyToMulticastQuery(),
                                                  data.isFirewalled(), score, 
