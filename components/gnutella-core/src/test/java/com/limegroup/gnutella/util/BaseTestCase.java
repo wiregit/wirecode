@@ -393,5 +393,12 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     		}
     	};
     }
+
+    /**
+     * Default main method, allowing all subclasses to be run individually.
+     */
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}  
 }       
 
