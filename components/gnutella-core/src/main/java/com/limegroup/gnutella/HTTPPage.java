@@ -52,7 +52,7 @@ public class HTTPPage {
 "		<a href=\"http://www.limewire.com/download\">LimeWire</a> client does not allow direct \r\n"+
 "		downloads from web browsers. If you would like to be a part of the Gnutella network, \r\n"+
 "		please download <a href=\"http://www.limewire.com/download\">LimeWire</a><br><br> For more \r\n"+
-"		information on Gnutella network, health go <a href=\"http://www.limewire.com/health.htm\">here</a>.\r\n"+
+"		information on Gnutella network health, go <a href=\"http://www.limewire.com/health.htm\">here</a>.\r\n"+
 "		</font>\r\n"+
 "		</p>\r\n"+
 "\r\n"+
