@@ -98,16 +98,45 @@ public class DuplicateFilterTest extends BaseTestCase {
         
         assertTrue(filter.allow(qr));
     }
-    
+
     public void testXMLDuplicate() throws Exception {
-        qr = QueryRequest.createQuery("tests", "<?xml");
-        assertTrue(filter.allow(qr));
-        assertTrue(!filter.allow(qr));
+        // Only allowed once in the timeframe ...
         qr = QueryRequest.createQuery("tests");
         assertTrue(filter.allow(qr));
         assertTrue(!filter.allow(qr));
-        qr = QueryRequest.createQuery("tests", "<?xml a");
+        // Invalid XML, considered same as plaintext.
+        qr = QueryRequest.createQuery("tests", "<?xml");
+        assertTrue(!filter.allow(qr));
+        qr = QueryRequest.createQuery("tests",
+            "<?xml version=\"1.0\"?>" +
+            "<audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\">" +
+            "<audio title=\"sam\" artist=\"sam's band\"></audio></audios>");
+        // same plain-text, different XML, allowed ...
         assertTrue(filter.allow(qr));
+        assertTrue(!filter.allow(qr));
+        qr = QueryRequest.createQuery("another test",
+            "<?xml version=\"1.0\"?>" +
+            "<audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\">" +
+            "<audio title=\"sam\" artist=\"sam's band\"></audio></audios>");
+        // same XML, different plaint-text, allowed ...
+        assertTrue(filter.allow(qr));
+        assertTrue(!filter.allow(qr));
+        qr = QueryRequest.createQuery("another test",
+            "<?xml version=\"1.0\"?>" +
+            "<audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\">" +
+            "<audio title=\"sam\" artist=\"sam's choir\"></audio></audios>");        
+        // different XML, allowed ...
+        assertTrue(filter.allow(qr));
+        assertTrue(!filter.allow(qr));        
+        qr = QueryRequest.createQuery("another test",
+            "<?xml version=\"1.0\"?>" +
+            "<audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\">" +
+            "<audio title=\"sam\" artist=\"sam's choir\"></audio></audios>");        
+        //same XML, not allowed.
         assertTrue(!filter.allow(qr));
     }
     
