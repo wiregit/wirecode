@@ -3,7 +3,8 @@ package com.limegroup.gnutella.settings;
  * Settings for messages
  */
 public class MessageSettings extends LimeProps {  
-    private MessageSettings() {}   
+    private MessageSettings() {}
+   
     /** 
      * The maximum allowable length of packets
      */

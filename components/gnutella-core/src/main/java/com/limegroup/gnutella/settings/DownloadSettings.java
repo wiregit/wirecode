@@ -4,7 +4,8 @@ package com.limegroup.gnutella.settings;
  * Settings for downloads
  */
 public class DownloadSettings extends LimeProps {
-    private DownloadSettings() {}                                                        
+    private DownloadSettings() {}
+                                                        
     /**
 	 * The maximum number of downstream bytes per second ever passed by
 	 * this node.
