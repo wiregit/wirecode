@@ -116,51 +116,22 @@ public class ExternalControl {
 		// Kick off appropriate downloaders
         // 
         MagnetOptions curOpt;
-        boolean xtSHA1 = false;
-        boolean xsSHA1 = false;
-        boolean asSHA1 = false;
+
 		for ( int i = 0; i < options.length; i++ ) {
             curOpt = options[i];
 
             // Find SHA1 URN
-			URN urn = null;
-			if ( curOpt.xt != null && curOpt.xt.length() > 0 ) {
-				try {
-			        urn = URN.createSHA1Urn(curOpt.xt);
-                    xtSHA1 = true;
-				} catch (IOException e) { 
-                    /* xt Not a SHA1 - try xs */ 
-                    if ( curOpt.xs != null && curOpt.xs.length() > 0 ) {
-                        try {
-                            urn = URN.createSHA1Urn(curOpt.xs);
-                            xsSHA1 = true;
-                        } catch (IOException e2) { 
-                            /* xs Not a SHA1 */ 
-                            if ( curOpt.as != null && 
-                                 curOpt.as.length() > 0 ) {
-                                try {
-                                    urn = URN.createSHA1Urn(curOpt.as);
-                                    asSHA1 = true;
-                                } catch (IOException e3) { /* as Not a SHA1 */ }
-                            }
-                        }
-                    }
-                }
-			}
+			URN urn = extractSHA1URN(curOpt);
 
 			// Collect up http locations
 			String defaultURLs[] = null;
 			ArrayList urls = new ArrayList();
             String errorMsg = null;
-            if (!xtSHA1 && curOpt.xt != null && 
-                curOpt.xt.startsWith(HTTP)) 
-                urls.add(curOpt.xt);
-			if (!xsSHA1 && curOpt.xs != null && 
-                curOpt.xs.startsWith(HTTP)) 
-				urls.add(curOpt.xs);
-			if (!asSHA1 && curOpt.as != null && 
-                curOpt.as.startsWith(HTTP)) 
-				urls.add(curOpt.as);
+            
+            urls.addAll(collectPotentialURLs(curOpt.getXT()));
+            urls.addAll(collectPotentialURLs(curOpt.getXS()));
+            urls.addAll(collectPotentialURLs(curOpt.getAS()));
+                
 			if (urls.size() > 0) {
                 // Verify each URL before adding it to the defaultURLs.
                 for(Iterator it = urls.iterator(); it.hasNext(); ) {
@@ -186,10 +157,10 @@ public class ExternalControl {
             // If not, report an error.
             if ( !( urls.size() > 0  || 
                     urn != null || 
-                    (curOpt.kt != null && !"".equals(curOpt.kt)) ) ) {
+                    (curOpt.getKT() != null && !"".equals(curOpt.getKT())) ) ) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("Invalid magnet. urls.size == " + urls.size() +
-                             "curOpt.kt == " + curOpt.kt);
+                             "curOpt.kt == " + curOpt.getKT());
                 }
                 if ( errorMsg != null )
                     errorMsg = curOpt.toString() + " (" + errorMsg + ")";
@@ -205,7 +176,7 @@ public class ExternalControl {
             
             try {
             	RouterService.download
-                   	(urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
+                   	(urn,curOpt.getKT(),curOpt.getDN(),defaultURLs,false);//!overwrite
             } catch ( AlreadyDownloadingException a ) {  
                 MessageService.showError(
                     "ERROR_ALREADY_DOWNLOADING", a.getFilename());
@@ -304,8 +275,48 @@ public class ExternalControl {
         
 	    return false;
 	}
+    
+    private static URN extractSHA1URN(MagnetOptions curOpt) {
+        try {
+            return extractSHA1URNFromList(curOpt.getXT());
+        } catch (IOException e1) {
+            /* try XS, AS...*/
+            try {
+                return extractSHA1URNFromList(curOpt.getXS());
+            } catch (IOException e2) {
+                /* try AS...*/
+                try {
+                    return extractSHA1URNFromList(curOpt.getAS());
+                } catch (IOException e3) {
+                    /* failed. */
+                    return null;
+                }
+            }
+        }
+    }
+    
+    private static URN extractSHA1URNFromList(List strings) throws IOException {
+        for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
+            try {
+                return URN.createSHA1Urn((String)iter.next());
+            } catch (IOException e) {
+                /* if this was the last String, throw exception */
+                if (!iter.hasNext())
+                    throw e;
+            } 
+        }
+        throw new IOException("List was empty. No URNs found.");
+    }
 
-
+    private static List collectPotentialURLs(List strings) {
+        List ret = new ArrayList();
+        for (Iterator iter = strings.iterator(); iter.hasNext(); ) {
+            String str = (String)iter.next();
+            if (str.startsWith(HTTP))
+                ret.add(str);
+        }
+        return ret;
+    }
 	
 	public static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");
@@ -363,17 +374,16 @@ public class ExternalControl {
 			if (curOptions == null) 
 				curOptions = new MagnetOptions();
 
-			if ( keystr.startsWith("xt") &&
-                 cmdstr.indexOf("urn:sha1:")!=-1 ) {
-				curOptions.xt = cmdstr;
+			if ( keystr.startsWith("xt") ) {
+				curOptions.addXT(cmdstr);
 			} else if ( keystr.startsWith("dn") ) {
-				curOptions.dn = cmdstr;
+				curOptions.setDN(cmdstr);
 			} else if ( keystr.startsWith("kt") ) {
-				curOptions.kt = cmdstr;
+				curOptions.setKT(cmdstr);
 			} else if ( keystr.startsWith("xs") ) {
-				curOptions.xs = cmdstr;
+				curOptions.addXS(cmdstr);
 			} else if ( keystr.startsWith("as") ) {
-				curOptions.as = cmdstr;
+				curOptions.addAS(cmdstr);
 			}
 			options.put(iIndex, curOptions);
 		}
