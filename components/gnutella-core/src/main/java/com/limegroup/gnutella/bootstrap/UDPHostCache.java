@@ -258,7 +258,7 @@ public class UDPHostCache {
     /**
      * Creates and adds a host/port as a UDP host cache.
      */
-    private createAndAdd(String host, int port) {
+    private void createAndAdd(String host, int port) {
         try {
             ExtendendEndpoint ep = new ExtendedEndpoint(host, port).setUDPHostCache(true);
             add(ep);
