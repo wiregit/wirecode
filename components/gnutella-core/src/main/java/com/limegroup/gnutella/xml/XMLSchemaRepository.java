@@ -19,7 +19,7 @@ public class XMLSchemaRepository extends java.lang.Object
     /**
      * Mapping from URI (string) to an instance of XMLSchema
      */
-    private Map /* Schema URI ==> XMLSchema */ _uriSchemaMap 
+    private Map /* Schema URI (String) ==> XMLSchema */ _uriSchemaMap 
         = new HashMap();
     
     /**
@@ -35,6 +35,7 @@ public class XMLSchemaRepository extends java.lang.Object
     
     /**
      * Initializes the internal data structures
+     * @requires Should be called from Constructor only
      */
     protected void initialize()
     {
@@ -79,7 +80,23 @@ public class XMLSchemaRepository extends java.lang.Object
      */
     public XMLSchema getSchema(String uri)
     {
-        return (XMLSchema)_uriSchemaMap.get(uri);
+        synchronized(_uriSchemaMap)
+        {
+            return (XMLSchema)_uriSchemaMap.get(uri);
+        }
+    }
+    
+    /**
+     * Returns the URIs scooresponding to the schemas that we have
+     * @return the URIs scooresponding to the schemas that we have
+     */ 
+    public String[] getAvailableSchemaURIs()
+    {
+        synchronized(_uriSchemaMap)
+        {
+            Set keySet = _uriSchemaMap.keySet();
+            return (String[])keySet.toArray(new String[0]);
+        }
     }
     
 }
