@@ -19,6 +19,17 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * Obsoletes the old SocketOpener class.
  */
 public class Sockets {
+    
+    /**
+     * The maximum number of concurrent connection attempts.
+     */
+    private static final int MAX_CONNECTING_SOCKETS = 8;
+    
+    /**
+     * The current number of waiting socket attempts.
+     */
+    private static int _socketsConnecting = 0;
+    
 
     private static volatile int _attempts=0;
 	/**
@@ -93,15 +104,22 @@ public class Sockets {
 	 */
 	private static Socket connectPlain(String host, int port, int timeout)
 		throws IOException {
-        if (CommonUtils.isJava14OrLater())
-            //a) 1.4-style sockets
-            return Sockets14.getSocket(host, port, timeout);
-        else if (timeout!=0)
-            //b) Emulation using threads
-            return (new SocketOpener(host, port)).connect(timeout);
-        else
-            //c) No timeouts
-            return new Socket(host, port);
+        
+        waitForSocket();
+		    
+        try {
+            if (CommonUtils.isJava14OrLater())
+                //a) 1.4-style sockets
+                return Sockets14.getSocket(host, port, timeout);
+            else if (timeout!=0)
+                //b) Emulation using threads
+                return (new SocketOpener(host, port)).connect(timeout);
+            else
+                //c) No timeouts
+                return new Socket(host, port);
+        } finally {
+            releaseSocket();
+        }
     }
 
 	/** 
@@ -354,6 +372,38 @@ public class Sockets {
 	public static void clearAttempts() {
 	    _attempts=0;
 	}
+	
+	/**
+	 * Waits until we're allowed to do an active outgoing socket
+	 * connection.
+	 */
+	private static void waitForSocket() throws IOException {
+	    if(!CommonUtils.isWindowsXP())
+	        return;
+	    synchronized(Sockets.class) {
+	        while(_socketsConnecting >= MAX_CONNECTING_SOCKETS) {
+	            try {
+	                Sockets.class.wait();
+	            } catch(InterruptedException ignored) {
+	                throw new IOException(ignored.getMessage());
+	            }
+	        }
+	        _socketsConnecting++;	        
+	    }
+	}
+	
+	/**
+	 * Notification that a socket has been released.
+	 */
+	private static void releaseSocket() {
+	    if(!CommonUtils.isWindowsXP())
+	        return;
+	    synchronized(Sockets.class) {
+	        _socketsConnecting--;
+	        Sockets.class.notifyAll();
+	    }
+	}   
+	
 	/** 
 	 * Opens Java sockets with a bounded timeout using threads.  Typical use:
 	 *
