@@ -1034,6 +1034,6 @@ log("ack timeout");
     }
 
 	public static void log2(String msg) {
-		System.out.println(msg);
+		System.err.println(msg);
 	}
 }

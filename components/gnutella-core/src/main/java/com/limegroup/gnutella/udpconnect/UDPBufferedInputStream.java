@@ -205,6 +205,6 @@ log("exit waiting ...");
     }
 
     private static void log2(String str) {
-       System.out.println(str); 
+       System.err.println(str); 
     }
 }
