@@ -134,14 +134,19 @@ sv      Swedish/Sweden          Messages      "Fredrik Olsson"
 sv_SE   Svenska/Sverige         Download page mail: peylow AT atari DOT org
                                               "Christopher D."
                                               mail: cdi AT spray DOT se
+                                              "Emil Sågfors"
+                                              mail: emil_sagfors AT hotmail DOT com
+------- ----------------------- ------------- -------------------------------
+tl      Tagalog/Philippines     Messages      "Tristan Almazar"
+tl_PH   Filipino/Pilipinas                    mail: tjalmzr AT nyc DOT rr DOT com
 ------- ----------------------- ------------- -------------------------------
 ******* Languages with Latin (Central European) characters ******************
 ------- ----------------------- ------------- -------------------------------
 cs      Czech/Czech Rep.        Messages      New translator needed !
 cs_CZ   Čeština (Česká republika)             mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
-hr      Croatian/Croatia        Messages      New translator needed !
-hr_HR   Hrvatsky/Hrvatska                     mail: ? AT ? DOT ?
+hr      Croatian/Croatia        Messages      "Dan Bernardic"
+hr_HR   Hrvatsky/Hrvatska                     mail: dan DOT bernardic AT gmail DOT com
 ------- ----------------------- ------------- -------------------------------
 hu      Hungarian/Hangary       Messages      "Laszlo Toth"
 hu_HU   Magyar/Magyarorszag                   mail: thlacus AT freemail DOT hu
@@ -180,8 +185,8 @@ vi_VN   Tiếng Việt Nam/Việt Nam                mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
 ******* Languages with Greek characters *************************************
 ------- ----------------------- ------------- -------------------------------
-el      Greek/Greece            Messages      New translator needed !
-el_GR   Ελληνικά/Ελλάδα                       mail: ? AT ? DOT ?
+el      Greek/Greece            Messages      "Andreas Fournaris"
+el_GR   Ελληνικά/Ελλάδα                       mail: androsf AT cytanet DOT com DOT cy
 el_CY   /Κύπρος                               
 ------- ----------------------- ------------- -------------------------------
 ******* Languages with Cyrillic characters **********************************
@@ -198,8 +203,8 @@ bg_BG   Български/България                    mail: ? AT ? DOT 
 bg      Macedonian/Macedonia    Messages      New translator needed !
 bg_BG   Македонски јазик/Македонја            mail: ? AT ? DOT ?
 ------- ----------------------- ------------- -------------------------------
-sr      Serbian/Serbia-Montenegro Messages    New translator needed !
-sr_SR   Српски/Југославија                    mail: ? AT ? DOT ?
+sr      Serbian/Serbia-Montenegro Messages    "Borislav Tadic"
+sr_SR   Српски/Југославија                    borislav AT trust-b DOT com
 ------- ----------------------- ------------- -------------------------------
 uk      Ukrainian/Ukrainia      Messages      New translator needed !
 uk_UA   Українська мова/Україна               mail: ? AT ? DOT ?
