@@ -186,6 +186,19 @@
 	</junitreport>
  </target>
  
+    <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="default.classpath"/>
+
+    <target name="pmd">
+        <pmd rulesetfiles="rulesets/unusedcode.xml">
+            <formatter type="html" toFile="pmd_report.html"/>
+            <fileset dir="..">
+                <include name="core/**/*.java"/>
+                <include name="gui/**/*.java"/>
+            </fileset>
+        </pmd>
+    </target>
+ 
+ 
 </project>
 
 
