@@ -54,13 +54,17 @@ public class VersionUpdate
 	{
 		_currentDirectory = System.getProperty("user.dir");
 		if(!_currentDirectory.endsWith(File.separator))
-			_currentDirectory += File.separator;		
+			_currentDirectory += File.separator;	
+		boolean delete = _settings.getDeleteOldJAR();
 		if(_settings.getDeleteOldJAR()) {
 			String oldJARName = _settings.getOldJARName();
 			File oldCharFile = new File(_currentDirectory, oldJARName);
 			if(oldCharFile.delete()) {
 				_settings.setDeleteOldJAR(false);
 				_settings.setOldJARName("");
+			}
+			else {
+				Utilities.showMessage("could not delete jar");
 			}
 		}
 		boolean checkAgain;		
@@ -353,20 +357,20 @@ public class VersionUpdate
 				String pathSeparator = System.getProperty("path.separator");
 				String line = br.readLine();
 				String curTok = "";
-				String endFlag = "update.jar"+pathSeparator;
+				String endFlag = "update.jar";
 				while(line != null) {
 					if(line.startsWith(newClasspaths)) {
 						line = line.substring(15);
 						st = new StringTokenizer(line, pathSeparator);
 						while(st.hasMoreTokens()) {
-							curTok = st.nextToken()+pathSeparator;							
+							curTok = st.nextToken();							
 							if(curTok.startsWith("LimeWire")) {
 								if(!curTok.endsWith(endFlag)) {
 									_settings.setOldJARName(curTok);
-									curTok = newFileName+pathSeparator;
+									curTok = newFileName;
 								}
 							}
-							sb.append(curTok);
+							sb.append(curTok + pathSeparator);
 						}
 						line = sb.toString();
 					}
@@ -397,8 +401,7 @@ public class VersionUpdate
 				cancelUpdate("renaming your configuration file.");
 				return false;
 			}
-			else
-				_settings.setDeleteOldJAR(true);
+			_settings.setDeleteOldJAR(true);
 		}
 		else {
 			cancelUpdate("locating your configuration file.");
