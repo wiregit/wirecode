@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.downloader.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -22,6 +22,8 @@ public class DownloadManager {
     private MessageRouter router;
     /** Used for get addresses in pushes. */
     private Acceptor acceptor;
+    /** Used to check if the file exists. */
+    private FileManager fileManager;
 
     /** The list of all ManagedDownloader's attempting to download.
      *  INVARIANT: active.size()<=slots() && active contains no duplicates */
@@ -39,35 +41,51 @@ public class DownloadManager {
      *     @param callback the UI callback to notify of download changes
      *     @param router the message router to use for sending push requests
      *     @param acceptor used to get my IP address and port for pushes
+     *     @param fileManager used to check if files exist
      */
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
-                           Acceptor acceptor) {
+                           Acceptor acceptor,
+                           FileManager fileManager) {
         this.callback=callback;
         this.router=router;
         this.acceptor=acceptor;
+        this.fileManager=fileManager;
     }
                 
     /** 
-     * Tries to download the given file.  Returns a Downloader that allows you
-     * to stop and resume this download.  The ActivityCallback will also be
-     * notified of this download, so the return value can usually be ignored.
-     * The download begins immediately, unless it is queued.  
+     * Tries to "smart download" any of the given files.<p>  
+     *
+     * If overwrite==false, then if any of the files already exists in the
+     * download directory, FileExistsException is thrown and no files are
+     * modified.  If overwrite==true, the files may be overwritten.<p>
+     * 
+     * Otherwise returns a Downloader that allows you to stop and resume this
+     * download.  The ActivityCallback will also be notified of this download,
+     * so the return value can usually be ignored.  The download begins
+     * immediately, unless it is queued.  It stops after any of the files
+     * succeeds.
+     *
      *     @modifies this, disk 
      */
-    public synchronized Downloader getFile(RemoteFileDesc file) {
-        return getFiles(new RemoteFileDesc[] { file });
-    }
+    public synchronized Downloader getFiles(
+            RemoteFileDesc[] files,
+            boolean overwrite) throws FileExistsException {
+        //Check if file exists.  This code is borrowed from HTTPDownloader.
+        //TODO2: we can avoid race conditions by actually reserving a space on
+        //disk for the file.  TODO3: perhaps we should pass all conflicting files
+        //to constructor.
+        if (! overwrite) {
+            String downloadDir = SettingsManager.instance().getSaveDirectory();
+            for (int i=0; i<files.length; i++) {
+                String filename=files[i].getFileName();
+                File completeFile = new File(downloadDir, filename);  
+                if ( completeFile.exists() ) 
+                    throw new FileExistsException(filename);            
+            }
+        }
 
-    /** 
-     * Tries to "smart download" any of the given files.  Returns a Downloader
-     * that allows you to stop and resume this download.  The ActivityCallback 
-     * will also be notified of this download, so the return value can usually
-     * be ignored.The download begins immediately, unless it is queued.  It
-     * stops after any of the files succeeds.
-     *      @modifies this, disk 
-     */
-    public synchronized Downloader getFiles(RemoteFileDesc[] files) {
+
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader=new ManagedDownloader(this, files);

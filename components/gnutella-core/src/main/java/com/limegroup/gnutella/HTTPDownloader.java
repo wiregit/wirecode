@@ -12,6 +12,11 @@ import com.limegroup.gnutella.downloader.*;
 import java.io.*;
 import java.net.*;
 
+/**
+ * Downloads a file over an HTTP connection.  This class is as simple as possible.
+ * It does not deal with retries, prioritizing hosts, etc.  Nor does it check
+ * whether a file already exists; it just writes over anything on disk.
+ */
 public class HTTPDownloader {
 
 	private int _index;
@@ -313,10 +318,15 @@ public class HTTPDownloader {
 		}
 
 		if ( complete_file.exists() ){
-			// ask the user if the file should be overwritten
-			// if ( ! _callback.overwriteFile(_filename) ) 
-			// TODO: Need to ask the user - but how?
-			throw new FileExistsException();
+            //It's up to the caller to prompt before overwriting.  So this can
+            //just go ahead and overwrite.
+			try {
+                complete_file.delete();
+            } catch (SecurityException e) {
+                //Hmm...shouldn't happen under normal contexts, but we can
+                //recover.
+                throw new IOException("Couldn't delete file");
+            }
 		}
 		
 

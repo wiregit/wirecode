@@ -36,9 +36,6 @@ public interface ActivityCallback
      */
     public void handleQueryString( String query );
 
-    /** Ask user if I should overwrite download file */
-    public boolean overwriteFile(String file);
-
     /** Add a file to the download window */
     public void addDownload(Downloader d);
 

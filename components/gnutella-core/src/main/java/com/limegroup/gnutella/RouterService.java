@@ -49,7 +49,7 @@ public class RouterService
         this.router.initialize(acceptor, manager, catcher);
         this.manager.initialize(router, catcher);
         this.acceptor.initialize(manager, router, downloader);
-        this.downloader.initialize(callback, router, acceptor);
+        this.downloader.initialize(callback, router, acceptor, FileManager.instance());
     }
 
     /**
@@ -559,14 +559,23 @@ public class RouterService
         return( FileManager.instance().getNumFiles() );
     }
 
-    /**
-     * Downloads the given files, stopping after ANY of the files is
-     * successfully downloaded.  May retry and/or queue the download as
-     * necessary.  Generally the download start immediately.  Returns a
-     * Downloader object that can be used to stop and resume the download. 
-     *     @modifies network, disk
+    /** 
+     * Tries to "smart download" any of the given files.<p>  
+     *
+     * If overwrite==false, then if any of the files already exists in the
+     * download directory, FileExistsException is thrown and no files are
+     * modified.  If overwrite==true, the files may be overwritten.<p>
+     * 
+     * Otherwise returns a Downloader that allows you to stop and resume this
+     * download.  The ActivityCallback will also be notified of this download,
+     * so the return value can usually be ignored.  The download begins
+     * immediately, unless it is queued.  It stops after any of the files
+     * succeeds.
+     *
+     *     @modifies this, disk 
      */
-    public Downloader download(RemoteFileDesc[] files) {
-        return downloader.getFiles(files);
+    public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
+        throws com.limegroup.gnutella.downloader.FileExistsException {
+        return downloader.getFiles(files, overwrite);
     }
 }
