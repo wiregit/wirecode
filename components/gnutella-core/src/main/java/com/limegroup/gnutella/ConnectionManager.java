@@ -427,7 +427,7 @@ public class ConnectionManager implements Runnable {
 	    endpoints.remove(new Endpoint(c.getInetAddress().getHostAddress(), c.getPort()));
 	    c.shutdown();//ensure that the connection is closed
 	    int need = keepAlive - getNumConnections() - fetchers.size();
-	    if ( need > 0 ) {
+	    for (int j=0; j<need; j++) {
 		//Asynchronously fetch a connection to replace c
 		ConnectionFetcher t=new ConnectionFetcher(this,1);
 		t.start();
@@ -519,7 +519,7 @@ public class ConnectionManager implements Runnable {
      *  Reset how many connections you want and start kicking more off
      *  if required
      */
-    public void adjustKeepAlive(int newKeep)
+    public synchronized void adjustKeepAlive(int newKeep)
     {
 	keepAlive = newKeep;
 	if (keepAlive > 0) {
