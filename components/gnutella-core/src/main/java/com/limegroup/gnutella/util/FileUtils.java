@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
+import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.FileManager;
 import com.sun.java.util.collections.*;
 
 /**
@@ -99,11 +99,34 @@ public class FileUtils
     	String name=f.getParent();
     	if(name == null) return null;
     	try {
-    		return FileManager.getCanonicalFile(new File(name));
+    		return FileUtils.getCanonicalFile(new File(name));
     	} catch(IOException ioe) {
     		//if the exception occurs, simply return null
     		return null;
     	}
+    }
+
+    /** Same as f.getCanonicalFile() in JDK1.3. */
+    public static File getCanonicalFile(File f) throws IOException {
+        return new File(f.getCanonicalPath());
+    }
+
+    /**
+     * simply gets whatever is after the "." in a filename, or the first thing
+     * after the first "." in the filename.
+     * 
+     * TODO:: test and improve -- doesn't look quite right!!
+     */ 
+    public static String getFileExtension(File f) {
+        String retString = null;
+    
+        StringTokenizer st = 
+            new StringTokenizer(f.getName(), ".");
+        if (st.countTokens() > 1) {
+            st.nextToken();
+            retString = st.nextToken();
+        }
+        return retString;
     }    
     
 }
