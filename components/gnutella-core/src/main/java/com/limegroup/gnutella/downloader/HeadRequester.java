@@ -64,62 +64,66 @@ final class HeadRequester implements Runnable {
 	 * download mesh.
 	 */
 	public void run() {
-		Iterator iter = HOSTS.iterator();
-		while(iter.hasNext()) {
-			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
-			if(QueryReply.isFirewalledQuality(rfd.getQuality())) {
-				// do not attempt to make a HEAD request to firewalled hosts
-                continue;
-			}
-			URN urn = rfd.getSHA1Urn();
-			if(urn == null) continue;
-			if(urn.equals(RESOURCE_NAME)) {
-				URL url = rfd.getUrl();
-				if(url == null) continue;
-				try {
-					HttpURLConnection httpConnection = 
-					    (HttpURLConnection)url.openConnection();
-					httpConnection.setRequestMethod("HEAD");
-					httpConnection.setDoOutput(true);
-					httpConnection.setDoInput(true);
-					httpConnection.setUseCaches(false);
-					httpConnection.setAllowUserInteraction(false);
-					httpConnection.setRequestProperty(
-					    HTTPHeaderName.CONTENT_URN.httpStringValue(), 
-						RESOURCE_NAME.httpStringValue());
-					httpConnection.setRequestProperty(
-						HTTPHeaderName.ALT_LOCATION.httpStringValue(),
-						TOTAL_ALTS.httpStringValue());
-                    httpConnection.setRequestProperty(
-                        HTTPHeaderName.CONNECTION.httpStringValue(),
-                        "close");
-					httpConnection.connect();
-					String contentUrn = httpConnection.getHeaderField
-					    (HTTPHeaderName.CONTENT_URN.httpStringValue());
-					if(contentUrn == null) {
-						continue;
-					}
-					try {
-						URN reportedUrn = URN.createSHA1Urn(contentUrn); 
-						if(!reportedUrn.equals(RESOURCE_NAME)) {
-							continue;
-						}
-					} catch(IOException e) {
-						continue;
-					}
-					String altLocs = httpConnection.getHeaderField
-					    (HTTPHeaderName.ALT_LOCATION.httpStringValue());
-					if(altLocs == null) {
-						continue;
-					}
-					AlternateLocationCollection alc = 
-					    AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
-					COLLECTOR.addAlternateLocationCollection(alc);
-                    httpConnection.disconnect();
-				} catch(IOException e) {
-					continue;
-				}					
-			}
-		}
+        try {
+            Iterator iter = HOSTS.iterator();
+            while(iter.hasNext()) {
+                RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
+                if(QueryReply.isFirewalledQuality(rfd.getQuality())) {
+                    // do not attempt to make a HEAD request to firewalled hosts
+                    continue;
+                }
+                URN urn = rfd.getSHA1Urn();
+                if(urn == null) continue;
+                if(urn.equals(RESOURCE_NAME)) {
+                    URL url = rfd.getUrl();
+                    if(url == null) continue;
+                    try {
+                        HttpURLConnection httpConnection = 
+                            (HttpURLConnection)url.openConnection();
+                        httpConnection.setRequestMethod("HEAD");
+                        httpConnection.setDoOutput(true);
+                        httpConnection.setDoInput(true);
+                        httpConnection.setUseCaches(false);
+                        httpConnection.setAllowUserInteraction(false);
+                        httpConnection.setRequestProperty(
+                            HTTPHeaderName.CONTENT_URN.httpStringValue(), 
+                            RESOURCE_NAME.httpStringValue());
+                        httpConnection.setRequestProperty(
+						    HTTPHeaderName.ALT_LOCATION.httpStringValue(),
+						    TOTAL_ALTS.httpStringValue());
+                        httpConnection.setRequestProperty(
+                            HTTPHeaderName.CONNECTION.httpStringValue(),
+                            "close");
+                        httpConnection.connect();
+                        String contentUrn = httpConnection.getHeaderField
+					        (HTTPHeaderName.CONTENT_URN.httpStringValue());
+                        if(contentUrn == null) {
+                            continue;
+                        }
+                        try {
+                            URN reportedUrn = URN.createSHA1Urn(contentUrn); 
+                            if(!reportedUrn.equals(RESOURCE_NAME)) {
+                                continue;
+                            }
+                        } catch(IOException e) {
+                            continue;
+                        }
+                        String altLocs = httpConnection.getHeaderField
+                            (HTTPHeaderName.ALT_LOCATION.httpStringValue());
+                        if(altLocs == null) {
+                            continue;
+                        }
+                        AlternateLocationCollection alc = 
+                            AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
+                        COLLECTOR.addAlternateLocationCollection(alc);
+                        httpConnection.disconnect();
+                    } catch(IOException e) {
+                        continue;
+                    }			
+                }
+            }
+        } catch(Exception e) {
+            RouterService.instance().getActivityCallback().error(e);
+        }
 	}
 }
