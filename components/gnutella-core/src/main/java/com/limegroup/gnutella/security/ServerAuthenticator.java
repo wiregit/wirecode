@@ -40,24 +40,6 @@ public class ServerAuthenticator implements Authenticator
         else
             return null;
     }
-    
-    /**
-     * Converts a 16-byte MD5 hash into a 32 byte hex string.
-     */
-    private static String generateHexString(byte[] hash)
-    {
-        StringBuffer sb = new StringBuffer();
-        
-        for(int i = 0; i < hash.length; i++)
-        {
-            if ( (((int)hash[i] & 0xff)) < 0x10)
-                sb.append("0");
-            sb.append(Long.toString((int)hash[i] & 0xff, 16));
-        }
-        
-        return sb.toString();
-    }
-
 }
 
 
