@@ -4,8 +4,10 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 
@@ -108,6 +110,11 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToOutgoingLeaf() throws Exception {
         ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+
+        assertTrue(RouterService.isSupernode());
 
         UltrapeerHandshakeResponder responder = 
             new UltrapeerHandshakeResponder("23.3.4.5");
@@ -180,7 +187,15 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToIncomingLeaf() throws Exception {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);        
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);      
+        
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+
+        assertTrue(RouterService.isSupernode());
+        
+          
         // the ultrapeer we'll be testing against
         UltrapeerHandshakeResponder responder = 
             new UltrapeerHandshakeResponder("23.3.4.5");

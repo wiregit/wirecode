@@ -178,11 +178,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
             HandshakeResponse.createResponse(new LeafHeaders("80.45.0.1"));
         HandshakeResponse hr = responder.respondUnauthenticated(leaf, false);
         
-        assertTrue("should accept connections to other leaves when "+
-                   "we don't know our status yet"+
-                   hr.getStatusLine(), 
-                   hr.isAccepted());
-        assertTrue("should be deflated", hr.isDeflateEnabled());
+        assertFalse("should never accept leaves if we're a leaf.", hr.isAccepted());
     }
 
 }
