@@ -47,9 +47,27 @@ public final class ConnectionChecker implements Runnable {
     /**
      * Array of standard internet hosts to connect to when determining whether
      * or not the user has a live Internet connection.  These are randomized
-     * so a minimum number is hit on each check.  NON-FINAL FOR TESTING.
+     * so a minimum number is hit on each check.  Note that we only hit one 
+     * random server per test and that we only test the connection if we have
+     * ample evidence that the users machine is no longer connected, resulting
+     * in minimal traffic to these sites.  NON-FINAL FOR TESTING.
      */
     private static String[] STANDARD_HOSTS = {
+        "http://www.microsoft.com",
+        "http://www.wanadoo.fr",
+        "http://www.tiscali.com",
+        "http://www.ntt.com",
+        "http://www.tonline.com",
+        "http://www.download.com",
+        "http://www.ibm.com",
+        "http://www.sun.com",
+        "http://www.apple.com",
+        "http://www.ebay.com",
+        "http://www.sun.com",
+        "http://www.monster.com",
+        "http://www.uunet.com",
+        "http://www.real.com",
+        "http://www.level3.com",
         "http://www.microsoft.com",
         "http://www.sco.com",
         "http://www.google.com",
@@ -73,6 +91,22 @@ public final class ConnectionChecker implements Runnable {
         "http://www.gm.com",
         "http://www.aol.com",
         "http://www.verizon.com",
+        "http://www.passport.com",
+        "http://www.go.com",
+        "http://www.overture.com",
+        "http://www.earthlink.net",
+        "http://www.bellsouth.net",
+        "http://www.excite.com",
+        "http://www.paypal.com",
+        "http://www.altavista.com",
+        "http://www.weather.com",
+        "http://www.mapquest.com",
+        "http://www.geocities.com",
+        "http://www.juno.com",
+        "http://www.msnbc.com",
+        "http://www.lycos.com",
+        "http://www.comcast.com",
+        "http://www.overture.com",
     };
     
     /**
