@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.ErrorService;
 
 /**
  * This class contains a systemwide File creation time cache that persists these
@@ -12,6 +13,8 @@ import com.limegroup.gnutella.util.*;
  * File.lastModifiedTime() all the time.  We want to preserve creation times
  * across the Gnutella network.
  *
+ * In order to be speedy, this class maintains two data structures - one for
+ * fast URN to creation time lookup, another for fast 'youngest' file lookup.
  */
 public final class CreationTimeCache {
     
@@ -39,8 +42,16 @@ public final class CreationTimeCache {
      */
     private static final Map /* URN -> Creation Time (Long) */ TIME_MAP;
 
+    /**
+     * Alternate container.  LOCKING: obtain this.
+     * Creation Time (Long) -> Set of URNs
+     */
+    private static final SortedMap URN_MAP;
+
     static {
         TIME_MAP = createMap();
+        // use a custom comparator to sort the map in descending order....
+        URN_MAP = new TreeMap(new MyComparator());
         fileManager = RouterService.getFileManager();
         instance = new CreationTimeCache();
     }
@@ -59,6 +70,7 @@ public final class CreationTimeCache {
      */
     private CreationTimeCache() {
 		removeOldEntries(TIME_MAP);
+        constructURNMap();
 	}
     
     /**
@@ -76,6 +88,7 @@ public final class CreationTimeCache {
      */
     public synchronized void removeTime(URN urn) {
         TIME_MAP.remove(urn);
+        // don't worry about URN_MAP, it'll be pruned next time on startup
     }
 
     /**
@@ -89,7 +102,18 @@ public final class CreationTimeCache {
         throws IllegalArgumentException {
         if (urn == null) throw new IllegalArgumentException("Null URN.");
         if (time <= 0) throw new IllegalArgumentException("Bad Time.");
-        TIME_MAP.put(urn, new Long(time));
+        Long cTime = new Long(time);
+
+        // populate urn to time
+        TIME_MAP.put(urn, cTime);
+
+        // populate time to set of urns
+        Set urnSet = (Set) URN_MAP.get(cTime);
+        if (urnSet == null) {
+            urnSet = new HashSet();
+            URN_MAP.put(cTime, urnSet);
+        }
+        urnSet.add(urn);
     }
 
 
@@ -98,12 +122,18 @@ public final class CreationTimeCache {
      * @return the iterator returns younger URNs first.
      */
     public synchronized Iterator getFiles() {
-        Iterator iter = null;
+        List urnList = new ArrayList();
+        Iterator iter = URN_MAP.entrySet().iterator();
 
-        // no implementation as of yet, need to change the implementation
-        // of this to make it quick....
+        // we bank on the fact that the URN_MAP iterator returns the entries
+        // in descending order....
+        while (iter.hasNext()) {
+            Map.Entry currEntry = (Map.Entry) iter.next();
+            Set urns = (Set) currEntry.getValue();
+            urnList.addAll(urns);
+        }
 
-        return iter;
+        return urnList.listIterator();
     }
 
         
@@ -127,7 +157,31 @@ public final class CreationTimeCache {
                 iter.remove();
         }
     }
-    
+
+    /**
+     * Constructs the URN_MAP, which is based off the entries in the TIME_MAP.
+     */
+    private static void constructURNMap() {
+        Set entries = TIME_MAP.entrySet();
+        Iterator iter = entries.iterator();
+        while (iter.hasNext()) {
+            // for each entry, get the creation time and the urn....
+            Map.Entry currEntry = (Map.Entry) iter.next();
+            Long cTime = (Long) currEntry.getValue();
+            URN urn = (URN) currEntry.getKey();
+
+            // put the urn in a set of urns that have that creation time....
+            Set urnSet = (Set) URN_MAP.get(cTime);
+            if (urnSet == null)
+                urnSet = new HashSet();
+            urnSet.add(urn);
+
+            // and populate the reverse mapping
+            URN_MAP.put(cTime, urnSet);
+        }
+    }
+
+
     /**
      * Loads values from cache file, if available
      */
@@ -173,5 +227,24 @@ public final class CreationTimeCache {
         } catch (Exception e) {
             ErrorService.error(e);
         }
+    }
+
+    
+    private static final class MyComparator implements Comparator {
+
+        // switches the usual meaning of compare....        
+        public int compare(Object o1, Object o2) {
+            if ((o1 instanceof Long) && (o2 instanceof Long))
+                return 0 - ((Long)o1).compareTo(((Long)o2));
+            ErrorService.error(new Exception("Should only compare longs!!" +
+                                             "  o1.class = " + o1.getClass() +
+                                             ", o2.class = " + o2.getClass()));
+            return 0;
+        }
+
+        public boolean equals(Object o) {
+            return (o instanceof MyComparator);
+        }
+
     }
 }
