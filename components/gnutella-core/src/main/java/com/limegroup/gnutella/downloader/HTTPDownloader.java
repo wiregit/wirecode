@@ -1294,7 +1294,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 Assert.that(left>0);
 
                 BandwidthThrottle throttle = _socket instanceof UDPConnection ?
-                    THROTTLE : UDP_THROTTLE;
+                    UDP_THROTTLE : THROTTLE;
                 int toRead = throttle.request(Math.min(BUF_LENGTH, left));
                 c = _byteReader.read(buf, 0, toRead);
                 if (c == -1) 

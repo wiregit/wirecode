@@ -208,7 +208,7 @@ public final class NormalUploadState implements HTTPMessage {
         byte[] buf = new byte[BLOCK_SIZE];
         while (true) {
             BandwidthThrottle throttle =
-                _uploader.isUDPTransfer() ? THROTTLE : UDP_THROTTLE;        
+                _uploader.isUDPTransfer() ? UDP_THROTTLE : THROTTLE;
             throttle.setRate(getUploadSpeed());
 
             int c = -1;
