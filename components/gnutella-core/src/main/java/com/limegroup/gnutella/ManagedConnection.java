@@ -275,7 +275,7 @@ public class ManagedConnection extends Connection
      * connection.
      */
     private QueryRouteTable _lastQRPTableSent;
-    
+
     /**
      * Holds the mappings of GUIDs that are being proxied.
      * We want to construct this lazily....
@@ -1520,7 +1520,6 @@ public class ManagedConnection extends Connection
     }
     
 
-    
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
@@ -1571,6 +1570,13 @@ public class ManagedConnection extends Connection
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}
+
+    /**
+     * set preferencing for the responder
+     */
+    public void setLocalePreferencing(boolean b) {
+        RESPONSE_HEADERS.setLocalePreferencing(b);
+    }
 
     /** Class-wide expiration mechanism for all ManagedConnections.
      *  Only expires on-demand.

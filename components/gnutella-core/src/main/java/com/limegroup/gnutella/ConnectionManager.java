@@ -144,7 +144,8 @@ public class ConnectionManager {
     private final List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
-
+    private ConnectionFetcher _dedicatedPrefFetcher;
+    private volatile boolean _needPref = true;
     /**
      * List of all connections.  The core data structures are lists, which allow
      * fast iteration for message broadcast purposes.  Actually we keep a couple
@@ -636,7 +637,7 @@ public class ConnectionManager {
         return getNumInitializedConnections() < _keepAlive
             || (isSupernode() 
 				&& getNumInitializedClientConnections() < 
-				   UltrapeerSettings.MAX_LEAVES.getValue());
+                UltrapeerSettings.MAX_LEAVES.getValue());
     }
     
     /**
@@ -663,7 +664,6 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
-
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
@@ -1345,6 +1345,10 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
+        if(RouterService.isShieldedLeaf() 
+           && _needPref 
+           && _dedicatedPrefFetcher == null)
+            _dedicatedPrefFetcher = new ConnectionFetcher(true);
         //How many connections do we need?  To prefer ultrapeers, we try to
         //achieve NUM_CONNECTIONS ultrapeer connections.  But to prevent
         //fragmentation with clients that don't support ultrapeers, we'll give
@@ -1456,7 +1460,10 @@ public class ConnectionManager {
             }
 
             _initializingFetchedConnections.add(mc);
-            _fetchers.remove(fetcher);
+            if(fetcher == _dedicatedPrefFetcher)
+                _dedicatedPrefFetcher = null;
+            else
+                _fetchers.remove(fetcher);
             connectionInitializing(mc);
             // No need to adjust connection fetchers here.  We haven't changed
             // the need for connections; we've just replaced a ConnectionFetcher
@@ -1533,7 +1540,6 @@ public class ConnectionManager {
         Properties headers = connection.headers().props();
         //return if no headers to process
         if(headers == null) return;
-        
         //update the addresses in the host cache (in case we received some
         //in the headers)
         updateHostCache(connection.headers());
@@ -1684,7 +1690,6 @@ public class ConnectionManager {
             processConnectionHeaders(c);
         }
 
-		
         //If there's not space for the connection, reject it.  This mechanism
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes ManagedConnections are handled by headers
@@ -1694,7 +1699,7 @@ public class ConnectionManager {
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
-
+        
         //For incoming connections, add it to the GUI.  For outgoing connections
         //this was done at the top of the method.  See note there.
         if (! c.isOutgoing()) {
@@ -1825,7 +1830,7 @@ public class ConnectionManager {
      * responsible for recording the death.
      */
     private class ConnectionFetcher extends ManagedThread {
-
+        private boolean _pref = false;
         /**
          * Tries to add a connection.  Should only be called from a thread
          * that has the enclosing ConnectionManager's monitor.  This method
@@ -1833,8 +1838,12 @@ public class ConnectionManager {
          * locking requirement.
          */
         public ConnectionFetcher() {
-            setName("ConnectionFetcher");
+            this(false);
+        }
 
+        public ConnectionFetcher(boolean pref) {
+            setName("ConnectionFetcher");
+            _pref = pref;
             // Kick off the thread.
             setDaemon(true);
             start();
@@ -1854,6 +1863,8 @@ public class ConnectionManager {
                 _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(
                     endpoint.getAddress(), endpoint.getPort());
+                //set preferencing
+                connection.setLocalePreferencing(_pref);
 
                 // If we've been trying to connect for awhile, check to make 
                 // sure the user's internet connection is live.  We only do 
@@ -1880,6 +1891,7 @@ public class ConnectionManager {
                     initializeFetchedConnection(connection, this);
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
+                    _needPref = false;
                 } catch (NoGnutellaOkException e) {
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);

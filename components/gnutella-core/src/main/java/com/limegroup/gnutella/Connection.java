@@ -190,7 +190,7 @@ public class Connection implements IpPort {
      * Non-final so that the responder can be garbage collected after we've
      * concluded the responding (by setting to null).
      */
-    private HandshakeResponder RESPONSE_HEADERS;
+    protected HandshakeResponder RESPONSE_HEADERS;
 
     /** The list of all properties written during the handshake sequence,
      *  analogous to HEADERS_READ.  This is needed because
@@ -262,6 +262,10 @@ public class Connection implements IpPort {
      */
     protected static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
+
+    /**
+     */
+    private boolean _isPreference = false;
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -550,7 +554,7 @@ public class Connection implements IpPort {
                 throw new IOException("Bad connect string");
             }
 				
-			
+
 			//3. Read the Gnutella headers. 
 			readHeaders();
 
