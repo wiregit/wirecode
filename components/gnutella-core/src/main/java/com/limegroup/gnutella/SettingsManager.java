@@ -942,6 +942,11 @@ public final class SettingsManager {
 					try {
 						setSaveDirectory(new File(p));
 					} catch(IOException e) {
+						try {
+							setSaveDirectory(DEFAULT_SAVE_DIRECTORY);
+						} catch(IOException ioe) {
+							// this should never happen
+						}
                         e.printStackTrace();
                         // this should never happen unless the user manually
                         // enters the save directory in the props file or
@@ -2343,13 +2348,12 @@ public final class SettingsManager {
 	 */
     public void setSaveDirectory(File saveDir) throws IOException {
 		if(saveDir == null) throw new NullPointerException();
-		String parentDir = saveDir.getParent();
-
-		File incDir = new File(parentDir, "Incomplete");
 		if(!saveDir.isDirectory()) {
 			if(!saveDir.mkdirs()) throw new IOException();
 		}
 
+		String parentDir = saveDir.getParent();
+		File incDir = new File(parentDir, "Incomplete");
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException();
 		}
@@ -2361,7 +2365,7 @@ public final class SettingsManager {
 		_saveDirectory       = saveDir;
 		_incompleteDirectory = incDir;
 		
-		PROPS.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
+		setStringValue(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
 
