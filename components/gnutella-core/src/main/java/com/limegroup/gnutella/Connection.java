@@ -1144,7 +1144,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * Receives a message with timeout.  This method is NOT thread-safe.
      * Behavior is undefined if two threads are in a receive call at the same
-     * time for a given connection.
+     * time for a given connection.  THIS METHOD IS ONLY USED FOR TESTING.
      *
      * @requires this is fully initialized
      * @effects exactly like Message.read(), but throws InterruptedIOException
@@ -1154,24 +1154,29 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public Message receive(int timeout)
         throws IOException, BadPacketException, InterruptedIOException {
-        //See note in receive().
-        if (_closed)
-            throw CONNECTION_CLOSED;
-
-        //temporarily change socket timeout.
-        int oldTimeout=_socket.getSoTimeout();
-        _socket.setSoTimeout(timeout);
         try {
-            Message m = readAndUpdateStatistics();
-            if (m==null) {
-                throw new InterruptedIOException("null message read");
+            //See note in receive().
+            if (_closed)
+                throw CONNECTION_CLOSED;
+    
+            //temporarily change socket timeout.
+            int oldTimeout = _socket.getSoTimeout();
+            _socket.setSoTimeout(timeout);
+            try {
+                Message m = readAndUpdateStatistics();
+                if (m==null) {
+                    throw new InterruptedIOException("null message read");
+                }
+                
+                // record received message in stats
+                stats().addReceived();
+                return m;
+            } finally {
+                _socket.setSoTimeout(oldTimeout);
             }
-            
-            // record received message in stats
-            stats().addReceived();
-            return m;
-        } finally {
-            _socket.setSoTimeout(oldTimeout);
+        } catch(IOException e) {
+            RouterService.getConnectionManager().remove(this);
+            throw e;            
         }
     }
     
