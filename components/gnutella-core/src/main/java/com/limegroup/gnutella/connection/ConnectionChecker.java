@@ -73,7 +73,7 @@ public final class ConnectionChecker implements Runnable {
         "http://www.real.com",
         "http://www.level3.com",
         "http://www.microsoft.com",
-        "http://www.sco.com",
+        "http://www.thescogroup.com",
         "http://www.google.com",
         "http://www.cnn.com",
         "http://www.amazon.com",
