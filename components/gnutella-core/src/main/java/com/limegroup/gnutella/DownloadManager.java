@@ -676,7 +676,7 @@ public class DownloadManager implements BandwidthTracker {
         debug("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
         lastRequeryTime = System.currentTimeMillis();
-        router.broadcastQueryRequest(query);
+		router.sendDynamicQuery(query);
         return true;
     }
 
