@@ -49,6 +49,11 @@ public final class QueryHandler {
 	private static final int HASH_QUERY_RESULTS = 10;
 
     /**
+     * If Leaf Guidance is in effect, the maximum number of hits to route.
+     */
+    private static final int MAXIMUM_ROUTED_FOR_LEAVES = 100;
+
+    /**
      * The number of milliseconds to wait per query hop.  So, if we send
      * out a TTL=3 query, we will then wait TTL*_timeToWaitPerHop
      * milliseconds.  As the query continues and we gather more data
@@ -605,14 +610,17 @@ public final class QueryHandler {
 		// return false if the query hasn't started yet
 		if(_queryStartTime == 0) return false;
 
-        // if the leaf has reported results that is greater or equal to what it
-        // needs, OR the leaf has never reported results and we've routed what
-        // it needs, then return true
-		if((_numResultsReportedByLeaf >= RESULTS) || 
-           ((_numResultsReportedByLeaf == 0) &&
-            (RESULT_COUNTER.getNumResults() >= RESULTS)
-            ) 
-           )
+        // if leaf guidance is in effect, we have different criteria.
+        if (_numResultsReportedByLeaf > 0) {
+            // we shouldn't route too much regardless of what the leaf says
+            if (RESULT_COUNTER.getNumResults() >= MAXIMUM_ROUTED_FOR_LEAVES)
+                return true;
+            // if the leaf is happy, so are we....
+            if (_numResultsReportedByLeaf > RESULTS)
+                return true;
+        }
+        // leaf guidance is not in effect or we are doing our own query
+        else if (RESULT_COUNTER.getNumResults() >= RESULTS)
             return true;
 
         // if our theoretical horizon has gotten too high, consider
