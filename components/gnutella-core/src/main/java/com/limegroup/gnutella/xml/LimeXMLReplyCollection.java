@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.xml;
 
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.mp3.*;
 import com.limegroup.gnutella.*;
 import java.io.*;
@@ -225,7 +224,6 @@ public class LimeXMLReplyCollection{
         if( dataFile.isDirectory() )
             return null;
         mainMap = new HashMap();
-        MapSerializer ret = null;
         try {
             return new MapSerializer(dataFile);
         } catch(IOException e) {
