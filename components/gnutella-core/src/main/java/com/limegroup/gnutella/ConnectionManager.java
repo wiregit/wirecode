@@ -341,8 +341,6 @@ public class ConnectionManager {
 		//list of best candidates
 		if (_disconnectTime==0)
 			BestCandidates.routeFailed(mc);
-		else
-			BestCandidates.purge();
 		
         removeInternal(mc);
 
@@ -1250,6 +1248,8 @@ public class ConnectionManager {
      */
     public synchronized void disconnect() {
         _disconnectTime = System.currentTimeMillis();
+        BestCandidates.purge();
+        
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
         //   to ignore the fact that we have a client-ultrapeer connection.

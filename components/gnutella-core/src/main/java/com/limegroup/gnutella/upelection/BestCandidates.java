@@ -3,6 +3,7 @@
 package com.limegroup.gnutella.upelection;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
 import com.limegroup.gnutella.util.IpPort;
 import com.sun.java.util.collections.*;
 
@@ -26,6 +27,8 @@ public class BestCandidates {
 	//index 2 the best leaf at ttl 2 excluding ttl 1 and our leaf
 	Candidate [] _best;
 	
+	static CandidateAdvertiser _advertiser;
+	
 	/**
 	 * a comparator to compare the leaves for potential candidates
 	 */
@@ -40,6 +43,10 @@ public class BestCandidates {
 	
 	private BestCandidates() {
 		_best = new Candidate[3];
+		_advertiser = new CandidateAdvertiser();
+		_advertiser.setDaemon(true);
+		_advertiser.setName("candidate advertiser");
+		_advertiser.start();
 	}
 	
 	/**
@@ -58,10 +65,12 @@ public class BestCandidates {
 	public static Candidate getBest() {
 		Comparator comparator = RemoteCandidate.priorityComparator();
 		Candidate best = instance._best[0];
-		if (comparator.compare(instance._best[1],best) > 1)
-			best = instance._best[1];
-		if (comparator.compare(instance._best[2],best) > 1)
-			best = instance._best[2];
+		synchronized(instance) {
+			if (comparator.compare(instance._best[1],best) > 1)
+				best = instance._best[1];
+			if (comparator.compare(instance._best[2],best) > 1)
+				best = instance._best[2];
+		}
 		return best;
 	}
 	
@@ -101,37 +110,11 @@ public class BestCandidates {
 			 comp.compare(instance._best[2], newCandidates[1]) < 0 ||
 			 	newCandidates[1].getAdvertiser().isSame(instance._best[2].getAdvertiser()))
 					instance._best[2] = newCandidates[1];
+			
+			propagateChange();
 		}
 	}
 	
-	/**
-	 * updates my own best leaf.  Can be called as often as the best leaf 
-	 * changes.
-	 * @param myLeaf a Candidate representation of my new best leaf
-	 */
-	public static void update(Candidate myLeaf) {
-		synchronized(instance) {
-			purgeDead();
-			instance._best[0] = myLeaf;
-		}
-	}
-	
-	/**
-	 * removes a candidate from the list if they fail to respond
-	 * to a promotion request
-	 * @param e a IpPort representing the candidate
-	 */
-	public static void fail(IpPort e) {
-		if (instance == null)
-			return;
-		synchronized(instance) {
-			for (int i =0;i<instance._best.length;i++)
-				if (instance._best[i]!=null && 
-						instance._best[i].isSame(e))
-					instance._best[i]=null;
-			purgeDead();
-		}
-	}
 	
 	/**
 	 * cleans up the table of the candidates whose route
@@ -148,25 +131,17 @@ public class BestCandidates {
 			if (instance._best[i].getAdvertiser().isSame(ip)) 
 				synchronized(instance) {
 					instance._best[i]=electBest(i);
+					propagateChange();
 				}
-				
-		propagateChange();
-			
-	}
-	/**
-	 * cleans up candidates from the table if we've lost the
-	 * connection to their advertisers.
-	 */
-	public static final void purgeDead() {
-		if (instance != null)
-		synchronized(instance) {
-			for (int i =0;i<3;i++)
-				if (instance._best[i]!=null && !instance._best[i].isOpen())
-					instance._best[i]=null;
-		}
 	}
 	
-	private static void propagateChange(){} //do something here...
+	/**
+	 * sets the current message to be sent in the next awakening of the advertising
+	 * thread.
+	 */
+	private static void propagateChange(){
+		_advertiser.setMsg(new BestCandidatesVendorMessage(instance._best));
+	} 
 	
 	/**
 	 * goes through our currnetly known candidates and selects

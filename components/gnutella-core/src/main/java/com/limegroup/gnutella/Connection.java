@@ -2220,6 +2220,22 @@ public class Connection implements Candidate {
 	private void handleBestCandidatesMessageInternal(BestCandidatesVendorMessage m) 
 		throws IOException {
 		
+		
+		
+		//first see if we are not sending to this connection too soon.
+		if (System.currentTimeMillis() - _lastSentAdvertisementTime 
+				< ADVERTISEMENT_INTERVAL) {
+			
+			//we are trying to send too soon.  However if the message should be scheduled
+			//to be sent once the interval expires.
+			if (m!=null){
+				_needsAdvertisement=true;
+				_candidatesSent=m;
+			}
+			
+			return;
+		}
+		
 		//we got called just to check if we couldn't send the last update on time.
 		if (m==null) {
 			if (_needsAdvertisement && _candidatesSent!=null){ 
@@ -2230,27 +2246,9 @@ public class Connection implements Candidate {
 			return;
 		}
 		
-		//we got called to send a real message.
-		
-		boolean identical = m.isSame(_candidatesSent);
-		
-		//first see if we are not sending to this connection too soon.
-		//do not lock for reading.
-		if (System.currentTimeMillis() - _lastSentAdvertisementTime 
-				< ADVERTISEMENT_INTERVAL) {
-			
-			//we are trying to send too soon.  However if the message is not the same, it should
-			//still be updated.
-			if (!identical){
-				_needsAdvertisement=true;
-				_candidatesSent=m;
-			}
-			
-			return;
-		}
 		
 		//also see if anything has changed since last time.
-		if (identical)
+		if (m.isSame(_candidatesSent))
 			return;
 		
 		//if not we should send the new message
