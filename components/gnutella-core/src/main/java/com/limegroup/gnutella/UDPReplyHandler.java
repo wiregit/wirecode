@@ -67,11 +67,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-	    try {
-		    UDP_SERVICE.send(pong, IP, PORT);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe, "ip/port: " + IP + ":" + PORT);
-        }
+        UDP_SERVICE.send(pong, IP, PORT);
 		if(RECORD_STATS) 
 			SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
@@ -86,11 +82,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-	    try {
-		    UDP_SERVICE.send(hit, IP, PORT);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe, "ip/port: " + IP + ":" + PORT);
-        }
+        UDP_SERVICE.send(hit, IP, PORT);
 		if(RECORD_STATS) 
 			SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
@@ -105,11 +97,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-		try {
-		    UDP_SERVICE.send(request, IP, PORT);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe, "ip/port: " + IP + ":" + PORT);
-        }
+        UDP_SERVICE.send(request, IP, PORT);
 		if(RECORD_STATS) 
 			SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}

@@ -494,14 +494,8 @@ public abstract class MessageRouter {
 		if( reply == null )
 		    return;
 
-        try {
-		    UDPService.instance().send(reply, datagram.getAddress(), 
-			    					   datagram.getPort());
-        } catch(IOException ioe) {
-            ErrorService.error(ioe,
-                "ip/port: " + datagram.getAddress() + ":" + datagram.getPort());
-        }
-
+        UDPService.instance().send(reply, datagram.getAddress(), 
+                                   datagram.getPort());
 		if(RECORD_STATS)
 			SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
@@ -710,14 +704,8 @@ public abstract class MessageRouter {
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
             PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
-        try {
-            UDPService.instance().send(reply, datagram.getAddress(),
-                                       datagram.getPort());
-        } catch(IOException ioe) {
-            ErrorService.error(ioe, "ip/port: " + datagram.getAddress() + 
-                               ":" + datagram.getPort());
-        }
-
+        UDPService.instance().send(reply, datagram.getAddress(),
+                                   datagram.getPort());
     }
 
 
@@ -867,12 +855,7 @@ public abstract class MessageRouter {
             //send the query replies
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
-                try {
-                    UDPService.instance().send(queryReply, addr, port);
-                } catch(IOException e) {
-                    ErrorService.error(e, "ip/port: " + addr + ":" + port);
-                    break; // if one failed, they'll all fail.
-                }
+                UDPService.instance().send(queryReply, addr, port);
             }
         }
         // else some sort of routing error or attack?
@@ -909,9 +892,6 @@ public abstract class MessageRouter {
         catch (BadPacketException terrible) {
             ErrorService.error(terrible);
         }
-        catch (IOException ioe) {
-            ErrorService.error(ioe);
-        }        
     }
 
 
@@ -981,12 +961,7 @@ public abstract class MessageRouter {
         }
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        try {
-            UDPService.instance().send(pr, addrToContact, portToContact);
-        } catch(IOException e) {
-            ErrorService.error(e, 
-                "invalid ip/port: " + addrToContact + ":" + portToContact);
-        }
+        UDPService.instance().send(pr, addrToContact, portToContact);
     }
 
 
@@ -1026,12 +1001,7 @@ public abstract class MessageRouter {
 
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
-        try {
-            UDPService.instance().send(pr, addrToContact, portToContact);
-        } catch(IOException e) {
-            ErrorService.error(e, 
-                "invalid ip/port: " + addrToContact + ":" + portToContact);
-        }
+        UDPService.instance().send(pr, addrToContact, portToContact);
     }
 
 

@@ -255,12 +255,7 @@ public class StandardMessageRouter extends MessageRouter {
                     ReplyNumberVendorMessage vm = 
                         new ReplyNumberVendorMessage(new GUID(query.getGUID()),
                                                      resultCount);
-                    try {
-                        UDPService.instance().send(vm, addr, port);
-                    } catch(IOException ioe) {
-                        ErrorService.error(ioe,
-                            "ip/port: " + addr + ":" + port);
-                    }
+                    UDPService.instance().send(vm, addr, port);
                 }
                 catch (BadPacketException bpe) {
                     // should NEVER happen

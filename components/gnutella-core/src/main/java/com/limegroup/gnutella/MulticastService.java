@@ -61,6 +61,8 @@ public final class MulticastService implements Runnable {
 	 */
 	private final Thread MULTICAST_THREAD;
 
+    private final ErrorCallback _err = new ErrorCallbackImpl();
+
 	/**
 	 * Instance accessor.
 	 */
@@ -215,11 +217,7 @@ public final class MulticastService implements Runnable {
     public synchronized void send(Message msg) {
         // only send the msg if we've initialized the port.
         if( _port != -1 ) {
-            try {
-                UDPService.instance().send(msg, _group, _port);
-            } catch(IOException ioe) {
-                // multicast is never necessary, ignore.
-            }
+            UDPService.instance().send(msg, _group, _port, _err);
         }
 	}
 
@@ -244,4 +242,11 @@ public final class MulticastService implements Runnable {
 	public String toString() {
 		return "MulticastService\r\nsocket: "+_socket;
 	}
+
+    
+    private class ErrorCallbackImpl implements ErrorCallback {
+        public void error(Throwable t) {}
+        public void error(Throwable t, String msg) {}
+    }
+
 }

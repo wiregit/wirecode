@@ -4,6 +4,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
+import com.sun.java.util.collections.*;
 
 /**
  * This class handles UDP messaging services.  It both sends and
@@ -16,9 +17,6 @@ import java.io.*;
  * @see MessageRouter
  * @see QueryUnicaster
  *
- * //TODO: We need to create a Worker Thread that actually does a send() and
- * frees up the run() method from potentially blocking send() calls.  At that
- * point we should stop catching and discarding all exceptions....
  */
 public final class UDPService implements Runnable {
 
@@ -26,7 +24,7 @@ public final class UDPService implements Runnable {
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
 	private final static UDPService INSTANCE = new UDPService();
-
+    
 	/** 
      * LOCKING: Grab the _recieveLock before receiving.  grab the _sendLock
      * before sending.  Moreover, only one thread should be wait()ing on one of
@@ -41,33 +39,45 @@ public final class UDPService implements Runnable {
      * used by the UDP_THREAD.
      */
     private final Object _receiveLock = new Object();
-
+    
     /**
      * Used for synchronized SEND access to the UDP socket.  Should only be used
      * in the send method.
      */
     private final Object _sendLock = new Object();
-
+    
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
-
+    
     /** True if the UDPService has ever received a solicited incoming UDP
      *  packet.
      */
     private boolean _acceptedSolicitedIncoming = false;
-
+    
     /** True if the UDPService has ever received a unsolicited incoming UDP
      *  packet.
      */
     private boolean _acceptedUnsolicitedIncoming = false;
-
+    
 	/**
 	 * The thread for listening of incoming messages.
 	 */
-	private final Thread UDP_THREAD;
+	private final Thread UDP_RECEIVE_THREAD;
+    
+    /**
+     * The thread for sending of outgoing messages.  Useful because
+     * we don't want the receive thread to block while processing
+     * messages....
+     */
+    private final Thread UDP_SEND_THREAD;
+
+    /**
+     * Used for communication between send() calls and the send thread.
+     */ 
+    private final List PACKETS_TO_SEND;
 
     /**
      * The GUID that we advertise out for UDPConnectBack requests.
@@ -85,17 +95,21 @@ public final class UDPService implements Runnable {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	private UDPService() {	    
-        UDP_THREAD = new Thread(this, "UDPService");
-		UDP_THREAD.setDaemon(true);
+        PACKETS_TO_SEND = new LinkedList();
+        UDP_RECEIVE_THREAD = new Thread(this, "UDPService-Receiver");
+        UDP_RECEIVE_THREAD.setDaemon(true);
+        UDP_SEND_THREAD = new Thread(new Sender(), "UDPService-Sender");
+        UDP_SEND_THREAD.setDaemon(true);
     }
 	
 	/**
 	 * Starts the UDP Service.
 	 */
 	public void start() {
-        UDP_THREAD.start();
+        UDP_RECEIVE_THREAD.start();
+        UDP_SEND_THREAD.start();
     }
-
+    
     /** @return The GUID to send for UDPConnectBack attempts....
      */
     public GUID getConnectBackGUID() {
@@ -231,51 +245,112 @@ public final class UDPService implements Runnable {
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
 	 */
-    public synchronized void send(Message msg, InetAddress ip, int port) 
-      throws IOException {
+    public void send(Message msg, InetAddress ip, int port) {
+        send(msg, ip, port, ErrorService.getErrorCallback());
+    }
+
+	/**
+	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
+     * This method should not be called if the client is not GUESS enabled.
+     *
+     * If sending fails for reasons such as a BindException,
+     * NoRouteToHostException or specific IOExceptions such as
+     * "No buffer space available", this message is silently dropped.
+     *
+	 * @param msg  the <tt>Message</tt> to send
+	 * @param ip   the <tt>InetAddress</tt> to send to
+	 * @param port the port to send to
+     * @param err  an <tt>ErrorCallback<tt> if you want to be notified errors
+	 */
+    public void send(Message msg, InetAddress ip, int port, ErrorCallback err) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             msg.write(baos);
-        } catch(IOException e) {
+        } 
+        catch(IOException e) {
             // this should not happen -- we should always be able to write
             // to this output stream in memory
             ErrorService.error(e);
-
             // can't send the hit, so return
             return;
         }
 
         byte[] data = baos.toByteArray();
         DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-        synchronized (_sendLock) {
-            if(_socket == null) // just drop it, don't wait - FOR NOW.  when we
-                                // thread this, we will wait...
-                return;
-            try {
-                _socket.send(dg);
-            } catch(BindException be) {
-                // oh well, if we can't bind our socket, ignore it.. 
-                return;
-            } catch(NoRouteToHostException nrthe) {
-                // oh well, if we can't find that host, ignore it ...
-                return;
-            } catch(IOException ioe) {
-                //If we're full, just drop it.  UDP is unreliable like that.
-                if( "No buffer space available".equals(ioe.getMessage()) )
-                    return;
-                // there seems to be a windows specific java issue with UDP
-                // stuff, though i've never witnessed it meself. since this is
-                // UDP and unreliable, continually throwing the exception prolly
-                // isn't necessary
-                // TODO: see major TODO up top....
-                if( CommonUtils.isWindows() &&
-                    (ioe.getMessage() != null) &&
-                    (ioe.getMessage().indexOf("Datagram send failed") >= 0) )
-                    return;
-                throw ioe;
-            }
+        synchronized (PACKETS_TO_SEND) {
+            if (PACKETS_TO_SEND.isEmpty())
+                PACKETS_TO_SEND.notify();
+            PACKETS_TO_SEND.add(new SendBundle(dg, err));
         }
 	}
+
+    // Just a simple container class
+    private class SendBundle {
+        DatagramPacket _dp;
+        ErrorCallback _err;
+        public SendBundle(DatagramPacket dp, ErrorCallback custom) {
+            _dp = dp;
+            _err = custom;
+        }
+    }
+    
+    // the runnable that actually sends the UDP packets.  didn't wany any
+    // potential blocking in send to slow down the receive thread.  also allows
+    // received packets to be handled much more quickly
+    private class Sender implements Runnable {
+        
+        public void run() {
+            SendBundle currBundle = null;
+            while (true) {
+
+                // get something to send
+                // ------
+                synchronized (PACKETS_TO_SEND) {
+                    while (PACKETS_TO_SEND.isEmpty()) {
+                        try {
+                            PACKETS_TO_SEND.wait();
+                        }
+                        catch (InterruptedException ignored) {}
+                    }
+                    currBundle = (SendBundle) PACKETS_TO_SEND.remove(0);
+                }
+                // ------
+
+                // send away
+                // ------
+                synchronized (_sendLock) {
+                    // we could be changing ports, just drop the message, 
+                    //tough luck
+                    if (_socket == null) 
+                        return;
+                    try {
+                        _socket.send(currBundle._dp);
+                    } 
+                    catch(BindException be) {
+                        // oh well, if we can't bind our socket, ignore it.. 
+                        return;
+                    } 
+                    catch(NoRouteToHostException nrthe) {
+                        // oh well, if we can't find that host, ignore it ...
+                        return;
+                    } 
+                    catch(IOException ioe) {
+                        //If we're full, just drop it.  UDP is unreliable like 
+                        //that.
+                        if("No buffer space available".equals(ioe.getMessage()))
+                            return;
+                        String errString = "ip/port: " + 
+                                           currBundle._dp.getAddress() + ":" + 
+                                           currBundle._dp.getPort();
+                        currBundle._err.error(ioe, errString);
+                    }
+                }
+                // ------
+
+            }
+        }
+        
+    }
 
 
 	/**

@@ -217,13 +217,8 @@ public final class QueryUnicaster {
                 if (!_queryKeys.containsKey(toQuery)) { 
                     // send a QueryKey Request
                     PingRequest pr = new PingRequest();
-                    try {
-                        udpService.send(pr,toQuery.getAddress(),
-                                        toQuery.getPort());
-                    } catch(IOException ioe) {
-                        ErrorService.error(ioe, "ip/port: " +
-                            toQuery.getAddress() + ":" + toQuery.getPort());
-                    }
+                    udpService.send(pr,toQuery.getAddress(),
+                                    toQuery.getPort());
                     if(RECORD_STATS)
                         SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
@@ -252,13 +247,8 @@ public final class QueryUnicaster {
 							QueryRequest qrToSend = 
 								QueryRequest.createQueryKeyQuery(currQB._qr, 
 																 queryKey);
-                            try {
-							    udpService.send(qrToSend, 
-							                    ip, toQuery.getPort());
-                            } catch(IOException ioe) {
-                                ErrorService.error(ioe, "ip/port: " +
-                                    ip + ":" + toQuery.getPort());
-                            }
+                            udpService.send(qrToSend, 
+                                            ip, toQuery.getPort());
 							currentHostUsed = true;
 							if(RECORD_STATS)
 								SentMessageStatHandler.UDP_QUERY_REQUESTS.
@@ -380,13 +370,8 @@ public final class QueryUnicaster {
 			   !RouterService.isGUESSCapable() &&
 			   _testUDPPingsSent < 10) {
 				PingRequest pr = new PingRequest((byte)1);
-				try {
-				    UDPService.instance().send(pr, endpoint.getAddress(), 
-                                               endpoint.getPort());
-                } catch(IOException ioe) {
-                    ErrorService.error(ioe, "ip/port: " +
-                        endpoint.getAddress() + ":" + endpoint.getPort());
-                }
+                UDPService.instance().send(pr, endpoint.getAddress(), 
+                                           endpoint.getPort());
 				if(RECORD_STATS) 
 					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
@@ -519,12 +504,7 @@ public final class QueryUnicaster {
                 if (!_pingList.contains(toReturn)) {
                     PingRequest pr = new PingRequest((byte)1);
                     InetAddress ip = toReturn.getAddress();
-                    try {
-                        UDPService.instance().send(pr, ip, toReturn.getPort());
-                    } catch(IOException ioe) {
-                        ErrorService.error(ioe, "ip/port: " +
-                            ip + ":" + toReturn.getPort());
-                    }
+                    UDPService.instance().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
 					if(RECORD_STATS) 
 						SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
