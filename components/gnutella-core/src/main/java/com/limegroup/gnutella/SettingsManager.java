@@ -93,7 +93,7 @@ public class SettingsManager implements SettingsInterface
      */
     private SettingsManager()
     {
-	
+	System.out.println("SettingsManager::SettingsManager");
 	props_      = new Properties();
 	ndProps_    = new Properties();
 	fileSep_    = System.getProperty("file.separator");
@@ -959,7 +959,7 @@ public class SettingsManager implements SettingsInterface
     {
         try {
 	    FileOutputStream ostream = new FileOutputStream(fileName_);
-	    props_.save(ostream, SettingsInterface.HEADER);
+	    props_.save(ostream, "");
 	    ostream.close();
 	} 
 	catch (Exception e){}
