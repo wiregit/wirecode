@@ -164,9 +164,13 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
                                    HugeTestUtils.URN_SETS[0],
                                    false,false,"",0,null, -1);
 
-        // this should not throw an exception, since private addresses are now ok.
-        AlternateLocation.create(rfd);        
-
+        // this should throw an exception since there are no proxies.
+        try {
+            AlternateLocation.create(rfd);
+            fail("should not have created altloc without proxies");
+        }catch(IOException expected){}
+        
+        
 
 
         try {
