@@ -1881,11 +1881,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                         try {
                             iterate = connectAndDownload(rfd);
                         } catch (Throwable e) {
-                            //This is a "firewall" for reporting unhandled
-                            //errors.  We don't really try to recover at this
-                            //point, but we do attempt to display the error in
-                            //the GUI for debugging purposes.
-                            ErrorService.error(e);
+                            iterate = true;
+                             // Ignore InterruptedException -- the JVM throws
+                             // them for some reason at odd times, even though
+                             // we've caught and handled all of them
+                             // appropriately.
+                            if(!(e instanceof InterruptedException)) {
+                                //This is a "firewall" for reporting unhandled
+                                //errors.  We don't really try to recover at
+                                //this point, but we do attempt to display the
+                                //error in the GUI for debugging purposes.
+                                ErrorService.error(e);
+                            }
                         } finally {
                             synchronized (ManagedDownloader.this) { 
                                 threads.remove(this); 
