@@ -38,7 +38,8 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime
 	//cout << "\ngot window\n";
 	
   	XScreenSaverInfo *mit_info = NULL;
-  	int event_base, error_base, idle_time;
+  	int event_base, error_base;
+	long idle_time;
 		if (XScreenSaverQueryExtension(display, &event_base, &error_base)) {
 	//		cout << "system supports screensavers\n";
 			
@@ -47,7 +48,7 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime
 			}
 			XScreenSaverQueryInfo(display, window, mit_info);
 			
-			idle_time = (mit_info->idle) / 1000;
+			idle_time = (mit_info->idle);
 			
 	//		cout <<"queried successfully " << idle_time <<"\n";
 		} else
