@@ -46,30 +46,30 @@ public class Main implements ActivityCallback {
 			  "Print this message.");
 			System.out.println("listen <port>            "+
 			  "Set the port you are listening on.");
-			System.out.println("push                     "+
-			  "Print push routes.");
+//  			System.out.println("push                     "+
+//  			  "Print push routes.");
 			System.out.println("query <string>           "+
 			  "Send a query to the network.");
 			System.out.println("quit                     "+
 			  "Quit the application.");
-			System.out.println("route                    "+
-			  "Print routing tables.");
-			System.out.println("stat                     "+
-			  "Print statistics.");
+//  			System.out.println("route                    "+
+//  			  "Print routing tables.");
+//  			System.out.println("stat                     "+
+//  			  "Print statistics.");
 			System.out.println("update                   "+
 			  "Send pings to update the statistics.");
 		}
         else if (command.equals("quit"))
             break;
-        //Print routing tables
-        else if (command.equals("route"))
-            service.dumpRouteTable();
-        //Print connections
-        else if (command.equals("push"))
-            service.dumpPushRouteTable();
+//          //Print routing tables
+//          else if (command.equals("route"))
+//              service.dumpRouteTable();
+//          //Print connections
+//          else if (command.equals("push"))
+//              service.dumpPushRouteTable();
         //Print push route
         else if (command.equals("stat")) {
-            service.dumpConnections();
+//              service.dumpConnections();
             System.out.println("Number of hosts: "+service.getNumHosts());
             System.out.println("Number of files: "+service.getNumFiles());
             System.out.println("Size of files: "+service.getTotalFileSize());
