@@ -1080,7 +1080,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The IncompleteFileDesc is also notified of new locations for this
      * file.
      */
-    private void informMesh(RemoteFileDesc rfd, boolean good) {
+    private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         URN bucketHash = null;
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
@@ -1088,9 +1088,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // AlternateLocation objects.
         AlternateLocation loc = null;
         AlternateLocation forFD = null;
-
-        //TODO2: unsplit the lock when we don't need the debugging info
-        synchronized(this) {
+        
         if(!rfd.isAltLocCapable())
             return;
             
@@ -1126,7 +1124,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             else
                 httpDloader.addFailedAltLoc(loc);
         }
-        }
+
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             ifd = (IncompleteFileDesc)fd;
@@ -1143,7 +1141,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 ifd = null; // do not use, it's bad.
             }
         }
-        synchronized(this) {
+
         if(good) {
             //check if validAlts contains loc to avoid duplicate stats, and
             //spurious count increments in the local
@@ -1162,7 +1160,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             if( ifd != null )
                 ifd.remove(forFD);
             invalidAlts.put(rfd, rfd);
-        }
         }
     }
 
