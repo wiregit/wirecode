@@ -432,12 +432,11 @@ System.out.println(_alternateLocationsReceived);
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(boolean checkOverlap, ManagedDownloader md) 
-            throws IOException {
+	public void doDownload(VerifyingFile commonOutFile) 
+        throws IOException {
         _socket.setSoTimeout(0);//once downloading we can stall for a bit
-        RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
+        long currPos = _initialReadingPoint;
         try {
-            fos.seek(_initialReadingPoint);
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
             byte[] fileBuf = new byte[BUF_LENGTH];
@@ -446,13 +445,16 @@ System.out.println(_alternateLocationsReceived);
                 //1. Read from network.  It's possible that we've read more than
                 //requested because of a call to setAmountToRead from another
                 //thread.  This used to be an error resulting in
-                //FileTooLargeException. TODO: what should we do here now?
-                if (_amountRead >= _amountToRead) 
-                    break;
-                
-                int left=_amountToRead - _amountRead;
+                //FileTooLargeException.  Now we just return silently.  Note that
+                //we capture _amountToRead in a local variable to prevent race
+                //conditions; presumably Java can't de-optimize this.
+                int atr=_amountToRead;
+                if (_amountRead >= atr) 
+                    break;                
+                int left=atr - _amountRead;
+                Assert.that(left>0);
+
                 c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
-                
                 if (c == -1) 
                     break;
                             
@@ -462,36 +464,18 @@ System.out.println(_alternateLocationsReceived);
                 //which is easy in the case of resuming.  Also note that
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
-                long currPos = fos.getFilePointer();
-                int amountToCheck=(int)Math.min(c,fos.length()-currPos);
-                if(checkOverlap && amountToCheck>0) {                    
-                    fos.readFully(fileBuf,0,amountToCheck);
-                    for(int i=0;i<amountToCheck;i++) {
-                        if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) {
-                            if(md!=null) //for tesing purposes md may == null
-                                md.promptAboutCorruptDownload();
-                        }
-                    }
-                    //get the fp back where it was before we checked
-                    fos.seek(currPos);
-                }
-            
-                //3. Write to disk.
-                fos.write(buf, 0, c);			
-                _amountRead+=c;
+                commonOutFile.writeBlock(currPos,c, buf);
+
+                currPos += c;//update the currPos for next iteration
+                _amountRead += c;
             }  // end of while loop
 
-
-            if ( _amountRead != _amountToRead ) {
-                //TODO: what if corruptBytes>0?
+            //It's OK to have read too much; see comment (1) above.
+            if ( _amountRead < _amountToRead ) { 
                 throw new FileIncompleteException();  
             }
         } finally {
             _byteReader.close();
-            try {
-                fos.getFD().sync();
-            } catch (SyncFailedException ignored) { }
-            fos.close();
         }
 	}
 
