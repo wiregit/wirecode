@@ -8,7 +8,6 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
-import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.guess.*;
 
@@ -621,7 +620,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
-            long size = incompleteFileManager.getCompletedSize(incompleteFile);
+            long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             // Find any matching file-desc for this URN.
             FileDesc fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
@@ -773,19 +772,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
-    /** Returns the URNs for requery, i.e., the union of all requeries 
-     *  (within reason).
-     *  @return a Set of URN */
-    private final Set /* of URN */ extractUrns() {
-        final int MAX_URNS=2;
-        Set ret=new HashSet(MAX_URNS);
-        for (int i=0; i<allFiles.length && ret.size()<MAX_URNS; i++) {
-            URN urn=allFiles[i].getSHA1Urn();
-            if (urn!=null)
-                ret.add(urn);
-        }
-        return ret;
-    }
 
     /** Returns the keywords for a requery, i.e., the keywords found in all
      *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
@@ -1378,6 +1364,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         Iterator iter = urns.iterator();
         while (iter.hasNext()) {
             URN currURN = (URN) iter.next();
+            if(currURN == null) continue;
             File incomplete = incompleteFileManager.getFileForUrn(currURN);
             if (incomplete == null) continue;
             VerifyingFile vF =incompleteFileManager.getEntry(incomplete);
