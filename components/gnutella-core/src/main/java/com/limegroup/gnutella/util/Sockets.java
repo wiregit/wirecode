@@ -52,12 +52,16 @@ public class Sockets {
      *  native timeouts, always uses that.  Otherwise connects without a 
      *  timeout.  
      * @return the connected Socket
-     * @exception IOException the connections couldn't be made in the 
+     * @throws IOException the connections couldn't be made in the 
      *  requested time
+	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public static Socket connect(String host, int port, 
                                  int timeout, boolean emulate) 
                                  throws IOException {
+		if((port & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("port out of range: "+port);
+		} 
         if (CommonUtils.isJava14OrLater()) {
             //a) Non-blocking IO using Java 1.4. Conceptually, this code
             //   does the following:
@@ -108,101 +112,106 @@ public class Sockets {
             return new Socket(host, port);
         }
     }
-}
 
 
-/** 
- * Opens Java sockets with a bounded timeout using threads.  Typical use:
- *
- * <pre>
- *    try {
- *        Socket socket=(new SocketOpener(host, port)).connect(timeout);
- *    } catch (IOException e) {
- *        System.out.println("Couldn't connect in time.");
- *    }
- * </pre>
- *
- * This is basically just a hack to work around JDK bug 4110694.  It is
- * implemented in a similar way as Wayne Conrad's SocketOpener class, except
- * that it doesn't use Thread.stop() or interrupt().  Rather opening threads
- * hang around until the connection really times out.  That means frequent calls
- * to this may result in numerous threads waiting to die.<p>
- *
- * This class is currently NOT thread safe.  Currently connect() can only be 
- * called once.
- */
-class SocketOpener {
-    private String host;
-    private int port;
-    /** The established socket, or null if not established OR couldn't be
-     *  established.. Notify this when socket becomes non-null. */
-    private Socket socket=null;
-    /** True iff the connecting thread should close the socket if/when it
-     *  is established. */
-    private boolean timedOut=false;
-
-    public SocketOpener(String host, int port) {
-        this.host=host;
-        this.port=port;
-    }
-
-    /** 
-     * Returns a new socket to the given host/port.  If the socket couldn't be
-     * established withing timeout milliseconds, throws IOException.  If
-     * timeout==0, no timeout occurs.  If this thread is interrupted while
-     * making connection, throws IOException.
-     *
-     * @requires connect has only been called once, no other thread calling
-     *  connect.  Timeout must be non-negative.  
-     */
-    public synchronized Socket connect(int timeout) 
+	/** 
+	 * Opens Java sockets with a bounded timeout using threads.  Typical use:
+	 *
+	 * <pre>
+	 *    try {
+	 *        Socket socket=(new SocketOpener(host, port)).connect(timeout);
+	 *    } catch (IOException e) {
+	 *        System.out.println("Couldn't connect in time.");
+	 *    }
+	 * </pre>
+	 *
+	 * This is basically just a hack to work around JDK bug 4110694.  It is
+	 * implemented in a similar way as Wayne Conrad's SocketOpener class, except
+	 * that it doesn't use Thread.stop() or interrupt().  Rather opening threads
+	 * hang around until the connection really times out.  That means frequent calls
+	 * to this may result in numerous threads waiting to die.<p>
+	 *
+	 * This class is currently NOT thread safe.  Currently connect() can only be 
+	 * called once.
+	 */
+	private static class SocketOpener {
+		private String host;
+		private int port;
+		/** The established socket, or null if not established OR couldn't be
+		 *  established.. Notify this when socket becomes non-null. */
+		private Socket socket=null;
+		/** True iff the connecting thread should close the socket if/when it
+		 *  is established. */
+		private boolean timedOut=false;
+		
+		public SocketOpener(String host, int port) {
+			if((port & 0xFFFF0000) != 0) {
+				throw new IllegalArgumentException("port out of range: "+port);
+			} 
+			this.host=host;
+			this.port=port;
+		}
+		
+		/** 
+		 * Returns a new socket to the given host/port.  If the socket couldn't be
+		 * established withing timeout milliseconds, throws IOException.  If
+		 * timeout==0, no timeout occurs.  If this thread is interrupted while
+		 * making connection, throws IOException.
+		 *
+		 * @requires connect has only been called once, no other thread calling
+		 *  connect.  Timeout must be non-negative.  
+		 */
+		public synchronized Socket connect(int timeout) 
             throws IOException {
-        //Asynchronously establish socket.
-        Thread t=new SocketOpenerThread();
-        t.start();
-        
-        //Wait for socket to be established, or for timeout.
-        Assert.that(socket==null, "Socket already established w.o. lock.");
-        try {
-            this.wait(timeout);
-        } catch (InterruptedException e) {
-            if (socket==null)
-                timedOut=true;
-            else
-                try { socket.close(); } catch (IOException e2) { }
-            throw new IOException();
-        }
-
-        //a) Normal case
-        if (socket!=null) {
-            return socket;
-        } 
-        //b) Timeout case
-        else {            
-            timedOut=true;
-            throw new IOException();
-        }            
-    }
-
-    private class SocketOpenerThread extends Thread {
-        public void run() {
-            try {
-                Socket sock=null;
-                try {
-                    sock=new Socket(host, port);
-                } catch (IOException e) { }                
-                
-                synchronized (SocketOpener.this) {
-                    if (timedOut && sock!=null)
-                        try { sock.close(); } catch (IOException e) { }
-                    else {
-                        socket=sock;   //may be null
-                        SocketOpener.this.notify();
-                    }
-                }
-            } catch(Throwable t) {
-                RouterService.error(t);
-            }
-        }
-    }
+			//Asynchronously establish socket.
+			Runnable runner = new SocketOpenerThread();
+			Thread t = new Thread(new SocketOpenerThread());
+			t.setDaemon(true);
+			t.start();
+			
+			//Wait for socket to be established, or for timeout.
+			Assert.that(socket==null, "Socket already established w.o. lock.");
+			try {
+				this.wait(timeout);
+			} catch (InterruptedException e) {
+				if (socket==null)
+					timedOut=true;
+				else
+					try { socket.close(); } catch (IOException e2) { }
+				throw new IOException();
+			}
+			
+			//a) Normal case
+			if (socket!=null) {
+				return socket;
+			} 
+			//b) Timeout case
+			else {            
+				timedOut=true;
+				throw new IOException();
+			}            
+		}
+		
+		private class SocketOpenerThread implements Runnable {
+			public void run() {
+				try {
+					Socket sock=null;
+					try {
+						sock=new Socket(host, port);
+					} catch (IOException e) { }                
+					
+					synchronized (SocketOpener.this) {
+						if (timedOut && sock!=null)
+							try { sock.close(); } catch (IOException e) { }
+						else {
+							socket=sock;   //may be null
+							SocketOpener.this.notify();
+						}
+					}
+				} catch(Throwable t) {
+					RouterService.error(t);
+				}
+			}
+		}
+	}
 }
