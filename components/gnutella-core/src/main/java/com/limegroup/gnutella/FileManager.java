@@ -115,7 +115,7 @@ public abstract class FileManager {
     /**
      * An index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
-     * without a character from DELIMETERS.  IncompleteFile keywords
+     * without a character from DELIMITERS.  IncompleteFile keywords
      * are NOT stored in this index.  Retrieval of IncompleteFiles are only
      * allowed by hash.
      *
@@ -179,7 +179,7 @@ public abstract class FileManager {
     private IntSet _incompletesShared;
 
     /**
-     *  The thread responsisble for adding contents of _sharedDirectories to
+     *  The thread responsible for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
      *  because indexing files can be slow.  Interrupt this thread to stop the
      *  loading; it will periodically check its interrupted status. 
@@ -192,13 +192,13 @@ public abstract class FileManager {
      *  _loadThread.isInterrupted() does not behave as expected.  See
      *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html
      */
-    private boolean _loadThreadInterrupted=false;
+    private boolean _loadThreadInterrupted = false;
     
     /**
      * The lock for _loadThread.  Necessary to prevent deadlocks in
      * loadSettings.
      */
-    private Object _loadThreadLock=new Object();
+    private Object _loadThreadLock = new Object();
     
     /**
      * Whether or not we are finished loading the files.
@@ -230,8 +230,8 @@ public abstract class FileManager {
     /**
      * Characters used to tokenize queries and file names.
      */
-    public static final String DELIMETERS=" -._+/*()\\,";
-    private static final boolean isDelimeter(char c) {
+    public static final String DELIMITERS=" -._+/*()\\,";
+    private static final boolean isDelimiter(char c) {
         switch (c) {
         case ' ':
         case '-':
@@ -1278,7 +1278,7 @@ public abstract class FileManager {
      */
     private static String[] extractKeywords(FileDesc fd) {
         return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()), 
-            DELIMETERS);
+            DELIMITERS);
     }
 
     /** Removes any URN index information for desc */
@@ -1598,13 +1598,13 @@ public abstract class FileManager {
         //For each keyword in the query....  (Note that we avoid calling
         //StringUtils.split and take advantage of Trie's offset/limit feature.)
         for (int i=0; i<query.length(); ) {
-            if (isDelimeter(query.charAt(i))) {
+            if (isDelimiter(query.charAt(i))) {
                 i++;
                 continue;
             }
             int j;
             for (j=i+1; j<query.length(); j++) {
-                if (isDelimeter(query.charAt(j)))
+                if (isDelimiter(query.charAt(j)))
                     break;
             }
 

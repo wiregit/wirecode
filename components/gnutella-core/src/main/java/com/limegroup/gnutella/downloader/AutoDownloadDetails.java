@@ -185,7 +185,7 @@ public class AutoDownloadDetails implements Serializable {
             if (retVal && (wordSet.size() > 0)) {
                 StringTokenizer st = 
                 new StringTokenizer(ripExtension(inputFileName),
-                                    FileManager.DELIMETERS);
+                                    FileManager.DELIMITERS);
                 int additions = 0;
                 final int numTokens = st.countTokens();
                 while (st.hasMoreTokens()) {
@@ -246,7 +246,7 @@ public class AutoDownloadDetails implements Serializable {
                 // used by my hashset comparator....
                 StringTokenizer st = 
                 new StringTokenizer(ripExtension(inputFileName),
-                                    FileManager.DELIMETERS);
+                                    FileManager.DELIMITERS);
                 while (st.hasMoreTokens())
                     wordSet.add(st.nextToken().toLowerCase());
                 debug("ADD.addDownload(): wordSet = " + wordSet);
@@ -274,7 +274,7 @@ public class AutoDownloadDetails implements Serializable {
         // only discards after the appropriate amt. of removes....
         StringTokenizer st = 
         new StringTokenizer(ripExtension(toRemove.getFileName()),
-                            FileManager.DELIMETERS);
+                            FileManager.DELIMITERS);
         while (st.hasMoreTokens())
             wordSet.remove(st.nextToken().toLowerCase());
         

@@ -135,7 +135,7 @@ public class HashFunction {
             // also removes accents by converting first to NFKD and keeping
             // only PRIMARY differences
             I18NConvert.instance().getNorm(filePath),
-            FileManager.DELIMETERS);
+            FileManager.DELIMITERS);
     }
 
     /** 
@@ -144,15 +144,15 @@ public class HashFunction {
      */
     public static int keywordStart(String query, int i) {
         //Search for the first character that is not a delimiterer TODO3: we can
-        //make this O(|DELIMETERS|) times faster by converting
-        //FileManager.DELIMETERS into a Set in this' static initializer.  But
+        //make this O(|DELIMITERS|) times faster by converting
+        //FileManager.DELIMITERS into a Set in this' static initializer.  But
         //then we have to allocate Strings here.  Can work around the problem,
         //but it's trouble.
-        final String DELIMETERS=FileManager.DELIMETERS;
+        final String DELIMITERS=FileManager.DELIMITERS;
         for ( ; i<query.length() ; i++) {
             char c=query.charAt(i);
-            //If c not in DELIMETERS, declare success.
-            if (DELIMETERS.indexOf(c)<0)
+            //If c not in DELIMITERS, declare success.
+            if (DELIMITERS.indexOf(c)<0)
                 return i;
         }
         return -1;
@@ -165,11 +165,11 @@ public class HashFunction {
     public static int keywordEnd(String query, int i) {
         //Search for the first character that is a delimiter.  
         //TODO3: see above
-        final String DELIMETERS=FileManager.DELIMETERS;
+        final String DELIMITERS=FileManager.DELIMITERS;
         for ( ; i<query.length() ; i++) {
             char c=query.charAt(i);
-            //If c in DELIMETERS, declare success.
-            if (DELIMETERS.indexOf(c)>=0)
+            //If c in DELIMITERS, declare success.
+            if (DELIMITERS.indexOf(c)>=0)
                 return i;
         }
         return query.length();

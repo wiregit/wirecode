@@ -196,7 +196,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 	}
 	
 	/**
-	 * Tests multiple extensions (garbage) can be added with the delimeter.
+	 * Tests multiple extensions (garbage) can be added with the delimiter.
 	 */
 	public void testMultipleGarbageExtensions() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();

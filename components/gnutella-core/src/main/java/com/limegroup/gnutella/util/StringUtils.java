@@ -183,16 +183,16 @@ public class StringUtils {
     }
 
     /**
-     * Exactly like split(s, Character.toString(delimeter))
+     * Exactly like split(s, Character.toString(delimiter))
      */
-    public static String[] split(String s, char delimeter) {
+    public static String[] split(String s, char delimiter) {
         //Character.toString only available in Java 1.4+
-        return split(s, delimeter+"");
+        return split(s, delimiter+"");
     }
 
     /** 
-     *  Returns the tokens of s delimited by the given delimeter, without
-     *  returning the delimeter.  Repeated sequences of delimeters are treated
+     *  Returns the tokens of s delimited by the given delimiter, without
+     *  returning the delimiter.  Repeated sequences of delimiters are treated
      *  as one. Examples:
      *  <pre>
      *    split("a//b/ c /","/")=={"a","b"," c "}
@@ -200,12 +200,12 @@ public class StringUtils {
      *    split("///", "/")=={}.
      *  </pre>
      *
-     * <b>Note that whitespace is preserved if it is not part of the delimeter.</b>
+     * <b>Note that whitespace is preserved if it is not part of the delimiter.</b>
      * An older version of this trim()'ed each token of whitespace.  
      */
-    public static String[] split(String s, String delimeters) {
-        //Tokenize s based on delimeters, adding to buffer.
-        StringTokenizer tokenizer = new StringTokenizer(s, delimeters);
+    public static String[] split(String s, String delimiters) {
+        //Tokenize s based on delimiters, adding to buffer.
+        StringTokenizer tokenizer = new StringTokenizer(s, delimiters);
         Vector buf = new Vector();        
         while (tokenizer.hasMoreTokens())
             buf.add(tokenizer.nextToken());
@@ -219,18 +219,18 @@ public class StringUtils {
     }
 
     /**
-     * Exactly like splitNoCoalesce(s, Character.toString(delimeter))
+     * Exactly like splitNoCoalesce(s, Character.toString(delimiter))
      */
-    public static String[] splitNoCoalesce(String s, char delimeter) {
+    public static String[] splitNoCoalesce(String s, char delimiter) {
         //Character.toString only available in Java 1.4+
-        return splitNoCoalesce(s, delimeter+"");
+        return splitNoCoalesce(s, delimiter+"");
     }
 
     /**
-     * Similar to split(s, delimeters) except that subsequent delimeters are not
+     * Similar to split(s, delimiters) except that subsequent delimiters are not
      * coalesced, so the returned array may contain empty strings.  If s starts
-     * (ends) with a delimeter, the returned array starts (ends) with an empty
-     * strings.  If s contains N delimeters, N+1 strings are always returned.
+     * (ends) with a delimiter, the returned array starts (ends) with an empty
+     * strings.  If s contains N delimiters, N+1 strings are always returned.
      * Examples:
      *
     *  <pre>
@@ -240,32 +240,32 @@ public class StringUtils {
      *  </pre>
      *
      * @return an array A s.t. s.equals(A[0]+d0+A[1]+d1+...+A[N]), where 
-     *  for all dI, dI.size()==1 && delimeters.indexOf(dI)>=0; and for
-     *  all c in A[i], delimeters.indexOf(c)<0
+     *  for all dI, dI.size()==1 && delimiters.indexOf(dI)>=0; and for
+     *  all c in A[i], delimiters.indexOf(c)<0
      */
-    public static String[] splitNoCoalesce(String s, String delimeters) {
-        //Tokenize s based on delimeters, adding to buffer.
-        StringTokenizer tokenizer = new StringTokenizer(s, delimeters, true);
+    public static String[] splitNoCoalesce(String s, String delimiters) {
+        //Tokenize s based on delimiters, adding to buffer.
+        StringTokenizer tokenizer = new StringTokenizer(s, delimiters, true);
         Vector buf = new Vector(); 
-        //True if last token was a delimeter.  Initialized to true to force
-        //an empty string if s starts with a delimeter.
-        boolean gotDelimeter=true; 
+        //True if last token was a delimiter.  Initialized to true to force
+        //an empty string if s starts with a delimiter.
+        boolean gotDelimiter=true; 
         while (tokenizer.hasMoreTokens()) {
             String token=tokenizer.nextToken();
-            //Is token a delimeter?
-            if (token.length()==1 && delimeters.indexOf(token)>=0) {
-                //If so, add blank only if last token was a delimeter.
-                if (gotDelimeter)
+            //Is token a delimiter?
+            if (token.length()==1 && delimiters.indexOf(token)>=0) {
+                //If so, add blank only if last token was a delimiter.
+                if (gotDelimiter)
                     buf.add("");
-                gotDelimeter=true;
+                gotDelimiter=true;
             } else {
                 //If not, add "real" token.
                 buf.add(token);
-                gotDelimeter=false;
+                gotDelimiter=false;
             }            
         }
         //Add trailing empty string UNLESS s is the empty string.
-        if (gotDelimeter && !buf.isEmpty())
+        if (gotDelimiter && !buf.isEmpty())
             buf.add("");
 
         //Copy from buffer to array.
@@ -508,10 +508,10 @@ public class StringUtils {
     public static final String removeIllegalChars(String name) {
         String ret = "";
         
-        String delim = FileManager.DELIMETERS;
+        String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
-        sb.append(illegal).append(FileManager.DELIMETERS);
+        sb.append(illegal).append(FileManager.DELIMITERS);
         StringTokenizer st = new StringTokenizer(name, sb.toString());        
         while(st.hasMoreTokens())
             ret += st.nextToken().trim() + " ";
@@ -519,7 +519,7 @@ public class StringUtils {
     }   
 
     /**
-     * Gets the keywords in this filename, seperated by delimeters & illegal
+     * Gets the keywords in this filename, seperated by delimiters & illegal
      * characters.
      */
     public static final Set keywords(String fileName) {
@@ -528,10 +528,10 @@ public class StringUtils {
         
         //Separate by whitespace and _, etc.
         Set ret=new HashSet();
-        String delim = FileManager.DELIMETERS;
+        String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
-        sb.append(illegal).append(FileManager.DELIMETERS);
+        sb.append(illegal).append(FileManager.DELIMITERS);
 
         StringTokenizer st = new StringTokenizer(fileName, sb.toString());
         while (st.hasMoreTokens()) {

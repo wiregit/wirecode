@@ -350,7 +350,7 @@ public class ExtendedEndpoint extends Endpoint {
      */
     public static ExtendedEndpoint read(String line) throws ParseException {
         //Break the line into fields.  Skip if badly formatted.  Note that
-        //subsequent delimeters are NOT coalesced.
+        //subsequent delimiters are NOT coalesced.
         String[] linea=StringUtils.splitNoCoalesce(line, FIELD_SEPARATOR);
         if (linea.length==0)
             throw new ParseException("Empty line", 0);
