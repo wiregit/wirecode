@@ -1392,6 +1392,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 					// if the SHA1s don't match, keep going
 					continue;
 				}
+				
+				// don't add an alternate location is this RFD had an invalid
+				// port.  (rfds may have an invalid port -- we'll push to them)
+				if( !NetworkUtils.isValidPort(tempRFD.getPort()) )
+				    continue;
+				
 				try {
 					AlternateLocation location = 
 						AlternateLocation.createAlternateLocation(tempRFD);
@@ -2705,6 +2711,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             return true;
         //Return true if rfd is private or unreachable
         if (rfd.isPrivate())
+            return true;
+        else if (!NetworkUtils.isValidPort(rfd.getPort()))
             return true;
         else
             return false;
