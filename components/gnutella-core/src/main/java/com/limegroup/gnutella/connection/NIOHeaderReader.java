@@ -7,7 +7,10 @@ import java.nio.channels.SocketChannel;
 import com.limegroup.gnutella.http.HTTPHeader;
 
 /**
- * Specialized class for non-blocking reading of Gnutella message headers.
+ * Specialized class for non-blocking reading of Gnutella message headers.  
+ * This class is necessary to avoid allocating too much memory to read buffers.
+ * This class allocates 1024 bytes for reading individual headers, the 
+ * standard, although unspecified, HTTP header length limit.
  */
 public final class NIOHeaderReader implements HeaderReader {
 
@@ -28,9 +31,15 @@ public final class NIOHeaderReader implements HeaderReader {
      */
     private final Connection CONNECTION;
     
-
+    /**
+     * The <tt>ByteBuffer</tt> that header data is read into.  Non-final so
+     * that this can be nulled and garbage collected as quickly as possible.
+     */
     private ByteBuffer _headerByteBuffer = ByteBuffer.allocate(1024);
     
+    /**
+     * <tt>StringBuffer</tt> for storing header data.
+     */
     private StringBuffer _buffer = new StringBuffer();
     
     /**
