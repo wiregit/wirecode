@@ -115,8 +115,10 @@ public class RouterService
     }
 
 
+	/**
+	 *  This is the entry point for a group connection request.
+	 */
 	public void connectToGroup(String group) {
-		System.out.println("Connect to: " + group );
 		groupConnect(group);
 	}
 
@@ -152,6 +154,7 @@ public class RouterService
     public void groupConnect(String group) {
         SettingsManager settings=SettingsManager.instance();
 
+		// Store the quick connect value.
 		boolean useQuickConnect = settings.getUseQuickConnect(); 
 		settings.setUseQuickConnect(false);
 
@@ -179,6 +182,7 @@ public class RouterService
 		try {
 			groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
 		} catch (IOException exc) {
+			settings.setUseQuickConnect(useQuickConnect);
 			return;
 		}
 
