@@ -670,9 +670,9 @@ public abstract class MessageRouter {
                 // this query came from a leaf - so check if it desires out-of-band
                 // responses and make sure that the IP it advertises is legit -
                 // if it isn't drop away....
+                // no need to check the port - if you are attacking yourself you
+                // got problems
                 Connection conn = (Connection) handler;
-                if (request.getReplyPort() != conn.getPort())
-                    return;
                 String remoteAddr = conn.getInetAddress().getHostAddress();
                 if (!request.getReplyAddress().equals(remoteAddr))
                     return;
