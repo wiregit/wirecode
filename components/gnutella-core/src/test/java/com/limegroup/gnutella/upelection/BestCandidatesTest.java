@@ -21,10 +21,12 @@ public class BestCandidatesTest extends BaseTestCase {
 
 	
 	//couple of candidates
-	private static RemoteCandidate goodCandidate, badCandidate, mediocreCandidate;
+	private static RemoteCandidate goodCandidate, badCandidate, mediocreCandidate,
+		veryGoodCandidate,veryBadCandidate;
 	
 	//couple of advertisers
-	private static Connection advertiser1, advertiser2, advertiser3;
+	private static UPStubConn advertiser2, advertiser3;
+	private static ManagedConnectionStub advertiser1;
 	
 	//couple of good leaf candidates
 	private static Connection goodLeaf, betterLeaf, bestLeaf;
@@ -40,6 +42,7 @@ public class BestCandidatesTest extends BaseTestCase {
     }
 	
 	protected void setUp() {
+
 		
 		//in the set up, replace the advertising thread with a stub.
 		BestCandidates instance = null;
@@ -58,6 +61,10 @@ public class BestCandidatesTest extends BaseTestCase {
 			_advertiserThread = new CandidateAdvertiserStub();
 			PrivilegedAccessor.setValue(instance,"_advertiser", _advertiserThread);
 			
+			//also set some stubs in routerservice.
+			PrivilegedAccessor.setValue(RouterService.class,"router",new MessageRouterStub());
+			PrivilegedAccessor.setValue(RouterService.class,"callback",new ActivityCallbackStub());
+			
 		}catch(Exception what) {
 			fail("could not (re)set the candidates table",what);
 		}
@@ -67,15 +74,27 @@ public class BestCandidatesTest extends BaseTestCase {
 			goodCandidate = new RemoteCandidate("1.2.3.4",15,(short)20); //20 minutes uptime
 			mediocreCandidate = new RemoteCandidate("1.2.3.5",15,(short)15); //15 mins
 			badCandidate = new RemoteCandidate("1.2.3.6",15,(short)10); //10 mins
+			veryGoodCandidate = new RemoteCandidate("1.2.3.7",15,(short)100);
+			veryBadCandidate = new RemoteCandidate("1.2.3.8",15,(short)-1);
 		}catch (UnknownHostException ieh) {
 			fail("find better test ip addresses",ieh);
 		}
 		
 		
 		//make some false advertisers
-		advertiser1 = new ManagedConnectionStub("127.0.0.1",2000);
-		advertiser2 = new ManagedConnectionStub("127.0.0.2",2000);
-		advertiser3 = new ManagedConnectionStub("127.0.0.3",2000);
+		
+		advertiser1 = new ManagedConnectionStub("127.0.0.1",2000); //this is localhost.
+		
+		Candidate [] remoteCandidates = new Candidate[2];
+		remoteCandidates[0]=badCandidate;
+		remoteCandidates[1]=veryGoodCandidate;
+		
+		advertiser2 = new UPStubConn(remoteCandidates,"127.0.0.2",2000);
+		
+		remoteCandidates = new Candidate[2];
+		remoteCandidates[0]=veryBadCandidate;
+		remoteCandidates[1]=goodCandidate;
+		advertiser3 = new UPStubConn(remoteCandidates,"127.0.0.3",2000);
 		
 		//and some good leafs
 		goodLeaf = new GoodLeafCandidate("1.2.3.4",1234,(short)10, 20);
@@ -89,8 +108,12 @@ public class BestCandidatesTest extends BaseTestCase {
 		
 		//associate them with the best and the worst
 		mediocreCandidate.setAdvertiser(advertiser1);
-		goodCandidate.setAdvertiser(advertiser2);
-		badCandidate.setAdvertiser(advertiser3);
+		
+		badCandidate.setAdvertiser(advertiser2);
+		veryGoodCandidate.setAdvertiser(advertiser2);
+		
+		goodCandidate.setAdvertiser(advertiser3);
+		veryBadCandidate.setAdvertiser(advertiser3);
 		
 		
 		//put the mediocre candidate as our best candidate at ttl 0
@@ -324,8 +347,7 @@ public class BestCandidatesTest extends BaseTestCase {
 		assertEquals(4, manager.getNumInitializedClientConnections());
 		
 		//calling ConnectionManager.remove should trigger an update.
-		PrivilegedAccessor.setValue(RouterService.class,"router",new MessageRouterStub());
-		PrivilegedAccessor.setValue(RouterService.class,"callback",new ActivityCallbackStub());
+
 		//PrivilegedAccessor.setValue(RouterService.class,"callback",new ActivityCallbackStub());
 		manager.remove((ManagedConnection)goodLeaf);
 		
@@ -342,10 +364,130 @@ public class BestCandidatesTest extends BaseTestCase {
 	}
 	
 	/**
+	 * tests the case where a route fails to an UP connection which has
+	 * advertised a candidate.
+	 */
+	public void testRouteFailedToUP() throws Exception {
+		
+		//make sure I have somebody at ttl 1 and 2
+		Candidate [] update = new Candidate[2];
+		update[0]=goodCandidate;
+		update[1]=badCandidate;
+		
+		BestCandidates.update(update);
+		
+		assertNotNull(BestCandidates.getCandidates()[1]);
+		assertNotNull(BestCandidates.getCandidates()[2]);
+		
+		//connect the advertisers to the connection manager.
+		List list = new LinkedList();
+		list.add(advertiser2);
+		list.add(advertiser3);
+		
+		ConnectionManager manager = RouterService.getConnectionManager();
+		
+		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
+		
+		//////////////////////////////
+		// start the test
+		//////////////////////////////
+		
+		//* *  * * * *    ROUTING TABLE:
+		//
+		//NAME:				TTL 1			TTL 2
+		//advertiser2      badCandidate		veryGoodCandidate
+		//advertiser3      veryBadCandidate goodCandidate
+
+		//CURRRENT STATE: TTL1: goodCandidate  TTL2: badCandidate
+		
+		//so, after closing advertiser 2 we should :
+		
+		manager.remove(advertiser2);
+		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
+		
+		//the candidate at ttl1 should not change because we do not check it.
+		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[1]));
+		
+		//at ttl2 we had goodCandidate.. so now we have it twice ;)
+		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		
+		//CURRRENT STATE: TTL1: goodCandidate  TTL2: goodCandidate.
+		
+		//both are advertised by advertiser3, so removing that will simply put the
+		//values from advertiser2.
+		
+		manager.remove(advertiser3);
+		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
+		
+		assertTrue(badCandidate.isSame(BestCandidates.getCandidates()[1]));
+		assertTrue(veryGoodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		
+		//CURRRENT STATE: TTL1: badCandidate  TTL2: veryGoodCandidate.
+		
+		//both of these candidates are better than the ones advertiser3 has.
+		//lets edit the table directly.
+		update[1]=null;
+		BestCandidates.update(update);
+		
+		assertTrue(goodCandidate.isSame(BestCandidates.getCandidates()[1]));
+		assertTrue(veryGoodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		
+		//CURRENT STATE: TTL1: goodCandidate  TTL2: veryGoodCandidate
+		
+		//if we remove advertiser3, TTL1 should be replaced with VeryBadCandidate.
+		manager.remove(advertiser3);
+		PrivilegedAccessor.setValue(manager,"_initializedConnections",list);
+		
+		assertTrue(badCandidate.isSame(BestCandidates.getCandidates()[1]));
+		assertTrue(veryGoodCandidate.isSame(BestCandidates.getCandidates()[2]));
+		//CURRENT STATE: TTL1: badCandidate TTL2: veryGoodCandidate
+		
+	}
+	/**
 	 * uses PrivilegedAccessor to call this method from BestCandidates
 	 */
 	private static void propagateChange() throws Exception{
 		PrivilegedAccessor.invokeAllStaticMethods(
 				BestCandidates.class,"propagateChange", new Object[0]);
+	}
+	
+	
+	private static void dumpRoutingTable(Candidate [] table) {
+		System.out.println(table[1].getAddress()+ " advertised by "+table[1].getAdvertiser());
+		System.out.println(table[2].getAddress()+ " advertised by "+table[2].getAdvertiser());
+	}
+	
+	/**
+	 * a class which mimics a ManagedConnection which has remembered its advertisers.
+	 */
+	static class UPStubConn extends ManagedConnectionStub {
+		final Candidate [] _candidates;
+		
+		public UPStubConn(Candidate [] cands) {
+			super();
+			_candidates = cands;
+		}
+		
+		public UPStubConn(Candidate [] cands, String host, int port) {
+			super(host,port);
+			_candidates = cands;
+		}
+		public Candidate[] getCandidates() {
+			return _candidates;
+		}
+		
+		
+		/* (non-Javadoc)
+		 * @see com.limegroup.gnutella.Connection#isSupernodeClientConnection()
+		 */
+		public boolean isSupernodeClientConnection() {
+			return false;
+		}
+		/* (non-Javadoc)
+		 * @see com.limegroup.gnutella.Connection#isSupernodeSupernodeConnection()
+		 */
+		public boolean isSupernodeSupernodeConnection() {
+			return true;
+		}
 	}
 }
