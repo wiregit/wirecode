@@ -61,26 +61,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    }
 	    
 	}
-
-    /**
-     * Tests the isMe method.
-     */
-    public void testIsMe() throws Exception {
-        Method m = 
-            PrivilegedAccessor.getMethod(HostCatcher.class, "isMe", 
-                                         new Class[] {String.class, Integer.TYPE});
-
-        Object[] params = new Object[2];
-        params[1] = new Integer(6346);
-        
-        params[0] = "localhost"; 
-        boolean me = ((Boolean)m.invoke(null, params)).booleanValue();        
-        assertTrue("should be me: "+params[0], me);
-
-        params[0] = "127.1.2.1"; 
-        me = ((Boolean)m.invoke(null, params)).booleanValue();        
-        assertTrue("should be me: "+params[0], me);
-    }
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
      *  priority but different ip's.  This was a problem at one point. */

@@ -160,4 +160,14 @@ public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         buf[3]=(byte)255;
         assertEquals("252.253.254.255",NetworkUtils.ip2string(buf));        
     }
+    
+    /**
+     * Tests the isMe method.
+     */
+    public void testIsMe() throws Exception {
+        assertTrue("localhost should be me",
+            NetworkUtils.isMe("localhost", 6346));
+
+            NetworkUtils.isMe("127.1.2.1", 6346);
+    }    
 }

@@ -339,7 +339,7 @@ public class HostCatcher {
 
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
-        if (isMe(e.getHostname(), e.getPort()))
+        if (NetworkUtils.isMe(e.getHostname(), e.getPort()))
             return false;
 
         //Skip if this host is banned.
@@ -610,32 +610,6 @@ public class HostCatcher {
     public synchronized void clear() {
         ENDPOINT_QUEUE.clear();
         ENDPOINT_SET.clear();
-    }
-
-
-    /**
-     * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
-     *  the manager's listening port.
-     */
-    private static boolean isMe(String host, int port) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.*.*.*" since
-        //they are aliases this machine.
-        byte[] cIP;
-        try {
-            cIP=InetAddress.getByName(host).getAddress();
-        } catch (IOException e) {
-            return false;
-        }
-
-        if (cIP[0]==(byte)127) {
-            return port == RouterService.getPort();
-        } else {
-            byte[] managerIP = RouterService.getAddress();
-            return (Arrays.equals(cIP, managerIP) &&
-                    (port==RouterService.getPort()));
-        }
     }
 
     public String toString() {

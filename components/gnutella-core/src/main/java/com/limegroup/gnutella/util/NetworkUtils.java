@@ -5,6 +5,8 @@ import com.limegroup.gnutella .*;
 import java.io.*;
 import java.net.*;
 
+import com.sun.java.util.collections.Arrays;
+
 /**
  * This class handles common utility functions for networking tasks.
  */
@@ -173,6 +175,37 @@ public final class NetworkUtils {
         sbuf.append(ByteOrder.ubyte2int(ip[offset+3]));
         return sbuf.toString();
     }
+    
+
+
+
+    /**
+     * If host is not a valid host address, returns false.
+     * Otherwise, returns true if connecting to host:port would connect to
+     *  the manager's listening port.
+     *
+     * @return <tt>true</tt> if the specified host/port combo is this servent,
+     *         otherwise <tt>false</tt>.
+     */
+    public static boolean isMe(String host, int port) {
+        //Don't allow connections to yourself.  We have to special
+        //case connections to "localhost" or "127.*.*.*" since
+        //they are aliases this machine.
+        byte[] cIP;
+        try {
+            cIP=InetAddress.getByName(host).getAddress();
+        } catch (IOException e) {
+            return false;
+        }
+
+        if (cIP[0]==(byte)127) {
+            return port == RouterService.getPort();
+        } else {
+            byte[] managerIP = RouterService.getAddress();
+            return port == RouterService.getPort() &&
+                   Arrays.equals(cIP, managerIP);
+        }
+    }    
 }
 
 
