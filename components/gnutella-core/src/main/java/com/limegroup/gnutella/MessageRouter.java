@@ -1636,8 +1636,10 @@ public abstract class MessageRouter {
 		List list = _manager.getInitializedConnections();
 
         // only send to at most 4 Ultrapeers, as we could have more
-        // as a result of race conditions
-        int limit = Math.min(4, list.size());
+        // as a result of race conditions - also, don't send what is new
+        // requests down too many connections
+        final int max = qr.isWhatIsNewRequest() ? 2 : 4;
+        int limit = Math.min(max, list.size());
         final boolean wantsOOB = qr.desiresOutOfBandReplies();
         for(int i=0; i<limit; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);
