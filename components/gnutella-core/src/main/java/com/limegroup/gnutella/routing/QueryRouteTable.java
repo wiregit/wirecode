@@ -100,6 +100,15 @@ public class QueryRouteTable {
         }
         String richQueryWords="";
         if(doc!=null){            
+            {   // check if this client can handle this uri....
+                String docSchemaURI = doc.getSchemaURI();
+                int hash = HashFunction.hash(docSchemaURI, 
+                                             log2(table.length));
+                if ((table[hash] > qr.getTTL()) || 
+                    (table[hash] >= infinity))
+                    return false;
+            }
+            
             Iterator iter = doc.getKeyWords().iterator();
             while(iter.hasNext()){
                 String str = (String)iter.next();
@@ -163,6 +172,17 @@ public class QueryRouteTable {
                     entries++;  //added new entry
                 table[hash]=(byte)ttl;
             }
+        }
+    }
+
+
+    public void addIndivisible(String iString) {
+        final int ttl = 1;
+        final int hash = HashFunction.hash(iString, log2(table.length));
+        if (ttl < table[hash]) {
+            if (table[hash] >= infinity)
+                entries++;  //added new entry
+            table[hash] = (byte)ttl;
         }
     }
 
