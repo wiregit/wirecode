@@ -2609,8 +2609,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         } finally {
             // we must ensure that all dloaders are removed from the data
             // structure before returning from this method.
-            synchronized(this) {
-                dloaders.remove(dloader);
+            synchronized(stealLock) {
+                synchronized(this) {
+                    dloaders.remove(dloader);
+                }
             }
         }
         
@@ -2635,8 +2637,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             // us after we succesfully managed to download some
             // information.  despite the rarity of the situation,
             // we should be prepared.
-            synchronized(this) {
-                dloaders.remove(dloader);
+            synchronized(stealLock){
+                synchronized(this) {
+                    dloaders.remove(dloader);
+                }
             }
             Thread.sleep(status.getQueuePollTime());//value from QueuedException
             return false;
@@ -3223,12 +3227,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //      I think it's ok, though it could result in >100% in the GUI
         HTTPDownloader biggest = null;
         synchronized (this) {
-            if (dloaders.isEmpty() && 
-                    !commonOutFile.isComplete() &&
-                    commonOutFile.hasFreeBlocksToAssign()) {
-                assignWhite(dloader,http11);
-                return;
-            }
+            Assert.silent(!dloaders.isEmpty());
             for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
                 HTTPDownloader h = (HTTPDownloader)iter.next();
                 // If this guy isn't downloading, don't steal from him.
@@ -3471,12 +3470,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Release the ranges assigned to a downloader  
      */
-    private synchronized void releaseRanges(HTTPDownloader dloader) {
+    private void releaseRanges(HTTPDownloader dloader) {
         int low=dloader.getInitialReadingPoint();
         int high = dloader.getInitialReadingPoint()+dloader.getAmountToRead()-1;
         //note: the high'th byte will also be downloaded.
         if( (high-low)>0) {//dloader failed to download a part assigned to it?
-            commonOutFile.releaseBlock(new Interval(low,high));
+            synchronized(stealLock) {
+                commonOutFile.releaseBlock(new Interval(low,high));
+            }
         }
     }
 
