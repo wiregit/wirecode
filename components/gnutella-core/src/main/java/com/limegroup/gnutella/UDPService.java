@@ -363,16 +363,7 @@ public final class UDPService implements Runnable {
                     } catch(NoRouteToHostException nrthe) {
                         // oh well, if we can't find that host, ignore it ...
                     } catch(IOException ioe) {
-                        String message = ioe.getMessage();
-                        if( message == null )
-                            message = "";
-                            
-                        //If we're full, just drop it.  UDP is unreliable like 
-                        //that.
-                        if(message.equals("No buffer space available."))
-                            return;
-                        //If we were interrupted, ignore.
-                        if(message.indexOf("code=10004") > -1)
+                        if(isIgnoreable(ioe.getMessage()))
                             return;
                             
                         String errString = "ip/port: " + 
@@ -386,6 +377,97 @@ public final class UDPService implements Runnable {
             }
         }
         
+        /**
+         * Determines whether or not the given IOException can
+         * can be ignored.
+         *
+         * Visit http://www.dte.net/winsock_error.htm for explanations
+         * of each code/message.
+         *
+         * Most of these have no meaning when applied to UDP, but
+         * it doesn't hurt to check for ones that aren't harmful.
+         * Depending on the version of Java or the OS, the error may
+         * either be "Datagram send failed (code=<code>)"
+         * or simply the text of the error.
+         */
+        private boolean isIgnoreable(final String message) {
+            if(message == null)
+                return false;
+
+            // For easier comparison, make everything lowercase
+            final String msg = message.toLowerCase();
+            
+            if(scan(msg, 10013, "permission denied"))
+                return true;
+            // propogate 10048 / Address already in use
+            if(scan(msg, 10049, "cannot assign requested address"))
+                return true;
+            // propogate 10047 / Address family not supported by protocol family
+            // propogate 10037 / Operation already in progress
+            if(scan(msg, 10053, "software caused connection abort"))
+                return true;
+            if(scan(msg, 10054, "connection reset by peer"))
+                return true;
+            if(scan(msg, 10061, "connection refused"))
+                return true;
+            // propogate 10039 / Destination address required
+            // propogate 10014 / Bad address
+            if(scan(msg, 10064, "host is down"))
+                return true;
+            if(scan(msg, 10065, "no route to host"))
+                return true;
+            // propogate 10036 / Operation now in progress
+            if(scan(msg, 10004, "interrupted function call"))
+                return true;
+            // propogate 10022 / Invalid Argument
+            // propogate 10056 / Socket is already connected
+            // propogate 10024 / Too many open files
+            // propogate 10040 / Message too long
+            if(scan(msg, 10050, "network is down"))
+                return true;
+            if(scan(msg, 10052, "network dropped connection on reset"))
+                return true;
+            if(scan(msg, 10051, "network is unreachable"))
+                return true;
+            if(scan(msg, 10055, "no buffer space available"))
+                return true;
+            // propogate 10042 / Bad protocol option
+            // propogate 10057 / Socket is not connected
+            // propogate 10038 / Socket operation on non-socket
+            // propogate 10045 / Operation not supported
+            // propogate 10046 / Protocl family not supported
+            // propogate 10067 / Too many processes
+            // propogate 10043 / Protocol not supported
+            // propogate 10041 / Protocol wrong type for socket
+            // propogate 10058 / Cannot send after socket shutdown
+            // propogate 10044 / Socket type not supported
+            if(scan(msg, 10060, "connection timed out"))
+                return true;
+            if(scan(msg, 10035, "resource temporarily unavailable"))
+                return true;
+            if(scan(msg, 11001, "host not found"))
+                return true;
+            if(scan(msg, 10091, "network subsystem is unavailable"))
+                return true;
+                
+            // General invalid error on Linux
+            if(msg.indexOf("operation not permitted") > -1)
+                return true;
+                
+            return false;
+        }
+        
+        /**
+         * Scans the error message for either the code or the name of
+         * of the message, returning true if either was found.
+         */
+        private boolean scan(final String msg, int code, final String name) {
+            if(msg.indexOf("code="+code) > -1)
+                return true;
+            if(msg.indexOf(name) > -1)
+                return true;
+            return false;
+        }
     }
 
 
