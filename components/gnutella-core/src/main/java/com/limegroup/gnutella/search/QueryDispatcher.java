@@ -146,8 +146,8 @@ public final class QueryDispatcher implements Runnable {
                 if(qh.getReplyHandler() == handler)
                     toRemove.add(qh);
             }
-            //TODO: ask adam if toRemove will ever have more than 1 element.  i
-            //don't know the code that well....
+
+
             iter = toRemove.iterator();
             while (iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
@@ -202,7 +202,9 @@ public final class QueryDispatcher implements Runnable {
                     _toRemove.remove(handler.getGUID());
                     expiredQueries.add(handler);
                 }
-                handler.sendQuery();
+                else
+                    handler.sendQuery();
+
                 if(handler.hasEnoughResults()) {
                     expiredQueries.add(handler);
                 }
