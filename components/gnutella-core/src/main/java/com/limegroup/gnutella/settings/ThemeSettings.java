@@ -32,10 +32,9 @@ public final class ThemeSettings extends LimeProps {
 		new File(CommonUtils.getUserSettingsDir(), "themes");
     
     /**
-     * The default name of the theme file for all operating systems other than
-     * OS X.
+     * The normal 'LimeWire' theme.
      */
-    public static final String DEFAULT_THEME_NAME =
+    public static final String LIMEWIRE_THEME_NAME =
 		"limewire_theme."+EXTENSION;
     
     /**
@@ -59,14 +58,14 @@ public final class ThemeSettings extends LimeProps {
     /**
      * The default name of the theme file name for non-OS X pro users.
      */
-    public static final String DEFAULT_PRO_THEME_NAME =
+    public static final String PRO_THEME_NAME =
         "limewirePro_theme."+EXTENSION;
     
     /**
-     * The full path to the default theme file.
+     * The full path to the LimeWire theme file.
      */
-    static final File DEFAULT_THEME_FILE =
-		new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
+    static final File LIMEWIRE_THEME_FILE =
+		new File(THEME_DIR_FILE, LIMEWIRE_THEME_NAME);
     
     /**
      * The full path to the default theme file on OS X.
@@ -88,10 +87,10 @@ public final class ThemeSettings extends LimeProps {
         
         
     /**
-     * The full path to the default theme file on OS X.
+     * The full path to the pro only theme.
      */
-    static final File DEFAULT_PRO_THEME_FILE =
-        new File(THEME_DIR_FILE, DEFAULT_PRO_THEME_NAME);
+    static final File PRO_THEME_FILE =
+        new File(THEME_DIR_FILE, PRO_THEME_NAME);
     
     /**
      * Statically expand any zip files in our jar if they're newer than the
@@ -107,11 +106,11 @@ public final class ThemeSettings extends LimeProps {
         if(!themesJar.isFile()) {
             String url =
             ThemeSettings.class.getClassLoader().
-                getResource(DEFAULT_THEME_NAME).toString();
+                getResource(LIMEWIRE_THEME_NAME).toString();
             if (url != null && url.startsWith("jar:file:")) {
                 url = url.substring("jar:file:".length(), url.length());
                 url = url.substring(0, url.length()-
-                    DEFAULT_THEME_NAME.length()-"!/".length());
+                    LIMEWIRE_THEME_NAME.length()-"!/".length());
                 themesJar = new File(url);
             }
         }
@@ -215,7 +214,7 @@ public final class ThemeSettings extends LimeProps {
      *  otherwise <tt>false</tt>
      */
     public static boolean isDefaultTheme() {
-        return THEME_FILE.getValue().equals(THEME_DEFAULT.getValue());
+        return THEME_FILE.getValue().equals(THEME_DEFAULT);
     }
     
     /** 
@@ -247,7 +246,7 @@ public final class ThemeSettings extends LimeProps {
      */
     public static boolean isNativeOSXTheme() {
         return CommonUtils.isMacOSX() &&
-              (isDefaultTheme() || isBrushedMetalTheme());
+              (isPinstripesTheme() || isBrushedMetalTheme());
     }
     
     /**
@@ -286,35 +285,36 @@ public final class ThemeSettings extends LimeProps {
     /**
      * Setting for the default theme file to use for LimeWire display.
      */
-    public static final FileSetting THEME_DEFAULT =
-		FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
-								  PINSTRIPES_OSX_THEME_FILE :
-                                  CommonUtils.isPro() ?
-                                  DEFAULT_PRO_THEME_FILE :
-							      DEFAULT_THEME_FILE);
-	
-	/**
-	 * Setting for the default theme directory to use in LimeWire display.
-	 */
-	public static final FileSetting THEME_DEFAULT_DIR =
-        FACTORY.createFileSetting("THEME_DEFAULT_DIR",
-								  CommonUtils.isMacOSX() ?
-							      new File(THEME_DIR_FILE,
-										   "pinstripes_theme_osx") :
-								  new File(THEME_DIR_FILE,
-										   "brushed_metal_theme_osx"));
+    public static final File THEME_DEFAULT;
+    public static final File THEME_DEFAULT_DIR;
+    static {
+        File theme, dir;
+        if(CommonUtils.isMacOSX()) {
+            theme = PINSTRIPES_OSX_THEME_FILE;
+            dir = new File(THEME_DIR_FILE, "pinstripes_theme_osx");
+        } else if(CommonUtils.isPro()) {
+            theme = PRO_THEME_FILE;
+            dir = new File(THEME_DIR_FILE, "limewirePro_theme");
+        } else if(CommonUtils.isWindowsXP() && CommonUtils.isJava14OrLater()) {
+            theme = WINDOWS_LAF_THEME_FILE;
+            dir = new File(THEME_DIR_FILE, "windows_theme");
+        } else {
+            theme = LIMEWIRE_THEME_FILE;
+            dir = new File(THEME_DIR_FILE, "limewire_theme");
+        }
+        THEME_DEFAULT = theme;
+        THEME_DEFAULT_DIR = dir;
+    }
 	
 	/**
 	 * Setting for the file name of the theme file.
 	 */
 	public static final FileSetting THEME_FILE =
-		FACTORY.createFileSetting("THEME_FILE",
-								  THEME_DEFAULT.getValue());
+		FACTORY.createFileSetting("THEME_FILE", THEME_DEFAULT);
 	
 	/**
 	 * Setting for the file name of the theme directory.
 	 */
 	public static final FileSetting THEME_DIR =
-		FACTORY.createFileSetting("THEME_DIR",
-								  THEME_DEFAULT_DIR.getValue());
+		FACTORY.createFileSetting("THEME_DIR", THEME_DEFAULT_DIR);
 }
