@@ -300,6 +300,7 @@ public final class SettingsManager {
 
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
+
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
 
     //authentication settings
@@ -665,7 +666,6 @@ public final class SettingsManager {
 
 	private volatile boolean  _chatEnabled;
 	private volatile boolean  _playerEnabled;
-    private volatile boolean  _guessEnabled;
 
     private volatile boolean  _monitorViewEnabled;
     private volatile boolean  _connectionViewEnabled;
@@ -1480,7 +1480,7 @@ public final class SettingsManager {
 	public boolean getChatEnabled() {return _chatEnabled;}
 
 	/** Returns true if GUESS is enabled */
-	public boolean getGuessEnabled() {return _guessEnabled;}
+	public boolean getGuessEnabled() {return getBooleanValue(GUESS_ENABLED);}
 
 	/** Returns true if the player is enabled */
 	public boolean getPlayerEnabled() {
@@ -2721,9 +2721,7 @@ public final class SettingsManager {
 	 * @param guessEnabled specified whether or not GUESS is enabled
 	 */
 	public void setGuessEnabled(boolean guessEnabled) {
-		_guessEnabled = guessEnabled;
-		String s = String.valueOf(guessEnabled);
-		PROPS.put(GUESS_ENABLED, s);
+		setBooleanValue(GUESS_ENABLED, guessEnabled);
 	}
 
 
