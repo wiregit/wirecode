@@ -298,7 +298,7 @@ public class LimeXMLReplyCollection{
         int size = replyDocs.size();
         for(int i=0; i<size;i++){
             LimeXMLDocument currDoc = (LimeXMLDocument)replyDocs.get(i);
-            String xml = currDoc.getXMLString();
+            String xml = currDoc.getXMLStringWithIdentifier();
             if(audio){
                 String fName = currDoc.getIdentifier();
                 ID3Editor e = new ID3Editor();

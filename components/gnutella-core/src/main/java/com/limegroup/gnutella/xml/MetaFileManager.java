@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 
@@ -31,19 +31,7 @@ public class MetaFileManager extends FileManager {
         Response[] result = union(normals,metas);
         return result;
     }
-    
-//    public FileDesc file2index(String fullName) {  
-//        // TODO1: precompute and store in table.
-//        for (int i=0; i<_files.size(); i++) {
-//            FileDesc fd=(FileDesc)_files.get(i);
-//            if (fd==null)  file://unshared
-//            continue;
-//            else if (fd._path.equals(fullName))
-//                return fd;
-//        }
-//        return null;//The file with this name was not found.
-//    }
-    
+        
     /**This method now breaks the contract of the super class. The super class
      * claims that this method is non-blocking. Because the the loadThread 
      * would asynchronously do the loading.
@@ -133,30 +121,31 @@ public class MetaFileManager extends FileManager {
      */
     public Map getAllMP3FilesRecursive(){
         SettingsManager man = SettingsManager.instance();
-        List dirs = Arrays.asList(man.getDirectoriesAsArray());
+        ArrayList dirs = new ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
         Map map  = new HashMap();
         int k=0;
         while(k < dirs.size()){
             String dir = (String)dirs.get(k);
             k++;
-            File[] files = getSharedFiles(new File(dir));
+            File currDir = new File(dir);
+            //add all subdirectories to dirs
+            String[] subFiles = currDir.list();
+            int z = subFiles.length;
+            for(int j=0;j<z;j++){
+                File f = new File(dir+File.separator+subFiles[j]);
+                if(f.isDirectory()){
+                    String newDir = dir+File.separator+subFiles[j];
+                    dirs.add(newDir);
+                }
+            }
+            //check files in this dir for .mp3 files.
+            File[] files = getSharedFiles(currDir);
             int size = files.length;
             for(int i=0;i<size;i++){
-                if (files[i].isDirectory()){
-                    String t="";
-                    try{
-                        t = files[i].getCanonicalPath();
-                    }catch(Exception e){
-                        continue;
-                    }
-                    if(t!=null && !t.equals(""))
-                        dirs.add(t);
-                }
-                else{
                     String name="";
                     try{
                         name = files[i].getCanonicalPath();
-                    }catch(Exception e){
+                    }catch(IOException e){
                         continue;
                     }
                     int j = name.lastIndexOf(".");
@@ -165,7 +154,6 @@ public class MetaFileManager extends FileManager {
                         ext = name.substring(j);
                     if(ext.equalsIgnoreCase(".mp3"))
                         map.put(name,files[i]);
-                }
             }
         }
         return map;
