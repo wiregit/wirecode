@@ -62,12 +62,14 @@ public class StandardMessageRouter
         ManagedConnection receivingConnection)
     {
         receivingConnection.updateHorizonStats(pingReply);
-        
+
         SettingsManager settings=SettingsManager.instance(); 
         //Kill incoming connections that don't share.  Note that we randomly
         //allow some freeloaders.  (Hopefully they'll get some stuff and then
-        //share!)
+        //share!)  Note that we only consider killing them on the first ping.
+        //(Message 1 is their ping, message 2 is their reply to our ping.)
         if ((pingReply.getHops()<=1)
+               && (receivingConnection.getNumMessagesReceived()<=2)
                && (! receivingConnection.isOutgoing())
                && (receivingConnection.isKillable())
                && (pingReply.getFiles()<settings.getFreeloaderFiles())
