@@ -22,21 +22,25 @@ public class UDataFileCreator {
     }
     
     public void createFile() {
-        BitSet dontExclude = new BitSet();
+        java.util.BitSet dontExclude = new java.util.BitSet();
         Map codepoints = new TreeMap();
 
         HashMap caseMap = new HashMap();
-        BitSet excludedChars = new BitSet();
-        
+        java.util.BitSet excludedChars = new java.util.BitSet();
+        java.util.BitSet replaceWithSpace = new java.util.BitSet();
+
         HashMap tempNFKC = new HashMap();
         
 
         try {
             readNonExclusion(dontExclude);
-            dealWithUnicodeData(codepoints, dontExclude, excludedChars);
+            dealWithUnicodeData(codepoints, 
+				dontExclude, 
+				excludedChars,
+				replaceWithSpace);
             readCaseFolding(caseMap);
             //all we need now is caseMap and excludedChars
-            writeOutObjects(caseMap, excludedChars);
+            writeOutObjects(caseMap, excludedChars, replaceWithSpace);
         }
         catch(IOException e) {
             e.printStackTrace();
@@ -48,7 +52,9 @@ public class UDataFileCreator {
     /**
      * write out object files
      */
-    private void writeOutObjects(Map caseMap, BitSet excludedChars) 
+    private void writeOutObjects(Map caseMap, 
+				 java.util.BitSet excludedChars,
+				 java.util.BitSet replaceWithSpace) 
         throws IOException {
         
         FileOutputStream fo =
@@ -59,6 +65,11 @@ public class UDataFileCreator {
         fo = new FileOutputStream(new File("caseMap.dat"));
         oo = new ObjectOutputStream(fo);
         oo.writeObject(caseMap);
+        
+        fo = new FileOutputStream(new File("replaceSpace.dat"));
+        oo = new ObjectOutputStream(fo);
+        oo.writeObject(replaceWithSpace);
+    
     }
 
     /**
@@ -66,7 +77,7 @@ public class UDataFileCreator {
      * though they might belong to a category that should be excluded
      * (ie. dakuon, etc)
      */
-    private void readNonExclusion(BitSet ex) 
+    private void readNonExclusion(java.util.BitSet ex) 
         throws IOException {
         //most Mn will be excluded but few will be kept like voiced marks
         //this list may change
@@ -98,7 +109,10 @@ public class UDataFileCreator {
      * read in the unicode data file to get a list of all the codepoints
      * and to determine the category of these codepoints
      */
-    private void dealWithUnicodeData(Map cp, BitSet ex, BitSet excluded) 
+    private void dealWithUnicodeData(Map cp, 
+				     java.util.BitSet ex, 
+				     java.util.BitSet excluded,
+				     java.util.BitSet replaceWithSpace) 
         throws IOException {
         
         BufferedReader buf = getBR("UnicodeData.txt"); 
@@ -107,17 +121,30 @@ public class UDataFileCreator {
         boolean go = true;
 
         while((line = buf.readLine()) != null && go) 
-            go = processLine(cp, ex, line, excluded);
+            go = processLine(cp, ex, line, excluded, replaceWithSpace);
         
         buf.close();
     }
 
     int numEx = 0; //variable keeping track of number of excluded codepoints
-    private boolean processLine(Map cp, BitSet ex, 
-                                String line, BitSet excluded) {
+    private boolean processLine(Map cp, 
+                                java.util.BitSet ex, 
+                                String line, 
+                                java.util.BitSet excluded,
+                                java.util.BitSet replaceWithSpace) {
         String[] parts = StringUtils.splitNoCoalesce(line, ";");
         if(parts[0].equals("FFEE")) return false;
-        if(isExcluded(parts, ex)) {
+        if(parts[2].charAt(0) == 'P') {
+            //puctuations should be mostly be replaces with \u0020 (space).
+            //except for apostraphes
+            if(excludedPClass(parts[0])) {
+                numEx++;
+                excluded.set(Integer.parseInt(parts[0],16));
+            }
+            else
+                replaceWithSpace.set(Integer.parseInt(parts[0], 16));
+        }
+        else if(isExcluded(parts, ex)) {
             //put the codepoint into the excluded list
             numEx++;
             excluded.set(Integer.parseInt(parts[0],16));
@@ -134,13 +161,25 @@ public class UDataFileCreator {
     }
     
     /**
+     * check if this puctuation class should be excluded
+     */
+    private boolean excludedPClass(String codepoint) {
+        //TODO: may need to add to this list of one
+        //for all the different languages
+        if(codepoint.equals("0027"))
+            return true;
+        else
+            return false;
+    }
+
+    /**
      * check to see if code point in the array p 
      * is excluded.  
      */
-    private boolean isExcluded(String[] p, BitSet ex) {
+    private boolean isExcluded(String[] p, java.util.BitSet ex) {
         String cat = p[2];
         String cc = p[3];
-        char first = cat.charAt(0);
+        //char first = cat.charAt(0);
         if(ex.get(Integer.parseInt(p[0].trim(), 16)))
             return false;
         else if(cat.equals("Lu") ||
@@ -153,8 +192,8 @@ public class UDataFileCreator {
                 cat.equals("Cs") ||
                 cat.equals("Co") ||
                 cat.equals("Zs") ||
-                cat.equals("So") ||
-                first == 'P' 
+                cat.equals("So") //||
+                //first == 'P' 
                 )
             return false;
         else if(cat.equals("Mn") && cc.equals("0")) {

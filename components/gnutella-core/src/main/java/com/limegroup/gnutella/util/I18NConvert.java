@@ -19,6 +19,8 @@ public class I18NConvert {
     private final java.util.BitSet _excluded;
     /** lookup map for locale independent case mapping */
     private final Map _cMap;
+    /** check if the char should be replaced by space */
+    private final java.util.BitSet _replaceWithSpace;
     
     /* instance */
     private final static I18NConvert _instance = new I18NConvert();
@@ -28,6 +30,7 @@ public class I18NConvert {
      */
     private I18NConvert() {
     	java.util.BitSet bs = null;
+        java.util.BitSet bs2 = null;
     	Map hm = null;
     	try {
     	    ClassLoader cl = getClass().getClassLoader();
@@ -40,7 +43,10 @@ public class I18NConvert {
     	    //read in the case map
             ois = new ObjectInputStream(cl.getResource("caseMap.dat").openStream());
             hm = (HashMap)ois.readObject();
-    
+
+            ois = new  ObjectInputStream(cl.getResource("replaceSpace.dat").openStream());
+            bs2 = (java.util.BitSet)ois.readObject();
+            
     	}
     	catch(IOException ioe) {
     	    ErrorService.error(ioe);
@@ -51,6 +57,7 @@ public class I18NConvert {
     
     	_excluded = bs;
     	_cMap = hm;
+        _replaceWithSpace = bs2;
     }
 
     /** accesor */
@@ -106,12 +113,15 @@ public class I18NConvert {
     	//and lower case if necessary
     	for(int i = 0; i < len; i++) {
     	    c = nfkd.charAt(i);
-    	    if(!_excluded.get(c)) {
+            if(_replaceWithSpace.get(c)) {
+                buf.append(" ");
+            }
+    	    else if(!_excluded.get(c)) {
                 lower = (String)_cMap.get(String.valueOf(c));
-    		if(lower != null)
-    		    buf.append(lower);
-    		else
-    		    buf.append(c);
+                if(lower != null)
+                    buf.append(lower);
+                else
+                    buf.append(c);
     	    }
     	}
     	
