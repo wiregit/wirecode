@@ -685,8 +685,8 @@ public class QueryReply extends Message implements Serializable{
     private void parseResults() {
         if (_parsed)
             return;
-        parseResults2();
         _parsed=true;
+        parseResults2();
     }
 
     /**
