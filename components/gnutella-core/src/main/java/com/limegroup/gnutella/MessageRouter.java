@@ -704,6 +704,9 @@ public abstract class MessageRouter {
             // don't send it to leaves here -- the dynamic querier will 
             // handle that
             locallyEvaluate = false;
+            
+            // do respond with files that we may have, though
+            respondToQueryRequest(request, _clientGUID);
 			if(handler.isGoodLeaf()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
 																	  handler,
@@ -889,6 +892,8 @@ public abstract class MessageRouter {
 	 *
 	 * @param qh the <tt>QueryHandler</tt> instance that generates
 	 *  queries for this dynamic query
+     * @param handler the <tt>ReplyHandler</tt> for routing replies for
+     *  this query
 	 * @throws <tt>NullPointerException</tt> if the <tt>ResultCounter</tt>
 	 *  for the guid cannot be found -- this should never happen, or if any
 	 *  of the arguments is <tt>null</tt>
