@@ -7,8 +7,7 @@ import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.*;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 
@@ -19,7 +18,8 @@ import com.sun.java.util.collections.HashSet;
  * Firewalled hosts can also be alternate locations, although the format is
  * slightly different.
  */
-public final class AlternateLocation implements HTTPHeaderValue, Comparable {
+public final class AlternateLocation implements HTTPHeaderValue, 
+	com.sun.java.util.collections.Comparable {
     
     /**
      * The vendor to use.
@@ -541,17 +541,29 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
         int ret = _count - other._count;
         if(ret!=0) 
             return ret;
-        ret = this.URL.getHost().compareTo(other.URL.getHost());
-        if(ret!=0)
-            return ret;
-        ret = (this.URL.getPort() - other.URL.getPort());
-        if(ret!=0)
-            return ret;
+        if (_pushAddress!=null) {
+        	ret = other._pushAddress.getProxies().size() - 
+				_pushAddress.getProxies().size();
+        	if (ret!=0)
+        		return ret;
+        }
+        else if (URL!=null){
+        	ret = this.URL.getHost().compareTo(other.URL.getHost());
+        	if(ret!=0)
+        		return ret;
+        	ret = (this.URL.getPort() - other.URL.getPort());
+        	if(ret!=0)
+        		return ret;
+        } 
+        else
+        	throw new Error("an altloc had neither URL nor PE - bad.");
+        
         ret = SHA1_URN.httpStringValue().compareTo(
             other.SHA1_URN.httpStringValue());
         if(ret != 0)
             return ret;
-        return URL.getProtocol().hashCode()-other.URL.getProtocol().hashCode();
+        return hashCode() - other.hashCode(); 
+        			
     }
 
 	/**
@@ -573,7 +585,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
             	result = (37* result)+this.URL.getProtocol().hashCode();
             } 
             else if (_pushAddress!=null)
-            	result = (37* result)+this._pushAddress.hashCode();
+            	result = (37* result)+this._pushAddress.hashCode() +
+            		(37* result)+this.SHA1_URN.hashCode();
             else 
             	throw new Error("an altloc had neither an URL nor a PE - bad.");
             hashCode = result;
