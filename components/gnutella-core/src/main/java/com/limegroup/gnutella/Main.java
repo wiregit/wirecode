@@ -35,12 +35,6 @@ public class Main implements ActivityCallback {
             break;
         else if (command.equals("quit"))
             break;
-        //Print routing tables
-        else if (command.equals("route"))
-            service.dumpRouteTable();
-        //Print connections
-        else if (command.equals("push"))
-            service.dumpPushRouteTable();
         //Print push route
         else if (command.equals("stat")) {
             service.dumpConnections();
