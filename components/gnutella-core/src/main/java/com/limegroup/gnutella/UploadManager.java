@@ -220,7 +220,8 @@ public final class UploadManager implements BandwidthTracker {
                 
                 LOG.trace("parsing http line.");
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
-                LOG.trace("line = " + line);
+                if (LOG.isTraceEnabled())
+                    LOG.trace("line = " + line);
 
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " successfully parsed request");
