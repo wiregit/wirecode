@@ -25,12 +25,6 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
     private static RouterService ROUTER_SERVICE;
             
 	/**
-     * A filename to search for.
-     */
-    private static final String searchFor = "FileManager.class." +
-        Backend.SHARED_EXTENSION;
-        
-	/**
      * A filename that won't match.
      */
     private static final String noMatch = "junkie junk";
@@ -77,7 +71,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 
         CALLBACK = new TestCallback();
         FMAN = new MetaFileManager();
-        MESSAGE_ROUTER = new TestMessageRouter(CALLBACK, FMAN);
+        MESSAGE_ROUTER = new TestMessageRouter(FMAN);
         ROUTER_SERVICE = new RouterService(
             CALLBACK, MESSAGE_ROUTER, FMAN);
         ROUTER_SERVICE.start();
@@ -149,8 +143,8 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
     }
     
     private static class TestMessageRouter extends StandardMessageRouter {
-        public TestMessageRouter(ActivityCallback a, FileManager f) {
-            super(a, f);
+        public TestMessageRouter(FileManager f) {
+            super(f);
         }
         
         public void originateQuery(QueryRequest r, ManagedConnection c) {

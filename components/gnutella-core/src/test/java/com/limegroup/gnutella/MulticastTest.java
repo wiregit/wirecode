@@ -1,18 +1,28 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.stubs.*;
-import junit.framework.*;
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.search.*;
+import junit.framework.Test;
 
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.xml.MetaFileManager;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 public class MulticastTest extends BaseTestCase {
 
@@ -27,7 +37,6 @@ public class MulticastTest extends BaseTestCase {
 	private static final String MP3_NAME =
         "com/limegroup/gnutella/mp3/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3";
         
-	private static final Map guidMap = new HashMap();
 
     public MulticastTest(String name) {
         super(name);
@@ -70,15 +79,15 @@ public class MulticastTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
         FMAN = new MetaFileManager();
-        MESSAGE_ROUTER = new MulticastMessageRouter(CALLBACK, FMAN);
+        MESSAGE_ROUTER = new MulticastMessageRouter(FMAN);
         ROUTER_SERVICE = new RouterService(
             CALLBACK, MESSAGE_ROUTER, FMAN);
     
         setSettings();
                 
         ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();
+		RouterService.clearHostCatcher();
+		RouterService.connect();
         
         // MUST SLEEP TO LET THE FILE MANAGER INITIALIZE
         sleep(2000);
@@ -95,7 +104,7 @@ public class MulticastTest extends BaseTestCase {
 	}
     
     public static void globalTearDown() throws Exception {
-        ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
 	}
     
     private static void sleep(int time) {
@@ -282,7 +291,6 @@ public class MulticastTest extends BaseTestCase {
         // should be a push.
         m = (Message)MESSAGE_ROUTER.multicasted.get(0);
         assertInstanceof(PushRequest.class, m);
-        PushRequest pr = (PushRequest)m;
         
         assertEquals("should not have unicasted anything", 0,
             MESSAGE_ROUTER.unicasted.size());
@@ -311,8 +319,8 @@ public class MulticastTest extends BaseTestCase {
     
     private static class MulticastMessageRouter extends StandardMessageRouter {
 
-        MulticastMessageRouter(ActivityCallback ac, FileManager fm) {
-            super(ac, fm);
+        MulticastMessageRouter(FileManager fm) {
+            super(fm);
         }
 
         List multicasted = new LinkedList();
