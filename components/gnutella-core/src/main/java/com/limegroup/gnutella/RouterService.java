@@ -356,6 +356,9 @@ public class RouterService
 		}
 
         String[] files=incompleteDir.list();
+
+		if(files == null) return;
+
         for (int i=0; i<files.length; i++) {
             if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
                 File file=new File(incompleteDir, files[i]);
