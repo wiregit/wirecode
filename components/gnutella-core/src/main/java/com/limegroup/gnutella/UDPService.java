@@ -51,12 +51,15 @@ public final class UDPService implements Runnable {
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
 
-	/**
-	 * Variable for whether or not this node is capable of running its
-	 * own GUESS-style searches, dependent upon whether or not it
-	 * has successfully received an incoming UDP packet.
-	 */
-	private boolean _isGUESSCapable = false;
+    /** True if the UDPService has ever received a solicited incoming UDP
+     *  packet.
+     */
+    private boolean _acceptedSolicitedIncoming = false;
+
+    /** True if the UDPService has ever received a unsolicited incoming UDP
+     *  packet.
+     */
+    private boolean _acceptedUnsolicitedIncoming = false;
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -68,6 +71,11 @@ public final class UDPService implements Runnable {
 	 */
 	private QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
+    /**
+     * The GUID that we advertise out for UDPConnectBack requests.
+     */
+    private GUID _connectBackGUID = null;
+
 	/**
 	 * Instance accessor.
 	 */
@@ -78,7 +86,15 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPService() {}
+	private UDPService() {
+        _connectBackGUID = new GUID(GUID.makeGuid());
+    }
+
+    /** @return The GUID to send for UDPConnectBack attempts....
+     */
+    public GUID getConnectBackGUID() {
+        return _connectBackGUID;
+    }
 
     /** 
      * Returns a new DatagramSocket that is bound to the given port.  This
@@ -172,13 +188,21 @@ public final class UDPService implements Runnable {
                 // ----------------------------*                
                 // process packet....
                 // *----------------------------
-                _isGUESSCapable = true;
                 byte[] data = datagram.getData();
                 int length = datagram.getLength();
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);		
+                    Message message = Message.read(in);
+                    if (!isGUESSCapable()) {
+                        if (message instanceof PingRequest) {
+                            GUID guidReceived = new GUID(message.getGUID());
+                            if (_connectBackGUID.equals(guidReceived))
+                                _acceptedUnsolicitedIncoming = true;
+                        }
+                        else
+                            _acceptedSolicitedIncoming = true;
+                    }
                     if(message == null) continue;
                     //if (message instanceof QueryRequest)
 					//sendAcknowledgement(datagram, message.getGUID());
@@ -232,6 +256,33 @@ public final class UDPService implements Runnable {
 	}
 
 	/**
+	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified
+     * on the socket specified.
+     * This utility method is NOT synchronized - should only be used if you want
+     * to send a quick UDP message.....
+     *
+	 * @param msg  the <tt>Message</tt> to send
+	 * @param ip   the <tt>InetAddress</tt> to send to
+	 * @param port the <tt>port</tt> to send to
+     * @param socket the <tt>socket</tt> to send on.
+	 */
+    public static synchronized void send(Message msg, InetAddress ip, 
+                                         int port, DatagramSocket socket) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            msg.write(baos);
+            byte[] data = baos.toByteArray();
+            DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
+            socket.send(dg);
+        }
+        catch(IOException e) {
+            System.err.println("ip: "+ip);
+            System.err.println("port: "+port); 
+            e.printStackTrace();
+        }
+	}
+
+	/**
 	 * Returns whether or not this node is capable of sending its own
 	 * GUESS queries.  This would not be the case only if this node
 	 * has not successfully received an incoming UDP packet.
@@ -240,7 +291,7 @@ public final class UDPService implements Runnable {
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */	
 	public boolean isGUESSCapable() {
-		return _isGUESSCapable;
+		return _acceptedSolicitedIncoming && _acceptedUnsolicitedIncoming;
 	}
 
 	/**

@@ -205,7 +205,8 @@ public abstract class MessageRouter {
                     ;
                 else if (vmp instanceof UDPConnectBackVMP)
                     // do some UDP ConnectBack mumbo jumbo....
-                    ;
+                    handleUDPConnectBackRequest((UDPConnectBackVMP)vmp,
+                                                receivingConnection);
             }
             catch (BadPacketException ohwell) {
             }
@@ -550,6 +551,30 @@ public abstract class MessageRouter {
             !RouterService.acceptedIncomingConnection())
             return;
         respondToQueryRequest(request, _clientGUID);
+    }
+
+
+    protected void handleUDPConnectBackRequest(UDPConnectBackVMP udp,
+                                               Connection source) {
+        GUID guidToUse = udp.getConnectBackGUID();
+        int portToContact = udp.getConnectBackPort();
+        InetAddress addrToContact = null;
+        try {
+            addrToContact = source.getInetAddress();
+        }
+        catch (IllegalStateException ise) {
+            return;
+        }
+        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
+                                         (byte) 0);
+        try {
+            DatagramSocket tempSocket = new DatagramSocket();
+            UDPService.send(pr, addrToContact, portToContact, tempSocket);
+            tempSocket.close();
+        }
+        catch (SocketException se) {
+            // whatever....            
+        }
     }
 
     /**

@@ -859,6 +859,43 @@ public class Connection {
         else
             return _propertiesRead.getProperty(name);
     }
+
+
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int supportsVendorMessage(byte[] vendorID, int selector) {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsMessage(vendorID, selector);
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsUDPConnectBack() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsUDPConnectBack();
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsTCPConnectBack() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsTCPConnectBack();
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsHopsFlow() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsHopsFlow();
+        return -1;
+    }
     
     /**
      * Returns the headers received during connection Handshake

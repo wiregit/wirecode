@@ -56,6 +56,10 @@ public class ManagedConnection
     /** The total amount of upstream messaging bandwidth for ALL connections
      *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
+    /** The maximum number of times ManagedConnection instances should send UDP
+     *  ConnectBack requests.
+     */
+    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
 
     private final MessageRouter _router;
     private final ConnectionManager _manager;
@@ -260,6 +264,11 @@ public class ManagedConnection
      *  this certain hops value....
      */
     private int softMaxHops = -1;
+
+    /** The class wide static counter for the number of udp connect back 
+     *  request sent.
+     */
+    private static int _numUDPConnectBackRequests = 0;
 
     /** 
      * Creates an outgoing connection. 
@@ -945,8 +954,21 @@ public class ManagedConnection
         super.handleVendorMessagePayload(vmp);
         // now i can process
         if (vmp instanceof HopsFlowVMP) {
+            // update the softMaxHops value so it can take effect....
             HopsFlowVMP hops = (HopsFlowVMP) vmp;
             softMaxHops = hops.getHopValue();
+        }
+        else if (vmp instanceof MessagesSupportedVMP) {
+            // do i need to send any ConnectBack messages????
+            if (!UDPService.instance().isGUESSCapable() &&
+                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsUDPConnectBack() > -1)) {
+                _numUDPConnectBackRequests++;
+                UDPConnectBackVMP udp = 
+                   new UDPConnectBackVMP(RouterService.getPort(),
+                                         RouterService.getUDPConnectBackGUID());
+                send(udp.getVendorMessage());
+            }
         }
     }
 
