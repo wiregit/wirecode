@@ -57,7 +57,9 @@ public class FileManager{
         _sharedDirectories = new HashSet();
         // These two variables are cleared, not overwritten
         _templateRepository = new GMLTemplateRepository();
-        _replyRepository = new GMLReplyRepository();
+        _replyRepository = new GMLReplyRepository(_templateRepository);
+        _replyRepository.addEmbeddedDocumentReader(
+            ID3DocumentReader.getInstance(), "mp3");
 
         // Launch a thread to asynchronously scan directories to load files
         Thread loadSettingsThread =
@@ -80,42 +82,18 @@ public class FileManager{
         return _templateRepository;
     }
 
-    /**
-     * @return a copy of the collection of GML replies stored in the reply
-     *         repository for the given file.  Does not include the mp3 reply,
-     *         if there is one.
-     */
-    public GMLReplyCollection getReplyCollection(File file) {
-        String id = getReplyCollectionIdentifier(file);
-        GMLReplyCollection replyCollection =
-            _replyRepository.getReplyCollection(id);
-        return replyCollection.createClone();
+    public GMLReplyRepository getReplyRepository() {
+        return _replyRepository;
     }
 
-    /**
-     * Set the Reply Collection associated with <CODE>file</CODE>.
-     * @throws IOException if the reply repository can't be written to disk
-     */
-    public void setReplyCollection(GMLReplyCollection replyCollection,
-                                   File file) throws IOException {
-        String id = getReplyCollectionIdentifier(file);
-        _replyRepository.setReplyCollection(replyCollection, id);
-        String replyFileName = SettingsManager.instance().getGMLReplyFile();
-        FileWriter replyFileWriter = new FileWriter(replyFileName);
-        _replyRepository.write(replyFileWriter);
-        replyFileWriter.close();
-    }
-
-    /**
-     * @return the identifier used for getting the file's metadata out of
-     * the reply repository
-     */
-    private static String getReplyCollectionIdentifier(File file) {
-        // Get the canoncial path, using the absolute path as a backup.
-        try {
-            return file.getCanonicalPath();
-        } catch(IOException e2) {
-            return file.getAbsolutePath();
+    public void writeReplyRepository() {
+         try {
+            FileWriter writer = new FileWriter(
+                SettingsManager.instance().getGMLReplyFile());
+            _replyRepository.write(writer);
+            writer.close();
+        } catch(IOException e) {
+            // Probably want some error handling here.
         }
     }
 
@@ -156,8 +134,11 @@ public class FileManager{
         int j = 0;
         for(Iterator iterFiles = files.iterator(); iterFiles.hasNext();  ) {
             FileDesc desc = (FileDesc)iterFiles.next();
+            GMLReplyCollection replyCollection =
+                _replyRepository.getReplyCollection(desc.getFile());
+            String metadata = replyCollection.getXMLString();
             response[j++] = new Response(desc.getIndex(), desc.getSize(),
-                                         desc.getName(), desc.getMetadata());
+                                         desc.getName(), metadata);
         }
         return response;
     }
@@ -198,11 +179,7 @@ public class FileManager{
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
 
-            _files.add(new FileDesc(_files.size(),
-                                    myFile,
-                                    getReplyCollectionIdentifier(myFile),
-                                    _templateRepository,
-                                    _replyRepository));
+            _files.add(new FileDesc(_files.size(), myFile));
             _numFiles++;
         }
     }
@@ -333,8 +310,7 @@ public class FileManager{
         try
         {
             _replyRepository.loadReplies(
-                new InputSource(new FileInputStream(replyFileName)),
-                _templateRepository);
+                new InputSource(new FileInputStream(replyFileName)));
         } catch(GMLParseException e) {
             // TODO: We should probably report the error somehow.  This
             // happens when the reply repository is corrupt.
@@ -442,9 +418,12 @@ public class FileManager{
             FileDesc desc = (FileDesc)iterFiles.next();
             if (desc==null)
                 continue;
+            GMLReplyCollection replyCollection =
+                _replyRepository.getReplyCollection(desc.getFile());
             if(desc.isTextQueryMatch(textQuery) ||
+               replyCollection.hasMatch(textQuery) ||
                ((gmlDocument != null) &&
-                desc.isGMLDocumentMatch(gmlDocument))) {
+                replyCollection.hasMatch(gmlDocument))) {
                 if(response_list==null)
                     response_list=new ArrayList();
                 response_list.add(desc);

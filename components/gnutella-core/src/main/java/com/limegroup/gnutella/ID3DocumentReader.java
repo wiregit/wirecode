@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.gml.EmbeddedDocumentReader;
 import com.limegroup.gnutella.gml.GMLChoice;
 import com.limegroup.gnutella.gml.GMLChoiceField;
 import com.limegroup.gnutella.gml.GMLDocument;
@@ -14,25 +15,34 @@ import java.io.RandomAccessFile;
 
 /**
  * This class provides a utility method to read ID3 Tag information from MP3
- * files and creates GMLDocuments from them.  The class is uninstantiable.
+ * files and creates GMLDocuments from them.  The class is a singleton.
  *
  * @author Ron Vogl
  */
-final class ID3DocumentFactory
+final class ID3DocumentReader
+    implements EmbeddedDocumentReader
 {
     private static final String MP3_TEMPLATE_URI =
         "http://content.limewire.com/gmlt/mp3.gmlt";
 
+    private static final ID3DocumentReader _instance =
+        new ID3DocumentReader();
+
     /**
-     * Private constructor.  The class is uninstantiable.
+     * Private constructor.  The class is a singleton.
      */
-    private ID3DocumentFactory() {}
+    private ID3DocumentReader() {}
+
+    public static final ID3DocumentReader getInstance()
+    {
+        return _instance;
+    }
 
     /**
      * Attempts to read an ID3 tag from the specified file.
      * @return an null if the document has no ID3 tag
      */
-    public static final GMLDocument createID3Document(
+    public final GMLDocument readDocument(
         File file, GMLTemplateRepository templateRepository)
         throws IOException, TemplateNotFoundException
     {
