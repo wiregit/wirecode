@@ -276,7 +276,9 @@ public class LimeXMLUtils
             String queryValue = queryDoc.getValue(currFieldName);
             String replyDocValue = replyDoc.getValue(currFieldName);
             if(replyDocValue == null)
+            {
                 nullCount++;
+            }
             else {
                 try {  
                     // if this is a parse-able numeric value, doing a prefix
@@ -360,10 +362,14 @@ public class LimeXMLUtils
      * Parses the passed string, and encodes the special characters (used in
      * xml for special purposes) with the appropriate codes.
      * e.g. '<' is changed to '&lt;'
-     * @return the encoded string
+     * @return the encoded string. Returns null, if null is passed as argument
      */
     public static String encodeXML(String inData)
     {
+        //return null, if null is passed as argument
+        if(inData == null)
+            return null;
+        
         //get the length of input String
         int length = inData.length();
         //create a StringBuffer of double the size (size is just for guidance

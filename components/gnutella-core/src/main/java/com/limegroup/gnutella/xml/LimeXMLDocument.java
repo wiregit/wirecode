@@ -222,6 +222,15 @@ public class LimeXMLDocument{
     }
 
     /**
+     * Sets the schema URI for this document
+     * @param the schema URI to be set
+     */
+    public void setSchemaURI(String schemaURI){
+        this.schemaUri = schemaURI;
+    }
+    
+    
+    /**
      * Returns the name of the file that the data in this XML document 
      * corresponds to. If the meta-data does not correspond to any file
      * in the file system, this method will rerurn a null.
