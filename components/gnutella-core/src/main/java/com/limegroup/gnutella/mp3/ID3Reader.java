@@ -7,6 +7,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.licenses.CCConstants;
 import java.util.StringTokenizer;
 import de.vdheide.mp3.*;
 
@@ -44,7 +45,7 @@ public final class ID3Reader {
     private static final String LICENSE_KEY =    KEY_PREFIX + "license" + 
         XMLStringUtils.DELIMITER;
         
-    private static final String LICENSE_RDF_OPEN = "<license rdf:resource=\"";
+    private static final String LICENSE_RDF_OPEN = CCConstants.LICENSE_RDF_OPEN;
 
     /**
      * This class should never be constructed.

@@ -301,11 +301,18 @@ public class MetaFileManager extends FileManager {
         List words = super.getIndivisibleKeyWords();
         if (words == null)
             words = new ArrayList();
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         String[] schemas = rep.getAvailableSchemaURIs();
-        for (int i = 0; i < schemas.length; i++) 
+        LimeXMLReplyCollection collection;
+        for (int i = 0; i < schemas.length; i++) {
             if (schemas[i] != null)
                 words.add(schemas[i]);        
+            collection = map.getReplyCollection(schemas[i]);
+            if(collection==null)//not loaded? skip it and keep goin'
+                continue;
+            words.addAll(collection.getKeyWordsIndivisible());
+        }
         return words;
     }
 
