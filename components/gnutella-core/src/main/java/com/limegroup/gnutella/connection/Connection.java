@@ -936,7 +936,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
     
     /**
-     * Accessor for the <tt>Inflater</tt> instance for this connection.
+     * Accessor for the <tt>Inflater</tt> instance for this connection.  The
+     * inflater decompresses incoming data if downstream compression is turned
+     * on for this connection.
      * 
      * @return this connection's inflater
      */
@@ -945,7 +947,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
     
     /**
-     * Accessor for the <tt>Deflater</tt> instance for this connection.
+     * Accessor for the <tt>Deflater</tt> instance for this connection.  The
+     * deflater compresses outgoing data if upstream compression is turned
+     * on for this connection.
      * 
      * @return this connection's deflater
      */
