@@ -184,10 +184,10 @@ public class InstantMessenger implements Chatter {
 		// TODO: add socket timeouts.
 		while (true) {
 			String str = _reader.readLine();
-			if  (str.equals("")) 
-				break;
 			if (str == null) 
 				return;
+			if (str.equals("")) 
+				break;
 		}
 
 		_socket.setSoTimeout(0);
