@@ -137,6 +137,11 @@ public class TestUploader extends AssertComparisons {
     private boolean useBadThexResponseHeader = false;
     
     /**
+     * whether or not we are interested in receiving push locs
+     */
+    private boolean interestedInFalts = false;
+    
+    /**
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
@@ -180,6 +185,7 @@ public class TestUploader extends AssertComparisons {
             server.bind(new InetSocketAddress(port));
         } catch (IOException e) {
             LOG.debug("Couldn't bind socket to port "+port+"\n");
+            
             //System.out.println("Couldn't listen on port "+port);
             ErrorService.error(e);
             return;
@@ -414,6 +420,13 @@ public class TestUploader extends AssertComparisons {
     }
     
     /**
+     * Sets whether or not the uploader should receive falts
+     */
+    public void setInterestedInFalts(boolean yes) {
+        interestedInFalts=yes;
+    }
+    
+    /**
      * Sets whether or not we'll use a bad thex response header.
      */
     public void setUseBadThexResponseHeader(boolean yes ) {
@@ -541,10 +554,13 @@ public class TestUploader extends AssertComparisons {
 				_sha1 = readContentUrn(line);
 			}
             
-            if(HTTPHeaderName.NALTS.matchesStartOfString(line))
-                badLocs = readAlternateLocations(line);
-			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line))
-				goodLocs = readAlternateLocations(line);
+            if(HTTPHeaderName.NALTS.matchesStartOfString(line) ||
+                    HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(line))
+                badLocs=readAlternateLocations(line);
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line) ||
+			        HTTPHeaderName.FALT_LOCATION.matchesStartOfString(line))
+			    goodLocs=readAlternateLocations(line);
+			    
 
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
@@ -581,8 +597,10 @@ public class TestUploader extends AssertComparisons {
             if(goodLocs!=null) {
                 synchronized(goodLocs) {
                     Iterator iter = goodLocs.iterator();
-                    while(iter.hasNext()) 
-                        incomingAltLocs.add((AlternateLocation)iter.next());
+                    while(iter.hasNext()) {
+                        AlternateLocation altloc = (AlternateLocation)iter.next();
+                        incomingAltLocs.add(altloc);
+                    }
                 }        
             }
         }
@@ -720,6 +738,9 @@ public class TestUploader extends AssertComparisons {
                                   TestFile.tree(),
                                   out);
         }
+        if(interestedInFalts) 
+            HTTPUtils.writeFeatures(out);
+
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
@@ -882,7 +903,6 @@ public class TestUploader extends AssertComparisons {
 				        st.nextToken().trim(), _sha1);
 				alc.add(al);
 			} catch(IOException e) {
-                e.printStackTrace();
 				// just return without adding it.
 				continue;
 			}
@@ -921,6 +941,7 @@ public class TestUploader extends AssertComparisons {
 	    public void run() {          
             try {
                 while(http11 && !stopped) {
+                    Thread.yield();
                     handleRequest(mySocket);
                     if (queue) { 
                         mySocket.setSoTimeout(MAX_POLL);

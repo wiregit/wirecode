@@ -38,6 +38,7 @@ import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -1101,6 +1102,51 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("pusher did all the work", TestFile.length()/2+FUDGE_FACTOR, 
                 pusher.amountUploaded());
         assertGreaterThan("pusher didn't do anything",0,pusher.amountUploaded());
+    }
+    
+    /**
+     * tests that a download from a push location becomes an alternate location      
+     */
+    public void testPusherBecomesPushLocAndSentToInterrested() throws Exception {
+        LOG.debug("-Testing push download creating a push location...");
+        final int RATE=200;
+        final int FUDGE_FACTOR=RATE*1536;
+        uploader1.setRate(RATE);
+        uploader1.setInterestedInFalts(true);
+        uploader2.setRate(RATE);
+        uploader2.setInterestedInFalts(false);
+        
+        TestUploader pusher = new TestUploader("push uploader");
+        pusher.setRate(RATE);
+        pusher.stopAfter(150*1024);
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
+        
+        RemoteFileDesc pushRFD = pushLoc.createRemoteFileDesc(TestFile.length());
+        RemoteFileDesc openRFD1 = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc openRFD2 = newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        
+        RemoteFileDesc []now={pushRFD};
+        RemoteFileDesc []later={openRFD1,openRFD2};
+        
+        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),pusher);
+        
+        tGeneric(now,later);
+        
+
+        assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
+
+        assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
+
+        assertGreaterThan("pusher did no work",100*1024,pusher.amountUploaded());
+        
+        AlternateLocationCollection alc = uploader1.getAlternateLocations();
+        assertTrue("interested uploader did not get pushloc",alc.contains(pushLoc));
+        
+        alc=uploader2.getAlternateLocations();
+        assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
     }
     
     public void testAlternateLocationsAreRemoved() throws Exception {  
