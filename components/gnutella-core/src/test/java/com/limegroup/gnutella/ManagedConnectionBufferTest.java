@@ -258,6 +258,16 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6343,
             ((PushRequest)m).getPort());
+            
+        m=in.receive(); //push        
+        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
+        assertEquals("unexpected push request port", 6342,
+            ((PushRequest)m).getPort());
+
+        m=in.receive(); //push        
+        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
+        assertEquals("unexpected push request port", 6341,
+            ((PushRequest)m).getPort());            
 
         m=in.receive(); //reply/6341 (high priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
@@ -324,16 +334,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             6342, ((PingReply)m).getPort());
         assertEquals("unexpected number of hops",
             0, m.getHops());  //watchdog response pong
-            
-        m=in.receive(); //push        
-        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
-        assertEquals("unexpected push request port", 6342,
-            ((PushRequest)m).getPort());
-
-        m=in.receive(); //push        
-        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
-        assertEquals("unexpected push request port", 6341,
-            ((PushRequest)m).getPort());
 
         m=in.receive(); //push
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
