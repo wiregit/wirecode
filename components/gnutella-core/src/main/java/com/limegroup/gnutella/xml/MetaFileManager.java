@@ -167,7 +167,7 @@ public class MetaFileManager extends FileManager {
         }
         for(int i = 0; i < audioList.size(); i++) {
             NameValue nameVal = (NameValue)audioList.get(i);
-            if(AudioMetaData.isNonID3Field(nameVal.getName()))
+            if(AudioMetaData.isNonLimeAudioField(nameVal.getName()))
                 id3List.add(nameVal);
         }
         audioDoc = new LimeXMLDocument(id3List, AudioMetaData.schemaURI);

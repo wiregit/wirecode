@@ -7,6 +7,8 @@ import java.io.*;
 import com.limegroup.gnutella.util.*;
 import org.apache.xerces.parsers.DOMParser;
 import com.limegroup.gnutella.mp3.AudioMetaData;
+import com.limegroup.gnutella.mp3.MP3MetaData;
+
 import org.xml.sax.*;
 import org.w3c.dom.*;
 
@@ -500,7 +502,7 @@ public class LimeXMLDocument implements Serializable {
         if (fieldName.equals("audios__audio__genre__") && (retValue != null)) {
             try {
                 short index = Short.parseShort(retValue);
-                retValue = AudioMetaData.getGenreString(index);
+                retValue = MP3MetaData.getGenreString(index);
                 fieldToValue.put(fieldName, retValue);
             }
             catch (NumberFormatException ignored) {
