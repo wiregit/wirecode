@@ -244,7 +244,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			return QueryRequest.createRequery(_urn);
 		} else if(isRequery) {
 			return QueryRequest.createRequery(_textQuery);
-		}
+		} else if(_urn != null) {
+            return QueryRequest.createQuery(_urn);
+        }
 		return QueryRequest.createQuery(_textQuery);
     }
 
