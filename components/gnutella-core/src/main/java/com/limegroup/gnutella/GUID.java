@@ -130,20 +130,27 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         return ret;
     }
 
-    /** Create a guid with an ip and port encoded within.
-     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
-     *  port is not a valid value.
+    /** Useful since you want to make sure you aren't messing up these bytes.
+     *  Just address encodes the appropriate portions of the bytes and returns
+     *  a new GUID (with different underlying bytes).
      */
-    public static byte[] makeAddressEncodedGuid(byte[] ip, int port) 
+    public GUID addressEncodeGuid(byte[] ip, int port)
         throws IllegalArgumentException {
-        
+        byte[] newBytes = new byte[SZ];
+        System.arraycopy(bytes(), 0, newBytes, 0, newBytes.length);
+        return new GUID(GUID.convertToAddressEncodedGuid(newBytes, ip, port));
+    }
+
+    /** Returns a new GUID that is address encoded as needed.
+     */
+    private static byte[] convertToAddressEncodedGuid(byte[] ret, byte[] ip, 
+                                                     int port) 
+        throws IllegalArgumentException {
+
         if (!NetworkUtils.isValidAddress(ip))
             throw new IllegalArgumentException("IP is invalid!");
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Port is invalid: " + port);
-
-
-        byte[] ret = makeGuid();
 
         // put the IP in there....
         for (int i = 0; i < 4; i++)
@@ -153,6 +160,15 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         ByteOrder.short2leb((short) port, ret, 13);
         
         return ret;
+    }
+
+    /** Create a guid with an ip and port encoded within.
+     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+     *  port is not a valid value.
+     */
+    public static byte[] makeAddressEncodedGuid(byte[] ip, int port) 
+        throws IllegalArgumentException {
+        return convertToAddressEncodedGuid(makeGuid(), ip, port);
     }
 
     /** Returns LimeWire's secret tag described above. */

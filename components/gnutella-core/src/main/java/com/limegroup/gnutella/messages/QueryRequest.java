@@ -505,6 +505,26 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
 	/**
+	 * Creates a new query from the existing query with the specified
+	 * ttl.
+	 *
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @param guid the address encoded guid.
+	 * @return a new <tt>QueryRequest</tt> with the same characteristics as the
+	 * original query that 1) is marked for OOB, 2) preserves firewalled status,
+     * 3) and has hop of 0
+	 */
+	public static QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
+		return new QueryRequest(guid, qr.getTTL(), qr.getQuery(),
+								qr.getRichQueryString(), 
+								qr.getRequestedUrnTypes(),
+								qr.getQueryUrns(), qr.getQueryKey(),
+								qr.isFirewalledSource(),
+								qr.getNetwork(), true,
+                                qr.getCapabilitySelector());
+	}
+
+	/**
 	 * Creates a new query from the existing query and loses the OOB marking.
 	 *
 	 * @param qr the <tt>QueryRequest</tt> to copy
