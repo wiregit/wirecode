@@ -2,10 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.http.HTTPHeader;
 
 /**
@@ -62,16 +60,19 @@ public final class NIOHeaderReader implements HeaderReader {
      * @throws IOException if there is an IO error reading the header from the
      *  network, including a syntax error
      */    
-    public HTTPHeader readHeader() throws IOException  { 
+    public HTTPHeader readHeader() throws IOException  {
         // if there are more headers to read in the buffer, keep reading
         if(_headerByteBuffer.position() != 0 && 
            _headerByteBuffer.hasRemaining())  {
             String header = read(_headerByteBuffer);
         
+            // If we read the final \r\n to end the headers, return null.
+            if(header.length() == 0) {
+                return null;
+            }
             // If we get a complete header, return it.  Otherwise, we'll 
             // read more
             if(header != null)  {
-                System.out.println(header);
                 return HTTPHeader.createHeader(header);
             }
         } 
@@ -94,18 +95,12 @@ public final class NIOHeaderReader implements HeaderReader {
         }
     
         _headerByteBuffer.flip();
-        //_headerBuffer = _headerByteBuffer.asCharBuffer();
-      
         String header = read(_headerByteBuffer);
     
         if(header == null)  {  
             // continue reading on the next pass
             return null;
         }
-    
-    
-        // set the buffer's read position back to the beginning
-        //_headerByteBuffer.clear();
     
         //_header = new HttpHeader();
         return HTTPHeader.createHeader(header);        
@@ -119,13 +114,13 @@ public final class NIOHeaderReader implements HeaderReader {
      */
     private String read(ByteBuffer buf) throws IOException   {
         while(buf.hasRemaining() && _buffer.length() < 1024)  {
+            //System.out.println("NIOHeaderReader::read::in loop");
             char curChar = (char)buf.get();
+            //System.out.print(curChar);
             if(curChar == '\r' || curChar == '\n') {
                 char nextChar = (char)buf.get();
                 if(nextChar == '\n') {
                     // we've reached the end of a header
-                    // note that the CharBuffer likely still has more 
-                    // characters
                     String header = _buffer.toString().trim();
                     if(header.length() == 0)  {
                         _headersComplete = true;
@@ -133,6 +128,7 @@ public final class NIOHeaderReader implements HeaderReader {
                         _headersComplete = false;
                     }
                     _buffer = new StringBuffer();
+                    
                     return header;
                 } else {
                     // we encountered only a '\r' or a '\n' but no final 
@@ -175,6 +171,13 @@ public final class NIOHeaderReader implements HeaderReader {
      * @see com.limegroup.gnutella.connection.HeaderReader#readConnect()
      */
     public String readConnect() throws IOException {
+        // TODO: what happens when these reads fail -- need to handle that
+        _headerByteBuffer.clear();
+        int bytesRead = CHANNEL.read(_headerByteBuffer);
+        if(bytesRead == -1) {
+            throw new IOException("reached end of stream");
+        }
+        _headerByteBuffer.flip();
         return read(_headerByteBuffer);
     }
 
