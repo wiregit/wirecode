@@ -410,7 +410,7 @@ public class SettingsManager implements SettingsInterface
           
         //Special case: if this is a modem, ensure that KEEP_ALIVE and
         //MAX_INCOMING_CONNECTIONS are sufficiently low.
-        if ( getConnectionSpeed()<=28 ) { //modem
+        if ( getConnectionSpeed()<=56 ) { //modem
             setKeepAlive(Math.min(2, getKeepAlive()));
             setMaxIncomingConnections(0);
         }
@@ -746,10 +746,8 @@ public class SettingsManager implements SettingsInterface
         int speed=getConnectionSpeed();
         //I'm copying these numbers out of GUIStyles.  I don't want this to
         //depend on GUI code, though. 
-        if (speed<=28)        //modem
+        if (speed<=56)    //modems
             return 3;
-        else if (speed<=56)        //ISDN
-            return 4;
         else if (speed<=350)  //cable
             return 6;
         else if (speed<=1000) //T1
