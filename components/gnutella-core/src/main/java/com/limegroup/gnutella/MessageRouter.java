@@ -279,6 +279,11 @@ public abstract class MessageRouter {
                 ;
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
+        else if (msg instanceof QueryStatusResponse) {
+			if(RECORD_STATS)
+                ;
+            handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
+        }
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -900,6 +905,20 @@ public abstract class MessageRouter {
             }
                 
         }
+    }
+
+    
+    protected void handleQueryStatus(QueryStatusResponse resp,
+                                     ManagedConnection leaf) {
+        // message only makes sense if i'm a UP and the sender is a leaf
+        if (!leaf.isSupernodeClientConnection())
+            return;
+
+        GUID queryGUID = resp.getQueryGUID();
+        int numResults = resp.getNumResults();
+        
+        // get the QueryHandler and update the stats....
+        DYNAMIC_QUERIER.updateLeafResultsForQuery(queryGUID, numResults);
     }
 
 

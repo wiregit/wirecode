@@ -91,6 +91,11 @@ public final class QueryHandler {
 	private static ConnectionManager _connectionManager =
 		RouterService.getConnectionManager();
 
+    /**
+     * Variable for the number of results the leaf reports it has.
+     */
+    private volatile int _numResultsReportedByLeaf = 0;
+
 	/**
 	 * Variable for the number of hosts that have been queried.
 	 */
@@ -603,7 +608,11 @@ public final class QueryHandler {
 		if(RESULT_COUNTER.getNumResults() >= RESULTS) {
             return true;
         }
-	 
+
+        //if the leaf has got enough results then cool. stop this badboy.
+        if(_numResultsReportedByLeaf >= RESULTS)
+            return true;
+
         // if our theoretical horizon has gotten too high, consider
         // it enough results
         // precisely what this number should be is somewhat hard to determine
@@ -622,6 +631,14 @@ public final class QueryHandler {
 
 		return false;
 	}
+
+    /**
+     * Use this to modify the number of results as reported by the leaf you are
+     * querying for.
+     */
+    public void updateLeafResults(int numResults) {
+        _numResultsReportedByLeaf = numResults;
+    }
 
     /**
      * Accessor for the <tt>ReplyHandler</tt> instance for the connection
@@ -649,6 +666,13 @@ public final class QueryHandler {
 	public String toString() {
 		return "QueryHandler: QUERY: "+QUERY;
 	}
+
+    /** @return simply returns the guid of the query this is handling.
+     */
+    public byte[] getGUID() {
+        return QUERY.getGUID();
+    }
+
 }
 
 
