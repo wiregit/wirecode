@@ -93,7 +93,10 @@ public class IncompleteFileManager implements Serializable {
      *  strengthened to depend on hash values.
      */
     public File getFile(RemoteFileDesc rfd) {
-        return getFile(rfd.getFileName(), rfd.getSize());
+       if(rfd.getSHA1Urn()!=null) {
+	  return getFile(rfd.getSHA1Urn().toString().replace('/','_').replace(':','_'),0);
+       }
+       return getFile(rfd.getFileName(), rfd.getSize());
     } 
 
     /** Same thing as getFile(rfd), where rfd.getFile().equals(name) 

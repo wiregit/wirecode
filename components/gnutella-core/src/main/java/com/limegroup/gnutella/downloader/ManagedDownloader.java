@@ -934,7 +934,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         //   end up.
         RemoteFileDesc rfd=null;
         synchronized (this) {
-            rfd=(RemoteFileDesc)files.get(0);
+	   int i=0;
+
+	   // CHORD: we run through until we find an rfd with a filename.
+	   do {
+            rfd=(RemoteFileDesc)files.get(i);
+	    i++;
+	   }while(i<=files.size() && (rfd.getFileName()==null || rfd.getFileName().equals("")));
         }
         int fileSize=rfd.getSize(); 
         String filename=rfd.getFileName(); 
@@ -945,11 +951,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             sharedDir=SettingsManager.instance().getSaveDirectory();
             completeFile=new File(sharedDir, filename);
             String sharedPath = sharedDir.getCanonicalPath();		
-            String completeFileParentPath = 
+            String completeFileParentPath =
             new File(completeFile.getParent()).getCanonicalPath();
-            if (!sharedPath.equals(completeFileParentPath))
-                throw new InvalidPathException();  
+
+            if (!sharedPath.equals(completeFileParentPath)) {
+	       System.out.println("filename: "+filename+" sharedpath: "+sharedPath+" cfpath:"+completeFileParentPath+"files: "+files);
+	       throw new InvalidPathException();  
+	    }
         } catch (IOException e) {
+	   e.printStackTrace();
             return COULDNT_MOVE_TO_LIBRARY;
         }           
 
@@ -1046,8 +1056,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         //someone is previewing it or it's on a different volume, try copy
         //instead.  If that failed, notify user.
         if (!incompleteFile.renameTo(completeFile))
-            if (! CommonUtils.copy(incompleteFile, completeFile))
+	   if (! CommonUtils.copy(incompleteFile, completeFile)) {
+	      System.out.println("Failed to copy file");
                 return COULDNT_MOVE_TO_LIBRARY;
+	   }
 
         //Add file to library.
         // first check if it conflicts with the saved dir....
@@ -1163,6 +1175,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 } catch(IOException e) {
                     //Ideally we should show the user some sort of message here.
                     //See GUI core bug #83.
+		   e.printStackTrace();
                     return COULDNT_MOVE_TO_LIBRARY;
                 }
                 //update needed
