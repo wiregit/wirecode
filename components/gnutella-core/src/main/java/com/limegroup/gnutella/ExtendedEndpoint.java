@@ -89,7 +89,7 @@ public class ExtendedEndpoint extends Endpoint {
         this.dailyUptime=dailyUptime;
         this.timeRecorded=now();
     }
-
+    
     /** 
      * Creates a new ExtendedEndpoint without extended uptime information.  (The
      * default will be used.)  The creation time is set to the current system
@@ -99,7 +99,7 @@ public class ExtendedEndpoint extends Endpoint {
         super(host, port);
         this.timeRecorded=now();
     }
-
+    
     /**
      * creates a new ExtendedEndpoint with the specified locale.
      */
@@ -128,7 +128,7 @@ public class ExtendedEndpoint extends Endpoint {
         else
             return timeRecorded;
     }
-
+ 
     /** Returns the average daily uptime (in seconds per day) reported in this'
      *  pong. */
     public int getDailyUptime() {
@@ -319,6 +319,11 @@ public class ExtendedEndpoint extends Endpoint {
             } catch (NumberFormatException e) { }
         }
 
+        //6. locale of the connection (optional)
+        if(linea.length>=6) {
+            ret.setClientLocale(linea[5]);
+        }
+
         return ret;
     }
 
@@ -341,15 +346,29 @@ public class ExtendedEndpoint extends Endpoint {
         return new PriorityComparator();
     }
 
+    private final static String ownLocale =
+        ApplicationSettings.LANGUAGE.getValue();
+
     static class PriorityComparator implements Comparator {
         public int compare(Object extEndpoint1, Object extEndpoint2) {
             ExtendedEndpoint a=(ExtendedEndpoint)extEndpoint1;
             ExtendedEndpoint b=(ExtendedEndpoint)extEndpoint2;
+
+            boolean bLoc = ownLocale.equals(b.getClientLocale());
+            //preference locale first or after connectScore?
+            if(ownLocale.equals(a.getClientLocale())) {
+                if(!bLoc) 
+                    return 1;
+            }
+            else 
+                if(bLoc) 
+                    return -1;
+
             int ret=a.connectScore()-b.connectScore();
             if (ret!=0) 
                 return ret;
-            else
-                return a.getDailyUptime() - b.getDailyUptime();
+            
+            return a.getDailyUptime() - b.getDailyUptime();
         }
     }
     
@@ -380,4 +399,3 @@ public class ExtendedEndpoint extends Endpoint {
         //TODO: implement
     }
 }
-

@@ -421,7 +421,7 @@ public class HostCatcher implements HostListener {
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
 
-        addToLocaleMap(endpoint);
+
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
             
@@ -506,6 +506,23 @@ public class HostCatcher implements HostListener {
             return add(e, NORMAL_PRIORITY);
     }
 
+    
+
+    //use this if locale is known
+    public boolean add(Endpoint e, boolean forceHighPriority, String locale) {
+        //need ExtendedEndpoint for the locale
+        if (forceHighPriority)
+            return add(new ExtendedEndpoint(e.getAddress(), 
+                                            e.getPort(),
+                                            locale),
+                       GOOD_PRIORITY);
+        else
+            return add(new ExtendedEndpoint(e.getAddress(),
+                                            e.getPort(),
+                                            locale), 
+                       NORMAL_PRIORITY);
+    }
+
     /**
      * Adds the specified host to the host catcher with the specified priority.
      * 
@@ -514,11 +531,13 @@ public class HostCatcher implements HostListener {
      * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
      */
     public boolean add(Endpoint host, int priority) {
+        //need ExtendedEndpoint for the locale
         LOG.trace("adding host");
-        return add(new ExtendedEndpoint(host.getAddress(), host.getPort()), 
-            priority);
+        return add(new ExtendedEndpoint(host.getAddress(), 
+                                        host.getPort()), 
+                   priority);
     }
-    
+
     /**
      * Adds the passed endpoint to the set of hosts maintained, temporary and
      * permanent. The endpoint may not get added due to various reasons
@@ -572,6 +591,7 @@ public class HostCatcher implements HostListener {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
+        addToLocaleMap(e); //add e to locale mapping 
         if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
             return false;
         if (permanentHostsSet.contains(e))

@@ -1179,8 +1179,9 @@ public class ConnectionManager {
             remove(c);
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
+                //add to catcher with the locale info.
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getPort()), true);
+                                          c.getPort()), true, c.getLocalePref());
             }   
         }
     }
@@ -1631,8 +1632,8 @@ public class ConnectionManager {
 
         //get the ultrapeers, and add those to the host cache
         String hostAddresses = headers.getXTryUltrapeers();
-    
-         
+        
+        
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
             Constants.ENTRY_SEPARATOR);
@@ -1899,7 +1900,9 @@ public class ConnectionManager {
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     if(e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
                         //if it failed because of a locale matching issue
-                        _catcher.add(endpoint, true); //readd to hostcatcher??
+                        //readd to hostcatcher??
+                        _catcher.add(endpoint, true,
+                                     connection.getLocalePref()); 
                     }
                     else {
                         _catcher.doneWithConnect(endpoint, true);
