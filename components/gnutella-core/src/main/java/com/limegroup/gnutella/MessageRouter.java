@@ -7,9 +7,11 @@ import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.*;
 
 
@@ -183,7 +185,8 @@ public abstract class MessageRouter {
 	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
 	 *  the message was received
      */
-    public void handleMessage(Message msg, ManagedConnection receivingConnection) {
+    public void handleMessage(Message msg, 
+                              ManagedConnection receivingConnection) {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
@@ -214,7 +217,17 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
-		}
+		} 
+        else if (msg instanceof MessagesSupportedVendorMessage) 
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        else if (msg instanceof HopsFlowVendorMessage)
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        else if (msg instanceof TCPConnectBackVendorMessage)
+            handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
+                                        receivingConnection);
+        else if (msg instanceof UDPConnectBackVendorMessage)
+            handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
+                                        receivingConnection);
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -324,12 +337,13 @@ public abstract class MessageRouter {
 								 RouterService.getNumSharedFiles(),
 								 RouterService.getSharedFileSize()/1024,
 								 RouterService.isSupernode(),
-								 Statistics.instance().calculateDailyUptime());		
+								 Statistics.instance().calculateDailyUptime(),
+                                 UDPService.instance().isGUESSCapable());
 		} else {
 			return new PingReply(guid, (byte)1,
 								 endpoint.getPort(),
 								 endpoint.getAddress().getAddress(),
-								 0, 0, true, 0);
+								 0, 0, true, 0, true);
 		}
 	}
 
@@ -572,6 +586,56 @@ public abstract class MessageRouter {
             return;
         respondToQueryRequest(request, _clientGUID);
     }
+
+    /**
+     * Basically, just get the correct parameters, create a temporary 
+     * DatagramSocket, and send a Ping.
+     */
+    protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
+                                               Connection source) {
+        GUID guidToUse = udp.getConnectBackGUID();
+        int portToContact = udp.getConnectBackPort();
+        InetAddress addrToContact = null;
+        try {
+            addrToContact = source.getInetAddress();
+        }
+        catch (IllegalStateException ise) {
+            return;
+        }
+        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
+                                         (byte) 0);
+        UDPService.instance().send(pr, addrToContact, portToContact);
+    }
+
+
+    /**
+     * Basically, just get the correct parameters, create a Socket, and
+     * send a "/n/n".
+     */
+    protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
+                                               Connection source) {
+        int portToContact = tcp.getConnectBackPort();
+        InetAddress addrToContact = null;
+        try {
+            addrToContact = source.getInetAddress();
+        }
+        catch (IllegalStateException ise) {
+            return;
+        }
+        try {
+            Socket sock = new Socket(addrToContact, portToContact);
+            OutputStream os = sock.getOutputStream();
+            os.write("\n\n".getBytes());
+            sock.close();
+        }
+        catch (IOException ioe) {
+            // whatever
+        }
+        catch (SecurityException se) {
+            // whatever
+        }
+    }
+
 
     /**
      * Sends the ping request to the designated connection,

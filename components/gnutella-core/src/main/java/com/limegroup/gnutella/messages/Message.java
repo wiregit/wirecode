@@ -5,6 +5,7 @@ import java.io.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.messages.vendor.*;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -24,6 +25,8 @@ public abstract class Message
     public static final byte F_QUERY=(byte)0x80;
     public static final byte F_QUERY_REPLY=(byte)0x81;
     public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x30;
+    public static final byte F_VENDOR_MESSAGE=(byte)0x31;
+    public static final byte F_VENDOR_MESSAGE_STABLE=(byte)0x32;
 
     private final static boolean PARSE_GROUP_PINGS = false;
 
@@ -70,7 +73,9 @@ public abstract class Message
         Assert.that(guid.length==16);
         Assert.that(func==F_PING || func==F_PING_REPLY
                     || func==F_PUSH
-                    || func==F_QUERY || func==F_QUERY_REPLY,
+                    || func==F_QUERY || func==F_QUERY_REPLY
+                    || func==F_VENDOR_MESSAGE 
+                    || func == F_VENDOR_MESSAGE_STABLE,
                     "Bad function code");
 
         if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
@@ -226,7 +231,19 @@ public abstract class Message
                 //the variant stored within the payload.  So leave it to the
                 //static read(..) method of RouteTableMessage to actually call
                 //the right constructor.
-                return RouteTableMessage.read(guid, ttl, hops, payload);            
+                return RouteTableMessage.read(guid, ttl, hops, payload);
+            case F_VENDOR_MESSAGE:
+                if ((ttl != 1) || (hops != 0))
+                    throw new BadPacketException("VM with bad ttl/hops: " +
+                                                 ttl + "/" + hops);
+                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+                                                         payload);
+            case F_VENDOR_MESSAGE_STABLE:
+                if ((ttl != 1) || (hops != 0))
+                    throw new BadPacketException("VM with bad ttl/hops: " +
+                                                 ttl + "/" + hops);
+                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
+                                                         payload);
         }
         throw new BadPacketException("Unrecognized function code: "+func);
     }

@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.Sockets;
@@ -49,6 +50,11 @@ public class Connection {
     private OutputStream _out;
     private boolean _outgoing;
 
+    /** The possibly non-null VendorMessagePayload which describes what
+     *  VendorMessages the guy on the other side of this connection supports.
+     */
+    protected MessagesSupportedVendorMessage _messagesSupported = null;
+    
     /**
      * Trigger an opening connection to close after it opens.  This
      * flag is set in shutdown() and then checked in initialize()
@@ -156,6 +162,36 @@ public class Connection {
         _outgoing = false;
         _propertiesWrittenR=properties;
     }
+
+
+    /** Call this method when the Connection has been initialized and accepted
+     *  as 'long-lived'.
+     */
+    protected void postInit() {
+        try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
+            String value = 
+                getProperty(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE);
+            if ((value != null) && !value.equals("")) {
+                MessagesSupportedVendorMessage msvm = null;
+                msvm = MessagesSupportedVendorMessage.instance();
+                send(msvm);
+            }
+        }
+        catch (IOException ioe) {
+        }
+        catch (BadPacketException bpe) {
+            bpe.printStackTrace();  // we don't really expect this....
+        }
+    }
+
+    /**
+     * Call this method when you want to handle us to handle a VM.  We may....
+     */
+    protected void handleVendorMessage(VendorMessage vm) {
+        if (vm instanceof MessagesSupportedVendorMessage)
+            _messagesSupported = (MessagesSupportedVendorMessage) vm;
+    }
+
 
     /** 
      * Initializes this without timeout; exactly like initialize(0). 
@@ -804,6 +840,43 @@ public class Connection {
             return null;
         else
             return _propertiesRead.getProperty(name);
+    }
+
+
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int supportsVendorMessage(byte[] vendorID, int selector) {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsMessage(vendorID, selector);
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsUDPConnectBack() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsUDPConnectBack();
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsTCPConnectBack() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsTCPConnectBack();
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsHopsFlow() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsHopsFlow();
+        return -1;
     }
     
     /**

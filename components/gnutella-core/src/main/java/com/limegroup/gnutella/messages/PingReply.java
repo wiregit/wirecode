@@ -63,7 +63,7 @@ public class PingReply extends Message implements Serializable {
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes, 
              boolean isUltrapeer) { 
-        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1);
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer, -1, false);
     }
 
     /**
@@ -88,9 +88,9 @@ public class PingReply extends Message implements Serializable {
      */
     public PingReply(byte[] guid, byte ttl,
              int port, byte[] ip, long files, long kbytes,
-             boolean isUltrapeer, int dailyUptime) {
+             boolean isUltrapeer, int dailyUptime, boolean isGUESSCapable) {
         this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-             newGGEP(dailyUptime, isUltrapeer));
+             newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
 
     /**
@@ -166,20 +166,23 @@ public class PingReply extends Message implements Serializable {
     }
 
     /** Returns the GGEP payload bytes to encode the given uptime */
-    private static byte[] newGGEP(int dailyUptime, boolean isUltrapeer) {
+    private static byte[] newGGEP(int dailyUptime, boolean isUltrapeer,
+                                  boolean isGUESSCapable) {
         try {
             GGEP ggep=new GGEP(true);
 
             if (dailyUptime >= 0)
                 ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
 
-            if (isUltrapeer) { 
+            if (isGUESSCapable && isUltrapeer) {
                 // indicate guess support
                 byte[] vNum = {
                 convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
                                      CommonUtils.getGUESSMinorVersionNumber())};
                 ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+            }
 
+            if (isUltrapeer) { 
                 // indicate UP support
                 addUltrapeerExtension(ggep);
             }

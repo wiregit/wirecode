@@ -200,23 +200,23 @@ public class HostCatcherTest extends TestCase {
             hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                          0l, 0l, false, 1000),
+                          0l, 0l, false, 1000, false),
                    null);
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                          0l, 0l, false, 1000),
+                          0l, 0l, false, 1000, false),
                    null);  //duplicate
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
-                          0l, 0l, false, 30),
+                          0l, 0l, false, 30, false),
                    null);
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
-                          0l, 0l, false, 30),
+                          0l, 0l, false, 30, false),
                    null);  //duplicate (well, with lower uptime)
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
                           new byte[] {(byte)192, (byte)168, (byte)0, (byte)1},
-                          0l, 0l, false, 3000),
+                          0l, 0l, false, 3000, false),
                    null);  //private address (ignored)
             File tmp=File.createTempFile("hc_test", ".net" );
             hc.write(tmp);
@@ -252,19 +252,19 @@ public class HostCatcherTest extends TestCase {
             for (int i=0; i<=N; i++) {
                 hc.add(new PingReply(GUID.makeGuid(), (byte)7, i,
                            new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, i+10),
+                           0l, 0l, false, i+10, false),
                        null);
             }
             //Now add bad pong--which isn't really added
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, N+1,
                            new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, 0),
+                           0l, 0l, false, 0, false),
                        null);
             //Now re-add port 0 (which was kicked out earlier).  Note that this
             //would fail if line 346 of HostCatcher were not executed.
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 0,
                            new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, N+100),
+                           0l, 0l, false, N+100, false),
                    null);
 
             File tmp=File.createTempFile("hc_test", ".net" );

@@ -1146,4 +1146,10 @@ public final class RouterService {
 	public static boolean isGUESSCapable() {
 		return udpService.isGUESSCapable();
 	}
+
+
+    public static GUID getUDPConnectBackGUID() {
+        return udpService.getConnectBackGUID();
+    }
+
 }

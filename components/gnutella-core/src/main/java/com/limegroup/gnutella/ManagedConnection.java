@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
@@ -44,6 +45,10 @@ import com.limegroup.gnutella.updates.*;
  * this change into ManagedConnection in the future, so please bear with this
  * for now.<p>
  * 
+ * ManagedConnection also takes care of various VendorMessage handling, in
+ * particular Hops Flow, UDP ConnectBack, and TCP ConnectBack.  See
+ * handleVendorMessage().
+ *
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
  */
@@ -56,6 +61,15 @@ public class ManagedConnection
     /** The total amount of upstream messaging bandwidth for ALL connections
      *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
+    /** The maximum number of times ManagedConnection instances should send UDP
+     *  ConnectBack requests.
+     */
+    private static final int MAX_UDP_CONNECT_BACK_ATTEMPTS = 15;
+
+    /** The maximum number of times ManagedConnection instances should send TCP
+     *  ConnectBack requests.
+     */
+    private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
 
     private final MessageRouter _router;
     private final ConnectionManager _manager;
@@ -256,6 +270,39 @@ public class ManagedConnection
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
 
+    /** Use this if a HopsFlowVM instructs us to stop sending queries below
+     *  this certain hops value....
+     */
+    private int softMaxHops = -1;
+
+    /** The class wide static counter for the number of udp connect back 
+     *  request sent.
+     */
+    private static int _numUDPConnectBackRequests = 0;
+
+    /** The class wide static counter for the number of tcp connect back 
+     *  request sent.
+     */
+    private static int _numTCPConnectBackRequests = 0;
+
+    /** 
+     * Creates an outgoing connection. 
+     *
+     * @param host the address to connect to in symbolic or dotted-quad format
+     *  If host names a special bootstrap server, e.g., "router.limewire.com",
+     *  this may take special action, like trying "router4.limewire.com" instead
+     *  with a 0.4 handshake.
+     * @param port the port to connect to
+     * @param router where to report messages
+     * @param where to report my death.  Also used for reject connections.
+     */
+    //ManagedConnection(String host,
+	//                int port,
+    //                  MessageRouter router,
+    //                  ConnectionManager manager) {
+    //    this(translateHost(host), port, router, manager, isRouter(host));
+    //}
+
     /**
      * Creates an outgoing connection.  The connection is considered a special
      * LimeWire router connection iff isRouter==true.  In this case host should
@@ -303,6 +350,7 @@ public class ManagedConnection
         _router = router;
         _manager = manager;
     }
+
 
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
@@ -397,6 +445,12 @@ public class ManagedConnection
     public void send(Message m) {
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
+        // if Hops Flow is in effect, and this is a QueryRequest, and the
+        // hoppage is too biggage, discardage time....
+        if ((softMaxHops > -1) &&
+            (m instanceof QueryRequest) &&
+            (m.getHops() >= softMaxHops))
+            return;
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
@@ -895,6 +949,51 @@ public class ManagedConnection
                                   ReplyHandler receivingConnection) {
         send(pushRequest);
     }
+
+
+    protected void handleVendorMessage(VendorMessage vm) {
+        // let Connection do as needed....
+        super.handleVendorMessage(vm);
+        // now i can process
+        if (vm instanceof HopsFlowVendorMessage) {
+            // update the softMaxHops value so it can take effect....
+            HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
+            softMaxHops = hops.getHopValue();
+        }
+        else if (vm instanceof MessagesSupportedVendorMessage) {
+            // do i need to send any ConnectBack messages????
+            if (!UDPService.instance().canReceiveUnsolicited() &&
+                (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsUDPConnectBack() > -1)) {
+                try {
+                    GUID connectBackGUID =
+                        RouterService.getUDPConnectBackGUID();
+                    UDPConnectBackVendorMessage udp = 
+                    new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                    connectBackGUID);
+                    send(udp);
+                    _numUDPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {
+                    ignored.printStackTrace(); // should NEVER happen!!
+                }
+            }
+            if (!RouterService.acceptedIncomingConnection() &&
+                (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
+                (remoteHostSupportsTCPConnectBack() > -1)) {
+                try {
+                    TCPConnectBackVendorMessage tcp =
+                       new TCPConnectBackVendorMessage(RouterService.getPort());
+                    send(tcp);
+                    _numTCPConnectBackRequests++;
+                }
+                catch (BadPacketException ignored) {
+                    ignored.printStackTrace(); // should NEVER happen!!
+                }
+            }
+        }
+    }
+
 
     //
     // End reply forwarding calls
