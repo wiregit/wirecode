@@ -15,10 +15,10 @@ public class SignatureVerifier {
     
     private static final Log LOG = LogFactory.getLog(SignatureVerifier.class);
     
-    private byte[] plainText;
-    private byte[] signature;
-    private PublicKey publicKey;
-    private String algorithm;
+    private final byte[] plainText;
+    private final byte[] signature;
+    private final PublicKey publicKey;
+    private final String algorithm;
 
     public SignatureVerifier(byte[] pText, byte[] sigBytes, PublicKey key, 
                                              String algorithm) {

@@ -97,11 +97,12 @@ public class SimppManagerTest extends BaseTestCase {
         assertTrue(BAD_XML_FILE.exists());
         assertTrue(RANDOM_BYTES_FILE.exists());
         
-        //TODO1: make sure the public key exists in the user home dir
+        // TODO: make simpp more than 1 class with 1 method.
         File pub = CommonUtils.getResourceFile(simppDir+"pub1.key");
-        File pub2 = new File(_settingsDir, "pub1.key");
+        File pub2 = new File(".", "pub1.key");
+        pub2.delete();
         CommonUtils.copy(pub, pub2);
-        assertTrue("test could not be set up", pub.exists());
+        assertTrue("local public key doesn't exist", pub2.exists());
 
         _simppFile = new File(_settingsDir, "simpp.xml");
 
@@ -133,14 +134,14 @@ public class SimppManagerTest extends BaseTestCase {
 
     ////////////////////////////////tests/////////////////////////////////////
 
-    public void testOldVersion() {
+    public void testOldVersion() throws Exception{
         //Note: we have already set the version to be old in setSettings
         SimppManager man = SimppManager.instance();
         assertEquals("problem reading/verifying old version file", 1,
                                                               man.getVersion());
     }
     
-    public void testMiddleVersion() {
+    public void testMiddleVersion() throws Exception {
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
         SimppManager man = SimppManager.instance();
@@ -148,7 +149,7 @@ public class SimppManagerTest extends BaseTestCase {
                                                              man.getVersion());
     }
     
-    public void testNewVersion() {
+    public void testNewVersion() throws Exception {
         _simppMessageNumber = NEW;
         changeSimppFile();
         SimppManager man = SimppManager.instance();
@@ -156,54 +157,46 @@ public class SimppManagerTest extends BaseTestCase {
                                                             man.getVersion());
     }
     
-    public void testBadSignatureFails() {
+    public void testBadSignatureFails() throws Exception {
         _simppMessageNumber = DEF_SIGNATURE;
         changeSimppFile();
         SimppManager man = SimppManager.instance();
         assertEquals("bad signature accepted", 0, man.getVersion());
     }
     
-    public void testBadMessageFails() {
+    public void testBadMessageFails() throws Exception {
         _simppMessageNumber = DEF_MESSAGE;
         changeSimppFile();
         SimppManager man = SimppManager.instance();
         assertEquals("tampered message accepted", 0, man.getVersion());
     }
     
-    public void testBadXMLFails() {
+    public void testBadXMLFails() throws Exception {
         _simppMessageNumber = BAD_XML;
         changeSimppFile();
         SimppManager man = SimppManager.instance();
         assertEquals("malformed xml accepted", 0, man.getVersion());
     }
     
-    public void testRandomBytesFails() {
+    public void testRandomBytesFails() throws Exception {
         _simppMessageNumber = RANDOM_BYTES;
         changeSimppFile();
         SimppManager man = SimppManager.instance();
         assertEquals("garbage bytes accepted", 0, man.getVersion());
     }
 
-    public void testOlderSimppNotRequested() {
+    public void testOlderSimppNotRequested() throws Exception {
         //1. Set up LimeWire
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the TestConnection to have the old version, and expect to
         //not receive a simpprequest
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(OLD, false, false);//!expect, !respond
-        } catch (IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(OLD, false, false);//!expect, !respond
         conn.start();
-        try {
-            //6s = 2s * 3 (timeout in TestConnection == 2s)
-            Thread.sleep(6000);//let messages be exchanged, 
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        //6s = 2s * 3 (timeout in TestConnection == 2s)
+        Thread.sleep(6000);//let messages be exchanged, 
+        
         //3. let the test run and make sure state is OK, for this test this part
         //is just a formality, the real testing is on the TestConnection in step
         //2 above.
@@ -213,26 +206,18 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
     
-    public void testOlderSimppNotRequestedUnsolicitedAccepted() {
+    public void testOlderSimppNotRequestedUnsolicitedAccepted() throws Exception {
         //1. Set up LimeWire 
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited newer SimppResponse
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(NEW ,false, true, OLD);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(NEW ,false, true, OLD);
         conn.start();
-        try {
-            //6s = 2s * 3 (timeout in TestConnection == 2s)
-            Thread.sleep(6000);//let messages be exchanged, 
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        //6s = 2s * 3 (timeout in TestConnection == 2s)
+        Thread.sleep(6000);//let messages be exchanged, 
+        
         //3. let the test run and make sure state is OK, 
         SimppManager man = SimppManager.instance();
         assertEquals("SimppManager should not have updated", NEW, 
@@ -240,26 +225,18 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
-    public void testSameSimppNotRequested() {
+    public void testSameSimppNotRequested() throws Exception {
         //1. Set up LimeWire 
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited same SimppResponse
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(MIDDLE,false, true);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(MIDDLE,false, true);
         conn.start();
-        try {
-            //6s = 2s * 3 (timeout in TestConnection == 2s)
-            Thread.sleep(6000);//let messages be exchanged, 
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        //6s = 2s * 3 (timeout in TestConnection == 2s)
+        Thread.sleep(6000);//let messages be exchanged, 
+
         //3. let the test run and make sure state is OK, 
         SimppManager man = SimppManager.instance();
         assertEquals("SimppManager should not have updated", MIDDLE, 
@@ -267,26 +244,19 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
     
-    public void testNewSimppAdvOldActualRejected() {
+    public void testNewSimppAdvOldActualRejected() throws Exception {
         //1. Set up LimeWire 
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the TestConnection to advertise same version, not expect a
         //SimppReq, and to send an unsolicited older SimppResponse
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(MIDDLE,false, true, OLD);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(MIDDLE,false, true, OLD);
         conn.start();
-        try {
-            //6s = 2s * 3 (timeout in TestConnection == 2s)
-            Thread.sleep(6000);//let messages be exchanged, 
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        
+        //6s = 2s * 3 (timeout in TestConnection == 2s)
+        Thread.sleep(6000);//let messages be exchanged, 
+
         //3. let the test run and make sure state is OK, 
         SimppManager man = SimppManager.instance();
         assertEquals("SimppManager should not have updated", MIDDLE, 
@@ -295,25 +265,18 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
 
-    public void testNewerSimppRequested() {
+    public void testNewerSimppRequested() throws Exception {
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(NEW, true, true);//expect, respond
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(NEW, true, true);//expect, respond
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        
+        Thread.sleep(6000);//let the message exchange take place
+
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
@@ -321,7 +284,7 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
-    public void testTamperedSimppSigRejected() {
+    public void testTamperedSimppSigRejected() throws Exception {
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -329,18 +292,11 @@ public class SimppManagerTest extends BaseTestCase {
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective signature
         //msg
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(DEF_SIGNATURE, true, true, NEW);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(DEF_SIGNATURE, true, true, NEW);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        
+        Thread.sleep(6000);//let the message exchange take place
+
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
@@ -348,25 +304,18 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
-    public void testTamperedSimppDataRejected() {
+    public void testTamperedSimppDataRejected() throws Exception  {
        //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a defective message msg
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(DEF_MESSAGE, true, true, NEW);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(DEF_MESSAGE, true, true, NEW);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        
+        Thread.sleep(6000);//let the message exchange take place
+
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
@@ -374,25 +323,17 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
-    public void testBadSimppXMLRejected() {
+    public void testBadSimppXMLRejected() throws Exception  {
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a bad_xml msg
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(BAD_XML, true, true, NEW);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(BAD_XML, true, true, NEW);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        Thread.sleep(6000);//let the message exchange take place
+
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
@@ -400,25 +341,17 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
-    public void testGargabeDataRejected() {
+    public void testGargabeDataRejected() throws Exception {
         //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
 
         //2. Set up the test connection, to advertise the new version, and to
         //expect a simpp request from limewire and send a garbage msg
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(RANDOM_BYTES, true, true, NEW);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(RANDOM_BYTES, true, true, NEW);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        Thread.sleep(6000);//let the message exchange take place
+
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
@@ -426,102 +359,71 @@ public class SimppManagerTest extends BaseTestCase {
         conn.killConnection();
     }
 
-    public void testSimppTakesEffect() {        
+    public void testSimppTakesEffect() throws Exception {        
         assertEquals("base case did not revert to defaults",4, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         //1. Test that Simpp files read off disk take effect. 
         _simppMessageNumber = OLD;
         changeSimppFile();
         resetSettingmanager();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ix) {
-            fail("could not set up test");
-        }
+        Thread.sleep(1000);
+
         assertEquals("base case did not revert to defaults",12, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(NEW, true, true);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(NEW, true, true);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+
+        Thread.sleep(6000);//let the message exchange take place
+
         assertEquals("test_upload setting not changed to simpp value", 15,
                                  UploadSettings.TEST_UPLOAD_SETTING.getValue());
     }
 
-    public void testSimppSettingStaysBelowMax() {
+    public void testSimppSettingStaysBelowMax() throws Exception {
         assertEquals("base case did not revert to defaults", 4, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         _simppMessageNumber = OLD;
         changeSimppFile();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ix) {
-            fail("could not set up test");
-        }
+        Thread.sleep(1000);
+        
         resetSettingmanager();
         assertEquals("base case did not revert to defaults",12, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(ABOVE_MAX, true, true, NEW);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(ABOVE_MAX, true, true, NEW);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        Thread.sleep(6000);//let the message exchange take place
+
         assertEquals("test_upload setting not changed to simpp value", 12,
                                 UploadSettings.TEST_UPLOAD_SETTING.getValue());
         
     }
 
-    public void testSimppSettingStaysAboveMin() {
+    public void testSimppSettingStaysAboveMin() throws Exception {
         assertEquals("base case did not revert to defaults", 4, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         _simppMessageNumber = OLD;
         changeSimppFile();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ix) {
-            fail("could not set up test");
-        }
+        Thread.sleep(1000);
+
         resetSettingmanager();
         assertEquals("base case did not revert to defaults",12, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
         //Get a new message from a connection and make sure the value is changed
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(BELOW_MIN, true, true, NEW);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(BELOW_MIN, true, true, NEW);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+        
+        Thread.sleep(6000);//let the message exchange take place
+        
         assertEquals("test_upload setting not changed to simpp value", 12,
                                 UploadSettings.TEST_UPLOAD_SETTING.getValue());
     }
 
-    public void testIOXLeavesSimppUnchanged() {
+    public void testIOXLeavesSimppUnchanged() throws Exception {
        //1. Set up limewire correctly
         _simppMessageNumber = MIDDLE;
         changeSimppFile();
@@ -529,19 +431,12 @@ public class SimppManagerTest extends BaseTestCase {
         //2. Set up the test connection, to have the new version, and to expect
         //a simpp request from limewire, but then close the connection while
         //uploading the simpp message
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(NEW, true, true);
-            conn.setCauseError(true);
-        } catch(IOException iox) {
-            fail("could not set up test connection");
-        }
+        TestConnection conn = new TestConnection(NEW, true, true);
+        conn.setCauseError(true);
         conn.start();
-        try {
-            Thread.sleep(6000);//let the message exchange take place
-        } catch (InterruptedException ix) {
-            fail("interrupted while waiting for simpp exchange to complete");
-        }
+
+        Thread.sleep(6000);//let the message exchange take place
+
         //3. OK. LimeWire should have upgraded now. 
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
@@ -551,7 +446,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     ////////////////////////////////private methods///////////////////////////
     
-    private static void changeSimppFile() {
+    private static void changeSimppFile() throws Exception {
         if(_simppMessageNumber == OLD) 
             CommonUtils.copy(OLD_SIMPP_FILE, _simppFile);
         else if(_simppMessageNumber == MIDDLE)
@@ -569,30 +464,18 @@ public class SimppManagerTest extends BaseTestCase {
         else 
             fail("simppMessageNumber value is illegal");
         
-        try {
-            PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
-            PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);
-            PrivilegedAccessor.setValue(SimppManager.class, "MIN_VERSION", 
-                                        new Integer(0));//so we can use 1,2,3
-        } catch (IllegalAccessException eax) {
-            fail("unable to nullify SimppManager.INSTANCE");
-        } catch (NoSuchFieldException nsfx) {
-            fail("unable to nullify SimppManager.INSTANCE");
-        }
+        PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
+        PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);
+        PrivilegedAccessor.setValue(SimppManager.class, "MIN_VERSION", 
+                                    new Integer(0));//so we can use 1,2,3
         //reload the SimppManager and Capabilities VM
         SimppManager.instance();
         CapabilitiesVM.instance();
     }
     
-    private static void resetSettingmanager() {
-        try {
-            PrivilegedAccessor.setValue(SimppSettingsManager.class,
-                                                              "INSTANCE", null);
-        } catch (IllegalAccessException eax) {
-            fail("unable to nullify SimppManager.INSTANCE");
-        } catch (NoSuchFieldException nsfx) {
-            fail("unable to nullify SimppManager.INSTANCE");
-        }
+    private static void resetSettingmanager() throws Exception {
+        PrivilegedAccessor.setValue(SimppSettingsManager.class,
+                                                          "INSTANCE", null);
         SimppSettingsManager.instance();
     }
     

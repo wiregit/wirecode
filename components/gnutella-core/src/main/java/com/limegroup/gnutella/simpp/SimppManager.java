@@ -32,7 +32,6 @@ import org.apache.commons.logging.Log;
 public class SimppManager {
     
     private static final Log LOG = LogFactory.getLog(SimppManager.class);
-    
 
     private static SimppManager INSTANCE;
 
@@ -69,6 +68,7 @@ public class SimppManager {
             _latestVersion = 0;
             verified = verifier.verifySource();
             if(!verified) {
+                LOG.debug("Unable to verify simpp message.");
                 problem = true;
                 return;
             }
