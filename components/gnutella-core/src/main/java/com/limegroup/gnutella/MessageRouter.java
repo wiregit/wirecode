@@ -7,7 +7,7 @@ import java.io.IOException;
  * One of the three classes that make up the core of the backend.  This
  * class' job is to direct the routing of messages and to count those message
  * as they pass through.  To do so, it aggregates a ConnectionManager that
- * maintains a list of connections.
+ * maintains a list of connections. 
  */
 public abstract class MessageRouter
 {
