@@ -68,6 +68,9 @@ public interface SettingsInterface
 	public String getForcedIPAddress();
 	public int getForcedPort();
 
+    public int getFreeloaderFiles();
+    public int getFreeloaderAllowed();
+
     /** writes out the properties to disk */
     public void writeProperties();
 
@@ -198,6 +201,9 @@ public interface SettingsInterface
 	public void setLastVersionChecked(String last);
 	public void setCheckAgain(boolean check);
 
+    public void setFreeloaderFiles(int files);
+    public void setFreeloaderAllowed(int probability);
+
     /** specialized method for writing the
      *  properties file for the network discoverer
      */
@@ -276,8 +282,10 @@ public interface SettingsInterface
     public static final String  DEFAULT_LAST_VERSION_CHECKED = "0.5";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
 	public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
-	public static final String  DEFAULT_FORCED_IP_ADDRESS = "";
-	public static final int     DEFAULT_FORCED_PORT = 6346;
+	public static final String DEFAULT_FORCED_IP_ADDRESS = "";
+	public static final int DEFAULT_FORCED_PORT = 6346;
+    public static final int DEFAULT_FREELOADER_FILES = 1;
+    public static final int DEFAULT_FREELOADER_ALLOWED = 100;
 
     // The property key name constants
     public static final String TTL            = "TTL";
@@ -323,5 +331,7 @@ public interface SettingsInterface
 	public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
 	public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
 	public static final String FORCED_PORT = "FORCED_PORT";
+    public static final String FREELOADER_FILES = "FREELOADER_FILES";
+    public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
 
 }
