@@ -174,7 +174,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** True iff a corrupt byte has been detected and this has been stopped by
      *  the thread detecting the problem.  INVARIANT: corrupted=>stopped.  */
     private boolean corrupted;
-    
+    /** Passed to HTTPDownloader to make sure disk operations are atomic. */
+    private Object diskLock=new Object();
+
     /** The lock for pushes (see below).  Used intead of THIS to prevent missing
      *  notify's.  See readObject for note on serialization.  LOCKING: use
      *  pushLock for all the pushX variables. */
@@ -295,6 +297,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //done in initialize, as that could cause problems in resume().
         pushLock=new Object();
         reqLock=new RequeryLock();
+        diskLock=new Object();
     }
 
     /** 
@@ -1323,7 +1326,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 List /* of RemoteFileDesc */ files,
                                 List /* of HTTPDownloader */ terminated) {
         try {
-            downloader.doDownload(true);
+            downloader.doDownload(true, diskLock);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
         } catch (OverlapMismatchException e) {

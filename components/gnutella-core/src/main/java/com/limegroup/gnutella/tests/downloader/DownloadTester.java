@@ -86,7 +86,7 @@ public class DownloadTester {
             HTTPDownloader downloader=new HTTPDownloader(
                 rfd, file, 0, TestFile.length());
             downloader.connect();
-            downloader.doDownload(true);        
+            downloader.doDownload(true, new Object());        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
         } catch (OverlapMismatchException e) {
@@ -107,7 +107,7 @@ public class DownloadTester {
             HTTPDownloader downloader=new HTTPDownloader(
                 rfd, file, 0, TestFile.length());
             downloader.connect();
-            downloader.doDownload(false);        
+            downloader.doDownload(false, new Object());        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
         } catch (OverlapMismatchException e) {

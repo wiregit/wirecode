@@ -363,12 +363,13 @@ public class HTTPDownloader implements BandwidthTracker {
      *  
      * @param checkOverlap check the existing contents of the incomplete file 
      *  before writing to it.
+     * @param diskLock the object to synchronize on during the read-write test
      * @exception OverlapMismatchException part of the incomplete file on
      *  disk didn't match data read from network.
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(boolean checkOverlap) 
+	public void doDownload(boolean checkOverlap, Object diskLock) 
             throws IOException, OverlapMismatchException {
         RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
         try {            
@@ -397,23 +398,25 @@ public class HTTPDownloader implements BandwidthTracker {
                 //which is easy in the case of resuming.  Also note that
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
-                long currPos = fos.getFilePointer();
-                long length=fos.length();
-                int amountToCheck=(int)Math.min(c,length-currPos);
-                if(checkOverlap && amountToCheck>0) {                    
-                    fos.readFully(fileBuf,0,amountToCheck);
-                    for(int i=0;i<amountToCheck;i++) {
-                        if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
-                            throw new OverlapMismatchException(
-                                currPos, length, c, amountToCheck, i, fileBuf[i]);
+                synchronized (diskLock) {
+                    long currPos = fos.getFilePointer();
+                    long length=fos.length();
+                    int amountToCheck=(int)Math.min(c,length-currPos);
+                    if(checkOverlap && amountToCheck>0) {                    
+                        fos.readFully(fileBuf,0,amountToCheck);
+                        for(int i=0;i<amountToCheck;i++) {
+                            if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
+                                throw new OverlapMismatchException(
+                                    currPos, length, c, amountToCheck, i, fileBuf[i]);
+                        }
+                        //get the fp back where it was before we checked
+                        fos.seek(currPos);
                     }
-                    //get the fp back where it was before we checked
-                    fos.seek(currPos);
-                }
             
-                //3. Write to disk.
-                fos.write(buf, 0, c);			
-                _amountRead+=c;
+                    //3. Write to disk.
+                    fos.write(buf, 0, c);			
+                    _amountRead+=c;
+                }
             }  // end of while loop
 
 
