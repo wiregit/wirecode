@@ -37,7 +37,9 @@ public class CommonUtils {
 	private CommonUtils() {}
 
 	/**
-	 * initialize the settings statically.
+	 * initialize the settings statically. this gives a little
+	 * more control over when the class is initialized over
+	 * a simple static initializer.
 	 */
 	public static void initialize() {
 
