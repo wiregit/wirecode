@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.ErrorService;
+import java.io.IOException;
 
 /**
  * class that handles the removal of accents, etc.
@@ -13,53 +14,49 @@ public class I18NConvert {
     private final static I18NConvert _instance = new I18NConvert();
     
     /** the class that handles the conversion */
-    private static AbstractI18NConverter _convertDelegator;
-    static {
-        //instantiates a implementation of abstract class AbstractI18NConverter
-        //depeneding on JVM (118 or not)
-        if(CommonUtils.isJava118()) {
-            _convertDelegator = new I18NConvert118();
-        } else {
-            _convertDelegator = new I18NConvertICU();
-        }
-        
-        initializeDel();
-    }
+    private AbstractI18NConverter _convertDelegator;
 
-    /**
-     * calls initialize on _convertDelegator.  If the initialization
-     * failes, the exception will be 'ErrorServic'ed and _convertDelegator
-     * will be changed.
-     */
-    private static void initializeDel() {
-        try {
-            _convertDelegator.initialize();
-            //try a simple getNorm to make sure it works
-            _convertDelegator.getNorm("touch ICU code");
-        }
-        catch(Throwable e) { 
-            ErrorService.error(e);
-            changeDel();
-        }
-    }
-
-    /**
-     * changes the _convertDelegator.  If the _convertDelegator 
-     * which failed (due to failure in initialization or internally
-     * in ICU) is I18NConvertICU then we try to load in I18NConvert118. 
-     */
-    private static void changeDel() {
-        if(_convertDelegator.getClass() == I18NConvertICU.class) {
-            _convertDelegator = new I18NConvert118();
-            initializeDel();
-        }
-     }
-
-    
     /**
      * Empty constructor so nothing else can instantiate it.
      */
-    private I18NConvert() {}
+    private I18NConvert() {
+        try {
+            //instantiates an implementation 
+            //of abstract class AbstractI18NConverter
+            //depeneding on JVM (118 or not)
+            if(CommonUtils.isJava118()) {
+                _convertDelegator = new I18NConvert118();
+            } else {
+                _convertDelegator = new I18NConvertICU();
+                _convertDelegator.getNorm("touch ICU code");
+            }
+        }
+        catch(IOException te) {
+            ErrorService.error(te);
+            convertTo118();
+        }
+        catch(ClassNotFoundException cnf) {
+            ErrorService.error(cnf);
+            convertTo118();
+        }
+    }
+
+    private void convertTo118() {
+        //if the error was in the ICU code
+        //then try to revert to I18NConvert118
+        if(!CommonUtils.isJava118()) {
+            try {
+                _convertDelegator = new I18NConvert118();
+            }
+            catch(IOException e) {
+                ErrorService.error(e);
+            }
+            catch(ClassNotFoundException cnf) {
+                ErrorService.error(cnf);
+            }
+        }
+    }
+
 
     /** accessor */
     public static I18NConvert instance() {

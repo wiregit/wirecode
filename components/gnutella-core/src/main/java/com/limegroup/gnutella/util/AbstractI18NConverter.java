@@ -16,9 +16,6 @@ abstract class AbstractI18NConverter {
      * @return the converted string
      */
     public abstract String getNorm(String s);
-    
-    public abstract void initialize()
-        throws IOException, ClassNotFoundException;
 
     /**
      * Returns a string split according to the unicode blocks.  A

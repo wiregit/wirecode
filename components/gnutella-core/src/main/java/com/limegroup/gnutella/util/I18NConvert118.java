@@ -13,10 +13,8 @@ final class I18NConvert118 extends AbstractI18NConverter {
     java.util.BitSet _ex;
 
 
-    I18NConvert118() {}
-
     /** read in the necessary data files created by UDataFileCreator */
-    public void initialize()
+    I18NConvert118()
         throws IOException, ClassNotFoundException {
         _convert = new Trie(false);
         _kc = new Trie(false);
@@ -36,6 +34,7 @@ final class I18NConvert118 extends AbstractI18NConverter {
         }
         
         fi = CommonUtils.getResourceStream("excluded.dat");            
+
         ObjectInputStream ois = new ObjectInputStream(fi);
         _ex = (java.util.BitSet)ois.readObject();
     }

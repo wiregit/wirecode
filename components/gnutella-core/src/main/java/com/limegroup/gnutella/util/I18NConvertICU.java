@@ -17,8 +17,6 @@ final class I18NConvertICU extends AbstractI18NConverter {
     private java.util.BitSet _replaceWithSpace;
     private Map _cMap;
 
-    I18NConvertICU() {}
-
     /**
      * initializer:
      * this subclass of AbstractI18NConverter uses the icu4j's 
@@ -28,7 +26,7 @@ final class I18NConvertICU extends AbstractI18NConverter {
      * remove accents, etc. and replace certain code points with
      * ascii space (\u0020)
      */
-    public void initialize()
+    I18NConvertICU()
         throws IOException, ClassNotFoundException {
     	java.util.BitSet bs = null;
         java.util.BitSet bs2 = null;
@@ -48,7 +46,7 @@ final class I18NConvertICU extends AbstractI18NConverter {
         fi = CommonUtils.getResourceStream("replaceSpace.dat");
         ois = new  ObjectInputStream(fi);
         bs2 = (java.util.BitSet)ois.readObject();
-            
+
     	_excluded = bs;
     	_cMap = hm;
         _replaceWithSpace = bs2;
