@@ -15,9 +15,9 @@ import java.io.*;
 final class HeadRequester implements Runnable {
 
 	/**
-	 * The <tt>List</tt> of hosts to send HEAD requests to.
+	 * The <tt>Set</tt> of hosts to send HEAD requests to.
 	 */
-	private final List HOSTS;
+	private final Set HOSTS;
 
 	/**
 	 * The <tt>URN</tt> instance to propagate through the mesh.
@@ -53,7 +53,7 @@ final class HeadRequester implements Runnable {
 						 URN resourceName,
 						 AlternateLocationCollector collector,
 						 AlternateLocationCollection totalAlts) {
-		HOSTS = new LinkedList(hosts);
+		HOSTS = new HashSet(hosts);
 		RESOURCE_NAME = resourceName;
 		COLLECTOR = collector;
 		TOTAL_ALTS = totalAlts;
