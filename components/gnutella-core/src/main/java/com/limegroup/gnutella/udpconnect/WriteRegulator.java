@@ -24,6 +24,12 @@ public class WriteRegulator {
     /** The expected failure rate at optimal throughput */
     private static final float TARGET_FAILURE_RATE  = 3f / 100f;
 
+    /** The low failure rate at optimal throughput */
+    private static final float LOW_FAILURE_RATE     = 2f / 100f;
+
+    /** The high failure rate at optimal throughput */
+    private static final float HIGH_FAILURE_RATE    = 4f / 100f;
+
 
     private DataWindow _sendWindow;
     private int        _skipCount  = 0;
@@ -50,7 +56,7 @@ public class WriteRegulator {
      */
     public void hitResendTimeout() {
         if ( (!_limitHit || _limitCount >= 10) &&
-              _tracker.failureRate() > TARGET_FAILURE_RATE ) {
+              _tracker.failureRate() > HIGH_FAILURE_RATE ) {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
@@ -203,7 +209,7 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit);
             if (_skipLimit < MAX_SKIP_LIMIT    &&
                 windowStart%windowSize == 0    &&
                 windowStart > MIN_START_WINDOW &&
-                _tracker.failureRate() < TARGET_FAILURE_RATE ) {
+                _tracker.failureRate() < LOW_FAILURE_RATE ) {
 System.out.println("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
             if(LOG.isDebugEnabled())  
