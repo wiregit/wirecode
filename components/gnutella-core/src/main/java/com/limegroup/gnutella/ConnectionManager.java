@@ -4,6 +4,9 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import java.util.Properties;
+import java.util.StringTokenizer;
+
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
@@ -579,6 +582,11 @@ public class ConnectionManager {
             }
             throw e;
         }
+        finally{
+            //if the connection received headers, process those to update
+            //local information (e.g. addresses of other hosts)
+            processConnectionHeaders(c);
+        }
 
         boolean connectionOpen = false;
         synchronized(this) {
@@ -594,6 +602,36 @@ public class ConnectionManager {
             _callback.connectionInitialized(c);
     }
 
+    /**
+     * Processes the headers received during connection handshake and updates
+     * itself with any useful information contained in those headers
+     * @param headers The headers to be processed
+     */
+    private void processConnectionHeaders(ManagedConnection connection){
+        //get the connection headers
+        Properties headers = connection.getHeaders();
+        
+        //check for the addresses of other hosts
+        String hostAddresses = 
+            headers.getProperty(ConnectionHandshakeHeaders.X_TRY);
+        //host addresses shoule be in the form:
+        //IP Address:Port [; IPAddress:Port]* 
+        //e.g. 123.4.5.67:6346; 234.5.6.78:6347
+        //Parse the addresses to retrieve individual host addresses 
+        //and store them
+        if(hostAddresses != null){
+            //tokenize to retrieve individual addresses
+            StringTokenizer st = new StringTokenizer(hostAddresses,";");
+            //iterate over the tokens
+            while(st.hasMoreTokens()){
+                //get an address
+                String address = ((String)st.nextToken()).trim();
+                //add it to the catcher
+                _catcher.add(new Endpoint(address), connection);
+            }
+        }
+    }
+    
     /**
      * Initializes an outgoing connection created by createConnection or any
      * incomingConnection.
@@ -713,6 +751,18 @@ public class ConnectionManager {
 
         return c;
     }
+    
+    /**
+     * @requires n>0
+     * @effects returns an iterator that yields up the best n endpoints of this.
+     *  It's not guaranteed that these are reachable. This can be modified while
+     *  iterating through the result, but the modifications will not be
+     *  observed.  
+     */
+    public synchronized Iterator getBestHosts(int n) {
+        return _catcher.getBestHosts(n);
+    }
+    
 
     /**
      * This thread does the message loop for ManagedConnections created
