@@ -76,9 +76,13 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public InputStream createInputStream() throws FileNotFoundException {
         // if we don't have any available ranges, we should never
         // have entered the download mesh in the first place!!!
-        if (getFile().length() == 0) {
-            throw new FileNotFoundException();
-        }
+        if (getFile().length() == 0)
+            throw new FileNotFoundException("nothing downloaded");
+        
+        // If the underlying data is corrupt, do not output anything.
+        if (_verifyingFile.isCorrupted())
+            throw new FileNotFoundException("data is corrupt");
+        
         return new FileInputStream(getFile());
     }
     
@@ -172,7 +176,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     		        continue;
     
                 added = true;
-                // ( we subtract one because HTTP value as exclusive )
+                // ( we subtract one because HTTP values are exclusive )
                 ret.append(" " + interval.low + "-" + (interval.high -1) + ",");
             }
         }
@@ -216,7 +220,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public String httpStringValue() {
         return getAvailableRanges();
     }
-    
+
 	// overrides Object.toString to provide a more useful description
 	public String toString() {
 		return ("IncompleteFileDesc:\r\n"+
