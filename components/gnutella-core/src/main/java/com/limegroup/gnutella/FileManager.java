@@ -361,7 +361,7 @@ public class FileManager {
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
 
-        String[] tempDirVar;
+        File[] tempDirVar;
         synchronized (this) {
             // Reset the file list info
             _size = 0;
@@ -393,23 +393,31 @@ public class FileManager {
             //So we just approximate this by sorting by filename length, from
             //smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
-            final String[] directories = 
-            StringUtils.split(SettingsManager.instance().getDirectories().trim(),
-                              ';');
+            //final String[] directories = 
+            //StringUtils.split(SettingsManager.instance().getDirectories().trim(),
+			//                ';');
+
+			final File[] directories = SettingsManager.instance().getDirectories();
 
             if (_loadThread.isInterrupted())
                 return;
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
-                    return ((String)a).length()-((String)b).length();
+                    return (a.toString()).length()-(b.toString()).length();
                 }
             });
+
+            //Arrays.sort(directories, new Comparator() {
+			//  public int compare(Object a, Object b) {
+			//      return ((String)a).length()-((String)b).length();
+			//  }
+			// });
             tempDirVar = directories;
         }
 
         //clear this, list of directories retreived
-        final String[] directories = tempDirVar;
+        final File[] directories = tempDirVar;
         if (notifyOnClear) 
             _callback.clearSharedFiles();
         
@@ -421,7 +429,7 @@ public class FileManager {
             // Add each directory as long as we're not interrupted.
             int i=0;
             while (i<directories.length && !_loadThread.isInterrupted()) {
-                addDirectory(new File(directories[i]), null);      
+                addDirectory(directories[i], null);      
                 i++;
             }
             

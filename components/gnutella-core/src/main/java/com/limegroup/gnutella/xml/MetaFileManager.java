@@ -236,19 +236,22 @@ public class MetaFileManager extends FileManager {
      */
     private void createFileToHashMaps(){
         SettingsManager man = SettingsManager.instance();
+        //ArrayList dirs = new 
+		//            ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
         ArrayList dirs = new 
-                      ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
+                      ArrayList(Arrays.asList(man.getDirectories()));
 
         int k=0;
         while(k < dirs.size()) {
-            String dir = (String)dirs.get(k);
+            //String dir = (String)dirs.get(k);
+            //File currDir = new File(dir);
+            File currDir = (File)dirs.get(k);
             k++;
-            File currDir = new File(dir);
             //add all subdirectories to dirs
             String[] subFiles = currDir.list();
             int z = subFiles.length;
             for(int j=0;j<z;j++){
-                File f = new File(dir,subFiles[j]);
+                File f = new File(currDir,subFiles[j]);
                 if(f.isDirectory()){
                     try {
                         String newDir = f.getCanonicalPath();                  
