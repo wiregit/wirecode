@@ -117,7 +117,7 @@ public abstract class MessageRouter
         _acceptor = acceptor;
         _manager = manager;
         _catcher = catcher;
-	_uploadManager = uploadManager;
+        _uploadManager = uploadManager;
     }
 
     public String getPingRouteTableDump()
@@ -224,7 +224,8 @@ public abstract class MessageRouter
         //any more.
         if ((receivingConnection.getNumMessagesReceived()<=2)
                 && (queryRequest.getHops()<=1)  //actually ==1 will do
-                && (queryRequest.getQuery().equals("    "))) {
+                && (queryRequest.getQuery().equals(
+                    FileManager.INDEXING_QUERY))) {
             receivingConnection.setKillable(false);
         }
 
