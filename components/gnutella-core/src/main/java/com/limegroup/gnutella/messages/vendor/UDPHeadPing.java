@@ -70,6 +70,12 @@ public class UDPHeadPing extends VendorMessage {
 		 _features = (byte) (features & FEATURE_MASK);
 	}
 	
+	/**
+	 * creates a plain udp head request
+	 */
+	public UDPHeadPing (URN urn) {
+		this(urn, PLAIN);
+	}
 	
 	private static byte [] derivePayload(URN urn, int features) {
 		features = features & FEATURE_MASK;

@@ -9,6 +9,8 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;
 
+import java.util.*;
+
 /**
  * a response to an UDPHeadPing.  It is a trimmed down version of the standard HEAD response,
  * since we are trying to keep the sizes of the udp packets small.
@@ -72,7 +74,7 @@ public class UDPHeadPong extends VendorMessage {
 	/**
 	 * the altlocs that were sent, if any
 	 */
-	private AlternateLocationCollection _altLocs;
+	private Set _altLocs;
 	
 	/**
 	 * the queue status, can be negative
@@ -155,8 +157,8 @@ public class UDPHeadPong extends VendorMessage {
 		if ((_features & UDPHeadPing.ALT_LOCS) == UDPHeadPing.ALT_LOCS) {
 			byte [] altlocs = new byte[dais.available()];
 			dais.readFully(altlocs);
-			_altLocs = 
-				AlternateLocationCollection.createCollectionFromHttpValue(new String(altlocs));
+			_altLocs = new HashSet();
+			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
 		}
 		
 		}catch(IOException oops) {
@@ -252,7 +254,7 @@ public class UDPHeadPong extends VendorMessage {
 		
 		if (altlocs!= null && altlocs.hasAlternateLocations() &&
 				ping.requestsAltlocs()) {
-			byte [] altbytes = altlocs.httpStringValue().getBytes();
+			byte [] altbytes = altlocs.toBytes();
 			
 			if (caos.getAmountWritten() + altbytes.length <= PACKET_SIZE)
 				caos.write(altbytes);
@@ -300,7 +302,7 @@ public class UDPHeadPong extends VendorMessage {
 	 * 
 	 * @return any alternate locations this alternate location returned.
 	 */
-	public AlternateLocationCollection getAltLocs() {
+	public Set getAltLocs() {
 		return _altLocs;
 	}
 	

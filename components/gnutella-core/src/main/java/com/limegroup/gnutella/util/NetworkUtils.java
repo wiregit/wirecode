@@ -4,8 +4,10 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella .*;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.filters.IPList;
+import com.limegroup.gnutella.messages.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 import com.sun.java.util.collections.Arrays;
 
@@ -274,7 +276,28 @@ public final class NetworkUtils {
             return port == RouterService.getPort() &&
                    Arrays.equals(cIP, managerIP);
         }
-    }    
+    }
+    
+    /**
+     * parses an ip:port byte-packed values.  If the size of the array is 
+     * not divisible by six, the extra bytes at the end are discarded.
+     * 
+     * @return a collection of <tt>IpPort</tt> objects.
+     */
+    public static Collection unpackIps(byte [] data) {
+    	List ret = new Vector();
+    	byte [] current = new byte[6];
+    	
+    	int size = data.length/6;
+    	for (int i=0;i<size;i++) {
+    		System.arraycopy(data,i*6,current,0,6);
+    		try {
+    			ret.add(QueryReply.IPPortCombo.getCombo(current));
+    		}catch(BadPacketException ignored) {}
+    	}
+    	
+    	return ret;
+    }
 }
 
 

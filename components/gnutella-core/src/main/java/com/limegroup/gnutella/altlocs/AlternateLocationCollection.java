@@ -306,4 +306,23 @@ public final class AlternateLocationCollection
         }
         return ret;
     }
+    
+    /**
+     * 
+     * @return the alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytes() {
+    	
+    	byte [] ret = new byte[6*LOCATIONS.size()];
+    	int index=0;
+    	for(Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
+    		AlternateLocation current = (AlternateLocation)iter.next();
+    		byte [] addr = current.getHost().getInetAddress().getAddress();
+    		System.arraycopy(addr,0,ret,index,4);
+    		ByteOrder.short2beb((short)
+    				current.getHost().getPort(),ret,index+4 );
+    		index+=6;
+    	}
+    	return ret;
+    }
 }
