@@ -15,6 +15,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.oroinc.text.regex.*;
+import java.util.*;
 
 public class FileManager{
 
@@ -80,16 +81,28 @@ public class FileManager{
         // int length = _extensions.length;
     }
 
-    public boolean hasExtension(String filename) {
+	public boolean hasExtension(String filename) {
+		int begin = filename.lastIndexOf(".") + 1;
+
+		if (begin == -1) 
+			return false;
+
+		int end = filename.length();
+		String ext = filename.substring(begin, end);
+		
         int length = _extensions.length;
         for (int i = 0; i < length; i++) {
-            if (filename.indexOf(_extensions[i]) != -1)
+            if (ext.equalsIgnoreCase(_extensions[i])) {
                 return true;
+            }
         }
-    
         return false;
+    		
+	}
 
-    }
+
+
+
     
     public synchronized void addFile(String path) { 
         File myFile = new File(path);  
@@ -126,11 +139,37 @@ public class FileManager{
 
     public synchronized void addDirectories(String dir_names) {
     
-        String[] dirs = HTTPUtil.stringSplit(dir_names, ';');
+        String[] names = HTTPUtil.stringSplit(dir_names, ';');
 
-        int length = dirs.length;
+		// need to see if there are duplicated directories...
 
-        for (int i=0; i < length; i++) {
+		java.util.Hashtable hash = new java.util.Hashtable();
+		
+		int size = names.length;
+
+		for (int i = 0; i < size; i++) {
+			if (!hash.containsKey(names[i]))
+				hash.put(names[i], names[i]);
+		}
+		
+		int hashsize = hash.size();
+
+		String[] dirs = new String[hashsize];
+
+		int j=0;
+
+		for(Enumeration e = hash.keys(); e.hasMoreElements() ;) {
+			dirs[j++] = (String)e.nextElement();
+		}
+		
+
+		// Collection c = hash.values();
+
+		// String[] dirs = (String[])c.toArray();
+
+        // int length = dirs.length;
+
+        for (int i=0; i < hashsize; i++) {
             addDirectory(dirs[i]);
         }
     
