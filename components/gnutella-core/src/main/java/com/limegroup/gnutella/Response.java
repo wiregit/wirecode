@@ -75,18 +75,26 @@ public class Response {
      */
     public Response(String betweenNulls, long index, long size, String name){
         this(index,size,name,""); // reuse standard constructor
+
         //now handle between-the-nulls
-        StringTokenizer stok = new StringTokenizer(betweenNulls,"\u001c"); // HUGE v0.93 GEM delimiter
+		// \u001c is the HUGE v0.93 GEM delimiter
+        StringTokenizer stok = new StringTokenizer(betweenNulls,"\u001c"); 
         while(stok.hasMoreTokens()) {
             this.handleLegacyOrGemExtensionString(stok.nextToken());
         }
     }
     
     protected void handleLegacyOrGemExtensionString(String ext) {      
-        if (ext.startsWith("urn:")||ext.startsWith("URN:")) {
-            // it's a HUGE v0.93 URN name for the same files
-            if (urns == null) urns = new HashSet();
-            addUrn(ext);
+		if(URN.isURN(ext)) {
+			// it's a HUGE v0.93 URN name for the same files
+			try {
+				URN urn = URNFactory.createURN(ext);
+				if (urns == null) urns = new HashSet();
+				this.addUrn(urn);
+			} catch(IOException e) {
+				// there was an error creating the URN, so return
+				return;
+			}
         } else {
             // it's legacy between-the-nulls gump
             //create an XML string out of the data between the nulls
@@ -247,7 +255,16 @@ public class Response {
         }
     }
     
-    public void addUrn(String urn){
+
+	/**
+	 * Adds a URN to the set of URNs for this <tt>Response</tt> instance.
+	 * Note that this method does no validity checking a requires that
+	 * the caller supply a valid URN.
+	 *
+	 * @param urn the <tt>URN</tt> instance to add to the set of URNs for
+	 *  this response
+	 */
+    public void addUrn(URN urn){
         if (urns == null) urns = new HashSet();
         urns.add(urn);
     }
