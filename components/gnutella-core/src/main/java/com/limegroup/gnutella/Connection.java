@@ -166,6 +166,9 @@ public class Connection {
         try {
             initializeWithoutRetry();
         } catch (BadHandshakeException e) {
+            //reset the flags
+            _isClientConnection = false;
+            _isSupernodeConnection = false;
             //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
             if (_negotiate 
