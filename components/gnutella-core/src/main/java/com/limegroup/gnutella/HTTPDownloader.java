@@ -152,7 +152,7 @@ public class HTTPDownloader implements Runnable {
 
     }
     
-    public void getState() {
+    public int getState() {
 	return _state;
     }
 
