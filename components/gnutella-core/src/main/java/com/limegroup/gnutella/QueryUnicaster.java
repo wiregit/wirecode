@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
+import java.util.Stack;
 
 /** This class runs a single thread which sends unicast UDP queries to a master
  * list of unicast-enabled hosts every n milliseconds.  It interacts with
@@ -11,7 +12,7 @@ public class QueryUnicaster {
 
     /** The time in between successive unicast queries.
      */
-    public static final int ITERATION_TIME = 666; // 2/3 of a second...
+    public static final int ITERATION_TIME = 100; // 1/10th of a second...
 
     // the instance of me....
     private static QueryUnicaster _instance = null;
@@ -27,6 +28,10 @@ public class QueryUnicaster {
      */
     private Vector _queries;
 
+    /** The unicast enabled hosts I should contact for queries.
+     */
+    private Stack _queryHosts;
+
     public static QueryUnicaster instance() {
         if (_instance == null)
             _instance = new QueryUnicaster();
@@ -36,6 +41,7 @@ public class QueryUnicaster {
     protected QueryUnicaster() {
         // construct DSes...
         _queries = new Vector();
+        _queryHosts = new Stack();
 
         // start service...
         _querier = new Thread() {
@@ -54,6 +60,7 @@ public class QueryUnicaster {
         while (_shouldRun) {
             try {
                 waitForQueries();
+                Endpoint toQuery = getUnicastHost();
 
                 Thread.sleep(ITERATION_TIME);
             }
@@ -79,9 +86,10 @@ public class QueryUnicaster {
     public boolean addQuery(QueryRequest query) {
         debug("QueryUnicaster.addQuery(): entered.");
         boolean retBool = false;
+        QueryBundle qb = new QueryBundle(query);
         synchronized (_queries) {
-            if (!_queries.contains(query)) 
-                retBool = _queries.add(query);
+            if (!_queries.contains(qb)) 
+                retBool = _queries.add(qb);
             if (retBool)
                 _queries.notify();
         }
@@ -89,14 +97,45 @@ public class QueryUnicaster {
         return retBool;
     }
 
-
-    /** @return true if the query was removed.
+    /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
-    public boolean removeQuery(QueryRequest query) {
-        debug("QueryUnicaster.removeQuery(): entered.");
-        boolean retBool = _queries.remove(query);
-        debug("QueryUnicaster.removeQuery(): returning " + retBool);
-        return retBool;
+    public void addUnicastEndpoint(ExtendedEndpoint endpoint) {
+        if (endpoint.getUnicastSupport()) {
+            synchronized (_queryHosts) {
+                _queryHosts.push(endpoint);
+                _queryHosts.notify();
+            }
+        }
+    }
+
+    /** May block if no hosts exist.
+     */
+    private ExtendedEndpoint getUnicastHost() throws InterruptedException {
+        synchronized (_queryHosts) {
+            if (_queryHosts.isEmpty())
+                _queryHosts.wait();
+            return (ExtendedEndpoint) _queryHosts.pop();
+        }
+    }
+
+
+    private class QueryBundle {
+        QueryRequest _qr = null;
+        int _numResults = 0;
+        /** The Set of Endpoints queried for this Query.
+         */
+        final Set _hostsQueried = new HashSet();
+
+        public QueryBundle(QueryRequest qr) {
+            _qr = qr;
+        }
+
+        public boolean equals(Object other) {
+            boolean retVal = false;
+            if (other instanceof QueryBundle)
+                retVal = _qr.equals(((QueryBundle)other)._qr);
+            return retVal;
+        }
     }
 
 
