@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.licenses;
 
+import java.io.*;
+
 /**
  * Our abstraction for a Creative Commons license.  This class is abstract
  * because we have specific subclasses which define rights.  This class does
@@ -9,16 +11,16 @@ package com.limegroup.gnutella.licenses;
  */
 public abstract class CreativeCommonsLicense {
 
-    private final boolean _allowsAttribution;
-    private final boolean _allowsNoncommercialUse;
+    private final boolean _requiresAttribution;
+    private final boolean _allowsNoncommercialUseOnly;
     private final boolean _disallowsDerivateWorks;
     private final boolean _isShareAlike;
 
     /**
      * Does some sanity checking for the license.
      */
-    protected CreativeCommonsLicense(boolean allowsAttribution,
-                                     boolean allowsNoncommercialUse,
+    protected CreativeCommonsLicense(boolean requiresAttribution,
+                                     boolean allowsNoncommercialUseOnly,
                                      boolean disallowsDerivativeWorks,
                                      boolean isShareAlike) 
         throws IllegalArgumentException {
@@ -26,10 +28,17 @@ public abstract class CreativeCommonsLicense {
         if (disallowsDerivativeWorks && isShareAlike)
             throw new IllegalArgumentException("Can't disallow derivative works if you Share Alike!!");
         
-        _allowsAttribution = allowsAttribution;
-        _allowsNoncommercialUse = allowsNoncommercialUse;
+        _requiresAttribution = requiresAttribution;
+        _allowsNoncommercialUseOnly = allowsNoncommercialUseOnly;
         _disallowsDerivateWorks = disallowsDerivativeWorks;
         _isShareAlike = isShareAlike;
+    }
+
+    /** @return null if no license exists, or the specific subclass of a
+     *  CreativeCommonsLicense.
+     */
+    public CreativeCommonsLicense deriveLicense(File file) {
+        return null;
     }
 
 
@@ -37,13 +46,13 @@ public abstract class CreativeCommonsLicense {
      *  your copyrighted work and derivative works based upon it but only if 
      *  they give you credit. 
      */
-    public boolean allowsAttribution() { return _allowsAttribution; }
+    public boolean requiresAttribution() { return _requiresAttribution; }
     
     /** @return true if You let others copy, distribute, display, and perform 
      *  your work and derivative works based upon it but for noncommercial 
      *  purposes only. 
      */
-    public boolean allowsNoncommercialUse() { return _allowsNoncommercialUse; }
+    public boolean allowsNoncommercialUseOnly() { return _allowsNoncommercialUseOnly; }
 
     /** @return true if You let others copy, distribute, display, and perform 
      *  only verbatim copies of your work, not derivative works based upon it. 
