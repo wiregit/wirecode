@@ -16,13 +16,13 @@ import org.apache.commons.logging.*;
  */
 class NIOOutputStream implements ReadHandler {
     
-    private static final Log LOG = LogFactory.getLog(NIOInputStream.class);
+    private static final Log LOG = LogFactory.getLog(NIOOutputStream.class);
     
     private final NIOSocket handler;
     private final SocketChannel channel;
     private final OutputStream sink;
     private final Pipe.SourceChannel source;
-    private final ByteBuffer buffer;
+    private ByteBuffer buffer;
     
     /**
      * Constructs a new pipe to allow SocketChannel's reading to funnel
@@ -31,13 +31,21 @@ class NIOOutputStream implements ReadHandler {
     NIOOutputStream(NIOSocket handler, SocketChannel channel) throws IOException {
         this.handler = handler;
         this.channel = channel;
-        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         
         Pipe pipe = Pipe.open();
         pipe.sink().configureBlocking(true);
         sink = Channels.newOutputStream(pipe.sink());
         source = pipe.source();
         source.configureBlocking(false);
+    }
+    
+    /**
+     * Initializes the internal ByteBuffer & registers the source for selection.
+     */
+    void init() {
+        if(buffer != null)
+            throw new IllegalStateException("already init'd!");
+        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         NIODispatcher.instance().registerRead(source, this);
     }
     
@@ -52,8 +60,12 @@ class NIOOutputStream implements ReadHandler {
      * Notification that a read can happen on the SourceChannel.
      */
     public boolean handleRead() throws IOException {
+        int read = 0;
+        
         // read everything we can.
-        while(buffer.hasRemaining() && source.read(buffer) != 0);
+        while(buffer.hasRemaining() && (read = source.read(buffer)) > 0);
+        if(read == -1)
+            throw new IOException("closed pipe.");
         
         // If there's data in the buffer, we're interested in writing.
         if(buffer.position() > 0)
@@ -67,10 +79,9 @@ class NIOOutputStream implements ReadHandler {
     /**
      * Notification that a write can happen on the SocketChannel.
      */
-    boolean writeChannel() throws IOException {
-        // write everything we can.
+    boolean writeChannel() throws IOException {// write everything we can.
         buffer.flip();
-        while(buffer.hasRemaining() && channel.write(buffer) != 0);
+        while(buffer.hasRemaining() && channel.write(buffer) > 0);
         buffer.compact();
         
         // If there's room in the buffer, we're interested in reading.

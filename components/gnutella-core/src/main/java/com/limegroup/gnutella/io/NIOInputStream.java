@@ -23,7 +23,7 @@ class NIOInputStream implements WriteHandler {
     private final SocketChannel channel;
     private final InputStream source;
     private final Pipe.SinkChannel sink;
-    private final ByteBuffer buffer;
+    private ByteBuffer buffer;
     
     /**
      * Constructs a new pipe to allow SocketChannel's reading to funnel
@@ -32,13 +32,22 @@ class NIOInputStream implements WriteHandler {
     NIOInputStream(NIOSocket handler, SocketChannel channel) throws IOException {
         this.handler = handler;
         this.channel = channel;
-        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         
         Pipe pipe = Pipe.open();
         sink = pipe.sink();
         sink.configureBlocking(false);
         pipe.source().configureBlocking(true);
         source = Channels.newInputStream(pipe.source());
+    }
+    
+    /**
+     * Initializes the internal ByteBuffer & registers the sink for selection.
+     */
+    void init() {
+        if(buffer != null)
+            throw new IllegalStateException("already init'd!");
+
+        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         NIODispatcher.instance().registerWrite(sink, this);
     }
     
@@ -53,13 +62,17 @@ class NIOInputStream implements WriteHandler {
      * Notification that a read can happen on the SocketChannel.
      */
     boolean readChannel() throws IOException {
+        int read = 0;
+        
         // read everything we can.
-        while(buffer.hasRemaining() && channel.read(buffer) != 0);
+        while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
+        if(read == -1)
+            throw new IOException("channel closed.");
         
         // If there's data in the buffer, we're interested in writing.
         if(buffer.position() > 0)
             NIODispatcher.instance().interestWrite(sink);
-        
+
         // if there's room in the buffer, we're interested in more reading ...
         // if not, we're not interested in more reading.
         return buffer.hasRemaining();
@@ -71,7 +84,7 @@ class NIOInputStream implements WriteHandler {
     public boolean handleWrite() throws IOException {
         // write everything we can.
         buffer.flip();
-        while(buffer.hasRemaining() && sink.write(buffer) != 0);
+        while(buffer.hasRemaining() && sink.write(buffer) > 0);
         buffer.compact();
         
         // If there's room in the buffer, we're interested in reading.

@@ -80,13 +80,15 @@ class NIODispatcher implements Runnable {
     /** Registers a SelectableChannel as being interested in a write again. */
     void interestWrite(SelectableChannel channel) {
         SelectionKey sk = channel.keyFor(selector);
-        sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
+        if(sk != null)
+            sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
     }
     
     /** Registers a SelectableChannel as being interested in a read again. */
     void interestRead(SelectableChannel channel) {
         SelectionKey sk = channel.keyFor(selector);
-        sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
+        if(sk != null)
+            sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
     }
     
     /**
@@ -166,7 +168,6 @@ class NIODispatcher implements Runnable {
         if (!sk.isValid())
             return;
         
-        SocketChannel channel = (SocketChannel)sk.channel();
         boolean more = handler.handleRead();
         if(!more)
             sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
@@ -185,10 +186,10 @@ class NIODispatcher implements Runnable {
         if (!sk.isValid())
             return;
         
-        SocketChannel channel = (SocketChannel)sk.channel();
         boolean more  = handler.handleWrite();
         if(!more)
             sk.interestOps(sk.interestOps() & ~SelectionKey.OP_WRITE);
+            
         // else it's already set.
     }
     
@@ -217,6 +218,7 @@ class NIODispatcher implements Runnable {
                 attachment.handleIOException(iox);
             }
         }
+        l.clear();
     }
     
     /**
@@ -227,6 +229,7 @@ class NIODispatcher implements Runnable {
         int n = -1;
                 
         while(true) {
+            
             addPendingItems();
 
             LOG.debug("Selecting");

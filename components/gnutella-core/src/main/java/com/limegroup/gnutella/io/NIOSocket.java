@@ -32,10 +32,12 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     NIOSocket(Socket s) throws IOException {
         channel = s.getChannel();
         socket = s;
-        NIODispatcher.instance().registerReadWrite(channel, this);
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
+        NIODispatcher.instance().registerReadWrite(channel, this);
         connectedTo = s.getInetAddress();
+        writer.init();
+        reader.init();
     }
     
     public NIOSocket() throws IOException {
@@ -164,10 +166,12 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
                     throw new SocketTimeoutException("couldn't connect in " + timeout + " milliseconds");
                     
             }
-            
-            if(LOG.isTraceEnabled())
-                LOG.trace("Connected to: " + addr);
         }
+        
+        if(LOG.isTraceEnabled())
+            LOG.trace("Connected to: " + addr);
+        writer.init();
+        reader.init();
     }
     
     public SocketChannel getChannel() {
