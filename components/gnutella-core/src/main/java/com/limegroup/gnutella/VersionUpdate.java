@@ -26,10 +26,7 @@ import com.limegroup.gnutella.util.Launcher;
 
 public class VersionUpdate
 {
-
-	private String VERSION_FILE = "version.txt";
-	private static final VersionUpdate _updater = new VersionUpdate();
-	
+	private static final VersionUpdate _updater = new VersionUpdate();	
 	private String _latest;
 	private String _newVersion;
 	private String _currentDirectory;
@@ -401,7 +398,7 @@ public class VersionUpdate
 					line = br.readLine();
 				}
 				// close the buffered reader and the file reader
-				// the readers do not flush
+				// the readers, of course, do not flush
 				br.close();
 				fr.close();
 
