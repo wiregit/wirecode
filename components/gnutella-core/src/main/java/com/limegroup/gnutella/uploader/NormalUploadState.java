@@ -75,6 +75,7 @@ public final class NormalUploadState implements HTTPMessage {
 			if(_fileSize < _uploadBegin)
 				throw new IOException("Invalid Range");
 			
+            
 			// Initial OK	
 			if( _uploadBegin==0 && _amountRequested==_fileSize ) {
 				ostream.write("HTTP/1.1 200 OK\r\n");
@@ -107,7 +108,7 @@ public final class NormalUploadState implements HTTPMessage {
 			//
 			// _uploadEnd is an EXCLUSIVE index internally, but HTTP uses
 			// an INCLUSIVE index.
-			if (_uploadBegin != 0) {
+			if (_uploadBegin != 0 || _amountRequested != _fileSize) {
 			    ostream.write("Content-Range: bytes " + _uploadBegin  +
 				    "-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n");
 			}
