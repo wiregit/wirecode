@@ -80,7 +80,7 @@ public final class RouterService {
 	/**
 	 * Initialize the class that manages all TCP connections.
 	 */
-    private static final ConnectionManager manager =
+    private static ConnectionManager manager =
 		new ConnectionManager(authenticator);
 
 	/**
