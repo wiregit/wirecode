@@ -349,6 +349,17 @@ public class Connection implements IpPort {
     }
 
     /**
+     * Call this method if you want to send your neighbours a message with your
+     * updated capabilities.
+     */
+    protected void sendUpdatedCapabilities() {
+        try {
+            if(_headers.supportsVendorMessages())
+                send(CapabilitiesVM.instance());
+        } catch (IOException iox) { }
+    }
+
+    /**
      * Call this method when you want to handle us to handle a VM.  We may....
      */
     protected void handleVendorMessage(VendorMessage vm) {
@@ -1454,7 +1465,7 @@ public class Connection implements IpPort {
      */
     public int getRemoteHostCapabilitySelector() {
         if (_capabilities != null)
-            return _capabilities.supportsCapabilityQueries();
+            return _capabilities.supportsFeatureQueries();
         return -1;
     }
 

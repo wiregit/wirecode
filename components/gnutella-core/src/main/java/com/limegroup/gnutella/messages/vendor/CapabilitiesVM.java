@@ -1,8 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
@@ -46,7 +45,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * The version of the latest simpp version this node knows about. 
      */
-    private int _simppVersion;
+    private static int _simppVersion;
 
     public static final int VERSION = 0;
 
@@ -118,7 +117,7 @@ public final class CapabilitiesVM extends VendorMessage {
         smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
                                         FEATURE_SEARCH_MAX_SELECTOR);
         hashSet.add(smp);
-        smp=new SupportedMessageBlock(SIMPP_CAPABILITIES_BYTES, _simppVersion);
+        smp=new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES, _simppVersion);
         hashSet.add(smp);
     }
 
@@ -162,7 +161,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /** @return true if 'what is new' capability query feature is supported.
      */
     public boolean supportsWhatIsNew() {
-        return supportsCapabilityQueries() > 0;
+        return supportsFeatureQueries() > 0;
     }
 
     // override super
@@ -177,6 +176,14 @@ public final class CapabilitiesVM extends VendorMessage {
         return false;
     }
     
+    public static void updateSimppVersion(int newSimppVersion) {
+        Assert.that(newSimppVersion > _simppVersion,"bad new simpp version");
+        _simppVersion = newSimppVersion;
+        //nullify the older instance so a newer one is created with the correct
+        //simppVersion, a new _capabilitiesSupported will be created
+        _instance = null;
+    }
+
     
     // override super
     public int hashCode() {

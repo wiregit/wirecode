@@ -417,7 +417,7 @@ public class ManagedConnection extends Connection
                         query.getCapabilitySelector());
             else if (isSupernodeSupernodeConnection())
                 return (getRemoteHostCapabilitySelector() >=  
-                        CapabilitiesVM.CAPABILITY_MIN_SELECTOR);
+                        CapabilitiesVM.FEATURE_SEARCH_MIN_SELECTOR);
             else return false;
         }
         return hitsQueryRouteTable(query);
