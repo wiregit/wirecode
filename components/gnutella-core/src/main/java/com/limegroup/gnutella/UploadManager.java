@@ -1374,7 +1374,6 @@ public final class UploadManager implements BandwidthTracker {
         upman.reportUploadSpeed(100000, 1000000);
         upman.reportUploadSpeed(100000, 1000000);
         Assert.that(upman.measuredUploadSpeed()==80);
-        System.out.println("passed");
     }
 
 }
