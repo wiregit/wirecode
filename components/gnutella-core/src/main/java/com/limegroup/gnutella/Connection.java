@@ -442,7 +442,6 @@ public class Connection implements IpPort {
             else
                 initializeIncoming();
 
-            _headers = HandshakeResponse.createResponse(HEADERS_READ);
             _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
 
             _connectionTime = System.currentTimeMillis();
@@ -549,13 +548,14 @@ public class Connection implements IpPort {
 				
 
 			//3. Read the Gnutella headers. 
-			readHeaders();
+			readHeaders(Constants.TIMEOUT);
 
             //Terminate abnormally if we read something other than 200 or 401.
             HandshakeResponse theirResponse = 
                 HandshakeResponse.createRemoteResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
+			_headers = theirResponse;
             Assert.that(theirResponse != null, "null theirResponse");
 
             int code = theirResponse.getStatusCode();
@@ -592,10 +592,10 @@ public class Connection implements IpPort {
 
             //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
 			//   and headers.
-			Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");
+			Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");			
             HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(theirResponse, true);
-
+            
             Assert.that(ourResponse != null, "null ourResponse");
             writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
@@ -728,7 +728,7 @@ public class Connection implements IpPort {
             HandshakeResponse theirResponse = 
                 HandshakeResponse.createRemoteResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(),
-                    HEADERS_READ);
+                    HEADERS_READ);           
 
 
             //Decide whether to proceed.
