@@ -94,6 +94,12 @@ public class ConnectionManager {
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
 
+    /**
+     * Minimum umber of connections that a supernode with leaf connections,
+     * must have
+     */
+    private static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
+    
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_SUPERNODES headers. */
     private int MAX_SUPERNODE_ENDPOINTS=10;
@@ -215,6 +221,11 @@ public class ConnectionManager {
                      _incomingConnections++;
              }                  
              
+             //if a leaf connected to us, ensure that we have enough non-leaf
+             //connections opened
+             if(connection.isSupernodeClientConnection())
+                ensureConnectionsForSupernode();
+             
              sendInitialPingRequest(connection);
              connection.loopForMessages();
          } catch(IOException e) {
@@ -275,6 +286,19 @@ public class ConnectionManager {
         adjustConnectionFetchers();
     }
 
+    /**
+     * Ensures that if a node is acting as supernode, it has atleast 
+     * some minimum number of connections opened
+     */ 
+    public synchronized void ensureConnectionsForSupernode(){
+        //Note: not holding the _incomingConnectionsLock as just reading the 
+        //volatile value
+        if(_incomingClientConnections > 0 
+            && _keepAlive < MIN_CONNECTIONS_FOR_SUPERNODE){
+            setKeepAlive(MIN_CONNECTIONS_FOR_SUPERNODE);
+        }
+    }
+    
     /**
      * Tells whether the node is gonna be a supernode or not
      * @return true, if supernode, false otherwise
@@ -996,12 +1020,12 @@ public class ConnectionManager {
      * stricter.  
      */
     public boolean allowClientMode() {
-        //if is a supernode, and have client connections, 
-        //or the supernode status is forced, dont change mode
-        if (_settings.getForceSupernodeMode() 
-            || (isSupernode() && _incomingClientConnections > 0))
-            return false;
-        else
+        //if is a supernode, and have client connections, 
+        //or the supernode status is forced, dont change mode
+        if (_settings.getForceSupernodeMode() 
+            || (isSupernode() && _incomingClientConnections > 0))
+            return false;
+        else
             return true;
     }
     
