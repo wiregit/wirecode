@@ -863,7 +863,9 @@ public class RouterService {
      * queries.
      */
     public static byte[] newQueryGUID() {
-        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
+        if (isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe() &&
+            NetworkUtils.isValidAddress(getAddress()) &&
+            NetworkUtils.isValidPort(getPort()))
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
