@@ -9,7 +9,7 @@ import java.net.*;
  * may want to access.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class CommonUtils {
+public final class CommonUtils {
 
 	/** 
 	 * Constant for the current version of LimeWire.
@@ -17,9 +17,9 @@ public class CommonUtils {
 	private static final String LIMEWIRE_VERSION = "1.8";
 	
 	/** 
-	 * Variable for the java system properties.
+	 * Constant for the java system properties.
 	 */
-	private static Properties _props;
+	private static final Properties PROPS = System.getProperties();
 
 	/** 
 	 * Variable for whether or not we're on Windows.
@@ -82,9 +82,6 @@ public class CommonUtils {
 	 * Initialize the settings statically. 
 	 */
 	static {
-		// get the system properties object
-		_props = System.getProperties();
-
 		// get the operating system
 		String os = System.getProperty("os.name");
 
@@ -162,21 +159,21 @@ public class CommonUtils {
 	 * Returns the version of java we're using.
 	 */
 	public static String getJavaVersion() {
-		return _props.getProperty("java.version");
+		return PROPS.getProperty("java.version");
 	}
 
 	/**
 	 * Returns the operating system.
 	 */
 	public static String getOS() {
-		return _props.getProperty("os.name");;
+		return PROPS.getProperty("os.name");;
 	}
 
 	/**
 	 * Returns the user's current working directory.
 	 */
 	public static String getCurrentDirectory() {
-		return _props.getProperty("user.dir");
+		return PROPS.getProperty("user.dir");
 	}
 
     /**
@@ -312,5 +309,4 @@ public class CommonUtils {
     public static boolean isPrivateAddress() {
 		return _isPrivateAddress;
     }
-
 }
