@@ -409,7 +409,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     //////////////////////////////////////////////////////////////////
 
     public static Integer numUPs() {
-        return new Integer(4);
+        return new Integer(3);
     }
 
     public static ActivityCallback getActivityCallback() {
