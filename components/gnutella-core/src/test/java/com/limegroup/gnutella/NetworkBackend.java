@@ -13,6 +13,10 @@
  * 	boolean success = NetworkBackend.launch(true, 6346, 9000, "localhost",10000, 
  * 			"com.limegroup.gnutella.mypackage.MyNetworkClientCallbackStub");  
  * 
+ * More often than not you will probably use nested classes for callbacks.  Pass their full name
+ * as you see it in stack traces.  Example:
+ *   "com.limegroup.gnutella.EnclosingClass$NestedClass"
+ * 
  * 
  * The return value will tell you whether the launch was successful.  You may want to wait some
  * time and check if the client has connected by calling the ".isConnected()" method of the server.
@@ -55,7 +59,20 @@ public class NetworkBackend extends Backend {
 		int serverPort = Integer.parseInt(ar[4]);
 		
 		//use reflection to get us a callback.. it better be in the classpath!
-		Class callbackClass = Class.forName(ar[5]);
+		Class callbackClass;
+		if (ar[5].indexOf("$")==-1)
+			callbackClass= Class.forName(ar[5]); //top-level class
+		else{
+			//nested class. fun fun fun
+			String enclosingClassName = ar[5].substring(0,ar[5].indexOf("$"));
+			String nestedClassName = ar[5].substring(
+						ar[5].indexOf("$")+1,ar[5].length());
+			
+			Class enclosingClass = Class.forName(enclosingClassName);
+			callbackClass = PrivilegedAccessor.getClass(enclosingClass,nestedClassName);
+			
+		}
+			
 		Object []callbackArgs = new Object[2];
 		callbackArgs[0] = host;
 		callbackArgs[1] = new Integer(serverPort);
