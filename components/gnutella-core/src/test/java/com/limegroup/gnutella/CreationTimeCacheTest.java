@@ -496,7 +496,7 @@ public class CreationTimeCacheTest
             toExclude = null;
         }
 
-        public FileDesc getAnyFileDescForUrn(URN urn){
+        public FileDesc getFileDescForUrn(URN urn){
             if (fd == null) {
                 File cacheFile = new File(_settingsDir, CREATION_CACHE_FILE);
                 Set urnSet = new HashSet();
