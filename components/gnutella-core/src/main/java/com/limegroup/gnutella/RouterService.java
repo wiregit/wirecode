@@ -261,7 +261,7 @@ public class RouterService {
   	    
   	    Thread t = new ManagedThread(r);
   	    t.setName("async gui initializer");
-  	    t.setDaemon(false);
+  	    t.setDaemon(true);
   	    t.start();
   	}
   	
