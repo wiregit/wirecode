@@ -19,20 +19,6 @@ public class StandardMessageRouter extends MessageRouter {
         _fileManager = fm;
     }
 
-    /**
-     * Override of handleQueryRequest to send query strings to the callback.
-     */
-    protected void handleQueryRequest(QueryRequest queryRequest,
-                                      ReplyHandler receivingConnection) {
-        // Apply the personal filter to decide whether the callback
-        // should be informed of the query
-        if (!receivingConnection.isPersonalSpam(queryRequest)) {
-            _callback.handleQueryString(queryRequest.getQuery());
-        }
-
-        super.handleQueryRequest(queryRequest, receivingConnection);
-    }
-
 
     /**
      * Responds to the PingRequest by getting information from the FileManager
