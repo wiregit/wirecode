@@ -101,6 +101,20 @@ public class LimeXMLProperties
         + File.separator + "directmapping.xml";
     
     /**
+     * The property that denotes the 
+     * name of the file that contains the keywords we are interested in 
+     * answering queries for
+     */
+    private static final String KEYWORD_LIST_FILE = "KEYWORD_LIST_FILE";
+    /**
+     * name of the file that contains the keywords we are interested in 
+     * answering queries for
+     */
+    private static final String KEYWORD_LIST_FILE_DEF =  "etc"
+        + File.separator + "keywords.list";
+    
+    
+    /**
      * Constructor: Initializes various default values, and loads the settings
      * from the properties file.
      * It is made private so that all the accesses to the static settings that
@@ -210,6 +224,20 @@ public class LimeXMLProperties
 
         return getPath() + directMappingFile;   
     }
+    
+    /**
+     * Returns name of the file that contains the keywords we are interested in 
+     * answering queries for
+     */
+    public String getKeywordListFile()
+    {
+        String keywordListFile = _properties.getProperty(
+            KEYWORD_LIST_FILE, 
+            KEYWORD_LIST_FILE_DEF);
+
+        return getPath() + keywordListFile;   
+    }
+    
     
     /**
      * Returns the files pertaining to the XML Schemas used for 
