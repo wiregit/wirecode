@@ -68,6 +68,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
     
     public void tearDown() throws Exception {
+        assertNotNull("in should not be null", in);
 		in.close();
         out.close();
     }
@@ -81,6 +82,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		
 		out.initialize();
 		in = acceptor.accept();
+        assertNotNull("in should not be null", in);
 		assertTrue("out.write should be deflated", out.isWriteDeflated());
 		assertTrue("out.read should be deflated", out.isReadDeflated());
 		assertTrue("in.write should be deflated", in.isWriteDeflated());
@@ -97,6 +99,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		
 		out.initialize();
 		in = acceptor.accept();
+        assertNotNull("in should not be null", in);
 		assertTrue("out.write should be !deflated",! out.isWriteDeflated());
 		assertTrue("out.read should be !deflated", !out.isReadDeflated());
 		assertTrue("in.write should be !deflated", !in.isWriteDeflated());
@@ -358,8 +361,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         startOutputRunner(out);
         
 
-        //System.out.println("ManagedConnectionBufferTest::testReorderBuffer::"+
-          //  "buffer size: "+((BIOMessageWriter)out.getWriter()).size());
         //3. Read them...now in different order!
         m=in.receive(); //watchdog ping
         
@@ -723,7 +724,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         BIOMessageWriter writer = 
             (BIOMessageWriter)PrivilegedAccessor.getValue(obj, "DELEGATE"); 
         Object writeLock = 
-            PrivilegedAccessor.getValue(writer, "OUTPUT_QUEUE_LOCK");
+            PrivilegedAccessor.getValue(writer, "QUEUE_LOCK");
         Method close = 
             PrivilegedAccessor.getMethod(writer, "close", new Class[0]);
         synchronized(writeLock) {
