@@ -540,7 +540,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             public void run() {
                 try {
                     upman.acceptUpload(HTTPRequestMethod.GET,sa, false);
-                catch(Throwable t) {
+                } catch(Throwable t) {
                     // make sure we know about errors.
                     ErrorService.error(t);
                 }
