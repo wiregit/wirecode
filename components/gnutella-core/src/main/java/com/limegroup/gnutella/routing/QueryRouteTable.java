@@ -520,6 +520,7 @@ public class QueryRouteTable {
         //3. encode-decode test--with compression
         //qrt={good/1, book/1, bad/3}
         qrt2=new QueryRouteTable(1000, (byte)7);
+        Assert.that(!qrt2.isPatched());
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             System.out.println("Got "+m);
@@ -531,7 +532,10 @@ public class QueryRouteTable {
             if (m instanceof PatchTableMessage)
                 Assert.that(((PatchTableMessage)m).getCompressor()
                     ==PatchTableMessage.COMPRESSOR_DEFLATE);
+            if (iter.hasNext())
+                Assert.that(! qrt2.isPatched());
         }
+        Assert.that(qrt2.isPatched());
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
 
         System.out.println();
@@ -661,5 +665,15 @@ public class QueryRouteTable {
         qrt2.addAll(qrt);
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
         Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
+
+        //6. Test sequence numbers.
+//          qrt=new QueryRouteTable();
+//          PatchTableMessage patch=new PatchTableMessage((short)2, (short)2,
+//              PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+//          try {
+//              qrt.update(patch);
+//              Assert.that(false);
+//          } catch (BadPacketException e) { }
+        
     }
 }
