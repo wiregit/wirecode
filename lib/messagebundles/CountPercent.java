@@ -443,7 +443,7 @@ public class CountPercent {
         buildStatus(page, langsStarted,
 "       are partly translated but still unfinished, and their use in LimeWire\n" +
 "       may be difficult for native language users. Providing a more complete\n" +
-"       translation would be very much appreciated.\n");
+"       translation would be very much appreciated.");
         buildStatus(page, langsEmbryonic,
 "       are only embryonic and actually need a complete translation.\n" +
 "       The current files are only there for demonstration purpose.");
@@ -458,7 +458,7 @@ public class CountPercent {
             LanguageInfo l = (LanguageInfo)i.next();
             if (first)
                 page.append(
-"      <li>");
+"      <li>\n");
             else if (!i.hasNext())
                 page.append(" and\n");
             else
