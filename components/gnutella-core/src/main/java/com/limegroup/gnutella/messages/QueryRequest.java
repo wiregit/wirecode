@@ -1155,6 +1155,15 @@ public class QueryRequest extends Message implements Serializable{
         return false;
     }
 
+
+    /**
+     * Returns true if this query is for 'What is new?' content, i.e. usually
+     * the top 3 YOUNGEST files in your library.
+     */
+    public boolean isWhatIsNewRequest() {
+        return false;
+    }
+
     /** Returns the address to send a out-of-band reply to.  Only useful
      *  when desiresOutOfBandReplies() == true.
      */

@@ -27,6 +27,7 @@ import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.TreeMap;
 import com.sun.java.util.collections.TreeSet;
 
@@ -1237,6 +1238,40 @@ public abstract class FileManager {
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
         boolean includeXML = shouldIncludeXMLInResponse(request);
+
+        //Special case: return up to 3 of your 'youngest' files.
+        if (request.isWhatIsNewRequest()) {
+            // see if there are any files to send....
+            Iterator iter = CreationTimeCache.instance().getFiles();
+            if (!iter.hasNext())
+                return EMPTY_RESPONSES;
+            
+            // get the appropriate responses
+            Set responses = new HashSet();
+            while (iter.hasNext() && (responses.size() < 3)) {
+                URN currURN = (URN) iter.next();
+                FileDesc desc = getFileDescForUrn(currURN);
+
+        		// If the file was unshared or is an incomplete file,
+        		// DO NOT SEND IT.
+                if (desc==null || desc instanceof IncompleteFileDesc) 
+                    continue;    
+
+                // Formulate the response
+                Response r = new Response(desc);
+                if(includeXML)
+                    addXMLToResponse(r, desc);
+                
+                // Cache it
+                responses.add(r);
+            }
+
+            // send them off
+            if (responses.size()==0)
+                return EMPTY_RESPONSES;
+            else 
+                return (Response[]) responses.toArray(new Response[responses.size()]);
+        }
 
         //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,

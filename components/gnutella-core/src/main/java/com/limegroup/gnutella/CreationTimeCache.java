@@ -91,6 +91,21 @@ public final class CreationTimeCache {
         if (time <= 0) throw new IllegalArgumentException("Bad Time.");
         TIME_MAP.put(urn, new Long(time));
     }
+
+
+    /**
+     * Returns an iterator of URNs, from 'youngest' to 'oldest'.
+     * @return the iterator returns younger URNs first.
+     */
+    public synchronized Iterator getFiles() {
+        Iterator iter = null;
+
+        // no implementation as of yet, need to change the implementation
+        // of this to make it quick....
+
+        return iter;
+    }
+
         
 	/**
 	 * Removes any stale entries from the map so that they will automatically
