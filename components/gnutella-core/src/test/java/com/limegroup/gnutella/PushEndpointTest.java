@@ -21,22 +21,18 @@ public class PushEndpointTest extends BaseTestCase {
 	public PushEndpointTest(String name) {
 		super(name);
 	}
-	
+	static Map m;
+	public static void globalSetUp () {
+	    try {
+	        m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,
+	                "GUID_PROXY_MAP");
+	    }catch(Exception bad){
+	        ErrorService.error(bad);
+	    }
+	}
     public static Test suite() {
         return buildTestSuite(PushEndpointTest.class);
     }
-    
-    
-    static Map m;
-    
-    public static void globalSetUp(){
-        try{
-            m= (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
-        }catch(Exception bad) {
-            ErrorService.error(bad);
-        }
-    }
-    
     
     public void testConstructors() throws Exception {
     	GUID guid1 = new GUID(GUID.makeGuid());
@@ -54,7 +50,6 @@ public class PushEndpointTest extends BaseTestCase {
     	set2.add(ppi2);
     	
     	PushEndpoint empty = new PushEndpoint(guid1.bytes());
-    	empty.updateProxies(true);
     	assertEquals(guid1,new GUID(empty.getClientGUID()));
     	assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies()));
     	assertEquals(0,empty.getProxies().size());
@@ -66,7 +61,6 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(0,one.supportsFWTVersion());
     	
     	PushEndpoint two = new PushEndpoint(guid2.bytes(),set2);
-    	two.updateProxies(true);
     	assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE,
     			PushEndpoint.getSizeBytes(two.getProxies()));
     	assertEquals(2,two.getProxies().size());
@@ -74,7 +68,6 @@ public class PushEndpointTest extends BaseTestCase {
     	
     	//test features
     	PushEndpoint three = new PushEndpoint(guid3.bytes(),set2,0x0,1);
-    	three.updateProxies(true);
     	assertGreaterThan(0,three.supportsFWTVersion());
     	assertEquals("1.1.1.1",three.getAddress());
     	assertEquals(6346,three.getPort());
@@ -106,7 +99,6 @@ public class PushEndpointTest extends BaseTestCase {
     	set6.add(ppi5);set6.add(ppi6);
     	
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	one.updateProxies(true);
     	
     	assertEquals(0,one.supportsFWTVersion());
     	byte [] network = one.toBytes();
@@ -120,12 +112,13 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(one,one_prim);
     	assertEquals(0,one_prim.supportsFWTVersion());
     	
+    	m.clear();
     	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,
     			0,2);
-    	six.updateProxies(true);
     	assertEquals(2,six.supportsFWTVersion());
     	network = six.toBytes();
     	assertEquals(PushEndpoint.getSizeBytes(six.getProxies()),network.length);
+    	
     	m.clear();
     	PushEndpoint four = PushEndpoint.fromBytes(network);
     	assertEquals(2,four.supportsFWTVersion());
@@ -136,17 +129,34 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(four.getProxies().size(),sent.size());
     	
     	// test a PE that carries its external address
+    	m.clear();
     	PushEndpoint ext = new PushEndpoint(guid2.bytes(),set6,
     			0,2, new IpPortImpl("1.2.3.4",5));
     	network = ext.toBytes();
     	assertEquals(ext.getSizeBytes(set6)+6,network.length);
     	
+    	m.clear();
     	PushEndpoint ext2 = PushEndpoint.fromBytes(network);
     	assertEquals(ext,ext2);
     	assertEquals("1.2.3.4",ext2.getAddress());
     	assertEquals(5,ext2.getPort());
     	assertEquals(4,ext2.getProxies().size());
-    
+    	
+    	// test that a PE with external address which can't do FWT 
+    	// does not use up the extra 6 bytes
+    	
+    	m.clear();
+    	PushEndpoint noFWT = new PushEndpoint(guid2.bytes(),set6,
+    	        0,0, new IpPortImpl("1.2.3.4",5));
+    	network = noFWT.toBytes();
+    	assertEquals(noFWT.getSizeBytes(set6),network.length);
+    	
+    	m.clear();
+    	PushEndpoint noFWT2 = PushEndpoint.fromBytes(network);
+    	assertEquals(noFWT,noFWT2);
+    	assertEquals(RemoteFileDesc.BOGUS_IP,noFWT2.getAddress());
+    	assertEquals(4,noFWT2.getProxies().size());
+    	m.clear();
     	
     }
     
@@ -173,13 +183,10 @@ public class PushEndpointTest extends BaseTestCase {
     	set6.add(ppi5);set6.add(ppi6);
     	
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	one.updateProxies(true);
     	
     	String httpString = one.httpStringValue();
     	
-    	m.clear();
     	PushEndpoint one_prim = new PushEndpoint(httpString);
-    	one_prim.updateProxies(true);
     	
     	
     	assertEquals(1,one_prim.getProxies().size());
@@ -189,12 +196,9 @@ public class PushEndpointTest extends BaseTestCase {
     	//now test a bigger endpoint with an ip in it
     	IpPort ip = new IpPortImpl("1.2.3.4",5);
        	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2,ip);
-       	six.updateProxies(true);
     	httpString = six.httpStringValue();
     	
-    	m.clear();
     	PushEndpoint four = new PushEndpoint(httpString);
-    	four.updateProxies(true);
     	    	
     	assertEquals(2,four.supportsFWTVersion());
     	assertEquals(4,four.getProxies().size());
@@ -205,43 +209,41 @@ public class PushEndpointTest extends BaseTestCase {
     	sent.retainAll(four.getProxies());
     	assertEquals(four.getProxies().size(),sent.size());
     	
+    	//now test an endpoint with an ip in it, but which does not support
+    	//FWT.  We should not get the ip in the http representation
+    	PushEndpoint noFWT = new PushEndpoint(guid2.bytes(),set1,0,0,ip);
+    	httpString = noFWT.httpStringValue();
+    	
+    	PushEndpoint parsed = new PushEndpoint(httpString);
+    	assertEquals(RemoteFileDesc.BOGUS_IP,parsed.getAddress());
+    	
     	//************* parsing tests *****************//
     	
     	//now an endpoint with a feature we do not understand
-    	m.clear();
     	
         PushEndpoint unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
-        unknown.updateProxies(true);
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	
     	//now an endpoint with the fwt header moved elsewhere
-    	m.clear();
     	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235");
-    	unknown.updateProxies(true);
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(1,unknown.supportsFWTVersion());
     	
     	//now an endpoint only with the guid
-    	m.clear();
     	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500");
-    	unknown.updateProxies(true);
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	
     	//now an endpoint only guid and port:ip
-    	m.clear();
     	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;5:1.2.3.4");
-    	unknown.updateProxies(true);
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	assertEquals("1.2.3.4",unknown.getAddress());
     	assertEquals(5,unknown.getPort());
     	
     	//now an endpoint only guid and two port:ips.. the second one should be ignored
-    	m.clear();
     	unknown = new PushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;5:1.2.3.4;6:2.3.4.5");
-    	unknown.updateProxies(true);
     	assertEquals(0,unknown.getProxies().size());
     	assertEquals(0,unknown.supportsFWTVersion());
     	assertEquals("1.2.3.4",unknown.getAddress());

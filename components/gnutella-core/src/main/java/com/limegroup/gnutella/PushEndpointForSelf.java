@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 /**
  * A push endpoint for myself.  This differs from the standard
@@ -51,10 +53,10 @@ public class PushEndpointForSelf extends PushEndpoint {
     }
     
     /**
-     * we always support the same fwt version
+     * we support the same FWT version if we support FWT at all
      */
     public int supportsFWTVersion() {
-    	return UDPConnection.VERSION;
+    	return UDPService.instance().canDoFWT() ? UDPConnection.VERSION : 0;
     }
     
     /**
@@ -90,7 +92,15 @@ public class PushEndpointForSelf extends PushEndpoint {
         return RouterService.getPort();
     }
     
-    protected boolean hasExternalAddress() {
-        return true;
+    protected IpPort getValidExternalAddress() {
+        try {
+            String addr = getAddress();
+            if (addr.equals(RemoteFileDesc.BOGUS_IP))
+                return null;
+            return new IpPortImpl(addr,getPort());
+            
+        }catch(UnknownHostException bad) {
+            return null;
+        }
     }
 }

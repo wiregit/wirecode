@@ -21,6 +21,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;
+import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -394,7 +395,10 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		Map m= (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
 		
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
-        PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2);
+        PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2,0,1,
+                new IpPortImpl("1.2.3.4",5));
+        PushEndpoint pe3 = new PushEndpoint(GUID.makeGuid(),proxies2,0,0,
+                new IpPortImpl("1.2.3.5",6));
 
         pe.updateProxies(true);
         pe2.updateProxies(true);
@@ -403,7 +407,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         assertNotNull(pe2.getProxies());
         
 		Set peSet = new HashSet();
-		peSet.add(pe);peSet.add(pe2);
+		peSet.add(pe);peSet.add(pe2);peSet.add(pe3);
         
 		RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
                 HugeTestUtils.URNS[0].httpStringValue(), 
@@ -413,16 +417,22 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
                 pe);
 		
 		RemoteFileDesc fwalled2 = new RemoteFileDesc(fwalled,pe2);
+		RemoteFileDesc fwalled3 = new RemoteFileDesc(fwalled,pe3);
 
 		assertEquals(proxies.size(),fwalled.getPushProxies().size());
 		
+		AlternateLocationCollection alc = AlternateLocationCollection.create(HugeTestUtils.URNS[0]);
+		
 		AlternateLocation firewalled = AlternateLocation.create(fwalled);
-		AlternateLocation firewalled2 = AlternateLocation.create(fwalled2);
+		AlternateLocation firewalled2 = 
+		    AlternateLocation.create(pe2.httpStringValue(),HugeTestUtils.URNS[0]);
+		AlternateLocation firewalled3 = 
+		    AlternateLocation.create(pe3.httpStringValue(),HugeTestUtils.URNS[0]);
 		
 		
-		_alCollection.add(firewalled);
+		alc.add(firewalled);
 		
-		byte [] data = _alCollection.toBytesPush(3);
+		byte [] data = alc.toBytesPush(3);
 		
 		assertLessThanOrEquals(41,data.length);
 		
@@ -433,18 +443,32 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		PushEndpoint received = (PushEndpoint)v.get(0);
 		assertEquals(pe,received);
 		
-		_alCollection.add(firewalled2);
+		// add a second pushLoc - one that should have IpPort info
+		alc.add(firewalled2);
 		
-		data = _alCollection.toBytesPush();
+		data = alc.toBytesPush();
 		
 		Set set = new HashSet(NetworkUtils.unpackPushEPs(data));
 		
 		assertEquals(2,set.size());
-		assertEquals(2,peSet.size());
+		assertEquals(3,peSet.size());
 		set.retainAll(peSet);
 		
 		assertEquals(2,set.size());
 		
+		// add a third push loc - one that should not have IpPort info
+		alc.add(firewalled3);
+		
+		data = alc.toBytesPush();
+		
+		set = new HashSet(NetworkUtils.unpackPushEPs(data));
+		
+		assertEquals(3,set.size());
+		assertEquals(3,peSet.size());
+		
+		set.retainAll(peSet);
+		
+		assertEquals(3,set.size());
     }
 }
 

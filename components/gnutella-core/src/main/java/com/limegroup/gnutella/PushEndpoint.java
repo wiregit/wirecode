@@ -250,10 +250,11 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	public byte [] toBytes() {
 	    Set proxies = getProxies();
 	    int payloadSize = getSizeBytes(proxies);
-	    if (hasExternalAddress())
+	    IpPort addr = getValidExternalAddress();
+	    if (addr != null && supportsFWTVersion() > 0)
 	        payloadSize+=6;
 		byte [] ret = new byte[payloadSize];
-		toBytes(ret,0,proxies);
+		toBytes(ret,0,proxies,addr);
 		return ret;
 	}
 	
@@ -263,13 +264,14 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	 * @param offset the offset within that byte [] to serialize
 	 */
 	public void toBytes(byte [] where, int offset) {
-		toBytes(where, offset, getProxies());
+		toBytes(where, offset, getProxies(),getValidExternalAddress());
 	}
 	
-	private void toBytes(byte []where, int offset, Set proxies) {
+	private void toBytes(byte []where, int offset, Set proxies, IpPort address) {
 	    
 	    int neededSpace = getSizeBytes(proxies);
-	    if (hasExternalAddress())
+	    int supportsFWT = supportsFWTVersion();
+	    if (address!=null && supportsFWT > 0)
 	        neededSpace+=6;
 	    
 	    if (where.length-offset < neededSpace)
@@ -278,7 +280,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		//store the number of proxies
 		where[offset] = (byte)(Math.min(4,proxies.size()) 
 		        | getFeatures() 
-		        | supportsFWTVersion() << 3);
+		        | supportsFWT << 3);
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,++offset,16);
@@ -286,18 +288,14 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		
 		//if we know the external address, store that too
 		//if its valid and not private and port is valid
-		if (hasExternalAddress()) {
-		    byte [] addr = getInetAddress().getAddress();
-		    int port = getPort();
-		    if (!getAddress().equals(RemoteFileDesc.BOGUS_IP) &&
-		            NetworkUtils.isValidAddress(addr) && 
-		            !NetworkUtils.isPrivateAddress(addr) &&
-		            NetworkUtils.isValidPort(port)) {
-		        System.arraycopy(addr,0,where,offset,4);
-		        offset+=4;
-		        ByteOrder.short2leb((short)getPort(),where,offset);
-		        offset+=2;
-		    }
+		if (address!=null && supportsFWT>0) {
+		    byte [] addr = address.getInetAddress().getAddress();
+		    int port = address.getPort();
+		    
+		    System.arraycopy(addr,0,where,offset,4);
+		    offset+=4;
+		    ByteOrder.short2leb((short)port,where,offset);
+		    offset+=2;
 		}
 		
 		//store the push proxies
@@ -316,8 +314,15 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		}
 	}
 	
-	protected boolean hasExternalAddress() {
-	    return _externalAddr!=null;
+	/**
+	 * 
+	 * @return an IpPort representing our valid external
+	 * address, or null if we don't have such.
+	 */
+	protected IpPort getValidExternalAddress() {
+	    if (!NetworkUtils.isValidExternalIpPort(_externalAddr))
+	        return null;
+	    return _externalAddr;
 	}
 	
 	/**
@@ -349,7 +354,8 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		if (data.length -offset < HEADER_SIZE+number*PROXY_SIZE)
 			throw new BadPacketException("not a valid PushEndpoint");
 		
-		if (data.length - offset >= HEADER_SIZE+(number+1)*PROXY_SIZE)
+		if (data.length - offset >= HEADER_SIZE+(number+1)*PROXY_SIZE 
+		        && version > 0)
 		    hasAddr=true;
 		
 		//get the guid
@@ -476,20 +482,22 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 				.append("/")
 				.append(fwtVersion)
 				.append(";");
-		}
 		
-		// append the external address of this endpoint if such exists
-		// and is valid, non-private and if the port is valid as well.
-		if (hasExternalAddress()) {
-		    String addr = getAddress();
-	        int port = getPort();
-	        if (!addr.equals(RemoteFileDesc.BOGUS_IP) && 
-	                NetworkUtils.isValidPort(port)){
-	            httpString.append(port)
-	            	.append(":")
-	            	.append(addr)
-	            	.append(";");
-	        }
+			// append the external address of this endpoint if such exists
+			// and is valid, non-private and if the port is valid as well.
+			IpPort address = getValidExternalAddress();
+			if (address!=null) {
+			    String addr = getAddress();
+			    int port = getPort();
+			    if (!addr.equals(RemoteFileDesc.BOGUS_IP) && 
+			            NetworkUtils.isValidPort(port)){
+			        httpString.append(port)
+			        .append(":")
+			        .append(addr)
+			        .append(";");
+			    }
+			}
+		
 		}
 		
 		int proxiesWritten=0;

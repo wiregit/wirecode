@@ -343,8 +343,10 @@ public final class NetworkUtils {
     	while (i < data.length ) {
     		PushEndpoint current = PushEndpoint.fromBytes(data,i);
     		i+=PushEndpoint.getSizeBytes(current.getProxies());
+    		
     		if (!current.getAddress().equals(RemoteFileDesc.BOGUS_IP))
     		    i+=6;
+    		
     		ret.add(current);
     	}
     	
@@ -357,6 +359,18 @@ public final class NetworkUtils {
     public static InetAddress getByAddress(byte[] addr) throws UnknownHostException {
         String addrString = NetworkUtils.ip2string(addr);
         return InetAddress.getByName(addrString);
+    }
+    
+    /**
+     * @return whether the IpPort is a valid external address.
+     */
+    public static boolean isValidExternalIpPort(IpPort addr) {
+        if (addr == null)
+            return false;
+        
+        return isValidAddress(addr.getAddress()) &&
+        	!isPrivateAddress(addr.getAddress()) &&
+        	isValidPort(addr.getPort());
     }
 }
 
