@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import junit.extensions.*;
@@ -14,66 +15,8 @@ import java.util.StringTokenizer;
  */
 public final class AlternateLocationCollectionTest extends TestCase {
 
-	private static final String[] validTimestampedLocs = {
-		"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z",
-		"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z",
-		"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z",
-		"X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z",
-		"http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z",
-		"http: //Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z"
-	};
-
-	private final String [] urnStrings = {
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-	};
-
-	private final String[] hostNameStrings = {
-		"www.limewire.com",
-		"www.limewire.org",
-		"www.cnn.com",
-		"www.download.com",
-		"www.news.com",
-		"www.help.com",
-		"www.columbia.edu",
-		"www.test.com",
-		"www.now.com",
-		"www.urn.com",
-		"jakarta.apache.org",
-		"www.junit.org",
-		"www.xerces.com",
-		"www.slahdot.org",
-		"www.media.com",
-		"www.espn.com",
-		"www.rr.com",
-		"www.light.com"
-	};
-
 	private Set _urnSet;
 	private Set _alternateLocations;
-
-	private File[] _fileArray;
-	private FileDesc[] _fileDescArray;
 
 	private AlternateLocationCollection _alCollection;
 
@@ -91,41 +34,64 @@ public final class AlternateLocationCollectionTest extends TestCase {
 
 	protected void setUp() {
 		_alternateLocations = new HashSet();
-		for(int i=0; i<hostNameStrings.length; i++) {
-			try {
-				URL url = new URL("http", hostNameStrings[i], 6346, "/test.htm");
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(url);
-				_alternateLocations.add(al);
-			} catch(IOException e) {
-				assertTrue("unexpected exception: "+e, false);
-			}
+		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
+			_alternateLocations.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[i]);
 		}
 
-		File curDir = CommonUtils.getCurrentDirectory();
-		File parDir = curDir.getParentFile();
-		_fileArray = parDir.listFiles();
-		_fileDescArray = new FileDesc[_fileArray.length];
-		for(int i=0; i<_fileArray.length; i++) {
-			_fileDescArray[i] = new FileDesc(_fileArray[i], 
-											 FileDesc.calculateAndCacheURN(_fileArray[i]),
-											 i);
-		}
 
-		_alCollection = new AlternateLocationCollection();
 		Iterator iter = _alternateLocations.iterator();
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
+			if(_alCollection == null) {
+				_alCollection = 
+					AlternateLocationCollection.createCollection(al.getSHA1Urn());
+			}
 			_alCollection.addAlternateLocation(al);
 		}
 	}
+
+	/**
+	 * Tests that adding an <tt>AlternateLocationCollection</tt> works correctly.
+	 */
+	public void testCreateCollectionFromHttpValue() {
+		AlternateLocationCollection collection = 
+			AlternateLocationCollection.createCollection
+			(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
+		AlternateLocationCollection testCollection = collection;
+		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
+			collection.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[i]);
+		}
+
+		testCollection.addAlternateLocationCollection(collection);
+	}
+
+	/**
+	 * Tests to make sure that unequal SHA1s cannot be added to an 
+	 * <tt>AlternateLocationCollection</tt>.
+	 */
+	public void testAddWrongLocation() {
+		AlternateLocationCollection collection = 
+			AlternateLocationCollection.createCollection
+			(HugeTestUtils.UNIQUE_SHA1);
+		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
+			try {
+				collection.addAlternateLocation(HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
+				fail("should not have accepted unequal location: "+
+					 HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i]);
+			} catch(IllegalArgumentException e) {
+				// this is the expected behavior
+			}
+		}
+	}
+
 
 	/**
 	 * Tests the method for adding alternate locations to this alternate 
 	 * location collection.
 	 */
 	public void testAddAlternateLocation() {
-		AlternateLocationCollection alc = new AlternateLocationCollection();
+		AlternateLocationCollection alc = 
+			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 		Iterator iter = _alternateLocations.iterator();
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
@@ -138,14 +104,16 @@ public final class AlternateLocationCollectionTest extends TestCase {
 	 * this AlternateLocationCollection.
 	 */
 	public void testAddAlternateLocationCollection() {
-		AlternateLocationCollection alc1 = new AlternateLocationCollection();
+		AlternateLocationCollection alc1 = 
+			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 		Iterator iter = _alternateLocations.iterator();
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
 			alc1.addAlternateLocation(al);
 		}
 
-		AlternateLocationCollection alc2 = new AlternateLocationCollection();
+		AlternateLocationCollection alc2 = 
+			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 		alc2.addAlternateLocationCollection(alc1);
 	}	
 
@@ -156,8 +124,10 @@ public final class AlternateLocationCollectionTest extends TestCase {
 	public void testHasAlternateLocations() {
 	   assertTrue("should have alternate locations", 
 				  _alCollection.hasAlternateLocations());
+	   AlternateLocationCollection testCollection = 
+		   AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 	   assertTrue("should not have alternate locations", 
-				  !new AlternateLocationCollection().hasAlternateLocations());
+				  !testCollection.hasAlternateLocations());
 	}
 
 	/**
@@ -167,7 +137,8 @@ public final class AlternateLocationCollectionTest extends TestCase {
 	public void testHTTPStringValue() {
 		String val = _alCollection.httpStringValue();
 		StringTokenizer st = new StringTokenizer(val, ",");
-		AlternateLocationCollection alc1 = new AlternateLocationCollection();
+		AlternateLocationCollection alc1 = 
+			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 		while(st.hasMoreTokens()) {
 			String str = st.nextToken();
 			str = str.trim();
