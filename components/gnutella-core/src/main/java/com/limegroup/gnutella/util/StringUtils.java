@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.HTTPUtil;
 import com.limegroup.gnutella.Assert;
+import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
+
 
 /** Various static routines for manipulating strings.*/
 public class StringUtils {
@@ -141,8 +143,9 @@ public class StringUtils {
             return c;            
     }
 
-    /** Returns the tokens of s delimited by the given delimeter,
-     *  without returning the delimeter.  Examples:
+    /** Returns the tokens of s delimited by the given delimeter, without
+     *  returning the delimeter.  Repeated sequences of delimeters are treated
+     *  as one. Examples:
      *  <pre>
      *    split("a//b/ c /","/")=={"a","b"," c "}
      *    split("a b", "/")=={"a b"}.
@@ -150,16 +153,26 @@ public class StringUtils {
      *  </pre>
      *
      * <b>Note that whitespace is preserved if it is not part of the delimeter.</b>
-     * An older version of this trim()'ed each token of whitespace.
-     */
+     * An older version of this trim()'ed each token of whitespace.  */
     public static String[] split(String s, char delimeter) {
-        return HTTPUtil.stringSplit(s, delimeter);
+        return split(s, delimeter+"");
     }
 
     /** Exactly like split(String,char), except ANY of the delimeters in
      *  "delimeters" can be used to split s. */
     public static String[] split(String s, String delimeters) {
-        return HTTPUtil.split(s, delimeters);
+        //Tokenize s based on delimeters, adding to buffer.
+        StringTokenizer tokenizer = new StringTokenizer(s, delimeters);
+        Vector buf = new Vector();        
+        while (tokenizer.hasMoreTokens())
+            buf.add(tokenizer.nextToken());
+
+        //Copy from buffer to array.
+        String[] ret = new String[buf.size()];
+        for(int i=0; i<buf.size(); i++)
+            ret[i] = (String)buf.get(i);
+
+        return ret;
     }
 
     /** Exactly the same as a.compareToIgnoreCase(b), which unfortunately
@@ -234,7 +247,26 @@ public class StringUtils {
         Assert.that(StringUtils.contains("abcd", " ") == true);
         Assert.that(StringUtils.contains("abcd", "    ") == true);
                                          
-        //Unit tests for split in HTTPUtil.
+        //split tests
+        String in;
+        String[] expected;
+        String[] result;
+        
+        in="a//b/ c /"; expected=new String[] {"a","b"," c "};
+        result=split(in, '/');
+        Assert.that(Arrays.equals(expected, result));
+        
+        in="a b";       expected=new String[] {"a b"};
+        result=split(in, '/');
+        Assert.that(Arrays.equals(expected, result));
+        
+        in="///";       expected=new String[] {};
+        result=split(in, '/');
+        Assert.that(Arrays.equals(expected, result));
+
+        in="a+b|c|+d+|";     expected=new String[] {"a", "b", "c", "d"};
+        result=split(in, "+|");
+        Assert.that(Arrays.equals(expected, result));
 
         //Unit tests for compareToIgnoreCase.  These require Java 2.
         testCompareIgnoreCase("", "");

@@ -13,6 +13,7 @@ import java.net.*;
 import java.util.Date;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.StringUtils;
 
 
 public class HTTPUploader implements Uploader {
@@ -153,7 +154,7 @@ public class HTTPUploader implements Uploader {
 				throw new IOException();
 			String command = str.substring(4, str.length());
 			// using this utility method, a bit hackey
-			String parse[] = HTTPUtil.stringSplit(command, '/');
+			String parse[] = StringUtils.split(command, '/');
 			// do some safety checks
 			if (parse.length != 4) 
 				throw new IOException();

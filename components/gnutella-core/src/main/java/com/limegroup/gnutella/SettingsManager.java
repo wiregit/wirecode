@@ -6,7 +6,7 @@ import com.sun.java.util.collections.*;
 import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
-
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * This class manages the property settings.  It maintains
@@ -658,7 +658,7 @@ public class SettingsManager implements SettingsInterface {
     public String[] getDirectoriesAsArray() {
 		if(directories_ == null) return new String[0];		
         directories_.trim();
-        return HTTPUtil.stringSplit(directories_, ';');
+        return StringUtils.split(directories_, ';');
     }
 
 	/**
@@ -672,7 +672,7 @@ public class SettingsManager implements SettingsInterface {
 		if(!temp.endsWith(";")) 
 			temp += ";";
 		temp += getIncompleteDirectory();
-        return HTTPUtil.stringSplit(temp, ';');		
+        return StringUtils.split(temp, ';');		
 	}
     
     /** Returns the name of the file used to store the downloader state.  This

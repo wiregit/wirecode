@@ -269,9 +269,8 @@ public class FileManager {
         _sharedDirectories = new TreeMap(new FileComparator());
 		
         // Load the extensions.
-        String[] extensions = HTTPUtil.stringSplit(
-            SettingsManager.instance().getExtensions().trim(),
-                                                   ';');
+        String[] extensions = StringUtils.split(
+            SettingsManager.instance().getExtensions().trim(), ';');
         for (int i=0; i<extensions.length; i++)
             _extensions.add(extensions[i].toLowerCase());
                       
@@ -282,9 +281,8 @@ public class FileManager {
         //So we just approximate this by sorting by filename length, from
         //smallest to largest.  Unless directories are specified as
         //"C:\dir\..\dir\..\dir", this will do the right thing.
-        final String[] directories = HTTPUtil.stringSplit(
-            SettingsManager.instance().getDirectories().trim(),
-            ';');
+        final String[] directories = StringUtils.split(
+            SettingsManager.instance().getDirectories().trim(), ';');
         Arrays.sort(directories, new Comparator() {
             public int compare(Object a, Object b) {
                 return ((String)a).length()-((String)b).length();
