@@ -189,4 +189,8 @@ public class IntervalSet {
             return ia.low-ib.low;
         }
     }
+    
+    public String toString() {
+        return intervals.toString();
+    }
 }
