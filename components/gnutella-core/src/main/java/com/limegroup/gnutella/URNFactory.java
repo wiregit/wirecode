@@ -53,6 +53,22 @@ public final class URNFactory {
 	}
 
 	/**
+	 * Creates a new <tt>URN</tt> instance from the specified string.
+	 * The resulting URN can had any Namespace Identifier and any
+	 * Namespace Specific String.
+	 *
+	 * @param URN_STRING the string instance to use to create a 
+	 *  <tt>URN</tt>
+	 * @return a new <tt>URN</tt> instance
+	 * @throws <tt>IOException</tt> if there was an error constructing
+	 *  the <tt>URN</tt>
+	 */
+	public static URN createURN(final String URN_STRING) 
+		throws IOException {
+		return new URN(URN_STRING);
+	}
+
+	/**
 	 * Creates a URN instance from the specified HTTP get request line.
 	 * The get request must be in the standard from, as specified in
 	 * RFC 2169.
