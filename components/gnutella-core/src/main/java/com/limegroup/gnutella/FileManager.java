@@ -21,6 +21,7 @@ public class FileManager {
     private int _size;                   /* the total size of all files */ 
     private int _numFiles;               /* the total number of files */
     public ArrayList _files;             /* the list of shareable files */
+    private String[] _extensions;
 
     private static FileManager _myFileManager;
 
@@ -28,6 +29,7 @@ public class FileManager {
 	_size = 0;                       /* all the provate variables */
 	_numFiles = 0;
 	_files = new ArrayList();
+	_extensions = null;
 	
     }
     
@@ -55,13 +57,33 @@ public class FileManager {
 	return response;
     }
 
+    public void setExtensions(String str) {   
+	/* recieves a semi-colon separated list of extensions */
+	_extensions =  HTTPUtil.stringSplit(str, ';');
+    }
+
+    public boolean hasExtension(String filename) {
+	
+	int length = _extensions.length;
+	
+	for (int i = 0; i < length; i++) {
+	    if (filename.indexOf(_extensions[i]) != -1)
+		return true;
+	}
+	
+	return false;
+
+    }
+    
     public synchronized void addFile(String path) { /* the addFile method adds */ 
 	File myFile = new File(path);  /* just one single file to */
 	String name = myFile.getName();     /* the name of the file */
 	int n = (int)myFile.length();       /* the list, and increments */
 	_size += n;                         /* the appropriate info */
-	_files.add(new FileDesc(_numFiles, name, path,  n));
-	_numFiles++;
+	if (hasExtension(name)) {
+	    _files.add(new FileDesc(_numFiles, name, path,  n));
+	    _numFiles++;
+	}
     }
 
     public void printFirstFive() {
