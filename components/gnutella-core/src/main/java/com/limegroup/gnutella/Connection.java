@@ -134,7 +134,10 @@ public class Connection {
      *  level, this method is never called.  
      */
     public Connection(Socket socket, HandshakeResponder properties) {
-        _host = socket.getInetAddress().toString();
+        //Get the address in dotted-quad format.  It's important not to do a
+        //reverse DNS lookup here, as that can block.  And on the Mac, it blocks
+        //your entire system!
+        _host = socket.getInetAddress().getHostAddress();
         _port = socket.getPort();
         _socket = socket;
         _outgoing = false;
