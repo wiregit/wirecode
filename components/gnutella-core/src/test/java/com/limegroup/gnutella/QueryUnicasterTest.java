@@ -242,7 +242,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply toReturn = new QueryReply(guid,
                                              (byte) 2,
-                                             0, ip, 0, resps,
+                                             1, ip, 0, resps,
                                              GUID.makeGuid(), false);
         return toReturn;
     }
