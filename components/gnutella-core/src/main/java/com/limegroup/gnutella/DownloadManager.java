@@ -904,8 +904,8 @@ public class DownloadManager implements BandwidthTracker {
         
         //whether we have already sent the UDP push and are now
         //sending the tcp one.
-        boolean failOver = _udpFailover.remove(
-        		file.getOOBAddress().getInetAddress());
+        boolean failOver = file.getOOBAddress()!=null &&
+			_udpFailover.remove(file.getOOBAddress().getInetAddress());
         
         // Send as multicast if it's multicast.
         if( file.isReplyToMulticast() ) {
