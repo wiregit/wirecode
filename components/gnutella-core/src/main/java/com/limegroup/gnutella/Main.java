@@ -55,7 +55,7 @@ public class Main implements ActivityCallback {
         //Print pong cache
         else if (command.equals("pong cache")) {
             for (Iterator iter=service.getCachedHosts(); iter.hasNext(); )
-            System.out.println(((PingReplyCacheEntry)iter.next()).
+            System.out.println(((MainCacheEntry)iter.next()).
                 getPingReply().toString());
         }
         String[] commands=split(command);

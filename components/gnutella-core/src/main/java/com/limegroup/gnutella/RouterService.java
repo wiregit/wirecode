@@ -46,7 +46,10 @@ public class RouterService
 		this.catcher.initialize(acceptor, manager,
 								SettingsManager.instance().getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager);
-		this.manager.initialize(router, catcher);		
+		this.manager.initialize(router, catcher);
+        //after initializations, create seperate thread to connect to a pong cache
+        //server for initial hosts.
+		catcher.connectToPongServer();
 		this.uploadManager.initialize(callback, router, acceptor);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
 		this.downloader.initialize(callback, router, acceptor, FileManager.instance());
@@ -206,9 +209,6 @@ public class RouterService
         // Disconnect from current connections.
         disconnect();
 
-        // Clear host catcher.
-        catcher.silentClear();
-
         // Kickoff the Group Connect fetch of PingReplies
         try {
             groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
@@ -261,15 +261,15 @@ public class RouterService
         SettingsManager settings=SettingsManager.instance();
         boolean useHack=
             (!settings.getUseQuickConnect())
-                && PingReplyCache.instance().size()==0 
+                && catcher.mainCacheSize()==0 
                 && (!catcher.reserveCacheSufficient());
         if (useHack) {
             settings.setUseQuickConnect(true);
             disconnect();
         }
 
-        //Force reconnect to pong server.
-        catcher.expire();
+        //force the catcher to connect to router.
+        catcher.connectToPongServer();
 
         //Ensure outgoing connections is positive.
         int outgoing=settings.getKeepAlive();
@@ -302,7 +302,7 @@ public class RouterService
      * @modifies this
      * @effects removes all connections.
      * @effects deactivates extra connection watchdog check
-     * @effects clears the PingReplyCache.
+     * @effects clears the HostCatcher (both main and reserve cache)
      */
     public void disconnect() {
 		// Deactivate checking for Ultra Fast Shutdown
@@ -322,9 +322,8 @@ public class RouterService
             removeConnection(c);
         }
         
-        //to maintain consistency, since we're removing all our connections,
-        //we need to clear the PingReply cache.
-        PingReplyCache.instance().clear();
+        //to maintain consistency, we need to clear the HostCatcher
+        catcher.reset();
     }
 
 	/**
@@ -345,21 +344,21 @@ public class RouterService
      * Clear the hostcatcher if requested
      */
     public void clearHostCatcher() {
-        catcher.silentClear();
+        catcher.reset();
     }
 
     /**
      * Get the reserve number of hosts from the host catcher
      */
     public int getNumReserveHosts() {
-        return(catcher.getNumReserveHosts());
+        return(catcher.reserveCacheSize());
     }
 
     /** 
      * Get the number of hosts from the Ping Reply Cache
      */
     public int getRealNumHosts() {
-        return (PingReplyCache.instance().size());
+        return (catcher.mainCacheSize());
     }
 
     /**
@@ -564,7 +563,7 @@ public class RouterService
      * Return an iterator on the PingReplyCache hosts
      */
     public Iterator getCachedHosts() {
-        return PingReplyCache.instance().iterator();
+        return catcher.getCachedHosts();
     }
 
     /**

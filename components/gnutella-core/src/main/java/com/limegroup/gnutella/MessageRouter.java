@@ -14,9 +14,6 @@ public abstract class MessageRouter
     protected HostCatcher _catcher;
     protected ConnectionManager _manager;
     protected Acceptor _acceptor;
-    //even though the Ping Reply Cache is a singleton, holding onto a 
-    //reference is better since we access it many times.
-    protected PingReplyCache _pongCache;
 
     /**
      * @return the GUID we attach to QueryReplies to allow PushRequests in
@@ -144,7 +141,6 @@ public abstract class MessageRouter
         _manager = manager;
         _catcher = catcher;
         _uploadManager = uploadManager;
-        _pongCache = PingReplyCache.instance();
     }
 
     public String getQueryRouteTableDump()
@@ -227,7 +223,7 @@ public abstract class MessageRouter
         //so that two different threads (i.e., ManagedConnections) don't think 
         //that the cache has expired and cause two broadcast pings.
         synchronized(this) {
-            if (_pongCache.expired())
+            if (_catcher.mainCacheExpired())
                 refreshPingReplyCache(receivingConnection);
         }
 
@@ -239,9 +235,10 @@ public abstract class MessageRouter
         respondToPingRequest(pingRequest, _acceptor, receivingConnection);
 
         //send back pongs
-        if (_pongCache.size() > receivingConnection.getTotalPongsNeeded())
+        if (_catcher.mainCacheSize() > receivingConnection.getTotalPongsNeeded())
             sendSomePongs(receivingConnection);
-        else if (_pongCache.size() > 0) //only send if some entries in cache
+        //only send if some entries in cache
+        else if (_catcher.mainCacheSize() > 0) 
             sendAllPongs(receivingConnection);
     }
 
@@ -306,10 +303,10 @@ public abstract class MessageRouter
         byte[] guid = receivingConnection.getLastPingGUID();
         int[] neededPongs = receivingConnection.getNeededPongsList();
         
-        for (Iterator iter = _pongCache.iterator(); 
+        for (Iterator iter = _catcher.getCachedHosts(); 
              iter.hasNext(); ) 
         {
-            PingReplyCacheEntry entry = (PingReplyCacheEntry)iter.next();
+            MainCacheEntry entry = (MainCacheEntry)iter.next();
             if (entry.getManagedConnection() != receivingConnection)
             {
                 PingReply cachedPingReply = entry.getPingReply();
@@ -337,7 +334,7 @@ public abstract class MessageRouter
             return false; //no need to send a pong for this hops.
 
         PingReply cachedPingReply =
-            _pongCache.getEntry(hops, receivingConnection);
+            _catcher.getMainCacheEntry(hops, receivingConnection);
         if (cachedPingReply == null)
             return false;
         
@@ -387,15 +384,13 @@ public abstract class MessageRouter
     }
 
     /**
-     * Refresh the PingReplyCache by first emptying contents of the cache into
-     * reserve cache (in HostCatcher), clearing the caching, and then 
-     * broadcasting a ping to all the new clients.
+     * Refresh the PingReplyCache by clearing the main pong cache (which 
+     * internally copies the contents of the main cache into the reserve cache)
+     * and then broadcasting a ping to all the new clients.
      */
     private void refreshPingReplyCache(ManagedConnection receivingConnection)
     {
-        _catcher.copyCacheContents(); //copy PingReplyCache into reserve cache.
-        
-        _pongCache.clear();
+        _catcher.clearMainCache();
 
         broadcastPingRequest(receivingConnection);
     }
@@ -588,7 +583,7 @@ public abstract class MessageRouter
         
         //add to cache and send pong to other connections, if it was 
         //successfully added to the cache.
-        if (_pongCache.addPingReply(pingReply, receivingConnection))
+        if (_catcher.addToMainCache(pingReply, receivingConnection))
         {
             _numPingReplies++;
             //send pong to other connections

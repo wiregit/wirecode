@@ -85,8 +85,6 @@ public class ConnectionManager {
     public void initialize(MessageRouter router, HostCatcher catcher) {
         _router = router;
         _catcher = catcher;
-        //notify host catcher that its' okay to create router connections now.
-        _catcher.setConnectionManagerInitialized();
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
@@ -107,7 +105,6 @@ public class ConnectionManager {
      */
     public ManagedConnection createConnectionBlocking(
             String hostname, int portnum) throws IOException {
-
         ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
                                                     this);
 
@@ -535,7 +532,7 @@ public class ConnectionManager {
                                              ConnectionFetcher fetcher)
             throws IOException {
         synchronized(this) {
-            if(fetcher.isInterrupted())
+            if(fetcher.isInterrupted()) 
                 // Externally generated interrupt.
                 // The interrupting thread has recorded the
                 // death of the fetcher, so throw IOException.
@@ -765,44 +762,19 @@ public class ConnectionManager {
         public void run() {
             // Wait for an endpoint.
             Endpoint endpoint = null;
-            Random random = new Random();
-            int hops;
-            PingReplyCache pongCache = PingReplyCache.instance();
-            PingReply entry = null;
-            PingReply pr = null;
-            
-            //if neither the pong cache, nor the reserve cache contains any
-            //endpoints, then return, allowing for the recording of the death
-            //of the fetcher.
-            if ((pongCache.size() == 0) && 
-                (_catcher.getNumReserveHosts() == 0)) {
-                _fetchers.remove(this);
-                return;                        
-            }
 
             do {
                 try {
-                    hops = random.nextInt
-                        (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-                    entry = pongCache.getEntry(hops+1, null);
-                    //if nothing in the cache, then try from the reserve cache
-                    if (entry == null) {
-                        endpoint = _catcher.getAnEndpoint();
-                    }
-                    else {
-                        endpoint = 
-                            new Endpoint(entry.getIPBytes(), entry.getPort());
-                    }
-                } catch (NoSuchElementException exc2) {
-                    //If we get here, it means that even the reserve cache has
-                    //either no elements (or only private IPs), so just return
-                    //and record the death of the fetcher.
-                    _fetchers.remove(this);
+                    endpoint = _catcher.getAnEndpoint();
+                } catch (InterruptedException exc2) {
+                    // Externally generated interrupt.
+                    // The interrupting thread has recorded the
+                    // death of the fetcher, so just return.
                     return;
                 }               
-            } while ((endpoint == null) || (isConnected(endpoint)) || 
-                     (Acceptor.isMe(endpoint.getHostname(), 
-                      endpoint.getPort())) );
+            } while ( (isConnected(endpoint)) || 
+                      (Acceptor.isMe(endpoint.getHostname(), 
+                       endpoint.getPort())) );
 
             Assert.that(endpoint != null);
 
