@@ -32,7 +32,6 @@ public class SettingsManager implements SettingsInterface
     private String lastVersionChecked_;
     private boolean checkAgain_;
 
-    private boolean write_ = false;
     /** Variables for the various settings */
 	private boolean  allowBroswer_;
     private byte     ttl_;
@@ -172,7 +171,6 @@ public class SettingsManager implements SettingsInterface
      */
     private void validateFile(Properties tempProps)
         throws IOException {
-        write_ = false;
         String p;
         Enumeration enum = tempProps.propertyNames();
         while(enum.hasMoreElements()){
@@ -440,9 +438,6 @@ public class SettingsManager implements SettingsInterface
             setKeepAlive(Math.min(2, getKeepAlive()));
             setMaxIncomingConnections(0);
         }
-
-        write_ = true;
-        writeProperties();
     }
 
     /* Load in the default values.  Any properties
@@ -513,8 +508,6 @@ public class SettingsManager implements SettingsInterface
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
 		setSessions(DEFAULT_SESSIONS);
-        write_ = true;
-        writeProperties();
     }
 
 
@@ -747,7 +740,6 @@ public class SettingsManager implements SettingsInterface
             maxLength_ = maxLength;
             String s = Integer.toString(maxLength_);
             props_.put(MAX_LENGTH, s);
-            writeProperties();
         }
     }
 
@@ -760,7 +752,6 @@ public class SettingsManager implements SettingsInterface
             timeout_ = timeout;
             String s = Integer.toString(timeout_);
             props_.put(TIMEOUT, s);
-            writeProperties();
         }
 
     }
@@ -808,7 +799,6 @@ public class SettingsManager implements SettingsInterface
             keepAlive_ = keepAlive;
             String s = Integer.toString(keepAlive_);
             props_.put(KEEP_ALIVE, s);
-            writeProperties();
         }
     }
 
@@ -839,7 +829,6 @@ public class SettingsManager implements SettingsInterface
             searchLimit_ = limit;
             String s = Byte.toString(searchLimit_);
             props_.put(SEARCH_LIMIT, s);
-            writeProperties();
         }
     }
 
@@ -850,7 +839,6 @@ public class SettingsManager implements SettingsInterface
         else {
             clientID_ = clientID;
             props_.put(CLIENT_ID, clientID_);
-            writeProperties();
         }
     }
 
@@ -900,7 +888,6 @@ public class SettingsManager implements SettingsInterface
             maxIncomingConn_ = maxConn;
             String s = Integer.toString(maxConn);
             props_.put(MAX_INCOMING_CONNECTIONS, s);
-            writeProperties();
         }
     }
 
@@ -943,7 +930,6 @@ public class SettingsManager implements SettingsInterface
         else {
             saveDefault_ = dir;
             props_.put(SAVE_DEFAULT, dir);
-            //writeProperties();
         }
     }
 
@@ -1297,7 +1283,6 @@ public class SettingsManager implements SettingsInterface
             bannedIps_ = bannedIps;
             props_.put(BANNED_IPS,
                        encode(bannedIps));
-            writeProperties();
         }
     }
 
@@ -1308,7 +1293,6 @@ public class SettingsManager implements SettingsInterface
             bannedWords_ = bannedWords;
             props_.put(BANNED_WORDS,
                        encode(bannedWords));
-            writeProperties();
         }
     }
 
@@ -1320,7 +1304,6 @@ public class SettingsManager implements SettingsInterface
             Boolean b = new Boolean(filterAdult);
             String s = b.toString();
             props_.put(FILTER_ADULT, s);
-            writeProperties();
         }
     }
 
@@ -1332,7 +1315,6 @@ public class SettingsManager implements SettingsInterface
             Boolean b = new Boolean(filterDuplicates);
             String s = b.toString();
             props_.put(FILTER_DUPLICATES, s);
-            writeProperties();
         }
     }
 
@@ -1344,7 +1326,6 @@ public class SettingsManager implements SettingsInterface
             Boolean b = new Boolean(filterHtml);
             String s = b.toString();
             props_.put(FILTER_HTML, s);
-            writeProperties();
         }
     }
 
@@ -1356,7 +1337,6 @@ public class SettingsManager implements SettingsInterface
             Boolean b = new Boolean(filterVbs);
             String s = b.toString();
             props_.put(FILTER_VBS, s);
-            writeProperties();
         }
     }
 
@@ -1365,7 +1345,6 @@ public class SettingsManager implements SettingsInterface
         Boolean b = new Boolean(yes);
         String s = b.toString();
         props_.put(FILTER_GREEDY_QUERIES, s);
-        writeProperties();
     }
 
 
@@ -1374,7 +1353,6 @@ public class SettingsManager implements SettingsInterface
         Boolean b = new Boolean(yes);
         String s = b.toString();
         props_.put(SettingsInterface.FILTER_BEARSHARE_QUERIES, s);
-        writeProperties();
     }
 
     public synchronized void setUseQuickConnect(boolean useQuickConnect) {
@@ -1385,7 +1363,6 @@ public class SettingsManager implements SettingsInterface
             Boolean b = new Boolean(useQuickConnect);
             String s = b.toString();
             props_.put(USE_QUICK_CONNECT, s);
-            writeProperties();
         }
     }
 
@@ -1396,7 +1373,6 @@ public class SettingsManager implements SettingsInterface
             quickConnectHosts_ = hosts;
             props_.put(QUICK_CONNECT_HOSTS,
                        encode(hosts));
-            writeProperties();
         }
     }
 
@@ -1408,7 +1384,6 @@ public class SettingsManager implements SettingsInterface
             searchAnimationTime_=seconds;
             String s = Integer.toString(seconds);
             props_.put(SEARCH_ANIMATION_TIME, s);
-            writeProperties();
         }
     }
 
@@ -1427,7 +1402,6 @@ public class SettingsManager implements SettingsInterface
         this.freeLoaderAllowed_=allowed;
         String s = Integer.toString(allowed);
         props_.put(FREELOADER_ALLOWED, s);
-        writeProperties();
     }
 
     /**
@@ -1443,7 +1417,6 @@ public class SettingsManager implements SettingsInterface
         this.freeLoaderFiles_=files;
         String s = Integer.toString(files);
         props_.put(FREELOADER_FILES, s);
-        writeProperties();
     }
 
     /**
@@ -1453,7 +1426,6 @@ public class SettingsManager implements SettingsInterface
     public void setLastVersionChecked(String last) {
         lastVersionChecked_ = last;
         props_.put(LAST_VERSION_CHECKED, last);
-        writeProperties();
     }
 
     public void setCheckAgain(boolean check) {
@@ -1464,7 +1436,6 @@ public class SettingsManager implements SettingsInterface
         else
             c = "false";
         props_.put(CHECK_AGAIN, c);
-        writeProperties();
     }
 
     /**
@@ -1496,25 +1467,24 @@ public class SettingsManager implements SettingsInterface
 
 
     /** writes out the properties file to with the specified
-     *  name in the user's home directory
+     *  name in the user's install directory.  This should only
+	 *  get called once when the program shuts down.
      */
-    public synchronized void writeProperties() {
-        if(write_) {
-            FileOutputStream ostream = null;
-            try {
-                ostream = new FileOutputStream(fileName_);
-                props_.save(ostream, "");
-                ostream.close();
-            }
-            catch (Exception e){}
-            finally {
-                try {
-                    ostream.close();
-                }
-                catch(IOException io) {}
-            }
-        }
-    }
+    public void writeProperties() {
+		FileOutputStream ostream = null;
+		try {
+			ostream = new FileOutputStream(fileName_);
+			props_.save(ostream, "");
+			ostream.close();
+		}
+		catch (Exception e){}
+		finally {
+			try {
+				ostream.close();
+			}
+			catch(IOException io) {}
+		}
+	}
 
     private static final String STRING_DELIMETER=";";
 
@@ -1541,10 +1511,6 @@ public class SettingsManager implements SettingsInterface
         String[] ret=new String[buf.size()];
         buf.copyInto(ret);
         return ret;
-    }
-
-    public synchronized void setWrite(boolean write) {
-        write_ = write;
     }
 
     //      /** Unit test */
