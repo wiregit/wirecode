@@ -298,60 +298,42 @@ public class WriteRegulator {
         _tracker.addFailure();
     }
 
-    /**
-     *  Keep track of successes and failures at a discrete level
-     */
-    class FailureBlock {
-
-        /** How many entries are in the block */
-        public int count;
-
-        /** How many successes are in the block */
-        public int success;
-
-        /** How many failures are in the block */
-        public int failure;
-
-        public FailureBlock() {
-            count   = 0;
-            success = 0;
-            failure = 0;
-        }
-    }
 
     /**
      *  Keep track of overall successes and failures 
      */
     class FailureTracker {
 
-        /** The number of discrete success/failure blocks to keep */
-        private static final int MAX_BLOCKS       = 5;
+    	private static final int HISTORY_SIZE=100;
+    	
+    	boolean _rollover =false;
+    	byte [] _data = new byte[HISTORY_SIZE];
+    	int _index;
 
-        /** The number of discrete success/failures per block */
-        private static final int NUMBER_PER_BLOCK = 20;
-
-
-        /** The list of success/failures stored as discrete aging blocks */
-        private ArrayList blocks = new ArrayList(MAX_BLOCKS+1);
 
         /**
          * Add one to the successful count
          */
         public void addSuccess() {
-            FailureBlock block = ensureSpace(); 
 
-            block.count++;
-            block.success++;
+        	_data[_index++]=1;
+        	if (_index>=HISTORY_SIZE-1){
+        		LOG.debug("rolled over");
+        		_index=0;
+        		_rollover=true;
+        	}
         }
 
         /**
          * Add one to the failure count
          */
         public void addFailure() {
-            FailureBlock block = ensureSpace(); 
-
-            block.count++;
-            block.failure++;
+        	_data[_index++]=0;
+        	if (_index>=HISTORY_SIZE-1){
+        		LOG.debug("rolled over");
+        		_index=0;
+        		_rollover=true;
+        	}
         }
 
         /**
@@ -359,28 +341,28 @@ public class WriteRegulator {
          * out a clump of failures more quickly.
          */
         public void clearOldFailures() {
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < HISTORY_SIZE/2; i++)
                 addSuccess();
         }
 
         /**
-         * Compute the failure rate of last 100 blocks once up and running
+         * Compute the failure rate of last HISTORY_SIZE blocks once up and running
          */
         public float failureRate() {
-            FailureBlock block;
-            int          count   = 0; 
-            int          failure = 0; 
-            
-            for (int i = 0; i < blocks.size(); i++) {
-                block = (FailureBlock) blocks.get(i);
-                count   += block.count;
-                failure += block.failure;
-            }
 
-            if ( count == 0 )
-                count = 1;
-
-            return ((float) failure) / ((float) count);
+        	int total=0;
+        	for (int i=0;i < (_rollover ? HISTORY_SIZE : _index);i++)
+        		total+=_data[i];
+        	
+        	if (LOG.isDebugEnabled()) {
+        		LOG.debug("failure rate from "+_index+ 
+        				" measurements and rollover "+_rollover+
+        				" total is "+total+
+						" and rate "+ 
+						(1- (float)total / (float)(_rollover ? HISTORY_SIZE : _index)));
+        	}
+        	
+        	return 1- ((float)total / (float)(_rollover ? HISTORY_SIZE : _index));
         }
 
         
@@ -395,35 +377,5 @@ public class WriteRegulator {
            return "" + irate + "." + drate;
         }
         
-
-        /**
-         * Make sure there is space for an addition and 
-         * return the active block
-         */
-        private FailureBlock ensureSpace() {
-            FailureBlock block;
-
-            // If nothing, initialize
-            if ( blocks.size() == 0 ) {
-                block = new FailureBlock();
-                blocks.add(0, block);
-                return block;
-            }
-
-            // Check latest block for room
-            block = (FailureBlock) blocks.get(0);
-
-            // Add new block if current is full
-            if ( block.count >= NUMBER_PER_BLOCK ) {
-                block = new FailureBlock();
-                blocks.add(0, block);
-
-                // Remove oldest block if too many
-                if ( blocks.size() > MAX_BLOCKS )
-                    blocks.remove(MAX_BLOCKS);
-            }
-
-            return block;
-        }
     }
 }
