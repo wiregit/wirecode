@@ -22,6 +22,21 @@ sending out queries.
 
 
 --------------------------------------------------------------------------------
+Date Posted: 10/01/02
+Date Resolved: 
+
+The UDPService should not assume guess capability if it got a UDP packet
+from a *private* address.
+
+Notes:
+This should be the last thing we do.  We need to accept private addresses
+wholeheartheadly while testing.
+
+********************************************************************************
+
+
+
+--------------------------------------------------------------------------------
 Date Posted: 9/30/02
 Date Resolved: 10/01/02 (see notes)
 
@@ -47,19 +62,6 @@ to the latest version of the GUESS spec?
 ********************************************************************************
 
 
---------------------------------------------------------------------------------
-Date Posted: 10/01/02
-Date Resolved: 
-
-The UDPService should not assume guess capability if it got a UDP packet
-from a *private* address.
-
-Notes:
-This should be the last thing we do.  We need to accept private addresses
-wholeheartheadly while testing.
-
-********************************************************************************
-
 
 --------------------------------------------------------------------------------
 Date Posted: 10/01/02
@@ -74,13 +76,14 @@ Notes: This feature has not been tested as much as I'd like.
 
 --------------------------------------------------------------------------------
 Date Posted: 10/03/02
-Date Resolved: 
+Date Resolved: 10/09/02
 Scenario: Mini-Network 1
 
 Leaves are not receiving the correct amount of results. Should receive 3
 but only receiving 2.
 
-Notes: It seems that Ultrapeers are not forwarding Queries to Leaves.
+Notes: UltraPeers now forward queries to leaves.  Fixed via a change to
+QueryRouteTable.
 
 
 ********************************************************************************
