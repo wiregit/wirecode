@@ -695,7 +695,6 @@ public class HTTPDownloader implements BandwidthTracker {
         try {
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
-            byte[] fileBuf = new byte[BUF_LENGTH];
             
             while (true) {
                 //1. Read from network.  It's possible that we've read more than
