@@ -36,6 +36,7 @@ import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.BloomFilter;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -201,7 +202,7 @@ public class HeadTest extends BaseTestCase {
 		
 		assertFalse(pong.hasFile());
 		assertFalse(pong.hasCompleteFile());
-		assertNull(pong.getAltLocs());
+		assertTrue(pong.getAltLocs().isEmpty());
 		assertNull(pong.getRanges());
 	}
 	
@@ -225,13 +226,13 @@ public class HeadTest extends BaseTestCase {
 		assertTrue(pong.hasFile());
 		assertTrue(pong.isFirewalled());
 		assertTrue(pong.hasCompleteFile());
-		assertNull(pong.getAltLocs());
+		assertTrue(pong.getAltLocs().isEmpty());
 		assertNull(pong.getRanges());
 		
 		assertTrue(pongi.hasFile());
 		assertTrue(pongi.isFirewalled());
 		assertFalse(pongi.hasCompleteFile());
-		assertNull(pongi.getAltLocs());
+		assertTrue(pongi.getAltLocs().isEmpty());
 		assertNull(pongi.getRanges());
 		
 		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", new Boolean(true));
@@ -248,13 +249,13 @@ public class HeadTest extends BaseTestCase {
 		assertFalse(pong.isFirewalled());
 		assertTrue(pong.hasFile());
 		assertTrue(pong.hasCompleteFile());
-		assertNull(pong.getAltLocs());
+		assertTrue(pong.getAltLocs().isEmpty());
 		assertNull(pong.getRanges());
 		
 		assertTrue(pongi.hasFile());
 		assertFalse(pongi.isFirewalled());
 		assertFalse(pongi.hasCompleteFile());
-		assertNull(pongi.getAltLocs());
+		assertTrue(pongi.getAltLocs().isEmpty());
 		assertNull(pongi.getRanges());
 	}
 	
@@ -366,8 +367,8 @@ public class HeadTest extends BaseTestCase {
 		assertTrue(Arrays.equals(_rangesMedium.toBytes(),pong2.getRanges().toBytes()));
 		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
 
-		assertNotNull(pong1.getAltLocs());
-		assertNotNull(pong2.getAltLocs());
+		assertFalse(pong1.getAltLocs().isEmpty());
+		assertFalse(pong2.getAltLocs().isEmpty());
 		assertLessThan(PACKET_SIZE,pong2.getPayload().length);
 		assertEquals(_alCollectionComplete.getAltLocsSize(),pong1.getTotalLocs(true));
 		assertEquals(0,pong1.getSkippedLocs(true));
@@ -393,15 +394,15 @@ public class HeadTest extends BaseTestCase {
 		HeadPing ping1 = reparse(new HeadPing(_haveFull,HeadPing.PUSH_ALTLOCS));
 		assertTrue(ping1.requestsPushLocs());
 		HeadPong pong1 = reparse (new HeadPong(ping1));
-		assertNull(pong1.getPushLocs());
+		assertTrue(pong1.getPushLocs().isEmpty());
 		
 		ping1 = reparse(new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS));
 		assertTrue(ping1.requestsPushLocs());
 		pong1 = reparse (new HeadPong(ping1));
 
 		assertNull(pong1.getRanges());
-		assertNull(pong1.getAltLocs());
-		assertNotNull(pong1.getPushLocs());
+		assertTrue(pong1.getAltLocs().isEmpty());
+		assertFalse(pong1.getPushLocs().isEmpty());
 		assertEquals(1,pong1.getTotalLocs(false));
 		assertEquals(0,pong1.getSkippedLocs(false));
 		
@@ -425,7 +426,7 @@ public class HeadTest extends BaseTestCase {
 		ping1 = reparse(new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS));
 		assertTrue(ping1.requestsFWTPushLocs());
 		pong1 = reparse(new HeadPong(ping1));
-		assertNull(pong1.getPushLocs());
+		assertTrue(pong1.getPushLocs().isEmpty());
 	}
 	
 	public void testMixedLocs() throws Exception {
@@ -434,8 +435,8 @@ public class HeadTest extends BaseTestCase {
 		
 		HeadPong pong = reparse(new HeadPong(ping));
 		
-		assertNotNull(pong.getAltLocs());
-		assertNotNull(pong.getPushLocs());
+		assertFalse(pong.getAltLocs().isEmpty());
+		assertFalse(pong.getPushLocs().isEmpty());
 		
 		RemoteFileDesc rfd = new RemoteFileDesc(
 				"1.2.3.4",1,1,"filename",
@@ -463,7 +464,7 @@ public class HeadTest extends BaseTestCase {
 	    // the pong should not carry any altlocs in it
 	    HeadPong pong = reparse(new HeadPong(ping));
 	    assertTrue(pong.supportsDigests());
-	    assertNull(pong.getAltLocs());
+	    assertTrue(pong.getAltLocs().isEmpty());
 	    
 	    // try a headping carrying some, but not all of the altlocs
 	    direct = new AltLocDigest();
@@ -499,14 +500,14 @@ public class HeadTest extends BaseTestCase {
 	    
 	    pong = reparse(new HeadPong(ping));
 	    
-	    assertNull(pong.getPushLocs());
+	    assertTrue(pong.getPushLocs().isEmpty());
 	    
 	    // add an extra loc, try again.
 	    GUID g = new GUID(GUID.makeGuid());
 	    _pushCollection.add(AlternateLocation.create(g.toHexString()+";5:1.2.3.4;1.2.3.4:5",_havePartial));
 	    pong = reparse(new HeadPong(ping));
 	    
-	    assertNotNull(pong.getPushLocs());
+	    assertFalse(pong.getPushLocs().isEmpty());
 	    assertEquals(1,pong.getSkippedLocs(false));
 	    assertEquals(2,pong.getTotalLocs(false));
 	}
