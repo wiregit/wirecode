@@ -320,6 +320,8 @@ public class Response {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int c;
         while((c=is.read())!=0) {
+            if(c == -1)
+                throw new IOException("EOF before null termination");
             baos.write(c);
         }
         String name = new String(baos.toByteArray());
@@ -330,6 +332,8 @@ public class Response {
         // Extract extra info, if any
         baos.reset();
         while((c=is.read())!=0) {
+            if(c == -1)
+                throw new IOException("EOF before null termination");
             baos.write(c);
         }
         byte[] rawMeta = baos.toByteArray();
