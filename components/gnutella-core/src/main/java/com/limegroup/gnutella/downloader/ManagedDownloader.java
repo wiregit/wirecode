@@ -1378,9 +1378,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         Iterator iter = urns.iterator();
         while (iter.hasNext()) {
             URN currURN = (URN) iter.next();
-            File incompleteFile = incompleteFileManager.getFileForUrn(currURN);
-            if (incompleteFile == null) continue;
-            VerifyingFile vF =incompleteFileManager.getEntry(incompleteFile);
+            File incomplete = incompleteFileManager.getFileForUrn(currURN);
+            if (incomplete == null) continue;
+            VerifyingFile vF =incompleteFileManager.getEntry(incomplete);
             if (vF == null) continue;
             if ((retURN == null) || (vF.getBlockSize() > currBigSize)) {
                 currBigSize = vF.getBlockSize();
