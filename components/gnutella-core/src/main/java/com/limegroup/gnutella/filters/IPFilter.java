@@ -75,29 +75,38 @@ public final class IPFilter extends SpamFilter {
         }        
         return goodHosts.contains(ip) || !badHosts.contains(ip);
     }
+    
+    /**
+     * Checks to see if a given host is banned.
+     * @param host the host's IP in byte form.
+     */
+    public boolean allow(byte[] host) {
+        IP ip;
+        try {
+            ip = new IP(host);
+        } catch(IllegalArgumentException badHost) {
+            return false;
+        }
+        return goodHosts.contains(ip) || !badHosts.contains(ip);
+    }
 
     /** 
      * Checks if a given Message's host is banned.
      * @return true if this Message's host is allowed, false if it is banned
      *  or we are unable to create correct IP addr out of it.
      */
-    public boolean allow(Message m){
-        String ip;
-        if( (m instanceof PingReply)){
+    public boolean allow(Message m) {
+        if (m instanceof PingReply) {
             PingReply pr = (PingReply)m;
-            ip = pr.getIP();
-        }
-        else if ( (m instanceof QueryReply) ){
+            return allow(pr.getIP());
+        } else if (m instanceof QueryReply) {
             QueryReply qr = (QueryReply)m;
-            ip = qr.getIP();
+            return allow(qr.getIPBytes());
         } else if (m instanceof PushRequest) {
             PushRequest push=(PushRequest)m;
-            ip = NetworkUtils.ip2string(push.getIP());
-        }
-        else // we dont want to block other kinds of messages
+            return allow(push.getIP());
+        } else // we dont want to block other kinds of messages
             return true;
-        // now check the ip
-        return allow(ip); 
     }
 }
 
