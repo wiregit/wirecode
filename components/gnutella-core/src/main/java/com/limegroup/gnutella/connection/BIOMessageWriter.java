@@ -172,7 +172,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
             CONNECTION.stats().addSent();
         }
         if(CONNECTION.isWriteDeflated()) {
-            CONNECTION.stats().addCompressedBytesSent(DEFLATER.getTotalOut());
+            CONNECTION.stats().setCompressedBytesSent(DEFLATER.getTotalOut());
             if(!CommonUtils.isJava118()) {
                 CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
                     (int)(DEFLATER.getTotalIn() - pUn));
