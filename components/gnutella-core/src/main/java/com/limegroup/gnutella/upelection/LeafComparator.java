@@ -29,7 +29,10 @@ public class LeafComparator implements Comparator {
 	
 	public int compare(Object a, Object b){
 		if (a==null)
-			return -1;
+			if (b==null)
+				return 0;
+			else
+				return -1;
 		if (b==null)
 			return 1;
 		

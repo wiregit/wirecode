@@ -128,7 +128,8 @@ public class BestCandidates {
 		//check needs to be unlocked.
 		
 		for (int i=0;i<3;i++)
-			if (instance._best[i].getAdvertiser().isSame(ip)) 
+			if (instance._best[i]!=null &&
+					instance._best[i].getAdvertiser().isSame(ip)) 
 				synchronized(instance) {
 					instance._best[i]=electBest(i);
 					propagateChange();
@@ -137,10 +138,12 @@ public class BestCandidates {
 	
 	/**
 	 * sets the current message to be sent in the next awakening of the advertising
-	 * thread.
+	 * thread.  We must have a best candidate of our own before we start propagating
+	 * other people's.
 	 */
 	private static void propagateChange(){
-		_advertiser.setMsg(new BestCandidatesVendorMessage(instance._best));
+		if (instance._best[0]!=null)
+			_advertiser.setMsg(new BestCandidatesVendorMessage(instance._best));
 	} 
 	
 	/**
@@ -152,7 +155,7 @@ public class BestCandidates {
 	 * @return the best candidate amongst the advertised connections.
 	 */
 	private static Candidate electBest(int ttl) {
-		
+
 		Candidate best = null;
 		
 		//if we are electing at ttl 0, cycle through the leaves.

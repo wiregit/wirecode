@@ -337,14 +337,14 @@ public class ConnectionManager {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return; 
 		
-		//if we are not disconnecting, we may need to update the 
-		//list of best candidates
-		if (_disconnectTime==0)
-			BestCandidates.routeFailed(mc);
-		
         removeInternal(mc);
 
         adjustConnectionFetchers();
+        
+        //if we are not disconnecting, we may need to update the 
+		//list of best candidates
+		if (_disconnectTime==0)
+			BestCandidates.routeFailed(mc);
     }
 
     /**

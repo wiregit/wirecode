@@ -64,6 +64,7 @@ public class CandidateAdvertiser extends ManagedThread {
 		
 		}catch(InterruptedException hmm) {
 			//this thread should not be interrupted.
+			//unless you want to stop it for testing reasons.
 			return;
 		}
 	}
