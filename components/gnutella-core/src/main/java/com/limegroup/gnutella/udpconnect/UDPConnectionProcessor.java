@@ -89,6 +89,9 @@ public class UDPConnectionProcessor {
 		a message being received */
     private static final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
 
+    /** Define the minimum wait time between ack timeout events */
+    private static final long MIN_ACK_WAIT_TIME       = 2;
+
     /** Define the size of a small send window for increasing wait time */
     private static final long SMALL_SEND_WINDOW       = 4;
 
@@ -448,8 +451,6 @@ public class UDPConnectionProcessor {
 	 *  data window.
      */
 	public int getChunkLimit() {
-
-log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
 		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
 
@@ -621,7 +622,7 @@ log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
 log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
-		_udpService.send(msg, _ip, _port);  // TODO: performance
+		_udpService.send(msg, _ip, _port);  
 	}
 
 
@@ -631,7 +632,6 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
      *  If no acks are pending, then do nothing.
      */
     private synchronized void scheduleAckIfNeeded() {
-log("------scheduleAckIfNeeded");
         DataRecord drec = _sendWindow.getOldestUnackedBlock();
         if ( drec != null ) {
             int rto         = _sendWindow.getRTO();
@@ -645,10 +645,12 @@ log("------scheduleAckIfNeeded");
                _ackResendCount = 0;
             }
 
-log("------scheduled");
+            // Enforce a mimimum waitTime from now
+            long minTime = System.currentTimeMillis() + MIN_ACK_WAIT_TIME;
+            waitTime = Math.max(waitTime, minTime);
+
             scheduleAckTimeoutEvent(waitTime);
         } else {
-log("------unscheduled");
             unscheduleAckTimeoutEvent();
         }
     }
@@ -829,8 +831,6 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
                 // Update the chunk limit for fast (nonlocking) access
                 _chunkLimit = _sendWindow.getWindowSpace();
-
-log("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 			}
         } else if (msg instanceof DataMessage) {
             // Pass the data message to the output window
@@ -918,7 +918,6 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             // Don't wait for next write if there is no chunk available.
             // Writes will get rescheduled if a chunk becomes available.
             synchronized(_input) {
-log("calling getPending");
                 if ( _input.getPendingChunks() == 0 ) {
                     scheduleWriteDataEvent(Long.MAX_VALUE);
                     _waitingForDataAvailable = true;
