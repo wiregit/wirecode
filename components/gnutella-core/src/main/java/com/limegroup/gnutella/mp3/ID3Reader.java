@@ -140,73 +140,78 @@ public final class ID3Reader {
         retObjs[4] = new Short((short)-1);
         retObjs[6] = new Short((short)-1);
 
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-        long length = randomAccessFile.length();
-
-        // short circuit to bitrate if not ID3 tag can be properly read...
-        // We need to read at least 128 bytes
-        if(length >= 128) {
-
-            randomAccessFile.seek(length - 128);
-            byte[] buffer = new byte[30];
-            
-            // Read ID3 Tag, return null if not present
-            randomAccessFile.readFully(buffer, 0, 3);
-            String tag = new String(buffer, 0, 3);
-            
-            if (tag.equals("TAG")) {
-            
-                // We have an ID3 Tag, now get the parts
-                // Title
-                randomAccessFile.readFully(buffer, 0, 30);
-                retObjs[0] = new String(buffer, 0, 
-                                           getTrimmedLength(buffer, 30));
+        RandomAccessFile randomAccessFile = null;
+        
+        try {
+            randomAccessFile = new RandomAccessFile(file, "r");
+            long length = randomAccessFile.length();
+    
+            // short circuit to bitrate if not ID3 tag can be properly read...
+            // We need to read at least 128 bytes
+            if(length >= 128) {
+    
+                randomAccessFile.seek(length - 128);
+                byte[] buffer = new byte[30];
                 
-                // Artist
-                randomAccessFile.readFully(buffer, 0, 30);
-                retObjs[1] = new String(buffer, 0, 
-                                           getTrimmedLength(buffer, 30));
+                // Read ID3 Tag, return null if not present
+                randomAccessFile.readFully(buffer, 0, 3);
+                String tag = new String(buffer, 0, 3);
                 
-                // Album
-                randomAccessFile.readFully(buffer, 0, 30);
-                retObjs[2] = new String(buffer, 0, 
-                                           getTrimmedLength(buffer, 30));
+                if (tag.equals("TAG")) {
                 
-                // Year
-                randomAccessFile.readFully(buffer, 0, 4);
-                retObjs[3] = new String(buffer, 0, 
-                                           getTrimmedLength(buffer, 4));
-                
-                // Comment and track
-                randomAccessFile.readFully(buffer, 0, 30);
-                int commentLength;
-                if(buffer[28] == 0)
-                {
-                    retObjs[4] = new Short((short)ByteOrder.ubyte2int(buffer[29]));
-                    commentLength = 28;
+                    // We have an ID3 Tag, now get the parts
+                    // Title
+                    randomAccessFile.readFully(buffer, 0, 30);
+                    retObjs[0] = new String(buffer, 0, 
+                                               getTrimmedLength(buffer, 30));
+                    
+                    // Artist
+                    randomAccessFile.readFully(buffer, 0, 30);
+                    retObjs[1] = new String(buffer, 0, 
+                                               getTrimmedLength(buffer, 30));
+                    
+                    // Album
+                    randomAccessFile.readFully(buffer, 0, 30);
+                    retObjs[2] = new String(buffer, 0, 
+                                               getTrimmedLength(buffer, 30));
+                    
+                    // Year
+                    randomAccessFile.readFully(buffer, 0, 4);
+                    retObjs[3] = new String(buffer, 0, 
+                                               getTrimmedLength(buffer, 4));
+                    
+                    // Comment and track
+                    randomAccessFile.readFully(buffer, 0, 30);
+                    int commentLength;
+                    if(buffer[28] == 0)
+                    {
+                        retObjs[4] = new Short((short)ByteOrder.ubyte2int(buffer[29]));
+                        commentLength = 28;
+                    }
+                    else
+                    {
+                        retObjs[4] = new Short((short)0);
+                        commentLength = 3;
+                    }
+                    retObjs[5] = new String(buffer, 0,
+                                               getTrimmedLength(buffer, 
+                                                                commentLength));
+                    
+                    // Genre
+                    randomAccessFile.readFully(buffer, 0, 1);
+                    retObjs[6] = new Short((short)ByteOrder.ubyte2int(buffer[0]));
                 }
-                else
-                {
-                    retObjs[4] = new Short((short)0);
-                    commentLength = 3;
-                }
-                retObjs[5] = new String(buffer, 0,
-                                           getTrimmedLength(buffer, 
-                                                            commentLength));
-                
-                // Genre
-                randomAccessFile.readFully(buffer, 0, 1);
-                retObjs[6] = new Short((short)ByteOrder.ubyte2int(buffer[0]));
             }
+    
+            MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
+            // Bitrate
+            retObjs[7] = new Integer(mp3Info.getBitRate());
+            // Length
+            retObjs[8] = new Integer((int) mp3Info.getLengthInSeconds());
+        } finally {
+            if( randomAccessFile != null )
+                randomAccessFile.close();
         }
-
-        MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
-        // Bitrate
-        retObjs[7] = new Integer(mp3Info.getBitRate());
-        // Length
-        retObjs[8] = new Integer((int) mp3Info.getLengthInSeconds());
-
-        randomAccessFile.close();
         return retObjs;
     }
 
