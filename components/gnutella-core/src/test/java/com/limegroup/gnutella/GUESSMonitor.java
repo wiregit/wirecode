@@ -82,6 +82,8 @@ public class GUESSMonitor {
     private class MyMessageRouter extends MetaEnabledMessageRouter {
 
         private List _guessPongs = new Vector();
+        private Set  _uniqueHosts = Collections.synchronizedSet(new HashSet());
+        private Set  _badHosts = Collections.synchronizedSet(new HashSet());
 
         private boolean _shouldRun = true;
         public void shutdown() {
@@ -138,6 +140,8 @@ public class GUESSMonitor {
                 }
                 if (_shouldRun && (_guessPongs.size() > 0)) {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
+                    if (_badHosts.contains(currPong.getIP()))
+                        continue;
                     debug("guessPongLoop(): consuming Pong = " + currPong);
                     Object[] retObjs = 
                         GUESSStatistics.getAckStatistics(currPong.getIP(),
@@ -148,6 +152,14 @@ public class GUESSMonitor {
                     float successRate = (numGot/numSent)*100;
 
                     tallyStats(numGot, numSent, averageTime, successRate);
+                    // also keep track of unique tests done....
+                    if (!_uniqueHosts.contains(currPong.getIP())) {
+                        _uniqueHosts.add(currPong.getIP());
+                        if (numGot == 0)
+                            _badHosts.add(currPong.getIP());
+                        else
+                            goodGUESSers++;
+                    }
 
                     debug("Sent Queries to " + currPong.getIP() + ":" +
                           currPong.getPort() + " . " + "Success Rate = " +
@@ -165,15 +177,16 @@ public class GUESSMonitor {
      */
     private float numTestsDone = 0;
     private float numSuccessTests = 0;
-    private float overallDropRate = 0;
+    private float overallSuccessRate = 0;
     private float overallLatency = 0;
+    private float goodGUESSers = 0;
 
     private synchronized void tallyStats(float numGot, float numSent, 
                                     float averageTime, float successRate) {
         if (numGot > 0) {
             numSuccessTests++;
-            overallDropRate = 
-            ((overallDropRate*numTestsDone) + successRate) /
+            overallSuccessRate = 
+            ((overallSuccessRate*numTestsDone) + successRate) /
             (numTestsDone+1);
             overallLatency = 
             ((overallLatency*numTestsDone) + averageTime) /
@@ -189,12 +202,17 @@ public class GUESSMonitor {
                            Calendar.getInstance().getTime());
         System.out.println("Number of Tests : " + numTestsDone);
         if (numSuccessTests > 0) {
-            System.out.println("Percentage of Tests Successful : " +
-                           (numSuccessTests/numTestsDone)*100);
-            System.out.println("Overall Drop Rate : " + overallDropRate +
+            float uniqueHostsSize = _messageRouter._uniqueHosts.size();
+            System.out.println("Overall Throughput Rate : " + 
+                               overallSuccessRate +
                                "%");
             System.out.println("Overall Latency : " + overallLatency +
                                "ms");
+            System.out.println("Number of Unique GUESS-enabled IPs : " +
+                               uniqueHostsSize);
+            System.out.println("Percentage of GUESS IPs that work : " +
+                               (goodGUESSers/uniqueHostsSize)*100 +
+                               "%");
         }
         System.out.println("----------------");
     }
