@@ -56,7 +56,7 @@ public class PingRequest extends Message {
      * 14(port+ip+files+kbytes)+group.length + 1(null)
      */
     protected PingRequest(byte ttl, byte length) {
-        super((byte)0x0, ttl, (byte)length);
+        super((byte)0x0, ttl, length);
     }
 
     /**
