@@ -10,7 +10,7 @@ import com.sun.java.util.collections.*;
  * This interface is implemented by ManagedConnection and by
  * MessageRouter.ForMeReplyHandler.
  */
-interface ReplyHandler {
+public interface ReplyHandler {
 
     /**
      * Handle the PingReply, failing silently
@@ -37,6 +37,14 @@ interface ReplyHandler {
 
 	boolean isOutgoing();
 
+	/**
+	 * Returns whether or not this handler is killable by the handler
+	 * watchdog.  In particular, this is used for old Clip2 indexing queries,
+	 * which should not be killed.
+	 *
+	 * @return <tt>true</tt> if the handler is 'killable', i.e. a clip2
+	 *  indexing query, otherwise <tt>false</tt>
+	 */
 	boolean isKillable();
 
 	/**
