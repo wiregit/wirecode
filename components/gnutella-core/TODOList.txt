@@ -52,3 +52,12 @@ This should be the last thing we do.  We need to accept private addresses
 wholeheartheadly while testing.
 
 ********************************************************************************
+
+
+--------------------------------------------------------------------------------
+Date Posted: 10/01/02
+Date Resolved: 
+
+Send UDP PingReplies to any initialized Ultrapeer TCP connections.
+
+********************************************************************************
