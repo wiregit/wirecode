@@ -8,8 +8,8 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 
 /**
- * Out-of-process test to check whether ultrapeers handle query routing, leaf
- * "TTL boost", routing of marked pongs, etc.
+ * Out-of-process test to check whether ultrapeers handle query routing, normal
+ * routing, routing of marked pongs, etc.
  */
 public class UltrapeerTester {
     static final int PORT=6347;
@@ -25,12 +25,13 @@ public class UltrapeerTester {
         
         try {
             connect();
-            testBroadcastFromLeaf();
+            testBroadcastFromLeaf();  //also tests replies, pushes
             testBroadcastFromOld();
             testBroadcastFromOldToLeaf();
-            testPingBroadcast();
+            testPingBroadcast();      //also tests replies
             testMisroutedPong();
             testUltrapeerPong();
+            testDropAndDuplicate();   //must be last; closes old
             shutdown();
         } catch (IOException e) { 
             System.err.println("Mysterious IOException:");
@@ -70,10 +71,12 @@ public class UltrapeerTester {
 
     private static void testBroadcastFromLeaf() 
              throws IOException, BadPacketException {
-        System.out.println("-Testing normal broadcast from leaf, with TTL boost");
+        System.out.println(
+            "-Testing normal broadcast from leaf, with replies and pushes");
         drain(old);
         drain(ultrapeer);
 
+        //1. Check that query broadcasted to old and ultrapeer
         QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
         leaf.send(qr);
         leaf.flush();
@@ -89,6 +92,82 @@ public class UltrapeerTester {
         Assert.that(((QueryRequest)m).getQuery().equals("crap"));
         Assert.that(m.getHops()==(byte)1); //used to be not decremented
         Assert.that(m.getTTL()==(byte)6);
+
+        //2. Check that replies are routed back.
+        drain(leaf);
+        Response response1=new Response(0l, 0l, "response1.txt");
+        byte[] guid1=GUID.makeGuid();
+        QueryReply reply1=new QueryReply(qr.getGUID(),
+                                         (byte)2,
+                                         6346,
+                                         new byte[4],
+                                         56,
+                                         new Response[] {response1},
+                                         guid1);
+        old.send(reply1);
+        old.flush();
+
+        QueryReply replyRead=(QueryReply)leaf.receive(TIMEOUT);
+        Assert.that(Arrays.equals(guid1, replyRead.getClientGUID()));
+
+        drain(leaf);
+        Response response2=new Response(0l, 0l, "response2.txt");
+        byte[] guid2=GUID.makeGuid();
+        QueryReply reply2=new QueryReply(qr.getGUID(),
+                                         (byte)2,
+                                         6346,
+                                         new byte[4],
+                                         56,
+                                         new Response[] {response1},
+                                         guid2);
+        ultrapeer.send(reply2);
+        ultrapeer.flush();
+
+        replyRead=(QueryReply)leaf.receive(TIMEOUT);
+        Assert.that(Arrays.equals(guid2, replyRead.getClientGUID()));
+
+        //3. Check that pushes are routed (not broadcast)
+        drain(old);
+        drain(ultrapeer);
+        PushRequest push1=new PushRequest(GUID.makeGuid(),
+                                          (byte)2,
+                                          guid1,
+                                          0, new byte[4],
+                                          6346);
+        leaf.send(push1);
+        leaf.flush();
+        PushRequest pushRead=(PushRequest)old.receive(TIMEOUT);
+        Assert.that(pushRead.getIndex()==0);
+        Assert.that(! drain(ultrapeer));
+
+        PushRequest push2=new PushRequest(GUID.makeGuid(),
+                                          (byte)2,
+                                          guid2,
+                                          1, new byte[4],
+                                          6346);
+        leaf.send(push2);
+        leaf.flush();
+        pushRead=(PushRequest)ultrapeer.receive(TIMEOUT);
+        Assert.that(pushRead.getIndex()==1);
+        Assert.that(! drain(old));        
+
+        //4. Check that queries can re-route push routes
+        drain(leaf);
+        drain(old);
+        ultrapeer.send(reply1);
+        ultrapeer.flush();
+        replyRead=(QueryReply)leaf.receive(TIMEOUT);
+        Assert.that(Arrays.equals(guid1, replyRead.getClientGUID()));
+        PushRequest push3=new PushRequest(GUID.makeGuid(),
+                                          (byte)2,
+                                          guid1,
+                                          3, new byte[4],
+                                          6346);
+        leaf.send(push3);
+        leaf.flush();
+        pushRead=(PushRequest)ultrapeer.receive(TIMEOUT);
+        Assert.that(pushRead.getIndex()==3);
+        Assert.that(! drain(old));
     }
 
     private static void testBroadcastFromOld() 
@@ -138,10 +217,11 @@ public class UltrapeerTester {
     private static void testPingBroadcast() 
              throws IOException, BadPacketException {
         System.out.println("-Testing ping broadcast from old connnection"
-                           +", no forwarding to leaf");
+                           +", no forwarding to leaf, with reply");
         drain(old);
         drain(leaf);
 
+        //Send ping
         Message m=new PingRequest((byte)7);
         ultrapeer.send(m);
         ultrapeer.flush();
@@ -152,6 +232,22 @@ public class UltrapeerTester {
         Assert.that(m.getTTL()==(byte)6);
 
         Assert.that(! drain(leaf));
+
+        //Send reply
+        drain(ultrapeer);        
+        PingReply pong=new PingReply(m.getGUID(),
+                                     (byte)7,
+                                     6344,
+                                     new byte[4],
+                                     3, 7);
+        old.send(pong);
+        old.flush();
+        for (int i=0; i<10; i++) {
+            PingReply pongRead=(PingReply)ultrapeer.receive(TIMEOUT);
+            if (pongRead.getPort()==pong.getPort())
+                return;
+        }
+        Assert.that(false, "Pong wasn't routed");
     }
 
 
@@ -162,7 +258,7 @@ public class UltrapeerTester {
         drain(old);
         drain(leaf);
 
-        Message m=new PingReply(new byte[16], 
+        Message m=new PingReply(GUID.makeGuid(), 
                                 (byte)7, 6399, new byte[4], 
                                 0, 0, false);                                
         ultrapeer.send(m);
@@ -179,8 +275,7 @@ public class UltrapeerTester {
         drain(old);
         drain(leaf);
 
-        byte[] guid=new byte[16];
-        guid[1]=(byte)7;  //need different GUID to fool duplicate filter
+        byte[] guid=GUID.makeGuid();
         Message m=new PingReply(guid, 
                                 (byte)7, 6399, new byte[4], 
                                 0, 0, true);                                
@@ -195,6 +290,33 @@ public class UltrapeerTester {
     }
 
 
+    private static void testDropAndDuplicate() 
+             throws IOException, BadPacketException {
+        System.out.println("-Testing that duplicates are dropped "
+                           +"when original connection closed");
+        drain(old);
+        drain(ultrapeer);
+
+        //Send query request from leaf, received by ultrapeer (and old)
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        leaf.send(qr);
+        leaf.flush();
+        
+        Message m=ultrapeer.receive(TIMEOUT);
+        Assert.that(m instanceof QueryRequest);
+        Assert.that(((QueryRequest)m).getQuery().equals("crap"));
+        Assert.that(m.getHops()==(byte)1); //used to be not decremented
+        Assert.that(m.getTTL()==(byte)6);
+
+        //After closing leaf (give it some time to clean up), make sure
+        //duplicate query is dropped.
+        drain(ultrapeer);
+        leaf.close();
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        old.send(qr);
+        old.flush();
+        Assert.that(!drain(ultrapeer));
+    }
 
     /** Tries to receive any outstanding messages on c 
      *  @return true if this got a message */
