@@ -958,6 +958,11 @@ public class UDPConnectionProcessor {
                 int           priorR = _receiverWindowSpace;
                 _receiverWindowSpace = amsg.getWindowSpace();
 
+                // Adjust the receivers window space with knowledge of
+                // how many extra messages we have sent since this ack
+                if ( _sequenceNumber > seqNo ) 
+                    _receiverWindowSpace += (seqNo - _sequenceNumber);
+
                 // Reactivate writing if required
                 if ( (priorR == 0 || _waitingForDataSpace) && 
                      _receiverWindowSpace > 0 ) {
@@ -1048,6 +1053,11 @@ public class UDPConnectionProcessor {
                 long             wStart = kmsg.getWindowStart(); 
                 int              priorR = _receiverWindowSpace;
                 _receiverWindowSpace    = kmsg.getWindowSpace();
+
+                // Adjust the receivers window space with knowledge of
+                // how many extra messages we have sent since this ack
+                if ( _sequenceNumber > seqNo ) 
+                    _receiverWindowSpace += (seqNo - _sequenceNumber);
 
                 // If receiving KeepAlives when closed, send another FinMessage
                 if ( isClosed() ) {
