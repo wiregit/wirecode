@@ -8,6 +8,7 @@ import java.net.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 
+import com.sun.java.util.collections.Iterator;
 
 /**
  * Unit tests for UpdateMessageVerifier
@@ -429,6 +430,14 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void testJava118NetworkVerification() throws Exception {
+    	ConnectionManager cman = RouterService.getConnectionManager();
+    	//close all connections, because previous tests influence the outcome
+    	for (Iterator iter = cman.getConnections().iterator();iter.hasNext();) {
+    		Connection c = (Connection)iter.next();
+    		c.close();
+    	}
+		//System.out.println("zab connections in test :"+cman.getNumConnections());
+    	
        UpdateManager man = UpdateManager.instance();
        assertEquals("setSettings not working", "2.9.3", man.getVersion());
        PrivilegedAccessor.setValue(CommonUtils.class, 
