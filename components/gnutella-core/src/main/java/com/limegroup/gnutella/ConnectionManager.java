@@ -428,6 +428,14 @@ public class ConnectionManager {
     }
     
     /**
+     * @return Returns endpoint representing its own address and port
+     */
+    public Endpoint getSelfAddress()
+    {
+       return new Endpoint(_router.getAddress(), _router.getPort()); 
+    }
+    
+    /**
      * Adds an initializing connection.
      * Should only be called from a thread that has this' monitor.
      * This is called from initializeExternallyGeneratedConnection
@@ -897,8 +905,7 @@ public class ConnectionManager {
         //set client/supernode flag for the connection
         String supernodeStr = headers.getProperty(
             ConnectionHandshakeHeaders.SUPERNODE);
-        if(supernodeStr != null)
-        {
+        if(supernodeStr != null){
             boolean isSupernode = (new Boolean(supernodeStr)).booleanValue();
             if(isSupernode)
                 connection.setSupernodeConnectionFlag(true);
@@ -909,12 +916,12 @@ public class ConnectionManager {
         //check Supernode-Needed header
         String supernodeNeededStr = headers.getProperty(
             ConnectionHandshakeHeaders.SUPERNODE_NEEDED);
-        if(supernodeNeededStr != null)
-        {
+        if(supernodeNeededStr != null){
             boolean supernodeNeeded 
                 = (new Boolean(supernodeNeededStr)).booleanValue();
             //take appropriate action
-            gotSupernodeNeededGuidance(supernodeNeeded);
+            gotSupernodeNeededGuidance(supernodeNeeded, 
+                headers.getProperty(ConnectionHandshakeHeaders.MY_ADDRESS));
         }
     }
    
@@ -925,9 +932,11 @@ public class ConnectionManager {
      * change our state based upon the guidance
      * @param supernodeNeeded True, if other node thinks we should be
      * a supernode, false otherwise
+     * @param remoteAddress address (host:port) of the remote host who is
+     * providing the guidance
      */
-    private void gotSupernodeNeededGuidance(boolean supernodeNeeded)
-    {
+    private void gotSupernodeNeededGuidance(boolean supernodeNeeded,
+        String remoteAddress){
         //if we are in the state asked for, return
         if(SettingsManager.instance().isSupernode() == supernodeNeeded)
             return;
@@ -939,6 +948,13 @@ public class ConnectionManager {
         if(SettingsManager.instance().isSupernode() && 
             _incomingClientConnections > 0)
             return;
+        
+        //Add the remote address to Host Cacher, so that we can connect to
+        //that
+        try{
+            if(remoteAddress != null)
+                _catcher.add(new Endpoint(remoteAddress),null);
+        }catch(IllegalArgumentException iae){}
         
         //else, set the state as guided, and reconnect
         SettingsManager.instance().setSupernodeMode(supernodeNeeded);
