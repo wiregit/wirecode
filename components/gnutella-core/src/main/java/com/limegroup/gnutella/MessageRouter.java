@@ -1588,7 +1588,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    protected void sendPushRequest(PushRequest push)
+    public void sendPushRequest(PushRequest push)
         throws IOException {
         if(push == null) {
             throw new NullPointerException("null push");

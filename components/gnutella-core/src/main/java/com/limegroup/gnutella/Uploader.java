@@ -21,6 +21,7 @@ public interface Uploader extends BandwidthTracker {
     public static final int BROWSE_HOST      = 8;
     public static final int QUEUED           = 9;
     public static final int UPDATE_FILE      = 10;
+    public static final int PUSH_PROXY       = 11;
 
     /**
 	 * Stops this upload.  If the download is already 

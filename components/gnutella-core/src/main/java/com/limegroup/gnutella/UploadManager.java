@@ -111,6 +111,13 @@ public final class UploadManager implements BandwidthTracker {
     
     public static final int UPDATE_FILE_INDEX = -2;
 
+    /** 
+     * The file index used in this structure to indicate a Push Proxy 
+     * request.
+     */
+    public static final int PUSH_PROXY_FILE_INDEX = -3;
+    
+
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
@@ -146,6 +153,7 @@ public final class UploadManager implements BandwidthTracker {
                 //      be able to remove it.
                 if ( uploader != null 
                   && uploader.getState() != Uploader.BROWSE_HOST
+                  && uploader.getState() != Uploader.PUSH_PROXY
                   && !oldFileName.equalsIgnoreCase(fileName) ) {
                     RouterService.getCallback().removeUpload(uploader);
                 }
@@ -228,7 +236,8 @@ public final class UploadManager implements BandwidthTracker {
 
             //ensure the uploader is removed from the GUI
             if (uploader != null && 
-                (uploader.getState() != uploader.BROWSE_HOST))
+                (uploader.getState() != uploader.BROWSE_HOST) &&
+                (uploader.getState() != uploader.PUSH_PROXY))
                 RouterService.getCallback().removeUpload(uploader);            
             
             debug("closing socket");
@@ -253,12 +262,12 @@ public final class UploadManager implements BandwidthTracker {
         debug(uploader+ " starting single upload");
         // note if this is a Browse Host Upload...
         boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
-        
+        boolean isPushProxy=(uploader.getState() == Uploader.PUSH_PROXY);
         boolean updateCheck= (uploader.getState() == Uploader.UPDATE_FILE);
         // check if it complies with the restrictions.
         // and set the uploader state accordingly
         int queued = -1;
-        if(!isBHUploader&&!updateCheck) { 
+        if(!isBHUploader&&!updateCheck&&!isPushProxy) { 
             //testing and book-keeping only if !browse host and !updateCheck
             //Note the state at this point can be either FILE_NOT_FOUND, 
             //BROWSE_HOST, PUSH_FAILED or CONNECTING
@@ -324,8 +333,8 @@ public final class UploadManager implements BandwidthTracker {
             // then set a flag in the upload manager...
             _hadSuccesfulUpload = true;
             // is this necessary? -- i'm pretty sure it is.
-            if ( !isBHUploader &&
-              uploader.getMethod() != HTTPRequestMethod.HEAD) {
+            if ((!isBHUploader || !isPushProxy) &&
+                uploader.getMethod() != HTTPRequestMethod.HEAD) {
                 FileDesc fd = uploader.getFileDesc();
 				if(fd != null) {
 					fd.incrementCompletedUploads();
@@ -498,6 +507,7 @@ public final class UploadManager implements BandwidthTracker {
 
         Assert.that(maxQueueSize>0,"queue size 0, cannot use");
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
+        Assert.that(uploader.getState()!=Uploader.PUSH_PROXY);//cannot be Proxy
         if(giveSlot)
             return ACCEPTED;
 
@@ -904,6 +914,16 @@ public final class UploadManager implements BandwidthTracker {
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
+            } else if (fileInfoPart.startsWith("/gnutella/pushproxy")) {
+                index = PUSH_PROXY_FILE_INDEX;
+                // set the filename as the servent ID
+                StringTokenizer stLocal = new StringTokenizer(fileInfoPart, "=");
+                if (stLocal.countTokens() < 2)
+                    throw new IOException("Malformed PushProxy HTTP Request");
+                // skip first part
+                stLocal.nextToken();
+                // had better be the client GUID
+                fileName = stLocal.nextToken();
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information
