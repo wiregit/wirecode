@@ -9,10 +9,10 @@ import java.util.HashMap;
  *  will remain.  For readers, the data can be passed on once any holes are 
  *  received. For the writer, if the round trip time for acks of the older data 
  *  is greatly exceeded, the data can be resent to try and receive an ack.
+ *
+ *  All methods in this class rely on external synchronization of access.
  * 
- *  TODO: This class is getting reworked from an improved TFTP experiment into
- *        use with a full streaming connection. The RTT statistics are going 
- *  to be improved for better smoothing.
+ *  TODO: DataMessage timing still requires work.
  */
 public class DataWindow
 {
@@ -49,7 +49,7 @@ public class DataWindow
     /*
      *  Add a new message to the window.  
      */
-	public synchronized DataRecord addData(UDPConnectionMessage msg) {
+	public DataRecord addData(UDPConnectionMessage msg) {
 		DataRecord d;
 		d          = new DataRecord();
 		d.pnum     = msg.getSequenceNumber();
@@ -68,7 +68,7 @@ public class DataWindow
     /** 
      *  Get the block based on the sequenceNumber.
      */
-	public synchronized DataRecord getBlock(int pnum) {
+	public DataRecord getBlock(int pnum) {
 		String     pkey = String.valueOf(pnum);
 		DataRecord d    = (DataRecord) window.get(pkey);
 		return d;
@@ -78,21 +78,21 @@ public class DataWindow
      *  Get the start of the data window. The start will generally be the
      *  sequence number of the lowest unacked message.
      */
-    public synchronized int getWindowStart() {
+    public int getWindowStart() {
         return windowStart;
     }
 
     /** 
      *  Get the size of the data window.
      */
-	public synchronized int getWindowSize() {
+	public int getWindowSize() {
 		return windowSize;
 	}
 
     /** 
      *  Get the number of slots in use.  This excludes written data.
      */
-    public synchronized int getUsedSpots() {
+    public int getUsedSpots() {
         DataRecord d;
         String     pkey;
         int        count = 0;
@@ -109,7 +109,7 @@ public class DataWindow
     /** 
      *  Get the number of slots available to be used.
      */
-    public synchronized int getWindowSpace() {
+    public int getWindowSpace() {
         return(windowSize - getUsedSpots());
     }
 
@@ -117,7 +117,7 @@ public class DataWindow
      *  Calculate the average wait time of the N lowest unresponded to 
      *  blocks
      */
-	public synchronized int calculateWaitTime(long time, int n) {
+	public int calculateWaitTime(long time, int n) {
         DataRecord d;
         String     pkey;
         int        count = 0;
@@ -142,7 +142,7 @@ public class DataWindow
      *  Clear out the acknowledged blocks at the beginning and advance the 
      *  window forward.  Return the number of acked blocks.
      */
-	public synchronized int clearLowAckedBlocks() {
+	public int clearLowAckedBlocks() {
         DataRecord d;
         String     pkey;
         int        count = 0;
@@ -164,7 +164,7 @@ public class DataWindow
      *  From the window, find the number for the next block. 
      *  i.e. sequenceNumber
      */
-    public synchronized int getLowestUnsentBlock() {
+    public int getLowestUnsentBlock() {
         String pkey;
         for (int i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = String.valueOf(i);
@@ -180,7 +180,7 @@ public class DataWindow
      *  Note that this assumes that the low block isn't acked since
      *  it would get cleared if it was acked.
      */
-    public synchronized int countHigherAckBlocks() {
+    public int countHigherAckBlocks() {
         DataRecord d;
         String     pkey;
         int        count = 0;
@@ -198,7 +198,7 @@ public class DataWindow
      *  If the sent data has not been acked for some multiple of 
      *  the RTO, it looks like a message was lost.
      */
-    public synchronized boolean acksAppearToBeMissing(long time, int multiple) {
+    public boolean acksAppearToBeMissing(long time, int multiple) {
 		// Check for first record being old
 		DataRecord drec = getBlock(windowStart);
 		if ( rto > 0 &&
@@ -214,28 +214,28 @@ public class DataWindow
     /** 
      *  Return the RTO based on window data and acks.
      */
-    public synchronized int getRTO() {
+    public int getRTO() {
         return (int)rto;
     }
 
     /** 
      *  Return the current measure of average round trip time.
      */
-    public synchronized int averageRoundTripTime() {
+    public int averageRoundTripTime() {
 		return (int) averageRTT;
 	}
 
     /** 
      *  Return the current measure of low round trip time.
      */
-    public synchronized int lowRoundTripTime() {
+    public int lowRoundTripTime() {
         return (int) lowRTT;
     }
 
     /** 
      *  Return a measure of the smoothed round trip time
      */
-    public synchronized int smoothRoundTripTime() {
+    public int smoothRoundTripTime() {
 		return (int) smoothRTT;
 	}
 
@@ -243,7 +243,7 @@ public class DataWindow
      *  Record that a block was acked and calculate the 
      *  round trip time and averages from it.
      */
-	public synchronized DataRecord ackBlock(int pnum) {
+	public DataRecord ackBlock(int pnum) {
 		DataRecord drec = getBlock(pnum);
 		if ( drec != null ) {
 			drec.acks++;
@@ -312,7 +312,7 @@ public class DataWindow
     /** 
      *  Get the oldest unacked block.
      */
-    public synchronized DataRecord getOldestUnackedBlock() {
+    public DataRecord getOldestUnackedBlock() {
         DataRecord d;
 
         // Find the oldest block.
@@ -332,7 +332,7 @@ public class DataWindow
     /** 
      *  Get a writable block which means unwritten ones at the start of Window
      */
-    public synchronized DataRecord getWritableBlock() {
+    public DataRecord getWritableBlock() {
         DataRecord d;
 
         // Find a writable block
@@ -353,7 +353,7 @@ public class DataWindow
 	 *  Once they do, older written blocks below the new window can be cleared.
 	 *  Return the size of the window advancement.
      */
-	public synchronized int clearEarlyWrittenBlocks() {
+	public int clearEarlyWrittenBlocks() {
         DataRecord d;
         String     pkey;
         int        count = 0;
@@ -393,7 +393,7 @@ public class DataWindow
     /** 
      *  Find the record that has been acked the most.
      */
-	public synchronized DataRecord findMostAcked() {
+	public DataRecord findMostAcked() {
         DataRecord d;
         DataRecord mostAcked = null;
 
@@ -413,7 +413,7 @@ public class DataWindow
     /** 
      *  Find the number of unwritten records
      */
-	public synchronized int numNotWritten() {
+	public int numNotWritten() {
         DataRecord d;
         int count = 0;
 
@@ -430,7 +430,7 @@ public class DataWindow
     /** 
      *  Find the number of unacked records
      */
-	public synchronized int numNotAcked() {
+	public int numNotAcked() {
         DataRecord d;
         int count = 0;
 
