@@ -472,6 +472,9 @@ public class RouterService
      * Kickoff a download request
      */
     public void kickoffDownload(HTTPDownloader down) {
+
+	down.ensureDequeued();
+
 	Thread t = new Thread(down);
 
 	t.setDaemon(true);

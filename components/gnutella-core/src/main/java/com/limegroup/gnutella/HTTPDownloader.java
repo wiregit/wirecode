@@ -48,6 +48,7 @@ public class HTTPDownloader implements Runnable {
     private boolean _resume;
     private boolean        _wasShutdown = false;
     private HTTPDownloader _replacement = null;
+    private PushRequestedFile savedPRF  = null;
 
 
     /** 
@@ -179,6 +180,14 @@ public class HTTPDownloader implements Runnable {
 	_manager = m;
 	_callback = _manager.getCallback();
 	_downloadDir = "";
+    }
+
+    /**
+     *  Ensure that a download is not queued prior to activation
+     */
+    public void ensureDequeued() {
+	if ( _state == QUEUED )
+	    _state = NOT_CONNECTED;
     }
     
 
@@ -358,6 +367,7 @@ public class HTTPDownloader implements Runnable {
 	}
 	PushRequestedFile prf=new PushRequestedFile(clientGUID, _filename,
 						    remoteIP, _index, this);
+        savedPRF = prf;
 	requested.add(prf);
 	
 	//TODO1: Should this be a new mGUID or the mGUID of the corresponding
@@ -525,6 +535,7 @@ public class HTTPDownloader implements Runnable {
 	boolean foundLength = false;
 	boolean foundRangeInitial = false;
 	boolean foundRangeFinal = false;
+	int     tempSize = -1;
 		
 	while (true) {
 	    try {
@@ -549,7 +560,7 @@ public class HTTPDownloader implements Runnable {
 		}
 		sub = sub.trim(); 
 		try {
-		    _sizeOfFile = java.lang.Integer.parseInt(sub);
+		    tempSize = java.lang.Integer.parseInt(sub);
 		}
 		catch (NumberFormatException e) {
 		    _state = ERROR;
@@ -568,7 +579,10 @@ public class HTTPDownloader implements Runnable {
 	    
 	}
 	
-	if (!foundLength) {
+	if (foundLength) {
+	    if ( tempSize != -1 )
+	    _sizeOfFile = tempSize;
+	} else {
 	    _state = ERROR;
 	}
 
@@ -577,6 +591,14 @@ public class HTTPDownloader implements Runnable {
     public void shutdown()
     {
 	_wasShutdown = true;
+
+	if ( _state != COMPLETE )
+	    _state = ERROR;
+
+	// Deactivate any pending push
+	if ( savedPRF != null )
+	    requested.remove(savedPRF);
+	    
 	try {
 	    _istream.close();
 	    _fos.close();
@@ -621,9 +643,14 @@ public class HTTPDownloader implements Runnable {
 
 	// If found then tell the original request, what its replacement is
 	if ( curPRF != null ) {
+	    requested.remove(curPRF);
+
+	    // Drop a cancelled request
+	    if ( curPRF.down.getState() != REQUESTING )
+		return false;
+
 	    curPRF.down.setReplacement(prf.down);
             setDownloadInfo(curPRF.down);
-	    requested.remove(curPRF);
 	    return true;
 	}
 	return false;
