@@ -793,8 +793,8 @@ public class ManagedConnection
         return this._isRouter;
     }
 
-    /** Returns true iff this is a connection to a shielded leaf node. 
-     *  Note that isClientConnection() ==> !isSupernodeConnection(). */
+    /** Returns true iff this connection wrote "Supernode: false".
+     *  This does NOT necessarily mean the connection is shielded. */
     public boolean isClientConnection() {
         String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
         if (value==null)
@@ -805,8 +805,7 @@ public class ManagedConnection
             return !Boolean.valueOf(value).booleanValue();
     }
 
-    /** Returns true iff this is a connection to a supernode.
-     *  Note that isSupernodeConnection() ==> !isClientConnection(). */
+    /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
         String value=getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
         if (value==null)
@@ -815,8 +814,9 @@ public class ManagedConnection
             return Boolean.valueOf(value).booleanValue();
     }
 
-    /** Returns true iff this is a connection to a supernode.
-     *  Note that isSupernodeConnection() ==> !isClientConnection(). */
+    /** Returns true iff the connection is a supernode shielding me, i.e., if I
+     *  wrote "Supernode: false" and this connection wrote "Supernode: true"
+     *  (not necessarily in that order). */
     public boolean isClientSupernodeConnection() {
         //Is remote host a supernode...
         if (! isSupernodeConnection())
@@ -829,6 +829,23 @@ public class ManagedConnection
             return false;
         else
             return !Boolean.valueOf(value).booleanValue();
+    }
+
+    /** Returns true iff I am a supernode shielding the given connection, i.e.,
+     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
+     *  false". */
+    public boolean isSupernodeClientConnection() {
+        //Is remote host a supernode...
+        if (! isClientConnection())
+            return false;
+
+        //...and am I a supernode?
+        String value=getPropertyWritten(
+            ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (value==null)
+            return false;
+        else
+            return Boolean.valueOf(value).booleanValue();
     }
 
     /** Returns the system time that we should next forward a query route table
@@ -1059,28 +1076,28 @@ public class ManagedConnection
         }
         
         public HandshakeResponse respond(HandshakeResponse response, 
-            boolean outgoing) throws IOException{
-            int code = 200;
-            String message = "OK";
-            
-            //set common properties
-            Properties ret=new Properties();
-            ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+                                         boolean outgoing) throws IOException {
+            if (outgoing) {
+                //a) Outgoing: nothing more to say
+                return new HandshakeResponse(new Properties());
+            } else {
+                Properties props=new Properties();
+                props.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, 
+                                  "False");
+                addCommonProperties(props);                
+                addHostAddresses(props, _manager);
 
-            //do stuff specific to connection direction
-            if(!outgoing){
-                addCommonProperties(ret);
-
-                //client should never accept the connection. Therefore, set the
-                //appropriate status
-                code = 503;
-                message = "I am a shielded client";
-                
-                //also add some host addresses in the response
-                addHostAddresses(ret, _manager);
+                if (_manager.hasShieldedClientSupernodeConnection()) {
+                    //b) Incoming, with supernode connection: reject (redirect)
+                    return new HandshakeResponse(
+                                   HandshakeResponse.SHIELDED,
+                                   HandshakeResponse.SHIELDED_MESSAGE,
+                                   props);
+                } else {
+                    //c) Incoming, no supernode: accept...until I find one
+                    return new HandshakeResponse(props);
+                }
             }
-            
-            return new HandshakeResponse(code, message, ret);
         }
     }
     
