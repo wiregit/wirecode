@@ -65,7 +65,7 @@ public class ApplicationSettings extends LimeProps {
 	 * The height that the application should be.
 	 */    
     public static final IntSetting APP_HEIGHT =
-        FACTORY.createIntSetting("APP_HEIGHT", 600);
+        FACTORY.createIntSetting("APP_HEIGHT", 800);
     
     /**
 	 * A flag for whether or not the application has been run one
