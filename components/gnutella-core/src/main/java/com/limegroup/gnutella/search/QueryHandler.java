@@ -56,6 +56,12 @@ public final class QueryHandler {
      */
     static final long TIME_TO_WAIT_PER_HOP = 2200;
 
+    /**
+     * Constant for the maximum number of milliseconds the entire query
+     * can last.  The query expires when this limit is reached.
+     */
+    public static final int MAX_QUERY_TIME = 200 * 1000;
+
 
 	/**
 	 * Handle to the <tt>MessageRouter</tt> instance.  Non-final for
@@ -554,7 +560,7 @@ public final class QueryHandler {
 		// return true if we've been querying for longer than the specified 
 		// maximum
 		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
-		if(queryLength > 200*1000) {
+		if(queryLength > MAX_QUERY_TIME) {
             return true;
         }
 
