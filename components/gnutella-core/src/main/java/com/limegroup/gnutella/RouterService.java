@@ -328,7 +328,7 @@ public class RouterService
         Connection c=null;
 
         //1. See if we're connected....
-        for (Iterator iter=manager.connections(); iter.hasNext(); ) {
+        for (Iterator iter=manager.initializedConnections(); iter.hasNext(); ) {
             Connection c2=(Connection)iter.next();
             //Get the IP address of c2 in dotted decimal form.  Note
             //that c2.getOrigHost is no good as it may return a
