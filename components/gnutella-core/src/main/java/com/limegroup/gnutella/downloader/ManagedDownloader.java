@@ -2848,10 +2848,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         rfd.resetFailedCount();
 
-        synchronized(this) {
-            setState(DOWNLOADING);
-        }
-
         if (stopped) {
             LOG.trace("Stopped in assignAndRequest");
             synchronized(this) {
@@ -2859,6 +2855,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             return ConnectionStatus.getNoData();
         }
+        
+        synchronized(this) {
+            setState(DOWNLOADING);
+        }
+        
         synchronized(this) {
             // only add if not already added.
             if(!dloaders.contains(dloader))
