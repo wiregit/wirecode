@@ -68,20 +68,22 @@ public class NIOMessageReader extends AbstractMessageReader {
         HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
         ByteBuffer buffer = handshaker.getRemainingData();
 
-        /*
         // read all data in the buffer
         while(buffer.hasRemaining()) {
             Message msg = createMessage(HEADER, PAYLOAD, conn, buffer);
             if(msg != null) { 
-                System.out.println("NIOMessageReader::routing left over message!!");
-                System.out.println(msg);
                 routeMessage(msg);
+                
+                // Clear the header and the payload to read in new data for the
+                // new message.  Note that these calls are inexpensive, as they
+                // simply reset the read point.
+                HEADER.clear();
+                PAYLOAD.clear();
             } else {
                 Assert.that(!buffer.hasRemaining(), 
                     "should not be any data in the buffer");
             }
         }
-        */
     }
 	
     /**
