@@ -1,6 +1,10 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.*;
+import java.net.*;
+import java.io.*;
 
 /**
  * Used for parsing the signed_update_file.xml and updating any values locally.
@@ -49,8 +53,33 @@ public class UpdateManager {
                 if(!isGreaterVersion(newVersion))
                      return;
                 System.out.println("Sumeet...getting file.");
-                //TODO1:connect to host
-                //TODO1:download file
+                final String UPDATE = "/update.xml";
+                String ip = c.getOrigHost();
+                int port = c.getOrigPort();
+                //TODO1: if the ip and port are invalid, we should return
+                try {
+                URL url = new URL("HTTP",ip,port,UPDATE);
+                HttpURLConnection connection=(HttpURLConnection)
+                                                      url.openConnection();
+                connection.setUseCaches(false);
+                connection.setRequestProperty("User-Agent",
+                                              CommonUtils.getHttpServer());
+                connection.setRequestProperty(  /*no persistence*/
+                HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+                connection.setRequestProperty("accept","text/html");//??
+                
+                InputStream in = connection.getInputStream();
+                while(true) {
+                    int a = in.read();
+                    if(a==-1)
+                         break;
+                    System.out.print((char)a);
+                }
+                } catch(Exception e ) {
+                    e.printStackTrace();
+                    System.out.println("failed");
+                }
+                System.out.println("read headers");
                 //TODO1:verify authenticity
                 //TODO1:parseFile using UpdateFileParser
                 synchronized(UpdateManager.this) {
