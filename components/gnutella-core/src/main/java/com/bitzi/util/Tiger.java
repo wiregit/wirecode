@@ -1,5 +1,5 @@
 /*
- * @(#)Tiger.java   1.6 2002-08-15
+ * @(#)Tiger.java   1.8 2004-03-01
  * This file was freely contributed to the LimeWire project  and is covered
  * by its existing GPL licence, but it may be used individually as a public
  * domain implementation of a published algorithm (see below for references).
@@ -128,8 +128,13 @@ public final class Tiger extends MessageDigest implements Cloneable {
      * Initialize or reset the digest context.
      */
     public void engineReset() {
-        for (int i = 63; i >= 0; i--)
-           pad[i] = (byte)0; // clear the evidence
+        int i = 60;
+        do {
+           pad[i    ] = (byte)0x00;
+           pad[i + 1] = (byte)0x00;
+           pad[i + 2] = (byte)0x00;
+           pad[i + 3] = (byte)0x00;
+        } while ((i -= 4) >= 0);
         padding = 0;
         bytes = 0;
         save0 = 0x0123456789abcdefL;
@@ -147,8 +152,8 @@ public final class Tiger extends MessageDigest implements Cloneable {
      */
     public void engineUpdate(byte input) {
         bytes++;
-        pad[padding++] = input;
-        if (padding == 64) {
+        pad[padding] = input;
+        if (++padding == 64) {
             computeBlock(pad, 0);
             padding = 0;
         }
@@ -242,66 +247,96 @@ public final class Tiger extends MessageDigest implements Cloneable {
         if (hashvalue.length - offset < TIGER_LENGTH)
             throw new DigestException(
                 "insufficient space in output buffer to store the digest");
-        /* flush the trailing bytes, adding padding bytes into last blocks */
-        pad[padding++] = (byte)0x01; // required padding byte!
-        // Add padding null bytes but replace the last 8 padding bytes by
-        // the little-endian 64-bit digested message bitlength.
-        // (optimized for 32-bit native architectures)
-        bytes <<= 3; // convert message size from bytes to bits
+
+        /*
+         * Flush the trailing bytes, adding padding bytes into last blocks.
+         */
         int temp;
-        if (padding > 56) { // need 8 bytes in block for the message size
-             // Not enough space to store the size of the digested message:
-             // pad this block with nulls, and restart a new block.
-            while (padding < 64) pad[padding++] = (byte)0x00;
-            computeBlock(pad, 0);
-            padding = 0;
+        // Add padding null bytes but replace the last 8 padding bytes by
+        // the little-endian 64-bit digested message bit-length.
+        pad[temp = padding] = (byte)0x01; // required first padding byte value!
+        // Check if 8 bytes available in pad to store the total message size
+        switch (temp) { // INVARIANT: temp must be in [0..63]
+        case 56: pad[57] = (byte)0x00; // no break; falls thru
+        case 57: pad[58] = (byte)0x00; // no break; falls thru
+        case 58: pad[59] = (byte)0x00; // no break; falls thru
+        case 59: pad[60] = (byte)0x00; // no break; falls thru
+        case 60: pad[61] = (byte)0x00; // no break; falls thru
+        case 61: pad[62] = (byte)0x00; // no break; falls thru
+        case 62: pad[63] = (byte)0x00; // no break; falls thru
+        case 63: computeBlock(pad, 0);
+            // Clear the 56 first bytes of pad[].
+            temp = 52;
+            do {
+                pad[temp     ] = (byte)0x00;
+                pad[temp +  1] = (byte)0x00;
+                pad[temp +  2] = (byte)0x00;
+                pad[temp +  3] = (byte)0x00;
+            } while ((temp -= 4) >= 0);
+            break;
+        case 52: pad[53] = (byte)0x00; // no break; falls thru
+        case 53: pad[54] = (byte)0x00; // no break; falls thru
+        case 54: pad[55] = (byte)0x00; // no break; falls thru
+        case 55: break;
+        default: // Clear the rest of 56 first bytes of pad[].
+            switch (temp & 3) {
+            case 3: temp++;
+                    break;
+            case 2: pad[(temp += 2) - 1] = (byte)0x00;
+                    break;
+            case 1: pad[(temp += 3) - 2] = (byte)0x00;
+                    pad[ temp       - 1] = (byte)0x00;
+                    break;
+            case 0: pad[(temp += 4) - 3] = (byte)0x00;
+                    pad[ temp       - 2] = (byte)0x00;
+                    pad[ temp       - 1] = (byte)0x00;
+            }
+            do {
+                pad[temp    ] = (byte)0x00;
+                pad[temp + 1] = (byte)0x00;
+                pad[temp + 2] = (byte)0x00;
+                pad[temp + 3] = (byte)0x00;
+            } while ((temp += 4) < 56);
         }
-        while (padding < 56) pad[padding++] = (byte)0x00;
-        temp = (int)(bytes       );
-        pad[56] = (byte)(temp       );
+        // Convert the message size from bytes to bits
+        pad[56] = (byte)(temp = (int)bytes << 3);
         pad[57] = (byte)(temp >>>  8);
         pad[58] = (byte)(temp >>> 16);
         pad[59] = (byte)(temp >>> 24);
-        temp = (int)(bytes >>> 32);
-        pad[60] = (byte)(temp       );
+        pad[60] = (byte)(temp = (int)(bytes >>> 29));
         pad[61] = (byte)(temp >>>  8);
         pad[62] = (byte)(temp >>> 16);
         pad[63] = (byte)(temp >>> 24);
         computeBlock(pad, 0);
+
         /*
          * Return the computed digest in little-endian byte order.
-         * (optimized for 32-bit native architectures)
          */
-        temp = (int)(save0       );
-        hashvalue[offset++] = (byte)(temp       );
-        hashvalue[offset++] = (byte)(temp >>>  8);
-        hashvalue[offset++] = (byte)(temp >>> 16);
-        hashvalue[offset++] = (byte)(temp >>> 24);
-        temp = (int)(save0 >>> 32);
-        hashvalue[offset++] = (byte)(temp       );
-        hashvalue[offset++] = (byte)(temp >>>  8);
-        hashvalue[offset++] = (byte)(temp >>> 16);
-        hashvalue[offset++] = (byte)(temp >>> 24);
-        temp = (int)(save1       );
-        hashvalue[offset++] = (byte)(temp       );
-        hashvalue[offset++] = (byte)(temp >>>  8);
-        hashvalue[offset++] = (byte)(temp >>> 16);
-        hashvalue[offset++] = (byte)(temp >>> 24);
-        temp = (int)(save1 >>> 32);
-        hashvalue[offset++] = (byte)(temp       );
-        hashvalue[offset++] = (byte)(temp >>>  8);
-        hashvalue[offset++] = (byte)(temp >>> 16);
-        hashvalue[offset++] = (byte)(temp >>> 24);
-        temp = (int)(save2       );
-        hashvalue[offset++] = (byte)(temp       );
-        hashvalue[offset++] = (byte)(temp >>>  8);
-        hashvalue[offset++] = (byte)(temp >>> 16);
-        hashvalue[offset++] = (byte)(temp >>> 24);
-        temp = (int)(save2 >>> 32);
-        hashvalue[offset++] = (byte)(temp       );
-        hashvalue[offset++] = (byte)(temp >>>  8);
-        hashvalue[offset++] = (byte)(temp >>> 16);
-        hashvalue[offset++] = (byte)(temp >>> 24);
+        hashvalue[offset     ] = (byte)(temp = (int) save0);
+        hashvalue[offset +  1] = (byte)(temp >>>  8);
+        hashvalue[offset +  2] = (byte)(temp >>> 16);
+        hashvalue[offset +  3] = (byte)(temp >>> 24);
+        hashvalue[offset += 4] = (byte)(temp = (int)(save0 >>> 32));
+        hashvalue[offset +  1] = (byte)(temp >>>  8);
+        hashvalue[offset +  2] = (byte)(temp >>> 16);
+        hashvalue[offset +  3] = (byte)(temp >>> 24);
+        hashvalue[offset += 4] = (byte)(temp = (int) save1);
+        hashvalue[offset +  1] = (byte)(temp >>>  8);
+        hashvalue[offset +  2] = (byte)(temp >>> 16);
+        hashvalue[offset +  3] = (byte)(temp >>> 24);
+        hashvalue[offset += 4] = (byte)(temp = (int)(save1 >>> 32));
+        hashvalue[offset +  1] = (byte)(temp >>>  8);
+        hashvalue[offset +  2] = (byte)(temp >>> 16);
+        hashvalue[offset +  3] = (byte)(temp >>> 24);
+        hashvalue[offset += 4] = (byte)(temp = (int) save2);
+        hashvalue[offset +  1] = (byte)(temp >>>  8);
+        hashvalue[offset +  2] = (byte)(temp >>> 16);
+        hashvalue[offset +  3] = (byte)(temp >>> 24);
+        hashvalue[offset += 4] = (byte)(temp = (int)(save2 >>> 32));
+        hashvalue[offset +  1] = (byte)(temp >>>  8);
+        hashvalue[offset +  2] = (byte)(temp >>> 16);
+        hashvalue[offset +  3] = (byte)(temp >>> 24);
+
         engineReset();  // clear the evidence
         return TIGER_LENGTH;
     }
@@ -326,347 +361,327 @@ public final class Tiger extends MessageDigest implements Cloneable {
         int lo, hi;
 
         /*
-         * Get the current saved digest.
+         * Local temporary work variables to compute the saved digests.
          */
-        long digest0 = save0, digest1 = save1, digest2 = save2;
+        long work0, work1, work2;
 
         /*
          * Read the input block into the local working set of 64-bit
          * values, in little-endian byte order. Be careful when
          * widening bytes or integers due to sign extension !
          */
-        long input0 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input1 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input2 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input3 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input4 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input5 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input6 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
-        long input7 = ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24)) & 0xffffffffL)
-                    | ((long)( (input[offset++] & 0xff)        |
-                              ((input[offset++] & 0xff) <<  8) |
-                              ((input[offset++] & 0xff) << 16) |
-                              ( input[offset++]         << 24) ) << 32);
+        long i0, i1, i2, i3, i4, i5, i6, i7;
 
         /*
-         * First pass with multiplier equal to 5 (or 4 + 1).
-         * Perform 8 rounds, each time rotating the 3 digest values.
+         * First pass with multiplier equal to 5.
+         *
+         * Note that this code is optimized to: (1) use the small additive
+         * constants which produce smaller Java Bytecode; (2) minimize
+         * the number of intermediate assignments; (3) use local variables
+         * instead of instance variables; (4) maximize the reuse of
+         * variable values with less loads (due to the limited way a Java
+         * compiler is able to perform these optimization).
          */
-        /* round(digest0, digest1, digest2, input0, 5) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input0)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 5;
-        /* round(digest1, digest2, digest0, input1, 5) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input1)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 5;
-        /* round(digest2, digest0, digest1, input2, 5) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input2)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 5;
-        /* round(digest0, digest1, digest2, input3, 5) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input3)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 5;
-        /* round(digest1, digest2, digest0, input4, 5) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input4)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 5;
-        /* round(digest2, digest0, digest1, input5, 5) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input5)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 5;
-        /* round(digest0, digest1, digest2, input6, 5) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input6)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 5;
-        /* round(digest1, digest2, digest0, input7, 5) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input7)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 5;
+        work0 =  save0
+              -  (SBOX0[(lo = (int)(work2 = save2 ^ (
+            i0 = ((long)( (input[offset     ] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + save1) * 5
+              -  (SBOX0[(lo = (int)(work0 ^= (
+            i1 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 5
+              -  (SBOX0[(lo = (int)(work1 ^= (
+            i2 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 5
+              -  (SBOX0[(lo = (int)(work2 ^= (
+            i3 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo >>> 16) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 5
+              -  (SBOX0[(lo = (int)(work0 ^= (
+            i4 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 5
+              -  (SBOX0[(lo = (int)(work1 ^= (
+            i5 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 5
+              -  (SBOX0[(lo = (int)(work2 ^= (
+            i6 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 5
+              -  (SBOX0[(lo = (int)(work0 ^= (
+            i7 = ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24)) & 0xffffffffL)
+               | ((long)( (input[offset += 4] & 0xff)        |
+                         ((input[offset +  1] & 0xff) <<  8) |
+                         ((input[offset +  2] & 0xff) << 16) |
+                         ( input[offset +  3]         << 24) ) << 32)
+                                             )  )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 5;
 
         /*
-         * Schedule the current input set before next pass.
+         * Schedule the current input set between each pass.
          */
-
-        input2 += (input1 ^= (input0 -= input7 ^ 0xa5a5a5a5a5a5a5a5L));
-        input5 += (input4 ^= (input3 -= input2 ^ ((~input1) <<  19) ));
-        input0 += (input7 ^= (input6 -= input5 ^ ((~input4) >>> 23) ));
-        input3 += (input2 ^= (input1 -= input0 ^ ((~input7) <<  19) ));
-        input7 -= (
-        input6 += (input5 ^= (input4 -= input3 ^ ((~input2) >>> 23) ))
-                  ) ^ 0x0123456789abcdefL;
+        i7 ^= i6 -= (i5 += i4 ^= i3 -= (i2 += i1 ^= i0 -= i7
+                                                        ^ 0xa5a5a5a5a5a5a5a5L
+                                       ) ^ ((~i1) << 19)
+                    ) ^ ((~i4) >>> 23);
+        i7 -= (i6 += i5 ^= i4 -= (i3 += i2 ^= i1 -= (i0 += i7
+                                                    ) ^ ((~i7) << 19)
+                                 ) ^ ((~i2) >>> 23)
+              ) ^ 0x0123456789abcdefL;
 
         /*
-         * Second pass with multiplier equal to 7 (or 8 - 1).
-         * Perform 8 rounds, each time rotating the 3 digest values.
+         * Second pass with multiplier equal to 7.
          */
-
-        /* round(digest2, digest0, digest1, input0, 7) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input0)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 7;
-        /* round(digest0, digest1, digest2, input1, 7) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input1)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 7;
-        /* round(digest1, digest2, digest0, input2, 5) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input2)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 7;
-        /* round(digest2, digest0, digest1, input3, 7) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input3)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 7;
-        /* round(digest0, digest1, digest2, input4, 7) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input4)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 7;
-        /* round(digest1, digest2, digest0, input5, 7) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input5)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 7;
-        /* round(digest2, digest0, digest1, input6, 7) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input6)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 7;
-        /* round(digest0, digest1, digest2, input7, 7) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input7)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 7;
+        work2 -= (SBOX0[(lo = (int)(work1 ^= i0 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 7
+              -  (SBOX0[(lo = (int)(work2 ^= i1 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 7
+              -  (SBOX0[(lo = (int)(work0 ^= i2 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 7
+              -  (SBOX0[(lo = (int)(work1 ^= i3 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 7
+              -  (SBOX0[(lo = (int)(work2 ^= i4 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 7
+              -  (SBOX0[(lo = (int)(work0 ^= i5 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 7
+              -  (SBOX0[(lo = (int)(work1 ^= i6 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 7
+              -  (SBOX0[(lo = (int)(work2 ^= i7 )) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 7;
 
         /*
-         * Schedule the current input set before next passes
-         * with multiplier equal to 9.
+         * Schedule the current input set between each pass.
+         */
+        i7 ^= i6 -= (i5 += i4 ^= i3 -= (i2 += i1 ^= i0 -= i7
+                                                        ^ 0xa5a5a5a5a5a5a5a5L
+                                       ) ^ ((~i1) << 19)
+                    ) ^ ((~i4) >>> 23);
+        i7 -= (i6 += i5 ^= i4 -= (i3 += i2 ^= i1 -= (i0 += i7
+                                                    ) ^ ((~i7) << 19)
+                                 ) ^ ((~i2) >>> 23)
+              ) ^ 0x0123456789abcdefL;
+
+        /*
+         * Third pass with multiplier equal to 9.
          * The standard Tiger algorithm currently perform only
          * one pass of this type with this schedule.
          */
-
-        input2 += (input1 ^= (input0 -= input7 ^ 0xa5a5a5a5a5a5a5a5L));
-        input5 += (input4 ^= (input3 -= input2 ^ ((~input1) <<  19) ));
-        input0 += (input7 ^= (input6 -= input5 ^ ((~input4) >>> 23) ));
-        input3 += (input2 ^= (input1 -= input0 ^ ((~input7) <<  19) ));
-        input7 -= (
-        input6 += (input5 ^= (input4 -= input3 ^ ((~input2) >>> 23) ))
-                  ) ^ 0x0123456789abcdefL;
-
-        /*
-         * Third pass with multiplier equal to 9 (or 8 + 1).
-         * Perform 8 rounds, each time rotating the 3 digest values.
-         */
-
-        /* round(digest1, digest2, digest0, input0, 9) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input0)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 9;
-        /* round(digest2, digest0, digest1, input1, 9) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input1)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 9;
-        /* round(digest0, digest1, digest2, input2, 9) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input2)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 9;
-        /* round(digest1, digest2, digest0, input3, 9) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input3)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 9;
-        /* round(digest2, digest0, digest1, input4, 9) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input4)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 9;
-        /* round(digest0, digest1, digest2, input5, 9) */
-        digest0 -=  SBOX0[(lo = (int)(digest2 ^= input5)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest2 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest1 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest1) * 9;
-        /* round(digest1, digest2, digest0, input6, 9) */
-        digest1 -=  SBOX0[(lo = (int)(digest0 ^= input6)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest0 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest2 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest2) * 9;
-        /* round(digest2, digest0, digest1, input7, 9) */
-        digest2 -=  SBOX0[(lo = (int)(digest1 ^= input7)) & 0xff] ^
-                    SBOX1[(lo >>> 16) & 0xff] ^
-                    SBOX2[(hi = (int)(digest1 >>> 32)) & 0xff] ^
-                    SBOX3[(hi >>> 16) & 0xff];
-        digest0 = ((SBOX3[(lo >>>  8) & 0xff] ^
-                    SBOX2[ lo >>> 24        ] ^
-                    SBOX1[(hi >>>  8) & 0xff] ^
-                    SBOX0[ hi >>> 24        ]) + digest0) * 9;
-
-        /*
-         * End of passes.
-         * Feed forward, update the saved state.
-         */
-        save0 ^= digest0;
-        save1  = digest1 - save1;
-        save2 += digest2;
+        work1 -= (SBOX0[(lo = (int)(work0 ^= i0) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 9
+              -  (SBOX0[(lo = (int)(work1 ^= i1) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 9
+              -  (SBOX0[(lo = (int)(work2 ^= i2) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 9
+              -  (SBOX0[(lo = (int)(work0 ^= i3) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work2 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 9
+              -  (SBOX0[(lo = (int)(work1 ^= i4) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work0 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 9
+              -  (SBOX0[(lo = (int)(work2 ^= i5) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work2 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        work1 = ((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work1) * 9
+              -  (SBOX0[(lo = (int)(work0 ^= i6) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work0 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        save2 +=((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work2) * 9
+              -  (SBOX0[(lo = (int)(work1 ^= i7) ) & 0xff] ^
+                  SBOX1[(lo               >>> 16 ) & 0xff] ^
+                  SBOX2[(hi = (int)(work1 >>> 32)) & 0xff] ^
+                  SBOX3[(hi               >>> 16 ) & 0xff]);
+        save0 ^=((SBOX3[(lo               >>>  8 ) & 0xff] ^
+                  SBOX2[ lo               >>> 24         ] ^
+                  SBOX1[(hi               >>>  8 ) & 0xff] ^
+                  SBOX0[ hi               >>> 24         ]) + work0) * 9;
+        save1 = work1 - save1;
     }
 
     /**
@@ -1190,139 +1205,3 @@ public final class Tiger extends MessageDigest implements Cloneable {
         /* 1020 */ 0xcd56d9430ea8280eL, /* 1021 */ 0xc12591d7535f5065L,
         /* 1022 */ 0xc83223f1720aef96L, /* 1023 */ 0xc3a0396f7363a51fL};
 }
-
-/*
- * Here are documented test ASCII-encoded strings with their corresponding
- * digested Tiger hash value (in 64-bit format), but the actual digests
- * are stored in little-endian byte order format as indicated below.
- * Canonical string encodings are also shown with Base16 [0-9A-F],
- * Base32 [A-Z2-7] and Base64 [A-Za-z0-9+/], for both Tiger and SHA-1.
- *
- * Text1.txt (0 bytes)
- *      "":      (empty input, padded with 0x01, and 63 null bytes)
- * This will digest one 64-bytes block and return:
- *      0x24f0130c63ac9332L (0x32,0x93,0xac,0x63,0x0c,0x13,0xf0,0x24),
- *      0x16166e76b1bb925fL (0x5f,0x92,0xbb,0xb1,0x76,0x6e,0x16,0x16),
- *      0xf373de2d49584e7aL (0x7a,0x4e,0x58,0x49,0x2d,0xde,0x73,0xf3);
- * Base16(Tiger): "3293AC630C13F0245F92BBB1766E16167A4E58492DDE73F3"
- * Base32(Tiger): "GKJ2YYYMCPYCIX4SXOYXM3QWCZ5E4WCJFXPHH4Y";
- * Base64(Tiger): "MpOsYwwT8CRfkruxdm4WFnpOWEkt3nPz";
- * Base16(SHA-1): "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709";
- * Base32(SHA-1): "3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ";
- * Base64(SHA-1): "2jmj7l5rSw0yVb/vlWAYkK/YBwk".
- *
- * Text2.txt (3 bytes, or 0x0000000000000018L bits)
- *      "abc":   (input bytes 0x61,0x62,0x63, padded with 0x01,0x00,...
- *                0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00)
- * This will process ONE 64-bytes block and return:
- *      0xf258c1e88414ab2aL (0x2a,0xab,0x14,0x84,0xe8,0xc1,0x58,0xf2),
- *      0x527ab541ffc5b8bfL (0xbf,0xb8,0xc5,0xff,0x41,0xb5,0x7a,0x52),
- *      0x935f7b951c132951L (0x51,0x29,0x13,0x1c,0x95,0x7b,0x5f,0x93);
- * Base16(Tiger): "2AAB1484E8C158F2BFB8C5FF41B57A525129131C957B5F93";
- * Base32(Tiger): "FKVRJBHIYFMPFP5YYX7UDNL2KJISSEY4SV5V7EY";
- * Base64(Tiger): "KqsUhOjBWPK/uMX/QbV6UlEpExyVe1+T";
- * Base16(SHA-1): "A9993E364706816ABA3E25717850C26C9CD0D89D";
- * Base32(SHA-1): "VGMT4NSHA2AWVOR6EVYXQUGCNSONBWE5";
- * Base64(SHA-1): "qZk+NkcGgWq6PiVxeFDCbJzQ2J0".
- *
- * Text3.txt (5 bytes)
- *     "Tiger"
- * This will process one 64-bytes block and return:
- *      0x9f00f599072300ddL (0xdd,0x00,0x23,0x07,0x99,0xf5,0x00,0x9f),
- *      0x276abb38c8eb6decL (0xec,0x6d,0xeb,0xc8,0x38,0xbb,0x6a,0x27),
- *      0x37790c116f9d2bdfL (0xdf,0x2b,0x9d,0x6f,0x11,0x0c,0x79,0x37);
- * Base16(Tiger): "DD00230799F5009FEC6DEBC838BB6A27DF2B9D6F110C7937";
- * Base32(Tiger): "3UACGB4Z6UAJ73DN5PEDRO3KE7PSXHLPCEGHSNY";
- * Base64(Tiger): "3QAjB5n1AJ/sbevIOLtqJ98rnW8RDHk3";
- * Base16(SHA-1): "DD697AA8CCE5C810F10070878F9D6F89C5A5937C";
- * Base32(SHA-1): "3VUXVKGM4XEBB4IAOCDY7HLPRHC2LE34";
- * Base64(SHA-1): "3Wl6qMzlyBDxAHCHj51vicWlk3w".
- *
- *
- * Text4.txt (64 bytes)
- *      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-":
- * This will process TWO 64-bytes blocks and return:
- *      0x87fb2a9083851cf7L (0xf7,0x1c,0x85,0x83,0x90,0x2a,0xfb,0x87),
- *      0x470d2cf810e6df9eL (0x9e,0xdf,0xe6,0x10,0xf8,0x2c,0x0d,0x47),
- *      0xb586445034a5a386L (0x86,0xa3,0xa5,0x34,0x50,0x44,0x86,0x58);
- * Base16(Tiger): "F71C8583902AFB879EDFE610F82C0D4786A3A534504486B5";
- * Base32(Tiger): "64OILA4QFL5YPHW74YIPQLANI6DKHJJUKBCINNI";
- * Base64(Tiger): "9xyFg5Aq+4ee3+YQ+CwNR4ajpTRQRIa1";
- * Base16(SHA-1): "C871F69A63CCA984848264E779955DD719417C91";
- * Base32(SHA-1): "ZBY7NGTDZSUYJBECMTTXTFK524MUC7ER";
- * Base64(SHA-1): "yHH2mmPMqYSEgmTneZVd1xlBfJE".
- *
- * Text5.txt (64 bytes)
- *      "ABCDEFGHIJKLMNOPQRSTUVWXYZ=abcdefghijklmnopqrstuvwxyz+0123456789":
- * This will process TWO 64-bytes blocks and return:
- *      0x467db80863ebce48L (0x48,0xce,0xeb,0x63,0x08,0xb8,0x7d,0x46),
- *      0x8df1cd1261655de9L (0xe9,0x5d,0x65,0x61,0x12,0xcd,0xf1,0x8d),
- *      0x57896565975f9197L (0x97,0x91,0x5f,0x97,0x65,0x65,0x89,0x57);
- * Base16(Tiger): "48CEEB6308B87D46E95D656112CDF18D97915F9765658957";
- * Base32(Tiger): "JDHOWYYIXB6UN2K5MVQRFTPRRWLZCX4XMVSYSVY";
- * Base64(Tiger): "SM7rYwi4fUbpXWVhEs3xjZeRX5dlZYlX";
- * Base16(SHA-1): "DF2A2EBEB2D0A971DA5D50E8DDDE98F749DF0409";
- * Base32(SHA-1): "34VC5PVS2CUXDWS5KDUN3XUY65E56BAJ";
- * Base64(SHA-1): "3youvrLQqXHaXVDo3d6Y90nfBAk";
- *
- *
- * Text6.txt (64 bytes)
- *      "Tiger - A Fast New Hash Function, by Ross Anderson and Eli Biham":
- * This will process TWO 64-bytes blocks and return:
- *      0x0c410a042968868aL (0x8a,0x86,0x68,0x29,0x04,0x0a,0x41,0x0c),
- *      0x1671da5a3fd29a72L (0x72,0x9a,0xd2,0x3f,0x5a,0xda,0x71,0x16),
- *      0x5ec1e457d3cdb303L (0x03,0xb3,0xcd,0xd3,0x57,0xe4,0xc1,0x5e);
- * Base16(Tiger): "8A866829040A410C729AD23F5ADA711603B3CDD357E4C15E";
- * Base32(Tiger): "RKDGQKIEBJAQY4U22I7VVWTRCYB3HTOTK7SMCXQ";
- * Base64(Tiger): "ioZoKQQKQQxymtI/WtpxFgOzzdNX5MFe";
- * Base16(SHA-1): "CC626F2EF4388A0B0DE1991DB2C6F7EDD4CC46A8";
- * Base32(SHA-1): "ZRRG6LXUHCFAWDPBTEO3FRXX5XKMYRVI";
- * Base64(SHA-1): "zGJvLvQ4igsN4Zkdssb37dTMRqg".
- *
- * Text7.txt (119 bytes)
- *      "Tiger - A Fast New Hash Function, by Ross Anderson and Eli Biham"+
- *      ", proceedings of Fast Software Encryption 3, Cambridge.":
- * This will process two 64-bytes blocks without NULL padding, and return:
- *      0xebf591d5afa655ceL (0xce,0x55,0xa6,0xaf,0xd5,0x91,0xf5,0xeb),
- *      0x7f22894ff87f54acL (0xac,0x54,0x7f,0xf8,0x4f,0x89,0x22,0x7f),
- *      0x89c811b6b0da3193L (0x93,0x31,0xda,0xb0,0xb6,0x11,0xc8,0x89);
- * Base16(Tiger): "CE55A6AFD591F5EBAC547FF84F89227F9331DAB0B611C889";
- * Base32(Tiger): "ZZK2NL6VSH26XLCUP74E7CJCP6JTDWVQWYI4RCI";
- * Base64(Tiger): "zlWmr9WR9eusVH/4T4kif5Mx2rC2EciJ";
- * Base16(SHA-1): "6F7B9B60636E669BA305ADB86ABD844721E682F0";
- * Base32(SHA-1): "N55ZWYDDNZTJXIYFVW4GVPMEI4Q6NAXQ";
- * Base64(SHA-1): "b3ubYGNuZpujBa24ar2ERyHmgvA".
- *
- * Text8.txt (125 bytes)
- *      "Tiger - A Fast New Hash Function, by Ross Anderson and Eli Biham"+
- *      ", proceedings of Fast Software Encryption 3, Cambridge, 1996.":
- * This will process THREE 64-bytes blocks and return:
- *      0x3d9aeb03d1bd1a63L (0x63,0x1a,0xbd,0xd1,0x03,0xeb,0x9a,0x3d),
- *      0x57b2774dfd6d5b24L (0x24,0x5b,0x6d,0xfd,0x4d,0x77,0xb2,0x57),
- *      0xdd68151d503974fcL (0xfc,0x74,0x39,0x50,0x1d,0x15,0x68,0xdd);
- * Base16(Tiger): "631ABDD103EB9A3D245B6DFD4D77B257FC7439501D1568DD";
- * Base32(Tiger): "MMNL3UID5OND2JC3NX6U255SK76HIOKQDUKWRXI";
- * Base64(Tiger): "Yxq90QPrmj0kW239TXeyV/x0OVAdFWjd";
- * Base16(SHA-1): "3B496542BF1D234611E3524AE462D1BB7DA822B5";
- * Base32(SHA-1): "HNEWKQV7DURUMEPDKJFOIYWRXN62QIVV";
- * Base64(SHA-1): "O0llQr8dI0YR41JK5GLRu32oIrU".
- *
- * Text9.txt (128 bytes)
- *      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-"+
- *      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-":
- * This will process THREE 64-bytes blocks and return:
- *      0x00b83eb4e53440c5L (0xc5,0x40,0x34,0xe5,0xb4,0x3e,0xb8,0x00),
- *      0x76ac6aaee0a74858L (0x58,0x48,0xa7,0xe0,0xae,0x6a,0xac,0x76),
- *      0x25fd15e70a59ffe4L (0xe4,0xff,0x59,0x0a,0xe7,0x15,0xfd,0x25);
- * Base16(Tiger): "C54034E5B43EB8005848A7E0AE6AAC76E4FF590AE715FD25";
- * Base32(Tiger): "YVADJZNUH24AAWCIU7QK42VMO3SP6WIK44K72JI";
- * Base64(Tiger): "xUA05bQ+uABYSKfgrmqsduT/WQrnFf0l";
- * Base16(SHA-1): "A0F25E8CC39931DAEA0FC39C949AA31A55CE5782";
- * Base32(SHA-1): "UDZF5DGDTEY5V2QPYOOJJGVDDJK44V4C";
- * Base64(SHA-1): "oPJejMOZMdrqD8OclJqjGlXOV4I".
- *
- * There should be other documented tests that do not restrict only to
- * the 7-bit US-ASCII character set for source files, but also test
- * binary files, so that we can effectively test that there's no bug
- * related to widening promotion of bytes (due to sign extension).
- */
