@@ -70,7 +70,9 @@ public class M4AMetaData extends AudioMetaData {
     final static int ARTIST_ATOM = 0xa9415254; //0xa9 + "ART"
     final static int DATE_ATOM = 0xa9646179; //0xa9 +"day" 
 	final static int  GENRE_ATOM = 0x676e7265; //"gnre"
+	final static int  GENRE_ATOM_STANDARD = 0xA967656E; //"0xa9+"gen"
 	final static int  TRACK_ATOM = 0x74726b6e; //"trkn"
+	final static int  TRACK_ATOM_STANDARD = 0xA974726b; //0xa9+"trk"
 	final static int COMMENT_ATOM = 0xA9636D74; //'�cmt' 
 	final static int DISK_ATOM = 0x6469736b; //"disk"
 	
@@ -256,8 +258,10 @@ public class M4AMetaData extends AudioMetaData {
 					case ALBUM_ATOM :
 						_metaData.put(new Integer(ALBUM_ATOM), readDataAtom());break;
 					case TRACK_ATOM :
+					case TRACK_ATOM_STANDARD:
 						_metaData.put(new Integer(TRACK_ATOM), readDataAtom());break;
 					case GENRE_ATOM :
+					case GENRE_ATOM_STANDARD:
 						_metaData.put(new Integer(GENRE_ATOM), readDataAtom());break;
 					case DATE_ATOM:
 						_metaData.put(new Integer(DATE_ATOM), readDataAtom());break;
