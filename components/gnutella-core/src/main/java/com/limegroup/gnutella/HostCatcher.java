@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
 import com.sun.java.util.collections.*;
+
 import java.io.*;
 import java.text.ParseException;
 
@@ -697,16 +698,16 @@ public class HostCatcher {
      *  iterating through the result, but the modifications will not be
      *  observed.  
      */
-    public synchronized Iterator getUltrapeerHosts(int n) {
+    public synchronized Collection getUltrapeerHosts(int n) {
         //Make n the # of hosts to return--never more than the # of ultrapeers.
         n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
         //Copy n best hosts into temporary buffer.
-        ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
+        List /* of ExtendedEndpoint */ buf = new ArrayList(n);
         for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); 
              iter.hasNext(); )
             buf.add(iter.next());
         //And return iterator of contents.
-        return buf.iterator();
+        return buf;
     }
     
     /**
