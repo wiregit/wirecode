@@ -1977,7 +1977,8 @@ public abstract class MessageRouter {
                 }
             }
         };
-        statHandler.start();
+        if(StatisticsSettings.RECORD_VM_STATS.getValue())
+            statHandler.start();
     }
 
     /**
