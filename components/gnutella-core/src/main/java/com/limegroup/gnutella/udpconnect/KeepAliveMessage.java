@@ -70,4 +70,8 @@ public class KeepAliveMessage extends UDPConnectionMessage {
     public int getWindowSpace() {
         return _windowSpace;
     }
+
+	public String toString() {
+		return "KeepAliveMessage start:"+_windowStart+" space:"+_windowSpace;
+	}
 }

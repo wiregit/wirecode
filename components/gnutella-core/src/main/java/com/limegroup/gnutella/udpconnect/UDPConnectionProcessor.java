@@ -167,6 +167,9 @@ public class UDPConnectionProcessor {
 		_multiplexor       = UDPMultiplexor.instance();
 		_scheduler         = UDPScheduler.instance();
 
+		// Precreate the receive window for responce reporting
+        _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
+
         // Register yourself for incoming messages
 		_myConnectionID    = _multiplexor.register(this);
 
@@ -234,7 +237,6 @@ public class UDPConnectionProcessor {
         _sendWindow      = new DataWindow(DATA_WINDOW_SIZE, 1);
 		// TODO: keep up to date
         _chunkLimit      = _sendWindow.getWindowSpace();  
-        _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
     }
 
     /**
@@ -348,6 +350,7 @@ public class UDPConnectionProcessor {
      *  Test whether the ip and ports match
      */
 	public boolean matchAddress(InetAddress ip, int port) {
+System.out.println("matchAddress ip:"+ip+" p:"+port);
 		return (_ip.equals(ip) && _port == port);
 	}
 
@@ -511,7 +514,7 @@ public class UDPConnectionProcessor {
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
-//System.out.println("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
+System.out.println("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 		_udpService.send(msg, _ip, _port);  // TODO: performance
 	}
 

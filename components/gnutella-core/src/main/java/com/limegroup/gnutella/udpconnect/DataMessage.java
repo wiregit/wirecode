@@ -59,4 +59,8 @@ public class DataMessage extends UDPConnectionMessage {
         chunk.length = _data2Length;
         return chunk;
     }
+
+	public String toString() {
+		return "DataMessage len:"+getDataLength();
+	}
 }

@@ -22,6 +22,7 @@ public class SynMessage extends UDPConnectionMessage {
           /* my data is my connectionID */ buildByteArray(connectionID),
           /* data length                */ 1
           );
+		  _senderConnectionID = connectionID;
     }
 
     /**
@@ -37,5 +38,10 @@ public class SynMessage extends UDPConnectionMessage {
 
 	public byte getSenderConnectionID() {
 		return _senderConnectionID; 
+	}
+
+	public String toString() {
+		return "SynMessage DestID:"+getConnectionID()+
+		  " SrcID:"+_senderConnectionID;
 	}
 }

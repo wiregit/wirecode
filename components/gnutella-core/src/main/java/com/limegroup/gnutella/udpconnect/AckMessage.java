@@ -61,4 +61,9 @@ public class AckMessage extends UDPConnectionMessage {
     public int getWindowSpace() {
         return _windowSpace;
     }
+
+	public String toString() {
+		return "AckMessage DestID:"+getConnectionID()+
+		  " start:"+_windowStart+" space:"+_windowSpace;
+	}
 }

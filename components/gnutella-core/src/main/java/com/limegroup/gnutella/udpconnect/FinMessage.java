@@ -30,4 +30,8 @@ public class FinMessage extends UDPConnectionMessage {
 
       	super(guid, ttl, hops, payload);
     }
+
+	public String toString() {
+		return "FinMessage";
+	}
 }
