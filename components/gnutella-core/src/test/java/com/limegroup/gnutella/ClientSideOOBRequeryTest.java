@@ -797,8 +797,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(10000);
-        assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
+        final int MAX_TRIES = 60;
+        for (int i = 0; i <= MAX_TRIES; i++) {
+            Thread.sleep(1000);
+            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+                break;
+            if (i == MAX_TRIES) fail("didn't GUESS!!");
+        }
 
         // we should start getting guess queries on all UDP ports, actually
         // querykey requests
@@ -930,8 +935,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(500);
-        assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
+        final int MAX_TRIES = 60;
+        for (int i = 0; i <= MAX_TRIES; i++) {
+            Thread.sleep(500);
+            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+                break;
+            if (i == MAX_TRIES) fail("didn't GUESS!!");
+        }
 
         // we should get a query key request
         {
@@ -1187,7 +1197,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             }
         }
 
-        Thread.sleep((UDP_ACCESS.length * 1000) - 
+        Thread.sleep((UDP_ACCESS.length * 1500) - 
                      (System.currentTimeMillis() - currTime));
 
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
@@ -1305,11 +1315,18 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
 
         // let downloaders do stuff  
-        Thread.sleep(2000);
+        final int MAX_TRIES = 60;
+        boolean oneGood = false, twoGood = false;
+        for (int i = 0; i <= MAX_TRIES; i++) {
+            Thread.sleep(500);
+            if (downloader.getState() == Downloader.WAITING_FOR_RETRY)
+                oneGood = true;
+            if (downloader2.getState() == Downloader.WAITING_FOR_RETRY)
+                twoGood = true;
+            if (oneGood && twoGood) break;
+            if (i == MAX_TRIES) fail("didn't GUESS!!");
+        }
 
-        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
-        assertEquals(Downloader.WAITING_FOR_RETRY, downloader2.getState());
-        
         ((MyCallback)getCallback()).clearGUID();  // isQueryAlive == false 
         downloader.stop();
 

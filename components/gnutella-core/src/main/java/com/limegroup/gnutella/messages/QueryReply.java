@@ -1283,7 +1283,10 @@ public class QueryReply extends Message implements Serializable{
                             ggeps[i].getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
                     }
                     catch (BadGGEPPropertyException bad) {
-                        ErrorService.error(bad);
+                        // just ignore for now - we can't even get the vendor
+                        // since this is a static method, will figure out
+                        // something later
+                        // TODO: add meaningful logging
                         continue;
                     }
 
