@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.http.*;
@@ -33,7 +34,7 @@ public class TestUploader {
 	private AlternateLocationCollection incomingAltLocs;
 	private URN                         _sha1;
     private boolean http11 = true;
-    ServerSocket server = null;
+    private ServerSocket server;
     private boolean busy = false;
     //Note about queue testing: This is how the queuing simulation works: If
     //queue is set, the uploader sends the X-Queue header etc in handleRequest
@@ -51,6 +52,11 @@ public class TestUploader {
     private final int MIN_POLL = 45000;
     private final int MAX_POLL = 120000;
 
+    /**
+     * <tt>IPFilter</tt> for only allowing local connections.
+     */
+    private final IPFilter IP_FILTER = new IPFilter();
+
 
     /** 
      * Creates a TestUploader listening on the given port.  Will upload a
@@ -58,6 +64,11 @@ public class TestUploader {
      * another thread to do the listening. 
      */
     public TestUploader(String name, final int port) {
+
+        // ensure that only local machines can connect!!
+        SettingsManager settings = SettingsManager.instance();
+        settings.setBannedIps(new String[] {"*.*.*.*"});
+        settings.setAllowedIps(new String[] {"127.*.*.*"});
         this.name=name;
         reset();
         //spawn loop();
@@ -72,8 +83,7 @@ public class TestUploader {
 
     public void stopThread() {
         try {
-            if (server!=null)
-                server.close();
+            server.close();
         } catch (IOException e) {}
     }
 
@@ -167,26 +177,34 @@ public class TestUploader {
      */
     private void loop(int port) {
         try {
+            server = new ServerSocket();
             //Use Java 1.4's option to reuse a socket address.  This is
             //important because some client thread may be using the given port
             //even though no threads are listening on the given socket.
-            server = new ServerSocket();
             server.setReuseAddress(true);
             server.bind(new InetSocketAddress(port));
-        } catch (IOException ioe) {
+        } catch (IOException e) {
             DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
             System.out.println("Couldn't listen on port "+port);
-            ioe.printStackTrace();
+            e.printStackTrace();
             return;
         }
 
+        Socket socket = null;
         while(true) {
-            Socket s=null;
             try {
-                s = server.accept();
+                socket = server.accept();
+
+                // make sure it's from us
+				InetAddress address = socket.getInetAddress();
+                if (isBannedIP(address.getHostAddress())) {
+                    server.close();
+                    continue;
+                }
+                DownloadTest.debug("UPLOADER ACCEPTED CONNECTION\n");
                 connects++;
                 //spawn thread to handle request
-                final Socket mySocket=s;
+                final Socket mySocket = socket;
                 Thread runner=new Thread() {
                     public void run() {          
                         try {
@@ -220,6 +238,14 @@ public class TestUploader {
         }
     }
 
+    /**
+     * Returns whether <tt>ip</tt> is a banned address.
+     * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
+     * @return true iff ip is a banned address.
+     */
+    public boolean isBannedIP(String ip) {        
+        return !IP_FILTER.allow(ip);
+    }
     
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
@@ -236,6 +262,7 @@ public class TestUploader {
         boolean firstLine=true;
         while (true) {
             String line=input.readLine();
+            //DownloadTest.debug(line+"\n"); 
             if (firstLine) {
                 request=line;
                 firstLine=false;
@@ -282,7 +309,7 @@ public class TestUploader {
     }
 
     private void send(OutputStream out, int start, int stop) 
-            throws IOException {
+        throws IOException {
         //Write header, stolen from NormalUploadState.writeHeader()
         long t0 = System.currentTimeMillis();
         if(minPollTime > 0) 
@@ -294,12 +321,15 @@ public class TestUploader {
                         "queued downloader responded too late, by "+
                         (t0-maxPollTime) +" mS");        
         
-		String str=
-        busy|queue?"HTTP/1.1 503 Service Unavailable\r\n":"HTTP/1.1 200 OK \r\n";
+		String str =
+            busy | queue ?
+            "HTTP/1.1 503 Service Unavailable\r\n" :
+            "HTTP/1.1 200 OK \r\n";
 		out.write(str.getBytes());
 
         if(queue) {
-            String s = "X-Queue: position=1, pollMin=" + MIN_POLL/1000 + ", pollMax=" + MAX_POLL/1000 + "\r\n";
+            DownloadTest.debug("UPLOAD QUEUED");
+            String s = "X-Queue: position=1, pollMin=45, pollMax=120\r\n";
             out.write(s.getBytes());
             s = "\r\n";
             out.write(s.getBytes());
@@ -310,7 +340,7 @@ public class TestUploader {
             return;
         }
 
-		str = "Content-length:"+ (stop - start) + "\r\n";
+		str = "Content-Length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
 		if (start != 0) {
             //Note that HTTP stop values are INCLUSIVE.  Our internal values
@@ -319,9 +349,14 @@ public class TestUploader {
 			"-" + (stop-1) + "/" + TestFile.length() + "\r\n"; 
 			out.write(str.getBytes());
 		}
-		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) 
+		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) {
+
+            DownloadTest.debug("WRITING ALTERNATE LOCATION HEADER:\n"+storedAltLocs+"\n");      
             HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-		      storedAltLocs, out);
+                                  storedAltLocs, out);
+        } else {
+            DownloadTest.debug("DID NOT WRITE ALT LOCS::ALT LOCS: "+storedAltLocs+"\n");
+        }
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
@@ -334,7 +369,7 @@ public class TestUploader {
         //ThrottledOutputStream
         for (int i=start; i<stop; ) {
             //1 second write cycle
-            if (stopAfter>-1 && totalUploaded>=stopAfter) {
+            if (stopAfter > -1 && totalUploaded == stopAfter) {
                 stopped=true;
                 out.flush();
                 throw new IOException();
