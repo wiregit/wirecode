@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.BufferedReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -55,7 +56,23 @@ class RichInfoLoader {
      * Takes a schema and the corresponding xml file and loads all the 
      * meta-data about all the files.
      */
-    public void loadMetaData(InputSource schema){
+    public void loadMetaData(File f){
+	String buffer="";
+	String xmlStruct="";
+	InputSource schema;
+	try {
+	    BufferedReader br = new BufferedReader(new FileReader(f));
+	    while(buffer!=null){
+		buffer=br.readLine();
+		if (buffer!=null){
+		    buffer=buffer.trim();
+		    xmlStruct = xmlStruct+buffer;
+		}
+	    }
+	    xmlStruct.trim();
+	}catch(IOException e){
+	    e.printStackTrace();
+	}
 	System.out.println("Sumeet: starting loadMetaData");
 	DocumentBuilderFactory documentBuilderFactory =
             DocumentBuilderFactory.newInstance();
@@ -68,6 +85,7 @@ class RichInfoLoader {
             //throw new GMLParseException("Unable to create validating parser");
 	    e.printStackTrace();
         }
+	schema = new InputSource(new StringReader(xmlStruct));
         // Set an entity resolver to resolve the schema
 	documentBuilder.setEntityResolver(new Resolver(schema));
 
@@ -77,6 +95,7 @@ class RichInfoLoader {
 	System.out.println("Sumeet: about to create blank document");
         try {
             document = documentBuilder.parse(schema);
+
         }catch(SAXException e){
             //throw new GMLParseException("SAX Exception\n" + e.toString());
 	    e.printStackTrace();
@@ -91,16 +110,16 @@ class RichInfoLoader {
 	Element root = document.getDocumentElement();
 	String rootName = root.getTagName();
 	System.out.println(rootName);
-	NodeList children = root.getElementsByTagName(rootName);
+	NodeList children = root.getChildNodes();
 	int numChildren = children.getLength();
 	System.out.println("Sumeet: no of children "+numChildren);
 	for(int i=0;i<numChildren; i++){
 	    Node n = children.item(i);
 	    String childName = n.getNodeName();
 	    System.out.println("Sumeet: child Name is "+childName);
-	}	
+	}
     }
-
+    
     private final class Resolver implements EntityResolver {
         private InputSource schema;
 
@@ -124,13 +143,21 @@ class RichInfoLoader {
 	r.test();
     }
     private void test(){
-	FileInputStream f = null;
+	File f = null;
 	try{
-	    f = new FileInputStream(XMLProperties.instance().getXMLSchemaDir() 
-                                        + File.separator + "gen-books.xsd");
-	}catch (IOException e){
+	    f = new File(XMLProperties.instance().getXMLSchemaDir(),"gen-books.xsd");
+	}catch(Exception e){
 	    e.printStackTrace();
 	}
-	loadMetaData(new InputSource(f));
+	loadMetaData(f);
     }       
 }
+
+
+
+
+
+
+
+
+

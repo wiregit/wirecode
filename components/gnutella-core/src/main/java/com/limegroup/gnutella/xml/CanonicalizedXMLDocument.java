@@ -17,9 +17,10 @@ import com.limegroup.gnutella.util.NameValue;
 public abstract class CanonicalizedXMLDocument
 {
     
-    /** Creates new XMLDocument */
-    public CanonicalizedXMLDocument()
-    {
+
+    /** Creates new CanonicalizedXMLDocument */
+    public CanonicalizedXMLDocument(){
+	
     }
     
     /**
@@ -47,8 +48,7 @@ public abstract class CanonicalizedXMLDocument
      * canonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      */
-    public List getNameValueList()
-    {
+    public List getNameValueList() {
         //TODO
         //return an instance of ArrayList <NameValue>
         return null;

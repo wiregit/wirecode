@@ -23,8 +23,7 @@ public class XMLSchema extends CanonicalizedXMLDocument
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public XMLSchema(File schemaFile) throws IOException
-    {
+    public XMLSchema(File schemaFile) throws IOException{
         //TODO
         //open the file, read it, and derive the structure, store internally
         
