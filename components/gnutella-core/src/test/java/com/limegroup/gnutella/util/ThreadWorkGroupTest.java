@@ -43,6 +43,7 @@ public class ThreadWorkGroupTest extends BaseTestCase {
             workGroup.addTask(new Object[] { new Integer(currInt) });
             localTotal += currInt;
         }
+        Thread.sleep(500);  // give each thread time to wake up...
         for (int i = 0; i < workers.length; i++)
             assertTrue(workers[i].wakeUp());
         Thread.sleep(4*1000); // let the workers work....
@@ -52,7 +53,7 @@ public class ThreadWorkGroupTest extends BaseTestCase {
         for (int i = 0; i < workers.length; i++)
             assertTrue(!workers[i].wakeUp());
         // ---------------------------------------------------------------------
-        
+
         // put in a bad task and make sure it doesn't get executed, though
         // this is only half testing ThreadWorkGroup
         // ---------------------------------------------------------------------
@@ -150,6 +151,8 @@ public class ThreadWorkGroupTest extends BaseTestCase {
         // use this to make sure a guy is running and then let him proceed
         // return whether this guy was waiting....
         public boolean wakeUp() {
+            if (_int == null)
+                return waiting;
             synchronized (_int) {
                 shouldWait = false;
                 _int.notify();
@@ -158,8 +161,12 @@ public class ThreadWorkGroupTest extends BaseTestCase {
         }
         // if you want a guy to wait after having wakeUp()'ed
         public void makeWait() {
-            synchronized (_int) {
+            if (_int == null)
                 shouldWait = true;
+            else {
+                synchronized (_int) {
+                    shouldWait = true;
+                }
             }
         }
     }
