@@ -112,7 +112,7 @@ class RejectConnection extends Connection
                     send(pr);
                     try
                     {
-                        Thread.sleep(100); //1/4th of a sec
+                        Thread.sleep(250); //1/4th of a sec
                     }
                     catch(InterruptedException ie)
                     {
