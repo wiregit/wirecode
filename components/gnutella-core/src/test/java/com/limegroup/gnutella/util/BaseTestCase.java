@@ -121,8 +121,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      *  backend fails
      */
     public static void launchAllBackends() throws IOException {
-        launchBackend(true);
-        launchBackend(false);
+        launchBackend(Backend.PORT);
+        launchBackend(Backend.REJECT_PORT);
     }
 
     /**
@@ -130,21 +130,21 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * @throws IOException if attempt to launch backend server fails
      */
     public static void launchBackend() throws IOException {
-        launchBackend(false);
+        launchBackend(Backend.PORT);
     }
     
     /**
      * Launch backend server if it is not running already
      * @throws IOException if attempt to launch backend server fails
      */
-    public static void launchBackend(boolean reject) throws IOException {
+    public static void launchBackend(int port) throws IOException {
         
         /* If we've already launched the backend, don't try it again */
-        int index = (reject ? 1 : 0);
+        int index = (port == Backend.REJECT_PORT ? 1 : 0);
         if (shutdownBackend[index]) return;
         
         /* Otherwise launch one if needed */
-        shutdownBackend[index] = Backend.launch(reject);
+        shutdownBackend[index] = Backend.launch(port);
     }
     
     /**
