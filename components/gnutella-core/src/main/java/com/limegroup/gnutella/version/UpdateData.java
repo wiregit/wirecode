@@ -62,7 +62,7 @@ class UpdateData implements Cloneable {
     /**
      * Gets the oldest version this applies to.
      */
-    Version getVersion() {
+    Version getOldestVersion() {
         return version;
     }
     
@@ -78,6 +78,16 @@ class UpdateData implements Cloneable {
      */
     OS[] getOS() {
         return os;
+    }
+    
+    /**
+     * Determines if any of the OSes here are acceptable.
+     */
+    boolean isOSAcceptable() {
+        for(int i = 0; i < os.length; i++)
+            if(os[i].isAcceptable())
+                return true;
+        return false;
     }
     
     /**

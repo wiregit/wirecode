@@ -27,7 +27,7 @@ public final class UpdateCollectionTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void testCreation() {
+	public void testCreation() throws Exception {
 	    
 	    UpdateCollection uc = UpdateCollection.create(
 	        "<update id='42' timestamp=\"150973213135\">" +
@@ -35,14 +35,14 @@ public final class UpdateCollectionTest extends BaseTestCase {
 	                "<lang id='en' url='http://www.limewire.com/update' current='4.6.0'>" +
 	                    "<![CDATA[<html><body>This is the text</body></html>]]>" +
 	                "</lang>" +
-	                "<lang id='es' url='http://www.limewire.com/update/es' current='4.6.0'>" +
+	                "<lang id='es' url='http://www.limewire.com/update/es' current='4.9.0'>" +
 	                    "<![CDATA[<html><body>Hola, no habla espanol.</body></html>]]>" +
 	                "</lang>" +
 	                "<lang id='bad' current='4.6.0'>" +
-	                    "<![CDATA[<html><body>This is the text</body></html>]]>" +
+	                    "<![CDATA[<html><body>This is bad text</body></html>]]>" +
 	                "</lang>" +
 	                "<lang id='badder' url='http://www.limewire.com/update'>" +
-	                    "<![CDATA[<html><body>This is the text</body></html>]]>" +
+	                    "<![CDATA[<html><body>This is badder text</body></html>]]>" +
 	                "</lang>" +
 	                "<lang id='worst' url='http://www.limewire.com/update' current='4.6.0'>" +
 	                "</lang>" +
@@ -56,7 +56,46 @@ public final class UpdateCollectionTest extends BaseTestCase {
 	                "</lang>" +
 	            "</msg>" +	            
 	        "</update>");
+	        
+        assertEquals(uc.getUpdateData().toString(), 4, uc.getUpdateData().size());
+        assertEquals(42, uc.getId());
+        assertEquals(150973213135L, uc.getTimestamp());
 	    
-	    System.out.println(uc.toString());
+	    UpdateData data;
+	    
+	    Version two = new Version("2.0.0");
+	    data = uc.getUpdateDataFor(two, "en");
+	    assertNotNull(data);
+	    assertEquals("http://www.limewire.com/update", data.getUpdateURI().toString());
+	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
+	    assertEquals("4.6.0", data.getUpdateVersion().toString());
+	    
+	    data = uc.getUpdateDataFor(two, "es");
+	    assertNotNull(data);
+	    assertEquals("http://www.limewire.com/update/es", data.getUpdateURI().toString());
+	    assertEquals("<html><body>Hola, no habla espanol.</body></html>", data.getUpdateText());
+	    assertEquals("4.9.0", data.getUpdateVersion().toString());
+	    
+        data = uc.getUpdateDataFor(two, "de");
+	    assertNotNull(data);
+	    assertEquals("http://www.limewire.com/update", data.getUpdateURI().toString());
+	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
+	    assertEquals("4.6.0", data.getUpdateVersion().toString());
+	    
+	    Version ttf = new Version("3.2.4");
+	    data = uc.getUpdateDataFor(ttf, "en");
+	    assertNotNull(data);
+	    assertEquals("http://www.limewire.com/update", data.getUpdateURI().toString());
+	    assertEquals("<html><body>This is the other text.</body></html>", data.getUpdateText());
+	    assertEquals("4.1.2", data.getUpdateVersion().toString());
+
+	    data = uc.getUpdateDataFor(ttf, "es");	    
+	    assertNotNull(data);
+	    assertEquals("http://www.limewire.com/update/es", data.getUpdateURI().toString());
+	    assertEquals("<html><body>Hola, no habla espanol (other).</body></html>", data.getUpdateText());
+	    assertEquals("4.3.4", data.getUpdateVersion().toString());
+	    
+	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en");
+	    assertNull(data);
     }
 }

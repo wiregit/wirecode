@@ -5,8 +5,11 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Iterator;
 import java.io.StringReader;
 import java.io.IOException;
 
@@ -72,6 +75,32 @@ class UpdateCollection {
     List getUpdateData() {
         return updateDataList;
     }
+    
+    /**
+     * Gets the UpdateData that is relevent to us.
+     */
+    UpdateData getUpdateDataFor(Version me, String lang) {
+        UpdateData data = null;
+        for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
+            UpdateData next = (UpdateData)i.next();
+            if( me.compareTo(next.getOldestVersion()) >= 0 && next.isOSAcceptable() ) {
+                // always accept if languages match.
+                if(lang.equals(next.getLanguage()))
+                    data = next;
+                // accept 'en' iff this is a newer msg than the existing one.
+                else if(data == null ||
+                  ( "en".equals(next.getLanguage()) &&
+                    next.getOldestVersion().compareTo(data.getOldestVersion()) > 0
+                  )
+                       )
+                    data = next;
+                // otherwise we already got a match for this version with a better language.
+            } else
+                break;
+       }
+       
+       return data;
+    }
 
     /**
      * Constructs and returns a new UpdateCollection that corresponds
@@ -80,6 +109,16 @@ class UpdateCollection {
     static UpdateCollection create(String xml) {
         UpdateCollection collection = new UpdateCollection();
         collection.parse(xml);
+        
+        // sort the collection according to the oldest version numbers.
+        Collections.sort(collection.updateDataList, new Comparator() {
+            public int compare(Object a, Object b) {
+                Version v1 = ((UpdateData)a).getOldestVersion();
+                Version v2 = ((UpdateData)b).getOldestVersion();
+                return v1.compareTo(v2);
+            }
+        });
+        
         return collection;
     }
     
@@ -189,7 +228,8 @@ class UpdateCollection {
         String currentText = getAttributeText(attr, "current");
         String updateText = lang.getTextContent();
         
-        if(idText == null || urlText == null || currentText == null || updateText == null) {
+        if(idText == null || urlText == null || currentText == null || 
+           updateText == null || updateText.equals("")) {
             LOG.error("no id, url, current, or text.");
             return;
         }

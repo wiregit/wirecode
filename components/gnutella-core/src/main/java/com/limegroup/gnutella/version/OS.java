@@ -18,7 +18,7 @@ class OS {
         return os;
     }
     
-    public boolean isCurrentOS() {
+    public boolean isAcceptable() {
         return acceptable;
     }
     
