@@ -457,33 +457,33 @@ public class SettingsManager implements SettingsInterface
     /** returns the directory to save to */
     public String getSaveDirectory() {
 		File file = new File(saveDirectory_);
-		boolean dirsMade = false;
-		if(!file.isDirectory())
-			dirsMade = file.mkdirs();
-		if(!dirsMade)
-			return "";
+		if(!file.isDirectory()) {
+			boolean dirsMade = file.mkdirs();
+			if(!dirsMade)
+				return "";
+		}
 		return saveDirectory_;
     }
 
 	/** returns the incomplete directory */ 
 	public String getIncompleteDirectory() {
 		File file = new File(incompleteDirectory_);
-		boolean dirsMade = false;
-		if(!file.isDirectory())
-			dirsMade = file.mkdirs();
-		if(!dirsMade)
-			return "";
+		if(!file.isDirectory()) {
+			boolean dirsMade = file.mkdirs();
+			if(!dirsMade)
+				return "";
+		}
 		return incompleteDirectory_;
 	}
 
     /** returns the default save directory */
     public String getSaveDefault() {
 		File file = new File(saveDefault_);
-		boolean dirsMade = false;
-		if(!file.isDirectory())
-			dirsMade = file.mkdirs();
-		if(!dirsMade)
-			return "";
+		if(!file.isDirectory()) {
+			boolean dirsMade = file.mkdirs();
+			if(!dirsMade)
+				return "";
+		}
 		return saveDefault_;
 	}
 
