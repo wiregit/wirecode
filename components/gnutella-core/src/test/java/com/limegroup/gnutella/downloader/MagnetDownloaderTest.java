@@ -118,6 +118,13 @@ public class MagnetDownloaderTest extends TestCase {
         assertTrue(! md.allowAddition(newRFD("", hash2)));
     }
 
+    /** Another test to match solely by keyword. */
+    public void testAllowAddition() {
+        MagnetDownloader md=newMagnetDownloader(
+            null, "LimeWireWin2.65.0000.exe", null, null);
+        assertTrue(md.allowAddition(newRFD("LimeWireWin2.65.0000.exe")));
+    }
+
     /** Writes the MagnetDownloader.dat file generated for testSerialization.
      *  This should be run to generate a new version when MagnetDownloader
      *  changes. */

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import junit.framework.*;
+import com.sun.java.util.collections.*;
 
 public class ResponseVerifierTest extends TestCase {
 
@@ -116,8 +117,22 @@ public class ResponseVerifierTest extends TestCase {
         assertTrue(rv.score(qr.getGUID(), r1)==100);
     }
 
-    public void testScore() {
-
+    public void testScoreIgnoreCase() {
+        assertEquals(100, 
+                     ResponseVerifier.score("test query", null, 
+                                            newRFD("test query.txt")));
+        assertEquals(100, 
+                     ResponseVerifier.score("TEST qUErY", null, 
+                                            newRFD("test Query.txt")));
+        assertEquals(50, 
+                     ResponseVerifier.score("query oops", null, 
+                                            newRFD("QQQQUERY.txt")));
     }
-    
+
+    private static RemoteFileDesc newRFD(String name) {
+        Set urns=new HashSet(1);
+        return new RemoteFileDesc("1.2.3.4", 6346, 13l,
+                                  name, 1024,
+                                  new byte[16], 56, false, 4, true, null, urns);
+    }
 }

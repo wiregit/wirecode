@@ -135,10 +135,10 @@ public class ResponseVerifier {
             return 100; // avoid divide-by-zero errors below
 
         //Count the number of regular expressions from the query that
-        //match the result's name.
+        //match the result's name.  Ignore case in comparison.
         for (int i=0; i<numQueryWords; i++) {
             String pattern=queryWords[i];
-            if (StringUtils.contains(filename,pattern)) {
+            if (StringUtils.contains(filename, pattern, true)) {
                 numMatchingWords++;
                 continue;
             }

@@ -301,7 +301,7 @@ public class RequeryDownloadTest extends TestCase {
         //Send a good response to the query.
         response=new Response(0l,   //index
                               TestFile.length(),
-                              "some file name.txt",
+                              "some FILE Name.txt",
                               null,  //metadata
                               null,  //URNs
                               null); //metadata
