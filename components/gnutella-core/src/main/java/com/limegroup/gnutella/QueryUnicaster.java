@@ -314,7 +314,7 @@ public final class QueryUnicaster {
 			_queryHosts.notify();
 			if(UDPService.instance().isListening() &&
 			   !RouterService.isGUESSCapable() &&
-			   _testUDPPingsSent < 5) {
+			   _testUDPPingsSent < 10) {
 				PingRequest pr = new PingRequest((byte)1);
 				UDPService.instance().send(pr, endpoint.getAddress(), 
 										   endpoint.getPort());
