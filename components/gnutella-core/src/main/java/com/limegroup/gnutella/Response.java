@@ -372,7 +372,7 @@ public class Response {
 			Set urns = huge.getURNS();
 
 			String metaString = "";
-            Iterator iter = huge.getXMLBlocks().iterator();
+            Iterator iter = huge.getMiscBlocks().iterator();
             while (iter.hasNext() && metaString.equals(""))
                 metaString = createXmlString(name, (String)iter.next());
 

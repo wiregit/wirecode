@@ -17,34 +17,32 @@ public class HUGEExtension {
     private Set _ggeps = null;
     private Set _urns = null;
     private Set _urnTypes = null;
-    private Set _xmlBlocks = null;
+    private Set _miscBlocks = null;
     // -----------------------------------------
 
-    /** @return the set GGEP Objects in this HUGE extension, may return null.
+    /** @return the set of GGEP Objects in this HUGE extension.
      */
     public Set getGGEPBlocks() {
         if (_ggeps == null) return DataUtils.EMPTY_SET;
         return _ggeps;
     }
-    /** @return the set URN Objects in this HUGE extension, may return null.
+    /** @return the set of URN Objects in this HUGE extension.
      */
     public Set getURNS() {
         if (_urns == null) return DataUtils.EMPTY_SET;
         return _urns;
     }
-    /** @return the set URN Type Objects in this HUGE extension, may return
-     *  null.
+    /** @return the set of URN Type Objects in this HUGE extension.
      */
     public Set getURNTypes() {
         if (_urnTypes == null) return DataUtils.EMPTY_SET;
         return _urnTypes;
     }
-    /** @return the set XML blocks (Strings) in this HUGE extension, may return
-     *  null.
+    /** @return the set of miscellaneous blocks (Strings) in this extension.
      */
-    public Set getXMLBlocks() {
-        if (_xmlBlocks == null) return DataUtils.EMPTY_SET;
-        return _xmlBlocks;
+    public Set getMiscBlocks() {
+        if (_miscBlocks == null) return DataUtils.EMPTY_SET;
+        return _miscBlocks;
     }
 
     public HUGEExtension(byte[] extsBytes) {
@@ -98,9 +96,9 @@ public class HUGEExtension {
                         } 
                         else {
                             // miscellaneous, but in the case of queries, xml
-                            if (_xmlBlocks == null)
-                                _xmlBlocks = new HashSet();
-                            _xmlBlocks.add(curExtStr);
+                            if (_miscBlocks == null)
+                                _miscBlocks = new HashSet();
+                            _miscBlocks.add(curExtStr);
                         }
                     }
                     catch (IOException bad) {}
