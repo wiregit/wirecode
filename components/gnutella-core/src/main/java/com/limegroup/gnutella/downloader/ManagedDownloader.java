@@ -260,6 +260,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
     private List /*of RemoteFileDesc */ files;
+    /** keeps a count of worker threads that are queued on uploader, useful 
+     * for setting the state correctly*/
+    private volatile int queuedCount;
 	
 	/**  LOCKING: AlternateLocationCollection is thread-safe. 
       *           this' lock not needed.
@@ -298,6 +301,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The name of the last file being attempted.  Needed only to support
      *  launch(). */
     private String currentFileName;
+    /**
+     * The position of the downloader in the uploadQueue */
+    private String queuePosition;
     /** The size of the last file being attempted.  Needed only to support
      *  launch(). */
     private int currentFileSize;
@@ -772,7 +778,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //be reflected in the iteration.  The children of
                 //tryAllDownloads call setState(CONNECTING) and
                 //setState(DOWNLOADING) as appropriate.
-                setState(QUEUED);                    
+                setState(QUEUED);  
+                queuePosition="";//initialize
+                queuedCount=0;
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
                 bucketNumber = 0;//reset
@@ -1278,22 +1286,32 @@ public class ManagedDownloader implements Downloader, Serializable {
         //should choose a part of the file to download and send the appropriate
         //HTTP hearders
         //Note: 0=disconnected,1=tcp-connected, 2=http-connected
-        int connected = 1;
-        int[] a = new int[1];//for pass by reference
+        boolean wasQueued = false;
+        int connected;
         while(true) { //while queued, connect and sleep if we queued
-            a[0]= -1;//reset the sleep value
+            int[] a = {-1};//reset the sleep value
             connected = assignAndRequest(dloader,a);
-            if(connected==1) {
-                try {
-                    if(a[0] > 0)
-                        Thread.sleep(a[0]);//value from QueuedException
-                } catch (InterruptedException ix) {
-                    debug("worker: interrupted while asleep in queue"+dloader);
-                    return;//close connection
-                }
-            }
-            else//not queued
+            if(connected!=1)
                 break;
+            if(!wasQueued) {
+                synchronized(this) {queuedCount++;}
+                wasQueued = true;
+            }
+            try {
+                if(a[0] > 0)
+                    Thread.sleep(a[0]);//value from QueuedException
+            } catch (InterruptedException ix) {
+                debug("worker: interrupted while asleep in queue"+dloader);
+                synchronized(this) {
+                    queuedCount--;
+                }
+                return;//close connection
+            }
+        }
+        if(wasQueued) {//we have been given a slot, after being queued
+            synchronized(this) {
+                queuedCount--;
+            }
         }
         //Now, connected is either 0 or 2
         Assert.that(connected==0 || connected==2,
@@ -1349,7 +1367,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (dloaders.size()==0 && getState()!=COMPLETE && 
                 getState()!=ABORTED && getState()!=GAVE_UP && 
                 getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
-                && getState()!=REMOTE_QUEUED)
+                && queuedCount==0)
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
@@ -1460,8 +1478,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //The extra time to sleep can be tuned. For now it's 1 S.
                 referenceArray[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
                 synchronized(this) {
-                    if(dloaders.size()==0)
+                    if(dloaders.size()==0) {
                         setState(REMOTE_QUEUED);
+                    }
+                    int oldPos = queuePosition.equals("")?
+                    Integer.MAX_VALUE:Integer.parseInt(queuePosition);
+                    int newPos = qx.getQueuePosition();
+                    queuePosition=oldPos<newPos?""+oldPos:""+newPos;
                 }
                 return 1;
             } catch (IOException iox) {
@@ -1942,6 +1965,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return browseList.hasBrowseHostEnabledHost();
 	}
 
+    public synchronized String getQueuePosition() {
+        if(getState() != REMOTE_QUEUED)
+            return "";
+        return queuePosition;
+    }
+
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();
         for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
@@ -2049,8 +2078,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean debugOn = true;
+    private final boolean log = true;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {

@@ -136,4 +136,9 @@ public interface Downloader extends BandwidthTracker {
 	 */
 	public boolean hasBrowseEnabledHost();
 
+    /**
+     * Returns the position of the download on the uploader, relavent only if
+     * the downloader is queueud.
+     */
+    public String getQueuePosition();
 }
