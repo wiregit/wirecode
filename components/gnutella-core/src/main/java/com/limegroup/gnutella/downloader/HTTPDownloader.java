@@ -224,7 +224,7 @@ public class HTTPDownloader implements Runnable {
 //  		OutputStreamWriter osw = new OutputStreamWriter(bos); 
 //  		BufferedWriter out = new BufferedWriter(osw); 
 		
-		char[] buf = new char[1024];
+		//  char[] buf = new char[1024];
 
 		//  while ((c = _in.read(buf)) != -1) {
 
@@ -234,16 +234,36 @@ public class HTTPDownloader implements Runnable {
 //  		}
 
 
-		while ((c = _istream.read()) != -1) {
+		//  while ((c = _istream.read()) != -1) {
 		    
-		    fos.write(c);
+//  		    fos.write(c);
+//  		    _amountRead+=c;
+
+//  		}
+
+
+		byte[] buf = new byte[1024];
+		
+		// while ((c = _istream.read(buf) != -1)) {
+		    
+		while (true) {
+		    
+		    c = _istream.read(buf);
+		    
+		    if (c == -1) 
+			break;
+
+		    fos.write(buf, 0, c);
 		    _amountRead+=c;
+
+		    System.out.println("THe amount read: " + _amountRead);		   
 
 		}
 
+
 		fos.close();
 
-		System.out.println("THe FINAL amount read: " + _amountRead);
+
 		System.out.println("THe size of the file: " + _sizeOfFile);
 
 
