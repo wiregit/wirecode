@@ -358,9 +358,12 @@ public class UDPConnectionProcessor {
             _inputFromOutputStream.connectionClosed();
 
         // Register for a full cleanup after a slight delay
-        _closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
-           System.currentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
-        _scheduler.register(_closedCleanupEvent);
+        if (_closedCleanupEvent==null) {
+        	_closedCleanupEvent = new ClosedConnectionCleanupTimerEvent(
+        			System.currentTimeMillis() + SHUTDOWN_DELAY_TIME,this);
+        	LOG.debug("registering a closedCleanupEvent");
+        	_scheduler.register(_closedCleanupEvent);
+        }
 	}
 
     private synchronized void finalClose() {
@@ -745,6 +748,7 @@ public class UDPConnectionProcessor {
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
+            LOG.warn("calling recursively closeAndCleanup");
             closeAndCleanup(FinMessage.REASON_SEND_EXCEPTION);
         }
     }
