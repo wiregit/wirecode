@@ -93,7 +93,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         if (ret) {
             ManagedDownloader md = _verifyingFile.getManagedDownloader();
             if( md != null )
-                md.addAlternateLocation(al, (int)getSize());
+                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
         }
         return ret;
     }
@@ -115,7 +115,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         for(Iterator iter = alc.values().iterator(); iter.hasNext(); ) {
             AlternateLocation al = (AlternateLocation)iter.next();
             if( super.add(al) ) {
-                md.addAlternateLocation(al, (int)getSize());
+                md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
                 added++;
             }
         }

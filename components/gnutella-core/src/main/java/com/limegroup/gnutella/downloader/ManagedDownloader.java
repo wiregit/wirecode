@@ -297,10 +297,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * for setting the state correctly*/
     private volatile int queuedCount;
 	
-	/**  LOCKING: AlternateLocationCollection is thread-safe. 
-      *           this' lock not needed.
-      */
-	private AlternateLocationCollection totalAlternateLocations; 
+    /**
+     * The collection of alternate locations we successfully downloaded from
+     * somthing from. We will never use this data-structure until the very end,
+     * when we have become active uploaders of the file.
+     */
+	private AlternateLocationCollection validAlts; 
 
     private VerifyingFile commonOutFile;
     
@@ -538,19 +540,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
             long size = incompleteFileManager.getCompletedSize(incompleteFile);
-            // Create our AlternateLocationCollection if we haven't already.
-            if( totalAlternateLocations == null )
-                totalAlternateLocations =
-                    AlternateLocationCollection.createCollection(hash);
-            
             // Find any matching file-desc for this URN.
             FileDesc fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
                 // Retrieve the alternate locations (without adding ourself)
-                AlternateLocationCollection alc =
-                    fd.getAlternateLocationCollectionWithoutSelf();
-                // Add the collection of locations to our files.
-                addAlternateLocations(alc, (int)size);
+                validAlts = fd.getAlternateLocationCollectionWithoutSelf();
+                Iterator iter = validAlts.iterator();
+                while(iter.hasNext()) {
+                    AlternateLocation loc = (AlternateLocation)iter.next();
+                    addDownload(loc.createRemoteFileDesc((int)size),false);
+                }
             }
         }
     }
@@ -1336,10 +1335,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Sumeet:TODO1: Check if this needs to be synchronized on 
         //totalAlternateLocations
         if( sha1!=null && 
-            (totalAlternateLocations == null || 
-             !totalAlternateLocations.getSHA1Urn().equals(sha1)) )
-            totalAlternateLocations=
-                        AlternateLocationCollection.createCollection(sha1);
+            (validAlts == null || !validAlts.getSHA1Urn().equals(sha1)) )
+            validAlts  = AlternateLocationCollection.createCollection(sha1);
         
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
@@ -1436,15 +1433,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(totalAlternateLocations != null && fileAdded) {
+		if(validAlts != null && fileAdded) {
 			FileDesc fileDesc = 
 			    fileManager.getFileDescMatching(completeFile);  
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
 			if (fileDesc != null && 
-              fileDesc.getSHA1Urn().equals(totalAlternateLocations.getSHA1Urn())) {                
-                fileDesc.addAll(totalAlternateLocations);
+              fileDesc.getSHA1Urn().equals(validAlts.getSHA1Urn())) { 
+                fileDesc.addAll(validAlts);
 				//tell the library we have alternate locations
 				callback.handleSharedFileUpdate(completeFile);
                 HashSet set = null;
@@ -1806,8 +1803,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // this is because newer clients work better with pushes,
         // but older ones didn't understand them
         if( rfd.isReplyToMulticast() ) {
-            // DO NOT PUT MULTICAST RFDs IN AlTERNATE LOCATIONS.
-            removeAlternateLocation(rfd);
             try {
                 ret = connectWithPush(rfd, incompleteFile);
             } catch(IOException e) {
@@ -1831,9 +1826,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // oh well, fall through to the push.
             }
         }
-        
-        // ALTERNATE LOCATIONS THAT NEED PUSHES SHOULD NOT BE IN THE MESH.
-        removeAlternateLocation(rfd);
         
         try {
             ret = connectWithPush(rfd, incompleteFile);
@@ -2004,13 +1996,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
                 debug("fnfx thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
                 debug("nsx thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
@@ -2035,27 +2025,27 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
                 debug("prhe thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0; //discard the rfd of dloader
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
                 debug("uce (" + uce.getCode() + ") thrown in assignAndRequest "
                       + dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0; //discard the rfd of dloader
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
                 debug("iox thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0; //discard the rfd of dloader
             } finally {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
-                synchronized(this) {
-                    addAlternateLocations(dloader.getAlternateLocations(),
-                                        dloader.getRemoteFileDesc().getSize());
+                Iterator iter = dloader.getAlternateLocations().iterator();
+                while(iter.hasNext()) {
+                    AlternateLocation loc = (AlternateLocation)iter.next();
+                    RemoteFileDesc rfd = loc.createRemoteFileDesc
+                    (dloader.getRemoteFileDesc().getSize());
+                    addDownload(rfd, false);//dont cache
                 }
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
@@ -2098,87 +2088,30 @@ public class ManagedDownloader implements Downloader, Serializable {
      * is accepted for future swarming, this returns true.  Otherwise,
      * this returns false.
      */
-    public synchronized boolean addAlternateLocation(AlternateLocation alt,
-                                                     int fileSize) {
+    private void addAlternateLocation(AlternateLocation alt) {
         // create the collection with the SHA1 of this alt if it hasn't
         // been created yet.
-        if( totalAlternateLocations == null )
-            totalAlternateLocations =
-                AlternateLocationCollection.createCollection(alt.getSHA1Urn());
+        if(validAlts == null)
+            validAlts =
+            AlternateLocationCollection.createCollection(alt.getSHA1Urn());
                 
-        boolean added = totalAlternateLocations.add(alt);
+        boolean added = validAlts.add(alt);
         
         // if the location didn't accept the new one.
-        if(!added) {
+        if(!added)
             DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-            return false;
-        }            
         
         // everything worked, add it (without caching)
         if( RECORD_STATS )
             DownloadStat.ALTERNATE_COLLECTED.incrementStat();
-
-        return addDownload(alt.createRemoteFileDesc(fileSize), false);
-    }    
-
-    /**
-     * Record new alternate locations and schedule them for use 
-     * in future swarming.  
-     * Note that alternate locations should have lower priority than
-     * QueryReplies.
-     */
-	private synchronized void addAlternateLocations(
-	  AlternateLocationCollection alts, int completeSize) {  
-		if (alts == null || !alts.hasAlternateLocations()  )
-			return;
-			
-        // Iterate through the new ones, attempt to add each,
-        // and if they're added succesfully, add them to the download
-        // list.
-        synchronized(totalAlternateLocations) {
-            for(Iterator i = alts.values().iterator(); i.hasNext(); ) {
-    		    AlternateLocation alt;
-    		    alt = (AlternateLocation)i.next();
-    		    if( totalAlternateLocations.add(alt) ) {
-    		        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
-    			    addDownload(alt.createRemoteFileDesc(completeSize), false);
-                } else {
-                    DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-                }
-    		}
-        }
-	}
-	
-	/**
-	 * Remove this RFD from the alternate locations collection.
-	 */
-	private void removeAlternateLocation(RemoteFileDesc rfd) {
-	    if ( totalAlternateLocations == null ||
-	        !totalAlternateLocations.hasAlternateLocations() ) {
-	        return;
-        }
-	    
-        AlternateLocation toRemove = null;
-	    try {
-	        toRemove = AlternateLocation.createAlternateLocation(rfd);
-        } catch(Exception failed) {
-            if(RECORD_STATS)
-                DownloadStat.ALTERNATE_INVALID.incrementStat();
-            return; // can't remove if we can't create.
-        }
-        
-	    // remove this location
-	    if(totalAlternateLocations.remove(toRemove) &&
-	       RECORD_STATS)
-	        DownloadStat.ALTERNATE_REMOVED.incrementStat();
     }
 	
 	/**
 	 * Returns the number of alternate locations that this download is using.
 	 */
 	public int getNumberOfAlternateLocations() {
-	    if ( totalAlternateLocations == null ) return 0;
-	    return totalAlternateLocations.getNumberOfAlternateLocations();
+	    if ( validAlts == null ) return 0;
+	    return validAlts.getNumberOfAlternateLocations();
     }
     
     /**
@@ -2493,7 +2426,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //no need to add http11 dloader to files                
                 if(!problem && !http11)
                     files.add(rfd);
-                int init=downloader.getInitialReadingPoint();
+                if(!problem && rfd.isAltLocCapable()) {
+                    AlternateLocation loc=null;
+                    try {
+                        loc = AlternateLocation.createAlternateLocation(rfd);
+                    } catch (Exception e) {}
+                    if(loc!=null)
+                        addAlternateLocation(loc);
+                }
             }
         }
     }

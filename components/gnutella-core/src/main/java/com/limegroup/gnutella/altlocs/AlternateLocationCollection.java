@@ -328,6 +328,11 @@ public final class AlternateLocationCollection
 	public int getNumberOfAlternateLocations() { 
 		return LOCATIONS.size();
     }
+    
+    public Iterator iterator() {
+        //Sumeet:TODO1: synchronization needs checking
+        return LOCATIONS.keySet().iterator();
+    }
 
 	/**
 	 * Overrides Object.toString to print out all of the alternate locations

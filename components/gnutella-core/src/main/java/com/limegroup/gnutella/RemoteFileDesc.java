@@ -403,6 +403,21 @@ public class RemoteFileDesc implements Serializable {
         return _proxies;
     }
 
+    /**
+     * @return true if I am not firewalled, multicast host or have private IP
+     */
+    public final boolean isAltLocCapable() {
+        boolean isPrivateIP = false;
+        try {
+            isPrivateIP = NetworkUtils.isPrivateAddress(_host);
+        } catch (UnknownHostException e) {
+            isPrivateIP = true; //altloc incapable
+        }
+        if(_replyToMulticast || _firewalled || isPrivateIP)
+            return false;
+        return true;
+    }
+
 	/**
 	 * Overrides <tt>Object.equals</tt> to return instance equality
 	 * based on the equality of all <tt>RemoteFileDesc</tt> fields.
