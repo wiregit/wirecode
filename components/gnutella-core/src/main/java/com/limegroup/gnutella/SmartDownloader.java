@@ -18,13 +18,14 @@ import java.net.*;
 import java.util.*;
 import com.sun.java.util.collections.*;
 
-public class SmartDownloader { //extends HTTPDownloader {
+public class SmartDownloader extends HTTPDownloader {
 
 	private RemoteFileDesc[] _remoteFiles;  // the array of connectionss
 
 	public SmartDownloader(MessageRouter router,  RemoteFileDesc[] files,
 						   Acceptor acceptor, ActivityCallback callback) {
 
+		super();
 		_remoteFiles = files;
 
 	}
@@ -41,9 +42,10 @@ public class SmartDownloader { //extends HTTPDownloader {
 
 		while (index < numFiles) {
 
-			/* get the first file and client */
+			/* get each possible file and host */
 			file = _remoteFiles[index];
 
+			/* see if we can connect to it */
 			  if ( tryHost(file.getIndex(), file.getFileName(),
 						   file.getHost(), file.getPort() ) ){
 				  break;

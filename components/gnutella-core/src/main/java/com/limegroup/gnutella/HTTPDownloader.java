@@ -130,6 +130,16 @@ public class HTTPDownloader implements Runnable {
         _sizeOfFile = size;
     }
 
+	/** 
+	 * This is a bit of a hack.  I've added this protected 
+	 * constructor so that the subclass SmartDownloader can
+	 * actually subclass without the normal constructors
+	 */
+	protected HTTPDownloader() {
+
+	}
+
+
     public void setDownloadInfo(HTTPDownloader down) {
 
     _protocol = down.getProtocal();
