@@ -591,8 +591,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * connection is ready to process Gnutella messages.
      */
     public void handshakeComplete() throws IOException  {
-        _headers = 
-            HandshakeResponse.createResponse(HANDSHAKER.getHeadersRead());
+        _headers = HANDSHAKER.getHeadersRead();
         _headersWritten = 
             HandshakeResponse.createResponse(HANDSHAKER.getHeadersWritten());
 
@@ -644,6 +643,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         UpdateManager.instance().checkAndUpdate(this);   
         
         _initialized = true ;  
+        
         
         RouterService.getConnectionManager().
             handleConnectionInitialization(this);    
@@ -1010,6 +1010,9 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         if(_socket == null) {
             throw new IllegalStateException("Not initialized");
         }
+        if(!_socket.isConnected()) {
+            throw new IllegalStateException("not connected");
+        }
         return _socket.getInetAddress();
     }
     
@@ -1367,7 +1370,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return _headers.isLeaf();
     }
 
-    /** Returns true iff this connection wrote "Supernode: true". */
+    /** Returns true iff this connection wrote "Ultrapeer: true". */
     public boolean isSupernodeConnection() {
         return _headers.isUltrapeer();
     }
@@ -1385,14 +1388,16 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                 isClientSupernodeConnection2() ?
                     Boolean.TRUE : Boolean.FALSE;
         }
+        
         return _isUltrapeer.booleanValue();
     }
 
     private boolean isClientSupernodeConnection2() {
         //Is remote host a supernode...
-        if (! isSupernodeConnection())
+        if (! isSupernodeConnection()) {
             return false;
-
+        }
+        
         //...and am I a leaf node?
         String value = HANDSHAKER.getHeaderWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
@@ -1728,12 +1733,15 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     }
 
     /**
+     * Accessor for the class that handles connection handshaking on behalf of
+     * this connection.
      * 
+     * @return the handshaker delegate class that handles handshaking
      */
     public Handshaker handshaker() {
         return HANDSHAKER;
-        
     }
+
 
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is
