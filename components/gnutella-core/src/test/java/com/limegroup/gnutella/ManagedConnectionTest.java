@@ -28,44 +28,33 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         return new TestSuite(ManagedConnectionTest.class);
     }    
 
-    public void setUp() {
-        SettingsManager.instance().setPort(6444);
-		ConnectionSettings.KEEP_ALIVE.setValue(1);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-        
-        
-        if(ROUTER_SERVICE.isStarted()) return;
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
 
+    public void setUp() throws Exception {
+        if(ROUTER_SERVICE.isStarted()) return;
+        launchBackend();
+        sleep(4000);
+        //SettingsManager.instance().setPort(6444);
+        setStandardSettings();
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+
+        // we start a router service so that all classes have correct
+        // access to the others -- ConnectionManager having a valid
+        // HostCatcher in particular
         ROUTER_SERVICE.start();
-		ROUTER_SERVICE.connect();
         RouterService.clearHostCatcher();
+		ROUTER_SERVICE.connect();
     }
 
 	public void tearDown() {
 		
 	}
-
-	public void testServerRunning() {
-		try {
-			ManagedConnection mc = 
-				new ManagedConnection("localhost", Backend.DEFAULT_PORT);
-			mc.initialize();		
-		} catch(IOException e) {
-			failWithServerMessage(e);
-		}
-	}
-
-    private void failWithServerMessage(Exception e) {
-        fail("You must run this test with servers running --\n"+
-             "use the test6300 ant target to run LimeWire servers "+
-             "on ports 6300 and 6300.\n\n"+
-             "Type ant -D\"class=ConnectionManagerTest\" test6300\n\n", e);        
-    }
  
     private static void sleep(long msecs) {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
@@ -73,12 +62,46 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 
 
 	/**
+	 * Test to make sure that GGEP extensions are correctly returned in pongs.
+	 */
+    public void testForwardsGGEP() throws Exception {
+        //ManagedConnection out = newConnection("localhost", Backend.PORT);
+		ManagedConnection out = 
+            new ManagedConnection("localhost", Backend.PORT);
+        out.initialize();
+
+        assertTrue("connection is open", out.isOpen());
+        assertTrue("connection should support GGEP", out.supportsGGEP());
+		// receive initial ping
+        //drain(out);
+		out.receive();
+		out.receive();
+		//out.receive();`
+
+        //assertTrue("connection should support GGEP", out.supportsGGEP());
+		out.send(new PingRequest((byte)3));
+		
+		Message m = out.receive();
+		assertTrue("should be a pong", m instanceof PingReply);
+		PingReply pr = (PingReply)m;
+
+        assertTrue("pong should have GGEP", pr.hasGGEPExtension());
+		assertTrue("should not support unicast", !pr.supportsUnicast());
+
+		assertTrue("incorrect daily uptime!", pr.getDailyUptime() > 0);
+		assertEquals("unexpected vendor", "LIME", pr.getVendor());
+		assertTrue("pong should have GGEP", pr.hasGGEPExtension());
+		out.close();
+    }
+
+	/**
 	 * Tests the method for checking whether or not the connection is a high-
 	 * degree connection that maintains high numbers of intra-Ultrapeer 
 	 * connections.
 	 */
 	public void testIsHighDegreeConnection() throws IOException {
-		ManagedConnection mc = new ManagedConnection("localhost", 6300);
+		ManagedConnection mc = 
+            new ManagedConnection("localhost", Backend.PORT);
 		mc.initialize();
 		assertTrue("connection should be high degree", 
 				   mc.isHighDegreeConnection());
@@ -143,56 +166,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         assertEquals("unexpected number of hosts", 0,mc.getNumHosts());
         assertEquals("unexpected total file size", 0,mc.getTotalFileSize());                
     }
-    
-	/*
-    public void testIsRouter() {
-        Assert.that(! ManagedConnection.isRouter("127.0.0.1"));
-        Assert.that(! ManagedConnection.isRouter("18.239.0.1"));
-        Assert.that(ManagedConnection.isRouter("64.61.25.171"));
-        Assert.that(ManagedConnection.isRouter("64.61.25.139"));
-        Assert.that(ManagedConnection.isRouter("64.61.25.143"));
-        Assert.that(! ManagedConnection.isRouter("64.61.25.138"));
-        Assert.that(! ManagedConnection.isRouter("64.61.25.170"));
-        Assert.that(! ManagedConnection.isRouter("www.limewire.com"));
-        Assert.that(! ManagedConnection.isRouter("public.bearshare.net"));
-        Assert.that(ManagedConnection.isRouter("router.limewire.com"));
-        Assert.that(ManagedConnection.isRouter("router4.limewire.com"));
-        Assert.that(ManagedConnection.isRouter("router2.limewire.com"));
-        Assert.that(ManagedConnection.translateHost("router.limewire.com").
-            equals("router4.limewire.com"));
-        Assert.that(ManagedConnection.translateHost("router4.limewire.com").
-            equals("router4.limewire.com"));
-     }
-	*/
-
-	/**
-	 * Test to make sure that GGEP extensions are correctly returned in pongs.
-	 */
-    public void testForwardsGGEP() throws Exception {
-        ManagedConnection out = newConnection("localhost", Backend.DEFAULT_PORT);
-        out.initialize();
-
-		// receive initial ping
-		out.receive();
-		out.receive();
-		out.receive();
-
-        assertTrue("connection should support GGEP", out.supportsGGEP());
-		out.send(new PingRequest((byte)2));
-		
-		Message m = out.receive();
-		//System.out.println(m); 
-		assertTrue("should be a pong", m instanceof PingReply);
-		PingReply pr = (PingReply)m;
-
-		assertTrue("should not support unicast", !pr.supportsUnicast());
-
-		assertTrue("incorrect daily uptime!", pr.getDailyUptime() > 0);
-		assertTrue("unexpected vendor", pr.getVendor().equals("LIME"));
-		assertTrue("pong should have GGEP", pr.hasGGEPExtension());
-		out.close();
-    }
-	
+    	
 	
 	/**
 	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
@@ -202,15 +176,16 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 	public void testStripsGGEP() throws Exception {
         ManagedConnection out = 
 			ManagedConnection.createTestConnection("localhost", 
-												   Backend.DEFAULT_PORT,
+												   Backend.PORT,
 												   new NoGGEPProperties(),
 												   new EmptyResponder());
 		out.initialize();
 
 		// receive initial ping
+        //drain(out);
 		out.receive();
 		out.receive();
-        out.receive();
+        //out.receive();
 
         //Connection in = acceptor.accept();
 		//assertNotNull("connection should not be null", in);
@@ -220,19 +195,20 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 		Message m = out.receive();
 		assertTrue("should be a pong", m instanceof PingReply);
 		PingReply pr = (PingReply)m;
-        try {
-            pr.getDailyUptime();
-            fail("Payload wasn't stripped");
-        } catch (BadPacketException e) { }			
+        //try {
+        pr.getDailyUptime();
+        
+        assertEquals("Payload wasn't stripped", -1, pr.getDailyUptime());
+        //fail("Payload wasn't stripped");
+        //} catch (BadPacketException e) { }			
 
-        try {
-            pr.getDailyUptime();
-            fail("GGEP payload wasn't stripped");
-        } catch (BadPacketException e) { }			
-        try {
-            pr.supportsUnicast();
-            fail("GGEP payload wasn't stripped");
-        } catch (BadPacketException e) { }			
+        //try {
+        //  pr.getDailyUptime();
+        //  fail("GGEP payload wasn't stripped");
+        //} catch (BadPacketException e) { }			
+        // try {
+        assertFalse("should not have contained GGEP block", 
+                    pr.supportsUnicast());
 
 		assertTrue("pong should not have GGEP", !pr.hasGGEPExtension());
 
@@ -254,7 +230,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-		out = new ManagedConnection("localhost", Backend.DEFAULT_PORT);
+		out = new ManagedConnection("localhost", Backend.PORT);
         //out=newConnection("localhost", PORT, manager);
         out.initialize();            
 
@@ -323,7 +299,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         boolean ret=false;
         while (true) {
             try {
-                Message m = c.receive(500);
+                Message m = c.receive(2000);
                 ret=true;
             } catch (InterruptedIOException e) {
                 return ret;
@@ -349,6 +325,9 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         }
     }
 
+    /**
+     * Handshake properties indicating no support for GGEP.
+     */
 	private static class NoGGEPProperties extends SupernodeProperties {
 		public NoGGEPProperties() {
 			super("localhost");
@@ -381,8 +360,4 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
             fail("could not initialize test", e);
         }		
 	}
-
-    public static void main(String argv[]) {
-        junit.textui.TestRunner.run(suite());
-    }
 }
