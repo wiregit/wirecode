@@ -97,9 +97,9 @@ public class LimeXMLSchema
         {
             document = documentBuilder.parse(schemaInputSource);
         }
-        catch(Exception e)
-        {
-            //e.printStackTrace();
+        catch(java.net.ConnectException ignored) { }
+        catch(java.net.UnknownHostException ignored) { }
+        catch(Exception e) {
             throw new IOException("" + e);
         }
         
@@ -350,12 +350,14 @@ public class LimeXMLSchema
         
         public InputSource resolveEntity(String publicId, String systemId)
         {
-            String Id = systemId+publicId;
-            String schemaId = schema.getSystemId()+schema.getPublicId();
-            if (Id.equals(schemaId))
-                return schema;
-            else
-                return null;
+            return schema;
+            
+            //String Id = systemId+publicId;
+            //String schemaId = schema.getSystemId()+schema.getPublicId();
+            //if (Id.equals(schemaId))
+            //    return schema;
+            //else
+            //    return null;
         }
     }//end of private innner class
 
