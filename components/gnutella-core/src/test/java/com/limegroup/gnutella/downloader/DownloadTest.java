@@ -325,7 +325,10 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
-        tGeneric(rfds);
+        // Download first from rfd2 so we get its stall
+        // and then add in rfd1.
+        tGeneric(new RemoteFileDesc[] { rfd2 },
+                 new RemoteFileDesc[] { rfd1 });
 
         //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.amountUploaded();
