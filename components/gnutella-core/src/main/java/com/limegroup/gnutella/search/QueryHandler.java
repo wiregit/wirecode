@@ -492,7 +492,7 @@ public final class QueryHandler {
         // match anyway
         if(ttl == 1 && 
            ((mc.isUltrapeerQueryRoutingConnection() &&
-            !mc.hitsQueryRouteTable(QUERY)) || probeConnection)) {
+            !mc.shouldForwardQuery(QUERY)) || probeConnection)) {
             ttl = 2;
         }
         QueryRequest query = createQuery(QUERY, ttl);

@@ -1431,7 +1431,7 @@ public abstract class MessageRouter {
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc == handler) continue;
-            if(mc.hitsQueryRouteTable(query)) {
+            if(mc.shouldForwardQuery(query)) {
                 hitConnections.add(mc);
             }
         }
@@ -1469,7 +1469,7 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
-		if (mc.hitsQueryRouteTable(query)) {
+		if (mc.shouldForwardQuery(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
