@@ -124,23 +124,23 @@ public class Sockets {
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
             try {
-                Object ret = _socketClass.newInstance();
+                Socket ret = (Socket)_socketClass.newInstance();
 
 				Object addr = _inetAddressConstructor.newInstance(
                     new Object[] { host, new Integer(port) });
 
                 _connectMethod.invoke(ret, 
                     new Object[] { addr, new Integer(timeout) });
-                return (Socket)ret;
+                return ret;
             } catch (InvocationTargetException e) {
                 //ioException.getTargetException() should be an instance of
                 //IOexception, but this is safer.
                 throw new IOException(e.getMessage()); 
-            } catch (Exception e) {
-                //I don't like generic "catch Exception"'s, but I think it's
-                //clearer than listing the zillion cases from above.  This
-                //should never happen, but we can go on to the emulation step
-                //below.
+            } catch(InstantiationException e) {
+                // this should never happen -- display the error
+                ErrorService.error(e);
+            } catch(IllegalAccessException e) {
+                // should almost never happen
             }
         }
      
