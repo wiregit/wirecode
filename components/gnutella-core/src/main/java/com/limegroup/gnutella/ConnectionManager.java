@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
+import com.limegroup.gnutella.handshaking.*;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
