@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.mp3.MetaDataReader;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.NameValue;
