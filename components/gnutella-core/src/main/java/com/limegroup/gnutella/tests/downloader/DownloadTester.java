@@ -35,7 +35,8 @@ public class DownloadTester {
         }
         RouterService rs=new RouterService(null, null, null, null);
         dm.initialize(new ActivityCallbackStub(), new MessageRouterStub(), 
-                      null, new FileManagerStub(), rs);
+                      null, new FileManagerStub());
+        dm.postGuiInit(rs);
 
         SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
@@ -442,7 +443,6 @@ public class DownloadTester {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) { }
-            dm.writeSnapshot();  //Try to mess up downloaders
         }
     }
 
@@ -453,7 +453,6 @@ public class DownloadTester {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) { }
-            dm.writeSnapshot();  //Try to mess up downloaders
         }
     }
 
