@@ -122,7 +122,8 @@ public class PushRequest extends Message implements Serializable {
 	}
 
     public String toString() {
-        return "PushRequest("+super.toString()+")";
+        return "PushRequest("+super.toString()+" "+
+            NetworkUtils.ip2string(getIP())+":"+getPort()+")";
     }
 
     //Unit tests: tests/com/limegroup/gnutella/messages/PushRequestTest
