@@ -106,11 +106,13 @@ public class GGEP extends Object {
 
             // get the data length
             currIndex += headerLen;
-            final int dataLength = deriveDataLength(messageBytes, currIndex);
+            int[] toIncrement = new int[1];
+            final int dataLength = deriveDataLength(messageBytes, currIndex,
+                                                    toIncrement);
 
             byte[] extensionData = null;
 
-            currIndex++;
+            currIndex+=toIncrement[0];
             if (dataLength > 0) {
                 // ok, data is present, get it....
 
@@ -200,7 +202,10 @@ public class GGEP extends Object {
         return retInt;
     }
 
-    private int deriveDataLength(byte[] buff, int beginOffset) 
+    /** @param increment a int array of size >0.  i'll put the number of bytes
+     *  devoted to data storage in increment[0].
+     */
+    private int deriveDataLength(byte[] buff, int beginOffset, int increment[]) 
         throws BadGGEPBlockException {
         int length = 0, iterations = 0;
         // the length is stored in at most 3 bytes....
@@ -212,6 +217,7 @@ public class GGEP extends Object {
             if (++iterations > MAX_ITERATIONS)
                 throw new BadGGEPBlockException();
         } while (0x40 != (currByte & 0x40));
+        increment[0] = iterations;
         return length;
     }
 
