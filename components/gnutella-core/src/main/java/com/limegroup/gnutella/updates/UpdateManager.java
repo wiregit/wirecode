@@ -239,6 +239,8 @@ public class UpdateManager {
                         if(System.currentTimeMillis() < makeTime+SEVEN_HOURS) {
                             Random rand = new Random();
                             long sleep = rand.nextLong() % SEVEN_HOURS;
+                            if(sleep<0)
+                                sleep = -1*sleep;
                             try {
                                 Thread.sleep(sleep);
                             } catch(InterruptedException ignored) {}
