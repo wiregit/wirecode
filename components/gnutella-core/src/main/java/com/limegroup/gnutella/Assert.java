@@ -20,7 +20,9 @@ public class Assert {
         if (!ok) {
             System.err.println("Assertion failed: "+msg);
 			RuntimeException re = new AssertFailure(msg);
-			if(_callback != null) _callback.error(re);
+			if(_callback != null) {
+				_callback.error(ActivityCallback.ASSERT_ERROR, re);
+			}
 			throw re;
         }
     }
