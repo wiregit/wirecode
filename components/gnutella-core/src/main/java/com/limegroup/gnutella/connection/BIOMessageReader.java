@@ -7,19 +7,27 @@ import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.util.zip.Inflater;
 
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.DataUtils;
 
 /**
  * Class that takes care of reading messages from blocking sockets.
  */
 public class BIOMessageReader extends AbstractMessageReader {
 
+    /**
+     * Constant for the <tt>Connection</tt> this reader is reading for.
+     */
     private final Connection CONNECTION;
     
     /**
@@ -51,13 +59,28 @@ public class BIOMessageReader extends AbstractMessageReader {
     private final byte SOFT_MAX;
     
     /**
-     * @return
+     * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
+     * the TTL is set to SOFT_MAX-hops.
+     */
+    public static final byte DEFAULT_SOFT_MAX = 
+        ConnectionSettings.SOFT_MAX.getValue();
+    
+    /**
+     * Creates a new <tt>BIOMessageReader</tt> for the specified 
+     * <tt>Connection</tt> instance.
+     * 
+     * @return a new <tt>MessageReader</tt> for the specified connection
      */
     public static MessageReader createReader(Connection conn) {
-        // TODO Auto-generated method stub
         return new BIOMessageReader(conn);
     }
     
+    /**
+     * Creates a new <tt>BIOMessageReader</tt> associated with the specified
+     * <tt>Connection</tt>.
+     * 
+     * @param conn the <tt>Connection</tt> instance this reader reads for
+     */
     private BIOMessageReader(Connection conn) {
         CONNECTION = conn;
         SOCKET = CONNECTION.getSocket();
@@ -66,24 +89,21 @@ public class BIOMessageReader extends AbstractMessageReader {
         SOFT_MAX = CONNECTION.getSoftMax();
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#createMessageFromTCP(java.io.InputStream)
-     */
-    public Message createMessageFromTCP(InputStream is) 
-        throws BadPacketException, IOException {
-        return Message.read(is);
-    }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#createMessageFromTCP(java.nio.channels.SelectionKey)
+    /**
+     * Implements the <tt>MessageReader</tt> interface.  This should never be
+     * called on this class while in blocking mode, since any reading from
+     * channels should be performed by <tt>NIOMessageReader</tt>.
+     * 
+     * @throws IllegalStateException if this method is ever called, since 
+     *  this class should only be used in blocking mode
      */
     public Message createMessageFromTCP(SelectionKey key) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalStateException("in blocking mode");
     }
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
-    private byte[] HEADER_BUF=new byte[23];
+    private byte[] HEADER_BUF = new byte[23];
     
     /**
      * Receives a message.  This method is NOT thread-safe.  Behavior is
@@ -174,7 +194,7 @@ public class BIOMessageReader extends AbstractMessageReader {
             
             // DO THE ACTUAL READ
             try {
-                msg = Message.read(INPUT_STREAM, HEADER_BUF, 
+                msg = BIOMessageReader.read(INPUT_STREAM, HEADER_BUF, 
                     Message.N_TCP, SOFT_MAX);
             } catch(IOException e) {
                 CONNECTION.close(); // if IOError, make sure we close.
@@ -204,8 +224,165 @@ public class BIOMessageReader extends AbstractMessageReader {
         return msg;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#startReading()
+    /**
+     * Reads a Gnutella message from the specified input stream.  The returned
+     * message can be any one of the recognized Gnutella message, such as
+     * queries, query hits, pings, pongs, etc.
+     *
+     * @param in the <tt>InputStream</tt> instance containing message data
+     * @return a new Gnutella message instance
+     * @throws <tt>BadPacketException</tt> if the message is not considered
+     *  valid for any reason
+     * @throws <tt>IOException</tt> if there is any IO problem reading the
+     *  message
+     */
+    public static Message read(InputStream in)
+        throws BadPacketException, IOException {
+        return BIOMessageReader.read(in, new byte[23], Message.N_UNKNOWN, 
+            DEFAULT_SOFT_MAX);
+    }
+    
+    /**
+     * Creates a new <tt>Message</tt> from an <tt>InputStream</tt> retrieved
+     * from a UDP socket.  Some messages include flags for the transport layer,
+     * making this specialized method necessary.<p>
+     * 
+     * Creates a new message unless one of the following happens:
+     * 
+     *    <ul>
+     *    <li>No data is available: returns null
+     *    <li>A bad packet is read: BadPacketException.  The client should be
+     *      able to recover from this.
+     *    <li>A major problem occurs: IOException.  This includes reading 
+     *      packets that are ridiculously long and half-completed messages. The 
+     *      client is not expected to recover from this.
+     *    </ul>
+     * 
+     * @param in the <tt>InputStream</tt> to create the message from
+     * @return a subclass of <tt>Message</tt>, or <tt>null</tt> if no data is
+     *  available
+     * @throws BadPacketException if we are not able to correctly parse the 
+     *  data read from the network
+     * @throws IOException if an IO error occurs or seriously abnormal packets
+     *  are seen.  This will result in the connection being closed.
+     */
+    public static Message createMessageFromMulticast(InputStream in)
+        throws BadPacketException, IOException {
+        return BIOMessageReader.read(in, new byte[23], Message.N_MULTICAST, 
+            DEFAULT_SOFT_MAX);
+    } 
+    
+    /**
+     * Creates a new <tt>Message</tt> from an <tt>InputStream</tt> retrieved
+     * from a UDP socket.  Some messages include flags for the transport layer,
+     * making this specialized method necessary.<p>
+     * 
+     * Creates a new message unless one of the following happens:
+     * 
+     *    <ul>
+     *    <li>No data is available: returns null
+     *    <li>A bad packet is read: BadPacketException.  The client should be
+     *      able to recover from this.
+     *    <li>A major problem occurs: IOException.  This includes reading 
+     *      packets that are ridiculously long and half-completed messages. The 
+     *      client is not expected to recover from this.
+     *    </ul>
+     * 
+     * @param in the <tt>InputStream</tt> to create the message from
+     * @return a subclass of <tt>Message</tt>, or <tt>null</tt> if no data is
+     *  available
+     * @throws BadPacketException if we are not able to correctly parse the 
+     *  data read from the network
+     * @throws IOException if an IO error occurs or seriously abnormal packets
+     *  are seen.  This will result in the connection being closed.
+     */
+    public static Message createMessageFromUDP(InputStream in)
+        throws BadPacketException, IOException {
+        return BIOMessageReader.read(in, new byte[23], Message.N_UDP, 
+            DEFAULT_SOFT_MAX);
+    }     
+
+        
+    /**
+     * @param network the network this was received from.
+     * @requires buf.length==23
+     * @effects exactly like Message.read(in), but buf is used as scratch for
+     *  reading the header.  This is an optimization that lets you avoid
+     *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
+     *  but the contents are not guaranteed to contain any useful data.  
+     */
+    public static Message read(InputStream in, byte[] buf, int network, 
+        byte softMax)
+        throws BadPacketException, IOException {
+
+        //1. Read header bytes from network.  If we timeout before any
+        //   data has been read, return null instead of throwing an
+        //   exception.
+        for (int i=0; i<23; ) {
+            int got;
+            try {
+                got = in.read(buf, i, 23-i);
+            } catch (InterruptedIOException e) {
+                //have we read any of the message yet?
+                if (i==0) return null;
+                else throw e;
+            }
+            if (got==-1) {
+                if( RECORD_STATS ){
+                    ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                }
+                throw new IOException("Connection closed.");
+            }
+            i+=got;
+        }
+
+        //2. Unpack.
+        byte func = buf[16];
+        byte ttl = buf[17];
+        byte hops = buf[18];
+        int length = ByteOrder.leb2int(buf,19);
+        //2.5 If the length is hopelessly off (this includes lengths >
+        //    than 2^31 bytes, throw an irrecoverable exception to
+        //    cause this connection to be closed.
+        if (length<0 || length > MessageSettings.MAX_LENGTH.getValue()) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_LENGTH.incrementStat();
+            throw new IOException("Unreasonable message length: "+length);
+        }
+
+        //3. Read rest of payload.  This must be done even for bad
+        //   packets, so we can resume reading packets.
+        byte[] payload = null;
+        if (length!=0) {
+            payload = new byte[length];
+            for (int i=0; i<length; ) {
+                int got=in.read(payload, i, length-i);
+                if (got==-1) {
+                    if( RECORD_STATS )
+                        ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                    throw new IOException("Connection closed.");
+                }
+                i+=got;
+            }
+        }
+        else {
+            payload = DataUtils.EMPTY_BYTE_ARRAY;
+        }
+
+        checkFields(ttl, hops, softMax, func);
+        
+        // Delayed GUID allocation
+        byte[] guid = new byte[16];
+        for (int i=0; i<16; i++) //TODO3: can optimize
+            guid[i] = buf[i];
+            
+        return createMessage(guid, func, ttl, hops, length, payload, network);
+    }
+
+    /**
+     * Starts reading messages from this TCP connection.
+     * 
+     * @throws IOException if there is an IO error reading from this socket
      */
     public void startReading() throws IOException {
         MessageRouter router = RouterService.getMessageRouter();
