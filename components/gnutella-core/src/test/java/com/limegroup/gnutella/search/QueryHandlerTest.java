@@ -19,10 +19,6 @@ import junit.framework.*;
  */
 public final class QueryHandlerTest extends BaseTestCase {
 
-    /**
-     * Cached method for creating the probe lists.
-     */
-    private static Method CREATE_PROBE_LISTS;
 
 	public QueryHandlerTest(String name) {
 		super(name);
@@ -34,14 +30,6 @@ public final class QueryHandlerTest extends BaseTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
-    }
-
-    public static void globalSetUp() throws Exception {
-        Class[] params = new Class[]{List.class, QueryRequest.class};
-		CREATE_PROBE_LISTS = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "createProbeLists",
-                                         params);        
     }
 
 
@@ -260,8 +248,9 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          "sendQuery",
                                          new Class[]{List.class});
 
-        List connections = new LinkedList();
-        for(int i=0; i<15; i++) {
+        int numConnections = 15;
+        List connections = new ArrayList();
+        for(int i=0; i<numConnections; i++) {
             connections.add(NewConnection.createConnection(10));
         }   
 
@@ -271,100 +260,19 @@ public final class QueryHandlerTest extends BaseTestCase {
                                        new TestResultCounter(0));
         
         
-        Iterator iter = connections.iterator();
-        //int results = 0;
-        while(iter.hasNext()) {
-            TestConnection tc = (TestConnection)iter.next();
-            m.invoke(handler, new Object[]{connections}); 
+        Object[] params = new Object[] {connections};
+
+        // just send queries to all connections
+        for(int i=0; i<numConnections; i++) {
+            m.invoke(handler, params);
         }
 
 
         // just make sure all of the connections received the query
-        iter = connections.iterator();
+        Iterator iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             assertTrue("should have received the query", tc.receivedQuery());
         }
-
-        
-        //m.invoke(null, new Object[]{handler, connections});        
-    }
-
-    /**
-     * Tests the <tt>QueryHandler</tt> utility method that takes
-     * two lists and puts the desired number of elements in a
-     * third list, prioritizing elements from one list over the
-     * other.
-     */
-    public void testAddToList() throws Exception {
-        Class[] paramTypes = 
-            new Class[]{List.class, List.class, List.class, Integer.TYPE};
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "addToList",
-                                         paramTypes);                
-
-        List listToAddTo = new LinkedList();
-        List list1 = new LinkedList();
-        List list2 = new LinkedList();
-        Integer numElements = new Integer(3);
-
-        Object[] params = 
-            new Object[] {listToAddTo, list1, list2, numElements};
-        
-        Integer one   = new Integer(1);
-        Integer two   = new Integer(2);
-        Integer three = new Integer(3);
-        Integer four  = new Integer(4);
-        Integer five  = new Integer(5);
-        Integer six   = new Integer(6);
-        Integer seven = new Integer(7);
-
-        List testList = new LinkedList();
-        testList.add(one);
-        testList.add(two);
-        testList.add(three);        
-
-        list1.add(one);
-        list1.add(two);
-        list1.add(three);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
-
-        list1.clear();
-        list2.clear();
-        listToAddTo.clear();
-
-        
-        list2.add(one);
-        list2.add(two);
-        list2.add(three);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
-
-        list1.clear();
-        list2.clear();
-        listToAddTo.clear();
-        
-        list1.add(one);
-        list2.add(two);
-        list2.add(three);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
-
-        list1.clear();
-        list2.clear();
-        listToAddTo.clear();
-        
-        list1.add(one);
-        list1.add(two);
-        list2.add(three);
-        list2.add(four);
-
-        m.invoke(null, params);
-        assertEquals("lists should be equal", testList, listToAddTo);
     }
 }
