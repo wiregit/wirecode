@@ -259,15 +259,7 @@ public final class ConnectionSettings extends LimeProps {
      * try 55 seconds.
      */
     public static final LongSetting SOLICITED_GRACE_PERIOD =
-    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",55000l);
-
-    /**
-     * how long we believe firewalls will let us send solicited udp
-     * traffic.  Field tests show at least a minute with most firewalls, so lets
-     * try 55 seconds.
-     */
-    public static final LongSetting SOLICITED_GRACE_PERIOD =
-    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",55000l);
+    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",85000l);
     
     /**
      * Helper method left from Settings Manager
