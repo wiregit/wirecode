@@ -1916,12 +1916,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         //initilaize the newly created HTTPDownloader with whatever AltLocs we
         //have discovered so far. These will be cleared out after the first
         //write, from them on, only newly successful rfds will be sent as alts
-        Iterator iter = validAlts.iterator();
-        synchronized(validAlts) {
-            int count = 0;
-            while(iter.hasNext() && count < 10) {
-                dloader.addSuccessfulAltLoc( (AlternateLocation)iter.next());
-                count++;
+        if(validAlts != null) {
+            Iterator iter = validAlts.iterator();
+            synchronized(validAlts) {
+                int count = 0;
+                while(iter.hasNext() && count < 10) {
+                    dloader.addSuccessfulAltLoc((AlternateLocation)iter.next());
+                    count++;
+                }
             }
         }
         
