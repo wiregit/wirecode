@@ -5,7 +5,7 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-class UpdateData implements Cloneable {
+class UpdateData implements Cloneable, UpdateInformation {
     
     private static final Log LOG = LogFactory.getLog(UpdateData.class);
         
@@ -100,7 +100,7 @@ class UpdateData implements Cloneable {
     /**
      * Gets the update URL.
      */
-    URI getUpdateURI() {
+    public URI getUpdateURI() {
         return updateURI;
     }
     
@@ -126,6 +126,13 @@ class UpdateData implements Cloneable {
     }
     
     /**
+     * Gets the update version as a string.
+     */
+    public String getVersion() {
+        return updateVersion.toString();
+    }
+    
+    /**
      * Gets the update version.
      */
     Version getUpdateVersion() {
@@ -142,7 +149,7 @@ class UpdateData implements Cloneable {
     /**
      * Gets the update text.
      */
-    String getUpdateText() {
+    public String getUpdateText() {
         return updateText;
     }
     
