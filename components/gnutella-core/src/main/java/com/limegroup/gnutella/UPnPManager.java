@@ -423,33 +423,36 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 */
 	public void deviceRemoved(Device dev) {}
 	
-	public static InetAddress getLocalAddress() 
-	  throws UnknownHostException {
-		InetAddress addr = InetAddress.getLocalHost();
-               
-		try { 
-	           if (addr.isLoopbackAddress() || !(addr instanceof Inet4Address)) {
-                       addr = null;
-                       Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
-                       if (interfaces != null) {
-                           while(addr == null && interfaces.hasMoreElements()) {
-                               NetworkInterface nif = (NetworkInterface)interfaces.nextElement();
-                               Enumeration addresses = nif.getInetAddresses();
-                               while(addresses.hasMoreElements()) {
-                                    InetAddress address = (InetAddress)addresses.nextElement();
-                                    if (!address.isLoopbackAddress() 
-                                           && address instanceof Inet4Address) {
-                                       addr = address;
-                                       break;
-                                   }
-                               }
+	/**
+	 *  @return A non-loopback IPv4 address of a network interface on the
+         * local host.
+         * @throws UnknownHostException
+         */
+   	public static InetAddress getLocalAddress()
+     	  throws UnknownHostException {
+            InetAddress addr;
+            if ((addr = InetAddress.getLocalHost()) instanceof Inet4Address
+                   && !addr.isLoopbackAddress())
+                return addr;
+            try {
+               final Enumeration interfaces =
+                   NetworkInterface.getNetworkInterfaces();
+               if (interfaces != null)
+                   while (interfaces.hasMoreElements())
+                       for (Enumeration addresses =
+                            ((NetworkInterface)interfaces.nextElement())
+                               .getInetAddresses();
+                        addresses.hasMoreElements(); ) {
+                           if ((addr=(InetAddress)addresses.nextElement())
+                                   instanceof Inet4Address &&
+                               !addr.isLoopbackAddress()) {
+                               return addr;
                            }
-                        }
-                    }
-		} catch (SocketException se) {}
-
-		return addr;
-	}
+                       }
+            } catch (SocketException se) {}
+       	    throw new UnknownHostException(
+               "localhost has no interface with a non-loopback IPv4 address");
+   	} 
 
 	private final class Mapping {
 		public final String _externalAddress;
