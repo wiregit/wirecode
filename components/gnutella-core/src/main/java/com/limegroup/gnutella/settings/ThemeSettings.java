@@ -42,35 +42,12 @@ public final class ThemeSettings {
 		   (themeDir.lastModified() < themeFile.lastModified())) {
 
 			themeDir.mkdirs();
-			
-			try {
-				ZipFile zf = new ZipFile(themeFile);		
-				
-				Enumeration list = zf.entries();
-				while (list.hasMoreElements()) {
-					ZipEntry ze = (ZipEntry)list.nextElement();
-					BufferedInputStream bis =
-						new BufferedInputStream(zf.getInputStream(ze));
-					FileOutputStream fos = 
-						new FileOutputStream(new File(themeDir, ze.getName()));
-					int sz = (int)ze.getSize();
-					final int N = 1024;
-					byte buf[] = new byte[N];
-					int ln = 0;
-					while (sz > 0 &&  // workaround for bug
-						   (ln = bis.read(buf, 0, Math.min(N, sz))) != -1) {
-						fos.write(buf, 0, ln);
-						sz -= ln;
-					}
-					bis.close();
-					fos.flush();				
-				}
-				
-				handleFactory(THEME_PROPS);
-			} catch(IOException e) {
+            try {
+                Expand.expandFile(themeFile, themeDir);
+            } catch(IOException e) {
 				// this should never really happen, so report it
 				RouterService.error(e);						
-			}
+            }
 		} 
 		handleFactory(THEME_PROPS);		
 		Settings.THEME_DIR.setValue(themeDir);
