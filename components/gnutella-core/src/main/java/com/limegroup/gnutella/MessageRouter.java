@@ -1804,7 +1804,7 @@ public abstract class MessageRouter {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = RouterService.getHostCatcher().add(reply);
 
-        if(newAddress) {
+        if(newAddress && !reply.isUDPHostCache()) {
             PongCacher.instance().addPong(reply);
         }
 
