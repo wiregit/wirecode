@@ -17,8 +17,7 @@ public class FinMessage extends UDPConnectionMessage {
     /**
      * Construct a new FinMessage with the specified settings.
      */
-    public FinMessage(byte connectionID, long sequenceNumber, byte reasonCode) 
-      throws BadPacketException {
+    public FinMessage(byte connectionID, long sequenceNumber, byte reasonCode) {
 
         super(
           /* his connectionID           */ connectionID, 

@@ -22,8 +22,7 @@ public class KeepAliveMessage extends UDPConnectionMessage {
      * Construct a new KeepAliveMessage with the specified settings and data
      */
     public KeepAliveMessage(byte connectionID, 
-      long windowStart, int windowSpace) 
-      throws BadPacketException {
+      long windowStart, int windowSpace) {
 
         super(
           /* his connectionID                 */ connectionID, 

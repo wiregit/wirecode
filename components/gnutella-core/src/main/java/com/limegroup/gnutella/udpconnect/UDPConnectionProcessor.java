@@ -637,9 +637,6 @@ public class UDPConnectionProcessor {
                 _receiveWindow.getWindowStart(), 
                 _receiveWindow.getWindowSpace());
             send(keepalive);
-        } catch (BadPacketException bpe) {
-            // This would not be good.   TODO: ????
-            ErrorService.error(bpe);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
@@ -677,9 +674,6 @@ public class UDPConnectionProcessor {
             if ( _receiverWindowSpace > 0 )
                 _receiverWindowSpace--;
 
-        } catch (BadPacketException bpe) {
-            // This would not be good.  
-            ErrorService.error(bpe);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
@@ -726,9 +720,6 @@ public class UDPConnectionProcessor {
             fin = new FinMessage(_theirConnectionID, _sequenceNumber,
               _closeReasonCode);
             send(fin);
-        } catch (BadPacketException bpe) {
-            // This would not be good.   
-            ErrorService.error(bpe);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
             ErrorService.error(iae);
