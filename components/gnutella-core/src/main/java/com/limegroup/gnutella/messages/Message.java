@@ -281,7 +281,10 @@ public abstract class Message
     protected boolean writeGemExtension(OutputStream os, 
 										boolean addPrefixDelimiter, 
 										String ext) throws IOException {
-        return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
+        if (ext != null)
+            return writeGemExtension(os, addPrefixDelimiter, ext.getBytes());
+        else
+            return writeGemExtension(os, addPrefixDelimiter, new byte[0]);
     }
     
     /**
