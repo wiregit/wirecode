@@ -717,8 +717,7 @@ public class LimeXMLUtils
 
     private static final int NUM_BYTES_TO_HASH = 100;
     private static final int NUM_TOTAL_HASH    = NUM_BYTES_TO_HASH*3;
-    private static final byte[] hashBytes = new byte[NUM_BYTES_TO_HASH];
-    private static void clearHashBytes() {
+    private static void clearHashBytes(byte[] hashBytes) {
         for (int i = 0; i < NUM_BYTES_TO_HASH; i++)
             hashBytes[i] = (byte)0;
     }
@@ -732,6 +731,8 @@ public class LimeXMLUtils
     public static byte[] hashFile(File toHash) throws IOException {
         byte[] retBytes = null;
         FileInputStream fis = null;
+        byte[] hashBytes = new byte[NUM_BYTES_TO_HASH];
+        
         try {        
 
             // setup
@@ -748,7 +749,7 @@ public class LimeXMLUtils
             if (fileLength < NUM_TOTAL_HASH) {
                 int numRead = 0;
                 do {
-                    clearHashBytes();
+                    clearHashBytes(hashBytes);
                     numRead = fis.read(hashBytes);
                     md.update(hashBytes);
                     // if the file changed underneath me, throw away...
@@ -761,7 +762,7 @@ public class LimeXMLUtils
                 long thirds = fileLength / (long) 3;
 
                 // beginning input....
-                clearHashBytes();
+                clearHashBytes(hashBytes);
                 int numRead = fis.read(hashBytes);
                 md.update(hashBytes);
 
@@ -770,7 +771,7 @@ public class LimeXMLUtils
                     throw new IOException("invalid length");
 
                 // middle input...
-                clearHashBytes();
+                clearHashBytes(hashBytes);
                 fis.skip(thirds - NUM_BYTES_TO_HASH);
                 numRead = fis.read(hashBytes);
                 md.update(hashBytes);
@@ -780,7 +781,7 @@ public class LimeXMLUtils
                     throw new IOException("invalid length");
                 
                 // ending input....
-                clearHashBytes();
+                clearHashBytes(hashBytes);
                 fis.skip(toHash.length() - 
                          (thirds + NUM_BYTES_TO_HASH) -
                          NUM_BYTES_TO_HASH);
