@@ -38,7 +38,7 @@ public class RouterService
 	Thread t=new Thread(manager);
 	t.setDaemon(true);
 	t.start();	
-	// FileManager.getFileManager().addDirectory("c:/rjs/src");
+	//FileManager.getFileManager().addDirectory("E:/My Music");
     }
 
     /**
@@ -64,9 +64,9 @@ public class RouterService
      */
     public void dumpConnections()
     {
-	Iterator iter=manager.connections();
-	while (iter.hasNext())
-	    System.out.println(iter.next().toString());
+	    Iterator iter=manager.connections();
+	    while (iter.hasNext())
+		System.out.println(iter.next().toString());
     }
 
     /**
@@ -76,7 +76,11 @@ public class RouterService
     {
 	try {
 	    System.out.println("connectToHost trying...");
-	    Connection c=new Connection(manager, host, port);
+	    Connection c=new Connection(host, port);
+	    c.connect();
+	    c.setManager(manager);
+	    manager.add(c);
+	    c.send(new PingRequest(Const.TTL));
 	    System.out.println("Connection established.");
 	    Thread tc=new Thread(c);
 	    tc.setDaemon(true);
