@@ -860,9 +860,10 @@ class MainCacheEntry
     }
 
     /**
-     * Determines if two pong cache entries are equal by looking at IP and port.
-     * This is used to ascertain that the same IP and address is added 
-     * continously in the cache (from the same connection, that is).
+     * Determines if two pong cache entries are equal by looking at the 
+     * connection and ping reply.  This is used to ascertain that the same IP and 
+     * port is not added continously in the cache (from the same connection, that 
+     * is).
      */
     public boolean equals(Object o)
     {
