@@ -28,7 +28,7 @@ public class Response {
 
     /** Per HUGE v0.93 proposal, urns includes returned urn-values
      */
-    private Collection urns;
+    private Set urns;
     // HUGE v.093 GeneralExtensionMechanism between-the-null extensions
     private byte[] extBytes;
     
@@ -318,7 +318,7 @@ public class Response {
 		return metadata;
 	}
 
-    public Collection getUrns() {
+    public Set getUrns() {
 		return urns;
     }
   
