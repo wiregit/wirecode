@@ -74,10 +74,9 @@ public class ManagedConnection
     /**
      * Reference to ManagedConnectionPingInfo for this connection.  This 
      * reference contains the last GUID, whether to throttle an incoming ping, 
-     * the needed pongs to return, etc .  It's initially set to null and then
-     * instantianted when the first ping is received.
+     * the needed pongs to return, etc .  
      */
-    private ManagedConnectionPingInfo pingInfo = null;
+    private ManagedConnectionPingInfo pingInfo = new ManagedConnectionPingInfo();
     /**
      * The query routing state for each "new client" connection, or null if the
      * connection doesn't support QRP.  Helps you decide when to send queries.
@@ -85,7 +84,6 @@ public class ManagedConnection
      * duplicate queries and decide where to send responses.)  
      */
     private volatile ManagedConnectionQueryInfo queryInfo = null;
-
 
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */

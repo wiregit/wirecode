@@ -114,11 +114,10 @@ public class ConnectionManager {
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-//          _watchdog = new ConnectionWatchdog(this, _router);
-//          Thread watchdog=new Thread(_watchdog);
-//          watchdog.setDaemon(true);
-//          watchdog.start();
-        System.err.println("WARNING: ConnectionWatchdog disabled.");
+        _watchdog = new ConnectionWatchdog(this, _router);
+        Thread watchdog=new Thread(_watchdog);
+        watchdog.setDaemon(true);
+        watchdog.start();
 
         setKeepAlive(_settings.getKeepAlive(), true);
         setKeepAlive(_settings.getKeepAliveOld(), false);
@@ -454,9 +453,12 @@ public class ConnectionManager {
      */
     private boolean isRouterConnection(ManagedConnection connection) {
         String host = connection.getOrigHost();
+        int port = connection.getOrigPort();
+        String conn = new String(host + ":" + port);
+        
         String[] routers = SettingsManager.instance().getQuickConnectHosts();
         for (int i = 0; i < routers.length; i++) {
-            if (host.equals(routers[i]))
+            if (conn.equals(routers[i]))
                 return true;
         }
 

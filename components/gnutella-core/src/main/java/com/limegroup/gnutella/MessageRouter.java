@@ -626,13 +626,7 @@ public abstract class MessageRouter
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (c != connection)
             {
-                //first make sure that the connection wants some pongs (i.e.,
-                //sent at least one "real" ping request yet, not just a 
-                //handshake ping.
-                
                 int[] neededPongs = c.getNeededPongsList();
-                if (neededPongs==null)
-                    continue;
                 if (neededPongs[hops-1] > 0)
                 {
                     byte[] guid = c.getLastPingGUID();

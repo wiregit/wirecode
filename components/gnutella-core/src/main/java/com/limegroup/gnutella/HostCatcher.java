@@ -402,7 +402,7 @@ public class HostCatcher {
     private void addToReserveCache(PingReply pr, 
                                    ManagedConnection receivingConnection) {
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
-                    pr.getFiles(), pr.getKbytes());
+                                pr.getFiles(), pr.getKbytes());
 
         //Skip if this would connect us to our listening port.
         if (Acceptor.isMe(e.getHostname(), e.getPort()))
@@ -462,8 +462,14 @@ public class HostCatcher {
 //              //all addresses from the main cache are considered the "best"
 //              //endpoints in the reserve cache.
 //              PingReply pr = (PingReply)iter.next();
-//              Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort(), 
-//                                        pr.getFiles(), pr.getKbytes());
+//              Endpoint e = new Endpoint(pr.getIP(), pr.getPort(), 
+//                  pr.getFiles(), pr.getKbytes());
+
+//              //don't add the host if the address and port would connect us to 
+//              //ourselves
+//              if (Acceptor.isMe(e.getHostname(), e.getPort()))
+//                  continue;
+
 //              e.setWeight(BEST_PRIORITY);
 //              //only add the element if it doesn't exist already
 //              if (!reserveCacheSet.contains(e)) {
@@ -679,8 +685,11 @@ public class HostCatcher {
                         //this cache cyle.
                         if (entry.wasPreviouslyReturned())
                             continue;
-                        entry.markPreviouslyReturned();
                         PingReply pr = entry.getPingReply();
+                        //don't return if this would connect us to ourselves
+                        //if (Acceptor.isMe(pr.getIP(), pr.getPort()))
+                        //    continue;
+                        entry.markPreviouslyReturned();
                         endpoint = new Endpoint(pr.getIP(), pr.getPort());
                         return endpoint;
                     }

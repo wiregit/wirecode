@@ -46,14 +46,17 @@ public class ManagedConnectionPingInfo {
     private int _totalNeeded;
 
     public ManagedConnectionPingInfo() {
-        _clientAcceptTime = System.currentTimeMillis() + PING_THROTTLE_TIME;
-
         resetNeeded();
         _lastTTL = 0;
         _totalNeeded = 0;
     }
 
     public void setLastGUID(byte[] guid) {
+        //if no ping received yet, then set the accept time (for throttling
+        //too frequent pings)
+        if (_lastGUID == null)
+            _clientAcceptTime = System.currentTimeMillis() + PING_THROTTLE_TIME;    
+
         this._lastGUID = guid;
     }
 
@@ -125,6 +128,10 @@ public class ManagedConnectionPingInfo {
      * the accept time for the next ping from this client.
      */
     public boolean throttlePing() {
+        //if no ping received yet, so we don't need to throttle the ping
+        if (_lastGUID == null)
+            return false;
+
         if (System.currentTimeMillis() > _clientAcceptTime) {
             _clientAcceptTime = System.currentTimeMillis() + 
                 PING_THROTTLE_TIME;
