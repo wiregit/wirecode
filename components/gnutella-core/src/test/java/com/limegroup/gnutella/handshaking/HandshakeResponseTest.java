@@ -317,7 +317,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("should be GUESS capable", hr.isGUESSCapable());
         assertTrue("should support GGEP", hr.supportsGGEP());
         assertTrue("should support vendor messages", hr.supportsVendorMessages());
-        assertTrue("should use dynamic querying", hr.usesDynamicQuerying());
+        assertTrue("should use dynamic querying", hr.isDynamicQueryConnection());
     }
 
     /**
