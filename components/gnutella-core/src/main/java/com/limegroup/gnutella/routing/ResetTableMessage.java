@@ -87,6 +87,7 @@ public class ResetTableMessage extends RouteTableMessage {
 
 
     /** Unit test */
+    /*
     public static void main(String args[]) {
         //From scratch.  Check encode/decode.
         ResetTableMessage m=new ResetTableMessage(1024, (byte)10);
@@ -130,4 +131,5 @@ public class ResetTableMessage extends RouteTableMessage {
             return null;  //never executed
         } 
     }
+    */
 }

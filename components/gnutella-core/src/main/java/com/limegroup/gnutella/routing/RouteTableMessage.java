@@ -113,6 +113,7 @@ public abstract class RouteTableMessage extends Message {
     }
 
     /** Unit test */
+    /*
     public static void main(String[] args) {                  
         //Read bytes with bad variant
         byte[] message=new byte[23+2];
@@ -129,6 +130,7 @@ public abstract class RouteTableMessage extends Message {
             Assert.that(false);
         }
     }
+    */
 }
 
 

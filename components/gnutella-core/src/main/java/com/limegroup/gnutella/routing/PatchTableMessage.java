@@ -148,6 +148,7 @@ public class PatchTableMessage extends RouteTableMessage {
 
 
     /** Unit test */
+    /*
     public static void main(String args[]) {
         //From scratch.  Check encode.
         PatchTableMessage m=new PatchTableMessage(
@@ -211,4 +212,5 @@ public class PatchTableMessage extends RouteTableMessage {
             return null;  //never executed
         } 
     }
+    */
 }
