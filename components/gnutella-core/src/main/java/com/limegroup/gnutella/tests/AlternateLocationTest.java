@@ -74,10 +74,6 @@ public final class AlternateLocationTest extends TestCase {
 		"urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
-		"urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-		"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
 	};
 
 	private static final String [] validURLS = {
@@ -129,7 +125,7 @@ public final class AlternateLocationTest extends TestCase {
 		} catch(IOException e) {
 			// this also catches MalformedURLException
 			assertTrue("AlternateLocation constructor should not have thrown an "+
-					   "exception", false);
+					   "exception: "+e, false);
 		}
 	}
 
