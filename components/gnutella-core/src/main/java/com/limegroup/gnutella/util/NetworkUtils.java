@@ -36,8 +36,11 @@ public final class NetworkUtils {
 	public static boolean isValidAddress(byte[] addr) {
 	    if( addr[0] == 0 && addr[1] == 0 && addr[2] == 0 && addr[3] == 0)
             return false;
-	    else
-	        return true;
+        if( addr[0] == 255 && addr[1] == 255 && 
+            addr[2] == 255 && addr[3] == 255)
+            return false;
+
+        return true;
     }
     
     /**
