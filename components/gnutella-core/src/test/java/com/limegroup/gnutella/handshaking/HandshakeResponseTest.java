@@ -1,14 +1,21 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
+import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import java.lang.reflect.*;
-import junit.framework.*;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Set;
 
 
 /**
