@@ -107,8 +107,9 @@ public final class UrnCache {
      * Loads values from cache file, if available
      */
     private static Map createMap() {
+        ObjectInputStream ois = null;
 		try {
-            ObjectInputStream ois = 
+            ois = 
 			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));            
 			return (Map)ois.readObject();
 		} catch(Exception e) {
