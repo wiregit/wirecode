@@ -15,7 +15,7 @@ import com.limegroup.gnutella.util.StringUtils;
 
 
 public class HTTPUploader implements Uploader {
-
+    //See accessors for documentation
 	protected OutputStream _ostream;
 	protected InputStream _fis;
 	protected Socket _socket;
@@ -285,9 +285,12 @@ public class HTTPUploader implements Uploader {
 	public String getFileName() {return _filename;}
 	public int getFileSize() {return _fileSize;}
 	public InputStream getInputStream() {return _fis;}
+    /** The number of bytes read, including any skipped by the Range header. */
 	public int amountUploaded() {return _amountRead;}
 	public void setAmountUploaded(int amount) {_amountRead = amount;}
+    /** The byte offset where we should start the upload. */
 	public int getUploadBegin() {return _uploadBegin;}
+    /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
     public int getUploadEnd() {return _uploadEnd;}
 	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
@@ -346,17 +349,22 @@ public class HTTPUploader implements Uploader {
 				_chatHost = host;
 				_chatPort = port;
 			}
-			// Look for the Range: header
-			// it will be in one of three forms.  either
-			// ' - n ', ' m - n', or ' 0 - '
-			// We add the second check to accomodate old BearShares, 
-			// which break protocal by not sending the '='
-            if ( (indexOfIgnoreCase(str, "Range: bytes=") != -1) ||
-				 (indexOfIgnoreCase(str, "Range: bytes ") != -1) ) {
+			// Look for range header of form, "Range: bytes=", "Range:bytes=",
+			// "Range: bytes ", etc.  Note that the "=" is required by HTTP, but
+            //  old versions of BearShare do not send it.  The value following the
+            //  bytes unit will be in the form '-n', 'm-n', or 'm-'.
+            if (indexOfIgnoreCase(str, "Range:") == 0) {
+                //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
+                //that we don't validate the data between "Range:" and the
+                //bytes.
 				String sub;
 				String second;
 				try {
-					sub = str.substring(13);
+                    int i=str.indexOf("bytes");    //TODO: use constant
+                    if (i<0)
+                        throw new IOException();
+                    i+=6;                          //TODO: use constant
+					sub = str.substring(i);
 				} catch (IndexOutOfBoundsException e) {
 					throw new IOException();
 				}
@@ -379,7 +387,11 @@ public class HTTPUploader implements Uploader {
 					}
                     second = second.trim();
 					try {
-						_uploadEnd = java.lang.Integer.parseInt(second);
+                        //A range request for "-3" means return the last 3 bytes
+                        //of the file.  (LW used to incorrectly return bytes
+                        //0-3.)  
+                        _uploadBegin = _fileSize-Integer.parseInt(second);
+						_uploadEnd = _fileSize;
 					} catch (NumberFormatException e) {
 						throw new IOException();
 					}
@@ -407,7 +419,10 @@ public class HTTPUploader implements Uploader {
                     second = second.trim();
                     if (!second.equals("")) 
 						try {
-							_uploadEnd = java.lang.Integer.parseInt(second);
+                            //HTTP range requests are inclusive.  So "1-3" means
+                            //bytes 1, 2, and 3.  But _uploadEnd is an EXCLUSIVE
+                            //index, so increment by 1.
+							_uploadEnd = java.lang.Integer.parseInt(second)+1;
                     } catch (NumberFormatException e) {
 						throw new IOException();
 					}

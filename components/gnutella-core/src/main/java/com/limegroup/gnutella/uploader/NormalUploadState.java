@@ -23,7 +23,9 @@ public class NormalUploadState implements UploadState {
 	private int _fileSize;
 	private InputStream _fis;
 	private int _amountRead;
+    /** @see HTTPUploader#getUploadBegin */
 	private int _uploadBegin;
+    /** @see HTTPUploader#getUploadEnd */
     private int _uploadEnd;
 
     /** Flag indicating whether we should close the connection after serving
