@@ -87,71 +87,148 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("hopped something other than 0", 0, pr.getHops());
         assertEquals("unexpected ttl", 4, pr.getTTL());
     }
-
+    
+    /**
+     * Perhaps the most important test in the suite, this checks to make
+     * sure that messages in the outgoing queue are ordered and prioritized
+     * correctly.
+     * NOTE: It is important to remember that the queues the messages are stored
+     * in are BucketQueues -- that means that even if the capacity of the queue is
+     * 1, then EACH BUCKET will have 1 item.  So two PingReply's with different
+     * hops will BOTH be stored in the queue, because each hop is a different
+     * priority, and each priority is a different bucket.
+     */
     public void testReorderBuffer() 
 		throws IOException, BadPacketException {
-        //This is the most important test in our suite. TODO: simplify this by
-        //breaking it into subparts, e.g., to test that twice as many replies as
-        //queries are sent, that replies are ordered by GUID volume, that
-        //queries with the same hops are LIFO, etc.
-
         //1. Buffer tons of messages.  By killing the old thread and restarting
         //later, we simulate a stall in the network.
         out.stopOutputRunner();
         Message m=null;
-        //out.send(new QueryRequest((byte)5, 0, "test", false));
-		
+
+        // send QueryRequest		
 		out.send(QueryRequest.createQuery("test", (byte)5));
+
+        // send PingRequest with one hop
         m=new PingRequest((byte)5);
         m.hop();
         out.send(m);
+
+        // send QueryReply with priority 1
         m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(30000);
         out.send(m);
+        
+        // send 3 push requests
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6340));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6341));
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6342));
+                                 
+        // send QueryReply with priority 1
+        m=new QueryReply(new byte[16], (byte)5, 6343, new byte[4], 0, 
+                         new Response[0], new byte[16], false);
+        m.setPriority(30000);
+        out.send(m);
+                                 
+        // send 4 push requests                                 
+        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+                                 0, new byte[4], 6343));
+        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+                                 0, new byte[4], 6344));
+        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+                                 0, new byte[4], 6345));
+        out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
+                                 0, new byte[4], 6346));                                                                                                                                    
+                                 
+        // send QueryReply with priority 7                                 
         m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         out.send(m);
+        
+        // send PingReply with 3 hops
         m=PingReply.create(new byte[16], (byte)5, 6343, new byte[4]);
-        m.hop();  m.hop();  m.hop();
+        m.hop();  m.hop();  m.hop();        
         out.send(m);
+        
+        // send PingReply with 3 hops
+        m=PingReply.create(new byte[16], (byte)5, 6344, new byte[4]);
+        m.hop();  m.hop();  m.hop();
+        out.send(m);        
+        
+        // send QueryReply with priority 2
+        m=new QueryReply(new byte[16], (byte)5, 6344, new byte[4], 0, 
+                         new Response[0], new byte[16], false);
+        m.setPriority(20000);
+        out.send(m);
+        
+        // send QueryReply with priority 0
+        m=new QueryReply(new byte[16], (byte)5, 6345, new byte[4], 0, 
+                         new Response[0], new byte[16], false);
+        m.setPriority(50000);
+        out.send(m);              
+        
+        // send Reset message
         out.send(new ResetTableMessage(1024, (byte)2));
+        
+        // send a watchdog pong
         out.send(PingReply.create(new byte[16], (byte)1, 6342, new byte[4]));
+        
+        // send PingReply with 2 hops
         m = PingReply.create(new byte[16], (byte)3, 6340, new byte[4]);
         m.hop();
         m.hop();
         out.send(m);
+        
+        // send QueryReply with priority 4
+        m=new QueryReply(new byte[16], (byte)5, 6346, new byte[4], 0, 
+                         new Response[0], new byte[16], false);
+        m.setPriority(5000);
+        out.send(m);            
+        
+        // send QueryReply with priority 5
         m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         m.setPriority(1000);
         out.send(m);
+        
+        // send Patch message
         out.send(new PatchTableMessage((short)1, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 0, 5));
+                                       
+        // send a watchdog ping                                       
         out.send(new PingRequest((byte)2));
+        
+        // send Patch message
         out.send(new PatchTableMessage((short)2, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 5, 9));
 
+        // send QueryRequest
 		out.send(QueryRequest.createQuery("test2", (byte)5));
 				 
+        // send QueryRequest with 1 hop
 		m = QueryRequest.createQuery("test far", (byte)5);
         m.hop();
         out.send(m);
+        
+        // send QueryRequest with 2 hop
+		m = QueryRequest.createQuery("test farther", (byte)5);
+        m.hop(); m.hop();
+        out.send(m);        
                
         //2. Now we let the messages pass through, as if the receiver's window
-        //became non-zero.  Buffers look this before emptying:
+        //became non-zero.  Buffers should look this before emptying:
+        // Except for QRP messages, all queues are LIFO when priorities match
         //  WATCHDOG: pong/6342 ping
-        //  PUSH: x/6340 x/6341 x/6342
-        //  QUERY_REPLY: 6340/3 6342/1000 6341/0 (highest priority)
-        //  QUERY: "test far"/1, "test"/0, "test2"/0
-        //  PING_REPLY: x/6340 x/6343
+        //  PUSH: x/6340 x/6341 x/6342 x/6343 x/6344 x/6345 x/6346
+        //  QUERY_REPLY: 6345/50k 6340/30k 6343/30k 
+        //               6344/20k 6346/5k 6342/1k 6341/0
+        //  QUERY: "test farther"/2 "test far"/1, "test"/0, "test2"/0
+        //  PING_REPLY: x/6340/2 x/6344/3
         //  PING: x
         //  OTHER: reset patch1 patch2
         out._lastPriority=0;  //cheating to make old tests work
@@ -160,45 +237,79 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //3. Read them...now in different order!
         m=in.receive(); //watchdog ping
         assertInstanceof("Unexpected message: "+m, PingRequest.class, m);
-        assertEquals("Unexpected # of hops"+m, 0, m.getHops());  
+        assertEquals("Unexpected # of hops"+m, 0, m.getHops());
 
         m=in.receive(); //push        
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
-        assertEquals("unexpected push request port", 6342,
+        assertEquals("unexpected push request port", 6346,
+            ((PushRequest)m).getPort());
+
+        m=in.receive(); //push        
+        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
+        assertEquals("unexpected push request port", 6345,
             ((PushRequest)m).getPort());
 
         m=in.receive(); //push
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
-        assertEquals("unexpected push request port", 6341,
+        assertEquals("unexpected push request port", 6344,
             ((PushRequest)m).getPort());
 
         m=in.receive(); //push
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
-        assertEquals("unexpected push request port", 6340,
+        assertEquals("unexpected push request port", 6343,
             ((PushRequest)m).getPort());
 
         m=in.receive(); //reply/6341 (high priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port.  priority: "
-             + m.getPriority(), ((QueryReply)m).getPort(), 6341);
+             + m.getPriority(), 6341, ((QueryReply)m).getPort());
 
         m=in.receive(); //reply/6342 (medium priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected query reply port", 6342,
             ((QueryReply)m).getPort());
+            
+        m=in.receive(); //reply/6346
+        assertInstanceof("m not a queryreply", QueryReply.class, m);
+        assertEquals("unexpected queryreply port",
+            6346, ((QueryReply)m).getPort());
 
+        m=in.receive(); //reply/6344
+        assertInstanceof("m not a queryreply", QueryReply.class, m);
+        assertEquals("unexpected queryreply port",
+            6344, ((QueryReply)m).getPort());            
         
+        m=in.receive(); //reply/6343
+        assertInstanceof("m not a queryreply", QueryReply.class, m);
+        assertEquals("unexpected queryreply port",
+            6343, ((QueryReply)m).getPort());
+
+        m=in.receive(); //reply/6340
+        assertInstanceof("m not a queryreply", QueryReply.class, m);
+        assertEquals("unexpected queryreply port",
+            6340, ((QueryReply)m).getPort());
+
         m=in.receive(); //query "test2"/0
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "test2",
             ((QueryRequest)m).getQuery());
+            
+        m=in.receive(); //query "test"/0
+        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
+        assertEquals("unexpected query", "test",
+            ((QueryRequest)m).getQuery());            
+
+        m=in.receive(); //query "test far"/1
+        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
+        assertEquals("unexpected query",
+            "test far", ((QueryRequest)m).getQuery());
 
         m=in.receive(); //reply 6343
         assertInstanceof("m not a pingreply", PingReply.class, m);
         assertEquals("unexpected pingreply port",
-            6343, ((PingReply)m).getPort());
+            6344, ((PingReply)m).getPort());
 
-        m=in.receive(); //ping
+        m=in.receive(); //ping 6340
         assertInstanceof("m not a pingrequest", PingRequest.class, m);
         assertGreaterThan("unexpected number of hops (>0)",
             0, m.getHops());
@@ -207,24 +318,37 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertInstanceof("m not a resettablemessage",
             ResetTableMessage.class, m);
 
-        
-
         m=in.receive(); //watchdog pong/6342
         assertInstanceof("m not a pingreply", PingReply.class, m);
         assertEquals("unexpected pingreply port",
             6342, ((PingReply)m).getPort());
         assertEquals("unexpected number of hops",
             0, m.getHops());  //watchdog response pong
+            
+        m=in.receive(); //push        
+        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
+        assertEquals("unexpected push request port", 6342,
+            ((PushRequest)m).getPort());
 
-        m=in.receive(); //reply/6340
+        m=in.receive(); //push        
+        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
+        assertEquals("unexpected push request port", 6341,
+            ((PushRequest)m).getPort());
+
+        m=in.receive(); //push
+        assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
+        assertEquals("unexpected push request port", 6340,
+            ((PushRequest)m).getPort());            
+
+        m=in.receive(); //reply/6341 (high priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
-        assertEquals("unexpected queryreply port",
-            6340, ((QueryReply)m).getPort());
-
-        m=in.receive(); //query "test"/0
+        assertEquals("unexpected queryreply port.  priority: "
+             + m.getPriority(),  6345, ((QueryReply)m).getPort());
+             
+        m=in.receive(); //query "test farther"/2
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
-        assertEquals("unexpected query", "test",
-            ((QueryRequest)m).getQuery());
+        assertEquals("unexpected query",
+            "test farther", ((QueryRequest)m).getQuery());             
 
         m=in.receive(); //reply 6340
         assertInstanceof("m not a pingreply", PingReply.class, m);
@@ -236,11 +360,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             PatchTableMessage.class, m);
         assertEquals("unexpected patchtablemessage sequencenumber",
             1, ((PatchTableMessage)m).getSequenceNumber());
-
-        m=in.receive(); //query "test"/0
-        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
-        assertEquals("unexpected query",
-            "test far", ((QueryRequest)m).getQuery());
 
         m=in.receive(); //QRP patch2
         assertInstanceof("m not a patchtable message",
