@@ -225,6 +225,11 @@ public final class UploadManager implements BandwidthTracker {
         } catch(ArrayIndexOutOfBoundsException ae) {
             debug("AIOOBE thrown, closing socket");
         } finally {
+            // If the socket timed out while waiting for the next request,
+            // then this is considered interupted.
+            if( uploader != null && uploader.getState() != Uploader.COMPLETE )
+                uploader.setState(Uploader.INTERRUPTED);
+                
             synchronized(this) {
                 //This call to remove is when we are finally done with all the
                 //requests. This call to to removeFromList is needed because we
@@ -240,8 +245,6 @@ public final class UploadManager implements BandwidthTracker {
                         iter.remove();
                     }
                 }
-                if(found)
-                    uploader.setState(Uploader.INTERRUPTED);
             }
 
             //ensure the uploader is removed from the GUI

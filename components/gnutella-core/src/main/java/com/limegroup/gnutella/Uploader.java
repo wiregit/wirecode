@@ -122,6 +122,11 @@ public interface Uploader extends BandwidthTracker {
      * returns the current request method.
      */
     public HTTPRequestMethod getMethod();
+    
+    /**
+     * Returns the current queue position if queued.
+     */
+    public int getQueuePosition();
 
 }
 

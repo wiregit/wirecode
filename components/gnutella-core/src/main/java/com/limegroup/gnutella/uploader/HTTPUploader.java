@@ -366,8 +366,24 @@ public final class HTTPUploader implements Uploader {
 	
 	OutputStream getOutputStream() {return _ostream;}
 	InputStream getInputStream() {return _fis;}
-	
-	public HTTPRequestMethod getMethod() { return _method; }
+    
+    
+	/**
+     * Returns the current HTTP Request Method.
+     */
+	public HTTPRequestMethod getMethod() {
+        return _method;
+    }
+    
+    /**
+     * Returns the queued position if queued.
+     */
+    public int getQueuePosition() {
+        if( _stateNum != QUEUED )
+            return -1;
+        else
+            return RouterService.getUploadManager().positionInQueue(_socket);
+    }
 
 	/**
 	 * Sets the number of bytes that have been uploaded for this upload.
