@@ -222,8 +222,8 @@ public class ConnectionManager {
              if(connection.isSupernodeClientConnection())
                 ensureConnectionsForSupernode();
              
-             sendInitialPingRequest(connection);
-             connection.loopForMessages();
+			 startConnection(connection);
+			 
          } catch(IOException e) {
          } catch(Exception e) {
              //Internal error!
@@ -1376,9 +1376,7 @@ public class ConnectionManager {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
-				// Send ping...possibly group ping.
-                sendInitialPingRequest(_connection);
-                _connection.loopForMessages();
+				startConnection(_connection);
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
@@ -1390,6 +1388,28 @@ public class ConnectionManager {
             }
         }
     }
+
+	/**
+	 * Runs standard calls that should be made whenever a connection if fully
+	 * established and should wait for messages.
+	 *
+	 * @param conn the <tt>ManagedConnection</tt> instance to start
+	 * @throws <tt>IOException</tt> if there is an excpetion while looping
+	 *  for messages
+	 */
+	private void startConnection(ManagedConnection conn) throws IOException {	
+		// Send ping...possibly group ping.
+		sendInitialPingRequest(conn);
+
+		if(conn.isGUESSUltrapeer()) {
+			int port = conn.getOrigPort();
+			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
+														 port);
+		}
+
+		// this can throw IOException
+		conn.loopForMessages();		
+	}
 
     //------------------------------------------------------------------------
 //     /**
@@ -1529,9 +1549,8 @@ public class ConnectionManager {
                     _catcher.doneWithConnect(endpoint, false);
                     throw e;
                 }
-                //Handle messages.
-                sendInitialPingRequest(connection);
-                connection.loopForMessages();
+
+				startConnection(connection);
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
