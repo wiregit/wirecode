@@ -5,7 +5,7 @@ import java.util.StringTokenizer;
 import java.util.Locale;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.URN;
 import org.apache.xerces.parsers.DOMParser;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.mp3.ID3Reader;
@@ -48,6 +48,19 @@ public class LimeXMLDocument implements Serializable {
      */
     private String identifier;
     private String action="";
+    
+    /**
+     * The URN that this XML doc is associated with.
+     */
+    private transient URN xmlHash = null;
+    
+    public URN getXMLUrn() {
+        return xmlHash;
+    }
+    
+    public void setXMLUrn(URN xmlHash) {
+        this.xmlHash = xmlHash;
+    }
 
     public void setIdentifier(String id) {
         identifier = id;
