@@ -1403,6 +1403,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                     manager.remove(this, false);
                     return;
                 }
+                
+                // try to do iterative guessing here
+                if (_originalQueryGUID != null) { 
+                    MessageRouter mr = RouterService.getMessageRouter();
+                    Set guessLocs =mr.getGuessLocs(_originalQueryGUID);
+                    
+                    if ((guessLocs != null) && !guessLocs.isEmpty()) {
+                        // start guessing....
+                    }
+                }
 
                 final long currTime = System.currentTimeMillis();
 
@@ -1442,6 +1452,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 } 
                 // 2.
                 else {
+                    
                     boolean areThereNewResults = false;
                     final long timeToWait = TIME_BETWEEN_REQUERIES - 
                         (System.currentTimeMillis() - timeQuerySent);

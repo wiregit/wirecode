@@ -96,7 +96,7 @@ public abstract class MessageRouter {
      * Keeps track of potential sources of content.  Comprised of Sets of GUESS
      * Endpoints.  Kept tidy when searches/downloads are killed.
      */
-    private final Map _bypassedResults = new HashMap();
+    private final Map _bypassedResults = new Hashtable();
 
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
@@ -197,6 +197,11 @@ public abstract class MessageRouter {
                                10 * CLEAR_TIME);
     }
 
+    //TODO: small issue with queryKilled and downloadFinished.  if the timing
+    //of things is such that a download is finishing just as a query is killed,
+    //then _bypassedResults may never clear.  likelihood seems small, and i
+    //think synchronization is not enough to solve the problem.
+
     /** Call this to inform us that a query has been killed by a user or
      *  whatever.  Useful for purging unneeded info.
      *  @throws IllegalArgumentException if the guid is null
@@ -217,6 +222,20 @@ public abstract class MessageRouter {
             throw new IllegalArgumentException("Input GUID is null!");
         if (!_callback.queryIsAlive(guid))
             _bypassedResults.remove(guid);
+    }
+    
+    /** @returns a Set with GUESSEndpoints that had matches for the
+     *  original query guid.  may be empty.
+     *  @param guid the guid of the query you want endpoints for.
+     */
+    public Set getGuessLocs(GUID guid) {
+        Set clone = new HashSet();
+        synchronized (_bypassedResults) {
+            Set eps = (Set) _bypassedResults.get(guid);
+            if (eps != null)
+                clone.addAll(eps);
+        }
+        return clone;
     }
     
     public String getPingRouteTableDump() {
