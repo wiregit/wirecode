@@ -987,7 +987,9 @@ public class ManagedConnection
                     send(udp);
                     _numUDPConnectBackRequests++;
                 }
-                catch (BadPacketException ignored) {}
+                catch (BadPacketException ignored) {
+                    ignored.printStackTrace(); // should NEVER happen!!
+                }
             }
             if (!RouterService.acceptedIncomingConnection() &&
                 (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
@@ -998,7 +1000,9 @@ public class ManagedConnection
                     send(tcp);
                     _numTCPConnectBackRequests++;
                 }
-                catch (BadPacketException ignored) {}
+                catch (BadPacketException ignored) {
+                    ignored.printStackTrace(); // should NEVER happen!!
+                }
             }
         }
     }
