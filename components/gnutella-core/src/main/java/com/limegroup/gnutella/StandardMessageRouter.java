@@ -15,23 +15,8 @@ import com.sun.java.util.collections.*;
  * This class is the message routing implementation for TCP messages.
  */
 public class StandardMessageRouter extends MessageRouter {
-
-    private FileManager _fileManager;
     
     private final boolean RECORD_STATS = !CommonUtils.isJava118();
-
-    /**
-     * Creates a new <tt>StandardMessageRouter</tt> with the specified
-     * <tt>ActivityCallback</tt> and <tt>FileManager</tt>.
-     *
-     * @param callback the <tt>ActivityCallback</tt> instance to use
-     * @param fm the <tt>FileManager</tt> for querying the set of 
-     *  shared files
-     */
-    public StandardMessageRouter(FileManager fm) {
-        _fileManager = fm;
-    }
-
 
     /**
      * Responds to a Gnutella ping with cached pongs.  This does special 
@@ -183,7 +168,8 @@ public class StandardMessageRouter extends MessageRouter {
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                          byte[] clientGUID) {
         // Run the local query
-        Response[] responses = _fileManager.query(queryRequest);
+        Response[] responses = 
+            RouterService.getFileManager().query(queryRequest);
         
         if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
             if( RECORD_STATS ) {
