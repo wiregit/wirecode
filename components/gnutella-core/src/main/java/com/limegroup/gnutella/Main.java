@@ -17,7 +17,7 @@ public class Main implements ActivityCallback {
 	    service=new RouterService();
 	}
 	//anu commented out to avoid print messages
-	//service.setActivityCallback(new Main());
+	service.setActivityCallback(new Main());
 
 	BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 	for ( ; ;) {

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.net.*;
 import java.io.*;
 
+
 /**
  * A Gnutella connection. A connection is either INCOMING or OUTGOING;
  * the difference doesn't really matter. It is also in one of three
@@ -48,9 +49,9 @@ public class Connection implements Runnable {
     /** These are only needed for the run method.
      *  INVARIANT: (manager==null)==(routeTable==null)==(pushRouteTable==null) 
      */
-    private ConnectionManager manager=null; //may be null
-    private RouteTable routeTable=null;     //may be null
-    private RouteTable pushRouteTable=null; 
+    protected ConnectionManager manager=null; //may be null
+    protected RouteTable routeTable=null;     //may be null
+    protected RouteTable pushRouteTable=null; 
 
     /** The underlying socket.  sock, in, and out are null iff this is in
      *  the unconnected state.
@@ -60,21 +61,24 @@ public class Connection implements Runnable {
      *  only use in and out, buffered versions of the input and output
      *  streams, for writing.  
      */
-    private String host;
-    private int port;
-    private Socket sock;
-    private InputStream in;
-    private OutputStream out;
-    private boolean incoming;
+
+    protected String host;
+    protected int port;
+    protected Socket sock;
+    protected InputStream in;
+    protected OutputStream out;
+    protected boolean incoming;
+
 
     /** Trigger an opening connection to shutdown after it opens */
     private boolean doShutdown;
 
     /** The number of packets I sent and received.  This includes bad packets. 
      *  These are synchronized by out and in, respectively. */
-    private int sent=0;
-    private int received=0;
-    private int dropped=0;
+
+    protected int sent=0;
+    protected int received=0;
+    protected int dropped=0;
     
     /** Statistics about horizon size. */
     public long totalFileSize;
@@ -193,7 +197,7 @@ public class Connection implements Runnable {
 	    if (manager!=null)
 		manager.total++;
 	}
-	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	//	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -211,7 +215,7 @@ public class Connection implements Runnable {
 	    received++;  //keep statistics.
 	    if (manager!=null)
 		manager.total++;
-	    //if (m!=null)
+	    //	    if (m!=null)
 	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
@@ -301,8 +305,8 @@ public class Connection implements Runnable {
 			    int kilobytes = fm.getSize();
 			    int num_files = fm.getNumFiles();
 
-			    Message pingReply = new PingReply(m.getGUID(),m.getTTL(),
-							      sock.getLocalPort(),
+			    Message pingReply = new PingReply(m.getGUID(),(byte)(m.getHops()+1),
+							      manager.getListeningPort(),
 							      ip, num_files, kilobytes);
 
 			    send(pingReply);
@@ -320,20 +324,24 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PingReply){
+		    // System.out.println("Sumeet: Getting ping reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    manager.catcher.spy(m);//update hostcatcher (even if this isn't for me)
 		    if(outConnection!=null){ //we have a place to route it
 			if (manager.stats==true)
 			    manager.PRepCount++; //keep stats if stats is turned on
 			//HACK: is the reply for me?
-			if (outConnection.equals(manager.ME_CONNECTION)) { 
+			if (outConnection.equals(manager.ME_CONNECTION)) {
+			    //System.out.println("Sumeet: I am the destination");
 			    //Update horizon stats.
 			    //This is not necessarily atomic, but that doesn't matter.
 			    totalFileSize += ((PingReply)m).getKbytes();
 			    numFiles += ((PingReply)m).getFiles();
-			    numHosts++;			    
+			    numHosts++;			   
+			    //System.out.println("Sumeet : updated stats"); 
 			}
 			else{//message needs to routed
+			    m.hop();// It's Ok to route even if TTL is zero since this is a reply
 			    outConnection.send(m);
 			}
 		    }
@@ -365,29 +373,12 @@ public class Connection implements Runnable {
 			    
 			    if (responses.length > 0) {
 				byte[] guid = m.getGUID();
-				// System.out.println("the guid " + guid);
-				byte ttl = SettingsManager.instance().getTTL();
-				// System.out.println("the ttl " + ttl);
+				byte ttl = (byte)(m.getHops() +1);
 				int port = manager.getListeningPort();
-				// System.out.println("the port " + port);
 				byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-				// System.out.println("the ip " + ip);
-				// System.out.println("the ip ");
-				// for(int i = 0; i < ip.length; i++) {
-				//     System.out.print(ip[i]);
-				// }
-				// long speed = ((QueryRequest)m).getMinSpeed();
 				long speed = 0;
-				// System.out.println("the speed " + speed);
 				byte[] clientGUID = manager.ClientId.getBytes();
-				// System.out.println("the client GUID ");
-				
-				// for(int i = 0; i < clientGUID.length; i++) {
-				//    System.out.print(clientGUID[i]);
-				// }
-				
-				// System.out.println("");
-				
+
 				QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
 								   speed, responses, clientGUID);
 				send(qreply);
@@ -406,9 +397,6 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof QueryReply){
-
-
-		    // System.out.println("Recieved a Querry Reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
 			if (manager.stats==true)
@@ -423,9 +411,8 @@ public class Connection implements Runnable {
 			    if (ui!=null) ui.handleQueryReply((QueryReply)m);
 			}
 			else {//message needs to be routed.
-			    //System.out.println("Sumeet:About to route reply");
+			    m.hop(); // It's Ok to route even if TTL is zero since this is a reply
 			    outConnection.send(m);//send the message along on its route
-			    //System.out.println("Sumeet:Sent query reply");
 			}
 		    }
 		    else{//route table does not know what to do this message
@@ -434,20 +421,16 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PushRequest){
-		    // System.out.println("Sumeet:We have a push request");
 		    if (manager.stats==true)
 			manager.pushCount++;//keeps stats if stats turned on
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
 		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
-		    //System.out.println("Sumeet: push request goes to"+nextHost.toString());
-		    //System.out.println("Sumeet: Destination ID" + DestinationId);
 		    if (nextHost!=null){//we have a place to route this message
-			//System.out.println("Sumeet : We have a host to route push to..");
+			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
 			nextHost.send(m); //send the message to appropriate host
 		    }
 		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
-			//System.out.println("Sumeet:I am the destination"); 
 			//unpack message
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
@@ -462,6 +445,7 @@ public class Connection implements Runnable {
 	}//try
 	catch (IOException e){
 	    manager.remove(this);
+	    //e.printStackTrace();
 	}
     }//run
 

@@ -167,6 +167,7 @@ public class HostCatcher {
 	//Add it to the likely set, remove it from the maybes set if
 	//it's there.
 	synchronized(likelys) {
+	    //System.out.println("Sumeet: Adding end point to likelys");
 	    likelys.add(e);
 	}
 	synchronized(maybes) {

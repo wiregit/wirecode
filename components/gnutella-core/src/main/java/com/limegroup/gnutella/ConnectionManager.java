@@ -192,26 +192,34 @@ public class ConnectionManager implements Runnable {
 		    InputStream in=client.getInputStream();
 		    String word=readWord(in);
 
-		    System.out.println("The Word: " + word);
+		    //System.out.println("The Word: " + word);
 
 		    c = null;
 
 		    if (word.equals("GNUTELLA")) {
 			//a) Gnutella connection
-			c =
-			  new Connection(
-			    getHostName(client.getInetAddress()), 
-			    client.getPort(), true);
+
+			if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//
+
+			c = new Connection( getHostName(client.getInetAddress() ), 
+					    client.getPort(), true);
 			tryingToConnect(c, true);
-			
 			c.initIncoming(client); 
 			c.setManager(this);
 			add(c);		 
 			Thread t=new Thread(c);
 			t.setDaemon(true);
 			t.start();
-		    } 
+			}
+			else{// we have more connections than we can handle
+			    RejectConnection rc = new RejectConnection(client);
+			    rc.setManager(this);
+			    Thread t = new Thread(rc);
+			    t.setDaemon(true);
+			    t.start();
+			}
 
+		    } 
 		    else if( word.equals("GET") || word.equals("PUT") ){
 			
 			HTTPMgr mgr = new HTTPMgr(client);

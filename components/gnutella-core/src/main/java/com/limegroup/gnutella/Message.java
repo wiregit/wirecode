@@ -232,12 +232,15 @@ public abstract class Message {
     }
 
     /** @modifies this
-     *  @effects increments hops, decrements TTL, and returns the
+     *  @effects increments hops, decrements TTL if > 0, and returns the
      *   OLD value of TTL.
      */
     public byte hop() {
 	hops++;
-	return ttl--;
+	if (ttl>0)
+	    return ttl--;
+	else 
+	    return ttl;
     }
 
     public String toString() {
