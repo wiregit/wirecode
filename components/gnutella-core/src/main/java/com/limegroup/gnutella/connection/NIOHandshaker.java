@@ -119,7 +119,7 @@ public class NIOHandshaker extends AbstractHandshaker {
         InetAddress localAddress = CONNECTION.getSocket().getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
             CONNECTION.getSocket().getInetAddress().equals(localAddress) &&
-            CONNECTION.getPort() == ConnectionSettings.PORT.getValue()) {
+            CONNECTION.getListeningPort()==ConnectionSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
         }      
 
