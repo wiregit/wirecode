@@ -656,9 +656,10 @@ public class HTTPUploader implements Uploader {
         // only the URN as the specifier?        
         URN requestedURN = HTTPUploader.parseContentUrn(str);
 		if(requestedURN == null) {
+            // TODO: do we really want to set the state to not found?
+            // what if keywords match?
 			setState(FILE_NOT_FOUND);
-		} 		
-		if(_fileDesc != null) {
+		} else if(_fileDesc != null) {
 			if(!_fileDesc.containsUrn(requestedURN)) {
 				setState(FILE_NOT_FOUND);
 			}
