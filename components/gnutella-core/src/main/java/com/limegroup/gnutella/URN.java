@@ -81,14 +81,15 @@ public final class URN implements HTTPHeaderValue, Serializable {
 
 	/**
 	 * Creates a new <tt>URN</tt> instance from the specified string.
-	 * The resulting URN can had any Namespace Identifier and any
+	 * The resulting URN can have any Namespace Identifier and any
 	 * Namespace Specific String.
 	 *
-	 * @param urnString the string instance to use to create a 
-	 *  <tt>URN</tt>
+	 * @param urnString a string description of the URN.  Typically 
+     *  this will be a SHA1 containing a 32-character value, e.g., 
+     *  "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB".
 	 * @return a new <tt>URN</tt> instance
-	 * @throws <tt>IOException</tt> if there was an error constructing
-	 *  the <tt>URN</tt>
+	 * @throws <tt>IOException</tt> urnString was malformed or an
+     *  unsupported type
 	 */
 	public static URN createSHA1Urn(final String urnString) 
 		throws IOException {
