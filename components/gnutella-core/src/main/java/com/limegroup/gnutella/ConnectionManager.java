@@ -1001,7 +1001,8 @@ public class ConnectionManager {
     }
 
     /**
-     * Sends a UDPConnectBack request to (up to) 4 connected Ultrapeers.
+     * Sends a UDPConnectBack request to (up to) 4 (and at least 2)
+     * connected Ultrapeers.
      * @returns false if no requests were sent, otherwise true.
      */
     public boolean sendUDPConnectBackRequests(GUID cbGuid) {
@@ -1016,7 +1017,7 @@ public class ConnectionManager {
                 sent++;
             }
         }
-        return (sent > 2);
+        return (sent > 0);
     }
 
     /**

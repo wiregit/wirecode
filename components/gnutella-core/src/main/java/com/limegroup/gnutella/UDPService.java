@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -266,6 +267,12 @@ public final class UDPService implements Runnable {
                                 _acceptedSolicitedIncoming = true;
                         }
                     }
+                    // ReplyNumberVMs are always sent in an unsolicited manner,
+                    // so we can use this fact to keep the last unsolicited up
+                    // to date
+                    if (message instanceof ReplyNumberVendorMessage)
+                        _lastUnsolicitedIncomingTime = 
+                            System.currentTimeMillis();
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
