@@ -7,37 +7,43 @@ import java.net.*;
 import java.io.*;
 
 /**
- * a class that establishes a connection for a chat, either
+ * This class establishes a connection for a chat, either
  * incoming or outgoing, and also maintains a list of all the 
  * chats currently in progress.
  *
- *@author rsoule
+ * @author rsoule
  */
-public class ChatManager {
+public final class ChatManager {
 
-	// Attributes
-	private static ChatManager _chatManager = new ChatManager();
-	/* a list of InstantMessenger objects */
+	/**
+	 * Constant for the <tt>ChatManager</tt> instance, following
+	 * singleton.
+	 */
+	private static final ChatManager CHAT_MANAGER = new ChatManager();
+
+	/** 
+	 * <tt>List</tt> of InstantMessenger objects.
+	 */
 	private List _chatsInProgress 
 		= Collections.synchronizedList(new LinkedList());
-	/* a list of strings that are the hosts that are blocked */
+
+	/** 
+	 * <tt>List</tt> of strings that are the hosts that are blocked.
+	 */
 	private List _blockedHosts 
 		= Collections.synchronizedList(new LinkedList());
-	private ActivityCallback _activityCallback;
 
-	// Operations
+	/**
+	 * Instance accessor for the <tt>ChatManager</tt>.
+	 */
 	public static ChatManager instance() {
-		return _chatManager;
+		return CHAT_MANAGER;
 	}
 
-	/** sets the activity callback so that the chats can 
-		communicate with the gui */
-	public void setActivityCallback(ActivityCallback callback) {
-		_activityCallback = callback;
-	}
-
-	/** accepts the given socket for a one-to-one
-		chat connection, like an instant messanger */
+	/** 
+	 * Accepts the given socket for a one-to-one
+	 * chat connection, like an instant messanger.
+	 */
 	public void accept(Socket socket) {
 		// the Acceptor class recieved a message already, 
 		// and asks the ChatManager to create an InstantMessager
@@ -66,25 +72,24 @@ public class ChatManager {
 		}
 
 		try {
-			InstantMessenger im = new InstantMessenger(socket, this, 
-													   _activityCallback);
+			ActivityCallback callback = 
+			    RouterService.instance().getCallback();
+			InstantMessenger im = 
+			    new InstantMessenger(socket, this, callback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add(im);
-			_activityCallback.acceptChat(im);
+			callback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
 			try {
 				socket.close();
 			} catch (IOException ee) {
 			}
-		} // catch (ConnectException ce) {
-		
-		// }
-
+		}
 	}
 
 	/** 
-	 * request a chat connection from the host specified 
+	 * Request a chat connection from the host specified 
 	 * returns an uninitialized chat connection.  the callback
 	 * will be called when the connection is established or
 	 * the connection has died.
@@ -92,20 +97,21 @@ public class ChatManager {
 	public Chatter request(String host, int port) {
 		InstantMessenger im = null;
 		try {
-			im = new InstantMessenger(host, port, this, 
-									  _activityCallback);
+			ActivityCallback callback = 
+			    RouterService.instance().getCallback();
+			im = new InstantMessenger(host, port, this, callback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add(im);
-			//_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
-		} // catch (ConnectException ce) {
-		// }
+		} 
 		return im;
 	}
 
-	/** remove the instance of chat from the list of chats
-		in progress */
+	/** 
+	 * Remove the instance of chat from the list of chats
+	 * in progress.
+	 */
 	public void removeChat(InstantMessenger chat) {
 		_chatsInProgress.remove(chat);
 	}
@@ -136,9 +142,4 @@ public class ChatManager {
 				sm.setBannedIps((String[])bannedList.toArray() );
 		}
 	}
-
-	// Private Classes
-	private ChatManager() {
-	}
-
 }
