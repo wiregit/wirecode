@@ -1,13 +1,12 @@
 package com.limegroup.gnutella.io;
 
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectableChannel;
 
-import org.apache.commons.logging.*;
-
-import com.limegroup.gnutella.RouterService;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * An OutputStream that attempts to write from a Buffer.

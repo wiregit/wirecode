@@ -1,13 +1,23 @@
 package com.limegroup.gnutella.io;
 
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.util.*;
+import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.ManagedThread;
-import org.apache.commons.logging.*;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * Dispatcher for NIO.
@@ -181,7 +191,6 @@ class NIODispatcher implements Runnable {
             return;
         
         handler.handleRead(sk);
-        // else it's already set.
     }
     
     /**

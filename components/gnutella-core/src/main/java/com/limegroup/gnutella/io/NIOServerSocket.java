@@ -1,14 +1,21 @@
 package com.limegroup.gnutella.io;
 
 
-import java.io.*;
-import java.net.*;
-import java.nio.*;
-import java.nio.channels.*;
+import java.io.IOException;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.net.SocketAddress;
+import java.net.ServerSocket;
 
-import java.util.*;
+import java.util.List;
+import java.util.LinkedList;
 
-import org.apache.commons.logging.*;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * A ServerSocket that does all of its accepting using NIO, but psuedo-blocks.
