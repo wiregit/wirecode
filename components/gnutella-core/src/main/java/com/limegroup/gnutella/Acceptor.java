@@ -222,6 +222,14 @@ public class Acceptor implements Runnable {
                 MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
             }
         }
+        
+
+        if (_port!=oldPort) {
+            ConnectionSettings.PORT.setValue(_port);
+            SettingsHandler.save();
+            RouterService.addressChanged();
+        }
+
         // if we created a socket and have a NAT, and the user is not 
         // explicitly forcing a port, create the mappings 
         if (_socket != null && UPNP_MANAGER != null) {
@@ -263,14 +271,8 @@ public class Acceptor implements Runnable {
         }
         
         socketError = null;
-
-        if (_port!=oldPort) {
-            ConnectionSettings.PORT.setValue(_port);
-            SettingsHandler.save();
-            RouterService.addressChanged();
-        }
-
 	}
+	
     /**
      * Launches the port monitoring thread, MulticastService, and UDPService.
      */
