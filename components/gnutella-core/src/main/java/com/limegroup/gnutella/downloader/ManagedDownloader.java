@@ -2314,7 +2314,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
             }//end of run
         };
-
+        
+        // if we'll be debugging, we want to distinguish the different workers
+        if (LOG.isDebugEnabled())
+            connectCreator.setName("DownloadWorker "+connectCreator.hashCode());
+        
         threads.add(connectCreator);
         currentRFDs.add(rfd);
 
