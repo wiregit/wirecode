@@ -842,6 +842,34 @@ public class RouterService {
 
 
 	/**
+	 * Sends a 'What Is New' query on the network.
+	 */
+	public static void queryWhatIsNew(final byte[] guid, final MediaType type) {
+		try {
+			_lastQueryTime = System.currentTimeMillis();
+            QueryRequest qr = null;
+            if ((new GUID(guid)).addressesMatch(getAddress(), getPort())) {
+                // if the guid is encoded with my address, mark it as needing out
+                // of band support.  note that there is a VERY small chance that
+                // the guid will be address encoded but not meant for out of band
+                // delivery of results.  bad things may happen in this case but 
+                // it seems tremendously unlikely, even over the course of a 
+                // VERY long lived client
+                qr = QueryRequest.createWhatIsNewOOBQuery(guid, (byte)2, type);
+                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+            }
+            else
+                qr = QueryRequest.createWhatIsNewQuery(guid, (byte)2, type);
+			verifier.record(qr, type);
+            RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
+			router.sendDynamicQuery(qr);
+		} catch(Throwable t) {
+			ErrorService.error(t);
+		}
+	}
+
+
+	/**
 	 * Accessor for the last time a query was originated from this host.
 	 *
 	 * @return a <tt>long</tt> representing the number of milliseconds since
