@@ -374,7 +374,7 @@ public final class QueryHandler {
 			
 			int resultsNeeded = handler.RESULTS - results;
 			
-			int hostsToQuery = 20000;
+			int hostsToQuery = 40000;
 			if(resultsPerHost != 0) {
 				hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
 			}
@@ -444,17 +444,15 @@ public final class QueryHandler {
          *  new probe
          */
         int sendProbe() {
-            if(!TTL_1_PROBES.isEmpty()) {
-                // send a TTL=1 probe query
-                System.out.println("sending ttl 1 probe: "+QUERY.getQuery()); 
-                ManagedConnection mc = 
-                    (ManagedConnection)TTL_1_PROBES.removeFirst();
+            Iterator iter = TTL_1_PROBES.iterator();
+            while(iter.hasNext()) {
+                ManagedConnection mc = (ManagedConnection)iter.next();
                 return sendQueryToHost(TTL_1_QUERY, mc, QueryHandler.this);
-            } else if(!TTL_2_PROBES.isEmpty()) {
-                // send a TTL=2 probe query
-                System.out.println("sending ttl 2 probe: "+QUERY.getQuery()); 
-                ManagedConnection mc = 
-                    (ManagedConnection)TTL_2_PROBES.removeFirst();
+            }
+            
+            iter = TTL_2_PROBES.iterator();
+            while(iter.hasNext()) {
+                ManagedConnection mc = (ManagedConnection)iter.next();
                 return sendQueryToHost(TTL_2_QUERY, mc, QueryHandler.this);
             }
 
@@ -479,10 +477,11 @@ public final class QueryHandler {
             ManagedConnection mc = (ManagedConnection)iter.next();
             
             if(mc.isGoodUltrapeer()) {
-                ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-
-                if(qi.lastReceived == null) continue;
-                if(qi.lastReceived.contains(query)) { 
+                //ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+                
+                //QueryRouteTable qrt = mc.getQueryKey
+                //if(qi.lastReceived == null) continue;
+                if(mc.hitsQueryRouteTable(query)) { 
                     hitConnections.add(mc);
                 } else {
                     missConnections.add(mc);
