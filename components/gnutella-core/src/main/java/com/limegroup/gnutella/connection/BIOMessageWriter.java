@@ -26,7 +26,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
     /** 
      * A lock to protect changes to the message queue for this connection. 
      */
-    private final Object OUTPUT_QUEUE_LOCK = new Object();
+    private final Object QUEUE_LOCK = new Object();
     
 
     /**
@@ -70,7 +70,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      */
     private BIOMessageWriter(Connection conn) {
         CONNECTION = conn;  
-        QUEUE = CompositeQueue.createQueue(CONNECTION, OUTPUT_QUEUE_LOCK); 
+        QUEUE = CompositeQueue.createQueue(CONNECTION, QUEUE_LOCK); 
         
         OUTPUT_STREAM = conn.getOutputStream();
         DEFLATER = conn.getDeflater();    
@@ -184,9 +184,9 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * @see com.limegroup.gnutella.connection.MessageWriter#write(com.limegroup.gnutella.messages.Message)
      */
     public boolean write(Message msg) {
-        synchronized (OUTPUT_QUEUE_LOCK) {
+        synchronized (QUEUE_LOCK) {
             QUEUE.add(msg);
-            OUTPUT_QUEUE_LOCK.notify();
+            QUEUE_LOCK.notify();
         }
         return true;
     }
@@ -236,11 +236,11 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
     private final void waitForQueued() throws IOException {
         //The synchronized statement is outside the while loop to
         //protect _queued.
-        synchronized (OUTPUT_QUEUE_LOCK) {
+        synchronized (QUEUE_LOCK) {
             while (CONNECTION.isOpen() && 
                    QUEUE.size()==0) {           
                 try {
-                    OUTPUT_QUEUE_LOCK.wait();
+                    QUEUE_LOCK.wait();
                 } catch (InterruptedException e) {
                     Assert.that(false, "OutputRunner Interrupted");
                 }
@@ -274,8 +274,8 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * Closes the writer.
      */
     public void close() {
-        synchronized(OUTPUT_QUEUE_LOCK) {
-            OUTPUT_QUEUE_LOCK.notify();
+        synchronized(QUEUE_LOCK) {
+            QUEUE_LOCK.notify();
         }
     }
     
@@ -294,7 +294,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * @return the queue lock object
      */
     public Object getLock() {
-        return OUTPUT_QUEUE_LOCK;
+        return QUEUE_LOCK;
     }
     
     /** 
