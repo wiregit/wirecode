@@ -96,7 +96,7 @@ public class ResumeDownloader extends ManagedDownloader
 
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
-    public QueryRequest newRequery(int numRequeries) {
+    protected QueryRequest newRequery(int numRequeries) {
         URN hash=_incompleteFileManager.getCompletedHash(_incompleteFile);
         Set queryUrns=null;
         if (hash!=null) {
