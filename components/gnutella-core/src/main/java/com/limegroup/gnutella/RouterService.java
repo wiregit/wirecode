@@ -31,7 +31,7 @@ public class RouterService
     /**
      * Initialize the connection manager 
      */
-    public void initManager()
+    private void initManager()
     {
 	manager.setKeepAlive(SettingsManager.instance().getKeepAlive());
 	Thread t=new Thread(manager);
@@ -134,6 +134,16 @@ public class RouterService
     public void adjustKeepAlive(int newKeep)
     {
         manager.adjustKeepAlive(newKeep);
+    }
+
+    /**
+     * @modifies this
+     * @effects sets the port on which to listen for incoming connections. 
+     *  If that fails, this is <i>not</i> modified and IOException is thrown.
+     *  If port==0, tells this to stop listening to incoming connections.
+     */
+    public void setListeningPort(int port) throws IOException {
+	manager.setListeningPort(port);
     }
 
     /**
