@@ -58,7 +58,7 @@ public class RouterService
     private FileManager fileManager;
     private ChatManager chatManager;//keep the reference around...prevent class GC
     private SimpleTimer timer;
-
+	private final UDPAcceptor udpAcceptor;
     
     /**
      * For authenticating users
@@ -94,6 +94,7 @@ public class RouterService
         this.fileManager = fManager;
         this.authenticator = authenticator;
         this.timer = new SimpleTimer(true, activityCallback);
+		this.udpAcceptor = UDPAcceptor.instance();
 		Assert.setCallback(this.callback);
         
         me = this;
@@ -118,7 +119,8 @@ public class RouterService
 		// Now, link all the pieces together, starting the various threads.
 		this.catcher.initialize(acceptor, manager,
 								SettingsManager.instance().getHostList());
-		this.router.initialize(acceptor, manager, catcher, uploadManager);
+		this.router.initialize(acceptor, manager, catcher, uploadManager,
+							   downloader, callback, fileManager);
 		this.manager.initialize(router, catcher);		
 		//this.uploadManager.initialize(callback, router, acceptor,fileManager);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
@@ -153,6 +155,10 @@ public class RouterService
 			if ( outgoing > 0 ) 
 				connect();
 		}
+
+		// start up the UDP server thread
+		Thread udpThread = new Thread(udpAcceptor);
+		udpThread.start();
   	}
 
     /**
@@ -193,6 +199,24 @@ public class RouterService
     public DownloadManager getDownloadManager() {
         return downloader;
     }
+
+	/**
+	 * Accessor for the <tt>UDPAcceptor</tt> instance.
+	 *
+	 * @return the <tt>UDPAcceptor</tt> instance in use
+	 */
+	public UDPAcceptor getUdpAcceptor() {
+		return udpAcceptor;
+	}
+
+	/**
+	 * Accessor for the <tt>MessageRouter</tt> instance.
+	 *
+	 * @return the <tt>MessageRouter</tt> instance in use
+	 */
+	public MessageRouter getMessageRouter() {
+		return router;
+	}
 
     /**
      * Schedules the given task for repeated fixed-delay execution on this'
@@ -574,7 +598,7 @@ public class RouterService
      * results in the GUI.)
      */
     public boolean acceptedIncomingConnection() {
-            return acceptor.acceptedIncoming();
+		return acceptor.acceptedIncoming();
     }
 
 
@@ -603,33 +627,33 @@ public class RouterService
      *  Returns the number of good hosts in my horizon.
      */
     public long getNumHosts() {
-        long ret=0;
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ret+=((ManagedConnection)iter.next()).getNumHosts();
-        return ret;
+		long ret=0;
+		for (Iterator iter=manager.getInitializedConnections().iterator();
+			 iter.hasNext() ; )
+			ret+=((ManagedConnection)iter.next()).getNumHosts();
+		return ret;
     }
 
     /**
      * Returns the number of files in my horizon.
      */
     public long getNumFiles() {
-        long ret=0;
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ret+=((ManagedConnection)iter.next()).getNumFiles();
-        return ret;
+		long ret=0;
+		for (Iterator iter=manager.getInitializedConnections().iterator();
+			 iter.hasNext() ; )
+			ret+=((ManagedConnection)iter.next()).getNumFiles();
+		return ret;
     }
 
     /**
      * Returns the size of all files in my horizon, in kilobytes.
      */
     public long getTotalFileSize() {
-        long ret=0;
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ret+=((ManagedConnection)iter.next()).getTotalFileSize();
-        return ret;
+		long ret=0;
+		for (Iterator iter=manager.getInitializedConnections().iterator();
+			 iter.hasNext() ; )
+			ret+=((ManagedConnection)iter.next()).getTotalFileSize();
+		return ret;
     }
 
     /**
@@ -667,8 +691,8 @@ public class RouterService
      */
     public void updateHorizon() {        
         for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; )
-            ((ManagedConnection)iter.next()).refreshHorizonStats();
+			 iter.hasNext() ; )
+			((ManagedConnection)iter.next()).refreshHorizonStats();
     }
 
     /** 
