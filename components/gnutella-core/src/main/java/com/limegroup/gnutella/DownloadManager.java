@@ -245,6 +245,11 @@ public class DownloadManager implements BandwidthTracker {
     /* Adds the file named in qr to an existing downloader if appropriate.
      */
     public void handleQueryReply(QueryReply qr) {
+        // first check if the qr is of 'sufficient quality', if not just
+        // short-circuit.
+        if (qr.calculateQualityOfService() < 1)
+            return;
+
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
         try { 
