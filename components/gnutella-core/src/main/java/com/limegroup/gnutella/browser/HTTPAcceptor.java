@@ -5,16 +5,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.BindException;
 import java.net.UnknownHostException;
 import java.util.Date;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.Random12;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
@@ -140,9 +143,11 @@ public class HTTPAcceptor implements Runnable {
         } catch (IOException e) {
 			boolean error = true;
             socketError = e;
-            //2. Try 10 different ports
-            for (int i=0; i<10; i++) {
-    			_port=i+45100;
+            Random12 gen = new Random12();
+            //2. Try 20 different random ports from 45100 to 50100
+            for (int i=0; i<20; i++) {
+                int rand = gen.nextInt(5000);
+    			_port = rand+45100;
                 try {
                     setListeningPort(_port);
 					error = false;
@@ -153,6 +158,8 @@ public class HTTPAcceptor implements Runnable {
             }
 
 			if(error) {
+                if(socketError instanceof BindException)
+                    MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
                 // If we still don't have a socket, there's an error
                 // but ignore buggy tcp/ip startup on Mac Classic
                 if ( !(socketError instanceof UnknownHostException &&
