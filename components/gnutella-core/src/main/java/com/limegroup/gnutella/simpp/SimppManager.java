@@ -31,8 +31,7 @@ public class SimppManager {
             raf = new RandomAccessFile(file, "r");
             byte[] content = new byte[(int)raf.length()];
             raf.readFully(content);
-            _latestVersion = verifier.getVersion();
-            SimppFileVerifier verifier = new SimppFileVerifier(content);
+            SimppDataVerifier verifier = new SimppDataVerifier(content);
             boolean verified = false;
             try {
                 verified = verifier.verifySource();
@@ -43,15 +42,15 @@ public class SimppManager {
                 _latestVersion = propsHandler.useDefaultProps();
                 return;
             }
-            this._simppBytes = verifier.getPropsData();
-            String propsInXML = new String(verifier.getPropsData(), "UTF-8");
+            SimppParser parser = new SimppParser(verifier.getVerifiedData());
+            _latestVersion = parser.getVersion();
+            this._simppBytes = content;
+            String propsInXML = parser.getPropsData();
             propsHandler.setProps(propsInXML);
         } catch (VerifyError ve) {
             problem = true;
         } catch (IOException iox) {
-            problem = true;
-        } catch (SAXException sax) {
-            problem = true;
+            problem = true;        
         } finally {
             if(problem)
                 _latestVersion = propsHandler.useDefaultProps();
@@ -89,7 +88,7 @@ public class SimppManager {
         final int myVersion = _latestVersion;
         Thread simppHandler = new ManagedThread("SimppFileHandler") {
             public void managedRun() {
-                SimppFileVerifier verifier=new SimppFileVerifier(simppPayload);
+                SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 boolean verified = false;
                 try {
                     verified = verifier.verifySource();
@@ -98,7 +97,8 @@ public class SimppManager {
                 }
                 if(!verified) 
                     return;
-                int version = verifier.getVersion();
+                SimppParser parser=new SimppParser(verifier.getVerifiedData());
+                int version = parser.getVersion();
                 if(version <= myVersion)
                     return;
                 //OK. We have a new SimppMessage, take appropriate steps
@@ -106,7 +106,7 @@ public class SimppManager {
                 SimppManager.this._latestVersion = version;
                 SimppManager.this._simppBytes = simppPayload;
                 // 2. get the props we just read
-                String props = new String(verifier.getPropsData(),"UTF-8");
+                String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
                 SettablePropsHandler.instance().setProps(props);
                 // 4. Update the capabilities VM with the new version
