@@ -615,7 +615,7 @@ public class ManagedConnection extends Connection
 
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time...
-	int smh = softMaxHops;.
+	int smh = softMaxHops;
         if ((smh > -1) &&
             (m instanceof QueryRequest) &&
             (m.getHops() >= smh))
