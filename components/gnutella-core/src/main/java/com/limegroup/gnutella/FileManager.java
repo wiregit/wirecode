@@ -228,6 +228,15 @@ public class FileManager {
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
         // overwrite all these variables
+        resetVariables();
+    }
+    
+    /**
+     * Method that resets all of the variables for this class, maintaining
+     * all invariants.  This is necessary, for example, when the shared
+     * files are reloaded.
+     */
+    private void resetVariables()  {
         _size = 0;
         _numFiles = 0;
         _numIncompleteFiles = 0;
@@ -623,17 +632,7 @@ public class FileManager {
         File[] tempDirVar;
         synchronized (this) {
             // Reset the file list info
-            _size = 0;
-            _numFiles = 0;
-            _numIncompleteFiles = 0;
-            _numPendingFiles = 0;
-            _files=new ArrayList();
-            _index=new Trie(true);   //maintain invariant
-            _urnIndex=new HashMap(); //maintain invariant
-            _extensions = new TreeSet(new StringComparator());
-            _sharedDirectories = new TreeMap(new FileComparator());
-            _incompletesShared = new IntSet();
-            _fileToFileDesc = new HashMap();
+            resetVariables();
 
             // Load the extensions.
             String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
