@@ -37,7 +37,7 @@ import com.limegroup.gnutella.util.*;
  *     isMandragoreWorm, download
  * <li><b>Notification of SettingsManager changes</b>:
  *     setKeepAlive, setListeningPort, adjustSpamFilters, refreshBannedIPs
- * <li><b>HostCatcher and horizon</b>: clearHostCatcher, getHosts, removeHost,
+ * <li><b>HostCatcher and horizon</b>: clearHostCatcher, getHosts
  *     getNumHosts, getNumFiles, getTotalFileSize, setAlwaysNotifyKnownHost,
  *     updateHorizon.  <i>(HostCatcher has changed dramatically on
  *     pong-caching-branch and query-routing3-branch of CVS, so these methods
@@ -894,13 +894,6 @@ public class RouterService
      */
     public int getNumLocalSearches() {
         return router.getNumQueryRequests();
-    }
-
-    /**
-     *  Ensures that the given host:port pair is not in the host catcher.
-     */
-    public void removeHost(String host, int port) {
-        catcher.removeHost(host, port);
     }
 
     /**
