@@ -74,7 +74,7 @@ public class RequeryDownloadTest extends TestCase {
         //SettingsManager.instance().setKeepAlive(0);
         //SettingsManager.instance().setConnectOnStartup(false);
         //SettingsManager.instance().setLocalIsPrivate(false);
-        SettingsManager.instance().setPort(0);
+        SettingsManager.instance().setPort(6346);
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
         } catch (IOException e) {
@@ -83,13 +83,13 @@ public class RequeryDownloadTest extends TestCase {
         createSnapshot();
         router=new TestMessageRouter();
         RouterService rs=new RouterService(new ActivityCallbackStub(), router);
-        mgr=rs.getDownloadManager();
         try {
             rs.setListeningPort(SettingsManager.instance().getPort());
         } catch (IOException e) {
             fail ("Couldn't set listening port");
         }
 
+        mgr=rs.getDownloadManager();
         boolean ok=mgr.readSnapshot(snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         uploader=new TestUploader("uploader 6666", 6666);
@@ -362,7 +362,6 @@ public class RequeryDownloadTest extends TestCase {
         try { Thread.sleep(8000); } catch (InterruptedException e) { }
 		downloader1.stop();
 		downloader2.stop();
-//System.out.println("size="+broadcasts.size());
         assertTrue(broadcasts.size()>=7);    //should be 8, plus fudge factor
         assertTrue(broadcasts.size()<=9);
         //Are they balanced?  Check for approximate fairness.
