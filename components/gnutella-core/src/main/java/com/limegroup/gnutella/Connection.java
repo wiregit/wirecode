@@ -149,7 +149,7 @@ public class Connection {
             //NullPointerException if the socket is closed.  (See Sun bug
             //4091706.)  Unfortunately the socket may have been closed after the
             //the check above, e.g., if the user pressed disconnect.  So we
-            //catch NullPointerException here--any any other weird possible
+            //catch NullPointerException here--and any other weird possible
             //exceptions.  An alternative is to obtain a lock before doing these
             //calls, but we are afraid that getInput/OutputStream may be a
             //blocking operation.  Just to be safe, we also check that in/out
@@ -174,14 +174,12 @@ public class Connection {
 
     /**
      * Called only from initialize()
-     * @requires _socket is properly set up
+     * @requires _socket, _out are properly set up
      */
     private void sendString(String s) throws IOException {
-        //TODO1: timeout.
         byte[] bytes=s.getBytes();
-        OutputStream out=_socket.getOutputStream();
-        out.write(bytes);
-        out.flush();
+        _out.write(bytes);
+        _out.flush();
     }
 
     /**
