@@ -212,6 +212,92 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
 	/**
+	 * Tests to make sure that queries by URN are correctly forwarded
+	 * only to those nodes that should receive them.  In this case, for example,
+	 * the leaf and Ultrapeer routing tables have no URN data, so the leaf
+	 * should not receive the queries, and the Ultrapeer should not receive
+	 * them at the last hop.
+	 */
+	public void testThatURNOnlyQueryDoesNotGetImproperlyForwarded() 
+		throws Exception {
+		QueryRequest qr = 
+			QueryRequest.createRequery(HugeTestUtils.SHA1);
+
+		ULTRAPEER_1.send(qr);
+		ULTRAPEER_1.flush();
+		
+		Message m = ULTRAPEER_2.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+		
+		assertTrue("leaf should not have received the query", !drain(LEAF));
+		
+
+		// now test to make sure that query routing on the last hop
+		// is working correctly for URN queries
+		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)2);
+
+		ULTRAPEER_1.send(qr);
+		ULTRAPEER_1.flush();
+
+		assertTrue("ultrapeer should not have received the query", 
+				   !drain(ULTRAPEER_2));
+
+	}
+
+	/**
+	 * Tests URN queries from the leaf.
+	 */
+	public void testUrnQueryFromLeaf() throws Exception {
+		QueryRequest qr = 
+			QueryRequest.createRequery(HugeTestUtils.SHA1);
+
+		LEAF.send(qr);
+		LEAF.flush();
+		
+		Message m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+
+		m = ULTRAPEER_2.receive(TIMEOUT);
+		assertQuery(m);
+
+		qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+		
+
+		// now test to make sure that query routing on the last hop
+		// is working correctly for URN queries
+		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)2);
+
+		LEAF.send(qr);
+		LEAF.flush();
+
+		assertTrue("ultrapeer2 should not have received the query", 
+				   !drainQuery(ULTRAPEER_2));
+
+		assertTrue("ultrapeer1 should not have received the query", 
+				   !drainQuery(ULTRAPEER_1));
+		
+	}
+
+// 	public void testUrnQueryBetweenUltrapeers() throws Exception {
+//         urnTest(ULTRAPEER_1, ULTRAPEER_2, LEAF);
+// 	}
+
+// 	public void testUrnQueryBetweenUltrapeers2() throws Exception {
+//         urnTest(ULTRAPEER_2, ULTRAPEER_1, LEAF);
+// 	}
+
+
+	/**
 	 * Tests to make sure that the passing of query routing tables between
 	 * Ultrapeers is working correctly.
 	 */
@@ -649,6 +735,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     /** This test makes sure that querys with no query string but with
      *  specified urn get through to leaves, etc.
      */ 
+	/*
     public void testNullQueryURNRequest() 
         throws Exception {
 
@@ -658,8 +745,17 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         urnTest(ULTRAPEER_2, LEAF, ULTRAPEER_1);
         urnTest(LEAF, ULTRAPEER_1, ULTRAPEER_2);        
     }
+	*/
 
 
+	/**
+	 * Tests a URN query send from the first <tt>Connnection</tt> to the other
+	 * two <tt>Connnection</tt>s.
+	 *
+	 * @param sndr the <tt>Connnection</tt> sending the query
+	 * @param rcv1 the first <tt>Connnection</tt> receiving the query
+	 * @param rcv2 the second <tt>Connnection</tt> receiving the query
+	 */
     private void urnTest(Connection sndr, Connection rcv1,
 						 Connection rcv2) 
         throws Exception {
@@ -667,8 +763,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         Set currUrnSet = new HashSet();
         Set currUrnTypeSet = new HashSet();
         for(int j = 0; j < HugeTestUtils.URNS.length; j++) {
-            currUrnSet.add(HugeTestUtils.URNS[j]);
-            currUrnTypeSet.add(HugeTestUtils.URNS[j].getUrnType());
+			currUrnSet.add(HugeTestUtils.URNS[j]);
+			currUrnTypeSet.add(HugeTestUtils.URNS[j].getUrnType());
         }
 
         // build the null QR
@@ -677,6 +773,11 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 			new QueryRequest(guid.bytes(), TTL, 0, "", "", false,
 							 currUrnTypeSet, currUrnSet, false);
         
+		//QueryRequest qr = QueryRequest.createRequery(HugeTestUtils.URNS[0]);
+        //GUID guid = new GUID(qr.getGUID());
+
+		//Set currUrnSet = qr.getQueryUrns();
+
         // send the QR - FROM sndr
         sndr.send(qr);
         sndr.flush();
@@ -752,8 +853,34 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
 				// we read a null message or received another 
-				// InterruptedIOException, which should mean that no 
-				// messages are left
+				// InterruptedIOException, which means a messages was not 
+				// received
+                return ret;
+            } catch (BadPacketException e) {
+            }
+        }
+    }
+
+    /** 
+	 * Tries to receive any outstanding queries on c.
+	 *
+     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
+	 */
+    private static boolean drainQuery(Connection c) throws IOException {
+        boolean ret=false;
+        while (true) {
+            try {
+                Message m = c.receive(TIMEOUT);
+				if(m instanceof QueryRequest) {
+					ret = true;
+				} else {
+					System.out.println(m); 
+				}
+                //System.out.println("Draining "+m+" from "+c);
+            } catch (InterruptedIOException e) {
+				// we read a null message or received another 
+				// InterruptedIOException, which means a messages was not 
+				// received
                 return ret;
             } catch (BadPacketException e) {
             }
