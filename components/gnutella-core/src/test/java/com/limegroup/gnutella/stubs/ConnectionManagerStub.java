@@ -30,9 +30,14 @@ public class ConnectionManagerStub extends ConnectionManager {
 
     public boolean allowConnection(boolean outgoing,
                                    String ultrapeerHeader,
-                                   String useragentHeader) {
+                                   String useragentHeader,
+                                   int degree) {
         //Needed to make ConnectionManagerTest pass. 
         //See ConnectionManagerTest.setUp.
         return true;
+    }
+    
+    public String toString() {
+        return "ConnectionManagerStub";
     }
 }

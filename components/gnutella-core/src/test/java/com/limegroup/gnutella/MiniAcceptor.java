@@ -75,6 +75,7 @@ public class MiniAcceptor implements Runnable {
         ServerSocket ss=null;
         try {
             ss=new ServerSocket(port);
+            ss.setReuseAddress(true);
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
