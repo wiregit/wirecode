@@ -22,6 +22,10 @@ class LanguageInfo implements Comparable {
     private double percentage;
     private final String alternateFileName;
     
+    private static final String CHARSET_UTF8 = "UTF-8";
+    private static final String CHARSET_8859_1 = "ISO-8859-1";
+    private final String sourceCharset;
+    
     /**
      * Constructs a new LanguageInfo object with the given
      * languageCode, countryCode, variantCode,
@@ -45,6 +49,8 @@ class LanguageInfo implements Comparable {
         fileName     = fn.trim();
         properties   = props;
         alternateFileName = alternateFile.trim();
+        sourceCharset = alternateFileName.equals(fileName) ?
+            CHARSET_8859_1 : CHARSET_UTF8;
     }
     
     /**
@@ -113,15 +119,25 @@ class LanguageInfo implements Comparable {
             !variantName.toLowerCase().equals("international") &&
             !variantName.equals(""))
             return bidi1 + languageName + ", " + variantName +
-                   " (" + countryName + ")" + bidi2;
+                   " (" + countryName + ')' + bidi2;
         else
             return bidi1 + languageName +
-                   " (" + countryName + ")" + bidi2;
+                   " (" + countryName + ')' + bidi2;
     }
     
     public String getScript() { return scriptName; }
     
     public String getFileName() { return fileName; }
+    
+    public String getSourceCharset() {
+        return sourceCharset;
+    }
+    
+    public boolean isUTF8() {
+        return sourceCharset.equals(CHARSET_UTF8);
+    }
+    
+    public String getAlternateFileName() { return alternateFileName; }
     
     public String getName() { return displayName; }
     
@@ -131,10 +147,5 @@ class LanguageInfo implements Comparable {
            "\" title=\"" + toString() + "\">" +
            displayName + "</a>";
     }
-    
-    public boolean isUTF8() { return !alternateFileName.equals(fileName); }
-    
-    public String getAlternateFileName() { return alternateFileName; }
-    
     
 }
