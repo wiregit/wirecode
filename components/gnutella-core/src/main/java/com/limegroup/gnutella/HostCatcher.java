@@ -205,21 +205,21 @@ public class HostCatcher {
 	 *	@throws NoSuchElementException if the candidates list is empty
      */
     public Endpoint getAnEndpoint() throws NoSuchElementException 
-	{
-	    Endpoint e=null;
-		//Synchronize on candidates to avoid structural modifications to it
-		//by multiple threads
-	    synchronized (candidates) {
+    {
+	Endpoint e=null;
+	//Synchronize on candidates to avoid structural modifications to it
+	//by multiple threads
+	synchronized (candidates) {
 		Iterator iter=candidates.iterator();	
 		if (! iter.hasNext()) 
-		    throw new NoSuchElementException();
+		    	throw new NoSuchElementException();
 		e=(Endpoint)iter.next();
 		candidates.remove(e);
 		System.out.print("Establishing outgoing connection on "
 				  +e.toString()+"...");
-	    }
+    	}
 
-		return e;
+	return e;
 
     }//end of getAnEndpoint
 
