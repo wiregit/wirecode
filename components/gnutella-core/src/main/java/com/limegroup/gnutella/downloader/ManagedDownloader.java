@@ -447,7 +447,9 @@ public class ManagedDownloader implements Downloader {
                 //The speed of this connection in kiloBYTES/sec.
                 long speed=rfd.getSpeed()/8;
                 //The estimated time
-                long estimatedTime=amountLeft/speed;
+                long estimatedTime=999999999;
+				if (speed != 0)  // Stop dividing by zero bug.
+                    estimatedTime=amountLeft/speed;
 
                 if (estimatedTime < lowestTime) {
                     lowestTime=estimatedTime;
