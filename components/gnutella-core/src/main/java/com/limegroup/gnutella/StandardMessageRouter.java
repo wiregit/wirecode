@@ -17,6 +17,8 @@ public class StandardMessageRouter extends MessageRouter {
 
     private ActivityCallback _callback;
     private FileManager _fileManager;
+    
+    private final boolean RECORD_STATS = !CommonUtils.isJava118();
 
     /**
      * Creates a new <tt>StandardMessageRouter</tt> with the specified
@@ -185,10 +187,12 @@ public class StandardMessageRouter extends MessageRouter {
         Response[] responses = _fileManager.query(queryRequest);
         
         if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
-            if( responses != null && responses.length > 0 )
-                RoutedQueryStat.LEAF_HIT.incrementStat();
-            else
-                RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
+            if( RECORD_STATS ) {
+                if( responses != null && responses.length > 0 )
+                    RoutedQueryStat.LEAF_HIT.incrementStat();
+                else
+                    RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
+            }
         }
 
         return sendResponses(responses, queryRequest, clientGUID);
