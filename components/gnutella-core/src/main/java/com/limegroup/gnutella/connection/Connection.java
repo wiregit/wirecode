@@ -501,6 +501,10 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             } else {
                 _socket = Sockets.connect(_host, _port, timeout);
             }
+        } else if(ConnectionSettings.USE_NIO.getValue()) {
+            // otherwise, it's an incoming connection, and we need to add this
+            // as a reader
+            NIODispatcher.instance().addReader(this);
         }
         
         if (_closed) {
@@ -875,12 +879,31 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * @throws BadPacketException if we read data that does not match any
      *  understood Gnutella message
      */
-    public void read() throws IOException, BadPacketException  {
-        if(HANDSHAKER.handshakeComplete()) {
-            _messageReader.read();
+    /*
+    public void read() {
+        if(HANDSHAKER.handshakeComplete()) {    
+            try {
+                //_messageReader.read();
+                Message msg = _messageReader.createMessageFromTCP(key);
+                    
+                if(msg == null) {
+                    // the message was not read completely -- we'll get
+                    // another read event on the channel and keep reading
+                    return;
+                }
+    
+                _messageReader.routeMessage(msg);
+            } catch (IOException e) {
+                // remove the connection if we got an IOException
+                RouterService.removeConnection(this);
+                MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
+            } catch (BadPacketException e) {
+                MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+            }
         } 
         HANDSHAKER.read();        
     }
+    */
 
     private boolean _writeRegistered;
     
@@ -890,8 +913,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     
     public void setWriteRegistered(boolean registered) {
         _writeRegistered = registered;
-        //HANDSHAKER.setWriteRegistered(registered);
-        //_messageWriter.setWriteRegistered(registered);
     }
     
     /**
