@@ -550,19 +550,27 @@ public class FileManager {
         //Strip off any trailing "\"'s to work around limitations in JDK1.1.8.
         //This isn't actually needed in this file, because f is always
         //canonicalized if a directory, but it can't hurt.f
-        while (true) {
-            String name=f.getAbsolutePath();
-            if (! name.endsWith(File.separator))
-                break;
-            f=new File(name.substring(0, name.length()-1));
-        }
-        
-        //Now list contents of directory.
-        String name=f.getParent();
+//  		while (true) {
+//              String name=f.getAbsolutePath();
+//              if (! name.endsWith(File.separator))
+//                  break;
+//              f=new File(name.substring(0, name.length()-1));
+//          }
+
+
+		// slight changes to get around getParent bug on Mac
+		String name=f.getParent();
+  		File canonicalFile=new File(name);
+		try {
+			canonicalFile = getCanonicalFile(canonicalFile);
+		} catch(IOException ioe) {
+  			//if the exception occurs, simply return null
+  			return null;
+  		}
         if (name==null)
             return null;
         else 
-            return new File(name);
+			return canonicalFile;
     }
     
     /** Same as the f.listFiles() in JDK1.3. */
