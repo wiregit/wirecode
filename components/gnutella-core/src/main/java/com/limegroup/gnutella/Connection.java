@@ -78,11 +78,15 @@ public class Connection {
      *  after "GNUTELLA CONNECT".  Null otherwise. */
     private final Properties REQUEST_HEADERS;
 
-    /** For outgoing Gnutella 0.6 connections, a function calculating the
+    /** 
+     * For outgoing Gnutella 0.6 connections, a function calculating the
      *  properties written after the server's "GNUTELLA OK".  For incoming
      *  Gnutella 0.6 connections, the properties written after the client's
-     *  "GNUTELLA CONNECT". */
-    private final HandshakeResponder RESPONSE_HEADERS;
+     *  "GNUTELLA CONNECT".
+     * Non-final so that the responder can be garbage collected after we've
+     * concluded the responding (by setting to null).
+     */
+    private HandshakeResponder RESPONSE_HEADERS;
 
     /** The list of all properties written during the handshake sequence,
      *  analogous to HEADERS_READ.  This is needed because
@@ -329,6 +333,12 @@ public class Connection {
             } else {
                 _softMax = ConnectionSettings.SOFT_MAX.getValue();
             }
+            
+            // remove the reference to the RESPONSE_HEADERS, since we'll no
+            // longer be responding.
+            // This does not need to be in a finally clause, because if an
+            // exception was thrown, the connection will be removed anyway.
+            RESPONSE_HEADERS = null;
 						
         } catch (NoGnutellaOkException e) {
             close();
