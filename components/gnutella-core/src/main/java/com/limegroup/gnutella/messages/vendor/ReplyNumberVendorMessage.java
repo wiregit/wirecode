@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import java.io.*;
 
@@ -28,9 +29,14 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
 
     /** @param numResults The number of results (1-255 inclusive) that you have
      *  for this query.  If you have more than 255 just send 255.
+     *  @param replyGUID The guid of the original query/reply that you want to
+     *  send reply info for.
      */
-    public ReplyNumberVendorMessage(int numResults) throws BadPacketException {
-        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, VERSION, derivePayload(numResults));
+    public ReplyNumberVendorMessage(GUID replyGUID, 
+                                    int numResults) throws BadPacketException {
+        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, VERSION,
+              derivePayload(numResults));
+        setGUID(replyGUID);
     }
 
     /** @return an int (1-255) representing the amount of results that a host
@@ -40,7 +46,8 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
 
-    private static byte[] derivePayload(int numResults) throws BadPacketException {
+    private static byte[] derivePayload(int numResults) 
+        throws BadPacketException {
         if ((numResults < 1) || (numResults > 255))
             throw new BadPacketException("Number of results too big: " +
                                          numResults);
@@ -50,5 +57,19 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         payload[0] = bytes[0];
         return payload;
     }
+
+    public boolean equals(Object other) {
+        if (other instanceof ReplyNumberVendorMessage) {
+            GUID myGuid = new GUID(getGUID());
+            GUID otherGuid = new GUID(((VendorMessage) other).getGUID());
+            int otherResults = 
+                ((ReplyNumberVendorMessage) other).getNumResults();
+            return ((myGuid.equals(otherGuid)) && 
+                    (getNumResults() == otherResults) &&
+                    super.equals(other));
+        }
+        return false;
+    }
+
 
 }
