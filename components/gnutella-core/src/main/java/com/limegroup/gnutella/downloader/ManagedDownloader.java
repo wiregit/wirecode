@@ -503,9 +503,27 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (! CommonUtils.copy(incompleteFile, completeFile))
                 return COULDNT_MOVE_TO_LIBRARY;
         //Add file to library.
+        // first check if it conflicts with the saved dir....
+        if (fileExists(completeFile))
+            fileManager.removeFileIfShared(completeFile);
         fileManager.addFileIfShared(completeFile, getXMLDocuments());  
         return COMPLETE;
     }   
+
+    /** @return True returned if the File exists in the Save directory....
+     */
+    private boolean fileExists(File f) {
+        boolean retVal = false;
+        try {
+            File downloadDir = SettingsManager.instance().getSaveDirectory();
+            String filename=f.getName();
+            File completeFile = new File(downloadDir, filename);  
+            if ( completeFile.exists() ) 
+                retVal = true;
+        }
+        catch (Exception e) { }
+        return retVal;
+    }
 
 
     /** Like tryDownloads2, but does not deal with the library and hence
