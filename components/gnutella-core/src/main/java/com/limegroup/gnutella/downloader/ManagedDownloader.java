@@ -214,9 +214,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  DownloadManager.  Package-access and non-final for testing.
      *  @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
     static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
-    /** The number of times to requery the network. 
-     *  We are getting rid of ALL requeries, so the new value is one such that
-     *  a Requery can never happen.
+    /** The number of times to requery the network. All requeries are
+     *  user-driven.
      */
     private static final int REQUERY_ATTEMPTS = 1;
     /** The size of the approx matcher 2d buffer... */
@@ -354,7 +353,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  no corrupt file. */
     private volatile File corruptFile;
     /** Lock used to communicate between addDownload and tryAllDownloads, and
-     *  pauseForRequery and resume
+     *  pauseForRequery and resume.
+     *  The RequeryLock is only meant for one producer and consumer.  The code
+     *  may it look like there are multiple producers and consumers, but if you
+     *  follow the code flow you'll see that there is only one of each.
      */
     private RequeryLock reqLock = new RequeryLock();
 
@@ -599,9 +601,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
      * of all hashes.
      *
-     * Since there are not more AUTOMATIC requeries, subclasses are advised to
+     * Since there are no more AUTOMATIC requeries, subclasses are advised to
      * stop using createRequery(...).  All attempts to 'requery' the network is
-     * spawned by the user, so use createQuery(...) .
+     * spawned by the user, so use createQuery(...) .  The reason we need to
+     * use createQuery is because DownloadManager.sendQuery() has a global
+     * limit on the number of requeries sent by LW (as IDed by the guid), but
+     * it allows normal queries to always be sent.
      *
      * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
@@ -1247,6 +1252,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //        wants to relaunch the query.  Note that the stalled
                 //        download could be resumed because relevant results
                 //        came in (they were later than TIME_BETWEEN_REQUERIES)
+                //    C.  Else, see if the subclass has any special 'give up'
+                //        instructions, else just give up and wait passively
+                //        for results
 
                 // 1.
                 if (waitForRetry) {
@@ -1276,8 +1284,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         areThereNewResults = reqLock.lock(timeToWait);
                     }
 
-                    // 2B) should we wait for the user to respawn a query?
                     if (!areThereNewResults) {
+                        // 2B) should we wait for the user to respawn a query?
                         // pauseForRequery delegates to subclasses when
                         // necessary, it returns if it was woken up due to new
                         // results.  so if new results, go up top and try and
@@ -1297,6 +1305,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                             } catch (CantResumeException ignore) { }
                         }
                         else {
+                            // 2C) delegate to subclasses and follow
+                            // instructions, or just 'give up' and wait for
+                            // results.
                             // first delegate to subclass - see if we should set
                             // the state and or wait for a certain amount of time
                             long[] instructions = 
@@ -3093,6 +3104,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  a requery result. moreover, it won't wait if it has a result already...
      *  -- The addDownload method, upon getting a result that matches, will
      *  wake up the tryAllDownloads thread with a release...().  
+     *  -- The tryAllDownloads method may release the lock due to a user-driven
+     *  query.
      *  WARNING:  THIS IS VERY SPECIFIC SYNCHRONIZATION.  IT WAS NOT MEANT TO 
      *  WORK WITH MORE THAN ONE PRODUCER OR ONE CONSUMER.
      */
