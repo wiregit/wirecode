@@ -10,7 +10,6 @@ import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.downloader.*; //for testing
-import com.limegroup.gnutella.tests.util.*; //for testing
 
 /**
  * The list of all the uploads in progress.
