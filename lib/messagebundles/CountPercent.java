@@ -213,7 +213,7 @@ public class CountPercent {
     "<td valign=\"top\" colspan=2>\n" +
 	"<div id=\"bod1\">\n" +
 	"<h1>Help Internationalize LimeWire</h1>\n" +
-"<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n" + 
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n" + 
 "<tr>\n" +
 "<td valign=\"top\" style=\"line-height : 16px;\">\n" +
   "The LimeWire Open Source project has embarked on an effort to " +
@@ -251,9 +251,10 @@ public class CountPercent {
     
     private void buildStatus(StringBuffer page, List completed, List midway, List started) {
         boolean first = false;
-        page.append("<b>Translations Status:</b> <ol>\n" +
-                    "<li><b><a href=\"" + ENGLISH_LINK + ">English</a></b>");
-                    
+        page.append("<b>Translations Status:</b> <ol>\n");
+
+        page.append("<li>");
+        first = true;
         for (Iterator i = completed.iterator(); i.hasNext(); ) {
             LanguageInfo l = (LanguageInfo)i.next();
             if (!first && !i.hasNext())
@@ -261,6 +262,7 @@ public class CountPercent {
             else if (!first)
                 page.append(", ");
             page.append("<b>" + l.getLink() + "</b>");
+            first = false;
         }
         page.append(" are complete and will require only small revisions during the project evolution.</li>");
         
