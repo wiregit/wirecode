@@ -37,43 +37,11 @@ public final class SettingsFactory {
 	SettingsFactory(File settingsFile, Properties defaultProps, Properties props) {
 		DEFAULT_PROPS = defaultProps;
 		PROPS = props;		
-		try {
-			reload(new FileInputStream(settingsFile));
-		} catch(IOException e) {			
-			// this should never really happen, so report it
-			RouterService.error(e);
-		}
-	}
-
-	/**
-	 * Creates a new <tt>SettingsFactory</tt> instance with the specified stream
-	 * to read properties from.
-	 *
-	 * @param stream the <tt>InputStream</tt> to read properties from
-	 */
-	SettingsFactory(InputStream stream, Properties defaultProps) {
-		DEFAULT_PROPS = defaultProps; 
-		PROPS = new Properties(defaultProps);
-		reload(stream);
+		reload(settingsFile);
 	}
 
 	static SettingsFactory createFromFile(File file, Properties defaultProps) {
 		return new SettingsFactory(file, defaultProps, new Properties(defaultProps));
-	}
-
-	static SettingsFactory createFromZip(File file, String propsName, 
-										 Properties defaultProps) {
-		try {
-			ZipFile zip = new ZipFile(file, ZipFile.OPEN_READ);
-			return new SettingsFactory(zip.getInputStream(zip.getEntry(propsName)),
-									   defaultProps);
-		} catch(Exception e) {
-			System.out.println("unexpected exception in createFromZip::file: "+file+
-							   " props name: "+propsName); 
-			// this should never really happen, so report it
-			RouterService.error(e);
-			return null;
-		}
 	}
 
 	/**
@@ -81,11 +49,11 @@ public final class SettingsFactory {
 	 *
 	 * @param settingsStream the <tt>InputStream</tt> to load
 	 */
-	public void reload(InputStream settingsStream) {
+	public void reload(File file) {//InputStream settingsStream) {
         try {
-            PROPS.load(settingsStream);
+            PROPS.load(new FileInputStream(file));
         } catch(IOException e) {
-            // the default properties will be used            
+            // the default properties will be used -- this is fine and expected
         }		
 	}
 
