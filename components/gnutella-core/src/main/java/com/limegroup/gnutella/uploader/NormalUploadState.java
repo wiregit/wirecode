@@ -264,7 +264,7 @@ public class NormalUploadState implements UploadState {
 								  _ostream);
 			if(_fileDesc.hasAlternateLocations()) {
 				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-									  _fileDesc.getAlternateLocationCollector(),
+									  _fileDesc.getAlternateLocationCollection(),
 									  _ostream);
 			}
 			//_fileDesc.writeUrnTo(_ostream);
