@@ -1345,7 +1345,8 @@ public abstract class FileManager {
 		}
 
         List responses = new LinkedList();
-        
+        final MediaType.Aggregator filter = MediaType.getAggregator(request);
+
         // Iterate through our hit indexes to create a list of results.
         for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
@@ -1355,7 +1356,8 @@ public abstract class FileManager {
                             "unexpected null in FileManager for query:\n"+
                             request);
             } 
-            
+            if ((filter != null) && !filter.allow(desc.getName())) continue;
+
             desc.incrementHitCount();
             
             RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
@@ -1364,7 +1366,9 @@ public abstract class FileManager {
                 addXMLToResponse(resp, desc);
             responses.add(resp);
         }
-        return (Response[])responses.toArray(new Response[responses.size()]);
+        if (responses.size() == 0) return EMPTY_RESPONSES;
+        else 
+            return (Response[])responses.toArray(new Response[responses.size()]);
     }
 
     /**

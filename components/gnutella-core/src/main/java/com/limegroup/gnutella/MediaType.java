@@ -234,9 +234,8 @@ public class MediaType implements Serializable {
         /** @return true if the Response falls within one of the MediaTypes
          *  this aggregates.
          */
-        public boolean allow(Response resp) {
+        public boolean allow(final String fName) {
             Iterator iter = _filters.iterator();
-            final String fName = resp.getName();
             while (iter.hasNext()) {
                 MediaType currType = (MediaType)iter.next();
                 if (currType.matches(fName))
