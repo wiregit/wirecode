@@ -35,8 +35,10 @@ public class HashTreeTest extends BaseTestCase {
         "IXVJNDJ7U3NCMZE5ZWBVCXSMWMFY4ZCXG5LUYAY";
         
     private static HashTree hashTree;
+    private static HashTree treeFromNetwork;
     private static DIMERecord xmlRecord;
     private static DIMERecord treeRecord;
+    private static byte[] written;
 
     public HashTreeTest(String name) {
         super(name);
@@ -48,9 +50,14 @@ public class HashTreeTest extends BaseTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
-    }        
+    }
+    
+    //Due to the long setup time of creating a TigerTree,
+    //these tests assign global variables as they go by.
+    //These tests must all be run in the exact order they're
+    //written so that they work correctly.
 
-    public void testTHEX() throws Throwable {
+    public void testBasicTigerTree() throws Throwable {
         assertTrue(file.exists());
         URN urn = URN.createSHA1Urn(file);
         assertEquals(sha1, urn.toString());
@@ -64,38 +71,42 @@ public class HashTreeTest extends BaseTestCase {
         assertEquals("/uri-res/N2X?" + sha1, hashTree.getThexURI());
         assertEquals("/uri-res/N2X?" + sha1 + ";" + root32,
             hashTree.httpStringValue());
-        {
-            List allNodes = hashTree.getAllNodes();
-            assertEquals(5, allNodes.size());
-            List one, two, three, four, five;
-            one = (List)allNodes.get(0);
-            two = (List)allNodes.get(1);
-            three = (List)allNodes.get(2);
-            four = (List)allNodes.get(3);
-            five = (List)allNodes.get(4);
-            assertEquals(five, hashTree.getNodes());
-            
-            // tree looks like:
-            //                 u (root)
-            //               /         \
-            //             t            s
-            //          /      \         \
-            //        q         r         s
-            //     /     \   /    \      /  \
-            //    l      m   n     o    p    k
-            //   /\     /\  /\    /\   /\     \  
-            //  a b    c d e f   g h  i j      k
-            
-            assertEquals(root32, Base32.encode((byte[])one.get(0)));
-            assertEquals(2, two.size());
-            assertEquals(3, three.size());
-            assertEquals(6, four.size());
-            assertEquals(11, five.size());
-        }
+
+        List allNodes = hashTree.getAllNodes();
+        assertEquals(5, allNodes.size());
+        List one, two, three, four, five;
+        one = (List)allNodes.get(0);
+        two = (List)allNodes.get(1);
+        three = (List)allNodes.get(2);
+        four = (List)allNodes.get(3);
+        five = (List)allNodes.get(4);
+        assertEquals(five, hashTree.getNodes());
+        
+        // tree looks like:
+        //                 u (root)
+        //               /         \
+        //             t            s
+        //          /      \         \
+        //        q         r         s
+        //     /     \   /    \      /  \
+        //    l      m   n     o    p    k
+        //   /\     /\  /\    /\   /\     \  
+        //  a b    c d e f   g h  i j      k
+        
+        assertEquals(root32, Base32.encode((byte[])one.get(0)));
+        assertEquals(2, two.size());
+        assertEquals(3, three.size());
+        assertEquals(6, four.size());
+        assertEquals(11, five.size());
+    }
+    
+    public void testWriteToStream() throws Throwable {
         
         // Now make sure we can write this record out correctly.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         hashTree.write(baos);
+        
+        written = baos.toByteArray();
         
         // Should be two DIME Records.
         ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
@@ -106,17 +117,22 @@ public class HashTreeTest extends BaseTestCase {
         
         UUID uuid = verifyXML(xmlRecord);
         verifyTree(treeRecord, uuid);
-        
+    }
+    
+    public void testReadFromStream() throws Throwable {
         
         // Make sure we can read the tree back in.
-        HashTree treeFromNetwork = HashTree.createHashTree(
-            new ByteArrayInputStream(baos.toByteArray()), sha1,
+        treeFromNetwork = HashTree.createHashTree(
+            new ByteArrayInputStream(written), sha1,
                                      root32, file.length()
         );
         
         assertEquals(hashTree.getDepth(), treeFromNetwork.getDepth());
         assertEquals(hashTree.getRootHash(), treeFromNetwork.getRootHash());
+        
+    }
 
+    public void testGetCorruptRanges() throws Throwable {
         File corrupt = new File("corruptFile");
         CommonUtils.copy(file, corrupt);
         assertTrue(corrupt.exists());
@@ -141,6 +157,8 @@ public class HashTreeTest extends BaseTestCase {
 
         assertEquals(cranges.get(0), cranges2.get(0));
         assertEquals(((Interval)cranges.get(0)).low, 0);
+        
+        corrupt.delete();
     }
     
     public void testCorruptedXMLRecord() throws Throwable {
@@ -223,54 +241,66 @@ public class HashTreeTest extends BaseTestCase {
         }
     }    
     
-    public void testCorruptedTreeData() throws Exception {
+    public void testCorruptedTreeData() throws Throwable {
         byte[] data;
         
         // data is too small to fit a root hash.
-        checkTree(new byte[3]);
-        
-        // random bytes in the data are off.
-        data = copyData(treeRecord);
-        data[135]++;
-        checkTree(data);        
+        data = copyData(treeRecord, 3);
+        checkTree(data, false);
         
         // the root hash is off.
-        data = copyData(treeRecord);
+        data = copyData(treeRecord, treeRecord.getData().length);
         data[0]++;
-        checkTree(data);
+        checkTree(data, false);
+
+        // random bytes in the data are off.
+        data = copyData(treeRecord, treeRecord.getData().length);
+        data[24 + 24*2 + 24*3 + 5]++;
+        checkTree(data, false);
+        
+        // the last generation is off.
+        data = copyData(treeRecord, treeRecord.getData().length);
+        data[data.length-5]++;
+        checkTree(data, false);
         
         // the root hash is correct, but no other data exists.
         // HashTreeHandler.HASH_SIZE==24
-        data = new byte[24];
-        for(int i = 0; i < data.length; i++)
-            data[i] = treeRecord.getData()[i];
-        checkTree(data);
+        data = copyData(treeRecord, 24);
+        checkTree(data, true);
         
         // we have some full correct generations, but not all.
-        data = new byte[24 + 24*2];
-        for(int i = 0; i < data.length; i++)
-            data[i] = treeRecord.getData()[i];
-        checkTree(data);
+        data = copyData(treeRecord, 24 + 24*2);            
+        checkTree(data, true);
+        
+        // we have correct data that stops in the middle of a generation.
+        data = copyData(treeRecord, 24 + 24*2 + 24*1);
+        checkTree(data, false);
         
         // the data isn't even a multiple of the hash size.
-        data = new byte[24 + 24*3 + 1];
-        for(int i = 0; i < data.length; i++)
-            data[i] = treeRecord.getData()[i];
-        checkTree(data);        
+        data = copyData(treeRecord, 24 + 24*3 + 1);
+        checkTree(data, false);
+        
+        // the data is longer than the ideal depth size would hold.
+        data = copyData(treeRecord, treeRecord.getData().length + 24 * 2);
+        checkTree(data, true);
     }
     
-    private void checkTree(byte[] data) {
+    private void checkTree(byte[] data, boolean good) throws Throwable {
         DIMERecord corrupt = null;
         corrupt = createCorruptRecord(treeRecord, data);
         try {
             createTree(xmlRecord, corrupt);
-            fail("expected exception");
-        } catch(IOException expected) {}
+            if(!good)
+                fail("expected exception");
+        } catch(IOException expected) {
+            if(good)
+                throw expected;
+        }
     }
     
-    private byte[] copyData(DIMERecord a) {
-        byte[] ret = new byte[a.getData().length];
-        for(int i = 0; i < ret.length; i++)
+    private byte[] copyData(DIMERecord a, int length) {
+        byte[] ret = new byte[length];
+        for(int i = 0; i < ret.length && i < a.getData().length; i++)
             ret[i] = a.getData()[i];
         return ret;
     }
@@ -348,15 +378,15 @@ public class HashTreeTest extends BaseTestCase {
         data = data.substring(test.length());
         assertEquals(test, current);
         
-        test = " uri='";
+        test = " uri='uuid:";
         current = data.substring(0, test.length());
         data = data.substring(test.length());
         assertEquals(test, current);
         
         // the uri is the next 36 characters, grab it.
-        String uri = data.substring(0, 36);
+        current = data.substring(0, 36);
         data = data.substring(36);
-        UUID uuid = new UUID(uri);
+        UUID uuid = new UUID(current);
         
         test = "'/></hashtree>";
         current = data.substring(0, test.length());

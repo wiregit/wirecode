@@ -91,16 +91,12 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * and filesize.
      */
     private HashTree(List allNodes, String sha1, long fileSize) {
-        List nodes = (List)allNodes.get(allNodes.size()-1);
-        byte[] root = (byte[])((List)allNodes.get(0)).get(0);
-        
         THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
-        NODES = Collections.unmodifiableList(nodes);
+        NODES = (List)allNodes.get(allNodes.size()-1);
         FILE_SIZE = fileSize;
-        ROOT_HASH = root;
-        // calculate the actual depth we read from the stream by calculating
-        // the log2.
-        DEPTH = log2Ceil(NODES.size());
+        ROOT_HASH = (byte[])((List)allNodes.get(0)).get(0);
+        DEPTH = allNodes.size()-1;
+        Assert.that(log2Ceil(NODES.size()) == DEPTH);
         
         // Only store smaller trees.
         if(DEPTH <= MAX_DEPTH_TO_STORE)
@@ -112,16 +108,11 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     /**
      * Creates a new HashTree for the given FileDesc.
      */
-    static HashTree createHashTree(FileDesc fd) {
+    static HashTree createHashTree(FileDesc fd) throws IOException {
         if (LOG.isDebugEnabled())
             LOG.debug("creating hashtree for file " + fd);
-        try {
-            return createHashTree(fd.getSize(), fd.createInputStream(),
-                                  fd.getSHA1Urn());
-        } catch(FileNotFoundException fnfe) {
-            LOG.debug(fnfe);
-            return null;
-        }
+        return createHashTree(fd.getSize(), fd.createInputStream(),
+                              fd.getSHA1Urn());
     }
     
     /**
@@ -131,7 +122,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * when no FileDesc exists.
      */
     private static HashTree createHashTree(long fileSize, InputStream is,
-                                           URN sha1) {
+                                           URN sha1) throws IOException {
         int depth = calculateDepth(fileSize);
         
         // don't create more than this many nodes
@@ -154,17 +145,10 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         Assert.that(nodeSize >= fileSize / maxNodes);
         Assert.that(nodeSize < (fileSize / maxNodes) * 2);
 
-        List nodes;
         // do the actual hashing
-        try {
-            nodes = createTTNodes(nodeSize, fileSize, is);
-        } catch (IOException ioe) {
-            LOG.debug(ioe);
-            return null;
-        }
-
+        List nodes = createTTNodes(nodeSize, fileSize, is);
         // calculate the intermediary nodes to get the root hash & others.
-        List allNodes = createAllNodes(nodes);
+        List allNodes = createAllParentNodes(nodes);
         return new HashTree(allNodes, sha1.toString(), fileSize);
     }        
 
@@ -183,8 +167,9 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      *            root hash
      * @param fileSize
      *            the long specifying the size of the File
-     * @return HashTree if we successfully read from the network or null if
-     *         there was an error.
+     * @return HashTree if we successfully read from the network
+     * @throws IOException if there was an error reading from the network
+     *         or if the data was corrupted or invalid in any way.
      */
     public static HashTree createHashTree(InputStream is, String sha1,
                                           String root32, long fileSize)
@@ -299,9 +284,9 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         if(ALL_NODES == null) {
             if(DEPTH <= MAX_DEPTH_TO_STORE)
                 ALL_NODES =
-                    Collections.unmodifiableList(createAllNodes(NODES));
+                    Collections.unmodifiableList(createAllParentNodes(NODES));
             else
-                return createAllNodes(NODES);
+                return createAllParentNodes(NODES);
         }
         
         return ALL_NODES;
@@ -348,6 +333,34 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     /*
      * Static helper methods
      */
+     
+    /*
+     * Create the parent generation of the Merkle HashTree for a given child
+     * generation
+     */
+    static List createParentGeneration(List nodes) {
+        MessageDigest md = new Tiger();
+        int size = nodes.size();
+        size = size % 2 == 0 ? size / 2 : (size + 1) / 2;
+        List ret = new ArrayList(size);
+        Iterator iter = nodes.iterator();
+        while (iter.hasNext()) {
+            byte[] left = (byte[]) iter.next();
+            if (iter.hasNext()) {
+                byte[] right = (byte[]) iter.next();
+                md.reset();
+                md.update(INTERNAL_HASH_PREFIX);
+                md.update(left, 0, left.length);
+                md.update(right, 0, right.length);
+                byte[] result = md.digest();
+                ret.add(result);
+            } else {
+                ret.add(left);
+            }
+        }
+        return ret;
+    }     
+     
 
     /*
      * Create a generation of nodes. It is very important that nodeSize equals
@@ -356,7 +369,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      */
     private static List createTTNodes(int nodeSize, long fileSize,
                                       InputStream is) throws IOException {
-        List ret = new ArrayList();
+        List ret = new ArrayList((int)Math.ceil((double)fileSize/nodeSize));
         MessageDigest tt = new TigerTree();
         byte[] block = new byte[BLOCK_SIZE * 128];
         long offset = 0;
@@ -379,7 +392,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
                 }
                 time = System.currentTimeMillis();
             }
-            // node hashed, add the hash to our internal Vector.
+            // node hashed, add the hash to our internal List.
             ret.add(tt.digest());
             // if read == -1 && offset != fileSize there is something wrong
             if(!(read == -1) == (offset == fileSize))
@@ -397,39 +410,14 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * The 0th element of the returned List will always be a List of size
      * 1, containing a byte[] of the root hash.
      */
-    private static List createAllNodes(List nodes) {
+    private static List createAllParentNodes(List nodes) {
         List allNodes = new ArrayList();
-        allNodes.add(nodes);
+        allNodes.add(Collections.unmodifiableList(nodes));
         while (nodes.size() > 1) {
             nodes = createParentGeneration(nodes);
             allNodes.add(0, nodes);
         }
         return allNodes;
-    }
-
-    /*
-     * Create the parent generation of the Merkle HashTree for a given child
-     * generation
-     */
-    static List createParentGeneration(List nodes) {
-        MessageDigest md = new Tiger();
-        List ret = new ArrayList();
-        Iterator iter = nodes.iterator();
-        while (iter.hasNext()) {
-            byte[] left = (byte[]) iter.next();
-            if (iter.hasNext()) {
-                byte[] right = (byte[]) iter.next();
-                md.reset();
-                md.update(INTERNAL_HASH_PREFIX);
-                md.update(left, 0, left.length);
-                md.update(right, 0, right.length);
-                byte[] result = md.digest();
-                ret.add(result);
-            } else {
-                ret.add(left);
-            }
-        }
-        return ret;
     }
 
     // calculates the next n with 2^n > number

@@ -78,7 +78,7 @@ public final class TigerTreeCache implements Serializable {
     public synchronized HashTree getHashTree(FileDesc fd) {
         HashTree tree = (HashTree) TREE_MAP.get(fd.getSHA1Urn());
         if (tree == null)
-            scheduleForHashing(fd);
+            QUEUE.add(new HashRunner(fd));
         if (LOG.isDebugEnabled() && tree != null)
             LOG.debug("returned hashtree for urn " + 
                       fd.getSHA1Urn() + " -> " + tree.getRootHash() );
@@ -186,10 +186,6 @@ public final class TigerTreeCache implements Serializable {
         }
     }
 
-    private static void scheduleForHashing(FileDesc fd) {
-        QUEUE.add(new HashRunner(fd));
-    }
-
     /**
      * Write cache so that we only have to calculate them once.
      */
@@ -225,8 +221,10 @@ public final class TigerTreeCache implements Serializable {
         }
 
         public void run() {
-            HashTree tree = HashTree.createHashTree(FD);
-            addHashTree(FD.getSHA1Urn(), tree);
+            try {
+                HashTree tree = HashTree.createHashTree(FD);
+                addHashTree(FD.getSHA1Urn(), tree);
+            } catch(IOException ignored) {}
         }
     }
 }

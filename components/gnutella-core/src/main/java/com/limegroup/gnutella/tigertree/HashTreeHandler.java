@@ -22,6 +22,7 @@ import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -139,15 +140,19 @@ class HashTreeHandler {
         DIMERecord xmlRecord = parser.nextRecord();
         DIMERecord treeRecord = parser.nextRecord();
         if(LOG.isDebugEnabled()) {
-            if(parser.hasNext())
-                LOG.debug("more elements in the dime record.");
             LOG.debug("xml id: [" + xmlRecord.getIdentifier() + "]");
             LOG.debug("xml type: [" + xmlRecord.getTypeString() + "]");
             LOG.debug("tree id: [" + treeRecord.getIdentifier() + "]");
             LOG.debug("tree type: [" + treeRecord.getTypeString() + "]");
             LOG.debug("xml type num: [" + xmlRecord.getTypeId() + "]");
             LOG.debug("tree type num: [" + treeRecord.getTypeId() + "]");
-        }   
+        }
+        
+        if(LOG.isWarnEnabled()) {
+            if(parser.hasNext())
+                LOG.warn("more elements in the dime record.");
+        }
+                
         String xml = new String(xmlRecord.getData(), "UTF-8");
         byte[] tree = treeRecord.getData();
         return
@@ -197,7 +202,7 @@ class HashTreeHandler {
             + TREE.getDepth()
             + "' type='"
             + SERIALIZED_TREE_TYPE
-            + "' uri='"
+            + "' uri='uuid:"
             + URI
             + "'/>"
             + XML_TREE_DESC_END;
@@ -250,7 +255,7 @@ class HashTreeHandler {
      * 
      * private class holding the XML Tree description
      */
-    private class XMLTreeDescription {
+    private static class XMLTreeDescription {
         private static final int UNKNOWN = 0;
         private static final int VALID = 1;
         private static final int INVALID = 2;
@@ -260,6 +265,7 @@ class HashTreeHandler {
         private String _algorithm = null;
         private int _hashSize = 0;
         private String _serializationType = null;
+        private String _uri;
         private String data;        
 
         protected XMLTreeDescription(String xml) {
@@ -271,6 +277,13 @@ class HashTreeHandler {
          */
         long getFileSize() {
             return _fileSize;
+        }
+        
+        /**
+         * Accessor for the _uri;
+         */
+        String getURI() {
+            return _uri;
         }
 
         /**
@@ -393,6 +406,7 @@ class HashTreeHandler {
 
         private void parseSerializedtreeElement(Element e) {
             _serializationType = e.getAttribute("type");
+            _uri = e.getAttribute("uri");
             try {
                 // value is ignored, but if it can't be parsed we should add
                 // a notice to the Log
@@ -402,6 +416,7 @@ class HashTreeHandler {
                     LOG.debug("couldn't parse depth: " + e.getNodeValue(),
                               nfe);
             }
+
         }
     }
 
@@ -410,7 +425,7 @@ class HashTreeHandler {
      * 
      * private class holding serialized HashTree
      */
-    private class HashTreeRecord {
+    private static class HashTreeRecord {
         private final byte[] DATA;
         
         protected HashTreeRecord(byte[] data) {
@@ -441,7 +456,7 @@ class HashTreeHandler {
             if (data.length % HASH_SIZE != 0) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("illegal size of data field for HashTreeRecord");
-                // this is not good but we will continue anyway
+                throw new IOException("corrupted hash tree detected");
             }
 
             // read the hashes from the data field
@@ -460,6 +475,8 @@ class HashTreeHandler {
             List parent = null;
             // index of the generation we are working on.
             int genIndex = 0;
+            // whether or not the current row is verified.
+            boolean verified = false;
             
             List allNodes = new ArrayList(depth+1);
             
@@ -492,9 +509,11 @@ class HashTreeHandler {
             // corrupt.
             
             while (genIndex <= depth && hashIterator.hasNext()) {
+                verified = false;
                 byte[] hash = (byte[]) hashIterator.next();
                 generation.add(hash);
                 if (parent == null) {
+                    verified = true;
                     // add generation 0 containing the root hash
                     genIndex++;
                     parent = generation;
@@ -535,16 +554,23 @@ class HashTreeHandler {
                         // the current generation is complete and verified!
                         genIndex++;
                         parent = generation;
-                        allNodes.add(generation);
-                        generation = new ArrayList(parent.size() * 2);
+                        allNodes.add(Collections.unmodifiableList(generation));
+                        // only create room for a new generation if one exists
+                        if(genIndex <= depth && hashIterator.hasNext())
+                            generation = new ArrayList(parent.size() * 2);
+                        verified = true;
                     }
                 }
             } // end of while
             
-            if(genIndex != depth + 1 || genIndex != allNodes.size())
-                throw new IOException("corrupted hash tree detected.");
+            // If the current row was unable to verify, fail.
+            // In mostly all cases, this will occur with the inner if
+            // statement in the above loop.  However, if the last row
+            // is the one that had the problem, the loop will not catch it.
+            if(!verified)
+                throw new IOException("corrupted hash tree detected");
 
-            LOG.debug("Good hash tree received.");
+            LOG.debug("Valid hash tree received.");
             return allNodes;
         }
         
