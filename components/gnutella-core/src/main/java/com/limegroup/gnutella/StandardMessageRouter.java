@@ -53,11 +53,13 @@ public class StandardMessageRouter
         //SPECIAL CASE: for Crawle ping
         if(hops ==1 && ttl==1) {
             handleCrawlerPing(pingRequest);
-            return;
+            //Note that the while handling crawler ping, we dont send our own
+            //pong, as that is unnecessary, since crawler already has our
+            //address. We though return it below for compatibility with old
+            //ConnectionWatchdogPing which had TTL=2 (instead of 1).
         }
         
-        
-        //handle normal ping
+        //send its own ping in all the cases
         int newTTL = hops+1;
         if ( (hops+ttl) <=2)
             newTTL = 1;
@@ -84,7 +86,7 @@ public class StandardMessageRouter
 
     /**
      * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
-     * corresponding to all its neighbors
+     * corresponding to all its leaves
      * @param m The ping request received
      * @exception In case any I/O error occurs while writing Pongs over the
      * connection
@@ -99,7 +101,7 @@ public class StandardMessageRouter
             //get the next connection
             ManagedConnection connection = (ManagedConnection)iterator.next();
             //create the pong for this connection
-            PingReply pr = new PingReply(m.getGUID(),(byte)2,
+            PingReply pr = new PingReply(m.getGUID(), (byte)2,
                 connection.getOrigPort(),
                 connection.getInetAddress().getAddress(), 0, 0); 
             
@@ -114,11 +116,7 @@ public class StandardMessageRouter
         }
         
         //pongs for the neighbors will be sent by neighbors themselves
-        //as ping will be broadcasted to them (since TTL=2)
-        
-        //Note that sending its own pong is not necessary, as the crawler has
-        //already connected to this node, and is not sent therefore. 
-        //May be sent for completeness though
+        //as ping will be broadcasted to them (since TTL=2)        
     }
     
     protected void handlePingReply(PingReply pingReply,
