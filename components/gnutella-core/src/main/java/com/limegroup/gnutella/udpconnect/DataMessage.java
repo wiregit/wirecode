@@ -22,6 +22,7 @@ public class DataMessage extends UDPConnectionMessage {
           /* data                       */ data,
           /* data length                */ datalength
           );
+
     }
 
     /**

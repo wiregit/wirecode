@@ -101,6 +101,7 @@ public class UDPScheduler extends ManagedThread {
         // Fire up the update thread if it isn't running
         if ( _updateThread == null ) {
             _updateThread = new UpdateThread();
+            _updateThread.setDaemon(true);
             _updateThread.start();
         }
 

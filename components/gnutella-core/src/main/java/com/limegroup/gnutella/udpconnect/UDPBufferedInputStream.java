@@ -66,6 +66,13 @@ public class UDPBufferedInputStream extends InputStream {
     }
 
     /**
+     * Just ensure that this call is passed to the detailed local read method.
+     */
+    public int read(byte b[]) throws IOException  {
+        return read(b, 0, b.length);
+    } 
+
+    /**
      * Read the next len byte of data from the input source. Return how much
      * was really read.  
      */
