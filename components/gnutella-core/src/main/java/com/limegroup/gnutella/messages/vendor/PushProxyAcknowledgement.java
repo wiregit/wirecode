@@ -40,7 +40,7 @@ public final class PushProxyAcknowledgement extends VendorMessage {
         // get the ip and  port from the payload....
         QueryReply.IPPortCombo combo = 
             QueryReply.IPPortCombo.getCombo(getPayload());
-        _addr = combo.getAddress();
+        _addr = combo.getInetAddress();
         _port = combo.getPort();
     }
 
