@@ -41,6 +41,11 @@ public class QueryReply extends Message implements Serializable{
     private static final int FALSE=0;
     private static final int UNDEFINED=-1;
 
+    /** The mask for extracting the push flag from the QHD common area. */
+    private static final byte PUSH_MASK=(byte)0x1;
+    /** The mask for extracting the busy flag from the QHD common area. */
+    private static final byte BUSY_MASK=(byte)0x4;
+
 
     /** Creates a new query reply.  The number of responses is responses.length
      *
@@ -51,11 +56,41 @@ public class QueryReply extends Message implements Serializable{
      *    clientGUID.length==16
      */
     public QueryReply(byte[] guid, byte ttl,
-              int port, byte[] ip, long speed, Response[] responses,
-              byte[] clientGUID) {
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID) {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             false, false, false);
+    }
+
+
+    /** 
+     * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
+     * the LIME vendor code and the given busy and push flags.  Note that this
+     * constructor has no support for undefined push or busy bits.
+     *
+     * @param needsPush true iff this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots.  
+     */
+    public QueryReply(byte[] guid, byte ttl, 
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID,
+            boolean needsPush, boolean isBusy) {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             true, needsPush, isBusy);
+    }
+
+    /** 
+     * Internal constructor.  Only creates QHD if includeQHD==true.  
+     */
+    private QueryReply(byte[] guid, byte ttl, 
+             int port, byte[] ip, long speed, Response[] responses,
+             byte[] clientGUID,
+             boolean includeQHD, boolean needsPush, boolean isBusy) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
-              //11 bytes for header, plus file records, plus 16-byte footer
-              11+rLength(responses)+16);
+              //11 bytes for header, plus file records, plus optional 7 byte QHD
+              //without private area, plus 16-byte footer
+              11 + rLength(responses) + (includeQHD ? 4+3 : 0) + 16);
         Assert.that((port&0xFFFF0000)==0);
         Assert.that(ip.length==4);
         Assert.that((speed&0xFFFFFFFF00000000l)==0);
@@ -88,41 +123,42 @@ public class QueryReply extends Message implements Serializable{
             payload[i++]=(byte)0;
         }
 
+        //Write QHD if desired
+        if (includeQHD) {
+            //a) vendor code.  This is hardcoded here for simplicity,
+            //efficiency, and to prevent character decoding problems.
+            payload[i++]=(byte)76; //'L'
+            payload[i++]=(byte)73; //'I'
+            payload[i++]=(byte)77; //'M'
+            payload[i++]=(byte)69; //'E'
+            //b) payload length
+            payload[i++]=(byte)2;
+            //c) common area flags and controls
+            payload[i++]=(byte)((needsPush ? PUSH_MASK : (byte)0) 
+                | (isBusy ? BUSY_MASK : (byte)0));
+            payload[i++]=PUSH_MASK | BUSY_MASK;  //always defined
+        }        
+
         //Write footer at payload[i...i+16-1]
         for (int j=0; j<16; j++) {
             payload[i+j]=clientGUID[j];
         }
     }
 
-    /** 
-     * Exactly the other constructor, but includes a BearShare 2.2.0-style QHD.
-     * <b>TODO: this is currently stubbed out.</b>
-     *
-     * @param vendor the vendor code, typically "LIME".  
-     *  REQUIRES: vendor.size()==4.
-     * @param needsPush true if this is firewalled and the downloader should
-     *  attempt a push without trying a normal download.
-     * @param isBusy true if this server is busy, i.e., has no more upload slots
-     */
-    public QueryReply(byte[] guid, byte ttl, int port, byte[] ip, long speed,
-                      Response[] responses, byte[] clientGUID,
-                      String vendor, boolean needsPush, boolean isBusy) {
-        //Implement!
-        this(guid, ttl, port, ip, speed, responses, clientGUID);
-    }
-
 
     /**
-    * Creates a new query reply from the passed query Reply. The new one is
-    * same as the passed one, but with different specified GUID
+    * Copy constructor.  Creates a new query reply from the passed query
+    * Reply. The new one is same as the passed one, but with different specified
+    * GUID.<p>
+    *
+    * Note: The payload is not really copied, but the reference in the newly
+    * constructed query reply, points to the one in the passed reply.  But since
+    * the payload cannot be mutated, it shouldn't make difference if different
+    * query replies maintain reference to same payload
+    *
     * @param guid The new GUID for the reply
     * @param reply The query reply from where to copy the fields into the
-    * new constructed query reply
-    * Note: The payload is not really copied, but the reference in the newly
-    * constructed query reply, points to the one in the passed reply.
-    * but since the payload is not meant to be
-    * mutated, it shouldnt make difference if different query replies
-    * maintain reference to same payload
+    *  new constructed query reply 
     */
     public QueryReply(byte[] guid, QueryReply reply){
         //call the super constructor with new GUID
@@ -369,10 +405,8 @@ public class QueryReply extends Message implements Serializable{
             } else {                //BearShare 2.2.0+
                 byte flags=payload[i];
                 byte control=payload[i+1];                
-                final int PUSH_MASK=0x1;
                 if ((control & PUSH_MASK)!=0)
                     pushFlagT = (flags&PUSH_MASK)!=0 ? TRUE : FALSE;
-                final int BUSY_MASK=0x4;
                 if ((control & BUSY_MASK)!=0)
                     busyFlagT = (flags&BUSY_MASK)!=0 ? TRUE : FALSE;
 //              System.out.println("Got extended QHD");
@@ -400,6 +434,7 @@ public class QueryReply extends Message implements Serializable{
         } 
     }
 
+
     /** Returns the 16 byte client ID (i.e., the "footer") of the
      *  responding host.  */
     public byte[] getClientGUID() {
@@ -417,6 +452,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Unit test */
+    /*
     public static void main(String args[]) {
         byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
         long u4=0x00000000FFFFFFFFl;
@@ -670,6 +706,75 @@ public class QueryReply extends Message implements Serializable{
         } catch (BadPacketException e) {
             System.out.println(e.toString());
             Assert.that(false);
-        }    
-    }
-}
+        }  
+
+        //Create extended QHD from scratch
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid,
+                          false, true);
+        Assert.that(qr.getIP().equals("255.0.0.1"));
+        Assert.that(qr.getPort()==0xFFFF);
+        Assert.that(qr.getSpeed()==u4);
+        Assert.that(Arrays.equals(qr.getClientGUID(),guid));
+        try {
+            Iterator iter=qr.getResults();
+            Response r1=(Response)iter.next();
+            Assert.that(r1.equals(responses[0]));
+            Response r2=(Response)iter.next();
+            Assert.that(r2.equals(responses[1]));
+            Assert.that(!iter.hasNext());
+            Assert.that(qr.getVendor().equals("LIME"));
+            Assert.that(qr.getNeedsPush()==false);
+            Assert.that(qr.getIsBusy()==true);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+            Assert.that(false);
+        }
+
+        //Create extended QHD from scratch with different bits set
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid,
+                          true, false);
+        try {
+            Assert.that(qr.getVendor().equals("LIME"));
+            Assert.that(qr.getNeedsPush()==true);
+            Assert.that(qr.getIsBusy()==false);
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+            Assert.that(false);
+        }
+
+        //Create from scratch with no bits set
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid);
+        try {
+            qr.getVendor();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            qr.getNeedsPush();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            qr.getIsBusy();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        
+    } //end unit test
+    */
+} //end QueryReply
+    
