@@ -4,7 +4,11 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 
 /**
- * This class handles the thread that dispatched dynamic queries for Ultrapeers.
+ * This class handles the thread that dispatches dynamic queries for Ultrapeers.
+ * This maintains the data for all active queries for this Ultrapeer and any
+ * of its leaves, also providing an interface for removing active queries.
+ * Queries may be removed, for example, when a leaf node with an active query
+ * disconnects from the Ultrapeer.
  */
 public final class QueryDispatcher implements Runnable {
 
