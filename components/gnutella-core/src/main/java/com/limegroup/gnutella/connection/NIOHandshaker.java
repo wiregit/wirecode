@@ -22,18 +22,41 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  */
 public class NIOHandshaker extends AbstractHandshaker {
 
+    /**
+     * Wrapper for the <tt>Buffer</tt> containing response data.
+     */
     private WriteHeaderWrapper _responseBuffer;
 
+    /**
+     * Wrapper for the <tt>Buffer</tt> containing request data.
+     */    
     private WriteHeaderWrapper _requestBuffer;
 
+    /**
+     * <tt>HandshakeResponse</tt> containing the handshake response headers 
+     * and status line we return to the remote host.
+     */
     private HandshakeResponse _ourResponse;
 
+    /**
+     * The current state of handshake writing, following the state pattern.
+     */
     private HandshakeWriteState _writeState;
 
+    /**
+     * The current state of handshake reading, following the state pattern.
+     */
     private HandshakeReadState _readState;
 
+    /**
+     * Variable for the number of handshake attempts for determining when to
+     * give up on authenticated handshakes.
+     */
     private int _handshakeAttempts;
     
+    /**
+     * Flag for whether or not an incoming connection is coming from a crawler.
+     */
     private boolean _isCrawler;
     
     /**
@@ -496,7 +519,7 @@ public class NIOHandshaker extends AbstractHandshaker {
             _responseBuffer = 
                 new WriteHeaderWrapper(
                     GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
-                    _ourResponse.props());
+                        _ourResponse.props());
             
             // Proceed to write our response if we're not already registered
             // for write events. If we are registered for write events, we'll
@@ -506,6 +529,9 @@ public class NIOHandshaker extends AbstractHandshaker {
                 write();
             }
     
+            if(_headerReader.hasRemainingData()) {
+                System.out.println("extra data after outgoing handshake!!!");
+            }
             // we're all done with reading
             return null;
         }
