@@ -105,16 +105,17 @@ public final class ID3Reader {
             str = str+" genre=\""+genre+"\"";
         if(!year.equals(""))
             //str = str+"<year>"+year+"</year>";
-            str = str+"< year=\""+year+"\"";
+            str = str+" year=\""+year+"\"";
         if(!comment.equals(""))
             //str = str+"<comments>"+comment+"</comments>";
             str = str+" comments=\""+comment+"\"";
         if(bitrate > 0)
             str = str+" bitrate=\""+bitrate+"\"";
-        if(solo)
+        if(solo){
             //str = str+"</audio>";
             str = str+"/>";
-        str=str+"</audios>";
+            str=str+"</audios>";
+        }
         
         randomAccessFile.close();
         //System.out.println("SumeetID3Reader XMLString="+str);
