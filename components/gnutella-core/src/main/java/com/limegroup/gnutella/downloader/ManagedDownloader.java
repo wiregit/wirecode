@@ -1719,6 +1719,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             while(true) { //while queued, connect and sleep if we queued
                 int[] a = {-1};//reset the sleep value
                 connected = assignAndRequest(dloader,a,http11);
+                if(connected == 4) //an uploader we want to stay connected with
+                    continue; // and has partial ranges
                 if(connected!=1)
                     break;
                 if(!wasQueued) {
@@ -1966,6 +1968,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * otherwise if queued return 1
      * otherwise if connected successfully return 2
      * otherwise if NoSuchElement( we have no areas to steal) return 3
+     * otherwise if rfd was partial uploader and gave us ranges to try return 4
      */
     private int assignAndRequest(HTTPDownloader dloader,int[] refSleepTime,
                                                                boolean http11) {
@@ -1982,21 +1985,28 @@ public class ManagedDownloader implements Downloader, Serializable {
             } catch(NoSuchElementException nsex) {
                 if(RECORD_STATS)
                     DownloadStat.NSE_EXCEPTION.incrementStat();
-                //if thrown in assignGrey.The downloader we were trying to steal
+                //thrown in assignGrey.The downloader we were trying to steal
                 //from is not mutated.  DO NOT CALL updateNeeded() here!
-                //if thrown in assignWhite, no range was assigned to the
-                //uploader.  DO NOT CALL updateNeeded() here either!
                 Assert.that(updateNeeded == false,
                             "updateNeeded not false in assignAndRequest");
                 debug("nsex thrown in assingAndRequest "+dloader);
                 synchronized(this) {
-                    // Add to busy, not files.
-                    // We either don't need the range right now or the
-                    // range isn't available... we'll try again in a minute
-                    // if everyone else dies.
-                    busy.add(dloader.getRemoteFileDesc());
+                    // Add to files, keep checking for stalled uploader with
+                    // this rfd
+                    files.add(dloader.getRemoteFileDesc());
                 }
                 return 3;
+            } catch (NoSuchRangeException nsrx) { 
+                if(RECORD_STATS)
+                    DownloadStat.NSR_EXCEPTION.incrementStat();
+                debug("nsrx thrown in assignAndRequest"+dloader);
+                synchronized(this) {
+                    RemoteFileDesc rfd = dloader.getRemoteFileDesc();
+                    //forget the ranges we are preteding uploader is busy.
+                    rfd.setAvailableRanges(null);
+                    busy.add(rfd);
+                }
+                return 0;                
             } catch(TryAgainLaterException talx) {
                 if(RECORD_STATS)
                     DownloadStat.TAL_EXCEPTION.incrementStat();
@@ -2009,10 +2019,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(RECORD_STATS)
                     DownloadStat.RNA_EXCEPTION.incrementStat();
                 debug("rnae thrown in assignAndRequest"+dloader);
-                synchronized(this) {
-                    busy.add(dloader.getRemoteFileDesc());//try this rfd later
-                }
-                return 0;
+                return 4; //no need to add to files or busy we keep iterating
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
@@ -2177,111 +2184,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     /**
-     * Extracts the first needed partial range from an HTTPDownloader.
-     * May throw NoSuchElementException if no elements are needed.
-     * Requires this' monitor is held.
-     *
-     * @return the first needed partial range from an HTTP Downloader.
-     * @throws NoSuchElementException if it has no elements that are neded
-     * @require this' monitor is held.
-     */
-    private Interval getNeededPartialRange(HTTPDownloader dloader)
-      throws NoSuchElementException {
-        List availableRanges =
-            dloader.getRemoteFileDesc().getAvailableRanges();
-        Interval ret = null;
-
-        // go through the list of needed ranges and match each one
-        // against the list of available ranges.
-        for (int i = 0; i < needed.size(); i++) {
-            // this is the interval we are going to match against
-            // the available ranges now
-            Interval need = (Interval)needed.get(i);
-            // go through the list of available ranges
-            for (int k = 0; k < availableRanges.size(); k++) {
-                // test this available range now but make sure
-                // to account for the OVERLAP_BYTES requested by
-                // the ManagedDownloader.
-                Interval available = (Interval)availableRanges.get(k);
-                available = addOverlap(available);
-                
-                // when the overlap was added, the range wasn't large
-                // enough, or the two ranges don't overlap...
-                if( available == null || !need.overlaps(available) )
-                    continue;
-                    
-                // we found a match! Remove the needed interval
-                ret = (Interval)needed.remove(i);
-
-                // set the high end of the interval to
-                // request. put the rest back.
-                if ( available.high < ret.high ) {
-                    addToNeeded( new Interval(
-                        available.high + 1, ret.high ) );
-                    ret = new Interval( 
-                        ret.low, available.high );
-                }
-
-                // set the low end of the interval 
-                // to request. Put the rest back.
-                if ( available.low > ret.low ) {
-                    addToNeeded( new Interval(
-                        ret.low, available.low -1 ) );
-                    ret = new Interval( 
-                        available.low, ret.high);
-                }
-                       
-                // leave the inner for loop, because we
-                // found a match.
-                break;
-            }
-            if (ret != null) {
-                // we obviously found a match, 
-                // so we will break here.
-                break;
-            }
-        }
-        
-        if( ret == null )
-            throw new NoSuchElementException("no partial range is needed");
-            
-        return ret;
-    }
-    
-    /**
-     * Returns a new chunk that is less than CHUNK_SIZE.
-     * This reduces the high value of the interval.
-     * Adds what was cut off to needed.
-     * Requires this' monitor is held.
-     *
-     * @return a new (smaller) interval up to CHUNK_SIZE.
-     * @require this' monitor is held
-     */
-    private Interval fixIntervalForChunk(Interval temp) {
-        Interval interval;
-        if((temp.high-temp.low+1) > CHUNK_SIZE) {
-            int max = temp.low+CHUNK_SIZE-1;
-            interval = new Interval(temp.low, max);
-            temp = new Interval(max+1,temp.high);
-            // this is not strictly necessary, as we know
-            // the interval will always be added at element 0.
-            // for efficiency, we could simply call needed.add(0, temp)
-            addToNeeded(temp);
-        } 
-        else { //temp's size <= CHUNK_SIZE
-            interval = temp;
-        }
-        
-        return interval;
-    }
-    
-    /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
     private void assignWhite(HTTPDownloader dloader, boolean http11) throws 
     IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException, NoSuchElementException {
+    NotSharingException , QueuedException, NoSuchRangeException {
         //Assign "white" (unclaimed) interval to new downloader.
         //TODO2: assign to existing downloader if possible, without
         //      increasing parallelis
@@ -2331,13 +2239,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * area to a new HTTPDownloader, if the current downloader is going too
      * slow.
      */
-    private void assignGrey(HTTPDownloader dloader, boolean http11) 
-        throws NoSuchElementException,  IOException, TryAgainLaterException, 
-               FileNotFoundException, NotSharingException, QueuedException {
+    private void assignGrey(HTTPDownloader dloader, boolean http11) throws
+    NoSuchElementException,  IOException, TryAgainLaterException, 
+    QueuedException, FileNotFoundException, NotSharingException,  
+    NoSuchRangeException  {
         //If this dloader is a partial source, don't attempt to steal...
         //to confusing, too many problems, etc...
         if( dloader.getRemoteFileDesc().isPartialSource() )
-            throw new NoSuchElementException();
+            throw new NoSuchRangeException();
                 
                 
         //Split largest "gray" interval, i.e., steal part of another
@@ -2408,6 +2317,93 @@ public class ManagedDownloader implements Downloader, Serializable {
             debug("WORKER: assigning split grey "
                   +start+"-"+stop+" from "+biggest+" to "+dloader);
         }
+    }
+
+    /**
+     * Extracts the first needed partial range from an HTTPDownloader.
+     * May throw NoSuchElementException if no elements are needed.
+     * Requires this' monitor is held.
+     *
+     * @return the first needed partial range from an HTTP Downloader.
+     * @throws NoSuchElementException if it has no elements that are neded
+     */
+    private synchronized Interval getNeededPartialRange(HTTPDownloader dloader)
+      throws NoSuchRangeException {
+        List availableRanges =
+            dloader.getRemoteFileDesc().getAvailableRanges();
+        Interval ret = null;
+
+        // go through the list of needed ranges and match each one
+        // against the list of available ranges.
+        for (int i = 0; i < needed.size(); i++) {
+            // this is the interval we are going to match against
+            // the available ranges now
+            Interval need = (Interval)needed.get(i);
+            // go through the list of available ranges
+            for (int k = 0; k < availableRanges.size(); k++) {
+                // test this available range now but make sure
+                // to account for the OVERLAP_BYTES requested by
+                // the ManagedDownloader.
+                Interval available = (Interval)availableRanges.get(k);
+                available = addOverlap(available);
+                
+                // when the overlap was added, the range wasn't large
+                // enough, or the two ranges don't overlap...
+                if( available == null || !need.overlaps(available) )
+                    continue;
+
+                ret = (Interval)needed.remove(i);
+                
+                //check if high end needs truncation
+                if (ret.high > available.high ) {
+                    ret = new Interval(ret.low, available.high );
+                    addToNeeded(new Interval(ret.high+1,need.high));
+                }
+                //check if low end needs trucncation
+                if ( ret.low < available.low ) {
+                    ret = new Interval(available.low, ret.high);
+                    addToNeeded(new Interval(need.low, ret.low-1));
+                }
+
+                break;//found a match, exit loop
+            } //end of inner
+
+            if (ret != null) //found a match, break
+                break;
+
+        } //end of outer
+        
+        if( ret == null )
+            throw new NoSuchRangeException("no partial range is needed");
+            
+        return ret;
+    }
+    
+    /**
+     * Returns a new chunk that is less than CHUNK_SIZE.
+     * This reduces the high value of the interval.
+     * Adds what was cut off to needed.
+     * Requires this' monitor is held.
+     *
+     * @return a new (smaller) interval up to CHUNK_SIZE.
+     * @require this' monitor is held
+     */
+    private Interval fixIntervalForChunk(Interval temp) {
+        Interval interval;
+        if((temp.high-temp.low+1) > CHUNK_SIZE) {
+            int max = temp.low+CHUNK_SIZE-1;
+            interval = new Interval(temp.low, max);
+            temp = new Interval(max+1,temp.high);
+            // this is not strictly necessary, as we know
+            // the interval will always be added at element 0.
+            // for efficiency, we could simply call needed.add(0, temp)
+            addToNeeded(temp);
+        } 
+        else { //temp's size <= CHUNK_SIZE
+            interval = temp;
+        }
+        
+        return interval;
     }
 
     /**

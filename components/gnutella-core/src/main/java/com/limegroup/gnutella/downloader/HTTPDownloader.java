@@ -232,10 +232,16 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception FileNotFoundException the host doesn't recognize the file
      * @exception NotSharingException the host isn't sharing files (BearShare)
      * @exception IOException miscellaneous  error 
+     * @exception QueuedException uploader has queued us
+     * @exception RangeNotAvailableException uploader has ranges 
+     * other than requested
+     * @exception ProblemReadingHeaderException could not parse headers
+     * @exception UnknownCodeException unknown response code
      */
     public void connectHTTP(int start, int stop, boolean supportQueueing) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
-               NotSharingException, QueuedException {
+             NotSharingException, QueuedException, RangeNotAvailableException,
+             ProblemReadingHeaderException, UnknownCodeException {
 
         _amountToRead = stop-start;
         _totalAmountRead += _amountRead;

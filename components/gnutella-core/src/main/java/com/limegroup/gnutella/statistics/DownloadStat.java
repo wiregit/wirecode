@@ -122,6 +122,12 @@ public class DownloadStat extends AdvancedStatistic {
     public static final Statistic IO_EXCEPTION =
         new DownloadStat();
 
+
+    /**
+     * Statistic for the number of NoSuchRangeExceptions while downloading.
+     */
+    public static final Statistic NSR_EXCEPTION = new DownloadStat();
+
     /**
      * Statistic for the number of 'ok' responses while downloading.
      */
