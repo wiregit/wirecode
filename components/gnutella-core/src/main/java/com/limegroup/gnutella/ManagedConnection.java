@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 
@@ -194,13 +195,25 @@ public class ManagedConnection
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
+    
+    /**
+     * The host to which are opening connection
+     */
+    private String _host = null;
 
+    /**
+	 * Constant handle to the <tt>SettingsManager</tt> for accessing
+	 * various properties.
+	 */
+	private final SettingsManager SETTINGS = SettingsManager.instance();
+    
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
                       int port,
                       MessageRouter router,
                       ConnectionManager manager) {
         this(host, port, router, manager, false);
+        this._host = host;
     }
 
     /**
@@ -214,7 +227,7 @@ public class ManagedConnection
                       ConnectionManager manager,
                       boolean isRouter) {
         super(host, port, new LazyProperties(router),
-            new AuthenticationHandshakeResponder(manager),true);
+            new AuthenticationHandshakeResponder(manager, host),true);
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
@@ -233,7 +246,8 @@ public class ManagedConnection
     ManagedConnection(Socket socket,
                       MessageRouter router,
                       ConnectionManager manager) {
-        super(socket, new AuthenticationHandshakeResponder(manager));
+        super(socket, new AuthenticationHandshakeResponder(manager,
+            socket.getInetAddress().getHostAddress()));
         _router = router;
         _manager = manager;
 
@@ -808,34 +822,84 @@ public class ManagedConnection
     }
     
     /**
-     * A very simple responder to be used by client-nodes during the
-     * connection handshake while accepting incoming connections
+     * An authentication-capable responder to be used during handshake.
      */
     private static class AuthenticationHandshakeResponder 
         implements HandshakeResponder{
-        ConnectionManager _manager;
+            
+        /**
+         * Constant handle to the <tt>Cookies</tt> for authentication
+         * purposes
+         */
+        private final Cookies COOKIES = Cookies.instance();    
         
-        public AuthenticationHandshakeResponder(ConnectionManager manager){
+        /**
+         * An instance of connection manager (to reference other stuff
+         * held by connection manager)
+         */
+        private ConnectionManager _manager;
+        
+        /**
+         * The host to which are opening connection
+         */
+        private String _host = null;
+        
+        /**
+         * Flag indicating whether its the first response as part of the
+         * handshake 
+         */
+        private boolean _firstResponse = true;
+        
+        /**
+         * Creates a new instance
+         * @param manager Instance of connection manager. managing this 
+         * connection
+         * @param host The host with whom we are handshaking
+         */
+        public AuthenticationHandshakeResponder(ConnectionManager manager,
+            String host){
             this._manager = manager;
+            this._host = host;
         }
         
+        //inherit doc comment
         public HandshakeResponse respond(HandshakeResponse response, 
             boolean outgoing) throws IOException{
-            int code = 200;
-            String message = "OK";
-            
-            //set common properties
-            Properties ret=new Properties();
-            ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
-            ret.setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            Properties ret = null;
+            int code = HandshakeResponse.OK;
+            String message = HandshakeResponse.OK_MESSAGE;
             
             //do stuff specific to connection direction
-            if(!outgoing){
-                //client should never accept the connection. Therefore, set the
-                //appropriate status
-                code = 503;
-                message = "I am a shielded client";
- 
+            if(outgoing){
+                //check the code we received from the other side
+                //if authentication needed
+                if(response.getStatusCode() 
+                    == HandshakeResponse.UNAUTHORIZED_CODE){
+                    //Authenticate
+                    User user = null;
+                    //first try with cookie
+                    if(_firstResponse && _host != null){
+                        //try using the cookie if we have
+                        user = COOKIES.getUserInfo(_host);
+                    }
+                    
+                    //if we dont have cookie, of we have already used the
+                    //cookie, then get the information interactively from user
+                    if(user == null){
+                        
+                    }
+                    
+                }
+            }
+            
+            //if first response, add the headers
+            if(_firstResponse){
+                //turn the flag off
+                _firstResponse = false;
+                //set common properties
+                ret=new Properties();
+                ret.setProperty(
+                    ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
             }
             
             return new HandshakeResponse(code, message, ret);

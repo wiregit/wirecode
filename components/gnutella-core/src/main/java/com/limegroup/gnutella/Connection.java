@@ -74,6 +74,12 @@ public class Connection {
     /** End of line for Gnutella 0.4 */
     public static final String LF="\n";
     
+    /**
+     * The number of times we will respond to a given challenge 
+     * from the other side, or otherwise, during connection handshaking
+     */
+    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;
+    
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.4 connection.
@@ -237,12 +243,33 @@ public class Connection {
         else {
             //1. Send "GNUTELLA CONNECT" and headers
             sendString(GNUTELLA_CONNECT_06+CRLF);
-            sendHeaders(_propertiesWrittenP);                
-            //2. Read "GNUTELLA /0.6 200 OK" and headers.  We require that the
-            //response be at the same protocol level as we sent out.  This is
-            //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
-            //respond with "GNUTELLA OK", only to be confused by the headers
-            //later.
+            sendHeaders(_propertiesWrittenP);      
+            
+            //conclude the handshake (This may involve exchange of 
+            //information multiple times with the host at the other end).
+            concludeOutgoingHandshake();
+        }
+    }
+    
+    /**
+     * Responds to the responses/challenges from the host on the other
+     * end of the connection, till a conclusion reaches. Handshaking may
+     * involve multiple steps.
+     * @exception IOException Thrown for variety of reasons, including 
+     * I/O error reading/writing
+     * over the connection, bad response from the other side, and
+     * unreachable conclusion
+     */
+    private void concludeOutgoingHandshake() throws IOException
+    {
+        //2. Read "GNUTELLA /0.6 200 OK" and headers.  We require that the
+        //response be at the same protocol level as we sent out.  This is
+        //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
+        //respond with "GNUTELLA OK", only to be confused by the headers
+        //later.
+        //2.a) This step may involve handshaking multiple times so as
+        //to support challenge/response kind of behaviour
+        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
             String connectLine = readLine();
             //check if the protocol is fine. We dont worry here about the 
             //status code (which dictates whether the connection will 
@@ -252,23 +279,30 @@ public class Connection {
             //read the headers
             _propertiesRead=new Properties();
             readHeaders();
-            
-            //if the connection was accepted (with 200 OK), we should go to the
-            //third step and send back our headers
-            if (! connectLine.equals(GNUTELLA_OK_06)){
-                throw new IOException("Bad connect string");
-            }
-            else{
-                //3. Send our response and headers
-                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
-                    new HandshakeResponse(_propertiesRead), true);
-                
-                sendString(GNUTELLA_06 + " " 
-                    + ourResponse.getStatusLine() + CRLF);
-                sendHeaders(ourResponse.getHeaders());
+
+            //Make up our response and headers
+            HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+                new HandshakeResponse(connectLine.substring(
+                GNUTELLA_06.length()).trim(), _propertiesRead), true);
+
+            //send the response and headers
+            sendString(GNUTELLA_06 + " " 
+                + ourResponse.getStatusLine() + CRLF);
+            sendHeaders(ourResponse.getHeaders());
+
+            //if our response was 200 OK, return from the method, we are
+            //done with the handshaking
+            if(ourResponse.getStatusCode() == HandshakeResponse.OK){
+                return;
             }
         }
+            
+        //if we didnt successfully return out of the method, throw an 
+        //I/O Exception to indicate that handshaking didnt reach any
+        //conclusion
+        throw new IOException("Too much handshaking, no conclusion");
     }
+    
 
     /** Sends and receives handshake strings for incoming connections,
      *  throwing IOException if any problems. */
@@ -339,17 +373,23 @@ public class Connection {
     /**
      * Writes the properties in props to network, including the blank line at
      * the end.  Throws IOException if there are any problems.
-     *    @modifies network 
+     * @param props The headers to be sent. Note: null argument is 
+     * acceptable, if no headers need to be sent (still the trailer will
+     * be sent
+     * @modifies network 
      */
     private void sendHeaders(Properties props) throws IOException {
-        Enumeration enum=props.propertyNames();
-        while (enum.hasMoreElements()) {
-            String key=(String)enum.nextElement();
-            String value=props.getProperty(key);
-            if (value==null)
-                value="";
-            sendString(key+": "+value+CRLF);            
+        if(props != null){
+            Enumeration enum=props.propertyNames();
+            while (enum.hasMoreElements()) {
+                String key=(String)enum.nextElement();
+                String value=props.getProperty(key);
+                if (value==null)
+                    value="";
+                sendString(key+": "+value+CRLF);            
+            }
         }
+        //send the trailer
         sendString(CRLF);
     }
 
