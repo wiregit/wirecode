@@ -26,27 +26,27 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
 	 * shared file data structure.
 	 */
-    public final int _index;
+    private final int _index;
 
 	/**
 	 * The absolute path for the file.
 	 */
-    public final String _path;
+    private final String _path;
 
 	/**
 	 * The name of the file, as returned by File.getName().
 	 */
-    public final String _name;
+    private final String _name;
 
 	/**
 	 * The size of the file, casted to an <tt>int</tt>.
 	 */
-    public final int _size;
+    private final int _size;
 
 	/**
 	 * The modification time of the file, which can be updated.
 	 */
-    public long _modTime;
+    private long _modTime;
 
 	/**
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
@@ -71,19 +71,6 @@ public final class FileDesc implements AlternateLocationCollector {
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
-		
-    /**
-     * Constructs a new <tt>FileDesc</tt> instance from the specified 
-	 * <tt>File</tt> class, calculating the hash as needed.   Same
-     * as FileDesc(file, calculateAndCacheURN(file), index).
-     *
-	 * @param file the <tt>File</tt> instance to use for constructing the
-	 *  <tt>FileDesc</tt>
-     * @param index the index in the FileManager
-     */
-    public FileDesc(File file, int index) {
-        this(file, calculateAndCacheURN(file), index);
-    }
 
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -106,6 +93,10 @@ public final class FileDesc implements AlternateLocationCollector {
 												"permitted in FileDesc: " +
 												index);
 		}
+		if(urns == null) {
+			throw new NullPointerException("cannot create a FileDesc with "+
+										   "a null URN Set");
+		}
 		// make a defensive copy
 		FILE = new File(file.getAbsolutePath());
         _index = index;
@@ -113,7 +104,7 @@ public final class FileDesc implements AlternateLocationCollector {
         _path = FILE.getAbsolutePath(); //TODO: right method?
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();
-        URNS=urns;
+        URNS = urns;
     }		
 
     /** 
@@ -206,7 +197,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * @return the <tt>File</tt> instance for this <tt>FileDesc</tt>
 	 */
 	public File getFile() {
-		return FILE;
+		return new File(FILE.getAbsolutePath());
 	}
 
 	/**
@@ -219,6 +210,16 @@ public final class FileDesc implements AlternateLocationCollector {
 	 */
 	public Set getUrns() {
 		return URNS;
+	}
+
+	/**
+	 * Returns the absolute path of the file represented wrapped by this
+	 * <tt>FileDesc</tt>.
+	 *
+	 * @return the absolute path of the file
+	 */
+	public String getPath() {
+		return FILE.getAbsolutePath();
 	}
 
 
