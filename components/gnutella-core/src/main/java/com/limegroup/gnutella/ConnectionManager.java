@@ -1784,7 +1784,7 @@ public class ConnectionManager {
                 long curTime = System.currentTimeMillis();
                 if(_connectionAttempts > 40 && 
                    ((curTime - _lastSuccessfulConnect)>2000) &&
-                   ((curTime - _lastConnectionCheck)>60000)) {
+                   ((curTime - _lastConnectionCheck)>120000)) {
                     _connectionAttempts = 0;
                     _lastConnectionCheck = curTime;
                     LOG.debug("checking for live connection");
