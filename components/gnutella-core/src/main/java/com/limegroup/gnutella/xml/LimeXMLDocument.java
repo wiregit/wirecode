@@ -19,7 +19,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Element;
 import java.util.Collection;
 import java.util.Iterator;
-
+import java.util.Vector;
 
 /**
  * @author  Sumeet Thadani
@@ -28,6 +28,9 @@ import java.util.Iterator;
  * Names of fields to the values as per a XML document.
  */
 public class LimeXMLDocument{
+
+    //TODO2: Need to build in the ability to work with multiple instances
+    //of some fields. 
     
     public Map fieldToValue;
     
@@ -163,30 +166,39 @@ public class LimeXMLDocument{
      * the XML Document.
      */
     public List getNameValueList() {
-        //TODO
-        //return an instance of ArrayList <NameValue>
-        return null;
+        int size = fieldToValue.size();
+        Iterator keys = fieldToValue.keySet().iterator();
+        List retList = new Vector();
+        for(int i=0; i< size; i++){
+            String name = (String)keys.next();
+            String value  = (String)fieldToValue.get(name);
+            NameValue namVal = new NameValue(name,value);
+            retList.add(namVal);
+        }
+        return retList;
     }
 
     //Unit Tester
-    public static void main(String args[]){
-        //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
+    /*
+      public static void main(String args[]){
+      //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
+      /*
         Runtime rt = Runtime.getRuntime();
         long mem = rt.totalMemory()- rt.freeMemory();
         System.out.println("Sumeet : Used memory is "+mem);
         File f = new File("C:/home/etc/xml","all-books-pub.xml");
         LimeXMLDocument l = new LimeXMLDocument(f);
-        Map m = l.fieldToValue;
-        int size = m.size();
-        long mem1 = rt.totalMemory()- rt.freeMemory();
-        System.out.println("Sumeet : Used memory is "+mem1);
-        Iterator keys = m.keySet().iterator();
-        for(int j =0; j<size; j++){
-            String key = (String)keys.next();            
-            String value = (String)m.get(key);
-            System.out.println("Sumeet: key "+key+"|");
-            System.out.println("Sumeet: value "+value+"|");
-        } 
-    }
+        List list = l.getNameValueList();
+        int size = list.size();
+        for (int i =0; i< size; i++){
+        NameValue a = (NameValue)list.get(i);
+        String name = a.getName();
+        String value = (String)a.getValue();
+        System.out.println("Sumeet : name "+name);
+        System.out.println("Sumeet : value "+value);
+        }
+        }
+    */
 }
+
 
