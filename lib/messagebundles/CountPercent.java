@@ -204,11 +204,18 @@ public class CountPercent {
     
     private void buildStartOfPage(StringBuffer page) {
         page.append(
-"<table width=\"100%\" border=\"0\" cellpadding=\"1\" cellspacing=\"0\">\n" + 
+
+"<html>\n" + 
+"<head>\n" +
+"<!--#include virtual=\"/includes/top.html\" -->\n" +
+"<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
+  "<tr>\n" +
+    "<td valign=\"top\" colspan=2>\n" +
+	"<div id=\"bod1\">\n" +
+	"<h1>Help Internationalize LimeWire</h1>\n" +
+"<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n" + 
 "<tr>\n" +
- "<td valign=\"top\">\n" +
-  "<b>Help Internationalize LimeWire</b><br>\n" + 
-  "<br>\n" +
+"<td valign=\"top\" style=\"line-height : 16px;\">\n" +
   "The LimeWire Open Source project has embarked on an effort to " +
   "internationalize LimeWire. This involves efforts not just by programmers and " +
   "developers, but also avid LimeWire users who are bilingual. If you are an " +
@@ -443,11 +450,13 @@ public class CountPercent {
 "//--></script><noscript><a href=\"#\">(Email address protected by JavaScript:\n" +
   "please enable JavaScript to contact me)</a></noscript>.\n" +
   "<i>We will review " +
-  "your translations and integrate them into our existing versions after review.</i><br>\n" +
+  "your translations and integrate them into our existing versions after review.</i><br><br>\n" +
+  "<br>\n" +
  "</td>\n" + 
+ "<td>&nbsp;&nbsp;&nbsp;</td>\n" +
  "<td valign=\"top\">\n" +
-  "<table border=\"0\" cellspacing=\"1\" cellpadding=\"4\" bgcolor=\"#CC0033\" width=\"270\">\n" +
-  "<tr bgcolor=\"#D9E3F2\">\n" + 
+  "<table border=\"0\" cellspacing=\"1\" cellpadding=\"4\" bgcolor=\"#b1b1b1\" width=\"270\">\n" +
+  "<tr bgcolor=\"#EFEFEF\">\n" + 
    "<td valign=\"top\"><br>\n" +
     "<b>LAST UPDATED: <font color=\"#FF0000\">" + df.format(new Date()) + "</font><br>\n" +
      "<br>\n" +
@@ -522,7 +531,10 @@ public class CountPercent {
         page.append(
  "</td>\n" +
 "</tr>\n" +
-"</table>\n"
+"</table>\n" +
+	"</div>\n" +
+    "</td>\n" +
+"<!--#include virtual=\"/includes/bottom.html\" -->"
 );
     }
     
