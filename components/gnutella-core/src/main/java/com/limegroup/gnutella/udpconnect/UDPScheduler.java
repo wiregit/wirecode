@@ -173,13 +173,14 @@ public class UDPScheduler extends ManagedThread {
 		}
 	}
 
+	static class NoEvent extends UDPTimerEvent {
+		public NoEvent(long time) {
+			super(time);
+		}
+
+		public void handleEvent() {
+		}
+	} 
+
 }
 
-class NoEvent extends UDPTimerEvent {
-    public NoEvent(long time) {
-        super(time);
-    }
-
-    public void handleEvent() {
-    }
-} 
