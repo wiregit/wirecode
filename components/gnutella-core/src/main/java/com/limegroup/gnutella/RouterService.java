@@ -1085,7 +1085,7 @@ public class RouterService {
 	 * Creates and returns a new chat to the given host and port.
 	 */
 	public static Chatter createChat(String host, int port) {
-		Chatter chatter = ChatManager.instance().request(host, port);
+		Chatter chatter = chatManager.request(host, port);
 		return chatter;
 	}
     
