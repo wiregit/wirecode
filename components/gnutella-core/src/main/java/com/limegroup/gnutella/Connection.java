@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+import com.jcraft.jzlib.*;
+import java.util.zip.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
@@ -73,6 +75,12 @@ public class Connection {
      */
 	private HandshakeResponse _headers = 
         HandshakeResponse.createEmptyResponse();
+        
+    /**
+     * The <tt>HandshakeResponse</tt> wrapper for written connection headers.
+     */
+	private HandshakeResponse _headersWritten = 
+        HandshakeResponse.createEmptyResponse();        
 
     /** For outgoing Gnutella 0.6 connections, the properties written
      *  after "GNUTELLA CONNECT".  Null otherwise. */
@@ -320,7 +328,8 @@ public class Connection {
             else
                 initializeIncoming();
 
-            _headers = HandshakeResponse.createResponse(HEADERS_READ);            
+            _headers = HandshakeResponse.createResponse(HEADERS_READ);
+            _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
@@ -332,6 +341,20 @@ public class Connection {
                 _softMax = (byte)(_headers.getMaxTTL()+(byte)1);
             } else {
                 _softMax = ConnectionSettings.SOFT_MAX.getValue();
+            }
+            
+            //wrap the streams with inflater/deflater
+            if(isWriteDeflated()) {
+                //System.out.println(this + ": deflating output stream");
+                ZOutputStream zout = new ZOutputStream(_out, JZlib.Z_DEFAULT_COMPRESSION);
+                zout.setFlushMode(JZlib.Z_PARTIAL_FLUSH);
+                _out = zout;
+                //_out = getOutputStream();
+            }            
+            if(isReadDeflated()) {
+               // System.out.println(this + ": inflating input stream");
+                _in = new InflaterInputStream(_in, inf);
+                //_in = getInputStream();
             }
             
             // remove the reference to the RESPONSE_HEADERS, since we'll no
@@ -348,6 +371,7 @@ public class Connection {
             throw new BadHandshakeException(e);
         }
     }
+    Inflater inf = new Inflater();
 
     /** 
      * Sends and receives handshake strings for outgoing connections,
@@ -691,18 +715,33 @@ public class Connection {
         }
     }
 
-    /** Returns the stream to use for writing to s.  By default this is a
-     *  BufferedOutputStream.  Subclasses may override to decorate the
-     *  stream. */
+    /**
+     * Returns the stream to use for writing to s.  If deflate is enabled
+     * on for writing, this returns a DeflaterOutpuStream.  Otherwise,
+     * by default this is a BufferedOutputStream.
+     * Subclasses may override to decorate the stream.
+     */
     protected OutputStream getOutputStream()  throws IOException {
-        return new BufferedOutputStream(_socket.getOutputStream());
+        //if(isWriteDeflated())
+          //  return new DeflaterOutputStream(_socket.getOutputStream());
+        //else            
+            return new BufferedOutputStream(_socket.getOutputStream());
     }
 
-    /** Returns the stream to use for reading from s.  By default this is a
-     *  BufferedInputStream.  Subclasses may override to decorate the stream. */
+    /**
+     * Returns the stream to use for reading from s.  If deflate is enabled
+     * on reading, this returns an InflaterInputStream.  Otherwise,
+     * by default this is a BufferedInputStream.
+     * Subclasses may override to decorate the stream.
+     */
     protected InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(_socket.getInputStream());
-    }
+        //if(isReadDeflated())
+            //return new InflaterInputStream(_socket.getInputStream());
+        //else
+            return new BufferedInputStream(_socket.getInputStream());
+    }    
+    
+    
 
     /////////////////////////////////////////////////////////////////////////
 
@@ -735,7 +774,21 @@ public class Connection {
 
         Message m = null;
         while (m == null) {
-            m = Message.read(_in, HEADER_BUF, _softMax);
+            if( isReadDeflated() ) {
+                Assert.that(_in instanceof InflaterInputStream, "should be inflating, but _in not an inflater");
+                try {
+                    m = Message.read(_in, HEADER_BUF, _softMax);
+                    System.out.println(this + ": Read " + m + " from deflated stream.");
+                    System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
+                } catch(IOException e) {
+                    System.out.println(this + ": Read failed.");
+                    System.out.println(this + ": Inflater TotalIn: " + inf.getTotalIn() + ", Inflater TotalOut: " + inf.getTotalOut());
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+            else
+                m = Message.read(_socket.getInputStream(), HEADER_BUF, _softMax);
         }
         return m;
     }
@@ -761,6 +814,7 @@ public class Connection {
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
         try {
+            
             Message m = Message.read(_in, HEADER_BUF, _softMax);
             if (m==null) {
                 throw new InterruptedIOException("null message read");
@@ -782,8 +836,17 @@ public class Connection {
      * @effects send m on the network.  Throws IOException if problems
      *   arise.
      */
+    private long totalLength;
     public void send(Message m) throws IOException {
-        m.write(_out);
+        if ( isWriteDeflated() ) {
+            ZOutputStream zos = (ZOutputStream)_out;
+            System.out.println(this + ": writing " + m + " to a deflated stream");
+            m.write(_out);
+            totalLength += m.getTotalLength();
+            System.out.println(this + ": Total message length: " + totalLength + ", TotalIn: " + zos.getTotalIn() + ", TotalOut: " + zos.getTotalOut());
+        } else {
+            m.write(_out);
+        }
     }
 
     /**
@@ -996,6 +1059,14 @@ public class Connection {
     // inherit doc comment
     public boolean isGoodConnection() {
         return _headers.isGoodConnection();
+    }
+    
+    public boolean isWriteDeflated() {
+        return _headersWritten.isDeflateEnabled();
+    }
+    
+    public boolean isReadDeflated() {
+        return _headers.isDeflateEnabled();
     }
 
 	/**

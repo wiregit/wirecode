@@ -100,5 +100,17 @@ public final class ConnectionSettings extends LimeProps {
 	 */
 	public static final BooleanSetting SHOW_KEEP_ALIVE =
 		FACTORY.createBooleanSetting("SHOW_KEEP_ALIVE", false);
+		
+    /**
+     * Setting for whether or not we'll accept deflate connections
+     */
+    public static final BooleanSetting ACCEPT_DEFLATE =
+        FACTORY.createBooleanSetting("ACCEPT_DEFLATE", true);
+    
+    /**
+     * Setting for whether or not we'll advertise deflate connection.
+     */
+    public static final BooleanSetting ADVERTISE_DEFLATE =
+        FACTORY.createBooleanSetting("ADVERTISE_DEFLATE", true);		
 }
 

@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.util.StringTokenizer;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -146,6 +148,12 @@ public final class HandshakeResponse {
      * X-Ultrapeer: false in it's handshake headers.
      */
     private final boolean LEAF;
+    
+    /**
+     * Cached value for whether or not the connection reported
+     * Content-Encoding: deflate
+     */
+    private final boolean DEFLATE_ENCODED;
 
 
     /**
@@ -182,6 +190,7 @@ public final class HandshakeResponse {
 
          ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
          LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
+         DEFLATE_ENCODED = isStringValue(HEADERS, "Content-Encoding", "deflate");
      }
    
     /**
@@ -527,7 +536,21 @@ public final class HandshakeResponse {
         return GOOD;
     }    
 
-
+    /**
+     * Returns whether or not this connnection is encoded in deflate.
+     */
+    public boolean isDeflateEnabled() {
+        return DEFLATE_ENCODED;
+    }
+    
+    /**
+     * Returns whether or not this connection accepts deflate as an encoding.
+     */
+    public boolean isDeflateAccepted() {
+        return ConnectionSettings.ACCEPT_DEFLATE.getValue() &&
+            containsStringValue(HEADERS, "Accept-Encoding", "deflate");
+    }
+    
 	/**
 	 * Returns whether or not this connection supports query routing 
      * between Ultrapeers at 1 hop.
@@ -715,6 +738,42 @@ public final class HandshakeResponse {
         if(value == null) return false;        
         return value.equalsIgnoreCase("false");
     }
+    
+    /**
+     * Utility method for determing whether or not a given header
+     * is a given string value.  Case-insensitive.
+     *
+     * @param headers the headers to check
+     * @param headerName the headerName to look for
+     * @param headerValue the headerValue to check against
+     */
+    private static boolean isStringValue(Properties headers,
+      String headerName, String headerValue) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+        return value.equalsIgnoreCase(headerValue);
+    }
+    
+    /**
+     * Utility method for determing whether or not a given header
+     * contains a given string value within a comma-delimited list.
+     * Case-insensitive.
+     *
+     * @param headers the headers to check
+     * @param headerName the headerName to look for
+     * @param headerValue the headerValue to check against
+     */
+    private static boolean containsStringValue(Properties headers,
+      String headerName, String headerValue) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+        StringTokenizer st = new StringTokenizer(value, ",");
+        while(st.hasMoreTokens()) {
+            if(st.nextToken().equalsIgnoreCase(headerValue))
+                return true;
+        }
+        return false;
+    }    
 
 
 

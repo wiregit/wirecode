@@ -530,7 +530,9 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 			respondUnauthenticated(HandshakeResponse response,
 			                       boolean outgoing) 
 			throws IOException {
-			return HandshakeResponse.createResponse(new Properties());
+			    Properties props = new Properties();
+			    props.put("Accept-Encoding", "deflate");
+			return HandshakeResponse.createResponse(props);
 		}
 	}
 

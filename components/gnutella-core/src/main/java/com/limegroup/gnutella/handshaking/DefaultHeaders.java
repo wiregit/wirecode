@@ -4,6 +4,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * This class contains the headers that all LimeWires pass in connection
@@ -70,6 +71,9 @@ public abstract class DefaultHeaders extends Properties {
 
         props.put(HeaderNames.X_MAX_TTL, "4");
         props.put(HeaderNames.X_DYNAMIC_QUERY, "0.1");
+        
+        if ( ConnectionSettings.ADVERTISE_DEFLATE.getValue() )
+            props.put("Accept-Encoding", "deflate");
         
         
         UpdateManager u = UpdateManager.instance();

@@ -386,9 +386,9 @@ public class ManagedConnection extends Connection
     }
 
     /** Throttles the super's OutputStream. */
-    protected OutputStream getOutputStream()  throws IOException {
-        return new ThrottledOutputStream(super.getOutputStream(), _throttle);
-    }
+//    protected OutputStream getOutputStream()  throws IOException {
+//        return new ThrottledOutputStream(super.getOutputStream(), _throttle);
+//    }
 
     /**
      * Override of receive to do ConnectionManager stats and to properly shut
@@ -1282,11 +1282,11 @@ public class ManagedConnection extends Connection
         */
     }
 
-	// overrides Object.toString
-	public String toString() {
-		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
-			" Leaf: "+isLeafConnection();
-	}
+//	// overrides Object.toString
+//	public String toString() {
+//		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
+//			" Leaf: "+isLeafConnection();
+//	}
     
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest
