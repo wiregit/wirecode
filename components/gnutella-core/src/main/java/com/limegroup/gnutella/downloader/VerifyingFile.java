@@ -210,7 +210,7 @@ public class VerifyingFile {
         //5. if we have a tree, see if there is a complete chunk in the partial list
         HashTree tree = managedDownloader.getHashTree(); 
         if (tree != null) {
-            for (Iterator iter = findVerifyableBlocks(intvl.high+1).iterator();iter.hasNext();)  {
+            for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
                 Interval i = (Interval) iter.next();
                 pendingBlocks.add(i);
                 if (LOG.isDebugEnabled())
@@ -236,9 +236,9 @@ public class VerifyingFile {
      * 
      * @param maxOffset do not check past this offset
      */
-    private List findVerifyableBlocks(int maxOffset) {
+    private List findVerifyableBlocks() {
         if (LOG.isDebugEnabled())
-            LOG.debug("trying to find verifyable blocks up to offset "+maxOffset+" out of "+partialBlocks);
+            LOG.debug("trying to find verifyable blocks out of "+partialBlocks);
         
         List verifyable = new ArrayList(2);
         List pending = partialBlocks.getAllIntervalsAsList();
@@ -246,10 +246,6 @@ public class VerifyingFile {
         
         for (int i = 0; i < pending.size() ; i++) {
             Interval current = (Interval)pending.get(i);
-            
-            // we passed the chunk we just added, no need to iterate further
-            if (current.low > maxOffset)
-                break;
             
             // find the beginning of the first chunk offset
             int lowChunkOffset = current.low - current.low % chunkSize;

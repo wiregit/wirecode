@@ -869,7 +869,6 @@ public class DownloadWorker implements Runnable {
                 int free = _commonOutFile.hasFreeBlocksToAssign(); 
                 if (free <= chunkSize && _manager.getPossibleHostCount() > 1) 
                     chunkSize = Math.max(MIN_SPLIT_SIZE, free / 2);
-                LOG.debug("free: "+free+" vs chunksize: "+chunkSize);
                 interval = _commonOutFile.leaseWhite(chunkSize);
             }else
                 interval = _commonOutFile.leaseWhite();
