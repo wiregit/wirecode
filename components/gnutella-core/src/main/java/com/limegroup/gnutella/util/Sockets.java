@@ -60,13 +60,14 @@ public class Sockets {
     public static Socket connect(String host, int port, 
                                  int timeout, boolean emulate) 
                                  throws IOException {
-        //TODO: use reflection for 1.8, add timeouts.  I think this requires
-        //use of Selector.select(timeout); the old code below will not give
-        //us a Socket with a channel.  But what about blocking DNS resolution?
+        //TODO: re-enable reflection for Java 1.1.8-1.3.
         InetSocketAddress addr=new InetSocketAddress(host, port);
         if (addr.isUnresolved())
             throw new IOException("Couldn't resolve address");
-        return SocketChannel.open(addr).socket();
+        Socket ret=SocketChannel.open().socket();
+        ret.connect(addr, timeout);
+        return ret;
+
 //          if (CommonUtils.isJava14OrLater()) {
 //              //a) Non-blocking IO using Java 1.4. Conceptually, this code
 //              //   does the following:
