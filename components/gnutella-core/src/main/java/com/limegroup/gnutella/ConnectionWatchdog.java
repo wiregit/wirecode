@@ -9,14 +9,27 @@ import com.sun.java.util.collections.*;
  * replaces dud connections with better ones.  There are a number of
  * possible heuristics to use when examining connections.
  */
-public class ConnectionWatchdog implements Runnable {
+public final class ConnectionWatchdog implements Runnable {
+
+    /**
+     * Constant handle to single <tt>ConnectionWatchdog</tt> instance,
+     * following the singleton pattern.
+     */
+    private static final ConnectionWatchdog INSTANCE =
+        new ConnectionWatchdog();
+
     /** How long (in msec) a connection can be a dud (see below)
      *  before being booted. */
     private static final int EVALUATE_TIME=10000;
     /** Additional time (in msec) to wait before rechecking connections. */
     private static final int REEVALUATE_TIME=8000;
 
-    private final ConnectionManager manager;
+    /**
+     * Singleton accessor for <tt>ConnectionWatchdog</tt> instance.
+     */
+    public static ConnectionWatchdog instance() {
+        return INSTANCE;
+    }
 
     /** 
 	 * Creates a new <tt>ConnectionWatchdog</tt> instance to monitor
@@ -25,8 +38,15 @@ public class ConnectionWatchdog implements Runnable {
      * @param manager the <tt>ConnectionManager</tt> instance that provides
 	 *  access to the list of connections to monitor
      */
-    public ConnectionWatchdog(ConnectionManager manager) {
-        this.manager = manager;
+    private ConnectionWatchdog() {}
+
+    /**
+     * Starts the <tt>ConnectionWatchdog</tt> thread.
+     */
+    public void start() {
+        Thread watchdog = new Thread(this, "ConnectionWatchdog");
+        watchdog.setDaemon(true);
+  		watchdog.start();        
     }
 
     /** A snapshot of a connection.  Used by run() */
@@ -155,7 +175,7 @@ public class ConnectionWatchdog implements Runnable {
                 //policy might be to restart a new connection to c.
                 //TODO2: If replacing connections doesn't work well, we're
                 //probably too slow, so drop the KEEP_ALIVE.
-                manager.remove(c);
+                RouterService.removeConnection(c);
             }
         }
     }
@@ -184,8 +204,10 @@ public class ConnectionWatchdog implements Runnable {
     /** Returns an iterator of all initialized connections in this, including
      *  leaf connecions. */
     private Iterator allConnections() {
-        List normal=manager.getInitializedConnections();
-        List leaves=manager.getInitializedClientConnections();
+        List normal = 
+            RouterService.getConnectionManager().getInitializedConnections();
+        List leaves = 
+            RouterService.getConnectionManager().getInitializedClientConnections();
 
         List buf=new ArrayList(normal.size()+leaves.size());
         buf.addAll(normal);
