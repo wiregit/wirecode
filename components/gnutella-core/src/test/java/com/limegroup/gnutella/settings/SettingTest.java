@@ -1,15 +1,21 @@
 package com.limegroup.gnutella.settings;
 
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import java.io.*;
 import java.util.Properties;
 import junit.framework.*;
 import java.awt.Color;
 
-public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
+/**
+ * Tests the setting for character arrays.
+ */
+public class SettingTest extends BaseTestCase {
     
     File settingsFile;
     
+    private final char[] chars = {'a','b','c'};
+
     class TestSettings {
 
         Properties DEF_PROPS;
@@ -22,6 +28,7 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         IntSetting INT_SETTING;
         LongSetting LONG_SETTING;
         StringSetting STRING_SETTING;
+        CharArraySetting CHAR_ARRAY_SETTING;
 
         TestSettings(File file) throws IOException {
             FACTORY = new SettingsFactory(file);
@@ -36,6 +43,8 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
             LONG_SETTING = FACTORY.createLongSetting("LONG_SETTING", 666666);
             STRING_SETTING = FACTORY.createStringSetting("STRING_SETTING", 
                                                          "terrific");
+            CHAR_ARRAY_SETTING = 
+                FACTORY.createCharArraySetting("CHAR_ARRAY_SETTING", chars);
         }
     }
     
@@ -65,6 +74,7 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testSetting() throws Exception {
         
+        
         String testFilePath;
         if(CommonUtils.isUnix() || CommonUtils.isMacOSX()) {
             testFilePath = "/mickey-mouse.com";
@@ -81,13 +91,12 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
             testFilePath2 = "c:/temp/turkey.txt";
         }
     
-        /* Delete any existing file and create a new set of settings */
+        // Delete any existing file and create a new set of settings */
         TestSettings settings = new TestSettings(settingsFile);
         TestSettings settings2 = new TestSettings(settingsFile);
         
-        /* Confirm all of the default values
-         * (Which requires one full conversion to and from their string values 
-         */
+        // Confirm all of the default values
+        // (Which requires one full conversion to and from their string values 
         assertEquals("Bool default", true, settings.BOOL_SETTING.getValue());
         assertEquals("Byte default", (byte)23, settings.BYTE_SETTING.getValue());
         assertEquals("Color default", new Color(255,127,63), 
@@ -100,8 +109,11 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Int default", 143, settings.INT_SETTING.getValue());
         assertEquals("Long default", 666666, settings.LONG_SETTING.getValue());
         assertEquals("String default", "terrific", settings.STRING_SETTING.getValue());
+        assertTrue("char arrays should be equal", 
+                   Arrays.equals(new char[]{'a','b','c'}, 
+                                 settings.CHAR_ARRAY_SETTING.getValue()));
         
-        /* Confirm that we can set everything */
+        // Confirm that we can set everything 
         settings.BOOL_SETTING.setValue(false);
         settings.BYTE_SETTING.setValue((byte)6);
         settings.COLOR_SETTING.setValue(new Color(66, 44, 67));
@@ -109,6 +121,7 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         settings.INT_SETTING.setValue(234);
         settings.LONG_SETTING.setValue(555555);
         settings.STRING_SETTING.setValue("OK so far");
+        settings.CHAR_ARRAY_SETTING.setValue(new char[] {'d', 'e', 'f'});
         
         assertEquals("Bool set", false, settings.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings.BYTE_SETTING.getValue());
@@ -118,8 +131,11 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Int set", 234, settings.INT_SETTING.getValue());
         assertEquals("Long set", 555555, settings.LONG_SETTING.getValue());
         assertEquals("String set", "OK so far", settings.STRING_SETTING.getValue());
+        assertTrue("char arrays should be equal", 
+                   Arrays.equals(new char[]{'d','e','f'}, 
+                                 settings.CHAR_ARRAY_SETTING.getValue()));
         
-        /* Write property to file and confirm that everything reloads properly */
+        // Write property to file and confirm that everything reloads properly 
         settings.FACTORY.save();
         
         settings = new TestSettings(settingsFile);
@@ -131,8 +147,11 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Int set", 234, settings.INT_SETTING.getValue());
         assertEquals("Long set", 555555, settings.LONG_SETTING.getValue());
         assertEquals("String set", "OK so far", settings.STRING_SETTING.getValue());
+        assertTrue("char arrays should be equal", 
+                   Arrays.equals(new char[]{'d','e','f'}, 
+                                 settings.CHAR_ARRAY_SETTING.getValue()));
         
-        /* Confirm that the backup object still has its default settings */
+        // Confirm that the backup object still has its default settings 
         assertEquals("Bool default", true, settings2.BOOL_SETTING.getValue());
         assertEquals("Byte default", (byte)23, settings2.BYTE_SETTING.getValue());
         assertEquals("Color default", new Color(255,127,63), settings2.COLOR_SETTING.getValue());
@@ -141,8 +160,11 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Int default", 143, settings2.INT_SETTING.getValue());
         assertEquals("Long default", 666666, settings2.LONG_SETTING.getValue());
         assertEquals("String default", "terrific", settings2.STRING_SETTING.getValue());
+        assertTrue("char arrays should be equal", 
+                   Arrays.equals(new char[]{'a','b','c'}, 
+                                 settings2.CHAR_ARRAY_SETTING.getValue()));
         
-        /* reload it from the real file and make sure we got everything */
+        // reload it from the real file and make sure we got everything 
         settings2.FACTORY.reload();
         assertEquals("Bool set", false, settings2.BOOL_SETTING.getValue());
         assertEquals("Byte set", (byte)6, settings2.BYTE_SETTING.getValue());
@@ -152,5 +174,8 @@ public class SettingTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("Int set", 234, settings2.INT_SETTING.getValue());
         assertEquals("Long set", 555555, settings2.LONG_SETTING.getValue());
         assertEquals("String set", "OK so far", settings2.STRING_SETTING.getValue());
+        assertTrue("char arrays should be equal", 
+                   Arrays.equals(new char[]{'d','e','f'}, 
+                                 settings2.CHAR_ARRAY_SETTING.getValue()));        
     }
 }
