@@ -9,6 +9,7 @@ package com.limegroup.gnutella.chat;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.gui.chat.*;
 import java.net.*;
 import java.io.*;
 

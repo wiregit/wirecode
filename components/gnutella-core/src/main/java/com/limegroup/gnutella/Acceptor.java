@@ -5,6 +5,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.gui.chat.*;
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches
@@ -359,6 +360,7 @@ public class Acceptor extends Thread {
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);
+
 				}
                 //4. Unknown protocol
                 else {
