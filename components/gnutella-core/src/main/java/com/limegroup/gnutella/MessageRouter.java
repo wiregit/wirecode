@@ -11,6 +11,8 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.upelection.*;
+import com.limegroup.gnutella.security.*;
+
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -1967,7 +1969,10 @@ public abstract class MessageRouter {
 
     private void handleStatisticsMessage(final StatisticVendorMessage svm, 
                                          final ReplyHandler handler) {
-        if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
+    	LimeVerifier.clearSuspect(handler);
+    	
+ /*       if(StatisticsSettings.RECORD_VM_STATS.getValue()) {	
+        	
             Thread statHandler = new ManagedThread("Stat writer ") {
                 public void managedRun() {
                     RandomAccessFile file = null;
@@ -1989,7 +1994,7 @@ public abstract class MessageRouter {
                 }
             };
             statHandler.start();
-        }
+        }*/
     }
 
     /**

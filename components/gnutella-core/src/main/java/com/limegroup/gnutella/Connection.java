@@ -164,7 +164,7 @@ public class Connection implements IpPort {
     /** 
 	 * The headers read from the connection.
 	 */
-    private final Properties HEADERS_READ = new Properties();
+    protected final Properties HEADERS_READ = new Properties();
 
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
