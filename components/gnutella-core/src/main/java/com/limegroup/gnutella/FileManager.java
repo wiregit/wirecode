@@ -1243,8 +1243,7 @@ public abstract class FileManager {
                 responses.add(resp);
             } 
         }
-        Response[] retArray = new Response[responses.size()];
-        return (Response[])responses.toArray(retArray);
+        return (Response[])responses.toArray();
     }
     
     /**
