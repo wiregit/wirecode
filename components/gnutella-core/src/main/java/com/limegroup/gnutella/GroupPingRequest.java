@@ -7,7 +7,7 @@ import java.io.*;
  * a special group.
  */
 
-public class GroupPingRequest extends PingRequest {
+public class GroupPingRequest extends PingRequest implements Serializable{
 
     /** All the data.  We extract the port, ip address and group name lazily */
     private byte[] payload;
