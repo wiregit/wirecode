@@ -1294,7 +1294,7 @@ public class QueryReply extends Message implements Serializable{
 
     /** A simple utility class for doling out PushProxy information.
      */
-    static class PushProxyContainer implements PushProxyInterface {
+    public static class PushProxyContainer implements PushProxyInterface {
         IPPortCombo _combo;
 
         public PushProxyContainer(String hostAddress, int port) 

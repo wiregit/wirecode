@@ -26,9 +26,10 @@ public class URLRemoteFileDesc extends RemoteFileDesc implements Serializable {
                              int size, byte[] clientGUID, int speed, 
                              boolean chat, int quality, boolean browseHost, 
                              LimeXMLDocument xmlDoc, Set urns,
-                             boolean replyToMulticast, URL url) {
+                             boolean replyToMulticast, URL url,
+                             PushProxyInterface[] proxies) {
         super(host, port, index, filename, size, clientGUID, speed, chat,
-              quality, browseHost, xmlDoc, urns, replyToMulticast, null);
+              quality, browseHost, xmlDoc, urns, replyToMulticast, proxies);
         this._url=url;
     }
 

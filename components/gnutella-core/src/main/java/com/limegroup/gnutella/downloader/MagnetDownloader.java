@@ -146,7 +146,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                 null,           //no metadata
                 urns,
                 false,          //not a reply to a multicast query
-                url);           //url for GET request
+                url,            //url for GET request
+                null);          //no push proxies
         } catch (IOException e) {
             return null;
         }
