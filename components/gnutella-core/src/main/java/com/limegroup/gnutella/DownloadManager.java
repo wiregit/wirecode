@@ -380,8 +380,9 @@ public class DownloadManager implements BandwidthTracker {
         final int minSpeed = 0;  // minSpeed of 0 is used in StandardSearchView...
         QueryRequest[] retQRs= new QueryRequest[queryStrings.length];
         for (int i = 0; i < queryStrings.length; i++)
+            // mark the query as a requery...
             retQRs[i] = new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, queryStrings[i]);
+                                         minSpeed, queryStrings[i], true);
         return retQRs;
     }
 
