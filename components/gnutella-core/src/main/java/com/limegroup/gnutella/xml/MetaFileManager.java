@@ -90,8 +90,7 @@ public class MetaFileManager extends FileManager {
             // fell through...
             if (!Thread.currentThread().isInterrupted())
                 initialized = true;
-            System.out.println("Sumeet: Printing current xml data");
-            showXMLData();
+            //            showXMLData();
         }//end of synchronized block
     }//end of loadSettings.
 

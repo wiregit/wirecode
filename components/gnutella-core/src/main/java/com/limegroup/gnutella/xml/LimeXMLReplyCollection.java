@@ -52,10 +52,8 @@ public class LimeXMLReplyCollection{
             File file = (File)hashToFile.get(hash);//this cannot be null
             try{
                 String XMLString = id3Reader.readDocument(file,solo);
-                if(!solo){
+                if(!solo)
                     XMLString = joinAudioXMLStrings(XMLString,fileXMLString);
-                    System.out.println("Sumeet joined string=\n"+XMLString);
-                }
                 doc = new LimeXMLDocument(XMLString);
             }catch(Exception e){
                 continue;
