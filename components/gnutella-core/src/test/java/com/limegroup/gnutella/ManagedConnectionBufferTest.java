@@ -411,7 +411,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 			respondUnauthenticated(HandshakeResponse response,
 			                       boolean outgoing) 
 			throws IOException {
-			return new HandshakeResponse(new Properties());
+			return HandshakeResponse.createResponse(new Properties());
 		}
 	}
 

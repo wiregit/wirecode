@@ -331,7 +331,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
                                          boolean outgoing) throws IOException {
             Properties props=new Properties();
             props.put("GGEP", "0.6"); 
-            return new HandshakeResponse(props);
+            return HandshakeResponse.createResponse(props);
         }
     }
 
@@ -339,7 +339,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         public HandshakeResponse respond(HandshakeResponse response,
                                          boolean outgoing) throws IOException {
             Properties props = new Properties();
-            return new HandshakeResponse(props);
+            return HandshakeResponse.createResponse(props);
         }
     }
 

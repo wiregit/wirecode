@@ -797,7 +797,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static class EmptyResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                                          boolean outgoing) throws IOException {
-            return new HandshakeResponse(new Properties());
+            return HandshakeResponse.createResponse(new Properties());
         }
     }
 }

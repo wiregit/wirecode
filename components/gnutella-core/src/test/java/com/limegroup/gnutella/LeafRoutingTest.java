@@ -378,7 +378,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
                       CommonUtils.getHttpServer());
             props.put(HeaderNames.X_QUERY_ROUTING, "0.1");
             props.put(HeaderNames.X_ULTRAPEER, "True");
-            return new HandshakeResponse(props);
+            return HandshakeResponse.createResponse(props);
         }
     }
 
@@ -387,7 +387,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) throws IOException {
             Properties props=new Properties();
-            return new HandshakeResponse(props);
+            return HandshakeResponse.createResponse(props);
         }
     }
 }

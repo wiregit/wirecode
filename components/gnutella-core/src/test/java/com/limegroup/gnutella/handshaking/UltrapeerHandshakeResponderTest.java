@@ -50,7 +50,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
 
         // 1) Ultrapeer-Ultrapeer::No X-Ultrapeer-Needed
         Properties props = new UltrapeerHeaders("40.0.9.8");
-        HandshakeResponse headers = new HandshakeResponse(props);
+        HandshakeResponse headers = HandshakeResponse.createResponse(props);
         
         HandshakeResponse hr = 
             responder.respondUnauthenticated(headers, true);
@@ -67,7 +67,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         // this should be redundant, but make sure it's handled the way
         // we want
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "true");
-        headers = new HandshakeResponse(props);
+        headers = HandshakeResponse.createResponse(props);
         
         hr = responder.respondUnauthenticated(headers, true);
 
@@ -81,7 +81,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         props = new UltrapeerHeaders("78.9.3.0");
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         
-        headers = new HandshakeResponse(props);        
+        headers = HandshakeResponse.createResponse(props);        
         hr = responder.respondUnauthenticated(headers, true);
         assertTrue("should not be an Ultrapeer", !hr.isUltrapeer());
         assertTrue("should be becoming an leaf", hr.isLeaf());
@@ -102,7 +102,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
 
         // Leaf-Ultrapeer  --> leaf slots available
         Properties props = new LeafHeaders("78.9.3.0");
-        HandshakeResponse headers = new HandshakeResponse(props);  
+        HandshakeResponse headers = HandshakeResponse.createResponse(props);  
         HandshakeResponse hr = responder.respondUnauthenticated(headers, true);
 
         assertTrue("should have returned that we accepted the connection", 
@@ -136,7 +136,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //    here because the Ultrapeer definitely does not have the
         //    maximum number of leaves
         HandshakeResponse up = 
-            new HandshakeResponse(new UltrapeerHeaders("80.45.0.1"));
+            HandshakeResponse.createResponse(new UltrapeerHeaders("80.45.0.1"));
         
         HandshakeResponse hr = 
             responder.respondUnauthenticated(up, false);
@@ -173,7 +173,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //  1) check to make sure that leaves are properly accepted as
         //     leaves
         HandshakeResponse leaf = 
-            new HandshakeResponse(new LeafHeaders("80.45.0.1"));
+            HandshakeResponse.createResponse(new LeafHeaders("80.45.0.1"));
         HandshakeResponse hr = responder.respondUnauthenticated(leaf, false);
         
         assertTrue("should report Ultrapeer true", hr.isUltrapeer());

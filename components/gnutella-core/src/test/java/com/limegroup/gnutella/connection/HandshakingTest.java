@@ -208,7 +208,7 @@ public final class HandshakingTest extends BaseTestCase {
 	private static final class UltrapeerResponder implements HandshakeResponder {
 		public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) 
 			throws IOException {
-			return new HandshakeResponse(new Properties());
+			return HandshakeResponse.createResponse(new Properties());
 		}		
 	}
 
