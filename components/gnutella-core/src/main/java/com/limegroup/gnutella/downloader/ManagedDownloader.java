@@ -323,11 +323,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             initDone = true;
         }
 
-        synchronized (this) {
-            // get other info...
-            final String otherName = other.getFileName();
-            final long otherLength = other.getSize();
+        // before doing expensive stuff, see if connection is even possible...
+        if (other.getQuality() < 1) // I only want 2,3,4 star guys....
+            return false;
 
+        // get other info...
+        final String otherName = other.getFileName();
+        final long otherLength = other.getSize();
+
+        synchronized (this) {
             // compare to allFiles....
             for (int i=0; i<allFiles.length; i++) {
                 // get current info....
