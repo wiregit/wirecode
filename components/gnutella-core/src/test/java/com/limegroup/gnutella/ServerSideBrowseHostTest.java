@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
@@ -370,7 +371,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
             currLine = in.readLine();
         } while ((currLine != null) && !currLine.equals(""));
 
-        QueryReply qr = (QueryReply) Message.read(s.getInputStream());
+        QueryReply qr = (QueryReply) BIOMessageReader.read(s.getInputStream());
         assertEquals(2, qr.getResultCount());
 
         assertNull(in.readLine());

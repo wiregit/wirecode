@@ -5,6 +5,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.stubs.*;
 
@@ -15,8 +16,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * IP-layer fragmentation.
 	 */
 	private final int BUFFER_SIZE = 8192;
-
-	private final int SOCKET_TIMEOUT = 2*1000; // 2 second wait for a message
 
     private final int NUM_UDP_LOOPS = 25;
 
@@ -294,11 +293,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             try {				
                 socket.receive(datagram);
                 byte[] data = datagram.getData();
-                int length = datagram.getLength();
                 try {
                     // construct a message out of it...
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);		
+                    Message message = BIOMessageReader.read(in);		
                     if(message == null) continue;
                     if (message instanceof PingRequest) {
                         PingRequest pr = (PingRequest)message;

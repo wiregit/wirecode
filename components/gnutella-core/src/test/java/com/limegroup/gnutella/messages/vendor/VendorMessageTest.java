@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 import java.io.*;
@@ -21,34 +22,32 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     }
 
     public void testCreationConstructor() throws Exception {
-        VendorMessage vm = null;
-        byte[] payload = null;
         byte[] vendorID = null;
         try {
             //test messed up vendor ID
             vendorID = new byte[5];
-            vm = new VM(vendorID, 1, 1, new byte[0]);
+            new VM(vendorID, 1, 1, new byte[0]);
             fail("bpe should have been thrown.");
         }
         catch (BadPacketException expected) {
         }
         try {
             // test bad selector
-            vm = new VM(new byte[4], 0x10000000, 1, new byte[0]);
+            new VM(new byte[4], 0x10000000, 1, new byte[0]);
             fail("bpe should have been thrown.");
         }
         catch (BadPacketException expected) {
         }
         try {
             // test bad version
-            vm = new VM(vendorID, 1, 0x00020101, new byte[0]);
+            new VM(vendorID, 1, 0x00020101, new byte[0]);
             fail("bpe should have been thrown.");
         }
         catch (BadPacketException expected) {
         }
         try {
             // test bad payload
-            vm = new VM(new byte[4], 1, 1, null);
+            new VM(new byte[4], 1, 1, null);
             fail("bpe should have been thrown.");
         }
         catch (NullPointerException expected) {
@@ -146,13 +145,13 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     public void testReplyNumber() throws Exception {
         try {
             GUID g = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 0);
+            new ReplyNumberVendorMessage(g, 0);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
         try {
             GUID g = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(g, 256);
+            new ReplyNumberVendorMessage(g, 256);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -168,7 +167,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             ReplyNumberVendorMessage vmRead = 
-                (ReplyNumberVendorMessage) Message.read(bais);
+                (ReplyNumberVendorMessage) BIOMessageReader.read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
@@ -180,13 +179,13 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     public void testLimeACK() throws Exception {
         try {
             GUID g = new GUID(GUID.makeGuid());
-            LimeACKVendorMessage vm = new LimeACKVendorMessage(g, -1);
+            new LimeACKVendorMessage(g, -1);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
         try {
             GUID g = new GUID(GUID.makeGuid());
-            LimeACKVendorMessage vm = new LimeACKVendorMessage(g, 256);
+            new LimeACKVendorMessage(g, 256);
             assertTrue(false);
         }
         catch (BadPacketException expected) {};
@@ -202,7 +201,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             ByteArrayInputStream bais = 
                 new ByteArrayInputStream(baos.toByteArray());
             LimeACKVendorMessage vmRead = 
-                (LimeACKVendorMessage) Message.read(bais);
+                (LimeACKVendorMessage) BIOMessageReader.read(bais);
             assertEquals(vm, vmRead);
             assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
             assertEquals("after Read guids aren't equal!", guid, 
@@ -232,7 +231,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) Message.read(bais);
+        VendorMessage vmRead = (VendorMessage) BIOMessageReader.read(bais);
         assertEquals(vm, vmRead);
     }
 
@@ -240,7 +239,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vm.write(baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        VendorMessage vmRead = (VendorMessage) Message.read(bais);
+        VendorMessage vmRead = (VendorMessage) BIOMessageReader.read(bais);
         assertEquals(vm,vmRead);
     }
 
@@ -296,16 +295,16 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         
-        VendorMessage vm = (VendorMessage) Message.read(bais);
+        VendorMessage vm = (VendorMessage) BIOMessageReader.read(bais);
         assertEquals(vm,(tcp));
 
-        vm = (VendorMessage) Message.read(bais);
+        vm = (VendorMessage) BIOMessageReader.read(bais);
         assertEquals(vm,(udp));
 
-        vm = (VendorMessage) Message.read(bais);
+        vm = (VendorMessage) BIOMessageReader.read(bais);
         assertEquals(vm,(ms));
         
-        vm = (VendorMessage) Message.read(bais);
+        vm = (VendorMessage) BIOMessageReader.read(bais);
         assertEquals(vm,(hops));
     }
 
@@ -323,7 +322,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             new ByteArrayInputStream(baos.toByteArray());
         
         try {
-            vm = (VendorMessage) Message.read(bais);
+            vm = (VendorMessage) BIOMessageReader.read(bais);
             assertTrue(false);
         }
         catch (BadPacketException expected) {

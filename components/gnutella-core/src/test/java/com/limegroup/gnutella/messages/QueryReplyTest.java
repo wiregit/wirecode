@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*; 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import junit.framework.*;
-import junit.extensions.*;
 
 /**
  * This class tests the QueryReply class.
@@ -398,7 +397,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)BIOMessageReader.read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -445,7 +444,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
-        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
+        qr=(QueryReply)BIOMessageReader.read(new ByteArrayInputStream(bytes));
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
         assertFalse(qr.getIsBusy());
@@ -767,7 +766,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             qr.write(baos);
             ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
-            QueryReply readQR = (QueryReply) Message.read(bais);
+            QueryReply readQR = (QueryReply) BIOMessageReader.read(bais);
 
             // test read from network            
             Set retProxies = readQR.getPushProxies();
