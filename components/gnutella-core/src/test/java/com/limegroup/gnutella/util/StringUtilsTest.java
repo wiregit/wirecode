@@ -174,4 +174,35 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! StringUtils.startsWithIgnoreCase("a", "ab"));
         assertTrue(! StringUtils.startsWithIgnoreCase("", "a"));
     }
+
+	/**
+	 * Tests the method that replaces sections of a string with a new
+	 * string.
+	 */
+	public void testStringUtilsReplace() {
+		String _testString = "test_";
+		String[] old_strs = {
+			"old0",
+			"old1",
+			"old2",
+			"old3",
+			"old4",
+		};
+
+		String[] new_strs = {
+			"new0",
+			"new1",
+			"new2",
+			"new3",
+			"new4",
+		};
+
+		for(int i=0; i<old_strs.length; i++) {
+			String str = 
+				StringUtils.replace(_testString+old_strs[i], 
+									old_strs[i], new_strs[i]);
+			
+			assertEquals("unexpected string", _testString+new_strs[i], str);
+		}
+	}
 }
