@@ -150,6 +150,11 @@ public class Connection implements IpPort {
     protected CapabilitiesVM _capabilities = null;
     
     /**
+     * reported features such as OS & JVM version, ability to receive TCP/UDP, etc.
+     */
+    protected FeaturesVendorMessage _features = null;
+    
+    /**
      * Trigger an opening connection to close after it opens.  This
      * flag is set in shutdown() and then checked in initialize()
      * to insure the _socket.close() happens if shutdown is called
@@ -364,6 +369,8 @@ public class Connection implements IpPort {
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
         if (vm instanceof CapabilitiesVM)
             _capabilities = (CapabilitiesVM) vm;
+        if (vm instanceof FeaturesVendorMessage)
+        	_features = (FeaturesVendorMessage)vm;
     }
 
 
@@ -2063,4 +2070,41 @@ public class Connection implements IpPort {
 //          if (cp.out!=null)
 //              cp.out.close();
 //      }    
+	/**
+	 * @return the reported shared files.
+	 */
+	public int getFileShared() {
+		return _features!= null ? _features.getFileShared() : -1;
+	}
+	/**
+	 * @return the reported JVM version
+	 */
+	public String getJVM() {
+		return _features!= null ? _features.getJVM() : null;
+	}
+	/**
+	 * @return the reported OS version
+	 */
+	public String getOS() {
+		return _features!=null ? _features.getOS() : null;
+	}
+	/**
+	 * @return the reported incoming TCP capability
+	 */
+	public boolean isTCPCapable() {
+		return _features!= null ?_features.isTCPCapable() : false;
+	}
+	/**
+	 * @return the reported UDP capability
+	 */
+	public boolean isUDPCapable() {
+		return _features != null ? _features.isUDPCapable() : false;
+	}
+	
+	/**
+	 * @return the reported upstream bandwidth.
+	 */
+	public int getBandwidth() {
+		return _features !=null ? _features.getBandidth() : -1;
+	}
 }

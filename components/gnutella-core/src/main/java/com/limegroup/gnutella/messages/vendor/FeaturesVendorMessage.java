@@ -22,6 +22,7 @@ public class FeaturesVendorMessage extends VendorMessage {
 	public static final String INCOMING_UDP="IN_UDP";
 	public static final String FILES_SHARED="Files";
 	public static final String JVM="JVM";  //why not
+	public static final String BANDWIDTH="BW";
 	
 	
 	private static final String CR="\n";
@@ -31,6 +32,9 @@ public class FeaturesVendorMessage extends VendorMessage {
 	 * the properties object.
 	 */
 	Properties _properties;
+	
+	int _filesShared, _bandwith;
+	boolean _inTcp,_inUdp;
 	
 	/**
 	 * constructs an object with data from the network
@@ -55,6 +59,16 @@ public class FeaturesVendorMessage extends VendorMessage {
 			String value = pair.substring(sep+1,pair.length());
 			_properties.put(name,value);
 		}
+		
+		try {
+			_filesShared=Integer.parseInt(_properties.getProperty(FILES_SHARED));
+			_bandwith = Integer.parseInt(_properties.getProperty(BANDWIDTH));
+		}catch(NumberFormatException bad) {
+			throw new BadPacketException ("invalid integer values in packet");
+		}
+		
+		_inTcp = Boolean.valueOf(_properties.getProperty(INCOMING_TCP)).booleanValue();
+		_inUdp = Boolean.valueOf(_properties.getProperty(INCOMING_UDP)).booleanValue();
 	}
 	
 	/**
@@ -96,13 +110,61 @@ public class FeaturesVendorMessage extends VendorMessage {
 	private static Properties getProperties() {
 		Properties  ret = new Properties();
 		
-		ret.setProperty(OS,CommonUtils.getOSVersion());
+		ret.setProperty(OS,CommonUtils.getOS().toLowerCase());
 		ret.setProperty(JVM,CommonUtils.getJavaVersion());
 		ret.setProperty(FILES_SHARED,""+RouterService.getFileManager().getNumFiles());
 		ret.setProperty(INCOMING_TCP,""+RouterService.acceptedIncomingConnection());
 		ret.setProperty(INCOMING_UDP,""+RouterService.isOOBCapable());
+		ret.setProperty(BANDWIDTH,""+(int)RouterService.getConnectionManager().
+					getMeasuredUpstreamBandwidth());
 		//add more here
 		
 		return ret;
+	}
+	
+	/**
+	 * @return the operating system the node reported.
+	 */
+	public String getOS() {
+		return _properties.getProperty(OS);
+	}
+	
+	/**
+	 * @return the java version the node reported
+	 */
+	public String getJVM() {
+		return _properties.getProperty(JVM);
+	}
+	
+	/**
+	 * 
+	 * @return the number of shared files the node reported
+	 */
+	public int getFileShared() {
+		return _filesShared;
+	}
+	
+	/**
+	 * 
+	 * @return whether the node reported that it can receive incoming TCP
+	 */
+	public boolean isTCPCapable() {
+		return _inTcp;
+	}
+	
+	/**
+	 * 
+	 * @return whether the node reported that it can receive incoming UDP
+	 */
+	public boolean isUDPCapable() {
+		return _inUdp;
+	}
+	
+	/**
+	 * 
+	 * @return the reported upstream bandwidth by the node.
+	 */
+	public int getBandidth() {
+		return _bandwith;
 	}
 }

@@ -351,6 +351,11 @@ public abstract class MessageRouter {
                 ;
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
+        else if (msg instanceof FeaturesVendorMessage) {
+			if(RECORD_STATS)
+                ;
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        }
         else if (msg instanceof HopsFlowVendorMessage) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);

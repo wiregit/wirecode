@@ -1574,7 +1574,7 @@ public class ManagedConnection extends Connection
      * @return whether the peer on the other side of this connection
      * can receive unsolicited UDP.  Ultrapeers always can.
      */
-    public boolean isUDPCapable() {
+    public boolean hasRequestedOOB() {
     	return isSupernodeConnection() ? true : _UDPCapable;
     }
     
