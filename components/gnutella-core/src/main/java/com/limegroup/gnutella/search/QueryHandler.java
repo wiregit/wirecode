@@ -128,8 +128,13 @@ public final class QueryHandler {
 	 */
 	private final Set QUERIED_REPLY_HANDLERS = new HashSet();
 
-
+	
 	private long _queryStartTime = 0;
+
+	/**
+	 * <tt>ReplyHandler</tt> for replies received for this query.
+	 */
+	private final ReplyHandler REPLY_HANDLER;
 
 	// statically initialize an unmodifiable set of urn types so that
 	// they'll be available for all instances
@@ -149,8 +154,9 @@ public final class QueryHandler {
 	 *  on the type of servant sending the request and is respeceted unless
 	 *  it's a query for a specific hash, in which case we try to get
 	 *  far fewer matches, ignoring this parameter
+	 * @param handler the <tt>ReplyHandler</tt> for routing replies
 	 */
-	private QueryHandler(QueryRequest query, int results) {
+	private QueryHandler(QueryRequest query, int results, ReplyHandler handler) {
 		boolean isHashQuery = !query.getQueryUrns().isEmpty();
 		GUID = query.getGUID();
 		if(isHashQuery) {
@@ -167,6 +173,8 @@ public final class QueryHandler {
 		} else {
 			RESULTS = results;
 		}
+
+		REPLY_HANDLER = handler;
 	}
 
 
@@ -176,9 +184,12 @@ public final class QueryHandler {
 	 *
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
+	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
+	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
-	public static QueryHandler createHandler(QueryRequest query) {	
-		return new QueryHandler(query, ULTRAPEER_RESULTS); 
+	public static QueryHandler createHandler(QueryRequest query, 
+											 ReplyHandler handler) {	
+		return new QueryHandler(query, ULTRAPEER_RESULTS, handler);
 	}
 
 	/**
@@ -187,9 +198,12 @@ public final class QueryHandler {
 	 *
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
+	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
+	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
-	public static QueryHandler createHandlerForOldLeaf(QueryRequest query) {	
-		return new QueryHandler(query, OLD_LEAF_RESULTS);
+	public static QueryHandler createHandlerForOldLeaf(QueryRequest query, 
+													   ReplyHandler handler) {	
+		return new QueryHandler(query, OLD_LEAF_RESULTS, handler);
 	}
 
 	/**
@@ -198,9 +212,12 @@ public final class QueryHandler {
 	 *
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
+	 * @param handler the <tt>ReplyHandler</tt> for routing the replies
+	 * @return the <tt>QueryHandler</tt> instance for this query
 	 */
-	public static QueryHandler createHandlerForNewLeaf(QueryRequest query) {	
-		return new QueryHandler(query, NEW_LEAF_RESULTS);
+	public static QueryHandler createHandlerForNewLeaf(QueryRequest query, 
+													   ReplyHandler handler) {		
+		return new QueryHandler(query, NEW_LEAF_RESULTS, handler);
 	}
 
 	/**
@@ -216,12 +233,21 @@ public final class QueryHandler {
 	public QueryRequest createQuery(byte ttl) {
 		if(ttl < 1 || ttl > 6) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
+
+		// build it from scratch if it's from us
 		if(HOPS == 0) {
 			return new QueryRequest(GUID, ttl, HOPS, QUERY, XML_QUERY, false, 
 									URN_TYPES, QUERY_URNS, null,
 									!RouterService.acceptedIncomingConnection());
 		} else {
-			return new QueryRequest(GUID, ttl, HOPS, PAYLOAD);
+			try {
+				return new QueryRequest(GUID, ttl, HOPS, PAYLOAD);
+			} catch(BadPacketException e) {
+				// this should never happen, since the query was already 
+				// read from the network, so report an error
+				ErrorService.error(e);
+				return null;
+			}
 		}
 	}
 
@@ -305,7 +331,7 @@ public final class QueryHandler {
 
 
 			// send out the query on the network
-			MESSAGE_ROUTER.sendQueryRequest(query, mc, null);
+			MESSAGE_ROUTER.sendQueryRequest(query, mc, REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
 			QUERIED_REPLY_HANDLERS.add(mc);
@@ -332,7 +358,7 @@ public final class QueryHandler {
 		for(int i=0; i<limit; i++) {
 			ManagedConnection mc = (ManagedConnection)connections.get(i);
 
-			MESSAGE_ROUTER.sendQueryRequest(query, mc, null);
+			MESSAGE_ROUTER.sendQueryRequest(query, mc, REPLY_HANDLER);
 
 			// add the reply handler to the list of queried hosts
 			QUERIED_REPLY_HANDLERS.add(mc);
