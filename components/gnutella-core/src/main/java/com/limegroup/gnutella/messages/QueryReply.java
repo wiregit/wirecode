@@ -1340,18 +1340,13 @@ public class QueryReply extends Message implements Serializable{
                 throw new IllegalArgumentException("Weird Input");
             
             String host = NetworkUtils.ip2string(fromNetwork, 0);
-            int port = (int) ByteOrder.leb2short(fromNetwork, 4);
-            if (host.equals("0.0.0.0"))
-                throw new IllegalArgumentException("Host is bad: 0.0.0.0");
+            int port = ByteOrder.ubytes2int(ByteOrder.leb2short(fromNetwork, 4));
 
             try {
                 return new IPPortCombo(host, port);
             }
             catch (UnknownHostException uhe) {
                 throw new IllegalArgumentException("Unknown Host");
-            }
-            catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException("Bad Port");
             }
         }
 
