@@ -9,7 +9,7 @@ import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import java.net.*;
 import java.util.Locale;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A query reply.  Contains information about the responding host in addition to
