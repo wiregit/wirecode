@@ -629,8 +629,12 @@ public final class UDPService implements Runnable {
                     _lastConnectBackTime = System.currentTimeMillis();
                     Runnable checkThread = new Runnable() {
                             public void run() {
-                                // we set according to the message listener
-                                _acceptedUnsolicitedIncoming = ml._gotIncoming;
+                                if ((_acceptedUnsolicitedIncoming && 
+                                     (_lastUnsolicitedIncomingTime < currTime))
+                                    || (!_acceptedUnsolicitedIncoming))
+                                    // we set according to the message listener
+                                    _acceptedUnsolicitedIncoming = 
+                                        ml._gotIncoming;
                                 mr.unregisterMessageListener(cbGuid);
                             }
                         };

@@ -26,6 +26,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -241,6 +242,80 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
             assertTrue(udpServ.canReceiveUnsolicited());
         }
     }
+
+    // make an incoming to the servent, wait a little, and then make sure
+    // it asks for a connect back again
+    public void testUDPInterleavingRequestsSent() throws Exception {
+        drainAll();
+        UDPService udpServ = UDPService.instance();
+        Random rand = new Random();
+        for (int i = 0; i < 6; i++) {
+            if (rand.nextBoolean()) {
+                DatagramSocket s = new DatagramSocket();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ReplyNumberVendorMessage vm  = 
+                    new ReplyNumberVendorMessage(new GUID(cbGuid), 1);
+                vm.write(baos);
+                DatagramPacket pack = 
+                    new DatagramPacket(baos.toByteArray(), 
+                                       baos.toByteArray().length,
+                                       InetAddress.getLocalHost(), PORT);
+                s.send(pack);
+                s.close();
+                Thread.sleep(100);
+            }
+            
+            // wait until the expire time is realized
+            Thread.sleep(MY_EXPIRE_TIME + MY_VALIDATE_TIME);
+            
+            // throw some randomness in there - if we get an incoming we should
+            // not send messages out
+            if (udpServ.canReceiveUnsolicited()) {
+                DatagramSocket s = new DatagramSocket();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ReplyNumberVendorMessage vm  = 
+                    new ReplyNumberVendorMessage(new GUID(cbGuid), 1);
+                vm.write(baos);
+                DatagramPacket pack = 
+                    new DatagramPacket(baos.toByteArray(), 
+                                       baos.toByteArray().length,
+                                       InetAddress.getLocalHost(), PORT);
+                s.send(pack);
+                s.close();
+                Thread.sleep(100);
+                assertTrue(udpServ.canReceiveUnsolicited());
+                try {
+                    testUP[0].receive(TIMEOUT);
+                }
+                catch (InterruptedIOException expected) {}
+            }
+            else {
+                Thread.sleep(MY_VALIDATE_TIME);
+                // query the Acceptor - it should send off more requests
+                Thread.sleep(100);
+                Message m = null;
+                do {
+                    m = testUP[0].receive(TIMEOUT);
+                } while (!(m instanceof UDPConnectBackVendorMessage)) ;
+                cbGuid = 
+                ((UDPConnectBackVendorMessage)m).getConnectBackGUID().bytes();
+
+                // now connect back and it should switch on unsolicited
+                DatagramSocket s = new DatagramSocket();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                PingRequest ping = new PingRequest(cbGuid, (byte)1, (byte)1);
+                ping.write(baos);
+                DatagramPacket pack = 
+                    new DatagramPacket(baos.toByteArray(), 
+                                       baos.toByteArray().length,
+                                       InetAddress.getLocalHost(), PORT);
+                s.send(pack);
+                s.close();
+            }
+        }
+    }
+
+
 
     //////////////////////////////////////////////////////////////////
     public static void doSettings() {
