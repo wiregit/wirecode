@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.downloader.*;
 
 /**
  * The External interface into the router world.
@@ -18,6 +17,7 @@ public class RouterService
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
     private DownloadManager downloader;
+    private UploadManager uploadmanager;
 
     /**
      * Create a RouterService accepting connections on the default port
@@ -43,20 +43,18 @@ public class RouterService
         this.router = router;
         this.catcher = new HostCatcher(callback);
         downloader = new DownloadManager();
+		this.uploadmanager = new UploadManager();
 
         // Now, link all the pieces together, starting the various threads.
         this.catcher.initialize(acceptor, manager,
                                 SettingsManager.instance().getHostList());
-        this.router.initialize(acceptor, manager, catcher);
+        // this.router.initialize(acceptor, manager, catcher);
+        this.router.initialize(acceptor, manager, catcher, uploadmanager);
         this.manager.initialize(router, catcher);
-        this.acceptor.initialize(manager, router, downloader);
+		
+	this.uploadmanager.initialize(activityCallback, router, acceptor);
+        this.acceptor.initialize(manager, router, downloader, uploadmanager);
         this.downloader.initialize(callback, router, acceptor, FileManager.instance());
-
-		// Make sure connections come up ultra-fast (beyond default keepAlive)
-        SettingsManager settings=SettingsManager.instance();
-        int outgoing=settings.getKeepAlive();
-		if ( outgoing > 0 )
-		    connect();
     }
 
     /**
@@ -135,6 +133,7 @@ public class RouterService
         groupConnect(group);
     }
 
+//------------------------------------------------------------------------
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established but send a GroupPingRequest
@@ -201,20 +200,15 @@ public class RouterService
             outgoing = settings.DEFAULT_KEEP_ALIVE;
             settings.setKeepAlive(outgoing);
         }
-        //int incoming=settings.getMaxIncomingConnections();
-        ///if (incoming<1 && outgoing!=0) {
-		// incoming = outgoing/2;
-		//  settings.setMaxIncomingConnections(incoming);
-        //}
-
-		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
-			manager.activateUltraFastConnectShutdown();
-		}
-        setKeepAlive(outgoing);
+        int incoming=settings.getMaxIncomingConnections();
+        if (incoming<1 && outgoing!=0) {
+            incoming = outgoing/2;
+            settings.setMaxIncomingConnections(incoming);
+        }
+        setKeepAlive(oldKeepAlive);
         settings.setUseQuickConnect(useQuickConnect);
     }
+//------------------------------------------------------------------------
 
     /**
      * @modifies this
@@ -232,12 +226,11 @@ public class RouterService
         //to give the connection fetchers time to do their thing.  Ugh.  A
         //Thread.yield() may work here too, but that's less dependable.  And I
         //do not want to bother with wait/notify's just for this obscure case.
-        SettingsManager settings=SettingsManager.instance();
         boolean useHack=
-            (!settings.getUseQuickConnect())
+            (! SettingsManager.instance().getUseQuickConnect())
                 && catcher.getNumHosts()==0;
         if (useHack) {
-            settings.setUseQuickConnect(true);
+            SettingsManager.instance().setUseQuickConnect(true);
             disconnect();
         }
 
@@ -245,22 +238,16 @@ public class RouterService
         catcher.expire();
 
         //Ensure outgoing connections is positive.
+        SettingsManager settings=SettingsManager.instance();
         int outgoing=settings.getKeepAlive();
         if (outgoing<1) {
             outgoing = settings.DEFAULT_KEEP_ALIVE;
             settings.setKeepAlive(outgoing);
         }
         //Actually notify the backend.
-
-		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
-			manager.activateUltraFastConnectShutdown();
-		}
         setKeepAlive(outgoing);
-
-        //int incoming=settings.getKeepAlive();
-        //setMaxIncomingConnections(incoming);
+        int incoming=settings.getMaxIncomingConnections();
+        setMaxIncomingConnections(incoming);
 
         //See note above.
         if (useHack) {
@@ -274,19 +261,15 @@ public class RouterService
     /**
      * @modifies this
      * @effects removes all connections.
-     * @effects deactivates extra connection watchdog check
      */
     public void disconnect() {
-		// Deactivate checking for Ultra Fast Shutdown
-		manager.deactivateUltraFastConnectShutdown(); 
-
         SettingsManager settings=SettingsManager.instance();
         int oldKeepAlive=settings.getKeepAlive();
 
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.
         setKeepAlive(0);
-        //setMaxIncomingConnections(0);
+        setMaxIncomingConnections(0);
         //2. Remove all connections.
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {
@@ -339,9 +322,9 @@ public class RouterService
      * connection manager.  This does not affect the permanent
      * MAX_INCOMING_CONNECTIONS property.  
      */
-    //public void setMaxIncomingConnections(int max) {
-	//manager.setMaxIncomingConnections(max);
-    //}
+    public void setMaxIncomingConnections(int max) {
+        manager.setMaxIncomingConnections(max);
+    }
 
     /**
      * Notify the backend that spam filters settings have changed, and that
@@ -503,7 +486,7 @@ public class RouterService
         }
 
         //2. Send a query for "*.*" with a TTL of 1.
-        QueryRequest qr=new QueryRequest((byte)1, 0, FileManager.BROWSE_QUERY);
+        QueryRequest qr=new QueryRequest((byte)1, 0, "*.*");
         router.sendQueryRequest(qr, c);
         try {
             c.flush();
@@ -600,7 +583,8 @@ public class RouterService
      *     @modifies this, disk 
      */
     public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
-        throws FileExistsException, AlreadyDownloadingException {
+    // throws com.limegroup.gnutella.downloader.FileExistsException {
+        throws Exception {
         return downloader.getFiles(files, overwrite);
     }
 }

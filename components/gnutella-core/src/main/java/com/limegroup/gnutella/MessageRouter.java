@@ -89,6 +89,8 @@ public abstract class MessageRouter
      */
     private volatile int _numRouteErrors;
 
+	protected UploadManager _uploadManager;
+
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -110,11 +112,12 @@ public abstract class MessageRouter
      * Links the MessageRouter up with the other back end pieces
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager,
-                    HostCatcher catcher)
+                    HostCatcher catcher, UploadManager uploadManager)
     {
         _acceptor = acceptor;
         _manager = manager;
         _catcher = catcher;
+	_uploadManager = uploadManager;
     }
 
     public String getPingRouteTableDump()
@@ -221,8 +224,7 @@ public abstract class MessageRouter
         //any more.
         if ((receivingConnection.getNumMessagesReceived()<=2)
                 && (queryRequest.getHops()<=1)  //actually ==1 will do
-                && (queryRequest.getQuery().equals(
-                    FileManager.INDEXING_QUERY))) {
+                && (queryRequest.getQuery().equals("    "))) {
             receivingConnection.setKillable(false);
         }
 

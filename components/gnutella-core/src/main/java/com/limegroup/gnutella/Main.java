@@ -191,9 +191,9 @@ public class Main implements ActivityCallback {
 
     public void removeDownload(Downloader mgr) {}
 
-    public void addUpload(HTTPUploader mgr) {}
+    public void addUpload(Uploader mgr) {}
 
-    public void removeUpload(HTTPUploader mgr) {}
+    public void removeUpload(Uploader mgr) {}
 
     public void setPort(int port){}
 
