@@ -378,7 +378,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	/**
 	 * Tests URN queries from the leaf.
 	 */
-    /*
+
 	public void testUrnQueryToLeaf() throws Exception {
 		QueryRequest qr = 
 			QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1);
@@ -403,7 +403,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
         
 	}
-    */
+
 
     /**
      * Test to make sure that queries with one more hop to go are
@@ -502,7 +502,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * should not receive the queries, and the Ultrapeer should not receive
 	 * them at the last hop.
 	 */
-    /*
+
 	public void testThatURNOnlyQueryDoesNotGetImproperlyForwarded() 
 		throws Exception {
 		QueryRequest qr = 
@@ -532,12 +532,10 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 				   !drain(ULTRAPEER_2));
 
 	}
-    */
 
 	/**
 	 * Tests URN queries from the leaf.
 	 */
-    /*
 	public void testUrnQueryFromLeaf() throws Exception {
 		QueryRequest qr = 
 			QueryRequest.createRequery(HugeTestUtils.SHA1);
@@ -559,7 +557,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		assertTrue("guids should be equal", 
 				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));				
 	}
-    */
 
 
 	/**

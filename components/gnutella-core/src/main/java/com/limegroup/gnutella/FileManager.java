@@ -1141,11 +1141,15 @@ public abstract class FileManager {
      *  can be checked for potential positives against a QRT.
      */
     public List getIndivisibleKeyWords() {
-        // Took out the code that added URNs to the returned List since we are
-        // not recognizing queries with hashes anymore.  If you need the code
-        // check CVS for it ;) .
-        // Just return an empty list.
-        return new ArrayList();
+        ArrayList retList = new ArrayList();
+        FileDesc[] files = getAllSharedFileDescriptors();
+        for (int i = 0; i < files.length; i++) {
+            Set urnsForCurrFile = files[i].getUrns();
+            Iterator iter = urnsForCurrFile.iterator();
+            while (iter.hasNext())
+                retList.add(((URN)iter.next()).httpStringValue());
+        }
+        return retList;
     }
 
     ////////////////////////////////// Queries ///////////////////////////////

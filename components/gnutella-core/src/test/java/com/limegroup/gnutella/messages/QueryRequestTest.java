@@ -280,7 +280,7 @@ public final class QueryRequestTest extends BaseTestCase {
     /**
      * Tests to make sure that network queries with URNS are not accepted.
      */
-	public void testThatNetworkQueriesWithURNsAreNotAccepted() throws Exception {
+	public void testThatNetworkQueriesWithURNsAreAccepted() throws Exception {
 		ByteArrayOutputStream[] URN_BYTES = 
 		    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
 		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
@@ -312,11 +312,20 @@ public final class QueryRequestTest extends BaseTestCase {
                     QueryRequest.createNetworkQuery(GUID.makeGuid(), ttl, hops, 
                                                     URN_BYTES[i].toByteArray(), 
                                                     Message.N_UNKNOWN);
-                fail("should not have accepted query: "+qr);
             } catch(BadPacketException e) {
-                // should be thrown for queries with URNS
+                fail("should have accepted query!!");
             }
         }
+    }
+
+
+    public void testQueriesWithOnlyURNsAreAccepted() throws Exception {
+        QueryRequest qr = QueryRequest.createQuery(HugeTestUtils.SHA1);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        qr.write(baos);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        QueryRequest qrRead = (QueryRequest) Message.read(bais);
     }
 
 
