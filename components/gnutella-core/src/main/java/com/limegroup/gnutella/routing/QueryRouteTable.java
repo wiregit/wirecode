@@ -391,8 +391,14 @@ public class QueryRouteTable {
         if (m.getCompressor()==PatchTableMessage.COMPRESSOR_DEFLATE) {
             try {
                 //a) If first message, create uncompressor (if needed).
-                if (m.getSequenceNumber()==1)
-                    uncompressor=new Inflater();
+                if (m.getSequenceNumber()==1) {
+                    // if this is the first uncompressor needed, create one
+                    if( uncompressor == null)
+                        uncompressor = new Inflater();
+                    // otherwise, reuse the existing one.
+                    else
+                        uncompressor.reset();
+                }       
                 Assert.that(uncompressor!=null, 
                     "Null uncompressor.  Sequence: "+m.getSequenceNumber());
                 data=uncompress(data);            
