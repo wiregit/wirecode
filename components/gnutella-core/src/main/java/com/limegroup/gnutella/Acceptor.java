@@ -51,7 +51,7 @@ public class Acceptor extends Thread {
     private MessageRouter _router;
     private ActivityCallback _callback;
 
-	private boolean _acceptedIncoming = false;
+	private volatile boolean _acceptedIncoming = false;
 
 
 	/**
