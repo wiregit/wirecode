@@ -344,9 +344,15 @@ public class BootstrapServerManager {
                 "close");
             //Always use ISO-8859-1 encoding to avoid misinterpreting bytes as
             //weird characters on international systems.
-            in = new BufferedReader(
-                new InputStreamReader(connection.getInputStream(), 
-									  "ISO-8859-1"));
+            try {
+                in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), 
+                                        "ISO-8859-1"));
+            } catch(NullPointerException e) {
+                // This can happen because of JDK bug 4218806
+                // See http://developer.java.sun.com/developer/bugParade/bugs/4218806.html
+                throw new IOException("null .getInputStream()");
+            }
 
             //For each line of data (excludes HTTP headers)...
             boolean firstLine = true;
