@@ -6,16 +6,15 @@ import java.security.*;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as
- * specified in RFC 2141.  This also provides public constants for 
- * standard URN strings and URN strings that have been agreed upon by
- * the Gnutella Developers Forum (GDF).<p>
+ * specified in RFC 2141.
  *
  * This class is immutable.
  *
  * @see UrnCache
  * @see FileDesc
  * @see URNFactory
- @ @see UrnType
+ * @see UrnType
+ * @see java.io.Serializable
  */
 public final class URN implements HTTPHeaderValue, Serializable {
 
@@ -201,10 +200,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * Returns whether or not the specified Namespace Specific String (NSS) 
 	 * is a valid NSS.
 	 *
-	 * @param NSS the Namespace Specific String for a URN
+	 * @param nss the Namespace Specific String for a URN
 	 * @return <tt>true</tt> if the NSS is valid, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidNamespaceSpecificString(final String NSS) {
+	private static boolean isValidNamespaceSpecificString(final String nss) {
 		int length = NSS.length();
 
 		// checks to make sure that it either is the length of a 32 
@@ -280,7 +279,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	private void writeObject(ObjectOutputStream s) 
 		throws IOException {
 		s.defaultWriteObject();
-		s.writeObject(_urnString);
+		s.writeUTF(_urnString);
 		s.writeObject(_urnType);
 	}
 
@@ -291,7 +290,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	private void readObject(ObjectInputStream s) 
 		throws IOException, ClassNotFoundException {
 		s.defaultReadObject();
-		_urnString = (String)s.readObject();
+		_urnString = s.readUTF();
 		_urnType = (UrnType)s.readObject();
 		if(!URN.isValidUrn(_urnString)) {
 			throw new InvalidObjectException("invalid urn: "+_urnString);
