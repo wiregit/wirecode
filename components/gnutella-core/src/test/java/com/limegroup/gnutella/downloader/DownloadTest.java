@@ -508,7 +508,8 @@ public class DownloadTest extends TestCase {
         debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
                          "stop when corrupt "+ deleteCorrupt+" ");
-        final int RATE=500;
+        final int RATE=100;
+        uploader1.setRate(RATE);
         RemoteFileDesc rfd1 = newRFDWithURN(6346,100,null);
         Downloader download = null;
         try {

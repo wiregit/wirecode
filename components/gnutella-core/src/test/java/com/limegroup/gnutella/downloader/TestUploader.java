@@ -7,6 +7,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.*;
 
 public class TestUploader {    
     /** My name, for debugging */
@@ -203,8 +204,9 @@ public class TestUploader {
         BufferedReader input = 
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-        BufferedOutputStream output = 
-            new BufferedOutputStream(socket.getOutputStream());
+        ThrottledOutputStream output = new ThrottledOutputStream(
+            new BufferedOutputStream(socket.getOutputStream()),
+            new BandwidthThrottle(rate*1024));
         int start = 0;
         int stop = TestFile.length();
         while (true) {
@@ -300,25 +302,17 @@ public class TestUploader {
         //ThrottledOutputStream
         for (int i=start; i<stop; ) {
             //1 second write cycle
-            long startTime=System.currentTimeMillis();
-            for (int j=0; j<Math.max(1,(rate*1024)) && i<stop; j++) {
-                //if we are above the threshold, simulate an interrupted connection
-                if (stopAfter>-1 && totalUploaded>=stopAfter) {
-                    stopped=true;
-                    out.flush();
-                    throw new IOException();
-                }
-                if(sendCorrupt)
-                    out.write(TestFile.getByte(i)+(byte)1);
-                else
-                    out.write(TestFile.getByte(i));
-                totalUploaded++;
-                i++;
+            if (stopAfter>-1 && totalUploaded>=stopAfter) {
+                stopped=true;
+                out.flush();
+                throw new IOException();
             }
-            long elapsed=System.currentTimeMillis()-startTime;
-            long wait=1000-elapsed;
-            if (wait>0)
-                try { Thread.sleep(wait); } catch (InterruptedException e) { }
+            if(sendCorrupt)
+                out.write(TestFile.getByte(i)+(byte)1);
+            else
+                out.write(TestFile.getByte(i));
+            totalUploaded++;
+            i++;
         }
         out.flush();
     }

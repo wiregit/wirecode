@@ -191,7 +191,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The interval size for downloaders with persistenace support  */
-    private static final int CHUNK_SIZE=5000;      //5 KB        
+    private static final int CHUNK_SIZE=20000;//20 KB-chosen after studying
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
     private static final float MIN_ACCEPTABLE_SPEED = 
