@@ -74,8 +74,13 @@ public class FileDesc implements AlternateLocationCollector {
 	
 	/**
 	 * The LimeXMLDocs associated with this FileDesc.
+	 *
+	 * Never add or remove from this list.  Always create a new list.
+	 * This has extra overhead when adding/removing, but makes synchronization
+	 * much much easier.
 	 */
-	private List /* of LimeXMLDocument */ _limeXMLDocs;
+	private volatile List /* of LimeXMLDocument */ _limeXMLDocs = 
+	    DataUtils.EMPTY_LIST;
 
 	/**
 	 * The collection of alternate locations for the file.
@@ -274,10 +279,10 @@ public class FileDesc implements AlternateLocationCollector {
 	 * Adds a LimeXMLDocument to this FileDesc.
 	 */
 	public void addLimeXMLDocument(LimeXMLDocument doc) {
-	    if( _limeXMLDocs == null ) {
-	        _limeXMLDocs = new ArrayList(1);
-	    }
-	    _limeXMLDocs.add(doc);
+	    List newDocs = new ArrayList(_limeXMLDocs.size() + 1);
+	    newDocs.addAll(_limeXMLDocs);
+	    newDocs.add(doc);
+	    _limeXMLDocs = newDocs;
     }
     
     /**
@@ -285,14 +290,15 @@ public class FileDesc implements AlternateLocationCollector {
      */
     public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
                                           LimeXMLDocument newDoc) {
-        if( _limeXMLDocs == null )
-            return false;
-
         int index = _limeXMLDocs.indexOf(oldDoc);
         if( index == -1 )
             return false;
-        _limeXMLDocs.remove(index);
-        _limeXMLDocs.add(newDoc);
+            
+        List newDocs = new ArrayList(_limeXMLDocs);
+        Object removed = newDocs.remove(index);
+        Assert.that(removed == oldDoc, "wrong doc removed!");
+        newDocs.add(newDoc);
+        _limeXMLDocs = newDocs;
         return true;
     }
     
@@ -300,19 +306,20 @@ public class FileDesc implements AlternateLocationCollector {
      * Removes a LimeXMLDocument from the FileDesc.
      */
     public boolean removeLimeXMLDocument(LimeXMLDocument toRemove) {
-        if( _limeXMLDocs == null )
+        if( _limeXMLDocs.size() == 0 ) 
             return false;
-        return _limeXMLDocs.remove(toRemove);
+        
+        List newDocs = new ArrayList(_limeXMLDocs);
+        boolean removed = newDocs.remove(toRemove);
+        _limeXMLDocs = newDocs;
+        return removed;
     }   
     
     /**
      * Returns the LimeXMLDocuments for this FileDesc.
      */
     public List getLimeXMLDocuments() {
-        if(_limeXMLDocs == null )
-            return DataUtils.EMPTY_LIST;
-        else
-            return _limeXMLDocs;
+        return _limeXMLDocs;
     }
 
 	/**
