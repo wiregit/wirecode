@@ -17,7 +17,7 @@ public class SchemaFieldInfo
      * List (of Strings) to store enumerated values, if associated with this
      *field
      */
-    private List enumerationList = null;
+    private List _enumerationList = null;
     
     /**
      * Canonicalized field name for which it stores the info
@@ -54,11 +54,11 @@ public class SchemaFieldInfo
     protected void addEnumerationValue(String value)
     {
         //create a new list, if doesnt exist
-        if(enumerationList == null)
-            enumerationList = new LinkedList();
+        if(_enumerationList == null)
+            _enumerationList = new LinkedList();
         
         //add the value
-        enumerationList.add(value);
+        _enumerationList.add(value);
         
         //also set the field type to be OPTIONS
         _fieldType = OPTIONS;
@@ -73,14 +73,31 @@ public class SchemaFieldInfo
     }
     
     
+     /**
+     * sets the canonicalized field name for which this object stores the
+     * information
+     */
     protected void setCanonicalizedFieldName(String canonicalizedFieldName)
     {
         this._canonicalizedFieldName = canonicalizedFieldName;
     }
     
-     public String getCanonicalizedFieldName()
+    /**
+     * returns the canonicalized field name for which this object stores the
+     * information
+     */
+    public String getCanonicalizedFieldName()
     {
         return _canonicalizedFieldName;
+    }
+    
+    /**
+     * Returns the List (of Strings) to store enumerated values, 
+     * if associated with this field
+     */
+    public List getEnumerationList()
+    {
+        return _enumerationList;
     }
     
 }//end of class FieldInfo
