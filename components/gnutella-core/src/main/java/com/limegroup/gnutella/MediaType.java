@@ -11,9 +11,25 @@ import java.io.Serializable;
 public class MediaType implements Serializable {
     static final long serialVersionUID = 3999062781289258389L;
 
-    private String schema;
-    private String descriptionKey;
-    private String[] extensions;
+    /**
+     * The description of this MediaType.
+     */
+    private final String schema;
+    
+    /**
+     * The key to look up this MediaType.
+     */
+    private final String descriptionKey;
+    
+    /**
+     * The list of extensions within this MediaType.
+     */
+    private final String[] extensions;
+    
+    /**
+     * The main extension for this MediaType.
+     */
+    private final String mainExt;
     
     // These values should match standard MIME content-type
     // categories and/or XSD schema names.
@@ -32,6 +48,22 @@ public class MediaType implements Serializable {
     private static final String VIDEO = "MEDIA_VIDEO";
     private static final String IMAGES = "MEDIA_IMAGES";
     
+    // An extension that signifies this MediaType, used
+    // for looking up icons in the file system.
+    private static final String EXT_ANY_TYPE = null;
+    private static final String EXT_DOCUMENTS = "rtf";
+    private static final String EXT_PROGRAMS = "exe";
+    private static final String EXT_AUDIO = "mp3";
+    private static final String EXT_VIDEO = "mpg";
+    private static final String EXT_IMAGES = "jpg";
+    
+    /**
+     * Constructs a MediaType with only a MIME-Type.
+     */
+    public MediaType(String schema) {
+        this(schema, null, null, null);
+    }
+    
     /**
      * @param schema a MIME compliant non-localizable identifier,
      *  that matches file categories (and XSD schema names).
@@ -41,11 +73,12 @@ public class MediaType implements Serializable {
      *  type.  Must be all lowercase.  If null, this matches
      *  any file.
      */
-    public MediaType(String schema, String descriptionKey,
+    public MediaType(String schema, String descriptionKey, String ext,
                      String[] extensions) {
         this.schema = schema;
         this.descriptionKey = descriptionKey;
         this.extensions = extensions;
+        this.mainExt = ext;
     }
         
     /** 
@@ -92,6 +125,13 @@ public class MediaType implements Serializable {
      */
     public String getMimeType() {
         return schema;
+    }
+    
+    /**
+     * Returns the probable extension for this media type.
+     */
+    public String getExtension() {
+        return mainExt;
     }
     
     /**
@@ -148,10 +188,12 @@ public class MediaType implements Serializable {
 
     /** Returns an array of default media types. */
     private static MediaType[] getTypes() {
-        MediaType any = new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE,
+        MediaType any = new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, 
+                                      EXT_ANY_TYPE,
                                       null);
         // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
         MediaType text = new MediaType(SCHEMA_DOCUMENTS, DOCUMENTS,
+                                       EXT_DOCUMENTS,
             new String[] {
                 "html", "htm", "xhtml", "mht", "mhtml", "xml",
                 "txt", "ans", "asc", "diz", "eml",
@@ -162,6 +204,7 @@ public class MediaType implements Serializable {
                 "tex", "texi", "latex", "info", "man"
             });
         MediaType programs = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+                                           EXT_PROGRAMS,
             new String[] {
                 "exe", "bin", "mdb",
                 "sh", "csh", "awk", "pl",
@@ -173,6 +216,7 @@ public class MediaType implements Serializable {
                 "iso", "nrg", "cue", "bin"
             });
         MediaType audio = new MediaType(SCHEMA_AUDIO, AUDIO,
+                                        EXT_AUDIO,
             new String[] {
                 "mp3", "mpa", "mp1", "mpga",
                 "ra", "rm", "ram", "rmj",
@@ -183,6 +227,7 @@ public class MediaType implements Serializable {
                 "mid", "midi", "rmi", "mod"
             });
         MediaType video = new MediaType(SCHEMA_VIDEO, VIDEO,
+                                        EXT_VIDEO,
             new String[] {
                 "mpg", "mpeg", "mpe", "mng", "mpv", "m1v",
                 "vob", "mp2", "mpv2", "mp2v", "m2p", "m2v",
@@ -193,6 +238,7 @@ public class MediaType implements Serializable {
                 "wml", "vrml", "swf", "dcr", "jve", "nsv"
             });
         MediaType images = new MediaType(SCHEMA_IMAGES, IMAGES,
+                                         EXT_IMAGES,
             new String[] {
                 "gif", "png",
                 "jpg", "jpeg", "jpe", "jif", "jiff", "jfif",
