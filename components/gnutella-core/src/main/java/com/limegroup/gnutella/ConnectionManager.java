@@ -61,7 +61,7 @@ public class ConnectionManager implements Runnable {
 	Connection except;
 	MessagePair (Message m, Connection except) { this.m=m; this.except=except; }
     }
-    private static final int MESSAGE_QUEUE_SIZE=1000;
+    private static final int MESSAGE_QUEUE_SIZE=500;
     private Buffer /* of MessagePair */ messageQueue=new Buffer(MESSAGE_QUEUE_SIZE);
 
     private int keepAlive=0;
@@ -81,9 +81,12 @@ public class ConnectionManager implements Runnable {
     
     private Vector badHosts = new Vector();
 
-    /** Creates a manager that listens for incoming connections on the given
-     * port.  If this is a bad port, you will get weird messages when you
-     * call run. */
+    /** Creates a manager that tries to listen to incoming connections
+     * on the given port.  If this is a bad port, the port will be
+     * changed when run is called and SettingsManager will be updated.
+     * If that fails, ActivityCallback.error will be called.  A port
+     * of 0 means do not accept incoming connections. 
+     */
     public ConnectionManager(int port) {
 	this.port=port;
 	Thread t=new Thread(new MessageBroadcaster());
@@ -153,6 +156,45 @@ public class ConnectionManager implements Runnable {
 	    }
 	}
     }
+
+    /**
+     * @modifies this
+     * @effects if tryOthers==false, equivalent to "setListeningPort(suggestPort);
+     *  return suggestedPort".
+     *     Otherwise, tries to set the port to suggestPort.  If that fails, tries
+     *  random values.  If this works, the new port value is returned; otherwise,
+     *  throws IOException, and this is not modified.<p>
+     *
+     *  If port==0, tells this to stop listening to incoming connections.
+     *  This is properly synchronized and can be called even while run() is
+     *  being called.
+     */
+    public int setListeningPort(int suggestedPort, boolean tryOthers)
+	throws IOException {
+	//Special case.
+	if (!tryOthers) {
+	    setListeningPort(suggestedPort);
+	    return suggestedPort;
+	}
+	
+	//1. Try suggested port.
+	try {
+	    setListeningPort(suggestedPort);
+	    return suggestedPort;
+	} catch (IOException e) { /* continue on */ }
+
+	//2. Try 10 different ports
+	for (int i=0; i<10; i++) {
+	    int port=i+6346;
+	    try {
+		setListeningPort(port);
+		return port;
+	    } catch (IOException e) { }
+	}
+
+	//3. Everything failed; give up!
+	throw new IOException();
+    }
     
     public void propertyManager(){
 	ClientId = SettingsManager.instance().getClientID();
@@ -193,12 +235,15 @@ public class ConnectionManager implements Runnable {
      */
     public void sendToAllExcept(Message m, Connection c) {
 	Assert.that(m!=null);
+	Object dropped;
 	//Queue the message.  MessageBroadcaster will dequeue and send.
 	synchronized (messageQueue) {
+	    dropped=messageQueue.add(new MessagePair(m,c));
+	    messageQueue.notify();
+	}
+	if (dropped!=null) {
 	    //TODO: increment dropped message count if returned value
 	    //of add(..) is not null, i.e., if buffer capacity is reached.	    
-	    messageQueue.add(new MessagePair(m,c));
-	    messageQueue.notify();
 	}
     }
 
@@ -249,9 +294,11 @@ public class ConnectionManager implements Runnable {
 	return total;
     }
 
-    /** @modifies this, network
+    /** @modifies this, network, SettingsManager
      *  @effects accepts new incoming connections on a designated port
-     *   and services incoming requests.
+     *   and services incoming requests.  If the port was changed
+     *   in order to accept incoming connections, SettingsManager is
+     *   changed accordingly.
      */
     public void run() {	
 	//1. Start background threads to fetch the desired number of
@@ -266,7 +313,10 @@ public class ConnectionManager implements Runnable {
 	//   incoming connections.  If there are problems, we can continue
 	//   onward.
 	try {
-	    setListeningPort(this.port);
+	    int oldPort=port;
+	    setListeningPort(port,true);
+	    if (port!=oldPort)
+		SettingsManager.instance().setPort(port);
 	} catch (IOException e) {
 	    error(ActivityCallback.ERROR_0);
 	}
