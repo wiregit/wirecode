@@ -216,6 +216,11 @@ public final class NetworkUtils {
         if(CommonUtils.isJava14OrLater()) {
             try {
                 socket.shutdownOutput();
+
+            } catch(Exception e) {
+                // we don't care
+            }
+            try {
                 socket.shutdownInput();
             } catch(Exception e) {
                 // we don't care
@@ -225,6 +230,10 @@ public final class NetworkUtils {
             // non-1.4 systems, so we can just close the streams
             try {
                 socket.getOutputStream().close();
+            } catch (Exception e) {
+                // we don't care
+            }
+            try {
                 socket.getInputStream().close();
             } catch (Exception e) {
                 // we don't care
