@@ -20,7 +20,7 @@ public final class URN implements HTTPHeaderValue {
 	 * should be used in a case-insensitive manner in compliance with
 	 * the URN specification (RFC 2141).
 	 */
-	private static final String URN_NS_ID = "urn:";
+	public static final String URN_NAMESPACE_ID = "urn:";
 
 	/**
 	 * The identifier for a SHA1 Namespace Identifier string.  This
@@ -38,7 +38,7 @@ public final class URN implements HTTPHeaderValue {
 	 * Constant for the URN identifier constant combined with the
 	 * SHA1 identifier constant.  This is used to identify SHA1 URNs.
 	 */
-	public static final String URN_SHA1 = URN_NS_ID+SHA1;
+	public static final String URN_SHA1 = URN_NAMESPACE_ID+SHA1;
 
 	/**
 	 * Constant code for a SHA1 URN.
@@ -131,7 +131,7 @@ public final class URN implements HTTPHeaderValue {
 	 */
 	public static boolean isUrnType(String urnString) {
 		final String urnStringLower = urnString.toLowerCase();
-		if(urnStringLower.equals(URN.URN_NS_ID) || 
+		if(urnStringLower.equals(URN.URN_NAMESPACE_ID) || 
 		   urnStringLower.equals(URN.URN_SHA1 + ":")) {
 			return true;
 		}
@@ -211,7 +211,7 @@ public final class URN implements HTTPHeaderValue {
 		int colon2Index = urnString.indexOf(":", colon1Index+1);
 		
 		if((colon2Index == -1) || 
-		   !urnStr.equalsIgnoreCase(URN.URN_NS_ID) ||
+		   !urnStr.equalsIgnoreCase(URN.URN_NAMESPACE_ID) ||
 		   !isValidNamespaceIdentifier(urnString.substring(colon1Index+1, 
 														   colon2Index)) ||
 		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
