@@ -45,4 +45,10 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting UI_GROUP_RESULTS =
         FACTORY.createBooleanSetting("UI_GROUP_RESULTS", true);
+        
+    /**
+     * Setting to allow ignoring of alt-locs in replies.
+     */
+    public static final BooleanSetting UI_ADD_REPLY_ALT_LOCS =
+        FACTORY.createBooleanSetting("UI_ADD_REPLY_ALT_LOCS", true);
 }
