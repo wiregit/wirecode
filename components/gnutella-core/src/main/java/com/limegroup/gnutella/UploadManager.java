@@ -188,13 +188,13 @@ public class UploadManager implements BandwidthTracker {
         // check if it complies with the restrictions.
         //and set the uploader state accordingly
         insertAndTest(uploader, host);
-        /*
-          // connect is always safe to call.  it should be
-          // if it is a non-push upload, then connect should
-          // just return.  if there is an error, it should
-          // be because the connection failed.
-          uploader.connect();
-        */
+        
+        //Note: We do not call connect() anymore. That's because connect would
+        //never do anything in the case of a normal upload  - becasue the
+        //HTTPUploader already have a socket. connect() would only be executed
+        // if a push was calling this method. 
+        //Now the acceptPushDownload method connects directly.
+        
         // start doesn't throw an exception.  rather, it
         // handles it internally.  is this the correct
         // way to handle it?
@@ -260,8 +260,10 @@ public class UploadManager implements BandwidthTracker {
                                               final int port, 
 											  final int index, 
                                               final String guid) { 
-		final Uploader uploader = new HTTPUploader(file, host, port, index, 
+		final Uploader GIVuploader = new HTTPUploader(file, host, port, index, 
                                                    guid, this, _fileManager);
+        //Note: GIVuploader is just used to connect, and while connecting, 
+        //the GIVuploader uploads the GIV message.
 
         // Test if we are either currently attempting a push, or we have
         // unsuccessfully attempted a push with this host in the past.
@@ -274,20 +276,21 @@ public class UploadManager implements BandwidthTracker {
         Thread runner=new Thread() {
             public void run() {
                 try {
-                    //synchronized(UploadManager.this) { _activeUploads++; }
-                    Socket s = uploader.connect();
+                    //create the socket and send the GIV message
+                    Socket s = GIVuploader.connect();
+                    //delegate to the normal upload
                     acceptUpload(s);
-                    //doSingleUpload(uploader, host, index);
-                }catch(IOException ioe){ 
+                    //Note: we do not do any book-keeping - like incrementing
+                    //_activeUploads. Because that is taken care off in 
+                    //acceptUpload.
+                }catch(IOException ioe){//connection failed? do book-keeping
                     synchronized(UploadManager.this) { 
                         insertFailedPush(host, index);  
                     }
                 }
                 finally {
-                    //decrement the download count
-                    //synchronized(UploadManager.this) { _activeUploads--; }
                     //close the socket
-                    uploader.stop();
+                    GIVuploader.stop();
                 }
             }
         };

@@ -117,16 +117,18 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 
-	// This method must be called in the case of a push.
+	/**
+     * This method is called in the case of a push only.
+     * <p>
+     * The method creates the socket, and send the GIV message.
+     * At this point the socket, is in the same state as a socket that was
+     * created by a normal downloader - ready to receive the GET
+     * <p>
+     * @return The returned socket is used for a normal upload.
+     */
 	public Socket connect() throws IOException {
-
-		// the socket should not be null if this is a non-push
-		// connect.  in case connect is called after a non-push,
-		// we just return.
-        //Note: We changed the doSingleUpload method. to not call 
-        //this method anymore. this method is only called from
-        //acceptPushUpload() now. So this will never happen...but
-        //lets just leave it in there.
+        // This method is only called from acceptPushUpload() now. 
+        // So this will never happen...but lets just leave it in there.
 		if (_socket != null)
 			return _socket;
 
@@ -146,48 +148,6 @@ public class HTTPUploader implements Uploader {
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
 			
-            /*
-              // Wait to recieve the GET
-              InputStream istream = _socket.getInputStream(); 
-              ByteReader in = new ByteReader(istream);
-              // set a time out for how long to wait for the push
-              int time = SettingsManager.instance().getTimeout();
-              _socket.setSoTimeout(time);
-              
-              // read directly from the socket
-              String str;
-              str = in.readLine();
-              // not sure why we set this to zero, if we set it above
-              _socket.setSoTimeout(0);
-              
-              // check the line, to see what was read.
-              if (str == null)
-              throw new IOException();
-              // check for the 'GET'
-              if (! str.startsWith("GET"))
-              throw new IOException();
-              String command = str.substring(4, str.length());
-              // using this utility method, a bit hackey
-              String parse[] = StringUtils.split(command, '/');
-              // do some safety checks
-              if (parse.length != 4) 
-              throw new IOException();
-              if (! parse[0].equals("get"))
-              throw new IOException();
-              
-              //Check that the filename matches what we sent
-              //in the GIV request.  I guess it doesn't need
-              //to match technically, but we check to be safe.
-              int end = parse[2].lastIndexOf("HTTP") - 1;
-              String filename = URLDecoder.decode(parse[2].substring(0, end));
-              // some safety checks - make sure name and index match.
-              if (! filename.equals(_filename))
-              throw new IOException();
-              int pindex = java.lang.Integer.parseInt(parse[1]);
-              if (pindex!= _index)
-              throw new IOException();
-			// catch any of the possible exceptions
-            */
             //OK. We conneced and sent the GIV, now just return the socket
             return _socket;
 		} catch (SecurityException e) {
