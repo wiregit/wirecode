@@ -196,7 +196,7 @@ public interface SettingsInterface
     /** Filter .htm[l] files? */
     public static final boolean DEFAULT_FILTER_HTML    = false;
     /** Use quick connect hosts instead of gnutella.net? */
-    public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
+    public static final boolean DEFAULT_USE_QUICK_CONNECT = false;
     /** List of hosts to try on quick connect */
     public static final String[] DEFAULT_QUICK_CONNECT_HOSTS 
 	= {"gnutellahosts.com:6346", "gnet.ath.cx:6346",
