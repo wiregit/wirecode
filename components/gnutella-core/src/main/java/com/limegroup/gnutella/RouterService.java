@@ -826,15 +826,13 @@ public class RouterService {
 		return _lastQueryTime;
 	}
 
-    /** Will make all attempts to stop a query from executing.  Really only 
-     *  applicable to GUESS queries...
-     *  8/20/2003: now it is also applicable to because of leaf guidance.
+    /** Purges the query from the QueryUnicaster (GUESS) and the ResultHandler
+     *  (which maintains query stats for the purpose of leaf guidance).
      *  @param guid The GUID of the query you want to get rid of....
      */
     public static void stopQuery(GUID guid) {
         QueryUnicaster.instance().purgeQuery(guid);
-        if (isShieldedLeaf())
-            RESULT_HANDLER.removeQuery(guid);
+        RESULT_HANDLER.removeQuery(guid);
     }
 
     /** 

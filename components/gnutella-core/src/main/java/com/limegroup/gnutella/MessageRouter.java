@@ -319,12 +319,13 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 		} else if (msg instanceof QueryReply) {
+            QueryReply qr = (QueryReply) msg;
 			if(RECORD_STATS) {
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-                QueryReply qr = (QueryReply)msg;
-                OutOfBandThroughputStat.RESPONSES_RECEIVED.incrementStat();
+                int numResps = qr.getResultCount();
+                OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
             }
-            handleQueryReply((QueryReply)msg, handler);
+            handleQueryReply(qr, handler);
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);

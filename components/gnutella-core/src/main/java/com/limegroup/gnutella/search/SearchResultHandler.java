@@ -26,6 +26,12 @@ public final class SearchResultHandler {
     private static final int BUFFER_SIZE = 2000;
 
     /** 
+     * The maximum number of results to send in a QueryStatusResponse -
+     * basically sent to say 'shut off query'.
+	 */
+    private static final int MAX_RESULTS = 65535;
+
+    /** 
 	 * The maximum number of replies to display per SECOND.  Must be greater
      * than 0. Note that one query reply may have many (up to 255!) results. 
 	 */
@@ -98,7 +104,7 @@ public final class SearchResultHandler {
 
     /**
      * Adds the Query to the list of queries kept track of.  You should do this
-     * EVERYTIME you start a query so we can leaf guide it when possible.
+     * EVERY TIME you start a query so we can leaf guide it when possible.
      *
      * @param qr The query that has been started.  We really just acces the guid.
      */ 
@@ -109,7 +115,7 @@ public final class SearchResultHandler {
 
     /**
      * Removes the Query frome the list of queries kept track of.  You should do
-     * this EVERYTIME you stop a query.
+     * this EVERY TIME you stop a query.
      *
      * @param guid the guid of the query that has been removed.
      */ 
@@ -117,7 +123,8 @@ public final class SearchResultHandler {
         if (removeQueryInternal(guid) != null) {
             // shut off the query at the UPs....
             try {
-                QueryStatusResponse stat = new QueryStatusResponse(guid, 65535);
+                QueryStatusResponse stat = new QueryStatusResponse(guid, 
+                                                                   MAX_RESULTS);
                 RouterService.getConnectionManager().updateQueryStatus(stat);
             }
             catch (BadPacketException terrible) {
@@ -257,7 +264,7 @@ public final class SearchResultHandler {
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
 															   results.size());
         Iterator iter = results.iterator();
-        int numSentToBackEnd = 0;
+        int numSentToFrontEnd = 0;
         for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
@@ -286,25 +293,25 @@ public final class SearchResultHandler {
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
-            numSentToBackEnd++;
+            numSentToFrontEnd++;
         } //end of response loop
 
         // ok - some responses may have got through to the GUI, we should account
         // for them....
-        accountAndUpdateDynamicQueriers(qr, numSentToBackEnd);
+        accountAndUpdateDynamicQueriers(qr, numSentToFrontEnd);
 
-        return (numSentToBackEnd > 0);
+        return (numSentToFrontEnd > 0);
     }
 
 
     private void accountAndUpdateDynamicQueriers(final QueryReply qr,
-                                                 final int numSentToBackEnd) {
+                                                 final int numSentToFrontEnd) {
 
         debug("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
         // technically Ultrapeers don't use this info, but we are keeping it
         // around for further use
-        if (numSentToBackEnd > 0) {
+        if (numSentToFrontEnd > 0) {
             // get the correct GuidCount
             GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
             if (gc == null)
@@ -315,7 +322,7 @@ public final class SearchResultHandler {
             
             // update the object
             debug("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
-            gc.increment(numSentToBackEnd);
+            gc.increment(numSentToFrontEnd);
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {

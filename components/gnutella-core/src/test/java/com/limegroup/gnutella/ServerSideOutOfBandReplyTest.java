@@ -895,7 +895,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     public void testIdentity() throws Exception {
         drainAll();
 
-        byte[] crapIP = {0,0,0,0};
+        byte[] crapIP = {(byte)192,(byte)168,(byte)1,(byte)1};
         QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
                                                                crapIP, 6346);
         LEAF.send(query);

@@ -137,10 +137,11 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     public static byte[] makeAddressEncodedGuid(byte[] ip, int port) 
         throws IllegalArgumentException {
         
-        if (ip.length != 4)
-            throw new IllegalArgumentException("IP address too big!");
+        if (!NetworkUtils.isValidAddress(ip))
+            throw new IllegalArgumentException("IP is invalid!");
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Port is invalid: " + port);
+
 
         byte[] ret = makeGuid();
 
