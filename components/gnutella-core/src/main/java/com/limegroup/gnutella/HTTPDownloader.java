@@ -277,58 +277,77 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void initThree() {
-
-		// Record a try again later case
-        boolean noPreExistingFile = (_stateString == TryAgainLater);
-		    
-
-        // Reset any error message
+		
+		// Reset any error message
         _stateString = null;
 
-        SettingsManager set = SettingsManager.instance();
-        _downloadDir = set.getIncompleteDirectory();
-        String pathname = _downloadDir + _filename;
-        File myFile = new File(pathname);
+		// First, get the incomplete directory where the 
+		// file will be temperarily downloaded.
+		SettingsManager sm = SettingsManager.instance();
+		String incompleteDir;
+		incompleteDir = sm.getIncompleteDirectory();
+		// check to see if we actually get a directory
+		if (incompleteDir == "") {
+			// the incomplete directory is null
+			// so i don't think we should be downloading
+			_state = ERROR;
+			return;
+		}
+		
+		// now, check to see if a file of that name alread
+		// exists in the temporary directory.
+		String incompletePath;
+		incompletePath = incompleteDir + _filename;
+		File incompleteFile = new File(incompletePath);
+		// incompleteFile represents the file as it would
+		// be named in the temporary incomplete directory.
 
-        if ( !myFile.exists() && !noPreExistingFile ) {
-            // allert an error
-            _stateString = "Resumed File Not Found";
-            _state = ERROR;
-            return;
-        }
+		int start = 0;
+		_resume = false;
+		// if there is a file, set the initial amount
+		// read at the size of that file, otherwise leave
+		// it at zero.
+		if (incompleteFile.exists()) {
+			// dont alert an error if the file doesn't 
+			// exist, just assume a starting range of 0;
+			start = (int)incompleteFile.length();
+			_resume = true;
+		}
+		// convert the int start to String equivalent
+		String startRange = java.lang.String.valueOf(start);
 
-        URLConnection conn;
-
-        String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
-
-        long start;
-        if ( noPreExistingFile ) 
-            start = 0;
-		else
-            start = myFile.length();
-
-        String startRange = java.lang.String.valueOf(start);
-
-        try {
-            URL url = new URL(_protocol, _host, _port, furl);
-            conn = url.openConnection();
-            conn.setRequestProperty("Range", "bytes="+ startRange + "-");
+		// Now, try to establish a socket connection
+		URLConnection conn;
+		String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
+				
+		try {
+			URL url = new URL(_protocol, _host, _port, furl);
+			conn = url.openConnection();
+			conn.setRequestProperty("Range", "bytes="+ startRange + "-");
             conn.connect();
+		} catch (Exception e) {
+			// for some reason the connection could not
+			// be established;
+			_stateString = "Resumed Connection Failed";
+            _state = ERROR;		_resume = true;
+            return;
+		}
+		// try to get the input stream from the connection
+		try {
             _istream = conn.getInputStream();
             _br = new ByteReader(_istream);
-        }
-        catch (Exception e) {
-            _stateString = "Resumed Connection Failed";
+		}
+		catch (Exception e) {
+			// for some reason the inputstream could
+			// not be opened.
+			_stateString = "Resumed Connection Failed";
             _state = ERROR;
             return;
-        }
+		}
 
-		// TRYING TO FIX THE RESUME DOWNLOAD
-		// _amountRead = (int)start; // is this the right place?
+		_state = CONNECTED;
 
-        _resume = true;
 
-        _state = CONNECTED;
     }
 
     public void run() {
@@ -481,8 +500,9 @@ public class HTTPDownloader implements Runnable {
         }
 
         /***********End of Double Check ***********/
-
-        if (myTest.exists()) {
+		
+		if ( ( myFile.exists() && !_resume  ) 
+			|| (myTest.exists()) ) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
                 _stateString = "File Already Exists";
