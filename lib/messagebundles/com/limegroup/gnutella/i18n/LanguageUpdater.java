@@ -44,7 +44,7 @@ class LanguageUpdater {
             return;
         }
         
-        System.out.println("Updating language: " + info.getName() + "(" + info.getCode() + ")");
+        System.out.print("Updating language: " + info.getName() + " (" + info.getCode() + ")... ");
         String filename = info.getFileName();
         File f = new File(lib, filename);
         if(!f.isFile())
@@ -58,11 +58,38 @@ class LanguageUpdater {
             writeInitialComments(fos, f, info);
             writeBody(fos, info);
             fos.close();
+            if(isDifferent(f, temp))
+                System.out.println("...changes.");
+            else
+                System.out.println("...no changes!");
             f.delete();
             temp.renameTo(f);
         } catch(IOException ioe) {
-            ioe.printStackTrace();
+            System.out.println("...error! (" + ioe.getMessage() + ")");
         }
+    }
+    
+    private boolean isDifferent(File a, File b) {
+        InputStream ia = null, ib = null;
+        try {
+            ia = new BufferedInputStream(new FileInputStream(a));
+            ib = new BufferedInputStream(new FileInputStream(b));
+            int reada, readb;
+            while( (reada = ia.read()) == (readb = ib.read()) ) {
+                // if we got here, both got to EOF at same time
+                if(reada == -1)
+                    return false;
+            }
+        } catch(IOException ignored) {
+        } finally {
+            if(ia != null)
+                try { ia.close(); } catch(IOException ignored) {}
+            if(ib != null)
+                try { ib.close(); } catch(IOException ignored) {}
+        }
+        // if we didn't exit in the loop, a character was different
+        // or one stream ended before another.
+        return true;
     }
     
     /**
@@ -202,7 +229,6 @@ class LanguageUpdater {
         StringBuffer sb = new StringBuffer(6);
         sb.append("\\u");
         String hex = Integer.toHexString(codepoint);
-        System.out.println("Unicode point: " + hex);
         for(int j = 0 + hex.length(); j < 4; j++)
             sb.append("0");
         sb.append(hex);
