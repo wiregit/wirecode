@@ -215,8 +215,7 @@ public class RouterService {
         // Restore any downloads in progress.
         downloader.postGuiInit();
         
-        UpdateManager updater = UpdateManager.instance();//initialize
-        updater.postGuiInit(callback);
+        UpdateManager.instance();//initialize
 		QueryUnicaster.instance().start();
 	    new HTTPAcceptor().start();	
         Pinger.instance().start();
