@@ -35,7 +35,7 @@ public class IntSet {
      *
      * INVARIANT: for all i<j, list[i].high < (list[j].low-1)
      */
-    public ArrayList /* of Interval */ list=new ArrayList();
+    public ArrayList /* of Interval */ list;
 
     /**
      * The size of this.  
@@ -133,6 +133,13 @@ public class IntSet {
 
     //////////////////////// Set-like Public Methods //////////////////////////
 
+    public IntSet() {
+        this.list=new ArrayList();
+    }
+
+    public IntSet(int expectedSize) {
+        this.list=new ArrayList(expectedSize);
+    }
 
     public int size() {
         return this.size;
