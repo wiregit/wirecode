@@ -6,22 +6,29 @@
  *       in the list _files.  There are methods for adding
  *       one file, or a whole directory.
  *
+ * Updated by Sumeet Thadani 8/17/2000. Changed the search method so that
+ * searches are possible with Regular Expressions. Imported necessary package
  */
 
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 package com.limegroup.gnutella;
 
 import java.io.*;
 import java.util.*;
+import com.oroinc.text.regex.*;
 
-//import com.limegroup.gnutella.*;
+public class FileManager{
 
-public class FileManager {
-
-    private int _size;                   /* the total size of all files */ 
-    private int _numFiles;               /* the total number of files */
+    protected int _size;                   /* the total size of all files */ 
+    protected int _numFiles;               /* the total number of files */
     public ArrayList _files;             /* the list of shareable files */
     private String[] _extensions;
+
+    // Regular Expressions Stuff.
+    private PatternMatcher matcher = new Perl5Matcher();
+    private PatternCompiler compiler = new Perl5Compiler();
+    private Pattern pattern;
+    private PatternMatcherInput input;
+
 
     private static FileManager _myFileManager;
 
@@ -35,7 +42,7 @@ public class FileManager {
     
     public static synchronized FileManager getFileManager() {
 	if(_myFileManager == null)
-	    _myFileManager = new FileManager();;
+	    _myFileManager = new FileManager();
 	return _myFileManager;
 
     }
@@ -140,21 +147,24 @@ public class FileManager {
 		addFile(file_list[i].getAbsolutePath());  /* addFile method */
 	}
     }
-
-    public ArrayList search(String query) {     /* the search method */
-	                                        /* looks for a particular */
-	ArrayList response_list = new ArrayList(); /* file name and returns */
-	                                        /* all of the matches in an */
-	for(int i=0; i < _numFiles; i++) {      /* array */
-	    FileDesc desc = (FileDesc)_files.get(i);
+    /** subclasses must override this method */
+    protected ArrayList search(String query) {
+	ArrayList response_list = new ArrayList();
+	try{
+	    pattern = compiler.compile(query);}
+	catch(MalformedPatternException e){
+	    System.out.println("Query was malformed");
+	    return null;
+	}
+	for(int i=0; i < _numFiles; i++){
+	    FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
 	    String file_name = desc._name;
-	    if (file_name.indexOf(query) != -1) /* we have a match */
+	    input = new PatternMatcherInput(file_name);
+	    if (matcher.contains(input,pattern))
 		response_list.add(_files.get(i));
 	}
-	
 	return response_list;
-    }
-    
+    }    
 }
 
 
