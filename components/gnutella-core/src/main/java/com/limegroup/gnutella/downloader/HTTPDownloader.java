@@ -390,6 +390,8 @@ public class HTTPDownloader implements Runnable {
 			catch(IOException e) {
 				_state = ERROR;
 				_stateString = e.getMessage();
+				if (_stateString.equals(""))
+					_stateString = "Error";
 			}
 			// check to see if there is an error condition 
 			// after attempting the download
