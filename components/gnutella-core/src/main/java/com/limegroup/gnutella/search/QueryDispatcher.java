@@ -129,7 +129,9 @@ public final class QueryDispatcher implements Runnable {
 		// necessary to obtain the lock because addAll iterates over
 		// NEW_QUERIES
 		synchronized(NEW_QUERIES) {
-			QUERIES.addAll(NEW_QUERIES);
+            synchronized(QUERIES) {
+                QUERIES.addAll(NEW_QUERIES);
+            }
 			NEW_QUERIES.clear();
 		}
 
