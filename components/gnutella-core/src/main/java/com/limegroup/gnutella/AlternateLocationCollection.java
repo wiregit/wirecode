@@ -19,7 +19,10 @@ public final class AlternateLocationCollection
 
 	/**
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
-	 * <tt>AlternateLocation</tt> instances.
+	 * <tt>AlternateLocation</tt> instances.  
+     * LOCKING: obtain this' monitor
+     * INVARIANT: _alternateLocations.get(k)==k
+     * TODO: shouldn't this just be s a sorted set?
 	 */
 	private SortedMap _alternateLocations;
 
@@ -117,7 +120,7 @@ public final class AlternateLocationCollection
 	}
 
 	// implements the AlternateLocationCollector interface
-	public boolean hasAlternateLocations() {
+	public synchronized boolean hasAlternateLocations() {
 		if(_alternateLocations == null) return false;
 		return !_alternateLocations.isEmpty();
 	}
@@ -158,7 +161,7 @@ public final class AlternateLocationCollection
 	 *
 	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
 	 */
-	public Collection values() {
+	public synchronized Collection values() {
 		if(_alternateLocations == null) {
 			return Collections.EMPTY_LIST;
 		}
@@ -171,7 +174,7 @@ public final class AlternateLocationCollection
 	 * Constructs a synchronized map instance for the alternate locations
 	 * if it's not already created.
 	 */
-	private void createMap() {
+	private synchronized void createMap() {
 		if(_alternateLocations == null) {
 			// we use a TreeMap to both filter duplicates and provide
 			// ordering based on the timestamp
@@ -190,7 +193,7 @@ public final class AlternateLocationCollection
 	 *  by commas, or the empty string if there are no alternate locations
 	 *  to report
 	 */	
-	public String httpStringValue() {
+	public synchronized String httpStringValue() {
 		// if there are no alternate locations, simply return the empty
 		// string
 		if(_alternateLocations == null) return "";
@@ -214,7 +217,7 @@ public final class AlternateLocationCollection
 	 *
 	 * @return the number of alternate locations stored
 	 */
-	public int size() {
+	public synchronized int size() {
 		if(_alternateLocations == null) {
 			return 0;
 		}
@@ -233,7 +236,7 @@ public final class AlternateLocationCollection
 	 * @return the string representation of all alternate locations in 
 	 *  this collection
 	 */
-	public String toString() {
+	public synchronized String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
 		if(_alternateLocations == null) {
