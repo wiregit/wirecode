@@ -495,6 +495,62 @@ public final class CommonUtils {
 		if(!isQuickTimeAvailable()) return false;
 		return isQuickTimeSupportedFormat(file);
 	}
+	
+	/**
+	 * Convenience method to generically compare any two comparable
+	 * things.
+     *
+	 * Handles comparison uniquely for 'native' types.
+	 * This is for a few reasons:
+	 * 1) We want to compare strings by lowercase comparison
+	 * 2) Java 1.1.8 did not have native types implement Comparable
+	 * Note that we check for both java.lang.Comparable and
+	 * com.sun.java.util.collections.Comparable,
+	 * and we do this _before_ checking for native types.
+	 * So, this is slightly optimized for more recent JVMs
+	 * Note that non-integer comparisons must specifically
+	 * check if the difference is less or greater than 0
+	 * so that rounding won't be wrong.
+	 * Of the native types, we check 'Integer' first since
+	 * that's the most common, Boolean,
+	 * then Double or Float, and finally, the rest will be caught in
+	 * 'Number', which just uses an int comparison.
+	 */
+    public static int compare(Object o1, Object o2) {
+        int retval;
+        
+        if ( o1 == null && o2 == null ) {
+            retval = 0;
+        } else if ( o1 == null ) {
+            retval = -1;
+        } else if ( o2 == null ) {
+            retval = 1;
+        } else if ( o1.getClass() == String.class ) {
+            retval = StringUtils.compareIgnoreCase( (String)o1, (String)o2 );
+        } else if( !CommonUtils.isJava118() &&
+                   o1 instanceof java.lang.Comparable ) {
+            retval = ((java.lang.Comparable)o1).compareTo(o2);
+        } else if( o1 instanceof com.sun.java.util.collections.Comparable ) {
+            retval =
+                ((com.sun.java.util.collections.Comparable)o1).compareTo(o2);
+        } else if( o1 instanceof Integer ) {
+            retval = ((Integer)o1).intValue() - ((Integer)o2).intValue();
+        } else if( o1 instanceof Boolean ) {
+            retval = o1.equals(o2) ? 0 : o1.equals(Boolean.TRUE) ? 1 : -1;
+        } else if( o1 instanceof Double || o1 instanceof Float ) {
+            double dbl = 
+                ((Number)o1).doubleValue() - ((Number)o2).doubleValue();
+            if ( dbl > 0 ) retval = 1;
+            else if ( dbl < 0 ) retval = -1;
+            else retval = 0;
+        } else if( o1 instanceof Number ) {
+            retval = ((Number)o1).intValue() - ((Number)o2).intValue();
+        } else {
+            retval = 0;
+        }
+        return retval;
+    }        
+        
 
 
     /*

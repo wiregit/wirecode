@@ -19,6 +19,16 @@ public class BandwidthTrackerImpl implements Serializable {
      *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
     transient Buffer /* of Float */ snapShots = new Buffer(HISTORY_SIZE);
     
+    /**
+     * Number of times we've been bandwidth measured.
+     */
+    private transient int numMeasures = 0;
+    
+    /**
+     * Overall average throughput
+     */
+    private transient float averageBandwidth = 0;
+    
     long lastTime;
     int lastAmountRead;
 
@@ -51,6 +61,8 @@ public class BandwidthTrackerImpl implements Serializable {
         }
         lastTime=currentTime;
         lastAmountRead=amountRead;
+        averageBandwidth = (averageBandwidth*numMeasures + measuredBandwidth)
+                            / ++numMeasures;
         snapShots.add(new Float(measuredBandwidth));
     }
 
@@ -67,10 +79,21 @@ public class BandwidthTrackerImpl implements Serializable {
             total+= ((Float)iter.next()).floatValue();
         }
         return total/size;
-    }    
+    }
+    
+    /**
+     * Returns the average overall bandwidth consumed.
+     */
+    public synchronized float getAverageBandwidth() {
+        if(snapShots.getSize() < 3) return 0f;
+        return averageBandwidth;
+    }
+          
 
     private void readObject(ObjectInputStream in) throws IOException {
         snapShots=new Buffer(HISTORY_SIZE);
+        numMeasures = 0;
+        averageBandwidth = 0;
         try {
             in.defaultReadObject();
         } catch (ClassNotFoundException e) {

@@ -87,6 +87,16 @@ public final class UploadManager implements BandwidthTracker {
      *  INVARIANT: speeds.size()<MIN_SPEED_SAMPLE_SIZE <==> highestSpeed==-1
      */
     private volatile int highestSpeed=-1;
+    
+    /**
+     * The number of measureBandwidth's we've had
+     */
+    private int numMeasures = 0;
+    
+    /**
+     * The current average bandwidth
+     */
+    private float averageBandwidth = 0f;
 
     /** The desired minimum quality of service to provide for uploads, in
      *  KB/s.  See testTotalUploadLimit. */
@@ -966,10 +976,17 @@ public final class UploadManager implements BandwidthTracker {
 
     /** Calls measureBandwidth on each uploader. */
     public synchronized void measureBandwidth() {
+        float currentTotal = 0f;
+        boolean c = false;
         for (Iterator iter = _activeUploadList.iterator(); iter.hasNext(); ) {
+            c = true;
 			BandwidthTracker bt = (BandwidthTracker)iter.next();
 			bt.measureBandwidth();
+			currentTotal += bt.getAverageBandwidth();
 		}
+		if ( c )
+		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+		                    / ++numMeasures;
     }
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
@@ -987,6 +1004,13 @@ public final class UploadManager implements BandwidthTracker {
 		}
         return sum;
 	}
+	
+	/**
+	 * returns the summed average of the uploads
+	 */
+	public synchronized float getAverageBandwidth() {
+        return averageBandwidth;
+	}	
     
     private final boolean debugOn = false;
     private final boolean log = false;    

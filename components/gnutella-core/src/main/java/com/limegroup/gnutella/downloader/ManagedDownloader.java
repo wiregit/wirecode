@@ -360,6 +360,23 @@ public class ManagedDownloader implements Downloader, Serializable {
     private Object corruptStateLock;
     
     /**
+     * one BandwidthTrackerImpl so we don't have to allocate one for
+     * each download every time we write a snapshot.
+     */
+    private static final BandwidthTrackerImpl BANDWIDTH_TRACKER_IMPL =
+        new BandwidthTrackerImpl();
+    
+    /**
+     * The number of times we've been bandwidth measured
+     */
+    private int numMeasures = 0;
+    
+    /**
+     * The average bandwidth over all managed downloads.
+     */
+    private float averageBandwidth = 0f;
+    
+    /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
      * any other methods until that point.
@@ -391,7 +408,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         //We used to write BandwidthTrackerImpl here. For backwards compatibility,
         //we write one as a place-holder.  It is ignored when reading.
-		stream.writeObject(new BandwidthTrackerImpl());
+		stream.writeObject(BANDWIDTH_TRACKER_IMPL);
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -439,6 +456,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         threadLockToSocket=Collections.synchronizedMap(new HashMap());
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
+        numMeasures = 0;
+        averageBandwidth = 0f;
         this.dloaderManagerThread=new Thread() {
             public void run() {
                 try { 
@@ -2184,11 +2203,18 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized void measureBandwidth() {
+        float currentTotal = 0f;
+        boolean c = false;
         Iterator iter = dloaders.iterator();
         while(iter.hasNext()) {
+            c = true;
             BandwidthTracker dloader = (BandwidthTracker)iter.next();
             dloader.measureBandwidth();
-        }
+			currentTotal += dloader.getAverageBandwidth();
+		}
+		if ( c )
+		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+		                    / ++numMeasures;
     }
     
     public synchronized float getMeasuredBandwidth() {
@@ -2206,6 +2232,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         return retVal;
     }
+    
+	/**
+	 * returns the summed average of the downloads
+	 */
+	public synchronized float getAverageBandwidth() {
+        return averageBandwidth;
+	}	    
 
     /**
      * @return true if the table we remembered from previous sessions, contains

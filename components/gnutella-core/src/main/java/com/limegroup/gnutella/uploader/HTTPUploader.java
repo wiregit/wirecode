@@ -795,6 +795,10 @@ public final class HTTPUploader implements Uploader {
         return retVal;
     }
     
+    public float getAverageBandwidth() {
+        return bandwidthTracker.getAverageBandwidth();
+    }    
+    
     //inherit doc comment
     public boolean getCloseConnection() {
         return _state.getCloseConnection();

@@ -29,6 +29,10 @@ public class FileManager {
     /** the total number of files.  INVARIANT: _numFiles==number of
      *  elements of _files that are not null. */
     private int _numFiles;
+    /** the total number of files that are pending sharing.
+     *  (ie: awaiting caching or being added)
+     */
+    private int _numPendingFiles;
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in a shared directory with a shareable extension. */
@@ -50,7 +54,7 @@ public class FileManager {
     
     /** The set of extensions to share, sorted by StringComparator. 
      *  INVARIANT: all extensions are lower case. */
-    private Set /* of String */ _extensions;
+    private static Set /* of String */ _extensions;
     /** The list of shared directories and their contents.  More formally, a
      *  mapping whose keys are shared directories and any subdirectories
      *  reachable through those directories.  The value for any key is the set
@@ -111,6 +115,7 @@ public class FileManager {
         // overwrite all these variables
         _size = 0;
         _numFiles = 0;
+        _numPendingFiles = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
         _urnIndex = new HashMap();
@@ -137,6 +142,9 @@ public class FileManager {
 
     /** Returns the number of files. */
     public int getNumFiles() {return _numFiles;}
+    
+    /** Returns the number of pending files. */
+    public int getNumPendingFiles() { return _numPendingFiles; }
 
 
     /**
@@ -271,9 +279,7 @@ public class FileManager {
             Assert.that(out==ret, "Couldn't fit list in returned value");
             return ret;
         }
-    }
-    
-        
+    }        
 
     /**
      * @param directory Gets all files under this directory RECURSIVELY.
@@ -442,6 +448,7 @@ public class FileManager {
             // Reset the file list info
             _size = 0;
             _numFiles = 0;
+            _numPendingFiles = 0;
             _files=new ArrayList();
             _index=new Trie(true);   //maintain invariant
             _urnIndex=new HashMap(); //maintain invariant
@@ -471,6 +478,7 @@ public class FileManager {
                     return (a.toString()).length()-(b.toString()).length();
                 }
             });
+                
             tempDirVar = directories;
         }
 
@@ -528,7 +536,7 @@ public class FileManager {
         if (file_list == null) 
             return; // directory doesn't exist or isn't a directory...
         int n = file_list.length;                   /* directory */
-
+        
         //Register this directory with list of share directories.
         synchronized (this) {
             if (_sharedDirectories.get(directory)!=null)
@@ -537,23 +545,39 @@ public class FileManager {
             _sharedDirectories.put(directory, new IntSet());
             if (_callback!=null)
                 _callback.addSharedDirectory(directory, parent);
+            // add this dir's files to the pending files
+            // this number MUST be decreased after any type of
+            // file is processed, regardless of if it's a directory,
+            // or a file (shared or unshared).
+            _numPendingFiles += n;                
         }
       
         //First add all files.  We'll add the directories later to smooth out
         //what the user sees.  It also decreases the size of the IntSet values
         //in _sharedDirectories.  Again, this is not strictly necessary for
         //correctness.
+        // NOTE: If files are added first, pending files will experience a
+        //       jump in the amount of pending shared every so often,
+        //       because directories are processed last.
+        //       So, processing files first is a trade-off between
+        //       a smooth display in the library and a smooth display
+        //       in the status line.
         List /* of File */ directories=new ArrayList();
         for (int i=0; i<n && !loadThreadInterrupted(); i++) {
-            if (file_list[i].isDirectory())     /* the recursive call */
+            if (file_list[i].isDirectory())     /* prepares for the recursive call */
                 directories.add(file_list[i]);
             else                                /* add the file with the */
-                addFile(file_list[i]); 
+                addFile(file_list[i]);
+            // decrease the pending files.
+            // the synchronization may not be really necessary,
+            // but if it is, it must *not* go around the addFile also,
+            // since that also blocks on this
+            synchronized(this) { _numPendingFiles--; }
         }
         //Now add directories discovered in previous pass.
         Iterator iter=directories.iterator();
         while (iter.hasNext() && !loadThreadInterrupted())
-            addDirectory((File)iter.next(), directory);
+            addDirectory((File)iter.next(), directory); /* the recursive call */
     }
 
     /**
@@ -581,11 +605,15 @@ public class FileManager {
         boolean directoryShared;
         synchronized (this) {
             directoryShared=_sharedDirectories.containsKey(dir);
+            _numPendingFiles++;
         }
+        boolean retval;
         if (directoryShared)
-            return addFile(file);
+            retval = addFile(file);
         else 
-            return false;		
+            retval = false;
+        synchronized(this) { _numPendingFiles--; }
+        return retval;
 	}
 
     /**
@@ -611,13 +639,9 @@ public class FileManager {
      */
     private boolean addFile(File file) {
         repOk();
-        if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
-			!hasExtension(file.getName())) {
-			return false;
-		}
-		long fileLength = file.length();  
-		if (fileLength>Integer.MAX_VALUE || fileLength<0) 
-			return false;
+        long fileLength = file.length();
+        if( !isFileShareable(file, fileLength) )
+            return false;
         
         //Calculate hash OUTSIDE of lock.
         Set urns=FileDesc.calculateAndCacheURN(file);  
@@ -808,7 +832,7 @@ public class FileManager {
     }
 
     /** Returns true if filename has a shared extension.  Case is ignored. */
-    private boolean hasExtension(String filename) {
+    private static boolean hasExtension(String filename) {
         int begin = filename.lastIndexOf(".");
 
         if (begin == -1)
@@ -816,6 +840,22 @@ public class FileManager {
 
         String ext = filename.substring(begin + 1).toLowerCase();
         return _extensions.contains(ext);
+    }
+    
+    /**
+     * Returns true if this file is sharable.
+     */
+    public static boolean isFileShareable(File file, long fileLength) {
+        if( file.isDirectory() ) return false;
+        
+        if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
+            !hasExtension(file.getName())) {
+        	return false;
+        }
+        if (fileLength>Integer.MAX_VALUE || fileLength<0) 
+        	return false;
+        
+        return true;
     }
 
     /** 

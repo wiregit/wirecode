@@ -42,7 +42,8 @@ import com.limegroup.gnutella.connection.*;
  *     pong-caching-branch and query-routing3-branch of CVS, so these methods
  *     will probably be obsolete in the future.)</i>
  * <li><b>Statistics</b>: getNumLocalSearches, getNumSharedFiles, 
- *      getTotalMessages, getTotalDroppedMessages, getTotalRouteErrors
+ *      getTotalMessages, getTotalDroppedMessages, getTotalRouteErrors,
+ *      getNumPendingShared
  * </ul> 
  */
 public final class RouterService {
@@ -833,6 +834,13 @@ public final class RouterService {
     public static int getNumSharedFiles( ) {
         return( fileManager.getNumFiles() );
     }
+    
+    /**
+     * Returns the number of files which are awaiting sharing.
+     */
+    public static int getNumPendingShared() {
+        return( fileManager.getNumPendingFiles() );
+    }
 
 	/**
 	 * Returns the size in bytes of shared files.
@@ -868,9 +876,7 @@ public final class RouterService {
     public static File[] getSharedFiles(File directory) {
         return fileManager.getSharedFiles(directory);
     }
-        
     
-
     /** 
      * Tries to "smart download" <b>any</b> [sic] of the given files.<p>  
      *

@@ -66,6 +66,16 @@ public class DownloadManager implements BandwidthTracker {
      *  clear it and start anew....
      */
     private List querySentMDs = new ArrayList();
+    
+    /**
+     * The number of times we've been bandwidth measures
+     */
+    private int numMeasures = 0;
+    
+    /**
+     * The average bandwidth over all downloads
+     */
+    private float averageBandwidth = 0;
 
     //////////////////////// Creation and Saving /////////////////////////
 
@@ -714,10 +724,17 @@ public class DownloadManager implements BandwidthTracker {
 
     /** Calls measureBandwidth on each uploader. */
     public synchronized void measureBandwidth() {
+        float currentTotal = 0f;
+        boolean c = false;
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
+            c = true;
 			BandwidthTracker bt = (BandwidthTracker)iter.next();
 			bt.measureBandwidth();
+			currentTotal += bt.getAverageBandwidth();
 		}
+		if ( c )
+		    averageBandwidth = ( (averageBandwidth * numMeasures) + currentTotal ) 
+		                    / ++numMeasures;
     }
 
     /** Returns the total upload throughput, i.e., the sum over all uploads. */
@@ -735,6 +752,13 @@ public class DownloadManager implements BandwidthTracker {
 		}
         return sum;
 	}
+	
+	/**
+	 * returns the summed average of the downloads
+	 */
+	public synchronized float getAverageBandwidth() {
+        return averageBandwidth;
+	}		
     
     /** Notifies the GUI of the uncaught exception e.  For use only by download
      *  runner threads. */

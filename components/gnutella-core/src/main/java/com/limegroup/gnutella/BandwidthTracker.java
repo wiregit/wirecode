@@ -19,5 +19,11 @@ public interface BandwidthTracker {
      * two calls to measureBandwidth, or 0.0 if unknown.  
      */
     public float getMeasuredBandwidth() throws InsufficientDataException;
+    
+    /**
+     * Returns the overall averaged bandwidth between 
+     * all calls of measureBandwidth
+     */
+    public float getAverageBandwidth();
 }
 

@@ -615,6 +615,11 @@ public class HTTPDownloader implements BandwidthTracker {
             throw ide;
         }
     }
+    
+    public float getAverageBandwidth() {
+        return bandwidthTracker.getAverageBandwidth();
+    }
+            
 	
 	////////////////////////////// Unit Test ////////////////////////////////
 
