@@ -164,7 +164,7 @@ public class HTTPUploader implements Uploader {
         _router = router;
 		try {
 			_fileDesc = _fileManager.get(_index);
-			_fileSize = _fileDesc._size;
+			_fileSize = (int)_fileDesc.getSize();
             // if the requested name does not match our name on disk,
 			// report File Not Found
 			if(!_fileName.equals(_fileDesc.getName())) {

@@ -350,7 +350,7 @@ public class StandardMessageRouter
             return;
         }
 
-        String file = desc._name;
+        String file = desc.getName();
 
         if (!_acceptor.isBannedIP(h))	
             _uploadManager.acceptPushUpload(file, h, port, 

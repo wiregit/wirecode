@@ -750,7 +750,7 @@ public final class UploadManager implements BandwidthTracker {
 		if(fileIndex == -1) {
 			throw new IOException("NO MATCHING FILE INDEX FOR URN");
 		}
-		String fileName = desc._name;
+		String fileName = desc.getName();
 		boolean isHTTP11 = this.isHTTP11Request(requestLine);
 		return new GETLine(fileIndex, fileName, isHTTP11);		
 	}
