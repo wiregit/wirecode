@@ -978,8 +978,16 @@ public abstract class FileManager {
     public synchronized FileDesc removeFileIfShared(File f) {
         repOk();
         
-        // Look for matching file ... 
-        FileDesc fd = getFileDescForFile(f);
+        //Take care of case, etc.
+        try {
+            f = FileUtils.getCanonicalFile(f);
+        } catch (IOException e) {
+            repOk();
+            return null;
+        }        
+        
+        // Look for matching file ...         
+        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
         if (fd==null)
             return null;
         
