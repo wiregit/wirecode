@@ -19,6 +19,10 @@ public final class QueryUnicaster {
      */
     public static final int MIN_ENDPOINTS = 50;
 
+    /** The max number of unicast pongs to store.
+     */
+    public static final int MAX_ENDPOINTS = 2000;
+
     // the instance of me....
     private static QueryUnicaster _instance = null;
 
@@ -37,9 +41,11 @@ public final class QueryUnicaster {
      */
     private Hashtable _queries;
 
-    /** The unicast enabled hosts I should contact for queries.
+    /** The unicast enabled hosts I should contact for queries.  Add to the
+     *  front, remove from the end.  Therefore, the OLDEST entries are at the
+     *  end.
      */
-    private Stack _queryHosts;
+    private LinkedList _queryHosts;
 
     /** The fixed size list of endpoints i've pinged.
      */
@@ -72,7 +78,8 @@ public final class QueryUnicaster {
     //----------------------------------------------------
 
 
-    /** Returns a List of unicast Endpoints.
+    /** Returns a List of unicast Endpoints.  These Endpoints are the NEWEST 
+     *  we've seen.
      */
     public List getUnicastEndpoints() {
         List retList = new ArrayList();
@@ -93,7 +100,7 @@ public final class QueryUnicaster {
     private QueryUnicaster() {
         // construct DSes...
         _queries = new Hashtable();
-        _queryHosts = new Stack();
+        _queryHosts = new LinkedList();
         _pingList = new FixedSizeList(25);
 
         // start service...
@@ -196,7 +203,9 @@ public final class QueryUnicaster {
         if (endpoint.getUnicastSupport() && notMe(endpoint)) {
             synchronized (_queryHosts) {
                 debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
-                _queryHosts.push(endpoint);
+                if (_queryHosts.size() == MAX_ENDPOINTS)
+                    _queryHosts.removeLast(); // evict a old guy...
+                _queryHosts.addFirst(endpoint);
                 _queryHosts.notify();
                 debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
             }
@@ -271,7 +280,7 @@ public final class QueryUnicaster {
         if (_queryHosts.size() < MIN_ENDPOINTS) {
             // send a ping to the guy you are popping if cache too small
             ExtendedEndpoint toReturn = 
-            (ExtendedEndpoint) _queryHosts.pop();
+            (ExtendedEndpoint) _queryHosts.removeLast();
             // if i haven't pinged him 'recently', then ping him...
             if (_pingList.add(toReturn)) {  
                 PingRequest pr = new PingRequest((byte)1);
@@ -286,7 +295,7 @@ public final class QueryUnicaster {
             }
             return toReturn;
         }
-        return (ExtendedEndpoint) _queryHosts.pop();
+        return (ExtendedEndpoint) _queryHosts.removeLast();
     }
 
 
