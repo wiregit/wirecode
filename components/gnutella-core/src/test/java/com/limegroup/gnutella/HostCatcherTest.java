@@ -418,6 +418,46 @@ public class HostCatcherTest extends TestCase {
         }
     }
 
+    /** Tests the randomization when large initial gnutella.net involved. */
+    public void testRandomizedGnutellaDotNet() {
+        //System.out.println("-Testing bad Gnutella.net");
+        try {
+            //1. Write initial gnutella.net file in order
+            File tmp=File.createTempFile("hc_test", ".net" );
+            FileWriter out=new FileWriter(tmp);
+            for (int i=1; i<=10000; i++)
+                out.write("18.239.0."+(i%255)+":"+i+"\n");
+            out.flush();
+            out.close();
+
+            //2. Read
+            SettingsManager.instance().setQuickConnectHosts(new String[0]);
+            setUp();
+            HostCatcher.DEBUG=false;  //Too darn slow
+            hc.read(tmp.getAbsolutePath());
+
+            assertEquals(HostCatcher.NORMAL_SIZE, hc.getNumHosts());
+            assertTrue(hc.getNumUltrapeerHosts()==0);
+
+            //3. Verify it's random.  This is hard to check.  We just verify
+            //that that the first three entries aren't the last three entries
+            //from gnutella.net.  The probability of there order remaining
+            //unchanged by the shuffle is very small.
+            Endpoint e1=hc.getAnEndpoint();  
+            Endpoint e2=hc.getAnEndpoint();
+            Endpoint e3=hc.getAnEndpoint();
+            assertTrue(   !(new Endpoint("18.239.0.235", 1000)).equals(e1)
+                       || !(new Endpoint("18.239.0.234", 999)).equals(e2)
+                       || !(new Endpoint("18.239.0.233", 998)).equals(e3));
+            //Clean up
+            tmp.delete();
+        } catch (IOException e) { 
+            assertTrue("Unexpected IO problem", false);
+        } catch (InterruptedException e) {
+            assertTrue("Unexpected InterruptedException "+e, false);
+        }
+    }
+
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }

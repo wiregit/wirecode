@@ -162,18 +162,43 @@ public class HostCatcher {
      */
     synchronized void read(String filename)
             throws FileNotFoundException, IOException {
-        BufferedReader in=null;
-        in=new BufferedReader(new FileReader(filename));
+        //Read gnutella.net file into temporary buffer.
+        ArrayList /* of ExtendedEndpoint */ buffer=new ArrayList(NORMAL_SIZE);
+        BufferedReader in=new BufferedReader(new FileReader(filename));
         while (true) {
             try {
                 ExtendedEndpoint e=ExtendedEndpoint.read(in);
-                if (e==null)
+                if (e==null)   //EOF
                     break;
-                //Everything passed!  Add it.  Note that first elements read are
-                //the worst elements, so end up at the tail of the queue.
-                add(e, priority(e));
+                buffer.add(e);
             } catch (ParseException pe) {
                 continue;
+            }
+        }
+
+        //Add entries to buffer.
+        if (buffer.size()>PERMANENT_SIZE) {
+            //a) If the gnutella.net file is very large, we can assume we're
+            //running LimeWire for the first time.  In this case, we want to
+            //pick a random subset of the gnutella.net file to add.  You might
+            //also want to check that LimeWire is running for the first time--
+            //but I worry that we might be using an old limewire.props with a
+            //new gnutella.net.
+            //
+            //It's possible to optimize this algorithm to run in
+            //O(PERMANENT_SIZE) time instead of O(buffer.size()) time, while
+            //still preventing duplicates.
+            Collections.shuffle(buffer);
+            for (int i=0; i<PERMANENT_SIZE; i++) {
+                ExtendedEndpoint e=(ExtendedEndpoint)buffer.get(i);
+                add(e, priority(e));
+            }
+        } else {
+            //b) Normal case.  Note that first elements read are the worst
+            //elements, so end up at the tail of the queue.
+            for (int i=0; i<buffer.size(); i++) {
+                ExtendedEndpoint e=(ExtendedEndpoint)buffer.get(i);
+                add(e, priority(e));
             }
         }
     }
