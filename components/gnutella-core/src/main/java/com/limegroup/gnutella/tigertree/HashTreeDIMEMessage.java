@@ -36,8 +36,8 @@ public class HashTreeDIMEMessage {
     private static final String SERIALIZED_TREE_TYPE =
         "http://open-content.net/spec/thex/breadthfirst";
 
-    private static final String XML_RECORD_ID = new String("xtd");
-    private static final String TREE_RECORD_ID = new String("tree");
+    private static final String XML_RECORD_ID = "xtd";
+    private static final String TREE_RECORD_ID = "tree";
 
     private static final String XML_TREE_DESC_END = "</hashtree>";
     private static final String XML_TREE_DESC_START =
@@ -96,8 +96,17 @@ public class HashTreeDIMEMessage {
         DIMEParser parser = new DIMEParser(is);
         DIMERecord xml = parser.nextRecord();
         DIMERecord tree = parser.nextRecord();
-        if(LOG.isDebugEnabled() && parser.hasNext())
-            LOG.debug("more elements in the dime record.");
+        if(LOG.isDebugEnabled()) {
+            if(parser.hasNext())
+                LOG.debug("more elements in the dime record.");
+            LOG.debug("xml id: [" + xml.getIdentifier() + "]");
+            LOG.debug("xml type: [" + xml.getTypeString() + "]");
+            LOG.debug("tree id: [" + tree.getIdentifier() + "]");
+            LOG.debug("tree type: [" + tree.getTypeString() + "]");
+            LOG.debug("xml type num: [" + xml.getTypeId() + "]");
+            LOG.debug("tree type num: [" + tree.getTypeId() + "]");
+        }   
+            
         return new HashTreeDIMEMessage(fileSize, xml, tree, root32);
 
     }
