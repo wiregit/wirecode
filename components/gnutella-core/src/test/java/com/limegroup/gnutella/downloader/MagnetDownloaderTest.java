@@ -6,6 +6,7 @@ import java.net.URL;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 
 /** 
  * Unit tests small parts of MagnetDownloader.  See RequeryDownloadTest for
@@ -14,6 +15,7 @@ import com.sun.java.util.collections.*;
  */
 public class MagnetDownloaderTest extends TestCase {
     static final URN hash=TestFile.hash();
+    static final int PORT=6670;
 
     public MagnetDownloaderTest(String name) {
         super(name);
@@ -76,6 +78,59 @@ public class MagnetDownloaderTest extends TestCase {
         } catch (IOException e) {
             fail("Couldn't make URL");
         }
+    }
+
+    /** Checks that we fake up a proper RFD using a HEAD request. */
+    public void testCreateRemoteFileDesc_normal() {
+        TestBootstrapServer server=null;
+        try {
+            server=new TestBootstrapServer(PORT);
+            server.setResponse("HTTP/1.0 200 OK\r\nContent-length: 5\r\n\r\n");
+            server.setResponseData("abcde");
+            RemoteFileDesc rfd=MagnetDownloader.createRemoteFileDesc(
+                "http://localhost:"+PORT+"/ignore/this/part",
+                "filename.txt",
+                null);
+            assertTrue(rfd!=null);
+            assertTrue(rfd.getSize()==5);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Mysterious IO problem");
+        } finally {
+            if (server!=null)
+                server.shutdown();
+        }
+    }
+
+    /** Checks that we ignore content-length on non-standard messages. */
+    public void testCreateRemoteFileDesc_error() {
+        TestBootstrapServer server=null;
+        try {
+            server=new TestBootstrapServer(PORT);
+            server.setResponse(
+                "HTTP/1.0 404 File Not Found\r\nContent-length: 5\r\n\r\n");
+            server.setResponseData("abcde");
+            RemoteFileDesc rfd=MagnetDownloader.createRemoteFileDesc(
+                "http://localhost:"+PORT+"/ignore/this/part",
+                "filename.txt",
+                null);
+            assertTrue(rfd==null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Mysterious IO problem");
+        } finally {
+            if (server!=null)
+                server.shutdown();
+        }
+    }
+
+    /** Checks that we return null host couldn't be reached. */
+    public void testCreateRemoteFileDesc_unreachable() {
+        RemoteFileDesc rfd=MagnetDownloader.createRemoteFileDesc(
+            "http://localhost:"+PORT+"/ignore/this/part",
+            "filename.txt",
+            null);
+        assertTrue(rfd==null);
     }
 
     public void testSerialization() throws IOException, ClassNotFoundException {

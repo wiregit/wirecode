@@ -96,7 +96,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         //Send HEAD request to default location (if present) to get its size.
         //This can block, so it must be done here instead of in constructor.
         //See class overview and ManagedDownloader.tryAllDownloads.
-        RemoteFileDesc defaultRFD=createRemoteFileDesc();
+        RemoteFileDesc defaultRFD=createRemoteFileDesc(_defaultURL,
+                                                       _filename,
+                                                       _urn);
         if (defaultRFD!=null) {
             //Add the faked up location before starting download.  Note that we
             //must force ManagedDownloader to accept this RFD in case it has no
@@ -112,27 +114,29 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
-     * returns null. 
+     * returns null.  Package-access and static for easy testing.
      */
-    private RemoteFileDesc createRemoteFileDesc() {
-        if (_defaultURL==null)
+    static RemoteFileDesc createRemoteFileDesc(String defaultURL,
+                                               String filename,
+                                               URN urn) {
+        if (defaultURL==null)
             return null;
 
         try {
-            URL url=new URL(_defaultURL);
+            URL url=new URL(defaultURL);
             int port=url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
 
             Set urns=new HashSet(1);
-            if (_urn!=null)
-                urns.add(_urn);
+            if (urn!=null)
+                urns.add(urn);
             
             return new URLRemoteFileDesc(
                 url.getHost(),  //TODO: can this be null?
                 port,
                 0l,             //index--doesn't matter since we won't push
-                filename(_filename, url),
+                filename(filename, url),
                 contentLength(url),
                 new byte[16],   //GUID--doesn't matter since we won't push
                 SpeedConstants.T3_SPEED_INT,
@@ -179,13 +183,20 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     private static int contentLength(URL url) throws IOException {
         URLConnection connection=null;
         try {
+            //Send a HEAD request to the URL.
             connection=url.openConnection();
             if (! (connection instanceof HttpURLConnection))
                 throw new IOException();
             HttpURLConnection httpConnection=(HttpURLConnection)connection;
             httpConnection.setRequestMethod("HEAD");
+            //Send User-Agent to bypass browser blocking.
             httpConnection.setRequestProperty("User-Agent",
                                               CommonUtils.getHttpServer());
+            //Extract Content-length, but only if the response was 200 OK.
+            //Generally speaking any 2xx response is ok, but in this situation
+            //we expect only 200.
+            if (httpConnection.getResponseCode()!=HttpURLConnection.HTTP_OK)
+                throw new IOException("No 200 OK");
             int length=httpConnection.getContentLength();
             if (length<0)
                 throw new IOException("No content length");
