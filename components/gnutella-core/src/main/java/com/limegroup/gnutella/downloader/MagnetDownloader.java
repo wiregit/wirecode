@@ -216,17 +216,17 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * Overrides ManagedDownloader to use the query words and hash (if any)
      * specified by the MAGNET URI.
      */
-    protected QueryRequest newRequery(int numRequeries) {        
-        Set queryUrns=null;
-        if (_urn!=null) {
-            queryUrns=new HashSet(1);
-            queryUrns.add(_urn);
-        }
+    protected QueryRequest newRequery(int numRequeries) 
+        throws CantResumeException {
 
+        if (_textQuery != null)
+            return QueryRequest.createQuery(_textQuery);
+        else if (_filename != null)
+            return QueryRequest.createQuery(_filename);
+        else return super.newRequery(numRequeries);
+
+        /* //TODO: if we ever add back URN query support
         boolean isRequery = numRequeries!=0;
-		if(_urn != null && isRequery) {
-			return QueryRequest.createRequery(_urn);
-		} 
 		if(isRequery && (_urn != null)) {
 			if (_filename == null)
 			    return QueryRequest.createRequery(_urn);
@@ -244,6 +244,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		if (_urn != null) 
             return QueryRequest.createQuery(_urn, _textQuery);
 		return QueryRequest.createQuery(_textQuery);
+        */
     }
 
     /** 
