@@ -209,9 +209,11 @@ public final class SettingsFactory {
             // some bugs were reported where the settings file's parent
             // directory was deleted.
             File parent = FileUtils.getParentFile(SETTINGS_FILE);
-            if(parent != null)
+            if(parent != null) {
                 parent.mkdirs();
-
+                FileUtils.setWriteable(parent);
+            }
+            FileUtils.setWriteable(SETTINGS_FILE);
             out = new FileOutputStream(SETTINGS_FILE);
 
             // Properties.store is not in Java 1.1.8, and Properties.save
