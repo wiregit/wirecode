@@ -886,13 +886,11 @@ public final class UploadManager implements BandwidthTracker {
                 LOG.warn(uploader + " banned.");
         	return BANNED;
         }
-        
 
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
-        boolean wontAccept = size >= maxQueueSize || 
-			rqc.isDupe(uploader.getFileDesc().getSHA1Urn());
+        boolean wontAccept = size >= maxQueueSize;
         int ret = -1;
 
         // if this uploader is greedy and at least on other client is queued
@@ -948,11 +946,6 @@ public final class UploadManager implements BandwidthTracker {
                     LOG.debug(uploader+" queued uploader flooding-throwing exception");
                 throw new IOException();
             }
-            
-            //check if this is a duplicate request
-            if (rqc.isDupe(uploader.getFileDesc().getSHA1Urn()))
-            	return REJECTED;
-            
             kv.setValue(new Long(System.currentTimeMillis()));
             if(LOG.isDebugEnabled())
                 LOG.debug(uploader+" updated queued uploader");
@@ -978,10 +971,6 @@ public final class UploadManager implements BandwidthTracker {
                 ret = REJECTED;
             }
         }
-        
-        //register the uploader in the dupe table
-        if (ret == ACCEPTED)
-        	rqc.startedUpload(uploader.getFileDesc().getSHA1Urn());
         return ret;
     }
 
@@ -1014,19 +1003,8 @@ public final class UploadManager implements BandwidthTracker {
 	 * of active uploads.
 	 */
   	private synchronized void removeFromList(Uploader uploader) {
-  		//if the uploader is not in the active list, we should not
-  		//try remove the urn from the map of unique uploaded files for that host.
-  		
-		if (_activeUploadList.remove(uploader)) {
-		
-			//at this point it is safe to allow other uploads from the same host
-			RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
+		_activeUploadList.remove(uploader);//no effect is not in
 
-			//check for nulls so that unit tests pass
-        	if (rcq!=null && uploader!=null && uploader.getFileDesc()!=null) 
-        		rcq.uploadDone(uploader.getFileDesc().getSHA1Urn());
-		}
-		
 		// Enable auto shutdown
 		if( _activeUploadList.size()== 0)
 			RouterService.getCallback().uploadsComplete();
@@ -1607,8 +1585,6 @@ public final class UploadManager implements BandwidthTracker {
 		 */
 		private final Set /* of SHA1 (URN) */ REQUESTS;
 		
-		private final Set /* of SHA1 (URN) */ ACTIVE_UPLOADS; 
-		
 		/**
 		 * The number of requests we've seen from this host so far.
 		 */
@@ -1629,7 +1605,6 @@ public final class UploadManager implements BandwidthTracker {
          */
      	RequestCache() {
     		REQUESTS = new FixedSizeExpiringSet(MAX_ENTRIES, WAIT_TIME);
-    		ACTIVE_UPLOADS = new HashSet();
     		_numRequests = 0;
     		_lastRequest = _firstRequest = System.currentTimeMillis();
         }
@@ -1642,17 +1617,7 @@ public final class UploadManager implements BandwidthTracker {
          */
     	boolean isGreedy(URN sha1) {
     		countRequest();
-
-    		
     		return REQUESTS.contains(sha1);
-    	}
-    	
-    	/**
-    	 * tells the cache that an upload to the host has started.
-    	 * @param sha1 the urn of the file being uploaded.
-    	 */
-    	void startedUpload(URN sha1) {
-    		ACTIVE_UPLOADS.add(sha1);
     	}
     	
     	/**
@@ -1680,21 +1645,6 @@ public final class UploadManager implements BandwidthTracker {
     	private void countRequest() {
     		_numRequests++;
     		_lastRequest = System.currentTimeMillis();
-    	}
-    	
-    	/**
-    	 * checks whether the given URN is a duplicate request
-    	 */
-    	boolean isDupe(URN sha1) {
-    		return ACTIVE_UPLOADS.contains(sha1);
-    	}
-    	
-    	/**
-    	 * informs the request cache that the given URN is no longer
-    	 * actively uploaded.
-    	 */
-    	void uploadDone(URN sha1) {
-    		ACTIVE_UPLOADS.remove(sha1);
     	}
     }
 }
