@@ -272,6 +272,11 @@ public class Connection implements Runnable {
     
     //////////////////////////////////////////////////////////////////////
 
+    private static boolean disposeable(Message m) {
+        return  ((m instanceof PingRequest) && (m.getHops()!=0))
+          || (m instanceof PingReply);
+    } 
+
     /**
      * Sends a message.
      * 
@@ -285,15 +290,38 @@ public class Connection implements Runnable {
             throw new IOException();
 
         synchronized (outputQueueLock) {
-            //TODO2: if the queue is full, we could use a smarter
-            //replacement scheme.
-            Object removed=outputQueue.addFirst(m);
-            if (removed!=null)
-                sentDropped++;
-
-            if (outputQueue.getSize() >= BATCH_SIZE)
-                outputQueueLock.notify();
             sent++;
+            if (outputQueue.isFull()) {
+                //Drop case. Instead of using a FIFO replacement scheme, we
+                //use the following:
+                //  1) Throw away m if it is (a) a ping request
+                //     whose hops count is not zero or (b) a pong.  
+                //  2) If that doesn't work, throw away the oldest message
+                //     message meeting above criteria.
+                //  3) If that doesn't work, throw away the oldest message.
+                sentDropped++;
+                if (disposeable(m)) 
+                    return;                
+                
+                //It's possible to optimize this by keeping track of the
+                //last value of i, but case (1) occurs more frequently.
+                int i;
+                for (i=outputQueue.getSize()-1; i>=0; i--) {
+                    Message mi=(Message)outputQueue.get(i);
+                    if (disposeable(mi))
+                        break;
+                }
+
+                if (i>=0)
+                    outputQueue.set(i,m);
+                else
+                    outputQueue.addFirst(m);
+            } else {
+                //Normal case.
+                outputQueue.addFirst(m);
+                if (outputQueue.getSize() >= BATCH_SIZE)
+                    outputQueueLock.notify();
+            }
         }
     }
 
@@ -674,7 +702,7 @@ public class Connection implements Runnable {
                         HTTPUploader(h, port, index, req_guid_hexstring, manager);
                         Thread t=new Thread(up);
                         t.setDaemon(true);
-                        t.run();
+                        t.start();
                     }
                     else{// the message has arrived in error or is spam
                         //do nothing.....drop the message
@@ -855,4 +883,51 @@ public class Connection implements Runnable {
         this.personalFilter=filter;
     }
 
+    
+    ///** Unit test */
+    /*
+    public static void main(String args[]) {
+        //1. Test replacement policies.
+        Message qr=new QueryRequest((byte)5, 0, "test");
+        Message qr2=new QueryRequest((byte)5, 0, "test2");
+        Message preq=new PingRequest((byte)5); preq.hop(); //from other
+        Message preq2=new PingRequest((byte)5);            //from me
+        Message prep=new PingReply(new byte[16], (byte)5, 6346,
+                                   new byte[4], 0, 0);
+
+        Connection c=new Connection("localhost", 6346);
+        try {
+            //   a') Regression test
+            c.send(qr);
+            c.send(qr2);
+            Assert.that(c.outputQueue.get(0)==qr2);
+            Assert.that(c.outputQueue.get(1)==qr);
+
+            for (int i=0; i<QUEUE_SIZE-2; i++) {
+                Assert.that(! c.outputQueue.isFull());
+                c.send(qr);
+            }
+            Assert.that(c.outputQueue.isFull());
+                    
+            //   a) No pings or pongs.  Boot oldest.
+            c.send(preq2);
+            Assert.that(c.outputQueue.isFull());
+            Assert.that(c.outputQueue.get(0)==preq2);
+
+            //   b) Old ping request in last position
+            c.outputQueue.set(QUEUE_SIZE-1, preq);
+            c.send(preq2);
+            Assert.that(c.outputQueue.get(QUEUE_SIZE-1)==preq2);
+        
+            //   c) Old ping reply in second to last position.
+            c.outputQueue.set(QUEUE_SIZE-2, prep);
+            c.send(qr);
+            Assert.that(c.outputQueue.get(QUEUE_SIZE-1)==preq2);
+            Assert.that(c.outputQueue.get(QUEUE_SIZE-2)==qr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Assert.that(false, "IOException");
+        }
+    }    
+    */
 }
