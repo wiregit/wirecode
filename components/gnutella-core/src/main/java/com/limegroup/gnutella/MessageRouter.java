@@ -488,6 +488,9 @@ public abstract class MessageRouter {
                 ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
+        MessageListener ml = 
+            (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
+        if (ml != null) ml.processMessage(msg);
     }
     
     /**
