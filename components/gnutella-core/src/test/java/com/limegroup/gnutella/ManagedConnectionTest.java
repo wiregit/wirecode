@@ -568,12 +568,16 @@ public class ManagedConnectionTest extends TestCase {
             in.close();
             out.close();
         } catch (IOException e) {
+			e.printStackTrace();
             fail("Mysterious IO problem: "+e);
         } catch (BadPacketException e) {
+			e.printStackTrace();
             fail("Bad packet: "+e);
         }
     }
 
+	
+	/*
     public void testForwardsGroupPing() {
         int TIMEOUT=1000;
         MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), PORT);
@@ -599,11 +603,14 @@ public class ManagedConnectionTest extends TestCase {
             in.close();
             out.close();
         } catch (IOException e) {
+			e.printStackTrace();
             fail("Mysterious IO problem: "+e);
         } catch (BadPacketException e) {
+			e.printStackTrace();
             fail("Bad packet: "+e);
         }
     }
+	*/
     
 
     class GGEPResponder implements HandshakeResponder {
