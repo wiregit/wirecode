@@ -117,9 +117,9 @@ public class GroupPingRequest extends PingRequest {
 		byte [] ip   = gpr.getAddress();
 
 		return( myip[0] == ip[0] && 
-				myip[0] == ip[0] && 
-				myip[0] == ip[0] && 
-				myip[0] == ip[0] && 
+				myip[1] == ip[1] && 
+				myip[2] == ip[2] && 
+				myip[3] == ip[3] && 
 				getPort() == gpr.getPort() );
 	}
 
