@@ -1,16 +1,8 @@
-//*****************************************************************************
-//#define NEW_CODE		//	Turns on the new WinXP ICF firewall detection code
-#define MACHINE_ARCH	//	Turns on the machine arch macros
-//*****************************************************************************
-// NOTE:  To compile this file with GCC, the following command should be used:
+// WindowsV5PlusUtils.cpp : Defines the entry point for the DLL application.
 //
-//	gcc -mno-cygwin -I/cygdrive/c/Program\ Files/Java/jdk1.5.0_01/include 
-//		-I/cygdrive/c/Program\ Files/Java/jdk1.5.0_01/include/win32
-//		-I/cygdrive/c/Program\ Files/Microsoft\ XP\ SP2\ PSDK/Include
-//		-Wl,--add-stdcall-alias -shared -o WindowsV5PlusUtils.dll WindowsV5PlusUtils.cpp
-//
-//	NOTE: Replace the -I include paths with the paths to the Java & WinXP SP2 
-//		PSDK include files (see below comments for Download URL of PSDK)
+
+//*****************************************************************************
+#define NEW_CODE		//	Turns on the new WinXP ICF firewall detection code
 //*****************************************************************************
 //	NOTE: As of Tuesday, 25th January 2005, this file won't compile under GCC.
 //		Lots of errors in the Windows include files cause problems.  This file 
@@ -18,18 +10,10 @@
 //		more tomorrow, to get a clean build made.
 //*****************************************************************************
 
-#ifdef MACHINE_ARCH
-	//	_M_IX86 must be defined for x86 architectures
-	#ifndef _M_IX86
-	#define _M_IX86
-	#endif
-
-	#ifndef _WIN32
-	#define _WIN32
-	#endif
-#endif
-
 #include <jni.h>
+#include <assert.h>
+
+#define _WIN32_WINNT 0x0500	//	Required windows version: Win2K or better
 #include <windows.h>
 
 /**
@@ -59,11 +43,14 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(
 #include <netfw.h>
 #include <objbase.h>
 #include <oleauto.h>
+#include <crtdbg.h>
 
-#define APP_NAME "%ProgramFiles%\\LimeWire\\LimeWireWin.exe"
+#define APP_NAME L"%ProgramFiles%\\LimeWire\\LimeWire.exe"
 
 //	Initialization code from:
 //	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/ics/ics/using_windows_firewall.asp
+
+//*****************************************************************************
 
 HRESULT WindowsFirewallInitialize(OUT INetFwProfile** fwProfile)
 {
@@ -122,6 +109,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 void WindowsFirewallCleanup(IN INetFwProfile* fwProfile)
 {
@@ -132,6 +120,7 @@ void WindowsFirewallCleanup(IN INetFwProfile* fwProfile)
     }
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallIsOn(IN INetFwProfile* fwProfile, OUT BOOL* fwOn)
 {
@@ -167,6 +156,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallTurnOn(IN INetFwProfile* fwProfile)
 {
@@ -202,6 +192,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallTurnOff(IN INetFwProfile* fwProfile)
 {
@@ -237,6 +228,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallAppIsEnabled(
             IN INetFwProfile* fwProfile,
@@ -334,6 +326,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallAddApp(
             IN INetFwProfile* fwProfile,
@@ -458,6 +451,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallPortIsEnabled(
             IN INetFwProfile* fwProfile,
@@ -533,6 +527,7 @@ error:
     return hr;
 }
 
+//-----------------------------------------------------------------------------
 
 HRESULT WindowsFirewallPortAdd(
             IN INetFwProfile* fwProfile,
@@ -652,18 +647,16 @@ error:
     return hr;
 }
 
+//*****************************************************************************
 
 /**
  * Retrieves the current state (block=true / nonblock=false) of the Windows ICF.  Available only on
  *		WinXP SP2 and above
  */
-extern "C"
-JNIEXPORT jboolean JNICALL 
-Java_com_limegroup_gnutella_util_SystemUtils_isFirewallWarningImminent(
-	JNIEnv		*	env, 
-	jclass			clazz ) 
+
+bool CheckFirewallWarningImminent( const wchar_t * szProcessFileName )
 {
-	jboolean bReturn=JNI_FALSE;
+	bool bReturn=false;
 
 
 	//	Here is the native WinXP SP2 COM code to open an INetFwPolicy interface
@@ -701,20 +694,33 @@ Java_com_limegroup_gnutella_util_SystemUtils_isFirewallWarningImminent(
 		}
 
 		//---------------------------------------------------------------------
-		//	Check for LimeWireWin.exe to be included in the enabled 
+		//	Check for szProcessFileName to be included in the enabled 
 		//		applications list for WinXP SP2 
 		//---------------------------------------------------------------------
 		if( fwProfile )
 		{
-			bool bEnabled=false;
+			BOOL bTurnedOn=FALSE;
+			hr=WindowsFirewallIsOn(
+				 fwProfile,
+				&bTurnedOn );
 
-			hr=WindowsFirewallAppIsEnabled(
-				fwProfile,
-				APP_NAME,
-				&bEnabled );
+			if( SUCCEEDED(hr) && bTurnedOn==TRUE )
+			{
+				BOOL bEnabled=FALSE;
 
-			if( SUCCEEDED(hr) )
-				bReturn=( (!bEnabled) ? (JNI_TRUE) : (JNI_FALSE) );
+				hr=WindowsFirewallAppIsEnabled(
+					fwProfile,
+					szProcessFileName,
+					&bEnabled );
+
+				if( SUCCEEDED(hr) )
+					bReturn=( (bEnabled==FALSE) ? true : false );
+			}
+			else
+			{
+				//	Win XP SP2 ICF is disabled
+				bReturn=false;
+			}
 		}
 
 		//---------------------------------------------------------------------
@@ -729,27 +735,33 @@ error:
 		}		
 	}
 
-	return (jboolean)bReturn;
+	return bReturn;
 }
 
+//*****************************************************************************
+
+extern "C"
+JNIEXPORT jboolean JNICALL 
+Java_com_limegroup_gnutella_util_SystemUtils_isFirewallWarningImminent(
+	JNIEnv		*	env, 
+	jclass			clazz,
+	jstring         appPath ) 
+{
+#pragma message( __FILE__ ":### DAVE Finish using the passed in appPath instead of APP_NAME" )
+
+	jboolean bRet=( (CheckFirewallWarningImminent(APP_NAME)) ? (JNI_TRUE) : (JNI_FALSE) );
+	return bRet;
+}
+
+//-----------------------------------------------------------------------------
+
+extern "C" __declspec(dllexport) bool IsFirewallWarningImminent( 
+	const wchar_t		*	szAppName )
+{
+	return CheckFirewallWarningImminent(szAppName);
+}
+
+//*****************************************************************************
+
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
