@@ -249,7 +249,7 @@ public class RouterService
 		//  Adjust up keepAlive for initial ultrafast connect
 		if ( outgoing < 10 ) {
 			outgoing = 10;
-			manager.setTimeEvent(15000, new AllowUltraFastConnect());
+			manager.activateUltraFastConnectShutdown();
 		}
         setKeepAlive(outgoing);
 
@@ -266,23 +266,14 @@ public class RouterService
     }
 
     /**
-     * This Runnable resets the KeepAlive to the appropriate value.
-     */
-    private class AllowUltraFastConnect implements Runnable {
-		
-		public void run() {
-            SettingsManager settings=SettingsManager.instance();
-        	int outgoing=settings.getKeepAlive();
-        	setKeepAlive(outgoing);
-		}
-	}
-
-    /**
      * @modifies this
      * @effects removes all connections.
+     * @effects deactivates extra connection watchdog check
      */
     public void disconnect() {
-		manager.setTimeEvent(0, null); // Deactivate any timed keepAlive fiddle
+		// Deactivate checking for Ultra Fast Shutdown
+		manager.deactivateUltraFastConnectShutdown(); 
+
         SettingsManager settings=SettingsManager.instance();
         int oldKeepAlive=settings.getKeepAlive();
 

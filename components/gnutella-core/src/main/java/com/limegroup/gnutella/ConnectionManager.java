@@ -68,6 +68,7 @@ public class ConnectionManager {
     private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
+	private Runnable _ultraFastCheck;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -97,15 +98,6 @@ public class ConnectionManager {
 		//SettingsManager.instance().getMaxIncomingConnections());
     }
 
-	/**
-	 *  Set a time trigger for a runnable action relative to current time
-	 *  Pass this on to the ConnectionWatchdog.
-     *  @param incrementalTime the incremental time of the event in milliseconds
-     *  @param action the Runnable for the event
-	 */
-	public void setTimeEvent(long incrementalTime, Runnable action) {
-		_watchdog.setTimeEvent(incrementalTime, action);
-	}
 
     /**
      * Create a new connection, blocking until it's initialized, but launching
@@ -346,7 +338,52 @@ public class ConnectionManager {
                                           c.getPort()));
             _endpoints=newEndpoints;
         }
+
+		// Check for satisfied ultra-fast connection threshold
+		if ( _ultraFastCheck != null )
+			_ultraFastCheck.run();
     }
+
+	/**
+	 *  Activate the ultraFast runnable for returning keepAlive value to normal.
+	 */
+	public void activateUltraFastConnectShutdown() {
+		_ultraFastCheck = new AllowUltraFastConnect();
+	}
+
+	/**
+	 *  Deactivate the ultraFast runnable returning keepAlive value to normal.
+	 */
+	public void deactivateUltraFastConnectShutdown() {
+		_ultraFastCheck = null;
+	}
+
+    /**
+     * This Runnable resets the KeepAlive to the appropriate value
+	 * if there are an acceptible number of stable connections
+     */
+    private class AllowUltraFastConnect implements Runnable {
+		
+		public void run() {
+            SettingsManager settings=SettingsManager.instance();
+        	int outgoing=settings.getKeepAlive();
+			int desired = Math.min(outgoing, 3);
+
+			// Determine if we have 3/desired stable connections
+            Iterator iter=getConnections().iterator();
+            for ( ; iter.hasNext(); ) {
+                ManagedConnection c=(ManagedConnection)iter.next();
+				// Stable connections are measured by having 4 incoming msgs
+			    if ( c.getNumMessagesReceived() >= 4 )
+				    desired--;
+            }
+			if ( desired <= 0 ) {
+        	    setKeepAlive(outgoing);
+				// Deactivate extra ConnectionWatchdog Process
+		        deactivateUltraFastConnectShutdown(); 
+			}
+		}
+	}
 
     /**
      * An unsynchronized version of remove, meant to be used when the monitor
