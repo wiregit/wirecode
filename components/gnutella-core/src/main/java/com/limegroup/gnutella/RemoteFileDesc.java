@@ -25,7 +25,7 @@ import java.net.*;
 public class RemoteFileDesc implements Serializable {
     private static final long serialVersionUID = 6619479308616716538L;
     
-    private static final int COPY_INDEX = 0;
+    private static final int COPY_INDEX = Integer.MAX_VALUE;
 
 	private final String _host;
 	private final int _port;
