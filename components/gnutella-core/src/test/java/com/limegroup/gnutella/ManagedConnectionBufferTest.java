@@ -249,6 +249,10 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             2, ((PatchTableMessage)m).getSequenceNumber());
     }
 
+    /**
+     * Test to make sure that messages properly timeout in the message
+     * queues and are dropped.
+     */
     public void testBufferTimeout() 
             throws IOException, BadPacketException {
         assertEquals("unexected queue time",
@@ -256,10 +260,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         
         //Drop one message
         out.stopOutputRunner();        
-        //out.send(new QueryRequest((byte)3, 0, "0", false));   
         out.send(QueryRequest.createQuery("0", (byte)3));   
         sleep(1200);
-        //out.send(new QueryRequest((byte)3, 0, "1200", false));        
         out.send(QueryRequest.createQuery("1200", (byte)3)); 
         out.startOutputRunner();
         Message m=(QueryRequest)in.receive(500);
