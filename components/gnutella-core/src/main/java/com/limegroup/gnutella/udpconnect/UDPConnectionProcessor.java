@@ -72,7 +72,8 @@ public class UDPConnectionProcessor {
         keep the connection alive (and firewalls open).  
  		Note: in an idle state, this affects data writing if the 
 		receivers window is full. */
-	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+	//private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+	private static final long KEEPALIVE_WAIT_TIME     = (200);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
