@@ -118,12 +118,12 @@ public class HTTPDownloader implements BandwidthTracker {
      * trying to connect, unless timeout is zero, in which case there is 
      * no timeout.  This MUST be uninitialized, i.e., connectTCP may not be 
      * called more than once.
-     *
+     * <p>
      * @param timeout the timeout to use for connecting, in milliseconds,
      *  or zero if no timeout
      * @exception CantConnectException could not establish a TCP connection
      */
-	public void connectTCP(int timeout) throws IOException {        
+	public void connectTCP(int timeout) throws IOException {
         //Connect, if not already done.  Ignore 
         //The try-catch below is a work-around for JDK bug 4091706.
         InputStream istream=null;
@@ -138,6 +138,10 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (Exception e) {
             throw new CantConnectException();
         }
+        //Note : once we have established the TCP connection with the host we
+        //want to download from we set the soTimeout. Its reset in doDownload
+        //Note2 : this may throw an IOException.  
+        _socket.setSoTimeout(SettingsManager.instance().getTimeout());
         _byteReader = new ByteReader(istream);
     }
     
@@ -365,8 +369,9 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public void doDownload(boolean checkOverlap) 
             throws IOException, OverlapMismatchException {
+        _socket.setSoTimeout(0);//once downloading we can stall for a bit
         RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
-        try {            
+        try {
             fos.seek(_initialReadingPoint);
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
