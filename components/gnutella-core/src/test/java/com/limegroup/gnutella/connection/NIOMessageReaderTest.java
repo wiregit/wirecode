@@ -12,6 +12,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -40,39 +41,35 @@ public class NIOMessageReaderTest extends BaseTestCase {
     }
     
     /**
+     * Test to make sure the constructor works properly.  In particular, tests
+     * to make sure that the constructor properly handles any leftover message
+     * data from handshaking.
+     * 
+     * @throws Exception if any unexpected exception is thrown, indicating an
+     *  error
+     */
+    public void testConstructor() throws Exception {
+        PingRequest ping = new PingRequest((byte)3);
+        String header = HeaderNames.USER_AGENT + ": "+
+            CommonUtils.getHttpServer() + "\r\n";
+        ByteBuffer buffer = createTestBuffer(ping, header);        
+        Handshaker testHandshaker = new TestHandshaker(buffer);
+    }
+    
+
+    
+    /**
      * Tests the createMessage method to make sure that it correctly creates
      * message from ByteBuffers.
      * 
-     * @throws Exception in any unexpected exception is thrown, indicating an
+     * @throws Exception if any unexpected exception is thrown, indicating an
      *  error
      */
     public void testCreateMessage() throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        PingRequest ping = new PingRequest((byte)3);
         String header = HeaderNames.USER_AGENT + ": "+
             CommonUtils.getHttpServer() + "\r\n";
-        buffer.put(header.getBytes());
-        PingRequest ping = new PingRequest((byte)3);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ping.write(baos);
-        } catch (IOException e) {
-            fail("unexpected exception: "+e);
-        }
-        byte[] bytes = baos.toByteArray();
-        int numPings = 0;
-        while(buffer.remaining() > ping.getTotalLength()) {
-            buffer.put(bytes);
-            numPings++;
-        }    
-        
-        
-        // fill it up with a partial header...
-        int remaining = buffer.remaining();
-        for(int i=0; i<remaining; i++) {
-            buffer.put(bytes[i]);
-        }
-        buffer.flip();
+        ByteBuffer buffer = createTestBuffer(ping, header);
         
         Connection testConnection = new Connection(new TestSocket());
         NIOHeaderReader reader = 
@@ -130,6 +127,39 @@ public class NIOMessageReaderTest extends BaseTestCase {
             headerBuffer.remaining(), 20);
     }
 
+    /**
+     * Utility method that creates a test byte buffer loaded up with a Gnutella
+     * message header, a bunch of messages, and a partial message.
+     * 
+     * @return a new <tt>ByteBuffer</tt> with header and message data for 
+     *  testing
+     */
+    public ByteBuffer createTestBuffer(Message msg, String header) {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        
+        buffer.put(header.getBytes());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            msg.write(baos);
+        } catch (IOException e) {
+            fail("unexpected exception: "+e);
+        }
+        byte[] bytes = baos.toByteArray();
+        int numPings = 0;
+        while(buffer.remaining() > msg.getTotalLength()) {
+            buffer.put(bytes);
+            numPings++;
+        }    
+        
+        // fill it up with a partial header...
+        int remaining = buffer.remaining();
+        for(int i=0; i<remaining; i++) {
+            buffer.put(bytes[i]);
+        }
+        buffer.flip();
+        return buffer;        
+    }
 
     /**
      * Helper class that allows test for random left over ByteBuffer from
