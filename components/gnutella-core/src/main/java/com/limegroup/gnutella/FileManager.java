@@ -80,7 +80,7 @@ public class FileManager {
     
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
-    private static ActivityCallback _callback;
+    protected static ActivityCallback _callback;
 
     /** Characters used to tokenize queries and file names. */
     public static final String DELIMETERS=" -._+/*()\\";
