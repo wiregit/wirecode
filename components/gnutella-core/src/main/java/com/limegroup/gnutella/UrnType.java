@@ -11,6 +11,8 @@ import java.io.*;
  */
 public class UrnType implements Serializable {
 
+	static final long serialVersionUID = -8211681448456483713L;
+
 	/**
 	 * Identifier string for the SHA1 type.
 	 */
