@@ -16,7 +16,7 @@ public class LimeXMLDocumentHelper{
      *<p>
      * returns null if the XML string does now parse.
      */
-    public List getDocuments(String aggregrateXMLStr, 
+    public static List getDocuments(String aggregrateXMLStr, 
                                                  int totalResponseCount){
         ArrayList retList = new ArrayList();
         if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
@@ -115,7 +115,7 @@ public class LimeXMLDocumentHelper{
      * If none of the responses have any metadata, this method returns an
      * empty string.
      */
-    public String getAggregateString(Response[] responses){
+    public static String getAggregateString(Response[] responses){
         String agg = internalGetAggregateString(responses);
         return (agg);
     }
@@ -125,7 +125,7 @@ public class LimeXMLDocumentHelper{
 
     /** @return the schema uri for the given input xml.  may return null.
      */
-    private String getSchemaURI(String xml) {
+    private static String getSchemaURI(String xml) {
         String retString = null;
         int i = xml.indexOf(SCHEMA_PRECEDE_STRING);
         if (i > -1) {
@@ -145,7 +145,7 @@ public class LimeXMLDocumentHelper{
     }
 
 
-    private String getSchemaURIXML(Element tree) {
+    private static String getSchemaURIXML(Element tree) {
         String retString="<"+tree.getNodeName()+" ";
         List attributes=LimeXMLUtils.getAttributes(tree.getAttributes());
         int z = attributes.size();
@@ -160,20 +160,19 @@ public class LimeXMLDocumentHelper{
     }
 
 
-    private HashMap _urisToLists = new HashMap();
-
-    private void indexTree(String schemaURI, Element tree) {
+    private static void indexTree(String schemaURI, Element tree,
+                                  HashMap urisToLists) {
         LinkedList trees = null;
-        if (_urisToLists.containsKey(schemaURI)) 
-            trees = (LinkedList) _urisToLists.remove(schemaURI);        
+        if (urisToLists.containsKey(schemaURI)) 
+            trees = (LinkedList) urisToLists.remove(schemaURI);        
         else 
             trees = new LinkedList();
         trees.add(tree);
-        _urisToLists.put(schemaURI, trees);
+        urisToLists.put(schemaURI, trees);
     }
 
-    private String internalGetAggregateString(Response[] responses){ 
-        _urisToLists.clear();
+    private static String internalGetAggregateString(Response[] responses){ 
+        HashMap urisToLists = new HashMap();
         
         final int len = responses.length;
 
@@ -188,17 +187,17 @@ public class LimeXMLDocumentHelper{
             if (currTree != null) {
                 addIndex(currTree, i);
                 String schemaURI = getSchemaURI(currXML);
-                indexTree(schemaURI, currTree);
+                indexTree(schemaURI, currTree, urisToLists);
             }
         }
 
         // now get all the disparate xml from the hashmap, and construct a xml
         // string for each.
         StringBuffer retStringBuffer = new StringBuffer();
-        Iterator keys = _urisToLists.keySet().iterator();
+        Iterator keys = urisToLists.keySet().iterator();
         while (keys.hasNext()) { // for each schema URI
             String currKey = (String) keys.next();
-            List treeList = (List) _urisToLists.get(currKey);
+            List treeList = (List) urisToLists.get(currKey);
             Iterator trees = treeList.iterator();
             boolean firstIter = true;
 
@@ -227,7 +226,7 @@ public class LimeXMLDocumentHelper{
         return retStringBuffer.toString();
     }
     
-    private String getNodeString(Node node){
+    private static String getNodeString(Node node){
 
         StringBuffer retStringB = new StringBuffer();
 
@@ -267,7 +266,7 @@ public class LimeXMLDocumentHelper{
         //TODO2:review and test
     }
         
-    private void addIndex(Node node, int childIndex){
+    private static void addIndex(Node node, int childIndex){
         //find the only child of node - called newLeaf
         Element newLeaf = getFirstNonTextChild(node);
         //then  add the index as the attribute of newLeaf
@@ -278,7 +277,7 @@ public class LimeXMLDocumentHelper{
         //then add newLeaf as a child of parent.
     }
 
-     private Element getFirstNonTextChild(Node node){
+     private static Element getFirstNonTextChild(Node node){
            List children = LimeXMLUtils.getElements(node.getChildNodes());
            int z = children.size();
            for (int i=0;i<z;i++){
@@ -311,7 +310,7 @@ public class LimeXMLDocumentHelper{
      * Takes a DOMElement, and a string that is part of the attribute
      * we are looking for, and returns the value of that attribute
      */
-    private String getAttributeValue(Node element,String targetName){
+    private static String getAttributeValue(Node element,String targetName){
         String lowerTargetName = targetName.toLowerCase();
         List atts=LimeXMLUtils.getAttributes(element.getAttributes());
         String retString="";
