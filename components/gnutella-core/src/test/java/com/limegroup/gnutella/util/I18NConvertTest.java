@@ -20,6 +20,9 @@ public class I18NConvertTest extends BaseTestCase {
     private final String SPLIT = "KEYWORD_SPLIT";
     private AbstractI18NConverter _instanceICU;
     private AbstractI18NConverter _instance118;
+    
+    private static final String fileName =
+        "com/limegroup/gnutella/util/i18ntest.txt";
 
     public I18NConvertTest(String name) {
         super(name);
@@ -32,8 +35,7 @@ public class I18NConvertTest extends BaseTestCase {
     public void setUp() throws Exception {
         //read in a file and do the tests from there.
         FileInputStream fin = 
-            new FileInputStream
-            (new File("com/limegroup/gnutella/util/i18ntest.txt"));
+            new FileInputStream(CommonUtils.getResourceFile(fileName));
         _buf = new BufferedReader(new InputStreamReader(fin, "UTF-8"));
 
         //_instance = I18NConvert.instance();
@@ -53,7 +55,7 @@ public class I18NConvertTest extends BaseTestCase {
         readLines(ACCENTS);
         _last = true;
         readLines(SPLIT);
-        System.out.println(System.currentTimeMillis() - l);
+        //System.out.println(System.currentTimeMillis() - l);
     }
 
     private void readLines(String what) {
@@ -93,7 +95,7 @@ public class I18NConvertTest extends BaseTestCase {
     }
     
     public void tearDown() throws Exception {
-        System.out.println("tear down");
+       // System.out.println("tear down");
         if(_last && _buf != null)
             _buf.close();
     }
