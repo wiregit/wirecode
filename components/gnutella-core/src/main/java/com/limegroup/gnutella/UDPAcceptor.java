@@ -57,14 +57,14 @@ public final class UDPAcceptor implements Runnable {
 	 * dispatches them to their appropriate handlers.
 	 */
 	public void run() {
-		while(RouterService.getTCPListeningPort() == -1) {
+		while(RouterService.getPort() == -1) {
 			try {
 				Thread.sleep(100);
 			} catch(InterruptedException e) {
 				return;
 			}
 		}
-		int port = RouterService.getTCPListeningPort();
+		int port = RouterService.getPort();
 		try {
 			_socket = new DatagramSocket(port);
 			//_socket.setSoTimeout(SOCKET_TIMEOUT);
@@ -80,7 +80,7 @@ public final class UDPAcceptor implements Runnable {
 		    new DatagramPacket(datagramBytes, BUFFER_SIZE);
 
 		
-		while(port == RouterService.getTCPListeningPort()) {
+		while(port == RouterService.getPort()) {
 			try {				
 				_socket.receive(datagram);
 				byte[] data = datagram.getData();
