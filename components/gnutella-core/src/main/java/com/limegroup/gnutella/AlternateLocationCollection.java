@@ -279,6 +279,7 @@ public final class AlternateLocationCollection
 		boolean  matches;
 		while (iter.hasNext()) {
 			value = (AlternateLocation)iter.next();
+            if ( wasRemoved(value) ) continue;
 
 			// see above for why synchronizing here is unnecessary
             iter2 = values().iterator();
@@ -366,4 +367,26 @@ public final class AlternateLocationCollection
 		}
 		return sb.toString();
 	}
+
+    
+    public boolean equals(Object o) {
+        if(o == this) return true;
+        if(!(o instanceof AlternateLocationCollection))
+            return false;
+        AlternateLocationCollection alc = (AlternateLocationCollection)o;
+        return SHA1.equals(alc.SHA1) &&
+            LOCATIONS.equals(alc.LOCATIONS);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
