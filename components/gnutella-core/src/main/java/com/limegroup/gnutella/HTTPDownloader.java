@@ -223,7 +223,7 @@ public class HTTPDownloader implements Runnable {
             }
 
             out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
-            out.write("User-Agent: Gnutella\r\n");
+            out.write("User-Agent: LimeWire\r\n");
             out.write("\r\n");
             out.flush();
         } catch (IOException e) {
@@ -244,6 +244,7 @@ public class HTTPDownloader implements Runnable {
         try {
             URL url = new URL(_protocol, _host, _port, furl);
             conn = url.openConnection();
+            conn.setRequestProperty("User-Agent", "LimeWire");
             conn.connect();
             //The try-catch below work-around for JDK bug 4091706.
             try {
@@ -337,6 +338,7 @@ public class HTTPDownloader implements Runnable {
             URL url = new URL(_protocol, _host, _port, furl);
             conn = url.openConnection();
             conn.setRequestProperty("Range", "bytes="+ startRange + "-");
+            conn.setRequestProperty("User-Agent", "LimeWire");
             conn.connect();
         } catch (Exception e) {
             // for some reason the connection could not
