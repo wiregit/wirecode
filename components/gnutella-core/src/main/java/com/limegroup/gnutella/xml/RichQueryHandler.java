@@ -37,8 +37,11 @@ public class RichQueryHandler{
      * Returns an array of Responses that correspond to documents
      * that have a match with the XMLQuery String
      * Warning: Returns null if the XMLQuery is malformed.
+     * <p>
+     * This method is synchronized. Because if two threads from different
+     * connections make two different queries. Then all bad things can happen.
      */
-    public Response[] query(String XMLQuery,FileManager fManager){
+    public synchronized Response[] query(String XMLQuery,FileManager fManager){
         //System.out.println("Sumeet: "+XMLQuery);
         if (XMLQuery.equals(""))
             return null;
