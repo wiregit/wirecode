@@ -128,6 +128,8 @@ public final class UrnCache {
         while (iter.hasNext()) {
 			UrnSetKey key = (UrnSetKey)iter.next();
 
+            if(key == null) continue;
+
             // check to see if file still exists unmodified
             File f = new File(key._path);
             if (!f.exists() || f.lastModified() != key._modTime) {
