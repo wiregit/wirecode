@@ -139,15 +139,7 @@ public final class PushManager {
 				}
                 finally {
                     if( s != null ) {
-                        try {
-                            s.getInputStream().close();
-                        } catch(IOException ioe) {}
-                        try {
-                            s.getOutputStream().close();
-                        } catch(IOException ioe) {}
-                        try {
-                            s.close();
-                        } catch(IOException ioe) {}
+                        NetworkUtils.close(s);
                     }
                     // do this here so if the index changes, there is no
                     // confusion

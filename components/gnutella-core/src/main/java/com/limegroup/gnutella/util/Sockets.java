@@ -128,28 +128,6 @@ public class Sockets {
             Socket sock = SocketChannel.open().socket();
             sock.connect(addr, timeout);
             return sock;
-//            try {
-//                Socket ret = (Socket)_socketClass.newInstance();
-//
-//				Object addr = _inetAddressConstructor.newInstance(
-//                    new Object[] { host, new Integer(port) });
-//
-//                _connectMethod.invoke(ret, 
-//                    new Object[] { addr, new Integer(timeout) });
-//                return ret;
-//            } catch (InvocationTargetException e) {
-//                Throwable e2 = e.getTargetException();
-//                if( !(e2 instanceof IOException) )
-//                    ErrorService.error(e2);
-//                throw (IOException)e2;
-//            } catch(InstantiationException e) {
-//                // this should never happen -- display the error
-//                ErrorService.error(e);
-//            } catch(IllegalAccessException e) {
-//                // should almost never happen -- we want to know if it 
-//                // does
-//                ErrorService.error(e);
-//            }
         }
      
         if (timeout!=0) {
@@ -223,9 +201,10 @@ public class Sockets {
 			} catch (InterruptedException e) {
 				if (socket==null)
 					timedOut=true;
-				else
-					try { socket.close(); } catch (IOException e2) { }
-				throw new IOException();
+				else {
+                    NetworkUtils.close(socket);
+                }
+				throw new IOException("socket timed out");
 			}
 			
 			//a) Normal case
@@ -248,9 +227,9 @@ public class Sockets {
 					} catch (IOException e) { }                
 					
 					synchronized (SocketOpener.this) {
-						if (timedOut && sock!=null)
-							try { sock.close(); } catch (IOException e) { }
-						else {
+						if (timedOut && sock!=null) {
+                            NetworkUtils.close(sock);
+						} else {
 							socket=sock;   //may be null
 							SocketOpener.this.notify();
 						}

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.chat;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.StringComparator;
+import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.io.*;
 
@@ -47,10 +47,7 @@ public final class ChatManager {
 
 		// see if chatting is turned off
 		if (! allowChats) {
-			try {
-				socket.close();
-			} catch (IOException e) {
-			}
+            NetworkUtils.close(socket);
 			return;
 		}
 
@@ -60,10 +57,7 @@ public final class ChatManager {
         
 		List bannedList = Arrays.asList(bannedIPs);
 		if (bannedList.contains(host) ) {
-			try {
-  				socket.close();
-  			} catch (IOException e) {
-  			}
+            NetworkUtils.close(socket);
   			return;
 		}
 
@@ -77,10 +71,7 @@ public final class ChatManager {
 			callback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
-			try {
-				socket.close();
-			} catch (IOException ee) {
-			}
+            NetworkUtils.close(socket);
 		}
 	}
 

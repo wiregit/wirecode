@@ -12,6 +12,7 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -242,7 +243,7 @@ public class HTTPAcceptor implements Runnable {
                 }
             } catch (IOException e) {
                 //handshake failed: try to close connection.
-                try { _socket.close(); } catch (IOException e2) { }
+                NetworkUtils.close(_socket);
             } catch(Exception e) {
 				ErrorService.error(e);
 			}
@@ -302,7 +303,7 @@ public class HTTPAcceptor implements Runnable {
 			String command = str.substring(loc, loc2);
 			triggerMagnetHandling(socket, command);
 		} 
-		try { socket.close(); } catch (IOException e) { }
+        NetworkUtils.close(socket);
   	}
 
 	private void triggerMagnetHandling(Socket socket, String command) {
@@ -332,7 +333,7 @@ public class HTTPAcceptor implements Runnable {
 			out.write(bytes);
 			out.flush();
 			
-			socket.close();
+            NetworkUtils.close(socket);
 		} catch (IOException e) {
 		}
 	}

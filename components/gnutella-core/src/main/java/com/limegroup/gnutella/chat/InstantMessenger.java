@@ -105,14 +105,14 @@ public class InstantMessenger implements Chatter {
 	 */
 	public void stop() {
 		_manager.removeChat(this);
-		try {
-			_out.close();
-			_socket.close();
-		} catch (IOException e) {
-			
-		} catch (NullPointerException e) {
-
-		}
+        if(_out != null) {
+            try {
+                _out.close();
+            } catch (IOException e) { 
+                // nothing we can do other than try to close it
+            }
+        }
+        NetworkUtils.close(_socket);
 	}
 
 	/** 
@@ -122,13 +122,14 @@ public class InstantMessenger implements Chatter {
 	 * calling it when a connection is not yet established.
 	 */
 	public void send(String message) {
-		try {
-			_out.write(message+"\n");
-			_out.flush();
-		} catch (IOException e) {
-		} catch (NullPointerException e) {
-
-		}
+        if(_out != null) {
+            try {
+                _out.write(message+"\n");
+                _out.flush();
+            } catch (IOException e) {
+                // nothing we can do other than try to close it
+            }
+        }
 	}
 
 	/** returns the host name to which the 

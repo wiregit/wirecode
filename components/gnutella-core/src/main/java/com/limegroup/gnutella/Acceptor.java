@@ -387,7 +387,7 @@ public class Acceptor implements Runnable {
                 if (isBannedIP(address.getHostAddress())) {
 			        if( RECORD_STATS )
 			            HTTPStat.BANNED_REQUESTS.incrementStat();                    
-                    client.close();
+                    NetworkUtils.close(client);
                     continue;
                 }
 				
@@ -472,7 +472,7 @@ public class Acceptor implements Runnable {
 					byte[] addressBytes = address.getAddress();
 					if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
 					    (addressBytes[0] == 127)) {
-						_socket.close();
+                        NetworkUtils.close(_socket);
 						return;
 					}
 				}
@@ -531,7 +531,7 @@ public class Acceptor implements Runnable {
                 }
             } catch (IOException e) {
                 //handshake failed: try to close connection.
-                try { _socket.close(); } catch (IOException e2) { }
+                NetworkUtils.close(_socket);
             } catch(Throwable e) {
 				ErrorService.error(e);
 			}

@@ -613,9 +613,7 @@ public class DownloadManager implements BandwidthTracker {
         }            
 
         //3. We never requested the file or already got it.  Kill it.
-        try {
-            socket.close();
-        } catch (IOException e) { }
+        NetworkUtils.close(socket);
     }
 
 

@@ -505,7 +505,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
-            _socket.close();
             throw CONNECTION_CLOSED;
         } 
         

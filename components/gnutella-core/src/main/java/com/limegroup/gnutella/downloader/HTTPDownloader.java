@@ -746,10 +746,9 @@ public class HTTPDownloader implements BandwidthTracker {
 	public void stop() {
         if (_byteReader != null)
             _byteReader.close();
-        try {
-            if (_socket != null)
-                _socket.close();
-        } catch (IOException e) { }
+        if (_socket != null) {
+            NetworkUtils.close(_socket);
+        }
 	}
 
     /**

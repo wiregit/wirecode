@@ -149,8 +149,8 @@ public class ExternalControl {
 		    handleMagnetRequest(line);
 		} catch (IOException e) {
 		}
-			
-		try { socket.close(); } catch (IOException e) { }
+		
+        NetworkUtils.close(socket);
 	}
 
 	

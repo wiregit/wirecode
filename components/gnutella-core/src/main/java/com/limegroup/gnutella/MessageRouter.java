@@ -870,9 +870,8 @@ public abstract class MessageRouter {
         }
         try {
             Socket sock = new Socket(addrToContact, portToContact);
-            OutputStream os = sock.getOutputStream();
-            os.write("\n\n".getBytes());
-            sock.close();
+            sock.getOutputStream().write("\n\n".getBytes());
+            NetworkUtils.close(sock);
         }
         catch (IOException ioe) {
             // whatever
