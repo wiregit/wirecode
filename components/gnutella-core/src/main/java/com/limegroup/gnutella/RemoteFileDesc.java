@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
@@ -96,6 +97,33 @@ public class RemoteFileDesc implements Serializable {
      * to transfer data.
      */
     private transient int _failedCount = 0;
+    
+    /**
+     * Constructs a new RemoteFileDesc exactly like the other one,
+     * but with a different remote host.
+     *
+     * It is okay to use the same internal structures
+     * for URNs and Proxies because they are immutable.
+     */
+    public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
+        this( ep.getHostname(),
+              ep.getPort(),
+              0,
+              rfd.getFileName(),
+              rfd.getSize(),
+              DataUtils.EMPTY_GUID,
+              0,
+              false,
+              2,
+              false,
+              rfd.getXMLDoc(),
+              rfd.getUrns(),
+              false,
+              false,
+              AlternateLocation.ALT_VENDOR,
+              System.currentTimeMillis(),
+              rfd.getPushProxies() );
+    }
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
