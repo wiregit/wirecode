@@ -1292,7 +1292,7 @@ public class QueryReply extends Message implements Serializable{
             return _combo.getPort();
         }
         public InetAddress getPushProxyAddress() {
-            return _combo.getAddress();
+            return _combo.getInetAddress();
         }
 
         public boolean equals(Object other) {
@@ -1317,7 +1317,7 @@ public class QueryReply extends Message implements Serializable{
      *  This may be a bad decision.  I'm sure someone will let me know during
      *  code review.
      */
-    public static class IPPortCombo {
+    public static class IPPortCombo implements IpPort {
         private int _port;
         private InetAddress _addr;
         
@@ -1369,11 +1369,19 @@ public class QueryReply extends Message implements Serializable{
                 throw new IllegalArgumentException("invalid addr: " + _addr);
         }
 
+        // Implements IpPort interface
         public int getPort() {
             return _port;
         }
-        public InetAddress getAddress() {
+        
+        // Implements IpPort interface
+        public InetAddress getInetAddress() {
             return _addr;
+        }
+
+        // Implements IpPort interface
+        public String getAddress() {
+            return _addr.getHostAddress();
         }
 
         /** @return the ip and port encoded in 6 bytes (4 ip, 2 port).
