@@ -29,6 +29,8 @@ import java.net.*;
 public class ManagedDownloader implements Downloader, Serializable {
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
+     * Finer-grained locking is probably possible but not necessary.  Do not
+     * hold lock while performing blocking IO operations.
      ***********************************************************************/
 
     /** This' manager for callbacks and queueing. */
@@ -71,7 +73,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     private boolean stopped;
     
     /** The lock for pushes (see below).  Used intead of THIS to prevent missing
-     *  notify's.  See readObject for note on serialization. */
+     *  notify's.  See readObject for note on serialization.  LOCKING: use
+     *  pushLock for all the pushX variables. */
     private Object pushLock=new Object();
     /** The name of the push file we are waiting for, or NULL if none */
     private String pushFile;        
@@ -725,10 +728,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                                            List busy) 
             throws NoSuchElementException, InterruptedException {        
         while (true) {
-            if (files.size()==0)
-                throw new NoSuchElementException();
-            if (stopped)
-                throw new InterruptedException();
+            //Lock here is just to be paranoid since files is modified by
+            //tryOneDownload in another thread.
+            synchronized (this) {
+                if (files.size()==0)
+                    throw new NoSuchElementException();
+                if (stopped)
+                    throw new InterruptedException();
+            }
 
             RemoteFileDesc rfd=removeBest(files);      
             File incompleteFile=incompleteFileManager.getFile(rfd);
@@ -780,8 +787,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //Add this for retry later
                 busy.add(rfd);
             } catch (CantConnectException e) {
-                //Schedule for pushing
-                files.add(new RemoteFileDesc2(rfd, true));
+                //Schedule for pushing.  Need lock because this can be modified
+                //by download worker threads in tryOneDownload.
+                synchronized (this) {
+                    files.add(new RemoteFileDesc2(rfd, true));
+                }
             } catch (IOException e) {
                 //Miscellaneous error: never revisit.
             }
@@ -937,7 +947,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-    public static RemoteFileDesc removeBest(List filesLeft) {
+    private synchronized RemoteFileDesc removeBest(List filesLeft) {
+        //Lock is needed here because filesLeft can be modified by
+        //tryOneDownload in worker thread.
         Iterator iter=filesLeft.iterator();
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
@@ -1188,7 +1200,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 	}	
     */
 	
-
     /*
     public static void main(String args[]) {
         //Test bucketing.  Note that the 1-star result is ignored.
@@ -1242,15 +1253,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         list.add(rf4);
         list.add(rf1);
         list.add(rf5);
-        Assert.that(removeBest(list)==rf1);  //quality over speed
+        ManagedDownloader stub=new ManagedDownloader();
+        Assert.that(stub.removeBest(list)==rf1);  //quality over speed
         Assert.that(list.size()==2);
         Assert.that(list.contains(rf4));
         Assert.that(list.contains(rf5));
-        Assert.that(removeBest(list)==rf5);  
+        Assert.that(stub.removeBest(list)==rf5);  
         Assert.that(list.size()==1);
         Assert.that(list.contains(rf4));
-        Assert.that(removeBest(list)==rf4);  
+        Assert.that(stub.removeBest(list)==rf4);  
         Assert.that(list.size()==0);
     }
+    
+    //Stub constructor for testing removeBest
+    private ManagedDownloader() { }
     */
 }
