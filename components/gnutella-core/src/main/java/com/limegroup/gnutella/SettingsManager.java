@@ -963,15 +963,7 @@ public class SettingsManager implements SettingsInterface
 			}
 			directories_ = sb.toString();
 		}
-		Thread fileManagerThread = new Thread() {
-			public void run() {
-				FileManager.getFileManager().reset();
-				FileManager.getFileManager().addDirectories(directories_);        
-			}
-		};
-		fileManagerThread.setDaemon(true);
-		fileManagerThread.start();
-
+		resetFileManager();
         props_.put(DIRECTORIES, directories_);
     }
 
@@ -1000,8 +992,7 @@ public class SettingsManager implements SettingsInterface
 				directories_ += ";";				
 			directories_ += newPath;
 			directories_ += ";";
-			FileManager.getFileManager().reset();
-			FileManager.getFileManager().addDirectories(directories_);        
+			resetFileManager();
 			props_.put(DIRECTORIES, directories_);
 			return true;
 		}
@@ -1012,8 +1003,7 @@ public class SettingsManager implements SettingsInterface
     public void setExtensions(String ext) {
         FileManager.getFileManager().setExtensions(ext);
 		if(getDirectories() != null) {
-			FileManager.getFileManager().reset();
-			FileManager.getFileManager().addDirectories(getDirectories());
+			resetFileManager();
 		}
         extensions_ = ext;
         props_.put(EXTENSIONS, ext);
@@ -1440,6 +1430,19 @@ public class SettingsManager implements SettingsInterface
             catch(IOException io) {}
         }
     }
+
+	// resets the file manager values in a new thread,
+	// as it could take a long time. 
+	private void resetFileManager() {
+		Thread fileManagerThread = new Thread() {
+			public void run() {
+				FileManager.getFileManager().reset();
+				FileManager.getFileManager().addDirectories(directories_);        
+			}
+		};
+		fileManagerThread.setDaemon(true);
+		fileManagerThread.start();
+	}
 
     /** writes out the properties file to with the specified
      *  name in the user's home directory
