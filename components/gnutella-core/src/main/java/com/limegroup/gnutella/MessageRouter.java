@@ -1322,10 +1322,27 @@ public abstract class MessageRouter {
         Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
         while (indivisibleWords.hasNext()) 
             qrt.addIndivisible((String) indivisibleWords.next());
-        /*
-          File[] files = _fileManager.getSharedFiles(null);
-          for (int i=0; i<files.length; i++)
-            qrt.add(files[i].getAbsolutePath());
-        */
+		if(RouterService.isSupernode()) {
+			addQueryRoutingEntriesForLeaves(qrt);
+		}
     }
+
+	/**
+	 * Adds all query routing tables of leaves to the query routing table for
+	 * this node for propagation to other Ultrapeers at 1 hop.
+	 *
+	 * @param qrt the <tt>QueryRouteTable</tt> to add to
+	 */
+	private void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
+		List leaves = _manager.getInitializedClientConnections2();
+		
+		for(int i=0; i<leaves.size(); i++) {
+			ManagedConnection mc = (ManagedConnection)leaves.get(i);
+			ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+			if(qi.lastReceived != null) {
+				qrt.addAll(qi.lastReceived);
+			}
+			
+		}
+	}
 }
