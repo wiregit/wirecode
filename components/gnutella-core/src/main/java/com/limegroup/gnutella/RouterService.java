@@ -919,10 +919,13 @@ public class RouterService
 	 * Browses the passed host
      * @param host The host to browse
      * @param port The port at which to browse
+     * @param guid The guid to be used for the query replies received 
+     * while browsing host
      * @exception IOException in case any I/O error occurs while 
      * connecting/reading/writing from the host
 	 */
-	public void doBrowseHost(String host, int port) throws IOException{
+	public void doBrowseHost(String host, int port, GUID guid) 
+        throws IOException{
         try {
             URLConnection conn 
                 = (new URL("http://"+host+":"+port)).openConnection();
@@ -930,15 +933,22 @@ public class RouterService
             
             while(true) {
                 Message m = Message.read(in);
-
+//                System.out.println("read " + m);
+                
                 if(m == null) {
                     //we are finished reading the stream
                     return;
+                } else {
+                    if(m instanceof QueryReply) {
+                        QueryReply queryReply = (QueryReply)m;
+                        m.setGUID(guid);
+                        callback.handleQueryReply(queryReply);
+                    }
                 }
             }
         } catch (Exception e) {
-            //TODO take it out after testing
-            e.printStackTrace();
+            //TODO take out the print statement after testing
+//            e.printStackTrace();
         }
 	}
 
