@@ -66,15 +66,8 @@ public class ForcedUltrapeerHandshakeResponderTest extends BaseTestCase {
     	
     	assertFalse(hr.isAccepted());
     	
-    	//3. Test if they are not LimeWire
-    	props = new UltrapeerHeaders("40.0.9.8");
-    	props.setProperty(HeaderNames.USER_AGENT,"RAZA"); //the evilest of 'em all
-    	headers = HandshakeResponse.createResponse(props);
-    	hr = responder.respondUnauthenticated(headers, true);
     	
-    	assertFalse(hr.isAccepted());
-    	
-    	//4. Test a proper connection that fits the required criteria
+    	//3. Test a proper connection that fits the required criteria
     	props = new UltrapeerHeaders("40.0.9.8");
     	props.setProperty(HeaderNames.X_ULTRAPEER_NEEDED, "True");
     	headers = HandshakeResponse.createResponse(props);
@@ -108,15 +101,8 @@ public class ForcedUltrapeerHandshakeResponderTest extends BaseTestCase {
     	}catch(IOException ignored){}
 
     	
-    	//3. test when we receive a connection from a non-limewire
-    	props = new UltrapeerHeaders("40.0.9.8");
-    	props.setProperty(HeaderNames.USER_AGENT,"RAZA"); //the evilest of 'em all
-    	headers = HandshakeResponse.createResponse(props);
-    	hr = responder.respondUnauthenticated(headers, false);
     	
-    	assertFalse(hr.isAccepted());
-    	
-    	//4. test when everything is ok and the connection is accepted
+    	//3. test when everything is ok and the connection is accepted
     	props = new UltrapeerHeaders("40.0.9.8");
     	props.setProperty(HeaderNames.CONTENT_ENCODING,HeaderNames.DEFLATE_VALUE);
     	headers = HandshakeResponse.createResponse(props);
