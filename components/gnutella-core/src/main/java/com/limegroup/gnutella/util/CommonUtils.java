@@ -16,7 +16,7 @@ public final class CommonUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static final String LIMEWIRE_VERSION = "2.3.1 Pro";
+	private static final String LIMEWIRE_VERSION = "2.3.4 Pro";
 	
 	/** 
 	 * Constant for the java system properties.
@@ -365,7 +365,11 @@ public final class CommonUtils {
 		    } catch(FileNotFoundException e) {
 		        // this will just continue to return the default
 		        // directory for all oses
-		    }
+		    } catch(NoSuchMethodError e) {
+				// this means it's probably an older java implementation,
+				// so just return the current directory
+				settingsDir = CommonUtils.getCurrentDirectory();
+			}
 		} else {
             settingsDir = new File(CommonUtils.getUserHomeDir(), 
 							       ".limewire");
