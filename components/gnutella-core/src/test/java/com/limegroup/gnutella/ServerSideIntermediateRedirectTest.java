@@ -288,6 +288,72 @@ public final class ServerSideIntermediateRedirectTest extends BaseTestCase {
             assertTrue(false);
         }
     }
+
+
+    public void testSendsRedirect() throws Exception {
+
+        Connection redirUP = new Connection("localhost", PORT,
+                                            new UltrapeerHeaders("localhost"),
+                                            new EmptyResponder());
+        
+        redirUP.initialize();
+        QueryRouteTable qrt = new QueryRouteTable();
+        qrt.add("leehsus");
+        qrt.add("berkeley");
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
+            redirUP.send((RouteTableMessage)iter.next());
+			redirUP.flush();
+        }
+        assertTrue(redirUP.isOpen());
+        drain(redirUP);
+
+        MessagesSupportedVendorMessage msvm = 
+            MessagesSupportedVendorMessage.instance();
+        redirUP.send(msvm);
+        redirUP.flush();
+
+        Thread.sleep(1000);
+        // now the guy knows i support the redirect message
+        assertNotNull(ROUTER_SERVICE.getConnectionManager().getTCPRedirectUltrapeer());
+        assertNotNull(ROUTER_SERVICE.getConnectionManager().getUDPRedirectUltrapeer());
+
+        // now actually test....
+        { // make sure tcp vm's are redirected
+            TCPConnectBackVendorMessage tcp = 
+                new TCPConnectBackVendorMessage(TCP_ACCESS_PORT);
+            LEAF.send(tcp);
+            LEAF.flush();
+
+            TCPConnectBackRedirect tcpR = (TCPConnectBackRedirect)
+                getFirstInstanceOfMessageType(redirUP, 
+                                              TCPConnectBackRedirect.class,
+                                              TIMEOUT);
+            assertNotNull(tcpR);
+            assertEquals(TCP_ACCESS_PORT, tcpR.getConnectBackPort());
+            assertTrue(tcpR.getConnectBackAddress().getHostAddress(),
+                       tcpR.getConnectBackAddress().getHostAddress().indexOf("127.0.0.1") >= 0);
+        }
+
+        { // make sure udp vm's are redirected
+            GUID cbGuid = new GUID(GUID.makeGuid());
+            UDPConnectBackVendorMessage udp =
+                new UDPConnectBackVendorMessage(UDP_ACCESS.getLocalPort(), 
+                                                cbGuid);
+            LEAF.send(udp);
+            LEAF.flush();
+
+            UDPConnectBackRedirect udpR = (UDPConnectBackRedirect)
+                getFirstInstanceOfMessageType(redirUP, 
+                                              UDPConnectBackRedirect.class, 
+                                              TIMEOUT);
+            assertNotNull(udpR);
+            assertEquals(UDP_ACCESS.getLocalPort(), udpR.getConnectBackPort());
+            assertTrue(udpR.getConnectBackAddress().getHostAddress().indexOf("127.0.0.1") >= 0);
+            assertEquals(cbGuid, udpR.getConnectBackGUID());
+        }
+
+        redirUP.close();
+    }
     
 
     // ------------------------------------------------------

@@ -571,6 +571,44 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
     
+    public static Message getFirstInstanceOfMessageType(Connection c,
+                                                        Class type) {
+        return getFirstInstanceOfMessageType(c, type, TIMEOUT);
+    }
+
+    public static Message getFirstInstanceOfMessageType(Connection c,
+                                                        Class type,
+                                                        int timeout) {
+        for(int i = 0; i < 200; i++) {
+            if(!c.isOpen()){
+                //System.out.println(c + " is not open");
+                return null;
+            }
+
+            try {
+                Message m = c.receive(timeout);
+                //System.out.println("m: " + m + ", class: " + m.getClass());
+                if (m instanceof RouteTableMessage)
+                    ;
+                else if (m instanceof PingRequest)
+                    ;
+                else if (type.isInstance(m))
+                    return m;
+                i = 0;
+            } catch (InterruptedIOException ie) {
+                //ie.printStackTrace();
+                return null;
+            } catch (BadPacketException e) {
+               // e.printStackTrace();
+                // ignore...
+            } catch (IOException ioe) {
+                //ioe.printStackTrace();
+                // ignore....
+            }
+        }
+        throw new RuntimeException("No IIOE or Message after 100 iterations");
+    }
+    
     public static QueryRequest getFirstQueryRequest(Connection c) {
         return getFirstQueryRequest(c, TIMEOUT);
     }

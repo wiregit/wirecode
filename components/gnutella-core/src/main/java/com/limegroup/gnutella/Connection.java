@@ -1766,7 +1766,9 @@ public class Connection {
 
     // overrides Object.toString
     public String toString() {
-        return "CONNECTION: host=" + _host  + " port=" + _port; 
+        return "CONNECTION: host=" + _host  + " port=" + _port + 
+        ", Connected to" + _socket.getInetAddress() + ":" +
+        _socket.getPort();
     }
     
 
