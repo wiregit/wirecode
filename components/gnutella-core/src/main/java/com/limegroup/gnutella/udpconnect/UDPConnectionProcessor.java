@@ -976,12 +976,15 @@ public class UDPConnectionProcessor {
     		_receiverWindowSpace    = kmsg.getWindowSpace();
 
 			// Ensure that all messages up to sent windowStart are acked
-			_sendWindow.pseudoAckToReceiverWindow(wStart);
+            // Note, you could get here preinitialization - in which case,
+            // do nothing.
+            if ( _sendWindow != null ) {  
+			    _sendWindow.pseudoAckToReceiverWindow(wStart);
 				
-
-			// Reactivate writing if required
-			if ( priorR == 0 && _receiverWindowSpace > 0 )
-    			writeSpaceActivation();
+			    // Reactivate writing if required
+			    if ( priorR == 0 && _receiverWindowSpace > 0 )
+    			    writeSpaceActivation();
+            }
 
         } else if (msg instanceof FinMessage) {
             // Stop sending data
