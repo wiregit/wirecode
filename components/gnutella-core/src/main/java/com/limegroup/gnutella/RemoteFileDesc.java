@@ -3,8 +3,10 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,7 +39,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * version of LimeWire will simply discard any extra fields F if reading from a
  * newer serialized file.  
  */
-public class RemoteFileDesc implements Serializable {
+public class RemoteFileDesc implements IpPort, Serializable {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
     
@@ -864,5 +866,16 @@ public class RemoteFileDesc implements Serializable {
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
 				 +getFileName().toLowerCase()+">");
+    }
+
+    public String getAddress() {
+        return getHost();
+    }
+
+    public InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByName(getAddress());
+        }catch(UnknownHostException bad){}
+        return null;
     }
 }
