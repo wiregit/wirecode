@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.mp3;
 
 import java.io.*;
+import java.net.*;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
+import java.util.StringTokenizer;
 import de.vdheide.mp3.*;
 
 /**
@@ -189,13 +191,56 @@ public final class ID3Reader {
     public static boolean hasVerifiedLicense(String filename) 
         throws IOException {
 
+        // 1. see if the mp3 file has a TCOP v2 Frame with a 'verify at' and
+        //    a reference url and remember the license
+        // 2. connect to the reference url and get its content
+        // 3. verify that the rdf has the same license as the TCOP frame did 
         try {
+
+            // get the TCOP frame            
             MP3File mp3 = new MP3File(filename);
             TagContent content = mp3.getCopyrightText();
-            if (filename.indexOf("verify at") > -1)
+            String textContent = content.getTextContent();
+            if (textContent == null)
+                return false;
+
+            // parse the TCOP frame and record the license and see if 
+            // there is someplace to verify the file at
+            StringTokenizer st = new StringTokenizer(textContent);
+            boolean seenVerify = false;
+            String license = null;
+            while (!seenVerify && st.hasMoreTokens()) {
+                String currToken = st.nextToken();
+                if (currToken.startsWith("http") && (license == null))
+                    license = currToken;
+                if (currToken.equalsIgnoreCase("verify")) 
+                    seenVerify = true;
+            }
+            if (!seenVerify)
+                return false;
+
+            // if there is someplace to verify the file at, verify the RDF
+            if (st.nextToken().equalsIgnoreCase("at")) {
+                String urlString = st.nextToken();
+                URL url = new URL(urlString);
+                HttpURLConnection http = 
+                    (HttpURLConnection) url.openConnection();
+                http.setInstanceFollowRedirects(true);
+                http.connect();
+                if (http.getResponseCode() != http.HTTP_ACCEPTED)
+                    return false;
+                
+                // TODO:
+                // we need to parse the source and see if license matches the
+                // one as detailed by the rdf tag....
                 return true;
+            }
             else
                 return false;
+
+        }
+        catch (MalformedURLException possible) {
+            return false;
         }
         catch (NoMP3FrameException why) {
             throw new IOException();
@@ -206,7 +251,6 @@ public final class ID3Reader {
         catch (ID3v2Exception suckypoo) {
             throw new IOException();
         }
-        
     }
 
 
