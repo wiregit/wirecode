@@ -409,7 +409,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Whether or not to record stats.
      */
-    private static final boolean RECORD_STATS = !CommonUtils.isJava118();
+    static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -1021,6 +1021,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         if(!rfd.isAltLocCapable())
             return;
+        
         AlternateLocation loc = null;
         try {
             loc = AlternateLocation.create(rfd);
@@ -1040,6 +1041,14 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         if(!good)
             validAlts.remove(loc);
+
+        //keep statistics
+        if( RECORD_STATS && ("ALT".equals(rfd.getVendor())) ) {//this was an Alt
+            if(good)
+                DownloadStat.ALTERNATE_WORKED.incrementStat();
+            else
+                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
+        }
     }
 
     public boolean resume() throws AlreadyDownloadingException {
@@ -2310,15 +2319,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             validAlts =
             AlternateLocationCollection.create(alt.getSHA1Urn());
                 
-        boolean added = validAlts.add(alt);
-        
-        // if the location didn't accept the new one.
-        if(!added)
-            DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-        
-        // everything worked, add it (without caching)
-        if( RECORD_STATS )
-            DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+        validAlts.add(alt);
     }
 	
 	/**

@@ -136,33 +136,22 @@ public class DownloadStat extends AdvancedStatistic {
         
     /**
      * Statistic for the number of alternate locations that we have succesfully
-     * added to our alternate location collection for this download.
+     * read from the network which we will possibly use for this download.
      */
     public static final Statistic ALTERNATE_COLLECTED =
         new DownloadStat();
         
     /**
-     * Statistic for the number of alternate locations that we did not attempt
-     * to add to our collection because we could not construct them as valid
-     * alternate locations, we previously removed this location, or
-     * we already have too many locations and this one isn't new enough.
+     * Statistic for the number of alternate locations that did not work.
      */
     public static final Statistic ALTERNATE_NOT_ADDED =
         new DownloadStat();
         
     /**
-     * Statistic for the number of alternate locations that we we unable
-     * to create (and thus remove) from our alternate location collection.
+     * Statistic for the number of Alternate Locations that we got off the 
+     * network which actually worked
      */
-    public static final Statistic ALTERNATE_INVALID =
-        new DownloadStat();
-       
-    /**
-     * Statistic for the number of previously-added alternate locations
-     * that have now been removed.
-     */ 
-    public static final Statistic ALTERNATE_REMOVED =
-        new DownloadStat();
+    public static final Statistic ALTERNATE_WORKED = new DownloadStat();
         
     /**
      * Statistic for the number of succesfully downloaded HTTP1.1 chunks.

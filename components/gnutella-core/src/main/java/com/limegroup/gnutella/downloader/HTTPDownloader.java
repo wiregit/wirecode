@@ -491,10 +491,14 @@ public class HTTPDownloader implements BandwidthTracker {
                     _altLocsReceived = 
                     AlternateLocationCollection.create(alSha1);
                 
+                boolean added = false;
+                
                 if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
                     synchronized(_altLocsReceived) {
-                        _altLocsReceived.add(al);
+                        added = _altLocsReceived.add(al);
                     }
+                    if(ManagedDownloader.RECORD_STATS && added) 
+                        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
                 }
 			} catch(IOException e) {
 				// continue without adding it.
