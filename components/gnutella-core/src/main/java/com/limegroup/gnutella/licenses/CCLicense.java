@@ -3,6 +3,7 @@ package com.limegroup.gnutella.licenses;
 import java.io.StringReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.ObjectInputStream;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -136,7 +137,9 @@ class CCLicense implements License, Serializable, Cloneable {
         }
     }
         
-    
+    /**
+     * Determines if the CC License is valid with this URN.
+     */
     public boolean isValid(URN urn) {
         if(!valid)
             return false;
@@ -146,16 +149,28 @@ class CCLicense implements License, Serializable, Cloneable {
         return expectedURN.equals(urn);
     }
     
+    /**
+     * Returns a CCLicense exactly like this, except
+     * with a different license string.
+     */
     public License copy(String license) {
         CCLicense newL = null;
         try {
             newL = (CCLicense)clone();
             newL.license = license;
-            newL.verified = VERIFIED;
         } catch(CloneNotSupportedException error) {
             ErrorService.error(error);
         }
         return newL;
+    }
+    
+    /**
+     * Assume that all serialized licenses were verified.
+     * (Otherwise they wouldn't have been serialized.
+     */
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        verified = VERIFIED;
     }
     
     /**
@@ -200,12 +215,28 @@ class CCLicense implements License, Serializable, Cloneable {
     }
     
     /**
+     * Erases all data associated with a verification.
+     */
+    private void clear() {
+        valid = false;
+        licenseURL = null;
+        expectedURN = null;
+        if(permitted != null)
+            permitted.clear();
+        if(prohibited != null)
+            prohibited.clear();
+        if(required != null)
+            required.clear();
+    }
+    
+    /**
      * Starts verification of the license.
      *
      * The listener is notified when verification is finished.
      */
     public void verify(VerificationListener listener) {
         verified = VERIFYING;
+        clear();
         VQUEUE.add(new Verifier(listener));
     }
 
