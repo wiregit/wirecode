@@ -9,7 +9,7 @@ import com.limegroup.gnutella.*;
  * data for sent Gnutella message statistics should go through this class 
  * to avoid losing any data.
  */
-public final class SentMessageStatHandler extends AbstractStatHandler {
+public class SentMessageStatHandler extends AbstractStatHandler {
 
 	/**
 	 * Creates a new <tt>SentMessageStatHandler</tt> instance.  
@@ -26,6 +26,7 @@ public final class SentMessageStatHandler extends AbstractStatHandler {
 								   Statistic limeByteStat) {
 		super(numberStat, byteStat, limeNumberStat, limeByteStat,
 			  BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
+		
 	}
 	
 
@@ -140,10 +141,10 @@ public final class SentMessageStatHandler extends AbstractStatHandler {
 	 * over TCP.
 	 */
 	public static final SentMessageStatHandler TCP_ROUTE_TABLE_MESSAGES = 
-	    new SentMessageStatHandler(SentMessageStat.UDP_FILTERED_MESSAGES,
-								   SentMessageStatBytes.UDP_FILTERED_MESSAGES,
-								   LimeSentMessageStat.UDP_FILTERED_MESSAGES,
-								   LimeSentMessageStatBytes.UDP_FILTERED_MESSAGES);
+	    new SentMessageStatHandler(SentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
+								   SentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES);
 
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella filtered messages sent 
