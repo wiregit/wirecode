@@ -81,4 +81,9 @@ public abstract class HTTPRequestMethod {
 				os.flush();
 			}
 		};
+    
+    // overrides Object.toString to report more information
+    public String toString() {
+        return "HTTPRequestMethod: "+METHOD_NAME;
+    }
 }
