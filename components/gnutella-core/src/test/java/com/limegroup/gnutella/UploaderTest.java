@@ -513,10 +513,44 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     
     
-   
+    public void testPerHostLimitedNotQueued() throws Exception {
+    	fail("this test needs to be re-implemented");
+    	UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+    	UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+    	UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+    	UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+    	
+    	HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+    	connectDloader(d1,true,rfd1,true);
+    	HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+    	connectDloader(d2,true,rfd2,true);
+    	HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+    	try {
+    		connectDloader(d3,true,rfd3,true);
+    		fail("Host limit reached, should not have accepted d3");
+    	} catch (QueuedException qx) {
+    		fail("host limit reached should not queue", qx);
+    	} catch (TryAgainLaterException expectedException) {
+    	} catch (IOException ioe) {//This is similar to d5 being rejected
+    		//in testNormalQueueing, IOE may be thrown if uploader
+    		//closes the socket. 
+    	}            
+    	HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
+    	try {
+    		connectDloader(d4,true,rfd1,true);
+    		fail("Host limit reached, should not have accepted d4");
+    	} catch (TryAgainLaterException tx) {
+    		fail("d4 should have been queued", tx);
+    	} catch (QueuedException expectedException) {
+    	} catch (IOException ioe) {
+    		fail("d4 should have been queued", ioe);
+    	}            
+    	//System.out.println("passed");
+    }
         
     
-    /*public void testGreedyLimitReached() throws Exception {
+    public void testGreedyLimitReached() throws Exception {
+    	fail("this test needs to be re-implemented");
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(2);
@@ -580,9 +614,10 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, upManager.getNumQueuedUploads());
         assertEquals("should have 0 active uploads",
             0, upManager.uploadsInProgress());
-    }*/
-    /*
+    }
+    
     public void testBanning() throws Exception {
+    	fail("this test needs to be re-implemented");
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(2);
@@ -688,7 +723,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("should have 1 active uploads",
             1, upManager.uploadsInProgress());        
     }        
- */
+ 
     public void testSoftMax() throws Exception {
         UploadSettings.HARD_MAX_UPLOADS.setValue(9999);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(2);
