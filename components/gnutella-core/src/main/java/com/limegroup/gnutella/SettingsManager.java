@@ -184,10 +184,14 @@ public class SettingsManager {
     //authentication settings
     private final boolean DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY 
         = false;
-    private static final String DEFAULT_COOKIES_FILE 
+    private final String DEFAULT_COOKIES_FILE 
         = "lib" + File.separator + "Cookies.dat";
     
+    
+    /** Specifies if the node is acting as server */
+    private final boolean DEFAULT_SERVER = false;  
 
+    
 	/**
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
@@ -328,8 +332,11 @@ public class SettingsManager {
      * The property that denotes the file that stores the 
      * Schema Transformation DataMap
      */
-    private static final String COOKIES_FILE
-        = "COOKIES_FILE";
+    private final String COOKIES_FILE = "COOKIES_FILE";
+    
+   /** Specifies if the node is acting as server */
+    private final String SERVER = "SERVER";
+    
 
 	/**
 	 * Constant key for the minimum quality to allow in search results.
@@ -446,6 +453,10 @@ public class SettingsManager {
     private volatile boolean _supernodeMode;
     private volatile boolean _shieldedClientSupernodeConnection;
 
+    /** Specifies if the node is acting as server */
+    private volatile boolean _server;
+   
+    
     /** 
 	 * Constant member variable for the main <tt>Properties</tt> instance.
 	 */
@@ -877,7 +888,9 @@ public class SettingsManager {
                 else if(key.equals(COOKIES_FILE)){
                    setCookiesFile(p);
                 }
-                setCookiesFile(DEFAULT_COOKIES_FILE);
+                else if(key.equals(SERVER)){
+                    setServer((new Boolean(p)).booleanValue());
+                }
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -987,6 +1000,8 @@ public class SettingsManager {
         setAcceptAuthenticatedConnectionsOnly(
             DEFAULT_ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY);
         setCookiesFile(DEFAULT_COOKIES_FILE);
+        
+        setServer(DEFAULT_SERVER);
         
 		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
 		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
@@ -1681,8 +1696,8 @@ public class SettingsManager {
     }
     
     /**
-     * Tells whether the node is gonna be a supernode or not
-     * @return true, if supernode, false otherwise
+     * Tells if the node is acting as server
+     * @return true, if sserver, false otherwise
      */
     public boolean isSupernode()
     {
@@ -1718,6 +1733,16 @@ public class SettingsManager {
     public String getCookiesFile() {
         return PROPS.getProperty(COOKIES_FILE);
     }
+    
+    /**
+     * Tells whether the node is gonna be a supernode or not
+     * @return true, if supernode, false otherwise
+     */
+    public boolean isServer()
+    {
+        return _server;
+    }
+    
     
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -2809,6 +2834,16 @@ public class SettingsManager {
      */
     public void setCookiesFile(final String filename) {
         PROPS.put(COOKIES_FILE, filename);
+    }
+    
+    /**
+     * Sets whether the node is a server or not
+     * @param isServer true, if the node is server, false otherwise
+     */
+    public void setServer(boolean isServer){
+        this._server = isServer;
+        PROPS.put(SERVER, 
+            (new Boolean(isServer)).toString());
     }
     
     
