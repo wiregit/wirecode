@@ -186,5 +186,6 @@ log("chunk: "+rChunk);
     }
 
     private static void log(String str) {
+       System.out.println(str); 
     }
 }
