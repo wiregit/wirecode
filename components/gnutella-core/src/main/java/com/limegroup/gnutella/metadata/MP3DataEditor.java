@@ -92,58 +92,30 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	    //No Exceptions? We are home
 	    return LimeXMLReplyCollection.NORMAL;
 	}
-	private void addAllNeededFrames(List updateList) {
-	    ID3v2Frame frame = null; 
 	
-	    if(title_ != null && !title_.equals("")) {
-	        frame = makeFrame(TITLE_ID,title_);
-	        if(frame!=null)
-	            updateList.add(frame);
-	    }
-	    if (artist_!=null && !artist_.equals("")) {
-	        frame = null;
-	        frame = makeFrame(ARTIST_ID,artist_);
-	        if(frame != null) 
-	            updateList.add(frame);
-	    }
-	    if(album_ != null && !album_.equals("")) {
-	        frame = null;
-	        frame = makeFrame(ALBUM_ID, album_);
-	        if(frame != null) 
-	            updateList.add(frame);
-	    }
-	    if (year_!=null && !year_.equals("")) { 
-	        frame = null;
-	        frame = makeFrame(YEAR_ID, year_);
-	        if(frame != null) 
-	            updateList.add(frame);
-	    }
-	    if(track_ != null && !track_.equals("")) {
-	        frame = null;
-	        frame = makeFrame(TRACK_ID, track_);
-	        if(frame !=  null)
-	            updateList.add(frame);
-	    }
-	    if (comment_!=null && !comment_.equals("")) {
-	        frame = null;
-	        frame = makeFrame(COMMENT_ID, comment_);
-	        if(frame != null) 
-	            updateList.add(frame);
-	    }
-	    if(genre_ != null && !genre_.equals("")) {
-	        frame = null;
-	        //The ID3v2 standard requires the writing out of the byte we used in
-	        //id3v1, so we need to add that in
-	        if(getGenreByte() > -1) {
-	            String v2Genre = "("+getGenreByte()+")"+genre_;
-	            frame = makeFrame(GENRE_ID, v2Genre);
-	        } else {
-	            frame = makeFrame(GENRE_ID, genre_);
-	        }
-	        if(frame != null) 
-	            updateList.add(frame);
-	    }
+	private void addAllNeededFrames(List updateList) {
+	    add(updateList, title_, TITLE_ID);
+	    add(updateList, artist_, ARTIST_ID);
+	    add(updateList, album_, ALBUM_ID);
+	    add(updateList, year_, YEAR_ID);
+	    add(updateList, track_, TRACK_ID);
+	    add(updateList, comment_, COMMENT_ID);
+	    add(updateList, genre_, GENRE_ID);
+	    add(updateList, license_, LICENSE_ID);
 	}
+	
+	private void add(List list, String data, String id) {
+	    if(data != null && !data.equals("")) {
+	        // genre needs to be updated.
+	        if(id == GENRE_ID && getGenreByte() > -1)
+                data = "(" + getGenreByte() + ")" + data;
+	        
+	        ID3v2Frame frame = makeFrame(id, data);
+	        if(frame != null)
+	            list.add(frame);
+        }
+    }
+	
 	private ID3v2Frame makeFrame(String frameID, String value) {
 	    
 	    boolean isISOLatin1 = true;
