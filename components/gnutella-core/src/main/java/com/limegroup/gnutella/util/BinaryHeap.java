@@ -6,11 +6,13 @@ import com.sun.java.util.collections.NoSuchElementException;
 import com.sun.java.util.collections.Iterator;
 
 /** 
- * A class for maintaining the objects in a binary heap form. Its a MAX heap,
- * i.e., the root of the heap is the element with max value.  The objects to be
- * inserted into the heap must implement java.lang.Comparable interface, as that
- * is what is used for comparison purposes so as to order the objects in the
- * heap form.
+ * A class for maintaining the objects in a binary heap form, i.e., a classic
+ * fixed-size priority queue.  Its a MAX heap, i.e., the root of the heap is the
+ * element with max value.  The objects to be inserted into the heap must
+ * implement java.lang.Comparable interface, as that is what is used for
+ * comparison purposes so as to order the objects in the heap form.  While in
+ * the heap, these objects must not be mutated in a way that affects compareTo.
+ * <b>This class is not synchronized; that is up to the user.</b>
  *
  * @author Anurag Singla 
  */
@@ -43,6 +45,15 @@ public class BinaryHeap
         currentSize = 0;
         this.maxSize = maxSize;
         array = new Comparable[maxSize + 1];
+    }
+
+    /**
+     * @modifes this
+     * @effects removes all elements from this
+     */
+    public void clear()
+    {
+        currentSize = 0;
     }
 
     /**
@@ -218,19 +229,22 @@ public class BinaryHeap
      * @effects returns an iterator that yields the max element first, then the
      *   rest of the elements in any order.  
      */
-    public Iterator iterator() {
+    public Iterator iterator()
+    {
         //TODO1: test me!
         return new BinaryHeapIterator();
     }
 
-    class BinaryHeapIterator extends UnmodifiableIterator {
+    class BinaryHeapIterator extends UnmodifiableIterator
+    {
         int next=1;
 
         public boolean hasNext() {
             return next<=currentSize;
         }
 
-        public Object next() throws NoSuchElementException {
+        public Object next() throws NoSuchElementException
+        {
             if (! hasNext())
                 throw new NoSuchElementException();
             
@@ -239,29 +253,45 @@ public class BinaryHeap
     }
 
     /** Returns the number of elements in this. */
-    public int size() {
+    public int size()
+    {
         return currentSize;
     }
 
     /** Returns the maximum number of elements in this. */
-    public int capacity() {
+    public int capacity()
+    {
         return maxSize;
     }
     
     /** Returns true if this cannot store any more elements, i.e., 
      *  size()==capacity() */
-    public boolean isFull() {
+    public boolean isFull()
+    {
         return currentSize==maxSize;
     }
 
     /** Returns true if this is empty, i.e., size()==0 */
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return currentSize==0;
+    }
+
+    public String toString()
+    {
+        StringBuffer ret=new StringBuffer("[");
+        for (Iterator iter=iterator(); iter.hasNext(); ) {
+            ret.append(iter.next().toString());
+            ret.append(", ");
+        }
+        ret.append("]");
+        return ret.toString();
     }
     
     /** Unit test */
     /*
-    public static void main(String args[]) {
+    public static void main(String args[]) 
+    {
         BinaryHeap q=new BinaryHeap(4);
         MyInteger one=new MyInteger(1);
         MyInteger two=new MyInteger(2);
@@ -336,13 +366,16 @@ public class BinaryHeap
     }
 
     //For testing with Java 1.1.8
-    static class MyInteger implements Comparable {
+    static class MyInteger implements Comparable
+    {
         private int val;
-        public MyInteger(int val) {
+        public MyInteger(int val)
+        {
             this.val=val;
         }
 
-        public int compareTo(Object other) {
+        public int compareTo(Object other)
+        {
             int val2=((MyInteger)other).val;
             if (val<val2)
                 return -1;
@@ -352,7 +385,8 @@ public class BinaryHeap
                 return 0;
         }
 
-        public String toString() {
+        public String toString()
+        {
             return String.valueOf(val);
         }
     }
