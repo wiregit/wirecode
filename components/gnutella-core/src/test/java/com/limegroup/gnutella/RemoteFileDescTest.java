@@ -148,4 +148,44 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		 assertFalse(fwalledNotGood.isAltLocCapable());
 		 assertTrue(fwalledNotGood.needsPush());
 	}
+	
+	public void testMergeRFDS() throws Exception {
+	    
+	    PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+	    PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",6346);
+	    PushProxyInterface ppi3 = new QueryReply.PushProxyContainer("1.2.3.6",6346);
+	    PushProxyInterface ppi4 = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		
+	    Set proxies = new HashSet();
+	    Set proxies2 = new HashSet();
+	    proxies.add(ppi);
+	    proxies.add(ppi2);
+	    proxies2.add(ppi2);
+	    proxies2.add(ppi3);
+	    proxies2.add(ppi4);
+		
+	    byte[] guid = GUID.makeGuid();
+	    PushEndpoint pe = new PushEndpoint(guid,proxies);
+	    PushEndpoint pe2 = new PushEndpoint(guid,proxies2);
+        
+	    RemoteFileDesc push1 = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+            HugeTestUtils.URNS[0].httpStringValue(), 10, 
+            pe.getClientGUID(), 10, true, 2, true, null, 
+            HugeTestUtils.URN_SETS[0],
+                false,true,"",0,proxies,-1);
+	    
+	    RemoteFileDesc push2 = new RemoteFileDesc(push1,pe2);
+	    
+	    assertEquals(push1,push2);
+	    
+	    RemoteFileDesc merged = RemoteFileDesc.mergeProxies(push1,push2);
+	    
+	    assertEquals(3,merged.getPushProxies().size());
+	    assertTrue(merged.getPushProxies().contains(ppi));
+	    assertTrue(merged.getPushProxies().contains(ppi2));
+	    assertTrue(merged.getPushProxies().contains(ppi3));
+	    
+	    assertEquals(push1,merged);
+	    
+	}
 }
