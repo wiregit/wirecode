@@ -1,9 +1,18 @@
 package com.limegroup.gnutella.settings;
 
+
 /**
  * Settings for searches.
  */
 public final class SearchSettings extends AbstractSettings {
+
+    /**
+     * Constant for the characters that are banned from search
+     * strings.
+     */
+    private static final char[] BAD_CHARS = {
+        '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', ':', ';', '/', '\\', 
+    };
 
 	/**
 	 * Setting for whether or not GUESS searching is enabled.
@@ -16,4 +25,10 @@ public final class SearchSettings extends AbstractSettings {
      */
     public static final ByteSetting PROBE_TTL =
         CFG_FACTORY.createByteSetting("PROBE_TTL", (byte)2);
+
+    /**
+     * Setting for the characters that are not allowed in search strings
+     */
+    public static final CharArraySetting ILLEGAL_CHARS =
+        FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
 }

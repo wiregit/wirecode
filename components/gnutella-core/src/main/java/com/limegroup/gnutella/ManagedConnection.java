@@ -76,7 +76,7 @@ public class ManagedConnection extends Connection
 
     /** The total amount of upstream messaging bandwidth for ALL connections
      *  in BYTES (not bits) per second. */
-    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=12000;
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=10000;
 
     /** The maximum number of times ManagedConnection instances should send UDP
      *  ConnectBack requests.

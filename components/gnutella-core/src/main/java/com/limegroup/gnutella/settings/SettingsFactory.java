@@ -206,7 +206,7 @@ public final class SettingsFactory {
 	 */
 	public synchronized IntSetting createIntSetting(String key, int defaultValue) {
 		IntSetting result = 
-                new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+            new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         settings.add(result);
         result.reload();
         return result;
@@ -238,7 +238,7 @@ public final class SettingsFactory {
 	 */
 	public synchronized LongSetting createLongSetting(String key, long defaultValue) {
 		 LongSetting result = 
-                new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+             new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
          settings.add(result);
          result.reload();
          return result;
@@ -257,7 +257,7 @@ public final class SettingsFactory {
 		if(!parent.isDirectory()) parent.mkdirs();
 
 		FileSetting result = 
-                new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+            new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
         settings.add(result);
         result.reload();
         return result;
@@ -277,4 +277,22 @@ public final class SettingsFactory {
         result.reload();
         return result;
 	}
+
+    /**
+     * Creates a new <tt>CharArraySetting</tt> instance for a character array 
+     * setting with the specified key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized CharArraySetting 
+        createCharArraySetting(String key, char[] defaultValue) {
+        
+        CharArraySetting result =
+            CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
+                                                    key, defaultValue);
+        settings.add(result);
+        result.reload();
+        return result;
+    }
 }
