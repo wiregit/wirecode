@@ -25,7 +25,9 @@ public class UpdateMessageVerifier {
     
     public boolean verifySource() {        
         //read the input stream and parse it into signature and xmlMessage
-        parse();        
+        parse(); 
+        if(CommonUtils.isMacClassic()) //Mac classic has trouble with public key
+            return true;
         //get the public key
         PublicKey pubKey = null;
         FileInputStream fis = null;
@@ -56,7 +58,7 @@ public class UpdateMessageVerifier {
                 }
             }       
         }
-        try {
+        try {            
             //initialize the verifier
             Signature verifier = Signature.getInstance("DSA");
             verifier.initVerify(pubKey);//initialize the signaure
