@@ -447,19 +447,17 @@ public class QueryRouteTable {
 
         //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
-            try {
-                if (data[i] == keywordPresent) {
-                    bitTable.set(nextPatch);
-                    resizedQRT = null;
-                }
-                else if (data[i] == keywordAbsent) {
-                    bitTable.clear(nextPatch);
-                    resizedQRT = null;
-                }
-            } catch (IndexOutOfBoundsException e) {
+            if(nextPatch >= bitTableLength)
                 throw new BadPacketException("Tried to patch "+nextPatch
-                                             +" of an "+data.length
-                                             +" element array.");
+                                             +" on a bitTable of size "
+                                             + bitTableLength);
+            if (data[i] == keywordPresent) {
+                bitTable.set(nextPatch);
+                resizedQRT = null;
+            }
+            else if (data[i] == keywordAbsent) {
+                bitTable.clear(nextPatch);
+                resizedQRT = null;
             }
             nextPatch++;
         }
