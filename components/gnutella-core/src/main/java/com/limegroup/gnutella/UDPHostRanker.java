@@ -32,14 +32,20 @@ public class UDPHostRanker {
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt> or if the listener argument is <tt>null</tt>
      */
-    public static UDPHostRanker rank(Collection hosts, HostListener hl){
+    public static void rank(final Collection hosts, final HostListener hl) {
         if(hosts == null) {
             throw new NullPointerException("null hosts not allowed");
         }
         if(hl == null) {
             throw new NullPointerException("null listener not allowed");
         }
-        return new UDPHostRanker(hosts, hl);
+        Thread ranker = new Thread(new Runnable() {
+                public void run() {
+                    new UDPHostRanker(hosts, hl);
+                }
+            }, "UDPHostRanker");
+        ranker.setDaemon(true);
+        ranker.start();        
     }
     
     /**
@@ -68,8 +74,15 @@ public class UDPHostRanker {
         
         // Add the mapping for the new GUID.
         UDPService.instance().addListener(pingGUID, LISTENER);
+        final int MAX_SENDS = 15;
         Iterator iter = hosts.iterator();
-        while(iter.hasNext()) {
+        for(int i = 0; iter.hasNext(); i++) {
+            if(i == MAX_SENDS) {
+                try {
+                    Thread.sleep(1000);
+                } catch(InterruptedException ignored) {}
+                i = 0;
+            }
             IpPort host = (IpPort)iter.next();
             UDPService.instance().send(ping, host);
         }
