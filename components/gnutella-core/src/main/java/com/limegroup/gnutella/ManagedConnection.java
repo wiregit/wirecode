@@ -50,6 +50,8 @@ public class ManagedConnection
     /** The timeout to use when connecting, in milliseconds.  This is NOT used
      *  for bootstrap servers.  */
     private static final int CONNECT_TIMEOUT=4000;  //4 seconds
+    /** The total amount of upstream messaging bandwidth for ALL connections. */
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
 
     private MessageRouter _router;
     private ConnectionManager _manager;
@@ -120,6 +122,9 @@ public class ManagedConnection
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
             = new MessageQueue(false,QUEUE_SIZE, 1, false, Integer.MAX_VALUE);
     }                                                             
+    /** Limits outgoing bandwidth for ALL connections. */
+    private final static BandwidthThrottle _throttle=
+        new BandwidthThrottle(TOTAL_OUTGOING_MESSAGING_BANDWIDTH);
 
 
     /**
@@ -330,6 +335,17 @@ public class ManagedConnection
         //Start the thread to empty the output queue
         new OutputRunner();
     }
+
+    /** Throttles the super's OutputStream. */
+    protected OutputStream getOutputStream(Socket s)  throws IOException {
+        return new ThrottledOutputStream(super.getOutputStream(s), _throttle);
+    }
+
+    /** Delegates to super. */
+    protected InputStream getInputStream(Socket s) throws IOException {
+        return super.getInputStream(s);
+    }
+
 
     /**
      * Override of receive to do ConnectionManager stats and to properly shut

@@ -262,8 +262,8 @@ public class Connection {
             // Set the Acceptors IP address
             Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
             
-            _in = new BufferedInputStream(_socket.getInputStream());
-            _out = new BufferedOutputStream(_socket.getOutputStream());
+            _in = getInputStream(_socket);
+            _out = getOutputStream(_socket);
             if (_in==null || _out==null) throw new IOException();
         } catch (Exception e) {
             //Apparently Socket.getInput/OutputStream throws
@@ -650,6 +650,19 @@ public class Connection {
             //Restore socket timeout.
             _socket.setSoTimeout(oldTimeout);
         }
+    }
+
+    /** Returns the stream to use for writing to s.  By default this is a
+     *  BufferedOutputStream.  Subclasses may override to decorate the
+     *  stream. */
+    protected OutputStream getOutputStream(Socket s)  throws IOException {
+        return new BufferedOutputStream(_socket.getOutputStream());
+    }
+
+    /** Returns the stream to use for reading from s.  By default this is a
+     *  BufferedInputStream.  Subclasses may override to decorate the stream. */
+    protected InputStream getInputStream(Socket s) throws IOException {
+        return new BufferedInputStream(_socket.getInputStream());
     }
 
     /////////////////////////////////////////////////////////////////////////
