@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.*;
  */
 public class BrowseHostHandler {
 
-    private static final int SPECIAL_INDEX = 4141414;
+    private static final int SPECIAL_INDEX = 0;
 
     /** Map from serventID to BrowseHostHandler instance.
      */
@@ -65,19 +65,22 @@ public class BrowseHostHandler {
     public void browseHost(String host, int port) throws IOException {
         
         // should we push?
-        if (_serventID != null && false) {
+        if (_serventID != null) {
+            debug("BHH.browseHost(): need to push.");
             PushRequest pr = new PushRequest(GUID.makeGuid(),
                                              SettingsManager.instance().getTTL(),
                                              _serventID.bytes(), 
                                              SPECIAL_INDEX,
                                              _acceptor.getAddress(),
                                              _acceptor.getPort());
-            _router.sendPushRequest(pr);
             // register with the map so i get notified about a response to my
             // Push.
             synchronized (_pushedHosts) {
                 _pushedHosts.put(_serventID, this);
             }
+            // send the Push after registering in case you get a response really
+            // quickly.
+            _router.sendPushRequest(pr);
         }
         else {
             try {
@@ -98,11 +101,13 @@ public class BrowseHostHandler {
         final String LF = "\r\n";
         String str = null;
         OutputStream oStream = socket.getOutputStream();
+        debug("BHH.browseExchange(): got output stream.");
 
         // ask for the browse results..
         str = "GET / HTTP/1.1" + LF;
         oStream.write(str.getBytes());
-        str = "Host: " + _acceptor.getAddress() + ":" + _acceptor.getPort() + LF;
+        str = "Host: " + Message.ip2string(_acceptor.getAddress()) + 
+              ":" + _acceptor.getPort() + LF;
         oStream.write(str.getBytes());
         str = "User-Agent: " + CommonUtils.getVendor() + LF;
         oStream.write(str.getBytes());
@@ -112,11 +117,14 @@ public class BrowseHostHandler {
         oStream.write(str.getBytes());
         str = "Connection: close" + LF;
         oStream.write(str.getBytes());
+        str = LF;
+        oStream.write(str.getBytes());
         oStream.flush();
         debug("BHH.browseExchange(): wrote request A-OK.");
         
         // get the results...
         InputStream in = socket.getInputStream();
+        debug("BHH.browseExchange(): got input stream.");
 
         // first check the HTTP code, encoding, etc...
         ByteReader br = new ByteReader(in);
@@ -129,8 +137,7 @@ public class BrowseHostHandler {
         // now confirm the content-type, the encoding, etc...
         boolean readingHTTP = true;
         String currLine = null;
-        while (readingHTTP && in.markSupported()) {
-            in.mark(100);
+        while (readingHTTP) {
             currLine = br.readLine();
             debug("BHH.browseExchange(): currLine = " + currLine);
             if (indexOfIgnoreCase(currLine, "User-Agent") > -1)
@@ -145,15 +152,14 @@ public class BrowseHostHandler {
                 // make sure it is QRs....
                 throw new IOException();  //  decompress currently not supported
             }
-            else {
+            else if ((currLine == null) || currLine.equals("")) {
                 // start processing queries...
-                in.reset();
                 readingHTTP = false;
             }
         }
         debug("BHH.browseExchange(): read HTTP seemingly OK.");
 
-        // ok, everything checks out, proceed...
+        // ok, everything checks out, proceed and read QRs...
         Message m = null;
         while(true) {
             try {
@@ -235,7 +241,7 @@ public class BrowseHostHandler {
 
     public static void handlePush(int index, GUID serventID, Socket socket) 
         throws IOException {
-
+        debug("BHH.handlePush(): entered.");
         if (index == SPECIAL_INDEX)
             ; // you'd hope, but not necessary...
 
@@ -245,10 +251,14 @@ public class BrowseHostHandler {
         }
         if (handler != null) 
             handler.browseExchange(socket);
+        else
+            debug("BHH.handlePush(): no matching BHH.");
+
+        debug("BHH.handlePush(): returning.");
     }
 
 
-    private final static boolean debugOn = true;
+    private final static boolean debugOn = false;
     private final static void debug(String out) {
         if (debugOn)
             System.out.println(out);
