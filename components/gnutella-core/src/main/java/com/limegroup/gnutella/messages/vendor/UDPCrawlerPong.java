@@ -19,7 +19,7 @@ public class UDPCrawlerPong extends VendorMessage {
 	
 	public static final int VERSION = 1;
 	
-	public static final String AGENT_SEP = "~";
+	public static final String AGENT_SEP = ";";
 	private String _agents;
 	
 	private List _ultrapeers, _leaves;
@@ -195,11 +195,11 @@ public class UDPCrawlerPong extends VendorMessage {
 			//put in the return payload.
 			byte [] versionsB = agents.toString().getBytes();
 			byte [] resTemp = result;
-			result = new byte[result.length+versionsB.length+1];
+			result = new byte[result.length+versionsB.length+2];
 			
 			System.arraycopy(resTemp,0,result,0,resTemp.length);
-			result[resTemp.length]=(byte)versionsB.length;
-			System.arraycopy(versionsB,0,result,resTemp.length+1,versionsB.length);
+			ByteOrder.short2leb((short)versionsB.length,result,resTemp.length);
+			System.arraycopy(versionsB,0,result,resTemp.length+2,versionsB.length);
 		}
 		return result;
 	}
@@ -341,13 +341,13 @@ public class UDPCrawlerPong extends VendorMessage {
 		
 		//check if the payload is proper size if it contains user agents.
 		if (_userAgent) {
-			int agentsSize = payload[agentsOffset];
+			int agentsSize = ByteOrder.leb2short(payload,agentsOffset);
 			
-			if (payload.length < agentsSize+agentsOffset)
+			if (payload.length < agentsSize+agentsOffset+2)
 				throw new BadPacketException("payload is "+payload.length+
 						" but should have been at least "+
-						(agentsOffset+agentsSize+1));
-			_agents = new String(payload,agentsOffset+1,agentsSize);
+						(agentsOffset+agentsSize+2));
+			_agents = new String(payload,agentsOffset+2,agentsSize);
 		}
 		
 		//Note: do the check whether we got as many results as requested elsewhere.
