@@ -135,7 +135,7 @@
    <javac debug="on" optimize="off" deprecation="off"
 	      srcdir="${coredir}:${guidir}:${basedir}"
 	      destdir="${builddir}" nowarn="${NOWARN}"
-		  excludes="macosx/**"
+		  excludes="macosx/**, windows/**"
 		  fork="true" memoryMaximumSize="100m">
 
      <classpath refid="default.classpath" />
