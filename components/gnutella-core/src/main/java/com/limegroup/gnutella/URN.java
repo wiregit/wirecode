@@ -19,7 +19,7 @@ import java.security.*;
  */
 public final class URN implements HTTPHeaderValue, Serializable {
 
-	static final long serialVersionUID = -6053855548211564799L;
+	private static final long serialVersionUID = -6053855548211564799L;
 
 	/**
 	 * The string representation of the URN.
