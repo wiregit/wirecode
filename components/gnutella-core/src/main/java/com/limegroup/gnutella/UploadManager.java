@@ -146,6 +146,7 @@ public final class UploadManager implements BandwidthTracker {
             int queued = -1;
             String oldFileName = "";
             HTTPRequestMethod currentMethod=method;
+            StalledUploadWatchdog watchdog = new StalledUploadWatchdog();
             //do uploads
             while(true) {
                 //parse the get line
@@ -174,7 +175,7 @@ public final class UploadManager implements BandwidthTracker {
                 removeFromList(uploader);
                 
                 uploader = new HTTPUploader(currentMethod, fileName, 
-											socket, line._index,uploader);
+									  socket, line._index,uploader,watchdog);
                 
                 uploader.readHeader();
                 

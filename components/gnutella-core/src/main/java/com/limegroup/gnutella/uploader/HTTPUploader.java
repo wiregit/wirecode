@@ -45,6 +45,7 @@ public final class HTTPUploader implements Uploader {
 	private final String _guid;
 	private final int _port;
 	private int _stateNum = CONNECTING;
+    private StalledUploadWatchdog _stalledChecker;
 
 	private HTTPMessage _state;
 	
@@ -95,8 +96,9 @@ public final class HTTPUploader implements Uploader {
      * @param old the old HTTPDownloader which we use for bandwidth 
      * to initialize this' bandwidth tracker so we have history
 	 */
-	public HTTPUploader(HTTPRequestMethod method, String fileName, Socket socket, 
-						int index, HTTPUploader old) {
+	public HTTPUploader(HTTPRequestMethod method, String fileName, 
+                        Socket socket, int index, HTTPUploader old, 
+                        StalledUploadWatchdog stallChecker) {
 		_method = method;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
@@ -105,6 +107,7 @@ public final class HTTPUploader implements Uploader {
 		_amountRead = 0;
 		_guid = null;
 		_port = 0;
+        _stalledChecker = stallChecker;
         if(old!=null) {
             _totalAmountRead += old.getTotalAmountUploaded();
             bandwidthTracker=old.bandwidthTracker;
@@ -157,19 +160,20 @@ public final class HTTPUploader implements Uploader {
 		
 
     /**
-     * The other constructor that is used for push uploads. This constructor
-     * does not take a socket. An uploader created with this constructor 
-     * must eventually connect to the downloader using the connect method of 
-     * this class.
-	 *
+     * The other constructor that is used for push uploads. This constructor *
+	 *  does not take a socket. An uploader created with this constructor * must
+	 *  eventually connect to the downloader using the connect method of * this
+	 *  class.  
+     *  Note: This uploader dies after receiving the GIV. So this constructor 
+     * does not have all the critical features the other constructr has.
+	 *  need to change
      * @param fileName The name of the file to be uploaded
      * @param host The downloaders ip address
      * @param port The port at which the downloader is listneing 
      * @param index index of file to be uploaded
-	 * @param guid the GUID of the request
-     */
+	 * @param guid the GUID of the request */
 	public HTTPUploader(String fileName, String host, int port, 
-						int index, String guid) {
+                                            int index, String guid) {
 		_fileName = fileName;
 		_index = index;
 		_uploadBegin = 0;
@@ -319,7 +323,7 @@ public final class HTTPUploader implements Uploader {
 		_stateNum = state;
 		switch (state) {
 		case CONNECTING:
-			_state = new NormalUploadState(this);
+			_state = new NormalUploadState(this,_stalledChecker);
 			break;
         case QUEUED:
             int pos=RouterService.getUploadManager().positionInQueue(_socket);

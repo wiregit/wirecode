@@ -66,14 +66,15 @@ public final class NormalUploadState implements HTTPMessage {
 	 *
 	 * @param uploaded the <tt>HTTPUploader</tt>
 	 */
-	public NormalUploadState(HTTPUploader uploader) {
+	public NormalUploadState(HTTPUploader uploader, 
+                                    StalledUploadWatchdog watchdog) {
 		_uploader = uploader;
 		_fileDesc = _uploader.getFileDesc();
 		_index = _uploader.getIndex();	
 		_fileName = _uploader.getFileName();
 		_fileSize = _uploader.getFileSize();
 		_amountWritten = 0;
-		_stalledChecker = new StalledUploadWatchdog();
+		_stalledChecker = watchdog; //new StalledUploadWatchdog();
  	}
     
 	public void writeMessageHeaders(OutputStream network) throws IOException {
