@@ -27,12 +27,10 @@ public class HTTPUploader implements Uploader {
 	protected String _hostName;
 	protected String _guid;
 	protected int _port;
-	protected int _stateNum = NOT_CONNECTED;
+	protected int _stateNum = CONNECTING;
 
 	private UploadState _state;
-
-
-
+	
 	/****************** Constructors ***********************/
 	/**
 	 * There are two constructors that are necessary.  The 
@@ -59,12 +57,12 @@ public class HTTPUploader implements Uploader {
 		_amountRead = 0;
 		FileDesc desc = FileManager.instance().get(_index);
 		_fileSize = desc._size;
-		setState(CONNECTED);
 		try {
 		    _ostream = _socket.getOutputStream();
 		} catch (IOException e) {
-		    setState(NOT_CONNECTED);
+		    setState(COULDNT_CONNECT);
 		}
+		setState(CONNECTING);
 	}
 		
 	// Push requested Upload
@@ -79,18 +77,22 @@ public class HTTPUploader implements Uploader {
 		_port = port;
 		FileDesc desc = FileManager.instance().get(_index);
 		_fileSize = desc._size;
-		setState(CONNECTED);
+		setState(CONNECTING);
 	}
 
 	// This method must be called in the case of a push.
 	public void connect() throws IOException {
-	// try to create the socket.
+
+		// the socket should not be null if this is a non-push
+		// connect.  in case connect is called after a non-push,
+		// we just return.
+		if (_socket != null)
+			return;
+
 		try {
+			// this.setState(UPLOADING);
+			// try to create the socket.
 			_socket = new Socket(_hostName, _port);
-		} catch (SecurityException e) {
-			throw new IOException();
-		}
-		try {
 			// open a stream for writing to the socket
 			_ostream = _socket.getOutputStream();
 			// ask chris about Assert
@@ -144,27 +146,33 @@ public class HTTPUploader implements Uploader {
 			if (pindex!= _index)
 				throw new IOException();
 			// catch any of the possible exceptions
+		} catch (SecurityException e) {
+			this.setState(Uploader.PUSH_FAILED);
+			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
+			this.setState(Uploader.PUSH_FAILED);
             throw new IOException();
         } catch (NumberFormatException e) {
+			this.setState(Uploader.PUSH_FAILED);
             throw new IOException();
         } catch (IllegalArgumentException e) {
+			this.setState(Uploader.PUSH_FAILED);
             throw new IOException();
-        }
+        } catch (IOException e) {
+			this.setState(Uploader.PUSH_FAILED);
+			throw new IOException();
+		}
 	}
 
     
 	public void start() {
 		try {
 			readHeader();
-		} catch (FreeloaderUploadingException e) {
+			_state.doUpload(this);
+		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
 		} catch (IOException e) {
-			// need to handle the error
-		}
-		try {
-			_state.doUpload(this);
-		} catch (IOException e) {
+			setState(INTERRUPTED);
 		}
 		stop();
 		
@@ -194,7 +202,7 @@ public class HTTPUploader implements Uploader {
 	public void setState(int state) {
 		_stateNum = state;
 		switch (state) {
-		case CONNECTED:
+		case CONNECTING:
 			_state = new NormalUploadState();
 			break;
 		case LIMIT_REACHED:
@@ -205,8 +213,6 @@ public class HTTPUploader implements Uploader {
 			break;
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
-			break;
-		case NOT_CONNECTED:
 			break;
 		case COMPLETE:
 			break;
@@ -312,3 +318,13 @@ public class HTTPUploader implements Uploader {
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
