@@ -50,6 +50,7 @@ public class QueryRequest extends Message implements Serializable{
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
 
+
 	/**
 	 * Cached immutable empty array of bytes to avoid unnecessary allocations.
 	 */
@@ -130,6 +131,43 @@ public class QueryRequest extends Message implements Serializable{
              requestedUrnTypes, queryUrns, null, isFirewalled);
     }
 
+	/**
+	 * Creates a new requery for the specified SHA1 value and the specified
+	 * firewall boolean.
+	 *
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 */
+	public static QueryRequest createRequery(URN sha1) {
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+		return new QueryRequest(newQueryGUID(true), (byte)6, 0, "\\", "", 
+								true, UrnType.SHA1_SET, sha1Set, 
+								!RouterService.acceptedIncomingConnection());
+	}
+	
+	/**
+	 * Creates a requery for when we don't know the hash of the file --
+	 * we don't know the hash.
+	 *
+	 * @param query the query string
+	 */
+	public static QueryRequest createRequery(String query) {
+		return new QueryRequest(newQueryGUID(true), (byte)6, 0, query, "",
+								true, EMPTY_SET, EMPTY_SET,
+								!RouterService.acceptedIncomingConnection());
+	}
+
+	/**
+	 * Creates a new query for the specified file name, with no XML.
+	 *
+	 * @param fileName the file name to search for
+	 */
+	public static QueryRequest createQuery(String fileName) {
+		return new QueryRequest(newQueryGUID(false), (byte)6, 0, fileName,
+								"", false, EMPTY_SET, EMPTY_SET, 
+								!RouterService.acceptedIncomingConnection());
+	}
 
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
@@ -178,13 +216,13 @@ public class QueryRequest extends Message implements Serializable{
 		if(requestedUrnTypes != null) {
 			tempRequestedUrnTypes = new HashSet(requestedUrnTypes);
 		} else {
-			tempRequestedUrnTypes = new HashSet();
+			tempRequestedUrnTypes = EMPTY_SET;
 		}
 		
 		if(queryUrns != null) {
 			tempQueryUrns = new HashSet(queryUrns);
 		} else {
-			tempQueryUrns = new HashSet();
+			tempQueryUrns = EMPTY_SET;
 		}
 
         this.queryKey = queryKey;
