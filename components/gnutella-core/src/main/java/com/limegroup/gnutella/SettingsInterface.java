@@ -75,9 +75,15 @@ public interface SettingsInterface {
     public static final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
     /** Use quick connect hosts instead of gnutella.net? */
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
+	/** This is limewire's public pong cache */
+    public static final String  DEFAULT_LIMEWIRE_ROUTER  = 
+	  "router.limewire.com";
+	/** This is limewire's dedicated pong cache */
+    public static final String  DEDICATED_LIMEWIRE_ROUTER  = 
+	  "router4.limewire.com";
     /** List of hosts to try on quick connect */
     public static final String[] DEFAULT_QUICK_CONNECT_HOSTS
-    = {"router.limewire.com:6346",
+    = {DEFAULT_LIMEWIRE_ROUTER+":6346",
        "gnutellahosts.com:6346",
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
