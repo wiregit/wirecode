@@ -3286,7 +3286,7 @@ public final class SettingsManager {
 		// limewire.props, but there will be CLASSPATH, so this will
 		// get overwritten when setClasspath is called when the 
 		// CLASSPATH is read from the props file
-		setClasspath(jarName);
+		setStringValue(CLASSPATH, jarName);
 	}
 
 	/**
@@ -3299,7 +3299,7 @@ public final class SettingsManager {
 
 		// see commment above -- JAR_NAME and CLASSPATH should
 		// always be the same value
-		setJarName(classpath);
+		setStringValue(JAR_NAME, classpath);
 	}
 
 	/**
