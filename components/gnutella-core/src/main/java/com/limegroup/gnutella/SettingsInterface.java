@@ -44,7 +44,7 @@ public interface SettingsInterface
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=2;
+    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=3;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */

@@ -39,7 +39,9 @@ public class ConnectionManager {
         new ArrayList();
     private List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
+
     private int _keepAlive=0;
+    private int _maxIncomingConnections=0;
 
     private MessageRouter _router;
     private HostCatcher _catcher;
@@ -71,6 +73,8 @@ public class ConnectionManager {
         watchdog.start();
 
         setKeepAlive(SettingsManager.instance().getKeepAlive());
+        setMaxIncomingConnections(
+            SettingsManager.instance().getMaxIncomingConnections());
     }
 
     /**
@@ -129,8 +133,7 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-        if (getNumInConnections() 
-                < SettingsManager.instance().getMaxIncomingConnections()) {
+         if (getNumInConnections() < _maxIncomingConnections) {             
             ManagedConnection connection = new ManagedConnection(socket,
                                                                  _router,
                                                                  this);
@@ -206,6 +209,15 @@ public class ConnectionManager {
     public synchronized void setKeepAlive(int newKeep) {
         _keepAlive = newKeep;
         adjustConnectionFetchers();
+    }
+
+    /**
+     * Sets the maximum number of incoming connections.  This does not
+     * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
+     * able to vary this without permanently setting the property.
+     */
+    public void setMaxIncomingConnections(int max) {
+        _maxIncomingConnections = max;
     }
 
     /**
