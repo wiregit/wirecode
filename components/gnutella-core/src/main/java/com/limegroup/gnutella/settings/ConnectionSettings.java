@@ -27,6 +27,18 @@ public final class ConnectionSettings extends AbstractSettings {
 		FACTORY.createIntSetting("KEEP_ALIVE", 15);
 
 	
+    /**
+     * Setting for the "soft max" ttl.  This is the limit for hops+ttl
+     * on incoming messages.  The soft max is invoked if the following is
+     * true:<p>
+     * 
+     * ttl + hops > SOFT_MAX<p>
+     *
+     * If this is the case, the TTL is set to SOFT_MAX - hops.
+     */
+    public static final ByteSetting SOFT_MAX =
+        CFG_FACTORY.createByteSetting("SOFT_MAX", (byte)5);
+
 	/**
 	 * Settings for whether or not to local addresses should be considered
 	 * private, and therefore ignored when connecting
