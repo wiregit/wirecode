@@ -10,6 +10,7 @@ public class AllTests {
     public static Test suite() {
         TestSuite suite=new TestSuite("All LimeWire tests");
         suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
+        suite.addTest(com.limegroup.gnutella.connection.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.util.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.filters.AllTests.suite());
         suite.addTest(ExtendedEndpointTest.suite());
