@@ -223,8 +223,6 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      *         we know that we have to rebuild the HashTree
      */
     public boolean isGoodDepth() {
-        if (LOG.isDebugEnabled())
-            LOG.debug("depth " + DEPTH + " file " + FILE_SIZE);
         return (DEPTH == calculateDepth(FILE_SIZE));
     }
     

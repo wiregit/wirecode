@@ -79,10 +79,6 @@ public final class TigerTreeCache implements Serializable {
         HashTree tree = (HashTree) TREE_MAP.get(fd.getSHA1Urn());
         if (tree == null)
             QUEUE.add(new HashRunner(fd));
-        if (LOG.isDebugEnabled() && tree != null)
-            LOG.debug("returned hashtree for urn " + 
-                      fd.getSHA1Urn() + " -> " + tree.getRootHash() );
-
         return tree;
     }
 
