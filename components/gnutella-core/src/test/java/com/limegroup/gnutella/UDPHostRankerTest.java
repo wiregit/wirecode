@@ -54,7 +54,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         final MLImpl ml = new MLImpl();
 
-        UDPHostRanker.rank(list, ml, null);
+        UDPHostRanker.rank(list, ml, null, null);
 
         for (int i = 0; i < udps.length; i++) {
             DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);

@@ -74,12 +74,12 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * The address this pong claims to be my external address
      */
-    private final InetAddress _myIP;
+    private final InetAddress MY_IP;
     
     /**
      * The port this pong claims to be my external port
      */
-    private final int _myPort;
+    private final int MY_PORT;
 
     /**
      * Constant for the number of shared files reported in the pong.
@@ -824,9 +824,9 @@ public class PingReply extends Message implements Serializable, IpPort {
             }            
 
         }
-        _myIP=myIP;
-        _myPort=myPort;
-
+        
+        MY_IP = myIP;
+        MY_PORT = myPort;
         HAS_GGEP_EXTENSION = ggep != null;
         DAILY_UPTIME = dailyUptime;
         SUPPORTS_UNICAST = supportsUnicast;
@@ -1307,11 +1307,11 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
 
     public InetAddress getMyInetAddress() {
-        return _myIP;
+        return MY_IP;
     }
     
     public int getMyPort() {
-        return _myPort;
+        return MY_PORT;
     }
     
     /**

@@ -7,7 +7,10 @@ import java.util.Arrays;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PingRequestTest(String name) {
@@ -205,8 +208,35 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         fromNet = (PingRequest) Message.read(bais);
         assertTrue(fromNet.requestsIP());
         assertEquals("zz",fromNet.getLocale());
+     
+        assertFalse(fromNet.supportsCachedPongs());
+        assertNull(fromNet.getSupportsCachedPongData());   
+    }
+    
+    public void testUDPPingRequest() {
+        PingRequest pr = PingRequest.createUDPPing();
+        assertTrue(pr.supportsCachedPongs());
         
-        // and make sure the ping marks itself as supporting cached pongs
-        assertTrue(fromNet.supportsCachedPongs());
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+        assertTrue(RouterService.isSupernode());
+        pr = PingRequest.createUDPPing();
+        assertFalse(pr.requestsIP());
+        byte[] data = pr.getSupportsCachedPongData();
+        assertEquals(0x1, data[0] & 0x1);
+        
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+        assertFalse(RouterService.isSupernode());
+        pr = PingRequest.createUDPPing();
+        assertFalse(pr.requestsIP());
+        data = pr.getSupportsCachedPongData();
+        assertEquals(0x0, data[0] & 0x0);
+        
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        pr = PingRequest.createUDPPing();
+        assertTrue(pr.requestsIP());
     }
 }

@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -325,7 +326,7 @@ public final class NetworkUtils {
     		ret.add(QueryReply.IPPortCombo.getCombo(current));
     	}
     	
-    	return ret;
+    	return Collections.unmodifiableList(ret);
     }
 
     /**
@@ -344,7 +345,7 @@ public final class NetworkUtils {
     		ret.add(current);
     	}
     	
-    	return ret;
+    	return Collections.unmodifiableList(ret);
     }
 }
 

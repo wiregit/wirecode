@@ -1038,22 +1038,16 @@ public class RouterService {
         if(hosts.size() < 10) {
             //we first try to get the connections that match the locale.
             List conns = manager.getInitializedConnectionsMatchLocale(locale);
-            for(Iterator i = conns.iterator(); i.hasNext();) {
+            for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < 10;)
                 hosts.add(i.next());
-                if(hosts.size() == 10)
-                    break;
-            }
             
             //if we still don't have enough hosts, get them from the list
             //of all initialized connection
             if(hosts.size() < 10) {
                 //list returned is unmmodifiable
                 conns = manager.getInitializedConnections();
-                for(Iterator i = conns.iterator(); i.hasNext();) {
+                for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < 10;)
                     hosts.add(i.next());
-                    if(hosts.size() == 10)
-                        break;
-                }
             }
         }
         

@@ -742,10 +742,31 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(3, ipp.getPort());
         ipp = (IpPort)l.get(3);
         assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());
+        
+        // Try with one of the constructors.
+        l.add(new Endpoint("1.5.3.5", 5));
+        pr = PingReply.create(GUID.makeGuid(), (byte)1, l);
+        l = pr.getPackedIPPorts();
+        assertFalse(pr.isUDPHostCache());
+        l = pr.getPackedIPPorts();
+        assertEquals(5, l.size());
+        ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
         assertEquals(4, ipp.getPort());        
-    }  
-        
-        
+        ipp = (IpPort)l.get(4);
+        assertEquals("1.5.3.5", ipp.getAddress());
+        assertEquals(5, ipp.getPort());
+    }   
     
     private final void addIP(byte[] payload) {
         // fill up the ip so its not blank.

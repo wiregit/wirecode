@@ -94,11 +94,13 @@ public class PingRequest extends Message {
     
     public static PingRequest createUDPPing() {
         GUID guid;
-        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue())
-            guid = new GUID();
-        else
-            guid = UDPService.instance().getSolicitedGUID();
         List l = new LinkedList();
+        if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
+            guid = new GUID();
+        } else {
+            l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
+            guid = UDPService.instance().getSolicitedGUID();
+        }
         byte[] data = new byte[1];
         if(RouterService.isSupernode())
             data[0] = 0x1;

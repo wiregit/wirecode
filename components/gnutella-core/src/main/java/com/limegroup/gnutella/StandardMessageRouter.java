@@ -123,7 +123,7 @@ public class StandardMessageRouter extends MessageRouter {
                 ipport = new QueryReply.IPPortCombo(
                             datagram.getAddress().getHostAddress(),
                             datagram.getPort());
-            } catch(IOException tooBad) {}
+            } catch(IOException tooBad) { }
         }
         
         byte[] data = request.getSupportsCachedPongData();
