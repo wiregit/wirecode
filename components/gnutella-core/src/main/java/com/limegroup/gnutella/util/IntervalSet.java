@@ -16,18 +16,12 @@ public class IntervalSet {
     
     private List /*of Interval*/ intervals;
     
-    /**
-     * INVARIANT: size==sum over all i of (get(i).high-get(i).low+1)
-     */
-    private int size = 0;
-    
     //constructor.
     public IntervalSet() {
         intervals = new ArrayList();
     }
 
     public void add(Interval addInterval) {
-        //TODO1: Increment the value of size here depending on the interval
         int low = addInterval.low;
         int high = addInterval.high;
         Interval lower=null;
@@ -121,12 +115,85 @@ public class IntervalSet {
         return overlapBlocks;
     }
 
+    public Iterator getAllIntervals() {
+        return intervals.iterator();
+    }
+
+    public int getSize() {
+        int sum=0;
+        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
+            Interval block=(Interval)iter.next();
+            sum+=block.high-block.low+1;
+        }
+        return sum;
+    }
+    
+    public void clear() {
+        intervals.clear();
+    }
+
+    /**
+     * @return an iterator or intervals needed to fill in the holes in this
+     * IntervalSet. Note that the IntervalSet does not know the maximum value of
+     * all the intervals.
+     */
+    public Iterator getNeededIntervals(int maxSize) {
+        if (intervals==null || intervals.size()==0) {//Nothing recorded?
+            Interval block=new Interval(0, maxSize-1);
+            List buf=new ArrayList(); 
+            buf.add(block);
+            return buf.iterator();
+        }
+            
+        //Sort list by low point in ascending order.  This has a side effect but
+        //it doesn't matter.
+        Collections.sort(intervals, new IntervalComparator());
+
+        //Now step through list one element at a time, putting gaps into buf.
+        //We take advantage of the fact that intervals are disjoint.  Treat
+        //beginning specially.  
+        //LOOP INVARIANT: interval!=null ==> low==interval.high
+        List buf=new ArrayList();
+        int low=-1;
+        Interval interval=null;
+        for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
+            interval=(Interval)iter.next();
+            if (low<interval.low)      //needed for first interval
+                buf.add(new Interval(low+1, interval.low-1));
+            low=interval.high;
+        }
+        //Special case space between last block and end of file.
+        Assert.that(interval!=null, "Null interval in getFreeBlocks");
+        if (interval.high < maxSize-1)
+            buf.add(new Interval(interval.high+1, maxSize-1));
+        
+        return buf.iterator();
+
+    }
+
+    private class IntervalComparator implements Comparator {
+        public int compare(Object a, Object b) {
+            Interval ia=(Interval)a;
+            Interval ib=(Interval)b;
+            return ia.low-ib.low;
+        }
+    }
+
+
     //////////////////////////Unit Test/////////////////////////////
     public static void main(String[] args) {
         IntervalSet iSet = new IntervalSet();
         Interval interval = new Interval(40,45);
         iSet.add(interval);
         Assert.that(iSet.numIntervals()==1,"add method broken");
+        Assert.that(iSet.getSize()==6,"getSize() broken");
+        Iterator iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==39,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==46,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
         ///testing case 1 (intervals is now {[40-45]}
         interval = new Interval(35,39);
         iSet.add(interval);
@@ -134,6 +201,7 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(0);
         Assert.that(interval.high==45,"lower boundry colating failed");
         Assert.that(interval.low==35,"lower boundry colating failed");
+        Assert.that(iSet.getSize()==11,"getSize() broken");
         //testing case 2 intervals is now {[35-45]}
         interval = new Interval(30,37);
         iSet.add(interval);
@@ -145,10 +213,35 @@ public class IntervalSet {
         interval = new Interval(20,25);
         iSet.add(interval);
         Assert.that(iSet.numIntervals()==2,"lower non-overlap add failed");
+        Assert.that(iSet.getSize()==22,"getSize() broken");
+        iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==19,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==26,"getNeededInterval broken");
+        Assert.that(interval.high==29,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==46,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
         //testing case 4 intervals is now {[20-25],[30-45]}
         interval = new Interval(50,60);
         iSet.add(interval);
         Assert.that(iSet.numIntervals()==3, "upper non-overlap add failed");
+        Assert.that(iSet.getSize()==33,"getSize() broken");
+        iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==19,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==26,"getNeededInterval broken");
+        Assert.that(interval.high==29,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==46,"getNeededInterval broken");
+        Assert.that(interval.high==49,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==61,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
         //////////////////getOverlapIntervals tests//////////
         //Note: Test all the cases for getOverlapIntervals, before continuing 
         //add test while the intervals are [20-25],[30-45],[50-60]
@@ -158,22 +251,22 @@ public class IntervalSet {
         Assert.that(list.size()==2,"getOverlapIntervals broken");
         //Note: we dont know the order of the intervals in the list
         interval = (Interval)list.get(0);//first interval
-        Assert.that(interval.low==30,"getOverlapIntervals broken");
-        Assert.that(interval.high==32,"getOverlapIntervals broken");
-        interval = (Interval)list.get(1);
         Assert.that(interval.low==23,"getOverlapIntervals broken");
         Assert.that(interval.high==25,"getOverlapIntervals broken");
+        interval = (Interval)list.get(1);
+        Assert.that(interval.low==30,"getOverlapIntervals broken");
+        Assert.that(interval.high==32,"getOverlapIntervals broken");
         //Case a.1
         interval = new Interval(25,30);
         list = iSet.getOverlapIntervals(interval);
         Assert.that(list.size()==2,"getOverlapIntervals broken");
         //Note: we dont know the order of the intervals in the list
         interval = (Interval)list.get(0);//first interval
-        Assert.that(interval.low==30,"getOverlapIntervals broken");
-        Assert.that(interval.high==30,"getOverlapIntervals broken");
-        interval = (Interval)list.get(1);
         Assert.that(interval.low==25,"getOverlapIntervals broken");
         Assert.that(interval.high==25,"getOverlapIntervals broken");
+        interval = (Interval)list.get(1);
+        Assert.that(interval.low==30,"getOverlapIntervals broken");
+        Assert.that(interval.high==30,"getOverlapIntervals broken");
         //Case b
         interval = new Interval(16,23);
         list = iSet.getOverlapIntervals(interval);
@@ -215,11 +308,11 @@ public class IntervalSet {
         list = iSet.getOverlapIntervals(interval);
         Assert.that(list.size()==3,"getOverlapIntervals broken");
         interval = (Interval)list.get(0);
-        Assert.that(interval.low==30);//order not known, but deterministic
-        Assert.that(interval.high==45);
-        interval = (Interval)list.get(1);
         Assert.that(interval.low==23);//order not known, but deterministic
         Assert.that(interval.high==25);
+        interval = (Interval)list.get(1);
+        Assert.that(interval.low==30);//order not known, but deterministic
+        Assert.that(interval.high==45);
         interval = (Interval)list.get(2);
         Assert.that(interval.low==50);//order not known, but deterministic
         Assert.that(interval.high==53);
@@ -228,11 +321,11 @@ public class IntervalSet {
         list = iSet.getOverlapIntervals(interval);
         Assert.that(list.size()==3,"getOverlapIntervals broken");
         interval = (Interval)list.get(0);
-        Assert.that(interval.low==30);//order not known, but deterministic
-        Assert.that(interval.high==45);
-        interval = (Interval)list.get(1);
         Assert.that(interval.low==20);//order not known, but deterministic
         Assert.that(interval.high==25);
+        interval = (Interval)list.get(1);
+        Assert.that(interval.low==30);//order not known, but deterministic
+        Assert.that(interval.high==45);
         interval = (Interval)list.get(2);
         Assert.that(interval.low==50);//order not known, but deterministic
         Assert.that(interval.high==60);
@@ -244,6 +337,7 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(2);
         Assert.that(interval.low==50);
         Assert.that(interval.high==70);
+        Assert.that(iSet.getSize()==43,"getSize() broken");
         //testing case 6 intervals is [20-25],[30-45],[50-70]
         interval = new Interval(71,75);
         iSet.add(interval);
@@ -251,6 +345,7 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(2);
         Assert.that(interval.low==50);
         Assert.that(interval.high==75);
+        Assert.that(iSet.getSize()==48,"getSize() broken");
         //test some boundry conditions [20-25],[30-45],[50-75]
         interval = new Interval(75,80);
         iSet.add(interval);
@@ -265,6 +360,20 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(2);//it was removed an readded
         Assert.that(interval.low==15);
         Assert.that(interval.high==25);
+        Assert.that(iSet.getSize()==58,"getSize() broken");
+        iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==14,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==26,"getNeededInterval broken");
+        Assert.that(interval.high==29,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==46,"getNeededInterval broken");
+        Assert.that(interval.high==49,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==81,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
         //[15-25],[30-45],[50-80]
         interval = new Interval(49,81);
         iSet.add(interval);
@@ -272,6 +381,7 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(2);
         Assert.that(interval.low==49);
         Assert.that(interval.high==81);
+        Assert.that(iSet.getSize()==60,"getSize() broken");
         // {[15-25],[30-45],[49-81]}
         interval = new Interval(55,60);
         iSet.add(interval);
@@ -286,11 +396,37 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(1);
         Assert.that(interval.low==15);
         Assert.that(interval.high==45);
+        iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==14,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==46,"getNeededInterval broken");
+        Assert.that(interval.high==48,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==82,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
         // {[15-45],[49-81]}
         interval = new Interval(3,5);
         iSet.add(interval);
         interval = new Interval(7,9);
         iSet.add(interval);
+        iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==2,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==6,"getNeededInterval broken");
+        Assert.that(interval.high==6,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==10,"getNeededInterval broken");
+        Assert.that(interval.high==14,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==46,"getNeededInterval broken");
+        Assert.that(interval.high==48,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==82,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
         // {[3-5],[7-9],[15-45],[49-81]}
         Assert.that(iSet.numIntervals() ==4);
         interval = new Interval(2,17);
@@ -299,13 +435,23 @@ public class IntervalSet {
         interval = iSet.getIntervalAt(1);
         Assert.that(interval.low==2);
         Assert.that(interval.high==45);
+        Assert.that(iSet.getSize()==77,"getSize() broken");
         //{[2-45],[49-81]}
         interval = new Interval(40,50);
         iSet.add(interval);
         Assert.that(iSet.numIntervals()==1);
+        //{[2-81]}
         interval = iSet.getIntervalAt(0);
         Assert.that(interval.low==2);
         Assert.that(interval.high==81);
+        Assert.that(iSet.getSize()==80,"getSize() broken");
+        iter = iSet.getNeededIntervals(100);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==0,"getNeededInterval broken");
+        Assert.that(interval.high==1,"getNeededInterval broken");
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==82,"getNeededInterval broken");
+        Assert.that(interval.high==99,"getNeededInterval broken");
     }
     ////////////method used only for tesing purposes////////////////
     public int numIntervals() {
