@@ -36,6 +36,7 @@ public class Constants
     public static final String CLIENT = "CLIENT";
     public static final String XML_CLIENT = "XML_CLIENT";
     public static final String SERVER = "SERVER";
+    public static final String ENTRY_SEPARATOR = ",";
     
         
     /** Converts the following bandwidth value, in kbytes/second, to 
