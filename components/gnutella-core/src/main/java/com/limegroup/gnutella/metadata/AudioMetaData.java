@@ -19,6 +19,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.XMLStringUtils;
 
+import com.limegroup.gnutella.licenses.CCConstants;
+
 /**
  * Simple class to encapsulate information about ID3 tags.
  * Can write the data to a NameValue list or an XML string.
@@ -36,6 +38,7 @@ public abstract class AudioMetaData extends MetaData {
     private short totalTracks =-1;
     private short disk=-1;
     private short totalDisks=-1;
+    private String ccLicense = null;
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
@@ -63,6 +66,7 @@ public abstract class AudioMetaData extends MetaData {
         XMLStringUtils.DELIMITER;
     public static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
+    public static final String LICENSE_KEY =  CCConstants.LICENSE_KEY;
 
     public AudioMetaData(File f) throws IOException{
     	parseFile(f);
@@ -102,6 +106,7 @@ public abstract class AudioMetaData extends MetaData {
     public String getGenre() { return genre; }
     public int getBitrate() { return bitrate; }
     public int getLength() { return length; }
+    public String getCCLicense() { return ccLicense; }
     
     void setTitle(String title) {
         this.title = title;
@@ -149,6 +154,10 @@ public abstract class AudioMetaData extends MetaData {
     
     void setLength(int length) {
         this.length = length;
+    }
+    
+    void setCCLicense(String license) {
+        this.ccLicense = license;
     }
     
     /**
@@ -205,6 +214,7 @@ public abstract class AudioMetaData extends MetaData {
         add(list, genre, GENRE_KEY);
         add(list, bitrate, BITRATE_KEY);
         add(list, length, SECONDS_KEY);
+        add(list, ccLicense, LICENSE_KEY);
         return list;
     }
     

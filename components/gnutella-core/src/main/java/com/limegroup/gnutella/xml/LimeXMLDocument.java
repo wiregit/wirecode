@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.licenses.CCConstants;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -86,6 +88,11 @@ public class LimeXMLDocument implements Serializable {
      * upon construction, they can be cached upon retrieval.
      */
     private transient List CACHED_KEYWORDS = null;
+    
+    /**
+     * Whether or not this document has a creative commons license.
+     */
+    private boolean hasCCLicense = false;
 
     /**
      * Constructs a LimeXMLDocument with the given string.
@@ -194,6 +201,25 @@ public class LimeXMLDocument implements Serializable {
         return fieldToValue.size();
     }
 
+    /** When parsing XML, some data should not be split up.  Note that here
+     *  and take action to dole out later.
+     */
+    public boolean shouldSkipIndivisibleKeyword(String currKey, String val) {
+        // unfortunately, parsing of CC stuff requires special casing
+        if (isAudioSchemaURI() && 
+            currKey.equals(CCConstants.LICENSE_KEY)) {
+            if ((val != null) && 
+                (val.startsWith(CCConstants.CC_URI_PREFIX))) {
+                hasCCLicense = true;
+                return true;
+                // suppose hasCCLicense is false here - should we really be
+                // skipping?  It may be masking a bug with LWs, but it could
+                // also be a third party decision.  Let it go....
+            }
+        }
+        return false;
+    }
+
     /**
      * Returns all the non-numeric fields in this.  These are
      * not necessarily QRP keywords.  For example, one of the
@@ -206,11 +232,14 @@ public class LimeXMLDocument implements Serializable {
             return CACHED_KEYWORDS;
 
         List retList = new ArrayList();
-        Iterator iter = fieldToValue.values().iterator();
+        Iterator iter = fieldToValue.keySet().iterator();
         while(iter.hasNext()){
             boolean number = true;//reset
-            String val = (String)iter.next();
-            try{
+            String currKey = (String) iter.next();
+            String val = (String) fieldToValue.get(currKey);
+            if (shouldSkipIndivisibleKeyword(currKey, val))
+                continue;
+            try {
                 new Double(val); // will trigger NFE.
             }catch(NumberFormatException e){
                 number = false;
@@ -220,6 +249,20 @@ public class LimeXMLDocument implements Serializable {
         }
         CACHED_KEYWORDS = retList;
         return retList;
+    }
+
+    /**
+     * Returns all the indivisible keywords for entry into QRP tables.
+     * Currently adds a CC URI if this document has a CC license.
+     */
+    public List getKeyWordsIndivisible() {
+        if(hasCCLicense) {
+            List retList = new ArrayList(1);
+            retList.add(CCConstants.CC_URI_PREFIX);
+            return retList;
+        } else {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     /**
@@ -359,6 +402,12 @@ public class LimeXMLDocument implements Serializable {
     public String getAttributeStringWithIndex(int i) {
         String attributes = getAttributeString();
         return attributes + " index=\"" + i + "\"/>";
+    }
+
+    /** Currently only useful internally.  Feel free to 'public'ize.
+     */
+    private boolean isAudioSchemaURI() {
+        return schemaUri.equals("http://www.limewire.com/schemas/audio.xsd");
     }
     
     /**

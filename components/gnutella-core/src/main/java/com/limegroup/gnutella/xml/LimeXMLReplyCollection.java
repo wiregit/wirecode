@@ -280,6 +280,25 @@ public class LimeXMLReplyCollection {
     }
 
     /**
+     * Gets a list of indivisible keywords from all the documents in this 
+     * collection.
+     * <p>
+     * Delegates to the individual documents and collates the list
+     */
+    protected List getKeyWordsIndivisible(){
+        List retList = new ArrayList();
+        Iterator docs;
+        synchronized(mainMap){
+            docs = mainMap.values().iterator();
+            while(docs.hasNext()){
+                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+                retList.addAll(d.getKeyWordsIndivisible());
+            }
+        }
+        return retList;
+    }
+
+    /**
      * Creates the MapSerializer object that deserializes the .sxml file.
      * @return the MapSerializer or null if there was an exception
      *   while creating the MapSerializer

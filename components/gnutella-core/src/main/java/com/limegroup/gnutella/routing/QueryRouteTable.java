@@ -282,6 +282,17 @@ public class QueryRouteTable {
                 i=k+1;
             }
         }
+
+        // some parts of the query are indivisible, so do some nonstandard
+        // matching
+        iter=richQuery.getKeyWordsIndivisible().iterator();
+        while(iter.hasNext()) {
+            hash = HashFunction.hash((String)iter.next(), bits);
+            if (contains(hash))//don't know the URI? can't answer query
+                matchCount++;
+            wordCount++;
+        }
+
         if (wordCount<3)
             //less than three word? 100% match required
             return wordCount==matchCount;
