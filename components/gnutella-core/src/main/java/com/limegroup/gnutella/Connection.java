@@ -873,6 +873,20 @@ public class Connection {
     }
 
     /**
+     * Returns whether or not this connection represents a local address.
+     *
+     * @return <tt>true</tt> if this connection is a local address,
+     *  otherwise <tt>false</tt>
+     */
+    protected boolean isLocal() {
+        InetAddress address = getInetAddress();
+        InetAddress localAddress = _socket.getLocalAddress();
+        byte[] byteAddress = address.getAddress();
+        return (address.equals(localAddress) ||
+                byteAddress[0] == 127);
+    }
+
+    /**
      * Returns the value of the given outgoing (written) connection property, or
      * null if no such property.  For example, getProperty("X-Supernode") tells
      * whether I am a supernode or a leaf node.  If I wrote a property multiple
