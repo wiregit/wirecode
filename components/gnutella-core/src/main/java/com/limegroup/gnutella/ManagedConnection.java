@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
+import java.util.Properties;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -212,7 +213,15 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager,
                       boolean isRouter) {
-        super(host, port);
+        super(host, port, 
+            SettingsManager.instance().isSupernode() ? 
+            (Properties)(new SupernodeProperties(router)) : 
+            (Properties)(new ClientProperties(router)),
+//            SettingsManager.instance().isSupernode() ? 
+//            new SupernodeHandshakeResponder() : new ClientHandshakeResponder()
+            null
+            , true);
+        
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
@@ -769,7 +778,73 @@ public class ManagedConnection
     public boolean isKillable() {
         return _isKillable;
     }
+    
+    private static class LazyProperties extends Properties {
+        private MessageRouter router;
+        
+        LazyProperties(MessageRouter router) {
+            this.router=router;
+            if (router!=null) {
+                setProperty(ConnectionHandshakeHeaders.MY_ADDRESS, "");  
+                //just temporary!
+            }
+        }
+        
+        //We don't define one method in terms of the other since that could
+        //cause infinite loops depending on the implementation of the
+        //superclass.
+        public String getProperty(String key, String defaultValue) {
+            if (router!=null && key.equals(
+                ConnectionHandshakeHeaders.MY_ADDRESS)) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key, defaultValue);
+            }
+        }
+        
+        public String getProperty(String key) {
+            if (router!=null && key.equals(
+                ConnectionHandshakeHeaders.MY_ADDRESS)) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key);
+            }
+        }
+    }
 
+    /**
+     * Properties for connection handshake, if the node is a supernode
+     */
+    private static class SupernodeProperties extends LazyProperties{
+        
+        public SupernodeProperties(MessageRouter router){
+            super(router);
+            //set supernode property
+            setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
+        }
+    }
+    
+    /**
+     * Properties for connection handshake, if the node is a client
+     */
+    private static class ClientProperties extends LazyProperties{
+        
+        public ClientProperties(MessageRouter router){
+            super(router);
+            //set supernode property
+            setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
+        }
+    }
+    
+//    private static class SupernodeHandshakeResponder
+//        implements HandshakeResponder
+//    {
+//        
+//    }
+    
+    
     /** Unit test.  Only tests statistics methods. */
     /*
     public static void main(String args[]) {        
