@@ -29,6 +29,7 @@ public class AllTests {
 		suite.addTest(QueryReplyTest.suite());
 		suite.addTest(QueryRequestTest.suite());
 		suite.addTest(FileDescTest.suite());
+		suite.addTest(RemoteFileDescTest.suite());
 		suite.addTest(AlternateLocationTest.suite());
 		suite.addTest(AlternateLocationCollectionTest.suite());
 		suite.addTest(ResponseTest.suite());
