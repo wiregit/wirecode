@@ -973,11 +973,6 @@ public class QueryRequest extends Message implements Serializable{
 		        ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
 		}       
-        if(QUERY_URNS.size() != 0) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.QUERY_URN.incrementStat();
-            throw BadPacketException.CANNOT_ACCEPT_URN_QUERIES;
-        }
         if(QUERY.length() > MAX_QUERY_LENGTH) {
             if( RECORD_STATS )
                 ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
