@@ -239,7 +239,6 @@ public class HandshakeResponse {
 			return 0;
 		}
 		
-		// TODO: use something else here!!!
 		try {
 			return Integer.valueOf(connections).intValue();
 		} catch(NumberFormatException e) {
