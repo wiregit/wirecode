@@ -68,7 +68,7 @@ public abstract class DefaultHeaders extends Properties {
 		props.put(HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 
                   QUERY_ROUTING_VERSION);
 
-        props.put(HeaderNames.X_MAX_TTL, "4");
+        props.put(HeaderNames.X_MAX_TTL, "3");
         props.put(HeaderNames.X_DYNAMIC_QUERY, "0.1");
         
         
