@@ -1144,10 +1144,6 @@ public class UDPConnectionProcessor {
                     }
                 }
 
-                // Make sure that data reading is alive
-                if ( _outputToInputStream != null ) {
-                    _outputToInputStream.wakeup();
-                }
 
             } else if (msg instanceof FinMessage) {
                 // Extend the msgs sequenceNumber to 8 bytes based on past state

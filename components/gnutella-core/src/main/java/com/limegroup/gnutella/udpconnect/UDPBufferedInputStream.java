@@ -47,13 +47,14 @@ public class UDPBufferedInputStream extends InputStream {
      * if there is no more data.
      */
     public int read() throws IOException  {
+    	boolean timedOut=false;
+    	
         synchronized(_processor) { // Lock on the ConnectionProcessor
             while (true) {
                 // Try to fetch some data if necessary
                 checkForData();
 
                 if ( _activeChunk != null && _activeChunk.length > 0 ) {
-
                     // return a byte of data
                     _activeChunk.length--;
                     return (_activeChunk.data[_activeChunk.start++] & 0xff);
@@ -61,8 +62,13 @@ public class UDPBufferedInputStream extends InputStream {
                 } else if ( _activeChunk == null && _processor.isConnected() ) {
 
                     // Wait for some data to become available
+                	if (timedOut) {
+                		SocketTimeoutException e = new SocketTimeoutException();
+                		LOG.debug("",e);
+                		throw e;
+                	}
                     waitOnData();
-
+                    timedOut=true;
                 } else {
 
                     // This connection is closed
@@ -88,13 +94,15 @@ public class UDPBufferedInputStream extends InputStream {
         int origLen = len;
         int origOff = off;
         int wlength;
-
+        boolean timedOut= false;
+        
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             while (true) {
                 // Try to fetch some data if necessary
                 checkForData();
 
                 if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                	timedOut=false;
 
                     // Load some data
                     wlength = Math.min(_activeChunk.length, len);
@@ -115,8 +123,13 @@ public class UDPBufferedInputStream extends InputStream {
                 } else if ( _activeChunk == null && _processor.isConnected() ) {
 
                     // Wait for some data to become available
+                	if (timedOut) {
+                		SocketTimeoutException e = new SocketTimeoutException();
+                		LOG.debug("",e);
+                		throw e;
+                	}
                     waitOnData();
-
+                    timedOut=true;
                 } else {
 
                     // This connection is closed
@@ -136,7 +149,8 @@ public class UDPBufferedInputStream extends InputStream {
         int len     = (int) n;
         int origLen = len;
         int wlength;
-
+        boolean timedOut=false;
+        
         // Just like reading a chunk of data above but the bytes get ignored
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             while (true) {
@@ -144,6 +158,7 @@ public class UDPBufferedInputStream extends InputStream {
                 checkForData();
 
                 if ( _activeChunk != null && _activeChunk.length > 0 ) {
+                	timedOut=false;
 
                     // Load some data
                     wlength = Math.min(_activeChunk.length, len);
@@ -161,8 +176,13 @@ public class UDPBufferedInputStream extends InputStream {
                 } else if ( _activeChunk == null && _processor.isConnected() ) {
 
                     // Wait for some data to become available
+                	if (timedOut) {
+                		SocketTimeoutException e = new SocketTimeoutException();
+                		LOG.debug("",e);
+                		throw e;
+                	}
                     waitOnData();
-
+                    timedOut=true;
                 } else {
 
                     // This connection is closed
@@ -223,18 +243,10 @@ public class UDPBufferedInputStream extends InputStream {
     /**
      *  Wait for a new chunk to become available.
      */
-    private void waitOnData() throws InterruptedIOException,SocketTimeoutException {
+    private void waitOnData() throws InterruptedIOException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
-            	int timeout = _processor.getReadTimeout();
-            	long now = System.currentTimeMillis();
-                _processor.wait(timeout);
-                if (timeout > 0 &&
-                		System.currentTimeMillis() - now > timeout) {
-                	SocketTimeoutException e = new SocketTimeoutException();
-                	LOG.debug("",e);
-                	throw e;
-                }
+            	_processor.wait(_processor.getReadTimeout());
             } catch(InterruptedException e) {
                 throw new InterruptedIOException(e.getMessage()); 
             } 
