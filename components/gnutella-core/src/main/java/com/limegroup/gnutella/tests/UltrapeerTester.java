@@ -81,14 +81,14 @@ public class UltrapeerTester {
         Message m=old.receive(TIMEOUT);
         Assert.that(m instanceof QueryRequest);
         Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)0); //not decremented
-        Assert.that(m.getTTL()==(byte)7);
+        Assert.that(m.getHops()==(byte)1); //used to be not decremented
+        Assert.that(m.getTTL()==(byte)6);
       
         m=ultrapeer.receive(TIMEOUT);
         Assert.that(m instanceof QueryRequest);
         Assert.that(((QueryRequest)m).getQuery().equals("crap"));
-        Assert.that(m.getHops()==(byte)0); //not decremented
-        Assert.that(m.getTTL()==(byte)7);
+        Assert.that(m.getHops()==(byte)1); //used to be not decremented
+        Assert.that(m.getTTL()==(byte)6);
     }
 
     private static void testBroadcastFromOld() 
