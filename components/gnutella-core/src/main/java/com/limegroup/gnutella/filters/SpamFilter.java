@@ -91,6 +91,10 @@ public abstract class SpamFilter {
         if (FilterSettings.FILTER_GREEDY_QUERIES.getValue())
             buf.add(new GreedyQueryFilter());
 
+        //4. Queries containing hash urns.
+        if (FilterSettings.FILTER_HASH_QUERIES.getValue())
+            buf.add(new HashFilter());
+        
         //4. BearShare high-bit queries.
         // if (FilterSettings.FILTER_HIGHBIT_QUERIES.getValue())
         //     buf.add(new BearShareFilter());

@@ -134,11 +134,6 @@ public class QueryRequest extends Message implements Serializable{
     private final QueryKey QUERY_KEY;
     
     /**
-     * Whether this query is only a hash query.
-     */
-    private final boolean _isHashOnly;
-
-    /**
      * The flag in the 'M' GGEP extension - if non-null, the query is requesting
      * only certain types.
      */
@@ -1261,7 +1256,6 @@ public class QueryRequest extends Message implements Serializable{
 
 		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
 		this.REQUESTED_URN_TYPES = Collections.unmodifiableSet(tempRequestedUrnTypes);
-		_isHashOnly=false;
 
     }
 
@@ -1367,13 +1361,6 @@ public class QueryRequest extends Message implements Serializable{
 			REQUESTED_URN_TYPES =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}
-		
-		// see if we have any type of URN besides hash or keywords/xml
-		tempRequestedUrnTypes.remove(UrnType.SHA1);
-		_isHashOnly=
-		    tempRequestedUrnTypes.isEmpty() &&
-			tempQuery.equals("") &&
-			tempRichQuery.equals("");
 		
         QUERY_KEY = tempQueryKey;
 		if(QUERY.length() == 0 &&
@@ -1587,13 +1574,6 @@ public class QueryRequest extends Message implements Serializable{
         return _featureSelector > 0;
     }
     
-    /**
-     * @return true if this query contains only a hash urn.
-     */
-    public boolean isHashOnlyQuery() {
-        return _isHashOnly;
-    }
-
     /**
      * Returns 0 if this is not a "feature" query, else it returns the selector
      * of the feature query, e.g. What Is New returns 1.
