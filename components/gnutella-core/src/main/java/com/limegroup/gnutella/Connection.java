@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
@@ -146,18 +147,6 @@ public class Connection {
         _propertiesWrittenP=properties1;
         _propertiesWrittenR=properties2;            
     }
-    
-    /**
-     * Creates an uninitialized incoming Gnutella 0.6/0.4 connection with no
-     * extra properties.  Connects at the same protocol level as the remote
-     * host.
-     *
-     * @param socket the socket accepted by a ServerSocket.  The word
-     *  "GNUTELLA " and nothing else must have been read from the socket.
-     */
-    //public Connection(Socket socket) {
-	//this(socket, null);
-    //}
 
     /**
      * Creates an uninitialized incoming 0.6/0.4 Gnutella connection.  Connects
@@ -258,9 +247,18 @@ public class Connection {
             throw new IOException();
         }
 
+        
+        // Check to see if this is an attempt to connect to ourselves
+        byte[] localAddress = _socket.getLocalAddress().getAddress();
+        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
+            Arrays.equals(_socket.getInetAddress().getAddress(), localAddress) && 
+            _port == SETTINGS.getPort()) {
+            throw new IOException("Connection to self");
+        }
+
         try {
             // Set the Acceptors IP address
-            Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
+            Acceptor.setAddress( localAddress );
             
             _in = getInputStream(_socket);
             _out = getOutputStream(_socket);
@@ -275,6 +273,7 @@ public class Connection {
             //calls, but we are afraid that getInput/OutputStream may be a
             //blocking operation.  Just to be safe, we also check that in/out
             //are not null.
+            close();
             throw new IOException();
         }
 
@@ -286,10 +285,10 @@ public class Connection {
             else
                 initializeIncoming();
         } catch (NoGnutellaOkException e) {
-            _socket.close();
+            close();
             throw e;
         } catch (IOException e) {
-            _socket.close();
+            close();
             throw new BadHandshakeException(e);
         }
     }
@@ -472,7 +471,7 @@ public class Connection {
                    HandshakeResponse.UNAUTHORIZED_CODE)) {
                 throw new NoGnutellaOkException(true,
                                                 ourResponse.getStatusCode(),
-                                                "We sent fatal status code");
+                                                "We sent fatal status code:");
             }
                     
             //3. read the response from the other side.  If we asked the other
@@ -872,6 +871,16 @@ public class Connection {
             try {
                 _socket.close();
             } catch(IOException e) {}
+        }
+        if (_in != null) {
+            try {
+                _in.close();
+            } catch (IOException e) {}
+        }
+        if (_out != null) {
+            try {
+                _out.close();
+            } catch (IOException e) {}
         }
     }
 
