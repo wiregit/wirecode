@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.messages.*;
 import org.xml.sax.SAXException;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -263,7 +262,6 @@ public class Response {
             throw new IOException("invalid index: " + index);
         if( (size &  0xFFFFFFFF00000000L)!=0 )
             throw new IOException("invalid size: " + size);        
-        
 
         //The file name is terminated by a null terminator.  
         // A second null indicates the end of this response.
