@@ -114,7 +114,14 @@ public class Main implements ActivityCallback {
 	    } catch (BadPacketException e) { }
 	}
     }
-    
+   
+    /**
+     *  Add a query string to the monitor screen
+     */
+    public void handleQueryString( String query ) {
+	System.out.println("Query String: "+query);
+    }
+
     public void error(String message) {
 	System.out.println("Error: "+message);
     }
