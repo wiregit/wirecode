@@ -158,8 +158,8 @@ public class PushAltLoc extends AlternateLocation {
 	/**
 	 * avoid comparing the demoted value when the comparant is a pushloc.
 	 */
-	protected boolean bothDemotedSame(AlternateLocation other) {
-	    return true;
+	protected boolean shouldCompareDemoted(AlternateLocation other) {
+	    return false;
 	}
 	
 	public int hashCode() {
