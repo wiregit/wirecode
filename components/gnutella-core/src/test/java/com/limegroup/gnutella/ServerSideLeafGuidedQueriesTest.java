@@ -365,10 +365,10 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         // UPs should not get any more queries
         Thread.sleep(3000);
         nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length); i++)
+        for (int i = 0; (i < ULTRAPEERS.length); i++) {
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
-
-        assertNull(nQuery);
+            assertNull(nQuery);
+        }
         
     }
 
@@ -415,10 +415,10 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         // we shouldn't get no more queries yo
         Thread.sleep(3000);
         nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length); i++)
+        for (int i = 0; (i < ULTRAPEERS.length); i++) {
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
-
-        assertNull(nQuery);
+            assertNull(nQuery);
+        }
     }
 
 
@@ -470,10 +470,10 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         // we shouldn't get no more queries yo
         Thread.sleep(4000);
         nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length); i++)
+        for (int i = 0; (i < ULTRAPEERS.length); i++) {
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
-
-        assertNull(nQuery);
+            assertNull(nQuery);
+        }
     }
 
 
@@ -540,10 +540,10 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         // we shouldn't get no more queries yo
         Thread.sleep(3000);
         nQuery = null;
-        for (int i = 0; (i < ULTRAPEERS.length); i++)
+        for (int i = 0; (i < ULTRAPEERS.length); i++) {
             nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
-
-        assertNull(nQuery);
+            assertNull(nQuery);
+        }
     }
 
 
