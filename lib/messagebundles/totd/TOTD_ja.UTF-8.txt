@@ -1,5 +1,5 @@
-﻿################################################################################
-# Tips of the Day for LimeWire 3.9.9
+################################################################################
+# Tips of the Day for LimeWire 4.1.10
 # Default locale for: English - United States
 # Maintained by the LimeWire project team.
 ################################################################################
@@ -41,6 +41,7 @@ GENERAL_32=ダウンロードしたファイルが見当たらない場合は、
 GENERAL_33=ライムワイヤーグッズをゲット！！<a href="http://www.limewire.com/english/content/gear.shtml">ライムワイヤー・グッズ</a>のウェブページではＴシャツや帽子を販売しています。
 GENERAL_34=ご自分のコンテンツをニューテラで出版しませんか？ライムワイヤーの<a href="http://www.magnetmix.com">MagnetMix（マグネット・ミックス）</a>ではインディーのアーチスト、シェアウェアーのゲームやソフトの出版者などがより多くの人に知ってもらうこｔのできるように成立しました。コンテンツを提出するには、<a href="http://www.magnetmix.com/form.html">こちら</a>でどうぞ。 
 GENERAL_35=音楽ジャンル検索を試してみてください！！<br>検索ウィンドウから、「音楽」を選択し、GENRE/ジャンルメニューから特定のジャンルを選択し、「検索」ボタンをクリックしてください。検索結果の殆どが選択されたジャンルのファイルです。
+#? GENERAL_36=Don't know what to look for? Try a "What's New" search and see what's recently been added to the network.
 
 #####################################################################################
 # TIPS FOR NON-OSX Machines (Useful for tips that reference the About Window or the Preferences Window)
@@ -58,6 +59,7 @@ NOT_OSX_10=ツールチップを表示するかしないかを選択するには
 NOT_OSX_11=テーブルのコラムヘッダーをクリックすることにより、並び替えをすることが出来ます。情報が入ってくるにつれて自動的に並び変わります。「自動並び替え」を有効・無効になりたいのであれば、コラムヘッダーを右クリックし、「他のオプション」で選択出来ます。
 NOT_OSX_12=検索結果で表示されるコラムを換えることが出来ます。「曲名」、「ジャンル」、「時間」等、多数のコラムから選ぶことができます。コラム・ヘッダーを右クリックすることでこれらを選ぶことができます。
 NOT_OSX_13=「会話」など他のコラムを検索結果のテーブルで表示したくなければ、コラム・ヘッダーを右クリックし、表示されたくないコラムを除外してください。また、コラムをドラッグすることによって順番を替えることができます。
+#? NOT_OSX_14=You can tell LimeWire which downloads to start next. Right-click on the column headers in the download area and check the 'Priority' column. Select the download you want to start next and click the up arrow until it's at the top!
 
 #####################################################################################
 # TIPS FOR OSX
@@ -84,11 +86,6 @@ OSX_17=「会話」など他のコラムを検索結果のテーブルで表示�
 # TIPS FOR NON MAC CLASSIC (Useful for tips that reference Java2 specific features like Advanced Stats)
 #####################################################################################
 NOT_MAC_CLASSIC_1=ライムワイヤーの内部の仕組みをよりよく調べたいですか?　開発者も使用する累計データなどを「機能」->「累計」メニューから「詳細」を選択することでご覧になれます。
-
-#####################################################################################
-# TIPS FOR MAC CLASSIC
-#####################################################################################
-#MAC_CLASSIC_1=Thank you for supporting LimeWire!
 
 #####################################################################################
 # TIPS FOR WINDOWS
