@@ -35,6 +35,16 @@ public class IOUtils {
             MessageService.showError("ERROR_DISK_FULL_" + friendly);
             return true;
         }
+        // If the file is locked, let them know.
+        if(StringUtils.contains(msg, "being used by another process")) {
+            MessageService.showError("ERROR_LOCKED_BY_PROCESS_" + friendly);
+            return true;
+        }
+        // If we don't have permissions to write, let them know.
+        if(StringUtils.contains(msg, "access is denied")) {
+            MessageService.showError("ERROR_ACCESS_DENIED_" + friendly);
+            return true;
+        }
         
         // dunno what to do, let the outer world handle it.
         return false;
