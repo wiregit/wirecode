@@ -782,7 +782,7 @@ public final class UploadManager implements BandwidthTracker {
 	private HttpRequestLine parseHttpRequest(Socket socket) throws IOException {
 
 		// Set the timeout so that we don't do block reading.
-        socket.setSoTimeout(SettingsManager.instance().getTimeout());
+        socket.setSoTimeout(Constants.TIMEOUT);
 		// open the stream from the socket for reading
 		ByteReader br = new ByteReader(socket.getInputStream());
 		

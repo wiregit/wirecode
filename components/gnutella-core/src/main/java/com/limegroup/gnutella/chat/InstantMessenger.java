@@ -55,7 +55,7 @@ public class InstantMessenger implements Chatter {
 		creation of the socket will be in the thread */
 	private void OutgoingInitializer() throws IOException  {
 		_socket =  new Socket(_host, _port);
-		_socket.setSoTimeout(SettingsManager.instance().getTimeout());
+		_socket.setSoTimeout(Constants.TIMEOUT);
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		_out=new BufferedWriter(osw);
@@ -158,7 +158,7 @@ public class InstantMessenger implements Chatter {
 		request.  At the moment, the header information
 		is pretty useless */
 	public void readHeader() throws IOException {
-		_socket.setSoTimeout(SettingsManager.instance().getTimeout());
+		_socket.setSoTimeout(Constants.TIMEOUT);
 		// For the Server side of the chat protocal:
 		// We expect to be recieving 'CHAT CONNECT/0.1'
 		// but 'CHAT' has been consumed by acceptor.

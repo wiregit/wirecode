@@ -104,7 +104,7 @@ public class ExternalControl {
 			InputStream in = socket.getInputStream();
 
 			// First read extra parameter
-			socket.setSoTimeout(SettingsManager.instance().getTimeout());
+			socket.setSoTimeout(Constants.TIMEOUT);
 			ByteReader br = new ByteReader(socket.getInputStream());
             // read the first line. if null, throw an exception
             String line = br.readLine();

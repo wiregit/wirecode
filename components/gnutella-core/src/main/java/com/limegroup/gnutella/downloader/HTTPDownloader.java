@@ -176,7 +176,7 @@ public class HTTPDownloader implements BandwidthTracker {
         //Note : once we have established the TCP connection with the host we
         //want to download from we set the soTimeout. Its reset in doDownload
         //Note2 : this may throw an IOException.  
-        _socket.setSoTimeout(SettingsManager.instance().getTimeout());
+        _socket.setSoTimeout(Constants.TIMEOUT);
         _byteReader = new ByteReader(istream);
     }
     

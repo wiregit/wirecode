@@ -223,7 +223,7 @@ public class HTTPAcceptor extends Thread {
                 } catch (Exception e) {
                     throw new IOException();
                 }
-                _socket.setSoTimeout(SettingsManager.instance().getTimeout());
+                _socket.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
                 String word=IOUtils.readWord(in,8);
@@ -264,7 +264,7 @@ public class HTTPAcceptor extends Thread {
 			return;
 
 		// Set the timeout so that we don't do block reading.
-        socket.setSoTimeout(SettingsManager.instance().getTimeout());
+        socket.setSoTimeout(Constants.TIMEOUT);
 		// open the stream from the socket for reading
 		ByteReader br = new ByteReader(socket.getInputStream());
 		
