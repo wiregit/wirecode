@@ -427,11 +427,18 @@ public class PushLocTest extends BaseTestCase {
 		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
 		AlternateLocation push = AlternateLocation.create(
 				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+		PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		
 		
 		fd.add(direct);
 		fd.add(push);
-		assertEquals(0,((PushAltLoc)push).getPushAddress().supportsFWTVersion());
-		assertEquals(2,fd.getAltLocsSize());
+		fd.add(pushFwt);
+		
+		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
+		assertEquals(1,pushFwt.supportsFWTVersion());
+		assertEquals(3,fd.getAltLocsSize());
 		
 		//send a set of headers without the FALT header.  The response should
 		//not contain any firewalled altlocs.
@@ -479,7 +486,7 @@ public class PushLocTest extends BaseTestCase {
 		Thread.sleep(700);
 		assertEquals(0,l.size());
 		
-		//now repeat with the fawt header sent.  We should get back one firewalled altloc.
+		//now repeat with the fawt header sent.  We should get back two firewalled altlocs.
 		
 		s = new Socket("localhost",PORT);
 		in = new BufferedReader(
@@ -519,11 +526,14 @@ public class PushLocTest extends BaseTestCase {
 		assertTrue(present);
 		assertNotNull(header);
 		parseHeader(header,returned);
-		assertEquals(1,returned.getAltLocsSize());
+		assertEquals(2,returned.getAltLocsSize());
+		assertTrue(returned.contains(push));
+		assertTrue(returned.contains(pushFwt));
+	
 		
 		
-		//now send with the FWAWT header sent.  We should not get any
-		//in the response.
+		//now send with the FWAWT header sent.  We should get only one
+		// altloc in the response
 		
 		try {
 			in.close();
@@ -553,6 +563,11 @@ public class PushLocTest extends BaseTestCase {
 		
 		assertTrue(b.booleanValue());
 		
+		int fwtVersion = (
+		        (Integer)(PrivilegedAccessor.getValue(u,"_FWTVersion"))).intValue();
+		
+		assertEquals(1,fwtVersion);
+		
 		present = false;
 		header=null;
 		try {
@@ -568,14 +583,19 @@ public class PushLocTest extends BaseTestCase {
 		
 		}catch(IOException expected ){}
 		
-		assertFalse(present);
-		assertNull(header);
+		assertTrue(present);
+		assertNotNull(header);
+		returned.clear();
+		parseHeader(header,returned);
+		assertEquals(1,returned.getAltLocsSize());
 		
-		//TODO: update test after FWT is done
+		assertTrue(returned.contains(pushFwt));
+		assertFalse(returned.contains(push));
 		
 		//clean up for next test
 		fd.remove(direct);fd.remove(direct);
 		fd.remove(push);fd.remove(push);
+		fd.remove(pushFwt);fd.remove(pushFwt);
 		
 		try {
 			in.close();
