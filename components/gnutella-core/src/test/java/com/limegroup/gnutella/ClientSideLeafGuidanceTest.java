@@ -38,6 +38,8 @@ public class ClientSideLeafGuidanceTest
 
     private static MyActivityCallback callback;
 
+    private final int REPORT_INTERVAL = SearchResultHandler.REPORT_INTERVAL;
+
     public ClientSideLeafGuidanceTest(String name) {
         super(name);
     }
@@ -248,6 +250,7 @@ public class ClientSideLeafGuidanceTest
         // spawn a query and make sure all UPs get it
         GUID queryGuid = new GUID(rs.newQueryGUID());
         rs.query(queryGuid.bytes(), "susheel");
+        Thread.sleep(250);
 
         for (int i = 0; i < testUPs.length; i++) {
             QueryRequest qr = getFirstQueryRequest(testUPs[i]);
@@ -319,6 +322,66 @@ public class ClientSideLeafGuidanceTest
                 assertEquals(new GUID(stat.getGUID()), queryGuid);
                 assertEquals(5*(i+1), stat.getNumResults());
             }
+        }
+    }
+
+
+    public void testAdvancedGuidance2() throws Exception {
+
+        Message m = null;
+
+        for (int i = 0; i < testUPs.length; i++)
+            drain(testUPs[i]);
+        
+        // spawn a query and make sure all UPs get it
+        GUID queryGuid = new GUID(rs.newQueryGUID());
+        rs.query(queryGuid.bytes(), "anita kesavan");
+
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryRequest qr = getFirstQueryRequest(testUPs[i]);
+            assertNotNull(qr);
+            assertEquals(new GUID(qr.getGUID()), queryGuid);
+        }
+
+        // now send back results and make sure that we get a QueryStatus
+        // from the leaf
+        Response[] res = new Response[20];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "anita is pretty"+j);
+
+        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        testUPs[0].send(m);
+        testUPs[0].flush();
+
+        // all UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            assertNotNull(stat);
+            assertEquals(new GUID(stat.getGUID()), queryGuid);
+            assertEquals(5, stat.getNumResults());
+        }
+
+
+        // now send just a few responses - less than the number of
+        // REPORT_INTERVAL - and confirm we don't get messages
+        res = new Response[REPORT_INTERVAL-1];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "anita is sweet"+j);
+
+        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        testUPs[0].send(m);
+        testUPs[0].flush();
+
+        // no UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
+            assertTrue(stat==null);
         }
     }
 

@@ -37,6 +37,11 @@ public final class SearchResultHandler {
 	 */
     private static final int DELAY_TIME = 1000/MAX_RATE;
 
+    /**
+     * The "delay" between responses to wait to send a QueryStatusResponse.
+     */
+    public static final int REPORT_INTERVAL = 5;
+
     /** 
 	 * The queue of buffered query replies.  Used to decouple backend,
      * grouping, and Swing threads.  Also needed for rate limiting.  Follows
@@ -292,7 +297,6 @@ public final class SearchResultHandler {
      *  represent the number of non-filtered results for the GUID.
      */
     private static class GuidCount {
-        private final int REPORT_INTERVAL = 5;
 
         private final GUID _guid;
         private int _numResults;
