@@ -249,42 +249,6 @@ public final class UrnCache {
 			_hashCode = calculateHashCode();
 		}
 	}
-
-
-	/*
-	private static void main(String[] args) {
-		UrnCache cache = UrnCache.instance();
-		File dir = new File("S:\\Gnutella\\installers\\LimeWire210\\winNoVM");
-		File[] files = dir.listFiles();
-		URN[] urns = new URN[files.length];
-		Set[] sets = new Set[files.length];
-		for(int i=0; i<files.length; i++) {
-			try {
-				urns[i] = URNFactory.createSHA1Urn(files[i]);
-			} catch(IOException e) {
-			}
-			sets[i] = new HashSet();
-			sets[i].add(urns[i]);
-			cache.addUrns(files[i], sets[i]);
-		}
-		System.out.println("map size before out: "+cache.URN_MAP.size()); 
-		cache.persistCache();
-		//cache.URN_MAP = null;
-		//cache.URN_MAP = UrnCache.createMap();
-		cache.URN_MAP.clear();
-		cache.URN_MAP.putAll(UrnCache.createMap());
-		System.out.println("map size after out:  "+cache.URN_MAP.size()); 
-		System.out.println("maps equal: "+cache.URN_MAP.equals(UrnCache.createMap())); 
-		for(int i=0; i<files.length; i++) {
-			Set set = cache.getUrns(files[i]);
-			System.out.println("sets equal: "+set.equals(sets[i])); 
-			//urns[i] = URNFactory.createSHA1Urn(files[i]);
-			//sets[i] = new HashSet(files[i], urns[i]);
-			//cache.addUrns(files[i], sets[i]);
-		}		
-	}
-	*/
-	
 }
 
 
