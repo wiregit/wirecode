@@ -63,6 +63,26 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting THEME_CHANGED =
         FACTORY.createBooleanSetting("THEME_CHANGED", false);
-    
+        
+    /**
+     * Setting for already downloading message
+     */
+    public static final BooleanSetting ALREADY_DOWNLOADING =
+        FACTORY.createBooleanSetting("ALREADY_DOWNLOADING", false);
+        
+    /**
+     * Setting for removing the last column
+     */
+    public static final BooleanSetting REMOVE_LAST_COLUMN =
+        FACTORY.createBooleanSetting("REMOVE_LAST_COLUMN", false);
+        
+            
+    /**
+     * Setting for being unable to resume an incomplete file
+     */
+    public static final BooleanSetting CANT_RESUME =
+        FACTORY.createBooleanSetting("CANT_RESUME", false);
+        
+       
     
 }
