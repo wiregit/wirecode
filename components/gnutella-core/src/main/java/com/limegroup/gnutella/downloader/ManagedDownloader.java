@@ -190,6 +190,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
+    /** The interval size for downloaders with persistenace support  */
+    private static final int CHUNK_SIZE=5000;      //5 KB        
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
     private static final float MIN_ACCEPTABLE_SPEED = 
@@ -198,7 +200,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		0.5f;
     /** The number of bytes to overlap when swarming and resuming, used to help
      *  verify that different sources are serving the same content. */
-    private static final int OVERLAP_BYTES=500;
+    private static final int OVERLAP_BYTES=10;
 
     /** The time to wait between requeries, in milliseconds.  This time can
      *  safely be quite small because it is overridden by the global limit in
@@ -1416,48 +1418,54 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(dloader == null)//any exceptions in the method internally?
             return;
 
-        //Step 2. OK. Wr have established TCP Connection. This downloader
-        //should choose a part of the file to download and send the appropriate
-        //HTTP hearders
-        //Note: 0=disconnected,1=tcp-connected, 2=http-connected
-        boolean wasQueued = false;
-        int connected;
-        while(true) { //while queued, connect and sleep if we queued
-            int[] a = {-1};//reset the sleep value
-            connected = assignAndRequest(dloader,a);
-            if(connected!=1)
-                break;
-            if(!wasQueued) {
-                synchronized(this) {queuedCount++;}
-                wasQueued = true;
+        boolean http11 = true;//must enter the loop
+
+        while(http11) {
+            //Step 2. OK. Wr have established TCP Connection. This downloader
+            //should choose a part of the file to download and send the
+            //appropriate HTTP hearders
+            //Note: 0=disconnected,1=tcp-connected,2=http-connected
+            boolean wasQueued = false;
+            int connected;
+            //Note: If the set of urns is empty we assume the uploader does not
+            //support persistence - vendors support http1.1 before hashes. 
+            http11 = !(rfd.getUrns().isEmpty());
+            while(true) { //while queued, connect and sleep if we queued
+                int[] a = {-1};//reset the sleep value
+                connected = assignAndRequest(dloader,a,http11);
+                if(connected!=1)
+                    break;
+                if(!wasQueued) {
+                    synchronized(this) {queuedCount++;}
+                    wasQueued = true;
+                }
+                try {
+                    if(a[0] > 0)
+                        Thread.sleep(a[0]);//value from QueuedException
+                } catch (InterruptedException ix) {
+                    debug("worker: interrupted while asleep in queue"+dloader);
+                    synchronized(this) {
+                        queuedCount--;
+                    }
+                    dloader.stop();
+                    return;//close connection
+                }
             }
-            try {
-                if(a[0] > 0)
-                    Thread.sleep(a[0]);//value from QueuedException
-            } catch (InterruptedException ix) {
-                debug("worker: interrupted while asleep in queue"+dloader);
+            if(wasQueued) {//we have been given a slot, after being queued
                 synchronized(this) {
                     queuedCount--;
                 }
-                dloader.stop();
-                return;//close connection
             }
+            //Now, connected is either 0 or 2
+            Assert.that(connected==0 || connected==2,
+                        "invalid return from assignAndRequest "+connected);
+            if(connected==0)
+                return;
+            
+            //Step 3. OK, we have successfully connected, start saving the file
+            //to disk
+            doDownload(dloader, http11);
         }
-        if(wasQueued) {//we have been given a slot, after being queued
-            synchronized(this) {
-                queuedCount--;
-            }
-        }
-        //Now, connected is either 0 or 2
-        Assert.that(connected==0 || connected==2,
-                    "invalid return from assignAndRequest "+connected);
-        if(connected==0)
-            return;
-        
-        //Step 3. OK, we have successfully connected, start saving the file
-        //to disk
-        doDownload(dloader);
-        
     }
     
     /** 
@@ -1574,15 +1582,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * otherwise if queued return 1
      * otherwise if connected successfully return 2
      */
-    private int assignAndRequest(HTTPDownloader dloader,int[] referenceArray)  {
+    private int assignAndRequest(HTTPDownloader dloader,int[] referenceArray,
+                                                               boolean http11) {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
                 if (needed.size()>0)
-                    assignWhite(dloader);
+                    assignWhite(dloader,http11);
                 else {
                     updateNeeded = false;      //1. See comment in finally
-                    assignGrey(dloader); 
+                    assignGrey(dloader,http11); 
                 }
                 updateNeeded = false;          //2. See comment in finally
             } catch(NoSuchElementException nsex) {
@@ -1622,7 +1631,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 return 1;
             } catch (IOException iox) {
-                debug("iox thrown in assignAndReplace "+dloader);
+                iox.printStackTrace();
+                debug("iox thrown in assignAndRequest "+dloader);
                 return 0; //discard the rfd of dloader
             } finally {
                 //Update the needed list unless any of the following happened: 
@@ -1695,16 +1705,28 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
-    private void assignWhite(HTTPDownloader dloader) throws IOException, 
-    TryAgainLaterException, FileNotFoundException, NotSharingException ,
-    QueuedException {
+    private void assignWhite(HTTPDownloader dloader, boolean http11) throws 
+    IOException, TryAgainLaterException, FileNotFoundException, 
+    NotSharingException , QueuedException {
         //Assign "white" (unclaimed) interval to new downloader.
         //TODO2: choose biggest, earliest, etc.
         //TODO2: assign to existing downloader if possible, without
         //      increasing parallelis
         Interval interval = null;
-        synchronized(this) {
-            interval=(Interval)needed.remove(0);
+        if(!http11) 
+            synchronized(this) {interval=(Interval)needed.remove(0);}
+        else { //take a chunk out of the first white part and put the rest back
+            synchronized(this) { 
+                Interval temp = (Interval)needed.remove(0);
+                if((temp.high-temp.low+1) > CHUNK_SIZE) {
+                    int max = temp.low+CHUNK_SIZE-1;
+                    interval = new Interval(temp.low, max);
+                    temp = new Interval(max+1,temp.high);
+                    needed.add(0,temp);
+                } 
+                else //temp's size <= CHUNK_SIZE
+                    interval = temp;
+            }
         }
         //Intervals from the needed set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
@@ -1725,7 +1747,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * area to a new HTTPDownloader, if the current downloader is going too
      * slow.
      */
-    private void assignGrey(HTTPDownloader dloader) 
+    private void assignGrey(HTTPDownloader dloader, boolean http11) 
         throws NoSuchElementException,  IOException, TryAgainLaterException, 
                FileNotFoundException, NotSharingException, QueuedException {
         //Split largest "gray" interval, i.e., steal part of another
@@ -1752,7 +1774,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //variable.
         int amountRead=biggest.getAmountRead();
         int left=biggest.getAmountToRead()-amountRead;
-        if (left < MIN_SPLIT_SIZE) { 
+        //check if we need to steal the last chunk from a slow downloader.
+        if ((http11 && left<CHUNK_SIZE) || (!http11 && left < MIN_SPLIT_SIZE)){ 
             float bandwidth = -1;//initialize
             try {
                 bandwidth = biggest.getMeasuredBandwidth();
@@ -1779,15 +1802,18 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
         else { //There is a big enough chunk to split...split it
-            int start=
-            biggest.getInitialReadingPoint()+amountRead+left/2;
+            int start;
+            if(http11) //steal CHUNK_SIZE bytes from the end
+                start = biggest.getAmountToRead()-CHUNK_SIZE +1;
+            else 
+                start=biggest.getInitialReadingPoint()+amountRead+left/2;
             int stop=
             biggest.getInitialReadingPoint()+biggest.getAmountToRead();
             //this line could throw a bunch of exceptions
             dloader.connectHTTP(getOverlapOffset(start), stop,true);
             dloader.stopAt(stop);
-            biggest.stopAt(start);
-            debug("MANAGER: assigning split grey "
+            biggest.stopAt(start);//we know that biggest must be http1.0
+            debug("WORKER: assigning split grey "
                   +start+"-"+stop+" from "+biggest+" to "+dloader);
         }
     }
@@ -1803,12 +1829,18 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param downloader the normal or push downloader to use for the transfer,
      * which MUST be initialized (i.e., downloader.connectTCP() and
      * connectHTTP() have been called) 
+     * @param http11 used to determine when this downloader should be removed
+     * from the dloaders list. The general rule: never remove the downloader
+     * from dloaders if the uploader supports persistence, unless we get an
+     * exception - in which case we do not add it back to files.  If !http11,
+     * then we remove from the dloaders in the finally block and add to files as
+     * before if no problem was encountered.  
      */
-    private void doDownload(HTTPDownloader downloader) {
+    private void doDownload(HTTPDownloader downloader, boolean http11) {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         try {
-            downloader.doDownload(commonOutFile);
+            downloader.doDownload(commonOutFile, http11);
         } catch (IOException e) {
             problem = true;
 			chatList.removeHost(downloader);
@@ -1827,7 +1859,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (problem)
                     updateNeeded(downloader);
                 dloaders.remove(downloader);
-                if(!problem)
+                if(!problem && !http11)//no  need to add http11 dloader to files
                     files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
                 this.notifyAll();
@@ -2198,8 +2230,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean debugOn = true;
+    private final boolean log = true;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
