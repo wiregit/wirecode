@@ -865,6 +865,11 @@ public final class CommonUtils {
     
     /**
      * Gets an InputStream from a resource file.
+     * 
+     * @param location the location of the resource in the resource file
+     * @return an <tt>InputStream</tt> for the resource
+     * @throws IOException if the resource could not be located or there was
+     *  another IO error accessing the resource
      */
     public static InputStream getResourceStream(String location) 
       throws IOException {
@@ -877,8 +882,8 @@ public final class CommonUtils {
             resource = cl.getResource(location);
         }
         
-        if( resource == null)
-            return null;
+        if( resource == null) 
+            throw new IOException("null resource: "+location);
         else
             return resource.openStream();
     }
