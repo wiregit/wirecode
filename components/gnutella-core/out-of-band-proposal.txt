@@ -34,3 +34,23 @@ Replies is a good idea:
     topology changes.  If the originator loses vital links during the
     processing of a Query, Query Replies that are routed directly to the
     originator will still reach the desired destination.
+
+  * Query Reply latency is potentially reduced as a set of Query Replies
+    may experience no hop latency while routed on Gnutella net.
+
+These are some of the reasons supporting 'out-of-band' Query Reply
+delivery may be beneficial to the Gnutella net.  LimeWire plans to test
+the 'out-of-band' scheme in future releases.
+
+1. Advertising 'out-of-band' Delivery
+
+Servents that support 'out-of-band' delivery should advertise their
+support via GGEP.  A Query Request message can contain a GGEP block
+between the two terminating null values.  The GGEP header value for
+'out-of-band' delivery support is "OB".  The GGEP block should peacefully
+co-exist with other vendor extensions in the Query Request.  For more
+information, please see :
+
+http://groups.yahoo.com/group/the_gdf/files/Proposals/GGEP/GnutellaGenericExtensionProtocol.0.51.html
+
+2. 
