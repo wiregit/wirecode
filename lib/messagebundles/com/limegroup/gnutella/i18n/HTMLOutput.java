@@ -184,10 +184,7 @@ class HTMLOutput {
 "     message bundle and uses its contents for any interface element\n" +
 "     that has text on it.  For instance, this is the <a href=\"http://www.limewire.org/fisheye/viewrep/~raw,r=MAIN/limecvs/lib/messagebundles/MessagesBundle.properties\">English message bundle</a>.  Note the line:\n" +
 "     \n" +
-"     <pre>\n" +
-"       SEARCH_DOWNLOAD_BUTTON_LABEL=Download\n" +
-"     </pre>\n" +
-"     \n" +
+"     <pre>SEARCH_DOWNLOAD_BUTTON_LABEL=Download</pre>\n" +
 "     This line indicates that the label used on the download button on\n" +
 "     the search tab should read &quot;Download&quot;.  Contrast this with the\n" +
 "     same line in the <a\n" +
@@ -198,7 +195,6 @@ class HTMLOutput {
 "       #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download\n" +
 "       SEARCH_DOWNLOAD_BUTTON_LABEL=Charger\n" +
 "     </pre>\n" +
-"     \n" +
 "     Note that the line starting with a &quot;#&quot; is a comment line,\n" +
 "     meaning it is not used by LimeWire.  Translators frequently preserve\n" +
 "     the English translation as a reference for the non-English\n" +
