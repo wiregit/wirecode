@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Settings for Gnutella TCP connections.
@@ -173,7 +174,8 @@ public final class ConnectionSettings extends LimeProps {
      * JVMs.
      */
     public static final BooleanSetting USE_NIO =
-        FACTORY.createBooleanSetting("USE_NIO", false);
+        FACTORY.createBooleanSetting("USE_NIO", 
+            CommonUtils.isJava14OrLater() && false);
           
     /**
      * Helper method left from Settings Manager
