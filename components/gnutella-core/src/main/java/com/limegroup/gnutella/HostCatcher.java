@@ -823,11 +823,11 @@ class BucketQueueArray {
     BucketQueueArray() {
         heaps=new BucketQueue[3];
         heaps[HostCatcher.BAD_PRIORITY]=
-            new BucketQueue(BUCKETS, HostCatcher.GOOD_SIZE); 
+            new BucketQueue(BUCKETS, HostCatcher.BAD_SIZE); 
         heaps[HostCatcher.NORMAL_PRIORITY]=
             new BucketQueue(BUCKETS,HostCatcher.NORMAL_SIZE);
         heaps[HostCatcher.GOOD_PRIORITY]=
-            new BucketQueue(BUCKETS, HostCatcher.BAD_SIZE); 
+            new BucketQueue(BUCKETS, HostCatcher.GOOD_SIZE); 
     }
 
     /**
