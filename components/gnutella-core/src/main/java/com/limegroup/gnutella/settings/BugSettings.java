@@ -6,7 +6,7 @@ import java.io.File;
 /**
  * Settings to deal with bugs
  */ 
-public final class BugSettings extends LimeProps {
+public class BugSettings extends LimeProps {
 
     private BugSettings() {}
 
