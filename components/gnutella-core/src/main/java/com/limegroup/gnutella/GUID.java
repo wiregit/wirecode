@@ -12,7 +12,7 @@ import com.sun.java.util.collections.*;
  *
  * <ol>
  * <li>G[8]==0xFF.  This serves to identify "new GUIDs", e.g. from BearShare.
- * <li>G[15]=0x00.  This is reserved for future use.
+ * <li>G[15]=0x01.  This is the GNUTELLA Protocol Version (currently 1).
  * <li>G[9][10]= 0xFFFF & ((G[4]G[5]+2)*(G[6][7]+3) >> 8).  This is LimeWire's
  *   proprietary marking.  In other words, the result is obtained by first taking
  *   the two byte values before the 0xFF and adding "secret" constants.  These

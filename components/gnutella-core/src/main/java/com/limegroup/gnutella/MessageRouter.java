@@ -25,10 +25,6 @@ public abstract class MessageRouter
     private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
     /**
-     * Maps PingRequest GUIDs to PingReplyHandlers
-     */
-    private RouteTable _pingRouteTable = new RouteTable(2048);
-    /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
      */
     private RouteTable _queryRouteTable = new RouteTable(2048);
@@ -132,11 +128,6 @@ public abstract class MessageRouter
         _uploadManager = uploadManager;
     }
 
-    public String getPingRouteTableDump()
-    {
-        return _pingRouteTable.toString();
-    }
-
     public String getQueryRouteTableDump()
     {
         return _queryRouteTable.toString();
@@ -153,22 +144,8 @@ public abstract class MessageRouter
      */
     public void removeConnection(ManagedConnection connection)
     {
-        _pingRouteTable.removeReplyHandler(connection);
         _queryRouteTable.removeReplyHandler(connection);
         _pushRouteTable.removeReplyHandler(connection);
-    }
-
-    /**
-     * The handler for PingRequests received in
-     * ManagedConnection.loopForMessages().  Checks the routing table to see
-     * if the request has already been seen.  If not, calls handlePingRequest.
-     */
-    final void handlePingRequestPossibleDuplicate(
-        PingRequest pingRequest, ManagedConnection receivingConnection)
-    {
-        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(),
-                                      receivingConnection))
-            handlePingRequest(pingRequest, receivingConnection);
     }
 
     /**
@@ -199,8 +176,8 @@ public abstract class MessageRouter
      *   3. Implement respondToPingRequest.  This allows you to use the default
      *      handling framework and just customize responses.
      */
-    protected void handlePingRequest(PingRequest pingRequest,
-                                     ManagedConnection receivingConnection)
+    public void handlePingRequest(PingRequest pingRequest,
+                                  ManagedConnection receivingConnection)
     {
         _numPingRequests++;
 
@@ -256,7 +233,7 @@ public abstract class MessageRouter
     public void sendPingRequest(PingRequest pingRequest,
                                 ManagedConnection connection)
     {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
+        //_pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
         connection.send(pingRequest);
     }
 
@@ -277,7 +254,7 @@ public abstract class MessageRouter
      */
     public void broadcastPingRequest(PingRequest pingRequest)
     {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
+        //_pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
         broadcastPingRequest(pingRequest, null, _manager);
     }
 

@@ -465,15 +465,17 @@ public class ManagedConnection
             //here.
             if(m instanceof PingRequest) {
                 //if an older client, see if we need to throttle the Ping.
-                if (_isOldClient && throttlePing())
-                {
+                if (_isOldClient && throttlePing()) {
                     countDroppedMessage();
                     continue;
                 }
-
+                //if pongs are still needed from previous ping, then drop request
+                if (stillNeedsPongs((int)m.getTTL())) {
+                    countDroppedMessage();
+                    continue;
+                }
                 _lastPingGUID = m.getGUID();
-                _router.handlePingRequestPossibleDuplicate(
-                    (PingRequest)m, this);
+                _router.handlePingRequest((PingRequest)m, this);
                 if (!_receivedFirstPing) 
                     checkForOlderClient(m); //older client?
                 continue;
@@ -521,8 +523,7 @@ public class ManagedConnection
      * throttle the PingRequest.
      * @requires - this is connection is to an older client.
      */
-    private boolean throttlePing()
-    {
+    private boolean throttlePing() {
         //if not older client, shouldn't be calling method, but just in case
         //the ping should be processed.
         if (!_isOldClient)
@@ -540,9 +541,19 @@ public class ManagedConnection
         }
     }
 
-    //
-    // Begin Message dropping and filtering calls
-    //
+    /**
+     * Determines whether the connected client still needs some PingReplies 
+     * based on the ttl passed.  It does this by seeing if there are any 
+     * more needed ping replies to be sent from the array (up to ttl)
+     */
+    private boolean stillNeedsPongs(int ttl) {
+        for (int i = 0; i < ttl; i++) {
+            if (neededPongsArray[i] > 0) 
+                return true;
+        }
+
+        return false;
+    }
 
     /**
      * A callback for the ConnectionManager to inform this connection that a

@@ -78,10 +78,9 @@ public class RouterService
     }
 
     /**
-     * Dump the ping and query routing tables
+     * Dump the query routing tables
      */
     public void dumpRouteTable() {
-        System.out.println(router.getPingRouteTableDump());
         System.out.println(router.getQueryRouteTableDump());
     }
 

@@ -21,46 +21,45 @@ import java.util.Date;
  * written to disk.
  */
 public class HostCatcher {
-    /**
-     * Increment for number of pongs stored in the cache (per ttl).  So if
-     * the number of pongs for TTL 1 = 10, then number of pongs for TTL 2 = 
-     * TTL 1 number of pongs + increment, TTL 3 = TTL 2 + number of pongs +
-     * increment, etc.  This is done because we will store more pongs from
-     * hosts that are further away from us (i.e., greater TTL), since it is
-     * more likely that I will have more pongs from all my neighbors's 
-     * neighbors, than from my direct neighbors.
+    /** 
+     * Number of sufficent pongs needed in the reserve cache before a Ping doesnt'
+     * have to be broadcasted across the network when creating a new connection.
      */
-    private static final int CACHE_TTL_SIZE_INCREMENT = 10;
-    /** Number of pongs to store in cache for TTL 1. */
-    private static final int CACHE_TTL_1_SIZE = 10;
+    private static final int RESERVE_CACHE_SUFFICIENT_CAPACITY = 50;
 
-     /** The number of router pongs to store. */
-    private static final int GOOD_SIZE=30;
-    /** The number of normal pongs to store. */
-    private static final int NORMAL_SIZE=70;
-    /** The number of private IP pongs to store. */
+    /** The number of router pongs to store in the reserve cache. */
+    private static final int ROUTER_SIZE=30;
+    /** The number of old client pongs to store in the reserve cache. */
+    private static final int OLD_CLIENT_SIZE=20;
+    /** The number of new client pongs to store in the reserve cache. */
+    private static final int NEW_CLIENT_SIZE=50;
+    /** The number of private IP pongs to store in the reserve cache. */
     private static final int BAD_SIZE=10;
-    private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
+    private static final int SIZE=ROUTER_SIZE+OLD_CLIENT_SIZE+
+        NEW_CLIENT_SIZE+BAD_SIZE;
 
-    /* Cache expire time is 3 seconds */
-    private static final long CACHE_EXPIRE_TIME = 3000;
+    /** Priorities for endpoints in reserve cache. */
+    private static final int BEST_PRIORITY=3; //new client pongs
+    private static final int GOOD_PRIORITY=2; //router pongs
+    private static final int NORMAL_PRIORITY=1; //old client pongs
+    private static final int BAD_PRIORITY=0; //private IP pongs
 
     /**
      * There are two pong caches used, a normal pong cache and a reserve
-     * pong cache.  The normal pong cache will only consist of pongs from
+     * pong cache.  The pong cache will only consist of pongs from
      * new clients (i.e., that are not firewalled and can currently accept
      * incoming connections).  Reserve cache is for all pongs from the router
      * and any old clients (before protocol version 0.6).  The max ttl of any
      * pongs that are put into the cache is the max ttl that we will use to
      * get new pongs to refresh the cache.
+     *
+     * LOCKING: obtain cacheLock when modifying cache.
      */
-    private PongCache cache =
-        new PongCache(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+    private PingReplyCache pongCache =
+        new PingReplyCache(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+    private Object cacheLock = new Object();
 
-    private PongCache reserveCache = 
-        new PongCache(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-
-    /* Our representation consists of a set and a queue, both bounded in size.
+    /* reserve cache consists of a set and a queue, both bounded in size.
      * The set lets us quickly check if there are duplicates, while the queue
      * provides ordering.  The elements at the END of the queue have the highest
      * priority. Note that if a priority queue is used instead of a bucket
@@ -70,9 +69,10 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.
      */
-    private BucketQueue /* of Endpoint */ queue=
-        new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
-    private Set /* of Endpoint */ set=new HashSet();
+    private BucketQueue /* of Endpoint */ reserveCacheQueue=
+        new BucketQueue(new int[] {BAD_SIZE, OLD_CLIENT_SIZE, 
+            ROUTER_SIZE, NEW_CLIENT_SIZE});
+    private Set /* of Endpoint */ reserveCacheSet=new HashSet();
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
 
@@ -183,13 +183,13 @@ public class HostCatcher {
             else
                 e.setWeight(NORMAL_PRIORITY);
 
-            if ((! set.contains(e)) && (! isMe(host, port))) {
+            if ((! reserveCacheSet.contains(e)) && (! isMe(host, port))) {
                 //add e to the head.  Order matters!
-                Object removed=queue.insert(e);
+                Object removed=reserveCacheQueue.insert(e);
                 //Shouldn't happen...
                 if (removed!=null)
-                    set.remove(removed);
-                set.add(e);
+                    reserveCacheSet.remove(removed);
+                reserveCacheSet.add(e);
                 notify();
             }
         }
@@ -203,7 +203,7 @@ public class HostCatcher {
     public synchronized void write(String filename) throws IOException {
         FileWriter out=new FileWriter(filename);
         //1) Write connections we're connected to--in no particular order.
-        //   Also add the connections to a set for step (2).  Ignore incoming
+        //   Also add the connections to a set for step (2 and 3).  Ignore incoming
         //   connections, since the remote host's port is ephemeral.
         Set connections=new HashSet();
         for (Iterator iter=manager.getInitializedConnections().iterator();
@@ -217,9 +217,17 @@ public class HostCatcher {
             writeInternal(out, e);
         }
 
+        //2.) Write out the connections in the cache.
+        for (Iterator iter=pongCache.iterator(); iter.hasNext(); ) {
+            Endpoint e = (Endpoint)iter.next();
+            if (connections.contains(e))
+                continue;
+            writeInternal(out, e);
+        }
+
         //2.) Write hosts in this that are not in connections--in order.
-        for (int i=queue.size()-1; i>=0; i--) {
-            Endpoint e=(Endpoint)queue.extractMax();
+        for (int i=reserveCacheQueue.size()-1; i>=0; i--) {
+            Endpoint e=(Endpoint)reserveCacheQueue.extractMax();
             if (connections.contains(e))
                 continue;
             writeInternal(out, e);
@@ -266,13 +274,13 @@ public class HostCatcher {
 
         boolean notifyGUI=false;
         synchronized(this) {
-            if (! (set.contains(e))) {
+            if (! (reserveCacheSet.contains(e))) {
                 //Adding e may eject an older point from queue, so we have to
                 //cleanup the set to maintain rep. invariant.
-                set.add(e);
-                Object ejected=queue.insert(e);
+                reserveCacheSet.add(e);
+                Object ejected=reserveCacheQueue.insert(e);
                 if (ejected!=null)
-                    set.remove(ejected);
+                    reserveCacheSet.remove(ejected);
 
                 //If this is not full, notify the callback.  If this is full,
                 //the GUI's display of the host catcher will differ from this.
@@ -308,8 +316,8 @@ public class HostCatcher {
         //Because priorities are only -1, 0, or 1, it suffices to look at the
         //head of the queue.  If this were not the case, we would likely have
         //to augment the state of this.
-        if (! queue.isEmpty()) {
-            Endpoint e=(Endpoint)queue.getMax();
+        if (! reserveCacheQueue.isEmpty()) {
+            Endpoint e=(Endpoint)reserveCacheQueue.getMax();
             return e.getWeight()==GOOD_PRIORITY;
         } else {
             return false;
@@ -476,11 +484,11 @@ public class HostCatcher {
      */
     private Endpoint getAnEndpointInternal()
             throws NoSuchElementException {
-        if (! queue.isEmpty()) {
+        if (! reserveCacheQueue.isEmpty()) {
             //            System.out.println("    GAEI: From "+set+",");
             //pop e from queue and remove from set.
-            Endpoint e=(Endpoint)queue.extractMax();
-            boolean ok=set.remove(e);
+            Endpoint e=(Endpoint)reserveCacheQueue.extractMax();
+            boolean ok=reserveCacheSet.remove(e);
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
@@ -488,11 +496,23 @@ public class HostCatcher {
             throw new NoSuchElementException();
     }
 
+    /** 
+     * return whether the reserve cache size is sufficient enough to not
+     * cause a refresh of the cache (i.e., broadcast a ping).
+     */
+    public synchronized boolean reserveCacheSufficient()
+    {
+        if (reserveCacheQueue.size() < RESERVE_CACHE_SUFFICIENT_CAPACITY)
+            return false;
+        else
+            return true;
+    }
+
     /**
      *  Return the number of hosts
      */
     public int getNumHosts() {
-        return( queue.size() );
+        return( reserveCacheQueue.size() );
     }
 
     /**
@@ -502,7 +522,7 @@ public class HostCatcher {
      */
     public synchronized Iterator getHosts() {
         //Clone the queue before iterating.
-        return (new BucketQueue(queue)).iterator();
+        return (new BucketQueue(reserveCacheQueue)).iterator();
     }
 
     /**
@@ -514,7 +534,7 @@ public class HostCatcher {
      */
     public synchronized Iterator getBestHosts(int n) {
         //Clone the queue before iterating.
-        return (new BucketQueue(queue)).iterator(n);
+        return (new BucketQueue(reserveCacheQueue)).iterator(n);
     }
 
     /**
@@ -522,8 +542,8 @@ public class HostCatcher {
      */
     public synchronized void removeHost(String host, int port) {
         Endpoint e=new Endpoint(host, port);
-        boolean removed1=set.remove(e);
-        boolean removed2=queue.removeAll(e);
+        boolean removed1=reserveCacheSet.remove(e);
+        boolean removed2=reserveCacheQueue.removeAll(e);
         //Check that set.contains(e) <==> queue.contains(e)
         Assert.that(removed1==removed2, "Rep. invariant for HostCatcher broken.");
     }
@@ -533,8 +553,8 @@ public class HostCatcher {
      * @effects removes all entries from this
      */
     public synchronized void clear() {
-        queue.clear();
-        set.clear();
+        reserveCacheQueue.clear();
+        reserveCacheSet.clear();
         expire();
     }
 
@@ -543,8 +563,8 @@ public class HostCatcher {
      * @effects removes all entries from this.  Does not wake up fetcher.
      */
     public synchronized void silentClear() {
-        queue.clear();
-        set.clear();
+        reserveCacheQueue.clear();
+        reserveCacheSet.clear();
     }
 
     /**
@@ -582,70 +602,7 @@ public class HostCatcher {
     }
 
     public String toString() {
-        return queue.toString();
-    }
-
-    /**
-     * Cache used to store all the pongs sent to us.  It stores all the
-     * pongs as an array of ArrayLists.  We use an ArrayList (instead of 
-     * DoublyLinkedList) because we don't need to remove entries one at a time
-     * (we just clear the cache at once).  Also, ArrayList allows us to return 
-     * a random element (using the indexOf method) whereas DoublyLinkedList
-     * has only basic methods to access the list.
-     */
-    private class PongCache {
-        private ArrayList[] pongs;
-
-        private Random random; //used for returning random Pongs from cache.
-
-        public PongCache(int maxTTL) {
-            //array of 0 .. maxTTL ArrayLists
-            pongs = new ArrayList[maxTTL];
-
-            int numOfPongsAllowed = CACHE_TTL_1_SIZE;
-            for (int i = 0; i < pongs.length; i++)
-            {
-                pongs[i] = new ArrayList(numOfPongsAllowed);
-                numOfPongsAllowed += CACHE_TTL_SIZE_INCREMENT;
-            }
-
-            random = new Random();
-        }
-
-        /** 
-         * adds a Pong to the cache, based on its TTL.
-         */
-        private void addPongToCache(PingReply pr) {
-            int ttl = pr.getTTL();
-            
-            if (ttl > pongs.length)
-                return; //if greater than Max TTL allowed, do nothing.
-
-            pongs[ttl-1].add(pr);
-        }
-
-        /**
-         * clears out all the pongs currently in the cache.
-         */
-        private void clearCache() {
-            for (int i = 0; i < pongs.length; i++) {
-                pongs[i].clear();
-            }
-        }
-
-        /**
-         * Return a pong for a specified TTL.  Basically, return a random
-         * pong from the ArrayList of that specified TTL.  Return null 
-         * if the ttl is greater than the Max TTL allowed for caching.
-         */
-        private PingReply getPong(int ttl) {
-            if (ttl > pongs.length)
-                return null;
-
-            ArrayList arrayOfPongs = pongs[ttl-1];
-            int index = random.nextInt(arrayOfPongs.size());
-            return arrayOfPongs.indexOf(index);
-        }
+        return reserveCacheQueue.toString();
     }
 
 //      /** Unit test: just calls tests.HostCatcherTest, since it
