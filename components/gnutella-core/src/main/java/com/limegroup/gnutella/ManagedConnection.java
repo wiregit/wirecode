@@ -285,6 +285,11 @@ public class ManagedConnection extends Connection
      */
     private int softMaxHops = -1;
 
+    /** Use this if a PushProxyAck is received for this MC meaning the remote
+     *  Ultrapeer can serve as a PushProxy
+     */
+    private int pushProxyPort = -1;
+
     /** The class wide static counter for the number of udp connect back 
      *  request sent.
      */
@@ -1091,6 +1096,15 @@ public class ManagedConnection extends Connection
             HopsFlowVendorMessage hops = (HopsFlowVendorMessage) vm;
             softMaxHops = hops.getHopValue();
         }
+        else if (vm instanceof PushProxyAcknowledgement) {
+            // this connection can serve as a PushProxy, so note this....
+            PushProxyAcknowledgement ack = (PushProxyAcknowledgement) vm;
+            if (Arrays.equals(ack.getGUID(),
+                              RouterService.getMessageRouter()._clientGUID))
+                pushProxyPort = ack.getListeningPort();
+            // else mistake on the server side - the guid should be my client
+            // guid - not really necessary but whatever
+        }
         else if (vm instanceof MessagesSupportedVendorMessage) {
 
             // see if you need a PushProxy - the remoteHostSupportsPushProxy
@@ -1403,6 +1417,23 @@ public class ManagedConnection extends Connection
     public void setQueryRouteTableSent(QueryRouteTable qrt) {
         _lastQRPTableSent = qrt;
     }
+
+    
+    /** @return a non-negative integer representing the proxy's port for UDP
+     *  communication, a negative number if PushProxy isn't supported.
+     */
+    public int getPushProxyPort() {
+        return pushProxyPort;
+    }
+
+    /** @return the InetAddress of the remote host - only meaningful if
+     *  getPushProxyPort() > -1
+     *  @see getPushProxyPort()
+     */
+    public InetAddress getPushProxyAddress() {
+        return getInetAddress();
+    }
+    
 
     
     /** 

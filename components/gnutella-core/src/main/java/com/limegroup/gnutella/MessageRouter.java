@@ -284,6 +284,11 @@ public abstract class MessageRouter {
                 ;
             handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
         }
+        else if (msg instanceof PushProxyAcknowledgement) {
+			if(RECORD_STATS)
+                ;
+            receivingConnection.handleVendorMessage((VendorMessage) msg);
+        }
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -885,7 +890,8 @@ public abstract class MessageRouter {
             try {
                 // 1)
                 PushProxyAcknowledgement ack = 
-                new PushProxyAcknowledgement(RouterService.getPort());
+                    new PushProxyAcknowledgement(RouterService.getPort(),
+                                                 ppReq.getClientGUID());
                 source.send(ack);
                 
                 // 2)

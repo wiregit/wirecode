@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
@@ -41,6 +42,19 @@ public final class PushProxyAcknowledgement extends VendorMessage {
         super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
               derivePayload(port));
         _port = port;
+    }
+
+    /** @param port The port you want people to connect back to.  If you give a
+     *  bad port I don't check so check yourself!
+     *  @param guid In case you want to set the guid (the PushProxy protocol
+     *  advises this).
+     */
+    public PushProxyAcknowledgement(int port,
+                                    GUID guid) throws BadPacketException {
+        super(F_LIME_VENDOR_ID, F_PUSH_PROXY_ACK, VERSION, 
+              derivePayload(port));
+        _port = port;
+        setGUID(guid);
     }
 
     /** @return the port the PushProxy is listening on....
