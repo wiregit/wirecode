@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=India
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Taml
-LOCALE_SCRIPT_NAME=தமிழ
+LOCALE_SCRIPT_NAME=Tamil
 LOCALE_ENGLISH_LANGUAGE_NAME=Tamil
 
 ################################################################################
