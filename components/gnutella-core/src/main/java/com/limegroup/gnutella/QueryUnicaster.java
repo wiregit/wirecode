@@ -9,7 +9,7 @@ import java.util.Stack;
  * HostCatcher to find unicast-enabled hosts.  It also allows for stopping of
  * individual queries by reply counts.
  */ 
-public class QueryUnicaster {
+public final class QueryUnicaster {
 
     /** The time in between successive unicast queries.
      */
@@ -48,7 +48,7 @@ public class QueryUnicaster {
     }
 
 
-    /** Returns a List of unicast Endpoints.
+    /** Returns a List of unicast Pongs (PingReply).
      */
     public List getUnicastEndpoints() {
         List retList = new ArrayList();
@@ -64,7 +64,7 @@ public class QueryUnicaster {
     }
 
 
-    protected QueryUnicaster() {
+    private QueryUnicaster() {
         // construct DSes...
         _queries = new Hashtable();
         _queryHosts = new Stack();
@@ -163,15 +163,18 @@ public class QueryUnicaster {
         return retBool;
     }
 
-    /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
+    /** Just feed me PingReplies - I'll check if I could use them or not.
      */
-    public void addUnicastEndpoint(ExtendedEndpoint endpoint) {
-        if (endpoint.getUnicastSupport()) {
-            synchronized (_queryHosts) {
-                _queryHosts.push(endpoint);
-                _queryHosts.notify();
+    public void addUnicastEndpoint(PingReply endpoint) {
+        try {
+            if (endpoint.supportsUnicast()) {
+                synchronized (_queryHosts) {
+                    _queryHosts.push(endpoint);
+                    _queryHosts.notify();
+                }
             }
         }
+        catch (BadPacketException ignored) {}
     }
 
     /** Feed me QRs so I can keep track of stuff.
@@ -194,7 +197,7 @@ public class QueryUnicaster {
 
     /** May block if no hosts exist.
      */
-    private ExtendedEndpoint getUnicastHost() throws InterruptedException {
+    private Endpoint getUnicastHost() throws InterruptedException {
         debug("QueryUnicaster.getUnicastHost(): waiting for hosts.");
         synchronized (_queryHosts) {
 
@@ -208,22 +211,23 @@ public class QueryUnicaster {
             }
             debug("QueryUnicaster.getUnicastHost(): got a host!");
 
+            PingReply pr = (PingReply) _queryHosts.pop();            
+            Endpoint toReturn = new Endpoint(pr.getIP(), pr.getPort());
+
             if (_queryHosts.size() < MIN_ENDPOINTS) {
                 // send a ping to the guy you are popping if cache too small
-                ExtendedEndpoint toReturn = 
-                (ExtendedEndpoint) _queryHosts.pop();
-                PingRequest pr = new PingRequest((byte)1);
+                PingRequest pReq = new PingRequest((byte)1);
                 UDPAcceptor udpService = UDPAcceptor.instance();
                 try {
                     InetAddress ip = 
                     InetAddress.getByName(toReturn.getHostname());
                     // send the query
-                    udpService.send(pr, ip, toReturn.getPort());
+                    udpService.send(pReq, ip, toReturn.getPort());
                 }
                 catch (UnknownHostException ignored) {}
                 return toReturn;
             }
-            return (ExtendedEndpoint) _queryHosts.pop();
+            return toReturn;
         }
     }
 
