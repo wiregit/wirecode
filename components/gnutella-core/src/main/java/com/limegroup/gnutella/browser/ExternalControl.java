@@ -13,8 +13,9 @@ import java.io.*;
 public class ExternalControl {
 
 
-	private static final String LOCALHOST = "127.0.0.1"; 
-	private static final String HTTP      = "http://";
+	private static final String LOCALHOST       = "127.0.0.1"; 
+	private static final String HTTP            = "http://";
+	private static String       enqueuedRequest = null;
 
 	public static String preprocessArgs(String args[]) {
 
@@ -41,6 +42,18 @@ public class ExternalControl {
 	public static void checkForActiveLimeWire(String arg) {
 	    if(  CommonUtils.isWindows() && testForLimeWire(arg) ) {
 		    System.exit(0);	
+		}
+	}
+
+	public static void enqueueMagnetRequest(String arg) {
+		enqueuedRequest = arg;
+	}
+
+	public static void runQueuedMagnetRequest() {
+	    if ( enqueuedRequest != null ) {
+			String request   = enqueuedRequest;
+			enqueuedRequest = null;
+	        handleMagnetRequest(request);
 		}
 	}
 	
