@@ -173,9 +173,12 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
     public static final String _200_OK     = " 200 OK";
     public static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
-    public static final String CONNECT="CONNECT/";
-    /** End of line for Gnutella 0.6 */
-    public static final String CRLF="\r\n";
+    public static final String CONNECT = "CONNECT/";
+    
+    /** 
+     * End of line for Gnutella 0.6 
+     */
+    public static final String CRLF = "\r\n";
     
     /**
      * Time to wait for inut from user at the remote end. (in milliseconds)
@@ -313,7 +316,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * The total amount of upstream messaging bandwidth for ALL connections
      * in BYTES (not bits) per second. 
      */
-    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=8000;
+    private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH = 8000;
                                                             
     /** 
      * Limits outgoing bandwidth for ALL connections. 
@@ -497,7 +500,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public void initialize(int timeout) 
         throws IOException, NoGnutellaOkException, BadHandshakeException {
-            
+        
+        // TODO: make sure we actually use a timeout here    
         boolean connectRegistered = false;
         if(isOutgoing())  {
             // If it's an outgoing connection, we need to obtain the socket.
@@ -524,7 +528,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             throw CONNECTION_CLOSED;
         } 
         
-        System.out.println("socket: "+_socket);
+        System.out.println("Connection::initialize::socket: "+_socket);
 
 
         
