@@ -2388,6 +2388,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         return (busy == null ? 0 : busy.size());
     }
 
+    public synchronized int getQueuedHostCount() {
+        return queuedCount;
+    }
+
     /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.

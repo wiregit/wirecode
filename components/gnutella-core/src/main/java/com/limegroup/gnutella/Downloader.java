@@ -168,5 +168,12 @@ public interface Downloader extends BandwidthTracker {
      * later
      */
     public int getBusyHostCount();
+
+    /**
+     * @return the number of hosts we are remotely queued on. 
+     */
+    public int getQueuedHostCount();
+
+
 }
 
