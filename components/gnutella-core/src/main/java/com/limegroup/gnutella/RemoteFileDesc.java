@@ -805,12 +805,6 @@ public class RemoteFileDesc implements Serializable {
                 ! ( Arrays.equals(_clientGUID,other._clientGUID)))
             return false;
 
-        // when testing we consider different PE's different
-        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
-            if (! (getPushAddr().equals(other.getPushAddr())))
-                return false;
-        }
-        
         if (_urns.isEmpty() && other._urns.isEmpty())
             return nullEquals(_filename, other._filename);
         else

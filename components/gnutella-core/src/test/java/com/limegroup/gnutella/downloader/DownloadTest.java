@@ -1155,7 +1155,7 @@ public class DownloadTest extends BaseTestCase {
         PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
                 savedFile.getName(),second);
         
-        RemoteFileDesc []rfd ={newRFDPush(PPORT_1)};
+        RemoteFileDesc []rfd ={newRFDPush(PPORT_1,2)};
         
         tGeneric(rfd);
         
@@ -1198,7 +1198,7 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
         
-        RemoteFileDesc pushRFD = newRFDPush(PPORT_1);
+        RemoteFileDesc pushRFD = newRFDPush(PPORT_1,2);
         
         assertFalse(pushRFD.supportsFWTransfer());
         assertTrue(pushRFD.needsPush());
@@ -1265,7 +1265,7 @@ public class DownloadTest extends BaseTestCase {
         
         RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
         
-        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2);
+        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2,3);
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
         
@@ -2398,14 +2398,14 @@ public class DownloadTest extends BaseTestCase {
                                   false, false,"",0,null, -1);
     }
     
-    private static RemoteFileDesc newRFDPush(int port) throws Exception{
+    private static RemoteFileDesc newRFDPush(int port,int suffix) throws Exception{
         PushAltLoc al = (PushAltLoc)AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+port,TestFile.hash());
         
         Set urns = new HashSet();
         urns.add(TestFile.hash());
         
-        return new RemoteFileDesc("127.0.0.1", 6346, 0, savedFile.getName(),
+        return new RemoteFileDesc("127.0.0."+suffix, 6346, 0, savedFile.getName(),
                 TestFile.length(),100,false,1,false, 
                 null,urns,false,
                 true,"ALT",0,0,al.getPushAddress());
