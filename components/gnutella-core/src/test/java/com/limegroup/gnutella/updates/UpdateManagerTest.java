@@ -14,17 +14,17 @@ import com.limegroup.gnutella.stubs.*;
  */
 public class UpdateManagerTest extends BaseTestCase {
     
-    private static final int OLD = 0;
+    static final int OLD = 0;
     
-    private static final int NEW = 1;
+    static final int NEW = 1;
     
-    private static final int DEF_SIGNATURE = 2;
+    static final int DEF_SIGNATURE = 2;
 
-    private static final int DEF_MESSAGE = 3;
+    static final int DEF_MESSAGE = 3;
 
-    private static final int BAD_XML = 4;
+    static final int BAD_XML = 4;
     
-    private static final int RANDOM_BYTES = 5;
+    static final int RANDOM_BYTES = 5;
     
     private static File OLD_VERSION_FILE;
     
@@ -49,7 +49,7 @@ public class UpdateManagerTest extends BaseTestCase {
 	}
 
 	public static Test suite() {
-		return buildTestSuite(UpdateManagerTest.class);//,"testHandshaking");
+		return buildTestSuite(UpdateManagerTest.class);//,"testOldVersionNotAcceptedFromNetwork");
 	}
 
 	public static void main(String[] args) {
@@ -166,10 +166,34 @@ public class UpdateManagerTest extends BaseTestCase {
         assertEquals("Problem with new update file", "3.2.2", man.getVersion());
     }
     
-//      public void testHandshaking() {
-//          TestConnection conn = new TestConnection(6666,"3.2.2");        
-//      }
+    public void testOldVersionNotAcceptedFromNetwork() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6666,"3.6.3",OLD); 
+        } catch(IOException iox) {
+            fail("could not set up test");
+        }
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update manager accepted lower version",
+                                                    "2.9.3",man.getVersion());
+    }
 
+    public void testIOXLeavesVersionIntact() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(6666,"3.6.3",OLD); 
+        } catch(IOException iox) {
+            fail("could not set up test");
+        }
+        conn.setSendUpdateData(false);
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Update manager accepted lower version",
+                                                    "2.9.3",man.getVersion());
+    }
 
 //      public void testNoMessageOnAtVersion() {
 //          InputStream is = null;
