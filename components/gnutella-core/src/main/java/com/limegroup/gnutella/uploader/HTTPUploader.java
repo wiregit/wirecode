@@ -385,7 +385,7 @@ public class HTTPUploader implements Runnable {
             String type = getMimeType();       /* write this method later  */
             str = "Content-type:" + type + "\r\n";
             _ostream.write(str.getBytes());
-            str = "Content-length:"+ _sizeOfFile + "\r\n";
+            str = "Content-length:"+ (_sizeOfFile - _uploadBegin) + "\r\n";
             _ostream.write(str.getBytes());
 
 			// Version 0.5 of limewire misinterpreted Content-range
