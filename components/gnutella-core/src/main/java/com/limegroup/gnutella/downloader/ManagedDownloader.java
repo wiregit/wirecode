@@ -275,10 +275,16 @@ public class ManagedDownloader implements Downloader, Serializable {
      * INVARIANT: dloaders.size<=threads 
      */
     private List /*of Threads*/ threads;
-    /** List of intervals within the file which have not been allocated to
-     * any downloader yet. The set of these intervals represents the "white"
-     * region of the file we are downloading*/
-    private List /* of Interval */ needed;
+    /**
+     * The IntervalSet of intervals within the file which have not been
+     * allocated to any downloader yet.  This set of intervals represents
+     * the "white" region of the file we are downloading.
+     *
+     * An IntervalSet is used to ensure that chunks readded to it are
+     * coalesced together.
+     * LOCKING: synchronize on this
+     */
+    private IntervalSet needed;
     /**List of RemoteFileDesc which were busy when we tried to connect to them.
      * To be used when we have run out of other options.*/
     private List /* of RemoteFileDesc2 */ busy;
@@ -1547,7 +1553,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
         synchronized(this) {
-            needed=new ArrayList(); 
+            needed=new IntervalSet(); 
             {//all variables in this block have limited scope
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                 File incompleteFile=incompleteFileManager.getFile(rfd);
@@ -1608,14 +1614,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if (stopped) {
                         debug("MANAGER: terminating because of stop");
                         throw new InterruptedException();
-                    } else if (dloaders.size()==0 && needed.size()==0) {
+                    } else if (dloaders.size()==0 && needed.isEmpty()) {
                         // Verify the commonOutFile is all done.
                         int doneSize =
                             (int)incompleteFileManager.getCompletedSize(
                                 incompleteFile);
                         Assert.that(
                             !commonOutFile.getFreeBlocks(doneSize).hasNext(),
-                            "file is incomplete, but needed.size() == 0" );
+                            "file is incomplete, but needed.isEmpty()" );
                             
                         //Finished. Interrupt all worker threads
                         for(int i=threads.size();i>0;i--) {
@@ -1975,7 +1981,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
-                if (needed.size()>0) {
+                if (!needed.isEmpty()) {
                     assignWhite(dloader,http11);
                 } else {
                     updateNeeded = false;      //1. See comment in finally
@@ -2204,7 +2210,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Then, if it's HTTP11, reduce the chunk up to CHUNK_SIZE.
         if( !dloader.getRemoteFileDesc().isPartialSource() ) {
             synchronized(this) {
-                interval = (Interval)needed.remove(0);
+                interval = needed.removeFirst();
                 if( dloader.isHTTP11() )
                     interval = fixIntervalForChunk(interval);
             }
@@ -2335,10 +2341,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // go through the list of needed ranges and match each one
         // against the list of available ranges.
-        for (int i = 0; i < needed.size(); i++) {
+        for (Iterator i = needed.getAllIntervals(); i.hasNext();) {
             // this is the interval we are going to match against
             // the available ranges now
-            Interval need = (Interval)needed.get(i);
+            Interval need = (Interval)i.next();
             // go through the list of available ranges
             for (int k = 0; k < availableRanges.size(); k++) {
                 // test this available range now but make sure
@@ -2352,7 +2358,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if( available == null || !need.overlaps(available) )
                     continue;
 
-                ret = (Interval)needed.remove(i);
+                ret = need;
+                i.remove();
                 
                 //check if high end needs truncation
                 if (ret.high > available.high ) {
@@ -2394,9 +2401,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             int max = temp.low+CHUNK_SIZE-1;
             interval = new Interval(temp.low, max);
             temp = new Interval(max+1,temp.high);
-            // this is not strictly necessary, as we know
-            // the interval will always be added at element 0.
-            // for efficiency, we could simply call needed.add(0, temp)
             addToNeeded(temp);
         } 
         else { //temp's size <= CHUNK_SIZE
@@ -2520,15 +2524,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     /**
-     * Adds an Interval into the needed list in the correctly sorted position.
+     * Adds an Interval into the needed list.
      */
     private synchronized void addToNeeded(Interval val) {
-        int position = Collections.binarySearch(needed, val);
-        // if it is not there, then binarySearch returns a negative
-        // number that is one greater than where we should insert it.
-        if(position < 0)
-            position = -(position + 1);
-        needed.add(position, val);
+        needed.add(val);
     }
 
     /** 

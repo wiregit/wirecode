@@ -66,6 +66,10 @@ public class IntervalSet {
             intervals.add(new Interval(lower.low, high));
         }   
     }
+    
+    public Interval removeFirst() {
+         return (Interval)intervals.remove(0);
+    }
 
     /**
      *@return a List of intervals that overlap checkInterval. For example
@@ -130,6 +134,10 @@ public class IntervalSet {
             sum+=block.high-block.low+1;
         }
         return sum;
+    }
+    
+    public boolean isEmpty() {
+        return intervals.isEmpty();
     }
     
     public void clear() {
