@@ -48,13 +48,15 @@ public class SchemaReplyCollectionMapper{
     }
     
     /**
-     * Returns null if the schemaURI does not correspond to any ReplyCollection
+     * Looks up and returns the <tt>LimeXMLReplyCollection</tt> value for the
+     * supplied schemaURI key.
+     * 
+     * @ return the <tt>LimeXMLReplyCollection</tt> for the given schema URI,
+     * or <tt>null</tt> if we the requested mapping does not exist
      */
     public LimeXMLReplyCollection getReplyCollection(String schemaURI){
-        LimeXMLReplyCollection replyCollection;
         synchronized(mapper){
-            replyCollection = (LimeXMLReplyCollection)mapper.get(schemaURI);
+            return (LimeXMLReplyCollection)mapper.get(schemaURI);
         }
-        return replyCollection;
     }
 }
