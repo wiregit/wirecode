@@ -873,16 +873,24 @@ public class Connection {
                 _socket.close();
             } catch(IOException e) {}
         }
-        if (_in != null) {
-            try {
-                _in.close();
-            } catch (IOException e) {}
-        }
-        if (_out != null) {
-            try {
-                _out.close();
-            } catch (IOException e) {}
-        }
+        
+       // closing _in (and possibly _out too) can cause NPE's
+       // in Message.read (and possibly other places),
+       // because BufferedInputStream can't handle
+       // the case where one thread is reading from the stream and
+       // another closes it.
+       // See BugParade ID: 4505257
+       
+       // if (_in != null) {
+       //     try {
+       //         _in.close();
+       //     } catch (IOException e) {}
+       // }
+       // if (_out != null) {
+       //     try {
+       //         _out.close();
+       //     } catch (IOException e) {}
+       // }
     }
 
     public String toString() {
