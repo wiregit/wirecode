@@ -19,7 +19,13 @@ public class SimppManager {
 
     private int _latestVersion;
     
-
+    /**
+     * The smallest version number of Simpp Messages. Any simpp message number
+     * less than this will be rejected. It's set to 3 for testing purposes, the
+     * first simpp message published by limwire will start at 4.
+     */
+    private static int MIN_VERSION = 3;
+    
     /** Cached Simpp bytes in case we need to sent it out on the wire */
     private byte[] _simppBytes;
 
@@ -36,15 +42,13 @@ public class SimppManager {
             raf.readFully(content);
             SimppDataVerifier verifier = new SimppDataVerifier(content);
             boolean verified = false;
+            _latestVersion = 0;
             try {
                 verified = verifier.verifySource();
             } catch (ClassCastException ccx) {
                 verified = false;
             }
             if(!verified) {
-                //TODO1: In this case what should the _latestVersion be set to
-                //the SimppSettingManager has not been initialized yet
-                //_latestVersion = propsHandler.useDefaultProps();
                 return;
             }
             SimppParser parser = null;
@@ -55,10 +59,7 @@ public class SimppManager {
             } catch (IOException iox) {
                 return;
             }
-            if(parser.getVersion() < 0) {
-                //TODO1: In this case what should the _latestVersion be set to
-                //the SimppSettingManager has not been initialized yet
-                //latestVersion = propsHandler.useDefaultProps();
+            if(parser.getVersion() <= MIN_VERSION) {
                 return;
             }
             this._latestVersion = parser.getVersion();
@@ -70,9 +71,7 @@ public class SimppManager {
             problem = true;        
         } finally {
             if(problem) {
-                //TODO1: In this case what should the _latestVersion be set to
-                //the SimppSettingManager has not been initialized yet
-                //_latestVersion = propsHandler.useDefaultProps();
+                //TODO: do we need to do anything here?
             }
             if(raf!=null) {
                 try {
