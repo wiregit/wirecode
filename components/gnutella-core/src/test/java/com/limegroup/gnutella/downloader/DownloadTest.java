@@ -2041,21 +2041,23 @@ public class DownloadTest extends BaseTestCase {
         uploader2.unqueue = false; //never unqueue this uploader.
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
+        RemoteFileDesc[] rfds = {rfd1};//one good and one queued
         
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
         ManagedDownloader downloader = null;
         
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(1000);
+        Thread.sleep(100);
+        downloader.addDownload(rfd2,false);
+        Thread.sleep(2000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",1, queued);
 
         downloader.addDownload(rfd3, true);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         
         //make sure we killed the queued
         swarm = downloader.getNumDownloaders();
@@ -2131,7 +2133,7 @@ public class DownloadTest extends BaseTestCase {
 
         //now try adding uploader 3 which is worse, nothing should change
         downloader.addDownload(rfd3,true);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = Integer.parseInt
@@ -2143,7 +2145,7 @@ public class DownloadTest extends BaseTestCase {
 
         //now try adding uploader 4 which is better, we should drop uploader2
         downloader.addDownload(rfd4,true);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = Integer.parseInt

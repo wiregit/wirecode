@@ -2600,7 +2600,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         synchronized(this) {
             // No replacement required?...
-            if(getNumDownloaders() < getSwarmCapacity()) {
+            if(getNumDownloaders() <= getSwarmCapacity()) {
                 if(status.isQueued())
                     queuedThreads.put(currentThread, new Integer(queuePos));
                 return true;
