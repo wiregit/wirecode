@@ -521,7 +521,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (dloaders.size()==0 && needed.size()==0) {
                     //Finished.
                     return SUCCESS;
-                } else if (dloaders.size()==0 && files.size()==0 && terminated.size()==0) {
+                } else if (dloaders.size()==0 
+                        && files.size()==0 
+                        && terminated.size()==0) {
                     //No downloaders worth living for.
                     if (busy.size()>0) {
                         files.addAll(busy);
@@ -558,9 +560,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 for (Iterator iter=terminated.iterator(); iter.hasNext(); ) {
                     HTTPDownloader dloader=(HTTPDownloader)iter.next();
+                    int init=dloader.getInitialReadingPoint();
                     Interval interval=new Interval(
-                        dloader.getInitialReadingPoint()+dloader.getAmountRead(),
-                        dloader.getInitialReadingPoint()+dloader.getAmountToRead());
+                        init+dloader.getAmountRead(),
+                        init+dloader.getAmountToRead());
                     if ((interval.high-interval.low) > 0)
                         needed.add(interval);
                 }
@@ -590,11 +593,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void startBestDownload(final List /* of RemoteFileDesc */ files,
                                    final List /* of Interval */ needed,
                                    final List /* of RemoteFileDesc */ busy,
-                                   final List /* of HTTPDownloader */ terminated) 
+                                   final List /* of HTTPDownloader*/ terminated)
             throws NoSuchElementException, InterruptedException {        
-        //1. Create downloader according to region to download.  Note that the downloader
-        //   requests until the end of the file (second arg to findConnectable) though
-        //   it secretly plans on terminating sooner (stopAt(..)).
+        //1. Create downloader according to region to download.  Note that the
+        //downloader requests until the end of the file (second arg to
+        //findConnectable) though it secretly plans on terminating sooner
+        //(stopAt(..)).
         HTTPDownloader dloader;
         if (needed.size()>0) {
             //Assign "white" (unclaimed) interval to new downloader.
@@ -603,7 +607,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //      increasing parallelism
             Interval interval=(Interval)needed.remove(0);
             try {
-                dloader=findConnectable(files, interval.low, interval.high, busy);
+                dloader=findConnectable(files, 
+                                        interval.low, interval.high,
+                                        busy);
             } catch (NoSuchElementException e) {
                 //Need to re-add the interval.  If there is an existing
                 //downloader, it will be reassigned to this later.
@@ -611,7 +617,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw e;
             }
             dloader.stopAt(interval.high);
-            //System.out.println("MANAGER: assigning white "+interval+" to "+dloader);
+            //System.out.println("MANAGER: assigning white "
+            //                   +interval+" to "+dloader);
         }
         else {
             //Split largest "gray" interval, i.e., steal part of another
@@ -625,7 +632,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized (this) {
                 for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
                     HTTPDownloader h=(HTTPDownloader)iter.next();
-                    if (biggest==null || h.getAmountToRead()>biggest.getAmountToRead())
+                    if (biggest==null 
+                           || h.getAmountToRead()>biggest.getAmountToRead())
                         biggest=h;
                 }                
             }
@@ -643,7 +651,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloader=findConnectable(files, start, stop, busy);
             dloader.stopAt(stop);
             biggest.stopAt(start);
-            //System.out.println("MANAGER: assigning grey "+start+"-"+stop+" to "+dloader);
+            //System.out.println("MANAGER: assigning grey "+start
+            //                    +"-"+stop+" to "+dloader);
         }
                 
         //2) Asynchronously do download
@@ -732,7 +741,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 continue;
             } catch (FileNotFoundException e) {
             } catch (IOException e) {
-                //TODO: differentiate between "can't connect" and other misc. errors
+                //TODO: differentiate between "can't connect" and other
+                //misc. errors
                 files.add(new RemoteFileDesc2(rfd, true));
                 continue;
             }
@@ -759,7 +769,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             downloader.doDownload();
         } catch (IOException e) {
         } finally {
-            int stop=downloader.getInitialReadingPoint()+downloader.getAmountRead();
+            //int stop=downloader.getInitialReadingPoint()
+            //            +downloader.getAmountRead();
             //System.out.println("    WORKER: terminating from "+downloader
             //                   +" at "+stop);
             //In order to reuse this location again, we need to know the
@@ -769,10 +780,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 dloaders.remove(downloader);
                 terminated.add(downloader);
                 files.add(rfd);
+                int init=downloader.getInitialReadingPoint();
                 incompleteFileManager.addBlock(
                     incompleteFileManager.getFile(rfd),
-                    downloader.getInitialReadingPoint(),
-                    downloader.getInitialReadingPoint()+downloader.getAmountRead());
+                    init,
+                    init+downloader.getAmountRead());
                 this.notifyAll();
             }
         }
@@ -915,10 +927,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    /***************************************************************************
+    /*************************************************************************
      * Accessors that delegate to dloader. Synchronized because dloader can
      * change.
-     ***************************************************************************/
+     *************************************************************************/
 
     public synchronized int getState() {
         return state;
