@@ -103,7 +103,6 @@ public final class NIOMessageWriter implements MessageWriter {
         // so we should start our application-level buffering of messages to
         // make sure we prioritize certain traffic over others
         if(hasPendingMessage()) {
-            System.out.println("NIOMessageWriter::adding to queue: "+msg);
             QUEUE.add(msg);
                 
             // should already be registered, but just in case...    
@@ -146,7 +145,6 @@ public final class NIOMessageWriter implements MessageWriter {
                 return true;
             }
     		Message msg = QUEUE.removeNext();
-            System.out.println("NIOMessageWriter::removed from queue: "+msg);
             Assert.that(msg != null, "should have obtained queued message");
             return write(msg);
     	} else if(!CHANNEL.isConnected()) {
@@ -154,7 +152,6 @@ public final class NIOMessageWriter implements MessageWriter {
         } else {
     	    CHANNEL.write(_message);
         	if(!_message.hasRemaining()) {
-                System.out.println("NIOMessageWriter::wrote to channel");
         		_message = null;
                 return QUEUE.size() == 0;
         	} else {
@@ -182,10 +179,7 @@ public final class NIOMessageWriter implements MessageWriter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#flush()
      */
-    public void flush() throws IOException {
-        // TODO Auto-generated method stub
-        
-    }
+    public void flush() throws IOException {}
 
     /**
      * Sets the flag for whether or not this writer is registered for write 
@@ -206,7 +200,6 @@ public final class NIOMessageWriter implements MessageWriter {
             try {
                 while(!write()) {}
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
