@@ -161,8 +161,7 @@ public class ConnectionManager {
         _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
-  		//watchdog.start();
-        System.err.println("Warning: watchdog disabled");
+  		watchdog.start();
         
         //We used to set the keep-alive to zero here, but that caused problems
         //because connection fetchers could wait in HostCatcher.getAnEndpoint()
