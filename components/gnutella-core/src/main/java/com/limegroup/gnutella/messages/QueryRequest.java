@@ -154,7 +154,7 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	public static QueryRequest createRequery(String query) {
 		return new QueryRequest(newQueryGUID(true), (byte)6, 0, query, "",
-								true, EMPTY_SET, EMPTY_SET,
+								true, UrnType.ANY_TYPE_SET, EMPTY_SET,
 								!RouterService.acceptedIncomingConnection());
 	}
 
@@ -165,8 +165,24 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	public static QueryRequest createQuery(String fileName) {
 		return new QueryRequest(newQueryGUID(false), (byte)6, 0, fileName,
-								"", false, EMPTY_SET, EMPTY_SET, 
+								"", false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection());
+	}
+
+	/**
+	 * Creates a new query with the specified guid, query string, and
+	 * xml query string.
+	 *
+	 * @param guid the message GUID for the query
+	 * @param query the query string
+	 * @param xmlQuery the xml query string
+	 */
+	public static QueryRequest createQuery(byte[] guid, String query, 
+										   String xmlQuery) {
+		return new QueryRequest(guid, (byte)6, 0, query, xmlQuery, false,
+								UrnType.ANY_TYPE_SET, EMPTY_SET, 
+								!RouterService.acceptedIncomingConnection());
+								
 	}
 
     /**
