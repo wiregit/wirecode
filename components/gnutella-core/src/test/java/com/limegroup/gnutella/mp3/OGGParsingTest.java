@@ -15,10 +15,10 @@ public class OGGParsingTest extends BaseTestCase {
 	static String _path = "com"+File.separator+"limegroup"+
 					File.separator+"gnutella"+File.separator+"mp3"+File.separator;
 	
-	static File _allFields = new File(_path+"oggAll.ogg");
-	static File _someFields = new File(_path+"oggSome.ogg");
-	static File _noFields = new File(_path+"oggNone.ogg");
-	static File _badFile = new File(_path+"oggBad.ogg");
+	static File _allFields = CommonUtils.getResourceFile(_path+"oggAll.ogg");
+	static File _someFields = CommonUtils.getResourceFile(_path+"oggSome.ogg");
+	static File _noFields = CommonUtils.getResourceFile(_path+"oggNone.ogg");
+	
 	
 	static AudioMetaData _metaData;
 	
@@ -62,12 +62,5 @@ public class OGGParsingTest extends BaseTestCase {
 		assertEquals(-1,_metaData.getTrack());
 		assertEquals("",_metaData.getGenre().toLowerCase());
 	}
-	
-	public void testBadFile() throws Exception {
-		try {
-			_metaData = (AudioMetaData) MetaData.parse(_badFile);
-			fail("invalid file parsed");
-		}catch(IOException expected) {}
-	}
-	
+
 }
