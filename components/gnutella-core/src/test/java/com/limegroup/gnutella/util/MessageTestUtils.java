@@ -27,7 +27,22 @@ public class MessageTestUtils {
      *  advertising free ultrapeer and leaf slots
      */
     public static PingReply createPongWithFreeLeafSlots() {
-        GGEP ggep = newGGEP(20, true, true);
+        GGEP ggep = newGGEP(20, true, true, true, false);
+        
+        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
+            new byte[]{1,1,1,1}, 10, 10, true, ggep);
+        return pr;
+    }
+    
+    /**
+     * Creates a new <tt>PingReply</tt> instance with the GGEP extension 
+     * advertising free ultrapeer and leaf slots.
+     * 
+     * @return a new <tt>PingReply</tt> for testing with the GGEP extension 
+     *  advertising free ultrapeer and leaf slots
+     */
+    public static PingReply createPongWithUltrapeerSlots() {
+        GGEP ggep = newGGEP(20, true, true, false, true);
         
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
             new byte[]{1,1,1,1}, 10, 10, true, ggep);
@@ -38,7 +53,8 @@ public class MessageTestUtils {
      * Returns the GGEP payload bytes to encode the given uptime. 
      */
     private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
-                                boolean isGUESSCapable) {
+                                boolean isGUESSCapable, boolean freeLeaf, 
+                                boolean freeUP) {
         GGEP ggep = new GGEP(true);
         
         if (dailyUptime >= 0)
@@ -54,7 +70,7 @@ public class MessageTestUtils {
         
         if (isUltrapeer) { 
             // indicate UP support
-            addUltrapeerExtension(ggep);
+            addUltrapeerExtension(ggep, freeLeaf, freeUP);
         }
         
         // all pongs should have vendor info
@@ -71,14 +87,23 @@ public class MessageTestUtils {
      * 
      * @param ggep the <tt>GGEP</tt> instance to add the extension to
      */
-    private static void addUltrapeerExtension(GGEP ggep) {
+    private static void addUltrapeerExtension(GGEP ggep, boolean freeLeaf, 
+                                              boolean freeUP) {
         byte[] payload = new byte[3];
         // put version
         payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
                                           CommonUtils.getUPMinorVersionNumber()
                                           );
-        payload[1] = (byte)10;
-        payload[2] = (byte)10;
+        if(freeLeaf) {
+            payload[1] = (byte)10;
+        } else {
+            payload[1] = (byte)0;
+        }
+        if(freeUP) {
+            payload[2] = (byte)10;
+        } else {
+            payload[2] = (byte)0;
+        }
 
         // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
