@@ -18,7 +18,8 @@ public class I18NConvertTest extends BaseTestCase {
     private final String ACCENTS = "ACCENTS";
     private final String OTHER = "OTHER";
     private final String SPLIT = "KEYWORD_SPLIT";
-    private I18NConvert _instance;
+    private AbstractI18NConverter _instanceICU;
+    private AbstractI18NConverter _instance118;
 
     public I18NConvertTest(String name) {
         super(name);
@@ -35,7 +36,15 @@ public class I18NConvertTest extends BaseTestCase {
             (new File("com/limegroup/gnutella/util/i18ntest.txt"));
         _buf = new BufferedReader(new InputStreamReader(fin, "UTF-8"));
 
-        _instance = I18NConvert.instance();
+        //_instance = I18NConvert.instance();
+
+        _instanceICU = 
+            (AbstractI18NConverter)PrivilegedAccessor.invokeConstructor(
+               I18NConvertICU.class, new Object[]{});
+
+        _instance118 = 
+            (AbstractI18NConverter)PrivilegedAccessor.invokeConstructor(
+               I18NConvert118.class, new Object[]{});
     }
     
     public void testConversions() throws Exception {
@@ -59,7 +68,7 @@ public class I18NConvertTest extends BaseTestCase {
             fail("problem with i18ntest.txt file", ioe);
         }
         catch(Throwable t) {
-            fail("proba at line : " + line, t);
+            fail("problem at line : " + line, t);
         }
 
     }
@@ -69,11 +78,17 @@ public class I18NConvertTest extends BaseTestCase {
 
         if(line.indexOf("# ") == -1) {
             String[] split = StringUtils.split(line, DELIM);
-            String x = _instance.getNorm(split[1]);
+            String x = _instance118.getNorm(split[1]);
+            String x2 = _instanceICU.getNorm(split[1]);
 
+            //make sure both conversion give the correct answer
             assertEquals(what + " " + line + ":", 
                          split[0], 
                          x);
+
+            assertEquals(what + " " + line + ":", 
+                         split[0], 
+                         x2);
         }
     }
     
