@@ -12,10 +12,15 @@ import com.limegroup.gnutella.*;
  * A standalone program for testing UDPConnections across machines.
  */
 public class UTest implements ActivityCallback, ErrorCallback {
+	
+	/** Control some logging of state */
+	private static boolean activeLogging = true;
+
     public static void main(String args[]) {
 		ActivityCallback callback = new UTest();
 		RouterService service = new RouterService(callback);
 		service.start();    
+		activeLogging = true;
 
 		log("Starting up ...");
 		waitOnUDP();
@@ -38,22 +43,22 @@ public class UTest implements ActivityCallback, ErrorCallback {
 					simpleTest(usock);
                 } else if (args[2].equals("-ec")) {
                     tlogstart("Starting EchoClient:");
-                    echoClient(usock);
+                    echoClient(usock, TARGET_BYTES);
                 } else if (args[2].equals("-es")) {
                     tlogstart("Starting EchoServer:");
-                    echoServer(usock);
+                    echoServer(usock, TARGET_BYTES);
                 } else if (args[2].equals("-ecb")) {
                     tlogstart("Starting EchoClientBlock:");
-                    echoClientBlock(usock);
+                    echoClientBlock(usock, TARGET_BLOCKS);
                 } else if (args[2].equals("-esb")) {
                     tlogstart("Starting EchoServerBlock:");
-                    echoServerBlock(usock);
+                    echoServerBlock(usock, TARGET_BLOCKS);
 				} else if (args[2].equals("-uc")) {
                     tlogstart("Starting UnidirectionalClient:");
-					unidirectionalClient(usock);
+					unidirectionalClient(usock, TARGET_BYTES);
 				} else if (args[2].equals("-us")) {
                     tlogstart("Starting UnidirectionalServer:");
-					unidirectionalServer(usock);
+					unidirectionalServer(usock, TARGET_BYTES);
                 }
 
 				usock.close();
@@ -72,46 +77,63 @@ public class UTest implements ActivityCallback, ErrorCallback {
     }
 
     private static void log2(String str) {
-        System.out.println(str);
+		if (activeLogging)
+        	System.out.println(str);
     }
 
     private static long startTime;
     private static long endTime;
     private static void tlogstart(String str) {
-        startTime = System.currentTimeMillis();
-        System.out.println(str +" "+ startTime);
+		if (activeLogging) {
+        	startTime = System.currentTimeMillis();
+        	System.out.println(str +" "+ startTime);
+		}
     }
 
     private static void tlogend(String str) {
-        endTime = System.currentTimeMillis();
-        System.out.println(str +" "+ endTime);
-        System.out.println("Total : "+(endTime -startTime)/1000 +" seconds");
+		if (activeLogging) {
+        	endTime = System.currentTimeMillis();
+        	System.out.println(str +" "+ endTime);
+        	System.out.println("Total: "+(endTime -startTime)/1000 +" seconds");
+		}
     }
 
-    private static int TARGET_BYTES = 2000000;
-	private static void echoClient(UDPConnection usock) throws IOException {
+	/** The amount of data to transfer */
+    private static int TARGET_BYTES  = 2000000;
+    private static int TARGET_BLOCKS = 4096;
+
+	/** A boolean that tracks whether the read thread was successful */
+    private static boolean readSuccess = false;
+
+	public static boolean echoClient(UDPConnection usock, int numBytes) 
+	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
-		ClientReader reader = new ClientReader(istream);
+		readSuccess = false;
+		ClientReader reader = new ClientReader(istream, numBytes);
 		reader.start();
 
-		for (int i = 0; i < TARGET_BYTES; i++) {
+		for (int i = 0; i < numBytes; i++) {
 			ostream.write(i % 128);
 			if ( (i % 1000) == 0 ) 
 				log2("Write status: "+i);
 		}
 		log("Done write");
 		
-		try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
+		try { reader.join(); } catch (InterruptedException ie){}
         tlogend("Done echoClient test");
+
+		return readSuccess;
 	}
 
 	static class ClientReader extends Thread {
 		InputStream istream;
+		int         numBytes;
 
-		public ClientReader(InputStream istream) {
+		public ClientReader(InputStream istream, int numBytes) {
 			this.istream = istream;
+			this.numBytes = numBytes;
 		}
 
 		public void run() {
@@ -119,7 +141,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 			log2("Begin read");
 
 			try {
-				for (int i = 0; i < TARGET_BYTES; i++) {
+				for (int i = 0; i < numBytes; i++) {
 					rval = istream.read();
 					if ( rval != (i % 128) ) {
 						log2("Error on read expected: "+i
@@ -129,7 +151,8 @@ public class UTest implements ActivityCallback, ErrorCallback {
 						log("Properly recieved: "+i);
 					if ( (i % 1000) == 0 ) 
 						log2("Read status: "+i);
-					}
+				}
+				readSuccess = true;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -137,13 +160,16 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		}
 	}
 
-	private static void echoServer(UDPConnection usock) throws IOException {
+	public static boolean echoServer(UDPConnection usock, int numBytes) 
+	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
+		boolean success = false;
+
 		int rval;
 		try {
-			for (int i = 0; i < TARGET_BYTES; i++) {
+			for (int i = 0; i < numBytes; i++) {
 				rval = istream.read();
 				if ( rval != (i % 128) ) {
 					log2("Error on read expected: "+i
@@ -154,20 +180,23 @@ public class UTest implements ActivityCallback, ErrorCallback {
 					log2("Echo status: "+i);
 				ostream.write(rval);
 			}
+			success = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		log("Done echo");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done echoServer test");
+		return success;
 	}
 
-	private static void echoClientBlock(UDPConnection usock) 
+	public static boolean echoClientBlock(UDPConnection usock, int numBlocks) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
-		ClientReader reader = new ClientReader(istream);
+		readSuccess = false;
+		ClientBlockReader reader = new ClientBlockReader(istream, numBlocks);
 		reader.start();
 	
 		// setup transfer data
@@ -175,22 +204,25 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		for (int i = 0; i < 512; i++)
 			bdata[i] = (byte) (i % 256);
 
-		for (int i = 0; i < 4096; i++) {
+		for (int i = 0; i < numBlocks; i++) {
 			ostream.write(bdata, 0, 512);
 			if ( (i % 8) == 0 ) 
 				log2("Write status: "+i*8);
 		}
 		log("Done write");
 		
-		try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
+		try { reader.join(); } catch (InterruptedException ie){}
         tlogend("Done echoClientBlock test");
+		return readSuccess;
 	}
 
 	static class ClientBlockReader extends Thread {
 		InputStream istream;
+		int         numBlocks;
 
-		public ClientBlockReader(InputStream istream) {
-			this.istream = istream;
+		public ClientBlockReader(InputStream istream, int numBlocks) {
+			this.istream   = istream;
+			this.numBlocks = numBlocks;
 		}
 
 		public void run() {
@@ -201,19 +233,20 @@ public class UTest implements ActivityCallback, ErrorCallback {
 
 			int len;
 			try {
-				for (int i = 0; i < 512 * 4096; i += len) {
+				for (int i = 0; i < 512 * numBlocks; i += len) {
 					len = istream.read(bdata);
 
 					for (int j = 0; j < len; j++) {
 						if ( bdata[j] != ((i+j) % 256) ) {
 							log2("Error on read expected: "+(i+j)
 							  +" received: "+bdata[j]);
-							break;
+							return;
 						} 
 						if ( ((i+j) % 1024) == 0 ) 
 							log2("Read status: "+i);
 					}
 				}
+				readSuccess = true;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -221,16 +254,18 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		}
 	}
 
-	private static void echoServerBlock(UDPConnection usock) 
+	public static boolean echoServerBlock(UDPConnection usock, int numBlocks) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
 
 		byte bdata[] = new byte[512];
 
+		boolean success = false;
+
 		int len = 0;
 		try {
-			for (int i = 0; i < 512 * 4096; i += len) {
+			for (int i = 0; i < 512 * numBlocks; i += len) {
 				len = istream.read(bdata);
 
 				for (int j = 0; j < len; j++) {
@@ -244,38 +279,45 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				}
 			}
 			ostream.write(bdata, 0, len);
+			success = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		log("Done echoBlock");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done echoServerBlock test");
+		return success;
 	}
 
-    private static void unidirectionalClient(UDPConnection usock) 
-      throws IOException {
+    public static boolean unidirectionalClient(UDPConnection usock, 
+	  int numBytes) throws IOException {
         OutputStream ostream = usock.getOutputStream();
 
+		boolean success = false;
+
         int i = 0;
-        for (i = 0; i < TARGET_BYTES; i++) {
+        for (i = 0; i < numBytes; i++) {
             ostream.write(i % 256);
             if ( (i % 1000) == 0 ) 
                 log2("Write status: "+i);
         }
+		success = true;
         log2("Write reached: "+i);
         
-        try { Thread.sleep(2*1000); } catch (InterruptedException ie){}
+        try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done unidirectionalClient test");
+		return success;
     }
 
-    private static void unidirectionalServer(UDPConnection usock) 
-      throws IOException {
+    public static boolean unidirectionalServer(UDPConnection usock, 
+	  int numBytes) throws IOException {
         InputStream  istream = usock.getInputStream();
 
+		boolean success = false;
         int rval;
         int i = 0;
         try {
-            for (i = 0; i < TARGET_BYTES; i++) {
+            for (i = 0; i < numBytes; i++) {
                 rval = istream.read();
                 if ( rval != (i % 256) ) {
                     log2("Error on read expected: "+i
@@ -286,6 +328,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
                         log2("Read Properly received: "+i);
                 }
             }
+			success = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -293,6 +336,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
         
         try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done unidirectionalServer test");
+		return success;
     }
 
 	private static void simpleTest(UDPConnection usock) throws IOException {

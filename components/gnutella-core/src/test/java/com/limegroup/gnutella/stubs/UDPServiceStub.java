@@ -1,14 +1,10 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class allows the creation of a UDPService instances with 
@@ -18,9 +14,14 @@ import com.sun.java.util.collections.*;
 public final class UDPServiceStub extends UDPService {
 
 	/**
+	 * The queue that processes packets to send.
+	 */
+	private final ProcessingQueue SEND_QUEUE;
+
+	/**
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
-	private final static UDPService INSTANCE1 = new UDPService();
+	private final static UDPService INSTANCE1 = new UDPServiceStub();
     
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
@@ -29,39 +30,29 @@ public final class UDPServiceStub extends UDPService {
 	private final int BUFFER_SIZE = 1024 * 32;
     
 
-	/**
-	 * The thread for listening of incoming messages.
-	 */
-	private final Thread UDP_RECEIVE_THREAD;
 	
 	/**
 	 * Instance accessor.
 	 */
-	public static UDPServiceStub instance() {
+	public static UDPService instance() {
 		return INSTANCE1;
+	}
+
+	/**
+	 * Stub Instance accessor.
+	 */
+	public static UDPServiceStub stubInstance() {
+		return (UDPServiceStub) INSTANCE1;
 	}
 
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	private UDPServiceStub() {	    
-        UDPSTUB_RECEIVE_THREAD1 = 
-            new ManagedThread(this,"UDPService-Receiver1");
-        UDP_RECEIVE_THREAD1.setDaemon(true);
 
-        SEND_QUEUE = new ProcessingQueue("UDPService-Sender");
-        RouterService.schedule(new IncomingValidator(), 
-                               Acceptor.TIME_BETWEEN_VALIDATES,
-                               Acceptor.TIME_BETWEEN_VALIDATES);
+        SEND_QUEUE = new ProcessingQueue("UDPServiceStub-Sender");
     }
-	
-	/**
-	 * 
-	 */
-	public void start() {
-        UDP_RECEIVE_THREAD.start();
-    }
-    
+
     /** 
      */
     public GUID getConnectBackGUID() {
@@ -87,90 +78,176 @@ public final class UDPServiceStub extends UDPService {
 	void setListeningSocket(DatagramSocket datagramSocket) {
 	}
 
+	/** Default wait time */
+	private final long LONG_TIME = 24 * 60 * 60 * 1000;
+
+	/** The active receivers of messages */
+	private final ArrayList RECEIVER_LIST = new ArrayList();
 
 	/**
-	 * Busy loop that accepts incoming messages sent over UDP and 
-	 * dispatches them to their appropriate handlers.
+     *  Create receiver for each simulated incoming connection
 	 */
-	public void run() {
-        try {
-            byte[] datagramBytes = new byte[BUFFER_SIZE];
-            MessageRouter router = RouterService.getMessageRouter();
-            while (true) {
-                // prepare to receive
-                DatagramPacket datagram = new DatagramPacket(datagramBytes, 
-                                                             BUFFER_SIZE);
-                
-                // when you first can, try to recieve a packet....
-                // *----------------------------
-                synchronized (_receiveLock) {
-                    while (_socket == null) {
-                        try {
-                            _receiveLock.wait();
-                        }
-                        catch (InterruptedException ignored) {
-                            continue;
-                        }
-                    }
-                    try {
-                        _socket.receive(datagram);
-                    } 
-                    catch(InterruptedIOException e) {
-                        continue;
-                    } 
-                    catch(IOException e) {
-                        continue;
-                    } 
-                }
-                // ----------------------------*                
-                // process packet....
-                // *----------------------------
-                if(!NetworkUtils.isValidAddress(datagram.getAddress()))
-                    continue;
-                if(!NetworkUtils.isValidPort(datagram.getPort()))
-                    continue;
-                
-                byte[] data = datagram.getData();
-                try {
-                    // we do things the old way temporarily
-                    InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in, Message.N_UDP);
-                    if(message == null) continue;                    
-                    if (!isGUESSCapable()) {
-                        if (message instanceof PingRequest) {
-                            GUID guid = new GUID(message.getGUID());
-                            if(isValidForIncoming(CONNECT_BACK_GUID, guid,
-                                                  datagram))
-                                _acceptedUnsolicitedIncoming = true;
-                            _lastUnsolicitedIncomingTime =
-                                System.currentTimeMillis();
-                        }
-                        else if (message instanceof PingReply) {
-                            GUID guid = new GUID(message.getGUID());
-                            if(isValidForIncoming(SOLICITED_PING_GUID, guid,
-                                                  datagram))
-                                _acceptedSolicitedIncoming = true;
-                        }
-                    }
-                    // ReplyNumberVMs are always sent in an unsolicited manner,
-                    // so we can use this fact to keep the last unsolicited up
-                    // to date
-                    if (message instanceof ReplyNumberVendorMessage)
-                        _lastUnsolicitedIncomingTime = 
-                            System.currentTimeMillis();
-                    router.handleUDPMessage(message, datagram);
-                }
-                catch (IOException e) {
-                    continue;
-                }
-                catch (BadPacketException e) {
-                    continue;
-                }
-                // ----------------------------*
-            }
-        } catch(Throwable t) {
-            ErrorService.error(t);
+	public void addReceiver(int toPort, int fromPort, int delay) {
+		Receiver r = new Receiver(toPort, fromPort, delay);
+		synchronized(RECEIVER_LIST) {
+			RECEIVER_LIST.add(r);
+		}
+	}
+
+	/**
+     *  Clean up the receiver list
+	 */
+	public void clearReceivers() {
+		synchronized(RECEIVER_LIST) {
+			RECEIVER_LIST.clear();
+		}
+	}
+
+    private class Receiver extends Thread {
+        private final ArrayList _messages;
+        private final int       _toPort;
+        private final int       _fromPort;
+        private final int       _delay;
+		private MessageRouter   _router;
+        
+        Receiver(int toPort, int fromPort, int delay) {
+            _messages = new ArrayList();
+            _toPort   = toPort;
+            _fromPort = fromPort;
+            _delay    = delay;
+			_router   = RouterService.getMessageRouter();
+        	setDaemon(true);
+			start();
         }
+
+		public int getPort() {
+			return _toPort;
+		}
+
+        public void add(DatagramPacket dp) {
+			synchronized(_messages) {
+				_messages.add(new MessageWrapper(dp, _delay));
+				Collections.sort(_messages);
+				_messages.notify();
+			}
+		}
+        
+        public void run() {
+            // forward on message when the time is right
+            // ------
+            MessageWrapper msg      = null;
+			long           time;
+			long 		   waitTime;
+
+            while (true) {
+				// Add some delay to the loop
+				try { Thread.sleep( 1 ); 
+				} catch(InterruptedException e) {}
+
+				time = System.currentTimeMillis();
+			    synchronized(_messages) {
+					if (_messages.size() > 0)
+						msg = (MessageWrapper) _messages.get(0);	
+					else
+						msg = null;
+					if (msg != null ) {
+						waitTime = msg._scheduledTime - time;
+					} else {
+						waitTime = LONG_TIME;
+					}
+
+					// wait for the scheduledTime or for earlier msgs
+					if ( waitTime > 0 ) {
+						try {
+							_messages.wait( LONG_TIME );
+               			} catch(InterruptedException e) {}
+						continue;
+					}
+				}
+
+				if (msg == null) 
+					continue;
+
+				// Message time has been reached so process it
+				receive(msg);
+
+			    synchronized(_messages) {
+					_messages.remove(0);
+				}
+            }
+        }
+
+		private void receive(MessageWrapper msg) {
+        	DatagramPacket datagram = msg._dp;
+			// swap the port to the sender from the receiver
+			datagram.setPort(_fromPort);
+
+			// ----------------------------*                
+			// process packet....
+			// *----------------------------
+			if(!NetworkUtils.isValidAddress(datagram.getAddress()))
+				return;
+			if(!NetworkUtils.isValidPort(datagram.getPort()))
+				return;
+			
+			byte[] data = datagram.getData();
+			try {
+				// we do things the old way temporarily
+				InputStream in = new ByteArrayInputStream(data);
+				Message message = Message.read(in, Message.N_UDP);
+				if(message == null) return;                    
+				_router.handleUDPMessage(message, datagram);
+			} catch (IOException e) {
+				return;
+			} catch (BadPacketException e) {
+				return;
+			}
+			// ----------------------------*
+		}
+    }	
+
+    private class MessageWrapper implements Comparable {
+        public final DatagramPacket _dp;
+        public final long           _scheduledTime;
+        public final int            _delay;
+        
+        MessageWrapper(DatagramPacket dp, int delay) {
+            _dp            = dp;
+            _scheduledTime = System.currentTimeMillis() + (long) delay;
+            _delay         = delay;
+        }
+
+		public int compareTo(Object o) {
+			MessageWrapper other = (MessageWrapper) o;
+			if (_scheduledTime < other._scheduledTime) 
+				return -1;
+			else if (_scheduledTime > other._scheduledTime) 
+				return 1;
+			return 0;
+		}
+    }	
+
+
+	/**
+	 *  This code replaces the socket.send.  It internally routes the message
+	 *  to a receiver.  This allows multiple local receivers 
+	 *  with different ip/ports to be simulated.
+	 */
+	public void internalSend(DatagramPacket dp) throws NoRouteToHostException {
+
+		Receiver r;
+
+		synchronized(RECEIVER_LIST) {
+			for (int i = 0; i < RECEIVER_LIST.size(); i++) {
+				r = (Receiver) RECEIVER_LIST.get(i);
+
+				if ( r.getPort() == dp.getPort() ) {
+					r.add(dp);
+					return;
+				}
+			}
+			throw new NoRouteToHostException("I don't see this ip/port");
+		}
 	}
     
     /**
@@ -256,33 +333,17 @@ public final class UDPServiceStub extends UDPService {
         public void run() {
             // send away
             // ------
-            synchronized (_sendLock) {
-                // we could be changing ports, just drop the message, 
-                // tough luck
-                if (_socket == null) {
-                    if (_socketSetOnce) {
-                        Exception npe = 
-                            new NullPointerException("Null UDP Socket!!");
-                        ErrorService.error(npe);
-                    }
-                    return;
-                }
-                try {
-                    _socket.send(_dp);
-                } catch(BindException be) {
-                    // oh well, if we can't bind our socket, ignore it.. 
-                } catch(NoRouteToHostException nrthe) {
-                    // oh well, if we can't find that host, ignore it ...
-                } catch(IOException ioe) {
-                    if(isIgnoreable(ioe.getMessage()))
-                        return;
-                        
-                    String errString = "ip/port: " + 
-                                       _dp.getAddress() + ":" + 
-                                       _dp.getPort();
-                    _err.error(ioe, errString);
-                }
-            }
+
+			try {
+				internalSend(_dp);
+			} catch(NoRouteToHostException nrthe) {
+				// oh well, if we can't find that host, ignore it ...
+			} catch(IOException ioe) {
+				String errString = "ip/port: " + 
+								   _dp.getAddress() + ":" + 
+								   _dp.getPort();
+				_err.error(ioe, errString);
+			}
         }
     }
 
