@@ -1,8 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
@@ -793,79 +792,6 @@ public class RouterService
     }
 
     /**
-     * Searches the given host for all its files.  Results are given to the GUI
-     * via handleQuery.  Returns the guid of the query, or null if the host
-     * couldn't be reached.  Blocks until the connection is established and the
-     * query is sent.  
-     *
-     * @return the guid of the underlying search.  Used to match up
-     *  query results.  Guaranteed to be 16 bytes long.
-     */
-    public byte[] browse(String host, int port) {
-        ManagedConnection c=null;
-
-        //1. See if we're connected....
-        for (Iterator iter=manager.getInitializedConnections().iterator();
-             iter.hasNext() ; ) {
-            ManagedConnection c2=(ManagedConnection)iter.next();
-            //Get the IP address of c2 in dotted decimal form.  Note
-            //that c2.getOrigHost is no good as it may return a
-            //symbolic name.
-            String ip=c2.getInetAddress().getHostAddress();
-            if (ip.equals(host) && c2.getOrigPort()==port) {
-            c=c2;
-            break;
-            }
-        }
-        //...if not, establish a new one.
-        if (c==null) {
-            try {
-                c = connectToHostBlocking(host, port);
-            } catch (IOException e) {
-                return null;
-            }
-        }
-
-        //2. Send a query for "*.*" with a TTL of 1.
-        QueryRequest qr=new QueryRequest((byte)1, 0, FileManager.BROWSE_QUERY);
-        router.sendQueryRequest(qr, c);
-        try {
-            c.flush();
-        } catch (IOException e) {
-            return null;
-        }
-
-        //3. Remove a lesser connection if necessary.  Current heuristic:
-        //drop the connection other than c with least number of files.
-        //
-        //TODO: this should go in ConnectionManager, but that requires
-        //us to add MAX_KEEP_ALIVE property.  Besides being the logical
-        //place for this functionality, it would make the network
-        //hill climbing a snap to implement.  It would also allow us to
-        //synchronize properly to prevent race conditions.
-        if (manager.getNumConnections()>manager.getKeepAlive()) {
-            ManagedConnection worst=null;
-            long files=Long.MAX_VALUE;
-            for (Iterator iter=manager.getConnections().iterator();
-                 iter.hasNext(); ) {
-                ManagedConnection c2=(ManagedConnection)iter.next();
-                //Don't remove the connection to the host we are browsing.
-                if (c2==c)
-                    continue;
-                long n=c2.getNumFiles();
-                if (n<files) {
-                    worst=c2;
-                    files=n;
-                }
-            }
-            if (worst!=null)
-                manager.remove(worst);
-        }
-
-        return qr.getGUID();
-    }
-
-    /**
      * Returns an iterator of the hosts in the host catcher, each
      * an Endpoint.
      */
@@ -984,6 +910,23 @@ public class RouterService
 	public Chatter createChat(String host, int port) {
 		Chatter chatter = ChatManager.instance().request(host, port);
 		return chatter;
+	}
+    
+    /**
+	 * Browses the passed host
+     * @param host The host to browse
+     * @param port The port at which to browse
+     * @param guid The guid to be used for the query replies received 
+     * while browsing host
+     * @param serventID The guid of the client to browse from.  I need this in
+     * case I need to push....
+	 */
+	public void doBrowseHost(String host, int port, 
+                             GUID guid, GUID serventID) {
+        BrowseHostHandler handler = new BrowseHostHandler(callback, router,
+                                                          acceptor, guid,
+                                                          serventID);
+        handler.browseHost(host, port);
 	}
 
     /**

@@ -22,6 +22,7 @@ public class RemoteFileDesc implements Serializable {
 	private int _speed;
 	private int _size;
 	private boolean _chatEnabled;
+    private boolean _browseHostEnabled;
     private int _quality;
     private LimeXMLDocument[] _xmlDocs = null;
 
@@ -41,7 +42,7 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
-						  boolean chat, int quality) {	   
+						  boolean chat, boolean browseHost, int quality) {	   
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -50,6 +51,7 @@ public class RemoteFileDesc implements Serializable {
 		_size = size;
 		_clientGUID = clientGUID;
 		_chatEnabled = chat;
+        _browseHostEnabled = browseHost;
         _quality = quality;
 	}
 
@@ -70,9 +72,10 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
-						  boolean chat, int quality, LimeXMLDocument[] xmlDocs) {
+						  boolean chat, boolean browseHost, int quality, 
+                          LimeXMLDocument[] xmlDocs) {
         this(host, port, index, filename, size,
-             clientGUID, speed, chat, quality);
+             clientGUID, speed, chat, browseHost, quality);
         _xmlDocs=xmlDocs;
 	}
 
@@ -85,6 +88,7 @@ public class RemoteFileDesc implements Serializable {
 	public byte[] getClientGUID() {return _clientGUID;}
 	public int getSpeed() {return _speed;}	
 	public boolean chatEnabled() {return _chatEnabled;}
+    public boolean browseHostEnabled() {return _browseHostEnabled;}
     public int getQuality() {return _quality;}
     public LimeXMLDocument[] getXMLDocs() {return _xmlDocs;}
 

@@ -43,11 +43,18 @@ public class HTTPUploader implements Uploader {
 
 	private UploadState _state;
 	private UploadManager _manager;
+    private MessageRouter _router;
 	
 	private boolean  _chatEnabled;
 	private String  _chatHost;
 	private int _chatPort;
     private FileManager _fileManager;
+    
+    /**
+     * Indicates that the client to which we are uploading is capable of
+     * accepting Queryreplies in the response.
+     */
+    private boolean _clientAcceptsXGnutellaQueryreplies = false;
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
@@ -61,7 +68,7 @@ public class HTTPUploader implements Uploader {
      * @param index index of file to upload
      */
 	public HTTPUploader(String file, Socket s, int index, UploadManager m,
-                        FileManager fm) {
+                        FileManager fm, MessageRouter router) {
 		_socket = s;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_filename = file;
@@ -69,14 +76,22 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
+        _router = router;
 		FileDesc desc;
 		boolean indexOut = false;
 		boolean ioexcept = false;
-
+        
 		try {
 			// This line can't be moved, or FileNotFoundUploadState
 			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
+            
+            //special case for browse host
+            if(index == UploadManager.BROWSE_HOST_FILE_INDEX) {
+                setState(BROWSE_HOST);
+                return;
+            }
+            
 			desc = _fileManager.get(_index);
 			_fileSize = desc._size;
 		} catch (IndexOutOfBoundsException e) {
@@ -108,7 +123,8 @@ public class HTTPUploader implements Uploader {
      * @param index index of file to be uploaded
      */
 	public HTTPUploader(String file, String host, int port, int index,
-						String guid, UploadManager m, FileManager fm) {
+						String guid, UploadManager m, FileManager fm,
+                        MessageRouter router) {
 		_filename = file;
 		_manager = m;
 		_index = index;
@@ -118,6 +134,7 @@ public class HTTPUploader implements Uploader {
 		_guid = guid;
 		_port = port;
         _fileManager = fm;
+        _router = router;
 		FileDesc desc;
 		try {
 			desc = _fileManager.get(_index);
@@ -158,8 +175,15 @@ public class HTTPUploader implements Uploader {
 			giv = "GIV " + _index + ":" + _guid + "/" + _filename + "\n\n";
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
-			
-            //OK. We conneced and sent the GIV, now just return the socket
+
+            InputStream in = _socket.getInputStream(); 
+            //dont read a word of size more than 3
+            String word = IOUtils.readWord(in, 3);
+            if (!word.equalsIgnoreCase("get"))
+                throw new IOException();
+
+            //OK. We connected, sent the GIV, and confirmed the get, 
+            //now just return the socket
             return _socket;
 		} catch (SecurityException e) {
 			this.setState(Uploader.PUSH_FAILED);
@@ -187,7 +211,8 @@ public class HTTPUploader implements Uploader {
 	 */
 	public void start() {
 		try {
-			prepareFile();
+            if(_stateNum != BROWSE_HOST)
+                prepareFile();
 		} catch (IOException e) {
 			setState(FILE_NOT_FOUND);
 		}
@@ -244,6 +269,9 @@ public class HTTPUploader implements Uploader {
 		case FREELOADER:     
 			_state = new FreeloaderUploadState();
 			break;
+        case BROWSE_HOST:
+            _state = new BrowseHostUploadState(_fileManager, _router);
+            break;
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
 		case COMPLETE:
@@ -287,6 +315,10 @@ public class HTTPUploader implements Uploader {
 	public boolean chatEnabled() {return _chatEnabled;}
 	public String getChatHost() {return _chatHost;}
 	public int getChatPort() {return _chatPort;}
+    public boolean getClientAcceptsXGnutellaQueryreplies() {
+        return _clientAcceptsXGnutellaQueryreplies;
+    }
+    
 	/****************** private methods *******************/
 
 
@@ -296,7 +328,8 @@ public class HTTPUploader implements Uploader {
         _uploadBegin = 0;
         _uploadEnd = 0;
 		String userAgent;
-		
+		_clientAcceptsXGnutellaQueryreplies = false;
+        
 		InputStream istream = _socket.getInputStream();
 		ByteReader br = new ByteReader(istream);
         
@@ -306,10 +339,11 @@ public class HTTPUploader implements Uploader {
 		while (true) {
 			// read the line in from the socket.
             str = br.readLine();
+            debug("HTTPUploader.readHeader(): str = " +  str);
 			// break out of the loop if it is null or blank
             if ( (str==null) || (str.equals("")) )
                 break;
-
+            
 			if (str.toUpperCase().indexOf("CHAT:") != -1) {
 				String sub;
 				try {
@@ -419,7 +453,9 @@ public class HTTPUploader implements Uploader {
 			if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
-				if (SettingsManager.instance().getAllowBrowser() == false) {
+                //Allow them to browse the host though
+				if (SettingsManager.instance().getAllowBrowser() == false
+                    && !(_stateNum == BROWSE_HOST)) {
 					// if we are not supposed to read from them
 					// throw an exception
 					if( (str.indexOf("Mozilla") != -1) ||
@@ -444,6 +480,13 @@ public class HTTPUploader implements Uploader {
 				}
 				userAgent = str.substring(11).trim();
 			}
+            //check the "accept:" header
+            if (indexOfIgnoreCase(str, "accept:") != -1) {
+                if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE)
+                    != -1) {
+                    _clientAcceptsXGnutellaQueryreplies = true;
+                }
+            }
 		}
 
 		if (_uploadEnd == 0)
@@ -514,6 +557,14 @@ public class HTTPUploader implements Uploader {
     public boolean getCloseConnection() {
         return _state.getCloseConnection();
     }
+
+
+    private final boolean debugOn = false;
+    private void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+
 }
 
 

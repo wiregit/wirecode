@@ -289,7 +289,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	private DownloadChatList chatList;
 
-    
     /** The various states of the ManagedDownloade with respect to the 
      * corruption state of this download. 
      */
@@ -305,6 +304,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int corruptState = NOT_CORRUPT_STATE;
     private Object corruptStateLock = new Object();
     
+	/** The list of all browsable hosts for this <tt>ManagedDownloader</tt>
+	 *  instance.
+	 */
+	private DownloadBrowseHostList browseList;
+
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -382,6 +386,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
         stealLock = new Object();
+        browseList=new DownloadBrowseHostList();
         stopped=false;
         corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
@@ -1447,6 +1452,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			chatList.removeHost(downloader);
         }
         finally {
+            browseList.removeHost(downloader);
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop+ 
@@ -1742,6 +1748,14 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 	public synchronized boolean hasChatEnabledHost() {
 		return chatList.hasChatEnabledHost();
+	}
+
+	public synchronized RemoteFileDesc getBrowseEnabledHost() {
+		return browseList.getBrowseHostEnabledHost();
+	}
+
+	public synchronized boolean hasBrowseEnabledHost() {
+		return browseList.hasBrowseHostEnabledHost();
 	}
 
     private final Iterator getHosts(boolean chattableOnly) {

@@ -447,7 +447,7 @@ public class DownloadTester {
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, file.getName(),
                                   TestFile.length(), new byte[16],
-                                  speed, false, 4);
+                                  speed, false, true, 4);
     }
 
     /** Waits for the given download to complete. */

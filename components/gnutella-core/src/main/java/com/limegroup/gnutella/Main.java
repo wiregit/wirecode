@@ -264,6 +264,8 @@ public class Main implements ActivityCallback {
     public void promptAboutCorruptDownload(Downloader dloader) {
         dloader.discardCorruptDownload(false);
     }
+
+    public void browseHostFailed(GUID guid) {};
         
 }
 

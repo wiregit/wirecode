@@ -251,6 +251,16 @@ public abstract class Message
             throw new IllegalArgumentException();
         this.ttl = ttl;
     }
+    
+    /**
+     * Sets the guid for this message. Is needed, when we want to cache 
+     * query replies or other messages, and change the GUID as per the 
+     * request
+     * @param guid The guid to be set
+     */
+    protected void setGUID(GUID guid) {
+        this.guid = guid.bytes();
+    }
 
     public byte getHops() {
         return hops;

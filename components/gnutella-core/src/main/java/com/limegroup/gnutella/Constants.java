@@ -37,6 +37,13 @@ public class Constants
     public static final String XML_CLIENT = "XML_CLIENT";
     public static final String SERVER = "SERVER";
     public static final String ENTRY_SEPARATOR = ",";
+    
+    /**
+     * Mime Type to be used when returning QueryReplies on receiving a
+     * HTTP request (or some other content request)
+     */
+    public static final String QUERYREPLY_MIME_TYPE 
+        = "application/x-gnutella-packets";
         
     /** Converts the following bandwidth value, in kbytes/second, to 
      *  a human readable string. */
