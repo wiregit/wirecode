@@ -232,20 +232,17 @@ public class RouterService
         //Force reconnect to pong server.
         catcher.expire();
 
-        //Ensure settings are positive
+        //Ensure outgoing connections is positive.
         SettingsManager settings=SettingsManager.instance();
         int outgoing=settings.getKeepAlive();
         if (outgoing<1) {
             outgoing = settings.DEFAULT_KEEP_ALIVE;
             settings.setKeepAlive(outgoing);
         }
-        int incoming=settings.getMaxIncomingConnections();
-        if (incoming<1 && outgoing!=0) {
-            incoming = outgoing/2;
-            settings.setMaxIncomingConnections(incoming);
-        }
-        //Special action needed if KEEP_ALIVE changed.
+        //Actually notify the backend.
         setKeepAlive(outgoing);
+        int incoming=settings.getMaxIncomingConnections();
+        setMaxIncomingConnections(incoming);
 
         //See note above.
         if (useHack) {
@@ -264,9 +261,10 @@ public class RouterService
         SettingsManager settings=SettingsManager.instance();
         int oldKeepAlive=settings.getKeepAlive();
 
-        //1. Prevent any new threads from starting.
+        //1. Prevent any new threads from starting.  Note that this does not
+        //   affect the permanent settings.
         setKeepAlive(0);
-        SettingsManager.instance().setMaxIncomingConnections(0);
+        setMaxIncomingConnections(0);
         //2. Remove all connections.
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {
@@ -308,10 +306,19 @@ public class RouterService
 
     /**
      *  Reset how many connections you want and start kicking more off
-     *  if required
+     *  if required.  Does not affect the KEEP_ALIVE property.
      */
     public void setKeepAlive(int newKeep) {
         manager.setKeepAlive(newKeep);
+    }
+
+    /**
+     * Sets the max number of incoming Gnutella connections allowed by the
+     * connection manager.  This does not affect the permanent
+     * MAX_INCOMING_CONNECTIONS property.  
+     */
+    public void setMaxIncomingConnections(int max) {
+        manager.setMaxIncomingConnections(max);
     }
 
     /**
@@ -394,24 +401,20 @@ public class RouterService
     }
 
     /**
-     * Updates the horizon statistics.
+     * Updates the horizon statistics.  This should called at least every five
+     * minutes or so to prevent the reported numbers from growing too large.
+     * You can safely call it more often.  Note that it does not modify the
+     * network; horizon stats are calculated by passively looking at messages.
      *
-     * @modifies manager, network
-     * @effects resets manager's horizon statistics and sends
-     *  out a ping request.  Ping replies come back asynchronously
-     *  and modify the horizon statistics.  Poll for them with
-     *  getNumHosts, getNumFiles, and getTotalFileSize.
+     * @modifies this (values returned by getNumFiles, getTotalFileSize, and
+     *  getNumHosts) 
      */
-    public void updateHorizon() {
-        //Reset statistics first
+    public void updateHorizon() {        
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext() ; )
-            ((ManagedConnection)iter.next()).clearHorizonStats();
-
-        //Send ping to everyone.
-        PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
-        router.broadcastPingRequest(pr);
+            ((ManagedConnection)iter.next()).refreshHorizonStats();
     }
+
 
     /**
      * Searches Gnutellanet files of the given type with the given

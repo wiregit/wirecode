@@ -44,7 +44,7 @@ public interface SettingsInterface
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=2;
+    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
@@ -53,7 +53,7 @@ public interface SettingsInterface
     public static final String  DEFAULT_EXTENSIONS     =
     "html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
     "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
-    "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt";
+    "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi";
 
 
 	/* the number of uplads allowed per person at a given time */
@@ -88,7 +88,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.1";
+    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.2b";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
     public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
     public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};

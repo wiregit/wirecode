@@ -285,10 +285,6 @@ public class SettingsManager implements SettingsInterface
                         return;
                     setCheckAgain(bs);
                 }
-
-                else if(key.equals(INCOMPLETE_DIR)) {
-                    setIncompleteDirectory(p);
-                }
                 else if(key.equals(BANNED_IPS)) {
                     setBannedIps(decode(p));
                 }
@@ -436,7 +432,7 @@ public class SettingsManager implements SettingsInterface
         //MAX_INCOMING_CONNECTIONS are sufficiently low.
         if ( getConnectionSpeed()<=56 ) { //modem
             setKeepAlive(Math.min(2, getKeepAlive()));
-            setMaxIncomingConnections(0);
+            setMaxIncomingConnections(2);
         }
     }
 
@@ -478,8 +474,6 @@ public class SettingsManager implements SettingsInterface
         setDirectories(home_);
         setSaveDirectory(home_);
         setSaveDefault(home_);
-        setIncompleteDirectory(home_);
-        //setInstallDir("");
         setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(DEFAULT_PARALLEL_SEARCH);
@@ -573,11 +567,9 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the incomplete directory */
     public String getIncompleteDirectory() {
-        File file = new File(incompleteDirectory_);
-        if(!file.isDirectory()) {
-            boolean dirsMade = file.mkdirs();
-            if(!dirsMade)
-                return "";
+        File incFile = new File(incompleteDirectory_);
+        if(!incFile.isDirectory()) {
+			setSaveDirectory(saveDirectory_);
         }
         return incompleteDirectory_;
     }
@@ -897,24 +889,24 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-	/** sets the incomplete directory.  this is not 
-	 *  synchronized since it will only get called
-	 *  once on startup. */
-    public void setIncompleteDirectory(String dir) {
-        File f = new File(dir);
-        boolean b = f.isDirectory();
-        if(b == false)
-            throw new IllegalArgumentException();
-        else {
-			String incDir = dir;
-			try {
-				incDir = f.getCanonicalPath();
-			}
-			catch(IOException ioe) {}
-            incompleteDirectory_ = incDir;
-            props_.put(INCOMPLETE_DIR, incompleteDirectory_);
-        }
-    }
+//  	/** sets the incomplete directory.  this is not 
+//  	 *  synchronized since it will only get called
+//  	 *  once on startup. */
+//      public void setIncompleteDirectory(String dir) {
+//          File f = new File(dir);
+//          boolean b = f.isDirectory();
+//          if(b == false)
+//              throw new IllegalArgumentException();
+//          else {
+//  			String incDir = dir;
+//  			try {
+//  				incDir = f.getCanonicalPath();
+//  			}
+//  			catch(IOException ioe) {}
+//              incompleteDirectory_ = incDir;
+//              props_.put(INCOMPLETE_DIR, incompleteDirectory_);
+//          }
+//      }
 
     /** sets the hard maximum time to live */
     public synchronized void setMaxTTL(byte maxttl)
@@ -973,19 +965,21 @@ public class SettingsManager implements SettingsInterface
 
     /** set the directory for saving files */
     public void setSaveDirectory(String dir) {
-        File f = new File(dir);
-        boolean b = f.isDirectory();
-        if(b == false)
-            throw new IllegalArgumentException();
-        else {
-			String saveDir = dir;
-			try {
-				saveDir = f.getCanonicalPath();
-			}
-			catch(IOException ioe) {}
-            saveDirectory_ = saveDir;
-            props_.put(SAVE_DIRECTORY, saveDirectory_);
-        }
+        File saveFile = new File(dir);
+		String parent = saveFile.getParent();
+		File incFile  = new File(parent, "Incomplete");
+		saveFile.mkdirs();
+		incFile.mkdirs();
+		String saveDir = dir;
+		String incDir = parent;
+		try {
+			saveDir = saveFile.getCanonicalPath();
+			incDir = incFile.getCanonicalPath();
+		}
+		catch(IOException ioe) {}
+		saveDirectory_ = saveDir;
+		incompleteDirectory_ = incDir;
+		props_.put(SAVE_DIRECTORY, saveDirectory_);
     }
 
     /* set the directories to search.  this is synchronized
@@ -1530,6 +1524,13 @@ public class SettingsManager implements SettingsInterface
         buf.copyInto(ret);
         return ret;
     }
+
+//  	public static void main(String args[]) {
+//  		SettingsManager settings = SettingsManager.instance();
+//  		String incDir = settings.getIncompleteDirectory();
+//  		String saveDir = settings.getSaveDirectory();
+//  		System.out.println("incDir: "+incDir+"  saveDir: "+saveDir);
+//  	}
 
     //      /** Unit test */
     //      public static void main(String args[]) {

@@ -53,6 +53,15 @@ public class StandardMessageRouter
         catch(IOException e) {}
     }
 
+    public void handlePingReply(PingReply pingReply,
+                                ManagedConnection receivingConnection)
+    {
+        //We override the super's method so the receiving connection's
+        //statistics are updated whether or not this is for me.
+        receivingConnection.updateHorizonStats(pingReply);
+        super.handlePingReply(pingReply, receivingConnection);
+    }
+    
     /**
      * Handles the PingReply by updating horizon stats.
      */
@@ -60,8 +69,6 @@ public class StandardMessageRouter
         PingReply pingReply,
         ManagedConnection receivingConnection)
     {
-        receivingConnection.updateHorizonStats(pingReply);
-
         SettingsManager settings=SettingsManager.instance();
         //Kill incoming connections that don't share.  Note that we randomly
         //allow some freeloaders.  (Hopefully they'll get some stuff and then
@@ -252,9 +259,8 @@ public class StandardMessageRouter
         }
         String file = desc._name;
 
-        HTTPUploader up = new HTTPUploader(file, h, port, index, 
-										   req_guid_hexstring);
-                                          
+        HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
+                                           _callback);
         Thread t=new Thread(up);
         t.setDaemon(true);
         t.start();

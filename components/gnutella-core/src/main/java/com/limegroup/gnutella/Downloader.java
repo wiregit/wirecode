@@ -30,8 +30,8 @@ public interface Downloader {
     public void stop();
 
     /**
-     * Returns the state of this: one of NOT_CONNECTED, CONNECTED, ERROR, COMPLETE,
-     * REQUESTING, QUEUED, WAITING_FOR_RETRY.
+     * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
+     * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP
      */
     public int getState();
 
@@ -42,7 +42,9 @@ public interface Downloader {
     public int getRemainingStateTime();
 
     /** 
-     * Returns the name of the file this is downloading.
+     * Returns the name of the current or last file this is downloading, or null
+     * in the rare case that this has no more files to download.  (This might
+     * happen if this has been stopped.)
      */
     public String getFileName();
 
@@ -62,4 +64,16 @@ public interface Downloader {
      * connected. 
      */
     public String getHost();
+
+    /**
+     * Returns the number of pushes results this is waiting for. 
+     *     @requires this in the WAITING_FOR_RETRY state
+     */
+    public int getPushesWaiting();
+
+    /**
+     * Returns the number of retries this is waiting for. 
+     *     @requires this in the WAITING_FOR_RETRY state
+     */
+    public int getRetriesWaiting();
 }

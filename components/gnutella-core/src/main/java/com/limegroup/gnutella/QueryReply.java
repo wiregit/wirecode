@@ -279,15 +279,18 @@ public class QueryReply extends Message implements Serializable{
             //Attempt to verify.  Results are not copied to this until verified.
             String vendorT=null;
             boolean pushFlagSetT;
-            try {
-                //Must use ASCII encoding since characters are more than two
-                //bytes on other platforms!
-                vendorT=new String(payload, i, 4, "US-ASCII");
-                Assert.that(vendorT.length()==4,
-                            "Vendor length wrong.  Wrong character encoding?");
-            } catch (UnsupportedEncodingException e) {
-                Assert.that(false, "No support for ASCII encoding.");
-            }
+            //Apparently the US-ASCII encoding is NOT supported by all
+            //platforms.  But since we do not use the vendor string yet, we
+            //ignore it.
+//              try {
+//                  //Must use ASCII encoding since characters are more than two
+//                  //bytes on other platforms!
+//                  vendorT=new String(payload, i, 4, "US-ASCII");
+//                  Assert.that(vendorT.length()==4,
+//                              "Vendor length wrong.  Wrong character encoding?");
+//              } catch (UnsupportedEncodingException e) {
+//                  Assert.that(false, "No support for ASCII encoding.");
+//              }
             i+=4;
             int length=ByteOrder.ubyte2int(payload[i]);
             if (length==0)
@@ -301,8 +304,8 @@ public class QueryReply extends Message implements Serializable{
 
             //All set.  Accept parsed values.
             this.pushFlagSet=pushFlagSetT;
-            Assert.that(vendorT!=null);
-            this.vendor=vendorT.toUpperCase();
+//              Assert.that(vendorT!=null);
+//              this.vendor=vendorT.toUpperCase();
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
