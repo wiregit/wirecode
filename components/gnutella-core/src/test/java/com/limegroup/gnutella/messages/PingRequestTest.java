@@ -6,6 +6,9 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+
 import java.util.Arrays;
 
 public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -156,6 +159,53 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         ByteArrayOutputStream out=new ByteArrayOutputStream();
         pr2.write(out);
         assertEquals(out.toByteArray().length, 23);
+        
+    }
+    
+    public void testAddIP() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        //try a ping which doesn't ask for ip 
+        
+        PingRequest noRequest = new PingRequest((byte)1);
+        assertFalse(noRequest.requestsIP());
+        
+        noRequest.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        PingRequest fromNet = (PingRequest) Message.read(bais);
+        
+        assertFalse(fromNet.requestsIP());
+        
+        //try a ping without any other ggeps except the ip request
+        byte []guid = GUID.makeGuid();
+        
+        PingRequest noPayload = new PingRequest(guid,(byte)1,(byte)0);
+        
+        assertFalse(noPayload.requestsIP());
+        
+        noPayload.addIPRequest();
+        assertTrue(noPayload.requestsIP());
+        
+        baos = new ByteArrayOutputStream();
+        noPayload.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingRequest) Message.read(bais);
+        
+        assertTrue(fromNet.requestsIP());
+        
+        // now try a ping with locale
+        String original = ApplicationSettings.LANGUAGE.getValue();
+        ApplicationSettings.LANGUAGE.setValue("zz");
+        PingRequest withLocale = new PingRequest((byte)1);
+        ApplicationSettings.LANGUAGE.setValue(original);
+        
+        withLocale.addIPRequest();
+        
+        baos = new ByteArrayOutputStream();
+        withLocale.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingRequest) Message.read(bais);
+        assertTrue(fromNet.requestsIP());
+        assertEquals("zz",fromNet.getLocale());
         
     }
 }
