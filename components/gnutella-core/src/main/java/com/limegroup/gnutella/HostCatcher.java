@@ -86,8 +86,9 @@ public class HostCatcher {
     private boolean managerInitialized = false;
     private Object managerInitializedLock=new Object();
 
-    /** The number of MILLISECONDS a server's pong is valid for. */
-    private static final int STALE_TIME=90*60*1000; //90 minutes
+    /** The number of MILLISECONDS to wait before connecting to a router when
+     *  the number of hosts in the reserve cache is not sufficent enough. */
+    private static final int WAIT_TIME=2*60*1000; //2 minutes
     /** The number of MILLISECONDS to wait before retrying quick-connect. */
     private static final int RETRY_TIME=5*60*1000; //5 minutes
     /** The amount of MILLISECONDS to wait after starting a connection before
@@ -247,8 +248,8 @@ public class HostCatcher {
         if (Acceptor.isMe(e.getHostname(), e.getPort()))
             return;
 
-        //Skip if this is the router.
-        if (isRouter(pr.getIPBytes())) 
+        //Skip if this is a router(e.g., router.limewire.com).
+        if (isARouter(pr.getIPBytes())) 
             return;
 
         //Current policy: "new clients" connections are the best.  After that, 
@@ -259,12 +260,12 @@ public class HostCatcher {
         //but with a different weight, we don't bother re-heapifying.
         if (e.isPrivateAddress())
             e.setWeight(BAD_PRIORITY);
+        else if (receivingConnection != null 
+                 && receivingConnection.isRouterConnection())
+            e.setWeight(GOOD_PRIORITY);
         else if (receivingConnection != null && 
                      !receivingConnection.isOldClient())
             e.setWeight(BEST_PRIORITY);                
-        else if (receivingConnection!=null
-                    && receivingConnection.isRouterConnection())
-            e.setWeight(GOOD_PRIORITY);
         else
             e.setWeight(NORMAL_PRIORITY);
 
@@ -281,20 +282,21 @@ public class HostCatcher {
             }
         }
 
-        //notify router thread not to connect to router if not required.  Also,
         //notify router thread that a pong was received from the router (if 
         //router connection)
-        if ( (e.getWeight() == BEST_PRIORITY) ||
-             (e.getWeight() == GOOD_PRIORITY) ) {
-            synchronized (needRouterConnectionLock) {
+        if (e.getWeight() == GOOD_PRIORITY) {
+            synchronized(gotRouterPongLock) {
+                gotRouterPong = true;
+                gotRouterPongLock.notify();
+            }
+        }
+
+        //if now, we have enough hosts in the reserve cache, then we need to 
+        //notify the RouterConnectorThread not to connect to router.
+        if (reserveCacheSufficient()) {
+            synchronized(needRouterConnectionLock) {
                 needRouterConnection = false;
                 needRouterConnectionLock.notify();
-            }
-            if (e.getWeight() == GOOD_PRIORITY) {
-                synchronized(gotRouterPongLock) {
-                    gotRouterPong = true;
-                    gotRouterPongLock.notify();
-                }
             }
         }
     }
@@ -329,9 +331,9 @@ public class HostCatcher {
 
     /**
      * This thread loops forever, contacting the pong server on startup, or
-     * everytime the reserve cache expires.  Once getting a router's pong
-     * it will sleep 30 minutes before waiting again to get connections from
-     * router.
+     * everytime the reserve cache needs more pongs.  Once getting a 
+     * router's pong it will sleep 2 minutes before waiting again to get 
+     * connections from router.
      */
     private class RouterConnectorThread extends Thread {
         RouterConnectorThread() {
@@ -339,8 +341,9 @@ public class HostCatcher {
             setName("RouterConnectorThread");
         }
 
-        /** Repeatedly contacts the pong server at most every STALE_TIME
-         *  milliseconds. */
+        /** Repeatedly contacts the pong server when there are not enough host
+         *  in the reserve cache or if expire is called.
+         */
         public void run() {
             //first, wait until manager is initialized before trying to create
             //connections to a GNUTELLA router.
@@ -354,36 +357,34 @@ public class HostCatcher {
                     }
                 }
             }
+                
             while(true) {
-                //if not enough values in the reserve cache, then connect to 
-                //router right away, to fill up the reserve cache.
-                if (reserveCacheSufficient()) {
-                    //To avoid connecting to the server every STALE_TIME minutes,
-                    //we check to make sure a connection to router is needed, if
-                    //not, we wait until it is needed.
-                    synchronized (needRouterConnectionLock) {
-                        while (!needRouterConnection) { 
-                            try {
-                                needRouterConnectionLock.wait();
-                            } catch (InterruptedException e) {
-                                continue;
-                            }
+                //To avoid continously connecting to the pong server, we check
+                //to make sure a connection to router is needed, if not, we 
+                //wait until it is needed.
+                synchronized (needRouterConnectionLock) {
+                    while (!needRouterConnection) {
+                        try {
+                            needRouterConnectionLock.wait();
+                        } catch (InterruptedException e) {
+                            continue;
                         }
                     }
                 }
-
+                
                 //2. Try connecting every RETRY_TIME milliseconds until we get a
-                //router pong, i.e., "good pong" ...
+                //router pong 
                 try {
                     connectUntilPong();
                 } catch (InterruptedException e) {
                     continue;
                 }
-
-                //3. Sleep until the cache expires and try again.
+                
+                //sleep for a while, and try again in WAIT_TIME minutes
                 try {
-                    Thread.sleep(STALE_TIME);
-                } catch (InterruptedException e) {
+                    Thread.sleep(WAIT_TIME);
+                }
+                catch (InterruptedException e) {
                     continue;
                 }
             }
@@ -453,12 +454,6 @@ public class HostCatcher {
                         needRouterConnectionLock.notify();
                     }
                 }
-                //if private IP is the top of the heap, then just return
-                //since a private IP is no good, if we're going to try
-                //and connect to it.
-                if (endpoint.getWeight() == BAD_PRIORITY) 
-                    throw new NoSuchElementException();
-                
                 break; 
 			} 
         } 
@@ -467,21 +462,13 @@ public class HostCatcher {
 
     /** 
      * return whether the reserve cache size is sufficient enough to not
-     * cause a refresh of the cache (i.e., broadcast a ping).  Also, 
-     * causes the router thread to create a connection to router.
+     * cause a refresh of the cache (i.e., broadcast a ping).  
      */
-    public boolean reserveCacheSufficient()
-    {
-        if (reserveCacheQueue.size() < RESERVE_CACHE_SUFFICIENT_CAPACITY) {
-            synchronized(needRouterConnectionLock) {
-                needRouterConnection = true;
-                needRouterConnectionLock.notify();
-            }
+    public boolean reserveCacheSufficient() {
+        if (reserveCacheQueue.size() < RESERVE_CACHE_SUFFICIENT_CAPACITY) 
             return false;
-        }
-        else {
+        else 
             return true;
-        }
     }
 
     /**
@@ -561,21 +548,34 @@ public class HostCatcher {
     public synchronized void expire() {
         reserveCacheQueue.clear();
         reserveCacheSet.clear();
-        synchronized(needRouterConnectionLock) {
+        synchronized (needRouterConnectionLock) {
             needRouterConnection = true;
             needRouterConnectionLock.notify();
         }
+        //interrupt thread (in case it's sleeping).
+        routerConnectorThread.interrupt();
     }
 
-    /** Returns true iff ip is the ip address of router.limewire.com.
+    /** Returns true iff ip is the ip address of router.limewire.com or 
+     *  gnutellahosts.com
      *      @requires ip.length==4 */
-    private boolean isRouter(byte[] ip) {
-        //Check for 64.61.25.139-143
-        return (ip[0]==(byte)64
+    private boolean isARouter(byte[] ip) {
+        //Check for 64.61.25.139-143 or 206.132.188.160
+        //TODO: There should be a list of all pong cache servers or "routers" in
+        //the settings manager.
+        if (ip[0]==(byte)64
             && ip[1]==(byte)61
             && ip[2]==(byte)25
             && ip[3]>=(byte)139
-            && ip[3]<=(byte)143);
+            && ip[3]<=(byte)143)
+            return true;
+        else if (ip[0]==(byte)206
+            && ip[1]==(byte)132
+            && ip[2]==(byte)188
+            && ip[3]==(byte)160)
+            return true;
+        else
+            return false;
     }
 
     public String toString() {

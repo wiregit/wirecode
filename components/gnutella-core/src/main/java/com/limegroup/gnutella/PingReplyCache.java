@@ -44,18 +44,6 @@ public class PingReplyCache
 
     private Random random; //used for returning random PingReplies from cache.
 
-    //when an initial connection to a pong cache server other than "router.
-    //limewire.com" is made, it will return pongs all with the same TTL.  Hence,
-    //the cache will only store replies for one hop and all the connection
-    //fetchers will have to get all the hosts in the cache from the same hop, 
-    //rather than randomly.
-    private boolean allRepliesOneHop;
-    
-    //if all the replies are only for one hop (currently), then the cache needs
-    //to hold that hop, so connection fetchers can get all the replies (for 
-    //that hop
-    private int currentHop;
-
     //singleton
     private static PingReplyCache instance = null;
 
@@ -73,8 +61,6 @@ public class PingReplyCache
 
         random = new Random();
         expireTime = System.currentTimeMillis() + CACHE_EXPIRE_TIME;
-        allRepliesOneHop = true;
-        currentHop = -1; //when size = 0
     }
 
     /**
@@ -88,8 +74,6 @@ public class PingReplyCache
         {
             pingReplies[i] = new ArrayList(otherCache.pingReplies[i]);
         }
-        allRepliesOneHop = false;
-        currentHop = MessageRouter.MAX_TTL_FOR_CACHE_REFRESH + 1;
     }
 
     /**
@@ -123,16 +107,6 @@ public class PingReplyCache
         if (hops > (pingReplies.length-1))
             return false; //if greater than Max Hops allowed, do nothing.
 
-        if (currentHop == -1) //empty cache
-        {
-            currentHop = hops;
-        }
-        else if (currentHop != hops) //ping reply with different hops
-        {
-            currentHop = MessageRouter.MAX_TTL_FOR_CACHE_REFRESH+1;
-            allRepliesOneHop = false;
-        }
-
         //only add to cache, if the cache already doesn't contain that PingReply
         //(determined by IP, port, hops, and different managed connections).
         PingReplyCacheEntry newEntry = new PingReplyCacheEntry(pr, connection);
@@ -152,8 +126,6 @@ public class PingReplyCache
                 pingReplies[i].clear();
 
         expireTime = System.currentTimeMillis() + CACHE_EXPIRE_TIME;
-        allRepliesOneHop = true;
-        currentHop = -1; //when size = 0
     }
 
     /**
@@ -177,24 +149,6 @@ public class PingReplyCache
         ArrayList arrayOfPongs = pingReplies[hops-1];
         int index = random.nextInt(arrayOfPongs.size());
         return (PingReplyCacheEntry)arrayOfPongs.get(index);
-    }
-
-    /**
-     * returns whether all the replies currently in the cache are all for the
-     * same hop.
-     */
-    public boolean areAllRepliesForOneHop()
-    {
-        return allRepliesOneHop;
-    }
-
-    /**
-     * if all the replies are currently for the same hop, then return that
-     * hop.  Returns -1, if the cache is currently empty.  
-     */
-    public int getCurrentHop()
-    {
-        return currentHop;
     }
 
     /**

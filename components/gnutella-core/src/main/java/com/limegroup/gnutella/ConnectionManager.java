@@ -768,11 +768,8 @@ public class ConnectionManager {
 
             do {
                 try {
-                    if (pongCache.areAllRepliesForOneHop()) 
-                        hops = pongCache.getCurrentHop();
-                    else
-                        hops = random.nextInt
-                            (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+                    hops = random.nextInt
+                        (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
                     entry = pongCache.getEntry(hops+1);
                     //if nothing in the cache, then try from the reserve cache
                     if (entry == null) {

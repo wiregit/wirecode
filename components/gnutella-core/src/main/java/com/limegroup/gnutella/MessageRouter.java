@@ -582,7 +582,9 @@ public abstract class MessageRouter
             (receivingConnection.isRouterConnection()))
         {
             _catcher.addToReserveCache(pingReply, receivingConnection);
-            receivingConnection.countDroppedMessage();
+            //only count dropped message if not a router connection
+            if (!receivingConnection.isRouterConnection())
+                receivingConnection.countDroppedMessage();
             return;
         }
         

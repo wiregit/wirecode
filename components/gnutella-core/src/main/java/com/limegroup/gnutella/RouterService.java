@@ -269,7 +269,7 @@ public class RouterService
      */
     public void connect() {
         //HACK. People used to complain that the connect button wasn't
-        //working when the Ping Reply Cache was empty and 
+        //working when the host catcher was empty and 
         //USE_QUICK_CONNECT=false.  This is not a bug; LimeWire isn't supposed 
         //to connect to the pong server in this case.  But this IS admittedly 
         //confusing.  So we force a connection to the pong server in this case 
@@ -282,7 +282,8 @@ public class RouterService
         SettingsManager settings=SettingsManager.instance();
         boolean useHack=
             (!settings.getUseQuickConnect())
-                && PingReplyCache.instance().size()==0;
+                && PingReplyCache.instance().size()==0 
+                && (!catcher.reserveCacheSufficient());
         if (useHack) {
             settings.setUseQuickConnect(true);
             disconnect();
