@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -14,13 +13,23 @@ public class Main implements ActivityCallback {
     //listening port number.
     RouterService service;
     ActivityCallback callback = new Main();
- 
+
+	// commented this segment out because RouterService changed--Adam
+    //if (args.length==1) {
+	//  service=new RouterService(Integer.parseInt(args[0]),
+	//                            callback,
+	//                            new StandardMessageRouter(callback));
+    //} else {
+    
     FileManager fm = new FileManager();
     service=new RouterService(callback,
                               (new StandardMessageRouter(callback,fm)),fm);
     
     service.initialize();
     service.postGuiInit();    
+    //}
+
+
 
     System.out.println("For a command list type help.");
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
@@ -240,6 +249,10 @@ public class Main implements ActivityCallback {
 	public void chatUnavailable(Chatter chatter) {}
 
 	public void chatErrorMessage(Chatter chatter, String st) {}
+        
+        public void downloadsComplete() {}        
 
+        public void uploadsComplete() {}
+        
 }
 
