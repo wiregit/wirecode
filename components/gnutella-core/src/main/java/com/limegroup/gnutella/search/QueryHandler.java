@@ -2,6 +2,7 @@ package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 
@@ -352,7 +353,41 @@ public final class QueryHandler {
      *  not be sent before this
 	 */
 	private static int sendProbeQuery(QueryHandler handler, List list) {
-		QueryRequest query = createQuery(handler.QUERY, PROBE_TTL);
+        // send a TTL=1 query to hosts that have matches in their
+        // QRP tables, running one at a time with pauses.
+        
+        QueryRequest query = createQuery(handler.QUERY, (byte)1);
+        Iterator iter = list.iterator();
+        int connectionsUsed = 0;
+        
+        // Holder for the number of Ultrapeer connections we have
+        // that use query routing.  This is used to decide how
+        // good our sample "probe" has been
+        int qrConnections = 0;
+        int qrConnectionsUsed = 0;
+        while(iter.hasNext()) {
+            ManagedConnection mc = (ManagedConnection)iter.next();
+
+            // this could be more fine-grained, since the connection
+            // only really needs to support intra-Ultrapeer QRP and
+            // to forward TTL=1 probe queries, but this is fine
+            if(!mc.isGoodConnection()) continue;
+            if(!mc.supportsProbeQueries()) continue;
+
+            ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+            if (qi.lastReceived == null) continue;
+
+            // don't consider this as a host used in our sample
+            // until we know it has a QRP table
+            qrConnections++;
+            if(qi.lastReceived.contains(query)) {
+                RouterService.getMessageRouter().sendQueryRequest(query, mc, 
+                    handler.REPLY_HANDLER);
+                qrConnectionsUsed++;
+            }
+        }
+		
+        query = createQuery(handler.QUERY, PROBE_TTL);
         int newHosts = 0;
 
         int hostsQueried = 0;
