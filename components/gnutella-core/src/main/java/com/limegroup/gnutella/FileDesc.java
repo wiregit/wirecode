@@ -145,8 +145,13 @@ public class FileDesc implements AlternateLocationCollector {
 	 *  <tt>null</tt>
 	 * @throws <tt>IllegalArgumentException</tt> if the <tt>file</tt> argument
 	 *  denotes a file that is not a file on disk
+     * @throws <tt>IOException</tt> if there is an IO error calculating the 
+     *  URN
+     * @throws <tt>InterruptedException</tt> if the thread that calculates
+     *  the URN is interrupted
      */
-    public static Set /* of URN */ calculateAndCacheURN(File file) {
+    public static Set /* of URN */ calculateAndCacheURN(File file) 
+        throws IOException, InterruptedException {
         if(file == null) {
             throw new NullPointerException("cannot accept null file argument");
         } 
@@ -347,19 +352,11 @@ public class FileDesc implements AlternateLocationCollector {
      * the calling thread is interrupted while executing this, returns an empty
      * set.
      */
-    private static Set calculateUrns(File file) {
-		try {
-			Set set = new HashSet();
-			set.add(URN.createSHA1Urn(file));
-			return set;
-		} catch (InterruptedException e) { 
-            // calculation aborted so return empty thing.  That's ok, as we're
-            // typically going to start loading everything over.
-            return EMPTY_SET;
-        } catch (IOException e) {
-			// the urn just does not get added
-			return EMPTY_SET;
-		}				
+    private static Set calculateUrns(File file) 
+        throws IOException, InterruptedException {
+        Set set = new HashSet();
+        set.add(URN.createSHA1Urn(file));
+        return set;
 	}
     
     /**
