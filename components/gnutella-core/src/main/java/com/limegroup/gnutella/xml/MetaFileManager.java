@@ -100,10 +100,10 @@ public class MetaFileManager extends FileManager {
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
 
         List xmlDocs = fd.getLimeXMLDocuments();        
-        if(LimeXMLUtils.isSupportedAudioFormat(f)) {
+        if(LimeXMLUtils.isEditableFormat(f)) {
             try {
                 LimeXMLDocument diskID3Doc = MetaDataReader.readDocument(f);
-                xmlDocs = resolveAudioDocs(xmlDocs,diskID3Doc);
+                xmlDocs = resolveWriteableDocs(xmlDocs,diskID3Doc);
             } catch(IOException e) {
                 // if we were unable to read this document,
                 // then simply add the file without metadata.
@@ -131,7 +131,7 @@ public class MetaFileManager extends FileManager {
      * Finds the audio metadata document in allDocs, and makes it's id3 fields
      * identical with the fields of id3doc (which are only id3).
      */
-    private List resolveAudioDocs(List allDocs, LimeXMLDocument id3Doc) {
+    private List resolveWriteableDocs(List allDocs, LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = 
         LimeXMLSchemaRepository.instance().getSchema(AudioMetaData.schemaURI);

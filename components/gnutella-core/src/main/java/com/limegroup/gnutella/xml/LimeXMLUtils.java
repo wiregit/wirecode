@@ -430,6 +430,17 @@ public class LimeXMLUtils
     }
     
     /**
+     * @return whether LimeWire supports writing metadata into the file of specific type.
+     * (we may be able to parse the metadata, but not annotate it)
+     */
+    public static boolean isEditableFormat(File file) {
+    	return isMP3File(file) || isOGGFile(file); //add more as they become editable
+    }
+    
+    public static boolean isEditableFormat(String file) {
+    	return isMP3File(file) || isOGGFile(file); 
+    }
+    /**
      * 
      * @param file The file that is about to be parsed for metadata
      * @return the URI of the schema which should be used to validate the xml.

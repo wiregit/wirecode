@@ -98,7 +98,7 @@ public class IOUtils {
     	long skipped = 0;
     	while(skipped < length) {
     		long current = in.skip(length - skipped);
-    	    if(current == -1)
+    	    if(current == -1 || current == 0)
     	        throw new EOFException("eof");
     	    else
     	        skipped += current;

@@ -44,7 +44,7 @@ import com.limegroup.gnutella.util.*;
 
 public class JOrbisComment {
 	
- static final	Log LOG = LogFactory.getLog(JOrbisComment.class);
+ private static final	Log LOG = LogFactory.getLog(JOrbisComment.class);
 	
   private State state=null;
 
@@ -60,43 +60,44 @@ public class JOrbisComment {
   	FileInputStream in =null;
   	FileOutputStream out = null;
   	File tempFile = null;
+  	
   	try {
-    state =new State();
-    in =new FileInputStream(file);
+  		state =new State();
+    	in =new FileInputStream(file);
     
-    read(in);
+    	read(in);
     
-    //update the comment
-    state.vc=comment;
+    	//update the comment
+    	state.vc=comment;
     
-    //copy the newly created file in a temp folder
-    tempFile=null;
-    try {
-     tempFile = File.createTempFile(file.getName(),"tmp");
-    }catch(IOException e) {
-    	//sometimes either the temp path is messed up or
-    	//there isn't enough space on that partition.
-    	//try to create a temp file on the same folder as the
-    	//original.  It will not be around long enough to get shared
+    	//copy the newly created file in a temp folder
+    	tempFile=null;
+    
+    	try {
+    		tempFile = File.createTempFile(file.getName(),"tmp");
+    	}catch(IOException e) {
+    		//sometimes either the temp path is messed up or
+    		//	there isn't enough space on that partition.
+    		//try to create a temp file on the same folder as the
+    		//original.  It will not be around long enough to get shared
     	
-    	//if an exception is thrown, let it propagate
-    	LOG.debug("couldn't create temp file in $TEMP, trying elsewhere");
+    		//if an exception is thrown, let it propagate
+    		LOG.debug("couldn't create temp file in $TEMP, trying elsewhere");
     	
-    	tempFile = new File(file.getAbsolutePath()+
-    			File.separator+
+    		tempFile = new File(file.getAbsolutePath(),
 				file.getName()+".tmp");
-    }
-    out=new FileOutputStream(tempFile);
+    	}
+    	out=new FileOutputStream(tempFile);
     
     
-    LOG.debug("about to write ogg file");
+    	LOG.debug("about to write ogg file");
     
-    write(out);
+    	write(out);
     
-    //rename fails on some rare filesystem setups
-    if (!FileUtils.forceRename(tempFile,file)){
-    	//something's seriously wrong
-    	throw new IOException("couldn't rename file");
+    	//rename fails on some rare filesystem setups
+    	if (!FileUtils.forceRename(tempFile,file)){
+    		//something's seriously wrong
+    		throw new IOException("couldn't rename file");
     }
     }finally {
   		if (out!=null)
