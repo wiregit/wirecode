@@ -635,7 +635,7 @@ public final class HTTPUploader implements Uploader {
      */
     private boolean readRangeHeader(String str) throws IOException {
         // was: != 0, is == -1 (that okay?)
-        if ( indexOfIgnoreCase(str, "Range:") == -1 )
+        if ( StringUtils.indexOfIgnoreCase(str, "Range:") == -1 )
             return false;
             
         //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
@@ -723,7 +723,7 @@ public final class HTTPUploader implements Uploader {
      */
     private boolean readUserAgentHeader(String str)
 		throws FreeloaderUploadingException {
-        if ( indexOfIgnoreCase(str, "User-Agent:") == -1 )
+        if ( StringUtils.indexOfIgnoreCase(str, "User-Agent:") == -1 )
             return false;
         
 		// check for netscape, internet explorer,
@@ -803,10 +803,10 @@ public final class HTTPUploader implements Uploader {
      * @return true if the header had an accept field
      */
     private boolean readAcceptHeader(String str) {
-        if ( indexOfIgnoreCase(str, "accept:") == -1 )
+        if ( StringUtils.indexOfIgnoreCase(str, "accept:") == -1 )
             return false;
            
-        if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE) != -1)
+        if(StringUtils.indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE) != -1)
             _clientAcceptsXGnutellaQueryreplies = true;
             
         return true;
@@ -829,7 +829,7 @@ public final class HTTPUploader implements Uploader {
      * @return true if the header had an node description value
      */
     private boolean readNodeHeader(final String str) {
-        if ( indexOfIgnoreCase(str, "X-Node") == -1 )
+        if ( StringUtils.indexOfIgnoreCase(str, "X-Node") == -1 )
             return false;
            
         StringTokenizer st = 
@@ -920,18 +920,7 @@ public final class HTTPUploader implements Uploader {
         }
 	}
 
-	/**
-	 * Helper method to compare two stings, ignoring their case.
-	 */ 
-	private int indexOfIgnoreCase(String str, String section) {
-		// convert both strings to lower case -- this is expensive
-		String aaa = str.toLowerCase();
-		String bbb = section.toLowerCase();
-		// then look for the index...
-		return aaa.indexOf(bbb);
-	}
-  
-    public void measureBandwidth() {
+	public void measureBandwidth() {
         bandwidthTracker.measureBandwidth(getTotalAmountUploaded());
     }
 
