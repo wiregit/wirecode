@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.io.*;
@@ -734,12 +735,12 @@ public final class UploadManager implements BandwidthTracker {
 		// is what the user *thinks* their connection
 		// speed is.  Note, that they may have set this
 		// wrong, but we have no way to tell.
-		float connectionSpeed  
-		= ((float)manager.getConnectionSpeed())/8.f;
+		float connectionSpeed = 
+            ((float)manager.getConnectionSpeed())/8.f;
 		// the second number is the speed that they have 
 		// allocated to uploads.  This is really a percentage
 		// that the user is willing to allocate.
-		float speed = manager.getUploadSpeed();
+		float speed = UploadSettings.UPLOAD_SPEED.getValue();
 		// the total bandwith available then, is the percentage
 		// allocated of the total bandwith.
 		float totalBandwith = ((connectionSpeed*((float)speed/100.F)));

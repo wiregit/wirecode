@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -61,7 +62,8 @@ public final class NormalUploadState implements HTTPMessage {
 		_fileName = _uploader.getFileName();
 		_fileSize = _uploader.getFileSize();
         if (_throttle == null)
-            _throttle = new BandwidthThrottle(getUploadSpeed());
+            _throttle = 
+                new BandwidthThrottle(UploadSettings.UPLOAD_SPEED.getValue());
  	}
     
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -210,7 +212,7 @@ public final class NormalUploadState implements HTTPMessage {
 	    // by setting the upload speed to unlimited
 	    // set the upload speed to 3.4E38 bytes per second.
 	    // This is de facto not limiting the uploads
-	    int uSpeed = SettingsManager.instance().getUploadSpeed();
+	    int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
 	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
 	        // connection speed is in kbits per second
 	        SettingsManager.instance().getConnectionSpeed() / 8.f 
