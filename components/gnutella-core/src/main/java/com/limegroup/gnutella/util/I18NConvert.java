@@ -49,10 +49,7 @@ public class I18NConvert {
                 _convertDelegator = new I18NConvert118();
             }
             catch(IOException e) {
-                ErrorService.error(e);
-            }
-            catch(ClassNotFoundException cnf) {
-                ErrorService.error(cnf);
+                throw new ExceptionInInitializerError(e);
             }
         }
     }
