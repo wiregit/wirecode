@@ -55,7 +55,7 @@ public final class StalledUploadWatchdog implements Runnable {
     /**
      * Activates the checking.
      */
-    public synchronized void activate(OutputStream ostream) {
+    public synchronized void activate(OutputStream os) {
         // let run() know when we're expecting to run, so
         // it can reschedule older schedulings if needed.
         nextCheckTime = System.currentTimeMillis() + DELAY_TIME;
@@ -66,7 +66,7 @@ public final class StalledUploadWatchdog implements Runnable {
             isScheduled = true;
         }
         
-        this.ostream = ostream;
+        this.ostream = os;
     }
     
     /**
