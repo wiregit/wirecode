@@ -7,6 +7,7 @@ import java.io.InputStream;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Set;
 
@@ -16,6 +17,9 @@ public class FileDescStub extends FileDesc {
     private static Set localSet2,globalSet;
     public Set localSet;
     public static final int size = 1126400;
+    
+    private AlternateLocationCollection _altlocCollection;
+    
     static {
         set = new HashSet();
         globalSet=new HashSet();
@@ -77,4 +81,16 @@ public class FileDescStub extends FileDesc {
     	else return
 			(URN)localSet.toArray()[0];
     }
+    
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.FileDesc#getAlternateLocationCollection()
+	 */
+	public AlternateLocationCollection getAlternateLocationCollection() {
+
+		return _altlocCollection;
+	}
+	
+	public void setAlternateLocationCollection(AlternateLocationCollection what) {
+		_altlocCollection=what;
+	}
 }
