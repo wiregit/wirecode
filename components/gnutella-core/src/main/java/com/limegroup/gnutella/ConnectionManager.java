@@ -88,6 +88,13 @@ public class ConnectionManager {
 	private static final int MAX_LEAVES = 
 		UltrapeerSettings.MAX_LEAVES.getValue();
 
+	/**
+	 * Constant for the version of query routing that we support -- the same
+	 * version is used both for query routing between leaves and Ultrapeers
+	 * and between Ultrapeers.
+	 */
+	public static final String QUERY_ROUTING_VERSION = "0.1";
+
     
     private MessageRouter _router;
     private HostCatcher _catcher;
@@ -552,6 +559,7 @@ public class ConnectionManager {
                                                 String ultrapeerHeader,
                                                 String userAgentHeader,
 												int degree) {
+
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
         //firewalled, so those who weren't had to make extra space for them.
@@ -940,10 +948,8 @@ public class ConnectionManager {
     }
     
     /** 
-     * Sends the initial ping request to a newly initialized connection.  If
-     * connection is router.limewire.com (e.g.,
-     * connection.isRouterConnection()), sends a special group ping.  Otherwise
-     * the ttl of the PingRequest will be 1 if we don't need any connections.
+     * Sends the initial ping request to a newly initialized connection.  The
+     * ttl of the PingRequest will be 1 if we don't need any connections.
      * Otherwise, the ttl = max ttl.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
@@ -956,9 +962,9 @@ public class ConnectionManager {
         //connections.
         PingRequest pr;
         if (getNumInitializedConnections() >= _keepAlive)
-            pr = new PingRequest((byte)1);                              //b
+            pr = new PingRequest((byte)1);   
         else
-            pr = new PingRequest(SettingsManager.instance().getTTL());  //c
+            pr = new PingRequest((byte)4);   
 
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
