@@ -104,6 +104,7 @@ public final class SettingsFactory {
     public synchronized void changeFile(File toUse) {
         SETTINGS_FILE = toUse;
         if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
+        revertToDefault();
         reload();
     }
 	
