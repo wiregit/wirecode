@@ -9,6 +9,9 @@ public class CountPercent {
     private static final int ACTION_HTML = 1;
     private static final int ACTION_CHECK = 2;
     private static final int ACTION_UPDATE = 3;
+    private static final int ACTION_RELEASE = 4;
+    
+    private static final double RELEASE_PERCENTAGE = .65;
     
     public static void main(String[] args) throws java.io.IOException {
         final int action;
@@ -22,6 +25,8 @@ public class CountPercent {
                 action = ACTION_UPDATE;
                 if(args.length > 1)
                     code = args[1];
+            } else if(args[0].equals("release")) {
+                action = ACTION_RELEASE;
             } else {
                 System.err.println("Usage: java CountPercent [html|check|update <code>]");
                 return;
@@ -77,6 +82,7 @@ public class CountPercent {
             HTMLOutput html = new HTMLOutput(df, pc, langs, basicTotal);
             html.printHTML(System.out);
             break;
+        case ACTION_RELEASE: // release updates first.
         case ACTION_UPDATE:
             loader.extendVariantLanguages();
             Set validKeys = new HashSet();
@@ -91,6 +97,11 @@ public class CountPercent {
                 LanguageInfo info = (LanguageInfo)langs.get(code);
                 updater.updateLanguage(info);
             }
+            if(action != ACTION_RELEASE)
+                break;
+            loader.retainKeys(basicKeys);
+            release(root);
+            break;
         }
     }
     
@@ -144,6 +155,116 @@ public class CountPercent {
                 //shouldn't occur
             }
             System.out.println(")");
+        }
+    }
+    
+    /**
+     * Releases the properties.
+     */
+    private void release(File root) {
+        // First gather statistics on which languages have a suitable % translated.
+        List validLangs = new LinkedList();
+        for(Iterator i = langs.values().iterator(); i.hasNext(); ) {
+            LanguageInfo li = (LanguageInfo)i.next();
+            int count = li.getProperties().size();
+            double percentage = (double)count / (double)basicTotal;
+            if(percentage >= RELEASE_PERCENTAGE)
+                validLangs.add(li);
+        }
+        
+        // Now that we've got a list of valid languages, go through
+        // and copy'm to a release dir.
+        File release = new File(root, "release");
+        deleteAll(release);
+        release.delete();
+        copy(root, release, new Filter(validLangs));
+    }
+    
+    /**
+     * Recursively copies all files in root to dir that match Filter.
+     */
+    private void copy(File root, File dir, FileFilter filter) {
+        File[] files = root.listFiles(filter);
+        for(int i = 0; i < files.length; i++) {
+            File f = files[i];
+            if(f.isDirectory())
+                copy(f, new File(dir, f.getName()), filter);
+            else
+                copy(f, dir);
+        }
+    }
+    
+    /**
+     * Recursively deletes all files in a directory.
+     */
+    private void deleteAll(File f) {
+        if(f.isDirectory()) {
+            File[] files = f.listFiles();
+            for(int i = 0; i < files.length; i++)
+                deleteAll(files[i]);
+        }
+        f.delete();
+    }
+    
+    /**
+     * Copies file to dir, ignoring any lines that are comments.
+     */
+    private void copy(File src, File dst) {
+        dst.mkdirs();
+        dst = new File(dst, src.getName());
+        
+        BufferedReader reader = null;
+        BufferedWriter writer  = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(src), "ISO-8859-1"));
+            writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(dst), "ISO-8859-1"));
+            String read;
+            while( (read = reader.readLine()) != null) {
+                Line line = new Line(read);
+                if(line.isComment())
+                    continue;
+                writer.write(read);
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader!=null)
+                try { reader.close(); } catch (IOException e) { }
+            if (writer!=null) {
+                try { writer.flush(); } catch (IOException e) { }
+                try { writer.close(); } catch (IOException e) { }
+            }
+        }
+    }        
+    
+    /**
+     * Filter for files.
+     */
+    private static class Filter implements FileFilter {
+        final List validLangs;
+        
+        Filter(List valid) { validLangs = valid; }
+        
+        public boolean accept(File f) {
+            if(f.isDirectory())
+                return true;
+            String name = f.getName();
+            if(!name.endsWith(".properties"))
+                return false;
+            int idxU = name.indexOf("_");
+            if(idxU == -1)
+                return true; // base resource.
+            int idxP = name.indexOf(".");
+            String code = name.substring(idxU + 1, idxP);
+            for(Iterator i = validLangs.iterator(); i.hasNext(); ) {
+                LanguageInfo li = (LanguageInfo)i.next();
+                if(code.equals(li.getBaseCode()) || code.equals(li.getCode()))
+                    return true;
+            }
+            return false;
         }
     }
 }
