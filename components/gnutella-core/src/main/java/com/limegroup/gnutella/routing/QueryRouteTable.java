@@ -113,6 +113,13 @@ public class QueryRouteTable {
     }
     
     /**
+     * Returns the size of this QueryRouteTable.
+     */
+    public int getSize() {
+        return bitTableLength;
+    }
+    
+    /**
      * Returns the percentage of slots used in this QueryRouteTable's BitTable.
      * The return value is from 0 to 100.
      */

@@ -1149,17 +1149,20 @@ public abstract class FileManager {
     }
 
     /**
-     * returns the QRTable.  
-     * if the shared files had changed, then it will rebuilt the
-     * qrt.
+     * Returns the QRTable.
+     * If the shared files had changed, then it will rebuilt the QRT.
+     * A copy is returned so that FileManager does not expose
+     * its internal data structure.
      */
     public QueryRouteTable getQRT() {
         if(_needRebuild) {
             buildQRT();
             _needRebuild = false;
         }
-
-        return _queryRouteTable;
+        
+        QueryRouteTable qrt = new QueryRouteTable(_queryRouteTable.getSize());
+        qrt.addAll(_queryRouteTable);
+        return qrt;
     }
 
     /**
