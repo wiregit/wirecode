@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
@@ -168,7 +169,7 @@ public class StandardMessageRouter extends MessageRouter {
     }
 
     private void sendResponses(Response[] responses, 
-                               QueryRequest queryRequest,
+                               QueryRequest query,
                                byte[] clientGUID) {
         // if either there are no responses or, the
         // response array came back null for some reason,
@@ -176,29 +177,69 @@ public class StandardMessageRouter extends MessageRouter {
         if ( (responses == null) || ((responses.length < 1)) )
             return;
 
-        // get the appropriate queryReply information
+        
+        // Here we can do a couple of things - if the query wants
+        // out-of-band replies we should do things differently.  else just
+        // send it off as usual.  only send out-of-band if you are GUESS-
+        // capable (being GUESS capable implies that you can receive 
+        // incoming TCP) and not firewalled
+        if (query.desiresOutOfBandReplies() && (query.getHops() > 1) &&
+            RouterService.isGUESSCapable() && 
+            RouterService.acceptedIncomingConnection()) {
+            
+            // send the replies out-of-band - we need to
+            // 1) buffer the responses
+            // 2) send a ReplyNumberVM with the number of responses
+            if (bufferResponsesForLaterDelivery(query, responses)) {
+                // special out of band handling....
+                InetAddress addr = null;
+                try {
+                    addr = InetAddress.getByName(query.getReplyAddress());
+                }
+                catch (UnknownHostException uhe) {
+                    // weird - just forget about it.....
+                    return;
+                }
+                int port = query.getReplyPort();
+                
+                // send a ReplyNumberVM to the host - he'll ACK you if he
+                // wants the whole shebang
+                try {
+                    int resultCount = 
+                        (responses.length > 255) ? 255 : responses.length;
+                    ReplyNumberVendorMessage vm = 
+                        new ReplyNumberVendorMessage(new GUID(query.getGUID()),
+                                                     resultCount);
+                    UDPService.instance().send(vm, addr, port);                
+                }
+                catch (BadPacketException bpe) {
+                    // should NEVER happen
+                    bpe.printStackTrace();
+                }
+            }
+            // else i couldn't buffer the responses due to busy-ness, oh, scrap
+            // them.....
 
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = 
-		    RouterService.getUploadManager().measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=SettingsManager.instance().getConnectionSpeed();
-            measuredSpeed=false;
+            return;
         }
 
+        // send the replies in-band
+        // -----------------------------
+
         //convert responses to QueryReplies
-        Iterator /*<QueryReply>*/iterator= responsesToQueryReplies(responses,
-                                                                   queryRequest);
+        Iterator /*<QueryReply>*/iterator=responsesToQueryReplies(responses,
+                                                                  query);
         //send the query replies
         try {
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
-                sendQueryReply(queryRequest, queryReply);
+                sendQueryReply(query, queryReply);
             }
         } 
         catch (IOException e) {
             // if there is an error, do nothing..
         }
+        // -----------------------------
+
     }
 }

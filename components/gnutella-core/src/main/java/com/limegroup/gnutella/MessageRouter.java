@@ -104,7 +104,7 @@ public abstract class MessageRouter {
     /**
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
      * if the sink wants them).  Cleared every CLEAR_TIME seconds.
-     * TimedGUID->QueryReply
+     * TimedGUID->QueryResponseBundle
      */
     private Hashtable _outOfBandReplies = new Hashtable();
 
@@ -749,15 +749,42 @@ public abstract class MessageRouter {
     protected void handleLimeACKMessage(LimeACKVendorMessage ack,
                                         DatagramPacket datagram) {
         GUID refGUID = new GUID(ack.getGUID());
-        QueryReply reply = (QueryReply) _outOfBandReplies.remove(refGUID);
-        if (reply != null) {
+        QueryResponseBundle bundle = 
+            (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
+        if (bundle != null) {
             InetAddress addr = datagram.getAddress();
             int port = datagram.getPort();
-            UDPService.instance().send(reply, addr, port);
+
+            //convert responses to QueryReplies
+            Iterator /*<QueryReply>*/ iterator = 
+                responsesToQueryReplies(bundle._responses, bundle._query);
+            //send the query replies
+            while(iterator.hasNext()) {
+                QueryReply queryReply = (QueryReply)iterator.next();
+                UDPService.instance().send(queryReply, addr, port);
+            }
         }
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
     }
+
+    /** Stores (for a limited time) the resps for later out-of-band delivery -
+     *  interacts with handleLimeACKMessage
+     *  @return true if the operation failed, false if not (i.e. too busy)
+     */
+    protected boolean bufferResponsesForLaterDelivery(QueryRequest query,
+                                                      Response[] resps) {
+        // store responses by guid for later retrieval
+        synchronized (_outOfBandReplies) {
+            if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
+                _outOfBandReplies.put(new TimedGUID(new GUID(query.getGUID())), 
+                                      new QueryResponseBundle(query, resps));
+                return true;
+            }
+            return false;
+        }
+    }
+
 
     /**
      * Basically, just get the correct parameters, create a temporary 
@@ -1479,49 +1506,8 @@ public abstract class MessageRouter {
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        FOR_ME_REPLY_HANDLER);
-            // Here we can do a couple of things - if the query wants
-            // out-of-band replies we should do things differently.  else just
-            // send it off as usual.  only send out-of-band if you are GUESS-
-            // capable (being GUESS capable implies that you can receive 
-            // incoming TCP) and not firewalled
-            if (!query.desiresOutOfBandReplies() || 
-                (query.getHops() < 2) ||
-                !RouterService.isGUESSCapable() || 
-                !RouterService.acceptedIncomingConnection())
-                rrp.getReplyHandler().handleQueryReply(queryReply, null);
-            else {
-                // special out of band handling....
-                InetAddress addr = null;
-                try {
-                    addr = InetAddress.getByName(query.getReplyAddress());
-                }
-                catch (UnknownHostException uhe) {
-                    throw new IOException("Couldn't locate host!!");
-                }
-                int port = query.getReplyPort();
-                
-                // send a ReplyNumberVM to the host - he'll ACK you if he
-                // wants the whole shebang
-                ReplyNumberVendorMessage vm = null;
-                GUID guid = new GUID(query.getGUID());
-                try {
-                    int resultCount = queryReply.getResultCount();
-                    vm = new ReplyNumberVendorMessage(guid, resultCount);
-                }
-                catch (BadPacketException bpe) {
-                    throw new IOException("Could not construct VM:" + bpe);
-                }
-                // store reply by guid for later retrieval
-                synchronized (_outOfBandReplies) {
-                    if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
-                        _outOfBandReplies.put(new TimedGUID(guid), 
-                                              queryReply);
-                        UDPService.instance().send(vm, addr, port);
-                    }
-                    // else "tough noogies, i'm too busy" - shouldn't
-                    // happen much
-                }
-            }
+            
+            rrp.getReplyHandler().handleQueryReply(queryReply, null);
         }
         else
             throw new IOException("no route for reply");
@@ -1938,6 +1924,17 @@ public abstract class MessageRouter {
             if (currTime - _creationTime >= MAX_LIFE)
                 return true;
             return false;
+        }
+    }
+
+
+    private static class QueryResponseBundle {
+        public final QueryRequest _query;
+        public final Response[] _responses;
+        
+        public QueryResponseBundle(QueryRequest query, Response[] responses) {
+            _query = query;
+            _responses = responses;
         }
     }
 
