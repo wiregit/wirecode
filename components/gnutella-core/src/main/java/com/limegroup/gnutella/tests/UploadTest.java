@@ -133,7 +133,16 @@ public class UploadTest {
                         "Unexpected: "+URLDecoder.decode(encodedFile));
             passed=download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
             test("URL encoded with HTTP1.1",passed);
-
+            
+            //////////////////Pipelining tests with HTTP1.1////////////// 
+            passed = pipelineDownloadNormal(file, null, 
+                                            "abcdefghijklmnopqrstuvwxyz");
+            test("piplining with normal download",passed);
+            
+            passed = pipelineDownloadPush(file,null, 
+                                          "abcdefghijklmnopqrstuvwxyz");
+            test("piplining with push download",passed);
+            
         } catch (IOException e) {
             e.printStackTrace();
             Assert.that(false, "Unexpected exception");
@@ -355,16 +364,131 @@ public class UploadTest {
             int c = in.read();
             buf.append((char)c);
         }
-        /*
-        while (true) {
-            int c=in.read();
-            if (c<0)
-                break;
-            buf.append((char)c);
-        }
-        */
         //System.out.println("Sumeet: about to return value " + buf);
         return buf.toString();
+    }
+
+    private static boolean pipelineDownloadNormal(String file, String header,
+                                                  String expResp) 
+        throws IOException {
+        boolean ret = true;
+        Socket s = new Socket(address,port);
+        BufferedReader in = new BufferedReader(new InputStreamReader
+                                               (s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter
+                                                (s.getOutputStream()));
+        
+        //write first request
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        if (header!=null)
+            out.write(header+"\r\n");
+        out.write("Connection:Keep-Alive\r\n");
+        out.write("\r\n");
+        out.flush();
+        
+        //write second request 
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        if (header!=null)
+            out.write(header+"\r\n");
+        out.write("Connection:Keep-Alive\r\n");
+        out.write("\r\n");
+        out.flush();
+        
+        int expectedSize = expResp.length();
+        
+        //read...ignore response headers
+        while(!in.readLine().equals("")){ }
+        //read first response
+        StringBuffer buf=new StringBuffer();        
+        for(int i=0; i<expectedSize; i++){
+            int c = in.read();
+            buf.append((char)c);
+        }
+        ret = buf.toString().equals(expResp);
+        //ingore second header
+        buf = new StringBuffer();
+        while(!in.readLine().equals("")){ }
+        //read Second response
+        for(int i=0; i<expectedSize; i++){
+            int c = in.read();
+            buf.append((char)c);
+        }
+        return ret && buf.toString().equals(expResp);
+    }
+
+    private static boolean pipelineDownloadPush(String file, String 
+                                                header, String expResp)
+        throws IOException , BadPacketException {
+        boolean ret = true;
+        //Establish push route
+        Connection c=new Connection(address, port);
+        c.initialize();
+        QueryRequest query=new QueryRequest((byte)5, 0, "txt");
+        c.send(query);
+        c.flush();
+        QueryReply reply=null;
+        while (true) {
+            Message m=c.receive(2000);
+            if (m instanceof QueryReply) {
+                reply=(QueryReply)m;
+                break;
+            } 
+        }
+        PushRequest push=new PushRequest(GUID.makeGuid(),
+            (byte)5,
+            reply.getClientGUID(),
+            0,
+            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+            callbackPort);
+
+        //Create listening socket, then send push.
+        ServerSocket ss=new ServerSocket(callbackPort);
+        c.send(push);
+        c.flush();
+        Socket s=ss.accept();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        in.readLine();  //skip GIV        
+        in.readLine();  //skip blank line
+        
+        //write first request
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        if (header!=null)
+            out.write(header+"\r\n");
+        out.write("Connection:Keep-Alive\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        //write second request
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        if (header!=null)
+            out.write(header+"\r\n");
+        out.write("Connection:Keep-Alive\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        int expectedSize = expResp.length();
+        
+        //read...ignore response headers
+        while(!in.readLine().equals("")){ }
+        //read first response
+        StringBuffer buf=new StringBuffer();        
+        for(int i=0; i<expectedSize; i++){
+            int c1 = in.read();
+            buf.append((char)c1);
+        }
+        ret = buf.toString().equals(expResp);
+        buf = new StringBuffer();
+        //ingore second header
+        while(!in.readLine().equals("")){ }
+        //read Second response
+        for(int i=0; i<expectedSize; i++){
+            int c1 = in.read();
+            buf.append((char)c1);
+        }
+        return ret && buf.toString().equals(expResp);
     }
 
 
