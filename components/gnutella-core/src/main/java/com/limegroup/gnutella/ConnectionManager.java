@@ -318,6 +318,8 @@ public class ConnectionManager {
      *  this one.
      */
     public synchronized void remove(ManagedConnection c) {
+		// removal may be disabled for tests
+		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
         removeInternal(c);
         adjustConnectionFetchers();
     }
