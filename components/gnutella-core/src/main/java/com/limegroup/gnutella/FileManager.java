@@ -649,8 +649,9 @@ public abstract class FileManager {
 		    RouterService.getDownloadManager().getIncompleteFileManager().
 		        registerAllIncompleteFiles();
 		    
-		// write out the cache of URNs
+		// write out the cache of URNs and creation times
 		UrnCache.instance().persistCache();
+        CreationTimeCache.instance().persistCache();
     }
     
     /**
@@ -874,6 +875,13 @@ public abstract class FileManager {
                 indices.add(fileIndex);
             }
 		
+            // Populate the creation time cache if necessary
+            URN mainURN = (URN) urns.iterator().next();
+            Long cTime = CreationTimeCache.instance().getCreationTime(mainURN);
+            if (cTime == null)
+                CreationTimeCache.instance().addTime(mainURN, 
+                                                     file.lastModified());
+
             // Ensure file can be found by URN lookups
             this.updateUrnIndex(fileDesc);
             _needRebuild = true;            
