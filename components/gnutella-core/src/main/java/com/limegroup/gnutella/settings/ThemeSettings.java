@@ -322,23 +322,23 @@ public final class ThemeSettings {
 		FACTORY.createIntSetting("WINDOW6_COLOR_B", 255);			
 		
 	/**
-	 * Setting for the secondary 3 color blue value.
+	 * Setting for the window 7 color blue value -- text fields, etc.
 	 */
 	public static final IntSetting WINDOW7_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_R", 100);	
+		FACTORY.createIntSetting("WINDOW7_COLOR_R", 255);	
 		
 
 	/**
-	 * Setting for the secondary 3 color blue value.
+	 * Setting for the window 7 color blue value.
 	 */
 	public static final IntSetting WINDOW7_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_G", 100);
+		FACTORY.createIntSetting("WINDOW7_COLOR_G", 255);
 		
 	/**
-	 * Setting for the secondary 3 color blue value.
+	 * Setting for the window 7 color blue value.
 	 */
 	public static final IntSetting WINDOW7_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_B", 100);		
+		FACTORY.createIntSetting("WINDOW7_COLOR_B", 255);		
 		
 	/**
 	 * Setting for the secondary 3 color blue value.
