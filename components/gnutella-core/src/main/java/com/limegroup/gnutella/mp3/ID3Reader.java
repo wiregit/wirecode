@@ -31,7 +31,7 @@ public final class ID3Reader {
 
         // Read ID3 Tag, return null if not present
         randomAccessFile.readFully(buffer, 0, 3);
-        String tag = new String(buffer, 0, 3, "Cp437");
+        String tag = new String(buffer, 0, 3);
 
         if(!tag.equals("TAG"))
             return null;
