@@ -166,13 +166,13 @@ public class FileManager {
 	 * @return the index corresponding to the requested urn, or
 	 *  -1 if not matching index could be found
 	 */
-	public int getFileIndexForURN(URN urn) {
+	public int getFileIndexForUrn(final URN urn) {
         Iterator iter = _files.iterator();
 		int count = 0;
         while(iter.hasNext()) {
             FileDesc candidate = (FileDesc)iter.next();
             if (candidate==null) continue;
-            if (candidate.satisfiesUrn(urn)) {
+            if (candidate.containsUrn(urn)) {
                 return count;
             }
 			count++;
@@ -190,12 +190,12 @@ public class FileManager {
 	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
 	 *  <tt>null</tt> if not matching <tt>FileDesc</tt> could be found
 	 */
-	public FileDesc getFileDescForURN(URN urn) {
+	public FileDesc getFileDescForUrn(final URN urn) {
         Iterator iter = _files.iterator();
         while(iter.hasNext()) {
             FileDesc candidate = (FileDesc)iter.next();
             if (candidate==null) continue;
-            if (candidate.satisfiesUrn(urn)) {
+            if (candidate.containsUrn(urn)) {
                 return candidate;
             }
         }
@@ -882,8 +882,8 @@ public class FileManager {
                     continue;                    
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
-                Response r= desc.responseFor(request);
-                ret[j]=r;
+                //Response r= desc.responseFor(request);
+                ret[j] = new Response(desc);
                 j++;
             }
             Assert.that(j==ret.length,
@@ -911,7 +911,7 @@ public class FileManager {
                  j++) {            
             int i=iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
-            response[j] = desc.responseFor(request);
+            response[j] = new Response(desc);//desc.responseFor(request);
         }
         return response;
     }
@@ -1010,13 +1010,13 @@ public class FileManager {
                 IntSet.IntSetIterator iter = hits.iterator();
                 while(iter.hasNext()) {
                     FileDesc fd = (FileDesc)_files.get(iter.next());
-                    if(fd.satisfiesUrn(urn)) {
+                    if(fd.containsUrn(urn)) {
                         // still valid
                         if(ret==null) ret = new IntSet();
                         ret.add(fd._index);
                     } else {
                         // was invalid; consider rehashing
-                        if(fd.shouldCalculateUrns()) {
+                        if(!fd.hasSHA1Urn()) {
 							//backgroundCalculateAndUpdate(fd);
 							_fileDescLoader.loadFileDesc(fd);
                         }
