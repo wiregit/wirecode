@@ -89,6 +89,7 @@ public final class HandshakingTest extends BaseTestCase {
 				CONNECTIONS.add(curConn);
 
 				sleep(200);
+				setPreferredConnectons();
 
 				if(i == 5) {
 					// extra check to make sure these connections are 
@@ -251,4 +252,14 @@ public final class HandshakingTest extends BaseTestCase {
 			}		
 		}
 	}
+	
+	/**
+	 * Enforces that the preferred connections are set in ConnectionManager.
+	 * This will always be done on a system that supports idle time, but we
+	 * need to enforce that its done on other systems (such as Linux).
+	 */
+	private void setPreferredConnectons() throws Exception {
+	    PrivilegedAccessor.invokeMethod(RouterService.getConnectionManager(), 
+	        "setPreferredConnections", null);
+    }
 }
