@@ -25,6 +25,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -369,6 +370,19 @@ public class LeafRoutingTest extends BaseTestCase {
 
 
     public void testLeafAnswersURNQueries() throws Exception {
+        FilterSettings.FILTER_HASH_QUERIES.setValue(false);
+        testURNs();
+    }
+    
+    public void testLeafFiltersURNQueries() throws Exception {
+        FilterSettings.FILTER_HASH_QUERIES.setValue(true);
+        try {
+            testURNs();
+            fail("did not filter URN query");
+        }catch(IOException expected){};
+    }
+    
+    private void testURNs() throws Exception {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
