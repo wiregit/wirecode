@@ -22,6 +22,11 @@ public class HostCatcherTest extends TestCase {
     /** Returns a new HostCatcher connected to stubs.  YOU MAY WANT TO CALL
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {
+
+        //explicitly allow all ips to test.
+        SettingsManager settings = SettingsManager.instance();
+        settings.setBannedIps(new String[] {});
+        settings.setAllowedIps(new String[] { "*.*" });
         
         HostCatcher.DEBUG=true;
 		rs = new RouterService(new ActivityCallbackStub());
