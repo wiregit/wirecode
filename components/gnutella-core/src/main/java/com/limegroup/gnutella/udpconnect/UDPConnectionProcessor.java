@@ -583,7 +583,7 @@ log(" _cl: "+_chunkLimit+" _rWS: "+_receiverWindowSpace);
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
-log("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
+log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 		_udpService.send(msg, _ip, _port);  // TODO: performance
 	}
 
@@ -628,7 +628,7 @@ log("------unscheduled");
 
             int start = _sendWindow.getWindowStart();
 
-log("Soft resend data:"+ start+ " rto:"+rto+
+log2("Soft resend data:"+ start+ " rto:"+rto+
 " uS:"+_sendWindow.getUsedSpots());
 
             DataRecord drec;
@@ -648,7 +648,7 @@ log("Soft resend data:"+ start+ " rto:"+rto+
 
 				// If too many sends then abort connection
 				if ( drec.sends > MAX_SEND_TRIES+1 ) {
-log("Tried too many send on:"+drec.msg.getSequenceNumber());
+log2("Tried too many send on:"+drec.msg.getSequenceNumber());
 					closeAndCleanup();
 					return;
 				}
@@ -657,7 +657,7 @@ log("Tried too many send on:"+drec.msg.getSequenceNumber());
 
                 // If it looks like we waited too long then speculatively resend
                 if ( currentWait > adjRTO ) {
-log("Soft resending message:"+drec.msg.getSequenceNumber());
+log2("Soft resending message:"+drec.msg.getSequenceNumber());
                     safeSend(drec.msg);
                     currTime      = _lastSendTime;
                     drec.sentTime = currTime;
@@ -731,7 +731,7 @@ log("Soft resending message:"+drec.msg.getSequenceNumber());
 
 		// Record when the last message was received
 		_lastReceivedTime = System.currentTimeMillis();
-log("handleMessage :"+msg+" t:"+_lastReceivedTime);
+log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
         if (msg instanceof SynMessage) {
             // First Message from other host - get his connectionID.
@@ -795,7 +795,7 @@ log("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 
                 // TODO: You are not enforcing any real upper limit 
             } else {
-log("Received duplicate block num: "+ dmsg.getSequenceNumber());
+log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             }
 
             // Ack the Data message
@@ -903,7 +903,7 @@ log("keepalive");
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-log("shutdown");
+log2("shutdown");
 				// If no incoming messages for very long time then 
 				// close connection
 				closeAndCleanup();
@@ -973,7 +973,10 @@ log("ack timeout");
     //
     // -----------------------------------------------------------------
 
-	public static void log(String msg) {
+    public static void log(String msg) {
+    }
+
+	public static void log2(String msg) {
 		System.out.println(msg);
 	}
 }
