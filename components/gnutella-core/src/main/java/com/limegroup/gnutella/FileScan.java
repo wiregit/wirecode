@@ -31,15 +31,15 @@ public class FileScan {
     public FileScan() {
         _list = new LimitedList();
         _filters = new String[0];
-		_extensions = new String [] {"html","htm","xml","txt","pdf",
-									 "ps","rtf","doc","tex","mp3",
-									 "wav","au","aif","aiff","ra","ram",
-									 "mpg","mpeg","asf","qt","mov","avi",
-									 "mpe","gif","jpg","jpeg","jpe","png",
-									 "tif","tiff","exe","zip","gz","gzip",
-									 "hqx","tar","tgz","z"};
+	_extensions = new String [] {"html","htm","xml","txt","pdf",
+				     "ps","rtf","doc","tex","mp3",
+				     "wav","au","aif","aiff","ra","ram",
+				     "mpg","mpeg","asf","qt","mov","avi",
+				     "mpe","gif","jpg","jpeg","jpe","png",
+				     "tif","tiff","exe","zip","gz","gzip",
+				     "hqx","tar","tgz","z"};
     }
-
+    
     public void setExtensions(String[] e) {
         _extensions = e;
     }
@@ -83,8 +83,25 @@ public class FileScan {
     
     }
 
+    
+    public String getListAsString() {
+	Object[] objs = _list.getAllElements();
+	int len = objs.length;
+	File f;
+	String files ="";
+	for(int i=0; i< len;i++) {
+	    f = (File)objs[i];
+	    files += f.getAbsolutePath();
+	    files += ";";
+	}
+	return files;
+}
+
+
+
     public void scan(String pathname) {
         scan(pathname, MAX_DEPTH);    
+
     }
 
     public void scan(String pathname, int depth) {
