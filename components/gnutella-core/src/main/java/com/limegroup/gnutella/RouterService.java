@@ -81,7 +81,9 @@ public class RouterService
 	    c.connect();
 	    c.setManager(manager);
 	    manager.add(c);
-	    c.send(new PingRequest(Const.TTL));
+	    PingRequest pr=new PingRequest(Const.TTL);
+	    manager.fromMe(pr);
+	    c.send(pr);
 	    System.out.println("Connection established.");
 	    Thread tc=new Thread(c);
 	    tc.setDaemon(true);
@@ -156,10 +158,69 @@ System.out.println("RouterService init");
     }
 
     /**
-     *  Return the number of good hosts
+     *  Return the number of good hosts in my horizon.
      */
-    public int getNumHosts() {
-	return( manager.catcher.getNumHosts() );
+    public long getNumHosts() {
+	long ret=0;
+	for (Iterator iter=manager.connections(); iter.hasNext() ; ) 
+	    ret+=((Connection)iter.next()).getNumHosts();
+	return ret;
+    }
+
+    /**
+     * Return the number of files in my horizon. 
+     */
+    public long getNumFiles() {
+	long ret=0;
+	for (Iterator iter=manager.connections(); iter.hasNext() ; ) 
+	    ret+=((Connection)iter.next()).getNumFiles();
+	return ret;
+    }
+
+    /**
+     * Return the size of all files in my horizon. 
+     */
+    public long getTotalFileSize() {
+	long ret=0;
+	for (Iterator iter=manager.connections(); iter.hasNext() ; ) 
+	    ret+=((Connection)iter.next()).getTotalFileSize();
+	return ret;
+    }
+
+    /**
+     * Updates the horizon statistics.
+     *
+     * @modifies manager, network
+     * @effects resets manager's horizon statistics and sends
+     *  out a ping request.  Ping replies come back asynchronously
+     *  and modify the horizon statistics.  Poll for them with
+     *  getNumHosts, getNumFiles, and getTotalFileSize.
+     */
+    public void updateHorizon() {
+	//Reset statistics first
+	for (Iterator iter=manager.connections(); iter.hasNext() ; ) 
+	    ((Connection)iter.next()).clearHorizonStats();
+    
+	//Send ping to everyone.  Call to fromMe() notes that replies
+	//are to me.
+	PingRequest pr=new PingRequest(Const.TTL);
+	manager.fromMe(pr);
+	try {
+	    manager.sendToAll(pr);
+	} catch (IOException e) { }
+    }
+
+    /**
+     * Searches Gnutellanet with given query string and expected 
+     * minimum speed.  Results are shown asynchronously 
+     * via ActivityCallback.
+     */
+    public void query(String query, int minSpeed) {
+	QueryRequest qr=new QueryRequest(Const.TTL, minSpeed, query);
+	manager.fromMe(qr);
+	try {
+	    manager.sendToAll(qr);
+	} catch (IOException e) { }
     }
 
     /**
@@ -169,7 +230,6 @@ System.out.println("RouterService init");
 	return( manager.catcher.getHosts() );
     }
 
-
     /**
      *  Return the number of good hosts
      */
@@ -178,3 +238,4 @@ System.out.println("RouterService init");
     }
 
 }
+
