@@ -100,7 +100,6 @@ public class SettingsManager implements SettingsInterface
      */
     private static SettingsManager instance_ = new SettingsManager();
 
-
     private String home_;
     private String fileName_;
     private String ndFileName_;
