@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
+import java.nio.channels.ServerSocketChannel;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -103,7 +104,18 @@ public class LeafRoutingTest extends BaseTestCase {
      
     private static Connection connect(int port, boolean ultrapeer) 
         throws Exception {
-         ServerSocket ss=new ServerSocket(port);
+         ServerSocket ss = null;
+
+         // use an NIO server socket if we should
+         if(CommonUtils.isJava14OrLater() &&
+            ConnectionSettings.USE_NIO.getValue()) {
+             ServerSocketChannel ssc = ServerSocketChannel.open();
+             ssc.configureBlocking(true);
+             ssc.socket().bind(new InetSocketAddress(port));
+             ss = ssc.socket();               
+         } else {
+             ss = new ServerSocket(port);
+         }         
          RouterService.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
          ss.close();
@@ -123,6 +135,14 @@ public class LeafRoutingTest extends BaseTestCase {
          
          Connection con = new Connection(socket, responder);
          con.initialize();
+
+         // use the test reader so that we can call "read()" in the
+         // same manner we do for blocking IO
+         if(CommonUtils.isJava14OrLater() &&
+            ConnectionSettings.USE_NIO.getValue()) {
+             PrivilegedAccessor.setValue(con, "_messageReader", 
+                 TestNIOMessageReader.createReader(con));
+         }
          replyToPing(con, ultrapeer);
          return con;
      }
