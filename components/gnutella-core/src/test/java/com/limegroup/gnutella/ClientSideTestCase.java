@@ -30,7 +30,7 @@ import java.net.*;
 public abstract class ClientSideTestCase 
     extends com.limegroup.gnutella.util.BaseTestCase {
     public static final int SERVER_PORT = 6669;
-    protected static final int TIMEOUT=500;
+    protected static int TIMEOUT=500;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
     private static final byte[] oldIP=
@@ -76,7 +76,7 @@ public abstract class ClientSideTestCase
     }        
     
     public static void globalSetUp(Class callingClass) throws Exception {
-        // calls all doSettings() for me and my parents
+        // calls all doSettings() for me and my children
         PrivilegedAccessor.invokeAllStaticMethods(callingClass, "doSettings",
                                                   null);
         callback=
