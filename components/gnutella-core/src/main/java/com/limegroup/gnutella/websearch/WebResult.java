@@ -15,4 +15,7 @@ public class WebResult {
         _clickURL = click;
     }    
 
+    public String toString() {
+        return _title+", "+_description+", "+_bidPrice+", "+_clickURL;
+    }
 }

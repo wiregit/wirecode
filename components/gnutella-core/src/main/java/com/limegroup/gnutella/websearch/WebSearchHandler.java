@@ -59,7 +59,6 @@ public class WebSearchHandler {
         } catch (IOException iox) {
             Assert.that(false, "server is not responding correctly");
         }
-        System.out.println("Sumeet: got xml response:\n"+new String(response));
         parseAndDisplay(response);
     }
 
@@ -113,9 +112,7 @@ public class WebSearchHandler {
                     clickURL = val;
             }
             //create a new WebResult with these attributes
-            System.out.println(title+", "+desc+", "+bidPrice+", "+clickURL);
             WebResult result = new WebResult(title, desc, bidPrice, clickURL);
-            //TODO: add these WebResults to the GUI
             RouterService.getCallback().addWebResult(result);
         }
         } catch(Exception e) {
