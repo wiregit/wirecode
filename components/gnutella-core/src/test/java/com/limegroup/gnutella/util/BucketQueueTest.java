@@ -42,10 +42,10 @@ public class BucketQueueTest extends BaseTestCase {
     }
 	
 	public void testLegacy() {
-        Endpoint e4=new Endpoint("garbage", 0); e4.setWeight(4);
-        Endpoint e2a=new Endpoint("garbage", 0); e2a.setWeight(2);
-        Endpoint e2b=new Endpoint("garbage", 0); e2b.setWeight(2);
-        Endpoint e0=new Endpoint("garbage", 0); e0.setWeight(0);
+        Endpoint e4=new Endpoint("garbage", 1); e4.setWeight(4);
+        Endpoint e2a=new Endpoint("garbage", 1); e2a.setWeight(2);
+        Endpoint e2b=new Endpoint("garbage", 1); e2b.setWeight(2);
+        Endpoint e0=new Endpoint("garbage", 1); e0.setWeight(0);
         BucketQueue q=new BucketQueue(5, 10);
         assertTrue(q.isEmpty());
 
