@@ -72,8 +72,8 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     // ADD NEW MESSAGES HERE AS YOU BUILD THEM....
     // you should only add messages supported over TCP
     private static void addSupportedMessages(Set hashSet) {
-        // TCP Connect Back
         SupportedMessageBlock smp = null;
+        // TCP Connect Back
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,
                                         TCPConnectBackVendorMessage.VERSION);
         hashSet.add(smp);
@@ -89,6 +89,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ,
                                         PushProxyRequest.VERSION);
         hashSet.add(smp);        
+        // Leaf Guidance Support
+        smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_LIME_ACK,
+                                        QueryStatusRequest.VERSION);
+        hashSet.add(smp);                
     }
 
 
@@ -151,6 +155,14 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      */
     public int supportsPushProxy() {
         return supportsMessage(F_LIME_VENDOR_ID, F_PUSH_PROXY_REQ);
+    }
+
+    /**
+     * @return -1 if the message isn't supported, else it returns the version 
+     * of the message supported.
+     */
+    public int supportsLeafGuidance() {
+        return supportsMessage(F_BEAR_VENDOR_ID, F_LIME_ACK);
     }
 
     // override super
