@@ -65,6 +65,14 @@ public final class MessageRouterTest extends BaseTestCase {
         "but", "it's", "hard", "to", "know", 
     };
 
+    /**
+     * Array of keywords that should not match anything in the routing
+     * tables.
+     */
+    private static final String[] UNMATCHING_KEYWORDS = {
+        "miss", "NCWEPHCE", "IEYWHFDSNC", "UIYRIEH", "dfjaivuih",
+    };
+
 
     public MessageRouterTest(String name) {
         super(name);
@@ -92,18 +100,57 @@ public final class MessageRouterTest extends BaseTestCase {
     }
 
     /**
-     * Test to make sure that the query route tables are forwarded 
+     * Test to make sure that the query route tables are forwarded correctly
+     * between Ultrapeers.
      */
-    public void testForwardQueryRouteTables() throws Exception {
-        TestConnectionManager tcm = new TestConnectionManager(6);
+    public void testIntraUltrapeerForwardQueryRouteTables() throws Exception {
+        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
+        FileManager fm = new TestFileManager();
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
+        PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
         Class[] params = new Class[] {};
 		Method m = 
             PrivilegedAccessor.getMethod(ROUTER, 
                                          "forwardQueryRouteTables",
                                          params);        
+        m.invoke(ROUTER, new Object[]{});
         
+        List connections = tcm.getInitializedConnections2();
+        Iterator iter = connections.iterator();
+        while(iter.hasNext()) {
+            TestConnection tc = (TestConnection)iter.next();
+            QueryRouteTable qrt = tc.getQueryRouteTable();
+            runQRPMatch(qrt);
+        }
+    }
+
+    /**
+     * Test to make sure that the given <tt>QueryRouteTable</tt> has matches
+     * for all of the expected keywords and that it doesn't have matches
+     * for any of the unexpected keywords.
+     *
+     * @param qrt the <tt>QueryRouteTable</tt> instance to test
+     */
+    private static void runQRPMatch(QueryRouteTable qrt) {
+        for(int i=0; i<MY_KEYWORDS.length; i++) {
+            QueryRequest qr = QueryRequest.createQuery(MY_KEYWORDS[i]);
+            assertTrue("should contain the given keyword: "+qr, 
+                       qrt.contains(qr));
+        }
+
+        for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
+            QueryRequest qr = QueryRequest.createQuery(LEAF_KEYWORDS[i]);
+            assertTrue("should contain the given keyword: "+qr, 
+                       qrt.contains(qr));
+        }
+
+        for(int i=0; i<UNMATCHING_KEYWORDS.length; i++) {
+            QueryRequest qr = 
+                QueryRequest.createQuery(UNMATCHING_KEYWORDS[i]);
+            assertTrue("should not contain the given keyword: "+qr, 
+                       !qrt.contains(qr));
+        }        
     }
 
     /**
@@ -125,6 +172,9 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);             
         QueryRouteTable qrt = new QueryRouteTable();
         m.invoke(ROUTER, new Object[] {qrt});
+        runQRPMatch(qrt);
+
+        /*
         for(int i=0; i<MY_KEYWORDS.length; i++) {
             QueryRequest qr = QueryRequest.createQuery(MY_KEYWORDS[i]);
             assertTrue("should contain the given keyword: "+qr, 
@@ -136,6 +186,7 @@ public final class MessageRouterTest extends BaseTestCase {
             assertTrue("should contain the given keyword: "+qr, 
                        qrt.contains(qr));
         }
+        */
     }
 
     /**
@@ -584,6 +635,11 @@ public final class MessageRouterTest extends BaseTestCase {
 
         private boolean _receivedQuery;
 
+        /**
+         * Constant for the query route table for this connection.
+         */
+        private final QueryRouteTable QRT = new QueryRouteTable();
+
         TestConnection(int connections) {
             super("60.76.5.3", 4444);
             CONNECTIONS = connections;
@@ -604,7 +660,21 @@ public final class MessageRouterTest extends BaseTestCase {
             return true;
         }
 
-        public void send(Message msg) {
+        /**
+         * Accessor for the <tt>QueryRouteTable</tt> instance.
+         */
+        public QueryRouteTable getQueryRouteTable() {
+            return QRT;
+        }
+
+        public void send(Message msg) {            
+            if(msg instanceof RouteTableMessage) {
+                try {
+                    QRT.update((RouteTableMessage)msg);
+                } catch (BadPacketException e) {
+                    fail("should not have received a bad packet: "+msg);
+                }
+            }
             if(!(msg instanceof QueryRequest)) return;
 
             _receivedQuery = true;
