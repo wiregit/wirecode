@@ -23,6 +23,11 @@ public final class QueryHandler {
 	 */
 	private final int RESULTS;
 
+    /**
+     * Constant for the max TTL for a query.
+     */
+    public static final byte MAX_QUERY_TTL = (byte) 6;
+
 	/**
 	 * The number of results to try to get if we're an Ultrapeer originating
 	 * the query.
@@ -292,7 +297,7 @@ public final class QueryHandler {
 	 *    <tt>null</tt>
 	 */
 	public static QueryRequest createQuery(QueryRequest query, byte ttl) {
-		if(ttl < 1 || ttl > 6) 
+		if(ttl < 1 || ttl > MAX_QUERY_TTL) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 		if(query == null) {
 			throw new NullPointerException("null query");
@@ -613,11 +618,14 @@ public final class QueryHandler {
      * @return the TTL to use for the next connection
 	 */
 	private static byte 
-        calculateNewTTL(int hostsToQueryPerConnection, int degree, byte maxTTL) {
-        
+        calculateNewTTL(int hostsToQueryPerConnection, int degree, 
+                        byte maxTTL) {
+
+        if (maxTTL > MAX_QUERY_TTL) maxTTL = MAX_QUERY_TTL;
+
         // not the most efficient algorithm -- should use Math.log, but
         // that's ok
-        for(byte i=1; i<6; i++) {
+        for(byte i=1; i<MAX_QUERY_TTL; i++) {
 
             // biased towards lower TTLs since the horizon expands so
             // quickly
