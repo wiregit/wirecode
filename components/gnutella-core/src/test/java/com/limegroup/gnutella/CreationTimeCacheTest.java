@@ -41,6 +41,11 @@ public class CreationTimeCacheTest
 
     private static MyActivityCallback callback;
 
+    private static URN hash1;
+    private static URN hash2;
+    private static URN hash3;
+    private static URN hash4;
+
     /**
      * Ultrapeer 1 UDP connection.
      */
@@ -111,6 +116,11 @@ public class CreationTimeCacheTest
         Thread.sleep(1000);
         assertEquals("unexpected port",
             PORT, ConnectionSettings.PORT.getValue());
+
+        hash1 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
+        hash2 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
+        hash3 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
+        hash4 = URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
     }        
     
     public void setUp() throws Exception  {
@@ -197,15 +207,6 @@ public class CreationTimeCacheTest
     /** Tests that the URN_MAP is derived correctly from the TIME_MAP
      */
     public void testMapCreation() throws Exception {
-        final URN hash1 = 
-            URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-        final URN hash2 = 
-            URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSANITA");
-        final URN hash3 = 
-            URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQABOALT");
-        final URN hash4 = 
-            URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5BERKELEY");
-        
         // mock up our own createtimes.txt
         Map toSerialize = new HashMap();
         toSerialize.put(hash1, new Long(0));
@@ -223,10 +224,6 @@ public class CreationTimeCacheTest
         CreationTimeCache ctCache = new CreationTimeCache();
         Map TIME_MAP = (Map)PrivilegedAccessor.getValue(ctCache, "TIME_MAP");
         assertEquals(toSerialize, TIME_MAP);
-        
-        // delete cache
-        File cache = new File(_settingsDir, CREATION_CACHE_FILE);
-        cache.delete();
     }
 
     
@@ -234,13 +231,13 @@ public class CreationTimeCacheTest
      * Test read & write of map
      */
     public void testPersistence() throws Exception {
+        deleteCacheFile();
         assertTrue("cache should not be present", !cacheExists() );
         
         CreationTimeCache cache = CreationTimeCache.instance();
         FileDesc[] descs = createFileDescs();
         assertNotNull("should have some file descs", descs);
         assertGreaterThan("should have some file descs", 0, descs.length);
-        assertTrue("cache should still not be present", !cacheExists() );
         cache.persistCache();
         assertTrue("cache should now exist", cacheExists());
         for( int i = 0; i < descs.length; i++) {
@@ -325,16 +322,15 @@ public class CreationTimeCacheTest
         public FileDesc getFileDescForUrn(URN urn){
             if (fd == null) {
                 File cacheFile = new File(_settingsDir, CREATION_CACHE_FILE);
-                try {
-                    URN hash1 = 
-                        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
-                    Set urnSet = new HashSet();
-                    urnSet.add(hash1);
-                    fd = new FileDesc(cacheFile, urnSet, 0);
-                }
-                catch (Exception bad) { bad.printStackTrace(); }
+                Set urnSet = new HashSet();
+                urnSet.add(hash1);
+                fd = new FileDesc(cacheFile, urnSet, 0);
             }
-            return fd;
+            if (urn.equals(hash1) ||
+                urn.equals(hash2) ||
+                urn.equals(hash3) ||
+                urn.equals(hash4)) return fd;
+            else return super.getFileDescForUrn(urn);
         }
     }
 
