@@ -395,13 +395,4 @@ public class BIOMessageReader extends AbstractMessageReader {
             routeMessage(msg);
         }
     }
-
-    /**
-     * Throws <tt>IllegalStateException</tt> because this method should never
-     * be called when we're in blocking mode.
-     */
-    public void handleMessage(SelectionKey key) {
-        throw new IllegalStateException("in blocking mode");
-        
-    }
 }
