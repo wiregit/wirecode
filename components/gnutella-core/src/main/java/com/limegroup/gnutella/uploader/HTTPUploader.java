@@ -121,6 +121,7 @@ public final class HTTPUploader implements Uploader {
         } catch(IOException e) {
             // the connection was broken
 			setState(FILE_NOT_FOUND);            
+            return;
         }
 
         //special case for certain states
