@@ -154,7 +154,7 @@ public class StandardMessageRouter extends MessageRouter {
 
             PingReply pr = 
                 PingReply.createExternal(m.getGUID(), (byte)2, 
-                                         connection.getOrigPort(),
+                                         connection.getListeningPort(),
                                          connection.getInetAddress().getAddress(),
                                          false);
                                                     

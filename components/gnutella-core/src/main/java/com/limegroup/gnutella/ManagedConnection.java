@@ -833,7 +833,7 @@ public class ManagedConnection extends Connection
                 */
                 pr = PingReply.
                     createExternal(m.getGUID(), (byte)2, 
-                                   connection.getOrigPort(),
+                                   connection.getListeningPort(),
                                    connection.getInetAddress().getAddress(), 
                                    true);
             } else if(connection.isLeafConnection() 
@@ -848,7 +848,7 @@ public class ManagedConnection extends Connection
 
                 pr = PingReply.
                     createExternal(m.getGUID(), (byte)2, 
-                                   connection.getOrigPort(),
+                                   connection.getListeningPort(),
                                    connection.getInetAddress().getAddress(), 
                                    false);
             }

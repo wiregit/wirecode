@@ -857,7 +857,7 @@ public class ConnectionManager {
             if(connection.isSupernodeConnection())
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
-                    connection.getOrigPort()));
+                    connection.getListeningPort()));
         }
         //add the best few endpoints from the hostcatcher.
         Iterator iterator =
@@ -882,7 +882,7 @@ public class ConnectionManager {
 			if(connection.isSupernodeConnection() && 
 			   connection.isGUESSUltrapeer()) {				
 				return new Endpoint(connection.getInetAddress().getAddress(),
-									connection.getOrigPort());
+									connection.getListeningPort());
 			}
 		}
 		return null;
@@ -982,7 +982,7 @@ public class ConnectionManager {
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getPort()), true);
+                    c.getListeningPort()), true);
             }   
         }
     }
@@ -1290,7 +1290,9 @@ public class ConnectionManager {
                 int port =
                     Integer.parseInt(remoteAddress.substring(colonIndex).trim());
                 if(NetworkUtils.isValidPort(port)) {
-                    connection.setOrigPort(port);
+                	// for incoming connections, set the port based on what it's connection
+                	// headers say the listening port is
+                    connection.setListeningPort(port);
                 }
             } catch(NumberFormatException e){
                 // should nothappen though if the other client is well-coded
@@ -1534,9 +1536,8 @@ public class ConnectionManager {
 		// Send ping...possibly group ping.
 		sendInitialPingRequest(conn);
 		if(conn.isGUESSUltrapeer()) {
-			int port = conn.getOrigPort();
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-														 port);
+				conn.getListeningPort());
 		}
 
 		// this can throw IOException
