@@ -611,11 +611,11 @@ public class QueryRequest extends Message implements Serializable{
 	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
 	 *  query string, and the urns are all empty
      */
-    private QueryRequest(byte[] guid, byte ttl,  
-						 String query, String richQuery, 
-						 Set requestedUrnTypes, Set queryUrns,
-						 QueryKey queryKey, boolean isFirewalled, 
-						 int network, boolean canReceiveOutOfBandReplies) {
+    public QueryRequest(byte[] guid, byte ttl,  
+                        String query, String richQuery, 
+                        Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey, boolean isFirewalled, 
+                        int network, boolean canReceiveOutOfBandReplies) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
 		if((query == null || query.length() == 0) &&
