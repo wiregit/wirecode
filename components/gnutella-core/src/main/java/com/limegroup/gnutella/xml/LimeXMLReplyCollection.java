@@ -377,14 +377,15 @@ public class LimeXMLReplyCollection{
     /**
      * @return the older document, which is being replaced. Can be null.
      */
-//    public LimeXMLDocument replaceDoc(Object hash, LimeXMLDocument newDoc){
-//        LimeXMLDocument oldDoc = null;
-//        synchronized(mainMap){
-//            oldDoc = (LimeXMLDocument)mainMap.get(hash);
-//            mainMap.put(hash,newDoc);
-//        }
-//        return oldDoc;
-//    }
+    public LimeXMLDocument replaceDoc(URN hash, LimeXMLDocument newDoc){
+        LimeXMLDocument oldDoc = null;
+        synchronized(mainMap){
+            oldDoc = (LimeXMLDocument)mainMap.get(hash);
+            mainMap.put(hash,newDoc);
+        }
+        newDoc.setXMLUrn(hash);
+        return oldDoc;
+    }
 
     public boolean removeDoc(URN hash){
         boolean found;
