@@ -4,8 +4,9 @@ import java.net.*;
 import java.io.*;
 
 /**
- * A Gnutella connection.  There are two kinds of connections:
- * incoming and outgoing.  The difference is not really substantial.<p>
+ * A Gnutella connection. A connection is either INCOMING or OUTGOING;
+ * the difference doesn't really matter. It is also in one of three
+ * states: UNCONNECTED, CONNECTING, or CONNECTED.<p>
  *
  * This class provides the core logic for handling the Gnutella
  * protocol.  This includes sending replies to requests but not
@@ -14,117 +15,124 @@ import java.io.*;
  * 
  * The class can be used in a number of ways.  The typical use, to
  * handle a normal Gnutella connection, involves creating a
- * ConnectionManager and a thread:<p>
+ * ConnectionManager and a thread.<p>
  *
  * <pre>
- *   Socket s=new Socket(...);
- *   Connection c=new Connection(.., s, false); //does handshake
+ *   ConnectionManager cm=new ConnectionManager();
+ *   Connection c=new Connection(host, port);
+ *   c.connect();                  //actually connect
+ *   cm.addConnection(c);          //register for broadcasting purposes
+ *   c.setManager(cm);             //Must set before calling run.
+ *   c.send(new PingRequest(Const.TTL); //initial ping
  *   Thread t=new Thread(c);       //create new handler thread
  *   t.start();                    //services connection by calling run()
  * </pre>
  *
  * The second use is for "do it yourselfers".  This is useful for
- * Gnutella spiders.  In this case, you don't pass a ConnectionManager
- * as a constructor argument and don't call the run() method.
+ * Gnutella spiders.  In this case, you don't set a ConnectionManager
+ * and don't call the run() method.<p>
+ *
+ * You will note that the first constructor doesn't actually connect
+ * this.  For that you must call connect().  While this is awkward,
+ * it is intentional, as it makes interfacing with the GUI easier.
  */
-  public class Connection implements Runnable { 
+public class Connection implements Runnable { 
+    /** These are only needed for the run method.
+     *  INVARIANT: (manager==null)==(routeTable==null)==(pushRouteTable==null) */
     private ConnectionManager manager=null; //may be null
     private RouteTable routeTable=null;     //may be null
     private RouteTable pushRouteTable=null; 
-    /** The underlying socket.  For thread synchronization reasons, it is important
-     *  that this only be modified by the send(m) and receive() methods.  Also, use
-     *  in and out, buffered versions of the input and output streams, for writing.
+
+    /** The underlying socket.  sock, in, and out are null iff this is in
+     *  the unconnected state.
+     * 
+     *  For thread synchronization reasons, it is important that this
+     *  only be modified by the send(m) and receive() methods.  Also,
+     *  only use in and out, buffered versions of the input and output
+     *  streams, for writing.  
      */
+    private String host;
+    private int port;
     private Socket sock;
     private InputStream in;
     private OutputStream out;
     private boolean incoming;
 
-    /** The number of packets I sent and received.  This includes bad packets. */
-    private int sent;
-    private int received;
+    /** The number of packets I sent and received.  This includes bad packets. 
+     *  These are synchronized by out and in, respectively. */
+    private int sent=0;
+    private int received=0;
+
+    static final String CONNECT="GNUTELLA CONNECT/0.4\n\n";
+    static final String CONNECT_WITHOUT_FIRST_WORD=" CONNECT/0.4\n\n";
+    static final String OK="GNUTELLA OK\n\n";
 
     /** 
-     * Creates an outgoing connection with a fresh socket.
-     * 
-     * @modifies network, manager
-     * @effects creates an outgoing socket to the following host and port and does 
-     *   the Gnutella handshake.   Throws IOException if the connection couldn't be 
-     *   established.  If manager is non-null, also sends an initial PingRequest
-     *   and register this with manager.
-     *
-     * @param manager the manager managing me and my "sibling" connections, or null
-     *   if the run() method will not be called.
-     * @param host the address of the host to contact, e.g., "192.168.0.1" or
-     *   "gnutella.limegroup.com"
-     * @param port the port of the host to contact, e.g, 6346
-     * @exception IOException if the connection or the handshake failed
+     * Creates a new outgoing connection in the unconnected state.
+     * You must call connect() to actually establish the connection.
      */
-    public Connection(ConnectionManager manager, String host, int port) 
-	throws IOException {
-	this(manager, new Socket(host, port), false);
+    public Connection(String host, int port) {	
+	this.host=host;
+	this.port=port;
+	this.incoming=false;
     }
 
     /** 
-     * Creates an outgoing or incoming connection around an existing socket.
-     *
-     * @modifies network, manager
-     * @effects wraps a connection around sock and does the Gnutella handshake.
-     *  Throws IOException if the connection couldn't be established.
-     *  If manager is non-null, also registers this with manager and sends
-     *  an initial PingRequest if this is outgoing..
-     *
-     * @param manager the manager managing me and my "sibling" connections, or null
-     *   if the run() method will not be called.
-     * @param sock the socket used for communication
-     * @param incoming true if this is an incoming connection.
-     *    False otherwise.
-     * @exception IOException if the handshake failed
+     * Connects an unconnected/outgoing connection.
+     * 
+     * @requires this is in the unconnected state
+     * @modifies this, network
+     * @effects connects to host:port, and does the Gnutella handshake.
+     *  Throws IOException if this failed.
+     *  DOES NOT SEND INITIAL PING REQUEST OR ADD THIS TO MANAGER.
      */
-    public Connection(ConnectionManager manager, Socket sock, boolean incoming) 
-	throws IOException {
-	this.manager=manager;
+    public synchronized void connect() throws IOException {
+	Assert.that(sock==null && in==null && out==null, "Illegal state");
+	//Entering CONNECTING state.  TODO: notify GUI
+	sock=new Socket(host, port);
+	//Entering CONNECTED state.  TODO: notify GUI
+	in=new BufferedInputStream(sock.getInputStream());
+	out=new BufferedOutputStream(sock.getOutputStream());
+
+	//Handshake
+	sendString(CONNECT);
+	expectString(OK);
+  	System.out.println("Established outgoing connection on "+sock.toString());
+    }
+
+    /** 
+     * Creates an incoming, connected connection around an existing socket.
+     *
+     * @requires the word "GNUTELLA" and nothing else has just been read from sock
+     * @modifies network
+     * @effects wraps a connection around sock and does the rest of the Gnutella
+     *  handshake.  Throws IOException if the connection couldn't be established.
+     *  DOES NOT ADD THIS TO MANAGER. 
+     */
+    public Connection(Socket sock) throws IOException {
 	this.sock=sock;
 	this.in=new BufferedInputStream(sock.getInputStream());
 	this.out=new BufferedOutputStream(sock.getOutputStream());
-	this.incoming=incoming;
-	if (manager!=null){
-	    this.routeTable=manager.routeTable;
-	    this.pushRouteTable = manager.pushRouteTable;
-	}
+	this.incoming=true;
+
 	//Handshake
-	final String CONNECT="GNUTELLA CONNECT/0.4\n\n";
-	final String OK="GNUTELLA OK\n\n";
-	if (incoming) {
-	    expectString(CONNECT);
-	    sendString(OK);
-	} else { //outgoing
-	    sendString(CONNECT);
-	    expectString(OK);
-	    if (manager!=null) {
-		Message m=new PingRequest(Const.TTL);
-		send(m);
-		routeTable.put(m.getGUID(), this);
-	    }
-	}
-	
-	if (manager!=null)
-	    manager.add(this);
-  	System.out.println("Established "+(incoming?"incoming":"outgoing")
-  			   +" connection on "+sock.toString());
-    }
-    
-    private synchronized void sendString(String s) throws IOException {
-	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
+	expectString(CONNECT_WITHOUT_FIRST_WORD);
+	sendString(OK);
+
+  	System.out.println("Established incoming connection on "+sock.toString());
+    }    
+
+    protected synchronized void sendString(String s) throws IOException {
+	//TODO1: timeout.
+	byte[] bytes=s.getBytes();
 	OutputStream out=sock.getOutputStream();
 	out.write(bytes);
 	out.flush();
     }
 
-    private void expectString(String s) throws IOException {
-	//TODO1: shouldn't this timeout?
-	byte[] bytes=s.getBytes(); //TODO: I don't think this is what we want
-	//TODO3: can optimize, but this isn't really important
+    protected synchronized void expectString(String s) throws IOException {
+	//TODO1: timeout.
+	byte[] bytes=s.getBytes();
 	for (int i=0; i<bytes.length; i++) {
 	    int got=in.read();
 	    if (got==-1)
@@ -137,48 +145,80 @@ import java.io.*;
     //////////////////////////////////////////////////////////////////////
 
     /**
+     * Sends a message.
+     * 
+     * @requires this is in the CONNECTED state
      * @modifies the network underlying this
      * @effects send m on the network.  Throws IOException if problems
      *   arise.  This is thread-safe.
      */
     public void send(Message m) throws IOException {
+	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for send");
 	//Can't use same lock as receive()!
 	synchronized (out) {
 	    m.write(out);
 	    out.flush();
-	    sent++;
-	    manager.total++;
+	    sent++;	    
+	    if (manager!=null)
+		manager.total++;
 	}
 	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
-     * See specification of Message.read. Note that this is
+     * Receives a message.
+     *
+     * @requires this is in the CONNECTED state
+     * @effects See specification of Message.read. Note that this <i>may</i> be
      *  non-blocking, but there is no hard guarantee on the maximum
      *  block time.  This is thread-safe.
      */
     public Message receive() throws IOException, BadPacketException {
-	InputStream in=sock.getInputStream();
+	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
 	//Can't use same lock as send()!
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
-	    manager.total++;
+	    if (manager!=null)
+		manager.total++;
 	    //if (m!=null)
-	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
 
+    /** 
+     * Sets the connection manager in preparation for run().
+     * 
+     * @requires manager!=null
+     * @modifies this
+     * @effects sets the manager to use for broadcasting.  
+     *  It is only necessary to call this method if you are 
+     *  going to call the run method.
+     */
+    public synchronized void setManager(ConnectionManager manager) {
+	Assert.that(manager!=null, "Cannot set null manager");
+	this.manager=manager;
+	if (manager!=null){
+	    this.routeTable=manager.routeTable;
+	    this.pushRouteTable = manager.pushRouteTable;
+	}
+    }
+
     /**
-     * @requires the manager to this is non-null
+     * Handles core Gnutella request/reply protocol.
+     *
+     * @requires this is in the CONNECTED state and
+     *   the manager to this has been set via setManager
      * @modifies the network underlying this, manager
      * @effects receives request and sends appropriate replies.
      *   Returns if either the connection is closed or an error happens.
      *   If this happens, removes itself from the manager's connection list.
      */
     public void run() {
-	Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null);
+	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for run");
+	Assert.that(manager!=null && routeTable!=null && pushRouteTable!=null,
+		    "Illegal manager state for run");
 	try {
 	    while (true) {
 		Message m=null;
@@ -259,7 +299,6 @@ import java.io.*;
 			    Response[] responses = fm.query((QueryRequest)m);
 			    
 			    if (responses.length > 0) {
-			    
 				byte[] guid = m.getGUID();
 				// System.out.println("the guid " + guid);
 				byte ttl = Const.TTL;
@@ -272,7 +311,6 @@ import java.io.*;
 				// for(int i = 0; i < ip.length; i++) {
 				//     System.out.print(ip[i]);
 				// }
-			LimeProperties.ja	System.out.println("");
 				// long speed = ((QueryRequest)m).getMinSpeed();
 				long speed = 0;
 				// System.out.println("the speed " + speed);
@@ -292,7 +330,6 @@ import java.io.*;
 				    manager.QRepCount++;//keep stats if stats is turned on
 
 			    }
-
 			}
 			else{//TTL is zero
 			    //do nothing(drop the message)
