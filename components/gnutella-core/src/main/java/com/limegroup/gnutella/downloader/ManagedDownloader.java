@@ -1957,38 +1957,34 @@ public class ManagedDownloader implements Downloader, Serializable {
             while(true) { //while queued, connect and sleep if we queued
                 int[] a = {-1,-1};//reset the sleep value, and queue position
                 connected = assignAndRequest(dloader,a,http11);
-                synchronized(this) {
-                    boolean addQueued = killQueuedIfNecessary(connected,a[1]);
-                    //an uploader we want to stay connected with
-                    if(connected == 4)
-                        continue; // and has partial ranges
-                    if(connected!=1)
-                        break;
+                boolean addQueued = killQueuedIfNecessary(connected,a[1]);
+                //an uploader we want to stay connected with
+                if(connected == 4)
+                    continue; // and has partial ranges
+                if(connected!=1)
+                    break;
                 
-                    if(a[1] > -1 || a[0] >-1) {//we have a queued thread 
-                        Assert.that(a[0]>-1&&a[1]>-1,"inconsistent queue data");
-                        if(addQueued) {
-                            //I'm queued-someone else was killed for me ||
-                            //retried and was queued again -- update the hashmap
-                            queuedThreads.put(Thread.currentThread(),
-                                                         new Integer(a[1]) );
-                            try {
-                                Thread.sleep(a[0]);//value from QueuedException
-                            } catch (InterruptedException ix) {
-                                debug("worker: interrupted while asleep in "+
-                                      "queue" + dloader);
-                                queuedThreads.remove(Thread.currentThread());
-                                dloader.stop();//close connection
+                if(connected==1 && !addQueued) {
+                    //I'm queued, but no thread was killed for me. die!
+                    return true; //manager! keep churning more threads
+                }
+                if(connected==1) {//we have a queued thread, sleep
+                    Assert.that(a[0]>-1&&a[1]>-1,"inconsistent queue data");
+                    try {
+                        Thread.sleep(a[0]);//value from QueuedException
+                    } catch (InterruptedException ix) {
+                        debug("worker: interrupted while asleep in "+
+                              "queue" + dloader);
+                        queuedThreads.remove(Thread.currentThread());
+                        dloader.stop();//close connection
                                 // notifying will make no diff, coz the next 
                                 //iteration will throw interrupted exception.
-                                return true;
-                            }
-                        }
-                        else //I'm queued, but no thread was killed for me. die!
-                            return true;//manager! keep churning more threads
+                        return true;
                     }
-                } //end of synchronized block
-            } //end of while
+                }
+                else
+                    Assert.that(false,"this should never happen");
+            }
             //we have been given a slot remove this thread from queuedThreads
             synchronized(this) {
                 //no problem even if this thread is  not in there
@@ -2034,7 +2030,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * worse than this thread. 
      */
     private boolean killQueuedIfNecessary(int connectCode, int queuePos) {
+        //check integrity constriants first
         Assert.that(connectCode>=0 && connectCode <=4,"Invalid connectCode");
+        if(connectCode==2)
+            Assert.that(queuePos==-1,"inconsistnet parameter queuePos");
+        if(queuePos > -1)
+            Assert.that(connectCode==1,"inconsistnet parameter connectCode");
+
         if(connectCode==0) //no need to replace a thread, server not available
             return false;
         if(connectCode==3) //no need to kill a thread for NoSuchElement
@@ -2059,6 +2061,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return false;
             //OK. let's kill this guy
             killThread.interrupt();
+            //OK. I should add myself to queuedThreads if I am queued
+            if(connectCode == 1)
+                queuedThreads.put(Thread.currentThread(),new Integer(queuePos));
             return true;
         }        
     }
