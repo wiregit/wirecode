@@ -166,7 +166,7 @@ public final class UDPService implements Runnable {
                 // when you first can, try to recieve a packet....
                 // *----------------------------
                 synchronized (_receiveLock) {
-                    if (_socket == null) {
+                    while (_socket == null) {
                         try {
                             _receiveLock.wait();
                         }

@@ -140,7 +140,8 @@ public final class MulticastService implements Runnable {
                 // leave the group if we're shutting off the service.
                 if (multicastSocket == null 
                  && _socket != null
-                 && _group != null) {
+                 && _group != null
+                 && !_socket.isClosed() ) {
                     _socket.leaveGroup(_group);
                 }
                 _socket = (MulticastSocket) multicastSocket;
@@ -167,7 +168,7 @@ public final class MulticastService implements Runnable {
                 // when you first can, try to recieve a packet....
                 // *----------------------------
                 synchronized (_receiveLock) {
-                    if (_socket == null) {
+                    while (_socket == null) {
                         try {
                             _receiveLock.wait();
                         }
