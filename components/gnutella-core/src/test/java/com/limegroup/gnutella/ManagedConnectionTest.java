@@ -3,15 +3,12 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 import java.io.*;
-import java.net.*;
 import java.util.Properties;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 
 
 /**
@@ -19,7 +16,7 @@ import com.sun.java.util.collections.*;
  * and once without.
  */
 public class ManagedConnectionTest extends BaseTestCase {  
-    public static final int PORT=6666;
+    public static final int SERVER_PORT = 6666;
 
 
     private static final RouterService ROUTER_SERVICE =
@@ -38,31 +35,34 @@ public class ManagedConnectionTest extends BaseTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        launchBackend();
-    }
-
-    public void setUp() throws Exception {
-        if(ROUTER_SERVICE.isStarted()) return;
-        sleep(4000);
         setStandardSettings();
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(1);
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
-		ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+        ConnectionSettings.NUM_CONNECTIONS.setValue(1);
+        ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+        ConnectionSettings.SEND_QRP.setValue(false);
 
+        launchBackend();
+        sleep(4000);
+        
         // we start a router service so that all classes have correct
         // access to the others -- ConnectionManager having a valid
         // HostCatcher in particular
         ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
-		ROUTER_SERVICE.connect();
+        RouterService.connect();
+    }
+
+    public void setUp() throws Exception {
+    }
+    
+    public static void globalTearDown() throws Exception {
     }
 
 	public void tearDown() {
-		
 	}
  
     private static void sleep(long msecs) {
@@ -73,7 +73,8 @@ public class ManagedConnectionTest extends BaseTestCase {
      * Tests the method for checking whether or not a connection is stable.
      */
     public void testIsStable() throws Exception {
-        Connection conn = new ManagedConnection("localhost", Backend.PORT);
+        Connection conn = 
+            new ManagedConnection("localhost", Backend.BACKEND_PORT);
         conn.initialize();
         
         assertTrue("should not yet be considered stable", !conn.isStable());
@@ -105,7 +106,7 @@ public class ManagedConnectionTest extends BaseTestCase {
     
     private void tForwardsGGEP() throws Exception {
 		ManagedConnection out = 
-            new ManagedConnection("localhost", Backend.PORT);
+            new ManagedConnection("localhost", Backend.BACKEND_PORT);
         out.initialize();
         out.buildAndStartQueues();        
 
@@ -140,7 +141,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 	 */
 	public void testIsHighDegreeConnection() throws IOException {
 		ManagedConnection mc = 
-            new ManagedConnection("localhost", Backend.PORT);
+            new ManagedConnection("localhost", Backend.BACKEND_PORT);
 		mc.initialize();
 		assertTrue("connection should be high degree", 
 				   mc.isHighDegreeConnection());
@@ -152,7 +153,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         ManagedConnection mc= new ManagedConnection("", 1);
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
-        hc.HORIZON_UPDATE_TIME=1*200;   
+        HorizonCounter.HORIZON_UPDATE_TIME = 1*200;   
 
         PingReply pr1 = PingReply.create(
             GUID.makeGuid(), (byte)3, 6346,
@@ -199,7 +200,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         hc.refresh();    //update stats
         assertEquals("unexedted number of files", 1+2+3, hc.getNumFiles());
         assertEquals("unexpected number of hosts", 3, hc.getNumHosts());
-        assertEquals("unexpedted total filesize", 10+20+30, hc.getTotalFileSize());
+        assertEquals("unexpedted total filesize", 10+20+30, 
+            hc.getTotalFileSize());
 
         try { Thread.sleep(HorizonCounter.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }       
@@ -237,7 +239,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 	private void tStripsGGEP() throws Exception {
         ManagedConnection out = 
 			ManagedConnection.createTestConnection("localhost", 
-												   Backend.PORT,
+												   Backend.BACKEND_PORT,
 												   new NoGGEPProperties(),
 												   new EmptyResponder());
         out.initialize();
@@ -246,7 +248,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         assertTrue("connection is open", out.isOpen());
 		// receive all initial messages.
 		drain(out);
-
+        Thread.sleep(2000);
+        drain(out);
 		out.send(new PingRequest((byte)3));
 		
 		Message m = out.receive();
@@ -265,16 +268,10 @@ public class ManagedConnectionTest extends BaseTestCase {
 	 */
     public void testClientSideClose() throws Exception {
         ManagedConnection out=null;
-        Connection in=null;
-        //com.limegroup.gnutella.MiniAcceptor acceptor=null;                
-        //When receive() or sendQueued() gets IOException, it calls
-        //ConnectionManager.remove().  This in turn calls
-        //ManagedConnection.close().  Our stub does this.
-        ConnectionManager manager=new ConnectionManagerStub(true);
 
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-		out = new ManagedConnection("localhost", Backend.PORT);
+		out = new ManagedConnection("localhost", Backend.BACKEND_PORT);
         out.initialize();            
         out.buildAndStartQueues();
 
@@ -295,10 +292,10 @@ public class ManagedConnectionTest extends BaseTestCase {
 	 * server side.
 	 */
     public void testServerSideClose() throws Exception {
-		MiniAcceptor acceptor = new MiniAcceptor(PORT);
+		MiniAcceptor acceptor = new MiniAcceptor(SERVER_PORT);
 		
 		//2. Remote close: discovered on read
-		ManagedConnection out = new ManagedConnection("localhost", PORT);
+		ManagedConnection out = new ManagedConnection("localhost", SERVER_PORT);
 		out.initialize();            
 		out.buildAndStartQueues();
         Connection in = acceptor.accept(); 
@@ -321,8 +318,8 @@ public class ManagedConnectionTest extends BaseTestCase {
         //3. Remote close: discovered on write.  Because of TCP's half-close
         //semantics, we need TWO writes to discover this.  (See unit tests
         //for Connection.)
-        acceptor = new com.limegroup.gnutella.MiniAcceptor(PORT);
-        out = new ManagedConnection("localhost", PORT);
+        acceptor = new com.limegroup.gnutella.MiniAcceptor(SERVER_PORT);
+        out = new ManagedConnection("localhost", SERVER_PORT);
         out.initialize();            
         out.buildAndStartQueues();
         in = acceptor.accept(); 
