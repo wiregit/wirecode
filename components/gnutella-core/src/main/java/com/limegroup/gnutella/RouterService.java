@@ -810,6 +810,15 @@ public final class RouterService {
         return( fileManager.getNumFiles() );
     }
 
+	/**
+	 * Returns the size in bytes of shared files.
+	 *
+	 * @return the size in bytes of shared files on this host
+	 */
+	public static int getSharedFileSize() {
+		return fileManager.getSize();
+	}
+
     /**
      * Returns a list of all shared file descriptors in the given directory.
      * All the file descriptors returned have already been passed to the gui
