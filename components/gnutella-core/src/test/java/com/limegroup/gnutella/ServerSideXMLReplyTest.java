@@ -223,7 +223,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -243,7 +243,7 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
     private static QueryReply getFirstQueryReply(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 if (m instanceof PingRequest)

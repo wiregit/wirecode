@@ -201,7 +201,7 @@ public final class PongCachingTest extends BaseTestCase {
 
 
     /** 
-	 * Tries to receive any outstanding messages on c 
+	 * Tries to reader().read any outstanding messages on c 
 	 *
      * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
 	 */
@@ -209,7 +209,7 @@ public final class PongCachingTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -250,7 +250,7 @@ public final class PongCachingTest extends BaseTestCase {
         
         Message received;
         for(int i=0; i<PongCacher.NUM_HOPS; i++) {
-            received = ULTRAPEER_1.receive(TIMEOUT);
+            received = ULTRAPEER_1.reader().read(TIMEOUT);
             assertInstanceof("message should be a pong", PingReply.class, 
                              received);
         }
@@ -264,7 +264,7 @@ public final class PongCachingTest extends BaseTestCase {
 
         // make sure we keep getting pings
         for(int i=0; i<3; i++) {
-            Message m = ULTRAPEER_2.receive(Pinger.PING_INTERVAL+200);
+            Message m = ULTRAPEER_2.reader().read(Pinger.PING_INTERVAL+200);
             assertInstanceof("message should be a ping request", 
                              PingRequest.class, m);
         }

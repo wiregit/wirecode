@@ -529,7 +529,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             c.writer().flush();
             QueryReply reply=null;
             while (true) {
-                Message m=c.receive(2000);
+                Message m=c.reader().read(2000);
                 if (m instanceof QueryReply) {
                     reply=(QueryReply)m;
                     break;
@@ -589,7 +589,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         c.writer().flush();
         QueryReply reply=null;
         while (true) {
-            Message m=c.receive(2000);
+            Message m=c.reader().read(2000);
             if (m instanceof QueryReply) {
                 reply=(QueryReply)m;
                 break;
@@ -836,7 +836,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         c.writer().flush();
         QueryReply reply=null;
         while (true) {
-            Message m=c.receive(2000);
+            Message m=c.reader().read(2000);
             if (m instanceof QueryReply) {
                 reply=(QueryReply)m;
                 break;

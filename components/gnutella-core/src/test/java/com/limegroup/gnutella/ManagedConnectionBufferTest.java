@@ -182,7 +182,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(pr);
         Thread.sleep(400);
         start=System.currentTimeMillis();        
-        pr=(PingRequest)in.receive();
+        pr = (PingRequest)in.reader().read();
         elapsed=System.currentTimeMillis()-start;
         assertEquals("unexpected number of sent messages", 1, 
             out.stats().getNumMessagesSent());
@@ -363,134 +363,134 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         
 
         //3. Read them...now in different order!
-        m=in.receive(); //watchdog ping
+        m=in.reader().read(); //watchdog ping
         
         assertInstanceof("Unexpected message: "+m, PingRequest.class, m);
         assertEquals("Unexpected # of hops"+m, 0, m.getHops());
 
-        m=in.receive(); //push        
+        m=in.reader().read(); //push        
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6346,
             ((PushRequest)m).getPort());
 
-        m=in.receive(); //push        
+        m=in.reader().read(); //push        
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6345,
             ((PushRequest)m).getPort());
 
-        m=in.receive(); //push
+        m=in.reader().read(); //push
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6344,
             ((PushRequest)m).getPort());
 
-        m=in.receive(); //push
+        m=in.reader().read(); //push
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6343,
             ((PushRequest)m).getPort());
             
-        m=in.receive(); //push        
+        m=in.reader().read(); //push        
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6342,
             ((PushRequest)m).getPort());
 
-        m=in.receive(); //push        
+        m=in.reader().read(); //push        
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6341,
             ((PushRequest)m).getPort());            
 
-        m=in.receive(); //reply/6341 (high priority)
+        m=in.reader().read(); //reply/6341 (high priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port.  priority: "
              + m.getPriority(), 6341, ((QueryReply)m).getPort());
 
-        m=in.receive(); //reply/6342 (medium priority)
+        m=in.reader().read(); //reply/6342 (medium priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected query reply port", 6342,
             ((QueryReply)m).getPort());
             
-        m=in.receive(); //reply/6346
+        m=in.reader().read(); //reply/6346
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port",
             6346, ((QueryReply)m).getPort());
 
-        m=in.receive(); //reply/6344
+        m=in.reader().read(); //reply/6344
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port",
             6344, ((QueryReply)m).getPort());            
         
-        m=in.receive(); //reply/6343
+        m=in.reader().read(); //reply/6343
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port",
             6343, ((QueryReply)m).getPort());
 
-        m=in.receive(); //reply/6340
+        m=in.reader().read(); //reply/6340
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port",
             6340, ((QueryReply)m).getPort());
 
-        m=in.receive(); //query "test2"/0
+        m=in.reader().read(); //query "test2"/0
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "test2",
             ((QueryRequest)m).getQuery());
             
-        m=in.receive(); //query "test"/0
+        m=in.reader().read(); //query "test"/0
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "test",
             ((QueryRequest)m).getQuery());            
 
-        m=in.receive(); //query "test far"/1
+        m=in.reader().read(); //query "test far"/1
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query",
             "test far", ((QueryRequest)m).getQuery());
 
-        m=in.receive(); //reply 6343
+        m=in.reader().read(); //reply 6343
         assertInstanceof("m not a pingreply", PingReply.class, m);
         assertEquals("unexpected pingreply port",
             6344, ((PingReply)m).getPort());
 
-        m=in.receive(); //ping 6340
+        m=in.reader().read(); //ping 6340
         assertInstanceof("m not a pingrequest", PingRequest.class, m);
         assertGreaterThan("unexpected number of hops (>0)",
             0, m.getHops());
 
-        m=in.receive(); //QRP reset
+        m=in.reader().read(); //QRP reset
         assertInstanceof("m not a resettablemessage",
             ResetTableMessage.class, m);
 
-        m=in.receive(); //watchdog pong/6342
+        m=in.reader().read(); //watchdog pong/6342
         assertInstanceof("m not a pingreply", PingReply.class, m);
         assertEquals("unexpected pingreply port",
             6342, ((PingReply)m).getPort());
         assertEquals("unexpected number of hops",
             0, m.getHops());  //watchdog response pong
 
-        m=in.receive(); //push
+        m=in.reader().read(); //push
         assertInstanceof("Unexpected message: "+m, PushRequest.class, m);
         assertEquals("unexpected push request port", 6340,
             ((PushRequest)m).getPort());            
 
-        m=in.receive(); //reply/6341 (high priority)
+        m=in.reader().read(); //reply/6341 (high priority)
         assertInstanceof("m not a queryreply", QueryReply.class, m);
         assertEquals("unexpected queryreply port.  priority: "
              + m.getPriority(),  6345, ((QueryReply)m).getPort());
              
-        m=in.receive(); //query "test farther"/2
+        m=in.reader().read(); //query "test farther"/2
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query",
             "test farther", ((QueryRequest)m).getQuery());             
 
-        m=in.receive(); //reply 6340
+        m=in.reader().read(); //reply 6340
         assertInstanceof("m not a pingreply", PingReply.class, m);
         assertEquals("unexpected pingreply port",
             6340, ((PingReply)m).getPort());
 
-        m=in.receive(); //QRP patch1
+        m=in.reader().read(); //QRP patch1
         assertInstanceof("m not a patchtablemessage",
             PatchTableMessage.class, m);
         assertEquals("unexpected patchtablemessage sequencenumber",
             1, ((PatchTableMessage)m).getSequenceNumber());
 
-        m=in.receive(); //QRP patch2
+        m=in.reader().read(); //QRP patch2
         assertInstanceof("m not a patchtable message",
             PatchTableMessage.class, m);
         assertEquals("unexpected patchtablemessage sequencenumber",
@@ -530,11 +530,11 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(QueryRequest.createQuery("1200", (byte)3)); 
         startOutputRunner(out);
         //out.startOutputRunner();
-        Message m=(QueryRequest)in.receive(500);
+        Message m=(QueryRequest)in.reader().read(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "1200", ((QueryRequest)m).getQuery());
         try {
-            m=in.receive(200);
+            m=in.reader().read(200);
             fail("buffer didn't timeout in time.  message: " + m);
         } catch (InterruptedIOException e) {
         }
@@ -555,14 +555,14 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(QueryRequest.createQuery("2000", (byte)3));
         startOutputRunner(out);
         //out.startOutputRunner();
-        m=in.receive(500);
+        m=in.reader().read(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", "2000", ((QueryRequest)m).getQuery());
-        m=in.receive(500);
+        m=in.reader().read(500);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         assertEquals("unexpected query", ((QueryRequest)m).getQuery(), "1100");
         try {
-            m=in.receive(200);
+            m=in.reader().read(200);
             fail("buffer didn't timeout in time.  message: " + m.toString());
         } catch (InterruptedIOException e) {
         }
@@ -599,9 +599,9 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         startOutputRunner(out);
         //out.startOutputRunner();
         assertInstanceof("didn't recieve queryrequest", 
-            QueryRequest.class, in.receive());
+            QueryRequest.class, in.reader().read());
         assertInstanceof("didn't recieve pingrequest", 
-            PingRequest.class, in.receive());
+            PingRequest.class, in.reader().read());
 
         //tail...<wrap>...head
         stopOutputRunner(out);
@@ -611,9 +611,9 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         startOutputRunner(out);
         //out.startOutputRunner();
         assertInstanceof("didn't recieve pingrequest",
-            PingRequest.class, in.receive());
+            PingRequest.class, in.reader().read());
         assertInstanceof("didn't recieve queryrequest",
-            QueryRequest.class, in.receive());
+            QueryRequest.class, in.reader().read());
 
         //tail...<wrap>...head
         //  WATCHDOG: ping
@@ -632,13 +632,13 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         out.send(QueryRequest.createQuery("a", (byte)3));
         startOutputRunner(out);
         //out.startOutputRunner();
-        m=in.receive();
+        m=in.reader().read();
         assertInstanceof("Got: "+m, QueryRequest.class, m);
-        m=in.receive();
+        m=in.reader().read();
         assertInstanceof("GOt: " +m, ResetTableMessage.class, m);
-        m=in.receive();
+        m=in.reader().read();
         assertInstanceof("Got: " + m, PingRequest.class, m);
-        m=in.receive();
+        m=in.reader().read();
         assertInstanceof("Got: " + m, QueryReply.class, m);
     }
 
@@ -678,7 +678,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         int bytesRead=0;
         while (true) {
             try {
-                Message m=in.receive(1000);
+                Message m = in.reader().read(1000);
                 read++;
                 bytesRead+=m.getTotalLength();
             } catch (InterruptedIOException e) {

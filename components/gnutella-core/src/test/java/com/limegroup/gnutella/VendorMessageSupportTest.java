@@ -121,7 +121,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         boolean receivedPushProxyAcknowledgement = false;
         while (true) {
             try {
-                Message m = c.receive(TIMEOUT);
+                Message m = c.reader().read(TIMEOUT);
                 if (m instanceof VendorMessage) {
                     if (m instanceof MessagesSupportedVendorMessage) {
                         c.handleVendorMessage((VendorMessage) m);
@@ -172,7 +172,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         
         while (true) {
             try {
-                Message m = _leaf1.receive(TIMEOUT);
+                Message m = _leaf1.reader().read(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("susheel"))
                         gotQR = true;
@@ -204,7 +204,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         
         while (true) {
             try {
-                Message m = _leaf1.receive(TIMEOUT);
+                Message m = _leaf1.reader().read(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("daswani"))
                         fail("Hops Flow message Ineffectual!!!");
@@ -234,7 +234,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         gotQR = false;
         while (true) {
             try {
-                Message m = _leaf1.receive(TIMEOUT);
+                Message m = _leaf1.reader().read(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("foosball"))
                         gotQR = true;
@@ -342,7 +342,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
             } catch (InterruptedIOException e) {
                 return ret;

@@ -160,7 +160,7 @@ public class ClientSideBrowseHostTest
         byte[] guid;
         try {
             while (!(m instanceof PingRequest)) {
-                m = conn.receive(500);
+                m = conn.reader().read(500);
             }
             guid = ((PingRequest)m).getGUID();            
         } catch(InterruptedIOException iioe) {
@@ -201,7 +201,7 @@ public class ClientSideBrowseHostTest
         // the testUP should get it
         Message m = null;
         do {
-            m = testUP.receive(TIMEOUT);
+            m = testUP.reader().read(TIMEOUT);
         } while (!(m instanceof QueryRequest)) ;
 
         // set up a server socket
@@ -277,7 +277,7 @@ public class ClientSideBrowseHostTest
 
         try {
             do {
-                m = testUP.receive(TIMEOUT);
+                m = testUP.reader().read(TIMEOUT);
                 assertTrue(!(m instanceof PushRequest));
             } while (true) ;
         }
@@ -300,7 +300,7 @@ public class ClientSideBrowseHostTest
         // the testUP should get it
         Message m = null;
         do {
-            m = testUP.receive(TIMEOUT);
+            m = testUP.reader().read(TIMEOUT);
         } while (!(m instanceof QueryRequest)) ;
 
         // set up a server socket to wait for proxy request
@@ -410,7 +410,7 @@ public class ClientSideBrowseHostTest
 
         try {
             do {
-                m = testUP.receive(TIMEOUT);
+                m = testUP.reader().read(TIMEOUT);
                 assertTrue(!(m instanceof PushRequest));
             } while (true) ;
         }
@@ -433,7 +433,7 @@ public class ClientSideBrowseHostTest
         // the testUP should get it
         Message m = null;
         do {
-            m = testUP.receive(TIMEOUT);
+            m = testUP.reader().read(TIMEOUT);
         } while (!(m instanceof QueryRequest)) ;
 
         // send a reply with some BAD PushProxy info
@@ -468,7 +468,7 @@ public class ClientSideBrowseHostTest
 
         // nothing works for the guy, we should get a PushRequest
         do {
-            m = testUP.receive(TIMEOUT*4);
+            m = testUP.reader().read(TIMEOUT*4);
         } while (!(m instanceof PushRequest)) ;
 
         // awesome - everything checks out!
@@ -479,13 +479,13 @@ public class ClientSideBrowseHostTest
 
     //////////////////////////////////////////////////////////////////
 
-    /** Tries to receive any outstanding messages on c 
+    /** Tries to reader().read any outstanding messages on c 
      *  @return true if this got a message */
     private boolean drain(Connection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(500);
+                c.reader().read(500);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {

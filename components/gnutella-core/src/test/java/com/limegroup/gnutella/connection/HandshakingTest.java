@@ -86,14 +86,14 @@ public final class HandshakingTest extends BaseTestCase {
 				if(i == 5) {
 					// extra check to make sure these connections are 
 					// really active
-					curConn.receive(6000);
+					curConn.reader().read(6000);
 				}
 
 				if(i == ConnectionManager.ULTRAPEER_CONNECTIONS) {
 
 					// this should throw an IOException because the connection should 
 					// really be closed
-					curConn.receive(6000);
+					curConn.reader().read(6000);
 					fail("accepted beyond max connections");
 				}
 			} catch(IOException e) {

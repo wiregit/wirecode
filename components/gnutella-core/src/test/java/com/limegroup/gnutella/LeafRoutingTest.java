@@ -1,13 +1,9 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 
@@ -161,7 +157,7 @@ public class LeafRoutingTest extends BaseTestCase {
         byte[] guid;
         try {
             while (!(m instanceof PingRequest)) {
-                m = c.receive(500);
+                m = c.reader().read(500);
             }
             guid = ((PingRequest)m).getGUID();            
         } catch(InterruptedIOException iioe) {
@@ -190,7 +186,7 @@ public class LeafRoutingTest extends BaseTestCase {
 
         while (true) {
             assertNotNull("ultrapeer1 is null", ultrapeer1);
-            Message m=ultrapeer1.receive(2000);
+            Message m=ultrapeer1.reader().read(2000);
             if (m instanceof QueryRequest) {
                 assertEquals("unexpected query name", "crap", 
                              ((QueryRequest)m).getQuery());
@@ -198,7 +194,7 @@ public class LeafRoutingTest extends BaseTestCase {
             }
         }       
         while (true) {
-            Message m=ultrapeer2.receive(2000);
+            Message m=ultrapeer2.reader().read(2000);
             if (m instanceof QueryRequest) {
                 assertEquals("unexpected query name", "crap", 
                              ((QueryRequest)m).getQuery());
@@ -206,7 +202,7 @@ public class LeafRoutingTest extends BaseTestCase {
             }
         }
         while (true) {
-            Message m=old1.receive(2000);
+            Message m=old1.reader().read(2000);
             if (m instanceof QueryRequest) {
                 assertEquals("unexpected query name", "crap", 
                              ((QueryRequest)m).getQuery());
@@ -214,7 +210,7 @@ public class LeafRoutingTest extends BaseTestCase {
             }
         }
 //          while (true) {
-//              Message m=old2.receive(2000);
+//              Message m=old2.reader().read(2000);
 //              if (m instanceof QueryRequest) {
 //                  assertEquals("unexpected query name", "crap", 
 //                               ((QueryRequest)m).getQuery());
@@ -301,7 +297,7 @@ public class LeafRoutingTest extends BaseTestCase {
 
         assertTrue(! drain(ultrapeer1));
         assertTrue(! drain(ultrapeer2));
-        Message m=old2.receive(500);
+        Message m=old2.reader().read(500);
         assertTrue(((QueryRequest)m).getQuery().equals("crap"));
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
         // we adjust all TTLs down to 6....
@@ -329,7 +325,7 @@ public class LeafRoutingTest extends BaseTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(rs.getFileManager().getNumFiles() == 2);
+        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
 
         // send a query that should hit
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
@@ -341,7 +337,7 @@ public class LeafRoutingTest extends BaseTestCase {
         // hope for the result
         Message m = null;
         do {
-            m = ultrapeer2.receive(TIMEOUT);
+            m = ultrapeer2.reader().read(TIMEOUT);
         } while (!(m instanceof QueryReply)) ;
         
     }
@@ -369,13 +365,13 @@ public class LeafRoutingTest extends BaseTestCase {
 
     //////////////////////////////////////////////////////////////////
 
-    /** Tries to receive any outstanding messages on c 
+    /** Tries to reader().read any outstanding messages on c 
      *  @return true if this got a message */
     private boolean drain(Connection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(500);
+                c.reader().read(500);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {

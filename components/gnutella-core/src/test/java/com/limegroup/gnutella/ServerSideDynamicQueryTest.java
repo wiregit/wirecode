@@ -208,7 +208,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     }
 
     /** 
-	 * Tries to receive any outstanding messages on c 
+	 * Tries to reader().read any outstanding messages on c 
 	 *
      * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
 	 */
@@ -216,7 +216,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -235,7 +235,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     private static boolean noUnexpectedMessages(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 if (m instanceof PingRequest)
@@ -262,7 +262,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     private static QueryRequest getFirstQueryRequest(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 if (m instanceof PingRequest)
@@ -291,7 +291,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
     private static QueryReply getFirstQueryReply(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 if (m instanceof PingRequest)
@@ -326,7 +326,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.writer().simpleWrite(request);
         ULTRAPEER_2.writer().flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
@@ -360,7 +360,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            LEAF.receive(TIMEOUT);
+            LEAF.reader().read(TIMEOUT);
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
@@ -384,7 +384,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.writer().simpleWrite(request);
         ULTRAPEER_2.writer().flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
@@ -418,7 +418,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            LEAF.receive(TIMEOUT);
+            LEAF.reader().read(TIMEOUT);
             fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
@@ -440,7 +440,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.writer().simpleWrite(request);
         ULTRAPEER_2.writer().flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
@@ -457,7 +457,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
         }
         catch (InterruptedIOException expected) {}
 
@@ -475,7 +475,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.writer().simpleWrite(request);
         ULTRAPEER_2.writer().flush();
 
-        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        QueryRequest reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
         assertEquals("berkeley", reqRecvd.getQuery());
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
@@ -492,7 +492,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            LEAF.receive(TIMEOUT);
+            LEAF.reader().read(TIMEOUT);
             fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
@@ -514,7 +514,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         // leaves don't get any unexpected messages, no use using
         // noUnenexpectedMessages
         try {
-            reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
             fail("expected InterruptedIOException");
         }
         catch (InterruptedIOException expected) {}
@@ -534,7 +534,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             ULTRAPEER_2.writer().simpleWrite(request);
             ULTRAPEER_2.writer().flush();
 
-            QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            QueryRequest reqRecvd = (QueryRequest) LEAF.reader().read(TIMEOUT);
             assertEquals("berkeley", reqRecvd.getQuery());
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
@@ -556,7 +556,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             // leaves don't get any unexpected messages, no use using
             // noUnenexpectedMessages
             try {
-                LEAF.receive(TIMEOUT);
+                LEAF.reader().read(TIMEOUT);
                 fail("expected InterruptedIOException");
             }
             catch (InterruptedIOException expected) {}

@@ -204,7 +204,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
     }
 
     /** 
-	 * Tries to receive any outstanding messages on c 
+	 * Tries to reader().read any outstanding messages on c 
 	 *
      * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
 	 */
@@ -212,7 +212,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -231,7 +231,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
     private static boolean noUnexpectedMessages(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 else // we should never get any other sort of message...
@@ -256,7 +256,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
     private static QueryRequest getFirstQueryRequest(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 else if (m instanceof QueryRequest) 
@@ -283,7 +283,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
     private static QueryReply getFirstQueryReply(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 else if (m instanceof QueryReply) 
@@ -338,7 +338,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         // await a response
         Message m = null;
         do {
-            m = ULTRAPEER_1.receive(TIMEOUT);
+            m = ULTRAPEER_1.reader().read(TIMEOUT);
         } while (!(m instanceof QueryReply)) ;
 
         // confirm it supports browse host

@@ -1,11 +1,13 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+
 import java.net.*;
+import java.nio.channels.ServerSocketChannel;
 import java.io.*;
-import java.util.*;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
@@ -25,8 +27,8 @@ import java.util.*;
  */
 public class MiniAcceptor implements Runnable {
     private Object lock=new Object();
-    private Connection c=null;
-    private boolean done=false;
+    private Connection conn = null;
+    private boolean done = false;
     private int port;
     private IOException error=null;
 
@@ -65,7 +67,7 @@ public class MiniAcceptor implements Runnable {
                     return null;
                 }
             }
-            return c;
+            return conn;
         }
     }
         
@@ -75,18 +77,29 @@ public class MiniAcceptor implements Runnable {
 
     /** Don't call.  For internal use only. */
     public void run() {
-        ServerSocket ss=null;
+        ServerSocket ss = null;
         try {
-            ss=new ServerSocket(port);
-            ss.setReuseAddress(true);
-            Socket s=ss.accept();
+            if(CommonUtils.isJava14OrLater() &&
+               ConnectionSettings.USE_NIO.getValue()) {
+               ServerSocketChannel ssc = ServerSocketChannel.open();
+               ssc.configureBlocking(true);
+               ssc.socket().bind(new InetSocketAddress(port));
+               System.out.println("MiniAcceptor::about to assign socket::ss: "+ss);
+               ss = ssc.socket();  
+               System.out.println("MiniAcceptor::about to assign socket::ss: "+ss); 
+            } else {
+                ss = new ServerSocket(port);
+                ss.setReuseAddress(true);
+            }
+            Socket s = ss.accept();
+            
             //Technically "GNUTELLA " should be read from s.  Turns out that
-            //out implementation doesn't care;
-            Connection c=new Connection(s, properties);
+            //our implementation doesn't care;
+            Connection c = new Connection(s, properties);
             c.initialize();
             ss.close();
             synchronized (lock) {
-                this.c=c;
+                this.conn=c;
                 done=true;
                 lock.notify();
             } 

@@ -110,16 +110,16 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         assertTrue("connection is open", out.isOpen());
         assertTrue("connection should support GGEP", out.supportsGGEP());
-        // receive initial ping
+        // reader().read initial ping
         //drain(out);
-        out.receive();
-        out.receive();
-        //out.receive();`
+        out.reader().read();
+        out.reader().read();
+        //out.reader().read();`
 
         //assertTrue("connection should support GGEP", out.supportsGGEP());
         out.send(new PingRequest((byte)3));
         
-        Message m = out.receive();
+        Message m = out.reader().read();
         assertInstanceof("should be a pong", PingReply.class, m);
         PingReply pr = (PingReply)m;
 
@@ -242,12 +242,12 @@ public class ManagedConnectionTest extends BaseTestCase {
         out.initialize();
 
         assertTrue("connection is open", out.isOpen());
-        // receive all initial messages.
+        // reader().read all initial messages.
         drain(out);
 
         out.send(new PingRequest((byte)3));
         
-        Message m = out.receive();
+        Message m = out.reader().read();
         assertInstanceof("should be a pong", PingReply.class, m);
         PingReply pr = (PingReply)m;
 
@@ -265,7 +265,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         Connection out = null;
         Connection in=null;
         //com.limegroup.gnutella.MiniAcceptor acceptor=null;                
-        //When receive() or sendQueued() gets IOException, it calls
+        //When reader().read() or sendQueued() gets IOException, it calls
         //ConnectionManager.remove().  This in turn calls
         //ManagedConnection.close().  Our stub does this.
         ConnectionManager manager = new ConnectionManagerStub(true);
@@ -304,7 +304,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         in.close();
         try {
-            out.receive();
+            out.reader().read();
             fail("should not have received message");
         } catch (BadPacketException e) {
             fail("should not have received bad packet", e);
@@ -335,13 +335,13 @@ public class ManagedConnectionTest extends BaseTestCase {
         sleep(2000);
     }
 
-    /** Tries to receive any outstanding messages on c 
+    /** Tries to reader().read any outstanding messages on c 
      *  @return true if this got a message */
     private static boolean drain(Connection c) throws IOException {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(2000);
+                c.reader().read(2000);
                 ret=true;
             } catch (InterruptedIOException e) {
                 return ret;

@@ -235,7 +235,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                c.receive(TIMEOUT);
+                c.reader().read(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -248,32 +248,6 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         }
     }
 
-    /** @return <tt>true<tt> if no messages (besides expected ones, such as 
-     *  QRP stuff) were recieved.
-     */
-    private static boolean noUnexpectedMessages(Connection c) {
-        while (true) {
-            try {
-                Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else // we should never get any other sort of message...
-                    return false;
-            }
-            catch (InterruptedIOException ie) {
-                return true;
-            }
-            catch (BadPacketException e) {
-                // ignore....
-            }
-            catch (IOException ioe) {
-                // ignore....
-            }
-        }
-    }
-
 
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
@@ -281,7 +255,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     private static QueryRequest getFirstQueryRequest(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 if (m instanceof PingRequest)
@@ -310,7 +284,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     private static QueryReply getFirstQueryReply(Connection c) {
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                Message m=c.reader().read(TIMEOUT);
                 if (m instanceof RouteTableMessage)
                     ;
                 if (m instanceof PingRequest)
@@ -422,7 +396,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             int cbPort = -1;
             while (cbGuid == null) {
                 try {
-                    Message m = ULTRAPEER_1.receive(TIMEOUT);
+                    Message m = ULTRAPEER_1.reader().read(TIMEOUT);
                     if (m instanceof UDPConnectBackVendorMessage) {
                         UDPConnectBackVendorMessage udp = 
                             (UDPConnectBackVendorMessage) m;
