@@ -54,7 +54,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 			this._urnString = URN.createSHA1String(file);
 			this._urnType = urnType;
 		} else {
-			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED");
+			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED: "+
+											   urnType);
 		}
 	}
 
@@ -68,7 +69,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	URN(final String urnString) throws IOException {
 		if(!URN.isValidUrn(urnString)) {
-			throw new IOException("INVALID URN STRING");
+			throw new IOException("INVALID URN STRING: "+urnString);
 		}
 		this._urnString = urnString;
 		this._urnType = UrnType.createUrnType(URN.getTypeString(_urnString));
