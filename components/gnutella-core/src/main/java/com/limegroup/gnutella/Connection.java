@@ -406,9 +406,6 @@ public class Connection {
         }
 
         try {
-            // Set the Acceptors IP address
-            RouterService.getAcceptor().setAddress( localAddress );
-            
             _in = getInputStream();
             _out = getOutputStream();
             if (_in == null) throw new IOException("null input stream");
