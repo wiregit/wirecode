@@ -1411,6 +1411,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Stops this download.
      */
     public void stop() {
+    
+        if(paused) {
+            stopped = true;
+            paused = false;
+        }
+
         // make redundant calls to stop() fast
         // this change is pretty safe because stopped is only set in two
         // places - initialized and here.  so long as this is true, we know
