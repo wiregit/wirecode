@@ -66,8 +66,10 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testHitsGWebCacheIfHostsFail() throws Exception {
         HostCatcher.DEBUG = false;
         HostCatcher catcher = new HostCatcher();
+        
         catcher.initialize();
         
+        PrivilegedAccessor.setValue(RouterService.class, "catcher", catcher);
         String startAddress = "30.4.5.";
         for(int i=0; i<250; i++) {
             Endpoint curHost = new Endpoint(startAddress+i, 6346);
@@ -87,12 +89,8 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
             catcher.doneWithConnect(curHost, false);
         }
         
-        Endpoint gWebCacheHost = null;
-        try {
-            gWebCacheHost = catcher.getAnEndpoint();  
-        } catch(InterruptedException e) {
-            e.printStackTrace();
-        }
+        Endpoint gWebCacheHost = catcher.getAnEndpoint();  
+
 
         // This time, the host should not be one of the addresses we added,
         // since it should come from the cache.  There's some remote chance of
