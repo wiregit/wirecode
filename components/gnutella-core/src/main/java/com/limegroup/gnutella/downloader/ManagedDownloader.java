@@ -1378,6 +1378,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         } finally {
                             synchronized (ManagedDownloader.this) { 
                                 threads.remove(this); 
+                                ManagedDownloader.this.notifyAll();
                             }
                         }
                     }//end of run
@@ -1861,7 +1862,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(!problem && !http11)//no  need to add http11 dloader to files
                     files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
-                this.notifyAll();
             }
         }
     }
@@ -1893,7 +1893,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized int getNumAllowedDownloads() {
         //TODO1: this should really be done dynamically by observing capacity
         //and load, but that's hard to do.
-        int downloads=dloaders.size();
+        int downloads=threads.size();
         int capacity=SettingsManager.instance().getConnectionSpeed();
         if (capacity<=SpeedConstants.MODEM_SPEED_INT)
             //Modems get 2 hosts at most...be safe and return positives
@@ -2229,8 +2229,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = true;
-    private final boolean log = true;    
+    private final boolean debugOn = false;
+    private final boolean log = false;    
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
