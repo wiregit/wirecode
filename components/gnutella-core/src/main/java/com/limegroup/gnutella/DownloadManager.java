@@ -206,7 +206,9 @@ public class DownloadManager implements BandwidthTracker {
         int index = 1;
         for(Iterator i = waiting.iterator(); i.hasNext(); ) {
             ManagedDownloader md = (ManagedDownloader)i.next();
-            if(md.isCancelled()) {
+            if(md.isAlive()) {
+                continue;
+            } else if(md.isCancelled()) {
                 i.remove();
                 cleanupCompletedDownload(md, false);
             } else if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {

@@ -361,7 +361,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** If started, the thread trying to coordinate all downloads.  
      *  Otherwise null. */
-    private Thread dloaderManagerThread;
+    private volatile Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
     private volatile boolean stopped;
     /** True iff this has been paused.  */
@@ -759,7 +759,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // Notify the manager that this download is done.
         // This MUST be done outside of this' lock, else
-        // dead could occur.
+        // deadlock could occur.
         manager.remove(this, complete);
 
         if(LOG.isTraceEnabled())
@@ -906,6 +906,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         return true;
+    }
+    
+    /**
+     * Determines if the downloading thread is still alive.
+     * It is possible that the download may be inactive yet
+     * the thread still alive.  The download must be not alive
+     * before being restarted.
+     */
+    public boolean isAlive() {
+        return dloaderManagerThread != null;
     }
     
     /**
@@ -1311,20 +1321,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         //causes spurious interrupts to happen when establishing connections
         //(push or otherwise).  So instead we target the two cases we're
         //interested: waiting for downloaders to complete (by waiting on
-        //this) or waiting for retry (by sleeping).
+        //this) or waiting for retry (handled by DownloadManager).
         if ( added ) {
             if(LOG.isTraceEnabled())
                 LOG.trace("added rfd: " + rfd);
-            if(isInactive() || dloaderManagerThread == null) {
-                LOG.trace("inactive, marking as new source");
+            if(isInactive() || dloaderManagerThread == null)
                 receivedNewSources = true;
-            } else {
+            else
                 this.notify();                      //see tryAllDownloads3
-            }
-            // we could manager.requestStart, but that is synchronized on
-            // manager and we can't grab that lock if we're synchronized on
-            // this.  since we can't guarantee we won't be holding this' lock,
-            // we leave it up to manager to start us off if we have new sources
         }
         
         return true;
