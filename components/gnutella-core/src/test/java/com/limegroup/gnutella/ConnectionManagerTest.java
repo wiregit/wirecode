@@ -79,7 +79,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         
         // test preconditions
         assertEquals("should start as supernode", true, mgr.isSupernode());
-        assertEquals("should not be leaf", false, mgr.isLeaf());
+        assertEquals("should not be leaf", false, mgr.isShieldedLeaf());
         
         // construct peers
         // u ==> i should be ultrapeer
@@ -92,21 +92,21 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         // add a supernode => client connection
         initializeStart(u1);
         assertEquals("should still be supernode", true, mgr.isSupernode());
-        assertEquals("should still not be leaf", false, mgr.isLeaf());
+        assertEquals("should still not be leaf", false, mgr.isShieldedLeaf());
         initializeDone(u1);
         assertEquals("should still be supernode", true, mgr.isSupernode());
-        assertEquals("should still not be leaf", false, mgr.isLeaf());
+        assertEquals("should still not be leaf", false, mgr.isShieldedLeaf());
         
         // add a leaf -> supernode connection
         initializeStart(l1);
         assertEquals("should still be supernode", true, mgr.isSupernode());
-        assertEquals("should still not be leaf", false, mgr.isLeaf());
+        assertEquals("should still not be leaf", false, mgr.isShieldedLeaf());
         initializeDone(l1);
         assertEquals("should not be supernode", false, mgr.isSupernode());
-        assertEquals("should be leaf", true, mgr.isLeaf());
+        assertEquals("should be leaf", true, mgr.isShieldedLeaf());
         mgr.remove(l1);
         assertEquals("should be supernode", true, mgr.isSupernode());
-        assertEquals("should not be leaf", false, mgr.isLeaf());
+        assertEquals("should not be leaf", false, mgr.isShieldedLeaf());
         
         // test a strange condition
         // (two leaves start, second finishes then removes,
@@ -115,16 +115,16 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         initializeStart(l2);
         initializeDone(l2);
         assertEquals("should not be supernode", false, mgr.isSupernode());
-        assertEquals("should be leaf", true, mgr.isLeaf());
+        assertEquals("should be leaf", true, mgr.isShieldedLeaf());
         mgr.remove(l2);
         assertEquals("should be supernode", true, mgr.isSupernode());
-        assertEquals("should not be leaf", false, mgr.isLeaf());
+        assertEquals("should not be leaf", false, mgr.isShieldedLeaf());
         mgr.remove(l1);
         assertEquals("should be supernode", true, mgr.isSupernode());
-        assertEquals("should not be leaf", false, mgr.isLeaf());
+        assertEquals("should not be leaf", false, mgr.isShieldedLeaf());
         initializeDone(l1);
         assertEquals("should be supernode", true, mgr.isSupernode());
-        assertEquals("should not be leaf", false, mgr.isLeaf());
+        assertEquals("should not be leaf", false, mgr.isShieldedLeaf());
     }   
         
     

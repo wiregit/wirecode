@@ -59,11 +59,13 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
 
         // we shouldn't send any response header in this case
         // we should not accept any incoming connections
+        // this implicitly checks for no deflation by checking the
+        // props size is 0.
         assertTrue("should have been accepted", hr.isAccepted());
         assertEquals("should not have any headers", 0, hr.props().size());
 
 
-        // 2) Ultrapeer-Ultrapeer::X-Ultrapeer-Needed: true
+        // 2) Ultrapeer-Leaf::X-Ultrapeer-Needed: true
         props = new UltrapeerHeaders("40.0.9.8");
 
         // this should be redundant, but make sure it's handled the way
@@ -75,10 +77,12 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
 
         // we shouldn't send any response header in this case -- it's
         // just assumed that we're becoming an Ultrapeer
+        // this implicitly checks for no deflation by checking the
+        // props size is 0.        
         assertTrue("should have been accepted", hr.isAccepted());
         assertEquals("should not have any headers", 0, hr.props().size());
 
-        // 3) Ultrapeer-Ultrapeer::X-Ultrapeer-Needed: false
+        // 3) Ultrapeer-Leaf::X-Ultrapeer-Needed: false
         props = new UltrapeerHeaders("78.9.3.0");
         props.put(HeaderNames.X_ULTRAPEER_NEEDED, "false");
         
@@ -101,7 +105,8 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         LeafHandshakeResponder responder = 
             new LeafHandshakeResponder("23.3.4.5");
 
-        // Leaf-Ultrapeer  --> leaf slots available
+        // Leaf-Leaf  --> never allowed, regardless of slots
+        UltrapeerSettings.MAX_LEAVES.setValue(1);
         Properties props = new LeafHeaders("78.9.3.0");
         HandshakeResponse headers = HandshakeResponse.createResponse(props);  
         HandshakeResponse hr = responder.respondUnauthenticated(headers, true);
@@ -111,7 +116,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
                    !hr.isAccepted());
         assertEquals("should not have any headers", 0, hr.props().size());
 
-        
+        // Leaf-Leaf --> never allowed, but check anyway with no slots
         UltrapeerSettings.MAX_LEAVES.setValue(0);
         hr = responder.respondUnauthenticated(headers, true);
         assertTrue("should not have accepted the connection", 
@@ -145,6 +150,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         assertTrue("should accept incoming connections as a leaf -- "+
                    "this could change in the future!",
                    hr.isAccepted());
+        assertTrue("should not deflate connection", !hr.isDeflateEnabled());
     }
 
     /**
@@ -168,6 +174,8 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
                    "we don't know our status yet"+
                    hr.getStatusLine(), 
                    hr.isAccepted());
+        assertTrue("should deflate, because its not shielded",
+                    hr.isDeflateEnabled());
     }
 
 }
