@@ -22,7 +22,7 @@ import java.io.*;
  */
 class RemoteFileDescGrouper implements Serializable {
     /** The actual buckets, each a list of same RemoteFileDesc's. */
-    private List /* of List of RemoteFileDesc2 */ buckets=new ArrayList();
+    private List /* of List of RemoteFileDesc */ buckets=new ArrayList();
    
     /** The corresponding incomplete files for the buckets.  This is needed
      *  to implement addFile when all the elements of a bucket are removed.
@@ -58,7 +58,7 @@ class RemoteFileDescGrouper implements Serializable {
 
     /** 
      * Creates a new RemoteFileDescGrouper containing copies of files (as
-     * RemoteFileDesc2), in bucketed and sorted order.
+     * RemoteFileDesc), in bucketed and sorted order.
      *
      * @param rfds the file/location pairs to group
      * @param incompleteFileManager passed by ManagedDownloader, used
@@ -89,10 +89,10 @@ class RemoteFileDescGrouper implements Serializable {
                         - incompleteFileManager.getBlockSize(incompleteFile);
             int bandwidth=1; //prevent divide by zero
             for (Iterator iter2=files.iterator(); iter2.hasNext(); ) {
-                RemoteFileDesc2 rfd2=(RemoteFileDesc2)iter2.next();
-                if (rfd2.getQuality()>=DECENT_QUALITY) {
+                RemoteFileDesc rfd=(RemoteFileDesc)iter2.next();
+                if (rfd.getQuality()>=DECENT_QUALITY) {
                     //TODO2: don't normalize measured speeds.
-					bandwidth+=normalize(rfd2.getSpeed());
+					bandwidth+=normalize(rfd.getSpeed());
 				}
             }
             float time=(float)size/(float)bandwidth;
@@ -164,11 +164,8 @@ class RemoteFileDescGrouper implements Serializable {
      *     @see buckets 
      */
     synchronized boolean add(RemoteFileDesc rfd) {
-        //Convert rfd to a RemoteFileDesc2 so we can store auxilliary
-        //information in ManagedDownloader.
         repOk();
-        RemoteFileDesc rfd2 = new RemoteFileDesc2(rfd);
-        File incompleteFile=incompleteFileManager.getFile(rfd2);
+        File incompleteFile=incompleteFileManager.getFile(rfd);
 
         //Compare the incomplete file for rfd with the incomplete file for each
         //bucket.  Note that all elements of a bucket have the same incomplete
@@ -181,16 +178,16 @@ class RemoteFileDescGrouper implements Serializable {
             //This bucket may be empty, so we look at the incompleteFile.
             File otherIncompleteFile=(File)incompletes.get(i);
             if (otherIncompleteFile.equals(incompleteFile)
-                    && hashEquals(rfd2.getSHA1Urn(), sha1s[i])) {
+                    && hashEquals(rfd.getSHA1Urn(), sha1s[i])) {
                 //"Same" file, append to existing bucket.  TODO: insert into
                 //appropriate place of bucket based on speed?
                 //Note: The URNs could have matched if sha1s[i]==null but
-                //rfd2.getSHA1Urn()!=null. In this case, we set 
-                //sha1s[i] == rfd2.getSHA1Urn().
-                if(sha1s[i]==null && rfd2.getSHA1Urn()!=null)
-                    sha1s[i]=rfd2.getSHA1Urn();
+                //rfd.getSHA1Urn()!=null. In this case, we set 
+                //sha1s[i] == rfd.getSHA1Urn().
+                if(sha1s[i]==null && rfd.getSHA1Urn()!=null)
+                    sha1s[i]=rfd.getSHA1Urn();
                 List bucket=(List)buckets.get(i);
-                bucket.add(rfd2);
+                bucket.add(rfd);
                 repOk();
                 return true;
             }
@@ -198,7 +195,7 @@ class RemoteFileDescGrouper implements Serializable {
 
         //No match?  Add in new bucket at END of bucket list.  Don't forget to
         List bucket=new ArrayList();
-        bucket.add(rfd2);
+        bucket.add(rfd);
         buckets.add(bucket);
         incompletes.add(incompleteFile);
         //note: we need to be careful while adding to sha1s, since some elements

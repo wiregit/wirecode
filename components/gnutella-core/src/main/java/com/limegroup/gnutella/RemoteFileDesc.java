@@ -47,6 +47,11 @@ public class RemoteFileDesc implements Serializable {
 	private Set _urns;
 	private boolean _browseHostEnabled;
     private PushProxyInterface[] _proxies;
+    private boolean _firewalled;
+    private String _vendor;
+    private int _score;
+    private long _timestamp;
+    
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -55,19 +60,15 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
-		
-    
-    /**
-     * Creates a RemoteFileDesc that isn't a response to a multicast query.
-     */
+	
     public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns) {
         this(host, port, index, filename, size, clientGUID, speed,
-             chat, quality, browseHost, xmlDoc, urns, false, null);
+             chat, quality, browseHost, xmlDoc, urns, false,false,0,"",0l, null);
     }
-
+	
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
      *
@@ -95,7 +96,9 @@ public class RemoteFileDesc implements Serializable {
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns,
-						  boolean replyToMulticast, PushProxyInterface[] proxies) {
+						  boolean replyToMulticast, boolean firewalled, 
+                          int score, String vendor, long timestamp,
+                          PushProxyInterface[] proxies) {
 		if((port & 0xFFFF0000) != 0) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -126,6 +129,10 @@ public class RemoteFileDesc implements Serializable {
 		_browseHostEnabled = browseHost;
 		_replyToMulticast = replyToMulticast;
         _proxies = proxies;
+        _firewalled = firewalled;
+        _score = score;
+        _vendor = vendor;
+        _timestamp = timestamp;
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
