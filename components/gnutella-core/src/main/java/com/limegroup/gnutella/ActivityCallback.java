@@ -40,21 +40,12 @@ public interface ActivityCallback
     public void connectionClosed(Connection c);
 
     /**
-     *  Add the given host/port to the host catcher
+     * Notifies the UI that a new query result has come in to the backend.
+     * 
+     * @param rfd the descriptor for the remote file
+     * @param data the data for the host returning the result
+     * @param locs the <tt>Set</tt> of alternate locations for the file
      */
-    public void knownHost(Endpoint e);
-
-    /**
-     * Add a query reply to the search result screen. 
-     *
-     *  The reply is not guaranteed to match the query; use 
-     *  RouterService.matchesType for that.  Also, it's possible that the
-     *  user has cancelled the search.
-     * @see RouterService#query(String,int,MediaType)
-     * @see RouterService#matchesType(byte[],Response)
-     */
-    //public void handleQueryReply( QueryReply qr );
-
 	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set locs);
 
     /**

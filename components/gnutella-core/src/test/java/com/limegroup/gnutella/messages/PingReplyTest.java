@@ -4,6 +4,7 @@ import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -26,6 +27,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+   
     /**
      * Tests the methods for getting the leaf and ultrapeer slots from the 
      * pong.
@@ -44,12 +46,39 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // not connected for this test, so leaf slots should be 0.
         assertEquals("unexpected number leaf slots", 0, pr.getNumLeafSlots());
         
+        assertTrue("slots unexpectedly not full", !pr.hasFreeLeafSlots());
+        
+        assertTrue("slots unexpectedly full", pr.hasFreeUltrapeerSlots());
+        
         // Connection status doesn't matter for ultrapeer slots -- we just 
         // subtract the number of connections we have from the desired number
         assertEquals("unexpected number ultrapeer slots", 
             ConnectionSettings.NUM_CONNECTIONS.getValue(), 
             pr.getNumUltrapeerSlots());
+        
+        // Switch ConnectionManager to report different values for free leaf
+        // and ultrapeer slots.
+        PrivilegedAccessor.setValue(RouterService.class, "manager",
+            new TestConnectionManager(0,10));
+        
+        pr = PingReply.create(guid, (byte)3, 6346, ip, 
+            (long)10, (long)10, true, 100, true);    
+            
+        assertTrue("slots unexpectedly full", pr.hasFreeSlots());
+
+        assertTrue("slots unexpectedly full", pr.hasFreeLeafSlots());
+        
+        assertTrue("slots unexpectedly not full", !pr.hasFreeUltrapeerSlots());
+        
+        // Should now have leaf slots
+        assertEquals("unexpected number leaf slots", 10, pr.getNumLeafSlots());
+        
+        // Connection status doesn't matter for ultrapeer slots -- we just 
+        // subtract the number of connections we have from the desired number
+        assertEquals("unexpected number ultrapeer slots",0, 
+            pr.getNumUltrapeerSlots());
     }
+   
     
     /**
      * Tests the method for creating a new pong with a changed GUID out
@@ -75,7 +104,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertNotEquals(pr.getGUID(), testPR.getGUID());
         assertEquals(pr.getTTL(), testPR.getTTL());
         assertEquals(pr.getPort(), testPR.getPort());
-        assertEquals(pr.getIP(), testPR.getIP());
+        assertEquals(pr.getInetAddress(), testPR.getInetAddress());
         assertEquals(pr.getFiles(), testPR.getFiles());
         assertEquals(pr.getKbytes(), testPR.getKbytes());
         assertEquals(pr.isUltrapeer(), testPR.isUltrapeer());
@@ -170,7 +199,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(u4, pr.getFiles());
         long kbytes=pr.getKbytes();
         assertEquals(Long.toHexString(kbytes), u4, kbytes);
-        String ip2=pr.getIP();
+        String ip2=pr.getAddress();
         assertEquals("254.0.0.1", ip2);
         assertTrue(! pr.isUltrapeer());
     }      
@@ -269,7 +298,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //Start testing
         assertEquals("wrong port", 15, pr.getPort());
-        String ip = pr.getIP();
+        String ip = pr.getAddress();
         assertEquals("wrong IP", "16.16.16.16", ip);
         assertEquals("wrong files", 15, pr.getFiles());
         assertEquals("Wrong share size", 15, pr.getKbytes());
@@ -473,7 +502,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(pr1.getFiles(), pr2.getFiles());
         assertEquals(pr1.getKbytes(), pr2.getKbytes());
         assertEquals(pr1.getPort(), pr2.getPort());
-        assertEquals(pr1.getIP(), pr2.getIP());
+        assertEquals(pr1.getInetAddress(), pr2.getInetAddress());
 
         assertTrue(! pr2.hasGGEPExtension());
         assertEquals("pong should not have a daily uptime", -1,
@@ -533,6 +562,28 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         payload[5] = 1;
     }
 
+    /**
+     * Utility class that overrides ConnectionManager methods for getting the
+     * number of free leaf and ultrapeer slots.
+     */
+    private static class TestConnectionManager extends ConnectionManager {
+        private final int NUM_FREE_NON_LEAF_SLOTS;
+        private final int NUM_FREE_LEAF_SLOTS;
+
+        TestConnectionManager(int numFreeNonLeafSlots, int numFreeLeafSlots) {
+            super(null);
+            NUM_FREE_NON_LEAF_SLOTS = numFreeNonLeafSlots;
+            NUM_FREE_LEAF_SLOTS = numFreeLeafSlots;
+        }
+        
+        public int getNumFreeNonLeafSlots() {
+            return NUM_FREE_NON_LEAF_SLOTS;
+        }
+        
+        public int getNumFreeLeafSlots() {
+            return NUM_FREE_LEAF_SLOTS;
+        }
+    }
     // TODO: build a test to test multiple GGEP blocks in the payload!!  the
     // implementation does not cover this it seems, so it should fail ;)
 

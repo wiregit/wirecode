@@ -109,6 +109,13 @@ public final class ConnectionSettings extends LimeProps {
 	public static final BooleanSetting IGNORE_KEEP_ALIVE =
 		FACTORY.createBooleanSetting("IGNORE_KEEP_ALIVE", false);
 
+    /**
+     * Setting for whether or not hosts should exchange QRP tables.  This is
+     * particularly useful for testing.
+     */
+    public static BooleanSetting SEND_QRP =
+        FACTORY.createBooleanSetting("SEND_QRP", true);
+
 	/**
 	 * Setting for whether or not to show the keep alive in the UI.
 	 */

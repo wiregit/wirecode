@@ -127,8 +127,8 @@ public class UpdateManager {
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 
                 //establish a connection and just return, its fail safe. 
-                String ip = c.getIPString();
-                int port = c.getListeningPort();
+                String ip = c.getAddress();
+                int port = c.getPort();
                 String connectTo = "http://" + ip + ":" + port + UPDATE;
                 HttpMethod get = new GetMethod(connectTo);
                 get.addRequestHeader("Cache-Control", "no-cache");

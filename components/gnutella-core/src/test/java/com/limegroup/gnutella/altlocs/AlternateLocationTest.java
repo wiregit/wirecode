@@ -280,7 +280,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
 	        AlternateLocation al = AlternateLocation.create(ip + ":50", urn);
 	        Endpoint ep = al.getHost();
-	        assertEquals(ip, ep.getHostname());
+	        assertEquals(ip, ep.getAddress());
 	        assertEquals(50, ep.getPort());
 	        assertEquals(urn, al.getSHA1Urn());
         }
@@ -290,7 +290,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	        String ip = i+"."+(i % 2)+"."+(i % 25)+"."+(i % 100);
 	        AlternateLocation al = AlternateLocation.create(ip, urn);
 	        Endpoint ep = al.getHost();
-	        assertEquals(ip, ep.getHostname());
+	        assertEquals(ip, ep.getAddress());
 	        assertEquals(6346, ep.getPort());
 	        assertEquals(urn, al.getSHA1Urn());
         }

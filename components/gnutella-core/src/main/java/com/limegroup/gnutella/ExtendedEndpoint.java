@@ -177,7 +177,7 @@ public class ExtendedEndpoint extends Endpoint {
      * @see read
      */
     public void write(Writer out) throws IOException {
-        out.write(getHostname());
+        out.write(getAddress());
         out.write(":");
         out.write(Integer.toString(getPort()));
         out.write(FIELD_SEPARATOR);
@@ -233,7 +233,7 @@ public class ExtendedEndpoint extends Endpoint {
         int port;
         try {
             Endpoint tmp=new Endpoint(linea[0], true);
-            host=tmp.getHostname();
+            host=tmp.getAddress();
             port=tmp.getPort();
         } catch (IllegalArgumentException e) {
             throw new ParseException("Couldn't extract address and port", 0);

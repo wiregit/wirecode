@@ -123,18 +123,14 @@ public class GUESSMonitor extends BaseTestCase {
         protected void handlePingReply(PingReply reply,
                                        ReplyHandler handler) {
             super.handlePingReply(reply, handler);
-            try {
-                if (!NetworkUtils.isPrivateAddress(reply.getIPBytes()) &&
-                    notMe(InetAddress.getByName(reply.getIP()), 
-                          reply.getPort()) &&
-                    reply.supportsUnicast()) {
-                    synchronized (_guessPongs) {
-                        _guessPongs.add(reply);
-                        _guessPongs.notify();
-                    }
+            if (!NetworkUtils.isPrivateAddress(reply.getIPBytes()) &&
+                notMe(reply.getInetAddress(), reply.getPort()) &&
+                reply.supportsUnicast()) {
+                synchronized (_guessPongs) {
+                    _guessPongs.add(reply);
+                    _guessPongs.notify();
                 }
             }
-            catch (UnknownHostException ignored) {}
         }
                 
         private void guessPongLoop() {
@@ -150,17 +146,17 @@ public class GUESSMonitor extends BaseTestCase {
                 }
                 if (_shouldRun && (_guessPongs.size() > 0)) {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
-                    if (_badHosts.contains(currPong.getIP()))
+                    if (_badHosts.contains(currPong.getInetAddress()))
                         continue;
                     {
                         // don't hit the same guys too often.....
-                        if (_lastFiveHosts.contains(currPong.getIP()))
+                        if (_lastFiveHosts.contains(currPong.getInetAddress()))
                             continue;
-                        _lastFiveHosts.addFirst(currPong.getIP());
+                        _lastFiveHosts.addFirst(currPong.getInetAddress());
                     }
                     debug("guessPongLoop(): consuming Pong = " + currPong);
                     Object[] retObjs = 
-                        GUESSStatistics.getAckStatistics(currPong.getIP(),
+                        GUESSStatistics.getAckStatistics(currPong.getAddress(),
                                                          currPong.getPort());
                     float numSent = ((Float)retObjs[1]).floatValue();
                     float numGot = ((Float)retObjs[0]).floatValue();
@@ -169,15 +165,15 @@ public class GUESSMonitor extends BaseTestCase {
 
                     tallyStats(numGot, averageTime, successRate);
                     // also keep track of unique tests done....
-                    if (!_uniqueHosts.contains(currPong.getIP())) {
-                        _uniqueHosts.add(currPong.getIP());
+                    if (!_uniqueHosts.contains(currPong.getInetAddress())) {
+                        _uniqueHosts.add(currPong.getInetAddress());
                         if (numGot == 0)
-                            _badHosts.add(currPong.getIP());
+                            _badHosts.add(currPong.getInetAddress());
                         else
                             goodGUESSers++;
                     }
 
-                    debug("Sent Queries to " + currPong.getIP() + ":" +
+                    debug("Sent Queries to " + currPong.getInetAddress() + ":" +
                           currPong.getPort() + " . " + "Success Rate = " +
                           successRate + " at an average of " +
                           averageTime + " ms per Query.");

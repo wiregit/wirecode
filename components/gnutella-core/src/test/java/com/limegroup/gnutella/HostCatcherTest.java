@@ -61,6 +61,210 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
     /**
+     * Test the method for putting hosts on probation.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testPutHostOnProbation() throws Exception {
+        HostCatcher catcher = new HostCatcher();
+        String ipStart = "34.56.";
+        int penultimatetByte;
+        for(int i=0; i<HostCatcher.PROBATION_HOSTS_SIZE; i++) {
+            
+            // Add a bunch of unique endpoints.
+            if(i >= 512) {
+                penultimatetByte = 2;
+            } else if(i >= 255) {
+                penultimatetByte = 1;
+            } else {
+                penultimatetByte = 0;
+            }
+            
+            int lastByte = i%256;
+            Endpoint curHost = 
+                new Endpoint(ipStart+penultimatetByte+"."+lastByte, 6346);
+            catcher.putHostOnProbation(curHost);
+        }
+        
+        Set probatedHosts =
+            (Set)PrivilegedAccessor.getValue(catcher, "PROBATION_HOSTS");
+        
+        assertEquals("unexpected size", HostCatcher.PROBATION_HOSTS_SIZE,
+            probatedHosts.size());
+        
+        // Start adding slightly different IPs
+        ipStart = "35.56.5.";
+        for(int i=0; i<10; i++) {
+            Endpoint curHost = new Endpoint(ipStart+i, 6346);
+            catcher.putHostOnProbation(curHost);
+            assertEquals("unexpected size", HostCatcher.PROBATION_HOSTS_SIZE,
+            probatedHosts.size());
+        }
+    }
+    
+    
+    /**
+     * Test the method for expiring hosts
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testExpireHosts() throws Exception {
+        HostCatcher catcher = new HostCatcher();
+        String ipStart = "34.56.";
+        int penultimatetByte;
+        for(int i=0; i<HostCatcher.EXPIRED_HOSTS_SIZE; i++) {
+            
+            // Add a bunch of unique endpoints.
+            if(i >= 512) {
+                penultimatetByte = 2;
+            } else if(i >= 255) {
+                penultimatetByte = 1;
+            } else {
+                penultimatetByte = 0;
+            }
+            
+            int lastByte = i%256;
+            Endpoint curHost = 
+                new Endpoint(ipStart+penultimatetByte+"."+lastByte, 6346);
+            catcher.expireHost(curHost);
+        }
+        
+        Set expiredHosts =
+            (Set)PrivilegedAccessor.getValue(catcher, "EXPIRED_HOSTS");
+        
+        assertEquals("unexpected size", HostCatcher.EXPIRED_HOSTS_SIZE,
+            expiredHosts.size());
+        
+        // Start adding slightly different IPs
+        ipStart = "35.56.5.";
+        for(int i=0; i<10; i++) {
+            Endpoint curHost = new Endpoint(ipStart+i, 6346);
+            catcher.putHostOnProbation(curHost);
+            assertEquals("unexpected size", HostCatcher.EXPIRED_HOSTS_SIZE,
+            expiredHosts.size());
+        }
+    }
+    
+    
+    /**
+     * Test to make sure we hit the GWebCache if hosts fail.
+     */
+    public void testHitsGWebCacheIfHostsFail() throws Exception {
+        HostCatcher.DEBUG = false;
+        HostCatcher catcher = new HostCatcher();
+        
+        catcher.initialize();
+        
+        PrivilegedAccessor.setValue(RouterService.class, "catcher", catcher);
+        String startAddress = "30.4.5.";
+        for(int i=0; i<250; i++) {
+            Endpoint curHost = new Endpoint(startAddress+i, 6346);
+            catcher.add(curHost, true);
+        }
+        
+ 
+        for(int i=0; i<250; i++) {
+            Endpoint host = catcher.getAnEndpoint();
+            assertTrue("unexpected address", 
+                host.getAddress().startsWith(startAddress));
+        }
+        
+        
+        for(int i=0; i<250; i++) {
+            Endpoint curHost = new Endpoint(startAddress+i, 6346);
+            catcher.doneWithConnect(curHost, false);
+        }
+        
+        Endpoint gWebCacheHost = catcher.getAnEndpoint();  
+
+
+        // This time, the host should not be one of the addresses we added,
+        // since it should come from the cache.  There's some remote chance of
+        // collision, but it's unlikely.
+        assertFalse("unexpected address", 
+            gWebCacheHost.getAddress().startsWith(startAddress));       
+        
+        HostCatcher.DEBUG = true;
+    }
+    
+    /**
+     * Tests to make sure that we ignore hosts that have expired.
+     * 
+     * @throws Exception if any error occurs
+     */
+    public void testIgnoreExpiredHosts() throws Exception {
+        Endpoint expiredHost = new Endpoint("20.4.5.7", 6346);
+        HostCatcher catcher = new HostCatcher();
+        catcher.initialize();
+        catcher.add(expiredHost,true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
+        Endpoint accessedHost = catcher.getAnEndpoint();
+        assertNotNull("host should not be null", accessedHost);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
+        
+        catcher.expireHost(expiredHost);
+        catcher.add(expiredHost, true);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());        
+    }
+    
+    /**
+     * Tests to make sure that we ignore hosts that have been put on probation.
+     * 
+     * @throws Exception if any error occurs
+     */
+    public void testIgnoreProbatedHosts() throws Exception {
+        Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
+        HostCatcher catcher = new HostCatcher();
+        catcher.initialize();
+        catcher.add(probatedHost,true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());
+        Endpoint accessedHost = catcher.getAnEndpoint();
+        assertNotNull("host should not be null", accessedHost);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
+        
+        catcher.putHostOnProbation(probatedHost);
+        catcher.add(probatedHost, true);
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());        
+    }
+    
+    /**
+     * Tests to make sure that hosts that are put on probation are properly 
+     * recovered.
+     * 
+     * @throws Exception if any error occurs
+     */
+    public void testRecoveryOfHostsOnProbation() throws Exception {
+        HostCatcher catcher = new HostCatcher();
+        long waitTime = 100;
+        PrivilegedAccessor.setValue(HostCatcher.class, 
+            "PROBATION_RECOVERY_WAIT_TIME", new Long(waitTime));
+        long interval = 20000;
+        PrivilegedAccessor.setValue(HostCatcher.class, 
+            "PROBATION_RECOVERY_TIME", new Long(interval));
+        
+        Endpoint probatedHost = new Endpoint("20.4.5.7", 6346);
+        
+        // Put the host on probation.
+        catcher.putHostOnProbation(probatedHost);
+        
+        catcher.add(probatedHost, true);
+        
+        // And make sure that it did not get added
+        assertEquals("unexpected number of hosts", 0, catcher.getNumHosts());
+        
+        // Start the probation recovery sequence...
+        catcher.initialize();        
+        
+        // Sleep until the recovery operation takes place...
+        Thread.sleep(waitTime+200);
+        
+        // Finally, make sure we are then able to add the host that was 
+        // formerly on probation.
+        catcher.add(probatedHost, true);
+        assertEquals("unexpected number of hosts", 1, catcher.getNumHosts());        
+    }
+    
+    /**
      * Tests to make sure that recovering used hosts works as expected.  This
      * method is used when the user's network connection goes down.
      *
@@ -86,6 +290,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
             hc.getAnEndpoint();
         }
         
+        assertEquals("hosts should be 0", 0, hc.getNumHosts());
         hc.recoverHosts();
         assertEquals("hosts should have been recovered", 
             numHosts, hc.getNumHosts());

@@ -98,7 +98,7 @@ public final class IPFilter extends SpamFilter {
     public boolean allow(Message m) {
         if (m instanceof PingReply) {
             PingReply pr = (PingReply)m;
-            return allow(pr.getIP());
+            return allow(pr.getAddress());
         } else if (m instanceof QueryReply) {
             QueryReply qr = (QueryReply)m;
             return allow(qr.getIPBytes());

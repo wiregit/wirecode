@@ -5,13 +5,14 @@ import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.net.*;
+
 import com.limegroup.gnutella.util.*;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable {
+public class PingReply extends Message implements Serializable, IpPort {
 
     /**
      * Constant for the number of ultrapeer slots for this host.
@@ -34,7 +35,7 @@ public class PingReply extends Message implements Serializable {
 
     /** The IP string as extracted from payload[2..5].  Cached to avoid
      *  allocations.  LOCKING: obtain this' monitor. */
-    private final String IP;
+    private final InetAddress IP;
 
     /**
      * Constant for the port number of this pong.
@@ -331,15 +332,21 @@ public class PingReply extends Message implements Serializable {
      *  data
      */
     public static PingReply 
-        create(byte[] guid, byte ttl, int port, byte[] ip, long files,
+        create(byte[] guid, byte ttl, int port, byte[] ipBytes, long files,
                long kbytes, boolean isUltrapeer, GGEP ggep) {
 
  		if(!NetworkUtils.isValidPort(port))
 			throw new IllegalArgumentException("invalid port: "+port);
-        if(!NetworkUtils.isValidAddress(ip))
+        if(!NetworkUtils.isValidAddress(ipBytes))
             throw new IllegalArgumentException("invalid address: " +
-                    NetworkUtils.ip2string(ip));			
+                    NetworkUtils.ip2string(ipBytes));			
         
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getByAddress(ipBytes);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
         byte[] extensions = null;
         if(ggep != null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -358,10 +365,10 @@ public class PingReply extends Message implements Serializable {
         //It's ok if casting port, files, or kbytes turns negative.
         ByteOrder.short2leb((short)port, payload, 0);
         //payload stores IP in BIG-ENDIAN
-        payload[2]=ip[0];
-        payload[3]=ip[1];
-        payload[4]=ip[2];
-        payload[5]=ip[3];
+        payload[2]=ipBytes[0];
+        payload[3]=ipBytes[1];
+        payload[4]=ipBytes[2];
+        payload[5]=ipBytes[3];
         ByteOrder.int2leb((int)files, payload, 6);
         ByteOrder.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), 
                           payload, 
@@ -373,7 +380,7 @@ public class PingReply extends Message implements Serializable {
                              payload, STANDARD_PAYLOAD_SIZE, 
                              extensions.length);
         }
-        return new PingReply(guid, ttl, (byte)0, payload, ggep);
+        return new PingReply(guid, ttl, (byte)0, payload, ggep, ip);
     }
 
 
@@ -407,11 +414,17 @@ public class PingReply extends Message implements Serializable {
                 ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port: "+port); 
         }
-        String ip = NetworkUtils.ip2string(payload, 2);
-        if(!NetworkUtils.isValidAddress(ip)) {
+        String ipString = NetworkUtils.ip2string(payload, 2);
+        if(!NetworkUtils.isValidAddress(ipString)) {
             if( RECORD_STATS )
                 ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
-            throw new BadPacketException("invalid address: " + ip);
+            throw new BadPacketException("invalid address: " + ipString);
+        }
+        InetAddress ip;
+        try {
+            ip = InetAddress.getByName(NetworkUtils.ip2string(payload, 2));
+        } catch (UnknownHostException e) {
+            throw new BadPacketException("bad IP:"+ipString+" "+e.getMessage());
         }
         GGEP ggep = parseGGEP(payload);
         
@@ -431,7 +444,8 @@ public class PingReply extends Message implements Serializable {
                                              vendorBytes.length);
             }
         }
-        return new PingReply(guid, ttl, hops, payload, ggep);
+
+        return new PingReply(guid, ttl, hops, payload, ggep, ip);
     }
      
     /**
@@ -443,15 +457,14 @@ public class PingReply extends Message implements Serializable {
      * @param payload the message payload
      */
     private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep) {
+                      GGEP ggep, InetAddress ip) {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
         PAYLOAD = payload;
         PORT = ByteOrder.ubytes2int(ByteOrder.leb2short(PAYLOAD,0));
         FILES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,6));
         KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
 
-        // IP is big-endian
-        IP = NetworkUtils.ip2string(PAYLOAD, 2);
+        IP = ip;
 
         // GGEP parsing
         //GGEP ggep = parseGGEP();
@@ -638,7 +651,29 @@ public class PingReply extends Message implements Serializable {
      *  slots, otherwise <tt>false</tt>
      */
     public boolean hasFreeSlots() {
-        return FREE_LEAF_SLOTS > 0 || FREE_ULTRAPEER_SLOTS > 0;    
+        return hasFreeLeafSlots() || hasFreeUltrapeerSlots();    
+    }
+    
+    /**
+     * Returns whether or not this pong is reporting free leaf slots on the 
+     * remote host.
+     * 
+     * @return <tt>true</tt> if the remote host has any free leaf slots, 
+     *  otherwise <tt>false</tt>
+     */
+    public boolean hasFreeLeafSlots() {
+        return FREE_LEAF_SLOTS > 0;
+    }
+
+    /**
+     * Returns whether or not this pong is reporting free ultrapeer slots on  
+     * the remote host.
+     * 
+     * @return <tt>true</tt> if the remote host has any free ultrapeer slots, 
+     *  otherwise <tt>false</tt>
+     */
+    public boolean hasFreeUltrapeerSlots() {
+        return FREE_ULTRAPEER_SLOTS > 0;
     }
     
     /**
@@ -685,8 +720,8 @@ public class PingReply extends Message implements Serializable {
      * Returns the ip field in standard dotted decimal format, e.g.,
      * "127.0.0.1".  The most significant byte is written first.
      */
-    public String getIP() { 
-        return IP;
+    public String getAddress() { 
+        return IP.getHostAddress();
     }
 
     /**
@@ -823,7 +858,7 @@ public class PingReply extends Message implements Serializable {
                          STANDARD_PAYLOAD_SIZE);
 
         return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                             newPayload, null);
+                             newPayload, null, IP);
     }
 
 
@@ -932,9 +967,19 @@ public class PingReply extends Message implements Serializable {
 
     // overrides Object.toString
     public String toString() {
-        return "PingReply("+getIP()+":"+getPort()+
+        return "PingReply("+getAddress()+":"+getPort()+
             ", free slots: "+hasFreeSlots()+
             ", "+super.toString()+")";
+    }
+
+    /**
+     * Implements <tt>IpPort</tt> interface.  Returns the <tt>InetAddress</tt>
+     * for this host.
+     * 
+     * @return the <tt>InetAddress</tt> for this host
+     */ 
+    public InetAddress getInetAddress() {
+        return IP;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest

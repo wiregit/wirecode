@@ -3,13 +3,14 @@ package com.limegroup.gnutella.bootstrap;
 import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.settings.*;
 
 /**
  * Unit tests for the HostCatcher/BootstrapServerManager interface.
  */
-public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class HostCatcherFetchTest extends BaseTestCase {
     private HostCatcher hc;
     private RecordingBootstrapServerManager gWebCache;
 
@@ -123,7 +124,7 @@ class RecordingBootstrapServerManager extends BootstrapServerManager {
     int updates=0;
     
     public RecordingBootstrapServerManager() {
-        super(null);
+        super();
     }
 
     public synchronized void fetchBootstrapServersAsync() { urlfiles++; }

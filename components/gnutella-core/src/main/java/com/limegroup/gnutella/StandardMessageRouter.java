@@ -77,10 +77,10 @@ public class StandardMessageRouter extends MessageRouter {
         Iterator iter = pongs.iterator();
         byte[] guid = ping.getGUID();
 
-        String pingerIP = handler.getInetAddress().getHostAddress();
+        InetAddress pingerIP = handler.getInetAddress();
         while(iter.hasNext()) {
             PingReply pr = (PingReply)iter.next();
-            if(pr.getIP().equals(pingerIP)) {
+            if(pr.getInetAddress().equals(pingerIP)) {
                 continue;
             }
             sendPingReply(pr.mutateGUID(guid), handler);
@@ -128,7 +128,7 @@ public class StandardMessageRouter extends MessageRouter {
 
             PingReply pr = 
                 PingReply.createExternal(m.getGUID(), (byte)2, 
-                                         connection.getListeningPort(),
+                                         connection.getPort(),
                                          connection.getInetAddress().getAddress(),
                                          false);
                                                     

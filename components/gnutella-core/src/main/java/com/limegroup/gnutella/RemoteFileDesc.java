@@ -119,7 +119,7 @@ public class RemoteFileDesc implements Serializable {
      * for URNs because the Set is immutable.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
-        this( ep.getHostname(),             // host
+        this( ep.getAddress(),             // host
               ep.getPort(),                 // port
               COPY_INDEX,                   // index (unknown)
               rfd.getFileName(),            // filename

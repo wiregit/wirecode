@@ -681,6 +681,4 @@ public class QueryRouteTable {
         else
             return b;        
     }
-
-
 }

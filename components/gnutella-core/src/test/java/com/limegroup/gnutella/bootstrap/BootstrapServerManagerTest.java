@@ -2,17 +2,17 @@ package com.limegroup.gnutella.bootstrap;
 
 import junit.framework.*;
 import com.sun.java.util.collections.*;
-import java.io.*;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Unit tests for BootstrapServerManager.
  */
-public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class BootstrapServerManagerTest extends BaseTestCase {
     public BootstrapServerManagerTest(String name) {
         super(name);
     }
@@ -23,7 +23,7 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
 
     ////////////////////////////////////////////////////////////////////////////
     final int RESPONSES_PER_SERVER=12;
-    final static int PORT=6700;
+    final static int SERVER_PORT=6700;
     final static String DIRECTORY="/path/to/script.php";
     final static String COMMON_PARAMS="client=LIME&version="
         +URLEncoder.encode(CommonUtils.getLimeWireVersion());
@@ -36,22 +36,23 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
     BootstrapServer url1, url2, url3;
     TestBootstrapServer s1, s2, s3;
 
-    public void setUp() throws IOException, ParseException {
-        url1=new BootstrapServer("http://127.0.0.1:"+(PORT)+DIRECTORY);
-        url2=new BootstrapServer("http://127.0.0.1:"+(PORT+1)+DIRECTORY);
-        url3=new BootstrapServer("http://127.0.0.1:"+(PORT+2)+DIRECTORY);
+    public void setUp() throws Exception {
+        url1=new BootstrapServer("http://127.0.0.1:"+(SERVER_PORT)+DIRECTORY);
+        url2=new BootstrapServer("http://127.0.0.1:"+(SERVER_PORT+1)+DIRECTORY);
+        url3=new BootstrapServer("http://127.0.0.1:"+(SERVER_PORT+2)+DIRECTORY);
 
         //Prepare backend
-        catcher=new TestHostCatcher();
-        bman=new TestBootstrapServerManager(catcher);
+        catcher = new TestHostCatcher();
+        PrivilegedAccessor.setValue(RouterService.class, "catcher", catcher);
+        bman = new TestBootstrapServerManager();
         bman.addBootstrapServer(url1);
         bman.addBootstrapServer(url2);
         bman.addBootstrapServer(url3);
 
         //Prepare servers
-        s1=new TestBootstrapServer(PORT);
-        s2=new TestBootstrapServer(PORT+1);
-        s3=new TestBootstrapServer(PORT+2);
+        s1=new TestBootstrapServer(SERVER_PORT);
+        s2=new TestBootstrapServer(SERVER_PORT+1);
+        s3=new TestBootstrapServer(SERVER_PORT+2);
 
         StringBuffer response=new StringBuffer();
         for (int i=0; i<RESPONSES_PER_SERVER; i++)
@@ -68,8 +69,9 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
         try { Thread.sleep(200); } catch (InterruptedException e) { }
     }
 
+    
     ///////////////////////////////////////////////////////////////////////
-
+    
     /** Checks hostfile=1 request.  Also checks that unreachable hosts are
      *  visited as needed.  */
     public void testFetchEndpointsAsync() {
@@ -267,9 +269,9 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
     }
 
     public void testGiveUp() {    
-        int old=bman.MAX_HOSTS_PER_REQUEST;
+        int old = BootstrapServerManager.MAX_HOSTS_PER_REQUEST;
         try {
-            bman.MAX_HOSTS_PER_REQUEST=2;
+            BootstrapServerManager.MAX_HOSTS_PER_REQUEST = 2;
             s3.shutdown();
             s2.shutdown();
             bman.fetchEndpointsAsync();
@@ -280,7 +282,7 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
             assertEquals(url1, iter.next());
             assertTrue(! iter.hasNext());
         } finally {
-            bman.MAX_HOSTS_PER_REQUEST=old;
+            BootstrapServerManager.MAX_HOSTS_PER_REQUEST = old;
         }
     }
 
@@ -362,12 +364,18 @@ class TestHostCatcher extends HostCatcher {
         list.add(e);
         return true;
     }
+
+    public boolean add(Endpoint e, int priority) {
+        list.add(e);
+        return true;
+    }
 }
 
 /** A BootstrapServerManager that tries host in a round-robin fashion. */
 class TestBootstrapServerManager extends BootstrapServerManager {
-    public TestBootstrapServerManager(HostCatcher hc) {
-        super(hc);
+
+    public TestBootstrapServerManager() {
+        super();
     }
 
     /** The LAST value given out, or -1 if none.  Starts with s3 and works down

@@ -6,9 +6,7 @@ import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
-import java.io.IOException;
 import java.net.*;
-import java.util.Stack;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master
@@ -449,14 +447,8 @@ public final class QueryUnicaster {
         if(qk == null) {
             throw new IllegalArgumentException("no key in pong");
         }
-        InetAddress address = null;
-        try {
-            address = InetAddress.getByName(pr.getIP());
-        }
-        catch (UnknownHostException damn) {
-            // unknown host exception??  weird - well, don't continue....
-            return;
-        }
+        InetAddress address = pr.getInetAddress();
+
         Assert.that(qk != null);
         int port = pr.getPort();
         GUESSEndpoint endpoint = new GUESSEndpoint(address, port);

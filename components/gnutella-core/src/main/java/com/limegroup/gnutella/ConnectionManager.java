@@ -437,7 +437,7 @@ public class ConnectionManager {
      * @return true if this is probably connected to <tt>host</tt> 
      */
     boolean isConnectedTo(Endpoint host) {        
-        String hostName=host.getHostname();
+        String hostName=host.getAddress();
         //A clone of the list of all connections, both initialized and
         //uninitialized, leaves and unrouted.  If Java could be prevented from
         //making certain code transformations, it would be safe to replace the
@@ -447,7 +447,7 @@ public class ConnectionManager {
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc = (ManagedConnection)iter.next();
  
-            if (mc.getIPString().equals(hostName))
+            if (mc.getAddress().equals(hostName))
                 return true;
         }
         return false;
@@ -502,7 +502,7 @@ public class ConnectionManager {
     /**
      * @return the number of free leaf slots.
      */
-    int getNumFreeLeafSlots() {
+    public int getNumFreeLeafSlots() {
         if (isSupernode())
 			return UltrapeerSettings.MAX_LEAVES.getValue() - 
 				getNumInitializedClientConnections();
@@ -514,7 +514,7 @@ public class ConnectionManager {
     /**
      * @return the number of free non-leaf slots.
      */
-    int getNumFreeNonLeafSlots() {
+    public int getNumFreeNonLeafSlots() {
         return ULTRAPEER_CONNECTIONS - getNumInitializedConnections();
     }
 
@@ -688,10 +688,11 @@ public class ConnectionManager {
 		    // Allow incoming if the other side is a good ultrapeer and we
 		    // aren't at our max.
 		    if(hr.isGoodUltrapeer() &&
-		       _shieldedConnections < PREFERRED_CONNECTIONS_FOR_LEAF)
-		       return true;
-            else
+		       _shieldedConnections < PREFERRED_CONNECTIONS_FOR_LEAF) {
+		        return true;
+            } else {
                 return false;
+            }
 		} else if (hr.isLeaf() || leaf) {
             // Leaf. As the spec. says, this assumes we are an ultrapeer.
             int leaves = getNumInitializedClientConnections();
@@ -956,7 +957,7 @@ public class ConnectionManager {
             if(connection.isSupernodeConnection())
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
-                    connection.getListeningPort()));
+                    connection.getPort()));
         }
         //add the best few endpoints from the hostcatcher.
         Iterator iterator =
@@ -981,7 +982,7 @@ public class ConnectionManager {
 			if(connection.isSupernodeConnection() && 
 			   connection.isGUESSUltrapeer()) {				
 				return new Endpoint(connection.getInetAddress().getAddress(),
-									connection.getListeningPort());
+									connection.getPort());
 			}
 		}
 		return null;
@@ -1099,7 +1100,7 @@ public class ConnectionManager {
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getListeningPort()), true);
+                    c.getPort()), true);
             }   
         }
     }
@@ -1552,6 +1553,7 @@ public class ConnectionManager {
             catch(IllegalArgumentException iae){
                 continue;
             }
+            
             //set the good priority, if specified
             //add it to the catcher
             _catcher.add(e, true);
@@ -1716,7 +1718,7 @@ public class ConnectionManager {
 	    Thread.currentThread().setName("MessageLoopingThread");
 		if(conn.isGUESSUltrapeer()) {
 			QueryUnicaster.instance().addUnicastEndpoint(conn.getInetAddress(),
-				conn.getListeningPort());
+				conn.getPort());
 		}
 
 		// this can throw IOException
@@ -1768,13 +1770,13 @@ public class ConnectionManager {
                         // death of the fetcher, so just return.
                         return;
                     }
-                } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
+                } while ( !IPFilter.instance().allow(endpoint.getAddress()) || 
                           isConnectedTo(endpoint) );                      
     
                 Assert.that(endpoint != null);
     
                 ManagedConnection connection = new ManagedConnection(
-                    endpoint.getHostname(), endpoint.getPort());
+                    endpoint.getAddress(), endpoint.getPort());
 
                 // If we've been trying to connect for awhile and have not 
                 // already checked our connection, check to make sure the
@@ -1782,7 +1784,7 @@ public class ConnectionManager {
                 long curTime = System.currentTimeMillis();
                 if(_connectionAttempts > 40 && 
                    ((curTime - _lastSuccessfulConnect)>2000) &&
-                   ((curTime - _lastConnectionCheck)>60000)) {
+                   ((curTime - _lastConnectionCheck)>120000)) {
                     _connectionAttempts = 0;
                     _lastConnectionCheck = curTime;
                     LOG.debug("checking for live connection");
@@ -1800,9 +1802,11 @@ public class ConnectionManager {
                 } catch (NoGnutellaOkException e) {
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
+                    _catcher.putHostOnProbation(endpoint);
                     throw e;                    
                 } catch (IOException e) {
                     _catcher.doneWithConnect(endpoint, false);
+                    _catcher.expireHost(endpoint);
                     throw e;
                 }
 

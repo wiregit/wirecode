@@ -579,7 +579,7 @@ public class Response {
               iter.hasNext() && i < MAX_LOCATIONS;) {
                 AlternateLocation al = (AlternateLocation)iter.next();
                 Endpoint host = al.getHost();
-                if( !NetworkUtils.isMe(host.getHostname(), host.getPort()) ) {
+                if( !NetworkUtils.isMe(host.getAddress(), host.getPort()) ) {
                     if (endpoints == null)
                         endpoints = new HashSet();
                     endpoints.add( al.getHost() );

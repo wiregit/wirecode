@@ -776,7 +776,7 @@ public abstract class MessageRouter {
         // also add the sender of the pong if different from the host
         // described in the reply...
         if((reply.getPort() != port) || 
-           (!reply.getIP().equals(address.getHostAddress()))) {
+           (!reply.getInetAddress().equals(address))) {
             UNICASTER.addUnicastEndpoint(address, port);
 		}
         
@@ -2357,6 +2357,11 @@ public abstract class MessageRouter {
 			else {
 			    lastSent = c.getQueryRouteTableSent();
 			    patches = table.encode(lastSent, true);
+            }
+            
+            // If sending QRP tables is turned off, don't send them.  
+            if(!ConnectionSettings.SEND_QRP.getValue()) {
+                return;
             }
             
 		    for(Iterator iter = patches.iterator(); iter.hasNext();) {

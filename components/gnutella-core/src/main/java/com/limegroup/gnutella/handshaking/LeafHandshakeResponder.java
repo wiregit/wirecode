@@ -64,9 +64,6 @@ public final class LeafHandshakeResponder
         if( RECORD_STATS )
             HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
         
-        // let the Ultrapeer know of any high-hops Ultrapeers
-        // we're aware of
-        // TODO:: add high hops in the response -- we don't do that now
         return HandshakeResponse.createAcceptOutgoingResponse(ret);
     }
 
@@ -77,15 +74,14 @@ public final class LeafHandshakeResponder
      * @return the <tt>HandshakeResponse</tt> with the handshake 
      *  headers to send in response to the connection attempt
      */
-    private HandshakeResponse 
-        respondToIncoming(HandshakeResponse hr) {
+    private HandshakeResponse respondToIncoming(HandshakeResponse hr) {
         Properties ret = new LeafHeaders(getRemoteIP());
         
         //If we already have enough ultrapeers, reject.
         if(!_manager.allowConnection(hr)) {
             if( RECORD_STATS )
                 HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
-            return HandshakeResponse.createLeafRejectIncomingResponse();
+            return HandshakeResponse.createLeafRejectIncomingResponse(hr);
         } 
 
 		//deflate if we can ...

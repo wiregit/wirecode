@@ -9,7 +9,7 @@ import com.limegroup.gnutella.util.*;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, Serializable,
+public class Endpoint implements Cloneable, Serializable, IpPort,
 com.sun.java.util.collections.Comparable
 {
     /**
@@ -272,9 +272,24 @@ com.sun.java.util.collections.Comparable
         + files + " kbytes=" + kbytes;
     }
 
-    public String getHostname()
+    public String getAddress()
     {
         return hostname;
+    }
+    
+    /**
+     * Accessor for the <tt>InetAddress</tt> instance for this host.  Implements
+     * <tt>IpPort</tt> interface.
+     * 
+     * @return the <tt>InetAddress</tt> for this host, or <tt>null</tt> if the
+     *  <tt>InetAddress</tt> cannot be created
+     */
+    public InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByName(hostname);
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 
     public void setHostname(String hostname)

@@ -108,7 +108,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
     public void testReadNormal() throws Exception {
         ExtendedEndpoint e=ExtendedEndpoint.read(
             "127.0.0.1:6348,3492,1, 100,86400113;113\n");
-        assertEquals("127.0.0.1", e.getHostname());
+        assertEquals("127.0.0.1", e.getAddress());
         assertEquals(6348, e.getPort());
         assertEquals(3492, e.getDailyUptime());
         assertEquals(1, e.getTimeRecorded());
@@ -139,7 +139,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
    public void testReadUnknown() throws Exception {
         ExtendedEndpoint e=ExtendedEndpoint.read(
             "127.0.0.1:6348,,A,, 86400113;113 \n");
-        assertEquals("127.0.0.1", e.getHostname());
+        assertEquals("127.0.0.1", e.getAddress());
         assertEquals(6348, e.getPort());
         assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
                      e.getDailyUptime());
@@ -156,7 +156,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
    public void testReadOldStyle() throws Exception {
         ExtendedEndpoint e=ExtendedEndpoint.read(
             "127.0.0.1:6348");
-        assertEquals("127.0.0.1", e.getHostname());
+        assertEquals("127.0.0.1", e.getAddress());
         assertEquals(6348, e.getPort());
         assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
                      e.getDailyUptime());

@@ -51,14 +51,7 @@ public class OnDemandUnicaster {
 
         // create guess endpoint
         // ------
-        InetAddress address = null;
-        try {
-            address = InetAddress.getByName(pr.getIP());
-        }
-        catch (UnknownHostException damn) {
-            // unknown host exception??  weird - well, don't continue....
-            return;
-        }
+        InetAddress address = pr.getInetAddress();
         int port = pr.getPort();
         GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
         // ------

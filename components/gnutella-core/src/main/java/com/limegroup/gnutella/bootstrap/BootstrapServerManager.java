@@ -55,8 +55,7 @@ public class BootstrapServerManager {
      *  random replacement strategy.  _lastConnectable should be nulled if we
      *  later unsuccessfully try to reconnect to it. */
     private BootstrapServer _lastConnectable;
-    /** Where to deposit fetched endpoints. */
-    private final HostCatcher CATCHER; 
+
     /** Source of randomness for picking servers. 
      *  TODO: this is thread-safe, right? */
     private Random12 _rand=new Random12();
@@ -64,12 +63,26 @@ public class BootstrapServerManager {
      *  LOCKING: this (don't want multiple fetches) */
     private boolean _hostFetchInProgress=false;
 
-    /////////////////////////// Public Interface //////////////////////
+    /**
+     * Constant instance of the boostrap server.
+     */
+    private static final BootstrapServerManager INSTANCE =
+        new BootstrapServerManager();
 
-    /** @param catcher where to deposit fetched endpoints. */
-    public BootstrapServerManager(HostCatcher catcher) {
-        this.CATCHER=catcher;
+
+    /**
+     * Accessor for the <tt>BootstrapServerManager</tt> instance.
+     * 
+     * @return the <tt>BootstrapServerManager</tt> instance
+     */
+    public static BootstrapServerManager instance() {
+        return INSTANCE;
     }
+
+    /** 
+     * Creates a new <tt>BootstrapServerManager</tt>.  Protected for testing.
+     */
+    protected BootstrapServerManager() {}
 
     /**
      * Adds server to this.
@@ -194,10 +207,8 @@ public class BootstrapServerManager {
                 //need to force a higher priority to prevent repeated fetching.
                 //(See HostCatcher.expire)
 
-				// TODO: Can this cause a problem with the X-Try-Ultrapeer headers?
-				//       Might this cause a problem with reporting private addresses
-				//       in those headers?
-                CATCHER.add(host, true);       
+                RouterService.getHostCatcher().add(host, 
+                    HostCatcher.CACHE_PRIORITY);       
                 responses++;
             } catch (IllegalArgumentException bad) { 
                 //One strike and you're out; skip servers that send bad data.
@@ -262,7 +273,7 @@ public class BootstrapServerManager {
             //My ip address as a parameter.
             String ipPart = null;
             if (myIP != null) 
-                ipPart = "ip="+myIP.getHostname()+":"+myIP.getPort();
+                ipPart = "ip="+myIP.getAddress()+":"+myIP.getPort();
 
             //Some of these case are disallowed by sendUpdatesAsync, but we
             //handle all of them here.
@@ -423,4 +434,5 @@ public class BootstrapServerManager {
     protected synchronized int size() {
         return SERVERS.size();
     }
+
 }

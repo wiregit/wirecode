@@ -427,7 +427,7 @@ public class ClientSideOOBRequeryTest
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUPs[0].getListeningPort(), 
+            m = new QueryReply(guid, (byte) 1, testUPs[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
@@ -566,7 +566,7 @@ public class ClientSideOOBRequeryTest
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUPs[0].getListeningPort(), 
+            m = new QueryReply(guid, (byte) 1, testUPs[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
@@ -719,7 +719,7 @@ public class ClientSideOOBRequeryTest
             res = new Response[75];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
-            m = new QueryReply(guid, (byte) 1, testUPs[0].getListeningPort(), 
+            m = new QueryReply(guid, (byte) 1, testUPs[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
