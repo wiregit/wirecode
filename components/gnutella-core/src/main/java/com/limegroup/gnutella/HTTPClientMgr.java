@@ -23,8 +23,7 @@ public class HTTPClientMgr implements Runnable {
     private int _amountRead;
     private FileManager _fmanager;
     private FileDesc _fdesc;
-
-
+    
     public HTTPClientMgr(Socket s, String filename, int index) {
 	
 	_socket = s;                    /* initialize variables */
@@ -69,6 +68,10 @@ public class HTTPClientMgr implements Runnable {
 
     public int getAmountRead() {
 	return _amountRead;
+    }
+
+    public InetAddress getInetAddress() {
+	return _socket.getInetAddress();
     }
 
     public void upload() {
