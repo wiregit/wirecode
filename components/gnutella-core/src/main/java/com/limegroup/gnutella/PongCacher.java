@@ -25,17 +25,12 @@ public final class PongCacher implements Runnable {
     private static List _cachedPongs = 
         Collections.unmodifiableList(new LinkedList());
 
-    /**
-     * Constant for the number of pongs to store at each hop. Public to 
-     * make testing easier.
-     */
-    public static final int PONGS_PER_HOP = 10;
 
     /**
      * Constant for the number of cached pongs returned in response to
      * pings.  Public to make testing easier.
      */
-    public static final int NUM_CACHED_PONGS = 10;
+    public static final int NUM_CACHED_PONGS = 4;
 
     /**
      * Constant for the number of milliseconds to wait before refreshing
@@ -47,7 +42,7 @@ public final class PongCacher implements Runnable {
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
     private static final BucketQueue PONGS =
-        new BucketQueue(8, PONGS_PER_HOP);
+        new BucketQueue(8, NUM_CACHED_PONGS);
 
     /**
      * Flag for whether or not we've received a new pong -- allows slight
