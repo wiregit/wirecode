@@ -1356,10 +1356,6 @@ public class ManagedConnection extends Connection
 		}
 	}
 
-	public void setKillable(boolean killable) {
-		this._isKillable=killable;
-	}
-
     /** 
      * Returns true if this should not be policed by the ConnectionWatchdog,
      * e.g., because this is a connection to a Clip2 reflector. Default value:
