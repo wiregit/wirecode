@@ -34,6 +34,14 @@ public final class AlternateLocationCollection
      */
  
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
+	
+	/**
+	 * this is a set of alternate locations that require push requests to be sent.
+	 * LOCKING: same as for LOCATIONS
+	 * INVARIANT: this is always a subset of LOCATIONS.  can be empty.
+	 */
+	private final Set PUSH_LOCATIONS = new HashSet(MAX_SIZE);
+	
         
     /**
      * SHA1 <tt>URN</tt> for this collection.
@@ -135,13 +143,18 @@ public final class AlternateLocationCollection
             if(alt==null) {//it was not in collections.
                 ret = true;
                 LOCATIONS.add(al);
+                if (al.getPushAddress() !=null)
+                	PUSH_LOCATIONS.add(al);
             }
             else {
                 LOCATIONS.remove(alt);
+                PUSH_LOCATIONS.remove(alt);
                 alt.increment();
                 alt.promote();
                 ret =  false;
                 LOCATIONS.add(alt); //add incremented version
+                if (al.getPushAddress() != null)
+                	PUSH_LOCATIONS.add(al);
             }
             return ret;
         }
@@ -163,12 +176,16 @@ public final class AlternateLocationCollection
                 return false;
             if(loc.getDemoted()) {//if its demoted remove it
                 LOCATIONS.remove(loc);
+                PUSH_LOCATIONS.remove(loc);
                 return true;         
             }   
             else {
                 LOCATIONS.remove(loc);
+                PUSH_LOCATIONS.remove(loc);
                 loc.demote(); //one more strike and you are out...
                 LOCATIONS.add(loc); //make it replace the older loc
+                if (loc.getPushAddress()!=null)
+                	PUSH_LOCATIONS.add(loc);
                 return false;
             }
 		}
@@ -207,6 +224,7 @@ public final class AlternateLocationCollection
 
     public synchronized void clear() {
         LOCATIONS.clear();
+        PUSH_LOCATIONS.clear();
     }
 
 	// implements the AlternateLocationCollector interface
@@ -225,7 +243,7 @@ public final class AlternateLocationCollection
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
 	 *
 	 * This adds randomness to the order in which alternate locations are
-	 * reported and only reports 10 locations.
+	 * reported and only reports 10 non-firewalled locations.
 	 *
 	 * @return an HTTP-compliant string of alternate locations, delimited
 	 *  by commas, or the empty string if there are no alternate locations
@@ -238,8 +256,11 @@ public final class AlternateLocationCollection
         synchronized(this) {
 	        Iterator iter = LOCATIONS.iterator();
             while(iter.hasNext()) {
-			    writeBuffer.append((
-                           (HTTPHeaderValue)iter.next()).httpStringValue());
+            	AlternateLocation current = (AlternateLocation)iter.next();
+            	if (current.getPushAddress()!=null)
+            		continue;
+			    writeBuffer.append(
+                           current.httpStringValue());
 			    writeBuffer.append(commaSpace);
 			    wrote = true;
 			}
@@ -309,7 +330,7 @@ public final class AlternateLocationCollection
     
     /**
      * 
-     * @return the alternate locations packed as ip:port pairs.
+     * @return the non-firewalled alternate locations packed as ip:port pairs.
      */
     public byte [] toBytes() {
     	return toBytes(MAX_SIZE);
@@ -318,24 +339,32 @@ public final class AlternateLocationCollection
     /**
      * 
      * @param number number of altlocs to return. 
-     * @return the alternate locations packed as ip:port pairs.
+     * @return the non-firewlled alternate locations packed as ip:port pairs.
      */
     public byte [] toBytes(int number) {
     	
-    	if (number > LOCATIONS.size())
-    		number = LOCATIONS.size();
-    	
-    	if (number <=0)
-    		return null;
-    	
-    	byte [] ret = new byte[6*number];
-    	int index=0;
+    
 	FixedSizeSortedSet clone=null;
+	int size;
 	synchronized(this) {
 		clone = (FixedSizeSortedSet) LOCATIONS.clone();
+		size = LOCATIONS.size() - PUSH_LOCATIONS.size();
 	}
+	
+	
+	if (number > size)
+		number = size;
+	
+	if (number <=0)
+		return null;
+	
+	byte [] ret = new byte[6*number];
+	int index=0;
+	
     	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
     		AlternateLocation current = (AlternateLocation)iter.next();
+    		if (PUSH_LOCATIONS.contains(current))
+    			continue;
     		byte [] addr = current.getHost().getInetAddress().getAddress();
     		System.arraycopy(addr,0,ret,index,4);
     		ByteOrder.short2leb((short)
@@ -344,5 +373,43 @@ public final class AlternateLocationCollection
     		number--;
     	}
     	return ret;
+    }
+    
+    /**
+     * 
+     * @return the firewalled alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytesPush() {
+    	return toBytesPush(MAX_SIZE);
+    }
+
+    /**
+     * 
+     * @param number number of altlocs to return. 
+     * @return the non-firewlled alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytesPush(int number) {
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	Set clone = new HashSet();
+    	
+    	
+    	synchronized(this) {
+    		clone.addAll(PUSH_LOCATIONS);
+    	}
+    	
+    	int total = 0;
+    	
+    	try {
+    		for (Iterator iter = clone.iterator();iter.hasNext() && total <number;) {
+    			AlternateLocation current = (AlternateLocation)iter.next();
+    			baos.write(current.getPushAddress().toBytes());
+    			total++;
+    		}
+    	}catch(IOException impossible) {
+    		ErrorService.error(impossible);
+    	}
+    	
+    	return baos.toByteArray();
     }
 }

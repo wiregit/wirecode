@@ -369,10 +369,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
     }
     
     /**
-     * Handles the UDP analog of reply to "Crawler:" header
-     * STUB.
+     * drops the message
      */
-    public void handleUDPCrawlerPong(UDPCrawlerPong m){}
+    public void send(Message m){}
 
 }
 

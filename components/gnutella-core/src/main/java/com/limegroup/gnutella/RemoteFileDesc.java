@@ -86,7 +86,7 @@ public class RemoteFileDesc implements Serializable {
     /**
      * The <tt>Set</tt> of proxies for this host -- can be empty.
      */
-    private transient Set _proxies;
+    private transient PushEndpoint _pushAddr;
 		
     /**
      * The list of available ranges.
@@ -157,6 +157,32 @@ public class RemoteFileDesc implements Serializable {
               DataUtils.EMPTY_SET,          // push proxies
               rfd.getCreationTime());       // creation time
     }
+    
+    /**
+     * Constructs a new RemoteFileDesc exactly like the other one,
+     * but with a different push proxy host.  Will be handy when processing
+     * head pongs.
+     */
+    public RemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe){
+    	this( rfd.getHost(),              // host - ignored
+                rfd.getPort(),                 // port -ignored
+                COPY_INDEX,                   // index (unknown)
+                rfd.getFileName(),            // filename
+                rfd.getSize(),                // filesize
+                pe.getClientGUID(),         // client GUID
+                rfd.getSpeed(),                            // speed
+                false,                        // chat capable
+                rfd.getQuality(),                            // quality
+                false,                        // browse hostable
+                rfd.getXMLDoc(),              // xml doc
+                rfd.getUrns(),                // urns
+                false,                        // reply to MCast
+                true,                        // is firewalled
+                AlternateLocation.ALT_VENDOR, // vendor
+                System.currentTimeMillis(),   // timestamp
+                pe.getProxies(),          // push proxies
+                rfd.getCreationTime());       // creation time
+    }
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
@@ -221,7 +247,8 @@ public class RemoteFileDesc implements Serializable {
 		_index = index;
 		_filename = filename;
 		_size = size;
-		_clientGUID = clientGUID;
+		_pushAddr = new PushEndpoint(clientGUID,proxies);
+		_clientGUID = _pushAddr.getClientGUID();
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
@@ -230,11 +257,7 @@ public class RemoteFileDesc implements Serializable {
         _vendor = vendor;
         _timestamp = timestamp;
         _creationTime = createTime;
-        if(proxies == null) {
-            _proxies = DataUtils.EMPTY_SET;
-        } else {
-            _proxies = Collections.unmodifiableSet(proxies);
-        }
+        
         if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
@@ -279,9 +302,7 @@ public class RemoteFileDesc implements Serializable {
             }
         }
                 
-        if(_proxies == null) {
-            _proxies = DataUtils.EMPTY_SET;
-        }
+        _pushAddr = new PushEndpoint(_clientGUID);
 		// preserve the invariant that the LimeXMLDocument array either be
 		// null or have at least one element
 		if(_xmlDocs != null && _xmlDocs.length == 0) {
@@ -582,7 +603,7 @@ public class RemoteFileDesc implements Serializable {
      *  for this host -- can be empty
      */
     public final Set getPushProxies() {
-        return _proxies;
+        return _pushAddr.getProxies();
     }
 
     /**
@@ -595,16 +616,42 @@ public class RemoteFileDesc implements Serializable {
     }
 
     /**
-     * @return true if I am not (firewalled, multicast host, have private IP)
-     *         and i do have a valid port & address.
+     * @return true if I am not a multicast host and have a hash.
+     * also, if I am firewalled I must have at least one push proxy,
+     * otherwise my port and address need to be valid.
      */
     public final boolean isAltLocCapable() {
-        return getSHA1Urn() != null &&
-               !_replyToMulticast &&
-               !_firewalled &&
-               NetworkUtils.isValidPort(_port) &&
-               !NetworkUtils.isPrivateAddress(_host) &&
-               NetworkUtils.isValidAddress(_host);
+        boolean ret = getSHA1Urn() != null &&
+               !_replyToMulticast;
+        
+        if (_firewalled)
+        	ret = ret && 
+				_pushAddr!=null &&
+				_pushAddr.getProxies().size() > 0;
+		else
+             ret= ret &&  
+			    NetworkUtils.isValidPort(_port) &&
+                !NetworkUtils.isPrivateAddress(_host) &&
+                NetworkUtils.isValidAddress(_host);
+        
+        return ret;
+    }
+    
+    /**
+     * 
+     * @return whether a push can/should be sent tho this rfd.
+     */
+    public boolean isPushCapable() {
+    	return _firewalled && _pushAddr!=null &&
+			_pushAddr.getProxies().size()>0;
+    }
+    
+    /**
+     * 
+     * @return the push address.
+     */
+    public PushEndpoint getPushAddr() {
+    	return _pushAddr;
     }
 
 	/**
@@ -631,7 +678,7 @@ public class RemoteFileDesc implements Serializable {
 
         if( (NetworkUtils.isPrivateAddress(_host) ||
              NetworkUtils.isPrivateAddress(other._host)) && 
-            !byteArrayEquals(_clientGUID, other._clientGUID) )
+            !_pushAddr.equals(other._pushAddr) )
             return false;
 
         if (_size != other._size)
@@ -676,6 +723,8 @@ public class RemoteFileDesc implements Serializable {
             result = (37* result)+_port;
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
+            if (_pushAddr!=null)
+            	result = (37 * result)+_pushAddr.hashCode();
             _hashCode = result;
         }
 		return _hashCode;

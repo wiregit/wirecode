@@ -361,6 +361,7 @@ public class FileDesc implements AlternateLocationCollector {
 											   SHA1_URN+"\n"+sha1);
 		}
 		return ALT_LOCS.add(al);
+		
 	}
     /**
      * @throws <tt>NullPointerException</tt> if the argument is <tt>null</tt>
