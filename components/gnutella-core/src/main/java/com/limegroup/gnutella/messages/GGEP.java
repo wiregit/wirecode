@@ -22,7 +22,7 @@ public class GGEP extends Object {
     /** The extension header (key) for Browse Host. */
     public static final String GGEP_HEADER_BROWSE_HOST = "BHOST";
     /** The extension header (key) for average daily uptime. */
-    public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DUPTIME";
+    public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
