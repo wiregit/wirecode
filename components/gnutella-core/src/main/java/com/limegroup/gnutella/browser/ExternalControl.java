@@ -73,6 +73,8 @@ public class ExternalControl {
 		}
 	}
 	
+	
+	//refactored the download logic into a separate method
 	public static void handleMagnetRequest(String arg) {
 	    LOG.trace("enter handleMagnetRequest");
 
@@ -92,8 +94,19 @@ public class ExternalControl {
 		        LOG.warn("Invalid magnet, ignoring: " + arg);
 			return;
         }
+		
+		downloadMagnet(options);
         
-        if(LOG.isDebugEnabled()) {
+        
+	}
+	
+	/**
+	 * performs the actual magnet download.  This way it is possible to 
+	 * parse and download the magnet separately (which is what I intend to do in the gui) --zab
+	 * @param options the magnet options returned from parseMagnet
+	 */
+	public static void downloadMagnet(MagnetOptions []options){
+		if(LOG.isDebugEnabled()) {
             for(int i = 0; i < options.length; i++) {
                 LOG.debug("Kicking off downloader for option " + i +
                           " " + options[i]);
@@ -293,6 +306,11 @@ public class ExternalControl {
 	}
 
 
+	public static boolean validateMagnet(String arg) {
+		MagnetOptions[] m = parseMagnet(arg);
+		return m==null ? false : true;
+	}
+	
 	private static MagnetOptions[] parseMagnet(String arg) {
 	    LOG.trace("enter parseMagnet");
 		MagnetOptions[] ret = null;
