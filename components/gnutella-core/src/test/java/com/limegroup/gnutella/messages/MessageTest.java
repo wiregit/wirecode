@@ -2,7 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.connection.BIOMessageReader;
 import java.io.*;
 
 public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
@@ -38,14 +38,11 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[20] = (byte)0;
         bytes[21] = (byte)0;
         bytes[22] = (byte)0;
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        byte[] b = new byte[40];
-        Message m  = null;
+        InputStream is = new ByteArrayInputStream(bytes);
         try {
-            m = Message.read(bais,b,(byte)4);
+            BIOMessageReader.read(is);
             fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
         }
-        PingReply pr = (PingReply)m;
     }
 }
