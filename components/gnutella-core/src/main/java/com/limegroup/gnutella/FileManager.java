@@ -732,6 +732,18 @@ public class FileManager {
         else 
             return ret;
     }
+    
+    /**
+     * Opens an input stream to the resource specified by the passed
+     * file descriptor
+     */
+    public InputStream getInputStream(FileDesc fdesc) throws IOException
+    {
+        // get the fileInputStream
+		String path = fdesc._path;
+		File myFile = new File(path);
+		return new FileInputStream(myFile);
+    }
 
 
     ///////////////////////////////////// Testing //////////////////////////////

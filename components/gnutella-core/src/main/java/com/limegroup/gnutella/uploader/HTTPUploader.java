@@ -18,7 +18,7 @@ import com.limegroup.gnutella.*;
 public class HTTPUploader implements Uploader {
 
 	protected OutputStream _ostream;
-	protected FileInputStream _fis;
+	protected InputStream _fis;
 	protected Socket _socket;
 	protected int _amountRead;
 	protected int _uploadBegin;
@@ -273,7 +273,7 @@ public class HTTPUploader implements Uploader {
 	public int getIndex() {return _index;}
 	public String getFileName() {return _filename;}
 	public int getFileSize() {return _fileSize;}
-	public FileInputStream getFileInputStream() {return _fis;}
+	public InputStream getInputStream() {return _fis;}
 	public int amountUploaded() {return _amountRead;}
 	public void setAmountUploaded(int amount) {_amountRead = amount;}
 	public int getUploadBegin() {return _uploadBegin;}
@@ -448,9 +448,7 @@ public class HTTPUploader implements Uploader {
         _fileSize = fdesc._size;
 
 		// get the fileInputStream
-		String path = fdesc._path;
-		File myFile = new File(path);
-		_fis = new FileInputStream(myFile);
+		_fis = FileManager.instance().getInputStream(fdesc);
 
 	}
 
