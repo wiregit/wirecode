@@ -130,7 +130,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN);
+								Message.N_UNKNOWN, false);
 
 	}
 
@@ -151,7 +151,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN);
+								Message.N_UNKNOWN, false);
 
 	}
 	/**
@@ -178,7 +178,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN);
+								Message.N_UNKNOWN, false);
 
 	}
 
@@ -206,7 +206,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN);
+								Message.N_UNKNOWN, false);
 
 	}
 
@@ -234,7 +234,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN);
+								Message.N_UNKNOWN, false);
 	}
 	
 	/**
@@ -253,7 +253,7 @@ public class QueryRequest extends Message implements Serializable{
 	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-	                            Message.N_UNKNOWN);
+	                            Message.N_UNKNOWN, false);
     }
 	    
 	
@@ -408,7 +408,7 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
-								qr.getNetwork());
+								qr.getNetwork(), false);
 	}
 
     /**
@@ -438,7 +438,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN);
+								Message.N_UNKNOWN, false);
     }
 
 
@@ -465,7 +465,7 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRichQuery(), 
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
-								false, Message.N_MULTICAST);
+								false, Message.N_MULTICAST, false);
 	}
 
     /** 
@@ -482,7 +482,8 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                                 qr.getQuery(), qr.getRichQuery(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                                key, qr.isFirewalledSource(), Message.N_UNKNOWN);
+                                key, qr.isFirewalledSource(), Message.N_UNKNOWN,
+                                false);
 	}
 
 	/**
@@ -495,7 +496,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, 
 								FileManager.INDEXING_QUERY, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN);
+                                false, Message.N_UNKNOWN, false);
 	}
 
 	/**
@@ -511,7 +512,7 @@ public class QueryRequest extends Message implements Serializable{
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN);
+                                false, Message.N_UNKNOWN, false);
 	}
 
 
@@ -569,12 +570,14 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN);
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, false);
     }
 
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
-     * needed.
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
      * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
@@ -589,7 +592,7 @@ public class QueryRequest extends Message implements Serializable{
 						 String query, String richQuery, 
 						 Set requestedUrnTypes, Set queryUrns,
 						 QueryKey queryKey, boolean isFirewalled, 
-						 int network) {
+						 int network, boolean canReceiveOutOfBandReplies) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
 		if((query == null || query.length() == 0) &&
@@ -606,8 +609,15 @@ public class QueryRequest extends Message implements Serializable{
 		// set the firewall bit if i'm firewalled
 		if (isFirewalled && !isMulticast())
 			minSpeed |= 0x40;
-		// LimeWire's ALWAYS want rich results....
-		minSpeed |= 0x20;
+        // THE DEAL:
+        // if we can NOT receive out of band replies, we want in-band XML - so
+		// set the correct bit.
+        // if we can receive out of band replies, we do not want in-band XML -
+		// we'll hope the out-of-band reply guys will provide us all necessary XML.
+        if (!canReceiveOutOfBandReplies) 
+            minSpeed |= 0x20;
+        else // bit 10 flags out-of-band support
+            minSpeed |= 0x04;
 
         MIN_SPEED = minSpeed;
 		if(query == null) {
@@ -961,6 +971,36 @@ public class QueryRequest extends Message implements Serializable{
         }
         return false;        
     }
+
+
+    /**
+     * Returns true if the query source can accept out-of-band replies.  Use
+     * getReplyAddress() and getReplyPort() if this is true to know where to
+     * it.  Always send XML if you are sending an out-of-band reply.
+     */
+    public boolean desiresOutOfBandReplies() {
+        if ((MIN_SPEED & 0x0080) > 0) {
+            if ((MIN_SPEED & 0x0004) > 0)
+                return true;
+        }
+        return false;
+    }
+
+    /** Returns the address to send a out-of-band reply to.  Only useful
+     *  when desiresOutOfBandReplies() == true.
+     */
+    public String getReplyAddress() {
+        return (new GUID(getGUID())).getIP();
+    }
+
+        
+    /** Returns the port to send a out-of-band reply to.  Only useful
+     *  when desiresOutOfBandReplies() == true.
+     */
+    public int getReplyPort() {
+        return (new GUID(getGUID())).getPort();
+    }
+
 
 	/**
 	 * Accessor for whether or not this is a requery from a LimeWire.
