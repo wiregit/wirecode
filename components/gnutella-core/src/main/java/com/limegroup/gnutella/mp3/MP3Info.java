@@ -296,10 +296,9 @@ public final class MP3Info {
                    - 120        // max possible VBR length
                    - 36;        // max bytes to skip
   		if (need < 0) { //special case, we need more data
-	  		//shift current data left to make room for need data
-	  		i -= need;
-			for (int j = 0, need = -need; 
-		  		 need < buf.length; j++, need++ ) {
+	  		need = -need; // flip need to be positive.
+	  		i -= need; // shift our offset down by the amount we'll be moving
+			for (int j = 0; need < buf.length; j++, need++ ) { // shift data
 		  		buf[j] = buf[need];
 	  		}
 	  		
