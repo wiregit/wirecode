@@ -8,6 +8,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.MessageSettings;
@@ -34,13 +35,12 @@ public final class NIOMessageReader extends AbstractMessageReader {
      */
      private final ByteBuffer PAYLOAD = 
         ByteBuffer.allocate(MessageSettings.MAX_LENGTH.getValue());
-       
-
-	/**
-	 * Constant for the hard max TTL for incoming messages.  If the TTL+hops of 
-	 * incoming messages exceeds this value, the message is dropped.
-	 */
-	private static final byte HARD_MAX = (byte)14;
+    
+    
+    /**
+     * Variable for the last message created -- used only for testing.
+     */
+    private Message _lastMessage;
     
 	
     /**
@@ -73,7 +73,8 @@ public final class NIOMessageReader extends AbstractMessageReader {
 	 */
 	public Message createMessageFromTCP(SelectionKey key) 
 		throws IOException, BadPacketException {
-		return createMessage(key, Message.N_TCP);
+        _lastMessage = createMessage(key, Message.N_TCP);
+		return _lastMessage;
 	}
 
 	/**
@@ -132,12 +133,21 @@ public final class NIOMessageReader extends AbstractMessageReader {
         }
         
         // if we get here, the header has been completely read
-        
-        // flip it for reading
-        //HEADER.flip();
         return true;
     }
-       
+    
+    /**
+     * Reads the payload of an incoming message.
+     * 
+     * @param key the <tt>SelectionKey</tt> for the incoming messsage
+     * @param network the transport layer the message arrived on, such as 
+     *  TCP or UDP
+     * 
+     * @return a new <tt>Message</tt> subclass
+     *  
+     * @throws IOException if there is an IO error reading the message
+     * @throws BadPacketException if the message data cannot be parsed correctly
+     */   
     private Message readPayload(SelectionKey key, int network) 
         throws IOException, BadPacketException {
         SocketChannel channel = (SocketChannel)key.channel();
@@ -174,12 +184,10 @@ public final class NIOMessageReader extends AbstractMessageReader {
 
         // if there's still more to read, return to read it on the next pass
 		if(PAYLOAD.hasRemaining()) {
-            //MessageReadErrorStat.INVALID_PAYLOAD.incrementStat();
 			return null;
 		}
 			
 		try {
-        
             return createMessage(HEADER, PAYLOAD, 
                 (Connection)key.attachment(), network);
         } finally {
@@ -203,11 +211,11 @@ public final class NIOMessageReader extends AbstractMessageReader {
      * @return
      * @throws BadPacketException
      */  
-    private Message 
-   		createMessage(ByteBuffer header, ByteBuffer payloadBuffer, 
-            Connection conn, int network) 
+    private Message createMessage(ByteBuffer header, ByteBuffer payloadBuffer, 
+        Connection conn, int network) 
         throws BadPacketException {
-            
+        
+        // make sure the limit on the payload buffer is set correctly    
         Assert.that(payloadBuffer.limit() == payloadBuffer.position(),
             "something wrong with buffer");
 		header.flip();
@@ -220,33 +228,9 @@ public final class NIOMessageReader extends AbstractMessageReader {
 		
 		//  Check values. 
 		byte softMax = conn.getSoftMax();
-		if (hops<0) {
-            MessageReadErrorStat.NEGATIVE_HOPS.incrementStat();
-			throw new BadPacketException("negative hops");
-		} else if (ttl<0) {
-            MessageReadErrorStat.NEGATIVE_TTL.incrementStat();
-			return null;
-		} else if ((hops >= softMax) && 
-				 (func != F_QUERY_REPLY) &&
-				 (func != F_PING_REPLY)) {
-			
-            MessageReadErrorStat.HOPS_OVER_SOFT_MAX.incrementStat();
-            throw new BadPacketException("hops over soft max");
-		}
-		else if (ttl+hops > HARD_MAX) {
-            
-            MessageReadErrorStat.HOPS_PLUS_TTL_OVER_HARD_MAX.incrementStat();
-            throw new BadPacketException("ttl+hops over hard max");
-		} else if ((ttl+hops > softMax) && 
-				 (func != F_QUERY_REPLY) &&
-				 (func != F_PING_REPLY)) {
-                     
-            // overzealous client, bump down the TTL           
-			ttl = (byte)(softMax - hops);
-			Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
-									 //new ttl>=0
-		}
-		
+        
+        checkFields(ttl, hops, softMax, func);
+
 		// dispatch based on opcode.
 		payloadBuffer.flip();     
 		byte[] payload = new byte[length];
@@ -254,8 +238,13 @@ public final class NIOMessageReader extends AbstractMessageReader {
 		return createMessage(guid, func, ttl, hops, length, payload, network);
 	}
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.AbstractMessageReader#createMessageFromTCP(java.io.InputStream)
+    /**
+     * Implements <tt>MessageReader</tt> interface.  Since we're in non-blocking
+     * mode and reading messages from channels and not streams, this always
+     * throws <tt>IllegalStateException</tt>.
+     * 
+     * @throws IllegalStateException whenever this method is called, as 
+     *  we shouldn't be reading from streams while in non-blocking mode
      */
     public Message createMessageFromTCP(InputStream is) 
         throws BadPacketException, IOException {
@@ -268,20 +257,25 @@ public final class NIOMessageReader extends AbstractMessageReader {
      */
     public void startReading() throws IOException {}
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#read()
+    /**
+     * Used only for testing.  
      */
     public Message read() throws IOException, BadPacketException {
-        // TODO Auto-generated method stub
-        return null;
+        return _lastMessage;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#read(int)
+    /**
+     * Used only for testing.
      */
     public Message read(int i) throws IOException, BadPacketException, 
         InterruptedIOException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException e) {
+            // this should never happen
+            ErrorService.error(e);
+        }
+        // return the last message read
+        return _lastMessage;
     }
 }
