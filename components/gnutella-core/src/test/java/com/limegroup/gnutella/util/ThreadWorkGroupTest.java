@@ -99,7 +99,7 @@ public class ThreadWorkGroupTest extends BaseTestCase {
 
         // make sure after stop no work is done....
         // ---------------------------------------------------------------------
-        workGroup.stop();
+        workGroup.stop(0);
         assertTrue(!workGroup.isActive());
         // anybody woken up should wait so i can tell....
         for (int i = 0; i < workers.length; i++)

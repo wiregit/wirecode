@@ -104,20 +104,30 @@ public class ThreadWorkGroup {
      *  on.
      *  @exception InterruptedException thrown because this call may block while
      *  threads are finishing....
+     *  @param waitTime join's for up to waitTime millis, or forever if 0.
+     *  @return true if none of the threads were alive upon returning from the
+     *  method and after waiting waitTime per thread.
      */
-    public synchronized void stop() throws InterruptedException {
+    public synchronized boolean stop(int waitTime) throws InterruptedException {
         _stopped = true;
+        boolean retVal = true;
         synchronized (_workers) {
             // interrupt everybody
             Iterator workers = _workers.iterator();
-            while (workers.hasNext()) 
+            while (workers.hasNext())
                 ((Thread) workers.next()).interrupt();
             // wait for the stragglers....
             workers = _workers.iterator();
-            while (workers.hasNext()) 
-                ((Thread) workers.next()).join();
+            while (workers.hasNext())
+                ((Thread) workers.next()).join(waitTime);
+            // make sure everybody is dead
+            workers = _workers.iterator();
+            while (workers.hasNext() && retVal)
+                if (((Thread) workers.next()).isAlive())
+                    retVal = false;
             _workers.clear();
         }
+        return retVal;
     }
 
     private class WorkerThread extends Thread {
