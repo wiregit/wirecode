@@ -209,7 +209,7 @@ public class Acceptor implements Runnable {
                 throw e;
             } catch (IllegalArgumentException e) {
                 udpServiceSocket.close();
-                throw new IOException();
+                throw new IOException("could not create a listening socket");
             }
             //b) Close old socket (if non-null)
             if (_socket!=null) {
