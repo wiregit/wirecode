@@ -384,30 +384,38 @@ com.sun.java.util.collections.Comparable
      *  RFC 1918.  In the case that this has a symbolic name that
      *  cannot be resolved, returns true;
      */
-    public boolean isPrivateAddress()
-    {
-        byte[] bytes;
+    public boolean isPrivateAddress() {
         try {
-            bytes=getHostBytes();
+            return isPrivateAddress(getHostBytes());
         } catch (UnknownHostException e) {
             return false;
         }
-        if (bytes[0]==(byte)10)
+    }
+
+    /**
+     * Checks to see if the given address is a firewalled address.
+     * 
+     * @param address the address to check
+     */
+    public static boolean isPrivateAddress(byte[] address) {
+        if (address[0]==(byte)10)
             return true;  //10.0.0.0 - 10.255.255.255
-        else if (bytes[0]==(byte)172 &&
-                 bytes[1]>=(byte)16 &&
-                 bytes[1]<=(byte)31)
+        else if (address[0]==(byte)127)
+            return true;  //127.x.x.x
+        else if (address[0]==(byte)172 &&
+                 address[1]>=(byte)16 &&
+                 address[1]<=(byte)31)
             return true;  //172.16.0.0 - 172.31.255.255
-        else if (bytes[0]==(byte)192 &&
-                 bytes[1]==(byte)168)
+        else if (address[0]==(byte)192 &&
+                 address[1]==(byte)168)
             return true; //192.168.0.0 - 192.168.255.255
-        else if (bytes[0]==(byte)0 &&
-                 bytes[1]==(byte)0 &&
-                 bytes[2]==(byte)0 &&
-                 bytes[3]==(byte)0)
+        else if (address[0]==(byte)0 &&
+                 address[1]==(byte)0 &&
+                 address[2]==(byte)0 &&
+                 address[3]==(byte)0)
             return true; //0.0.0.0 - Gnutella (well BearShare really) convention
         else
-            return false;
+            return false;        
     }
 
     /**
@@ -417,8 +425,7 @@ com.sun.java.util.collections.Comparable
      *  i.e., if this and other are in the same IP class and have the
      *  same network number.
      */
-    public boolean isSameSubnet(Endpoint other)
-    {
+    public boolean isSameSubnet(Endpoint other) {
         byte[] a;
         byte[] b;
         int first;
