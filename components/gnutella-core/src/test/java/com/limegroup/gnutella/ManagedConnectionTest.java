@@ -10,6 +10,8 @@ import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 
 public class ManagedConnectionTest extends TestCase {  
+    public static final int PORT=6666;
+
     public ManagedConnectionTest(String name) {
         super(name);
     }
@@ -52,9 +54,9 @@ public class ManagedConnectionTest extends TestCase {
             //Create loopback connection.  Uncomment the MiniAcceptor class in
             //Connection to get this to work.
             com.limegroup.gnutella.MiniAcceptor acceptor=
-                new com.limegroup.gnutella.MiniAcceptor(null);
+                new com.limegroup.gnutella.MiniAcceptor(null, PORT);
             ManagedConnection.QUEUE_TIME=1000;
-            ManagedConnection out=newConnection("localhost", 6346);
+            ManagedConnection out=newConnection("localhost", PORT);
             out.initialize();
             Connection in=acceptor.accept();      
             testSendFlush(out, in);
@@ -380,8 +382,8 @@ public class ManagedConnectionTest extends TestCase {
             ConnectionManager manager=new ConnectionManagerStub(true);
 
             //1. Locally closed
-            acceptor=new com.limegroup.gnutella.MiniAcceptor(null);
-            out=newConnection("localhost", 6346, manager);
+            acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
+            out=newConnection("localhost", PORT, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -394,8 +396,8 @@ public class ManagedConnectionTest extends TestCase {
             in.close(); //needed to ensure connect below works
 
             //2. Remote close: discovered on read
-            acceptor=new com.limegroup.gnutella.MiniAcceptor(null);
-            out=newConnection("localhost", 6346, manager);
+            acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
+            out=newConnection("localhost", PORT, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -414,8 +416,8 @@ public class ManagedConnectionTest extends TestCase {
             //3. Remote close: discovered on write.  Because of TCP's half-close
             //semantics, we need TWO writes to discover this.  (See unit tests
             //for Connection.)
-            acceptor=new com.limegroup.gnutella.MiniAcceptor(null);
-            out=newConnection("localhost", 6346, manager);
+            acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
+            out=newConnection("localhost", PORT, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -516,8 +518,8 @@ public class ManagedConnectionTest extends TestCase {
 
     public void testForwardsGGEP() {
         int TIMEOUT=1000;
-        MiniAcceptor acceptor=new MiniAcceptor(new GGEPResponder(), 6346);
-        ManagedConnection out=new ManagedConnection("localhost", 6346,
+        MiniAcceptor acceptor=new MiniAcceptor(new GGEPResponder(), PORT);
+        ManagedConnection out=new ManagedConnection("localhost", PORT,
                                                    new MessageRouterStub(),
                                                    new ConnectionManagerStub());
         try {
@@ -546,8 +548,8 @@ public class ManagedConnectionTest extends TestCase {
 
    public void testStripsGGEP() {
         int TIMEOUT=1000;
-        MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), 6346);
-        ManagedConnection out=new ManagedConnection("localhost", 6346,
+        MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), PORT);
+        ManagedConnection out=new ManagedConnection("localhost", PORT,
                                                    new MessageRouterStub(),
                                                    new ConnectionManagerStub());
         try {
@@ -575,9 +577,9 @@ public class ManagedConnectionTest extends TestCase {
 
     public void testForwardsGroupPing() {
         int TIMEOUT=1000;
-        MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), 6346);
+        MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), PORT);
         //Router connection
-        ManagedConnection out=new ManagedConnection("localhost", 6346,
+        ManagedConnection out=new ManagedConnection("localhost", PORT,
                                                    new MessageRouterStub(),
                                                    new ConnectionManagerStub());
         try {
