@@ -286,6 +286,22 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         }
         catch (InterruptedIOException expected) {}
 
+        // make sure probes are routed back correctly....
+		Response response1=new Response(0L, 0L, "berkeley rocks");
+		byte[] guid1=GUID.makeGuid();
+		QueryReply reply1=new QueryReply(request.getGUID(),
+										 (byte)2,
+										 6346,
+										 new byte[4],
+										 56,
+										 new Response[] {response1},
+										 guid1, false);
+        drain(ULTRAPEER_2);
+		LEAF.send(reply1);
+		LEAF.flush();
+		QueryReply qRep = (QueryReply) ULTRAPEER_2.receive(TIMEOUT);
+        assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
+
         Thread.sleep(2*1000);
 
         // extend the probe....
@@ -327,6 +343,22 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
+
+        // make sure probes are routed back correctly....
+		Response response1=new Response(0L, 0L, "berkeley rocks");
+		byte[] guid1=GUID.makeGuid();
+		QueryReply reply1=new QueryReply(request.getGUID(),
+										 (byte)2,
+										 6346,
+										 new byte[4],
+										 56,
+										 new Response[] {response1},
+										 guid1, false);
+        drain(ULTRAPEER_2);
+		LEAF.send(reply1);
+		LEAF.flush();
+		QueryReply qRep = (QueryReply) ULTRAPEER_2.receive(TIMEOUT);
+        assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
         Thread.sleep(2*1000);
 
