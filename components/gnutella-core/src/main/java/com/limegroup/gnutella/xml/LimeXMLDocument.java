@@ -37,25 +37,14 @@ public class LimeXMLDocument{
     
     public LimeXMLDocument(Node node, Node rootElement){        
         try{
-            grabDocInfo(rootElement);
-            grabDocInfo(node);
+            grabDocInfo(rootElement,true);
+            grabDocInfo(node,false);
         }catch(SchemaNotFoundException e){
             //not the fault of the grabDocInfo method
         }
-        createMap(node);
+        createMap(node,rootElement.getNodeName());
     }
 
-    /**
-     * Special constructor to deal with a multiple children.
-     */
-    public LimeXMLDocument(Node rootElement){        
-        try{
-            grabDocInfo(rootElement);
-        }catch(SchemaNotFoundException e){
-            //not the fault of the grabDocInfo method
-        }
-        createMap(rootElement);
-    }    
     /**
      * Constructs a new LimeXMLDocument
      * @param nameValueList List (of NameValue) of fieldnames (in canonicalized
@@ -93,11 +82,36 @@ public class LimeXMLDocument{
         parser.parse(doc);
         document=parser.getDocument();
         Element docElement = document.getDocumentElement();
-        grabDocInfo(docElement);
+        grabDocInfo(docElement,true);
+        Node child=docElement.getFirstChild();
+        grabDocInfo(child,false);//not root
         createMap(docElement);
     }
 
-    private void grabDocInfo(Node docElement)throws SchemaNotFoundException{
+    /**
+     * There are two possible places for important document information 
+     * may be stored. 
+     * 1. it may be in the root element. In which case the root variable
+     * should be set as true. In this case all the important doc info will
+     * be remembered, and any non-doc info present as attributes will
+     * be put into the hashmap
+     * <p>
+     * The other possible place is at the (only) child of the root element.
+     * If this is the node that is being passed. then root variable should
+     * be set to false. In this case. Just the doc info is grabbed. The
+     * non-doc info of a non-doc Node is not even looked at in this method.
+     * <p> 
+     * For this method to be effective, keep the following points in mind.
+     * The doc info mey be either in the root alone or in both the root and
+     * the only child of root. If it is only in root - call this method on 
+     * root, and create map on root.
+     * <p>
+     * If the doc-info is spread out b/w the root and the child. First
+     * call this method with root, then call it with child, and then 
+     * call createMap wht root. This will ensure no loss of data
+     */
+    private void grabDocInfo(Node docElement,boolean root)
+        throws SchemaNotFoundException{
         fieldToValue = new HashMap();
         //Element docElement = doc.getDocumentElement();
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
@@ -112,15 +126,20 @@ public class LimeXMLDocument{
                 identifier = att.getNodeValue();
             else if (lowerAttName.indexOf("action") >= 0)
                 action = att.getNodeValue();
-            else if(lowerAttName.indexOf("index") >= 0)
-                ;//This index corresponds to the index of the response in 
-            //the QR. NOP.
+            else if(lowerAttName.indexOf("index") >= 0){
+                //This index corresponds to the index of the response in
+                //the QR. Remove this attribute from the node. We are not 
+                //interested in it anymore
+                Element e = (Element)docElement;
+                e.removeAttribute(attName);
+            }
             else{//these are attributes that have a value
-                //String canonicalizedAttName= docElement.getTagName()+
-                String canonicalizedAttName= docElement.getNodeName()+
-                XMLStringUtils.DELIMITER+att.getNodeName()+
-                XMLStringUtils.DELIMITER;                
-                fieldToValue.put(canonicalizedAttName,att.getNodeValue());
+                if(root){
+                    String canonicalizedAttName= docElement.getNodeName()+
+                    XMLStringUtils.DELIMITER+att.getNodeName()+
+                    XMLStringUtils.DELIMITER;                
+                    fieldToValue.put(canonicalizedAttName,att.getNodeValue());
+                }
             }
         }
         if(schemaUri == null)//we cannot have a doc with out a schema
@@ -134,6 +153,10 @@ public class LimeXMLDocument{
     private void createMap(Node docElement) {
         //Element docElement = doc.getDocumentElement();
         doAllChildren(docElement,"");
+    }
+
+    private void createMap(Node docElement, String parent){
+        doAllChildren(docElement,parent);
     }
 
     private void doAllChildren (Node currNode, String parentName){
@@ -264,6 +287,7 @@ public class LimeXMLDocument{
         if (index < 0)
             return ret;  // do not insert anything if not valid xml
         index = ret.indexOf(">",++index);//index of end of root element
+        index = ret.indexOf(">",++index);//end of only child (plural form)
         String first = ret.substring(0,index);
         String last = ret.substring(index);
         String middle = " identifier=\""+identifier+"\"";

@@ -12,7 +12,7 @@ import com.limegroup.gnutella.xml.*;
  */
 public final class ID3Reader {
     private static final String schemaURI = 
-         "http://www.limewire.com/schemas/audio.xsd";
+         "http://www.limewire.com/schemas/audios.xsd";
 
     /**
      * Attempts to read an ID3 tag from the specified file.
@@ -79,10 +79,12 @@ public final class ID3Reader {
         
         String str = "";
         if(solo){
-            str = str+ "<audio noNamespaceSchemaLocation=\""+this.schemaURI;
+            str = str+ "<audios noNamespaceSchemaLocation=\""+this.schemaURI;
+            str = str+"\"";
+            str = str+"><audio ";
             String filename = file.getCanonicalPath();
             //str = str+"\""+" identifier=\""+filename+"\">";
-            str = str+"\""+" identifier=\""+filename+"\"";
+            str = str+" identifier=\""+filename+"\"";
         }
         //end of head
         if(!title.equals(""))
@@ -112,9 +114,10 @@ public final class ID3Reader {
         if(solo)
             //str = str+"</audio>";
             str = str+"/>";
-
+        str=str+"</audios>";
+        
         randomAccessFile.close();
-
+        //System.out.println("SumeetID3Reader XMLString="+str);
         return str;
     }
 
