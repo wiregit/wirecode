@@ -522,11 +522,17 @@ public abstract class MessageRouter
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
         List list=_manager.getInitializedConnections2();
+        int newClients = 0; //number of new client connections
+        int routedQueries = 0; //number of queries that were routed to new clients
         for(int i=0; i<list.size(); i++)
         {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection) {
-                //Send query along any connection to an old client, or to a new
+                //if the connection is to a new client, record the count for 
+                //statistics counting.
+                if (!c.isOldClient())
+                    newClients++;
+                //Send query along any connection to an old cl0ient, or to a new
                 //client with routing information for the given keyword.  TODO:
                 //because of some very obscure optimization rules, it's actually
                 //possible that qi could be non-null but not initialized.  Need
@@ -537,11 +543,18 @@ public abstract class MessageRouter
                     //sent us a table message.
                     c.send(queryRequest);
                 else if (qi.lastReceived.contains(queryRequest))
+                {
+                    routedQueries++;
                     //A new client with routing entry, or one that hasn't started
                     //sending the patch.
-                    c.send(queryRequest);              
+                    c.send(queryRequest);      
+                }
             }
         }
+        //add the percentage of routed queries to new clients vs. new client
+        //connections to the statistics recorder for monitoring purposes.
+        StatisticsRecorder.addToPercentage("Queries routed to new clients", 
+            newClients, routedQueries);
     }
 
     /**
@@ -823,11 +836,19 @@ public abstract class MessageRouter
                     
                 //Create table to send on this connection...
                 QueryRouteTable table=createRouteTable(c);
+                //add the table size (# of entries) to the statistics recorder 
+                //for monitoring purposes
+                StatisticsRecorder.addToAverage("Average QRP Table Size", 
+                    table.entries(), "entries");
 
                 //..and send each piece.
                 //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
+                    //add the RouteTableMessage size (in bytes) to the statistics
+                    //recorder for monitoring purposes.
+                    StatisticsRecorder.addToTotal("QRP Update Messages",
+                        m.getTotalLength(), "bytes");
                     System.out.println("    Sending "+m.toString()+" to "+c);
                     c.send(m);
                 }

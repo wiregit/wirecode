@@ -49,10 +49,10 @@ public class StatisticsRecorder
     /**
      * Adds the value to the statistic (specified by name).  If the statistic
      * doesn't exist, creates a new mapping for the new statistic.
-     *
-     * @param metric - the unit of measurement.
-     * @requires - the statistic is an average or mean statistic (i.e., measures
-     *             the average of mean of some value.
+     * @param name the name of the statistic. 
+     * @param metric the unit of measurement.
+     * @requires the statistic is an average or mean statistic (i.e., measures
+     *           the average of mean of some value.
      */
     public synchronized static void addToAverage(String name, int value, 
                                                  String metricUnit)
@@ -81,9 +81,9 @@ public class StatisticsRecorder
     /**
      * Adds the value to the statistic (specified by name).  If the statistic
      * doesn't exist, creates a new mapping for the new statistic.
-     *
-     * @param metric - the unit of measurement.
-     * @requires - the statistic is a measure of the total of some value.
+     * @param name the name of the statistic.
+     * @param metric the unit of measurement.
+     * @requires the statistic is a measure of the total of some value.
      */
     public synchronized static void addToTotal(String name, int value, 
                                                String metricUnit)
@@ -108,7 +108,39 @@ public class StatisticsRecorder
             nextTimeToSendStats = System.currentTimeMillis() + WAIT_TIME;
         }
     }
-    
+
+    /**
+     * Adds the values to the percent statistic (specified by name).  If the 
+     * statistic doesn't exist, creates a mapping for the new statistic.
+     * @param totalValue the denominator (total) of the percentage.
+     * @param percentValue the numerator (part or subtotal) of the percentage.
+     * @requires the statistic is a percent measurement.
+     */
+    public synchronized static void addToPercentage(String name, int totalValue,
+                                                    int percentValue)
+    {
+        //if the statistic already exists in the hash map, just add to the 
+        //sum
+        if (statistics.containsKey(name))
+        {
+            PercentageStatisticValue stat = 
+                (PercentageStatisticValue)statistics.get(name);
+            stat.addToPercentage(totalValue, percentValue);
+        }
+        else
+        {
+            statistics.put(name, 
+                new PercentageStatisticValue(totalValue, percentValue));
+        }
+        //if time to send the stats (if at least WAIT_TIME elapsed since 
+        //last time), then start a thread to send the stats to the server.
+        if (System.currentTimeMillis() >= nextTimeToSendStats)
+        {
+            (new StatisticsSenderThread()).start();
+            nextTimeToSendStats = System.currentTimeMillis() + WAIT_TIME;
+        }
+    }
+
     /**
      * Thread which sends the statistics recorded to the server.  Basically, 
      * creates a URL connection to a web server (via servlet) and then sends 
@@ -161,7 +193,13 @@ public class StatisticsRecorder
                     StatisticValue value = 
                         (StatisticValue)mappings[i].getValue();
                     String statValue = null;
-                    if (value.isAverageStatistic())
+                    if (value instanceof PercentageStatisticValue) 
+                    {
+                        percentValue = (PercentageStatisticValue)value;
+                        statValue = new String(value.calculatePercent() + " " +
+                            value.getMetric());
+                    }
+                    else if (value.isAverageStatistic())
                         statValue = new String(value.calculateAverage() + " " + 
                             value.getMetric());
                     else
@@ -188,14 +226,14 @@ class StatisticValue
      * If the statistic is one that measures the mean or average value,
      * then we'll need to use the count and average needed to calculate it.
      */
-    private int count;
+    protected int count;
     private boolean averageNeeded;
     /**
      * Metric used (e.g., "KB", "bytes/sec", etc. )
      */
     private String metric;  
 
-    public StatisticValue(int initialSum, boolean averageNeeded, String metric)
+    StatisticValue(int initialSum, boolean averageNeeded, String metric)
     {
         sum = initialSum;
         count = 1;
@@ -253,3 +291,51 @@ class StatisticValue
         return metric;
     }
 }
+
+/**
+ * Class which is a percentage statistic value.
+ */
+class PercentageStatisticValue extends StatisticValue
+{
+    /**
+     * The numerator of the percentage (e.g,., the number of queries actually
+     * routed when trying to determine the percentage of queries routed).
+     */
+    private int percentCount;
+
+    /**
+     * Create a percentage statistic value with the total count as the
+     * denominator and the percentage count as the numerator and the metric
+     * is set to "%"
+     */
+    PercentageStatisticValue(int totalCount, int percentageCount)
+    {
+        super(totalCount, false, "%");
+        percentCount = percentageCount;
+    }
+
+    void addToPercentage(int totalAddition, int percentAddition) 
+    {
+        addToSum(totalAddition);
+        percentCount += percentAddition;
+    }
+
+    /**
+     * getTotal doesn't make any sense for a percentage statistics
+     */
+    int getTotal() 
+    {
+        return 0;
+    }
+
+    double calculatePercent()
+    {
+        double percent = (double)percentCount / (double)count;
+        return percent * 100;
+    }
+}
+
+
+
+
+
