@@ -65,9 +65,10 @@ public class PingRequest extends Message {
     protected void writePayload(OutputStream out) throws IOException {
         if(payload != null) {
             out.write(payload);
-			if(RECORD_STATS) {
-				SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-			}
+        }
+        // the ping is still written even if there's no payload
+        if(RECORD_STATS) {
+            SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
         }
         //Do nothing...there is no payload!
     }
