@@ -5,6 +5,7 @@ import junit.extensions.*;
 import java.io.*;
 import java.net.*;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.*;
@@ -867,15 +868,15 @@ public class UploadTest extends BaseTestCase {
         String required = null;
 
         required = "X-Alt: " + 
-                   pre + 46 + post + comma +
-                   pre + 43 + post + comma +
-                   pre + 40 + post + comma +    
-                   pre + 48 + post + comma +
-                   pre + 45 + post + comma +
-                   pre + 42 + post + comma +
-                   pre + 47 + post + comma +
-                   pre + 44 + post + comma +
+                   pre + 40 + post + comma +
                    pre + 41 + post + comma +
+                   pre + 42 + post + comma +    
+                   pre + 43 + post + comma +
+                   pre + 44 + post + comma +
+                   pre + 45 + post + comma +
+                   pre + 46 + post + comma +
+                   pre + 47 + post + comma +
+                   pre + 48 + post + comma +
                    pre + 49 + post;
         downloadInternal11(reqFile,
                          "Range: bytes=0-1",
@@ -1277,11 +1278,11 @@ public class UploadTest extends BaseTestCase {
 
         //2. Read response code and headers, remember the content-length.
         boolean foundHeader = false;
-        String expectedHeader = null;
+        Header expectedHeader = null;
         int length = -1;
         
         if( requiredHeader != null )
-            expectedHeader = canonicalizeHeader(requiredHeader);
+            expectedHeader = new Header(requiredHeader);
             
         while (true) { 
             String line = in.readLine();
@@ -1290,7 +1291,8 @@ public class UploadTest extends BaseTestCase {
             if (line.equals(""))
                 break;
             if (requiredHeader != null) {
-                if (canonicalizeHeader(line).equals(expectedHeader)) {
+                Header found = new Header(line);
+                if( found.equals(expectedHeader) ) {
                     foundHeader = true;
                 }
             }
@@ -1314,6 +1316,67 @@ public class UploadTest extends BaseTestCase {
         
         return buf.toString();
     }
+    
+    private static class Header {
+        final String title;
+        final List contents;
+        
+        public Header(String data) {
+            contents = new LinkedList();
+            int colon = data.indexOf(":");
+            if( colon == -1 ) {
+                title = data;
+            } else {
+                title = data.substring(0, colon);
+                StringTokenizer st =
+                    new StringTokenizer(data.substring(colon+1), ",");
+                while(st.hasMoreTokens()) {
+                    String info = st.nextToken().trim();
+                    contents.add(info);
+                }
+            }       
+        }
+        
+        public boolean equals(Object o) {
+            if(o == this) return true;
+            if(!(o instanceof Header)) return false;
+            Header other = (Header)o;
+            if(!title.toLowerCase().equals(other.title.toLowerCase()))
+                return false;
+            return listEquals(contents, other.contents);
+        }
+        
+        public boolean listEquals(List one, List two) {
+            if( one.size() != two.size() )
+                return false;
+            boolean found;
+            for(Iterator i = one.iterator(); i.hasNext(); ) {
+                found = false;
+                String a = (String)i.next();
+                for(Iterator j = two.iterator(); j.hasNext(); ) {
+                    String b = (String)j.next();
+                    if(a.equalsIgnoreCase(b))
+                        found = true;
+                }
+                if(!found)
+                    return false;
+            }
+            for(Iterator i = two.iterator(); i.hasNext(); ) {
+                found = false;
+                String a = (String)i.next();
+                for(Iterator j = two.iterator(); j.hasNext(); ) {
+                    String b = (String)j.next();
+                    if(a.equalsIgnoreCase(b))
+                        found = true;
+                }
+                if(!found)
+                    return false;
+            }
+            return true;
+        }
+    }
+                
+        
     
     
     /** 
