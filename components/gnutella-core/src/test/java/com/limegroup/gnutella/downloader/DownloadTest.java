@@ -2050,7 +2050,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("uploader 2 not queued ",1, queued);
 
         downloader.addDownload(rfd3, true);
-        Thread.sleep(2000);
+        Thread.sleep(400);
         
         //make sure we killed the queued
         swarm = downloader.getNumDownloaders();
