@@ -2,6 +2,7 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -48,9 +49,8 @@ public final class AlternateLocationCollection
 	
 	/**
 	 * cached references for the last clean digests of this collection.
-	 * LOCKING: this
 	 */
-	private AltLocDigest _digest, _pushDigest;
+	private volatile SoftReference _digestRef, _pushDigestRef;
 	
     /**
      * Factory constructor for creating a new 
@@ -146,9 +146,9 @@ public final class AlternateLocationCollection
 		if(!sha1.equals(SHA1))
 			throw new IllegalArgumentException("SHA1 does not match");
 		
+		boolean ret = false;
 		synchronized(this) {
             AlternateLocation alt = (AlternateLocation)LOCATIONS.get(al);
-            boolean ret = false;
             if(alt==null) {//it was not in collections.
                 ret = true;
                 LOCATIONS.add(al);
@@ -161,15 +161,14 @@ public final class AlternateLocationCollection
                 LOCATIONS.add(alt); //add incremented version
 
             }
-            
-            // also add to the filter(s)
-            if (_digest != null && al instanceof DirectAltLoc)
-                _digest.add(al);
-            else if (_pushDigest != null && al instanceof PushAltLoc)
-                _pushDigest.add(al);
-                
-            return ret;
-        }
+		}  
+		
+		// also add to the filter(s) if any are cached
+		AltLocDigest digest = getDigest(al instanceof PushAltLoc);
+		if (digest != null)
+			digest.add(al);
+		
+		return ret;
     }
 	
 	        
@@ -186,9 +185,9 @@ public final class AlternateLocationCollection
 		    
 		    // purge the corresponding digest since we can't remove stuff
 		    if (al instanceof DirectAltLoc)
-		        _digest = null;
+		        _digestRef = null;
 		    else 
-		        _pushDigest = null;
+		        _pushDigestRef = null;
 		    
             AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
             if(loc==null) //it's not in locations, cannot remove
@@ -439,44 +438,56 @@ public final class AlternateLocationCollection
         return getDigest(AltLocDigest.DEFAULT_ELEMENT_SIZE);
     }
     
-    public synchronized AltLocDigest getDigest(int elementSize) {
-        if (_digest != null && _digest.getElementSize() == elementSize)
-            return _digest;
+    public AltLocDigest getDigest(int elementSize) {
+		AltLocDigest digest = getDigest(false);
+        if (digest != null && digest.getElementSize() == elementSize)
+            return digest;
         
-        AltLocDigest digest = new AltLocDigest();
+        digest = new AltLocDigest();
         digest.setElementSize(elementSize);
-    	
-    	for (Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
-    	    Object o = iter.next();
-    		if (!(o instanceof DirectAltLoc))
-    			continue;
-    		
-    		digest.add(o);
-    	}
-    	
-    	_digest = digest;
-    	return _digest;
+		
+    	synchronized(this) {
+			for (Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
+				Object o = iter.next();
+				if (!(o instanceof DirectAltLoc))
+					continue;
+				
+				digest.add(o);
+			}
+		}
+		
+    	_digestRef = new SoftReference(digest);
+    	return digest;
     }
     
     public AltLocDigest getPushDigest() {
         return getPushDigest(AltLocDigest.DEFAULT_ELEMENT_SIZE);
     }
     
-    public synchronized AltLocDigest getPushDigest(int elementSize) {
-        if (_pushDigest != null && _pushDigest.getElementSize() == elementSize)
-            return _pushDigest;
+    public AltLocDigest getPushDigest(int elementSize) {
+		AltLocDigest pushDigest = getDigest(true);
+        if (pushDigest != null && pushDigest.getElementSize() == elementSize)
+            return pushDigest;
         
-        AltLocDigest digest = new AltLocDigest();
-        digest.setElementSize(elementSize);
+        pushDigest = new AltLocDigest();
+        pushDigest.setElementSize(elementSize);
     	
-    	for (Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
-    	    Object o = iter.next();
-    		if (!(o instanceof PushAltLoc))
-    			continue;
-    		
-    		digest.add(o);
-    	}
-    	_pushDigest = digest;
-    	return _pushDigest;
+		synchronized(this) {
+			for (Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
+				Object o = iter.next();
+				if (!(o instanceof PushAltLoc))
+					continue;
+				
+				pushDigest.add(o);
+			}
+		}
+		
+    	_pushDigestRef = new SoftReference(pushDigest);
+    	return pushDigest;
     }
+	
+	private AltLocDigest getDigest(boolean push) {
+		SoftReference ref = push ? _pushDigestRef : _digestRef;
+		return (AltLocDigest)(ref == null ? null : ref.get());
+	}
 }

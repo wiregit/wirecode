@@ -84,7 +84,7 @@ public class AltLocDigest implements BloomFilter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.util.BloomFilter#add(java.util.Collection)
      */
-    public void add(Object o) {
+    public synchronized void add(Object o) {
         if (! (o instanceof AlternateLocation))
             throw new IllegalArgumentException ("trying to add a non-altloc to an altloc digest");
         AlternateLocation loc = (AlternateLocation)o;
@@ -98,7 +98,7 @@ public class AltLocDigest implements BloomFilter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.util.BloomFilter#addAll(java.util.Collection)
      */
-    public void addAll(Collection c) {
+    public synchronized void addAll(Collection c) {
         for (Iterator iter = c.iterator();iter.hasNext();)
             add(iter.next());
     }
@@ -106,7 +106,7 @@ public class AltLocDigest implements BloomFilter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.util.BloomFilter#contains(java.lang.Object)
      */
-    public boolean contains(Object o) {
+    public synchronized boolean contains(Object o) {
         if (! (o instanceof AlternateLocation))
             return false;
         AlternateLocation loc = (AlternateLocation)o;
@@ -119,7 +119,7 @@ public class AltLocDigest implements BloomFilter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.util.BloomFilter#containsAll(java.util.Collection)
      */
-    public boolean containsAll(Collection c) {
+    public synchronized boolean containsAll(Collection c) {
         for (Iterator iter = c.iterator();iter.hasNext();) {
             if (!contains(iter.next()))
                 return false;
@@ -130,7 +130,7 @@ public class AltLocDigest implements BloomFilter {
     /**
      * @return a bitpacked representation of the list of hashes
      */
-    public byte [] toBytes() {
+    public synchronized byte [] toBytes() {
         int maxElement = _values.length();
         
         // make sure we can represent all the values in the bitset
@@ -235,37 +235,50 @@ public class AltLocDigest implements BloomFilter {
     }
     
     
-    public int getElementSize() {
+    public synchronized int getElementSize() {
         return _elementSize;
     }
     
     public void and(BloomFilter other) {
         AltLocDigest digest = (AltLocDigest) other;
-        _values.and(digest._values);
+		BitSet values = digest.copyValues();
+		synchronized(this) {
+			_values.and(values);
+		}
     }
     
     /**
      * slow - use andNot whenever possible
      */
-    public void invert() {
+    public synchronized void invert() {
         for (int i = 0;i < _values.size();i++)
             _values.flip(i);
     }
     
     public void or(BloomFilter other) {
         AltLocDigest digest = (AltLocDigest) other;
-        _values.or(digest._values);
+		BitSet values = digest.copyValues();
+		synchronized(this) {
+			_values.or(values);
+		}
     }
-    public void xor(BloomFilter other) {
+	
+    public synchronized void xor(BloomFilter other) {
         AltLocDigest digest = (AltLocDigest) other;
-        _values.xor(digest._values);
+		BitSet values = digest.copyValues();
+		synchronized(this) {
+			_values.xor(values);
+		}
     }
     
     /**
      * efficient AndNot with another AltLocDigest.
      */
     public void andNot(AltLocDigest other) {
-        _values.andNot(other._values);
+		BitSet values = other.copyValues();
+		synchronized(this) {
+			_values.andNot(other._values);
+		}
     }
    
     /**
@@ -274,9 +287,15 @@ public class AltLocDigest implements BloomFilter {
      * whether that will be successful depends on the hash function.
      * Use with caution if the filter is not empty.
      */
-    public void setElementSize(int size) {
+    public synchronized void setElementSize(int size) {
         _elementSize = size;
         for (int i=0;i < size;i++)
             _mask |= (1 << i); 
     }
+	
+	synchronized BitSet copyValues() {
+		BitSet ret = new BitSet();
+		ret.or(_values);
+		return ret;
+	}
 }
