@@ -365,12 +365,14 @@ public class Response {
 				byte[] extBytes = ext.getBytes();
 				if( extBytes != null && extBytes.length > 1 && 
 				    extBytes[0] == GGEP.GGEP_PREFIX_MAGIC_NUMBER ) {
+				        boolean readMore = false;
 				        // GGEP can contain 0x1c in its information,
 				        // so it is documented that a GGEP block must be
 				        // the last block.
 				        // So, gather the rest of the tokens and make them
 				        // into one huge token.
 				        if( stok.hasMoreTokens() ) {
+				            readMore = true;
 				            StringBuffer sb = new StringBuffer(ext);
 				            while(stok.hasMoreTokens()) {
 				                sb.append(EXT_STRING);
@@ -381,11 +383,21 @@ public class Response {
 				        GGEP[] ggepBlocks = null;
 				        try {
 				            // See if there are any per-file GGEP blocks
-				            ggepBlocks = GGEP.read(extBytes, 0);
+				            if(!readMore)
+				                ggepBlocks = GGEP.read(extBytes, 0);
+                            else {
+                                //If we used up the rest of our tokens,
+                                //see where we ended reading the GGEPs
+                                //and put tokens back if needed.
+                                int[] end = new int[1];
+                                ggepBlocks = GGEP.read(extBytes, 0, end);
+                                //Recreate stok if necessary.
+                                if(end[0] != extBytes.length)
+                                    stok = recreateTokenizer(extBytes, end[0]);
+                            }
 				            endpoints = GGEPUtil.getLocations(ggepBlocks);
 				            continue;
 				        } catch(BadGGEPBlockException be) {
-				            be.printStackTrace();
 				            //invalid GGEP. try something else.
 				        }
 				}
@@ -397,7 +409,16 @@ public class Response {
 			return new Response(index, size, name, metaString, 
 			                    urns, null, endpoints, rawMeta);
         }
-    }  
+    }
+    
+    /**
+     * Recreates the string tokenizer using the specified bytes,
+     * starting at the specified offset.
+     */
+    private static StringTokenizer recreateTokenizer(byte[] data, int offset) {
+        String s = new String(data, offset, data.length - offset);
+        return new StringTokenizer(s, EXT_STRING);
+    }
 
 	/**
 	 * Constructs an xml string from the given extension sting.
