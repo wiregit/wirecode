@@ -27,7 +27,7 @@ public final class PushProxyUploadState implements HTTPMessage {
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 
         String clientGUID  = _uploader.getFileName();
-        String hostAddress = _uploader.getNodeAddress();
+        String hostAddress = _uploader.getNodeAddress().trim();
         int    hostPort    = _uploader.getNodePort();
 
         try {
