@@ -34,14 +34,15 @@ public class HTTPManager {
 	_socket = s;
 	_manager = m;
 
-	BufferedReader in;
-	String command;
+	String command=null;
 	FileManager fm = FileManager.getFileManager();
 
 	try {
 	    _istream = _socket.getInputStream();
 	    _br = new ByteReader(_istream);
 	    command = _br.readLine();   /* read in the first line */
+	    if (command==null)
+		throw new IOException();
 	}
 	catch (IOException e) {          /* if there is a problem reading */
 	    throw e;                     /* must alert the appropriate */
@@ -69,7 +70,7 @@ public class HTTPManager {
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 
-	    // readRange();
+	    //readRange();
 
 	    HTTPUploader uploader;
 	    uploader = new HTTPUploader(s, _filename, _index, _manager, _uploadBegin, _uploadBegin);
@@ -79,7 +80,11 @@ public class HTTPManager {
 	}
 
 	else /* isPush */ { 
-	    //Expect  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt"
+	    //Expect  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
+	    String next=_br.readLine();
+	    if (next==null || (! next.equals(""))) {
+		throw new IOException();
+	    }
 	    
 	    //1. Extract file index.  IndexOutOfBoundsException
 	    //   or NumberFormatExceptions will be thrown here if there's
@@ -94,6 +99,7 @@ public class HTTPManager {
 	    //3. Extract file name.  This can throw 
 	    //   IndexOutOfBoundsException.
 	    _filename=command.substring(j+1);
+
 
 	    //Constructor to HTTPUploader checks that we can accept the file.
 	    HTTPDownloader downloader;
@@ -115,7 +121,7 @@ public class HTTPManager {
 	}
     }    
     
-    public void readRange() {
+    public void readRange() throws IOException {
 	
 	String str = " ";;
 	
@@ -123,9 +129,11 @@ public class HTTPManager {
 	_uploadEnd = 0;
 
 
-	while (!str.equals("")) {
-
+	while (true) {	    
 	    str = _br.readLine();
+	    if (str==null) {
+		break;
+	    }
 	    
 	    if (str.indexOf("Range: bytes=") != -1) {
 		String sub = str.substring(13);
