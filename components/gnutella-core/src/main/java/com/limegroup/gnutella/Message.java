@@ -181,7 +181,7 @@ public abstract class Message
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
-        else if (hops>softMax)
+        else if (hops>=softMax)
             throw new BadPacketException("Hops already exceeds soft maximum");
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
