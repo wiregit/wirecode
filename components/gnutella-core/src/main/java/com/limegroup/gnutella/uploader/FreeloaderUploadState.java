@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * to them with more information on Gnutella and with more information on 
  * obtaining a client.
  */
-public class FreeloaderUploadState implements UploadState, HTTPMessage {
+public class FreeloaderUploadState implements HTTPMessage {
 
     public static final String RESPONSE_PAGE =
 		"<html>\r\n"+
@@ -25,18 +25,11 @@ public class FreeloaderUploadState implements UploadState, HTTPMessage {
 		"<a href=\"http://www2.limewire.com/browser.htm\">Please Share</a>\r\n"+
 		"</body>\r\n"+
 		"</html>\r\n";  
-
-
-	/**
-	 * This class implements a failed upload 
-	 * due to a freeloader making an upload attempt.
-	 */	
-	public void doUpload(HTTPUploader uploader) throws IOException {
+    
+	public void writeMessageHeaders(OutputStream os) throws IOException {
 		// Sends a 402 Browser Request Denied message 
-		OutputStream os = uploader.getOutputStream();
-
 		String str;
-		str = "HTTP 200 OK \r\n";
+		str = "HTTP/1.1 200 OK \r\n";
 		os.write(str.getBytes());
 		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		os.write(str.getBytes());
@@ -46,15 +39,11 @@ public class FreeloaderUploadState implements UploadState, HTTPMessage {
 		os.write(str.getBytes());
 		str = "\r\n";
 		os.write(str.getBytes());
+	}
+
+	public void writeMessageBody(OutputStream os) throws IOException {
 		os.write(RESPONSE_PAGE.getBytes());
 		os.flush();
-
-	}
-    
-	public void writeMessageHeaders(OutputStream os) {
-	}
-
-	public void writeMessageBody(OutputStream os) {
 	}
 
     /**
