@@ -23,6 +23,7 @@ public class WriteRegulator {
     private boolean    _limitHit   = false;
     private int        _limitCount = 0;
     private int        _limitReset = 400;
+    private int        _zeroCount  = 0;
 
     public WriteRegulator( DataWindow sendWindow ) {
         _sendWindow = sendWindow;
@@ -36,6 +37,7 @@ public class WriteRegulator {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
+System.out.println("hitResendTimeout _skipLimit = "+_skipLimit);
         }
     }
 
@@ -43,10 +45,13 @@ public class WriteRegulator {
      *  When a resend is required, scale down activity.
      */
     public void hitZeroWindow() {
-        if ( !_limitHit || _limitCount >= 2 ) { 
+        _zeroCount++;
+        if ( (!_limitHit || _limitCount >= 2) && _zeroCount > 4) { 
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
+            _zeroCount = 0;
+System.out.println("hitZeroWindow _skipLimit = "+_skipLimit);
         }
     }
 
@@ -176,6 +181,7 @@ public class WriteRegulator {
             if (_skipLimit < 50 &&
                 windowStart%windowSize == 0  &&
                 windowStart > MIN_START_WINDOW) {
+System.out.println("up _skipLimit = "+_skipLimit);
                 _skipLimit++;
             if(LOG.isDebugEnabled())  
                 LOG.debug(" -- UPP sL:"+_skipLimit);
@@ -194,6 +200,7 @@ public class WriteRegulator {
         if ( _skipCount != 0 && 
              rtt < maxRTT && 
              receiverWindowSpace > LOW_WINDOW_SPACE )  {
+System.out.println("_skipLimit = "+_skipLimit);
             sleepTime = 0;
         }
 
