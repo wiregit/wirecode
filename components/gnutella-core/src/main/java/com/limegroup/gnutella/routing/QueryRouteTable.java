@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
+import java.util.BitSet;
 import java.util.zip.*;
 import java.io.*;
 
@@ -45,12 +46,30 @@ public class QueryRouteTable {
      * [infinity, infinity, ...] represents an empty table.  
      */
     private byte[] table;
+
+    /** The *new* table implementation.  The table of keywords - each value in
+     *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
+     *  match MAY be at a leaf 1 hop away, whereas 'false' signifies it isn't.
+     *  QRP is really not used in full by the Gnutella Ultrapeer protocol, hence
+     *  the easy optimization of only using BitSets.
+     */
+    private BitSet bitTable;
+
+    /** The 'logical' length of the BitSet.  Needed because the BitSet accessor
+     *  methods don't seem to offer what is needed.
+     */
+    private int bitTableLength;
+
     /** The max distance (measured in hops) of files tracked by this, i.e., the 
      *  value used in table for infinity. */
     private byte infinity;
     /** The number of entries in this, used to make entries() run in O(1) time.
      *  INVARIANT: entries=number of i s.t. table[i]<infinity */
     private int entries;
+
+    /** The number of entries in this, used to make entries() run in O(1) time.
+     *  INVARIANT: bitEntries=number of i s.t. bitTable[i]==true */
+    private int bitEntries;
 
     /** The last message received of current sequence, or -1 if none. */
     private int sequenceNumber;
@@ -87,8 +106,11 @@ public class QueryRouteTable {
     private void initialize(int initialSize, byte infinity) {
         this.table=new byte[initialSize];
         Arrays.fill(table, infinity);
+        this.bitTable=new BitSet(initialSize);
+        this.bitTableLength=initialSize;
         this.infinity=infinity;
         this.entries=0;
+        this.bitEntries=0;
         this.sequenceNumber=-1;
         this.sequenceSize=-1;
         this.nextPatch=0;
@@ -103,6 +125,7 @@ public class QueryRouteTable {
     public boolean contains(QueryRequest qr) {
         int ttl=qr.getTTL();
         byte bits=Utilities.log2(table.length);
+        // byte bits=Utilities.log2(bitTableLength);
 
         //1. First we check that all the normal keywords of qr are in the route
         //   table.  Note that this is done with zero allocations!  Also note
@@ -183,6 +206,7 @@ public class QueryRouteTable {
     
     private final boolean contains(int hash, int ttl) {
         return table[hash]<infinity;
+        // return bitTable.get(hash);
     }
     
     /**
@@ -202,10 +226,15 @@ public class QueryRouteTable {
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], 
                                        Utilities.log2(table.length));
+            //int hash=HashFunction.hash(keywords[i], 
+            //                         Utilities.log2(bitTableLength));
             if (ttl<table[hash]) {
                 if (table[hash]>=infinity)
                     entries++;  //added new entry
                 table[hash]=(byte)ttl;
+                if (!bitTable.get(hash))
+                    bitEntries++; //added new entry
+                bitTable.set(hash);
             }
         }
     }
@@ -215,10 +244,15 @@ public class QueryRouteTable {
         final int ttl = 1;
         final int hash = HashFunction.hash(iString, 
                                            Utilities.log2(table.length));
+        //        final int hash = HashFunction.hash(iString, 
+        //                                   Utilities.log2(bitTableLength));
         if (ttl < table[hash]) {
             if (table[hash] >= infinity)
                 entries++;  //added new entry
             table[hash] = (byte)ttl;
+            if (!bitTable.get(hash))
+                bitEntries++; //added new entry
+            bitTable.set(hash);
         }
     }
 
@@ -240,6 +274,8 @@ public class QueryRouteTable {
 
         int m=qrt.table.length;
         int m2=this.table.length;
+        //        int m=qrt.bitTableLength;
+        //        int m2=this.bitTableLength;
         double scale=((double)m2)/((double)m);   //using float can cause round-off!
         for (int i=0; i<m; i++) {
             int low=(int)Math.floor(i*scale);
@@ -258,6 +294,13 @@ public class QueryRouteTable {
                     if (table[i2]>=infinity)
                         entries++; //added new entry
                     table[i2]=other;
+                }
+                if (qrt.bitTable.get(i)!=bitTable.get(i)) {
+                    if (qrt.bitTable.get(i)) {
+                        bitTable.set(i);
+                        bitEntries++;
+                    }
+                    // else bitTable[i] is already set..
                 }
             }
         }
@@ -278,11 +321,16 @@ public class QueryRouteTable {
         QueryRouteTable other=(QueryRouteTable)o;
         if (this.table.length!=other.table.length)
             return false;
+        if (this.bitTableLength!=other.bitTableLength)
+            return false;
 
         for (int i=0; i<this.table.length; i++) {
             if (this.table[i]!=other.table[i])
                 return false;
         }
+        if (!this.bitTable.equals(other.bitTable))
+            return false;
+
         return true;
     }
 
