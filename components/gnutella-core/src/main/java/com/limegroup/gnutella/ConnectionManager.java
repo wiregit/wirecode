@@ -219,7 +219,7 @@ public class ConnectionManager {
              // we could not start the connection for some reason --
              // this can easily happen, for example, if the connection
              // just drops
-         } catch(Exception e) {
+         } catch(Throwable e) {
              //Internal error!
              ErrorService.error(e);
          } finally {
