@@ -128,25 +128,28 @@ public class Connection {
         SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
 
-        if(isOutgoing()) {
+        if(isOutgoing())
             _socket = new Socket(_host, _port);
-            expectString = settingsManager.getConnectString();
-        } else {
-            // "GNUTELLA" was already read off the socket
-            expectString = settingsManager.getConnectStringRemainder();
-        }
 
+        // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
             throw new IOException();
         }
 
-        try {
-            _in = new BufferedInputStream(_socket.getInputStream());
-            _out = new BufferedOutputStream(_socket.getOutputStream());
+        _in = new BufferedInputStream(_socket.getInputStream());
+        _out = new BufferedOutputStream(_socket.getOutputStream());
 
-            sendString(expectString+"\n\n");
-            expectString(settingsManager.getConnectOkString()+"\n\n");
+
+        try {
+            if(isOutgoing()) {
+                sendString(settingsManager.getConnectString()+"\n\n");
+                expectString(settingsManager.getConnectOkString()+"\n\n");
+            } else {
+                expectString(
+                    settingsManager.getConnectStringRemainder()+"\n\n");
+                sendString(settingsManager.getConnectOkString()+"\n\n");
+            }
         } catch(IOException e) {
             _socket.close();
             throw e;
