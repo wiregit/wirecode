@@ -254,38 +254,46 @@ public class HostCatcher {
     //--------- Main Cache methods
 
     /** 
-     * adds a Pong to the main cache, based on its hops.  If the PingReply is 
-     * from an older client, then don't add it to the cache.  Note: hop() has 
-     * already been called on this ping reply before we add it to the cache.  
-     * Returns true if the pong was successfully added to the cache, false 
-     * otherwise.
+     * Adds an endpoint to the "new" client cache.  If e is private, adds
+     * it to expired portion.
      *
+     * @param e the address and port of the host
+     * @param pr the PingReply received
+     * @param connection the connection that sent us this pong.  MUST be a new
+     *  connection, i.e., connection.isOldClient()==false
+     * @return true iff e was successfully added.  
      */
-    private boolean addToMainCache(PingReply pr, 
+    private boolean addToMainCache(Endpoint e,
+                                   PingReply pr,
                                    ManagedConnection connection) {
-        if (GUID.getProtocolVersion(pr.getGUID()) < GUID.GNUTELLA_VERSION_06)
-            return false;
-
-        int hops = (int)pr.getHops();
+        //We don't bother to check the GUID version anymore.
+        //if (GUID.getProtocolVersion(pr.getGUID()) < GUID.GNUTELLA_VERSION_06)
+        //    return false;
+        
+        int hops=(int)pr.getHops();
         if (hops >= mainCache.length)
-            return false; //if greater than Max Hops allowed, do nothing.
+            return false; //if greater than Max Hops allowed, do nothing. TODO:?
         if (hops==0)
             hops=1;
 
-        //if private IP address, ignore.
-        Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort());
-        if (e.isPrivateAddress())
-            return false;
-
-        synchronized(cacheLock) {
-            //only add to main cache, if the main cache already doesn't contain 
-            //that PingReply (determined by IP, port, hops, and different 
-            //managed connections).
-            MainCacheEntry newEntry = 
-                new MainCacheEntry(pr, connection);
-            if (!(mainCache[hops-1].contains(newEntry)))
-                mainCache[hops-1].add(newEntry);
-            cacheLock.notify();
+        //Is e private?  
+        if (e.isPrivateAddress()) {
+            //Yes, add to expired portion.  It might make sense to discard such
+            //addresses altogether.  But putting these in the expired "new"
+            //category allows testing on private networks.
+            synchronized (cacheLock) {
+                mainCacheExpired.add(e);
+                cacheLock.notify();
+            }
+        } else {
+            //No, add to main cache--if not already there.
+            synchronized(cacheLock) {
+                MainCacheEntry newEntry = 
+                    new MainCacheEntry(pr, connection);
+                if (!(mainCache[hops-1].contains(newEntry)))
+                    mainCache[hops-1].add(newEntry);
+                cacheLock.notify();
+            }
         }
         return true;
     }
@@ -389,22 +397,10 @@ public class HostCatcher {
     //--------- Reserve Cache methods
 
     /**
-     * Adds a ping reply to the reserve cache.
+     * Adds an endpoint to the reserve cache.
      */
     private void addToReserveCache(Endpoint e,
                                    ManagedConnection receivingConnection) {
-        //Skip if this would connect us to our listening port.
-        if (Acceptor.isMe(e.getHostname(), e.getPort()))
-            return;
-
-        try {
-            //Skip if this is a router(e.g., router.limewire.com).
-            if (isARouter(e.getHostBytes())) 
-                return;
-        } catch (java.net.UnknownHostException exc) {
-            //Will never happen.
-        }
-
         //Current policy: "new clients" connections are the best.  After that, 
         //"Pong cache" connections are considered good.  Private addresses are 
         //considered real bad (negative weight).  This means tha the host 
@@ -422,15 +418,6 @@ public class HostCatcher {
         synchronized(cacheLock) {
             reserveCacheQueue.insert(e);
             cacheLock.notify();
-        }
-
-        //notify router thread that a pong was received from the router (if 
-        //router connection)
-        if (e.getWeight() == ROUTER_PRIORITY) {
-            synchronized(gotRouterPongLock) {
-                gotRouterPong = true;
-                gotRouterPongLock.notify();
-            }
         }
     }
 
@@ -634,23 +621,63 @@ public class HostCatcher {
     //--------- public access methods
 
     /**
-     * If receivingConnection is a new connection, tries to add pr to the main
-     * cache.  Otherwise, adds pr to the reserve cache and return false.  TODO:
-     * what the heck is the return value supposed to mean?
+     * Adds pr to this.  If receivingConnection is a new connection, tries to
+     * add pr to the main cache.  Otherwise, adds pr to the reserve cache.
+     *
+     * @return true iff pr was added to the main cache 
      */
     public boolean addToCache(PingReply pr, 
                               ManagedConnection receivingConnection) {
-        //if received from an old client or from a router, place the PingReply
-        //in the reserve cache (i.e., hostcatcher).
-        if (receivingConnection.isOldClient()) {
-            Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
-                                    pr.getFiles(), pr.getKbytes());            
-            addToReserveCache(e, receivingConnection);
-            return false; //always return false when adding to reserve cache.
-        }
-        else
-            return addToMainCache(pr, receivingConnection);
+        Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
+                                pr.getFiles(), pr.getKbytes());
+        return addToCache(e, pr,
+                          !receivingConnection.isOldClient(),
+                          receivingConnection);
+    }
 
+    /**
+     * Internal method.  Adds e to the given cache.
+     *
+     * @param e the endpoint to add.  If pr non-null, MUST be
+     *  equal to new Endpoint(pr.getIP(), ...)
+     * @param pr the PingReply if for a new client, or undefined (possibly null)
+     *  otherwise
+     * @param isNew true iff this came from a new client
+     * @return true iff pr was added to the main cache, which does not 
+     *  necessarily equal isNew
+     */
+    private boolean addToCache(Endpoint e,
+                               PingReply pr,
+                               boolean isNew,
+                               ManagedConnection receivingConnection) {
+        //Skip if this would connect us to our listening port.
+        if (Acceptor.isMe(e.getHostname(), e.getPort()))
+            return false;
+
+        //Skip if this is a router(e.g., router.limewire.com).
+        try {
+            if (isARouter(e.getHostBytes())) 
+                return false;
+        } catch (java.net.UnknownHostException exc) {
+            //Will never happen.
+        }
+
+        //Place in the appropriate cache depending on the connection.
+        boolean ret=false;
+        if (isNew)
+            ret=addToMainCache(e, pr, receivingConnection);
+        else
+            addToReserveCache(e, receivingConnection);
+
+        //If pong was received from a router, notify router thread.
+        if (receivingConnection != null 
+                && receivingConnection.isRouterConnection()) {
+            synchronized(gotRouterPongLock) {
+                gotRouterPong = true;
+                gotRouterPongLock.notify();
+            }
+        }
+        return ret;
     }
 
     /** 
@@ -667,7 +694,7 @@ public class HostCatcher {
                 //The Endpoint(String) constructor may be removed at some point,
                 //but we'll use it for now.
                 Endpoint e=new Endpoint(pongsA[i]);
-                addToReserveCache(e, receivingConnection);
+                addToCache(e, null, false, receivingConnection);
             } catch (IllegalArgumentException e) {
                 continue;
             }
@@ -757,12 +784,13 @@ public class HostCatcher {
 //          HostCatcher hc=new HostCatcher(new Main());
 //          ManagedConnection bogus=new ManagedConnection("fake.limewire.com", 6346, null);
 //          for (int i=0; i<4; i++) {
-//              hc.addToMainCache(new PingReply(GUID.makeGuid(),
+//              hc.addToMainCache(new Endpoint("1.1.1."+i, 6346),
+//                                new PingReply(GUID.makeGuid(),
 //                                       (byte)2,
 //                                       6346,
 //                                       new byte[] {(byte)1, (byte)1, (byte)1, (byte)i},
 //                                       0l, 0l),
-//                         bogus);
+//                                bogus);
 //          }
 //          for (int i=0; i<4; i++) {
 //              hc.addToReserveCache(new Endpoint("2.2.2."+i, 6346), bogus);
