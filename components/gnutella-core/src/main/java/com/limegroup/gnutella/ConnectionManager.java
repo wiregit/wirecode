@@ -965,11 +965,12 @@ public class ConnectionManager {
      * @param goodPriority Flag that specifies if the addresses have to be
      * given high priority
      */
-    private void updateHostCache(String hostAddresses, ManagedConnection
-        connection, boolean goodPriority){
+    private void updateHostCache(String hostAddresses, 
+                                 ManagedConnection connection, 
+                                 boolean goodPriority){
         //check for null param
-         if(hostAddresses == null)
-             return;
+        if(hostAddresses == null)
+            return;
          
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
@@ -986,10 +987,8 @@ public class ConnectionManager {
                 continue;
             }
             //set the good priority, if specified
-            if(goodPriority)
-                e.setWeight(HostCatcher.GOOD_PRIORITY);
             //add it to the catcher
-            _catcher.add(e, connection);
+            _catcher.add(e, goodPriority);
         }
     }
     
