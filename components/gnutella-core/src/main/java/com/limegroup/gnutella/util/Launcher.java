@@ -15,6 +15,26 @@ import java.lang.String;
  * Acknowledgement goes to Eric Albert for demonstrating the general 
  * technique for loading the MRJ classes in his frequently-used
  * "BrowserLauncher" code.
+ * <p>
+ * This code is Copyright 1999-2001 by Eric Albert (ejalbert@cs.stanford.edu) 
+ * and may be redistributed or modified in any form without restrictions as
+ * long as the portion of this comment from this paragraph through the end of  
+ * the comment is not removed.  The author requests that he be notified of any 
+ * application, applet, or other binary that makes use of this code, but that's 
+ * more out of curiosity than anything and is not required.  This software
+ * includes no warranty.  The author is not repsonsible for any loss of data 
+ * or functionality or any adverse or unexpected effects of using this software.
+ * <p>
+ * Credits:
+ * <br>Steven Spencer, JavaWorld magazine 
+ * (<a href="http://www.javaworld.com/javaworld/javatips/jw-javatip66.html">Java Tip 66</a>)
+ * <br>Thanks also to Ron B. Yeh, Eric Shapiro, Ben Engber, Paul Teitlebaum, 
+ * Andrea Cantatore, Larry Barowski, Trevor Bedzek, Frank Miedrich, and Ron 
+ * Rabakukk
+ *
+ * @author Eric Albert 
+ *  (<a href="mailto:ejalbert@cs.stanford.edu">ejalbert@cs.stanford.edu</a>)
+ * @version 1.4b1 (Released June 20, 2001)
  */
  //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public final class Launcher {
@@ -62,7 +82,7 @@ public final class Launcher {
 		if(CommonUtils.isWindows()) {
 			_windowsLauncher = new WindowsLauncher();
 		}
-		else if(CommonUtils.isMacClassic()) {
+		else if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
 			try {
 				loadMacClasses();		
 			} catch(IOException ioe) {
@@ -93,11 +113,8 @@ public final class Launcher {
 		if(CommonUtils.isWindows()) {
 			return openURLWindows(url);
 		}	   
-		else if(CommonUtils.isMacClassic()) {
-			openURLMacClassic(url);
-		}
-		else if(CommonUtils.isMacOSX()) {
-			launchFileMacOSX(url);
+		else if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
+			openURLMac(url);
 		}
 		else if(CommonUtils.isUnix()) {
 			launchFileUnix(url);
@@ -127,7 +144,7 @@ public final class Launcher {
 	 *         loaded successfully or if another exception was
 	 *         throws -- it wraps these exceptions in an <tt>IOException</tt>
 	 */
-	private static void openURLMacClassic(String url) throws IOException {
+	private static void openURLMac(String url) throws IOException {
 		if(!_macClassesLoadedSuccessfully) throw new IOException();
 		try {
 			Object[] params = new Object[] {url};
@@ -147,8 +164,6 @@ public final class Launcher {
 		}
 	}
 
-    private static void openURLOSX(String url) throws IOException {
-    }
 	/**
 	 * Launches the file whose abstract path is specified in the 
 	 * <tt>File</tt> parameter.  This method will not launch any file
@@ -288,8 +303,8 @@ public final class Launcher {
 			throw new IOException();
 		} 
 	}
-
-
+    
+    
 	/**
 	 * Attempts to launch the given file on Unix.
 	 * NOTE: WE COULD DO THIS ONE BETTER!!
@@ -318,17 +333,6 @@ public final class Launcher {
 								  + ie.getMessage());
 		}
 	}
-
-	/**
-	 * Methods required for Mac OS X.  The presence of native methods does not cause
-	 * any problems on other platforms.
-	 * 
-	 * NOTE: These are taken directly from Eric Albert's "BrowserLauncher" class
-	 */
-	private native static int ICStart(int[] instance, int signature);
-	private native static int ICStop(int[] instance);
-	private native static int ICLaunchURL(int instance, byte[] hint, byte[] data, int len,
-											int[] selectionStart, int[] selectionEnd);
 }
 
 
