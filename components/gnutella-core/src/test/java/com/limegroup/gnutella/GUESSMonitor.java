@@ -30,6 +30,7 @@ public class GUESSMonitor {
         FileManager staticFM = RouterService.getFileManager();
         _messageRouter = new MyMessageRouter(stub, staticFM);
         _backend = Backend.createLongLivedBackend(stub, _messageRouter);
+        _backend.start();
     }
 
     public void shutdown() {
