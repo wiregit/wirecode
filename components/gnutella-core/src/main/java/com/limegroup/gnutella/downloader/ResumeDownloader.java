@@ -132,12 +132,21 @@ public class ResumeDownloader extends ManagedDownloader
         //TODO: we always include the file name since HUGE specifies that
         //results should be sent if the name OR the hashes match.  But
         //ultrapeers may insist that all keywords are in the QRP tables.
+        //we have to substring the filename because we don't accept queries
+        //that have big search strings
         if (_hash != null)
             // TODO: we should be sending the URN with the query, but
             // we don't because URN queries are summarily dropped, though
             // this may change
-            return QueryRequest.createQuery(getFileName());
+            return QueryRequest.createQuery(truncate(getFileName(), 30));
         else
-            return QueryRequest.createQuery(getFileName());
+            return QueryRequest.createQuery(truncate(getFileName(), 30));
     }
+
+    
+    private String truncate(String string, int maxLen) {
+        int max = string.length() > maxLen ? maxLen : string.length();
+        return string.substring(0, max);
+    }
+
 }
