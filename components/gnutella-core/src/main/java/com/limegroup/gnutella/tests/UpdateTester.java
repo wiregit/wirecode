@@ -8,12 +8,12 @@ package com.limegroup.gnutella.tests;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-
-import com.limegroup.gnutella.update.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.SettingsManager;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.gui.LimeLookAndFeel;
+//
+//import com.limegroup.gnutella.update.*;
+//import com.limegroup.gnutella.util.CommonUtils;
+//import com.limegroup.gnutella.SettingsManager;
+//import com.limegroup.gnutella.FileManager;
+//import com.limegroup.gnutella.gui.LimeLookAndFeel;
 
 public class UpdateTester extends JFrame {
 
