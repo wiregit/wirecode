@@ -649,16 +649,26 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param qr the <tt>QueryRequest</tt> to copy
 	 * @return a new <tt>QueryRequest</tt> with the specified guid that is now
      * OOB marked.
+     * @throws IllegalArgumentException thrown if guid is not right size of if
+     * query is bad.
 	 */
 	public static QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
-		return new QueryRequest(guid, qr.getTTL(), qr.getQuery(),
-								qr.getRichQueryString(), 
-								qr.getRequestedUrnTypes(),
-								qr.getQueryUrns(), qr.getQueryKey(),
-								qr.isFirewalledSource(),
-								qr.getNetwork(), true,
-                                qr.getCapabilitySelector(), qr.doNotProxy(),
-                                qr.getMetaMask());
+
+        if (guid.length != 16)
+            throw new IllegalArgumentException("bad guid size: " + guid.length);
+
+        // i can't just call a new constructor, i have to recreate stuff
+        byte[] newPayload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
+        
+        try {
+            return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
+                                      newPayload, qr.getNetwork());
+        }
+        catch (BadPacketException ioe) {
+            throw new IllegalArgumentException("Input QR was bad!");
+        }
 	}
 
 	/**
