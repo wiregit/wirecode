@@ -220,7 +220,9 @@ public class QueryRequest extends Message implements Serializable{
 					if(tempRequestedUrnTypes == null) {
 						tempRequestedUrnTypes = new HashSet();
 					}
-					tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
+					if(UrnType.isSupportedUrnType(curExtStr)) {
+						tempRequestedUrnTypes.add(UrnType.createUrnType(curExtStr));
+					}
 				} else if (curExtStr.startsWith("<?xml")) {
 					// rich query
 					tempRichQuery = curExtStr;
