@@ -42,6 +42,14 @@ public class UDPConnection extends Socket {
 	public void close() throws IOException {
 		_processor.close();
 	}
+
+    public InetAddress getInetAddress() {
+        return _processor.getInetAddress();
+    }
+
+    public InetAddress getLocalAddress() {
+        return _processor.getLocalAddress();
+    }
     
     //-------  Mostly Unimplemented  ----------------
 
@@ -84,13 +92,6 @@ public class UDPConnection extends Socket {
         //throw new IOException("not implemented");
     //}
 
-    public InetAddress getInetAddress() {
-        return null;
-    }
-
-    public InetAddress getLocalAddress() {
-        return null;
-    }
 
     public int getPort() {
         return -1;

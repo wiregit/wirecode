@@ -3,8 +3,11 @@ package com.limegroup.gnutella.udpconnect;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,6 +68,7 @@ public class UDPConnectionProcessor {
     private UDPService        _udpService;
     private UDPMultiplexor    _multiplexor;
     private UDPScheduler      _scheduler;
+    private Acceptor          _acceptor;
 
     // Define WAIT TIMES
     //
@@ -224,6 +228,7 @@ public class UDPConnectionProcessor {
         // Only wake these guys up if the service is okay
 		_multiplexor       = UDPMultiplexor.instance();
 		_scheduler         = UDPScheduler.instance();
+        _acceptor          = RouterService.getAcceptor();
 
 		// Precreate the receive window for responce reporting
         _receiveWindow   = new DataWindow(DATA_WINDOW_SIZE, 1);
@@ -312,6 +317,32 @@ public class UDPConnectionProcessor {
         // is occasionally generating multiple FINs - probably from closing
         // repeatedly.
 	}
+
+    /**
+     *  Return the InetAddress.
+     */
+    public InetAddress getInetAddress() {
+        return _ip;
+    }
+
+    /**
+     *  Do some magic to get the local address if available.
+     */
+    public InetAddress getLocalAddress() {
+        InetAddress lip = null;
+        try {
+            lip = InetAddress.getByName(
+              NetworkUtils.ip2string(_acceptor.getAddress(false)));
+        } catch (UnknownHostException uhe) {
+            try {
+                lip = InetAddress.getLocalHost();
+            } catch (UnknownHostException uhe2) {
+                lip = null;
+            }
+        }
+
+        return lip;
+    }
 
     /**
      *  Prepare for handling an open connection.
