@@ -97,6 +97,10 @@ public class Connection {
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
      * needed.
      * 
+     * If properties1 and properties2 are null, forces connection at the 0.4
+     * level.  This is a bit of a hack to make implementation in this and
+     * subclasses easier; outside classes are discouraged from using it.
+     *
      * @param host the name of the host to connect to
      * @param port the port of the remote host
      * @param properties1 the headers to be sent after "GNUTELLA CONNECT"
@@ -115,7 +119,7 @@ public class Connection {
         _outgoing = true;
         _negotiate = negotiate;
         _propertiesWrittenP=properties1;
-        _propertiesWrittenR=properties2;
+        _propertiesWrittenR=properties2;            
     }
     
     /**
