@@ -22,7 +22,7 @@ public class RemoteFileDesc implements Serializable {
 	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
-    private final LimeXMLDocument[] _xmlDocs;
+    private final LimeXMLDocument _xmlDoc;
 	private final Set _urns;
 	private final boolean _browseHostEnabled;
 
@@ -33,29 +33,6 @@ public class RemoteFileDesc implements Serializable {
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
-
-	/** 
-     * Constructs a new RemoteFileDesc without metadata.
-     *
-	 * @param host the host's ip
-	 * @param port the host's port
-	 * @param index the index of the file that the client sent
-	 * @param filename the name of the file
-	 * @param clientGUID the unique identifier of the client
-	 * @param speed the speed of the connection
-     * @param chat true if the location is chattable
-     * @param quality the quality of the connection, where 0 is the
-     *  worst and 3 is the best.  (This is the same system as in the
-     *  GUI but on a 0 to N-1 scale.)
-	 * @param browseHost specifies whether or not the host associated with
-	 *  this 
-	 */
-	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
-						  boolean chat, int quality, boolean browseHost) {	   
-		this(host, port, index, filename, size,
-			 clientGUID, speed, chat, quality, browseHost, null, null);
-	}
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
@@ -75,7 +52,7 @@ public class RemoteFileDesc implements Serializable {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument[] xmlDocs, Set urns) {
+						  LimeXMLDocument xmlDoc, Set urns) {
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -86,16 +63,7 @@ public class RemoteFileDesc implements Serializable {
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
-
-		if(xmlDocs == null) {
-			_xmlDocs = null;
-		}
-		else {
-			// make a defensive copy of the xml docs array so no one can 
-			// mutate this class
-			_xmlDocs = new LimeXMLDocument[xmlDocs.length];
-			System.arraycopy(xmlDocs, 0, _xmlDocs, 0, xmlDocs.length);
-		}
+		_xmlDoc = xmlDoc;
 		if(urns == null) {
 			_urns = EMPTY_SET;
 		}
@@ -113,18 +81,27 @@ public class RemoteFileDesc implements Serializable {
 	public final byte[] getClientGUID() {return _clientGUID;}
 	public final int getSpeed() {return _speed;}	
 	public final boolean chatEnabled() {return _chatEnabled;}
-	public boolean browseHostEnabled() {return _browseHostEnabled;}
+	public final boolean browseHostEnabled() {return _browseHostEnabled;}
     public final int getQuality() {return _quality;}
 
 	/**
-	 * Returns a copy of the <tt>LimeXMLDocument</tt> array.
+	 * Returns the <tt>LimeXMLDocument</tt> for this <tt>RemoteFileDesc</tt>, 
+	 * which can be <tt>null</tt>.
 	 *
-	 * @return a copy of the <tt>LimeXMLDocument</tt> array
+	 * @return the <tt>LimeXMLDocument</tt> for this <tt>RemoteFileDesc</tt>, 
+	 * which can be <tt>null</tt>.
 	 */
-    public final LimeXMLDocument[] getXMLDocs() {
-		LimeXMLDocument[] xmlDocsCopy = new LimeXMLDocument[_xmlDocs.length];
-		System.arraycopy(_xmlDocs, 0, xmlDocsCopy, 0, _xmlDocs.length);
-		return xmlDocsCopy;
+    public final LimeXMLDocument getXMLDoc() {
+		return _xmlDoc;
+	}
+
+	/**
+	 * Accessor for the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>.
+	 *
+	 * @return the <tt>Set</tt> of URNs for this <tt>RemoteFileDesc</tt>
+	 */
+	public final Set getUrns() {
+		return _urns;
 	}
 
 	public final boolean isPrivate() {
@@ -159,8 +136,8 @@ public class RemoteFileDesc implements Serializable {
 				 Arrays.equals(_clientGUID, other._clientGUID)) &&
 				(_speed == other._speed) &&
 				(_size == other._size) &&
-				(_xmlDocs == null ? other._xmlDocs == null :
-				 Arrays.equals(_xmlDocs, other._xmlDocs)) &&
+				(_xmlDoc == null ? other._xmlDoc == null :
+				 _xmlDoc.equals(other._xmlDoc)) &&
 				(_urns == null ? other._urns == null :
 				 _urns.equals(other._urns)));		
     }
