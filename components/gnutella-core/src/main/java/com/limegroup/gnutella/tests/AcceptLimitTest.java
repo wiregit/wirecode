@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
@@ -20,12 +21,20 @@ import java.io.*;
  * -pongs given out if slots for any type of connection
  */
 public class AcceptLimitTest {
-    /** Assume that no host allows more than this many connections. */
-    private static int MAX_CONNECTIONS=100;
-    
+    public static boolean DEBUG=false;
+
+    /** The number of leaf connections */
+    private static int LEAF_CONNECTIONS=15;
+    /** The number of normal connections */
+    private static int KEEP_ALIVE=6;
+
     static int LEAF=0;
-    static int OLD=1;
-    static int ULTRAPEER=2;
+    static int OLD_04=1;
+    static int OLD_06=2;
+    static int ULTRAPEER=3;
+
+    static int REJECT_503=0;
+    static int REJECT_SILENT=1;
     
     /** Prevents connections from being garbage collected */
     private static List /* of Connection */ buffer=new LinkedList();
@@ -33,66 +42,102 @@ public class AcceptLimitTest {
     public static void main(String args[]) {
         String host="localhost";
         int port=6346;
+        System.out.println("If this test doesn't pass, try disabling ConnectionWatchdog");
 
         //Bring up application.
         SettingsManager settings=SettingsManager.instance();
         settings.setPort(6346);
         settings.setQuickConnectHosts(new String[0]);
-        settings.setConnectOnStartup(true);
         settings.setConnectOnStartup(false);
         settings.setEverSupernodeCapable(true);
-        settings.setDisableSupernodeMode(true);
-        settings.setMaxShieldedClientConnections(25);
-        RouterService rs=new RouterService(new DebugActivityCallback(),
-                                           new MessageRouterStub(),
-                                           new FileManagerStub(),
+        settings.setDisableSupernodeMode(false);
+        settings.setMaxShieldedClientConnections(LEAF_CONNECTIONS);
+        ActivityCallback callback=new ActivityCallbackStub();
+        FileManager files=new FileManagerStub();
+        RouterService rs=new RouterService(callback,
+                                           new MetaEnabledMessageRouter(callback, files),
+                                           files,
                                            new DummyAuthenticator());
         rs.initialize();
         rs.clearHostCatcher();
         try {
             rs.setKeepAlive(6);
         } catch (BadConnectionSettingException e) { Assert.that(false); }
+        Connection c=null;        
 
-        //You can reorder these statements (with small changes) in creative ways.
-        Connection c=testLimit(host, port, LEAF);        
+        System.out.println("\nTest group I:");
+        c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
+        testPong(c, true);        
+        testLimit(host, port, OLD_06, KEEP_ALIVE, REJECT_503);        
         testPong(c, true);
-        testLimit(host, port, OLD);        
+        //Note limited ultrapeer preferencing
+        testLimit(host, port, ULTRAPEER, 
+                  KEEP_ALIVE-ConnectionManager.DESIRED_OLD_CONNECTIONS, REJECT_503);       
+        testPong(c, false);
+        
+        cleanup(rs);
+
+        System.out.println("\nTest group II:");
+        c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); //ignores guidance
         testPong(c, true);
-        testLimit(host, port, ULTRAPEER);        
+        testLimit(host, port, OLD_06, 0, REJECT_503);  
+        testPong(c, true);
+        testLimit(host, port, OLD_04, 0, REJECT_SILENT);         //no handshaking  
+        testPong(c, true); //Still have leaf slots
+        c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
         testPong(c, false);
     }
 
     /** 
-     * Sees how many connections we can make of the given type, returning the
-     * last successful one, or null if none.
+     * Checks that HOST:PORT will accept LIMIT connections of the given type,
+     * returning the last successful one, or null if none.
+     *
+     * @param host the host to connect to
+     * @param port the port to conenct to
+     * @param type the type of connection to establish: LEAF, OLD_04, OLD_06,
+     *  or ULTRAPEER
+     * @param limit the expected number of connections
+     * @param rejectType what sort of rejection to expect when over the limit:
+     *  REJECT_503 (during handshaking) or REJECT_SILENT (during messaging)
      */
-    private static Connection testLimit(String host, int port, int type) {
+    private static Connection testLimit(String host, int port, int type, 
+                                        int limit, int rejectType) {
         String description=null;
-        if (type==OLD)
-            description="old";
+        if (type==OLD_04)
+            description="old/0.4";
+        else if (type==OLD_06)
+            description="old/0.6";
         else if (type==LEAF)
             description="leaf";
         else if (type==ULTRAPEER)
             description="ultrapeer";
         else
             Assert.that(false, "Bad type: "+type);
+        System.out.println("-Testing limit of "+limit+" "+description+" connections");
 
+        //Try to establish LIMIT connections
         Connection ret=null;
-        int i=0;
-        while (i<MAX_CONNECTIONS) {
-            Connection tmp=connect(host, port, type);
-            if (tmp==null)
-                break;
-            ret=tmp;
+        for (int i=0; i<limit; i++) {
+            try {
+                ret=connect(host, port, type);
+            } catch (IOException e) {
+                Assert.that(false, "Connection "+i+" disallowed");
+            }
             buffer.add(ret);
-            i++;           
+        }
+
+        //Check that next connection return 503.
+        try {            
+            Connection tmp=connect(host, port, type);
+            Assert.that(false, "Extra connection allowed");
+        } catch (NoGnutellaOkException e) {
+            Assert.that(rejectType==REJECT_503 
+                        && e.getCode()==HandshakeResponse.SLOTS_FULL, 
+                        "Unexpected code: "+e.getCode());
+        } catch (IOException e) {
+            Assert.that(rejectType==REJECT_SILENT, "Mysterious IO exception: "+e);
         }
         
-        //Assert.that(i>0, "Couldn't create any "+description+" connections");
-        Assert.that(i<MAX_CONNECTIONS, 
-            "There appears to be no limit on "+description+" connections");
-        System.out.println("-Established "+i+" "+description
-                           +" connections.  Is that right?");
         return ret;
     }
 
@@ -101,10 +146,16 @@ public class AcceptLimitTest {
      * or null if it failed.
      *   @param type one of t
      */
-    private static Connection connect(String host, int port, int type) {
+    private static Connection connect(String host, int port, int type) 
+            throws IOException {
         Connection ret=null;
-        if (type==OLD)
+        if (type==OLD_04)
             ret=new Connection(host, port);
+        else if (type==OLD_06)
+            ret=new Connection(host, port, 
+                               new Properties(),
+                               new EmptyResponder(),
+                               false);
         else if (type==LEAF)
             ret=new Connection(host, port, 
                                new LeafProperties(),
@@ -117,24 +168,22 @@ public class AcceptLimitTest {
                                false);
         else
             Assert.that(false, "Bad type: "+type);
-
+        
+        ret.initialize();
         try {
-            ret.initialize();
             ret.send(new PingRequest((byte)7));
             ret.flush();
             Message m=ret.receive();
-            return ret;
-        } catch (IOException e) {
-            return null;
         } catch (BadPacketException e) {
-            return null;
-        }   
+            throw new IOException("Couldn't read pong");
+        }
+        return ret;
     }
 
     /** Tests whether c responds or doesn't responds to a ping */
     private static void testPong(Connection c, boolean expectPong) {
         System.out.println("-Testing that host "
-                           +(expectPong? "sends" : "does not")
+                           +(expectPong? "sends" : "does NOT")
                            +" reply to ping");
 //          //Avoid being a victim of the duplicate filter
 //          try {
@@ -178,7 +227,20 @@ public class AcceptLimitTest {
             } catch (BadPacketException e) {
             }
         }
-    }        
+    }    
+
+    /** Closes all connections. */
+    private static void cleanup(RouterService rs) {
+        //Close on client
+        for (Iterator iter=buffer.iterator(); iter.hasNext(); ) {
+            Connection c=(Connection)iter.next();
+            c.close();
+        }
+        try {
+            //Give server time to cleanup connections.
+            Thread.sleep(200);
+        } catch (InterruptedException e) { }
+    }
 }
 
     
@@ -207,13 +269,15 @@ class EmptyResponder implements HandshakeResponder {
 
 class DebugActivityCallback extends ActivityCallbackStub {
     public void connectionInitializing(Connection c) { 
-        //System.out.println("Initializing "+str(c));
+        if (AcceptLimitTest.DEBUG)
+            System.out.println("Initializing "+str(c));
     }
     public void connectionInitialized(Connection c) { 
-        System.out.println("Initialized "+str(c));
+        //System.out.println("Initialized "+str(c));
     }
     public void connectionClosed(Connection c) { 
-        System.out.println("CLOSED "+str(c));
+        if (AcceptLimitTest.DEBUG)
+            System.out.println("CLOSED "+str(c));
     }
     private static String str(Connection c) {
         String ultrapeer="old";

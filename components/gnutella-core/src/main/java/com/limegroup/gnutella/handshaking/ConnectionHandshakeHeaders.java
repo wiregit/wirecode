@@ -26,4 +26,18 @@ public class ConnectionHandshakeHeaders
         "X-Domains-Authenticated";
     public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
     public static final String REMOTE_IP            = "Remote-IP";
+
+    /**
+     * Returns true if v.toLowerCase().equals("true").
+     */
+    public static boolean isTrue(String v) {
+        return v!=null && v.toLowerCase().equals("true");
+    }
+
+    /**
+     * Returns true if v.toLowerCase().equals("false").
+     */
+    public static boolean isFalse(String v) {
+        return v!=null && v.toLowerCase().equals("false");
+    }
 }

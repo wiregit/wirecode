@@ -53,28 +53,12 @@ public class SupernodeHandshakeResponder
             
             //also add some host addresses in the response
             addHostAddresses(ret, _manager);
-            
-            //Under some circumstances, we can decide to reject a connection
-            //during handshaking because no slots are available.  You might
-            //think you could reject the connection if
-            //!_manager.hasAvailableIncoming(A, L), where A is true if the
-            //connection is the connection is ultrapeer-aware and L is true
-            //if the user is a leaf.  Unfortunately this fails when the
-            //incoming connection is an ultrapeer (A&&!L) because of
-            //supernode guidance; we don't know whether they'll become a
-            //leaf node or not.  So we use the following conservative test,
-            //and depend on the old-fashioned reject connection mechanism in
-            //ConnectionManager for the other cases.  TODO: factor this!
+
+            //Decide whether to allow or reject.
             Properties props=response.getHeaders();
             String isUltrapeer=
-            props.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
-            if (//it's an unrouted old-style connection, and no slot
-                (isUltrapeer==null 
-                     && !_manager.hasAvailableIncoming(false, false))
-                //OR leaf, and no space (TODO)
-                //OR no space for leaves or ultrapeers
-                || (!_manager.hasAvailableIncoming(true, true)
-                     && !_manager.hasAvailableIncoming(true, false))) {
+                props.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+            if (reject(isUltrapeer)) {
                 return new HandshakeResponse(
                     HandshakeResponse.SLOTS_FULL,
                     HandshakeResponse.SLOTS_FULL_MESSAGE,
@@ -100,5 +84,30 @@ public class SupernodeHandshakeResponder
         }
     }
     
+    /** 
+     * Returns true if this incoming connections should be rejected with a 503. 
+     * @param isUltrapeer thevalue of the X_SUPERNODE header, or possibly null. 
+     */
+    private boolean reject(String isUltrapeer) { 
+        //Under some circumstances, we can decide to reject a connection during
+        //handshaking because no slots are available.  You might think you could
+        //reject the connection if !_manager.hasAvailableIncoming(A, L), where A
+        //is true if the connection is the connection is ultrapeer-aware and L
+        //is true if the user is a leaf.  Unfortunately this fails when the
+        //incoming connection is an ultrapeer (A&&!L) because of supernode
+        //guidance; we don't know whether they'll become a leaf node or not.  So
+        //we use the following conservative test, and depend on the
+        //old-fashioned reject connection mechanism in ConnectionManager for the
+        //other cases.
+        return //it's an unrouted old-style connection, and no slot
+               (isUltrapeer==null 
+                   && !_manager.hasAvailableIncoming(false, false))
+               //OR leaf, and no space
+               || (ConnectionHandshakeHeaders.isFalse(isUltrapeer)
+                   && !_manager.hasAvailableIncoming(true, true))
+               //OR no space for leaves or ultrapeers [sic]
+               || (!_manager.hasAvailableIncoming(true, true)
+                   && !_manager.hasAvailableIncoming(true, false));
+    }    
 }
 
