@@ -8,11 +8,13 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.sun.java.util.collections.Iterator;
@@ -46,6 +48,18 @@ public final class HandshakeResponseTest extends BaseTestCase {
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
     }
 
+    public void testLeafRejectIncoming() throws Exception {
+        Properties props = new Properties();
+        props.put(HeaderNames.X_ULTRAPEER, "false");
+        HostCatcher hc = RouterService.getHostCatcher();
+        hc.add(MessageTestUtils.createPongWithFreeLeafSlots());
+        HandshakeResponse headers = HandshakeResponse.createResponse(props);
+        HandshakeResponse hr = 
+            HandshakeResponse.createLeafRejectIncomingResponse(headers);
+        
+        assertTrue(hr.hasXTryUltrapeers());
+    }
+    
     /**
      * Tests the method that adds Ultrapeer hosts to the X-Try-Ultrapeer
      * header.
@@ -160,8 +174,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
 	        
 	
 	/**
-	 * Helper method for creating a list from a string of ip/port pairs separated
-	 * by commas, as per the Ultrapeer crawler format.
+	 * Helper method for creating a list from a string of ip/port pairs 
+	 * separated by commas, as per the Ultrapeer crawler format.
 	 * 
 	 * @param ipPorts the string of IP/port pairs
 	 * @return a new List of Connections from the IP/port pairs
@@ -213,7 +227,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		List leafList = createListFromIPPortString(leaves);
 		List ultrapeerList = createListFromIPPortString(ultrapeers);
 		assertTrue("leaf list should not be empty", !leafList.isEmpty());
-		assertTrue("ultrapeer list should not be empty", !ultrapeerList.isEmpty());
+		assertTrue("ultrapeer list should not be empty", 
+            !ultrapeerList.isEmpty());
 	}
 	
     /**
@@ -252,7 +267,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
                                          "extractMessage",
                                          new Class[]{String.class});
         String line = "200 OK";
-        int code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
+        int code = 
+            ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
         String message = (String)messageMethod.invoke(null, new Object[]{line});
         assertEquals("unexpected code", 200, code);
         assertEquals("unexpected message", "OK", message);
@@ -267,13 +283,15 @@ public final class HandshakeResponseTest extends BaseTestCase {
         code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
         assertEquals("unexpected code", 503, code);
         message = (String)messageMethod.invoke(null, new Object[]{line});
-        assertEquals("unexpected message", "Something Totally Different", message);
+        assertEquals("unexpected message", "Something Totally Different", 
+            message);
 
         line = "200 Something Totally Different";
         code = ((Integer)codeMethod.invoke(null, new Object[]{line})).intValue();
         assertEquals("unexpected code", 200, code);
         message = (String)messageMethod.invoke(null, new Object[]{line});
-        assertEquals("unexpected message", "Something Totally Different", message);
+        assertEquals("unexpected message", "Something Totally Different", 
+            message);
     }
 
 
@@ -423,22 +441,32 @@ public final class HandshakeResponseTest extends BaseTestCase {
     /**
      * Test to make sure that Ultrapeer headers are created correctly.
      */
-    public void testUltrapeerHeaders() {
+    public void testUltrapeerHeaders() throws Exception {
         
         // Test once with deflate support & once without.
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        
+        Properties headers = new Properties();
+        headers.put(HeaderNames.X_ULTRAPEER, "false");
+        HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectIncomingResponse();
+            HandshakeResponse.createRejectIncomingResponse(client);
         runRejectHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptIncomingResponse(
+            new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
         
+        headers = new Properties();
+        headers.put(HeaderNames.X_ULTRAPEER, "true");
+        client = HandshakeResponse.createResponse(headers);
+        
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
-        hr = HandshakeResponse.createRejectIncomingResponse();
+        hr = HandshakeResponse.createRejectIncomingResponse(client);
         runRejectHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptIncomingResponse(new UltrapeerHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptIncomingResponse(
+            new UltrapeerHeaders("32.9.8.9"));
         runUltrapeerHeadersTest(hr);
     }
 
@@ -446,24 +474,29 @@ public final class HandshakeResponseTest extends BaseTestCase {
     /**
      * Test to make sure that leaf headers are created correctly.
      */
-    public void testLeafHeaders() {
+    public void testLeafHeaders() throws Exception {
         // don't let the short-circuit take place, we want a real test.
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);        
         
         // Test once with deflate support & once without.
-        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);        
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);  
+        Properties headers = new Properties();
+        headers.put(HeaderNames.X_ULTRAPEER, "false");
+        HandshakeResponse client = HandshakeResponse.createResponse(headers);
         HandshakeResponse hr = 
-            HandshakeResponse.createRejectIncomingResponse();
+            HandshakeResponse.createRejectIncomingResponse(client);
         runRejectHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptIncomingResponse(new LeafHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptIncomingResponse(
+            new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
 
         ConnectionSettings.ACCEPT_DEFLATE.setValue(false);
         hr = HandshakeResponse.createRejectOutgoingResponse();
         runRejectOutgoingLeafHeadersTest(hr);
 
-        hr = HandshakeResponse.createAcceptOutgoingResponse(new LeafHeaders("32.9.8.9"));
+        hr = HandshakeResponse.createAcceptOutgoingResponse(
+            new LeafHeaders("32.9.8.9"));
         runLeafHeadersTest(hr);
     }
 
@@ -537,21 +570,25 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertEquals("unexpected user agent", 
                      CommonUtils.getHttpServer(), hr.getUserAgent());
 
-        assertTrue("should be a high-degree connection", hr.isHighDegreeConnection());
+        assertTrue("should be a high-degree connection", 
+            hr.isHighDegreeConnection());
         assertEquals("unexpected max ttl", 
                      ConnectionSettings.SOFT_MAX.getValue(), 
                      hr.getMaxTTL());
-        assertEquals("unexpected degree", 32, hr.getNumIntraUltrapeerConnections());
+        assertEquals("unexpected degree", 32, 
+            hr.getNumIntraUltrapeerConnections());
         assertTrue("should be GUESS capable", hr.isGUESSCapable());
         assertTrue("should support GGEP", hr.supportsGGEP());
-        assertTrue("should support vendor messages", hr.supportsVendorMessages());
+        assertTrue("should support vendor messages", 
+            hr.supportsVendorMessages());
         assertTrue("should use dynamic querying", hr.isDynamicQueryConnection());
 
         //if we added the value, make sure its there.
         if(ConnectionSettings.ACCEPT_DEFLATE.getValue())
             assertTrue("should accept deflate encoding", hr.isDeflateAccepted());
         else 
-            assertTrue("should not accept deflate encoding", !hr.isDeflateAccepted());
+            assertTrue("should not accept deflate encoding", 
+                !hr.isDeflateAccepted());
             
         // no responders have added the Content-Encoding: deflate yet...
         assertTrue("should not be encoding in deflate", !hr.isDeflateEnabled());
