@@ -693,6 +693,13 @@ public class DownloadManager implements BandwidthTracker {
         debug("DM.sendPush(): entered.");
         PushProxyInterface[] proxies = file.getPushProxies();
         if (proxies != null) {
+            //TODO: investigate not sending a HTTP request to a proxy
+            //you are directly connected to.  How much of a problem is this?
+            //Probably not much of one at all.  Classic example of code
+            //complexity versus efficiency.  It may be hard to actually
+            //distinguish a PushProxy from one of your UP connections if the
+            //connection was incoming since the port on the socket is ephemeral 
+            //and not necessarily the proxies listening port
             // we have proxy info - give them a try
             debug("DM.sendPush(): proxy info exists.");
             boolean requestSuccessful = false;
