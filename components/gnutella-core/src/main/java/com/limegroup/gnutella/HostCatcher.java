@@ -33,7 +33,7 @@ import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
  * <tt>router.limewire.com</tt>.  The expire() method can force this to
  * reconnect to the bootstrap server by demoting ultrapeer pongs.  YOU MUST CALL
  * EXPIRE() TO GET BOOTSTRAP PONGS.  This should be done when calling
- * RouterService.connect().  The doneWithEndpoint(e) method helps this connect
+ * RouterService.connect().  The doneWithMessageLoop method helps this connect
  * to only one bootstrap server at a time.<p>
  *
  * Finally, HostCatcher maintains a list of "permanent" locations, based on
@@ -375,8 +375,8 @@ public class HostCatcher {
      * @effects atomically removes and returns the highest priority host in
      *  this.  If no host is available, blocks until one is.  If the calling
      *  thread is interrupted during this process, throws InterruptedException.
-     *  The caller should call doneWithEndpoint(..) when done with the 
-     *  returned value.
+     *  The caller should call doneWithConnect and doneWithMessageLoop when done
+     *  with the returned value.
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
@@ -497,23 +497,19 @@ public class HostCatcher {
     }
 
     /**
-     * Notifies this that the fetcher is done with the fetched connection to
-     * host.  This exists primarily to tell if we're done with
-     * router.limewire.com.  
+     * Notifies this that the fetcher has finished attempting a connection to
+     * the given host.  This exists primarily to update the permanent host list
+     * with connection history.
      *
      * @param e the address/port, which should have been returned by 
      *  getAnEndpoint
      * @param success true if we successfully established a messaging connection 
-     *  to e, at least temporarily; false otherwise
+     *  to e, at least temporarily; false otherwise 
      */
-    public synchronized void doneWithEndpoint(Endpoint e, boolean success) {
-        if (e==bootstrapHostInProgress) {  //not .equals
-            //a) Was a special bootstrap host?  Keep track.
-            bootstrapHostInProgress=null;
-            notifyAll();  //may be able to try other bootstrap servers
-        } else {
-            //b) Normal host: update key.  TODO3: adjustKey() operation may be
-            //more efficient.
+    public synchronized void doneWithConnect(Endpoint e, boolean success) {
+        if (e!=bootstrapHostInProgress) {
+            //Normal host: update key.  TODO3: adjustKey() operation may be more
+            //efficient.
             if (! (e instanceof ExtendedEndpoint))
                 //Should never happen, but I don't want to update public
                 //interface of this to operate on ExtendedEndpoint.
@@ -526,33 +522,25 @@ public class HostCatcher {
             else
                 ee.recordConnectionFailure();
             addPermanent(ee);
-        }
+        }         
     }
-
+    
     /**
-     * Same as doneWithEndpoint(Endpoint,boolean) except that host/port need not
-     * have to have been returned by getAnEndpoint().  Expensive; runs in O(K^2)
-     * (or possible O(K lg K) with a permanent list of K entries.  Typically
-     * this method is only called for outgoing connections on shutdown.
-     * @see doneWithEndpoint(Endpoint,boolean) 
+     * Notifies this that the fetcher is done with the fetched connection to
+     * host.  This exists primarily to tell if we're done with
+     * router.limewire.com (and go on to other host caches if necessary).  This
+     * method may only be called after doneWithConnect().  It's ok to call this
+     * even if the connect failed.
+     *
+     * @param e the address/port, which should have been returned by 
+     *  getAnEndpoint 
      */
-    public synchronized void doneWithEndpoint(String host, 
-                                              int port, 
-                                              boolean success) {
-        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-            ExtendedEndpoint ee=(ExtendedEndpoint)iter.next();
-            if (ee.getHostname().equals(host) && ee.getPort()==port) {
-                doneWithEndpoint(ee, success);
-                return;
-            }
+    public synchronized void doneWithMessageLoop(Endpoint e) {
+        if (e==bootstrapHostInProgress) {  //not .equals
+            //Was a special bootstrap host?  Keep track.
+            bootstrapHostInProgress=null;
+            notifyAll();  //may be able to try other bootstrap servers
         }
-
-        //If this couldn't be found, we can fake up some information.  This is
-        //a hack, but it's necessary in case the endpoint was purged from the
-        //cache in between fetching and adding.  Unfortunately we've lost uptime
-        //and history information.
-        ExtendedEndpoint ee=new ExtendedEndpoint(host, port);
-        doneWithEndpoint(ee, success);
     }
 
     /**

@@ -768,29 +768,6 @@ public class ConnectionManager {
             }
         }
     }
-    
-    /**
-     * Takes any action necessary for shutdown.  Currently that means updating
-     * the HostCatcher with connection information.
-     */
-    public void shutdown() {
-        //doneWithEndpoint(Endpoint,boolean) will be called by connection
-        //fetcher threads when they terminate (see ConnectionFetcher.run), which
-        //may or may not be after the gnutella.net file is written.  Hence we
-        //force the call here.  It's ok if doneWithEndpoint is called twice,
-        //since it coalesces multiple connect/failure data.  This whole method
-        //is somewhat expensive: O(N*K*lg K) or (N*K^2) time for N connections
-        //and a permanent list of K connections.  Also, if the endpoint for
-        //a connection has been purged from the cache, uptime and other history
-        //information is lost.
-        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
-            ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isOutgoing())
-                _catcher.doneWithEndpoint(mc.getOrigHost(), 
-                                          mc.getOrigPort(), 
-                                          true);
-        }
-    }
 
     /**
      * Connects to the network.  Ensures the number of messaging connections
@@ -996,12 +973,21 @@ public class ConnectionManager {
 
     /**
      * Initializes an outgoing connection created by a ConnectionFetcher
+     * Throws any of the exceptions listed in Connection.initialize on
+     * failure; no cleanup is necessary in this case.
      *
-     * @throws IOException on failure.  No cleanup is necessary if this happens.
+     * @exception IOException we were unable to establish a TCP connection
+     *  to the host
+     * @exception NoGnutellaOkException we were able to establish a 
+     *  messaging connection but were rejected
+     * @exception BadHandshakeException some other problem establishing 
+     *  the connection, e.g., the server responded with HTTP, closed the
+     *  the connection during handshaking, etc. 
+     * @see com.limegroup.gnutella.Connection#initialize(int)
      */
     private void initializeFetchedConnection(ManagedConnection c,
                                              ConnectionFetcher fetcher)
-            throws IOException {
+            throws NoGnutellaOkException, BadHandshakeException, IOException {
         synchronized(this) {
             if(fetcher.isInterrupted())
                 // Externally generated interrupt.
@@ -1462,11 +1448,23 @@ public class ConnectionManager {
                 endpoint.getHostname(), endpoint.getPort(), _router,
                 ConnectionManager.this);
 
-            boolean success=false;
             try {
-                initializeFetchedConnection(connection, this);
+                //Try to connect, recording success or failure so HostCatcher
+                //can update connection history.  Note that we declare 
+                //success if we were able to establish the TCP connection
+                //but couldn't handshake (NoGnutellaOkException).
+                try {
+                    initializeFetchedConnection(connection, this);
+                    _catcher.doneWithConnect(endpoint, true);
+                } catch (NoGnutellaOkException e) {
+                    _catcher.doneWithConnect(endpoint, true);
+                    throw e;                    
+                } catch (IOException e) {
+                    _catcher.doneWithConnect(endpoint, false);
+                    throw e;
+                }
+                //Handle messages.
                 sendInitialPingRequest(connection);
-                success=true;
                 connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -1474,12 +1472,9 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                //Record connection success or failure.  Note that success only
-                //means that we were able to connect, even though we may have
-                //been rejected.  It's important to only call this AFTER
-                //handling the connection for bootstrap purposes.  See
-                //shutdown().
-                _catcher.doneWithEndpoint(endpoint, success);
+                //Record that we're done with the connection, which may allow
+                //HostCatcher to go on to other endpoints.
+                _catcher.doneWithMessageLoop(endpoint);
                 if (connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
             }

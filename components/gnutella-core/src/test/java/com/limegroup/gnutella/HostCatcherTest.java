@@ -112,7 +112,8 @@ public class HostCatcherTest extends TestCase {
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("128.103.60.1", 6346)));
             hc.add(new Endpoint("18.239.0.144", 6346), true);
-            hc.doneWithEndpoint(router1, false);    //got pong
+            hc.doneWithConnect(router1, false);    //got pong
+            hc.doneWithMessageLoop(router1);
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("18.239.0.144", 6346)));        
 
@@ -120,7 +121,8 @@ public class HostCatcherTest extends TestCase {
             assertTrue(router2.equals(new Endpoint("r2.b.c.d", 6347)));        
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("128.103.60.2", 6346)));        
-            hc.doneWithEndpoint(router2, false);    //did't get any pongs
+            hc.doneWithConnect(router2, false);
+            hc.doneWithMessageLoop(router2);
 
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("128.103.60.3", 6346))); //no more bootstraps
@@ -147,10 +149,12 @@ public class HostCatcherTest extends TestCase {
             assertTrue(hc.getNumUltrapeerHosts()==0);
             Endpoint e=hc.getAnEndpoint();
             assertTrue(e.equals(new Endpoint("r1.b.c.d", 6346)));
-            hc.doneWithEndpoint(e, false);
+            hc.doneWithConnect(e, false);
+            hc.doneWithMessageLoop(e);
             e=hc.getAnEndpoint();
             assertTrue(e.equals(new Endpoint("r2.b.c.d", 6347)));
-            hc.doneWithEndpoint(e, true);
+            hc.doneWithConnect(e, true);
+            hc.doneWithMessageLoop(e);
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("18.239.0.144", 6346)));
             assertTrue(hc.getAnEndpoint().equals(
@@ -306,7 +310,10 @@ public class HostCatcherTest extends TestCase {
                        null);
             //Now re-add port 0 (which was kicked out earlier).  Note that this
             //would fail if line 346 of HostCatcher were not executed.
-            hc.doneWithEndpoint("18.239.0.142", 0, true);
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 0,
+                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                           0l, 0l, false, N+100),
+                   null);
 
             File tmp=File.createTempFile("hc_test", ".net" );
             hc.write(tmp.getAbsolutePath());            
@@ -336,7 +343,7 @@ public class HostCatcherTest extends TestCase {
     }
 
     /** Test that connection history is recorded. */
-    public void testDoneWithEndpoint() {
+    public void testDoneWithConnect() {
         try {
             hc.add(new Endpoint("18.239.0.1"), true);  
             hc.add(new Endpoint("18.239.0.2"), true);  //will succeed
@@ -348,12 +355,12 @@ public class HostCatcherTest extends TestCase {
             assertEquals(new Endpoint("18.239.0.2"), e2);
 
             //record success (increases priority)
-            hc.doneWithEndpoint(e2, true); 
+            hc.doneWithConnect(e2, true); 
             //record failure (lowers priority) with alternate form of method
-            hc.doneWithEndpoint("18.239.0.3", 6346, false);
+            hc.doneWithConnect(e3, false);
             //Garbage (ignored)
-            hc.doneWithEndpoint(new Endpoint("1.2.3.4", 6346), false);  
-            hc.doneWithEndpoint("18.239.0.3", 6349, true);  //different port
+            hc.doneWithConnect(new Endpoint("1.2.3.4", 6346), false);  
+            hc.doneWithConnect(new Endpoint("18.239.0.3", 6349), true); //port
 
             //Check that permanent hosts are re-arranged.
             //Note that iterator yields worst to best.
