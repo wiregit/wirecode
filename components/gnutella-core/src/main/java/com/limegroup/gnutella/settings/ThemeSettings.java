@@ -147,6 +147,7 @@ public final class ThemeSettings extends LimeProps {
                             boolean overwrite) {
         themeDir.mkdirs();
         try {
+            FileUtils.setWriteable(themeDir);
             Expand.expandFile(themeFile, themeDir, overwrite);
         } catch(IOException e) {
             // this should never really happen, so report it
