@@ -57,6 +57,12 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting OVERWRITE_EXISTING =
         FACTORY.createIntSetting("OVERWRITE_EXISTING", 0);
+        
+    /**
+     * Setting for the theme changed message
+     */
+    public static final BooleanSetting THEME_CHANGED =
+        FACTORY.createBooleanSetting("THEME_CHANGED", false);
     
     
 }
