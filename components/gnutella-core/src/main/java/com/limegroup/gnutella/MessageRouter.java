@@ -35,6 +35,7 @@ import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.StatisticsSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
@@ -2697,6 +2698,9 @@ public abstract class MessageRouter {
      * Replies to a head ping sent from the given ReplyHandler.
      */
     private void handleHeadPing(HeadPing ping, ReplyHandler handler) {
+        if (DownloadSettings.DROP_HEADPINGS.getValue())
+            return;
+        
         GUID clientGUID = ping.getClientGuid();
         ReplyHandler pingee;
         

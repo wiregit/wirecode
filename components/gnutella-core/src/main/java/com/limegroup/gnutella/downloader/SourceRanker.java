@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.DownloadSettings;
 
 /**
  * A class that ranks sources for a download. 
@@ -36,7 +37,8 @@ public abstract class SourceRanker {
      * @return a ranker appropriate for our system's capabilities.
      */
     public static SourceRanker getAppropriateRanker() {
-        if (RouterService.canReceiveSolicited())
+        if (RouterService.canReceiveSolicited() && 
+                DownloadSettings.USE_HEADPINGS.getValue())
             return new PingRanker();
         else 
             return new LegacyRanker();

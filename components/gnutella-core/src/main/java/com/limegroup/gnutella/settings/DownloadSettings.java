@@ -46,4 +46,16 @@ public class DownloadSettings extends LimeProps {
     public static final IntSetting HISTORY_SIZE=
         FACTORY.createSettableIntSetting("HISTORY_SIZE",10,"history_size",50,2);
     
+    /**
+     * Whether the client should use HeadPings when ranking sources
+     */
+    public static final BooleanSetting USE_HEADPINGS =
+        FACTORY.createSettableBooleanSetting("USE_HEADPINGS",true,"use_headpings");
+    
+    /**
+     * Whether the client should drop incoming HeadPings.
+     */
+    public static final BooleanSetting DROP_HEADPINGS =
+        FACTORY.createSettableBooleanSetting("DROP_HEADPINGS",false,"drop_headpings");
+    
 }
