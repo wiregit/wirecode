@@ -1,7 +1,7 @@
 Content-Type: text/html
 
-<html><head><title>Gnutella Developer Forum: Gnutella UltraPeer Walking v0.01</title>
-<meta http-equiv="Expires" content="Tue, 27 Aug 2002 22:36:03 +0000">
+<html><head><title>Gnutella Developer Forum: Gnutella UltraPeer Crawling v0.01</title>
+<meta http-equiv="Expires" content="Wed, 28 Aug 2002 17:26:27 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -45,9 +45,9 @@ Content-Type: text/html
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">Gnutella Developer Forum</td><td width="33%" bgcolor="#666666" class="header">S. Daswani</td></tr>
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">A. Fisk</td></tr>
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">LimeWire LLC</td></tr>
-<tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">August 27, 2002</td></tr>
+<tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">August 28, 2002</td></tr>
 </table></td></tr></table>
-<div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella UltraPeer Walking v0.01</span></b></font></div>
+<div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella UltraPeer Crawling v0.01</span></b></font></div>
 <font face="verdana, helvetica, arial, sans-serif" size="2">
 
 <h3>Abstract</h3>
@@ -100,25 +100,21 @@ Congestion<br></b>
 Security Considerations<br></b>
 <b><a href="#anchor3">4.1</a>&nbsp;
 Distributed Denial of Service (DDOS) Attack<br></b>
-<b><a href="#anchor4">4.2</a>&nbsp;
-DDOS Prevention<br></b>
-<b><a href="#other">5.</a>&nbsp;
-Other Considerations<br></b>
-<b><a href="#push">5.1</a>&nbsp;
-Push Downloads<br></b>
-<b><a href="#ggep">6.</a>&nbsp;
+<b><a href="#ggep">5.</a>&nbsp;
 GGEP Extensions<br></b>
-<b><a href="#ggep_pongs">6.1</a>&nbsp;
+<b><a href="#ggep_pongs">5.1</a>&nbsp;
 Advertise UDP port in Pongs<br></b>
-<b><a href="#features">7.</a>&nbsp;
+<b><a href="#features">6.</a>&nbsp;
 Additional Features<br></b>
-<b><a href="#cycles">7.1</a>&nbsp;
+<b><a href="#cycles">6.1</a>&nbsp;
 Cycles No Longer a Concern<br></b>
+<b><a href="#push">6.2</a>&nbsp;
+Higher Success Rate for Push Downloads<br></b>
 <b><a href="#rfc.references1">&#167;</a>&nbsp;
 References<br></b>
 <b><a href="#rfc.authors">&#167;</a>&nbsp;
 Authors' Addresses<br></b>
-<b><a href="#anchor5">A.</a>&nbsp;
+<b><a href="#anchor4">A.</a>&nbsp;
 Acknowledgements<br></b>
 </ul>
 <br clear="all">
@@ -157,7 +153,7 @@ Acknowledgements<br></b>
 		“SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
 		“RECOMMENDED”, “MAY”, and “OPTIONAL” in this 
 		document are to be interpreted as described in 
-		RFC 2119.<a href="#refs.RFC2119" title="Bradner, S., Key words for use in RFCs to Indicate Requirement Levels, May 1997.">[5]</a>
+		RFC 2119.<a href="#RFC2119" title="Bradner, S., Key words for use in RFCs to Indicate Requirement Levels, March 1997.">[5]</a>
 		An implementation is not compliant if it fails to satisfy one or 
 		more of the MUST or REQUIRED level requirements for the protocols 
 		it implements. An implementation that satisfies all the MUST or 
@@ -352,12 +348,12 @@ Acknowledgements<br></b>
 		  
 <ol class="text">
 <li>
-			  Searches MUST NOT be sent to more than 20,000
+			  Searches MUST NOT be sent to more than 10,000
 			  UltraPeers.
 			
 </li>
 <li>
-			  Clients MUST NOT seek more than 2,000 results.
+			  Clients MUST NOT seek more than 1,000 results.
 			
 </li>
 <li>
@@ -410,11 +406,26 @@ Acknowledgements<br></b>
 		over TCP.  When a server receives a message over its open UDP
 		port, it MUST send any replies via UDP and over the same
 		port it is listening on.  As in the current Gnutella 
-		network, all replies are sent back to the sender.  Otherwise,
+		network, all replies are sent back to the sender.  This is
+		an important point in terms 
+		of <a href="#security">security</a>.  Otherwise,
 		servers should respond to messages just as if they 
 		recieved them over TCP.  Servers SHOULD accept all of the
 		traditional Gnutella messages, as defined in 
-		the <a href="#refs.gnutella_rfc" title="Thomas, J., Gnutella Protocol, August 2002.">Gnutella RFC</a>[12].
+		the <a href="#refs.clip2" title="Clip2, The Gnutella Protocol Specification v0.4, Document Revision 1.2, .">Gnutella RFC</a>[12].
+		
+		<br>
+<br>
+
+		On the server side, UltraPeers also MUST start forwarding 
+		TTL=1 queries to leaves.  Without this change, queries would
+		have to be sent with TTL=2, which would lessen the fine-grained
+		control over the query and would eliminate benefits such as
+		no longer needing to concern ourselves 
+		with <a href="#cycles">cycles</a>.  The current practice
+		of not forwarding TTL=1 queries to leaves also avoids using 
+		the powerful UltraPeer infrastructure that can be used more
+		productively. 
 		
 </p>
 <a name="rfc.section.2.3"></a><h4><a name="discovery">2.3</a>&nbsp;UltraPeer Discovery</h4>
@@ -437,14 +448,18 @@ Acknowledgements<br></b>
 		  If an UltraPeer's cache of other UltraPeers drops
 		  below a certain threshold, for example 1000, the
 		  UltraPeer MUST take steps to refresh its cache.  To
-		  do this, UltraPeers send pings over UDP to the 
-		  It does so using the normal broadcast ping message, 
-		  looking for 
-		  the <a href="#ggep_pongs">GGEP extension</a> in
-		  pongs.  UltraPeers also SHOULD read any pongs that
-		  they pass, even when not intended for them directly,
-		  to limit the need to send broadcast
-		  pings on their own.
+		  do this, UltraPeers send pings over UDP to the UltraPeers
+		  in their search cache.  This provides access to pongs
+		  that may not be within the horizon of the normal ping
+		  broadcast.  
+		  
+		  <br>
+<br>
+
+		  While UltraPeers MUST maintain an adequate cache of 
+		  other UltraPeers to query, they also MUST send a minimum
+		  number of pings to make this possible, less the network
+		  become flooded with ping and pong traffic.
 		
 </p>
 <a name="udp"><br><hr size="1" shade="0"></a>
@@ -481,7 +496,7 @@ Acknowledgements<br></b>
 			same port registered for Gnutella for TCP.
 			UltraPeers MAY, however, listen 
 			on a different port, particularly when, for example,
-			there is anothing Gnutella client listening on 6346,
+			there is another Gnutella client listening on 6346,
 			or when another application is using that port for
 			any reason.  In all cases, clients MUST
 			listen on the same port for both TCP and UDP traffic.
@@ -520,7 +535,7 @@ Acknowledgements<br></b>
 			excessive fragmentation.  The MTU of modem links
 			can be prohibitively small, as low as 296 bytes,
 			so we make no attempt to remain below this 
-			threshold.<a href="#refs.MTU" title="Mogul, J. and S. Deering, Path MTU Discovery, November 1990.">[8]</a>  These links
+			threshold.<a href="#RFC1191" title="Mogul, J. and S. Deering, Path MTU discovery, November 1990.">[8]</a>  These links
 			should only occur on the edges of the network,
 			however, as long as UltraPeer election algorithms are 
 			correctly measuring bandwidth.  This means that any
@@ -530,13 +545,21 @@ Acknowledgements<br></b>
 			datagram sizes.  In general, clients SHOULD limit the
 			size of their datagrams whenever appropriate.  A limit
 			of 512 is very conservative, and limiting datagrams 
-			to 1,024 bytes or less should avoid fragmentation on
-			the vast majority of routers.  This will often not
-			be possible for query hits.  Hits returning many
-			results, however, may indicate an overly general 
-			query (such as "txt"), so client MAY choose to
-			limit the responses per query hit to limit the 
-			overall size.
+			to 1,500 bytes or less should avoid fragmentation on
+			the vast majority of 
+			routers.<a href="#RFC1191" title="Mogul, J. and S. Deering, Path MTU discovery, November 1990.">[8]</a><br>
+<br>
+	
+			This will often not be possible for query hits.  
+			To address this problem, it is RECOMMENDED that 
+			developers break up large query hits into multiple smaller 
+			query hits.  This will increase the bandwidth required 
+			to return results only slightly (due to sending the same 
+			header multiple times) while reducing or eliminating fragmentation.
+			It also avoids the current "all or nothing" approach where all 
+			results from a host are lost if one packet is lost.  In this 
+			scheme, some hits can still get through when a packet 
+			from another hit is lost.
 		  
 </p>
 <a name="rfc.section.3.3"></a><h4><a name="congestion">3.3</a>&nbsp;Congestion</h4>
@@ -563,39 +586,47 @@ Acknowledgements<br></b>
 <p>
 			In the past, a principal objection to using UDP has been
 			that it allows anyone to easily execute a DDOS attack
-			on any target machine.  To execute such an attack, a
-			node would simply have to send out queries advertising 
-			the IP and port of the target machine in the GGEP block.
-			If no precautions were taken, all replying nodes would
-			attempt to reply to the target machine, quickly flooding
-			it with UDP datagrams.  			  
+			on any target machine.  This concern has been based on the
+			assumption that queries would require an extension listing
+			the UDP IP address and port to reply to, however.  In this
+			proposal, this extension is not required, as responses are
+			always sent directly back to the node that sent them, 
+			rendering such an attack impossible.
 	      
 </p>
-<a name="rfc.section.4.2"></a><h4><a name="anchor4">4.2</a>&nbsp;DDOS Prevention</h4>
+<a name="ggep"><br><hr size="1" shade="0"></a>
+<table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
+<a name="rfc.section.5"></a><h3>5.&nbsp;GGEP Extensions</h3>
+
+<a name="rfc.section.5.1"></a><h4><a name="ggep_pongs">5.1</a>&nbsp;Advertise UDP port in Pongs</h4>
 
 <p>
-			  To prevent such an attack, UltraPeers MUST verify that
-		      the IP address in the advertised GGEP block matches the 
-		      source IP address of the datagram itself.
-		      The ports are allowed to vary, as clients
-			  MAY send their UDP queries out over ephemeral ports.
-			  Clients also MAY send these queries over TCP while 
-			  expecting replies over UDP.  If the advertised IP 
-			  address does not match the IP address of the datagram, 
-			  UltraPeers MUST discard the query.  By performing this 
-			  check, UltraPeers largely thwart the attack described 
-			  above.  With this check in place, attackers would have 
-			  to establish UltraPeers themselves on a large scale and let 
-			  these queries through, which is difficult.  This security 
-			  check is required because not performing this check would 
-			  effectively do the attackers' work for them.
-			
+		    UltraPeers that are capable of receiving Gnutella 
+			messages over UDP MUST advertise that fact in a
+			new GGEP extension in 
+			pongs.<a href="#refs.GGEP" title="Thomas, J., Gnutella Generic Extension Protocol (GGEP) v0.51, Fedruary 2002.">[9]</a>
+			TODO: describe the GGEP extension in more detail.		  
+		  
 </p>
-<a name="other"><br><hr size="1" shade="0"></a>
+<a name="features"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.5"></a><h3>5.&nbsp;Other Considerations</h3>
+<a name="rfc.section.6"></a><h3>6.&nbsp;Additional Features</h3>
 
-<a name="rfc.section.5.1"></a><h4><a name="push">5.1</a>&nbsp;Push Downloads</h4>
+<a name="rfc.section.6.1"></a><h4><a name="cycles">6.1</a>&nbsp;Cycles No Longer a Concern</h4>
+
+<p>
+	      Adoption of this proposal has several additional benefits.  For example,
+		  concern for cycles in intra-UltraPeer connections is eliminated.  In the
+		  current network, cycles can be a serious problem in the worst case,
+		  resulting in nodes receiving many duplicate 
+		  messages, wasting bandwidth, CPU, and 
+		  memory.<a href="#refs.RandomWalk" title="Lv, Q., Cao, P., Cohen, E., Li, K. and S. Shenker, Search and Replication in Unstructured Peer-to-Peer Networks, June 2002.">[1]</a>  This eliminates
+		  these duplicates except in the case where leaves are connected to 
+		  multiple UltraPeers, and two or more of their UltraPeers are sent
+		  the same query.  
+	    
+</p>
+<a name="rfc.section.6.2"></a><h4><a name="push">6.2</a>&nbsp;Higher Success Rate for Push Downloads</h4>
 
 <p>
 		  This query scheme gracefully handles push downloads.  In
@@ -603,38 +634,18 @@ Acknowledgements<br></b>
 		  Push Proxy proposal.<a href="#refs.push_proxy" title="Thomas, J., Push Proxy v0.1, August 2002.">[11]</a>
 		  This scheme does not, however, allow two firewalled hosts
 		  to download from each other, as in the "Download Proxy"
-		  proposal.<a href="#refs.download_proxy" title="Thomas, J., Download Proxy v0.1, January 2002.">[10]</a>
-</p>
-<a name="ggep"><br><hr size="1" shade="0"></a>
-<table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.6"></a><h3>6.&nbsp;GGEP Extensions</h3>
-
-<a name="rfc.section.6.1"></a><h4><a name="ggep_pongs">6.1</a>&nbsp;Advertise UDP port in Pongs</h4>
-
-<p>
-			    UltraPeers that are capable of receiving Gnutella 
-			    messages over UDP MUST advertise that fact in a
-			    new GGEP extension in 
-			    pongs.<a href="#refs.GGEP" title="Thomas, J., Gnutella Generic Extension Protocol (GGEP) v0.51, Fedruary 2002.">[9]</a>
-			    TODO: describe the GGEP extension in more detail.		  
-		      
-</p>
-<a name="features"><br><hr size="1" shade="0"></a>
-<table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.7"></a><h3>7.&nbsp;Additional Features</h3>
-
-<a name="rfc.section.7.1"></a><h4><a name="cycles">7.1</a>&nbsp;Cycles No Longer a Concern</h4>
-
-<p>
-	      Adoption of this proposal has several additional benefits.  For example,
-		  concern for cycles in intra-UltraPeer connections is eliminated.  In the
-		  current network, cycles can be a serious problem in the worst case,
-		  resulting in nodes receiving many duplicate 
-		  messages.<a href="#refs.RandomWalk" title="Lv, Q., Cao, P., Cohen, E., Li, K. and S. Shenker, Search and Replication in Unstructured Peer-to-Peer Networks, June 2002.">[1]</a>  This eliminates
-		  these duplicates except in the case where leaves are connected to 
-		  multiple UltraPeers, and two or more of their UltraPeers are sent
-		  the same query.  
-	    
+		  proposal.<a href="#refs.download_proxy" title="Thomas, J., Download Proxy v0.1, January 2002.">[10]</a>  In the current
+		  network, push requests frequently fail, primarily because
+		  the node serving the file may be 7 hops away from the node
+		  requesting a file, and the request has to travel through
+		  all intervening nodes.  As a result, if any node along that
+		  path leaves the network, the push will not go through.
+		  With the adoption of this proposal, success rates for 
+		  push request should increase dramatically, as the node 
+		  serving the file will only be from 2 to 3 hops away 
+		  (depending on whether the node serving the file is
+		  a leaf or an UltraPeer).
+		
 </p>
 <a name="rfc.references1"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
@@ -648,22 +659,22 @@ Acknowledgements<br></b>
 <td class="author-text"><a href="http://www.freepeers.com">Falco, V.</a> and <a href="http://www.freepeers.com">S. Darwin</a>, "<a href="http://groups.yahoo.com/group/the_gdf/files/Proposals/querymesh.txt">Query Mesh v0.1</a>", March 2002.</td></tr>
 <tr><td class="author-text" valign="top"><b><a name="refs.http_mesh_proxy">[4]</a></b></td>
 <td class="author-text"><a href="http://www.freepeers.com">Klingberg, T.</a>, "<a href="http://groups.yahoo.com/group/the_gdf/message/9533">Gnutella over HTTP, Query Mesh, Push Proxy</a>", August 2002.</td></tr>
-<tr><td class="author-text" valign="top"><b><a name="refs.RFC2119">[5]</a></b></td>
-<td class="author-text">Bradner, S., "<a href="ftp://ftp.isi.edu/in-notes/rfc2119.txt">Key words for use in RFCs to Indicate Requirement Levels</a>", RFC 2119, May 1997.</td></tr>
+<tr><td class="author-text" valign="top"><b><a name="RFC2119">[5]</a></b></td>
+<td class="author-text"><a href="mailto:-">Bradner, S.</a>, "<a href="ftp://ftp.isi.edu/in-notes/rfc2119.txt">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, March 1997 (<a href="ftp://ftp.isi.edu/in-notes/rfc2119.txt">TXT</a>, <a href="http://xml.resource.org/public/rfc/html/rfc2119.html">HTML</a>, <a href="http://xml.resource.org/public/rfc/xml/rfc2119.xml">XML</a>).</td></tr>
 <tr><td class="author-text" valign="top"><b><a name="refs.agthorr">[6]</a></b></td>
 <td class="author-text">Agthorr, D., "<a href="http://groups.yahoo.com/group/the_gdf/message/4492">Re: GGEP 0.31 comments</a>", January 2002.</td></tr>
 <tr><td class="author-text" valign="top"><b><a name="refs.TCPIP">[7]</a></b></td>
 <td class="author-text">Stevens, R., "<a href="http://www.amazon.com/exec/obidos/tg/detail/-/0201633469/qid=1029899071/sr=8-1/ref=sr_8_1/002-2563381-7557664?s=books&n=507846">The Protocols (TCP/IP Illustrated, Volume 1)</a>", January 1994.</td></tr>
-<tr><td class="author-text" valign="top"><b><a name="refs.MTU">[8]</a></b></td>
-<td class="author-text">Mogul, J. and S. Deering, "<a href="http://www.faqs.org/rfcs/rfc1191.html">Path MTU Discovery</a>", RFC 1191, November 1990.</td></tr>
+<tr><td class="author-text" valign="top"><b><a name="RFC1191">[8]</a></b></td>
+<td class="author-text"><a href="mailto:mogul@decwrl.dec.com">Mogul, J.</a> and <a href="mailto:deering@xerox.com">S. Deering</a>, "<a href="ftp://ftp.isi.edu/in-notes/rfc1191.txt">Path MTU discovery</a>", RFC 1191, November 1990.</td></tr>
 <tr><td class="author-text" valign="top"><b><a name="refs.GGEP">[9]</a></b></td>
 <td class="author-text"><a href="mailto:jason@jasonthomas.com">Thomas, J.</a>, "<a href="http://groups.yahoo.com/group/the_gdf/files/Proposals/GGEP/GnutellaGenericExtensionProtocol.0.51.html">Gnutella Generic Extension Protocol (GGEP) v0.51</a>", Fedruary 2002.</td></tr>
 <tr><td class="author-text" valign="top"><b><a name="refs.download_proxy">[10]</a></b></td>
 <td class="author-text"><a href="mailto:jason@jasonthomas.com">Thomas, J.</a>, "<a href="http://groups.yahoo.com/group/the_gdf/files/Proposals/Download%20Proxy/Download%20Proxy.html">Download Proxy v0.1</a>", January 2002.</td></tr>
 <tr><td class="author-text" valign="top"><b><a name="refs.push_proxy">[11]</a></b></td>
 <td class="author-text"><a href="mailto:jason@jasonthomas.com">Thomas, J.</a>, "<a href="http://groups.yahoo.com/group/the_gdf/message/9317">Push Proxy v0.1</a>", August 2002.</td></tr>
-<tr><td class="author-text" valign="top"><b><a name="refs.gnutella_rfc">[12]</a></b></td>
-<td class="author-text"><a href="mailto:jason@jasonthomas.com">Thomas, J.</a>, "<a href="http://groups.yahoo.com/group/the_gdf/message/9317">Gnutella Protocol</a>", August 2002.</td></tr>
+<tr><td class="author-text" valign="top"><b><a name="refs.clip2">[12]</a></b></td>
+<td class="author-text">Clip2, "<a href="http://www.clip2.com/GnutellaProtocol04.pdf">The Gnutella Protocol Specification v0.4, Document Revision 1.2</a>".</td></tr>
 </table>
 
 <a name="rfc.authors"><br><hr size="1" shade="0"></a>
@@ -689,7 +700,7 @@ Acknowledgements<br></b>
 <td class="author-text"><a href="http://www.limewire.org">http://www.limewire.org</a></td></tr>
 </table>
 
-<a name="anchor5"><br><hr size="1" shade="0"></a>
+<a name="anchor4"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
 <a name="rfc.section.A"></a><h3>Appendix A.&nbsp;Acknowledgements</h3>
 

@@ -7,7 +7,7 @@
 <rfc docname="gnutella-unicast-search-01">
   <front>
     <title>
-	  Gnutella UltraPeer Walking v0.01
+	  Gnutella UltraPeer Crawling v0.01
 	</title>
     <author initials="S.D" surname="Daswani" fullname="Susheel Daswani">
 	  <organization>LimeWire LLC</organization>
@@ -30,6 +30,8 @@
 	<keyword>unicast</keyword>	
 	<keyword>search</keyword>	
 	<keyword>GDF</keyword>	
+	<keyword>walk</keyword>	
+	<keyword>crawl</keyword>	
 	<keyword>Gnutella Developer Forum</keyword>	
 	<keyword>LimeWire</keyword>	
     <abstract>
@@ -76,7 +78,7 @@
 		“SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
 		“RECOMMENDED”, “MAY”, and “OPTIONAL” in this 
 		document are to be interpreted as described in 
-		RFC 2119.<xref target="refs.RFC2119"/>
+		RFC 2119.<xref target="RFC2119"/>
 		An implementation is not compliant if it fails to satisfy one or 
 		more of the MUST or REQUIRED level requirements for the protocols 
 		it implements. An implementation that satisfies all the MUST or 
@@ -250,11 +252,11 @@
 		UltraPeers MUST follow.  These are:
 		  <list style="numbers">
 		    <t>
-			  Searches MUST NOT be sent to more than 20,000
+			  Searches MUST NOT be sent to more than 10,000
 			  UltraPeers.
 			</t>
 			<t>
-			  Clients MUST NOT seek more than 2,000 results.
+			  Clients MUST NOT seek more than 1,000 results.
 			</t>
 			<t>
 			  Clients MUST NOT query more than 1 UltraPeer every
@@ -302,11 +304,25 @@
 		over TCP.  When a server receives a message over its open UDP
 		port, it MUST send any replies via UDP and over the same
 		port it is listening on.  As in the current Gnutella 
-		network, all replies are sent back to the sender.  Otherwise,
+		network, all replies are sent back to the sender.  This is
+		an important point in terms 
+		of <xref target="security">security</xref>.  Otherwise,
 		servers should respond to messages just as if they 
 		recieved them over TCP.  Servers SHOULD accept all of the
 		traditional Gnutella messages, as defined in 
-		the <xref target="refs.gnutella_rfc">Gnutella RFC</xref>.
+		the <xref target="refs.clip2">Gnutella RFC</xref>.
+		
+		<vspace/>
+		<vspace/>
+		On the server side, UltraPeers also MUST start forwarding 
+		TTL=1 queries to leaves.  Without this change, queries would
+		have to be sent with TTL=2, which would lessen the fine-grained
+		control over the query and would eliminate benefits such as
+		no longer needing to concern ourselves 
+		with <xref target="cycles">cycles</xref>.  The current practice
+		of not forwarding TTL=1 queries to leaves also avoids using 
+		the powerful UltraPeer infrastructure that can be used more
+		productively. 
 		</t>
 	  </section>
 	  <section anchor="discovery" title="UltraPeer Discovery">
@@ -327,14 +343,17 @@
 		  If an UltraPeer's cache of other UltraPeers drops
 		  below a certain threshold, for example 1000, the
 		  UltraPeer MUST take steps to refresh its cache.  To
-		  do this, UltraPeers send pings over UDP to the 
-		  It does so using the normal broadcast ping message, 
-		  looking for 
-		  the <xref target="ggep_pongs">GGEP extension</xref> in
-		  pongs.  UltraPeers also SHOULD read any pongs that
-		  they pass, even when not intended for them directly,
-		  to limit the need to send broadcast
-		  pings on their own.
+		  do this, UltraPeers send pings over UDP to the UltraPeers
+		  in their search cache.  This provides access to pongs
+		  that may not be within the horizon of the normal ping
+		  broadcast.  
+		  
+		  <vspace/>
+		  <vspace/>
+		  While UltraPeers MUST maintain an adequate cache of 
+		  other UltraPeers to query, they also MUST send a minimum
+		  number of pings to make this possible, less the network
+		  become flooded with ping and pong traffic.
 		</t>
 	  </section>
 	  </section>
@@ -369,7 +388,7 @@
 			same port registered for Gnutella for TCP.
 			UltraPeers MAY, however, listen 
 			on a different port, particularly when, for example,
-			there is anothing Gnutella client listening on 6346,
+			there is another Gnutella client listening on 6346,
 			or when another application is using that port for
 			any reason.  In all cases, clients MUST
 			listen on the same port for both TCP and UDP traffic.
@@ -407,7 +426,7 @@
 			excessive fragmentation.  The MTU of modem links
 			can be prohibitively small, as low as 296 bytes,
 			so we make no attempt to remain below this 
-			threshold.<xref target="refs.MTU"/>  These links
+			threshold.<xref target="RFC1191"/>  These links
 			should only occur on the edges of the network,
 			however, as long as UltraPeer election algorithms are 
 			correctly measuring bandwidth.  This means that any
@@ -417,13 +436,22 @@
 			datagram sizes.  In general, clients SHOULD limit the
 			size of their datagrams whenever appropriate.  A limit
 			of 512 is very conservative, and limiting datagrams 
-			to 1,024 bytes or less should avoid fragmentation on
-			the vast majority of routers.  This will often not
-			be possible for query hits.  Hits returning many
-			results, however, may indicate an overly general 
-			query (such as "txt"), so client MAY choose to
-			limit the responses per query hit to limit the 
-			overall size.
+			to 1,500 bytes or less should avoid fragmentation on
+			the vast majority of 
+			routers.<xref target="RFC1191"/>
+			
+			<vspace/>
+			<vspace/>	
+			This will often not be possible for query hits.  
+			To address this problem, it is RECOMMENDED that 
+			developers break up large query hits into multiple smaller 
+			query hits.  This will increase the bandwidth required 
+			to return results only slightly (due to sending the same 
+			header multiple times) while reducing or eliminating fragmentation.
+			It also avoids the current "all or nothing" approach where all 
+			results from a host are lost if one packet is lost.  In this 
+			scheme, some hits can still get through when a packet 
+			from another hit is lost.
 		  </t>
 		</section>
 		<section anchor="congestion" title="Congestion">
@@ -447,57 +475,26 @@
 		  <t>
 			In the past, a principal objection to using UDP has been
 			that it allows anyone to easily execute a DDOS attack
-			on any target machine.  To execute such an attack, a
-			node would simply have to send out queries advertising 
-			the IP and port of the target machine in the GGEP block.
-			If no precautions were taken, all replying nodes would
-			attempt to reply to the target machine, quickly flooding
-			it with UDP datagrams.  			  
+			on any target machine.  This concern has been based on the
+			assumption that queries would require an extension listing
+			the UDP IP address and port to reply to, however.  In this
+			proposal, this extension is not required, as responses are
+			always sent directly back to the node that sent them, 
+			rendering such an attack impossible.
 	      </t>
 		  </section>
-		  <section title="DDOS Prevention">
-		    <t>
-			  To prevent such an attack, UltraPeers MUST verify that
-		      the IP address in the advertised GGEP block matches the 
-		      source IP address of the datagram itself.
-		      The ports are allowed to vary, as clients
-			  MAY send their UDP queries out over ephemeral ports.
-			  Clients also MAY send these queries over TCP while 
-			  expecting replies over UDP.  If the advertised IP 
-			  address does not match the IP address of the datagram, 
-			  UltraPeers MUST discard the query.  By performing this 
-			  check, UltraPeers largely thwart the attack described 
-			  above.  With this check in place, attackers would have 
-			  to establish UltraPeers themselves on a large scale and let 
-			  these queries through, which is difficult.  This security 
-			  check is required because not performing this check would 
-			  effectively do the attackers' work for them.
-			</t>
-		  </section>
 		</section>
-	<section anchor="other" title="Other Considerations">
-	  <section anchor="push" title="Push Downloads">
-	    <t>
-		  This query scheme gracefully handles push downloads.  In
-		  fact, it incorporates many of the ideas of the 
-		  Push Proxy proposal.<xref target="refs.push_proxy"/>
-		  This scheme does not, however, allow two firewalled hosts
-		  to download from each other, as in the "Download Proxy"
-		  proposal.<xref target="refs.download_proxy"/>
-		</t>
+      <section anchor="ggep" title="GGEP Extensions">
+	    <section anchor="ggep_pongs" title="Advertise UDP port in Pongs">
+	      <t>
+		    UltraPeers that are capable of receiving Gnutella 
+			messages over UDP MUST advertise that fact in a
+			new GGEP extension in 
+			pongs.<xref target="refs.GGEP"/>
+			TODO: describe the GGEP extension in more detail.		  
+		  </t>
+		</section>
 	  </section>
-	</section>
-		  <section anchor="ggep" title="GGEP Extensions">
-			<section anchor="ggep_pongs" title="Advertise UDP port in Pongs">
-			  <t>
-			    UltraPeers that are capable of receiving Gnutella 
-			    messages over UDP MUST advertise that fact in a
-			    new GGEP extension in 
-			    pongs.<xref target="refs.GGEP"/>
-			    TODO: describe the GGEP extension in more detail.		  
-		      </t>
-		    </section>
-		  </section>
     <section anchor="features" title="Additional Features">
 	  <section anchor="cycles" title="Cycles No Longer a Concern">
 	    <t>
@@ -505,11 +502,32 @@
 		  concern for cycles in intra-UltraPeer connections is eliminated.  In the
 		  current network, cycles can be a serious problem in the worst case,
 		  resulting in nodes receiving many duplicate 
-		  messages.<xref target="refs.RandomWalk"/>  This eliminates
+		  messages, wasting bandwidth, CPU, and 
+		  memory.<xref target="refs.RandomWalk"/>  This eliminates
 		  these duplicates except in the case where leaves are connected to 
 		  multiple UltraPeers, and two or more of their UltraPeers are sent
 		  the same query.  
 	    </t>
+	  </section>
+	  <section anchor="push" title="Higher Success Rate for Push Downloads">
+	    <t>
+		  This query scheme gracefully handles push downloads.  In
+		  fact, it incorporates many of the ideas of the 
+		  Push Proxy proposal.<xref target="refs.push_proxy"/>
+		  This scheme does not, however, allow two firewalled hosts
+		  to download from each other, as in the "Download Proxy"
+		  proposal.<xref target="refs.download_proxy"/>  In the current
+		  network, push requests frequently fail, primarily because
+		  the node serving the file may be 7 hops away from the node
+		  requesting a file, and the request has to travel through
+		  all intervening nodes.  As a result, if any node along that
+		  path leaves the network, the push will not go through.
+		  With the adoption of this proposal, success rates for 
+		  push request should increase dramatically, as the node 
+		  serving the file will only be from 2 to 3 hops away 
+		  (depending on whether the node serving the file is
+		  a leaf or an UltraPeer).
+		</t>
 	  </section>
 	</section>
   </middle>
@@ -638,20 +656,7 @@
         </front>
       </reference>
 
-      <reference anchor="refs.RFC2119">
-        <front>
-          <title>Key words for use in RFCs to Indicate Requirement Levels</title>
-          <author initials="S." surname="Bradner"
-                  fullname="Scott Bradner">
-            <organization abbrev="ISI">
-              Harvard University
-            </organization>
-          </author>
-
-          <date month="May" year="1997" />
-        </front>
-        <seriesInfo name="RFC" value="2119" />
-      </reference>
+      <?rfc include="reference.RFC.2119" ?>
 
       <reference target="http://groups.yahoo.com/group/the_gdf/message/4492"
 	             anchor="refs.agthorr">
@@ -678,20 +683,7 @@
 		</front>
 	  </reference>
 
-	  <reference target="http://www.faqs.org/rfcs/rfc1191.html"
-	             anchor="refs.MTU">
-        <front>
-          <title>Path MTU Discovery</title>
-          <author initials="J.C." surname="Mogul"
-                  fullname="J.C. Mogul">
-          </author>
-          <author initials="S.E." surname="Deering"
-                  fullname="S.E. Deering">
-          </author>
-          <date month="November" year="1990" />
-        </front>
-        <seriesInfo name="RFC" value="1191" />
-      </reference>
+      <?rfc include="reference.RFC.1191" ?>
 
 	  <reference target="http://groups.yahoo.com/group/the_gdf/files/Proposals/GGEP/GnutellaGenericExtensionProtocol.0.51.html"
 	             anchor="refs.GGEP">
@@ -735,17 +727,16 @@
         </front>
       </reference>
 
-	  <reference target="http://groups.yahoo.com/group/the_gdf/message/9317"
-	             anchor="refs.gnutella_rfc">
+      <reference anchor="refs.clip2"
+                 target="http://www.clip2.com/GnutellaProtocol04.pdf">
         <front>
-          <title>Gnutella Protocol</title>
-          <author initials="J.T." surname="Thomas"
-                  fullname="Jason Thomas">
-		    <address>
-			  <email>jason@jasonthomas.com</email>
-			</address>
+          <title>The Gnutella Protocol Specification v0.4, Document Revision 1.2</title>
+          <author fullname="Clip2">
+            <organization>Clip2</organization>
           </author>
-          <date month="August" year="2002" />
+          <date month="" year="" />
+          <note title="URL"><t>http://www.clip2.com/GnutellaProtocol04.pdf</t></note>
+          <note title="URN"><t>urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB</t></note>
         </front>
       </reference>
 	</references>
