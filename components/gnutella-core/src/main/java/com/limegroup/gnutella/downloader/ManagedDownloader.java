@@ -1347,8 +1347,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //state.  Otherwise the following call is needed to restart
             //the timer.
             if (dloaders.size()==0 && getState()!=COMPLETE && 
-               getState()!=ABORTED && getState()!=GAVE_UP && 
-               getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE)
+                getState()!=ABORTED && getState()!=GAVE_UP && 
+                getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
+                && getState()!=REMOTE_QUEUED)
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
@@ -1458,6 +1459,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
                 //The extra time to sleep can be tuned. For now it's 1 S.
                 referenceArray[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
+                synchronized(this) {
+                    if(dloaders.size()==0)
+                        setState(REMOTE_QUEUED);
+                }
                 return 1;
             } catch (IOException iox) {
                 debug(iox);

@@ -22,6 +22,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int COULDNT_MOVE_TO_LIBRARY = 7;
     public static final int WAITING_FOR_RESULTS = 8;
     public static final int CORRUPT_FILE      = 9;
+    public static final int REMOTE_QUEUED     = 10;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.
