@@ -5,6 +5,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.security.Authenticator;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -75,12 +76,20 @@ public class ConnectionManager {
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
+    
+    /**
+     * For authenticating users
+     */
+    private Authenticator _authenticator;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
+     * @param authenticator Authenticator instance for authenticating users
      */
-    public ConnectionManager(ActivityCallback callback) {
+    public ConnectionManager(ActivityCallback callback, 
+        Authenticator authenticator) {
         _callback = callback;		
+        this._authenticator = authenticator; 
 		_settings = SettingsManager.instance(); 
     }
 
