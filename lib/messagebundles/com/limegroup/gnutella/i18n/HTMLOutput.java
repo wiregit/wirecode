@@ -156,7 +156,7 @@ class HTMLOutput {
 "   <tr>\n" +
 "    <td valign=\"top\" style=\"line-height: 16px;\">\n" + /* Start column 1 (main content) */
 "     The LimeWire Open Source Project has embarked on an effort to\n" +
-"     internationalize LimeWire.&nbsp If you are an avid English-speaking\n" +
+"     internationalize LimeWire.&nbsp; If you are an avid English-speaking\n" +
 "     user fluent in another language, we need your help!&nbsp; Helping\n" +
 "     requires no programming knowledge and little computer savviness\n" +
 "     beyond using a word processor.<br />\n" +
@@ -165,18 +165,18 @@ class HTMLOutput {
 "     <br />\n" +
 "     First, view this <a\n" +
 "     href=\"http://www.limewire.com/img/screenshots/search.jpg\"\n" +
-"     target=\"_blank\">LimeWire screen-shot</a>.&nbsp Notice how the tabs\n" +
+"     target=\"_blank\">LimeWire screen-shot</a>.&nbsp; Notice how the tabs\n" +
 "     (<b>Search</b>, <b>Monitor</b>, <b>Library</b>, etc.) and the\n" +
 "     buttons (<b>Download</b>, <b>Kill Download</b>, etc.) have text\n" +
-"     on them.&nbsp All elements of the LimeWire interface can be\n" +
+"     on them.&nbsp; All elements of the LimeWire interface can be\n" +
 "     translated to any language very easily.<br />\n" +
 "     <br />\n" +
 "     This translation is accomplished by packaging all the words of\n" +
-"     the program into a &quot;message bundle&quot;.&nbsp A message bundle is more or\n" +
+"     the program into a &quot;message bundle&quot;.&nbsp; A message bundle is more or\n" +
 "     less a list, with phrases corresponding to certain parts of the\n" +
-"     software.&nbsp There are message bundles for different languages, so\n" +
+"     software.&nbsp; There are message bundles for different languages, so\n" +
 "     there is an English message bundle, a French message bundle, a\n" +
-"     Japanese message bundle, etc.&nbsp In English, the text for the\n" +
+"     Japanese message bundle, etc.&nbsp; In English, the text for the\n" +
 "     download button is &quot;Download&quot;, whereas in French the text is\n" +
 "     &quot;Charger&quot; (which is French for &quot;download&quot;).<br />\n" +
 "     <br />\n" +
@@ -209,7 +209,7 @@ class HTMLOutput {
 "     </blockquote>\n" +
 "     Note that the line starting with a &quot;#&quot; is a comment line,\n" +
 "     meaning it is not used by LimeWire.&nbsp; The English translation will always\n"+
-"     be present as a reference.&nbsp A label that is not yet translated in a bundle \n" +
+"     be present as a reference.&nbsp; A label that is not yet translated in a bundle \n" +
 "     will look like the following:<br />\n" +
 "     <blockquote>\n" +
 "      <table border=\"0\" cellspacing=\"1\" cellpadding=\"4\" bgcolor=\"#b1b1b1\">\n" +
@@ -431,7 +431,7 @@ class HTMLOutput {
 "     be used unambiguously, please use it in preference to the English term, even\n" +
 "     if you have seen many uses of this English term on web sites.&nbsp; A good\n" +
 "     translation must be understood by most native people that are not addicted to\n" +
-"     the Internet and computers &quot;jargon&quot;.&nbsp Pay particularly attention to the\n" +
+"     the Internet and computers &quot;jargon&quot;.&nbsp; Pay particularly attention to the\n" +
 "     non-technical translation of common terms: download, upload, host, byte,\n" +
 "     firewall, address, file, directory, # (number of), leaf (terminal node)...<br />\n" +
 "     <br />\n" +
