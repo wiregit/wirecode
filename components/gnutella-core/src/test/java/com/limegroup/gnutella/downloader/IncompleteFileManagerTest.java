@@ -39,7 +39,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
                new byte[16], 56, false, 4, true, null,
                urns);
        } catch (IOException e) {
-           fail("Invalid URN");
+           fail("Invalid URN", e);
            return null;
        }
     }
@@ -154,7 +154,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
                 "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
             assertEquals(urn, ifm.getCompletedHash(tmp1));
         } catch (IOException e) {
-            fail("Couldn't make URN");
+            fail("Couldn't make URN", e);
         }
     }
 
@@ -229,7 +229,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         try {
             file2.createNewFile();
         } catch (IOException e) {
-            fail("Couldn't create "+file2);
+            fail("Couldn't create "+file2, e);
         }
 
         //After purging, only hashes associated with files that exists remain.
@@ -256,7 +256,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     }
 
     /** Serializes, then deserializes. */
-    public void testSerialize() {
+    public void testSerialize() throws Exception {
         File tmp=null;
         try {
             //Create an IFM with one entry, with hash.
@@ -288,7 +288,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
             try {
                 inDir = SettingsManager.instance().getIncompleteDirectory();
             } catch(java.io.FileNotFoundException fnfe) {
-                fail("unable to set up test-cannot find incomplete directory");
+                fail("unable to set up test-cannot find incomplete directory", fnfe);
             }
             incomp =  new File(inDir, "T-1839-file name.txt");
             VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(incomp);
@@ -300,12 +300,6 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
             assertEquals(new File(inDir, "T-1839-file name.txt"),
                 ifm2.getFile(newRFD("different name.txt", 1839, 
                                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("IO problem");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            fail("Class not found");
         } finally {
             if (tmp!=null)
                 tmp.delete();
@@ -315,33 +309,25 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
 
     /** Test that serialized versions of IncompleteFileManager v. 1.9 can be
      *  deserialized.  (No hashes, didn't use VerifyingFile internally.) */
-    public void testDeserialize_19() {
+    public void testDeserialize_19() throws Exception{
         doDeserializeTest("IncompleteFileManager.1_9.dat");
     }
 
     /** Test that serialized versions of IncompleteFileManager v. 1.14 can be
      *  deserialized.  (No hashes.) */
-    public void testOldDeserialize_114() {
+    public void testOldDeserialize_114() throws Exception {
         doDeserializeTest("IncompleteFileManager.1_14.dat");
     }
 
-    private IncompleteFileManager doDeserializeTest(String filename) {
+    private IncompleteFileManager doDeserializeTest(String filename) throws Exception {
         IncompleteFileManager read=null;
-        try {
-            ObjectInputStream in=new ObjectInputStream(
-                new FileInputStream( CommonUtils.getResourceFile(
-                    "com/limegroup/gnutella/downloader/"+filename
-                ) )
-            );
-            read=(IncompleteFileManager)in.readObject();
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("IO problem: "+e);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            fail("Class not found: "+e);
-        }
+        ObjectInputStream in=new ObjectInputStream(
+            new FileInputStream( CommonUtils.getResourceFile(
+                "com/limegroup/gnutella/downloader/"+filename
+            ) )
+        );
+        read=(IncompleteFileManager)in.readObject();
+        in.close();
 
         VerifyingFile vf=(VerifyingFile)read.getEntry(
                                                new File("another file.txt"));

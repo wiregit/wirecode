@@ -39,31 +39,22 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
      * colossal test, delegating to lots of static helper methods.  At some
      * point, those static methods should be made standard JUnit testX methods.
      */
-    public void testBuffering() {
-        try {
-            //Create loopback connection.  Uncomment the MiniAcceptor class in
-            //Connection to get this to work.
-            com.limegroup.gnutella.MiniAcceptor acceptor=
-                new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            ManagedConnection.QUEUE_TIME=1000;
-            ManagedConnection out=newConnection("localhost", PORT);
-            out.initialize();
-            Connection in=acceptor.accept();      
-            testSendFlush(out, in);
-            testReorderBuffer(out, in);
-            testBufferTimeout(out, in);
-            testDropBuffer(out, in);
-            testPriorityHint(out, in);
-            in.close();
-            out.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Unexpected IO problem");
-        } catch (BadPacketException e) {
-            e.printStackTrace();
-            fail("Unexpected bad packet");
-        }
+    public void testBuffering() throws Exception {
+        //Create loopback connection.  Uncomment the MiniAcceptor class in
+        //Connection to get this to work.
+        com.limegroup.gnutella.MiniAcceptor acceptor=
+            new com.limegroup.gnutella.MiniAcceptor(null, PORT);
+        ManagedConnection.QUEUE_TIME=1000;
+        ManagedConnection out=newConnection("localhost", PORT);
+        out.initialize();
+        Connection in=acceptor.accept();      
+        testSendFlush(out, in);
+        testReorderBuffer(out, in);
+        testBufferTimeout(out, in);
+        testDropBuffer(out, in);
+        testPriorityHint(out, in);
+        in.close();
+        out.close();
     }
 
     private static void testSendFlush(ManagedConnection out, Connection in) 
@@ -359,19 +350,18 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         Assert.that(dropped+read==total);
     }
 
-    private static ManagedConnection newConnection(String host, int port) {
+    private static ManagedConnection newConnection(String host, int port) throws Exception {
         ManagedConnection mc = new ManagedConnection(host, port);
 		setStubs(mc);
 		return mc;
     }
 
-	private static void setStubs(ManagedConnection mc) {
+	private static void setStubs(ManagedConnection mc) throws Exception {
         try {
             PrivilegedAccessor.setValue(mc, "_router", new MessageRouterStub());
             PrivilegedAccessor.setValue(mc, "_manager", new ConnectionManagerStub());
         } catch(Exception e) {
-            e.printStackTrace();
-            fail("could not initialize test");
+            fail("could not initialize test", e);
         }		
 	}
 

@@ -133,36 +133,29 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() {
+	protected void setUp() throws Exception {
 		urns = new URN[VALID_URNS.length];
 		for(int i=0; i<urns.length; i++) {
-			try {
-				urns[i] = URN.createSHA1Urn(VALID_URNS[i]);
-				assertNotNull("urn should not be null",urns[i]);
-				assertTrue("should be SHA1: '"+urns[i]+"'\r\n"+
-						   urns[i].getUrnType(), urns[i].isSHA1());
-				assertTrue("urn should not have the empty string", 
-						   !urns[i].toString().equals(""));
-			} catch(IOException e) {
-				assertTrue("unexpected exception: "+e, false);
-			}		
+			urns[i] = URN.createSHA1Urn(VALID_URNS[i]);
+			assertNotNull("urn should not be null",urns[i]);
+			assertTrue("should be SHA1: '"+urns[i]+"'\r\n"+
+					   urns[i].getUrnType(), urns[i].isSHA1());
+			assertTrue("urn should not have the empty string", 
+					   !urns[i].toString().equals(""));
+
 		}
 		sha1Urns = new URN[VALID_SHA1_URNS.length];
 		for(int i=0; i<sha1Urns.length; i++) {
-			try {
-				sha1Urns[i] = URN.createSHA1Urn(VALID_SHA1_URNS[i]);
-				assertNotNull("urn should not be null",sha1Urns[i]);
-				assertTrue("urn should not have the empty string", 
-						   !sha1Urns[i].toString().equals(""));
-			} catch(IOException e) {
-				assertTrue("unexpected exception: "+e, false);
-			}		
+			sha1Urns[i] = URN.createSHA1Urn(VALID_SHA1_URNS[i]);
+			assertNotNull("urn should not be null",sha1Urns[i]);
+			assertTrue("urn should not have the empty string", 
+					   !sha1Urns[i].toString().equals(""));
 		}
 		for(int i=0; i<VALID_URN_HTTP_STRINGS.length; i++) {
 			try {
 				VALID_URNS_HTTP[i] = URN.createSHA1UrnFromHttpRequest(VALID_URN_HTTP_STRINGS[i]);
 			} catch(IOException e) {
-				assertTrue("could not create urns for URNTest setup: "+e, false);
+			    fail( "could not create urns for URNTest setup", e);
 			}
 		}
 
@@ -170,7 +163,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			try {
 				VALID_URNS_URI_RES[i] = URN.createSHA1UrnFromUriRes(VALID_URN_URI_RES_STRINGS[i]);
 			} catch(IOException e) {
-				fail("could not create urns for URNTest setup: "+e);
+				fail("could not create urns for URNTest setup", e);
 			}
 		}
 
@@ -195,13 +188,9 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Tests that valid urn strings successfully construct new URN instances.
 	 */
-	public void testValidUrns() {
+	public void testValidUrns() throws Exception {
 		for(int i=0; i<VALID_URNS.length; i++) {
-			try {
-				URN urn = URN.createSHA1Urn(VALID_URNS[i]);
-			} catch(IOException e) {
-				assertTrue("unexpected exception: "+e, false);				
-			}
+            URN urn = URN.createSHA1Urn(VALID_URNS[i]);
 		}
 	}
 
@@ -215,8 +204,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 		for(int i=0; i<INVALID_URNS.length; i++) {
 			try {
 				URN urn = URN.createSHA1Urn(INVALID_URNS[i]);
-				assertTrue("should have thrown an exception on: "+
-						   INVALID_URNS[i], false);
+				fail("should have thrown an exception on: " + INVALID_URNS[i]);
 			} catch(IOException e) {
 			}
 		}
@@ -225,32 +213,22 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Tests the URN constructor that takes a File instance.
 	 */
-	public void testUrnConstructionFromFiles() {
+	public void testUrnConstructionFromFiles() throws Exception {
 		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
 		File[] testFiles = _testDir.listFiles();
 		File curFile = null;
-		try {
-			for(int i=0; i<10; i++) {
-				curFile = testFiles[i];
-				if(!curFile.isFile()) {
-					continue;
-				}
-				URN urn = URN.createSHA1Urn(curFile);
-				assertTrue("should be a valid SHA1", urn.isSHA1());
-				assertTrue("should be considered a urn", urn.isUrn(urn.toString()));
-				assertTrue("should be == UrnTypes", urn.getUrnType() == UrnType.SHA1);
-				try {
-					URN newURN = URN.createSHA1Urn(urn.toString());
-					assertEquals("urns should be equal", urn, newURN);
-				} catch(IOException e) {
-					assertTrue("unexpected exception: "+e, false);
-				}
+		for(int i=0; i<10; i++) {
+			curFile = testFiles[i];
+			if(!curFile.isFile()) {
+				continue;
 			}
-		} catch(IOException e) {
-			assertTrue("unexpected exception: "+e, false);
-		} catch(InterruptedException e) {
-            fail("Thread interrupted.");
-        }
+			URN urn = URN.createSHA1Urn(curFile);
+			assertTrue("should be a valid SHA1", urn.isSHA1());
+			assertTrue("should be considered a urn", urn.isUrn(urn.toString()));
+			assertEquals("should be == UrnTypes", urn.getUrnType(), UrnType.SHA1);
+            URN newURN = URN.createSHA1Urn(urn.toString());
+            assertEquals("urns should be equal", urn, newURN);
+		}
 	}
 
 
@@ -262,16 +240,15 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			try {
 				URN.createSHA1UrnFromHttpRequest(VALID_URN_HTTP_STRINGS[i]);
 			} catch(IOException e) {
-				assertTrue("construction of an URN from a valid get request failed: "+e,
-						   false);
+				fail("construction of an URN from a valid get request failed",
+						   e);
 			}
 		}
 		for(int i=0; i<invalidURNStrings.length; i++) {
 			try {
 				URN.createSHA1UrnFromHttpRequest(invalidURNStrings[i]);
-				assertTrue("construction of a URN from an invalid get request succeeded: "+
-						   invalidURNStrings[i],
-						   false);				
+				fail("construction of a URN from an invalid get request succeeded: "+
+						   invalidURNStrings[i]);
 			} catch(IOException e) {
 				continue;
 			}			
@@ -281,18 +258,15 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Test the URN constructor that takes only a file parameter.
 	 */
-	public void testCreateSHA1Urn() {
+	public void testCreateSHA1Urn() throws Exception {
 		File[] files = _testDir.listFiles();
 		for(int i=0; i<files.length; i++) {
 			if(!files[i].isFile()) continue;
 			try {
 				URN.createSHA1Urn(files[i]);
 			} catch(IOException e) {
-				assertTrue("could not create a SHA1 URN from a valid file: "+
-						   e, false);
-			} catch(InterruptedException e) {
-                fail("Thread interrupted.");
-            }
+				fail("could not create a SHA1 URN from a valid file", e);
+			}
 		}
 	}
 
@@ -318,11 +292,11 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 		};
 		
 		for(int i=0; i<validURNTypes.length; i++) {			
-			assertTrue(UrnType.isSupportedUrnType(validURNTypes[i]));
+			assertTrue("should be supported URNType", UrnType.isSupportedUrnType(validURNTypes[i]));
 		}
 
 		for(int i=0; i<invalidURNTypes.length; i++) {
-			assertTrue(!UrnType.isSupportedUrnType(invalidURNTypes[i]));
+			assertTrue("should not be supported URNType", !UrnType.isSupportedUrnType(invalidURNTypes[i]));
 		}
 	}
 
@@ -330,21 +304,17 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Tests the hashCode method.
 	 */
-	public void testHashCode() {
+	public void testHashCode() throws Exception {
 		int[] hashCodes = new int[VALID_URNS.length];
 		for(int i=0; i<VALID_URNS.length; i++) {
-			try {
-				hashCodes[i] = URN.createSHA1Urn(VALID_URNS[i]).hashCode();
-			} catch(IOException e) {
-				assertTrue(false);
-			}
+            hashCodes[i] = URN.createSHA1Urn(VALID_URNS[i]).hashCode();
 		}
 
 		for(int i=0; i<hashCodes.length; i++) {
 			int curCode = hashCodes[i];
 			for(int j=0; j<hashCodes.length; j++) {
 				if(i == j) continue;
-				assertTrue(curCode != hashCodes[j]);
+				assertTrue("hashes of two different URNs should not be equal", curCode != hashCodes[j]);
 			}
 		}
 	}
@@ -352,19 +322,15 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Tests the equals method.
 	 */
-	public void testEquals() {
+	public void testEquals()  throws Exception {
 		URN curUrn;
 		for(int i=0; i<urns.length; i++) {
 			curUrn = urns[i];
-			assertTrue("current urn is unexpectedly null", curUrn != null);
+			assertNotNull("current urn is unexpectedly null", curUrn);
 			for(int j=0; j<urns.length; j++) {
 				if(i == j) {
-					try {
-						URN tempUrn = URN.createSHA1Urn(urns[j].toString());
-						assertEquals("urns should be equal", curUrn, tempUrn);
-					} catch(IOException e) {
-						assertTrue("unexpected exception: "+e, false);
-					}
+					URN tempUrn = URN.createSHA1Urn(urns[j].toString());
+					assertEquals("urns should be equal", curUrn, tempUrn);
 					continue;
 				}
 				else {

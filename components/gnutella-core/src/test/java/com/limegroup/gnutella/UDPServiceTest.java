@@ -58,17 +58,11 @@ public class UDPServiceTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
 
-	private void establishConnection() {
+	private void establishConnection() throws Exception{
 		byte[] ipBytes = ROUTER_SERVICE.getAddress();
 		String address = Message.ip2string(ipBytes);
-		try {
-			ROUTER_SERVICE.connectToHostBlocking(address, 6346);
-			Thread.sleep(1000);
-		} catch(IOException e) {
-			fail("unexpected exception: "+e);
-		} catch(InterruptedException e) {
-			fail("unexpected exception: "+e);
-		}
+		ROUTER_SERVICE.connectToHostBlocking(address, 6346);
+		Thread.sleep(1000);
 		
 		RouterService.disconnect();
 	}
@@ -76,39 +70,34 @@ public class UDPServiceTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Test that sending pings to GUESS server returns the appropriate pongs.
 	 */
-	public void testPings() {
+	public void testPings() throws Exception {
 		establishConnection();
 		PingRequest ping = new PingRequest((byte)1);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ping.write(baos);
+		byte[] data = baos.toByteArray();
+		InetAddress ip = InetAddress.getLocalHost();
+		
+		System.out.println("localhost: "+ip); 
+		UDPService service = ROUTER_SERVICE.getUdpService();			
+		service.send(ping, ip, 6346);
+		System.out.println("send ping: "+ping); 
 		try {
-			ping.write(baos);
-			byte[] data = baos.toByteArray();
-			InetAddress ip = InetAddress.getLocalHost();
-			
-			System.out.println("localhost: "+ip); 
-			UDPService service = ROUTER_SERVICE.getUdpService();			
-			service.send(ping, ip, 6346);
-			System.out.println("send ping: "+ping); 
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {}
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {}
 
-			if(_pingReply == null) {
-				fail("PingReply unexpectedly null");
-			}
-			assertEquals("GUID of pong should equal GUID of ping", ping.getGUID(), 
-						 _pingReply.getGUID());
-			
-		} catch(Throwable t) {
-			t.printStackTrace();
-			fail("unexpected throwable: "+t);
-		}		
+		if(_pingReply == null) {
+			fail("PingReply unexpectedly null");
+		}
+		assertEquals("GUID of pong should equal GUID of ping", ping.getGUID(), 
+					 _pingReply.getGUID());
+
 	}
 
 	/**
 	 * Tests sending query requests to the UDP port.
 	 */
-	public void testQueryRequests() {
+	public void testQueryRequests() throws Exception {
 		establishConnection();
 		FileManager fm = ROUTER_SERVICE.getFileManager();
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
@@ -119,46 +108,26 @@ public class UDPServiceTest extends com.limegroup.gnutella.util.BaseTestCase {
 											   curName, false); 
 			PingRequest ping = new PingRequest((byte)1);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ping.write(baos);
+			byte[] data = baos.toByteArray();
+			InetAddress ip = InetAddress.getLocalHost();
+		
+			UDPService service = ROUTER_SERVICE.getUdpService();
+			service.send(ping, ip, 6346);
+			MessageRouter router = ROUTER_SERVICE.getMessageRouter();
 			try {
-				ping.write(baos);
-				byte[] data = baos.toByteArray();
-				InetAddress ip = InetAddress.getLocalHost();
-			
-				UDPService service = ROUTER_SERVICE.getUdpService();
-				service.send(ping, ip, 6346);
-				MessageRouter router = ROUTER_SERVICE.getMessageRouter();
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {}
-				ROUTER_SERVICE.query(ROUTER_SERVICE.newQueryGUID(), 
-									 curName, 0, null);
-				try {
-					while(_reply == null) {
-						Thread.sleep(100);
-					}
-				} catch(InterruptedException e) {
-					e.printStackTrace();
-				}				
-				
-				try {
-					RemoteFileDesc[] rfds = _reply.toRemoteFileDescArray(true);
-					assertEquals("should only be one response in reply", rfds.length, 1);	
-					assertEquals("reply name should equal query name", rfds[0].getFileName(),
-								 curName);
-					_reply = null;
-				} catch(BadPacketException e) {
-					fail("unexpected exception: "+e);
-				}
-			} catch(UnknownHostException e) {
-				fail("unexpected exception: "+e);
-				e.printStackTrace();
-			} catch(SocketException e) {
-				e.printStackTrace();
-				fail("unexpected exception: "+e);
-			} catch(IOException e) {
-				e.printStackTrace();
-				fail("unexpected exception: "+e);
-			}		
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {}
+			ROUTER_SERVICE.query(ROUTER_SERVICE.newQueryGUID(), 
+								 curName, 0, null);
+			while(_reply == null) {
+				Thread.sleep(100);
+			}
+			RemoteFileDesc[] rfds = _reply.toRemoteFileDescArray(true);
+			assertEquals("should only be one response in reply", rfds.length, 1);	
+			assertEquals("reply name should equal query name", rfds[0].getFileName(),
+						 curName);
+            _reply = null;
 		}
 	}
 

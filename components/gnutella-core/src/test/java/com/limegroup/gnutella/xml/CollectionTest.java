@@ -195,7 +195,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testSerialized() {
+    public void testSerialized()  throws Exception  {
         createFiles();
         populateDirectory();
 
@@ -271,8 +271,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    private void createFiles() {
-        try {
+    private void createFiles() throws Exception {
         HashMap map = new HashMap();
         LimeXMLDocument doc = null;
         LimeXMLReplyCollection.MapSerializer ms = null;
@@ -301,11 +300,6 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         map.put(mfm.readFromMap(mason), doc);
         ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"video.collection"), map);
         ms.commit();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("could not make collections!");
-        }
     }
     
 

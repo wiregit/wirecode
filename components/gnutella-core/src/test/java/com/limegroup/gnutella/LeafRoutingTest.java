@@ -47,7 +47,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testLegacy() {
+    public void testLegacy() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
@@ -72,24 +72,13 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected port", PORT, settings.getPort());
 
         //Run tests
-        try {
-            connect(rs);
-            doRedirect();
-            doLeafBroadcast(rs);
-            doBroadcastFromUltrapeer();
-            doConnectionToOldDisallowed();
-            //doNoBroadcastFromOld();
-            shutdown();
-        } catch (IOException e) { 
-            e.printStackTrace();
-            fail("Mysterious IOException: "+e);
-        } catch (BadPacketException e) { 
-            e.printStackTrace();
-            fail("Mysterious bad packet: "+e);
-        } catch (Exception e) {
-            e.printStackTrace();
-			fail("unexpected exception: "+e);
-        }
+        connect(rs);
+        doRedirect();
+        doLeafBroadcast(rs);
+        doBroadcastFromUltrapeer();
+        doConnectionToOldDisallowed();
+        //doNoBroadcastFromOld();
+        shutdown();
      }
 
      ////////////////////////// Initialization ////////////////////////

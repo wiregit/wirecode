@@ -123,27 +123,16 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * Tests that alternate locations with the same SHA1 values can be
 	 * added to a <tt>FileDesc</tt>.
 	 */
-	public void testAddingAlternateLocations() {
+	public void testAddingAlternateLocations() throws Exception{
 		File file = new File("build.xml");
-		try {
-			Set urns = FileDesc.calculateAndCacheURN(file);
-			FileDesc fd = new FileDesc(file, urns, 0);
-			URN sha1 = fd.getSHA1Urn();
-  			URL sha1Url = new URL("http", "60.23.35.10", 6346, 
-								  "/uri-res/N2R?"+sha1.httpStringValue());
-			AlternateLocation loc =  
-				AlternateLocation.createAlternateLocation(sha1Url);
-			fd.addAlternateLocation(loc);
-		} catch(IllegalArgumentException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
-		} catch(MalformedURLException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
-		} catch(IOException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
-		}
+		Set urns = FileDesc.calculateAndCacheURN(file);
+		FileDesc fd = new FileDesc(file, urns, 0);
+		URN sha1 = fd.getSHA1Urn();
+		URL sha1Url = new URL("http", "60.23.35.10", 6346, 
+							  "/uri-res/N2R?"+sha1.httpStringValue());
+		AlternateLocation loc =  
+			AlternateLocation.createAlternateLocation(sha1Url);
+		fd.addAlternateLocation(loc);
 	}
 
 	/**

@@ -66,27 +66,23 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Test the method for copying files from jars to disk.
 	 */
-	public void testCommonUtilsCopyResourceFile() {
+	public void testCommonUtilsCopyResourceFile() throws Exception {
 		File newResourceFile = new File("themes", "copyTest");
 		newResourceFile.deleteOnExit();
 		String fileName = "com/sun/java/util/collections/Comparable.class";
-		try {
-			File collectionsFile = new File("lib", "collections.jar");
-			if(!collectionsFile.isFile()) {
-				collectionsFile = new File("../lib", "collections.jar");
-			}
-			if(!collectionsFile.isFile()) {
-				fail("collections.jar not located");
-			}
-			JarFile collections = new JarFile(collectionsFile);//new File("lib", "collections.jar"));
-			JarEntry entry = collections.getJarEntry(fileName);
-			long entrySize = entry.getCompressedSize();
-			CommonUtils.copyResourceFile(fileName, newResourceFile, false);
-			assertEquals("size of file in jar should equal size on disk", 
-						 entrySize, newResourceFile.length());
-		} catch(Exception e) {
-			fail("unexpected exception: "+e);
-		}		
+		File collectionsFile = new File("lib", "collections.jar");
+		if(!collectionsFile.isFile()) {
+			collectionsFile = new File("../lib", "collections.jar");
+		}
+		if(!collectionsFile.isFile()) {
+			fail("collections.jar not located");
+		}
+		JarFile collections = new JarFile(collectionsFile);//new File("lib", "collections.jar"));
+		JarEntry entry = collections.getJarEntry(fileName);
+		long entrySize = entry.getCompressedSize();
+		CommonUtils.copyResourceFile(fileName, newResourceFile, false);
+		assertEquals("size of file in jar should equal size on disk", 
+					 entrySize, newResourceFile.length());
 
 		newResourceFile.delete();
 		new File("themes").delete();

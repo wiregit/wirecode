@@ -91,7 +91,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
 
     /////////////////////////// Reading and Writing /////////////////////////
 
-    public void testWriteNormal() {
+    public void testWriteNormal() throws Exception {
         TestExtendedEndpoint.now=100;
         e.recordConnectionSuccess();
         TestExtendedEndpoint.now=113;
@@ -99,37 +99,29 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         TestExtendedEndpoint.now+=ExtendedEndpoint.WINDOW_TIME; //1x
         e.recordConnectionFailure();
         StringWriter out=new StringWriter();
-        try {
-            e.write(out);
-            //Window time is hard-coded below.
-            assertEquals("127.0.0.1:6346,3492,1,100,86400113;113\n",
-                         out.toString());
-        } catch (IOException e) {
-            fail("Mysterious IO problem");
-        }
+        e.write(out);
+        //Window time is hard-coded below.
+        assertEquals("127.0.0.1:6346,3492,1,100,86400113;113\n",
+                     out.toString());
     }
 
-    public void testReadNormal() {
-        try {
-            ExtendedEndpoint e=ExtendedEndpoint.read(
-                "127.0.0.1:6348,3492,1, 100,86400113;113\n");
-            assertEquals("127.0.0.1", e.getHostname());
-            assertEquals(6348, e.getPort());
-            assertEquals(3492, e.getDailyUptime());
-            assertEquals(1, e.getTimeRecorded());
-            Iterator iter=e.getConnectionSuccesses();
-            assertEquals(100, ((Long)iter.next()).longValue());
-            assertTrue(!iter.hasNext());
-            iter=e.getConnectionFailures();
-            assertEquals(86400113, ((Long)iter.next()).longValue());
-            assertEquals(113, ((Long)iter.next()).longValue());
-            assertTrue(!iter.hasNext());
-        } catch (ParseException e) {
-            fail("Mysterious parse error");
-        }        
+    public void testReadNormal() throws Exception {
+        ExtendedEndpoint e=ExtendedEndpoint.read(
+            "127.0.0.1:6348,3492,1, 100,86400113;113\n");
+        assertEquals("127.0.0.1", e.getHostname());
+        assertEquals(6348, e.getPort());
+        assertEquals(3492, e.getDailyUptime());
+        assertEquals(1, e.getTimeRecorded());
+        Iterator iter=e.getConnectionSuccesses();
+        assertEquals(100, ((Long)iter.next()).longValue());
+        assertTrue(!iter.hasNext());
+        iter=e.getConnectionFailures();
+        assertEquals(86400113, ((Long)iter.next()).longValue());
+        assertEquals(113, ((Long)iter.next()).longValue());
+        assertTrue(!iter.hasNext());
     }
 
-    public void testWriteUnknown() {
+    public void testWriteUnknown() throws Exception  {
         long now=System.currentTimeMillis();
         e=new ExtendedEndpoint("127.0.0.1", 6346);
         assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
@@ -138,54 +130,42 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(now, (float)e.getTimeRecorded(), 500.f);
         String timeString=Long.toString(e.getTimeRecorded());
         StringWriter out=new StringWriter();
-        try {
-            e.write(out);
-            //Window time is hard-coded below.
-            assertEquals("127.0.0.1:6346,,"+timeString+",,\n",
-                         out.toString());
-        } catch (IOException e) {
-            fail("Mysterious IO problem");
-        }
+        e.write(out);
+        //Window time is hard-coded below.
+        assertEquals("127.0.0.1:6346,,"+timeString+",,\n",
+                     out.toString());
     }
 
-   public void testReadUnknown() {
-        try {
-            ExtendedEndpoint e=ExtendedEndpoint.read(
-                "127.0.0.1:6348,,A,, 86400113;113 \n");
-            assertEquals("127.0.0.1", e.getHostname());
-            assertEquals(6348, e.getPort());
-            assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
-                         e.getDailyUptime());
-            assertEquals(ExtendedEndpoint.DEFAULT_TIME_RECORDED, 
-                         e.getTimeRecorded());
-            Iterator iter=e.getConnectionSuccesses();
-            assertTrue(!iter.hasNext());
-            iter=e.getConnectionFailures();
-            assertEquals(86400113, ((Long)iter.next()).longValue());
-            assertEquals(113, ((Long)iter.next()).longValue());
-            assertTrue(!iter.hasNext());
-        } catch (ParseException e) {
-            fail("Mysterious parse error");
-        }        
+   public void testReadUnknown() throws Exception {
+        ExtendedEndpoint e=ExtendedEndpoint.read(
+            "127.0.0.1:6348,,A,, 86400113;113 \n");
+        assertEquals("127.0.0.1", e.getHostname());
+        assertEquals(6348, e.getPort());
+        assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
+                     e.getDailyUptime());
+        assertEquals(ExtendedEndpoint.DEFAULT_TIME_RECORDED, 
+                     e.getTimeRecorded());
+        Iterator iter=e.getConnectionSuccesses();
+        assertTrue(!iter.hasNext());
+        iter=e.getConnectionFailures();
+        assertEquals(86400113, ((Long)iter.next()).longValue());
+        assertEquals(113, ((Long)iter.next()).longValue());
+        assertTrue(!iter.hasNext());
     }
 
-   public void testReadOldStyle() {
-        try {
-            ExtendedEndpoint e=ExtendedEndpoint.read(
-                "127.0.0.1:6348");
-            assertEquals("127.0.0.1", e.getHostname());
-            assertEquals(6348, e.getPort());
-            assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
-                         e.getDailyUptime());
-            assertEquals(ExtendedEndpoint.DEFAULT_TIME_RECORDED, 
-                         e.getTimeRecorded());
-            Iterator iter=e.getConnectionSuccesses();
-            assertTrue(!iter.hasNext());
-            iter=e.getConnectionFailures();
-            assertTrue(!iter.hasNext());
-        } catch (ParseException e) {
-            fail("Mysterious parse error");
-        }        
+   public void testReadOldStyle() throws Exception {
+        ExtendedEndpoint e=ExtendedEndpoint.read(
+            "127.0.0.1:6348");
+        assertEquals("127.0.0.1", e.getHostname());
+        assertEquals(6348, e.getPort());
+        assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME, 
+                     e.getDailyUptime());
+        assertEquals(ExtendedEndpoint.DEFAULT_TIME_RECORDED, 
+                     e.getTimeRecorded());
+        Iterator iter=e.getConnectionSuccesses();
+        assertTrue(!iter.hasNext());
+        iter=e.getConnectionFailures();
+        assertTrue(!iter.hasNext());
     }
     
     /////////////////////////// Comparators //////////////////////////////

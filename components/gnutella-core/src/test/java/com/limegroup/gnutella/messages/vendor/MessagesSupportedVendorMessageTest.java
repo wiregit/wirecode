@@ -23,38 +23,33 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
     }
 
     
-    public void testStaticConstructor() {
-        try {
-            MessagesSupportedVendorMessage vmp = 
-                MessagesSupportedVendorMessage.instance();
-            assertTrue(vmp.supportsTCPConnectBack() > 0);
-            assertTrue(vmp.supportsUDPConnectBack() > 0);
-            assertTrue(vmp.supportsHopsFlow() > 0);
-            assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
-            assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
-            assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
-                                                 
-        
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            vmp.write(baos);
-            ByteArrayInputStream bais = 
-                new ByteArrayInputStream(baos.toByteArray());
-            MessagesSupportedVendorMessage vmpRead = 
-                (MessagesSupportedVendorMessage) Message.read(bais);
-            assertTrue(vmp.equals(vmpRead));
-            assertTrue(vmpRead.supportsTCPConnectBack() > 0);
-            assertTrue(vmpRead.supportsUDPConnectBack() > 0);
-            assertTrue(vmpRead.supportsHopsFlow() > 0);
-            assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
-            assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
-            assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
-        }
-        catch (Exception noway) {
-            assertTrue(false);
-        }
+    public void testStaticConstructor() throws Exception {
+        MessagesSupportedVendorMessage vmp = 
+            MessagesSupportedVendorMessage.instance();
+        assertTrue(vmp.supportsTCPConnectBack() > 0);
+        assertTrue(vmp.supportsUDPConnectBack() > 0);
+        assertTrue(vmp.supportsHopsFlow() > 0);
+        assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
+        assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
+        assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
+                                             
+    
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        vmp.write(baos);
+        ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+        MessagesSupportedVendorMessage vmpRead = 
+            (MessagesSupportedVendorMessage) Message.read(bais);
+        assertTrue(vmp.equals(vmpRead));
+        assertTrue(vmpRead.supportsTCPConnectBack() > 0);
+        assertTrue(vmpRead.supportsUDPConnectBack() > 0);
+        assertTrue(vmpRead.supportsHopsFlow() > 0);
+        assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
+        assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
+        assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
     }
 
-    public void testNetworkConstructor() {
+    public void testNetworkConstructor() throws Exception {
         MessagesSupportedVendorMessage.SupportedMessageBlock smp1 = 
             new MessagesSupportedVendorMessage.SupportedMessageBlock("SUSH".getBytes(),
                                                             10, 10);
@@ -65,58 +60,49 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             new MessagesSupportedVendorMessage.SupportedMessageBlock("DAWG".getBytes(), 
                                                            3, 3);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            byte[] guid = GUID.makeGuid();
-            byte ttl = 1, hops = 0;
-            ByteOrder.short2leb((short)4, baos);
-            baos.write(smp1.encode());
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp3.encode());
-            VendorMessage vm = new MessagesSupportedVendorMessage(guid, ttl,
-                                                                  hops, 0,
-                                                                  baos.toByteArray());
-            baos = new ByteArrayOutputStream();
-            vm.write(baos);
-            ByteArrayInputStream bais = 
-                new ByteArrayInputStream(baos.toByteArray());
-            MessagesSupportedVendorMessage vmp = 
-               (MessagesSupportedVendorMessage) Message.read(bais);
-            // make sure it supports everything we expect....
-            assertTrue(vmp.supportsMessage("SUSH".getBytes(), 10) == 10);
-            assertTrue(vmp.supportsMessage("NEIL".getBytes(), 5) == 5);
-            assertTrue(vmp.supportsMessage("DAWG".getBytes(), 3) == 3);
-            assertTrue(vmp.supportsTCPConnectBack() == -1);
-            assertTrue(vmp.supportsUDPConnectBack() == -1);
-            assertTrue(vmp.supportsHopsFlow() == -1);
 
-            // now creat another one, mix up the blocks that are supported, and
-            // make sure they are equal....
-            baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)3, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
-            
-            MessagesSupportedVendorMessage vmpOther = 
-                new MessagesSupportedVendorMessage(guid, ttl, hops, 0,
-                                                   baos.toByteArray());
+        byte[] guid = GUID.makeGuid();
+        byte ttl = 1, hops = 0;
+        ByteOrder.short2leb((short)4, baos);
+        baos.write(smp1.encode());
+        baos.write(smp2.encode());
+        baos.write(smp3.encode());
+        baos.write(smp3.encode());
+        VendorMessage vm = new MessagesSupportedVendorMessage(guid, ttl,
+                                                              hops, 0,
+                                                              baos.toByteArray());
+        baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+        MessagesSupportedVendorMessage vmp = 
+           (MessagesSupportedVendorMessage) Message.read(bais);
+        // make sure it supports everything we expect....
+        assertTrue(vmp.supportsMessage("SUSH".getBytes(), 10) == 10);
+        assertTrue(vmp.supportsMessage("NEIL".getBytes(), 5) == 5);
+        assertTrue(vmp.supportsMessage("DAWG".getBytes(), 3) == 3);
+        assertTrue(vmp.supportsTCPConnectBack() == -1);
+        assertTrue(vmp.supportsUDPConnectBack() == -1);
+        assertTrue(vmp.supportsHopsFlow() == -1);
 
-            assertTrue(vmp.equals(vmpOther));
-        }
-        catch (IOException noway) {
-            noway.printStackTrace();
-            assertTrue(false);
-        }
-        catch (BadPacketException noway) {
-            noway.printStackTrace();
-            assertTrue(false);
-        }
+        // now creat another one, mix up the blocks that are supported, and
+        // make sure they are equal....
+        baos = new ByteArrayOutputStream();
+        ByteOrder.short2leb((short)3, baos);
+        baos.write(smp2.encode());
+        baos.write(smp3.encode());
+        baos.write(smp1.encode());
+        
+        MessagesSupportedVendorMessage vmpOther = 
+            new MessagesSupportedVendorMessage(guid, ttl, hops, 0,
+                                               baos.toByteArray());
+
+        assertTrue(vmp.equals(vmpOther));
 
     }
 
 
-    public void testBadCases() {
+    public void testBadCases() throws Exception {
         MessagesSupportedVendorMessage.SupportedMessageBlock smp1 = 
             new MessagesSupportedVendorMessage.SupportedMessageBlock("SUSH".getBytes(),
                                                             10, 10);
@@ -139,13 +125,8 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             MessagesSupportedVendorMessage vmpOther = 
                 new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                    baos.toByteArray());
-            assertTrue(false);
-        }
-        catch (IOException noway) {
-            noway.printStackTrace();
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {
+            fail("bpe should have been thrown.");
+        } catch (BadPacketException expected) {
         }
         try {
             // test corrupt info....
@@ -158,42 +139,28 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             MessagesSupportedVendorMessage vmpOther = 
                 new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                    baos.toByteArray());
-            assertTrue(false);
+            fail("bpe should have been thrown.");
+        } catch (BadPacketException expected) {
         }
-        catch (IOException noway) {
-            noway.printStackTrace();
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {
-        }
-        try {
-            // test semantics....
-            baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)0, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
-            MessagesSupportedVendorMessage vmpOther = 
-                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
-                                                   baos.toByteArray());
-            baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)3, baos);
-            baos.write(smp2.encode());
-            baos.write(smp3.encode());
-            baos.write(smp1.encode());
-            MessagesSupportedVendorMessage vmpOneOther = 
-                new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
-                                                   baos.toByteArray());
-            assertTrue(!vmpOther.equals(vmpOneOther));
-        }
-        catch (IOException noway) {
-            noway.printStackTrace();
-            assertTrue(false);
-        }
-        catch (BadPacketException noway) {
-            noway.printStackTrace();
-            assertTrue(false);
-        }
+
+        // test semantics....
+        baos = new ByteArrayOutputStream();
+        ByteOrder.short2leb((short)0, baos);
+        baos.write(smp2.encode());
+        baos.write(smp3.encode());
+        baos.write(smp1.encode());
+        MessagesSupportedVendorMessage vmpOther = 
+            new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+                                               baos.toByteArray());
+        baos = new ByteArrayOutputStream();
+        ByteOrder.short2leb((short)3, baos);
+        baos.write(smp2.encode());
+        baos.write(smp3.encode());
+        baos.write(smp1.encode());
+        MessagesSupportedVendorMessage vmpOneOther = 
+            new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
+                                               baos.toByteArray());
+        assertTrue(!vmpOther.equals(vmpOneOther));
 
     }
 

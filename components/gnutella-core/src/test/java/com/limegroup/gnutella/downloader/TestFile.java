@@ -44,9 +44,9 @@ public class TestFile {
                 raf.close();
                 myHash = URN.createSHA1Urn(tmpFile);
             } catch ( InterruptedException e) {
-                throw new RuntimeException( "interrupted calculating hash.");
+                ErrorService.error(e);
             } catch ( IOException e ) {
-                throw new RuntimeException("error reading/writing file while getting hash.");
+                ErrorService.error(e);
             }
         } 
         return myHash;

@@ -80,8 +80,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testAddPriorities() {
-        //Endpoints.
-        setUp();
         
         // Adding a private host should add 1 more to the numPrivateHosts...
         hc.add(new Endpoint("192.168.0.1"), false);
@@ -193,181 +191,159 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! iter.hasNext());
     }
 
-    public void testPermanent() {
+    public void testPermanent() throws Exception {
         //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
-        try {
-            //1. Create HC, add entries, write to disk.
-            hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
-                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                          0l, 0l, false, 1000, false),
-                   null);
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
-                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                          0l, 0l, false, 1000, false),
-                   null);  //duplicate
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
-                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
-                          0l, 0l, false, 30, false),
-                   null);
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
-                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
-                          0l, 0l, false, 30, false),
-                   null);  //duplicate (well, with lower uptime)
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
-                          new byte[] {(byte)192, (byte)168, (byte)0, (byte)1},
-                          0l, 0l, false, 3000, false),
-                   null);  //private address (ignored)
-            File tmp=File.createTempFile("hc_test", ".net" );
-            hc.write(tmp);
+        //1. Create HC, add entries, write to disk.
+        hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
+                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                      0l, 0l, false, 1000, false),
+               null);
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
+                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                      0l, 0l, false, 1000, false),
+               null);  //duplicate
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
+                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
+                      0l, 0l, false, 30, false),
+               null);
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
+                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
+                      0l, 0l, false, 30, false),
+               null);  //duplicate (well, with lower uptime)
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
+                      new byte[] {(byte)192, (byte)168, (byte)0, (byte)1},
+                      0l, 0l, false, 3000, false),
+               null);  //private address (ignored)
+        File tmp=File.createTempFile("hc_test", ".net" );
+        hc.write(tmp);
 
-            //2. read HC from file.
-            setUp();
-            hc.read(tmp);
-            assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
-            assertEquals(new Endpoint("18.239.0.142", 6342),
-                         hc.getAnEndpoint());
-            assertEquals(new Endpoint("18.239.0.141", 6341),
-                         hc.getAnEndpoint());
-            assertEquals(new Endpoint("18.239.0.143", 6343),
-                         hc.getAnEndpoint());
-            assertEquals(0, hc.getNumHosts());
+        //2. read HC from file.
+        setUp();
+        hc.read(tmp);
+        assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
+        assertEquals(new Endpoint("18.239.0.142", 6342),
+                     hc.getAnEndpoint());
+        assertEquals(new Endpoint("18.239.0.141", 6341),
+                     hc.getAnEndpoint());
+        assertEquals(new Endpoint("18.239.0.143", 6343),
+                     hc.getAnEndpoint());
+        assertEquals(0, hc.getNumHosts());
 
-            //Cleanup.
-            tmp.delete();
-        } catch (IOException e) {
-            assertTrue("Unexpected IO problem: "+e, false);
-        } catch (InterruptedException e) {
-            assertTrue("Unexpected InterruptedException "+e, false);
-        }
+        //Cleanup.
+        tmp.delete();
     }
 
     /** Tests that only the best hosts are remembered.  */
-    public void testBestPermanent() {  
+    public void testBestPermanent() throws Exception  {  
         HostCatcher.DEBUG=false;  //Too darn slow
-        try {
-            //1. Fill up host catcher with PERMANENT_SIZE+1 mid-level pongs
-            //(various uptimes).
-            final int N=HostCatcher.PERMANENT_SIZE;
-            for (int i=0; i<=N; i++) {
-                hc.add(new PingReply(GUID.makeGuid(), (byte)7, i,
-                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, i+10, false),
-                       null);
-            }
-            //Now add bad pong--which isn't really added
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, N+1,
-                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, 0, false),
-                       null);
-            //Now re-add port 0 (which was kicked out earlier).  Note that this
-            //would fail if line 346 of HostCatcher were not executed.
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 0,
-                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, N+100, false),
+        //1. Fill up host catcher with PERMANENT_SIZE+1 mid-level pongs
+        //(various uptimes).
+        final int N=HostCatcher.PERMANENT_SIZE;
+        for (int i=0; i<=N; i++) {
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, i,
+                       new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                       0l, 0l, false, i+10, false),
                    null);
-
-            File tmp=File.createTempFile("hc_test", ".net" );
-            hc.write(tmp);            
-
-            //2. Read
-            setUp();
-            HostCatcher.DEBUG=false;  //Too darn slow
-            hc.read(tmp);
-            assertEquals(0, hc.getNumUltrapeerHosts());
-            assertEquals(new Endpoint("18.239.0.142", 0),
-                         hc.getAnEndpoint());
-            for (int i=N; i>1; i--) {
-                assertTrue("No more hosts after "+i, hc.getNumHosts()>0);
-                assertEquals(new Endpoint("18.239.0.142", i),
-                             hc.getAnEndpoint());
-            }
-            assertEquals(0, hc.getNumHosts());
-
-            //Cleanup.
-            tmp.delete();
-        } catch (IOException e) {
-            assertTrue("Unexpected IO problem: "+e, false);
-        } catch (InterruptedException e) {
-            assertTrue("Unexpected InterruptedException "+e, false);
         }
+        //Now add bad pong--which isn't really added
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, N+1,
+                       new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                       0l, 0l, false, 0, false),
+                   null);
+        //Now re-add port 0 (which was kicked out earlier).  Note that this
+        //would fail if line 346 of HostCatcher were not executed.
+        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 0,
+                       new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                       0l, 0l, false, N+100, false),
+               null);
+
+        File tmp=File.createTempFile("hc_test", ".net" );
+        hc.write(tmp);            
+
+        //2. Read
+        setUp();
+        HostCatcher.DEBUG=false;  //Too darn slow
+        hc.read(tmp);
+        assertEquals(0, hc.getNumUltrapeerHosts());
+        assertEquals(new Endpoint("18.239.0.142", 0),
+                     hc.getAnEndpoint());
+        for (int i=N; i>1; i--) {
+            assertTrue("No more hosts after "+i, hc.getNumHosts()>0);
+            assertEquals(new Endpoint("18.239.0.142", i),
+                         hc.getAnEndpoint());
+        }
+        assertEquals(0, hc.getNumHosts());
+
+        //Cleanup.
+        tmp.delete();
     }
 
     /** Test that connection history is recorded. */
-    public void testDoneWithConnect() {
-        try {
-            hc.add(new Endpoint("18.239.0.1"), true);  
-            hc.add(new Endpoint("18.239.0.2"), true);  //will succeed
-            hc.add(new Endpoint("18.239.0.3"), true);  //will fail
+    public void testDoneWithConnect() throws Exception {
+        hc.add(new Endpoint("18.239.0.1"), true);  
+        hc.add(new Endpoint("18.239.0.2"), true);  //will succeed
+        hc.add(new Endpoint("18.239.0.3"), true);  //will fail
 
-            ExtendedEndpoint e3=(ExtendedEndpoint)hc.getAnEndpoint();
-            assertEquals(new Endpoint("18.239.0.3"), e3);
-            ExtendedEndpoint e2=(ExtendedEndpoint)hc.getAnEndpoint();
-            assertEquals(new Endpoint("18.239.0.2"), e2);
+        ExtendedEndpoint e3=(ExtendedEndpoint)hc.getAnEndpoint();
+        assertEquals(new Endpoint("18.239.0.3"), e3);
+        ExtendedEndpoint e2=(ExtendedEndpoint)hc.getAnEndpoint();
+        assertEquals(new Endpoint("18.239.0.2"), e2);
 
-            //record success (increases priority)
-            hc.doneWithConnect(e2, true); 
-            //record failure (lowers priority) with alternate form of method
-            hc.doneWithConnect(e3, false);
-            //Garbage (ignored)
-            hc.doneWithConnect(new Endpoint("1.2.3.4", 6346), false);  
-            hc.doneWithConnect(new Endpoint("18.239.0.3", 6349), true); //port
+        //record success (increases priority)
+        hc.doneWithConnect(e2, true); 
+        //record failure (lowers priority) with alternate form of method
+        hc.doneWithConnect(e3, false);
+        //Garbage (ignored)
+        hc.doneWithConnect(new Endpoint("1.2.3.4", 6346), false);  
+        hc.doneWithConnect(new Endpoint("18.239.0.3", 6349), true); //port
 
-            //Check that permanent hosts are re-arranged.
-            //Note that iterator yields worst to best.
-            Iterator iter=hc.getPermanentHosts();
-            ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
-            assertEquals(new Endpoint("18.239.0.3"), e);
-            assertTrue(!e.getConnectionSuccesses().hasNext());
-            assertTrue(e.getConnectionFailures().hasNext());
+        //Check that permanent hosts are re-arranged.
+        //Note that iterator yields worst to best.
+        Iterator iter=hc.getPermanentHosts();
+        ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
+        assertEquals(new Endpoint("18.239.0.3"), e);
+        assertTrue(!e.getConnectionSuccesses().hasNext());
+        assertTrue(e.getConnectionFailures().hasNext());
 
-            e=(ExtendedEndpoint)iter.next();
-            assertEquals(new Endpoint("18.239.0.1"), e);
-            assertTrue(!e.getConnectionSuccesses().hasNext());
-            assertTrue(!e.getConnectionFailures().hasNext());
+        e=(ExtendedEndpoint)iter.next();
+        assertEquals(new Endpoint("18.239.0.1"), e);
+        assertTrue(!e.getConnectionSuccesses().hasNext());
+        assertTrue(!e.getConnectionFailures().hasNext());
 
-            e=(ExtendedEndpoint)iter.next();
-            assertEquals(new Endpoint("18.239.0.2"), e);
-            assertTrue(e.getConnectionSuccesses().hasNext());
-            assertTrue(!e.getConnectionFailures().hasNext());
-        } catch (InterruptedException fail) {
-            fail("InterruptedException");
-        }
+        e=(ExtendedEndpoint)iter.next();
+        assertEquals(new Endpoint("18.239.0.2"), e);
+        assertTrue(e.getConnectionSuccesses().hasNext());
+        assertTrue(!e.getConnectionFailures().hasNext());
     }
 
-    public void testBadGnutellaDotNet() {
+    public void testBadGnutellaDotNet() throws Exception {
         //System.out.println("-Testing bad Gnutella.net");
-        try {
-            //1. Write (mostly) corrupt file
-            File tmp=File.createTempFile("hc_test", ".net" );
-            FileWriter out=new FileWriter(tmp);
-            out.write("18.239.0.141\n");                  //GOOD: port optional
-            out.write("\n");                              //blank line
-            out.write("18.239.0.144:A\n");                //bad port
-            out.write("18.239.0.141:6347 A\n");           //bad uptime
-            out.write("<html>total crap\n");              //not even close!
-            out.write("  some garbage,1000,a,b,c,d,e,f,g\n");   //bad address
-            out.write("18.239.0.142:6342,1000,a,b,c,d,e,f,g\n");//GOOD: ignore extra
-            out.flush();
-            out.close();
+        //1. Write (mostly) corrupt file
+        File tmp=File.createTempFile("hc_test", ".net" );
+        FileWriter out=new FileWriter(tmp);
+        out.write("18.239.0.141\n");                  //GOOD: port optional
+        out.write("\n");                              //blank line
+        out.write("18.239.0.144:A\n");                //bad port
+        out.write("18.239.0.141:6347 A\n");           //bad uptime
+        out.write("<html>total crap\n");              //not even close!
+        out.write("  some garbage,1000,a,b,c,d,e,f,g\n");   //bad address
+        out.write("18.239.0.142:6342,1000,a,b,c,d,e,f,g\n");//GOOD: ignore extra
+        out.flush();
+        out.close();
 
-            //2. Read and verify
-            setUp();
-            hc.read(tmp);
-            assertTrue(hc.getAnEndpoint().equals( 
-                new Endpoint("18.239.0.142", 6342)));
-            assertTrue(hc.getAnEndpoint().equals( 
-                new Endpoint("18.239.0.141", 6346)));
-            assertTrue(hc.getNumHosts()==0);
-            assertTrue(hc.getNumUltrapeerHosts()==0);
+        //2. Read and verify
+        setUp();
+        hc.read(tmp);
+        assertTrue(hc.getAnEndpoint().equals( 
+            new Endpoint("18.239.0.142", 6342)));
+        assertTrue(hc.getAnEndpoint().equals( 
+            new Endpoint("18.239.0.141", 6346)));
+        assertTrue(hc.getNumHosts()==0);
+        assertTrue(hc.getNumUltrapeerHosts()==0);
 
-            //Clean up
-            tmp.delete();
-        } catch (IOException e) { 
-            assertTrue("Unexpected IO problem", false);
-        } catch (InterruptedException e) {
-            assertTrue("Unexpected InterruptedException "+e, false);
-        }
+        //Clean up
+        tmp.delete();
     }
 
     public static void main(String argv[]) {

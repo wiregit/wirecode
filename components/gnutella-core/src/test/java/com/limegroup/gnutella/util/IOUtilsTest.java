@@ -30,24 +30,16 @@ public final class IOUtilsTest extends com.limegroup.gnutella.util.BaseTestCase 
 	/**
 	 * Tests the readWord method.
 	 */
-	public void testIOUtilsReadWord() {
+	public void testIOUtilsReadWord() throws Exception {
 		String firstWord = "GET";
 		String test0 = firstWord+" /get/0/file.txt";
 		InputStream stream0 = new ByteArrayInputStream(test0.getBytes());
-		try {
-			String result = IOUtils.readWord(stream0, 3);
-			assertEquals("result should equal first word", result, firstWord);
-		} catch(IOException e) {
-			fail("unexpected exception: "+e);
-		}
+		String result = IOUtils.readWord(stream0, 3);
+		assertEquals("result should equal first word", result, firstWord);
 
 
 		InputStream stream1 = new ByteArrayInputStream(test0.getBytes());
-		try {
-			String result = IOUtils.readWord(stream1, 4);
-			assertEquals("result should equal first word", result, firstWord);
-		} catch(IOException e) {
-			fail("unexpected exception: "+e);
-		}
+		result = IOUtils.readWord(stream1, 4);
+		assertEquals("result should equal first word", result, firstWord);
 	}
 }

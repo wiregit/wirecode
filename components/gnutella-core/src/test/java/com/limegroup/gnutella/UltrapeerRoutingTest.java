@@ -83,7 +83,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 					   );
     }
 
-	public void setUp() {
+	public void setUp() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
@@ -109,16 +109,11 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());
 		if(!ROUTER_SERVICE.isStarted()) {
+			buildConnections();
 			ROUTER_SERVICE.start();
 			ROUTER_SERVICE.clearHostCatcher();
 			ROUTER_SERVICE.connect();	
-			try {
-				connect();
-			} catch(Exception e) {
-				e.printStackTrace();
-				fail("unexpected exception: "+e);
-			}
-			buildConnections();
+			connect();
 		}
         assertEquals("unexpected port", PORT, 
 					 SettingsManager.instance().getPort());
@@ -126,24 +121,19 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 		drainAll();
 	}
 
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		drainAll();
 	}
 
-	private static void drainAll() {
-		try {
-			if(ULTRAPEER_1.isOpen()) {
-				drain(ULTRAPEER_1);
-			}
-			if(ULTRAPEER_1.isOpen()) {
-				drain(ULTRAPEER_2);
-			}
-			if(LEAF.isOpen()) {
-				drain(LEAF);
-			}
-		} catch(IOException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
+	private static void drainAll() throws Exception {
+		if(ULTRAPEER_1.isOpen()) {
+			drain(ULTRAPEER_1);
+		}
+		if(ULTRAPEER_1.isOpen()) {
+			drain(ULTRAPEER_2);
+		}
+		if(LEAF.isOpen()) {
+			drain(LEAF);
 		}
 	}
 
@@ -201,129 +191,125 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Ultrapeer connections -- the one connected to the leaf, as well as the
 	 * other one.
 	 */
-    public static void testBroadcastFromLeaf() {
+    public static void testBroadcastFromLeaf() throws Exception {
 
-		try {
-			//System.out.println(
-			//   "-Testing normal broadcast from leaf, with replies and pushes");
-			//drain(ULTRAPEER_2);
-			//drain(ULTRAPEER_1);
-			
-			//1. Check that query broadcasted to ULTRAPEER_2 and ultrapeer
-			QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
-			LEAF.send(qr);
-			LEAF.flush();
-			
-			//Message m;
-			Message m = ULTRAPEER_2.receive(TIMEOUT);
-			assertTrue("message not a QueryRequest", m instanceof QueryRequest);
-			assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
-			assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
-			
-			// since it's coming from the leaf, the intervening Ultrapeer 
-			// sends a dynamic, probe query -- so check for that TTL
-			assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
-			
-			m = ULTRAPEER_1.receive(TIMEOUT);
-			assertTrue("message not a QueryRequest", m instanceof QueryRequest);
-			assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
-			assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
-			
-			// since it's coming from the leaf, the intervening Ultrapeer 
-			// sends a dynamic, probe query -- so check for that TTL
-			assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
-			
-			//2. Check that replies are routed back.
-			drain(LEAF);
-			Response response1=new Response(0L, 0L, "response1.txt");
-			byte[] guid1=GUID.makeGuid();
-			QueryReply reply1=new QueryReply(qr.getGUID(),
-											 (byte)2,
-											 6346,
-											 new byte[4],
-											 56,
-											 new Response[] {response1},
-											 guid1);
-			ULTRAPEER_2.send(reply1);
-			ULTRAPEER_2.flush();
-			
-			QueryReply replyRead=(QueryReply)LEAF.receive(TIMEOUT);
-			assertTrue("guids should be equal", 
-					   Arrays.equals(guid1, replyRead.getClientGUID()));
-			
-			drain(LEAF);
-			Response response2 = new Response(0l, 0l, "response2.txt");
-			byte[] guid2 = GUID.makeGuid();
-			QueryReply reply2 = 
-				new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
-							   56, new Response[] {response1}, guid2);
-			ULTRAPEER_1.send(reply2);
-			ULTRAPEER_1.flush();
-			
-			m = LEAF.receive(TIMEOUT);
-		   
-			assertTrue("message not a QueryReply", m instanceof QueryReply);
-			replyRead = (QueryReply)m;
-			assertTrue("guids should be equal", 
-					   Arrays.equals(guid2, replyRead.getClientGUID()));
-			
-			//3. Check that pushes are routed (not broadcast)
-			drain(ULTRAPEER_2);
-			drain(ULTRAPEER_1);
-			PushRequest push1=new PushRequest(GUID.makeGuid(),
-											  (byte)2,
-											  guid1,
-											  0, new byte[4],
-											  6346);
-			LEAF.send(push1);
-			LEAF.flush();
-			m = ULTRAPEER_2.receive(TIMEOUT);
-			assertTrue("message not a PushRequest", m instanceof PushRequest);
-			PushRequest pushRead = (PushRequest)m;
-			assertEquals("unexpected push index", 0, pushRead.getIndex());
-			assertTrue("should not have drained ULTRAPEER_1 successfully", 
-					   !drain(ULTRAPEER_1));
-			
-			PushRequest push2=new PushRequest(GUID.makeGuid(),
-											  (byte)2,
-											  guid2,
-											  1, new byte[4],
-											  6346);
-			LEAF.send(push2);
-			LEAF.flush();
-			m = ULTRAPEER_1.receive(TIMEOUT);
-			assertTrue("message not a PushRequest", m instanceof PushRequest);
-			pushRead=(PushRequest)m;
-			assertEquals("unexpected push index", 1,pushRead.getIndex());
-			assertTrue("should not have drained ultrapeer successfully", 
-					   !drain(ULTRAPEER_2));   
-			
-			//4. Check that queries can re-route push routes
-			drain(LEAF);
-			drain(ULTRAPEER_2);
-			ULTRAPEER_1.send(reply1);
-			ULTRAPEER_1.flush();
+		//System.out.println(
+		//   "-Testing normal broadcast from leaf, with replies and pushes");
+		//drain(ULTRAPEER_2);
+		//drain(ULTRAPEER_1);
+		
+		//1. Check that query broadcasted to ULTRAPEER_2 and ultrapeer
+		QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
+		LEAF.send(qr);
+		LEAF.flush();
+		
+		//Message m;
+		Message m = ULTRAPEER_2.receive(TIMEOUT);
+		assertTrue("message not a QueryRequest", m instanceof QueryRequest);
+		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+		assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
+		
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
+		
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertTrue("message not a QueryRequest", m instanceof QueryRequest);
+		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+		assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
+		
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
+		
+		//2. Check that replies are routed back.
+		drain(LEAF);
+		Response response1=new Response(0L, 0L, "response1.txt");
+		byte[] guid1=GUID.makeGuid();
+		QueryReply reply1=new QueryReply(qr.getGUID(),
+										 (byte)2,
+										 6346,
+										 new byte[4],
+										 56,
+										 new Response[] {response1},
+										 guid1);
+		ULTRAPEER_2.send(reply1);
+		ULTRAPEER_2.flush();
+		
+		QueryReply replyRead=(QueryReply)LEAF.receive(TIMEOUT);
+		assertTrue("guids should be equal", 
+				   Arrays.equals(guid1, replyRead.getClientGUID()));
+		
+		drain(LEAF);
+		Response response2 = new Response(0l, 0l, "response2.txt");
+		byte[] guid2 = GUID.makeGuid();
+		QueryReply reply2 = 
+			new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
+						   56, new Response[] {response1}, guid2);
+		ULTRAPEER_1.send(reply2);
+		ULTRAPEER_1.flush();
+		
+		m = LEAF.receive(TIMEOUT);
+	   
+		assertTrue("message not a QueryReply", m instanceof QueryReply);
+		replyRead = (QueryReply)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(guid2, replyRead.getClientGUID()));
+		
+		//3. Check that pushes are routed (not broadcast)
+		drain(ULTRAPEER_2);
+		drain(ULTRAPEER_1);
+		PushRequest push1=new PushRequest(GUID.makeGuid(),
+										  (byte)2,
+										  guid1,
+										  0, new byte[4],
+										  6346);
+		LEAF.send(push1);
+		LEAF.flush();
+		m = ULTRAPEER_2.receive(TIMEOUT);
+		assertTrue("message not a PushRequest", m instanceof PushRequest);
+		PushRequest pushRead = (PushRequest)m;
+		assertEquals("unexpected push index", 0, pushRead.getIndex());
+		assertTrue("should not have drained ULTRAPEER_1 successfully", 
+				   !drain(ULTRAPEER_1));
+		
+		PushRequest push2=new PushRequest(GUID.makeGuid(),
+										  (byte)2,
+										  guid2,
+										  1, new byte[4],
+										  6346);
+		LEAF.send(push2);
+		LEAF.flush();
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertTrue("message not a PushRequest", m instanceof PushRequest);
+		pushRead=(PushRequest)m;
+		assertEquals("unexpected push index", 1,pushRead.getIndex());
+		assertTrue("should not have drained ultrapeer successfully", 
+				   !drain(ULTRAPEER_2));   
+		
+		//4. Check that queries can re-route push routes
+		drain(LEAF);
+		drain(ULTRAPEER_2);
+		ULTRAPEER_1.send(reply1);
+		ULTRAPEER_1.flush();
 
-			m = LEAF.receive(TIMEOUT);
-			assertTrue("message not a QueryReply", m instanceof QueryReply);
-			replyRead = (QueryReply)m; 
-			assertTrue("unexpected GUID", 
-					   Arrays.equals(guid1, replyRead.getClientGUID()));
-			PushRequest push3 =
-				new PushRequest(GUID.makeGuid(), (byte)2, guid1, 3, new byte[4], 6346);
-			LEAF.send(push3);
-			LEAF.flush();
+		m = LEAF.receive(TIMEOUT);
+		assertTrue("message not a QueryReply", m instanceof QueryReply);
+		replyRead = (QueryReply)m; 
+		assertTrue("unexpected GUID", 
+				   Arrays.equals(guid1, replyRead.getClientGUID()));
+		PushRequest push3 =
+			new PushRequest(GUID.makeGuid(), (byte)2, guid1, 3, new byte[4], 6346);
+		LEAF.send(push3);
+		LEAF.flush();
 
-			m = ULTRAPEER_1.receive(TIMEOUT);
-			assertTrue("message not a PushRequest", m instanceof PushRequest);
-			pushRead = (PushRequest)m;
-			assertEquals("unexpected push index", 3, pushRead.getIndex());
-			assertTrue("should not have drained ultrapeer successfully", 
-					   !drain(ULTRAPEER_2));   
-		} catch(Throwable t) {
-			t.printStackTrace();
-			fail("unexpected exception: "+t);
-		}
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertTrue("message not a PushRequest", m instanceof PushRequest);
+		pushRead = (PushRequest)m;
+		assertEquals("unexpected push index", 3, pushRead.getIndex());
+		assertTrue("should not have drained ultrapeer successfully", 
+				   !drain(ULTRAPEER_2));   
+
     }
 
 
@@ -331,7 +317,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests broadcasting of queries from ULTRAPEER_2.
 	 */
     public static void testBroadcastFromUltrapeer2() 
-             throws IOException, BadPacketException {
+             throws Exception  {
         //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
         //                   +", no forwarding to leaf");
         //drain(ULTRAPEER_1);
@@ -355,7 +341,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests the broadcasting of queries from ultrapeer 2 to the leaf.
 	 */
     public static void testBroadcastFromUltrapeer2ToLeaf() 
-             throws IOException, BadPacketException {
+             throws Exception {
         //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
         //                   +", with forwarding to leaf");
         //drain(ULTRAPEER_1);
@@ -382,7 +368,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests broadcasting of queries from the Ultrapeer to other hosts.
 	 */
     public static void testBroadcastFromUltrapeerToBoth() 
-             throws IOException, BadPacketException {
+             throws Exception {
         //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
         //                   +", with forwarding to leaf");
         //drain(LEAF);
@@ -409,7 +395,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests broadcasting pings between the various hosts.
 	 */
     public static void testPingBroadcast() 
-             throws IOException, BadPacketException {
+             throws Exception {
         //System.out.println("-Testing ping broadcast from ULTRAPEER_2 connnection"
         //                   +", no forwarding to leaf, with reply");
         //drain(ULTRAPEER_2);
@@ -449,7 +435,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * and so have a payload -- between the various hosts.
 	 */
     public static void testBigPingBroadcast() 
-             throws IOException, BadPacketException {
+             throws Exception {
         //System.out.println("-Testing big ping broadcast from leaf connnection"
         //                   +", no payload forwarding to ULTRAPEER_2, with big reply");
         drain(ULTRAPEER_2);
@@ -471,8 +457,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         try{
             ping = (PingRequest)m;
         }catch(ClassCastException cce){
-            cce.printStackTrace();
-            assertTrue("Big ping not created properly on ULTRAPEER_2 client", false);
+            fail("Big ping not created properly on ULTRAPEER_2 client", cce);
         }
 
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
@@ -484,8 +469,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         try{
             ping.write(stream);
         }catch(IOException ioe){
-            ioe.printStackTrace();
-            assertTrue("error while writing payload in ULTRAPEER_2 client", false);
+            fail("error while writing payload in ULTRAPEER_2 client", ioe);
         }
         byte[] b = stream.toByteArray();
         //get rid of bytes 0-22(inclusive) ie the header
@@ -502,8 +486,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         try{
             ping = (PingRequest)m;
         }catch(ClassCastException cce){
-            cce.printStackTrace();
-            assertTrue("Big ping not created properly on ULTRAPEER_2 client", false);
+            fail("Big ping not created properly on ULTRAPEER_2 client", cce);
         }
         assertEquals("unexpected hops", (byte)1, m.getHops());
 		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
@@ -565,8 +548,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         try{
             ourPong.write(stream);
         }catch(IOException ioe){
-            ioe.printStackTrace();
-            assertTrue("problem with writing out big pong", false);
+            fail("problem with writing out big pong", ioe);
         }
         byte[] op = stream.toByteArray();
         byte[] big = new byte[2];
@@ -582,7 +564,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
 
     public static void testMisroutedPong() 
-             throws IOException, BadPacketException {
+             throws Exception {
         //System.out.println("-Testing misrouted normal pong"
         //                   +", not forwarded to leaf");
         drain(ULTRAPEER_2);
@@ -601,7 +583,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public static void testUltrapeerPong() 
-             throws IOException, BadPacketException {
+             throws Exception {
         //System.out.println("-Testing misrouted ultrapeer pong"
         //                   +", forwarded to leaf");
         drain(ULTRAPEER_2);
@@ -628,7 +610,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
      *  specified urn's get through to leaves, etc.
      */ 
     public static void testNullQueryURNRequest() 
-        throws IOException, BadPacketException {
+        throws Exception {
         //System.out.println("-Testing null query string with non-null URN" +
         //                   " QR routing.");
         
@@ -647,7 +629,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
     private static void urnTest(Connection sndr, Connection rcv1,
                                 Connection rcv2) 
-        throws IOException, BadPacketException {
+        throws Exception {
         // make urns...
         Set currUrnSet = new HashSet();
         Set currUrnTypeSet = new HashSet();
@@ -692,7 +674,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * originated the connection is dropped.
 	 */
     public static void testDropAndDuplicate() 
-		throws IOException, BadPacketException {
+		throws Exception {
         //System.out.println("-Testing that duplicates are dropped "
         //                   +"when original connection closed");
 

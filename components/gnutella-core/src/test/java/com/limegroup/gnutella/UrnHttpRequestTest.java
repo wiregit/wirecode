@@ -85,7 +85,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * Tests requests that follow the traditional "get" syntax to make sure that 
 	 * the X-Gnutella-Content-URN header is always returned.
 	 */
-	public void testLimitReachedRequests() {
+	public void testLimitReachedRequests()  throws Exception {
 		int maxUploads = SettingsManager.instance().getMaxUploads();
 		SettingsManager.instance().setMaxUploads(0);
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
@@ -106,7 +106,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	/**
 	 * Test requests by URN.
 	 */
-	public void testHttpUrnRequest() {
+	public void testHttpUrnRequest() throws Exception {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
@@ -120,7 +120,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * Tests requests that follow the traditional "get" syntax to make sure that 
 	 * the X-Gnutella-Content-URN header is always returned.
 	 */
-	public void testTraditionalGetForReturnedUrn() {
+	public void testTraditionalGetForReturnedUrn() throws Exception {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
@@ -135,7 +135,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * the X-Gnutella-Content-URN header.  In these requests, both the URN and the file
 	 * name and index are correct, so a valid result is expected.
 	 */
-	public void testTraditionalGetWithContentUrn() {
+	public void testTraditionalGetWithContentUrn() throws Exception {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, 
@@ -154,7 +154,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * include an invalid content URN header -- these should fail with error code
 	 * 404.
 	 */
-	public void testTraditionalGetWithInvalidContentUrn() {
+	public void testTraditionalGetWithInvalidContentUrn() throws Exception {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
@@ -169,7 +169,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * Tests to make sure that invalid traditional Gnutella get requests with
 	 * matching X-Gnutella-Content-URN header values also fail with 404.
 	 */
-	public void testInvalidTraditionalGetWithValidContentUrn() {
+	public void testInvalidTraditionalGetWithValidContentUrn() throws Exception  {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
@@ -185,56 +185,51 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * expected headers.
 	 */
 	private void sendRequestThatShouldSucceed(HTTPRequestMethod method, String request, 
-											  FileDesc fd) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			baos.write(request.getBytes());
-			Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-			RouterService.getUploadManager().acceptUpload(method, sock);
-			String reply = sock.getOutputStream().toString();
-			StringTokenizer st = new StringTokenizer(reply, "\r\n");
-			boolean contentUrnHeaderPresent = false;
-			boolean OKPresent = false;
-			assertTrue("HTTP response headers should be present: "+fd, st.countTokens()>0);
-			while(st.hasMoreTokens()) {
-				String curString = st.nextToken();
-				if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(curString)) {
-					continue;
-				} else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(curString)) {
-					URN curUrn = null;
-					try {
-						String tmpString = HTTPUtils.extractHeaderValue(curString);
-						curUrn = URN.createSHA1Urn(tmpString);
-					} catch(IOException e) {
-						assertTrue("unexpected exception: "+e, false);
-					}
-					assertEquals(HTTPHeaderName.GNUTELLA_CONTENT_URN.toString()+
-								 "s should be equal for "+fd,
-								 fd.getSHA1Urn(), curUrn);
-					contentUrnHeaderPresent = true;
-				} else if(HTTPHeaderName.CONTENT_RANGE.matchesStartOfString(curString)) {
-					continue;
-				} else if(HTTPHeaderName.CONTENT_TYPE.matchesStartOfString(curString)) {
-					continue;
-				} else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(curString)) { 
-					String value = HTTPUtils.extractHeaderValue(curString);
-					assertEquals("sizes should match for "+fd, (int)fd.getSize(), 
-								 Integer.parseInt(value));						
-				} else if(HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
-					continue;
-				} else if(curString.equals("HTTP/1.1 200 OK")) {
-					OKPresent = true;
-				}		
-			}
-			assertTrue("HTTP/1.1 200 OK should have been returned: "+fd, OKPresent);
-			assertTrue("content URN header should always be reported:\r\n"+
-					   fd+"\r\n"+
-					   "reply: "+reply,
-					   contentUrnHeaderPresent);
-		} catch(IOException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
+											  FileDesc fd) throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(request.getBytes());
+		Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
+		RouterService.getUploadManager().acceptUpload(method, sock);
+		String reply = sock.getOutputStream().toString();
+		StringTokenizer st = new StringTokenizer(reply, "\r\n");
+		boolean contentUrnHeaderPresent = false;
+		boolean OKPresent = false;
+		assertTrue("HTTP response headers should be present: "+fd, st.countTokens()>0);
+		while(st.hasMoreTokens()) {
+			String curString = st.nextToken();
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(curString)) {
+				continue;
+			} else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(curString)) {
+				URN curUrn = null;
+				try {
+					String tmpString = HTTPUtils.extractHeaderValue(curString);
+					curUrn = URN.createSHA1Urn(tmpString);
+				} catch(IOException e) {
+					assertTrue("unexpected exception: "+e, false);
+				}
+				assertEquals(HTTPHeaderName.GNUTELLA_CONTENT_URN.toString()+
+							 "s should be equal for "+fd,
+							 fd.getSHA1Urn(), curUrn);
+				contentUrnHeaderPresent = true;
+			} else if(HTTPHeaderName.CONTENT_RANGE.matchesStartOfString(curString)) {
+				continue;
+			} else if(HTTPHeaderName.CONTENT_TYPE.matchesStartOfString(curString)) {
+				continue;
+			} else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(curString)) { 
+				String value = HTTPUtils.extractHeaderValue(curString);
+				assertEquals("sizes should match for "+fd, (int)fd.getSize(), 
+							 Integer.parseInt(value));						
+			} else if(HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
+				continue;
+			} else if(curString.equals("HTTP/1.1 200 OK")) {
+				OKPresent = true;
+			}		
 		}
+		assertTrue("HTTP/1.1 200 OK should have been returned: "+fd, OKPresent);
+		assertTrue("content URN header should always be reported:\r\n"+
+				   fd+"\r\n"+
+				   "reply: "+reply,
+				   contentUrnHeaderPresent);
 	}
 
 	/**
@@ -242,21 +237,16 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * correctly.
 	 */
 	private void sendRequestThatShouldFail(HTTPRequestMethod method, String request, 
-										   FileDesc fd, String error) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			baos.write(request.getBytes());
-			Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
-			RouterService.getUploadManager().acceptUpload(method, sock);
-			String reply = sock.getOutputStream().toString();
-			StringTokenizer st = new StringTokenizer(reply, "\r\n");
-			boolean sentExpectedError = false;
-			String curString = st.nextToken().trim();
-			assertEquals("received unexpected HTTP response", error, curString);
-		} catch(IOException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
-		}
+										   FileDesc fd, String error) throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(request.getBytes());
+		Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
+		RouterService.getUploadManager().acceptUpload(method, sock);
+		String reply = sock.getOutputStream().toString();
+		StringTokenizer st = new StringTokenizer(reply, "\r\n");
+		boolean sentExpectedError = false;
+		String curString = st.nextToken().trim();
+		assertEquals("received unexpected HTTP response", error, curString);
 	}
 
 

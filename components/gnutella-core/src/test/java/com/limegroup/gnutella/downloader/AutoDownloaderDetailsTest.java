@@ -14,7 +14,7 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
         return new TestSuite(AutoDownloaderDetailsTest.class);
     }
 
-	public void testLegacy() {
+	public void testLegacy() throws Exception {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("moxxiffey", null,
                                 GUID.makeGuid(), MediaType.getAudioMediaType());
@@ -28,24 +28,16 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
 
         //Test serialization by writing to disk and rereading.  All the methods
         //should still work afterwards.
-        try {
-            File tmp=File.createTempFile("AutoDownloadDetails_test", "dat");
-            ObjectOutputStream out=
-                        new ObjectOutputStream(new FileOutputStream(tmp));
-            out.writeObject(add);
-            out.close();
-            ObjectInputStream in=
-                          new ObjectInputStream(new FileInputStream(tmp));
-            add=(AutoDownloadDetails)in.readObject();
-            in.close();
-            tmp.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue("Unexpected IO problem.",false);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            assertTrue("Unexpected class cast problem.",false);
-        }
+        File tmp=File.createTempFile("AutoDownloadDetails_test", "dat");
+        ObjectOutputStream out=
+                    new ObjectOutputStream(new FileOutputStream(tmp));
+        out.writeObject(add);
+        out.close();
+        ObjectInputStream in=
+                      new ObjectInputStream(new FileInputStream(tmp));
+        add=(AutoDownloadDetails)in.readObject();
+        in.close();
+        tmp.delete();
         
         assertTrue(add.addDownload(rfds[0]));
         add.commitDownload(rfds[0]);

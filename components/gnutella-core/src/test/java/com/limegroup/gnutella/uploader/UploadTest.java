@@ -53,12 +53,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() {
-		try {
-  			address = InetAddress.getLocalHost().getHostAddress();
-  		} catch(UnknownHostException e) {
-  		    fail("could not get local host address ??? ");
-  		}
+	protected void setUp() throws Exception {
+		address = InetAddress.getLocalHost().getHostAddress();
         SettingsManager.instance().setBannedIps(new String[] {"*.*.*.*"});
         SettingsManager.instance().setAllowedIps(new String[] {"127.*.*.*"});
 		SettingsManager.instance().setPort(PORT);
@@ -109,362 +105,202 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     //}
     
     ///////////////////push downloads with HTTP1.0///////////
-    public void testHTTP10Push() {
+    public void testHTTP10Push() throws Exception {
         boolean passed = false;
-        try {
-            passed = downloadPush(file, null,alphabet);
-            assertTrue("Push download",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed = downloadPush(file, null,alphabet);
+        assertTrue("Push download",passed);
     }
 
-    public void testHTTP10PushEncodedFile() {
+    public void testHTTP10PushEncodedFile() throws Exception {
         boolean passed = false;        
-        try {
-            passed=downloadPush(encodedFile, null,alphabet);
-            assertTrue("Push download, encoded file name",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed=downloadPush(encodedFile, null,alphabet);
+        assertTrue("Push download, encoded file name",passed);
     }
 
-    public void testHTTP10PushRange() {
+    public void testHTTP10PushRange() throws Exception {
         boolean passed = false;
-        try {
-            passed =downloadPush(file, "Range: bytes=2-5","cdef");
-            assertTrue("Push download, middle range, inclusive",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =downloadPush(file, "Range: bytes=2-5","cdef");
+        assertTrue("Push download, middle range, inclusive",passed);
     }
 
     ///////////////////push downloads with HTTP1.1///////////////            
-    public void testHTTP11Push() {
+    public void testHTTP11Push() throws Exception {
         boolean passed = false;
-        try {
-            passed = downloadPush1(file, null, alphabet);
-            assertTrue("Push download with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed = downloadPush1(file, null, alphabet);
+        assertTrue("Push download with HTTP1.1",passed);
     }
      
 
-    public void testHTTP11PushEncodedFile() {
+    public void testHTTP11PushEncodedFile() throws Exception {
         boolean passed = false;
-        try {
-            passed =downloadPush1(encodedFile, null,
-                             "abcdefghijklmnopqrstuvwxyz");
-            assertTrue("Push download, encoded file name with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =downloadPush1(encodedFile, null,
+                         "abcdefghijklmnopqrstuvwxyz");
+        assertTrue("Push download, encoded file name with HTTP1.1",passed);
     }
 
-    public void testHTTP11PushRange() {
+    public void testHTTP11PushRange() throws Exception {
         boolean passed = false;
-        try {
-            passed =downloadPush1(file, "Range: bytes=2-5","cdef");
-            assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-        }
+        passed =downloadPush1(file, "Range: bytes=2-5","cdef");
+        assertTrue("Push download, middle range, inclusive with HTTP1.1",passed);
     }
      
 
-    public void testHTTP11Head() {
-        try {
-            assertTrue("Persistent push HEAD requests", 
-                       downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-        }
+    public void testHTTP11Head() throws Exception {
+        assertTrue("Persistent push HEAD requests", 
+                   downloadPush1("HEAD", "/get/"+index+"/"+encodedFile, null, ""));
     }
         
                        
 
     //////////////normal downloads with HTTP 1.0//////////////
 
-    public void testHTTP10Download() {
+    public void testHTTP10Download() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, null,"abcdefghijklmnopqrstuvwxyz");
-            assertTrue("No range header",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, null,"abcdefghijklmnopqrstuvwxyz");
+        assertTrue("No range header",passed);
     }
     
-    public void testHTTP10DownloadRange() {
+    public void testHTTP10DownloadRange() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range: bytes=2-", 
-                        "cdefghijklmnopqrstuvwxyz");
-            assertTrue("Standard range header",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range: bytes=2-", 
+                    "cdefghijklmnopqrstuvwxyz");
+        assertTrue("Standard range header",passed);
     }
 
-    public void testHTTP10DownloadMissingRange() {
+    public void testHTTP10DownloadMissingRange() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range: bytes 2-", 
-                        "cdefghijklmnopqrstuvwxyz");
-            assertTrue("Range missing \"=\".  (Not legal HTTP, but common.)",
-                   passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range: bytes 2-", 
+                    "cdefghijklmnopqrstuvwxyz");
+        assertTrue("Range missing \"=\".  (Not legal HTTP, but common.)",
+               passed);
     }
 
-    public void testHTTP10DownloadMiddleRange() {
+    public void testHTTP10DownloadMiddleRange() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range: bytes=2-5","cdef",
-                        "Content-range: bytes 2-5/26");
-            assertTrue("Middle range, inclusive",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range: bytes=2-5","cdef",
+                    "Content-range: bytes 2-5/26");
+        assertTrue("Middle range, inclusive",passed);
     }
 
-    public void testHTTP10DownloadRangeNoSpace() {
+    public void testHTTP10DownloadRangeNoSpace() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range:bytes 2-",
-                        "cdefghijklmnopqrstuvwxyz",
-                        "Content-length:24");
-            assertTrue("No space after \":\".  (Legal HTTP.)",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range:bytes 2-",
+                    "cdefghijklmnopqrstuvwxyz",
+                    "Content-length:24");
+        assertTrue("No space after \":\".  (Legal HTTP.)",passed);
     }
 
-    public void testHTTP10DownloadRangeLastByte() {
+    public void testHTTP10DownloadRangeLastByte() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range: bytes=-5","vwxyz");
-            assertTrue("Last bytes of file",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range: bytes=-5","vwxyz");
+        assertTrue("Last bytes of file",passed);
     }
 
-    public void testHTTP10DownloadRangeTooBigNegative() {
+    public void testHTTP10DownloadRangeTooBigNegative() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range: bytes=-30",
-                        "abcdefghijklmnopqrstuvwxyz");
-            assertTrue("Too big negative range request",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range: bytes=-30",
+                    "abcdefghijklmnopqrstuvwxyz");
+        assertTrue("Too big negative range request",passed);
     }
 
 
-    public void testHTTP10DownloadRangeExtraSpace() {
+    public void testHTTP10DownloadRangeExtraSpace() throws Exception {
         boolean passed = false;
-        try {
-            passed =download(file, "Range:   bytes=  2  -  5 ", "cdef");
-            assertTrue("Lots of extra space",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(file, "Range:   bytes=  2  -  5 ", "cdef");
+        assertTrue("Lots of extra space",passed);
     }
 
 
-    public void testHTTP10DownloadURLEncoding() {
+    public void testHTTP10DownloadURLEncoding() throws Exception {
         assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile), file,
                      java.net.URLDecoder.decode(encodedFile));
         boolean passed = false;
-        try {
-            passed =download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
-            assertTrue("URL encoded",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+        assertTrue("URL encoded",passed);
     }
 
     ////////////normal download with HTTP 1.1////////////////
 
-    public void testHTTP11DownloadNoRangeHeader() {
+    public void testHTTP11DownloadNoRangeHeader() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, null,"abcdefghijklmnopqrstuvwxyz");
-            assertTrue("No range header with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download1(file, null,"abcdefghijklmnopqrstuvwxyz");
+        assertTrue("No range header with HTTP1.1",passed);
     }
 
-    public void testHTTP11DownloadStandardRangeHeader() {
+    public void testHTTP11DownloadStandardRangeHeader() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, "Range: bytes=2-", 
-                         "cdefghijklmnopqrstuvwxyz");
-            assertTrue("Standard range header with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download1(file, "Range: bytes=2-", 
+                     "cdefghijklmnopqrstuvwxyz");
+        assertTrue("Standard range header with HTTP1.1",passed);
     }
 
 
-    public void testHTTP11DownloadRangeMissingEquals() {
+    public void testHTTP11DownloadRangeMissingEquals() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, "Range: bytes 2-", 
-                         "cdefghijklmnopqrstuvwxyz");
-            assertTrue("Range missing \"=\". (Not legal HTTP, but common.)"+
-                   "with HTTP1.1", passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download1(file, "Range: bytes 2-", 
+                     "cdefghijklmnopqrstuvwxyz");
+        assertTrue("Range missing \"=\". (Not legal HTTP, but common.)"+
+               "with HTTP1.1", passed);
     }
 
-    public void testHTTP11DownloadMiddleRange() {
+    public void testHTTP11DownloadMiddleRange() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, "Range: bytes=2-5","cdef");
-            assertTrue("Middle range, inclusive with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download1(file, "Range: bytes=2-5","cdef");
+        assertTrue("Middle range, inclusive with HTTP1.1",passed);
     }
         
-    public void testHTTP11DownloadRangeNoSpaceAfterColon() {
+    public void testHTTP11DownloadRangeNoSpaceAfterColon() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, "Range:bytes 2-",
-                         "cdefghijklmnopqrstuvwxyz");
-            assertTrue("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download1(file, "Range:bytes 2-",
+                     "cdefghijklmnopqrstuvwxyz");
+        assertTrue("No space after \":\".  (Legal HTTP.) with HTTP1.1",passed);
     }
 
-    public void testHTTP11DownloadRangeLastByte() {
+    public void testHTTP11DownloadRangeLastByte() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, "Range: bytes=-5","vwxyz");
-            assertTrue("Last bytes of file with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail("unexpected exception: "+e);
-
-        }
+        passed =download1(file, "Range: bytes=-5","vwxyz");
+        assertTrue("Last bytes of file with HTTP1.1",passed);
     }
 
 
-    public void testHTTP11DownloadRangeLotsOfExtraSpace() {
+    public void testHTTP11DownloadRangeLotsOfExtraSpace() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(file, "Range:   bytes=  2  -  5 ", "cdef");
-            assertTrue("Lots of extra space with HTTP1.1",passed);        
-        } catch(Exception e) {
-            e.printStackTrace(); 
-            fail("unexpected exception: "+e);
-        } 
+        passed =download1(file, "Range:   bytes=  2  -  5 ", "cdef");
+        assertTrue("Lots of extra space with HTTP1.1",passed);        
 
         
         assertEquals("Unexpected: "+java.net.URLDecoder.decode(encodedFile),
                      file, java.net.URLDecoder.decode(encodedFile));
     }
 
-    public void testHTTP11DownloadURLEncoding() {
+    public void testHTTP11DownloadURLEncoding() throws Exception {
         boolean passed = false;
-        try {
-            passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
-            assertTrue("URL encoded with HTTP1.1",passed);
-        } catch(Exception e) {
-            e.printStackTrace(); 
-            fail("unexpected exception: "+e);
-        } 
+        passed =download1(encodedFile, null,"abcdefghijklmnopqrstuvwxyz");
+        assertTrue("URL encoded with HTTP1.1",passed);
 
     }
 
 //////////////////Pipelining tests with HTTP1.1//////////////             
-    public void testHTTP11PipeliningDownload() {
+    public void testHTTP11PipeliningDownload() throws Exception {
         boolean passed = false;
-        try {
-            passed = pipelineDownloadNormal(file, null, 
-                                        "abcdefghijklmnopqrstuvwxyz");
-        } catch(Exception e) {
-            e.printStackTrace(); 
-            fail("unexpected exception: "+e);
-        } 
+        passed = pipelineDownloadNormal(file, null, 
+                                    "abcdefghijklmnopqrstuvwxyz");
         assertTrue("piplining with normal download",passed);
     }
             
-    public void testHTTP11PipeliningDownloadPush() {
+    public void testHTTP11PipeliningDownloadPush() throws Exception {
         boolean passed = false;
-        try {
-            passed = pipelineDownloadPush(file,null, 
-                                           "abcdefghijklmnopqrstuvwxyz");
-        } catch(Exception e) {
-            e.printStackTrace(); 
-            fail("unexpected exception: "+e);
-        } 
+        passed = pipelineDownloadPush(file,null, 
+                                       "abcdefghijklmnopqrstuvwxyz");
         assertTrue("piplining with push download",passed);
     }
          
-    public void testHTTP11DownloadMixedPersistent() {
-        try {
-            tMixedPersistentRequests();
-        } catch(Throwable t) {
-            t.printStackTrace();
-            fail("unexpected exception: "+t);
-        }
+    public void testHTTP11DownloadMixedPersistent() throws Exception {
+        tMixedPersistentRequests();
     }
 
-    public void testHTTP11DownloadPersistentURI() {
-        try {
-            tPersistentURIRequests();
-        } catch(Throwable t) {
-            t.printStackTrace();
-            fail("unexpected exception: "+t);
-        }
+    public void testHTTP11DownloadPersistentURI() throws Exception {
+        tPersistentURIRequests();
     }
 
     /** 
@@ -893,7 +729,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     /** Makes sure that a HEAD request followed by a GET request does the right
      *  thing. */
-    public void tMixedPersistentRequests() {
+    public void tMixedPersistentRequests() throws Exception {
         Socket s = null;
         try {
             //1. Establish connection.
@@ -909,9 +745,6 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             //3. Send GET request, make sure data ok.
             assertEquals(alphabet,
                 downloadInternal1(encodedFile, null, out, in, alphabet.length()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail ("Mysterious IO problem: "+e);
         } finally {
             if (s!=null)
                 try { s.close(); } catch (IOException ignore) { }
@@ -920,7 +753,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     /** Tests persistent connections with URI requests.  (Raphael Manfredi claimed this
      *  was broken.)  */
-    public void tPersistentURIRequests() {
+    public void tPersistentURIRequests() throws Exception {
         Socket s = null;
         try {
             //1. Establish connection.
@@ -937,9 +770,6 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertEquals(alphabet,
                          downloadInternal1("GET", "/uri-res/N2R?"+hash,
                                            null, out, in, alphabet.length()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail ("Mysterious IO problem: "+e);
         } finally {
             if (s!=null)
                 try { s.close(); } catch (IOException ignore) { }

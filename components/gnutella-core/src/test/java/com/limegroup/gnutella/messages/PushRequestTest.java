@@ -38,7 +38,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(pr.getPort()==u2);
     }
 
-    public void testBigPush() {        
+    public void testBigPush() throws Exception {        
         byte[] bytes=new byte[23+26+10];
         bytes[16]=Message.F_PUSH;
         bytes[17]=(byte)3;     //hops
@@ -47,41 +47,34 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[23+16]=(byte)3;  //index
         bytes[23+26+3]=(byte)7;//random big pong payload
         ByteArrayInputStream in=new ByteArrayInputStream(bytes);
-        try {
-            //1. Test that we can read big push
-            PushRequest pr=(PushRequest)Message.read(in);            
-            assertEquals("unexpected push index", pr.getIndex(), 3);
-            assertEquals("unexpected total length", pr.getTotalLength(), 
-                         bytes.length);
-            assertEquals("unexpected length", pr.getLength(), bytes.length-23);
+        //1. Test that we can read big push
+        PushRequest pr=(PushRequest)Message.read(in);            
+        assertEquals("unexpected push index", pr.getIndex(), 3);
+        assertEquals("unexpected total length", pr.getTotalLength(), 
+                     bytes.length);
+        assertEquals("unexpected length", pr.getLength(), bytes.length-23);
 
-            //2. Test that yields returns the same thing
-            ByteArrayOutputStream out=new ByteArrayOutputStream();
-            pr.write(out);
-            assertTrue("written bytes should be equal", 
-                       Arrays.equals(out.toByteArray(), bytes));
+        //2. Test that yields returns the same thing
+        ByteArrayOutputStream out=new ByteArrayOutputStream();
+        pr.write(out);
+        assertTrue("written bytes should be equal", 
+                   Arrays.equals(out.toByteArray(), bytes));
 
-            //3. Test that we can strip the payload out
-            PushRequest pr2=(PushRequest)pr.stripExtendedPayload();
-            assertEquals("unexpected length", pr2.getLength(), 26);
-            assertEquals("unexpected hops", pr2.getHops(), pr.getHops());
-            ByteArrayOutputStream out2=new ByteArrayOutputStream();
-            pr2.write(out2);
-            byte[] bytes2=out2.toByteArray();
-            assertEquals("unexpected bytes length", bytes2.length, 23+26);
-            for (int i=0; i<bytes2.length; i++)
-                if (i!=19) //skip payload length
-                    assertEquals(bytes2[i], bytes[i]);
-        } catch (BadPacketException e) {
-            e.printStackTrace();
-            fail("Bad packet exception: "+e);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Unexpected IO problem");
-        }
+        //3. Test that we can strip the payload out
+        PushRequest pr2=(PushRequest)pr.stripExtendedPayload();
+        assertEquals("unexpected length", pr2.getLength(), 26);
+        assertEquals("unexpected hops", pr2.getHops(), pr.getHops());
+        ByteArrayOutputStream out2=new ByteArrayOutputStream();
+        pr2.write(out2);
+        byte[] bytes2=out2.toByteArray();
+        assertEquals("unexpected bytes length", bytes2.length, 23+26);
+        for (int i=0; i<bytes2.length; i++)
+            if (i!=19) //skip payload length
+                assertEquals(bytes2[i], bytes[i]);
+
     }
 
-    public void testPushTooSmall() {
+    public void testPushTooSmall() throws Exception {
         byte[] bytes=new byte[23+25];  //one byte too small
         bytes[16]=Message.F_PUSH;
         bytes[17]=(byte)3;     //hops
@@ -92,8 +85,6 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         try {
             Message.read(in);
             fail("No exception thrown");
-        } catch (IOException fail) {
-            fail("Unexpected IO problem");
         } catch (BadPacketException pass) { 
             //Pass!
         }

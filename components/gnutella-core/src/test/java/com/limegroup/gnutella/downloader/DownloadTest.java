@@ -108,8 +108,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         try {
             SettingsManager.instance().setSaveDirectory(saveDir);        
         } catch(IOException e) {
-            e.printStackTrace();
-            fail( "cannot set save directory.");
+            fail( "cannot set save directory.", e);
         }
         
         //Pick random name for file.
@@ -188,49 +187,38 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     ////////////////////////// Test Cases //////////////////////////
     
-    private static void tOverlapCheckSpeed(int rate) {
+    private static void tOverlapCheckSpeed(int rate) throws Exception {
         RemoteFileDesc rfd=newRFDWithURN(6346, 100);
         debug("-Measuring time for download at rate "+rate+"... \n");
         uploader1.setRate(rate);
         long start1=System.currentTimeMillis();
         AlternateLocationCollection dcoll = 
 			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
-        try {
-            HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile,dcoll);
-            VerifyingFile vf = new VerifyingFile(true);
-            vf.open(savedFile,null);
-            downloader.connectTCP(0);
-            downloader.connectHTTP(0,TestFile.length(),true);
-            downloader.doDownload(vf,false);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Unexpected exception: "+e);
-        } 
+
+        HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile,dcoll);
+        VerifyingFile vf = new VerifyingFile(true);
+        vf.open(savedFile,null);
+        downloader.connectTCP(0);
+        downloader.connectHTTP(0,TestFile.length(),true);
+        downloader.doDownload(vf,false);
+
         long elapsed1=System.currentTimeMillis()-start1;
         
-        try{
-            RandomAccessFile raf = new RandomAccessFile(savedFile,"rw");
-            raf.seek(300);
-            raf.write(65);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Unexpected exception: "+e);
-        }
+        RandomAccessFile raf = new RandomAccessFile(savedFile,"rw");
+        raf.seek(300);
+        raf.write(65);
         
         long start2=System.currentTimeMillis();
-        try {
-            AlternateLocationCollection dcol = 
-				AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
-            HTTPDownloader downloader=new HTTPDownloader(rfd, savedFile,dcol);
-            VerifyingFile vf = new VerifyingFile(false);
-            vf.open(savedFile,null);
-            downloader.connectTCP(0);
-            downloader.connectHTTP(0, TestFile.length(),true);
-            downloader.doDownload(vf, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Unexpected exception: "+e);
-        } 
+
+        AlternateLocationCollection dcol = 
+			AlternateLocationCollection.createCollection(rfd.getSHA1Urn());
+        downloader=new HTTPDownloader(rfd, savedFile,dcol);
+        vf = new VerifyingFile(false);
+        vf.open(savedFile,null);
+        downloader.connectTCP(0);
+        downloader.connectHTTP(0, TestFile.length(),true);
+        downloader.doDownload(vf, false);
+
         long elapsed2=System.currentTimeMillis()-start2;
         debug("  No check="+elapsed2+", check="+elapsed1 +"\n");
     }
@@ -238,7 +226,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     /**
      * Tests a basic download that does not swarm.
      */
-    public void testSimpleDownload() {
+    public void testSimpleDownload() throws Exception {
         shouldRun(SIMPLE_DOWNLOAD);
         debug("-Testing non-swarmed download...");
         
@@ -247,7 +235,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         tGeneric(rfds);
     }
     
-    public void testSimpleSwarm() {
+    public void testSimpleSwarm() throws Exception {
         shouldRun(SIMPLE_SWARM);
         debug("-Testing swarming from two sources...");
         
@@ -280,7 +268,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testUnbalancedSwarm() {
+    public void testUnbalancedSwarm() throws Exception  {
         shouldRun(UNBALANCED_SWARM);
         debug("-Testing swarming from two unbalanced sources...");
         
@@ -310,7 +298,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testSwarmWithInterrupt() {
+    public void testSwarmWithInterrupt() throws Exception {
         shouldRun(SWARM_WITH_INTERRUPT);
         debug("-Testing swarming from two sources (one broken)...");
         
@@ -340,7 +328,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testStealerInterrupted() {
+    public void testStealerInterrupted() throws Exception {
         shouldRun(STEALER_INTERRUPTED);
         debug("-Testing unequal swarming with stealer dying...");
         
@@ -373,7 +361,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
 
-    public void testAddDownload() {
+    public void testAddDownload() throws Exception {
         shouldRun(ADD_DOWNLOAD);
         debug("-Testing addDownload (increases swarming)...");
         
@@ -385,20 +373,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         RemoteFileDesc rfd2=newRFD(6347, 100);
 
         Downloader download=null;
-        try {
-            //Start one location, wait a bit, then add another.
-            download=dm.download(new RemoteFileDesc[] {rfd1}, false);
-            ((ManagedDownloader)download).addDownload(rfd2);
-        } catch (FileExistsException e) {
-            e.printStackTrace();
-            fail("FAILED: already exists");
-        } catch (AlreadyDownloadingException e) {
-            e.printStackTrace();
-            fail("FAILED: already downloading");
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            fail("FAILED: file not found (huh?)");
-        }
+
+        //Start one location, wait a bit, then add another.
+        download=dm.download(new RemoteFileDesc[] {rfd1}, false);
+        ((ManagedDownloader)download).addDownload(rfd2);
+
         waitForComplete(download);
         if (isComplete())
             debug("pass"+"\n");
@@ -419,7 +398,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("u2 did all the work", u2<(TestFile.length()/2+FUDGE_FACTOR));
     }
 
-    public void testStallingUploaderReplaced() {
+    public void testStallingUploaderReplaced() throws Exception  {
         shouldRun(STALLING_UPLOADER_REPLACED);
         debug("-Testing download completion with stalling downloader...");
         
@@ -446,16 +425,16 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed"+"\n");//file downloaded? passed
     }
     
-    public void testOverlapCheckGreyNoStopOnCorrupt() {
+    public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
         tOverlapCheckGrey(false);
     }
     
-    public void testOverlapCheckGreyStopOnCorrupt() {
+    public void testOverlapCheckGreyStopOnCorrupt() throws Exception {
         callback.delCorrupt = true;
         tOverlapCheckGrey(true);
     }
 
-    private void tOverlapCheckGrey(boolean deleteCorrupt) {
+    private void tOverlapCheckGrey(boolean deleteCorrupt) throws Exception {
         shouldRun(OVERLAP_CHECK_GREY);
         debug("-Testing overlap checking from Grey area..." +
                          "stop when corrupt "+deleteCorrupt+" ");
@@ -468,19 +447,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         RemoteFileDesc rfd2=newRFD(6347, 100);
         
         Downloader download=null;
-        try {
-            //Start one location, wait a bit, then add another.
-            download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
-        } catch (FileExistsException e) {
-            e.printStackTrace();
-            fail("FAILED: already exists");
-        } catch (AlreadyDownloadingException e) {
-            e.printStackTrace();
-            fail("FAILED: already downloading");
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            fail("FAILED: file not found (huh?)");
-        }
+        //Start one location, wait a bit, then add another.
+        download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
         if(deleteCorrupt)
             waitForCorrupt(download);
         else
@@ -489,16 +457,16 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //TODO: check IncompleteFileManager, disk
     }
 
-    public void testOverlapCheckWhiteNoStopOnCorrupt() {
+    public void testOverlapCheckWhiteNoStopOnCorrupt() throws Exception {
         tOverlapCheckWhite(false);
     }
     
-    public void testOverlapCheckWhiteStopOnCorrupt() {
+    public void testOverlapCheckWhiteStopOnCorrupt() throws Exception {
         callback.delCorrupt = true;        
         tOverlapCheckWhite(true);
     }
 
-    private void tOverlapCheckWhite(boolean deleteCorrupt) {
+    private void tOverlapCheckWhite(boolean deleteCorrupt) throws Exception {
         shouldRun(OVERLAP_CHECK_WHITE);
         debug("-Testing overlap checking from White area..."+
                          "stop when corrupt "+deleteCorrupt+" ");
@@ -511,19 +479,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         RemoteFileDesc rfd2=newRFD(6347, 100);
         
         Downloader download=null;
-        try {
-            //Start one location, wait a bit, then add another.
-            download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
-        } catch (FileExistsException e) {
-            e.printStackTrace();
-            fail("FAILED: already exists");
-        } catch (AlreadyDownloadingException e) {
-            e.printStackTrace();
-            fail("FAILED: already downloading");
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            fail("FAILED: file not found (huh?)");
-        }
+
+        //Start one location, wait a bit, then add another.
+        download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
+
         if(deleteCorrupt)
             waitForCorrupt(download);
         else
@@ -531,16 +490,16 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed"+"\n");//got here? Test passed
     }
     
-    public void testMismatchedVerifyHashNoStopOnCorrupt() {
+    public void testMismatchedVerifyHashNoStopOnCorrupt() throws Exception {
         tMismatchedVerifyHash(false);
     }
     
-    public void testMismatchedVerifyHashStopOnCorrupt() {
+    public void testMismatchedVerifyHashStopOnCorrupt() throws Exception {
         callback.delCorrupt = true;        
         tMismatchedVerifyHash(true);
     }
 
-    private void tMismatchedVerifyHash(boolean deleteCorrupt) {
+    private void tMismatchedVerifyHash(boolean deleteCorrupt) throws Exception {
         shouldRun(MISMATCHED_VERIFY_HASH);
         debug("-Testing file declared corrupt, when hash of "+
                          "downloaded file mismatches bucket hash" +
@@ -551,18 +510,9 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         RemoteFileDesc rfd1 = newRFDWithURN(6346,100,
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         Downloader download = null;
-        try {
-            download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
-        } catch (FileExistsException e) {
-            e.printStackTrace();
-            fail("FAILED: already exists");
-        } catch (AlreadyDownloadingException e) {
-            e.printStackTrace();
-            fail("FAILED: already downloading");
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            fail("FAILED: file not found (huh?)");
-        }
+        
+        download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
+
         if(deleteCorrupt)
             waitForCorrupt(download);
         else
@@ -570,7 +520,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed"+"\n");//got here? Test passed
     }
 
-    public void testSimpleAlternateLocations() {  
+    public void testSimpleAlternateLocations() throws Exception {  
         shouldRun(SIMPLE_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
@@ -584,13 +534,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection ashould = 
 			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
-        try {
-            ashould.addAlternateLocation(
+
+        ashould.addAlternateLocation(
                 AlternateLocation.createAlternateLocation(rfd1.getUrl()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
         AlternateLocationCollection adiff = 
         ashould.diffAlternateLocationCollection(alt1); 
 
@@ -604,7 +551,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("SHA1 test failed", sha1Matches);
     }
 
-    public void testTwoAlternateLocations() {  
+    public void testTwoAlternateLocations() throws Exception {  
         shouldRun(TWO_ALTERNATE_LOCATIONS);
         debug("-Testing Two AlternateLocations...");
         
@@ -620,19 +567,16 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
         AlternateLocationCollection ashould = 
 			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
-        try {
-            URL url1 = rfd1.getUrl();
-            URL url2 = rfd2.getUrl();
-            AlternateLocation al1 =
-				AlternateLocation.createAlternateLocation(url1);
-            AlternateLocation al2 =
-				AlternateLocation.createAlternateLocation(url2);
-            ashould.addAlternateLocation(al1);
-            ashould.addAlternateLocation(al2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
+        URL url1 = rfd1.getUrl();
+        URL url2 = rfd2.getUrl();
+        AlternateLocation al1 =
+			AlternateLocation.createAlternateLocation(url1);
+        AlternateLocation al2 =
+			AlternateLocation.createAlternateLocation(url2);
+        ashould.addAlternateLocation(al1);
+        ashould.addAlternateLocation(al2);
+
         AlternateLocationCollection adiff = 
             ashould.diffAlternateLocationCollection(alt1); 
         AlternateLocationCollection adiff2 = 
@@ -644,7 +588,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("uploader got wrong alt", !adiff2.hasAlternateLocations());
     }
 
-    public void testUploaderAlternateLocations() {  
+    public void testUploaderAlternateLocations() throws Exception {  
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
         shouldRun(UPLOADER_ALTERNATE_LOCATIONS);
@@ -666,15 +610,12 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.createCollection(rfd2.getSHA1Urn());
-        try {
-            URL url2 = rfd2.getUrl();
-            AlternateLocation al2 =
-				AlternateLocation.createAlternateLocation(url2);
-            ualt.addAlternateLocation(al2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
+        URL url2 = rfd2.getUrl();
+        AlternateLocation al2 =
+			AlternateLocation.createAlternateLocation(url2);
+        ualt.addAlternateLocation(al2);
+
         uploader1.setAlternateLocations(ualt);
 
         tGeneric(rfds);
@@ -692,7 +633,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("u2 did all the work", u2<TestFile.length()/2+FUDGE_FACTOR);
     }
 
-    public void testWeirdAlternateLocations() {  
+    public void testWeirdAlternateLocations() throws Exception {  
         shouldRun(WIERD_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
@@ -704,23 +645,20 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.createCollection(
                 HugeTestUtils.EQUAL_SHA1_LOCATIONS[0].getSHA1Urn());
-        try {
-            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
-			//AlternateLocation.createAlternateLocation(
-			//genericURL("http://211.211.211.211:6347/get/0/foobar.txt")));
-            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
-			//  AlternateLocation.createAlternateLocation(
-			//      genericURL("http://211.211.211.211/get/0/foobar.txt")));
-            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
-			//  AlternateLocation.createAlternateLocation(
-			//      genericURL("http://www.yahoo.com/foo/bar/foobar.txt")));
-            ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
-			//  AlternateLocation.createAlternateLocation(
-			//      genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
+        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
+		//AlternateLocation.createAlternateLocation(
+		//genericURL("http://211.211.211.211:6347/get/0/foobar.txt")));
+        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
+		//  AlternateLocation.createAlternateLocation(
+		//      genericURL("http://211.211.211.211/get/0/foobar.txt")));
+        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
+		//  AlternateLocation.createAlternateLocation(
+		//      genericURL("http://www.yahoo.com/foo/bar/foobar.txt")));
+        ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
+		//  AlternateLocation.createAlternateLocation(
+		//      genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
+
         uploader1.setAlternateLocations(ualt);
 
         tGeneric(rfds);
@@ -730,13 +668,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection ashould = 
 			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
-        try {
-            ashould.addAlternateLocation(
-                AlternateLocation.createAlternateLocation(rfd1));
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
+        ashould.addAlternateLocation(
+            AlternateLocation.createAlternateLocation(rfd1));
+
         //ashould.addAlternateLocationCollection(ualt);
         AlternateLocationCollection adiff = 
             ashould.diffAlternateLocationCollection(alt1); 
@@ -749,7 +684,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("uploader didn't get all alts", !adiff2.hasAlternateLocations());
     }
 
-    public void testStealerInterruptedWithAlternate() {
+    public void testStealerInterruptedWithAlternate() throws Exception {
         shouldRun(STEALER_INTERRUPTED_WITH_ALTERNATE);
         debug("-Testing swarming of rfds ignoring alt ...");
         
@@ -773,14 +708,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Prebuild an uploader alt in lieu of rdf4
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.createCollection(rfd4.getSHA1Urn());
-        try {
-            AlternateLocation al4 =
-				AlternateLocation.createAlternateLocation(rfd4);
-            ualt.addAlternateLocation(al4);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
+        AlternateLocation al4 =
+			AlternateLocation.createAlternateLocation(rfd4);
+        ualt.addAlternateLocation(al4);
+
         uploader1.setAlternateLocations(ualt);
 
         tGeneric(rfds);
@@ -842,7 +774,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		}
 	*/
 
-    public void testUpdateWhiteWithFailingFirstUploader() {
+    public void testUpdateWhiteWithFailingFirstUploader() throws Exception {
         shouldRun(UPDATE_WHITE_WITH_FAILING_FIRST_UPLOADER);
         debug("-Testing corruption of needed. \n");
         
@@ -869,7 +801,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed \n");
     }
 
-    public void testQueuedDownloader() {
+    public void testQueuedDownloader() throws Exception {
         shouldRun(QUEUED_DOWNLOADER);
         debug("-Testing queued downloader. \n");
         
@@ -887,7 +819,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
      * uploader response headers even if the response code is a 503,
      * try again later.
      */
-    public void testAlternateLocationsExchangedWithBusy() {
+    public void testAlternateLocationsExchangedWithBusy() throws Exception {
         //tests that a downloader reads alternate locations from the
         //uploader even if it receives a 503 from the uploader.
         shouldRun(ALTERNATE_LOCATIONS_EXCHANGED_WITH_BUSY);
@@ -909,14 +841,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Prebuild an uploader alts in lieu of rdf2
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.createCollection(rfd1.getSHA1Urn());
-        try {
-            AlternateLocation al2 =
-				AlternateLocation.createAlternateLocation(rfd2);
-            ualt.addAlternateLocation(al2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Couldn't setup test");
-        }
+
+        AlternateLocation al2 =
+			AlternateLocation.createAlternateLocation(rfd2);
+        ualt.addAlternateLocation(al2);
+
         uploader1.setAlternateLocations(ualt);
 
         tGeneric(rfds);
@@ -977,21 +906,11 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
-    private static void tGeneric(RemoteFileDesc[] rfds) {
+    private static void tGeneric(RemoteFileDesc[] rfds) throws Exception {
         Downloader download=null;
-        try {
-            download=dm.download(rfds, false);
-        } catch (FileExistsException e) {
-            e.printStackTrace();
-            fail("FAILED: already exists");
-        } catch (AlreadyDownloadingException e) {
-            e.printStackTrace();
-            fail("FAILED: already downloading");
-            return;
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            fail("FAILED: file not found (huh?)");
-        }
+
+        download=dm.download(rfds, false);
+
         waitForComplete(download);
         if (isComplete())
             debug("pass"+"\n");
@@ -1027,8 +946,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         try {
             theURL = new URL(url);
         } catch( Exception e ) {
-            e.printStackTrace();
-            fail("Generic URL creation failed");
+            fail("Generic URL creation failed", e);
         }  
         return theURL;
     }
@@ -1057,8 +975,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             else
                 set.add(URN.createSHA1Urn(urn));
         } catch(Exception e) {
-            e.printStackTrace();
-            fail("SHA1 not created for: "+savedFile);
+            fail("SHA1 not created for: "+savedFile, e);
         }
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, savedFile.getName(),
@@ -1108,7 +1025,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
                 }
             }
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            //ioe.printStackTrace();
             return false;
         } finally {
             if (stream!=null) {

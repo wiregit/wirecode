@@ -19,7 +19,7 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         return new TestSuite(RequeryDownloaderTest.class);
     }
 
-	public void testLegacy() {
+	public void testLegacy() throws Exception {
         //Test serialization.
         AutoDownloadDetails details=new AutoDownloadDetails(
             "test", "", new byte[16], new MediaType("", "", new String[0]));
@@ -31,22 +31,14 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         downloader.initialize(new DownloadManager(), 
                               new FileManager(),
                               new ActivityCallbackStub());
-        try {
-            File tmp=File.createTempFile("RequeryDownloader_test", "dat");
-            ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
-            out.writeObject(downloader);
-            out.close();
-            ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
-            RequeryDownloader downloader2=(RequeryDownloader)in.readObject();
-            in.close();
-            assertTrue(downloader.hasFile()==downloader2.hasFile());//weak test
-            tmp.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue("Unexpected IO problem.", false);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            assertTrue("Unexpected class cast problem.",false);
-        }
+        File tmp=File.createTempFile("RequeryDownloader_test", "dat");
+        ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));
+        out.writeObject(downloader);
+        out.close();
+        ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
+        RequeryDownloader downloader2=(RequeryDownloader)in.readObject();
+        in.close();
+        assertTrue(downloader.hasFile()==downloader2.hasFile());//weak test
+        tmp.delete();
     }
 }

@@ -22,8 +22,8 @@ public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCa
     protected void setUp() {
     }
 
-    private void basicTest(File file) {
-        Assert.assertTrue("File " + file + " cannot be found!",
+    private void basicTest(File file) throws Exception  {
+        assertTrue("File " + file + " cannot be found!",
                           file.exists());
         try {
             LimeXMLReplyCollection.MapSerializer ms =
@@ -38,22 +38,20 @@ public class XMLDocSerializerTest extends com.limegroup.gnutella.util.BaseTestCa
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
-            Assert.assertTrue("Couldn't deserialize XML Docs!",
-                              false);
+            fail("couldn't deserialize XML docs", e);
         }
     }
     
     /* Test the first version of LimeXMLDocument, versions 2.4.4 and preceding.
      */
-    public void test244Pre() {
+    public void test244Pre() throws Exception {
         basicTest(CommonUtils.getResourceFile(fileLocation + "audio244Pre.sxml"));
     }
 
     /* This method should be changed as new versions are added.  And the current
      * version should be added as a new test.
      */
-    public void testCurrent() {
+    public void testCurrent() throws Exception {
         basicTest(CommonUtils.getResourceFile(fileLocation + "audio.sxml"));
     }
 

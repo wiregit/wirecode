@@ -296,7 +296,7 @@ public final class HugeTestUtils {
 			BAD_PORT_URLS[0] = new URL("http", "www.limewire.org", -1, "test");
 			BAD_PORT_URLS[1] = new URL("http", "www.limewire.org", 66000, "test");				
 		} catch(MalformedURLException e) {
-			e.printStackTrace();
+			ErrorService.error(e);
 		}
 
 		for(int i=0; i<VALID_URN_STRINGS.length; i++) {
@@ -308,7 +308,7 @@ public final class HugeTestUtils {
 				urnSet.add(urn);
 				URN_SETS[i] = urnSet;
 			} catch(IOException e) {
-				e.printStackTrace();
+				ErrorService.error(e);
 			}
 		}
 
@@ -319,7 +319,7 @@ public final class HugeTestUtils {
 							"/uri-res/N2R?"+URNS[i].httpStringValue());
 			} catch(MalformedURLException e) {
 				// this should not happen
-				e.printStackTrace();
+				ErrorService.error(e);
 			}
 		}
 
@@ -330,7 +330,7 @@ public final class HugeTestUtils {
 							"/uri-res/N2R?"+URNS[0].httpStringValue());
 			} catch(MalformedURLException e) {
 				// this should not happen
-				e.printStackTrace();
+				ErrorService.error(e);
 			}
 		}
 
@@ -340,7 +340,7 @@ public final class HugeTestUtils {
 					AlternateLocation.createAlternateLocation(UNEQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
-				e.printStackTrace();
+				ErrorService.error(e);
 			}
 		}
 
@@ -350,7 +350,7 @@ public final class HugeTestUtils {
 					AlternateLocation.createAlternateLocation(EQUAL_URLS[0]);
 			} catch(IOException e) {
 				// this should not happen
-				e.printStackTrace();
+				ErrorService.error(e);
 			}
 		}
 

@@ -105,7 +105,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
     }
 
 
-    public void testLegacy() {
+    public void testLegacy() throws Exception {
         //TODO: test handle bad packets (sequences, etc)
 
         //-1. Just for sanity's sake....
@@ -127,23 +127,20 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         }
         byte[] dataCompressed=invokeCompress(dummy, data);
         assertTrue(dataCompressed.length<data.length);
-        
-        try {
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            for (int i=0; i<dataCompressed.length; ) {
-                int length=Math.min(rand.nextInt(100), dataCompressed.length-i);
-                byte[] chunk=new byte[length];
-                System.arraycopy(dataCompressed, i, chunk, 0, length);
-                byte[] chunkRead=invokeUncompress(dummy, chunk);
-                baos.write(chunkRead);
-                i+=length;
-            }
-            baos.flush();
-            assertTrue(Arrays.equals(data, baos.toByteArray()),
-                        "Compress/uncompress loop failed");
-        } catch (IOException e) {
-            e.printStackTrace();
+    
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        for (int i=0; i<dataCompressed.length; ) {
+            int length=Math.min(rand.nextInt(100), dataCompressed.length-i);
+            byte[] chunk=new byte[length];
+            System.arraycopy(dataCompressed, i, chunk, 0, length);
+            byte[] chunkRead=invokeUncompress(dummy, chunk);
+            baos.write(chunkRead);
+            i+=length;
         }
+        baos.flush();
+        assertTrue(Arrays.equals(data, baos.toByteArray()),
+                    "Compress/uncompress loop failed");
+
 
         //0.1. halve/unhalve
         assertTrue(QueryRouteTable.extendNibble((byte)0x03)==0x03);
@@ -340,7 +337,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
         try {
             qrt.update(patch);
-            assertTrue(false);
+            fail("bpe should have been thrown.");
         } catch (BadPacketException e) { 
         }
 
@@ -352,13 +349,13 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.update(patch);
         } catch (BadPacketException e) {
-            assertTrue(false);
+            fail("bpe should have been thrown.");
         }
         try {
             patch=new PatchTableMessage((short)2, (short)4,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.update(patch);
-            assertTrue(false);
+            fail("bpe should have been thrown.");
         } catch (BadPacketException e) { 
         }
 
@@ -368,50 +365,40 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.update(patch);
         } catch (BadPacketException e) {
-            assertTrue(false);
+            fail("bpe should have been thrown.");
         }
         try {
             patch=new PatchTableMessage((short)3, (short)3,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.update(patch);
-            assertTrue(false);
+            fail("bpe should have been thrown.");
         } catch (BadPacketException e) {
         }        
 
         qrt=new QueryRouteTable();  //d. sequence interrupted by reset
-        try {
-            patch=new PatchTableMessage((short)1, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            reset=new ResetTableMessage(1024, (byte)2);
-            qrt.update(reset);
-        } catch (BadPacketException e) {
-            assertTrue(false);
-        }
-        try {
-            patch=new PatchTableMessage((short)1, (short)6,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-        } catch (BadPacketException e) {
-            assertTrue(false);
-        }
+        patch=new PatchTableMessage((short)1, (short)3,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        qrt.update(patch);
+        reset=new ResetTableMessage(1024, (byte)2);
+        qrt.update(reset);
+
+        patch=new PatchTableMessage((short)1, (short)6,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        qrt.update(patch);
 
         qrt=new QueryRouteTable();  //e. Sequence too big
-        try {
-            patch=new PatchTableMessage((short)1, (short)2,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            patch=new PatchTableMessage((short)2, (short)2,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-        } catch (BadPacketException e) {
-            assertTrue(false);
-        }
+        patch=new PatchTableMessage((short)1, (short)2,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        qrt.update(patch);
+        patch=new PatchTableMessage((short)2, (short)2,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        qrt.update(patch);
+
         try {
             patch=new PatchTableMessage((short)3, (short)2,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.update(patch);
-            assertTrue(false);
+            fail("bpe should have been thrown.");
         } catch (BadPacketException e) {
         }
     }

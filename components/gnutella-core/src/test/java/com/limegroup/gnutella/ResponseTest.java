@@ -36,7 +36,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * Modified version of the unit test that was formerly embedded in
 	 * the Response class.
 	 */
-	public void testLegacyResponseUnitTest() {
+	public void testLegacyResponseUnitTest() throws Exception {
         Response r = new Response(3,4096,"A.mp3");
         int nameSize = r.getNameBytesSize();
 		assertEquals(nameSize, 5);
@@ -90,12 +90,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
         //create documents.
         LimeXMLDocument d1 = null;
         LimeXMLDocument d2 = null;
-        try {
-            d1 = new LimeXMLDocument(xml1);
-            d2 = new LimeXMLDocument(xml2);
-        } catch (Exception stop) {
-			assertTrue("unexpected exception: "+stop+"\r\ntest failed", false);
-        }//not the Responses fault.
+        d1 = new LimeXMLDocument(xml1);
+        d2 = new LimeXMLDocument(xml2);
         Response ra = new Response(12,231,"def1.txt",d1);
         Response rb = new Response(13,232,"def2.txt",d2);
 		assertEquals("problem with doc constructor", d1, ra.getDocument());

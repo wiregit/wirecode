@@ -71,8 +71,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 									   false, null, null);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
-					 validPorts[i]);
-				// this is expected
+					 validPorts[i], e);
 			}
 		}
 	}

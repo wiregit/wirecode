@@ -17,7 +17,7 @@ public class ManagedConnectionStub extends ManagedConnection {
             PrivilegedAccessor.setValue(this, "_router", new MessageRouterStub());
             PrivilegedAccessor.setValue(this, "_manager", new ConnectionManagerStub());
         } catch(Exception e) {
-            e.printStackTrace();
+            ErrorService.error(e);
         }		
 		//_router = new MessageRouterStub(); 
         //_manager = new ConnectionManagerStub();

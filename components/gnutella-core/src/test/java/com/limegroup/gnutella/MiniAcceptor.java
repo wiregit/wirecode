@@ -88,8 +88,7 @@ public class MiniAcceptor implements Runnable {
             } 
         } catch (IOException e) {
             if (ss==null) {
-                System.err.println("Couldn't listen to port "+port);
-                e.printStackTrace();  //Couldn't listen?  Serious.
+                ErrorService.error(e);
             }
             error=e;                  //Record for later.
             synchronized (lock) {

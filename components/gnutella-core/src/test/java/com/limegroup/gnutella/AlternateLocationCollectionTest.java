@@ -134,7 +134,7 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 	 * Tests the method for getting the HTTP string value for the alternate
 	 * location collection.
 	 */
-	public void testHTTPStringValue() {
+	public void testHTTPStringValue() throws Exception {
 		String val = _alCollection.httpStringValue();
 		StringTokenizer st = new StringTokenizer(val, ",");
 		AlternateLocationCollection alc1 = 
@@ -142,13 +142,9 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 		while(st.hasMoreTokens()) {
 			String str = st.nextToken();
 			str = str.trim();
-			try {
-				AlternateLocation al = 
-				    AlternateLocation.createAlternateLocation(str);
-				alc1.addAlternateLocation(al);
-			} catch(IOException e) {
-				assertTrue("Exception in AlternateLocation contruction: "+e, false);
-			}
+			AlternateLocation al = 
+			    AlternateLocation.createAlternateLocation(str);
+			alc1.addAlternateLocation(al);
 		}
 
 		//assertTrue("AlternateLocationCollections should be equal:\r\n"+_alCollection+

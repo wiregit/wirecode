@@ -50,39 +50,36 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
             try {
                 maxPortRunning = Integer.parseInt(serversRunning);
             } catch(NumberFormatException e) {
-                e.printStackTrace();
-                failWithServerMessage();                
+                failWithServerMessage(e);                
             }
         }
         if(serversRunning == null || maxPortRunning < Backend.DEFAULT_REJECT_PORT) {      
-            failWithServerMessage();
+            failWithServerMessage(null);
         }
         if(ROUTER_SERVICE.isStarted()) return;
 
         try {
             PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);
         } catch(Exception e) {
-            e.printStackTrace();
-            fail("could not initialize test");
+            fail("could not initialize test", e);
         }
 
         try {
             PrivilegedAccessor.setValue(ROUTER_SERVICE.getConnectionManager(),
                                         "_catcher",CATCHER);
         } catch(Exception e) {
-            e.printStackTrace();
-            fail("could not initialize test");
+            fail("could not initialize test", e);
         }
 
         ROUTER_SERVICE.start();
         RouterService.clearHostCatcher();
     }
 
-    private void failWithServerMessage() {
+    private void failWithServerMessage(Exception e) {
         fail("You must run this test with servers running --\n"+
              "use the test6301 ant target to run LimeWire servers "+
              "on ports 6300 and 6301.\n\n"+
-             "Type ant -D\"class=ConnectionManagerTest\" test6301\n\n");        
+             "Type ant -D\"class=ConnectionManagerTest\" test6301\n\n", e);        
     }
 
     public void tearDown() {

@@ -33,7 +33,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 	/**
 	 * Runs the legacy unit test that was formerly in QueryReply.
 	 */
-	public void testLegacyUnitTest() {		
+	public void testLegacyUnitTest() throws Exception {		
 		byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
 		long u4=0x00000000FFFFFFFFl;
 		byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
@@ -43,11 +43,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 									 guid);
 		assertEquals(qr.getSpeed(), 1);
 		assertEquals(Integer.toHexString(qr.getPort()), qr.getPort(), 0xF3F1);
-		try {
-			assertEquals(qr.getResults().hasNext(), false);
-		} catch (BadPacketException e) {
-			assertTrue(false);
-		}
+
+        assertEquals(qr.getResults().hasNext(), false);
+
 		responses=new Response[2];
 		responses[0]=new Response(11,22,"Sample.txt");
 		responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
@@ -58,18 +56,14 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		assertEquals(qr.getPort(), 0xFFFF);
 		assertEquals(qr.getSpeed(), u4);
 		assertEquals(Arrays.equals(qr.getClientGUID(),guid), true);
-		try {
-			Iterator iter=qr.getResults();
-			Response r1=(Response)iter.next();
-			assertEquals(r1, responses[0]);
-			Response r2=(Response)iter.next();
-			assertEquals(r2, responses[1]);
-			assertEquals(iter.hasNext(), false);
-		} catch (BadPacketException e) {
-			assertTrue(false);
-		} catch (NoSuchElementException e) {
-			assertTrue(false);
-		}
+
+		Iterator iter=qr.getResults();
+		Response r1=(Response)iter.next();
+		assertEquals(r1, responses[0]);
+		Response r2=(Response)iter.next();
+		assertEquals(r2, responses[1]);
+		assertEquals(iter.hasNext(), false);
+
 		
 		////////////////////  Contruct from Raw Bytes /////////////
 		
@@ -77,27 +71,23 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
 		payload[11+8]=(byte)65;  //The character 'A'
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
-		try {
-			Iterator iter=qr.getResults();
-			Response response=(Response)iter.next();
-			assertEquals("'"+response.getName()+"'", response.getName(), "A");
-			assertEquals(iter.hasNext(), false);
-		} catch (BadPacketException e) {
-			assertTrue(false);
-		}
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
+
+		iter=qr.getResults();
+		Response response=(Response)iter.next();
+		assertEquals("'"+response.getName()+"'", response.getName(), "A");
+		assertEquals(iter.hasNext(), false);
+
 		try {
 			qr.getVendor();    //undefined => exception
-			assertTrue(false);
+			fail("qr should have been invalid");
 		} catch (BadPacketException e) { }
 		try {
 			qr.getNeedsPush(); //undefined => exception
-			assertTrue(false);
+			fail("qr should have been invalid");
 		} catch (BadPacketException e) { }
 		
 		
@@ -106,19 +96,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload=new byte[11+11+15];
         payload[0]=1;                    //Number of results
         payload[11+8]=(byte)65;          //The character 'A'
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
         try {
-            Iterator iter=qr.getResults();
-            assertTrue(false);
+            iter=qr.getResults();
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getVendor();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
 
         //Test case added by Sumeet Thadani to check the metadata part
@@ -139,14 +127,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1+4+3]=(byte)'H';   //The character 'E'
         payload[11+11+4+1+4+4]=(byte)0;   //null terminator
 		
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
         try {
-            Iterator iter=qr.getResults();
+            iter=qr.getResults();
             Response r = (Response)iter.next();
             assertEquals("sumeet test a", r.getNameBytesSize(), 1);
             assertEquals("sumeet test b", r.getMetaBytesSize(), 0);
@@ -156,7 +142,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             assertEquals("SUSH is not " + (new String(qr.getXMLBytes())), 
 						 (new String(qr.getXMLBytes())), "SUSH");
         }catch(BadPacketException e){
-            System.out.println("MetaResponse not created well!");
+            fail("metaResponse not created well!", e);
         }
 
         //Normal case: basic metainfo with no vendor data
@@ -171,22 +157,15 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
         payload[11+11+4+1+2]=(byte)4;  // set xml length
         payload[11+11+4+1+3]=(byte)0;
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
-        try {
-            String vendor=qr.getVendor();
-            assertEquals(vendor, "LIME", vendor);
-            vendor=qr.getVendor();
-            assertEquals(vendor, "LIME", vendor);
-            assertEquals(qr.getNeedsPush(), true);
-        } catch (BadPacketException e) {
-            System.out.println(e.toString());
-            assertTrue(false);
-        }
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
+        String vendor=qr.getVendor();
+        assertEquals(vendor, "LIME", vendor);
+        vendor=qr.getVendor();
+        assertEquals(vendor, "LIME", vendor);
+        assertEquals(qr.getNeedsPush(), true);
         
         //Normal case: basic metainfo with extra vendor data
         payload=new byte[11+11+(4+1+4+20000)+16];
@@ -202,25 +181,19 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1+3]=(byte)78; // size of xml msb
         for (int i = 0; i < 20000; i++)
             payload[11+11+4+1+4+i] = 'a';
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}		
-        try {
-            String vendor=qr.getVendor();
-            assertEquals(vendor, "LLME", vendor);
-            vendor=qr.getVendor();
-            assertEquals(vendor, "LLME", vendor);
-            assertEquals(qr.getNeedsPush(), false);
-        } catch (BadPacketException e) {
-            assertTrue(false);
-            e.printStackTrace();
-        }
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
+        vendor=qr.getVendor();
+        assertEquals(vendor, "LLME", vendor);
+        vendor=qr.getVendor();
+        assertEquals(vendor, "LLME", vendor);
+        assertEquals(qr.getNeedsPush(), false);
+
         try {
             qr.getSupportsChat();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) {
         }
 
@@ -229,19 +202,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[0]=1;            //Number of results
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}		
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
         try {
             qr.getNeedsPush();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try { 
             qr.getVendor();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
 
         //Bad case.  Common payload length lies.
@@ -253,20 +224,15 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);            
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
-        try {
-            qr.getResults();
-        } catch (BadPacketException e) {
-            assertTrue(false);
-        }
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);            
+
+        qr.getResults();
+        
         try {
             qr.getVendor();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }  
 
 
@@ -286,35 +252,30 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1]=(byte)0x0; //no data known
         payload[11+11+4+1+1]=(byte)0x0; 
         payload[11+11+4+1+2]=(byte)1;         
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+						  
+        vendor=qr.getVendor();
+        assertEquals(vendor, vendor, "LIME");
+        vendor=qr.getVendor();
+        assertEquals(vendor, vendor, "LIME");
+        
         try {
-            String vendor=qr.getVendor();
-            assertEquals(vendor, vendor, "LIME");
-            vendor=qr.getVendor();
-            assertEquals(vendor, vendor, "LIME");
-        } catch (BadPacketException e) {
-            System.out.println(e.toString());
-            assertTrue(false);
-        }                                        
-        try {
-            assertEquals(qr.getNeedsPush(), false);
+            qr.getNeedsPush();
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getIsBusy();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getHadSuccessfulUpload();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getIsMeasuredSpeed();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
        
 
@@ -332,29 +293,21 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1+1]=(byte)0x1c;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         payload[11+11+4+1+4]=(byte)0x1; //supports chat
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
-        try {
-            String vendor=qr.getVendor();
-            assertEquals(vendor, "LIME", vendor);
-            assertEquals(qr.getNeedsPush(), true);
-            assertEquals(qr.getNeedsPush(), true);
-            assertEquals(qr.getIsBusy(), true);
-            assertEquals(qr.getIsBusy(), true);
-            assertEquals(qr.getIsMeasuredSpeed(), true);
-            assertEquals(qr.getIsMeasuredSpeed(), true);
-            assertEquals(qr.getHadSuccessfulUpload(), true);
-            assertEquals(qr.getHadSuccessfulUpload(), true);
-            assertEquals(qr.getSupportsChat(), true);
-        } catch (BadPacketException e) {
-            System.out.println(e.toString());
-            assertTrue(false);
-        }                                        
 
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+							  
+        vendor=qr.getVendor();
+        assertEquals(vendor, "LIME", vendor);
+        assertEquals(qr.getNeedsPush(), true);
+        assertEquals(qr.getNeedsPush(), true);
+        assertEquals(qr.getIsBusy(), true);
+        assertEquals(qr.getIsBusy(), true);
+        assertEquals(qr.getIsMeasuredSpeed(), true);
+        assertEquals(qr.getIsMeasuredSpeed(), true);
+        assertEquals(qr.getHadSuccessfulUpload(), true);
+        assertEquals(qr.getHadSuccessfulUpload(), true);
+        assertEquals(qr.getSupportsChat(), true);
           
         //Normal case: busy and push bits defined and unset
         payload=new byte[11+11+(4+1+4+1)+16];
@@ -368,26 +321,20 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         payload[11+11+4+1]=(byte)0x1c;  //111X1 
         payload[11+11+4+1+1]=(byte)0x0;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
-		try {
-			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-							  payload);
-		} catch(BadPacketException e) {
-			fail("unexpected exception: "+e);
-		}
-        try {
-            String vendor=qr.getVendor();
-            assertEquals(vendor, "LIME", vendor);
-            assertEquals(qr.getNeedsPush(), false);
-            assertEquals(qr.getIsBusy(), false);
-            assertEquals(qr.getIsMeasuredSpeed(), false);
-            assertEquals(qr.getHadSuccessfulUpload(), false);
-        } catch (BadPacketException e) {
-            System.out.println(e.toString());
-            assertTrue(false);
-        }  
+
+		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+						  payload);
+
+        vendor=qr.getVendor();
+        assertEquals(vendor, "LIME", vendor);
+        assertEquals(qr.getNeedsPush(), false);
+        assertEquals(qr.getIsBusy(), false);
+        assertEquals(qr.getIsMeasuredSpeed(), false);
+        assertEquals(qr.getHadSuccessfulUpload(), false);
+
         try {
             qr.getSupportsChat();
-            assertTrue(false); //LiME!=LIME when looking at private area
+            fail("LiME!=LIME when looking at private area");
         } catch (BadPacketException e) { }
 
         //Create extended QHD from scratch
@@ -402,24 +349,20 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(qr.getPort(), 0xFFFF);
         assertEquals(qr.getSpeed(), u4);
         assertTrue(Arrays.equals(qr.getClientGUID(),guid));
-        try {
-            Iterator iter=qr.getResults();
-            Response r1=(Response)iter.next();
-            assertEquals(r1, responses[0]);
-            Response r2=(Response)iter.next();
-            assertEquals(r2, responses[1]);
-            assertEquals(iter.hasNext(), false);
-            assertEquals(qr.getVendor(), "LIME");
-            assertEquals(qr.getNeedsPush(), false);
-            assertEquals(qr.getIsBusy(), true);
-            assertEquals(qr.getHadSuccessfulUpload(), true);
-            assertEquals(qr.getIsMeasuredSpeed(), false);
-            assertEquals(qr.getSupportsChat(), true);
-        } catch (BadPacketException e) {
-            assertTrue(false);
-        } catch (NoSuchElementException e) {
-            assertTrue(false);
-        }
+
+        iter=qr.getResults();
+        r1=(Response)iter.next();
+        assertEquals(r1, responses[0]);
+        r2=(Response)iter.next();
+        assertEquals(r2, responses[1]);
+        assertEquals(iter.hasNext(), false);
+        assertEquals(qr.getVendor(), "LIME");
+        assertEquals(qr.getNeedsPush(), false);
+        assertEquals(qr.getIsBusy(), true);
+        assertEquals(qr.getHadSuccessfulUpload(), true);
+        assertEquals(qr.getIsMeasuredSpeed(), false);
+        assertEquals(qr.getSupportsChat(), true);
+
 
         //Create extended QHD from scratch with different bits set
         responses=new Response[2];
@@ -429,25 +372,18 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           0xFFFF, ip, u4, responses,
                           guid,
                           true, false, false, true, false);
-        try {
-            assertEquals(qr.getVendor(), "LIME");
-            assertEquals(qr.getNeedsPush(), true);
-            assertEquals(qr.getIsBusy(), false);
-            assertEquals(qr.getHadSuccessfulUpload(), false);
-            assertEquals(qr.getIsMeasuredSpeed(), true);
-            assertEquals(qr.getSupportsChat(), false);
-        } catch (BadPacketException e) {
-            assertTrue(false);
-        } catch (NoSuchElementException e) {
-            assertTrue(false);
-        }
+
+        assertEquals(qr.getVendor(), "LIME");
+        assertEquals(qr.getNeedsPush(), true);
+        assertEquals(qr.getIsBusy(), false);
+        assertEquals(qr.getHadSuccessfulUpload(), false);
+        assertEquals(qr.getIsMeasuredSpeed(), true);
+        assertEquals(qr.getSupportsChat(), false);
+
         //And check raw bytes....
         ByteArrayOutputStream out=new ByteArrayOutputStream();
-        try {
-            qr.write(out);
-        } catch (IOException e) {
-            assertTrue(false);
-        }
+        qr.write(out);
+
         byte[] bytes=out.toByteArray();
         final int ggepLen = GGEPUtil.getQRGGEP(true).length;
         //Length includes header, query hit header and footer, responses, and
@@ -465,23 +401,23 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           guid);
         try {
             qr.getVendor();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getNeedsPush();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getIsBusy();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getHadSuccessfulUpload();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
         try {
             qr.getIsMeasuredSpeed();
-            assertTrue(false);
+            fail("qr should have been invalid");
         } catch (BadPacketException e) { }
 	}
 

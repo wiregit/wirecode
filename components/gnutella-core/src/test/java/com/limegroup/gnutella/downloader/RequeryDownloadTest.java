@@ -60,7 +60,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         //return new RequeryDownloadTest("testRequeryScheduling");
     }
 
-    public void setUp() {
+    public void setUp() throws Exception {
         ManagedDownloader.NO_DELAY = true;	
         (new File(filename)).delete();
 		ConnectionSettings.KEEP_ALIVE.setValue(0);
@@ -73,7 +73,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
         } catch (IOException e) {
-            fail("Couldn't create saved directory");
+            fail("Couldn't create saved directory", e);
         }
         createSnapshot();
         router=new TestMessageRouter();
@@ -81,7 +81,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         try {
             rs.setListeningPort(SettingsManager.instance().getPort());
         } catch (IOException e) {
-            fail ("Couldn't set listening port");
+            fail ("Couldn't set listening port", e);
         }
 
         mgr=rs.getDownloadManager();
@@ -94,7 +94,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
     /** Creates a downloads.dat file named SNAPSHOT with a faked up
      *  IncompleteFileManager in it.  All of this because we can't access
      *  DownloadManager.incompleteFileManager. */
-    private void createSnapshot() {
+    private void createSnapshot() throws Exception {
         try {
             //Make IncompleteFileManager with appropriate entries...
             IncompleteFileManager ifm=createIncompleteFile();
@@ -106,13 +106,13 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             out.writeObject(ifm);
             out.close();
         } catch (IOException e) {
-            fail("Couldn't create temp file");
+            fail("Couldn't create temp file", e);
         }
     }
 
     /** Creates the incomplete file and returns an IncompleteFileManager with
      *  info for that file. */
-    public IncompleteFileManager createIncompleteFile() {
+    public IncompleteFileManager createIncompleteFile() throws Exception {
        IncompleteFileManager ifm=new IncompleteFileManager();
        Set urns=new HashSet(1);
        urns.add(hash);
@@ -132,7 +132,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
            out.write((byte)TestFile.getByte(1));
            out.close();
        } catch (IOException e) { 
-           fail("Couldn't create incomplete file");
+           fail("Couldn't create incomplete file", e);
        }
 
        //Record information in IncompleteFileManager.
@@ -257,21 +257,17 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
      * Tests RequeryDownloader, aka the "wishlist" downloader.  It must
      * initially send the right query and only accept the right results.  
      */
-    public void testRequeryDownload() {
+    public void testRequeryDownload() throws Exception {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=5*1000; //5 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=5*1000;
 
         //Start a download for the given incomplete file.  Give the thread time
         //to start up, then make sure nothing has been sent initially.
         Downloader downloader=null;
-        try {
-            downloader=mgr.download("file name", 
-                                    null, 
-                                    GUID.makeGuid(),
-                                    null);
-        } catch (AlreadyDownloadingException e) {
-            fail("Already downloading.");
-        }
+        downloader=mgr.download("file name", 
+                                null, 
+                                GUID.makeGuid(),
+                                null);
         try { Thread.sleep(200); } catch (InterruptedException e) { }  
         assertEquals(0, router.broadcasts.size());
 
@@ -336,7 +332,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
     }
     
     /** Tests that requeries are sent fairly and at appropriate rate. */
-    public void testRequeryScheduling() {
+    public void testRequeryScheduling() throws Exception {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=200; //0.1 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=1000;   //1 second
 
@@ -344,12 +340,8 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         Downloader downloader2=null;
 		byte [] guid1 = GUID.makeGuid();
 		byte [] guid2 = GUID.makeGuid();
-        try {
-            downloader1=mgr.download("xxxxx", null, guid1, null);
-            downloader2=mgr.download("yyyyy", null, guid2, null);
-        } catch (AlreadyDownloadingException e) {
-            fail("Already downloading.");
-        }
+        downloader1=mgr.download("xxxxx", null, guid1, null);
+        downloader2=mgr.download("yyyyy", null, guid2, null);
 
         //Got right number of requeries?
 		// Note that the first query will kick off immediately now

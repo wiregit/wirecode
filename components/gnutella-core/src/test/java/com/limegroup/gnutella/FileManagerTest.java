@@ -39,7 +39,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     /** Unit test.  REQUIRES JAVA2 FOR createTempFile Note that many tests are
      *  STRONGER than required by the specifications for simplicity.  For
      *  example, we assume an order on the values returned by getSharedFiles. */
-    public void testLegacy() {
+    public void testLegacy() throws Exception{
         //Test some of add/remove capability
         File f1=null;
         File f2=null;
@@ -127,7 +127,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             fman.get(2);
             try {
                 fman.get(1);
-                assertTrue(false);
+                fail("should not have gotten anything");
             } catch (IndexOutOfBoundsException e) { }
 
             responses=fman.query(new QueryRequest((byte)3,0,"*unit*", false));
@@ -186,26 +186,20 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    static File createNewTestFile(int size) {
-        try {		   
-			File file = File.createTempFile("FileManager_unit_test", ".XYZ", _testDir);
-			file.deleteOnExit();
-            OutputStream out=new FileOutputStream(file);
-            out.write(new byte[size]);
-            out.flush();
-            out.close();
-
-            //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
-            return FileManager.getCanonicalFile(file);
-        } catch (Exception e) {
-			fail("unexpected exception in createNewTestFile: "+e);
-            return null; //never executed
-        }
+    static File createNewTestFile(int size) throws Exception {
+		File file = File.createTempFile("FileManager_unit_test", ".XYZ", _testDir);
+		file.deleteOnExit();
+        OutputStream out=new FileOutputStream(file);
+        out.write(new byte[size]);
+        out.flush();
+        out.close();
+        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
+        return FileManager.getCanonicalFile(file);
     }
 
     /** Same a createNewTestFile but doesn't actually allocate the requested
      *  number of bytes on disk.  Instead returns a subclass of File. */
-    File createFakeTestFile(long size) {
+    File createFakeTestFile(long size) throws Exception {
         File real=createNewTestFile(1);
         return new HugeFakeFile(real.getParentFile(), real.getName(), size);       
     }

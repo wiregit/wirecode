@@ -33,7 +33,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         ManagedDownloader.unitTest();
     }
 
-    public void testNewRequery() {
+    public void testNewRequery() throws Exception {
         RemoteFileDesc[] rfds={
             newRFD("Susheel_Daswani_Neil_Daswani.txt",
                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"),
@@ -59,9 +59,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             assertTrue(urns.contains(URN.createSHA1Urn(
                 "urn:sha1:LSTHGIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
         } catch (CantResumeException e) {
-            fail("Couldn't make requery");
+            fail("Couldn't make requery", e);
         } catch (IOException e) {
-            fail("Couldn't make hash");
+            fail("Couldn't make hash", e);
         }
     }
 
@@ -74,12 +74,12 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             assertEquals("limewire again", qr.getQuery());
             assertEquals(new HashSet(), qr.getQueryUrns());
         } catch (CantResumeException e) {
-            fail("Couldn't make requery");
+            fail("Couldn't make requery", e);
         }
     }
     
     /** Tests that the progress is retained for deserialized downloaders. */
-    public void testSerializedProgress() {        
+    public void testSerializedProgress() throws Exception {        
         DownloadManager manager=new DownloadManagerStub();
         FileManager fileman=new FileManagerStub();
         ActivityCallback callback=new ActivityCallbackStub();
@@ -115,11 +115,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             in.close();
             downloader.initialize(manager, fileman, callback);
         } catch (IOException e) {
-            e.printStackTrace();
-            fail("Couldn't serialize");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            fail("No class");
+            fail("Couldn't serialize", e);
         }
 
         //Check same state as before serialization.
@@ -155,7 +151,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             try { 
                 downloader.resume(); 
             } catch (AlreadyDownloadingException e) {
-                fail("No other downloads!");
+                fail("No other downloads!", e);
             }
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
             assertEquals(Downloader.WAITING_FOR_RESULTS, 
@@ -181,7 +177,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             try {
                 urns.add(URN.createSHA1Urn(hash));
             } catch (IOException e) {
-                fail("Couldn't create URN");
+                fail("Couldn't create URN", e);
             }
         }        
         return new RemoteFileDesc("127.0.0.1", PORT, 13l,

@@ -60,7 +60,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     }
 
 
-    public void testQueries() {
+    public void testQueries() throws Exception {
         // start udp hosts....
         Thread[] udpLoopers = new Thread[NUM_UDP_LOOPS];
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
@@ -75,12 +75,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 
         // add these endpoints....
         InetAddress addr = null;
-        try {
-            addr = InetAddress.getByName("127.0.0.1");
-        }
-        catch (Exception damn) {
-            assertTrue(false);
-        }
+        addr = InetAddress.getByName("127.0.0.1");
         for (int i = 0; i < NUM_UDP_LOOPS; i++) 
             QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
 
@@ -147,7 +142,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 
 
 
-    public void testResultMaxOut() {
+    public void testResultMaxOut() throws Exception {
         // clear out messages...
         _messages.clear();
         // start up threads...
@@ -171,12 +166,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 
         // add these endpoints....
         InetAddress addr = null;
-        try {
-            addr = InetAddress.getByName("127.0.0.1");
-        }
-        catch (Exception damn) {
-            assertTrue(false);
-        }
+        addr = InetAddress.getByName("127.0.0.1");
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
             QueryUnicaster.instance().addUnicastEndpoint(addr, 5000+i);
             if (i % 5 == 0) {

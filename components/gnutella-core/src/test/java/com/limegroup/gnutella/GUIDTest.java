@@ -57,7 +57,7 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("Get test 2", out.equals("test"));
     }
 
-    public void testHexStrings() {
+    public void testHexStrings()  {
         String hexString="FF010A00000000000000000000000001";
         bytes=new byte[16];
         bytes[0]=(byte)255;
@@ -72,16 +72,14 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         try {
             GUID.fromHexString("aa01");
-            assertTrue(false);
+            fail("should not have made GUID");
         } catch (IllegalArgumentException e) {
-            assertTrue(true);
         }
 
         try {
             GUID.fromHexString("ff010a0000000000000000000000000z");
-            assertTrue(false);
+            fail("should not have made GUID");
         } catch (IllegalArgumentException e) {
-            assertTrue(true);
         }
     }
     

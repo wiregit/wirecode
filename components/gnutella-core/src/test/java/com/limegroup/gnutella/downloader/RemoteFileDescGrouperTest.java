@@ -18,7 +18,7 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
     RemoteFileDesc rf1, rf2, rf3, rf4, rf5, rf6;
     IncompleteFileManager ifm;
     
-    public void setUp() {
+    public void setUp() throws Exception {
         RemoteFileDescGrouper.DEBUG=true;
 
         ifm=new IncompleteFileManager();
@@ -51,7 +51,7 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
             urnSet2=new HashSet(1);
             urnSet2.add(urn2);
         } catch (IOException e) { 
-            fail("Couldn't make valid URN");
+            fail("Couldn't make valid URN", e);
         }
 
         //Same name and size as rf1/rf2, different hashes.

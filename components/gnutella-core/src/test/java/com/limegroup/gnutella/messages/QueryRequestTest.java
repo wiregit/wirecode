@@ -72,51 +72,47 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
 	 * Tests the constructor that most of the other constructors are built
 	 * off of.
 	 */
-	public void testQueryRequestConstructorWithGUID1() {
-		try {
-			ByteArrayOutputStream[] baos = 
-			    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
-			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
-				baos[i] = new ByteArrayOutputStream();
-				baos[i].write(0);
-				baos[i].write(0);
-				baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
-				baos[i].write(0);
-				Set curUrnSet = new HashSet();
-				Set curUrnTypeSet = new HashSet();
-				//curUrnTypeSet.add(UrnType.SHA1);
-				curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
-				for(int j=i; j<HugeTestUtils.URNS.length; j++) {
-					baos[i].write(HugeTestUtils.URNS[j].toString().getBytes());
-					curUrnSet.add(HugeTestUtils.URNS[j]);
-					if((j+1) != HugeTestUtils.URNS.length) {
-						baos[i].write(0x1c);
-					}
+	public void testQueryRequestConstructorWithGUID1() throws Exception {
+		ByteArrayOutputStream[] baos = 
+		    new ByteArrayOutputStream[HugeTestUtils.URNS.length];
+		for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+			baos[i] = new ByteArrayOutputStream();
+			baos[i].write(0);
+			baos[i].write(0);
+			baos[i].write(HugeTestUtils.QUERY_STRINGS[i].getBytes());
+			baos[i].write(0);
+			Set curUrnSet = new HashSet();
+			Set curUrnTypeSet = new HashSet();
+			//curUrnTypeSet.add(UrnType.SHA1);
+			curUrnTypeSet = Collections.unmodifiableSet(curUrnTypeSet);
+			for(int j=i; j<HugeTestUtils.URNS.length; j++) {
+				baos[i].write(HugeTestUtils.URNS[j].toString().getBytes());
+				curUrnSet.add(HugeTestUtils.URNS[j]);
+				if((j+1) != HugeTestUtils.URNS.length) {
+					baos[i].write(0x1c);
 				}
-				baos[i].write(0);
-				QueryRequest qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
-												   (byte)4, 
-												   baos[i].toByteArray());
-				assertEquals("speeds should be equal", 0, qr.getMinSpeed());
-				assertEquals("queries should be equal", 
-							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
-				Set queryUrns = qr.getQueryUrns();
-				assertEquals("query urn sets should be equal", curUrnSet, 
-                             queryUrns);
-				Set queryUrnTypes = qr.getRequestedUrnTypes();
+			}
+			baos[i].write(0);
+			QueryRequest qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
+											   (byte)4, 
+											   baos[i].toByteArray());
+			assertEquals("speeds should be equal", 0, qr.getMinSpeed());
+			assertEquals("queries should be equal", 
+						 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
+			Set queryUrns = qr.getQueryUrns();
+			assertEquals("query urn sets should be equal", curUrnSet, 
+                         queryUrns);
+			Set queryUrnTypes = qr.getRequestedUrnTypes();
 
-				assertEquals("urn type set sizes should be equal", 
-                             curUrnTypeSet.size(),
-							 queryUrnTypes.size());
-				assertEquals("urn types should be equal\r\n"+
-							 "set 1: "+print(curUrnTypeSet)+"r\n"+
-							 "set 2: "+print(queryUrnTypes), 
-							 curUrnTypeSet,
-							 queryUrnTypes);
-			}		   
-		} catch(IOException e) {
-			fail("unexpected exception: "+e);
-		}
+			assertEquals("urn type set sizes should be equal", 
+                         curUrnTypeSet.size(),
+						 queryUrnTypes.size());
+			assertEquals("urn types should be equal\r\n"+
+						 "set 1: "+print(curUrnTypeSet)+"r\n"+
+						 "set 2: "+print(queryUrnTypes), 
+						 curUrnTypeSet,
+						 queryUrnTypes);
+        }
 	}	
 
 

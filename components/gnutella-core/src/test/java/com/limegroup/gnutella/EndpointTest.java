@@ -11,41 +11,32 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
         return new TestSuite(EndpointTest.class);
     }
 
-    public void testLegacy() {
+    public void testLegacy() throws Exception {
         Endpoint e;
         try {
             e=new Endpoint(":6347");
-            assertTrue(false);
+            fail("endpoint should not have been created");
         } catch (IllegalArgumentException exc) {
             assertTrue(true);
         }
         try {
             e=new Endpoint("abc:cas");
-            assertTrue(false);
+            fail("endpoint should not have been created");
         } catch (IllegalArgumentException exc) {
             assertTrue(true);
         }
-        try {
-            e=new Endpoint("abc");
-            assertTrue(e.getHostname().equals("abc"));
-            assertTrue(e.getPort()==6346);
-        } catch (IllegalArgumentException exc) {
-            assertTrue(false);
-        }
-        try {
-            e=new Endpoint("abc:");
-            assertTrue(e.getHostname().equals("abc"));
-            assertTrue(e.getPort()==6346);
-        } catch (IllegalArgumentException exc) {
-            assertTrue(false);
-        }
-        try {
-            e=new Endpoint("abc:7");
-            assertTrue(e.getHostname().equals("abc"));
-            assertTrue(e.getPort()==7);
-        } catch (IllegalArgumentException exc) {
-            assertTrue(false);
-        }
+
+        e=new Endpoint("abc");
+        assertTrue(e.getHostname().equals("abc"));
+        assertTrue(e.getPort()==6346);
+
+        e=new Endpoint("abc:");
+        assertTrue(e.getHostname().equals("abc"));
+        assertTrue(e.getPort()==6346);
+
+        e=new Endpoint("abc:7");
+        assertTrue(e.getHostname().equals("abc"));
+        assertTrue(e.getPort()==7);
 
         ////////////////////////// Private IP and Subnet Tests ////////////////
         //These tests are incomplete since the methods are somewhat trivial.

@@ -43,7 +43,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
 	/**
 	 * Make sure that the cache contains the expected values.
 	 */
-  	public void testPersistence() {
+//  	public void testPersistence() {
 //  		assertTrue("cache should be present", cacheExists());
 //  		UrnCache cache = UrnCache.instance();
 //  		File[] files = createFiles();
@@ -53,7 +53,7 @@ public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase
 //  			Set set = cache.getUrns(files[i]);
 //  			assertTrue("URN set should not be empty", !set.isEmpty());
 //  		}
-  	}
+//  	}
 
 
 	private static File[] createFiles() {

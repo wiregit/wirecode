@@ -23,35 +23,27 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     //TODO: test other parts of ping!
 
-    public void testQueryKeyPing() {
-        try {
-            PingRequest pr = new PingRequest();
-            assertFalse(pr.isQueryKeyRequest()); // hasn't been hopped yet
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pr.write(baos);
-            ByteArrayInputStream bais = 
-            new ByteArrayInputStream(baos.toByteArray());
-            PingRequest prRead = (PingRequest) Message.read(bais);
-            prRead.hop();
-            assertTrue(prRead.isQueryKeyRequest());
-        }
-        catch (Exception crap) {
-            assertTrue(false);
-        }
+    public void testQueryKeyPing() throws Exception {
+        PingRequest pr = new PingRequest();
+        assertFalse(pr.isQueryKeyRequest()); // hasn't been hopped yet
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        pr.write(baos);
+        ByteArrayInputStream bais = 
+        new ByteArrayInputStream(baos.toByteArray());
+        PingRequest prRead = (PingRequest) Message.read(bais);
+        prRead.hop();
+        assertTrue(prRead.isQueryKeyRequest());
+
     }
 
 
-    public void testGGEPPing() {
+    public void testGGEPPing() throws Exception {
         // first make a GGEP block....
         GGEP ggepBlock = new GGEP(false);
         ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ggepBlock.write(baos);
-        }
-        catch (IOException uhoh) {
-            assertTrue(false);
-        }
+        ggepBlock.write(baos);
+
         byte[] ggepBytes = baos.toByteArray();
 
         //Headers plus payload(6 bytes)
@@ -82,22 +74,9 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         //OK, ggep ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
         Message m = null;
-        try{
-            m = Message.read(stream);
-        }catch(BadPacketException bpe ){
-            bpe.printStackTrace();
-            assertTrue("TEST FAILED : bad packet in test", false);
-        }
-        catch (IOException ioe){
-            ioe.printStackTrace();
-            assertTrue("TEST FAILED : IO Exception", false);
-        }
+        m = Message.read(stream);
         PingRequest pr = null;
-        try{
-            pr = (PingRequest)m;
-        }catch(ClassCastException cce){
-            assertTrue("TEST FAILED : did not create Big ping", false);
-        }
+        pr = (PingRequest)m;
         assertTrue(!pr.isQueryKeyRequest());
         pr.hop();
         assertTrue(pr.isQueryKeyRequest());
@@ -105,7 +84,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testBigPing() {
+    public void testBigPing() throws Exception {
         byte[] buffer = new byte[23+16];//Headers plus payload(16 bytes)
         //Note: We choose a size of 16 to make sure it does not create a
         //group ping, 
@@ -137,28 +116,11 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         //OK, Big ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
         Message m = null;
-        try{
-            m = Message.read(stream);
-        }catch(BadPacketException bpe ){
-            bpe.printStackTrace();
-            assertTrue("TEST FAILED : bad packet in test", false);
-        }
-        catch (IOException ioe){
-            ioe.printStackTrace();
-            assertTrue("TEST FAILED : IO Exception", false);
-        }
+        m = Message.read(stream);
         PingRequest pr = null;
-        try{
-            pr = (PingRequest)m;
-        }catch(ClassCastException cce){
-            assertTrue("TEST FAILED : did not create Big ping", false);
-        }
+        pr = (PingRequest)m;
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
-        try{
-            pr.write(outBuffer);
-        }catch (IOException e){
-            assertTrue("error while writing payload of Big ping", false);
-        }
+        pr.write(outBuffer);
         String out = outBuffer.toString().substring(23);
         assertTrue("Wrong payload "+out, out.equals("ABCDEFGHIJKLMNOP"));
       
@@ -179,7 +141,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testStripPayload() {
+    public void testStripPayload() throws Exception  {
         byte[] guid=new byte[16];  guid[0]=(byte)0xFF;       
         byte[] payload=new byte[20]; payload[3]=(byte)0xBC;
         PingRequest pr=new PingRequest(guid, (byte)3, (byte)4, payload);
@@ -190,11 +152,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         assertTrue(pr2.getTotalLength()==23);
         ByteArrayOutputStream out=new ByteArrayOutputStream();
-        try {
-            pr2.write(out);
-        } catch (IOException e) {
-            fail("Unexpected IO problem");
-        }
+        pr2.write(out);
         assertTrue(out.toByteArray().length==23);
         
     }

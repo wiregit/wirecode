@@ -61,7 +61,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
 
     /** Tests that the progress is not 0% while requerying.
      *  This issue was reported by Sam Berlin. */
-    public void testRequeryProgress() {
+    public void testRequeryProgress() throws Exception {
         ResumeDownloader downloader=newResumeDownloader();
         while (downloader.getState()!=Downloader.WAITING_FOR_RESULTS) {         
 			if ( downloader.getState() != Downloader.QUEUED )
@@ -72,29 +72,21 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
 
-        try {
-            //Serialize it!
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            ObjectOutputStream out=new ObjectOutputStream(baos);
-            out.writeObject(downloader);
-            out.flush(); out.close();
-            downloader.stop();
+        //Serialize it!
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        ObjectOutputStream out=new ObjectOutputStream(baos);
+        out.writeObject(downloader);
+        out.flush(); out.close();
+        downloader.stop();
 
-            //Deserialize it as a different instance.  Initialize.
-            ObjectInputStream in=new ObjectInputStream(
-                new ByteArrayInputStream(baos.toByteArray()));
-            downloader=(ResumeDownloader)in.readObject();
-            in.close();
-            downloader.initialize(new DownloadManagerStub(),
-                                  new FileManagerStub(),
-                                  new ActivityCallbackStub());
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("Couldn't serialize");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            fail("No class");
-        }
+        //Deserialize it as a different instance.  Initialize.
+        ObjectInputStream in=new ObjectInputStream(
+            new ByteArrayInputStream(baos.toByteArray()));
+        downloader=(ResumeDownloader)in.readObject();
+        in.close();
+        downloader.initialize(new DownloadManagerStub(),
+                              new FileManagerStub(),
+                              new ActivityCallbackStub());
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }

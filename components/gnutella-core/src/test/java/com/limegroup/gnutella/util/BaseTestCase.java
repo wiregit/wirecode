@@ -136,8 +136,27 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
         PrivilegedAccessor.setValue(CommonUtils.class,
                                     "SETTINGS_DIRECTORY",
                                     _settingsDir);
+        
+        //make sure it'll delete even if something odd happens.
+        _baseDir.deleteOnExit();
     }
     
+    /**
+     * Fails the test with an AssertionFailedError and another
+     * error as the root cause.
+     */
+    static public void fail(Throwable e) {
+        fail(null, e);
+    }
+    
+    /**
+     * Fails the test with an AssertionFailedError and another
+     * error as the root cause, with a message.
+     */
+    static public void fail(String message, Throwable e) {
+        throw new UnexpectedExceptionError(message, e);
+    }
+            
     
     /* 
      * This is the callback from ErrorService, and why we implement

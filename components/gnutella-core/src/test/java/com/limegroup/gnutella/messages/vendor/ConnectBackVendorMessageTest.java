@@ -29,7 +29,7 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
     }
 
     
-    public void testUDPConnectBackConstructor() {
+    public void testUDPConnectBackConstructor() throws Exception {
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         try {
@@ -62,38 +62,33 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
             assertTrue(false);
         }
         catch (BadPacketException expected) {}
-        try {
-            // this is the correct size of the payload
-            UDPConnectBackVendorMessage udp = 
-                new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION, new byte[18]);
-        }
-        catch (BadPacketException notExpected) {
-            assertTrue(false);
-        }
+
+        // this is the correct size of the payload
+        UDPConnectBackVendorMessage udp = 
+            new UDPConnectBackVendorMessage(guid, ttl, hops,
+                                            UDP_VERSION, new byte[18]);
+
+
 
         // make sure we encode things just fine....
         GUID guidObj = new GUID(GUID.makeGuid());
-        try {
-            UDPConnectBackVendorMessage VendorMessage1 = 
-                new UDPConnectBackVendorMessage(6346, guidObj);
-            UDPConnectBackVendorMessage VendorMessage2 = 
-                new UDPConnectBackVendorMessage(guidObj.bytes(), ttl, hops, 
-                                                UDP_VERSION, 
-                                                VendorMessage1.getPayload());
-            assertTrue(VendorMessage1.equals(VendorMessage2));
-            assertTrue(VendorMessage1.getConnectBackPort() == 
-                       VendorMessage2.getConnectBackPort());
-            assertTrue(VendorMessage1.getConnectBackGUID().equals(VendorMessage2.getConnectBackGUID()));
-        }
-        catch (BadPacketException what) {
-            assertTrue(false);
-        }
+
+
+        UDPConnectBackVendorMessage VendorMessage1 = 
+            new UDPConnectBackVendorMessage(6346, guidObj);
+        UDPConnectBackVendorMessage VendorMessage2 = 
+            new UDPConnectBackVendorMessage(guidObj.bytes(), ttl, hops, 
+                                            UDP_VERSION, 
+                                            VendorMessage1.getPayload());
+        assertTrue(VendorMessage1.equals(VendorMessage2));
+        assertTrue(VendorMessage1.getConnectBackPort() == 
+                   VendorMessage2.getConnectBackPort());
+        assertTrue(VendorMessage1.getConnectBackGUID().equals(VendorMessage2.getConnectBackGUID()));
     }
     
 
 
-    public void testTCPConnectBackConstructor() {
+    public void testTCPConnectBackConstructor() throws Exception {
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         try {
@@ -126,31 +121,24 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
             assertTrue(false);
         }
         catch (BadPacketException expected) {}
-        try {
-            // this is the correct size of the payload
-            TCPConnectBackVendorMessage TCP = 
-                new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, new byte[2]);
-        }
-        catch (BadPacketException notExpected) {
-            assertTrue(false);
-        }
+
+        // this is the correct size of the payload
+        TCPConnectBackVendorMessage TCP = 
+            new TCPConnectBackVendorMessage(guid, ttl, hops,
+                                            TCP_VERSION, new byte[2]);
+
 
         // make sure we encode things just fine....
-        try {
-            TCPConnectBackVendorMessage VendorMessage1 = 
-                new TCPConnectBackVendorMessage(6346);
-            TCPConnectBackVendorMessage VendorMessage2 = 
-                new TCPConnectBackVendorMessage(VendorMessage1.getGUID(),
-                                                ttl, hops, TCP_VERSION, 
-                                                VendorMessage1.getPayload());
-            assertTrue(VendorMessage1.equals(VendorMessage2));
-            assertTrue(VendorMessage1.getConnectBackPort() == 
-                       VendorMessage2.getConnectBackPort());
-        }
-        catch (BadPacketException what) {
-            assertTrue(false);
-        }
+        TCPConnectBackVendorMessage VendorMessage1 = 
+            new TCPConnectBackVendorMessage(6346);
+        TCPConnectBackVendorMessage VendorMessage2 = 
+            new TCPConnectBackVendorMessage(VendorMessage1.getGUID(),
+                                            ttl, hops, TCP_VERSION, 
+                                            VendorMessage1.getPayload());
+        assertTrue(VendorMessage1.equals(VendorMessage2));
+        assertTrue(VendorMessage1.getConnectBackPort() == 
+                   VendorMessage2.getConnectBackPort());
+
     }
 
 

@@ -15,7 +15,7 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         return new TestSuite(MessageTest.class);
     }
 
-    public void testLegacy() {
+    public void testLegacy() throws Exception {
         //Note: some of Message's code is covered by subclass tests, e.g.,
         //PushRequestTest.
         byte[] buf=new byte[10];
@@ -63,11 +63,9 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         Message m  = null;
         try {
             m = Message.read(bais,b);
-            assertTrue(false);//if things go well, we should throw bpe
+            fail("bpe should have been thrown.");
         } catch(BadPacketException bpe) {
-        } catch(Exception e) {
-            assertTrue("Messasge.read failed",false);
-        } 
+        }
         PingReply pr = (PingReply)m;
     }
 }

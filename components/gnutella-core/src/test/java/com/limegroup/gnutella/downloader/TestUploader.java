@@ -186,8 +186,8 @@ public class TestUploader {
             server.bind(new InetSocketAddress(port));
         } catch (IOException e) {
             DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
-            System.out.println("Couldn't listen on port "+port);
-            e.printStackTrace();
+            //System.out.println("Couldn't listen on port "+port);
+            ErrorService.error(e);
             return;
         }
 
