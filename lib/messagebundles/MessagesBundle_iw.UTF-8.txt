@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=ישראל
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=בינלאומי
 LOCALE_SCRIPT_CODE=Hebr
-LOCALE_SCRIPT_NAME=עברית
+LOCALE_SCRIPT_NAME=Hebrew
 LOCALE_ENGLISH_LANGUAGE_NAME=Hebrew
 # UTF-8 file edited with Notepad on Windows NT/2000/XP with the "Courier New" font
 ################################################################################
@@ -92,7 +92,7 @@ NO=לֹא
 #??? ABOUT_TITLE=About LimeWire
 ABOUT_LABEL_START=LimeWire לָקוֹחַ
 #??? ABOUT_LABEL_ADDRESS=http://www.limewire.com
-#??? ABOUT_LABEL_END=Copyright @2000-2002 Lime Wire LLC
+#??? ABOUT_LABEL_END=Copyright (c)2000-2004 Lime Wire LLC
 #??? ABOUT_LABEL_TITLE=About LimeWire
 ABOUT_BUTTON_LABEL=אוֹ
 #??? ABOUT_BUTTON_TIP=Close the About window
@@ -234,7 +234,7 @@ MENU_HELP_TITLE_MNEMONIC=H
 #??? MENU_HELP_ABOUT_ACCESSIBLE=Information about LimeWire
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for SearchView stuff...
 ################################################################################
 #??? SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 #??? SEARCH_DOWNLOAD_BUTTON_TIP=Download all selected files
@@ -321,7 +321,7 @@ SEARCH_STOP_BUTTON_LABEL=רגע
 #??? PLAYLIST_FILE_DESCRIPTION=PlayList files (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 #??? MEDIA_PLAYER_DEFAULT_STRING=LimeWire media player
 #??? MEDIA_PLAY_BUTTON_TIP=Play
@@ -335,7 +335,7 @@ SEARCH_STOP_BUTTON_LABEL=רגע
 #??? PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Password
 
 ################################################################################
-# Key/value pairs for Statistics string....
+# Key/value pairs for Statistics string...
 ################################################################################
 #??? STATISTICS_AVAILABLE=available
 #??? STATISTICS_FILES=files
@@ -494,7 +494,7 @@ SEARCH_STOP_BUTTON_LABEL=רגע
 #??? PLAYLIST_OPTIONS_CONTINUE=Continuous
 #??? PLAYLIST_OPTIONS_SHUFFLE=Shuffle
 #??? PLAYLIST_DIALOG_OPEN_TITLE=Select playlist (.m3u)
-#??? PLAYLIST_DIALOG_SAVE_TITLE=Save playlist as....
+#??? PLAYLIST_DIALOG_SAVE_TITLE=Save playlist as...
 #??? PLAYLIST_DIALOG_SAVE_SAVE=Save
 
 ################################################################################

@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=대한민국
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=국제
 LOCALE_SCRIPT_CODE=Hang
-LOCALE_SCRIPT_NAME=Hangul
+LOCALE_SCRIPT_NAME=Far-East Asian
 LOCALE_ENGLISH_LANGUAGE_NAME=Korean
 #UTF-8 file edited with Notepad/Windows 2000, and a "Gulim" or "GulimChe" font.
 ################################################################################
@@ -90,7 +90,7 @@ APP_TITLE=LimeWire: 그누텔라 네트워크
 ABOUT_TITLE=LimeWire 정보
 ABOUT_LABEL_START=라임와이어 클라이언트
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_END=Copyright @2000-2002 Lime Wire LLC
+ABOUT_LABEL_END=Copyright (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=LimeWire 정보
 ABOUT_BUTTON_LABEL=확인
 ABOUT_BUTTON_TIP=정보 창 닫기
@@ -229,7 +229,7 @@ MENU_HELP_ABOUT_MNEMONIC=A
 #??? MENU_HELP_ABOUT_ACCESSIBLE=Information about LimeWire
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for SearchView stuff...
 ################################################################################
 #??? SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 #??? SEARCH_DOWNLOAD_BUTTON_TIP=Download all selected files
@@ -312,7 +312,7 @@ PLAYLIST_DELETE_BUTTON_LABEL=삭제
 #??? PLAYLIST_FILE_DESCRIPTION=Playlist files (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 #??? MEDIA_PLAYER_DEFAULT_STRING=LimeWire media player
 #??? MEDIA_PLAY_BUTTON_TIP=Play
@@ -326,7 +326,7 @@ MEDIA_REWIND_BUTTON_TIP=뒤로
 #??? PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Password
 
 ################################################################################
-# Key/value pairs for Statistics string....
+# Key/value pairs for Statistics string...
 ################################################################################
 #??? STATISTICS_AVAILABLE=available
 #??? STATISTICS_FILES=files
@@ -481,7 +481,7 @@ LIBRARY_TABLE_UPLOAD_COUNT=올려놓기
 #??? PLAYLIST_OPTIONS_CONTINUE=Continuous
 #??? PLAYLIST_OPTIONS_SHUFFLE=Shuffle
 #??? PLAYLIST_DIALOG_OPEN_TITLE=Select playlist (.m3u)
-#??? PLAYLIST_DIALOG_SAVE_TITLE=Save playlist as....
+#??? PLAYLIST_DIALOG_SAVE_TITLE=Save playlist as...
 #??? PLAYLIST_DIALOG_SAVE_SAVE=Save
 
 ################################################################################

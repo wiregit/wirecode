@@ -90,7 +90,7 @@ APP_TITLE=LimeWire: Gnutella network futtatása
 ABOUT_TITLE=Ismertető LimeWire
 ABOUT_LABEL_START=LimeWire Ügyfél
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_END=Copyright @2000-2002 Lime Wire LLC
+ABOUT_LABEL_END=Copyright (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=Ismertető LimeWire
 ABOUT_BUTTON_LABEL=OK
 #??? ABOUT_BUTTON_TIP=Close the About window
@@ -229,7 +229,7 @@ MENU_HELP_ABOUT_MNEMONIC=I
 MENU_HELP_ABOUT_ACCESSIBLE=LimeWire információ
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for SearchView stuff...
 ################################################################################
 SEARCH_DOWNLOAD_BUTTON_LABEL=Letöltés
 SEARCH_DOWNLOAD_BUTTON_TIP=Minden kiválasztott file letöltése
@@ -310,7 +310,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Kiválasztott fileok eltávolítása a lejátszólist
 PLAYLIST_FILE_DESCRIPTION=Lejátszólista (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Lejátszó
 #??? MEDIA_PLAY_BUTTON_TIP=Play
@@ -324,7 +324,7 @@ PASSWORD_DIALOG_USERNAME_FIELD_LABEL=Felhasználónév
 PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Jelszó
 
 ################################################################################
-# Key/value pairs for Statistics String....
+# Key/value pairs for Statistics String...
 ################################################################################
 STATISTICS_AVAILABLE=elérhető
 STATISTICS_FILES=fileok
