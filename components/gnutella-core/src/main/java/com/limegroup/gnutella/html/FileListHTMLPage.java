@@ -68,10 +68,10 @@ public class FileListHTMLPage {
         {
             // put the magnet links
             sb.append(htmlMagnet);
-            final String beginURL = "\r\n<a href=\"magnet:?xt=urn:sha1:";
+            final String beginURL = "\r\n<a href=\"magnet:?xt=";
             final String middle1URL = "&dn=";
             final String middle2URL = 
-                "&xs=http://" + host + ":" + port + "/uri-res/N2R?urn:sha1:";
+                "&xs=http://" + host + ":" + port + "/uri-res/N2R?";
             final String middle3URL = "\">";
             final String endURL = "</a><br>";
             for (int i = 0; i < sharedFiles.length; i++) {
