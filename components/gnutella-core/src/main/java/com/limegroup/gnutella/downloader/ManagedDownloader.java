@@ -969,13 +969,32 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( incompleteFile == null ) // no incomplete, no big deal.
             return;
             
+        
+        FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
+        if( fd != null && fd instanceof IncompleteFileDesc) {
+            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
+            if(!downloadSHA1.equals(ifd.getSHA1Urn())) {
+                // Assert that the SHA1 of the IFD and our sha1 match.
+                Assert.silent(false, "wrong IFD.\n" +
+                           "we are resuming :"+(this instanceof ResumeDownloader)+
+                           "ours  :   " + incompleteFile +
+                           "\ntheirs: " + ifd.getFile() +
+                           "\nour hash    : " + downloadSHA1 +
+                           "\ntheir hashes: " +
+                           DataUtils.listSet(ifd.getUrns())+
+                          "\nifm.hashes : "+incompleteFileManager.dumpHashes());
+                fileManager.removeFileIfShared(incompleteFile);
+                ifd = null; // do not use, it's bad.
+            }
+        }
+        
         // Locate the hash for this incomplete file, to retrieve the 
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
             long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             // Find any matching file-desc for this URN.
-            FileDesc fd = fileManager.getFileDescForUrn(hash);
+            fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
                 //create validAlts
                 validAlts = AlternateLocationCollection.create(hash);
@@ -1442,6 +1461,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(!downloadSHA1.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and our sha1 match.
                 Assert.silent(false, "wrong IFD.\n" +
+                           "we are resuming :"+(this instanceof ResumeDownloader)+
                            "ours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
                            "\nour hash    : " + downloadSHA1 +
