@@ -241,9 +241,9 @@ public class ExternalControl {
             handleMagnetRequest(line);
 		} catch (IOException e) {
 		    LOG.warn("Exception while responding to magnet request", e);
-		}
-			
-		try { socket.close(); } catch (IOException e) { }
+		} finally {
+		    try { socket.close(); } catch (IOException e) { }
+        }
 	}
 
 	
@@ -267,29 +267,28 @@ public class ExternalControl {
         }   
 		try {
 			socket = Sockets.connect(LOCALHOST, port, 500);
-		} catch (IOException e) {
-		    return false;
-		}
-		//The try-catch below is a work-around for JDK bug 4091706.
-		InputStream istream=null;
-		try {
-			istream=socket.getInputStream(); 
-		} catch (Exception e) {
-			return false;
-		}
-		try {
+			InputStream istream = socket.getInputStream(); 
 			socket.setSoTimeout(500); 
 		    ByteReader byteReader = new ByteReader(istream);
 		    OutputStream os = socket.getOutputStream();
 		    OutputStreamWriter osw = new OutputStreamWriter(os);
-		    BufferedWriter out=new BufferedWriter(osw);
+		    BufferedWriter out = new BufferedWriter(osw);
 		    out.write("MAGNET "+arg+" ");
 		    out.write("\r\n");
 		    out.flush();
 		    String str = byteReader.readLine();
 		    return(str != null && str.startsWith(CommonUtils.getUserName()));
 		} catch (IOException e2) {
-		}
+		} finally {
+		    if(socket != null) {
+		        try {
+                    socket.close();
+                } catch (IOException e) {
+                    // nothing we can do
+                }
+            }
+        }
+        
 	    return false;
 	}
 
