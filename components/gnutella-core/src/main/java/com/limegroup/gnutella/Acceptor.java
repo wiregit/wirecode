@@ -473,7 +473,7 @@ public class Acceptor implements Runnable {
         			// This should happen long before the first scheduled
         			// IncomingValidator tasks, otherwise the resetters may overlap.
         			resetLastConnectBackTime();
-        			(new IncomingValidator()).run();
+        			RouterService.schedule(new IncomingValidator(),500,0);
         			UDPService.instance().triggerConnectBack();
         		}
         	}

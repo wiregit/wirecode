@@ -786,7 +786,7 @@ public class UDPService implements Runnable {
 	 */
 	void triggerConnectBack() {
 		resetLastConnectBackTime();
-		(new IncomingValidator()).run();
+		RouterService.schedule(new IncomingValidator(),0,0);
 	}
 	
     private static class MLImpl implements MessageListener {
