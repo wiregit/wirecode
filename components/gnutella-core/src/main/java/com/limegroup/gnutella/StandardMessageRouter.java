@@ -71,16 +71,15 @@ public class StandardMessageRouter extends MessageRouter {
                 sendPingReply(pr, handler);
             }
         }
-
+        
         List pongs = PongCacher.instance().getBestPongs(ping.getLocale());
         Iterator iter = pongs.iterator();
         byte[] guid = ping.getGUID();
         InetAddress pingerIP = handler.getInetAddress();
         while(iter.hasNext()) {
             PingReply pr = (PingReply)iter.next();
-            if(pr.getInetAddress().equals(pingerIP)) {
+            if(pr.getInetAddress().equals(pingerIP))
                 continue;
-            }
             sendPingReply(pr.mutateGUID(guid), handler);
         }
     }

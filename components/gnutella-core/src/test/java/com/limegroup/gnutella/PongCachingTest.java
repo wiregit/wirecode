@@ -20,7 +20,6 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.ArrayList;
@@ -296,10 +295,7 @@ public final class PongCachingTest extends BaseTestCase {
         for(int i=0; i<PongCacher.NUM_HOPS+4; i++) {
             PingReply curPong = 
                 PingReply.create(new GUID().bytes(), (byte)3, 13232, ip, 0, 0, 
-                    true, -1, false);
-            PrivilegedAccessor.setValue((Object)curPong,
-                                        "CLIENT_LOCALE",
-                                        "en");
+                    true, -1, false, "en", 1);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {
                     curPong.hop();
@@ -313,10 +309,7 @@ public final class PongCachingTest extends BaseTestCase {
         for(int i=0; i<PongCacher.NUM_HOPS+4; i++) {
             PingReply curPong = 
                 PingReply.create(new GUID().bytes(), (byte)3, 13232, ip2, 
-                                 0, 0, true, -1, false);
-            PrivilegedAccessor.setValue((Object)curPong,
-                                        "CLIENT_LOCALE",
-                                        "ja");
+                                 0, 0, true, -1, false, "ja", 1);
             for(int j=0; j<i; j++) {
                 if(j < PongCacher.NUM_HOPS) {
                     curPong.hop();
@@ -325,31 +318,11 @@ public final class PongCachingTest extends BaseTestCase {
             PongCacher.instance().addPong(curPong);            
         }
 
-        byte[] ip3 = { (byte)3, (byte)3, (byte)3, (byte)3 };
-        //add sv locale pongs
-        for(int i=0; i< 2; i++) {
-            PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)3, 13232, ip3, 
-                                 0, 0, true, -1, false);
-            PrivilegedAccessor.setValue((Object)curPong,
-                                        "CLIENT_LOCALE",
-                                        "sv");
-            for(int j=0; j<i; j++) {
-                if(j < PongCacher.NUM_HOPS) {
-                    curPong.hop();
-                }
-            }
-            PongCacher.instance().addPong(curPong);            
-        }
-        
         //check that all the pongs are in the PongCacher
         List pongs = PongCacher.instance().getBestPongs("ja");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         pongs = PongCacher.instance().getBestPongs("en");
-        assertEquals( PongCacher.NUM_HOPS, pongs.size() );
-
-        pongs = PongCacher.instance().getBestPongs("sv");
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         //create a ja locale PingRequest
@@ -358,14 +331,6 @@ public final class PongCachingTest extends BaseTestCase {
         assertEquals("locale of ping should be ja",
                      "ja", ((PingRequest)m).getLocale());
 
-        //create a sv locale PingRequest
-        ApplicationSettings.LANGUAGE.setValue("sv"); 
-        Message m2 = new PingRequest((byte)7);
-        assertEquals("locale of ping should be sv",
-                     "sv", ((PingRequest)m2).getLocale());
-        
-        ApplicationSettings.LANGUAGE.setValue("ja");
-        
         //send a ja ping using ULTRAPEER_3
         ULTRAPEER_3.send(m);
         ULTRAPEER_3.flush();        
@@ -374,15 +339,12 @@ public final class PongCachingTest extends BaseTestCase {
 
         ApplicationSettings.LANGUAGE.setValue("en");        
 
-        ULTRAPEER_4.send(m2);
-        ULTRAPEER_4.flush();
-
         //check for ja pongs
         Message received;   
         for(int i=0; i< PongCacher.NUM_HOPS; i++) {
             received = getFirstMessageOfType(ULTRAPEER_3, 
                                              PingReply.class, 
-                                             10000);
+                                             5000);
 
             assertNotNull("should have gotten pong. hop: " + i, received);
             PingReply pr = (PingReply)received;
@@ -390,12 +352,38 @@ public final class PongCachingTest extends BaseTestCase {
                          "ja", pr.getClientLocale());
         }
 
+
+        byte[] ip3 = { (byte)3, (byte)3, (byte)3, (byte)3 };
+        //add sv locale pongs
+        for(int i=0; i< 2; i++) {
+            PingReply curPong = 
+                PingReply.create(new GUID().bytes(), (byte)3, 13232, ip3, 
+                                 0, 0, true, -1, false, "sv", 1);
+            for(int j=0; j<i; j++) {
+                if(j < PongCacher.NUM_HOPS) {
+                    curPong.hop();
+                }
+            }
+            PongCacher.instance().addPong(curPong);            
+        }
+        pongs = PongCacher.instance().getBestPongs("sv");
+        assertEquals( PongCacher.NUM_HOPS, pongs.size() );        
+
+        //create a sv locale PingRequest
+        ApplicationSettings.LANGUAGE.setValue("sv"); 
+        Message m2 = new PingRequest((byte)7);
+        assertEquals("locale of ping should be sv",
+                     "sv", ((PingRequest)m2).getLocale());
+
+        ULTRAPEER_4.send(m2);
+        ULTRAPEER_4.flush();
+
         //check ofr sv pongs
         List returnedPongs = new ArrayList();
         for(int i = 0; i < PongCacher.NUM_HOPS; i++) {
             received = getFirstMessageOfType(ULTRAPEER_4, 
                                              PingReply.class, 
-                                             10000);
+                                             5000);
             assertNotNull("should have gotten pong. hop: " + i, received);
             PingReply pr = (PingReply)received;
             returnedPongs.add(pr);
@@ -418,25 +406,6 @@ public final class PongCachingTest extends BaseTestCase {
                      2, numSVPongs);
         
         PingPongSettings.PINGS_ACTIVE.setValue(true);
-    }
-
-    private void addPongs(byte[] ip, String locale) throws Exception {
-        
-        for(int i = 0; i < PongCacher.NUM_HOPS+4; i++) {
-            PingReply curPong = 
-                PingReply.create(new GUID().bytes(), (byte)3, 13232,
-                                 ip, 0, 0, true, -1, false);
-            PrivilegedAccessor.setValue((Object)curPong,
-                                        "CLIENT_LOCALE",
-                                        locale);
-            for(int j=0; j<i; j++) {
-                if(j < PongCacher.NUM_HOPS) {
-                    curPong.hop();
-                }
-            }
-            PongCacher.instance().addPong(curPong);            
-        }
-
     }
 }
 

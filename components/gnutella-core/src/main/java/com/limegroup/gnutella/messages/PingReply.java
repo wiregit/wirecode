@@ -490,18 +490,20 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
         GGEP ggep = parseGGEP(payload);
         
-        if(ggep != null && ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
-            byte[] vendorBytes = null;
-            try {
-                vendorBytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-            } catch (BadGGEPPropertyException e) {
-                ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
-                throw new BadPacketException("bad GGEP: "+vendorBytes);
-            }
-            if(vendorBytes.length < 4) {
-                ReceivedErrorStat.PING_REPLY_INVALID_VENDOR.incrementStat();
-                throw new BadPacketException("invalid vendor length: "+
-                                             vendorBytes.length);
+        if(ggep != null) {
+            if(ggep.hasKey(GGEP.GGEP_HEADER_VENDOR_INFO)) {
+                byte[] vendorBytes = null;
+                try {
+                    vendorBytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
+                } catch (BadGGEPPropertyException e) {
+                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
+                    throw new BadPacketException("bad GGEP: "+vendorBytes);
+                }
+                if(vendorBytes.length < 4) {
+                    ReceivedErrorStat.PING_REPLY_INVALID_VENDOR.incrementStat();
+                    throw new BadPacketException("invalid vendor length: "+
+                                                 vendorBytes.length);
+                }
             }
 
             if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {

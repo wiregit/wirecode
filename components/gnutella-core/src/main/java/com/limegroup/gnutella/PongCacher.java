@@ -41,9 +41,9 @@ public final class PongCacher {
 
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
+     * The map is of String (locale) to BucketQueue (Pongs per Hop)
      */
-    private static final Map PONGS = new HashMap();
-    //new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+    private static final Map /* String -> BucketQueue */ PONGS = new HashMap();
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
