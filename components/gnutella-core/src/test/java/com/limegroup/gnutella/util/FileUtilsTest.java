@@ -35,13 +35,9 @@ public final class FileUtilsTest extends BaseTestCase {
           new File("standard."+EXT),  
           new File("a.little.weird."+EXT), 
           new File(".ext."+EXT), 
-        };
-        
-       
+        };   
         
         for(int i=0; i<testFiles.length; i++)  {
-            System.out.println("TESTING EXTS");
-            System.out.println("testing: "+testFiles[i]+" extension: "+FileUtils.getFileExtension(testFiles[i]));
             assertEquals("unexpected extension extracted", 
                 EXT, FileUtils.getFileExtension(testFiles[i]));
         }
@@ -54,8 +50,6 @@ public final class FileUtilsTest extends BaseTestCase {
         };
         
         for(int i=0; i<nullFiles.length; i++)  {
-            System.out.println("TESTING NULLS");
-            System.out.println("testing: "+nullFiles[i]+" extension: "+FileUtils.getFileExtension(nullFiles[i]));
             assertNull("extension should be null", 
                 FileUtils.getFileExtension(nullFiles[i]));
         };
