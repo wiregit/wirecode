@@ -17,6 +17,11 @@ public class ConnectionWatchdog implements Runnable {
     private ConnectionManager manager;
     private MessageRouter router;
 
+	/** Track time as it passes for incremental events */
+	private long     timePassage;  
+	private long     triggerTime0;
+	private Runnable timeEvent0;
+
     /** 
      * @param manager to list of connections to manage
      * @param router the router to use to send ping requests, if necessary to
@@ -25,6 +30,9 @@ public class ConnectionWatchdog implements Runnable {
     public ConnectionWatchdog(ConnectionManager manager, MessageRouter router) {
         this.manager=manager;
         this.router=router;
+        timePassage=0;
+        triggerTime0=0;
+        timeEvent0=null;
     }
 
     /** A snapshot of a connection.  Used by run() */
@@ -84,6 +92,7 @@ public class ConnectionWatchdog implements Runnable {
         //Wait a bit more.
         try {
             Thread.currentThread().sleep(EVALUATE_TIME);
+			recordTimePassage(EVALUATE_TIME);
         } catch (InterruptedException e) { /* do nothing */ }
 
         //Loop through all connections, trying to find ones that
@@ -133,6 +142,7 @@ public class ConnectionWatchdog implements Runnable {
         //Wait a tiny amount of time.
         try {
             Thread.currentThread().sleep(REEVALUATE_TIME);
+			recordTimePassage(REEVALUATE_TIME);
         } catch (InterruptedException e) { /* do nothing */ }
 
         //Loop through all connections again.  This time, any that
@@ -158,6 +168,35 @@ public class ConnectionWatchdog implements Runnable {
             }
         }
     }
+
+	/**
+	 *  Record the incremental passage of time and trigger any events based 
+	 *  on time passage.
+     *  @param time the time that has passed in milliseconds
+	 */
+	private void recordTimePassage(long time) {
+		synchronized(this) {
+			timePassage += time;
+
+			if ( timeEvent0 != null && triggerTime0 <= timePassage ) {
+			    timeEvent0.run();
+				timeEvent0   = null;
+				triggerTime0 = 0;
+			}
+		}
+	}
+
+	/**
+	 *  Set a time trigger for a runnable action relative to current time
+     *  @param incrementalTime the incremental time of the event in milliseconds
+     *  @param action the Runnable for the event
+	 */
+	public void setTimeEvent(long incrementalTime, Runnable action) {
+		synchronized(this) {
+			triggerTime0 = timePassage + incrementalTime;
+			timeEvent0   = action;
+		}
+	}
 
 
     /** 

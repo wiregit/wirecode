@@ -67,6 +67,7 @@ public class ConnectionManager {
     private HostCatcher _catcher;
     private ActivityCallback _callback;
 	private SettingsManager _settings;
+	private ConnectionWatchdog _watchdog;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -86,7 +87,8 @@ public class ConnectionManager {
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-        Thread watchdog=new Thread(new ConnectionWatchdog(this, _router));
+        _watchdog = new ConnectionWatchdog(this, _router);
+        Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
         watchdog.start();
 
@@ -94,6 +96,16 @@ public class ConnectionManager {
         //setMaxIncomingConnections(
 		//SettingsManager.instance().getMaxIncomingConnections());
     }
+
+	/**
+	 *  Set a time trigger for a runnable action relative to current time
+	 *  Pass this on to the ConnectionWatchdog.
+     *  @param incrementalTime the incremental time of the event in milliseconds
+     *  @param action the Runnable for the event
+	 */
+	public void setTimeEvent(long incrementalTime, Runnable action) {
+		_watchdog.setTimeEvent(incrementalTime, action);
+	}
 
     /**
      * Create a new connection, blocking until it's initialized, but launching

@@ -51,6 +51,12 @@ public class RouterService
         this.manager.initialize(router, catcher);
         this.acceptor.initialize(manager, router, downloader);
         this.downloader.initialize(callback, router, acceptor, FileManager.instance());
+
+		// Make sure connections come up ultra-fast (beyond default keepAlive)
+        SettingsManager settings=SettingsManager.instance();
+        int outgoing=settings.getKeepAlive();
+		if ( outgoing > 0 )
+		    connect();
     }
 
     /**
@@ -129,7 +135,6 @@ public class RouterService
         groupConnect(group);
     }
 
-//------------------------------------------------------------------------
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established but send a GroupPingRequest
@@ -204,7 +209,6 @@ public class RouterService
         setKeepAlive(oldKeepAlive);
         settings.setUseQuickConnect(useQuickConnect);
     }
-//------------------------------------------------------------------------
 
     /**
      * @modifies this
@@ -241,8 +245,15 @@ public class RouterService
             settings.setKeepAlive(outgoing);
         }
         //Actually notify the backend.
+
+		//  Adjust up keepAlive for initial ultrafast connect
+		if ( outgoing < 10 ) {
+			outgoing = 10;
+			manager.setTimeEvent(15000, new AllowUltraFastConnect());
+		}
         setKeepAlive(outgoing);
-        int incoming=settings.getKeepAlive();
+
+        //int incoming=settings.getKeepAlive();
         //setMaxIncomingConnections(incoming);
 
         //See note above.
@@ -253,6 +264,18 @@ public class RouterService
             SettingsManager.instance().setUseQuickConnect(false);
         }
     }
+
+    /**
+     * This Runnable resets the KeepAlive to the appropriate value.
+     */
+    private class AllowUltraFastConnect implements Runnable {
+		
+		public void run() {
+            SettingsManager settings=SettingsManager.instance();
+        	int outgoing=settings.getKeepAlive();
+        	setKeepAlive(outgoing);
+		}
+	}
 
     /**
      * @modifies this
