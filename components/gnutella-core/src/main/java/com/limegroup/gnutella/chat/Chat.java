@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.chat2;
+package com.limegroup.gnutella.chat;
 /**
  * this class is the superclass for all possible types
  * of chat.

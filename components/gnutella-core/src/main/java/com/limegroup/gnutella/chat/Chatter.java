@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.chat2;
+package com.limegroup.gnutella.chat;
 /**
  * the class that serves as the interface between a Chat
  * instance and the gui.

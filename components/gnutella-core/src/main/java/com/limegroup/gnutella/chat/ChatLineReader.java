@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.chat2;
+package com.limegroup.gnutella.chat;
 /**
  * Similar to the controversial ByteReader class, this
  * class also handle reading off of an input stream, but
@@ -65,7 +65,8 @@ public class ChatLineReader {
             c = _istream.read();
 
             if (c == -1) 
-                return null;
+				throw new IOException();
+                // return null;
         
             if( ( c == _creturn[0] ) || 
 				( c == _nline[0] ) ){

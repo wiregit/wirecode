@@ -361,7 +361,7 @@ public class Acceptor extends Thread {
                 }
 				else if (word.equals("CHAT")) {
 					System.out.println("Recieved Chat!!!");
-					ChatManager.instance().acceptIM(_socket);
+					ChatManager.instance().accept(_socket);
 				}
                 //4. Unknown protocol
                 else {

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.chat2;
+package com.limegroup.gnutella.chat;
 /**
  * a class that establishes a connection for a chat, either
  * incoming or outgoing, and also maintains a list of all the 
@@ -40,6 +40,7 @@ public class ChatManager {
 													   _activityCallback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add((Chat)im);
+			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
 			
@@ -48,16 +49,18 @@ public class ChatManager {
 	}
 
 	/** request a chat connection from the host specified */
-	public void request(String host, int port) {
+	public Chat request(String host, int port) {
+		InstantMessenger im = null;
 		try {
-			InstantMessenger im = new InstantMessenger(host, port, this, 
-													   _activityCallback);
+			im = new InstantMessenger(host, port, this, 
+									  _activityCallback);
 			// insert the newly created InstantMessager into the list
 			_chatsInProgress.add((Chat)im);
+			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
 		}
-			
+		return im;
 	}
 
 	/** remove the instance of chat from the list of chats

@@ -688,8 +688,8 @@ public class RouterService
 	 * create a new chat
 	 */
 	public Chatter createChat(String host, int port) {
-		ChatManager.instance().requestIM(host, port);
-		return null;
+		Chatter chatter = ChatManager.instance().request(host, port);
+		return chatter;
 	}
 
 

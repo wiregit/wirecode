@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.chat2;
+package com.limegroup.gnutella.chat;
 /**
  * this class is a subclass of Chat, also implementing
  * Chatter interface.  it is a one-to-one instant message
@@ -22,6 +22,7 @@ public class InstantMessenger extends Chat {
 	/** constructor for an incoming chat request */
 	public InstantMessenger(Socket socket, ChatManager manager, 
 							ActivityCallback callback) throws IOException {
+		System.out.println("InstantMessenger socket ");
 		_manager = manager;
 		_socket = socket;
 		_activityCallback = callback;
@@ -35,6 +36,7 @@ public class InstantMessenger extends Chat {
 	/** constructor for an outgoing chat request */
 	public InstantMessenger(String host, int port, ChatManager manager,
 							ActivityCallback callback) throws IOException {
+		System.out.println("InstantMessenger host port ");
 		_manager = manager;
 		_activityCallback = callback;
 		_socket =  new Socket(host, port);
@@ -88,6 +90,8 @@ public class InstantMessenger extends Chat {
 
 		public void run() {
 			while (true){
+				System.out.println("reading..");
+
 				String str;
 				try {
 					// read into a buffer off of the socket
@@ -102,6 +106,7 @@ public class InstantMessenger extends Chat {
 					// was terminated.
 					return;
 				}
+
 			}
 		}
 		
