@@ -140,9 +140,11 @@ public class PingReply extends Message implements Serializable {
         try {
             GGEP ggep=new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
-            if (udpSupported)
-                // the version number is .01 (.01 * 10 == 1).
-                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, 1);
+            if (udpSupported) {
+                // the version number is 0.1
+                byte[] vNum = {(byte) 1}; // high nibble is 0, low nibble is 1
+                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+            }
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
