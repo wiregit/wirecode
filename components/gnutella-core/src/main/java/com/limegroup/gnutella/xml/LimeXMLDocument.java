@@ -14,18 +14,18 @@ import com.limegroup.gnutella.util.NameValue;
  * @author  asingla
  * @version
  */
-public abstract class CanonicalizedXMLDocument
+public abstract class LimeXMLDocument
 {
     
 
-    /** Creates new CanonicalizedXMLDocument */
-    public CanonicalizedXMLDocument(){
+    /** Creates new LimeXMLDocument */
+    public LimeXMLDocument(){
 	
     }
     
     /**
      * Returns a List <NameValue>, where each name-value corresponds to a
-     * canonicalized field name (placeholder), and its corresponding value in
+     * Canonicalized field name (placeholder), and its corresponding value in
      * the XML Document.
      * <p>
      * Canonicalization:

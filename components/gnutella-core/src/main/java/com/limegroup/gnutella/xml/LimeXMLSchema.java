@@ -1,5 +1,5 @@
 /*
- * XMLSchema.java
+ * LimeXMLSchema.java
  *
  * Created on April 12, 2001, 4:03 PM
  */
@@ -14,16 +14,16 @@ import java.io.*;
  * @author  asingla
  * @version
  */
-public class XMLSchema extends CanonicalizedXMLDocument
+public class LimeXMLSchema extends CanonicalizedXMLDocument
 {
     
     /** 
-     * Creates new XMLSchema 
+     * Creates new LimeXMLSchema 
      * @param schemaFile The filefrom where to read the schema definition
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public XMLSchema(File schemaFile) throws IOException{
+    public LimeXMLSchema(File schemaFile) throws IOException{
         //TODO
         //open the file, read it, and derive the structure, store internally
         

@@ -17,7 +17,7 @@ import com.limegroup.gnutella.*;
  * @author Anurag Singla
  */
 
-public class XMLProperties
+public class LimeXMLProperties
 {
 
     /**
@@ -34,7 +34,7 @@ public class XMLProperties
      * as the users
      * will be invoking all the methods on this instance only.
      */
-    private static XMLProperties _instance = null;
+    private static LimeXMLProperties _instance = null;
 
     private static final String XML_PROPS_FILENAME = "xml.props";
     
@@ -59,9 +59,9 @@ public class XMLProperties
      * from the properties file.
      * It is made private so that all the accesses to the static settings that
      * it maintains is thru the '_instance' using instance() method
-     * @see XMLProperties#_instance
+     * @see LimeXMLProperties#_instance
      */
-    private XMLProperties()
+    private LineXMLProperties()
     {
         //load the properties from file
         loadProperties();
@@ -91,11 +91,11 @@ public class XMLProperties
      * a new instance and returns the same
      * @return The initialized instance of this class
      */
-    public static XMLProperties instance()
+    public static LimeXMLProperties instance()
     {
         if(_instance == null)
         {
-            _instance = new XMLProperties();
+            _instance = new LimeXMLProperties();
         }
         return _instance;
     }

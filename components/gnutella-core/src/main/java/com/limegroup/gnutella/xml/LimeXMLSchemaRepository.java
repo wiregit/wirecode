@@ -1,5 +1,5 @@
 /*
- * XMLSchemaRepository.java
+ * LimeXMLSchemaRepository.java
  *
  * Created on April 12, 2001, 4:00 PM
  */
@@ -13,7 +13,7 @@ import java.io.*;
  * @author  asingla
  * @version
  */
-public class XMLSchemaRepository extends java.lang.Object
+public class LimeXMLSchemaRepository extends java.lang.Object
 {
     
     /**
@@ -25,10 +25,10 @@ public class XMLSchemaRepository extends java.lang.Object
     /**
      * An instance of this class
      */
-    private XMLSchemaRepository _instance = null;
+    private LimeXMLSchemaRepository _instance = null;
     
-    /** Creates new XMLSchemaRepository */
-    private XMLSchemaRepository()
+    /** Creates new LimeXMLSchemaRepository */
+    private LimeXMLSchemaRepository()
     {
         initialize();
     }
@@ -64,10 +64,10 @@ public class XMLSchemaRepository extends java.lang.Object
      * Returns an instance of this class. Adheres to Singleton design pattern.
      * So, only one instance of the class is created.
      */
-    public XMLSchemaRepository instance()
+    public LimeXMLSchemaRepository instance()
     {
         if(_instance == null)
-            _instance = new XMLSchemaRepository();
+            _instance = new LimeXMLSchemaRepository();
         
         return _instance;
     }
