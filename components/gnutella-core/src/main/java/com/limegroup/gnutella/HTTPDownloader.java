@@ -55,7 +55,6 @@ public class HTTPDownloader implements Runnable {
   	    // _in = new DataInputStream(_istream);
 	    _br = new ByteReader(_istream);
 	}
-
 	catch (Exception e) {
 	    _callback.error(ActivityCallback.ERROR_4);
 	}
@@ -102,6 +101,10 @@ public class HTTPDownloader implements Runnable {
   	    // _in = new DataInputStream(_istream);
 	    _br = new ByteReader(_istream);
   	}
+	catch (NoRouteToHostException e) {
+	    System.out.println("No route to host");
+	    return;
+	}
   	catch (IOException e) {
   	    e.printStackTrace();
   	    sendPushRequest(host, index, port, guid);
@@ -183,9 +186,10 @@ public class HTTPDownloader implements Runnable {
 	SettingsManager set = SettingsManager.instance();
 	_downloadDir = set.getSaveDirectory();
 	
-	String fs = System.getProperty("file.seperator");
-
-	String pathname = _downloadDir + fs + _filename;
+	//  String fs = System.getProperty("file.separator");
+//  	String pathname = _downloadDir + fs + _filename;
+	
+	String pathname = _downloadDir + _filename;
 	
 	System.out.println(pathname);
 	try {

@@ -54,6 +54,8 @@ public class ByteReader {
 
 	try {
 	    c = _istream.read(buf);
+	    System.out.print(c  + " ");
+
 	}
 	catch(IOException e) {
 	    
