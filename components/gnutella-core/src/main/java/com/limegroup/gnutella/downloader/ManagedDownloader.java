@@ -45,7 +45,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
     /** The max number of downloads to try in parallel. */
-    private static final int PARALLEL_DOWNLOAD=2;
+    private static final int PARALLEL_DOWNLOAD=4;
     /** The time to wait trying to establish each connection, in milliseconds.*/
     private static final int CONNECT_TIME=8000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
@@ -85,11 +85,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The time as returned by Date.getTime() that this entered the current
         state.  Should be modified only through setState. */
     private long stateTime;
-    /** The current address we're trying, or last address if waiting, or null
-		if unknown. */
-    private String lastAddress;
-    /** The number of tries we've made.  0 means on the first try. */
-    private int tries;
 
 
     /**
@@ -142,12 +137,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         busy=new LinkedList();
         requested=new LinkedList();
-
         dloaders=new LinkedList();
         stopped=false;
         setState(QUEUED);
-        this.lastAddress=null;
-        this.tries=0;
             
         this.dloaderManagerThread=new Thread() {
             public void run() {
@@ -392,6 +384,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 "MANAGER: downloading from "+start+" to "+stop+" with "+rfd);
             setState(DOWNLOADING);
             synchronized (this) {
+                if (stopped)
+                    return;
                 dloaders.add(downloader);
             }
             final RemoteFileDesc rfd2=rfd;
@@ -411,6 +405,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //download, etc.
         System.out.println("MANAGER: waiting for complete");
         synchronized (this) {
+            if (stopped)
+                return;
             while (dloaders.size()>0) {
                 try {
                     this.wait();
@@ -419,6 +415,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return;
                 }
             }
+            if (stopped)
+                return;
         }
 
         //3. Move to library.  
@@ -512,25 +510,16 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /////////////////////////////   Display Variables ////////////////////////////
 
-    /** Sets this' state, taking care of locking.  lastAddress is only well-defined
-     *  for some states and is ignored if null.
+    /** Sets this' state, taking care of locking
      *      @requires newState one of the constants defined in Downloader
-     *      @modifies this.state, this.stateTime, this.lastAddress */
-    private void setState(int newState, String lastAddress) {
+     *      @modifies this.state, this.stateTime */
+    private void setState(int newState) {
         synchronized (this) {
             this.state=newState;
-            if (lastAddress!=null)
-                this.lastAddress=lastAddress;
             this.stateTime=(new Date()).getTime();
         }
     }
 
-    /** Sets this' state, taking care of locking.
-     *      @requires newState one of the constants defined in Downloader
-     *      @modifies this.state, this.stateTime */
-    private void setState(int newState) {
-        setState(newState, lastAddress);
-    }
 
     /***************************************************************************
      * Accessors that delegate to dloader. Synchronized because dloader can
