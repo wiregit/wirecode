@@ -949,12 +949,7 @@ public abstract class MessageRouter {
             }
             else 
                 iterator = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query, 1);
-
-            //if we will be sending at least one reply back, add a reply handler for  
-            //ourselves (like we do with tcp responses) 
-            if (iterator.hasNext()) 
-            	_pushRouteTable.routeReply(_clientGUID, FOR_ME_REPLY_HANDLER); 
+                                                   bundle._query, 1); 
             
             //send the query replies
             while(iterator.hasNext()) {
@@ -2032,7 +2027,10 @@ public abstract class MessageRouter {
 
         if(replyHandler != null) {
             replyHandler.handlePushRequest(request, handler);
-        }
+        } 
+	else if (Arrays.equals(_clientGUID,
+                               request.getClientGUID()))
+            FOR_ME_REPLY_HANDLER.handlePushRequest(request, handler);
         else {
 			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
@@ -2078,11 +2076,6 @@ public abstract class MessageRouter {
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
-            // Prepare a routing for a PushRequest, which works
-            // here like a QueryReplyReply
-            // Note the use of getClientGUID() here, not getGUID()
-            _pushRouteTable.routeReply(queryReply.getClientGUID(),
-                                       FOR_ME_REPLY_HANDLER);
             rrp.getReplyHandler().handleQueryReply(queryReply, null);
         }
         else
