@@ -49,11 +49,12 @@ public class WriteRegulator {
      *  scale down activity.
      */
     public void hitResendTimeout() {
-        if ( (!_limitHit || _limitCount >= 6) &&
+        if ( (!_limitHit || _limitCount >= 10) &&
               _tracker.failureRate() > TARGET_FAILURE_RATE ) {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
+            _tracker.clearOldFailures();
 System.out.println("hitResendTimeout _skipLimit = "+_skipLimit);
         }
     }
@@ -63,7 +64,7 @@ System.out.println("hitResendTimeout _skipLimit = "+_skipLimit);
      */
     public void hitZeroWindow() {
         _zeroCount++;
-        if ( (!_limitHit || _limitCount >= 6) && _zeroCount > 4) { 
+        if ( (!_limitHit || _limitCount >= 10) && _zeroCount > 4) { 
             // Doing nothing for now since this is irrelevent to the skipping
             //
 
@@ -300,6 +301,15 @@ System.out.println("_skipLimit = "+_skipLimit);
 
             block.count++;
             block.failure++;
+        }
+
+        /**
+         * Clear out old failures to give new rate a chance. This should clear
+         * out a clump of failures more quickly.
+         */
+        public void clearOldFailures() {
+            for (int i = 0; i < 50; i++)
+                addSuccess();
         }
 
         /**
