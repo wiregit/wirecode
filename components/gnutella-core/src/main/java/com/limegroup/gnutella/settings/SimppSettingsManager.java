@@ -86,6 +86,8 @@ public class SimppSettingsManager {
                 Setting currSetting = findSettingByName(simppSetting);
                 if(currSetting == null) //create a new Setting
                     currSetting = makeSettingPerType(simppSetting, simppValue);
+                if(!currSetting.isSimppEnabled())
+                    continue;
                 //get the default/current value and cache it                
                 String defaultValue = (String)currSetting.getValueAsString();
                 System.out.println("current value:"+defaultValue);
@@ -125,6 +127,7 @@ public class SimppSettingsManager {
     }
 
     private void setSettingByType(Setting toSet, String value) {
+        
         //TODO: Find out what kind of setting it is an set the value
         //accordingly
     }

@@ -16,8 +16,9 @@ public final class LongSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultLong the default value to use for the setting
 	 */
-	LongSetting(Properties defaultProps, Properties props, String key, long defaultLong) {
-		super(defaultProps, props, key, String.valueOf(defaultLong));
+	LongSetting(Properties defaultProps, Properties props, String key, 
+                                          long defaultLong, boolean useSimpp) {
+		super(defaultProps, props, key, String.valueOf(defaultLong), useSimpp);
 	}
         
 	/**

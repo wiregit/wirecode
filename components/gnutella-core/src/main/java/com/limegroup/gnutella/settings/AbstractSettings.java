@@ -2,6 +2,7 @@ package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.util.*;
 import java.util.Properties;
+import com.sun.java.util.collections.*;
 import java.io.*;
 
 
@@ -95,5 +96,17 @@ public abstract class AbstractSettings {
      */
     public boolean getShouldSave() {
         return _shouldSave;
+    }
+
+    public Setting getSetting(String key) {
+        synchronized(FACTORY) {
+            Iterator iter = FACTORY.iterator();
+            while(iter.hasNext()) {
+                Setting currSetting = (Setting)iter.next();
+                if(currSetting.getKey().equals(key))
+                    return currSetting;
+            }
+        }
+        return null; //unable the find the setting we are looking for
     }
 }

@@ -24,15 +24,15 @@ public final class CharArraySetting extends Setting {
 	 */
     static CharArraySetting 
         createCharArraySetting(Properties defaultProps, Properties props, 
-                               String key, 
-                               char[] defaultValue) {
+                               String key, char[] defaultValue, 
+                                                             boolean useSimpp) {
         return new CharArraySetting(defaultProps, props, key, 
-                                    new String(defaultValue));
+                                           new String(defaultValue), useSimpp);
     }
 
 	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                     String defaultValue) {
-		super(defaultProps, props, key, defaultValue);
+                                       String defaultValue, boolean useSimpp) {
+		super(defaultProps, props, key, defaultValue, useSimpp);
 	}
         
 	/**

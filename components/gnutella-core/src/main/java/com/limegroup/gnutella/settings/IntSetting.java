@@ -16,8 +16,9 @@ public final class IntSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultInt the default value to use for the setting
 	 */
-	IntSetting(Properties defaultProps, Properties props, String key, int defaultInt) {
-		super(defaultProps, props, key, String.valueOf(defaultInt));
+	IntSetting(Properties defaultProps, Properties props, String key, 
+                                           int defaultInt, boolean useSimpp) {
+		super(defaultProps, props, key, String.valueOf(defaultInt), useSimpp);
 	}
         
 	/**

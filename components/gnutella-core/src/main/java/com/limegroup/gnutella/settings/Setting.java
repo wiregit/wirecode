@@ -35,6 +35,14 @@ public abstract class Setting {
 	 * Value for whether or not this setting should always save.
 	 */
 	private boolean _alwaysSave = false;
+
+
+    /**
+     * Value for whether or not this setting can be changed by SIMPP. Default is
+     * false, so setting that want to be SIMPP enabled have to specifically say
+     * so.  
+     */
+    private final boolean SIMPP_ENABLED;
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -43,17 +51,19 @@ public abstract class Setting {
 	 *
 	 * @param key the key for the setting
 	 * @param defaultValue the defaultValue for the setting
+     * @param simppEnabled whether or not this setting should be SIMPP settable
 	 * @throws <tt>IllegalArgumentException</tt> if the key for this 
 	 *  setting is already contained in the map of default settings
 	 */
-	protected Setting(Properties defaultProps, Properties props, String key, String defaultValue) {
+	protected Setting(Properties defaultProps, Properties props, String key, 
+                      String defaultValue, boolean simppEnabled) {
 		DEFAULT_PROPS = defaultProps;
 		PROPS = props;
 		KEY = key;
+        SIMPP_ENABLED = simppEnabled;
 		DEFAULT_VALUE = defaultValue;
-		if(DEFAULT_PROPS.containsKey(key)) {
+		if(DEFAULT_PROPS.containsKey(key)) 
 			throw new IllegalArgumentException("duplicate setting key");
-		}
 		DEFAULT_PROPS.put(KEY, defaultValue);
         loadValue(defaultValue);
 	}
@@ -126,6 +136,10 @@ public abstract class Setting {
     protected void setValue(String value) {
         PROPS.put(KEY, value);
         loadValue(value);
+    }
+
+    public boolean isSimppEnabled() {
+        return SIMPP_ENABLED;
     }
 
     /**
