@@ -218,7 +218,8 @@ public class LimeXMLReplyCollection {
                 if(LOG.isDebugEnabled())
                     LOG.debug("reconstructing document for id3v2: " + file);
                 LimeXMLDocument tempDoc = constructDocument(file);
-                if (tempDoc != null) doc = tempDoc;
+                if (tempDoc != null)
+                    doc = tempDoc;
             }
                 
             // Verify the doc has information in it.
@@ -249,20 +250,13 @@ public class LimeXMLReplyCollection {
      *  <tt>LimeXMLDocument</tt> otherwise.
      */
     private LimeXMLDocument constructDocument(File file) {
-
-    	
         if (LimeXMLUtils.isSupportedFormatForSchema(file,schemaURI)) { 
-        	
             try{    
             	return MetaDataReader.readDocument(file);
-            }
-            
-            catch (IOException ignored) { 
+            } catch (IOException ignored) { 
             	return null; 
             }
-            
         }
-        
         return null;
     }
     
@@ -790,7 +784,10 @@ public class LimeXMLReplyCollection {
                 }
             } catch(Throwable t) {
                 LOG.error("Unable to read LimeXMLCollection", t);
-                throw new IOException();
+                if(t instanceof IOException)
+                    throw (IOException)t;
+                 else
+                    throw new IOException(t.getMessage());
             } finally {
                 if( is != null ) {
                     try {
@@ -810,19 +807,20 @@ public class LimeXMLReplyCollection {
 
         
         private void serializeToFile() throws IOException {
-            FileOutputStream ostream = null;
             ObjectOutputStream objStream = null;
             try {
-                ostream = new FileOutputStream(_backingStoreFile);
                 objStream = new ObjectOutputStream(
-                        new BufferedOutputStream(ostream));
+                        new BufferedOutputStream(
+                         new FileOutputStream(_backingStoreFile)));
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Serializing (" + _backingStoreFile + "), map: " + _hashMap);
                 synchronized (_hashMap) {
                     objStream.writeObject(_hashMap);
                 }
             } finally {
-                if( ostream != null ) {
+                if( objStream != null ) {
                     try {
-                        ostream.close();
+                        objStream.close();
                     } catch(IOException ignored) {}
                 }
             }
