@@ -205,13 +205,16 @@ public class RouterService {
 													 manager);
 		sa.start();
 
+        // THIS MUST BE BEFORE THE CONNECT (below)
+        // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
+		catcher.initialize();
+
 		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		
 			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
 			if ( outgoing > 0 ) 
 				connect();
 		}
-		catcher.initialize();
         // Asynchronously load files now that the GUI is up, notifying
         // callback.
         fileManager.start();

@@ -159,6 +159,8 @@ public class BootstrapServerManager {
          *  HTTP response code, or got an ERROR method.  Default value: remove
          *  it from the list. */
         protected void handleError(BootstrapServer server) {
+            if(LOG.isWarnEnabled())
+                LOG.warn("Error on server: " + server);
             //For now, we just remove the host.  
             //Eventually we put it on probation.
             synchronized (BootstrapServerManager.this) {
@@ -224,6 +226,10 @@ public class BootstrapServerManager {
                     addBootstrapServer(e);
                 }
                 responses++;
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Added bootstrap host: " + e);
+                ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.setValue(
+                    System.currentTimeMillis());                
             } catch (ParseException error) { 
                 //One strike and you're out; skip servers that send bad data.
                 handleError(server);
@@ -290,6 +296,7 @@ public class BootstrapServerManager {
 		if(request == null) {
 			throw new NullPointerException("asynchronous request to null cache");
 		}
+		
         Thread runner=new Thread() {
             public void run() {
                 try {
@@ -326,12 +333,16 @@ public class BootstrapServerManager {
                                         
     private void requestFromOneHost(GWebCacheRequest request,
                                     BootstrapServer server) {
-		if(request == null) {
+    	if(request == null) {
 			throw new NullPointerException("null cache in request to one host");
 		}
 		if(server == null) {
 			throw new NullPointerException("null server in request to one host");
 		}
+		
+        if(LOG.isTraceEnabled())
+            LOG.trace("requesting: " + request + " from " + server);
+		
         BufferedReader in = null;
         String connectTo = server.getURL().toString()
                  +"?client="+CommonUtils.QHD_VENDOR_NAME
@@ -364,8 +375,8 @@ public class BootstrapServerManager {
                 if (line == null)
                     break;
                     
-                if(LOG.isTraceEnabled())
-                    LOG.trace("<< " + line);
+//                if(LOG.isTraceEnabled())
+//                    LOG.trace("<< " + line);
 
                 if (firstLine && StringUtils.startsWithIgnoreCase(line,"ERROR")){
                     request.handleError(server);

@@ -15,6 +15,9 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.filters.IPFilter;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
  * user-requested outgoing connections, accepts incoming connections, and
@@ -52,6 +55,8 @@ import com.limegroup.gnutella.filters.IPFilter;
  * doesn't quite fit the BandwidthTracker interface.
  */
 public class ConnectionManager {
+    
+    private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
 	/**
 	 * The number of Ultrapeer connections to ideally maintain as an Ultrapeer.
@@ -1075,8 +1080,16 @@ public class ConnectionManager {
      */
     public synchronized void connect() {
 
-        //Tell the HostCatcher it's ok to reconnect to router.limewire.com.
-        _catcher.expire();
+        //Tell the HostCatcher to retrieve more bootstrap servers
+        //if necessary. (Only fetch if we haven't received a reply
+        //within a week.)
+        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
+        if( fetched + DataUtils.ONE_WEEK <= System.currentTimeMillis() ) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Fetching more bootstrap servers. " +
+                          "Last fetch time: " + fetched);
+            _catcher.expire();
+        }
 
         //Ensure outgoing connections is positive.
 		int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();

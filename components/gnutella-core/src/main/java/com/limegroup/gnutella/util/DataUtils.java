@@ -51,6 +51,11 @@ public final class DataUtils {
     public static final byte[] EMPTY_GUID = new byte[16];
     
     /**
+     * The amount of milliseconds in a week.
+     */
+    public static final long ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    
+    /**
      * Utility function to write out the toString contents
      * of a URN.
      */

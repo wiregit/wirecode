@@ -54,6 +54,13 @@ public final class ConnectionSettings extends LimeProps {
 	 */
 	public static final BooleanSetting USE_GWEBCACHE =
 		FACTORY.createBooleanSetting("USE_GWEBCACHE", true);
+		
+    /**
+     * Setting for the last time (in msecs since epoch) that we
+     * connected to retrieve more gWebCache bootstrap servers
+     */
+    public static final LongSetting LAST_GWEBCACHE_FETCH_TIME =
+        FACTORY.createLongSetting("LAST_GWEBCACHE_FETCH_TIME", 0);
 
 	/**
 	 * Setting for whether or not to activate the connection watchdog
