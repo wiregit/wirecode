@@ -636,6 +636,9 @@ public class HTTPUploader implements Uploader {
 
 		while(st.hasMoreTokens()) {
 			try {
+				// note that the trim method removes any CRLF character
+				// sequences that may be used if the sender is using
+				// continuations.
 				AlternateLocation al = 
 				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
 				alc.addAlternateLocation(al);
