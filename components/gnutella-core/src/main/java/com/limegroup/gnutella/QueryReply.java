@@ -150,8 +150,11 @@ public class QueryReply extends Message implements Serializable{
             payload[i++]=(byte)2;
             //c) common area flags and controls.  See format in parseResults2.
             payload[i++]=(byte)((needsPush ? PUSH_MASK : 0) 
-                | BUSY_MASK | UPLOADED_MASK | SPEED_MASK);
-            payload[i++]=(byte)((isBusy ? BUSY_MASK : 0) 
+                | BUSY_MASK 
+                | UPLOADED_MASK 
+                | SPEED_MASK);
+            payload[i++]=(byte)(PUSH_MASK
+                | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
                 | (measuredSpeed ? SPEED_MASK : 0));
         }        
@@ -412,27 +415,33 @@ public class QueryReply extends Message implements Serializable{
             return;
         }                
 
-        //2. Extract BearShare-style metainformation, if any.  Any
-        //exceptions are silently caught. The format is 
+        //2. Extract BearShare-style metainformation, if any.  Any exceptions
+        //are silently caught.  The definitive reference for this format is at
+        //http://www.clip2.com/GnutellaProtocol04.pdf.  Briefly, the format is 
         //      vendor code           (4 bytes, case insensitive)
         //      common payload length (1 byte, unsigned, always>0)
         //      common payload        (length given above.  See below.)
         //      vendor payload        (length until clientGUID)
         //The normal 16 byte clientGUID follows, of course.
         //
-        //The first byte of the common payload has a one in its first bit* if we
-        //should try a push.  The remaining bits tell whether the corresponding
-        //bits in the optional second byte is defined.  These bits are as 
-        //followed:
-        //      bit 2*  undefined, for historical reasons
-        //      bit 3   1 iff server is busy
-        //      bit 4   1 iff server has successfully completed an upload
-        //      bit 5   1 iff server's reported speed was actually measured, not
-        //              simply set by the user.
-        //The idea behind having two bits per flag is to distinguish between
-        //YES, NO, and MAYBE.
+        //The first byte of the common payload has a one in its 0'th bit* if we
+        //should try a push.  However, if there is a second byte, and if the
+        //0'th bit of this byte is zero, the 0'th bit of the first byte should
+        //actually be interpreted as MAYBE.  Unfortunately LimeWire 1.4 failed
+        //to set this bit in the second byte, so it should be ignored when 
+        //parsing, though set on writing.
         //
-        //*Here, we use 1-N numbering.  So "first bit" refers to the least
+        //The remaining bits of the first byte of the common payload area tell
+        //whether the corresponding bits in the optional second byte is defined.
+        //The idea behind having two bits per flag is to distinguish between
+        //YES, NO, and MAYBE.  These bits are as followed:
+        //      bit 1*  undefined, for historical reasons
+        //      bit 2   1 iff server is busy
+        //      bit 3   1 iff server has successfully completed an upload
+        //      bit 4   1 iff server's reported speed was actually measured, not
+        //              simply set by the user.
+        //
+        //*Here, we use 0-(N-1) numbering.  So "0'th bit" refers to the least
         //significant bit.
         try {
 			if (i > (payload.length-16-4-2)) {   //see above
@@ -464,6 +473,11 @@ public class QueryReply extends Message implements Serializable{
             i++;
 
             //c) extract push and busy bits from common payload
+            //Note: technically, you should look at the second byte [sic] to
+            //see if the push flag of the first byte is set.  (Again note
+            //that this is the reverse of the other bits.)  However, older
+            //LimeWire's don't set this.  So we always assume that the push
+            //bit is defined.
             pushFlagT = (payload[i]&PUSH_MASK)==1 ? TRUE : FALSE;
             if (length > 1) {   //BearShare 2.2.0+
                 byte control=payload[i];
@@ -512,7 +526,7 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
-    /** Unit test */
+    /** Unit test.  TODO: these badly need to be factored. */
     /*
     public static void main(String args[]) {
         byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
@@ -831,6 +845,19 @@ public class QueryReply extends Message implements Serializable{
         } catch (NoSuchElementException e) {
             Assert.that(false);
         }
+        //And check raw bytes....
+        ByteArrayOutputStream out=new ByteArrayOutputStream();
+        try {
+            qr.write(out);
+        } catch (IOException e) {
+            Assert.that(false);
+        }
+        byte[] bytes=out.toByteArray();
+        //Length includes header, query hit header and footer, responses, and QHD
+        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+3));
+        Assert.that(bytes[bytes.length-16-2]==0x1d); //11101
+        Assert.that(bytes[bytes.length-16-1]==0x11); //10001
+
 
         //Create from scratch with no bits set
         responses=new Response[2];
