@@ -57,9 +57,10 @@ public interface ActivityCallback
      * and extension settings.  Note that the files in directory are not
      * necessarily yet indexed at the time of this call.
      *
-     * @requires "directory" is a directory
+     * @requires "directory" is a directory and "parent" is the parent
+	 *  directory of that directory, or null if no parent exists. 
      */
-    public void addSharedDirectory(final File dir, final File parent);
+    public void addSharedDirectory(final File directory, final File parent);
 
     /**
      * Notifies the GUI that the given file has been shared.  This method is
