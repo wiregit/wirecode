@@ -4,11 +4,11 @@ import java.io.*;
 import com.sun.java.util.collections.Comparator;
 
 /**
- * Compares to File's lexically by file name).  Useful for storing Java 1.1.8
+ * Compares two File's lexically by file name).  Useful for storing Java 1.1.8
  * Files in Java 1.2+ sorted collections classes.  This is needed because Files
- * in 1.1.8 do not implement the Comparable interface, unlike Strings in 1.2+.
+ * in 1.1.8 do not implement the Comparable interface, unlike Files in 1.2+.
  */
-public class FileComparator implements Comparator, Serializable {
+final class FileComparator implements Comparator, Serializable {
     static final long serialVersionUID = 879961226428880051L;
 
     /** Returns (((File)a).getAbsolutePath()).compareTo(
