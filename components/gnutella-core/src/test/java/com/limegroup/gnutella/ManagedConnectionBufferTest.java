@@ -29,7 +29,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     public static final int BUFFER_PORT = 6666;
     private Connection out = null;
     private Connection in = null;
-    MiniAcceptor acceptor = null;
+    private MiniAcceptor acceptor = null;
 
 	public ManagedConnectionBufferTest(String name) {
 		super(name);
@@ -44,8 +44,10 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        PrivilegedAccessor.setValue(NIODispatcher.instance(), "_testing",
-            new Boolean(true));  
+        // set flag in NIODispatcher so that it doesn't actually route 
+        // messages it's read
+        PrivilegedAccessor.setValue(NIODispatcher.instance(), "_testing", 
+            new Boolean(true));    
     }
     
 	public void setUp() throws Exception {
@@ -90,7 +92,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         if(CommonUtils.isJava14OrLater() &&
            ConnectionSettings.USE_NIO.getValue()) {
             PrivilegedAccessor.setValue(in, "_messageReader", 
-                TestNIOMessageReader.createReader());
+                TestNIOMessageReader.createReader(in));
         }
         assertNotNull("in should not be null", in);
 		assertTrue("out.write should be deflated", out.isWriteDeflated());
@@ -113,7 +115,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         if(CommonUtils.isJava14OrLater() &&
            ConnectionSettings.USE_NIO.getValue()) {
             PrivilegedAccessor.setValue(in, "_messageReader", 
-                TestNIOMessageReader.createReader());
+                TestNIOMessageReader.createReader(in));
         }
         assertNotNull("in should not be null", in);
 		assertTrue("out.write should be !deflated",! out.isWriteDeflated());
@@ -209,10 +211,10 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         elapsed=System.currentTimeMillis()-start;
         assertEquals("unexpected number of sent messages", 1, 
             out.stats().getNumMessagesSent());
-        assertEquals("unexpected number of uncompressed bytes received", 
-            pr.getTotalLength(), in.stats().getUncompressedBytesReceived() );
-        assertEquals("unexpected number of uncompressed bytes sent",
-            pr.getTotalLength(), out.stats().getUncompressedBytesSent() );
+        assertEquals( pr.getTotalLength(), 
+            in.stats().getUncompressedBytesReceived() );
+        assertEquals( pr.getTotalLength(), 
+            out.stats().getUncompressedBytesSent() );
         assertLessThan("Unreasonably long send time", 500, elapsed);
         assertEquals("hopped something other than 0", 0, pr.getHops());
         assertEquals("unexpected ttl", 3, pr.getTTL());
@@ -699,14 +701,9 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
             }
         }
         
-        if(CommonUtils.isJava14OrLater() &&
-           ConnectionSettings.USE_NIO.getValue()) {
-            return;
-        }
         int dropped=out.stats().getNumSentMessagesDropped()-initialDropped;
         assertGreaterThan("dropped msg cnt > 0", 0, dropped);
-        assertGreaterThan("drop prct > 0", 0, 
-            out.stats().getPercentSentDropped());
+        assertGreaterThan("drop prct > 0", 0, out.stats().getPercentSentDropped());
         assertLessThan("read cnt < total", total, read);
         assertEquals("drop + read == total", total, dropped+read);
     }
