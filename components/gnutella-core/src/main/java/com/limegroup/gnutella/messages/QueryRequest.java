@@ -427,7 +427,7 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
-						boolean multicast) {
+						boolean isMulticast) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
 		if((query == null || query.length() == 0) &&
@@ -444,14 +444,14 @@ public class QueryRequest extends Message implements Serializable{
             // it isn't because of ByteOrder.short2leb
             minSpeed = 0x00000080; 
             // set the firewall bit if i'm firewalled
-            if (isFirewalled)
+            if (isFirewalled && !isMulticast)
                 minSpeed |= 0x40;
             // LimeWire's ALWAYS want rich results....
             if (true)
                 minSpeed |= 0x20;
 
 			// set the multicast bit
-			if (multicast) 
+			if (isMulticast) 
 				minSpeed |= 0x10;
         }
         this.MIN_SPEED=minSpeed;
