@@ -1,19 +1,16 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.messages.*;
 
-import java.util.StringTokenizer;
+import java.util.*;
 import java.io.IOException;
 import java.net.UnknownHostException;
-;
+
 
 /**
  * a class that represents an endpoint behind one or more PushProxies.
@@ -68,30 +65,18 @@ public class PushEndpoint implements HTTPHeaderValue{
 	//because we may pass on the altloc to someone who does.
 	private static final int FEATURES_MASK=0xE0;   //1110 0000
 	
+	
+	private static final Map GUID_PROXY_MAP = new WeakHashMap();
+	
 	/**
 	 * the client guid of the endpoint
 	 */
 	private final byte [] _clientGUID;
 	
 	/**
-	 * the GUID as GUID object - cached to avoid recreating
+	 * the guid as an object to avoid recreating
 	 */
 	private final GUID _guid;
-	
-	/**
-	 * set of <tt>PushProxyInterface</tt> objects.
-	 */
-	private final Set _proxies;
-	
-	/**
-	 * how big this PE is/will be in bytes.
-	 */
-	private int _size=-1;
-	
-	/**
-	 * the hashcode of this object
-	 */
-	private int _hashcode=-1;
 	
 	/**
 	 * the string representation as sent in headers.
@@ -108,6 +93,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * this endpoint supports.  
 	 */
 	private final int _fwtVersion;
+	
+	/**
+	 * the set of proxies I have immediately after creating the endpoint
+	 * cleared after registering in the map.
+	 */
+	private Set _proxies;
 
 	/**
 	 * 
@@ -120,13 +111,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 		_fwtVersion=version;
 		
 		_clientGUID=guid;
-		_guid = new GUID(guid);
+		_guid = new GUID(_clientGUID);
+		
 		
 		if (proxies!=null)
-			_proxies = Collections.unmodifiableSet(proxies);
+		    _proxies = Collections.synchronizedSet(proxies);
 		else 
-			_proxies = Collections.EMPTY_SET;
-		
+		    _proxies = Collections.synchronizedSet(new HashSet());
+			
 		
 	}
 	
@@ -141,14 +133,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * not very useful but can happen.
 	 */
 	public PushEndpoint(byte [] guid) {
-		this(guid, DataUtils.EMPTY_SET);
+		this(guid, Collections.EMPTY_SET);
 	}
 	
 	/**
 	 * creates a PushEndpoint from a String passed in http header exchange.
 	 * 
 	 */
-	public PushEndpoint(String httpString) throws IOException{
+	private PushEndpoint(String httpString) throws IOException{
 		
 
 	    if (httpString.length() < 32 ||
@@ -164,9 +156,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
-		int hashcode = _guid.hashCode();
-		
-		HashSet proxies = new HashSet();
+		Set proxies = new HashSet();
 		
 		int fwtVersion =0;
 		
@@ -202,8 +192,6 @@ public class PushEndpoint implements HTTPHeaderValue{
 				QueryReply.PushProxyContainer ppc = 
 					new QueryReply.PushProxyContainer(host, port);
 				
-				hashcode = 37* hashcode + ppc.hashCode();
-				
 				proxies.add(ppc);
 				
 			}catch(UnknownHostException notBad) {
@@ -213,31 +201,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 			}
 		}
 		
-		if (proxies.size() == 0)
-			_proxies = Collections.EMPTY_SET;
-		else
-			_proxies = proxies;
-		
-		_hashcode=hashcode;
+		_proxies = Collections.synchronizedSet(proxies);
 		
 		_fwtVersion=fwtVersion;
 		
 		// its ok to use the _proxies and _size fields directly since altlocs created
 		// from http string do not need to change
-		_features = _proxies.size() | (_fwtVersion << 3);
-		_size = HEADER_SIZE+
-			Math.min(_proxies.size(),4) * PROXY_SIZE;
-	}
-	
-	protected final int getHashcode() {
-	    int hashcode = _guid.hashCode();
+		_features = proxies.size() | (_fwtVersion << 3);
 		
-		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
-			PushProxyInterface cur = (PushProxyInterface)iter.next();
-			hashcode = 37 *hashcode+cur.hashCode();	
-		}
-		
-		return hashcode;
 	}
 	
 	/**
@@ -319,7 +290,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 			proxies.add(new QueryReply.PushProxyContainer(tmp));
 		}
 		
-		return new PushEndpoint(guid,proxies,features,version);
+		/** this adds the read set to the existing proxies */
+		PushEndpoint pe = new PushEndpoint(guid,proxies,features,version);
+		updateProxies(pe);
+		return pe;
 	}
 	
 	public byte [] getClientGUID() {
@@ -327,7 +301,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public Set getProxies() {
-		return _proxies;
+		synchronized(PushEndpoint.class) {
+		    return (Set) GUID_PROXY_MAP.get(_clientGUID);
+		}
 	}
 	
 	/**
@@ -347,11 +323,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public int hashCode() {
-	    if (_hashcode==-1) {
-	        _hashcode = getHashcode();
-	    }
-	        
-		return _hashcode;
+	    return _clientGUID.hashCode();
 	}
 	
 	public boolean equals(Object other) {
@@ -366,24 +338,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		PushEndpoint o = (PushEndpoint)other;
 		
-		// create a local ref to the two sets in case we compare
-		// against a PushEndpointForSelf
-		Set myProxies = getProxies();
-		Set otherProxies = o.getProxies();
-		
 		//same guid
-		boolean ret = Arrays.equals(_clientGUID,o.getClientGUID());
-		
-		//same # of push proxies
-		ret = ret & myProxies.size() == otherProxies.size();
-		
-		//and the same proxies
-		HashSet temp = new HashSet(myProxies);
-		temp.retainAll(otherProxies);
-		
-		ret = ret & temp.size() ==myProxies.size();
-		
-		return ret;
+		return Arrays.equals(_clientGUID,o.getClientGUID());
 	}
 	
 	public String toString() {
@@ -431,6 +387,31 @@ public class PushEndpoint implements HTTPHeaderValue{
 	
 	public int getFeatures() {
 		return _features & FEATURES_MASK;
+	}
+	
+	public static synchronized PushEndpoint updateProxies(String httpString) 
+		throws IOException{
+	    PushEndpoint pe = new PushEndpoint(httpString);
+	    updateProxies(pe);
+	    return pe;
+	}
+	
+	private static synchronized void updateProxies(PushEndpoint pe){
+	    
+	    Set existing = (Set)GUID_PROXY_MAP.get(pe._guid);
+	    if (existing!=null)
+	        existing.add(pe._proxies);
+	    else
+	        GUID_PROXY_MAP.put(pe._guid,pe._proxies);
+	    pe._proxies=null;
+	}
+	
+	public static synchronized PushEndpoint overwriteProxies(String httpString) 
+		throws IOException{
+	    PushEndpoint pe = new PushEndpoint(httpString);
+	    GUID_PROXY_MAP.put(pe._guid,pe._proxies);
+	    pe._proxies=null;
+	    return pe;
 	}
 	
 }
