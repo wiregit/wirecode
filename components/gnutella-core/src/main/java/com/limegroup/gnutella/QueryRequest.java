@@ -20,6 +20,14 @@ public class QueryRequest extends Message implements Serializable{
     /** Any exact URNs requested to match */
     private Set queryUrns = null;
 
+	/**
+	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
+	 * because Collections.EMPTY_SET is not serializable in the collections 
+	 * 1.1 implementation.
+	 */
+	private static final Set EMPTY_SET = 
+		Collections.unmodifiableSet(new HashSet());
+
     /**
      * Builds a new query from scratch
      *
@@ -55,7 +63,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(this.queryUrns == null) {
 			// this is necessary because Collections.EMPTY_SET is not
 			// serializable in collections 1.1
-			this.queryUrns = Collections.unmodifiableSet(new HashSet()); 
+			this.queryUrns = EMPTY_SET; 
 		}
 		else {
 			this.queryUrns = Collections.unmodifiableSet(queryUrns);
@@ -63,7 +71,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(this.requestedUrnTypes == null) {
 			// this is necessary because Collections.EMPTY_SET is not
 			// serializable in collections 1.1
-			this.requestedUrnTypes = Collections.unmodifiableSet(new HashSet());
+			this.requestedUrnTypes = EMPTY_SET;
 		}
 		else {
 			this.requestedUrnTypes =
@@ -117,13 +125,13 @@ public class QueryRequest extends Message implements Serializable{
             System.out.println("QueryRequest.scanPayload() IOException");
         }
 		if(this.queryUrns == null) {
-			this.queryUrns = Collections.unmodifiableSet(new HashSet()); 
+			this.queryUrns = EMPTY_SET; 
 		}
 		else {
 			this.queryUrns = Collections.unmodifiableSet(queryUrns);
 		}
 		if(this.requestedUrnTypes == null) {
-			this.requestedUrnTypes = Collections.unmodifiableSet(new HashSet());
+			this.requestedUrnTypes = EMPTY_SET;
 		}
 		else {
 			this.requestedUrnTypes =
