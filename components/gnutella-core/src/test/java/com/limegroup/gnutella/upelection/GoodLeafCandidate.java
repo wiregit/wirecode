@@ -24,7 +24,12 @@ import com.limegroup.gnutella.messages.vendor.BestCandidatesVendorMessage;
 			_filesShared = filesShared;
 		}
 		
-		
+		/* (non-Javadoc)
+		 * @see com.limegroup.gnutella.Connection#isOpen()
+		 */
+		public boolean isOpen() {
+			return true;
+		}
 		/* (non-Javadoc)
 		 * @see com.limegroup.gnutella.Connection#getBandwidth()
 		 */
