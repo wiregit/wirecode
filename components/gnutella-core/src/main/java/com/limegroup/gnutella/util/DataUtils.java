@@ -20,6 +20,11 @@ public final class DataUtils {
      * Constant empty byte array for any class to use -- immutable.
      */
     public static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+    
+    /**
+     * Constant empty string array for any class to use -- immutable.
+     */
+    public static String[] EMPTY_STRING_ARRAY = new String[0];
 
     /**
      * Utility immutable emtpy set (not supported in 1.1.8 version of 
