@@ -467,7 +467,14 @@ public class Acceptor implements Runnable {
         		else {
         			ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         			ConnectionSettings.FORCED_PORT.setValue(mappedPort);
+        			
         			// we could get our external address from the NAT but its too slow
+        			// so we just trigger another connect back request
+        			// This should happen long before the first scheduled
+        			// IncomingValidator tasks, otherwise the resetters may overlap.
+        			resetLastConnectBackTime();
+        			(new IncomingValidator()).run();
+        			UDPService.instance().triggerConnectBack();
         		}
         	}
         	else 

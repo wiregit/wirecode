@@ -781,6 +781,14 @@ public class UDPService implements Runnable {
 		return "UDPAcceptor\r\nsocket: "+_socket;
 	}
 
+	/**
+	 * triggers a connect-back check.  
+	 */
+	void triggerConnectBack() {
+		resetLastConnectBackTime();
+		(new IncomingValidator()).run();
+	}
+	
     private static class MLImpl implements MessageListener {
         public boolean _gotIncoming = false;
 
