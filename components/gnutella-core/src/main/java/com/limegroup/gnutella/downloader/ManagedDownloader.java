@@ -871,10 +871,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Do actual download.
         synchronized (this) {
             if (state==GAVE_UP || state==ABORTED) {
-                //This stopped because all hosts were tried.  (Note that this
-                //couldn't have been user aborted.)  Therefore no threads are
-                //running in this and it may be safely resumed.
-                initialize(this.manager, this.fileManager, this.callback, false);
+                if ((state==GAVE_UP) &&
+                    (dloaderManagerThread!=null) && 
+                    (dloaderManagerThread.isAlive()))
+                    // if the dloaderManagerThread is simply waiting on reqLock,
+                    // then just release him.  calling initialize will 'do the 
+                    // right thing' but will cause a memory leak due to threads
+                    // not being cleaned up.  Alternatively, we could have
+                    // called stop() and then initialize.
+                    reqLock.release();
+                else
+                    //This stopped because all hosts were tried.  (Note that this
+                    //couldn't have been user aborted.)  Therefore no threads are
+                    //running in this and it may be safely resumed.
+                    initialize(this.manager, this.fileManager, this.callback, 
+                               false);
             } else if (state==WAITING_FOR_RETRY) {
                 //Interrupt any waits.
                 if (dloaderManagerThread!=null)
