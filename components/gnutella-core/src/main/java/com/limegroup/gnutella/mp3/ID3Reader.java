@@ -384,15 +384,15 @@ public final class ID3Reader {
             //ID3v2 frame for genre has the byte used in ID3v1 encoded within it
             //-- we need to parse that out
             int index = str.indexOf(")");
-            //TOD02: It's possible that the user entered her own genre in which
-            //case there could be spurious braces, not sure what to do about it
-            //at this point. however for now we handle the case when there is no
-            //byte in the brace or if the whole genre string is in the brace
-            //(rare -- but easy to handle)
-            if(index == -1 || index == str.length())
+            //Note: It's possible that the user entered her own genre in which
+            //case there could be spurious braces, the id3v2 braces enclose
+            //values between 0 -127 so the index of the closing brace should be
+            //either 2, 3 or 4
+            if(index == -1 || !(index==2 || index==3 || index==4) )
                 audioTags[6] = str;
             else 
                 audioTags[6] = str.substring(index+1);
+            
         }
         return fieldCount == 7;
     }

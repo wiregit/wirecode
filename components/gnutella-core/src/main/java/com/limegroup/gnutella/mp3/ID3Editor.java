@@ -371,8 +371,12 @@ public class ID3Editor {
             frame = null;
             //The ID3v2 standard requires the writing out of the byte we used in
             //id3v1, so we need to add that in
-            String v2Genre = "("+getGenreByte()+")"+genre_;
-            frame = makeFrame("TCON", v2Genre);
+            if(getGenreByte() > -1) {
+                String v2Genre = "("+getGenreByte()+")"+genre_;
+                frame = makeFrame("TCON", v2Genre);
+            } else {
+                frame = makeFrame("TCON", genre_);
+            }
             if(frame != null) 
                 updateList.add(frame);
         }
