@@ -183,9 +183,11 @@ public class StandardMessageRouter
             // decrement the number of responses we have left
             numResponses-= arraySize;
 
+			boolean busy = _uploadManager.isBusy();
+
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
-                                        speed, res, clientGUID);
+                                        speed, res, clientGUID, false, busy);
 
             // try to send the new queryReply
             try {

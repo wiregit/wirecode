@@ -32,6 +32,7 @@ public class HTTPUploader implements Uploader {
 	protected int _stateNum = CONNECTING;
 
 	private UploadState _state;
+	private UploadManager _manager;
 	
 	/****************** Constructors ***********************/
 	/**
@@ -51,10 +52,11 @@ public class HTTPUploader implements Uploader {
 	 */
 
 	// Regular upload
-	public HTTPUploader(String file, Socket s, int index) {
+	public HTTPUploader(String file, Socket s, int index, UploadManager m) {
 		_socket = s;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_filename = file;
+		_manager = m;
 		_index = index;
 		_amountRead = 0;
 		FileDesc desc = FileManager.instance().get(_index);
@@ -69,8 +71,9 @@ public class HTTPUploader implements Uploader {
 		
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
-						String guid) {
+						String guid, UploadManager m) {
 		_filename = file;
+		_manager = m;
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
@@ -235,6 +238,7 @@ public class HTTPUploader implements Uploader {
 	public int getUploadBegin() {return _uploadBegin;}
 	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
+	public UploadManager getManager() {return _manager;}
 
 	/****************** private methods *******************/
 
