@@ -1409,8 +1409,6 @@ public abstract class FileManager {
      */
     private Response[] respondToWhatIsNewRequest(QueryRequest request, 
                                                  boolean includeXML) {
-        System.out.println("responding to what's new");
-                                                    
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
