@@ -21,6 +21,10 @@ public class UpdateManagerTest extends BaseTestCase {
     private static final int DEF_SIGNATURE = 2;
 
     private static final int DEF_MESSAGE = 3;
+
+    private static final int BAD_XML = 4;
+    
+    private static final int RANDOM_BYTES = 5;
     
     private static File OLD_VERSION_FILE;
     
@@ -29,6 +33,10 @@ public class UpdateManagerTest extends BaseTestCase {
     private static File DEF_SIG_FILE;
 
     private static File DEF_MESSAGE_FILE;
+
+    private static File BAD_XML_FILE;
+
+    private static File RANDOM_BYTES_FILE;
 
     private static File updateXMLFile;
     
@@ -41,7 +49,7 @@ public class UpdateManagerTest extends BaseTestCase {
 	}
 
 	public static Test suite() {
-		return buildTestSuite(UpdateManagerTest.class);
+		return buildTestSuite(UpdateManagerTest.class);//,"testHandshaking");
 	}
 
 	public static void main(String[] args) {
@@ -50,6 +58,11 @@ public class UpdateManagerTest extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         setSettings();
+        RouterService rs = new RouterService(new ActivityCallbackStub());
+        rs.start();
+        rs.clearHostCatcher();
+        rs.connect();
+
     }
     
     private static void setSettings() throws Exception {
@@ -63,6 +76,11 @@ public class UpdateManagerTest extends BaseTestCase {
                 CommonUtils.getResourceFile(updateDir + "def_verFile.xml");
         DEF_MESSAGE_FILE = 
                 CommonUtils.getResourceFile(updateDir + "def_messageFile.xml");
+        BAD_XML_FILE = 
+                CommonUtils.getResourceFile(updateDir + "bad_xmlFile.xml");
+        RANDOM_BYTES_FILE =
+                CommonUtils.getResourceFile(updateDir + "random_bytesFile.xml");
+
         assertTrue(OLD_VERSION_FILE.exists());
         assertTrue(NEW_VERSION_FILE.exists());
         assertTrue(DEF_SIG_FILE.exists());
@@ -94,11 +112,6 @@ public class UpdateManagerTest extends BaseTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         //Set the version to a lower version
         PrivilegedAccessor.setValue(CommonUtils.class, "testVersion", "3.2.2");
-
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        rs.start();
-        rs.clearHostCatcher();
-        rs.connect();
     }
 
     public void setUp() throws Exception {
@@ -139,6 +152,20 @@ public class UpdateManagerTest extends BaseTestCase {
         assertEquals("Problem with new update file", "3.2.2", man.getVersion());
     }
 
+    public void testBadXMLFileFails() {
+        updateVersion = BAD_XML;
+        changeUpdateFile();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Problem with new update file", "3.2.2", man.getVersion());
+    }
+
+    public void testGarbageFileFails() {
+        updateVersion = RANDOM_BYTES;
+        changeUpdateFile();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Problem with new update file", "3.2.2", man.getVersion());
+    }
+    
 //      public void testHandshaking() {
 //          TestConnection conn = new TestConnection(6666,"3.2.2");        
 //      }
@@ -215,6 +242,10 @@ public class UpdateManagerTest extends BaseTestCase {
             CommonUtils.copy(DEF_MESSAGE_FILE, updateXMLFile);
         else if(updateVersion == DEF_SIGNATURE)
             CommonUtils.copy(DEF_SIG_FILE, updateXMLFile);
+        else if(updateVersion == BAD_XML)
+            CommonUtils.copy(BAD_XML_FILE, updateXMLFile);
+        else if(updateVersion == RANDOM_BYTES)
+            CommonUtils.copy(RANDOM_BYTES_FILE, updateXMLFile);
         else
             fail("updateVersion set to wrong value");
         
