@@ -1,6 +1,9 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.*; 
+import com.limegroup.gnutella.util.Random12;
+import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import com.limegroup.gnutella.util.ForgetfulHashMap;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.StringTokenizer;
@@ -16,30 +19,65 @@ import java.io.*;
  */
 public final class AlternateLocationCollection 
 	implements HTTPHeaderValue, AlternateLocationCollector {
+	    
+    private static final int MAX_LOCATIONS = 100;
+    private static final int MAX_REMOVED = 500;
+    
+    private static final long DAY = 1000 * 60 * 60 * 24;
+    private static final long FIVEHOURS = 1000 * 60 * 60 * 5;
+    private static final long ONEHOUR = 1000 * 60 * 60;
+    private static final long HALFHOUR = 1000 * 60 * 30;
 
 	/**
-	 * <tt>Set</tt> of <tt>AlternateLocation</tt> instances that map to
+	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
 	 * <tt>AlternateLocation</tt> instances.  
+	 * This uses a <tt>FixedSizeForgetfulHashMap</tt> so that the oldest
+	 * entry inserted is removed when the limit is reached.
      * LOCKING: obtain LOCATIONS monitor when iterating -- otherwise 
 	 *          it's synchronized on its own
-     * INVARIANT: _alternateLocations.get(k)==k
+     * INVARIANT: LOCATIONS.get(k)==k
+     *
+     * This is NOT SORTED because of the way we look for locations.
+     * All retrieval operations inherently are based on simply the URL,
+     * and not the timestamp.  If a SortedMap were used, we would need
+     * to iterate over every location and manually do an equals on the URLs.
+     * By using a FixedsizeForgetfulHashMap, we are relying on when we
+     * add/renew/remove items from the map to determine how they are purged.
+     * This will not be exact, but with the time-limiting code (isValidTime),
+     * entries that are added earlier will necesarily be older entries.
+     *
+     * There must be a seperate _locations variable to do equals comparisons
+     * on.  SynchronizedMap.equals(SynchronizedMap) won't work, because
+     * the synchronized map does not extend Fixedsize.., and Fixedsize..
+     * uses private variables for the equals comparison.
 	 */
-	private final SortedSet LOCATIONS = 
-		Collections.synchronizedSortedSet(new TreeSet());
+	private final Map _locations =
+        new FixedsizeForgetfulHashMap(MAX_LOCATIONS);
+    private final Map LOCATIONS = Collections.synchronizedMap(_locations);
 		
     /**
-     * <tt>Set</tt> of <tt>AlternateLocation</tt> instances that we've
+     * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that we've
      * removed from this collection.  Attempts to add to this collection
      * will first check to see if the location has been previously removed.
      * If so, we will not re-add them.
+     * LOCKING: obtain REMOVED's monitor when iterating -- otherwise
+     *          it's synchronized on its own
+     * INVARIANT: REMOVED.get(k)==k
+     *
+     * See note on sorting in the comments for LOCATIONS.
      */
-    private final Set REMOVED =
-        Collections.synchronizedSet(new HashSet());
+    private final Map REMOVED = Collections.synchronizedMap(
+        new FixedsizeForgetfulHashMap(MAX_REMOVED));
 
     /**
      * SHA1 <tt>URN</tt> for this collection.
      */
 	private final URN SHA1;
+	
+	/**
+	 * Random Number instance for use with httpStringValue()
+	 */
+	private static final Random12 random12 = new Random12();
 
     /**
      * Factory constructor for creating a new 
@@ -133,52 +171,78 @@ public final class AlternateLocationCollection
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
 		
-		// do not add this if it was previously removed.
-		if ( wasRemoved(al) ) {
-		    return;
-        }
-
-		URL url = al.getUrl();
+		// All these operations must be done atomically with
+		// respect to LOCATIONS
 		synchronized(LOCATIONS) {
-			Iterator iter = LOCATIONS.iterator();
-			while(iter.hasNext()) {
-				AlternateLocation curAl = (AlternateLocation)iter.next();
-				URL curUrl = curAl.getUrl();
-				
-				// make sure we don't store multiple alternate locations
-				// for the same url
-				if(curUrl.equals(url)) {
-					// this checks the date
-					int comp = curAl.compareTo(al);
-					if(comp  > 0) {
-						// the AlternateLocation argument is newer than the 
-						// existing one with the same URL
-						LOCATIONS.remove(curAl);
-						break;
-					} else {
-						return;
-					}
-				}
-			}
-		}
-		// note that alternate locations without a timestamp are placed
-		// at the end of the map because they have the oldest possible
-		// date according to the date class, namely:
-		// January 1, 1970, 00:00:00 GMT.
-		LOCATIONS.add(al);
-
-		// if the collection of alternate locations is getting too big,
-		// remove the last element (the least desirable alternate location)
-		// from the Map
-		if(LOCATIONS.size() > 100) {
-			LOCATIONS.remove(LOCATIONS.last());
-		}
+		    
+    		// if it's not a valid time, don't attempt to add.
+            if ( !isValidTime(al.getTime()) ) {
+                return;
+            }
+    		
+    		// do not add this if it was previously removed.
+    		if ( wasRemoved(al) ) {
+    		    return;
+            }
+            
+            // See if this location already exists in the map somewhere.
+            AlternateLocation toUpdate = (AlternateLocation)LOCATIONS.get(al);
+            // if it doesn't, or if this one is newer, put this entry in
+            // (FixedsizeForgetfulHashMap takes care of removing the oldest)
+            if( toUpdate == null ||
+              ( toUpdate != null && toUpdate.compareTo(al) > 0 ) ) {
+                LOCATIONS.put(al, al);
+                return;
+            }
+        }
 	}
 	
 	/**
-	 * Removes this <tt>AlternateLocation</tt> from the list.  This will
-	 * iterate through the list to locate an alternate location with the same
-	 * URL and remove that.
+	 * Determine if the time of the alternate location is valid.
+	 */
+	private boolean isValidTime(long alTime) {
+	    long now = System.currentTimeMillis();
+		int size = LOCATIONS.size() + REMOVED.size();
+		long diff = now - alTime;
+		
+		// always allow locations
+		if ( size <= 25 )
+		    return true;
+		
+		// only allow if location was generated under a day ago
+	    if ( size <= 75 ) {
+	        if ( diff > DAY )
+	            return false;
+	        else
+	            return true;
+	    }
+	    
+	    // only allow if location was generated under 5 hours ago
+	    if ( size <= 150 ) {
+	        if ( diff > FIVEHOURS )
+	            return false;
+	        else
+	            return true;
+	    }
+	    
+	    // only allow if location was generated under 1 hour ago
+	    if ( size <= 300 ) {
+	        if ( diff > ONEHOUR )
+	            return false;
+	        else
+	            return true;
+        }
+        
+        // only allow if location was generated under a half hour ago
+	    if ( diff > HALFHOUR )
+	        return false;
+	    else
+	        return true;
+    }
+	        
+	/**
+	 * Removes this <tt>AlternateLocation</tt> from the active locations
+	 * and adds it to the removed locations.
 	 */
 	 public boolean removeAlternateLocation(AlternateLocation al) {
 	    URN sha1 = al.getSHA1Urn();
@@ -186,42 +250,41 @@ public final class AlternateLocationCollection
 			return false; // it cannot be in this list if it has a different SHA1
 		}
 		
+		//This must be atomic with respect to LOCATIONS
 		synchronized(LOCATIONS) {
-			Iterator iter = LOCATIONS.iterator();
-			while(iter.hasNext()) {
-				AlternateLocation curAl = (AlternateLocation)iter.next();
-				if ( curAl.equalsURL(al) ) {
-				    LOCATIONS.remove(curAl);
-				    REMOVED.add(curAl);
-				    return true;
-                }
-			}
+            REMOVED.put(al, al);
+            return LOCATIONS.remove(al) != null;
 		}
-		return false;
     }
     
     /**
      * Determines if this <tt>AlternateLocation</tt> was once removed
-     * from this collection.
+     * from this collection.  If 'al' has a newer timestamp then
+     * the item in the removed list, we remove it from the removed list
+     * and return false.
      */
     public boolean wasRemoved(AlternateLocation al) {
         URN sha1 = al.getSHA1Urn();
         // it could never have been added (or removed) if the sh1 is different
         if(!sha1.equals(SHA1))
             return false;
+        
+        AlternateLocation removed = (AlternateLocation)REMOVED.get(al);
+    
+        // it was never removed.
+        if( removed == null )
+            return false;
             
-        synchronized(REMOVED) {
-            Iterator iter = REMOVED.iterator();
-            while(iter.hasNext()) {
-                AlternateLocation curAl = (AlternateLocation)iter.next();
-                if( curAl.equalsURL(al) )
-                    return true;
-            }
+        // it was removed, but this is a newer location, remove it from REMOVED
+        if(removed.compareTo(al) > 0) {
+            REMOVED.remove(al);
+            return false;
         }
-        return false;
+        
+        // it is older or the same.
+        return true;
     }
-                    
-
+    
 	/**
      * Implements the <tt>AlternateLocationCollector</tt> interface.
      * Adds the specified <tt>AlternateLocationCollection</tt> to this 
@@ -241,12 +304,12 @@ public final class AlternateLocationCollection
 		if(!alc.getSHA1Urn().equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
-		Set set = alc.LOCATIONS;
-		synchronized(set) { // we must synchronize iteration over the map
-			Iterator iter = set.iterator();
+		
+		synchronized(alc.LOCATIONS) {
+			Iterator iter = alc.LOCATIONS.keySet().iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
-				this.addAlternateLocation(curLoc);
+				addAlternateLocation(curLoc);
 			}
 		}
 	}
@@ -268,34 +331,27 @@ public final class AlternateLocationCollection
         if(alc==null) {
             throw new NullPointerException("alc is null");
         }
-		AlternateLocationCollection nalc = new AlternateLocationCollection(SHA1);
+        
+		AlternateLocationCollection nalc = 
+		    new AlternateLocationCollection(SHA1);
+        
 
-		// don't need to synchronize here because the values method returns
-		// a copy -- we're the only one that has it
-		Iterator iter = alc.values().iterator();
-		AlternateLocation value;
-		Iterator iter2;
-		AlternateLocation value2;
-		boolean  matches;
-		while (iter.hasNext()) {
-			value = (AlternateLocation)iter.next();
-            if ( wasRemoved(value) ) continue;
-
-			// see above for why synchronizing here is unnecessary
-            iter2 = values().iterator();
-			matches = false;
-
-			// Compare to all of this list for a match
-		    while (iter2.hasNext()) {
-			    value2 = (AlternateLocation) iter2.next();
-				matches = value.equalsURL(value2);
-				if (matches) 
-				    break;
-			}
-			if ( !matches ) {
-			    nalc.addAlternateLocation(value);
-			}
-		}
+        // We only want to retain values if the following conditions are true:
+        // 1) We do not have this location in our collection
+        // 2) We have not removed this location from our collection
+        // 3) This location could potentially be added to our collection
+        //    based on the timestamp.
+        synchronized(alc.LOCATIONS) {
+		    Iterator iter = alc.LOCATIONS.keySet().iterator();
+		    AlternateLocation value;
+    		while (iter.hasNext()) {
+    			value = (AlternateLocation)iter.next();
+                if (!LOCATIONS.containsKey(value)
+                  && !wasRemoved(value) 
+                  && isValidTime(value.getTime()) ) 
+    			    nalc.addAlternateLocation(value);
+            }
+        }
 		return nalc;
 	}
 
@@ -306,16 +362,13 @@ public final class AlternateLocationCollection
 	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
 	 */
 	public Collection values() {
-		List list = null;
-		synchronized(LOCATIONS) {
-			// Note that new ArrayList(List) internally iterates over List
-			// so you need to synchronize this call.
-		    list = new ArrayList(LOCATIONS);
-		}
+        List list;
+        synchronized(LOCATIONS) {
+		    list = new ArrayList(LOCATIONS.keySet());
+        }
 		Collections.shuffle(list);
 		return list;
 	}
-
 
 	/**
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
@@ -328,33 +381,38 @@ public final class AlternateLocationCollection
 	 *  to report
 	 */	
 	public String httpStringValue() {
-        // TODO: Could this be a performance issue??
-
-        List list = null;
-        synchronized(LOCATIONS) {
-			// Note that new ArrayList(List) internally iterates over List
-			// so you need to synchronize this call.
-            list = new LinkedList(LOCATIONS);
-        }
-        list = list.subList(0, list.size() >= 10 ? 10 : list.size());
-
-		// we have our own copy, so we don't need to synchronize
-		Iterator iter = list.iterator();
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
-		while(iter.hasNext()) {
-			writeBuffer.append(((HTTPHeaderValue)iter.next()).httpStringValue());
-			if(iter.hasNext()) {
-				writeBuffer.append(commaSpace);
+		boolean wrote = false;
+        synchronized(LOCATIONS) {
+	        Iterator iter = LOCATIONS.keySet().iterator();
+            int start = random12.nextInt(LOCATIONS.size());
+            start = Math.max(0, start-10); // start from 0, or 10 before this one.
+            
+            //traverse blindly through X amount of times.
+            for(int i = 0; i < start; i++)
+                iter.next();
+            
+            // then write out the next 10.
+            for(int i = 0; i < start+10 && iter.hasNext(); i++) {
+			    writeBuffer.append(((HTTPHeaderValue)iter.next()).httpStringValue());
+			    writeBuffer.append(commaSpace);
+			    wrote = true;
 			}
 		}
+		
+		// Truncate the last comma from the buffer.
+		// This is arguably quicker than rechecking hasNext on the iterator.
+		if ( wrote )
+		    writeBuffer.setLength(writeBuffer.length()-2);
+		    
 		return writeBuffer.toString();
 	}
 	
 
     // Implements AlternateLocationCollector interface -- 
     // inherit doc comment
-	public int numberOfAlternateLocations() { 
+	public int getNumberOfAlternateLocations() { 
 		return LOCATIONS.size();
     }
 
@@ -369,11 +427,11 @@ public final class AlternateLocationCollection
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
 		synchronized(LOCATIONS) {
-			Iterator iter = LOCATIONS.iterator();
+			Iterator iter = LOCATIONS.keySet().iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
 				sb.append(curLoc.toString());
-				sb.append(" ");
+				sb.append("\n");
 			}
 		}
 		return sb.toString();
@@ -385,8 +443,18 @@ public final class AlternateLocationCollection
         if(!(o instanceof AlternateLocationCollection))
             return false;
         AlternateLocationCollection alc = (AlternateLocationCollection)o;
-        return SHA1.equals(alc.SHA1) &&
-            LOCATIONS.equals(alc.LOCATIONS);
+        boolean ret = SHA1.equals(alc.SHA1);
+        if ( !ret )
+            return false;
+        // This must be synchronized on both LOCATIONS and alc.LOCATIONS
+        // because we not using the SynchronizedMap versions, and equals
+        // will inherently call methods that would have been synchronized.
+        synchronized(LOCATIONS) {
+            synchronized(alc.LOCATIONS) {
+                ret = _locations.equals(alc._locations);
+            }
+        }
+        return ret;
     }
 }
 

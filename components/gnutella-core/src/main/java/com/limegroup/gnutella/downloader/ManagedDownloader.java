@@ -1377,8 +1377,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
 			if (fileDesc != null && 
-                fileDesc.getSHA1Urn().equals(totalAlternateLocations.getSHA1Urn())) {
-				fileDesc.addAlternateLocationCollection(totalAlternateLocations);
+              fileDesc.getSHA1Urn().equals(totalAlternateLocations.getSHA1Urn())) {                
+                fileDesc.addAlternateLocationCollection(totalAlternateLocations);
 				//tell the library we have alternate locations
 				callback.handleSharedFileUpdate(completeFile);
 				HeadRequester requester = 
@@ -1388,7 +1388,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 				headThread.setDaemon(true);
 				headThread.start();
 			}
-		} 
+		}
+		
         return COMPLETE;
     }   
 
@@ -1925,7 +1926,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	public int getNumberOfAlternateLocations() {
 	    if ( totalAlternateLocations == null ) return 0;
-	    return totalAlternateLocations.numberOfAlternateLocations();
+	    return totalAlternateLocations.getNumberOfAlternateLocations();
     }
 
     /**

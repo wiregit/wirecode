@@ -158,5 +158,22 @@ public class FixedsizeForgetfulHashMapTest extends BaseTestCase {
         assertTrue(b1==a1 || b1==a4);  //NOT a2, a3
         assertNotSame(b1, b2);
         assertTrue(! iter.hasNext());
+        
+        rt = new FixedsizeForgetfulHashMap(4);
+        rt.put(g1, c1);
+        rt.put(g2, c2);
+        assertEquals("should be equals", rt, rt);
+        assertEquals("hashcodes should be equal", rt.hashCode(), rt.hashCode());
+        FixedsizeForgetfulHashMap rt2 = new FixedsizeForgetfulHashMap(3);
+        rt2.put(g1, c1);
+        assertNotEquals("should not be equal", rt, rt2);
+        assertNotEquals("hashes shouldn't be equal", rt.hashCode(), rt2.hashCode());
+        rt2.put(g2, c2);
+        assertEquals("should be equals", rt, rt2);
+        assertEquals("hashes should be equal", rt.hashCode(), rt2.hashCode());
+        
+        rt2.remove(g1);
+        assertNotEquals("should not be equal", rt, rt2);
+        assertNotEquals("hashes shouldn't be equal", rt.hashCode(), rt2.hashCode());
     }
 }

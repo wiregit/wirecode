@@ -154,9 +154,12 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		AlternateLocationCollection alc = 
 			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 		Iterator iter = _alternateLocations.iterator();
+		int i = 0;
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
 			alc.addAlternateLocation(al);
+			assertEquals("was not able to add as new",
+			    ++i, alc.getNumberOfAlternateLocations() );
 		}
 	}	
 
@@ -176,6 +179,9 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		AlternateLocationCollection alc2 = 
 			AlternateLocationCollection.createCollection(_alCollection.getSHA1Urn());
 		alc2.addAlternateLocationCollection(alc1);
+		assertEquals("was not able to add all from the collection.",
+		    alc1.getNumberOfAlternateLocations(),
+		    alc2.getNumberOfAlternateLocations());
 	}	
 
 	/**
@@ -224,15 +230,15 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 	 */
 	public void testCanRemoveLocation() {
 	    Iterator iter = _alternateLocations.iterator();
-	    int total = _alCollection.numberOfAlternateLocations();
+	    int total = _alCollection.getNumberOfAlternateLocations();
 	    int i = 0;
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
                 i++;
-			    assertTrue("unable to remove al: " + al,
+			    assertTrue("unable to remove al: " + al + " from collection: " + _alCollection,
 			        _alCollection.removeAlternateLocation(al));
                 assertEquals("size is off", 
-                    total-i, _alCollection.numberOfAlternateLocations() );
+                    total-i, _alCollection.getNumberOfAlternateLocations() );
 		}
     }
     
@@ -241,7 +247,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
      */
     public void testCantAddAfterRemove() {
 	    Iterator iter = _alternateLocations.iterator();
-	    int total = _alCollection.numberOfAlternateLocations();
+	    int total = _alCollection.getNumberOfAlternateLocations();
 	    int i = 0;
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
@@ -249,10 +255,10 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 			    assertTrue("unable to remove al: " + al,
 			        _alCollection.removeAlternateLocation(al));
                 assertEquals("size is off", 
-                    total-i, _alCollection.numberOfAlternateLocations() );
+                    total-i, _alCollection.getNumberOfAlternateLocations() );
                 _alCollection.addAlternateLocation(al);
                 assertEquals("size is off", 
-                    total-i, _alCollection.numberOfAlternateLocations() );                
+                    total-i, _alCollection.getNumberOfAlternateLocations() );                
 		}
     }        
 }

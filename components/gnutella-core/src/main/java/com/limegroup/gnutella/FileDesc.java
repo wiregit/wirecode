@@ -333,8 +333,8 @@ public class FileDesc implements AlternateLocationCollector {
 	}
 	
 	// implements AlternateLocationCollector interface
-	public int numberOfAlternateLocations() {
-	    return ALT_LOCS.numberOfAlternateLocations();
+	public int getNumberOfAlternateLocations() {
+	    return ALT_LOCS.getNumberOfAlternateLocations();
 	}
 	
     

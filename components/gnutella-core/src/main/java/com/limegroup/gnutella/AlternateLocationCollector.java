@@ -34,7 +34,7 @@ public interface AlternateLocationCollector {
 	 * Number of alternate locations this collector is holding
 	 *
 	 */
-	public int numberOfAlternateLocations();
+	public int getNumberOfAlternateLocations();
 
 	/**
 	 * Accessor for the SHA1 <tt>URN</tt> instance for this collection.

@@ -242,6 +242,17 @@ public final class AlternateLocation
 	public URN getSHA1Urn() {
 		return SHA1_URN;
 	}
+	
+
+	/**
+	 * Accessor for the datetime of this location
+	 *
+	 * @return the time (in millisecond since epoch) that this was stamped
+	 */
+	public long getTime() {
+	    return TIME;
+	}
+	
 
 	/**
 	 * Converts the specified <tt>Date</tt> instance to a <tt>String</tt> 
@@ -618,12 +629,13 @@ public final class AlternateLocation
 	 * @see java.lang.Comparable
 	 */
 	public int compareTo(Object obj) {
-		if(equals(obj)) return 0;
 		if(obj == this) return 0;
-		if(!(obj instanceof AlternateLocation)) return -1;				
+		//if(equals(obj)) return 0;		
+		if(!(obj instanceof AlternateLocation)) return -1;
+		
 		AlternateLocation al = (AlternateLocation)obj;		
 		if(URL.equals(al.URL)) {
-			return (this.TIME<al.TIME ? 1 : (this.TIME==al.TIME ? 0 : -1));
+		    return this.TIME == al.TIME ? 0 : this.TIME <= al.TIME ? 1 : -1;
 		} 
 		if(isTimestamped() && al.isTimestamped()) {
 			if(this.TIME == al.TIME) {
@@ -646,34 +658,23 @@ public final class AlternateLocation
 	/**
 	 * Overrides the equals method to accurately compare 
 	 * <tt>AlternateLocation</tt> instances.  <tt>AlternateLocation</tt>s 
-	 * are equal if their <tt>URL</tt>s and timestamps are equal.
+	 * are equal if their <tt>URL</tt>s are equal.
 	 *
 	 * @param obj the <tt>Object</tt> instance to compare to
-	 * @return <tt>true</tt> if the <tt>URL</tt> and timestamp of this
-	 *  <tt>AlternateLocation</tt> are equal to the <tt>URL</tt> and 
-	 *  timestamp of the <tt>AlternateLocation</tt> location argument,
+	 * @return <tt>true</tt> if the <tt>URL</tt> of this
+	 *  <tt>AlternateLocation</tt> is equal to the <tt>URL</tt>
+	 *  of the <tt>AlternateLocation</tt> location argument,
 	 *  and otherwise returns <tt>false</tt>
 	 */
 	public boolean equals(Object obj) {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
-		AlternateLocation al = (AlternateLocation)obj;		
-		return ((OUTPUT_DATE_TIME == null ? al.OUTPUT_DATE_TIME == null :
-				 OUTPUT_DATE_TIME.equals(al.OUTPUT_DATE_TIME)) && 
-				(URL == null ? al.URL == null :
-				 URL.equals(al.URL)));
-	}
-
-	/**
-	 * Allow the comparison of just the URL component.
-     *
-	 * @param al the <tt>AlternateLocation</tt> instance to compare to
-	 * @return <tt>true</tt> if the <tt>URL</tt> matches
-	 *  and otherwise returns <tt>false</tt>
-	 */
-	public boolean equalsURL(AlternateLocation al) {
-		return (URL == null ? al.URL == null :
-				URL.equals(al.URL));
+		AlternateLocation al = (AlternateLocation)obj;
+		return URL == null ? al.URL == null : URL.equals(al.URL);
+//		return ((OUTPUT_DATE_TIME == null ? al.OUTPUT_DATE_TIME == null :
+//				 OUTPUT_DATE_TIME.equals(al.OUTPUT_DATE_TIME)) && 
+//				(URL == null ? al.URL == null :
+//				 URL.equals(al.URL)));
 	}
 
 	/**
@@ -705,10 +706,11 @@ public final class AlternateLocation
 	 */
 	public int hashCode() {
 		if(hashCode == 0) {
-			int result = 17;
-			result = (37*result) + (int)(TIME^(TIME >>> 32));
-			result = (37*result) + this.URL.hashCode();
-			hashCode = result;
+		    hashCode = 37 * this.URL.hashCode();
+//			int result = 17;
+//          result = (37*result) + (int)(TIME^(TIME >>> 32));
+//			result = (37*result) + this.URL.hashCode();
+//			hashCode = result;
 		}
 		return hashCode;
 	}

@@ -130,6 +130,26 @@ public class FixedsizeForgetfulHashMap implements Map
         public Object getValue() {
             return value;
         }
+        
+        /**
+         * Returns true if the value of these elements are equal.
+         * Needed for map.equals(other.map) to work.
+         */
+        public boolean equals(Object o) {
+            if ( o == this ) return true;
+            if ( !(o instanceof ValueElement) )
+                return false;
+            ValueElement other = (ValueElement)o;
+            return value.equals(other.value);
+        }
+        
+        /**
+         * Returns the hashcode of the value element.
+         * Needed for map.hashCode() to work.
+         */
+        public int hashCode() {
+            return value.hashCode();
+        }
     }
 
     /**
@@ -392,10 +412,15 @@ public class FixedsizeForgetfulHashMap implements Map
     }
 
     public boolean equals(Object o) {
-        if (o instanceof FixedsizeForgetfulHashMap)
+        if ( o == this ) return true;
+        if(!(o instanceof FixedsizeForgetfulHashMap))
             return false;
         FixedsizeForgetfulHashMap other=(FixedsizeForgetfulHashMap)o;
         return map.equals(other.map);
+    }
+    
+    public int hashCode() {
+        return map.hashCode();
     }
             
     public boolean isEmpty() {
