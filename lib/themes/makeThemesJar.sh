@@ -18,5 +18,5 @@ done
 rm -f themes.jar
 jar -0Mcf themes.jar *.lwtp
 rm -f *.lwtp
-mv themes.jar ../jars/themes.jar
+mv themes.jar ../jars/other/themes.jar
 
