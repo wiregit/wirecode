@@ -1103,11 +1103,11 @@ public class UploadTest extends BaseTestCase {
     public void testFeatureHeader() throws Exception {
         ChatSettings.CHAT_ENABLED.setValue(true);
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
-                   "X-Features: browse/1.0, chat/0.1"));
+                   "X-Features: fwalt/0.1, browse/1.0, chat/0.1"));
                    
         ChatSettings.CHAT_ENABLED.setValue(false);
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
-                   "X-Features: browse/1.0"));
+                   "X-Features: fwalt/0.1, browse/1.0"));
     }
     
     //////////  test thex works /////////////
@@ -1493,7 +1493,7 @@ public class UploadTest extends BaseTestCase {
                 break;
             if (requiredHeader != null) {
                 Header found = new Header(line);
-                if( found.equals(expectedHeader) ) {
+                if( found.equals(expectedHeader)) {
                     foundHeader = true;
                 }
             }
