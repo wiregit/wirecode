@@ -46,7 +46,7 @@ public final class SearchResultHandler {
     /**
      * The "delay" between responses to wait to send a QueryStatusResponse.
      */
-    public static final int REPORT_INTERVAL = 5;
+    public static final int REPORT_INTERVAL = 15;
 
     /** 
 	 * The queue of buffered query replies.  Used to decouple backend,
