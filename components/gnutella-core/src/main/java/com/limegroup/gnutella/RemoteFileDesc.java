@@ -103,7 +103,7 @@ public class RemoteFileDesc implements Serializable {
      * but with a different remote host.
      *
      * It is okay to use the same internal structures
-     * for URNs and Proxies because they are immutable.
+     * for URNs they are immutable.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
         this( ep.getHostname(),
@@ -122,7 +122,7 @@ public class RemoteFileDesc implements Serializable {
               false,
               AlternateLocation.ALT_VENDOR,
               System.currentTimeMillis(),
-              rfd.getPushProxies() );
+              DataUtils.EMPTY_SET );
     }
 
 	/** 
