@@ -32,8 +32,10 @@ public final class StalledUploadWatchdog implements Runnable {
     /**
      * The amount of time to wait before we close this connection
      * if nothing has been written to the socket.
+     *
+     * Non final for testing.
      */
-    public static final long DELAY_TIME = 1000 * 60 * 2; //2 minutes    
+    public static long DELAY_TIME = 1000 * 60 * 2; //2 minutes    
     
     private OutputStream ostream;
     private boolean isScheduled;

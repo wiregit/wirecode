@@ -51,6 +51,12 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         rfd5 = new RemoteFileDesc("1.1.1.5",0,0,"abc.txt",1000000,
                                   new byte[16], 56, false, 3,
                                   false, null, null);
+                                  
+        // we don't want the tests confused by the stalled
+        // watchdog killing stuff.
+        // note that the testStalledUploads sets this to the
+        // correct time.
+        StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
     }
 
     public UploaderTest(String name) {
@@ -86,6 +92,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      *   the test is slightly more complicated than it needs to be.)
      */
     public void testStalledUploader() throws Exception {
+        StalledUploadWatchdog.DELAY_TIME = 1000 * 60 * 2; //2 minutes            
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
@@ -147,7 +154,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - when an uploade with slot terminates first uploader gets slot
      * - when an uploader with slot terminates, everyone in queue advances.
      */
-    public void testNormalQueueing() throws Exception {        
+    public void testNormalQueueing() throws Exception {
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
@@ -234,10 +241,10 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
                 + e.getQueuePosition(), e);
         }
         
-        assertEquals("should have 2 active uploads",
-            1, upManager.uploadsInProgress());
         assertEquals("should have 1 queued upload",
             1, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());            
         
         //Test that uploads in queue advance. d4 should have 0th position
         Thread.sleep((UploadManager.MIN_POLL_TIME+
@@ -247,6 +254,11 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch(QueuedException qx) {
             assertEquals(1,qx.getQueuePosition());
         }
+        
+        assertEquals("should have 1 queued upload",
+            1, upManager.getNumQueuedUploads());
+        assertEquals("should have 2 active uploads",
+            2, upManager.uploadsInProgress());
         //System.out.println("Passed");
     }
         
