@@ -247,8 +247,8 @@ public class HTTPUploader implements Uploader {
 
 		if(_alternateLocationCollection != null) {
 			// making this call now is necessary to avoid writing the 
-			// same alternate locations back to the requester as they sent 
-			// in their original headers
+			// same alternate locations back to the requester as were 
+			// sent in the request headers
 			_fileDesc.addAlternateLocationCollection(_alternateLocationCollection);
 		}
 	}
@@ -390,9 +390,15 @@ public class HTTPUploader implements Uploader {
 	/****************** private methods *******************/
 
 
+	/**
+	 * Reads the HTTP header sent by the requesting client -- note that the
+	 * 'GET' portion of the request header has already been read.
+	 *
+	 * @throws <tt>IOException</tt> if there are any io issues while reading
+	 *  the header
+	 */
 	private void readHeader() throws IOException {
-
-        String str = " ";
+        String str = "";
         _uploadBegin = 0;
         _uploadEnd = 0;
 		String userAgent;
@@ -595,8 +601,8 @@ public class HTTPUploader implements Uploader {
 			offset += 2;
 		}
 		else {
-			// otherwise, the request is of an unknown form, so just
-			// return without setting _requestedURN
+			// otherwise, the request is of an unknown form, so just 
+			// return null
 			return null;
 		}
 		
