@@ -100,15 +100,15 @@ public class UDPBufferedInputStream extends InputStream {
                     if ( len <= 0 ) 
                         return origLen;
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
-
-                    // Wait for some data to become available
-                    waitOnData();
-
                 } else if ( origLen != len ){
 
                     // Return whatever was available
                     return(origLen - len);
+
+                } else if ( _activeChunk == null && _processor.isConnected() ) {
+
+                    // Wait for some data to become available
+                    waitOnData();
 
                 } else {
 
@@ -146,15 +146,15 @@ public class UDPBufferedInputStream extends InputStream {
                     if ( len <= 0 ) 
                         return origLen;
 
-                } else if ( _activeChunk == null && _processor.isConnected() ) {
-
-                    // Wait for some data to become available
-                    waitOnData();
-
                 } else if ( origLen != len ){
 
                     // Return whatever was available
                     return(origLen - len);
+
+                } else if ( _activeChunk == null && _processor.isConnected() ) {
+
+                    // Wait for some data to become available
+                    waitOnData();
 
                 } else {
 
