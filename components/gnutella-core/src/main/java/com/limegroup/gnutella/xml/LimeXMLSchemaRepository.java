@@ -54,7 +54,7 @@ public class LimeXMLSchemaRepository extends java.lang.Object
                 try
                 {
                     limeXmlSchema = new LimeXMLSchema(schemaFiles[i]);
-                    _uriSchemaMap.put(limeXmlSchema.getSchemaIdentifier(),limeXmlSchema);
+                    _uriSchemaMap.put(limeXmlSchema.getSchemaURI(),limeXmlSchema);
                 }
                 catch(IOException ioe)
                 {
@@ -86,12 +86,7 @@ public class LimeXMLSchemaRepository extends java.lang.Object
     {
         synchronized(_uriSchemaMap)
         {
-            //TODO anu remove
-            return new LimeXMLSchema();
-            //end remove
-            
-            //TODO anu uncomment 
-//            return (LimeXMLSchema)_uriSchemaMap.get(uri);
+            return (LimeXMLSchema)_uriSchemaMap.get(uri);
         }
     }
     
@@ -101,16 +96,11 @@ public class LimeXMLSchemaRepository extends java.lang.Object
      */ 
     public String[] getAvailableSchemaURIs()
     {
-        
-        //TODO anu remove
-        String[] result = {"LimewireBookSchema", "LimewireRealEstateSchema"};
-        return result;
-        //end remove
-//        synchronized(_uriSchemaMap)
-//        {
-//            Set keySet = _uriSchemaMap.keySet();
-//            return (String[])keySet.toArray(new String[0]);
-//        }
+        synchronized(_uriSchemaMap)
+        {
+            Set keySet = _uriSchemaMap.keySet();
+            return (String[])keySet.toArray(new String[0]);
+        }
     }
     
 }

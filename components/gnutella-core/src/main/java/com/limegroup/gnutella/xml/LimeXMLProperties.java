@@ -146,7 +146,19 @@ public class LimeXMLProperties
      */
     public File[] getAllXMLSchemaFiles()
     {
-        return (new File(getXMLSchemaDir())).listFiles();
+        return (new File(getXMLSchemaDir())).listFiles(
+            new FilenameFilter()
+            {
+                //the files to be accepted to be returned
+                public boolean accept(File dir, String name)
+                {
+                    if(name.endsWith(".xsd"))
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            });
     }
     
     /**

@@ -28,10 +28,15 @@ import org.xml.sax.EntityResolver;
 public class LimeXMLSchema 
 {
     /**
-     * List<String> of elements (in canonicalized form to preserve the structural
+     * List<String> of fields (in canonicalized form to preserve the structural
      * information)
      */
-    List /* of String */ canonicalizedElements = new LinkedList();
+    private List /* of String */ _canonicalizedFields = new LinkedList();
+    
+    /**
+     * The URI for this schema
+     */
+    private String _schemaURI = null;
 
     /** 
      * Creates new LimeXMLSchema 
@@ -42,12 +47,6 @@ public class LimeXMLSchema
     public LimeXMLSchema(File schemaFile) throws IOException
     {
         this(LimeXMLUtils.getInputSource(schemaFile));
-    }
-    
-    //TODO anu
-    //this constructor may not be needed
-    public LimeXMLSchema()
-    {
     }
     
     /** 
@@ -104,62 +103,82 @@ public class LimeXMLSchema
         }
         
         //print some of the elements
-        Element root = document.getDocumentElement();
-        printNode(root);
+//        Element root = document.getDocumentElement();
+//        printNode(root);
         
         //get the fields
-        LimeXMLSchemaFieldExtractor.getFields(document);
+        _canonicalizedFields = LimeXMLSchemaFieldExtractor.getFields(document);
         
-//        String rootName = root.getTagName();
-//        System.out.println("root = " + rootName);
-//        NodeList children = root.getChildNodes();
-//        int numChildren = children.getLength();
-//        System.out.println("no of children "+numChildren);
-//        for(int i=0;i<numChildren; i++)
-//        {
-//            Node n = children.item(i);
-//            String childName = n.getNodeName();
-//            System.out.println("child Name is "+childName);
-//        }
+        //also get the schema URI
+        _schemaURI = retrieveSchemaURI(document);
         
-        
-        
-        //TODO anu
-            
+        //return
+        return;
     }
     
+    /**
+     * Returns the URI of the schema represented in the passed document
+     * @param document The document representing the XML Schema whose URI is to
+     * be retrieved
+     * @return The schema URI
+     * @requires The document be a parsed form of valid xml schema
+     */
+    private static String retrieveSchemaURI(Document document)
+    {
+        //get the root element which should be "xsd:schema" element (provided
+        //document represents valid schema)
+        Element root = document.getDocumentElement();
+        //get attributes
+        NamedNodeMap  nnm = root.getAttributes();
+        //get the targetNameSpaceAttribute
+        Node targetNameSpaceAttribute = nnm.getNamedItem("targetNameSpace");
+
+        if(targetNameSpaceAttribute != null)
+        {
+            //return the specified target name space as schema URI
+            return targetNameSpaceAttribute.getNodeValue();
+        }
+        else
+        {
+            //return an empty string otherwise
+            return "";
+        }
+    }
+    
+    /**
+     * Prints the node, as well as its children (by invoking the method
+     * recursively on the children)
+     * @param n The node which has to be printed (along with children)
+     */
     private void printNode(Node n)
     {
-        System.out.print("node = " + n.getNodeName() + " ");
-        
         //get attributes
-        NamedNodeMap  nnm = n.getAttributes();
-        Node name = nnm.getNamedItem("name");
-        if(name != null)
-            System.out.print(name + "" );
-        System.out.println("");
-        NodeList children = n.getChildNodes();
-        int numChildren = children.getLength();
-        for(int i=0;i<numChildren; i++)
+        if(n.getNodeType() == Node.ELEMENT_NODE)
         {
-            Node child = children.item(i);
-            printNode(child);
-	    }
+            System.out.print("node = " + n.getNodeName() + " ");
+            NamedNodeMap  nnm = n.getAttributes();
+            Node name = nnm.getNamedItem("name");
+            if(name != null)
+                System.out.print(name + "" );
+            System.out.println("");
+            NodeList children = n.getChildNodes();
+            int numChildren = children.getLength();
+            for(int i=0;i<numChildren; i++)
+            {
+                Node child = children.item(i);
+                printNode(child);
+            }
+        }
+        
     }
     
     /**
      * Returns the unique identifier which identifies this particular schema
      * @return the unique identifier which identifies this particular schema
      */
-    public String getSchemaIdentifier()
+    public String getSchemaURI()
     {
-        //TODO anu remove
-        return "schemas/gen_books.xsd";
-        //end remove
-        
-        //TODO
-        //return null;
-        
+        return _schemaURI;
     }
     
     /**
@@ -184,20 +203,7 @@ public class LimeXMLSchema
      */
     public String[] getCanonicalizedFieldNames()
     {
-        //TODO anu remove
-        String[] result =
-            {
-                "gen_book_info__Title__",
-                "gen_book_info__Author__",
-                "gen_book_info__NumChapters__",
-                "gen_book_info__Genre__"
-            };
-            return result;
-        
-        //end remove
-        
-        //TODO
-        //return null;
+        return (String[])_canonicalizedFields.toArray(new String[0]);
     }
     
     public static void Test()

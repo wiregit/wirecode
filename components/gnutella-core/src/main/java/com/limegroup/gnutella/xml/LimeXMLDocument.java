@@ -101,7 +101,7 @@ public class LimeXMLDocument{
         if(schemaLocation == null)
             throw(new SchemaNotFoundException());
         System.out.println("Sumeet: final schema location "+ schemaLocation);
-        LimeXMLSchema schema = repositoty.getSchema(schemaLocation);
+        //LimeXMLSchema schema = repositoty.getSchema(schemaLocation);
         
 
     }
