@@ -48,6 +48,7 @@ public class SimppManager {
             _latestVersion = 0;
             verified = verifier.verifySource();
             if(!verified) {
+                problem = true;
                 return;
             }
             SimppParser parser = null;
@@ -61,6 +62,7 @@ public class SimppManager {
                 return;
             }
             if(parser.getVersion() <= MIN_VERSION) {
+                problem = true; //set the values to default
                 return;
             }
             this._latestVersion = parser.getVersion();

@@ -48,8 +48,8 @@ public class SimppSettingsManager {
     private SimppSettingsManager() {
         _usingUserPrefs = true; //we are using defualt settings by default
         String simppSettings = SimppManager.instance().getPropsString();
-        if(simppSettings == null || simppSettings.equals(""))
-            throw new IllegalArgumentException("SimppManager not ready");
+        if(simppSettings == null)
+            throw new IllegalArgumentException("SimppManager unexpected state");
         _userPrefs = new HashMap();
         _remainderSimppSettings = new HashMap();
         updateSimppSettings(simppSettings);
