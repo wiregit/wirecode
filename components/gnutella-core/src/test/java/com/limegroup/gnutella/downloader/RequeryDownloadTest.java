@@ -254,8 +254,8 @@ public class RequeryDownloadTest
             responseURNs = new HashSet(1);
             responseURNs.add(responseURN);
         }
-        Response response = newResponse(0l, TestFile.length(), responseName,
-                                         null, responseURNs, null, null, null); 
+        Response response = newResponse(0l, TestFile.length(),
+                                        responseName, responseURNs);
         byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
         QueryReply reply = new QueryReply(guidToUse, 
             (byte)6, 6666, ip, 0l, 
@@ -560,16 +560,16 @@ public class RequeryDownloadTest
     /**
      * Utility method to create a new response.
      */
-    private Response newResponse(long index, long size, String name,
-					 String metadata, Set urns, LimeXMLDocument doc, 
-					 Set endpoints, byte[] extensions) throws Exception {
+    private Response newResponse(long index, long size, String name, Set urns) 
+					 throws Exception {
+        Class gc = PrivilegedAccessor.getClass(Response.class, "GGEPContainer");
         return (Response)PrivilegedAccessor.invokeConstructor(
             Response.class, new Object[] {
                 new Long(index), new Long(size), name,
-                metadata, urns, doc, endpoints, extensions },
+                null, urns, null, null, null },
             new Class[] {
                 Long.TYPE, Long.TYPE, String.class,
                 String.class, Set.class, LimeXMLDocument.class,
-                Set.class, byte[].class } );
+                gc, byte[].class } );
     }
 }

@@ -368,7 +368,7 @@ public class PrivilegedAccessor {
             if ( cs[i].getParameterTypes().length == 0 && classTypes == null )
                 return cs[i];
         }
-        throw new NoSuchMethodException();
+        throw new NoSuchMethodException("invalid constructor for class: " + clazz);
     }
     
     /**
