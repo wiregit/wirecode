@@ -48,9 +48,6 @@ public class ConnectionManagerTest extends TestCase {
         String serversRunning = System.getProperty("servers"); 
         int maxPortRunning = 0;
         if(serversRunning != null) {
-            if(serversRunning.equals("all")) {
-                maxPortRunning = Integer.MAX_VALUE;
-            }
             try {
                 maxPortRunning = Integer.parseInt(serversRunning);
             } catch(NumberFormatException e) {
