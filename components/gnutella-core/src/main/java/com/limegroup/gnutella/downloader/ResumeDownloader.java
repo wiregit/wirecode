@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * A ManagedDownloader that tries to resume to a specific incomplete file.  The
@@ -139,19 +140,15 @@ public class ResumeDownloader extends ManagedDownloader
         //ultrapeers may insist that all keywords are in the QRP tables.
         //we have to substring the filename because we don't accept queries
         //that have big search strings
+        //searches with strings greater than 30 characters are dropped.
+        String truncFileName = StringUtils.truncate(getFileName(), 30);
         if (_hash != null)
             // TODO: we should be sending the URN with the query, but
             // we don't because URN queries are summarily dropped, though
             // this may change
-            return QueryRequest.createQuery(truncate(getFileName(), 30));
+            return QueryRequest.createQuery(truncFileName);
         else
-            return QueryRequest.createQuery(truncate(getFileName(), 30));
-    }
-
-    
-    private String truncate(String string, int maxLen) {
-        int max = string.length() > maxLen ? maxLen : string.length();
-        return string.substring(0, max);
+            return QueryRequest.createQuery(truncFileName);
     }
 
 }

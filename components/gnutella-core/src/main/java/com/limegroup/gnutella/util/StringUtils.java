@@ -364,5 +364,11 @@ public class StringUtils {
 		return buf.toString();
     }
 
+    
+    public static String truncate(final String string, final int maxLen) {
+        final int max = string.length() > maxLen ? maxLen : string.length();
+        return string.substring(0, max);
+    }
+
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
 }
