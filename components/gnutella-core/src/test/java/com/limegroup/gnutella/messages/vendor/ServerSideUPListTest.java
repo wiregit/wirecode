@@ -69,6 +69,7 @@ public class ServerSideUPListTest extends BaseTestCase {
     private static final UDPCrawlerPing msgTimes = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)1);
     private static final UDPCrawlerPing msgLocale = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)2);
     private static final UDPCrawlerPing msgBadMask = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0xFF);
+    private static final UDPCrawlerPing msgNewOnly = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x4);
 	
     
     /**
@@ -407,6 +408,58 @@ public class ServerSideUPListTest extends BaseTestCase {
  		ExtendedEndpoint result = (ExtendedEndpoint)reply.getUltrapeers().get(0);
  		assertEquals(ApplicationSettings.LANGUAGE.getValue(),
  				result.getClientLocale());
+ 		sleep();
+ 	}
+ 	
+ 	/**
+ 	 * tests a ping message requesting only results that support
+ 	 * udp crawling themselves.
+ 	 */
+ 	public void testNewOnly() throws Exception {
+ 		PrivilegedAccessor.setValue(Constants.class,"MINUTE",new Long(1));
+ 		
+
+ 		//make sure some of our connections support crawling.
+ 		
+ 		MessagesSupportedVendorMessage msvm = (MessagesSupportedVendorMessage)
+			PrivilegedAccessor.invokeConstructor(MessagesSupportedVendorMessage.class, new Object[0]);
+ 		
+ 		assertGreaterThan(0,msvm.supportsUDPCrawling());
+ 		
+ 		List upCons = RouterService.getConnectionManager().getInitializedConnections();
+ 		
+ 		Connection notSupporting = (Connection) upCons.get(0);
+ 		Connection supporting = (Connection) upCons.get(1);
+ 		
+ 		assertLessThanOrEquals(0,supporting.remoteHostSupportsUDPCrawling());
+ 		assertLessThanOrEquals(1,supporting.remoteHostSupportsUDPCrawling());
+ 		
+ 		PrivilegedAccessor.setValue(supporting,"_messagesSupported",msvm);
+ 		
+ 		assertLessThanOrEquals(0,notSupporting.remoteHostSupportsUDPCrawling());
+ 		assertGreaterThanOrEquals(1,supporting.remoteHostSupportsUDPCrawling());
+ 		
+ 		
+ 		
+ 		//so now, one less UP should be in the result.
+ 		
+ 		UDPCrawlerPong pong = tryMessage(msgNewOnly);
+ 		
+ 		assertEquals(upCons.size()-1, pong.getUltrapeers().size());
+ 		
+ 		
+ 		sleep();
+ 		
+ 		//now, make the other UP support that message as well
+ 		
+ 		PrivilegedAccessor.setValue(notSupporting,"_messagesSupported",msvm);
+ 		
+ 		assertGreaterThan(0,notSupporting.remoteHostSupportsUDPCrawling());
+ 		assertGreaterThan(0,supporting.remoteHostSupportsUDPCrawling());
+ 		
+ 		pong = tryMessage(msgNewOnly);
+ 		
+ 		assertEquals(upCons.size(),pong.getUltrapeers().size());
  	}
  	
  	private UDPCrawlerPong tryMessage(UDPCrawlerPing which) throws Exception {
