@@ -377,9 +377,9 @@ public class IncompleteFileManager implements Serializable {
                 Iterator iter = ((List)o).iterator();
                 VerifyingFile vf;
                 try {
-                    vf = new VerifyingFile(true, (int)getCompletedSize(f));
+                    vf = new VerifyingFile((int)getCompletedSize(f));
                 } catch(IllegalArgumentException iae) {
-                    vf = new VerifyingFile(true);
+                    vf = new VerifyingFile();
                 }
                 while(iter.hasNext()) {
                     Interval interval = (Interval)iter.next();

@@ -149,6 +149,19 @@ public class IntervalSet {
         return ret;
     }
 
+	/**
+	 * @return whether this interval set contains fully the given interval
+	 */
+	public boolean contains(Interval i) {
+		for (Iterator iter = getAllIntervals();iter.hasNext();) {
+			Interval ours = (Interval)iter.next();
+			if (ours.low <= i.low && ours.high >= i.high)
+				return true;
+		}
+		
+		return false;
+	}
+	
     /**
      *@return a List of intervals that overlap checkInterval. For example
      * if Intervals contains{[1-4],[6-10]} and checkInterval is [3-8],
@@ -159,7 +172,7 @@ public class IntervalSet {
         List overlapBlocks = new ArrayList(); //initialize for this write
         long high =checkInterval.high;
         long low = checkInterval.low;
-        if (low >= high)
+        if (low > high)
             return overlapBlocks;
         
         //TODO2:For now we iterate over each of the inervals we have, 

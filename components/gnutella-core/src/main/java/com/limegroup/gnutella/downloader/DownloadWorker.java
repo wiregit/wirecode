@@ -76,9 +76,6 @@ public class DownloadWorker implements Runnable {
 		DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue() < 8 ? 
 		0.1f:
 		0.5f;
-    /** The number of bytes to overlap when swarming and resuming, used to help
-     *  verify that different sources are serving the same content. */
-    static final int OVERLAP_BYTES=10;
     /** The time to wait trying to establish each normal connection, in
      *  milliseconds.*/
     private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
@@ -764,7 +761,7 @@ public class DownloadWorker implements Runnable {
             if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
                 assignWhite(http11);
             } else {
-                assignGrey(http11); 
+                assignGrey(); 
             }
             
         } catch(NoSuchElementException nsex) {
@@ -923,7 +920,7 @@ public class DownloadWorker implements Runnable {
         //code below.  Note connectHTTP can throw several exceptions.
         int low = interval.low;
         int high = interval.high; // INCLUSIVE
-        _downloader.connectHTTP(getOverlapOffset(low), high + 1, true);
+        _downloader.connectHTTP(low, high + 1, true);
         
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
@@ -962,7 +959,7 @@ public class DownloadWorker implements Runnable {
      * area to a new HTTPDownloader, if the current downloader is going too
      * slow.
      */
-    private void assignGrey(boolean http11) throws
+    private void assignGrey() throws
     NoSuchElementException,  IOException, TryAgainLaterException, 
     QueuedException, FileNotFoundException, NotSharingException,  
     NoSuchRangeException  {
@@ -1015,140 +1012,104 @@ public class DownloadWorker implements Runnable {
         int amountRead = biggest.getAmountRead();
         int left = biggest.getAmountToRead()-amountRead;
         //check if we need to steal the last chunk from a slow downloader.
-        //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
-        if ((http11 && left<_manager.getChunkSize()) || (!http11 && left < MIN_SPLIT_SIZE)){ 
-            float bandwidthVictim = -1;
-            float bandwidthStealer = -1;
-            
-            try {
-                bandwidthVictim = biggest.getAverageBandwidth();
-                biggest.getMeasuredBandwidth(); // trigger IDE.
-            } catch (InsufficientDataException ide) {
-                LOG.debug("victim does not have datapoints", ide);
-                bandwidthVictim = -1;
-            }
-            try {
-                bandwidthStealer = _downloader.getAverageBandwidth();
-                _downloader.getMeasuredBandwidth(); // trigger IDE.
-            } catch(InsufficientDataException ide) {
-                LOG.debug("stealer does not have datapoints", ide);
-                bandwidthStealer = -1;
-            }
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: "+
-                        	 _downloader + " attempting to steal from " + 
-                          biggest + ", stealer speed [" + bandwidthStealer +
-                          "], victim speed [ " + bandwidthVictim + "]");
-            
-            // If we do have a measured bandwidth for the existing download,
-            // and it is slower than what is acceptable, let the new guy steal.
-            // OR
-            // If the new guy is of an acceptable speed and his average
-            // bandwidth is faster than the existing one, let him steal.
-            if (bandwidthStealer > bandwidthVictim ||
-                    (bandwidthVictim != -1 &&
-                            bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
-                            bandwidthStealer == -1))
-                 {
-                //replace (bad boy) biggest if possible
-                int start = biggest.getInitialReadingPoint() + amountRead;
-                final int stop = biggest.getInitialReadingPoint() + 
-                           biggest.getAmountToRead();
-                
-                // If we happened to finish off the download, throw NSEX
-                // and so we don't download any more.
-                if(stop <= start)
-                    throw new NoSuchElementException();
-                
-                //Note: we are not interested in being queued at this point this
-                //line could throw a bunch of exceptions (not queuedException)
-                _downloader.connectHTTP(getOverlapOffset(start), stop, false);
-                
-                int newLow = _downloader.getInitialReadingPoint();
-                int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
-                
-                // If the stealer isn't going to give us everything we need,
-                // there's no point in stealing, so throw an exception and
-                // don't steal.
-                if( newHigh < stop ) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("WORKER: not stealing because stealer " +
-                                  "gave a subrange.  Expected low: " + start +
-                                  ", high: " + stop + ".  Was low: " + newLow +
-                                  ", high: " + newHigh);
-                    throw new IOException("bad stealer.");
-                }
-                if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER:"+
-                            " picking stolen grey "
-                      +start+"-"+stop+" from "+biggest+" to "+_downloader);
-                
-                // stop the victim
-                Interval toFree;
-                synchronized(biggest) {
-                    biggest.stopAt(stop);
-                    biggest.setVictim();
-                    
-                    // free up whatever the victim wrote while we were connecting
-                    // unless that data is already verified or pending verification
-                    int middle = biggest.getInitialReadingPoint()+biggest.getAmountRead();
-                    
-                    // the victim may have even completed the download while we were
-                    // connecting
-                    if (stop <= middle)
-                        throw new NoSuchElementException();
-                    
-                    toFree = new Interval(start,middle);
-                }
-                _commonOutFile.leaseFromPartial(toFree);
-            }
-            else { //less than MIN_SPLIT_SIZE...but we are doing fine...
-                throw new NoSuchElementException();
-            }
-        }
-        else { //There is a big enough chunk to split...split it
-            int start;
-            if(http11) { //steal CHUNK_SIZE bytes from the end
-                start = biggest.getInitialReadingPoint() +
-                        biggest.getAmountToRead() - _manager.getChunkSize() + 1;
-            } else {
-                start= biggest.getInitialReadingPoint() + amountRead + left/2;
-            }
-            int stop = biggest.getInitialReadingPoint() + 
-                       biggest.getAmountToRead();
-            
-            // If we happened to finish off the dl, don't download any more
-            if(stop <= start)
-                throw new NoSuchElementException();
-            
-            //this line could throw a bunch of exceptions
-            _downloader.connectHTTP(getOverlapOffset(start), stop, true);
-            
-            int newLow = _downloader.getInitialReadingPoint();
-            int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
-            if(newHigh < stop) {
-                // We have a stealer, but he isn't going to give us all the
-                // data we want, so discard him.
-                if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER: not stealing because stealer " +
-                              "gave a lower high.  Expected high: " + 
-                              stop + ".  Was high: " + newHigh);
-                throw new IOException("bad stealer");
-            }
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: assigning split grey "
-                  +newLow+"-"+newHigh+" from "+biggest+" to "+_downloader);
-            // Refocus the start with this new data, if the downloader
-            // actually gave us a higher low value.  This is so we
-            // don't tell the currently downloading guy to stop downloading
-            // data we aren't going to get.
-            if(newLow > start)
-                start = newLow;
-            biggest.stopAt(start);//we know that biggest must be http1.0
-        }
-    }
+		float bandwidthVictim = -1;
+		float bandwidthStealer = -1;
+		
+		try {
+			bandwidthVictim = biggest.getAverageBandwidth();
+			biggest.getMeasuredBandwidth(); // trigger IDE.
+		} catch (InsufficientDataException ide) {
+			LOG.debug("victim does not have datapoints", ide);
+			bandwidthVictim = -1;
+		}
+		try {
+			bandwidthStealer = _downloader.getAverageBandwidth();
+			_downloader.getMeasuredBandwidth(); // trigger IDE.
+		} catch(InsufficientDataException ide) {
+			LOG.debug("stealer does not have datapoints", ide);
+			bandwidthStealer = -1;
+		}
+		
+		if(LOG.isDebugEnabled())
+			LOG.debug("WORKER: "+
+					_downloader + " attempting to steal from " + 
+					biggest + ", stealer speed [" + bandwidthStealer +
+					"], victim speed [ " + bandwidthVictim + "]");
+		
+		// If we do have a measured bandwidth for the existing download,
+		// and it is slower than what is acceptable, let the new guy steal.
+		// OR
+		// If the new guy is of an acceptable speed and his average
+		// bandwidth is faster than the existing one, let him steal.
+		if (bandwidthStealer > bandwidthVictim ||
+				(bandwidthVictim != -1 &&
+						bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
+						bandwidthStealer == -1))
+		{
+			//replace (bad boy) biggest if possible
+			int start = biggest.getInitialReadingPoint() + amountRead;
+			final int stop = biggest.getInitialReadingPoint() + 
+			biggest.getAmountToRead();
+			
+			// If we happened to finish off the download, throw NSEX
+			// and so we don't download any more.
+			if(stop <= start)
+				throw new NoSuchElementException();
+			
+			//Note: we are not interested in being queued at this point this
+			//line could throw a bunch of exceptions (not queuedException)
+			_downloader.connectHTTP(start, stop, false);
+			
+			int newLow = _downloader.getInitialReadingPoint();
+			int newHigh = _downloader.getAmountToRead() + newLow; // EXCLUSIVE
+			
+			// If the stealer isn't going to give us everything we need,
+			// there's no point in stealing, so throw an exception and
+			// don't steal.
+			if( newHigh < stop ) {
+				if(LOG.isDebugEnabled())
+					LOG.debug("WORKER: not stealing because stealer " +
+							"gave a subrange.  Expected low: " + start +
+							", high: " + stop + ".  Was low: " + newLow +
+							", high: " + newHigh);
+				throw new IOException("bad stealer.");
+			}
+			if(LOG.isDebugEnabled())
+				LOG.debug("WORKER:"+
+						" picking stolen grey "
+						+start+"-"+stop+" from "+biggest+" to "+_downloader);
+			
+			// stop the victim
+			Interval toFree = null;
+			synchronized(biggest) {
+				biggest.stopAt(stop);
+				biggest.setVictim();
+				
+				// free up whatever the victim wrote while we were connecting
+				// unless that data is already verified or pending verification
+				int middle = biggest.getInitialReadingPoint()+biggest.getAmountRead();
+				
+				// the victim may have even completed their download while we were
+				// connecting
+				if (stop <= middle)
+					throw new NoSuchElementException();
+				
+				if (start < middle)
+					toFree = new Interval(start,middle-1);
+			}
+			
+			// TODO: get rid of this hack and make the downloader start
+			// writing at middle
+			if (toFree != null) {
+				int writeStart = _commonOutFile.leaseFromPartial(toFree);
+				if (writeStart != newLow)
+					LOG.warn(" will overwrite some stuff... :(");
+			}
+		}
+		else { //less than MIN_SPLIT_SIZE...but we are doing fine...
+			throw new NoSuchElementException();
+		}
+	}
     
     ////// various handlers for failure states of the assign process /////
     
@@ -1252,15 +1213,6 @@ public class DownloadWorker implements Runnable {
     }
     
     //////// end handlers of various failure states ///////
-    
-    /**
-     * Offsets i by OVERLAP_BYTES.  Used when requesting the start-range
-     * for downloading.
-     * If we have a valid hashTree we do not request overlaps.
-     */
-    private int getOverlapOffset(int i) {
-        return _manager.getHashTree() == null ? Math.max(0, i-OVERLAP_BYTES) : i;
-    }
     
     /**
      * interrupts this downloader.

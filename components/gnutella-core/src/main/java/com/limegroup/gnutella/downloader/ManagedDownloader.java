@@ -2037,18 +2037,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * and sets the verifying file to not do overlap checking.
      */
     private void initializeHashTree() {
-        boolean goodTree = false;
 		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
 			synchronized(hashTreeLock) {
 				hashTree = tree;
-				goodTree=true;
 			}
 		}
-	    if (goodTree)
-	        commonOutFile.setCheckOverlap(false);
     }
 	
     /**
@@ -2230,7 +2226,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         if(commonOutFile==null) {//no entry in incompleteFM
             LOG.trace("creating a verifying file");
-            commonOutFile = new VerifyingFile(true, completedSize);
+            commonOutFile = new VerifyingFile(completedSize);
             try {
                 //we must add an entry in IncompleteFileManager
                 incompleteFileManager.
@@ -2867,8 +2863,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(hashTreeLock) {
             hashTree = tree;
         }
-        if (tree != null)
-            commonOutFile.setCheckOverlap(false);
     }
     
     public synchronized Object getStealLock() {

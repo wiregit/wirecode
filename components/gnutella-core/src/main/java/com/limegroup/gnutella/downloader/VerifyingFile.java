@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,14 +39,10 @@ public class VerifyingFile {
     
     /**
      * The file we're writing to / reading from.
+     * LOCKING: itself. this->fos is ok
      */
     private RandomAccessFile fos;
 
-    /**
-     * Whether or not we're doing overlap checking.
-     */
-    private boolean checkOverlap;
-    
     /**
      * Whether or not we've detected corruption in the file.
      */
@@ -101,17 +94,16 @@ public class VerifyingFile {
      *
      * Useful for tests.
      */
-    public VerifyingFile(boolean checkOverlap) {
-        this(checkOverlap, -1);
+    public VerifyingFile() {
+        this(-1);
     }
     
     /**
      * Constructs a new VerifyingFile for the specified size.
      * If checkOverlap is true, will scan for overlap corruption.
      */
-    public VerifyingFile(boolean checkOverlap, int completedSize) {
+    public VerifyingFile(int completedSize) {
         this.completedSize = completedSize;
-        this.checkOverlap = checkOverlap;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
         pendingBlocks = new IntervalSet();
@@ -142,12 +134,6 @@ public class VerifyingFile {
     }
 
     /**
-     * enable/disable overlap checking
-     */
-    public synchronized void setCheckOverlap(boolean yes) {
-        checkOverlap = yes;
-    }
-    /**
      * used to add blocks direcly. Blocks added this way are marked
      * partial.
      */
@@ -169,8 +155,27 @@ public class VerifyingFile {
             return;
         if(fos == null)
             throw new DiskException("no file?");
-        
-        Interval intvl = saveToDisk(currPos,numBytes,buf);
+		
+		Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
+		
+		/// some stuff to help debugging ///
+		if (!leasedBlocks.contains(intvl)) {
+			LOG.error("trying to write an interval that wasn't leased "+dumpState(), 
+					new Exception());
+			System.exit(1);
+		}
+		
+		if (verifiedBlocks.contains(intvl) || 
+				partialBlocks.contains(intvl) ||
+				pendingBlocks.contains(intvl)) {
+			LOG.error("trying to write an interval that was already written"+dumpState(), 
+					new Exception());
+			System.exit(1);
+		}
+		
+		////////////
+		
+        saveToDisk(currPos,numBytes,buf);
 		
         // 4. if write went ok, add this interval to the partial blocks
         if (LOG.isDebugEnabled())
@@ -183,121 +188,21 @@ public class VerifyingFile {
     }
 
 	/**
-	 * Saves the given interval to disk. If it overlaps
-	 * with any already written interval, it gets trimmed if we
-	 * have a HashTree.
-	 * 
-	 * @return the interval that was actually written to disk
+	 * Saves the given interval to disk. 
 	 */
-	private Interval saveToDisk(long currPos, int numBytes, byte [] buf) 
+	private void saveToDisk(long currPos, int numBytes, byte [] buf) 
 	throws DiskException{
-		Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
 		try {
-            if(checkOverlap) 
-                checkOverlap(intvl, buf);
-            else {
-				// since we are mixing overlapping intervals with non-overlapping,
-				// it is possible to have an interval downloaded when we didn't have a
-				// tree which overlaps with an interval we downloaded after we
-				// found the tree.  We do not want to overwrite any already written data.
-				
-				// find any overlapping regions
-				List overlaps = verifiedBlocks.getOverlapIntervals(intvl);
-				overlaps.addAll(partialBlocks.getOverlapIntervals(intvl));
-				overlaps.addAll(pendingBlocks.getOverlapIntervals(intvl));
-				
-				// if we have overlapping regions, we need to trim the interval
-				if (!overlaps.isEmpty()) {
-					if (LOG.isDebugEnabled())
-						LOG.debug("found overlapping region(s):"+overlaps);
-					
-					IntervalSet temp = new IntervalSet();
-					temp.add(intvl);
-					
-					// remove them from our interval
-					for (Iterator iter = overlaps.iterator();iter.hasNext();) 
-						temp.delete((Interval)iter.next());
-					
-					// overlaps should have been at the edges of the 
-					// interval, so we should have a single interval left
-					List resultList = temp.getAllIntervalsAsList();
-					Assert.silent(resultList.size() == 1);
-					
-					Interval trimmed = (Interval)resultList.get(0);
-					
-					// that interval should be at most 2*OVERLAP_BYTES smaller
-					// than the original.  Otherwise we have a problem
-					Assert.silent(trimmed.high - trimmed.low >= 
-						intvl.high - intvl.low - 2 * DownloadWorker.OVERLAP_BYTES);
-					
-					if (LOG.isDebugEnabled())
-						LOG.debug("after removing overlaps, the interval is "+trimmed);
-					
-					// trim the data buffer to the new interval
-					byte [] newbuf = new byte[trimmed.high - trimmed.low +1];
-					System.arraycopy(buf,trimmed.low - (int)currPos,newbuf,0,newbuf.length);
-					
-					// update the parameters
-					buf = newbuf;
-					currPos = trimmed.low;
-					numBytes = newbuf.length;
-					intvl = trimmed;
-				}
-            }
-			
             //2. get the fp back to the position we want to write to.
-            fos.seek(currPos);
-            //3. Write to disk.
-            fos.write(buf, 0, numBytes);
+			synchronized(fos) {
+				fos.seek(currPos);
+				//3. Write to disk.
+				fos.write(buf, 0, numBytes);
+			}
         }catch(IOException diskIO) {
             throw new DiskException(diskIO);
         }
-        
-		return intvl;
 	}
-    /**
-     * checks whether data supposed to go at an interval on disk matches with any
-     * previous data written to the disk
-     */
-    private void checkOverlap(Interval intvl, byte [] data) throws IOException {
-        
-        // get all written blocks
-        IntervalSet onDisk = new IntervalSet();
-        for (Iterator iter = getBlocks();iter.hasNext();)
-            onDisk.add((Interval)iter.next());
-        
-        // do any them overlap with our interval?
-        List overlapBlocks = onDisk.getOverlapIntervals(intvl);
-        if(overlapBlocks.isEmpty())
-            return;
-        
-        //OK now we know whether or not to check before writing to disk.
-        //1. If there are overlaps, check those parts of the buffer we are about
-        // to write.
-        LOG.debug("will check overlaps");
-        
-        for(Iterator iter = overlapBlocks.iterator(); iter.hasNext();) {
-            Interval overlapInterval = (Interval)iter.next();
-            int amountToCheck=(overlapInterval.high-overlapInterval.low)+1;
-            
-            byte[] fileBuf = new byte[amountToCheck];
-            fos.seek(overlapInterval.low);//seek to begining of overlap part
-            fos.readFully(fileBuf,0,amountToCheck);
-            
-            int j = findInitialPoint(overlapInterval,intvl.low);
-            for(int i=0;i<amountToCheck;i++,j++) {
-                if (data[j]!=fileBuf[i]) { //corrupt bytes
-					
-					if (LOG.isWarnEnabled())
-						LOG.warn("corruption found in checkOverlap");
-					
-                    isCorrupted = true; // flag as corrupted.
-                    if(managedDownloader!=null)//md may be null for testing
-                        managedDownloader.promptAboutCorruptDownload();
-                }
-            }
-        }
-    }
     
 	/**
 	 * Schedules those chunks that can be verified against the hash tree
@@ -406,20 +311,7 @@ public class VerifyingFile {
         ranges.delete(leasedBlocks);
         ranges.delete(partialBlocks);
         ranges.delete(pendingBlocks);
-        Interval temp = ranges.removeFirst();
-        
-        Interval ret;
-        if (checkOverlap) {
-            // damn you, overlap checking!
-            while (temp != null 
-                    && temp.high - temp.low <= DownloadWorker.OVERLAP_BYTES)
-                temp = ranges.removeFirst();
-            
-            ret =
-                new Interval(temp.low+DownloadWorker.OVERLAP_BYTES, temp.high);
-        } else 
-            ret = ranges.removeFirst();
-
+        Interval ret = ranges.removeFirst();
         leaseBlock(ret);
         return ret;
     }
@@ -443,14 +335,25 @@ public class VerifyingFile {
             LOG.debug("Releasing interval: " + in+" state "+dumpState());
         leasedBlocks.delete(in);
     }
-    
-    public synchronized void leaseFromPartial(Interval in) {
-        if (LOG.isDebugEnabled())
-            LOG.debug("moving interval back to lease"+in+" status is "+dumpState());
-        partialBlocks.delete(in);
-        leasedBlocks.add(in);
+	
+ 
+	// TODO: get rid of this
+    public synchronized int leaseFromPartial(Interval in) {
+		Interval clipped = (Interval)partialBlocks.getOverlapIntervals(in).get(0);
+		
+		if (LOG.isDebugEnabled()) {
+            LOG.debug("moving interval back to lease"+in+
+					"which was clipped to "+clipped+
+					" status is "+dumpState());
+		}
+		
+        partialBlocks.delete(clipped);
+        leasedBlocks.add(clipped);
+		
         if (LOG.isDebugEnabled())
             LOG.debug("state after re-lease "+dumpState());
+		
+		return clipped.low;
     }
     
     /**
@@ -665,16 +568,14 @@ public class VerifyingFile {
             // read the interval from the file
             long pos = -1;
             try {
-                pos = fos.getFilePointer();
-                fos.seek(i.low);
-                fos.read(b);
+				synchronized(fos) {
+					fos.seek(i.low);
+					fos.read(b);
+				}
             }catch (IOException bad) {
                 // we failed reading back from the file - assume block is corrupt
                 // and it will have to be re-downloaded
                 return false;
-            }finally {
-                if (pos != -1)
-                    try {fos.seek(pos);}catch(IOException iox){}
             }
             
             boolean corrupt = tree.isCorrupt(i,b);
