@@ -1706,7 +1706,7 @@ public class SettingsManager {
      * @return true, if this node should accept authenticated connections
      * only, false otherwise
      */
-    public boolean getAcceptAuthenticatedConnectionsOnly() {
+    public boolean acceptAuthenticatedConnectionsOnly() {
         return Boolean.valueOf(PROPS.getProperty(
             ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY)).booleanValue();
     }
