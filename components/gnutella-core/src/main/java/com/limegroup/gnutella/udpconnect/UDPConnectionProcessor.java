@@ -84,7 +84,7 @@ public class UDPConnectionProcessor {
 
 	/** Define the maximum wait time before sending a message in order to
         keep the connection alive (and firewalls open).  */
-	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
+	private static final long KEEPALIVE_WAIT_TIME     = (1*1000 - 500);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
