@@ -144,6 +144,7 @@ public class HandshakeResponse {
         }
         catch(Exception e){
             //in case of any exception, use default bad codes
+            //TODO: this is bogus
             this.statusCode = DEFAULT_BAD_STATUS_CODE;
             this.statusMessage = DEFAULT_BAD_STATUS_MESSAGE;
         }

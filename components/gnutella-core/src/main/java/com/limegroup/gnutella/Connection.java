@@ -27,6 +27,10 @@ import com.limegroup.gnutella.handshaking.*;
  * specified by the remote host.  Outgoing connections can be made at the 0.4
  * level, the 0.6 level, or the best level possible.  Realize that the latter is
  * implemented by reconnecting the socket.<p>
+ *
+ * This class augments the basic 0.6 handshaking mechanism to allow
+ * authentication via "401" messages.  Authentication interactions can take
+ * multiple rounds.  
  */
 public class Connection {
     /** 
@@ -175,11 +179,20 @@ public class Connection {
     }
 
     /**
-     * Initialize the connection by doing the handshake.  Subclasses of
-     * connection should override this method and call super.initialize()
-     * in the first line of the override.
+     * Initialize the connection by doing the handshake.  Throws IOException
+     * if we were unable to establish a normal messaging connection for
+     * any reason.  Do not call send or receive if this happens.
+     *
+     * @exception IOException we were unable to connect to the host
+     * @exception NoGnutellaOkException one of the participants responded
+     *  with an error code other than 200 OK (possibly after several rounds
+     *  of 401's)
+     * @exception BadHandshakeException some other problem establishing 
+     *  the connection, e.g., the server responded with HTTP, closed the
+     *  the connection during handshaking, etc.
      */
-    public void initialize() throws IOException {
+    public void initialize() 
+            throws IOException, NoGnutellaOkException, BadHandshakeException {
         try {
             initializeWithoutRetry();
         } catch (NoGnutellaOkException e) {
@@ -187,14 +200,14 @@ public class Connection {
             //Don't bother to retry
             throw e;
         } catch (BadHandshakeException e) {
-            //reset the flags
-            _propertiesRead = null;
             //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
             if (_negotiate 
                     && isOutgoing() 
                     && _propertiesWrittenP!=null
                     && _propertiesWrittenR!=null) {
+                //reset the flags
+                _propertiesRead = null;
                 _propertiesWrittenP=null;
                 _propertiesWrittenR=null;
                 initializeWithoutRetry();
@@ -208,8 +221,9 @@ public class Connection {
      * Exactly like initialize, but without the re-connection.
      *
      * @exception IOException couldn't establish the TCP connection
-     * @exception NoGnutellaOkException the other end understood the 0.6
-     *  protocol but returned a response code other than "200 OK"
+     * @exception NoGnutellaOkException one of the participants responded
+     *  with an error code other than 200 OK (possibly after several rounds
+     *  of 401's)
      * @exception BadHandshakeException some sort of protocol error after
      *  establishing the connection
      */
@@ -266,8 +280,9 @@ public class Connection {
      * Sends and receives handshake strings for outgoing connections,
      * throwing exception if any problems. 
      * 
-     * @exception NoGnutellaOkException the other end understood the 0.6
-     *  protocol but returned a response code other than "200 OK"
+     * @exception NoGnutellaOkException one of the participants responded
+     *  with an error code other than 200 OK (possibly after several rounds
+     *  of 401's)
      * @exception IOException any other error.  May wish to retry at 0.4
      */
     private void initializeOutgoing() throws IOException {
@@ -295,72 +310,81 @@ public class Connection {
     /**
      * Responds to the responses/challenges from the host on the other
      * end of the connection, till a conclusion reaches. Handshaking may
-     * involve multiple steps.
-     * @exception IOException Thrown for variety of reasons, including 
-     * I/O error reading/writing
-     * over the connection, bad response from the other side, and
-     * unreachable conclusion
+     * involve multiple steps. 
+     *
+     * @exception NoGnutellaOkException one of the participants responded
+     *  with an error code other than 200 OK (possibly after several rounds
+     *  of 401's)
+     * @exception IOException any other error.  May wish to retry at 0.4
      */
     private void concludeOutgoingHandshake() throws IOException
     {
-        //2. Read "GNUTELLA /0.6 200 OK" and headers.  We require that the
-        //response be at the same protocol level as we sent out.  This is
-        //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
-        //respond with "GNUTELLA OK", only to be confused by the headers
-        //later.
-        //2.a) This step may involve handshaking multiple times so as
+        //This step may involve handshaking multiple times so as
         //to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
+            //2. Read "GNUTELLA/0.6 200 OK" and headers.  We require that the
+            //response be at the same protocol level as we sent out.  This is
+            //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
+            //respond with "GNUTELLA OK", only to be confused by the headers
+            //later.
             String connectLine = readLine();
-            //check if the protocol is fine. We dont worry here about the 
-            //status code (which dictates whether the connection will 
-            //be accepted or not. We will worry about that later.
             if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
-            //read the headers
-            _propertiesRead=new Properties();
+            //Read the headers.  The _propertiesRead field is allocated here
+            //if not already done to signify that this is Gnutella 0.6.
+            if (_propertiesRead==null)
+                _propertiesRead=new Properties();
             readHeaders();
+            //Terminate abnormally if we read something other than 200 or 401.
+            HandshakeResponse theirResponse=new HandshakeResponse(
+                connectLine.substring(GNUTELLA_06.length()).trim(), 
+                _propertiesRead);
+            int theirCode=theirResponse.getStatusCode();
+            if (theirCode!=HandshakeResponse.OK 
+                    &&  theirCode!=HandshakeResponse.UNAUTHORIZED_CODE)
+                throw new NoGnutellaOkException(false, 
+                                                theirResponse.getStatusCode(),
+                                                "Server sent fatal response");
 
-            //Make up our response and headers
+            //3. Write "GNUTELLA/0.6 200 OK" and headers.
             HandshakeResponse ourResponse = _propertiesWrittenR.respond(
-                new HandshakeResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(), 
-                    _propertiesRead), true);
-
-            //send the response and headers
+                theirResponse, true);
             sendString(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.getHeaders());
-
-            //if our response was 200 OK, (or an error code) 
-            //return from the method, we are
-            //done with the handshaking. 
-            //Continue in case response was 200 xxxxx (where xxxxx != OK)
-            if(ourResponse.getStatusCode() == HandshakeResponse.OK){
+            //Consider termination...
+            if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
                 if(ourResponse.getStatusMessage().equals(
                     HandshakeResponse.OK_MESSAGE)){
-                    //done with handshaking. Return    
+                    //a) Terminate normally if we wrote "200 OK".
                     return;
+                } else {
+                    //b) Continue loop if we wrote "200 AUTHENTICATING".                    
+                    continue;
                 }
-            }
-            else{
-                //our response was non-OK, return with exception
-                throw new NoGnutellaOkException();
+            } else {
+                //c) Terminate abnormally if we wrote anything else.               
+                throw new NoGnutellaOkException(true,
+                                                ourResponse.getStatusCode(),
+                                                "We sent fatal response");
             }
         }
             
-        //if we didnt successfully return out of the method, throw an 
-        //I/O Exception to indicate that handshaking didnt reach any
-        //conclusion
-        throw new NoGnutellaOkException("Too much handshaking, no conclusion");
+        //If we didn't successfully return out of the method, throw an exception
+        //to indicate that handshaking didn't reach any conclusion.  The values
+        //here are kind of a hack.
+        throw new NoGnutellaOkException(false,
+                                        HandshakeResponse.UNAUTHORIZED_CODE,
+                                        "Too much handshaking, no conclusion");
     }
     
     /** 
      * Sends and receives handshake strings for incoming connections,
      * throwing exception if any problems. 
      * 
-     * @exception NoGnutellaOkException the other end understood the 0.6
-     *  protocol but returned a response code other than "200 OK"
+     * @exception NoGnutellaOkException one of the participants responded
+     *  with an error code other than 200 OK (possibly after several rounds
+     *  of 401's)
      * @exception IOException any other error.  May wish to retry at 0.4
      */
     private void initializeIncoming() throws IOException {
@@ -383,8 +407,8 @@ public class Connection {
             _propertiesRead=new Properties();
             //1. Read headers (connect line has already been read)
             readHeaders();
-            //2. conclude the handshake (This may involve exchange of 
-            //information multiple times with the host at the other end).
+            //Conclude the handshake (This may involve exchange of information
+            //multiple times with the host at the other end).
             concludeIncomingHandshake();
         } else {
             throw new IOException("Unexpected connect string");
@@ -396,80 +420,85 @@ public class Connection {
      * Responds to the handshake from the host on the other
      * end of the connection, till a conclusion reaches. Handshaking may
      * involve multiple steps.
-     * @exception IOException Thrown for variety of reasons, including 
-     * I/O error reading/writing
-     * over the connection, bad response from the other side, and
-     * unreachable conclusion
+     * 
+     * @exception NoGnutellaOkException one of the participants responded
+     *  with an error code other than 200 OK (possibly after several rounds
+     *  of 401's)
+     * @exception IOException any other error.  May wish to retry at 0.4
      */
     private void concludeIncomingHandshake() throws IOException
     {
-        //respond to the handshake
-        //This step may involve handshaking multiple times so as
-        //to support challenge/response kind of behaviour
+        //Respond to the handshake.  This step may involve handshaking multiple
+        //times so as to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
-            //Send our response and headers
-            if (_propertiesWrittenR==null){
-                sendString(GNUTELLA_OK_06+CRLF);
-                sendString(CRLF);  //no headers specified ==> blank line
-                //Thats the end of handshaking in old fashion way
-                return;
-            }
-            else{
-                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+            //2. Send our response and headers.
+            HandshakeResponse ourResponse=null;
+            if (_propertiesWrittenR==null) 
+                //user requested didn't specify, so use default 200 OK;
+                ourResponse=new HandshakeResponse(new Properties());
+            else
+                //Note: in the following code, it appears that we're ignoring
+                //the response code written by the initiator of the connection.
+                //However, you can prove that the last code was always 200 OK.
+                //See initializeIncoming and the code at the bottom of this
+                //loop.
+                ourResponse= _propertiesWrittenR.respond(
                     new HandshakeResponse(_propertiesRead), false);
-                sendString(GNUTELLA_06 + " " 
-                    + ourResponse.getStatusLine() + CRLF);
-                sendHeaders(ourResponse.getHeaders());   
-                
-                //our response should be either OK or UNAUTHORIZED for the
-                //handshake to proceed
-                if((ourResponse.getStatusCode() != HandshakeResponse.OK)
-                    && (ourResponse.getStatusCode() !=
-                    HandshakeResponse.UNAUTHORIZED_CODE)) {
-                    throw new NoGnutellaOkException("Our response: " 
-                        + ourResponse.getStatusLine());
-                }
-                    
-                //read the response from the other side
-                String connectLine;
-                //if we asked the other side to authenticate, give more time
-                //so as to receive user input
-                if(ourResponse.getStatusCode() 
-                    == HandshakeResponse.UNAUTHORIZED_CODE){
-                    connectLine = readLine(USER_INPUT_WAIT_TIME);  
-                    readHeaders(USER_INPUT_WAIT_TIME); 
-                }else{
-                    connectLine = readLine();  
-                    readHeaders();
-                }
-                
-                //if our response was full OK
-                if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
-                    //In this case, we must have received full OK from 
-                    //other side, else drop the connection
-                    if(!connectLine.startsWith(GNUTELLA_OK_06)){
-                        throw new NoGnutellaOkException(
-                            "Response from other side: " + connectLine);
-                    }else{
-                        //else we are done with a successful handshake, 
-                        //and therefore, return
-                        return;
-                    }
-                }
-                else{
-                    //if the connectLine doesnt start with GNUTELLA_06_200,
-                    //thats an unexpected response, and so drop the conection
-                    if(!connectLine.startsWith(GNUTELLA_06_200))
-                        throw new NoGnutellaOkException(
-                            "Response from other side: " + connectLine);
-                }
+            sendString(GNUTELLA_06 + " " 
+                       + ourResponse.getStatusLine() + CRLF);
+            sendHeaders(ourResponse.getHeaders());                   
+            //Our response should be either OK or UNAUTHORIZED for the handshake
+            //to proceed.
+            if((ourResponse.getStatusCode() != HandshakeResponse.OK)
+               && (ourResponse.getStatusCode() !=
+                   HandshakeResponse.UNAUTHORIZED_CODE)) {
+                throw new NoGnutellaOkException(true,
+                                                ourResponse.getStatusCode(),
+                                                "We sent fatal status code");
             }
-        }
-            
-        //if we didnt successfully return out of the method, throw an 
-        //I/O Exception to indicate that handshaking didnt reach any
-        //conclusion
-        throw new NoGnutellaOkException("Too much handshaking, no conclusion");
+                    
+            //3. read the response from the other side.  If we asked the other
+            //side to authenticate, give more time so as to receive user input
+            String connectLine;
+            if(ourResponse.getStatusCode() 
+               == HandshakeResponse.UNAUTHORIZED_CODE){
+                connectLine = readLine(USER_INPUT_WAIT_TIME);  
+                readHeaders(USER_INPUT_WAIT_TIME); 
+            }else{
+                connectLine = readLine();  
+                readHeaders();
+            }
+            if (! connectLine.startsWith(GNUTELLA_06))
+                throw new IOException("Bad connect string");
+            HandshakeResponse theirResponse=new HandshakeResponse(
+                connectLine.substring(GNUTELLA_06.length()).trim(), 
+                _propertiesRead);
+
+            //Decide whether to proceed.
+            int ourCode=ourResponse.getStatusCode();
+            if(ourCode == HandshakeResponse.OK) {
+                if(theirResponse.getStatusCode()==HandshakeResponse.OK)
+                    //a) If we wrote 200 and they wrote 200 OK, stop normally.
+                    return;
+            } else {
+                Assert.that(ourCode==HandshakeResponse.UNAUTHORIZED_CODE,
+                            "Response code: "+ourCode);
+                if(theirResponse.getStatusCode()==HandshakeResponse.OK)
+                    //b) If we wrote 401 and they wrote "200...", keep looping.
+                    continue;
+            }
+            //c) Terminate abnormally
+            throw new NoGnutellaOkException(false,
+                                            theirResponse.getStatusCode(),
+                                            "Initiator sent fatal status code");
+        }        
+
+        //If we didn't successfully return out of the method, throw an exception
+        //to indicate that handshaking didn't reach any conclusion.  The values
+        //here are kind of a hack.
+        throw new NoGnutellaOkException(true,
+                                        HandshakeResponse.UNAUTHORIZED_CODE,
+                                        "Too much handshaking, no conclusion");
     }
     
     /** Returns true iff line ends with "CONNECT/N", where N
