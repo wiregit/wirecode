@@ -256,6 +256,24 @@ public class ServerSideUPListTest extends BaseTestCase {
  		//test whether we got proper # of results
  		assertEquals(3,reply.getLeaves().size());
  		assertEquals(3,reply.getUltrapeers().size());
+ 		
+ 		assertEquals(LEAF_1.getInetAddress(),LEAF_2.getInetAddress());
+ 		assertEquals(LEAF_1.getInetAddress(),LEAF_3.getInetAddress());
+ 		
+ 		assertEquals(UP1.getInetAddress(),UP2.getInetAddress());
+ 		assertEquals(UP1.getInetAddress(),UP3.getInetAddress());
+ 		
+ 		for (Iterator iter = reply.getLeaves().iterator();iter.hasNext();){
+ 			Endpoint e =(Endpoint)iter.next();
+ 			assertEquals(LEAF_1.getInetAddress(),e.getInetAddress());
+ 			assertTrue(e.getPort() == LEAF_1.getPort());
+ 		}
+ 		
+ 		for (Iterator iter = reply.getUltrapeers().iterator();iter.hasNext();){
+ 			Endpoint e =(Endpoint)iter.next();
+ 			assertEquals(UP1.getInetAddress(),e.getInetAddress());
+ 			assertTrue(e.getPort() == UP1.getPort());
+ 		}
  		sleep();
  		
  	}
