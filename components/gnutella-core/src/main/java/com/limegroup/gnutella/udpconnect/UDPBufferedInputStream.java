@@ -40,6 +40,7 @@ public class UDPBufferedInputStream extends InputStream {
      * if there is no more data.
      */
     public int read() throws IOException  {
+	try {
         synchronized(_processor) { // Lock on the ConnectionProcessor
             while (true) {
                 // Try to fetch some data if necessary
@@ -54,15 +55,21 @@ public class UDPBufferedInputStream extends InputStream {
                 } else if ( _activeChunk == null && _processor.isConnected() ) {
 
                     // Wait for some data to become available
+log("Wait on data");
                     waitOnData();
 
                 } else {
+log2("Closed Incoming");
 
                     // This connection is closed
                     return -1;
                 }
             }
         }
+	} catch(IOException e) { 
+log2("Got an exception:"+e);	
+	throw e;
+	}
     }
 
     /**
@@ -162,6 +169,7 @@ public class UDPBufferedInputStream extends InputStream {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             if ( _activeChunk == null || _activeChunk.length <= 0 ) {
                 _activeChunk = _processor.getIncomingChunk();
+log("Fetched incoming chunk");
             }
         }
     }
