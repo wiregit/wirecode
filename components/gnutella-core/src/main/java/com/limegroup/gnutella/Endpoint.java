@@ -77,9 +77,9 @@ public class Endpoint implements Cloneable, Serializable,
 	
 	Endpoint other = (Endpoint) o;	
 	
-	if(connectivity > other.connectivity)	
+	if(weight > other.weight)	
 	    return 1;
-	if(connectivity < other.connectivity)
+	if(weight < other.weight)
 	    return -1;
 	return 0;		
     }
@@ -148,7 +148,7 @@ public class Endpoint implements Cloneable, Serializable,
     }
     
     /** Returns the number of files the host has, or -1 if I don't know */
-    public long getFiles() {
+    public long getFiles(){
         return files;
     }
     
@@ -164,39 +164,49 @@ public class Endpoint implements Cloneable, Serializable,
     *  ratio is not ridiculous, in which case it normalizes the values
     */   
     public long getKbytes() {
+        return kbytes;
+    }
+
+    private void normalizeFilesAndSize()
+    {
+        //normalize files
         try
         {
+            if(kbytes > 20000000) // > 20GB
+            {
+                files = kbytes = 0;
+                return;
+            }
+            if(files > 10000)  //>10000 files
+            {
+                files = kbytes = 0;
+                return;
+            }
+            
             if(kbytes/files < 35000)  //ie avg file size less than 35MB
             {
-                return kbytes;
+                files = kbytes = 0;
+                return;
             }
-            else if(kbytes/files < 150000 && files < 8) //ie avg file size less
-            {                               //than 150MB, and num-files < 8
+            else if(kbytes/files < 150000 && files < 10) //ie avg file size less
+            {                               //than 150MB, and num-files < 10
                                             //might be some video files
                                             //but with more number of files
                                             //maintaining such a ratio may not 
                                             //be possible
-                return kbytes;
+                files = kbytes = 0;
+                return;
             }
-            else if(kbytes/files < 150000000) //ie avg file size less than 150GB
-                                              //but more than 150MB
-            {
-                                             //user might have sent number of 
-                                             //bytes instead of number of kbytes
-                return kbytes/1000;
-                
-            }
+             
         }
         catch(ArithmeticException ae)
         {
-            return 0;   //as files=0 throws ArithmeticException, that should
-                        //make the kbytes also zero
+            files = kbytes = 0;
+            return;   
         }
         
-        
-        return -1;
     }
-
+    
     /** Sets the size of all files the host has, in kilobytes, 
     */   
     public void setKbytes(long kbytes) {
