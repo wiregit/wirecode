@@ -77,8 +77,8 @@ public class ConnectionWatchdog implements Runnable {
         Map /* ManagedConnection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            //if (! c.isKillable())
-			//continue; //e.g., Clip2 reflector
+            if (! c.isKillable())
+				continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
         }
 
@@ -92,8 +92,8 @@ public class ConnectionWatchdog implements Runnable {
         List ret = new ArrayList();
         for (Iterator iter=allConnections(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            //if (! c.isKillable())
-			//  continue; //e.g., Clip2 reflector
+            if (! c.isKillable())
+				continue; //e.g., Clip2 reflector
             Object state=snapshot.get(c);
             if (state==null)
                 continue;  //this is a new connection
@@ -123,8 +123,8 @@ public class ConnectionWatchdog implements Runnable {
         HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=connections.iterator(); iter.hasNext();) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            //if (! c.isKillable())
-			//  continue; //e.g., Clip2 reflector
+            if (! c.isKillable())
+				continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
             c.setHorizonEnabled(false);
             RouterService.getMessageRouter().sendPingRequest(
@@ -140,8 +140,8 @@ public class ConnectionWatchdog implements Runnable {
         //haven't made progress are killed.
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            //if (! c.isKillable())
-			//  continue; //e.g., Clip2 reflector
+            if (! c.isKillable())
+				continue; //e.g., Clip2 reflector
             c.setHorizonEnabled(true);
             Object state=snapshot.get(c);
             if (state==null)
