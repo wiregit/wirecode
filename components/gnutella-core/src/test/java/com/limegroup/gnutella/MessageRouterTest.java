@@ -1,13 +1,23 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
-import junit.framework.*;
-import com.sun.java.util.collections.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.NewConnection;
+import com.limegroup.gnutella.util.OldConnection;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestConnection;
+import com.limegroup.gnutella.util.TestConnectionManager;
+import com.limegroup.gnutella.xml.MetaFileManager;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 
 /**
  * This class tests the <tt>MessageRouter</tt>.
@@ -48,11 +58,36 @@ public final class MessageRouterTest extends BaseTestCase {
         ROUTER.initialize();
     }
 
-    //public void tearDown() {
-    //  LeafConnection.resetCounter();
-    //  UltrapeerConnection.resetCounter();
-    //}
 
+    /**
+     * Tests the method for forwarding queries to leaves.
+     * 
+     * @throws Exception if any error in the test occurs
+     */
+    public void testForwardQueryRequestToLeaves() throws Exception  {
+        TestConnectionManager tcm = 
+            TestConnectionManager.createManagerWithVariedLeaves();
+        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
+        Class[] paramTypes = new Class[] {
+            QueryRequest.class,
+            ReplyHandler.class,
+        };
+
+        Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                "forwardQueryRequestToLeaves",
+                paramTypes);
+        
+        QueryRequest qr = 
+            QueryRequest.createQuery(TestConnectionManager.ALT_LEAF_KEYWORD);
+        ReplyHandler rh = new ManagedConnection("localhost", 6346);
+        Object[] params = new Object[]  {qr, rh};
+        m.invoke(ROUTER, params);
+        int numQueries = tcm.getNumUltrapeerQueries();
+        assertEquals("unexpected number of queries received by leaves", 
+            UltrapeerSettings.MAX_LEAVES.getValue()/2, numQueries);
+    }
+    
     /**
      * Tests the method for creating <tt>QueryReply</tt> instances from
      * <tt>Response</tt> arrays.
@@ -157,7 +192,7 @@ public final class MessageRouterTest extends BaseTestCase {
         
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries old sent", 15, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries new sent", 0, 
@@ -207,7 +242,7 @@ public final class MessageRouterTest extends BaseTestCase {
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 15, 
@@ -238,7 +273,7 @@ public final class MessageRouterTest extends BaseTestCase {
         QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
-        assertEquals("unexpected number of queries sent", 0, tcm.getNumQueries());
+        assertEquals("unexpected number of queries sent", 0, tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
@@ -271,7 +306,7 @@ public final class MessageRouterTest extends BaseTestCase {
         // make sure we send a query from an old connection to old 
         // connections even when it's the last hop
         assertEquals("unexpected number of queries sent", 15, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 15, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
@@ -298,7 +333,7 @@ public final class MessageRouterTest extends BaseTestCase {
         
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS-4, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 4, 
@@ -325,7 +360,7 @@ public final class MessageRouterTest extends BaseTestCase {
         ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
@@ -352,7 +387,7 @@ public final class MessageRouterTest extends BaseTestCase {
         ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
@@ -382,7 +417,7 @@ public final class MessageRouterTest extends BaseTestCase {
 
         // the query should not have been sent along any of the connections,
         // as none of them should have Ultrapeer routing tables.
-        assertEquals("unexpected number of queries sent", 0, tcm.getNumQueries());
+        assertEquals("unexpected number of queries sent", 0, tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
@@ -414,7 +449,7 @@ public final class MessageRouterTest extends BaseTestCase {
         // the query should not have been sent along any of the connections,
         // as none of them should have Ultrapeer routing tables.
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
@@ -441,7 +476,7 @@ public final class MessageRouterTest extends BaseTestCase {
         
         m.invoke(ROUTER, new Object[] {qr});
         assertEquals("unexpected number of queries sent", 4, 
-                     tcm.getNumQueries());
+                     tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 1, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 3, 
