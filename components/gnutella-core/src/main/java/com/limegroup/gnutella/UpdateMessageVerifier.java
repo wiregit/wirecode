@@ -1,0 +1,76 @@
+package com.limegroup.gnutella;
+
+import java.security.*;
+import java.io.*;
+import com.bitzi.util.*;
+
+/**
+ * Provides static methods, which accept an InputStream and use the 
+ * LimeWire public key to verify that the contents are authentic.
+ */
+public class UpdateMessageVerifier {
+
+    private byte[] data;
+    private byte[] signature;
+    private byte[] xmlMessage;
+    
+    public UpdateMessageVerifier(byte[] fromStream) {
+        if(fromStream == null)
+            throw new IllegalArgumentException();
+        this.data = fromStream;
+    }
+    
+    
+    public boolean verifySource() throws Exception {
+        //read the input stream and parse it into signature and xmlMessage
+        parse();        
+        //get the public key
+        PublicKey pubKey = null;
+        FileInputStream fis = new FileInputStream("lib\\public.key");
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        pubKey = (PublicKey)ois.readObject();        
+        //initialize the verifier
+        Signature verifier = Signature.getInstance("DSA");
+        verifier.initVerify(pubKey);//initialize the signaure
+        verifier.update(xmlMessage,0,xmlMessage.length);
+        //verify
+        return verifier.verify(signature);
+    }
+
+    private void parse() {
+        byte b;
+        int i;
+        int j;
+        for(i=0, b=-1; b!=0; i++)
+            b = data[i];
+        i--;
+        //now i is at the first null
+        for(j=i+1, b=-1; b!=0; j++)
+            b = data[j];
+        j--;
+        //now j is at the second null
+        byte[] temp = new byte[i];
+        System.arraycopy(data,0,temp,0,i);
+        String base32 = new String(temp);
+        signature = Base32.decode(base32);
+        xmlMessage = new byte[data.length-1-j];
+        System.arraycopy(data,j+1,xmlMessage,0,data.length-1-j);       
+    }
+
+    public static void main(String[] args) {
+        try {
+        RandomAccessFile f=new RandomAccessFile(
+                                   new File("lib\\signed_update_file.xml"),"r");
+        byte[] content = new byte[(int)f.length()];
+        f.readFully(content);
+        f.close();
+        //start the test
+        UpdateMessageVerifier tester = new UpdateMessageVerifier(content);
+        boolean rslt = tester.verifySource();
+        System.out.println(""+rslt);
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed");
+        }
+    }
+}
