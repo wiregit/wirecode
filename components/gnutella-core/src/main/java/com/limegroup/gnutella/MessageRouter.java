@@ -45,22 +45,27 @@ public abstract class MessageRouter
      * The time to wait between route table updates, in milliseconds. 
      */
     private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
-    
+    private int MAX_ROUTE_TABLE_SIZE=50000;        //actually 100,000 entries
+
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
-     * typically around 2500 entries.
+     * typically around 2500 entries, but never more than 100,000 entries.
      */
-    private RouteTable _pingRouteTable = new RouteTable(2*60);
+    private RouteTable _pingRouteTable = new RouteTable(2*60, 
+                                                        MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
-     * typically around 13000 entries.
+     * typically around 13000 entries, but never more than 100,000 entries.
      */
-    private RouteTable _queryRouteTable = new RouteTable(5*60);
+    private RouteTable _queryRouteTable = new RouteTable(5*60,
+                                                         MAX_ROUTE_TABLE_SIZE);
     /**
-     * Maps QueryReply client GUIDs to PushRequestHandlers.  
-     * Stores 7-14 minutes, typically around 3500 entries.
+     * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
+     * minutes, typically around 3500 entries, but never more than 100,000
+     * entries.  
      */
-    private RouteTable _pushRouteTable = new RouteTable(7*60);
+    private RouteTable _pushRouteTable = new RouteTable(7*60,
+                                                        MAX_ROUTE_TABLE_SIZE);
 
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.

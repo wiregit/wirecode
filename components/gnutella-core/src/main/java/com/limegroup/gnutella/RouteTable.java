@@ -54,18 +54,25 @@ class RouteTable {
         new TreeMap(new GUID.GUIDByteComparator());
     private int _mseconds;
     private long _nextSwitchTime;
+    private int _maxSize;
 
     private Map /* Integer -> ReplyHandler */ _idMap=new HashMap();
     private Map /* ReplyHandler -> Integer */ _handlerMap=new HashMap();
     private int _nextID;
 
     /**
-     * Creates a new route table with enough space to hold the last 
-     * seconds to 2*seconds worth of data.
+     * Creates a new route table with enough space to hold the last seconds to
+     * 2*seconds worth of entries, or maxSize elements, whichever is smaller
+     * [sic].
+     *
+     * Typically maxSize is very large, and serves only as a guarantee to
+     * prevent worst case behavior.  Actually 2*maxSize elements can be held in
+     * this in the worst case.  
      */
-    public RouteTable(int seconds) {
+    public RouteTable(int seconds, int maxSize) {
         this._mseconds=seconds*1000;
         this._nextSwitchTime=System.currentTimeMillis()+_mseconds;
+        this._maxSize=maxSize;
     }
 
     /**
@@ -207,8 +214,8 @@ class RouteTable {
      */
     private final boolean purge() {
         long now=System.currentTimeMillis();
-        if (now<_nextSwitchTime) 
-            //not enough time has elapsed
+        if (now<_nextSwitchTime && _newMap.size()<_maxSize) 
+            //not enough time has elapsed and sets too small
             return false;
 
         //System.out.println(now+" "+this.hashCode()+" purging "
@@ -285,9 +292,9 @@ class RouteTable {
         ReplyHandler c3=new StubReplyHandler();
         ReplyHandler c4=new StubReplyHandler();
 
-        //1. Test replacement policy (glass box).
+        //1. Test time replacement policy (glass box).
         int MSECS=1000;
-        rt=new RouteTable(MSECS/1000);
+        rt=new RouteTable(MSECS/1000, Integer.MAX_VALUE);
         rt.routeReply(g1, c1);
         rt.routeReply(g2, c2);                    //old, new:
         rt.routeReply(g3, c3);                    //{}, {g1, g2, g3}
@@ -322,8 +329,24 @@ class RouteTable {
         Assert.that(rt.getReplyHandler(g3)==null);
         Assert.that(rt.getReplyHandler(g4)==null);
 
+        //1.5 Test space replacment (hard upper bounds)
+        rt=new RouteTable(Integer.MAX_VALUE, 1);
+        rt.routeReply(g1, c1);
+        rt.routeReply(g2, c2);                      //{g1}, {g2}
+        Assert.that(rt.getReplyHandler(g1)==c1);
+        Assert.that(rt.getReplyHandler(g2)==c2);
+        rt.routeReply(g3, c3);                      //{g3}, {g2}
+        Assert.that(rt.getReplyHandler(g1)==null);
+        Assert.that(rt.getReplyHandler(g2)==c2);
+        Assert.that(rt.getReplyHandler(g3)==c3);
+        rt.routeReply(g4, c4);
+        Assert.that(rt.getReplyHandler(g1)==null);
+        Assert.that(rt.getReplyHandler(g2)==null);
+        Assert.that(rt.getReplyHandler(g3)==c3);
+        Assert.that(rt.getReplyHandler(g4)==c4);
+
         //2. Test routing/re-routing abilities...with glass box tests.
-        rt=new RouteTable(1000);
+        rt=new RouteTable(1000, Integer.MAX_VALUE);
         rt._nextID=Integer.MAX_VALUE;  //test wrap-around
         Assert.that(rt.tryToRouteReply(g1, c1));         //g1->c1
         Assert.that(! rt.tryToRouteReply(g1, c2));
@@ -345,7 +368,7 @@ class RouteTable {
         Assert.that(rt._idMap.size()==1);
 
         //Test that _idMap/_handlerMap don't grow without bound.
-        rt=new RouteTable(1000);
+        rt=new RouteTable(1000, Integer.MAX_VALUE);
         Assert.that(rt.tryToRouteReply(g1, c1));
         Assert.that(rt.tryToRouteReply(g2, c1));
         Assert.that(rt.tryToRouteReply(g3, c1));
@@ -366,6 +389,7 @@ class RouteTable {
         public void handlePingReply(PingReply pingReply, 
                                     ManagedConnection receivingConnection) {
         }
+
         public void handlePushRequest(PushRequest pushRequest, 
                                       ManagedConnection receivingConnection) {
         }
