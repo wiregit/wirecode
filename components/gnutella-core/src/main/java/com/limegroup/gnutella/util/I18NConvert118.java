@@ -2,7 +2,6 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.ErrorService;
 import java.io.*;
-import java.util.*;
 
 /**
  * 118 compatible class that handles normalization 

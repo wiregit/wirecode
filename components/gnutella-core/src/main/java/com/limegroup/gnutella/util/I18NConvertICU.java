@@ -3,8 +3,6 @@ package com.limegroup.gnutella.util;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-
 import com.limegroup.gnutella.ErrorService;
 import com.ibm.icu.text.Normalizer;
 

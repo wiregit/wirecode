@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.Assert;
 
 /**
  * Provides utility methods like checking set intersection etc.
