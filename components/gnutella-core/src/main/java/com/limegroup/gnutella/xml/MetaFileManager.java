@@ -311,7 +311,7 @@ public class MetaFileManager extends FileManager {
                     try{
                         name = files[i].getCanonicalPath();
                         hash = new String(LimeXMLUtils.hashFile(files[i]));
-                    }catch(Exception e){
+                    }catch(IOException e){
                         continue;
                     }
                     writeToMap(files[i],hash);
