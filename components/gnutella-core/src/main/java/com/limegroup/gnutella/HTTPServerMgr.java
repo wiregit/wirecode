@@ -56,8 +56,14 @@ public class HTTPServerMgr implements Runnable {
     }
 
     public void run() {
-
+	
+	ActivityCallback callback = _manager.getCallback();
+	
+	callback.addDownload();
+	
 	download();
+
+	callback.removeDownload();
 
     }
 

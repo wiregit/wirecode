@@ -57,7 +57,13 @@ public class HTTPClientMgr implements Runnable {
 
     public void run() {
 
+	ActivityCallback callback = _manager.getCallback();
+
+	callback.addUpload();
+
 	upload();
+
+	callback.removeUpload();
 
     }
 
