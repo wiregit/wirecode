@@ -809,17 +809,6 @@ public class HostCatcher implements HostListener {
         return copy;
     }
 
-    /**
-     *  Remove unwanted or used entries
-     */
-    public synchronized void removeHost(String host, int port) {
-        Endpoint e=new Endpoint(host, port);
-        boolean removed1=ENDPOINT_SET.remove(e);
-        boolean removed2=ENDPOINT_QUEUE.removeAll(e);
-        //Check that ENDPOINT_SET.contains(e) <==> ENDPOINT_QUEUE.contains(e)
-        Assert.that(removed1==removed2, "Rep. invariant for HostCatcher " +
-            "broken.");
-    }
 
     /**
      * Notifies this that connect() has been called.  This may decide to give
