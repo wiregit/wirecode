@@ -281,7 +281,7 @@ public class DownloadManager implements BandwidthTracker {
         return downloader;
     }   
     
-    /*
+    /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
      * <tt>defaultURL</tt>, if specified.  If that fails, or if defaultURL does
      * not provide alternate locations, issues a requery with <tt>textQuery</tt>
@@ -298,7 +298,8 @@ public class DownloadManager implements BandwidthTracker {
      *
      * @exception AlreadyDownloadingException couldn't download because the
      *  another downloader is getting the file
-     * @exception IllegalArgumentException both urn and textQuery are null */
+     * @exception IllegalArgumentException both urn and textQuery are null 
+     */
     public synchronized Downloader download(
             URN urn, String textQuery, String filename, String [] defaultURL) 
             throws IllegalArgumentException, AlreadyDownloadingException {         
@@ -490,7 +491,8 @@ public class DownloadManager implements BandwidthTracker {
         return retVal;
     }
 
-    /* Adds the file named in qr to an existing downloader if appropriate.
+    /** 
+     * Adds the file named in qr to an existing downloader if appropriate.
      */
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
@@ -698,19 +700,39 @@ public class DownloadManager implements BandwidthTracker {
      * Sends a push request for the given file.  Returns false iff no push could
      * be sent, i.e., because no routing entry exists. That generally means you
      * shouldn't send any more pushes for this file.
-     *     @modifies router 
+     *
+     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
+     *  hit, containing data about the host we're pushing to
+     * @return <tt>true</tt> if the push was successfully sent, otherwise
+     *  <tt>false</tt>
      */
     public boolean sendPush(RemoteFileDesc file) {
+        
+        // handle multicast replies specially...
+        boolean multicast = file.isReplyToMulticast();
+        
         // multicast push requests must have a TTL of 1
-        byte ttl = file.isReplyToMulticast() ? 
+        byte ttl = multicast ? 
             1 : SettingsManager.instance().getTTL();
             
-        PushRequest pr=new PushRequest(GUID.makeGuid(),
-                                       ttl,
-                                       file.getClientGUID(),
-                                       file.getIndex(),
-                                       RouterService.getAddress(),
-                                       RouterService.getPort());
+        // make sure we don't use the forced ip address and port if 
+        // we received the reply via UDP (in response to a 
+        // multicasted query)
+        byte[] address = multicast ? 
+            RouterService.getNonForcedAddress() :
+            RouterService.getAddress();
+
+        int port = multicast ?
+            RouterService.getNonForcedPort() : 
+            RouterService.getPort(); 
+        PushRequest pr = 
+            new PushRequest(GUID.makeGuid(),
+                            ttl,
+                            file.getClientGUID(),
+                            file.getIndex(),
+                            address,
+                            port);
+
         try {
             if( file.isReplyToMulticast() )
                 router.sendMulticastPushRequest(pr);
