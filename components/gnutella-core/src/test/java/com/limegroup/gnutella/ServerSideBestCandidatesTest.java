@@ -22,9 +22,6 @@ import java.io.IOException;
 public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 	
 	
-	//some serialized ExtendedEndpoints taken from my gnutella.net file
-	private static String _candidateA = "24.102.60.110:6346,513,1079392562917,1079392566666";
-	private static String _candidateB = "67.8.163.72:6346,1483,1079131813732,1079389012339;1079131820399";
 	
 	public ServerSideBestCandidatesTest(String name){
 		super(name);
@@ -64,6 +61,7 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 	
 	public static void setSettings() throws Exception {
 		ServerSideTestCase.setSettings();
+		PrivilegedAccessor.setValue(Candidate.class,"MINUTE",new Integer(1));
 		
 	}
 	
@@ -183,8 +181,8 @@ public class ServerSideBestCandidatesTest extends ServerSideTestCase {
 		//first, create new Candidate []
 		
 		Candidate [] update = new Candidate [2];
-		update[0] = new Candidate(_candidateA);
-		update[1] = new Candidate(_candidateB);
+		update[0] = new Candidate("1.2.3.4",15,(short)20);
+		update[1] = new Candidate("1.2.3.4",15,(short)25);
 		
 		BestCandidatesVendorMessage bcvm = new BestCandidatesVendorMessage(update);
 		
