@@ -214,6 +214,10 @@ public abstract class Message implements Serializable{
     public byte[] getGUID() {
         return guid;
     }
+    
+     public void setGUID(byte[] guid) {
+        this.guid = guid;
+    }
 
     public byte getFunc() {
         return func;
