@@ -59,7 +59,7 @@ public class UDPBufferedOutputStream extends OutputStream {
             if ( activeCount < UDPConnectionProcessor.DATA_CHUNK_SIZE ) {
 				// Add to the current chunk
                 activeChunk[activeCount] = (byte) b;
-System.out.println("adding: "+b);
+log("adding: "+b);
                 activeCount++;
                 return;
             } else {
@@ -167,7 +167,7 @@ System.out.println("adding: "+b);
 		// Wakeup any write operation waiting for space
 		notify();
 
-System.out.println("chunk: "+rChunk);
+log("chunk: "+rChunk);
 		return rChunk;
     }
 
@@ -183,5 +183,8 @@ System.out.println("chunk: "+rChunk);
 			count++;
 
 		return count;
+    }
+
+    private static void log(String str) {
     }
 }

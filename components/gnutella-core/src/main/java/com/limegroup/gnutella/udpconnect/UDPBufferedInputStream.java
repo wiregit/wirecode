@@ -172,13 +172,13 @@ public class UDPBufferedInputStream extends InputStream {
     private void waitOnData() throws SocketTimeoutException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
-System.out.println("waiting ...");
+log("waiting ...");
                 _processor.wait(_processor.getReadTimeout()); 
-System.out.println("done waiting ...");
+log("done waiting ...");
             } catch(InterruptedException e) {
                 throw new SocketTimeoutException(); 
             } 
-System.out.println("exit waiting ...");
+log("exit waiting ...");
         }
     }
 
@@ -188,8 +188,11 @@ System.out.println("exit waiting ...");
     void wakeup() {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             // Wakeup any read operation waiting for data
-    System.out.println("wakeup ...");
+    log("wakeup ...");
             _processor.notify();  
         }
+    }
+
+    private static void log(String str) {
     }
 }
