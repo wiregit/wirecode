@@ -363,8 +363,7 @@ public class LimeXMLReplyCollection{
         LimeXMLDocument oldDoc = null;
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
-            oldDoc = (LimeXMLDocument)mainMap.get(hash);
-            mainMap.put(hash,newDoc);
+            oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
         }
         fd.replaceLimeXMLDocument(oldDoc, newDoc);
         return oldDoc;
