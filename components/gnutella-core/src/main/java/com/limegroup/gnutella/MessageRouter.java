@@ -217,6 +217,8 @@ public abstract class MessageRouter {
         RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
         
+        // run the task for candidate advertisement even if we are a leaf
+        // because we may become an UP later on.
         RouterService.schedule(new CandidateAdvertiser(), 
         			PromotionManager.CANDIDATE_PROPAGATION_DELAY,	
 					PromotionManager.CANDIDATE_PROPAGATION_INTERVAL);
