@@ -703,21 +703,22 @@ public class PingReply extends Message implements Serializable {
         System.arraycopy(PAYLOAD, 0,
                          newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
-        //try {
-            return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                                 newPayload);
-            //} catch (BadPacketException e) {
-            //Assert.that(false, "Couldn't strip payload! "+e);
-            //return null;
-            //}
+
+        return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
+                             newPayload);
     }
 
 
     ////////////////////////// Pong Marking //////////////////////////
 
-    /** Returns true if this message is "marked", i.e., likely from a
-     *  supernode. */
-    public boolean isMarked() {
+    /** 
+     * Returns true if this message is "marked", i.e., likely from an
+     * Ultrapeer. 
+     *
+     * @return <tt>true</tt> if this pong is marked as an Ultrapeer pong,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isUltrapeer() {
         //Returns true if kb is a power of two greater than or equal to eight.
         long kb = getKbytes();
         if (kb < 8)
