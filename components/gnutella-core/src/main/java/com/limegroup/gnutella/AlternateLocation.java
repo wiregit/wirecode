@@ -161,7 +161,7 @@ public final class AlternateLocation
 		}
 		URN urn = rfd.getSHA1Urn();
 		if(urn == null) {
-			throw new IllegalArgumentException("no SHA1 in RFD");
+			throw new IOException("no SHA1 in RFD");
 		}
 		int port = rfd.getPort();
 		if((port & 0xFFFF0000) != 0) {
