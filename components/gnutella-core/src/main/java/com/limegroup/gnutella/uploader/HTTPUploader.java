@@ -190,23 +190,34 @@ public final class HTTPUploader implements Uploader {
 		_hostName = host;
 		_guid = guid;
 		_port = port;
-		try {
-			_fileDesc = RouterService.getFileManager().get(_index);
-			_fileSize = (int)_fileDesc.getSize();
-            // if the requested name does not match our name on disk,
-			// report File Not Found
-			if(!_fileName.equals(_fileDesc.getName())) {
-				setState(FILE_NOT_FOUND);
-			}
-			else {
-				_fis = _fileDesc.createInputStream();
-				setState(CONNECTING);
-			}
-		} catch (IndexOutOfBoundsException e) {
-			setState(PUSH_FAILED);
-		} catch (IOException e) {
-			setState(FILE_NOT_FOUND);
-		}
+
+        FileManager fm = RouterService.getFileManager();
+        if(!fm.isValidIndex(_index)) {
+            setState(PUSH_FAILED);
+            return;
+        }
+        _fileDesc = fm.get(_index);
+        if(_fileDesc == null) {
+            setState(PUSH_FAILED);
+            return;                
+        }
+        
+        _fileSize = (int)_fileDesc.getSize();
+        
+            
+        // if the requested name does not match our name on disk,
+        // report File Not Found
+        if(!_fileName.equals(_fileDesc.getName())) {
+            setState(FILE_NOT_FOUND);
+        }
+        else {
+            try {
+                _fis = _fileDesc.createInputStream();
+                setState(CONNECTING);
+            } catch(IOException e) {
+                setState(FILE_NOT_FOUND);                    
+            }
+        }
 	}
 
     /**
