@@ -211,7 +211,7 @@ public abstract class MessageRouter {
 		} else if(msg instanceof PingRequest) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
-			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
+            handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
@@ -292,10 +292,11 @@ public abstract class MessageRouter {
      * ManagedConnection.loopForMessages().  Checks the routing table to see
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
-    final void handleUDPPingRequestPossibleDuplicate(
+    final void handleUDPPingRequestPossibleDuplicate(                                                     
         PingRequest pingRequest, ReplyHandler handler) {
-        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(), handler))
-            handleUDPPingRequest(pingRequest, handler);
+
+        // TODO: we should probably handle duplicates in some regard
+        handleUDPPingRequest(pingRequest, handler);
     }
 
     /**
