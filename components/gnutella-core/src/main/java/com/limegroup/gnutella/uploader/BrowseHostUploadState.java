@@ -19,10 +19,6 @@ public class BrowseHostUploadState implements UploadState
     private FileManager _fileManager;
     private MessageRouter _router;
     
-    /** Indexing query (4 white spaces) */
-    public static final String INDEXING_QUERY = "    ";
-    
-    
     public BrowseHostUploadState(FileManager fileManager, MessageRouter router)
     {
         this._fileManager = fileManager;
@@ -55,7 +51,7 @@ public class BrowseHostUploadState implements UploadState
         
         //create a new indexing query
         QueryRequest indexingQuery
-            = new QueryRequest((byte)1, 0, INDEXING_QUERY);
+            = new QueryRequest((byte)1, 0, FileManager.INDEXING_QUERY);
         
         //get responses from file manager
         Response[] responses = _fileManager.query(indexingQuery);
