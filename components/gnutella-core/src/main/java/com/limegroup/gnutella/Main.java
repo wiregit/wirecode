@@ -149,7 +149,11 @@ public class Main implements ActivityCallback {
 
 
     public void error(int message) {
-	//System.out.println("Error: "+message);
+	error(message, null);
+    }
+
+    public void error(int message, Throwable t) {
+	System.out.println("Error: "+message);
     }
     
     ///////////////////////////////////////////////////////////////////////////

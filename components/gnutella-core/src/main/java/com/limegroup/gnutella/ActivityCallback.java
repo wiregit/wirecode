@@ -63,13 +63,24 @@ public interface ActivityCallback
 
 
     /**
-     * REQUIRES: a string in the range of
-     * allowable error messages
-     *
-     * FUNCTION: displays one of the 
-     * predefined errors
+	 * Equivalent to error(errorCode, t).
      */
-    public void error(int error);
+    public void error(int errorCode);
+
+    /**
+     * @requires errorCode is a number matching up with one of the
+	 * predefined error messages, e.g., "15" to show GUIStyles.E_15.
+	 *
+     * @effects displays one the predefined error message
+	 *  corresponding to errorCode.  If t!=null, also displays the
+	 *  stack trace of t; in this case, the associated error message
+	 *  should explain the stack trace to the user.  
+	 */
+    public void error(int errorCode, Throwable t);
+	
+
+	/**
+	 * @requires a 
 
     /** Constants for the various errors
      *  See GUIStyles.java for the 
@@ -112,6 +123,9 @@ public interface ActivityCallback
     public static final int ERROR_12 = 12;
     /** error finding the router host */
     public static final int ERROR_13 = 13;
+	/** internal error */
+	public static final int ERROR_20 = 20;
+	
 }
 
 
