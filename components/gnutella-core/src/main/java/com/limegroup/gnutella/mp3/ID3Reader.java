@@ -5,6 +5,7 @@ import java.net.*;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import de.vdheide.mp3.*;
@@ -222,13 +223,22 @@ public final class ID3Reader {
             // if there is someplace to verify the file at, verify the RDF
             if (st.nextToken().equalsIgnoreCase("at")) {
                 String urlString = st.nextToken();
+                System.out.println("CLIENT: " + urlString);
                 URL url = new URL(urlString);
                 HttpURLConnection http = 
                     (HttpURLConnection) url.openConnection();
                 http.setInstanceFollowRedirects(true);
+                http.setUseCaches(false);
+                http.setRequestProperty("User-Agent",
+                                        CommonUtils.getHttpServer());
+                http.setRequestProperty(  /*no persistence*/
+                    HTTPHeaderName.CONNECTION.httpStringValue(), "close");
+                http.setRequestProperty("accept","text/html");//??
                 http.connect();
+                System.out.println("CLIENT: connected, waiting for resp.");
                 if (http.getResponseCode() != http.HTTP_ACCEPTED)
                     return false;
+                System.out.println("CLIENT: connected, got resp.");
                 
                 // TODO:
                 // we need to parse the source and see if license matches the
@@ -238,6 +248,9 @@ public final class ID3Reader {
             else
                 return false;
 
+        }
+        catch (ConnectException possible) {
+            return false;
         }
         catch (MalformedURLException possible) {
             return false;
