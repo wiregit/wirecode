@@ -99,7 +99,7 @@ public interface SettingsInterface
 	public static final long    DEFAULT_AVERAGE_UPTIME = 200;
 	public static final long    DEFAULT_TOTAL_UPTIME = 0;
 	public static final int     DEFAULT_SESSIONS = 1;
-    public static final String  DEFAULT_SERVANT_TYPE = Constants.CLIENT;
+    public static final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
 
     // The property key name constants
 	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
