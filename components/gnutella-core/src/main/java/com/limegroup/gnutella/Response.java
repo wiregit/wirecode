@@ -952,11 +952,10 @@ public class Response {
                         int port = ByteOrder.ubytes2int(
                                     ByteOrder.leb2short(locBytes, j+4)
                                    );
-                        if(!NetworkUtils.isValidPort(port))
-                            continue;
-                        if(!NetworkUtils.isValidAddress(host))
-                            continue;
-                        if(!IPFilter.instance().allow(host))
+                        if(!NetworkUtils.isValidPort(port) ||
+                           !NetworkUtils.isValidAddress(host) ||
+                           !IPFilter.instance().allow(host) ||
+                           NetworkUtils.isMe(host, port))
                             continue;
                         if( locations == null )
                             locations = new HashSet();
