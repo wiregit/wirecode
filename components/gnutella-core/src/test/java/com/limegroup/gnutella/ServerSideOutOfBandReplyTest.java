@@ -603,7 +603,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
 
         // WAIT for the expirer to expire the query reply
-        Thread.sleep(120 * 1000); // 2 minutes - expirer must run twice
+        Thread.sleep(60 * 1000); // 1 minute - expirer must run twice
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -624,6 +624,78 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 message = Message.read(in);
                 assertTrue(!((message instanceof QueryReply) &&
                              (Arrays.equals(ack.getGUID(), message.getGUID()))));
+            }
+        }
+        catch (IOException expected) {}
+
+        // good - now lets test that if we send a LOT of out-of-band queries,
+        // we get a lot of ReplyNumberVMs but at the 251st we don't get a
+        // ReplyNumberVM - this test may be fragile because i'm hardcoding
+        // MAX_BUFFERED_REPLIES from MessageRouter
+        final int MAX_BUFFERED_REPLIES = 15;
+
+        // ok, we need to set MAX_BUFFERED_REPLIES in MessageRouter
+        MessageRouter.MAX_BUFFERED_REPLIES = MAX_BUFFERED_REPLIES;
+
+        // send 15 queries
+        Random rand = new Random();
+        int numReplyNumberVMs = 0;
+        for (int i = 0; i < MAX_BUFFERED_REPLIES; i++) {
+            query = 
+            QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
+                                                  InetAddress.getLocalHost().getAddress(),
+                                                  UDP_ACCESS.getLocalPort());
+            query.hop();
+
+            if (rand.nextInt(2) == 0) {
+                ULTRAPEER_2.send(query);
+                ULTRAPEER_2.flush();
+            }
+            else {
+                ULTRAPEER_1.send(query);
+                ULTRAPEER_1.flush();
+            }
+
+            Thread.sleep(1250);
+            // count 15 ReplyNumberVMs
+            try {
+                while (true) {
+                    UDP_ACCESS.setSoTimeout(500);
+                    pack = new DatagramPacket(new byte[1000], 1000);
+                    UDP_ACCESS.receive(pack);
+                    InputStream in = new ByteArrayInputStream(pack.getData());
+                    message = Message.read(in);
+                    if (message instanceof ReplyNumberVendorMessage)
+                        numReplyNumberVMs++;
+                }
+            }
+            catch (IOException expected) {}
+        }
+
+        assertEquals("Didn't get all VMs!!", numReplyNumberVMs, 
+                     MAX_BUFFERED_REPLIES);
+
+        // send 2 new queries that shouldn't be ACKed
+        for (int i = 0; i < 2; i++) {
+            query = 
+            QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
+                                                  InetAddress.getLocalHost().getAddress(),
+                                                  UDP_ACCESS.getLocalPort());
+            query.hop();
+
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+        }
+
+        // count NO ReplyNumberVMs
+        try {
+            while (true) {
+                UDP_ACCESS.setSoTimeout(500);
+                pack = new DatagramPacket(new byte[1000], 1000);
+                UDP_ACCESS.receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                message = Message.read(in);
+                assertTrue(!(message instanceof ReplyNumberVendorMessage));
             }
         }
         catch (IOException expected) {}

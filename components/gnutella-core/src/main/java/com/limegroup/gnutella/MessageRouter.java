@@ -96,7 +96,11 @@ public abstract class MessageRouter {
 
     /** How long to buffer up out-of-band replies.
      */
-    private static final long CLEAR_TIME = 60 * 1000; // 60 seconds
+    private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+
+    /** The maximum amount of UDP replies to buffer up
+     */
+    static int MAX_BUFFERED_REPLIES = 250;
 
     /**
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
@@ -156,7 +160,11 @@ public abstract class MessageRouter {
         _secretPad = QueryKey.generateSecretPad();
 
         // schedule a runner to clear unused out-of-band replies
-        RouterService.schedule(new Expirer(), 0, CLEAR_TIME);
+        // this used to be called from RouterService.schedule, but i'm afraid
+        // that during hectic times the schedule thread may be waiting for this
+        // guy
+        Expirer expirer = new Expirer();
+        expirer.start();
     }
 
     /**
@@ -1481,8 +1489,15 @@ public abstract class MessageRouter {
                         throw new IOException("Could not construct VM:" + bpe);
                     }
                     // store reply by guid for later retrieval1
-                    _outOfBandReplies.put(new GUIDBundle(guid), queryReply);
-                    UDPService.instance().send(vm, addr, port);
+                    synchronized (_outOfBandReplies) {
+                        if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
+                            _outOfBandReplies.put(new GUIDBundle(guid), 
+                                                  queryReply);
+                            UDPService.instance().send(vm, addr, port);
+                        }
+                        // else "tough noogies, i'm too busy" - shouldn't
+                        // happen much
+                    }
                 }
             }
         }
@@ -1810,7 +1825,7 @@ public abstract class MessageRouter {
      *  QueryReplies waiting for out-of-band delivery.
      */
     private static class GUIDBundle {
-        public static final long MAX_LIFE = 45 * 1000; // 45 seconds
+        public static final long MAX_LIFE = 25 * 1000; // 25 seconds
         private final GUID _guid;
         private final long _creationTime;
 
@@ -1850,25 +1865,30 @@ public abstract class MessageRouter {
 
     /** Can be run to invalidate out-of-band ACKs that we are waiting for....
      */
-    private class Expirer implements Runnable {
+    private class Expirer extends Thread {
         public void run() {
-            try {
-                Set toRemove = new HashSet();
-                synchronized (_outOfBandReplies) {
-                    Iterator keys = _outOfBandReplies.keySet().iterator();
-                    while (keys.hasNext()) {
-                        GUIDBundle currQB = (GUIDBundle) keys.next();
-                        if ((currQB != null) && (currQB.shouldExpire()))
-                            toRemove.add(currQB);
+            while (true) {
+                try {
+                    sleep(CLEAR_TIME);
+                    Set toRemove = new HashSet();
+                    synchronized (_outOfBandReplies) {
+                        Iterator keys = _outOfBandReplies.keySet().iterator();
+                        while (keys.hasNext()) {
+                            GUIDBundle currQB = (GUIDBundle) keys.next();
+                            if ((currQB != null) && (currQB.shouldExpire()))
+                                toRemove.add(currQB);
+                        }
+                        // done iterating through _outOfBandReplies, remove the 
+                        // keys now...
+                        keys = toRemove.iterator();
+                        while (keys.hasNext())
+                            _outOfBandReplies.remove(keys.next());
                     }
-                    // done iterating through _outOfBandReplies, remove the 
-                    // keys now...
-                    keys = toRemove.iterator();
-                    while (keys.hasNext())
-                        _outOfBandReplies.remove(keys.next());
+                } 
+                catch (InterruptedException ignored) {}
+                catch(Throwable t) {
+                    ErrorService.error(t);
                 }
-            } catch(Throwable t) {
-                ErrorService.error(t);
             }
         }
     }
