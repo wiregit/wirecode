@@ -9,6 +9,7 @@ package com.limegroup.gnutella.messages.vendor;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.upelection.*;
+import com.limegroup.gnutella.util.*;
 
 import java.io.*;
 import java.text.ParseException;
@@ -22,7 +23,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	
 	/**
 	 * creates a new message containing the best candidate ultrapeers at 0 1 hops
-	 * respectively.  They are in serialized ExtendedEndpoint form.
+	 * respectively.  They are in serialized Candidate form.
 	 * 
 	 * @param bestCandidates an array of <tt>Candidate</tt> objects.  
 	 * If we only have data about our
@@ -45,8 +46,9 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 		}
 		else 
 			networkData = new byte[8];
-
-		System.arraycopy(bestCandidates[0].toBytes(),0,networkData,0,8); 
+		
+		if (bestCandidates[0]!=null)
+			System.arraycopy(bestCandidates[0].toBytes(),0,networkData,0,8); 
 		
 		return networkData;
 	}
@@ -80,7 +82,8 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 		_bestCandidates = new RemoteCandidate[2];
 		
 		//we have at least one candidate, it should start at offset 0
-		_bestCandidates[0] = new RemoteCandidate(payload,0);
+		if (payload[0]!=0x0)
+			_bestCandidates[0] = new RemoteCandidate(payload,0);
 		
 		//get the size of the candidates based on version
 		int candidateSize = RemoteCandidate.getBytesForVersion(getVersion());

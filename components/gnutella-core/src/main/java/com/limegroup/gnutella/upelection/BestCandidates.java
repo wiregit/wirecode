@@ -106,15 +106,16 @@ public class BestCandidates {
 		//if mine is null, take his candidate
 		//do the same if his candidate is better
 		//or he is changing his mind about his best candidate
-		if (newBest[1]==null || 
+		if (newCandidates[0]!=null)
+			if (newBest[1]==null || 
 				comp.compare(newBest[1], newCandidates[0]) < 0 ||  
 						newBest[1].getAdvertiser().isSame(newCandidates[0].getAdvertiser()))  
 			newBest[1] = newCandidates[0];
 			
 			
 		//and my ttl 2 best with the other guy's ttl 1 best
-			
-		if (newBest[2]==null ||
+		if (newCandidates[1]!=null)	
+			if (newBest[2]==null ||
 				 comp.compare(newBest[2], newCandidates[1]) < 0 ||
 				 	newBest[2].getAdvertiser().isSame(newCandidates[1].getAdvertiser()))
 			newBest[2] = newCandidates[1];
@@ -163,7 +164,9 @@ public class BestCandidates {
 	 * sets the current message to be sent in the next awakening of the advertising
 	 * thread.  
 	 */
-	private void propagateChange(){ 
+	private synchronized void propagateChange(){
+		if (_best[0]==null && _best[1]==null)
+			return;
 		_advertiser.setMsg(new BestCandidatesVendorMessage(_best));
 	} 
 	
