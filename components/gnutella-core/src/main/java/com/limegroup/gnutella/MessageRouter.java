@@ -2598,13 +2598,10 @@ public abstract class MessageRouter {
     /**
      * replies to a head ping that came through tcp
      * unless the same person has pinged us too recently.
-<<<<<<< MessageRouter.java
-=======
      * 
      * Note: if I'm a leaf, I can only receive these pings
      * from my Ultrapeer(s). In this case, the time limit is ignored.
      * 
->>>>>>> 1.203.4.5
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
     	
