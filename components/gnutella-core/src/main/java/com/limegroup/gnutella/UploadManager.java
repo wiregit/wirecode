@@ -1006,7 +1006,10 @@ public final class UploadManager implements BandwidthTracker {
 		
 		//at this point it is safe to allow other uploads from the same host
         RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
-        rcq.uploadDone(uploader.getFileDesc().getSHA1Urn());
+        
+        //check for nulls so that unit tests pass
+        if (rcq!=null && uploader!=null && uploader.getFileDesc()!=null)
+        	rcq.uploadDone(uploader.getFileDesc().getSHA1Urn());
         
 		// Enable auto shutdown
 		if( _activeUploadList.size()== 0)
@@ -1674,6 +1677,10 @@ public final class UploadManager implements BandwidthTracker {
     	 */
     	void uploadDone(URN sha1) {
     		Integer i = (Integer) ACTIVE_UPLOADS.get(sha1);
+    		
+    		if (i==null)
+    			return;
+    		
     		int newVal = i.intValue() -1;
     		if (newVal == 0)
     			ACTIVE_UPLOADS.remove(sha1);
