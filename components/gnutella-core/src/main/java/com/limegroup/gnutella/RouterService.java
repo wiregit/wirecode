@@ -891,7 +891,7 @@ public class RouterService {
 	public static void queryWhatIsNew(final byte[] guid, final MediaType type) {
 		try {
             QueryRequest qr = null;
-            if ((new GUID(guid)).addressesMatch(getAddress(), getPort())) {
+            if (GUID.addressesMatch(guid, getAddress(), getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
                 // of band support.  note that there is a VERY small chance that
                 // the guid will be address encoded but not meant for out of band

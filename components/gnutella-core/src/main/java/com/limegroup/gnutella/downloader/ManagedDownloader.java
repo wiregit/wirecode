@@ -2494,7 +2494,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
             //OK. I should add myself to queuedThreads if I am queued
             if(status.isQueued())
-                    queuedThreads.put(currentThread, new Integer(queuePos));
+                queuedThreads.put(currentThread, new Integer(queuePos));
             
             return true;
         }        

@@ -290,7 +290,9 @@ public class GUID implements Comparable {
         if (ip.length != 4)
             throw new IllegalArgumentException("IP address too big!");
         if (!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("Port is invalid: " + port);
+            return false;
+        if (!NetworkUtils.isValidAddress(ip))
+            return false;
 
         byte[] portBytes = new byte[2];
         ByteOrder.short2leb((short) port, portBytes, 0);
