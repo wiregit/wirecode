@@ -47,6 +47,7 @@ public class StatisticVendorMessage extends VendorMessage {
             case GiveStatsVendorMessage.ALL_CONNECTIONS_STATS:
             case GiveStatsVendorMessage.UP_CONNECTIONS_STATS:
             case GiveStatsVendorMessage.LEAF_CONNECTIONS_STATS:
+            case GiveStatsVendorMessage.UP_ELECTION_STATS:
                 return true;
             default:
                 return false;
@@ -193,6 +194,16 @@ public class StatisticVendorMessage extends VendorMessage {
                 buff.append(DELIMITER2);
             }
             return buff.toString().getBytes();
+         case GiveStatsVendorMessage.UP_ELECTION_STATS:
+         	buff.append((int)ReceivedMessageStatHandler.BEST_CANDIDATES.NUMBER_STAT.getTotal()).
+				append(DELIMITER).
+				append((int)ReceivedMessageStatHandler.UDP_CRAWLER_PING.NUMBER_STAT.getTotal()).
+				append(DELIMITER).
+				append((int)ReceivedMessageStatHandler.PROMOTION_REQUEST_TTL0.NUMBER_STAT.getTotal()).
+				append(DELIMITER).
+				append((int)ReceivedMessageStatHandler.PROMOTION_REQUEST_TTL1.NUMBER_STAT.getTotal()).
+				append(DELIMITER2);
+         	return buff.toString().getBytes();
         default:
             throw new IllegalArgumentException("unknown control: " + control);
         }
