@@ -54,7 +54,8 @@ public interface SettingsInterface
     public boolean    getClearCompletedDownload();
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
-    public int        getSearchAnimationTime();
+    public int        getSearchAnimationTime();		
+	
     public String     getConnectString();
     public String     getConnectOkString();
 
@@ -226,6 +227,10 @@ public interface SettingsInterface
     "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;"+
     "gif;jpg;jpeg;jpe;png;tif;tiff;"+
     "exe;zip;gz;gzip;hqx;tar;tgz;z";
+
+	
+
+
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
     public static final String[] DEFAULT_BANNED_WORDS   = {};
@@ -288,4 +293,26 @@ public interface SettingsInterface
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
+	
+	// RJS - ADDING 3 NEW PROPERTIES
+	
+	public static final String DEFAULT_CURRENT_VERSION = "0.4a";
+    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.4a";
+    public static final boolean DEFAULT_CHECK_AGAIN = true;
+
+	public static final String CURRENT_VERSION = "0.4a";
+    public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
+    public static final String CHECK_AGAIN = "CHECK_AGAIN";
+
+	public String getCurrentVersion();
+	public String getLastVersionChecked();
+	public boolean getCheckAgain();
+
+	public void setCurrentVersion(String version);
+	public void setLastVersionChecked(String last);
+	public void setCheckAgain(boolean check);
+
+
+	// END OF RJS ADDED
+
 }

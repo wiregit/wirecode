@@ -303,9 +303,6 @@ public class HTTPDownloader implements Runnable {
 		// incompleteFile represents the file as it would
 		// be named in the temporary incomplete directory.
 
-		System.out.println("The incomplete directory: " + incompletePath);
-
-
 		int start = 0;
 		_resume = false;
 		// if there is a file, set the initial amount
@@ -319,9 +316,6 @@ public class HTTPDownloader implements Runnable {
 		}
 		// convert the int start to String equivalent
 		String startRange = java.lang.String.valueOf(start);
-
-
-		System.out.println("The startRange is: " + startRange);
 
 		// Now, try to establish a socket connection
 		URLConnection conn;
@@ -532,12 +526,6 @@ public class HTTPDownloader implements Runnable {
 
         byte[] buf = new byte[1024];
 
-
-
-		System.out.println("The amount read is: " + _amountRead);
-		System.out.println("The size of the file is: " + _sizeOfFile);
-
-
         while (true) {
 
 			if (_amountRead == _sizeOfFile) {
@@ -575,10 +563,6 @@ public class HTTPDownloader implements Runnable {
 
             _amountRead+=c;
 
-			//  System.out.println("*******************");
-//  			System.out.println("The amount read is: " + _amountRead);
-//  			System.out.println("The size of the file is: " + _sizeOfFile);
-
         }
 
         try {
@@ -589,9 +573,6 @@ public class HTTPDownloader implements Runnable {
             _state = ERROR;
             return;
         }
-
-		System.out.println("The amount read is: " + _amountRead);
-		System.out.println("The size of the file is: " + _sizeOfFile);
 
         //Move from temporary directory to final directory.
         if ( _amountRead == _sizeOfFile ) {

@@ -21,6 +21,16 @@ import java.util.StringTokenizer;
 
 public class SettingsManager implements SettingsInterface
 {
+
+	// these two variables are for version control
+	// the currentVerison is the version number of this
+	// software, and the lastVersionChecked is the most
+	// recent version number checked.  (this is redundant)
+	// Also, there is a boolean for don't check again
+	private static String currentVersion_;
+	private String lastVersionChecked_;
+	private boolean checkAgain_;
+
     boolean write_ = false;
     /** Variables for the various settings */
     private static byte     ttl_;
@@ -54,7 +64,8 @@ public class SettingsManager implements SettingsInterface
     private static boolean  clearCompletedUpload_;
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
-    private static int      maxUploads_;
+    private static int      maxUploads_;	
+
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
 
@@ -124,6 +135,46 @@ public class SettingsManager implements SettingsInterface
         catch(SecurityException se) {}
         initSettings();
     }
+
+
+	/**
+	 * private methods to handle versioning 
+	 * control information
+	 */
+	public String getCurrentVersion() {
+		return currentVersion_;
+	}
+	public String getLastVersionChecked() {
+		return lastVersionChecked_;
+	}
+	public boolean getCheckAgain() {
+		return checkAgain_;
+	}
+
+	public void setCurrentVersion(String version) {
+		currentVersion_ = version;
+		props_.put(SettingsInterface.CURRENT_VERSION, version);
+        writeProperties();
+	}
+	
+	public void setLastVersionChecked(String last) {
+		lastVersionChecked_ = last;
+		props_.put(SettingsInterface.LAST_VERSION_CHECKED, last);
+		writeProperties();
+	}
+	
+	public void setCheckAgain(boolean check) {
+		checkAgain_ = check;
+		String c;
+		if (check == true)
+			c = "true";
+		else 
+			c = "false";
+		props_.put(SettingsInterface.CHECK_AGAIN, c);
+        writeProperties();
+
+	}
+
 
     /** Check the properties file and set the props */
     private void initSettings() {
@@ -319,6 +370,27 @@ public class SettingsManager implements SettingsInterface
                     catch (IllegalArgumentException ie){}
                 }
 
+
+				else if(key.equals(SettingsInterface.CURRENT_VERSION)) {
+                    try {setCurrentVersion(p);}
+                    catch (IllegalArgumentException ie){}
+                }
+				else if(key.equals(SettingsInterface.LAST_VERSION_CHECKED)) {
+                    try {setLastVersionChecked(p);}
+                    catch (IllegalArgumentException ie){}
+                }
+				else if(key.equals(SettingsInterface.CHECK_AGAIN)) {
+                    boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    try { setCheckAgain(bs); }
+                    catch (IllegalArgumentException ie){}
+                }
+
                 else if(key.equals(SettingsInterface.INCOMPLETE_DIR)) {
                     setIncompleteDirectory(p);
                 }
@@ -473,6 +545,12 @@ public class SettingsManager implements SettingsInterface
         setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
         setConnectString(SettingsInterface.DEFAULT_CONNECT_STRING);
         setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
+
+		// RJS - setting the default values... 
+		setCurrentVersion(SettingsInterface.DEFAULT_CURRENT_VERSION);
+		setLastVersionChecked(SettingsInterface.DEFAULT_LAST_VERSION_CHECKED);
+		setCheckAgain(SettingsInterface.DEFAULT_CHECK_AGAIN);
+
         write_ = true;
         writeProperties();
     }
