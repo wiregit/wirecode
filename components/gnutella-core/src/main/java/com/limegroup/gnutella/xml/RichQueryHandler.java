@@ -1,16 +1,15 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
-import org.xml.sax.SAXException;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
+
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
 import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Iterator;
 
 
 /**
