@@ -249,6 +249,8 @@ public class RemoteFileDesc implements Serializable {
 		Iterator iter = _urns.iterator(); 
 		while(iter.hasNext()) {
 			URN urn = (URN)iter.next();
+			// defensively check against null values added.
+			if(urn == null) continue;
 			if(urn.isSHA1()) {
 				return urn;
 			}
