@@ -133,31 +133,6 @@ public class DIMERecord {
     private final byte _byte2;
     
     /**
-     * The length of the options.
-     */
-    private final int _optionsLength;
-    
-    /**
-     * The length of the id field.
-     */
-    private final int _idLength;
-    
-    /**
-     * The length of the type field.
-     */
-    private final int _typeLength;
-    
-    /**
-     * The length of the data.
-     *
-     * The DIME specification allows this to be a 32-bit unsigned field,
-     * which in Java would be a long -- but in order to hold the array
-     * of the data, we can only read up to 16 unsigned bits (an int), in order
-     * to size the array correctly.
-     */
-    private final int _dataLength;
-    
-    /**
      * The options.
      */
     private final byte[] _options;
@@ -194,10 +169,6 @@ public class DIMERecord {
                        byte[] id, byte[] type, byte[] data) {
         _byte1 = byte1;
         _byte2 = byte2;
-        _optionsLength = options.length;
-        _idLength = id.length;
-        _typeLength = type.length;
-        _dataLength = data.length;
         _options = options;
         _id = id;
         _type = type;
@@ -263,11 +234,12 @@ public class DIMERecord {
         // Write the header.
         out.write(_byte1);
         out.write(_byte2);
-        ByteOrder.int2beb(_optionsLength, out, 2);
-        ByteOrder.int2beb(_idLength, out, 2);
-        ByteOrder.int2beb(_typeLength, out, 2);
-        ByteOrder.int2beb(_dataLength, out, 4);
+        ByteOrder.int2beb(_options.length, out, 2);
+        ByteOrder.int2beb(_id.length, out, 2);
+        ByteOrder.int2beb(_type.length, out, 2);
+        ByteOrder.int2beb(_data.length, out, 4);
         
+        // Write out the data.
         writeDataWithPadding(_options, out);
         writeDataWithPadding(_id, out);
         writeDataWithPadding(_type, out);
@@ -397,7 +369,7 @@ public class DIMERecord {
         byte maskedType = (byte)(_byte2 & TYPE_MASK);
         switch(maskedType) {
         case TYPE_UNCHANGED:
-            if(_typeLength != 0)
+            if(_type.length != 0)
                 throw new IllegalArgumentException(
                     "TYPE_UNCHANGED requires 0 type length");
             break;                    
@@ -406,12 +378,12 @@ public class DIMERecord {
         case TYPE_ABSOLUTE_URI:
             break;
         case TYPE_UNKNOWN:
-            if(_typeLength != 0)
+            if(_type.length != 0)
                 throw new IllegalArgumentException(
                     "TYPE_UNKNOWN requires 0 type length");
             break;
         case TYPE_NONE:
-            if(_typeLength != 0 || _dataLength != 0)
+            if(_type.length != 0 || _data.length != 0)
                 throw new IllegalArgumentException(
                     "TYPE_NONE requires 0 type & data length");
             break;
