@@ -1075,9 +1075,8 @@ public abstract class MessageRouter {
         }
 
         // 2)
-        PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
-                                         (byte) 0);
-        UDPService.instance().send(pr, sourceAddr, portToContact);
+        // we used to do old style ConnectBacks here but no use - the chances
+        // not having ANY redirct candidates is small.
     }
 
 
@@ -1154,29 +1153,8 @@ public abstract class MessageRouter {
         }
 
         // 2)
-        final String addrToContact = sourceAddr.getHostAddress();
-
-        Thread connectBack = new ManagedThread( new Runnable() {
-            public void run() {
-                Socket sock = null;
-                OutputStream os = null;
-                try {
-                    sock = Sockets.connect(addrToContact, portToContact, 12);
-                    os = sock.getOutputStream();
-                    os.write("\n\n".getBytes());
-                } catch (IOException ignored) {
-                } catch (SecurityException ignored) {
-                } catch (Throwable t) {
-                    ErrorService.error(t);
-                } finally {
-                    if(sock != null)
-                        try { sock.close(); } catch(IOException ignored) {}
-                    if(os != null)
-                        try { os.close(); } catch(IOException ignored) {}
-                }
-            }
-        }, "TCPConnectBackThread");
-        connectBack.start();
+        // we used to do old style ConnectBacks here but no use - the chances
+        // not having ANY redirct candidates is small.
     }
 
 
