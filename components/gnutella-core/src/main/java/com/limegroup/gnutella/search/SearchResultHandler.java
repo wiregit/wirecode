@@ -9,6 +9,9 @@ import com.limegroup.gnutella.xml.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import com.sun.java.util.collections.*;
 
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +26,17 @@ public final class SearchResultHandler {
     
     private static final Log LOG =
         LogFactory.getLog(SearchResultHandler.class);
+    
+    /**
+     * set of hosts which are firewalled and returned ReplyNumberVMs.
+     *  - it needs to be big since we can get results from lots of people.
+     *  - static because a firewalled host is always firewalled
+     *  - self-expiring because we may not get a reply from the same host 
+     *    for more than one search and do not want to remove it from the set 
+     *  - not locked because all processing happens in serial.
+     */
+    private static Set _firewalledOOBHosts = 
+    	new FixedSizeExpiringSet(10000,30*1000);
         
     /**
      * The maximum amount of time to allow a query's processing
@@ -141,6 +155,10 @@ public final class SearchResultHandler {
             return -1;
     }
     
+    public static void receivedReplyVM(InetAddress host) {
+    		_firewalledOOBHosts.add(host);
+    }
+    
     /**
      * Determines whether or not the specified 
     
@@ -161,6 +179,7 @@ public final class SearchResultHandler {
      */
     private boolean handleReply(final QueryReply qr) {
         HostData data;
+        boolean OOBFirewalled=false;
         try {
             data = qr.getHostData();
         } catch(BadPacketException bpe) {
@@ -194,7 +213,18 @@ public final class SearchResultHandler {
                return false;
             }
         }
-
+        
+        //check if this is an oob reply from a firewalled host
+        //only do it if the message arrived through udp - this way we ensure only the 
+        //UDP reading thread will do this.
+        if (qr.getNetwork() == Message.N_UDP)
+        	try{
+        		OOBFirewalled = _firewalledOOBHosts.contains(
+        				InetAddress.getByName(data.getIP()));
+        	}catch(UnknownHostException tough) {
+        		OOBFirewalled=false;
+        	}
+        
         List results = null;
         try {
             results = qr.getResultsAsList();
@@ -204,6 +234,8 @@ public final class SearchResultHandler {
         }
 
         int numSentToFrontEnd = 0;
+        long now = System.currentTimeMillis();
+        
         for(Iterator iter = results.iterator(); iter.hasNext();) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
@@ -213,6 +245,11 @@ public final class SearchResultHandler {
                 continue;
 
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
+            
+            //set the status in the RFDs
+            if (OOBFirewalled)
+            	rfd.setOOBStatus(now);
+            
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
             numSentToFrontEnd++;

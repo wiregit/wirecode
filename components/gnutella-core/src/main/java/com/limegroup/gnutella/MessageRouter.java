@@ -1026,6 +1026,12 @@ public abstract class MessageRouter {
             return;
         }
 
+        /**
+         * if the reply claims it cannot receive unsolicited, record that.
+         */
+        if (!reply.canReceiveUnsolicited())
+        	SearchResultHandler.receivedReplyVM(datagram.getAddress());
+        
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(qGUID, reply.getNumResults());
         UDPService.instance().send(ack, datagram.getAddress(),

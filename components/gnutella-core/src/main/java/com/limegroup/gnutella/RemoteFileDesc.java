@@ -6,6 +6,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 import com.bitzi.util.Base32;
 import java.net.*;
 
@@ -130,6 +131,15 @@ public class RemoteFileDesc implements Serializable {
      */
     private transient long _creationTime;
     
+    /**
+     * The time this RFD arrived as a response to a query
+     */
+    private transient long _arrivalTime;
+    
+    /**
+     * Whether this RFD arrived as an OOB response from a firewalled host. 
+     */
+    private transient boolean _isOOBFirewalled;
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
      * but with a different remote host.
@@ -658,6 +668,25 @@ public class RemoteFileDesc implements Serializable {
 
     private boolean byteArrayEquals(byte[] one, byte[] two) {
         return one == null ? two == null : Arrays.equals(one, two);
+    }
+    
+    /**
+     * 
+     * @return whether this rfd can be requested with a push sent via UDP.
+     */
+    public boolean canPushUDP() {
+    	return _isOOBFirewalled && 
+			_arrivalTime + ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue() >
+				System.currentTimeMillis();
+    }
+    
+    /**
+     * tells this RFD it points to a host behind firewall.
+     * @param receivedTime when the reply arrived
+     */
+    public void setOOBStatus(long receivedTime) {
+    	_arrivalTime = receivedTime;
+    	_isOOBFirewalled=true;
     }
 
 	/**
