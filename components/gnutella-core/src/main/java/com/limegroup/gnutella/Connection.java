@@ -441,7 +441,9 @@ public class Connection implements Runnable {
 				int port = manager.getListeningPort();
 				byte[] ip=sock.getLocalAddress().getAddress(); //little endian
 				long speed = SettingsManager.instance().getConnectionSpeed();
-				byte[] clientGUID = manager.ClientId.getBytes();
+				//byte[] clientGUID = manager.ClientId.getBytes(); - This should
+				// have been a bug
+				byte[] clientGUID = GUID.fromHexString(manager.ClientId);
 
 				// changing the port here to test push:
 			  	QueryReply qreply = new QueryReply(guid, ttl, port, ip, 

@@ -358,7 +358,8 @@ public class SettingsManager implements SettingsInterface
 	setPort(SettingsInterface.DEFAULT_PORT);
 	setConnectionSpeed(SettingsInterface.DEFAULT_SPEED);
 	setSearchLimit(SettingsInterface.DEFAULT_SEARCH_LIMIT);
-	setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
+	//setClientID(SettingsInterface.DEFAULT_CLIENT_ID);
+	setClientID( (new GUID(Message.makeGuid())).toHexString() );	
 	setStats(SettingsInterface.DEFAULT_STATS);
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
 	setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);

@@ -167,7 +167,8 @@ public interface SettingsInterface
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client/gu id */
-    public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
+    //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
+    public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default boolean for stats file */
     public static final boolean DEFAULT_STATS          = false;
     /** Default maximum number of connections */
