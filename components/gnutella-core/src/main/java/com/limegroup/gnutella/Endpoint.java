@@ -1,13 +1,9 @@
 package com.limegroup.gnutella;
 
-import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.*;
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size
