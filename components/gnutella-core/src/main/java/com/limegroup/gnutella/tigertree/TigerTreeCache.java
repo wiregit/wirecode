@@ -37,7 +37,7 @@ public final class TigerTreeCache {
     /**
      * TigerTreeCache instance variable.
      */
-    private static TigerTreeCache instance = new TigerTreeCache();
+    private static TigerTreeCache instance = null;
     
     /**
      * The ProcessingQueue to do the hashing.
@@ -64,7 +64,9 @@ public final class TigerTreeCache {
      * 
      * @return the <tt>TigerTreeCache</tt> instance
      */
-    public static TigerTreeCache instance() {
+    public synchronized static TigerTreeCache instance() {
+        if(instance == null)
+            instance = new TigerTreeCache();
         return instance;
     }
 
@@ -139,13 +141,15 @@ public final class TigerTreeCache {
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));
             Map map = (Map)ois.readObject();
-            for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                // Remove values that aren't correct.
-                Map.Entry next = (Map.Entry)i.next();
-                Object key = next.getKey();
-                Object value = next.getValue();
-                if( !(key instanceof URN) || !(value instanceof HashTree) )
-                    i.remove();
+            if(map != null) {
+                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
+                    // Remove values that aren't correct.
+                    Map.Entry next = (Map.Entry)i.next();
+                    Object key = next.getKey();
+                    Object value = next.getValue();
+                    if( !(key instanceof URN) || !(value instanceof HashTree) )
+                        i.remove();
+                }
             }
             return map;
         } catch(Throwable t) {
