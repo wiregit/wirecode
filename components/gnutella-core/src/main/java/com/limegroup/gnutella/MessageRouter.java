@@ -384,11 +384,12 @@ public abstract class MessageRouter
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
 			broadcastQueryRequest(request, handler);
+			forwardQueryRequestToLeaves(request, handler);
 		}
 			
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
-		forwardQueryRequestToLeaves(request, handler);
+		//forwardQueryRequestToLeaves(request, handler);
         respondToQueryRequest(request, _clientGUID);
     }
 
