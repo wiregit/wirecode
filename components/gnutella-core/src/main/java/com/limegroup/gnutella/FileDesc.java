@@ -185,7 +185,6 @@ public final class FileDesc {
 	 * @return the SHA1 <tt>URN</tt> instance if there is one, <tt>null</tt>
 	 *  otherwise
      */
-	/*
     public URN getSHA1Urn() {
         Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
@@ -196,7 +195,6 @@ public final class FileDesc {
         }
         return null;
     }
-	*/
 
 	/**
 	 * Returns the <tt>File</tt> instance for this <tt>FileDesc</tt>.
