@@ -18,7 +18,10 @@ public class FileManager {
     /** The string used by LimeWire to browse hosts. */
     public static final String BROWSE_QUERY="*.*";
 
-    /******  LOCKING: obtain this' monitor before modifying this *******/
+    /**********************************************************************
+     * LOCKING: obtain this' monitor before modifying this. The exception
+     * is _loadThread, which is controlled by _loadThreadLock.
+     **********************************************************************/
 
     /** the total size of all files, in bytes.
      *  INVARIANT: _size=sum of all size of the elements of _files */
@@ -58,8 +61,13 @@ public class FileManager {
     /** The thread responsisble for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
      *  because indexing files can be slow.  Interrupt this thread to stop the
-     *  loading; it will periodically check its interrupted status. */
+     *  loading; it will periodically check its interrupted status. 
+     *  LOCKING: obtain _loadThreadLock before modifying and before obtaining
+     *  this (to prevent deadlock). */
     private Thread _loadThread;
+    /** The lock for _loadThread.  Necessary to prevent deadlocks in
+     *  loadSettings. */
+    private Object _loadThreadLock=new Object();
 
     /** The single instance of FileManager.  (Singleton pattern.) */
     private static FileManager _instance = new FileManager();
@@ -115,6 +123,9 @@ public class FileManager {
         this._callback=callback;
         loadSettings(false);
     }
+
+    ////////////////////////////// Accessors ///////////////////////////////
+
     
     /** Returns the size of all files, in <b>bytes</b>.  Note that the largest
      *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
@@ -172,6 +183,8 @@ public class FileManager {
         return ret;
     }
 
+    
+    ///////////////////////////// Mutators ////////////////////////////////////   
 
     /**
      * Ensures this contains exactly the files specified by the
@@ -192,23 +205,61 @@ public class FileManager {
      * discarded, and loading starts over immediately.
      *
      * @modifies this 
-	 * @param notifyOnClear determines whether or not to make the callback to
-	 *  clear the shared files from the gui.
+	 * @param notifyOnClear if true, callback is notified via clearSharedFiles
+     *  when the previous load settings thread has been killed.
      */
-    public synchronized void loadSettings(boolean notifyOnClear) {
-        // If settings are already being loaded, interrupt and wait for them to
-        // complete.  TODO: the call to join would block if the call to
-        // File.list called by listFiles called by addDirectory blocks.  If this
-        // is the case, we need to spawn a thread before join'ing.
-        if (_loadThread!=null) {
-            _loadThread.interrupt();
-            try {
-                _loadThread.join();
-            } catch (InterruptedException e) {
-                return;
+    public void loadSettings(boolean notifyOnClear) {
+        synchronized (_loadThreadLock) {
+            //If settings are already being loaded, interrupt and wait for them
+            //to complete.  Note that we cannot hold this' monitor when calling
+            //join(); doing so may result in deadlock!  On the other hand, we
+            //have to hold _loadThreadLock's monitor to prevent a load thread
+            //from starting up immediately after checking for null.
+            //
+            //TODO: the call to join would block if the call to File.list called
+            //by listFiles called by addDirectory blocks.  If this is the case,
+            //we need to spawn a thread before join'ing.
+            if (_loadThread!=null) {
+                _loadThread.interrupt();
+                try {
+                    _loadThread.join();
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
-        }
 
+            //Clear this and get the list of directories.
+            final String[] directories=loadSettingsInternal();
+            if (notifyOnClear) 
+                _callback.clearSharedFiles();
+
+            //Load the shared directories and their files asynchonously.
+            //Duplicates in the directories list will be ignored.  Note that the
+            //runner thread only obtain this' monitor when adding individual
+            //files.
+            _loadThread = new Thread("FileManager.loadSettings") {
+                public void run() {
+                    // Add each directory as long as we're not interrupted.
+                    int i=0;
+                    while (i<directories.length && !_loadThread.isInterrupted()) {
+                        addDirectory(new File(directories[i]), null);      
+                        i++;
+                    }
+
+                    // Compact the index once.  As an optimization, we skip this
+                    // if loadSettings has subsequently been called.
+                    if (! _loadThread.isInterrupted())
+                        trim();                    
+                }
+            };
+            _loadThread.start();
+        } 
+    }
+
+    /** Clears this', reloads this' extensions, and returns an array of
+     *  directories that should be added to this via addDirectory.
+     *      @modifies this */
+    private synchronized String[] loadSettingsInternal() {
         // Reset the file list info
         _size = 0;
         _numFiles = 0;
@@ -216,13 +267,11 @@ public class FileManager {
         _index=new Trie(true); //maintain invariant
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
-        if (notifyOnClear) 
-			_callback.clearSharedFiles();
 		
         // Load the extensions.
         String[] extensions = HTTPUtil.stringSplit(
             SettingsManager.instance().getExtensions().trim(),
-            ';');
+                                                   ';');
         for (int i=0; i<extensions.length; i++)
             _extensions.add(extensions[i].toLowerCase());
                       
@@ -241,34 +290,7 @@ public class FileManager {
                 return ((String)a).length()-((String)b).length();
             }
         });
-
-        // Load the shared directories and their files asynchonously.
-        // Duplicates in the directories list will be ignored.  Note that the
-        // runner thread only obtain this' monitor when adding individual files.
-        _loadThread = new Thread("FileManager.loadSettings") {
-            public void run() {
-                // Add each directory as long as we're not interrupted.
-                int i=0;
-                while (i<directories.length && !_loadThread.isInterrupted()) {
-                    addDirectory(new File(directories[i]), null);      
-                    i++;
-                }
-
-                // Compact the index once.  As an optimization, we skip this if
-                // loadSettings has subsequently been called.
-                if (! _loadThread.isInterrupted()) {
-                    synchronized (FileManager.this) {
-                        _index.trim(new Function() {
-                            public Object apply(Object intSet) {
-                                ((IntSet)intSet).trim();
-                                return intSet;
-                            }
-                        });
-                    }
-                }
-            }
-        };
-        _loadThread.start();
+        return directories;
     }
 
 
@@ -500,6 +522,17 @@ public class FileManager {
         }
     }
 
+
+    /** Ensures that this' index takes the minimum amount of space.  Only
+     *  affects performance, not correctness; hence no modifies clause. */
+    private synchronized void trim() {
+        _index.trim(new Function() {
+            public Object apply(Object intSet) {
+                ((IntSet)intSet).trim();
+                return intSet;
+            }
+        });
+    }
 
     /** Returns true if filename has a shared extension.  Case is ignored. */
     private boolean hasExtension(String filename) {
@@ -773,7 +806,7 @@ public class FileManager {
             settings.setDirectories(directory.getAbsolutePath());
             //Since we don't have a non-blocking loadSettings method, we just
             //wait a little time and cross our fingers.
-            fman.loadSettings();
+            fman.loadSettings(false);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) { }
