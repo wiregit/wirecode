@@ -103,12 +103,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	
 	/** 
 	 * the router we have and the sub-device necessary for port mapping 
-	 *  LOCKING: this
+	 *  LOCKING: DEVICE_LOCK
 	 */
 	private Device _router;
 	
 	/**
-	 * The port-mapping service we'll use.  LOCKING: this
+	 * The port-mapping service we'll use.  LOCKING: DEVICE_LOCK
 	 */
 	private Service _service;
 	
@@ -116,8 +116,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	private Mapping _tcp, _udp;
 	
 	/**
-	 * Lock that waitForDevice and deviceAdded share for device notification. 
-	 * LOCKING: MUST grab this' lock first.
+	 * Lock that everything uses.
 	 */
 	private final Object DEVICE_LOCK = new Object();
 	
@@ -127,30 +126,37 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
         addDeviceChangeListener(this);
     }
     
-    public synchronized boolean start() {
+    public boolean start() {
 	    LOG.debug("Starting UPnP Manager.");
 	    
-	    try {
-	        return super.start();
-	    } catch(Exception bad) {
-	        ConnectionSettings.DISABLE_UPNP.setValue(true);
-	        ErrorService.error(bad);
-	        return false;
-	    }
+
+        synchronized(DEVICE_LOCK) {
+            try {
+    	        return super.start();
+    	    } catch(Exception bad) {
+    	        ConnectionSettings.DISABLE_UPNP.setValue(true);
+    	        ErrorService.error(bad);
+    	        return false;
+    	    }
+        }
 	}
 	
 	/**
 	 * @return whether we are behind an UPnP-enabled NAT/router
 	 */
-	public synchronized boolean isNATPresent() {
-		return _router != null && _service != null;
+	public boolean isNATPresent() {
+	    synchronized(DEVICE_LOCK) {
+		    return _router != null && _service != null;
+        }
 	}
 
 	/**
 	 * @return whether we have created mappings this session
 	 */
-	public synchronized boolean mappingsExist() {
-		return _tcp != null && _udp != null;
+	public boolean mappingsExist() {
+	    synchronized(DEVICE_LOCK) {
+		    return _tcp != null && _udp != null;
+        }
 	}
 	
 	/**
@@ -160,7 +166,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	public InetAddress getNATAddress() throws UnknownHostException {
 		Action getIP;
 		
-		synchronized(this) {
+		synchronized(DEVICE_LOCK) {
 			if (!isNATPresent())
 				return null;
 			getIP = _service.getAction("GetExternalIPAddress");
@@ -201,7 +207,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	/**
 	 * this method will be called when we discover a UPnP device.
 	 */
-	public synchronized void deviceAdded(Device dev) {
+	public void deviceAdded(Device dev) {
 	    synchronized(DEVICE_LOCK) {
             if(LOG.isTraceEnabled())
                 LOG.trace("Device added: " + dev.getFriendlyName());
@@ -332,7 +338,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		}
 		
 		// save a ref to the mappings
-		synchronized(this) {
+		synchronized(DEVICE_LOCK) {
 			_tcp = tcp;
 			_udp = udp;
 		}
@@ -356,7 +362,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 			LOG.debug("adding "+m);
 		
 		Action add;
-		synchronized(this) {
+		synchronized(DEVICE_LOCK) {
 			add = _service.getAction("AddPortMapping");
 		}
 		
@@ -391,7 +397,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 			LOG.debug("removing "+m);
 		
 		Action remove;
-		synchronized(this) {
+		synchronized(DEVICE_LOCK) {
 			remove = _service.getAction("DeletePortMapping");
 		}
 		
@@ -416,7 +422,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 */
 	public void clearMappingsOnShutdown() {
 		final Mapping tcp, udp;
-		synchronized(this) {
+		synchronized(DEVICE_LOCK) {
 			tcp = _tcp;
 			udp = _udp;
 		}
@@ -455,10 +461,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		stop();
 	}
 
-	private synchronized String getGUIDSuffix() {
-	    if (_guidSuffix == null)
-			_guidSuffix = ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
-	    return _guidSuffix;
+	private String getGUIDSuffix() {
+	    synchronized(DEVICE_LOCK) {
+    	    if (_guidSuffix == null)
+    			_guidSuffix = ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
+    	    return _guidSuffix;
+        }
 	}
 	/**
 	 * stub 
@@ -566,7 +574,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		    
 			Set mappings = new HashSet();
 			Action getGeneric;
-			synchronized(UPnPManager.this) {
+			synchronized(DEVICE_LOCK) {
 				getGeneric = _service.getAction("GetGenericPortMappingEntry");
 			}
 			
@@ -618,7 +626,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 						current._description.equals(UDP_PREFIX+getGUIDSuffix())) {
 					
 					// is it not the same as the mappings we created this session?
-					synchronized(this) {
+					synchronized(DEVICE_LOCK) {
 						
 						if (_tcp != null && _udp != null &&
 								current._externalPort == _tcp._externalPort &&
