@@ -45,7 +45,7 @@ public class UDPHeadTest extends BaseTestCase {
 	/**
 	 * an interval that can fit in a packet, and one that can't
 	 */
-	static IntervalSet _ranges, _rangesTooBig;
+	static IntervalSet _ranges, _rangesMedium, _rangesTooBig;
 	
 	
 	public UDPHeadTest(String name) {
@@ -70,17 +70,28 @@ public class UDPHeadTest extends BaseTestCase {
 		_fm = new FileManagerStub();
 		_um = new UploadManagerStub();
 		
-		Random r = new Random();
+		int base=0;
 		_ranges = new IntervalSet();
 		for (int i=2;i<10;i++) {
-			int low = r.nextInt(1000);
+			int low = base;
 			_ranges.add(new Interval(low,low+i));
+			base+=2*i;
 		}
 		
+		base=0;
+		_rangesMedium = new IntervalSet();
+		for (int i=2;i<63;i++) {
+			int low = base;
+			_rangesMedium.add(new Interval(low,low+i));
+			base+=2*i;
+		}
+		
+		base=0;
 		_rangesTooBig = new IntervalSet();
 		for (int i=2;i<200;i++) {
-			int low = r.nextInt(1000);
+			int low = base;
 			_rangesTooBig.add(new Interval(low,low+i));
+			base+=2*i;
 		}
 		
 		_haveFull = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
@@ -212,6 +223,9 @@ public class UDPHeadTest extends BaseTestCase {
 		pongi = reparse(new UDPHeadPong(pingi));
 		
 		assertNull(pongi.getRanges());
+		assertLessThan(512,pongi.getPayload().length);
+		
+		_partial.setRangesByte(_ranges.toBytes());
 	}
 	
 	/**
@@ -242,6 +256,33 @@ public class UDPHeadTest extends BaseTestCase {
 		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(new UDPHeadPong(ping));
 		assertGreaterThanOrEquals(127,pong.getQueueStatus());
+	}
+	
+	/**
+	 * tests handling of alternate locations.
+	 */
+	public void testAltLocs() throws Exception {
+		
+		//add some big interval that fill most of the packet but not all
+		_partial.setRangesByte(_rangesMedium.toBytes());
+		
+		//ping 1 should contain alternate locations. 
+		
+		//the second ping should be too big to contain all altlocs.
+		UDPHeadPing ping1 = new UDPHeadPing(_haveFull,UDPHeadPing.ALT_LOCS);
+		UDPHeadPing ping2 = new UDPHeadPing(_havePartial,
+				UDPHeadPing.ALT_LOCS | UDPHeadPing.INTERVALS);
+		
+		UDPHeadPong pong1 = reparse (new UDPHeadPong(ping1));
+		UDPHeadPong pong2 = reparse (new UDPHeadPong(ping2));
+		
+		assertNull(pong1.getRanges());
+		assertNotNull(pong2.getRanges());
+		assertTrue(Arrays.equals(_rangesMedium.toBytes(),pong2.getRanges().toBytes()));
+		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
+		
+		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());
+		assertLessThan(512,pong2.getPayload().length);
 	}
 	
 	private UDPHeadPong reparse(UDPHeadPong original) throws Exception{
@@ -293,6 +334,7 @@ public class UDPHeadTest extends BaseTestCase {
 			}            
 			_alCollectionIncomplete.add(al);
 		}
+
         assertTrue("failed to set test up",_alCollectionIncomplete.getAltLocsSize()==alternateLocations.size());
 	}
 	
