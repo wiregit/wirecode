@@ -13,7 +13,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.*;
 
-import com.bitzi.util.*;
+import java.util.Arrays;
 
 /**
  * Manages, buying of PRO from within LimeWire. Also, tells the rest of the code
@@ -23,6 +23,8 @@ import com.bitzi.util.*;
 public class ProManager {
     
     private String macAddress = null;
+    private final String START = "{";
+    private final String END = "}";
 
     /**
      * @return true if we can find the MAC address of this machine - for
@@ -35,7 +37,9 @@ public class ProManager {
         return(macAddress!=null && CommonUtils.isJava13OrLater());
     }
     
-    public boolean buyPro(String ccNumber, String expDate)  {
+    public boolean buyPro(String name, String address, String city, 
+                          String state, String zip, String country, 
+                          String email, String ccNumber, String expDate)  {
         try {
             Assert.that(canBuyPro());
             //1. open a secure socket to LimeWire server.
@@ -46,15 +50,35 @@ public class ProManager {
             InputStream is = socket.getInputStream();
             //2. Authenticate the server again!
             boolean serverAuthenticated = verifyConnection(os,is);
-            System.out.println("Sumeet: verified "+serverAuthenticated);
-
-            //3. Send the Credit card info as well as macAddress.
+            System.out.println("Sumeet: verified server "+serverAuthenticated);
+            if(!serverAuthenticated)
+                return false;
+            //3. generate and send info for server  -- including MAC address
+            String str = getInfoForServer(name,address,city,state,zip,country,
+                                       email, ccNumber, expDate);
+            byte[] info = str.getBytes("UTF-8");
+            int size = info.length;//this can be more than 127...we need an int
+            byte[] s = {0,0,0,0};
+            ByteOrder.int2leb(size,s,0);
+            //write the size of data the server should expect
+            os.write(s);
+            os.flush();
+            //write the data.
+            os.write(info);
+            os.flush();
             //4. Server will send back a signed file, save it.
-            //5. close the socket.
+            while(true) {
+                int a = is.read();
+                if(a==-1)
+                    break;
+                System.out.print((char)a);
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            //5. close the socket.
+            return true;
         }
-        return true;
     }
 
     /**
@@ -112,6 +136,37 @@ public class ProManager {
         return  verifier.verifySource();
     }
 
+    /**
+     * Formats all the information so that the server can read it, and 
+     * process the transaction. 
+     * <p>
+     * Includes the MAC address as part of the formatted string.
+     * @return null if unable to find the MAC address. 
+     */
+    private String getInfoForServer(String name, String address, String city, 
+                          String state, String zip, String country, 
+                            String email, String ccNumber, String expDate) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(START); sb.append("1");sb.append(END);//version server use
+        sb.append(START); sb.append(name);sb.append(END);
+        sb.append(START); sb.append(address);sb.append(END);
+        sb.append(START); sb.append(city);sb.append(END);
+        sb.append(START); sb.append(state);sb.append(END);
+        sb.append(START); sb.append(zip);sb.append(END);
+        sb.append(START); sb.append(country);sb.append(END);
+        sb.append(START); sb.append(email);sb.append(END);
+        sb.append(START); sb.append(ccNumber);sb.append(END);
+        sb.append(START); sb.append(expDate);sb.append(END);
+        if(macAddress == null) {
+            MacAddressFinder maf = new MacAddressFinder();
+            macAddress = maf.getMacAddress();
+        }
+        if(macAddress == null)//useless we cannot do the transaction
+            return null;
+        sb.append(START); sb.append(macAddress);sb.append(END);
+        return sb.toString();
+    }
+
     public boolean isPro() {
         MacAddressFinder maf = new MacAddressFinder();
         this.macAddress = maf.getMacAddress();
@@ -125,12 +180,12 @@ public class ProManager {
         //6. If verified  and  currTimeMillis() < expiry time return true
         //7. Else return false
         return false;
-    }
+    }    
 
     public static void main(String[] args) {
         try {
             ProManager man = new ProManager();
-            man.buyPro("Sumeet", "Ashish");
+            man.buyPro("Thadani Anurag Adam Susheel John Jay", "300 Oak Tree Street, Third Avenue and Sixth Street ","New York","NY","04033","US","abcdefght@blahsblahs.com","112222222222","123233333333333333333");
         } catch(Exception e) {
             e.printStackTrace();
             System.out.println("Sumeet: test failed");
