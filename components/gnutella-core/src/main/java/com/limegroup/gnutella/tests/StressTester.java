@@ -40,6 +40,8 @@ import java.util.*;
  * processor machines.  Despite these drawbacks, I think it's pretty good.
  */
 public class StressTester {
+    public static byte TTL=(byte)4;
+
     private static void syntaxError() {
 	System.err.println("Syntax: java com.limegroup.gnutella.tests.StressTester "
 			   +"<host> <port> <threads> <messages>, where threads>1");
@@ -77,26 +79,39 @@ public class StressTester {
 	start();
 	for (int i=0; i<messages; i++) {
 	    //1. Send request.  It's always a PingRequest because that avoids the store.
-	    PingRequest pr=new PingRequest(Const.TTL);
+	    PingRequest pr=new PingRequest(TTL);
+	    byte[] guid=pr.getGUID();
 	    client.send(pr);
 	    
 	    //2. For each server...
 	    for (int j=0; j<testers; j++) {
 		Connection server=servers[j];
-		//a) On the server side, wait for a ping request and reply
+		//a) On the server side, wait for my ping request...
 		Message m=null;
-		while (m==null || (! (m instanceof PingRequest)))
+		while (true) {
 		    m=server.receive();
+		    if (m==null) continue;
+		    else if (! (m instanceof PingRequest)) continue;
+		    else if (! (Arrays.equals(m.getGUID(), guid))) continue;
+		    else break;
+		}
+
+		//   ...and reply.
 		byte[] myIP=new byte[4]; //I'm lazy
-		PingReply reply=new PingReply(m.getGUID(), Const.TTL,
+		PingReply reply=new PingReply(m.getGUID(), TTL,
 					      (byte)0, myIP, //I'm lazy
 					      0, 0);
 		server.send(reply);
 
-		//b) On the client side, wait for reply
+		//b) On the client side, wait for reply to my message.
 		m=null;
-		while (m==null || (! (m instanceof PingReply)))
+		while (true) {
 		    m=client.receive();
+		    if (m==null) continue;
+		    else if (! (m instanceof PingReply)) continue;
+		    else if (! (Arrays.equals(m.getGUID(), guid))) continue;
+		    else break;
+		}
 	    }
 	}
 	finish();
