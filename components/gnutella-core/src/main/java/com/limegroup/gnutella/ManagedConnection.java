@@ -101,6 +101,12 @@ public class ManagedConnection
      *  empty. */
     private Object _flushLock=new Object();
 
+    /**
+     * The amount of time to wait for a handshake ping in reject connections, in
+     * milliseconds.     
+     */
+    private static final int REJECT_TIMEOUT=500;  //0.5 sec
+
 
     /**
      * The number of messages received.  This messages that are eventually
@@ -471,9 +477,17 @@ public class ManagedConnection
      * Implements the reject connection mechanism.  Loops until receiving a
      * handshake ping, responds with the best N pongs, and closes the
      * connection.  Closes the connection if no ping is received within a
-     * reasonable amount of time.  
+     * reasonable amount of time.  Does NOT clean up route tables in the case
+     * of an IOException.
      */
     void loopToReject(HostCatcher catcher) {
+        //IMPORTANT: note that we do not use this' send or receive methods.
+        //This is an important optimization to prevent calling
+        //RouteTable.removeReplyHandler when the connection is closed.
+        //Unfortunately it still can be triggered by the
+        //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
+        //thread in this case?
+
         try {
         //The first message we get from the remote host should be its initial
         //ping.  However, some clients may start forwarding packets on the
@@ -482,9 +496,8 @@ public class ManagedConnection
         //more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
         for (int i=0; i<10; i++) {
             Message m=null;
-            try {
-                // get the timeout from SettingsManager
-                m=receive(SettingsManager.instance().getTimeout());
+            try {                
+                m=super.receive(REJECT_TIMEOUT);
                 if (m==null)
                     return; //Timeout has occured and we havent received the ping,
                             //so just return
@@ -508,9 +521,9 @@ public class ManagedConnection
                     // the ttl is 1; and for now the number of files
                     // and kbytes is set to 0 until chris stores more
                     // state in the hostcatcher
-                    send(pr);
+                    super.send(pr);
                 }
-                flush();
+                super.flush();
                 return;
             }// end of (if m is PingRequest)
         } // End of while(true)
