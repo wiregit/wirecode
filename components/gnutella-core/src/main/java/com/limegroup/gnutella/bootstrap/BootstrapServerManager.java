@@ -18,8 +18,10 @@ public class BootstrapServerManager {
     /** The maximum number of bootstrap servers. */
     private static final int MAX_BOOTSTRAP_SERVERS=200;
 
-    /** The list of GWebCache servers.  Order doesn't matter; hosts are chosen
-     *  randomly from this.  
+    /** 
+     * The bounded-size list of GWebCache servers, each as a BootstrapServer.
+     * Order doesn't matter; hosts are chosen randomly from this.  Eventually
+     * this may be prioritized by some metric.
      *  LOCKING: this 
      *  INVARIANT: _servers.size()<MAX_BOOTSTRAP_SERVERS
      */        
@@ -75,14 +77,25 @@ public class BootstrapServerManager {
     }
 
 
-    /////////////////////////// Requests /////////////////////////////////
-
+    /////////////////////////// Request Types ////////////////////////////////
 
     abstract class GWebCacheRequest {
+        /** Appends parameters to the given url. */
         public abstract String requestURL(String url);
-        //public abstract void handleUnconnectable(URL url);
-        //public abstract void handleResponseError(URL url, String msg);
-        public abstract void handleResponseData(URL url, String line);
+        /** Called when if were unable to connect to the URL, got a non-standard
+         *  HTTP response code, or got an ERROR method.  Default value: remove
+         *  it from the list. */
+        public void handleError(BootstrapServer server) {
+            //For now, we just remove the host.  
+            //TODO: Eventually we put it on probation.
+            synchronized (BootstrapServerManager.this) {
+                _servers.remove(server);
+            }
+        }
+        /** Called when we got a line of data.  Implementation may wish
+         *  to call handleError if the data is in a bad format. */
+        public abstract void handleResponseData(BootstrapServer server, String line);
+        /** Should we go on to another host? */
         public abstract boolean needsMoreData();
     }
     
@@ -91,12 +104,16 @@ public class BootstrapServerManager {
         public String requestURL(String url) {
             return url+"?hostfile=1";
         }
-        public void handleResponseData(URL url, String line) {
+        public void handleResponseData(BootstrapServer server, String line) {
             try {
+                //Endpoint's constructor won't choke on "ERROR", so we check.            
                 Endpoint host=new Endpoint(line);                    
                 _catcher.add(host, true);
                 responses++;
-            } catch (IllegalArgumentException ignored) { }            
+            } catch (IllegalArgumentException bad) { 
+                //One strike and you're out; skip servers that send bad data.
+                handleError(server);
+            }            
         }
         public boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
@@ -108,9 +125,11 @@ public class BootstrapServerManager {
         public String requestURL(String url) {
             return url+"?urlfile=1";
         }
-        public void handleResponseData(URL url, String line) {
+        public void handleResponseData(BootstrapServer server, String line) {
             try {
                 BootstrapServer e=new BootstrapServer(line);
+                //Ensure url in this.  If list is too big, remove random element.
+                //TODO: eventually we may remove "worst" element.
                 synchronized (BootstrapServerManager.this) {
                     if (! _servers.contains(e))
                         _servers.add(e);
@@ -118,7 +137,10 @@ public class BootstrapServerManager {
                         _servers.remove(randomServer());
                 }
                 responses++;
-            } catch (ParseException ignored) { }            
+            } catch (ParseException error) { 
+                //One strike and you're out; skip servers that send bad data.
+                handleError(server);
+            }            
         }
         public boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
@@ -126,6 +148,7 @@ public class BootstrapServerManager {
     }
 
 
+    /////////////////////////// Generic Request Functions ///////////////////////
 
     private void requestAsync(final GWebCacheRequest request) {
         Thread runner=new Thread() {
@@ -160,16 +183,19 @@ public class BootstrapServerManager {
             BufferedReader in=new BufferedReader(
                                   new InputStreamReader(
                                       connection.getInputStream()));
-            while (true) {
+            while (true) {                
                 String line=in.readLine();
                 if (line==null)
                     break;
-                request.handleResponseData(url, line);
+                if (line.startsWith("ERROR"))
+                    request.handleError(server);
+                else
+                    request.handleResponseData(server, line);
             }
             //Close.  TODO: is this really the preferred way?
             in.close();
         } catch (IOException ioe) {
-            //TODO: notify request
+            request.handleError(server);
         }
     }
 
