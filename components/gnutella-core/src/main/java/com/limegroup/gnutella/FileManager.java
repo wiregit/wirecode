@@ -10,6 +10,9 @@
  * searches are possible with Regular Expressions. Imported necessary package
  */
 
+// This comment line is just a test to see if Adam is getting the 
+// right version of the FileManager. -rob
+
 package com.limegroup.gnutella;
 
 import java.io.*;
