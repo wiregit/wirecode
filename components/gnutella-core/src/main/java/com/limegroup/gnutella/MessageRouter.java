@@ -94,6 +94,16 @@ public abstract class MessageRouter {
     private RouteTable _pushRouteTable = new RouteTable(7*60,
 														MAX_ROUTE_TABLE_SIZE);
 
+    /** How long to buffer up out-of-band replies.
+     */
+    private static final long CLEAR_TIME = 60 * 1000; // 60 seconds
+
+    /**
+     * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
+     * if the sink wants them).  Cleared every CLEAR_TIME seconds.
+     * GUIDBundle->QueryReply
+     */
+    private Hashtable _outOfBandReplies = new Hashtable();
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -144,6 +154,9 @@ public abstract class MessageRouter {
         }
         _secretKey = QueryKey.generateSecretKey();
         _secretPad = QueryKey.generateSecretPad();
+
+        // schedule a runner to clear unused out-of-band replies
+        RouterService.schedule(new Expirer(), 0, CLEAR_TIME);
     }
 
     /**
@@ -286,7 +299,10 @@ public abstract class MessageRouter {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
-		}
+		} else if(msg instanceof LimeACKVendorMessage) {
+            handleLimeACKMessage((LimeACKVendorMessage)msg, datagram);
+        }
+        
     }
     
     /**
@@ -710,6 +726,22 @@ public abstract class MessageRouter {
                 return;
             respondToQueryRequest(request, _clientGUID);
         }
+    }
+
+    /** Handles a ACK message - looks up the QueryReply and sends it out of
+     *  band.
+     */
+    protected void handleLimeACKMessage(LimeACKVendorMessage ack,
+                                        DatagramPacket datagram) {
+        GUID refGUID = new GUID(ack.getGUID());
+        QueryReply reply = (QueryReply) _outOfBandReplies.remove(refGUID);
+        if (reply != null) {
+            InetAddress addr = datagram.getAddress();
+            int port = datagram.getPort();
+            UDPService.instance().send(reply, addr, port);
+        }
+        // else some sort of routing error or attack?
+        // TODO: tally some stat stuff here
     }
 
     /**
@@ -1394,7 +1426,7 @@ public abstract class MessageRouter {
      * stats are updated.
      * @throws IOException if no appropriate route exists.
      */
-    public void sendQueryReply(QueryReply queryReply)
+    public void sendQueryReply(QueryRequest query, QueryReply queryReply)
         throws IOException {
  
         if(queryReply == null) {
@@ -1415,7 +1447,43 @@ public abstract class MessageRouter {
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
                                        FOR_ME_REPLY_HANDLER);
-            rrp.getReplyHandler().handleQueryReply(queryReply, null);
+            // Here we can do a couple of things - if the query wants
+            // out-of-band replies we should do things differently.  else just
+            // send it off as usual
+            if (!query.desiresOutOfBandReplies()) 
+                rrp.getReplyHandler().handleQueryReply(queryReply, null);
+            else {
+                // special out of band handling....
+                InetAddress addr = null;
+                try {
+                    addr = InetAddress.getByName(query.getReplyAddress());
+                }
+                catch (UnknownHostException uhe) {
+                    throw new IOException("Couldn't locate host!!");
+                }
+                int port = query.getReplyPort();
+                
+                if (!UDPService.instance().canReceiveSolicited()) 
+                    // if i can't receive solicited traffic, then just send
+                    // the reply out of band
+                    UDPService.instance().send(queryReply, addr, port);
+                else {
+                    // send a ReplyNumberVM to the host - he'll ACK you if he
+                    // wants the whole shebang
+                    ReplyNumberVendorMessage vm = null;
+                    GUID guid = new GUID(query.getGUID());
+                    try {
+                        int resultCount = queryReply.getResultCount();
+                        vm = new ReplyNumberVendorMessage(guid, resultCount);
+                    }
+                    catch (BadPacketException bpe) {
+                        throw new IOException("Could not construct VM:" + bpe);
+                    }
+                    // store reply by guid for later retrieval1
+                    _outOfBandReplies.put(new GUIDBundle(guid), queryReply);
+                    UDPService.instance().send(vm, addr, port);
+                }
+            }
         }
         else
             throw new IOException("no route for reply");
@@ -1736,4 +1804,70 @@ public abstract class MessageRouter {
 			}
 		}
 	}
+
+    /** Simply couples a GUID with a timestamp.  Needed for expiration of
+     *  QueryReplies waiting for out-of-band delivery.
+     */
+    private static class GUIDBundle {
+        public static final long MAX_LIFE = 45 * 1000; // 45 seconds
+        private final GUID _guid;
+        private final long _creationTime;
+
+        public GUIDBundle(GUID guid) {
+            _guid = guid;
+            _creationTime = System.currentTimeMillis();
+        }
+
+        /** @return true if other is a GUID that is the same as the GUID
+         *  in this bundle.
+         */
+        public boolean equals(Object other) {
+            if (other instanceof GUID)
+                return _guid.equals(other);
+            return false;
+        }
+
+        /** Since guids will be all we have when we do a lookup in a hashtable,
+         *  we want the hash code to be the same as the GUID. 
+         */
+        public int hashCode() {
+            return _guid.hashCode();
+        }
+
+        /** @return true if this bundle is greater than MAX_LIFE seconds old.
+         */
+        public boolean shouldExpire() {
+            long currTime = System.currentTimeMillis();
+            if (currTime - _creationTime >= MAX_LIFE)
+                return true;
+            return false;
+        }
+    }
+
+
+    /** Can be run to invalidate out-of-band ACKs that we are waiting for....
+     */
+    private class Expirer implements Runnable {
+        public void run() {
+            try {
+                Set toRemove = new HashSet();
+                synchronized (_outOfBandReplies) {
+                    Iterator keys = _outOfBandReplies.keySet().iterator();
+                    while (keys.hasNext()) {
+                        GUIDBundle currQB = (GUIDBundle) keys.next();
+                        if ((currQB != null) && (currQB.shouldExpire()))
+                            toRemove.add(currQB);
+                    }
+                    // done iterating through _outOfBandReplies, remove the 
+                    // keys now...
+                    keys = toRemove.iterator();
+                    while (keys.hasNext())
+                        _outOfBandReplies.remove(keys.next());
+                }
+            } catch(Throwable t) {
+                ErrorService.error(t);
+            }
+        }
+    }
+
 }
