@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
@@ -374,6 +375,59 @@ public class FWTDetectionTest extends BaseTestCase {
         
         ponger1.reply(myself);
         assertTrue(UDPService.instance().canDoFWT());
+        
+    }
+    
+    public void testServerResponse() throws Exception {
+        cmStub.setConnected(true);
+        DatagramSocket sock = new DatagramSocket(20000);
+        sock.setSoTimeout(500);
+        
+        PingRequest with = new PingRequest((byte)1);
+        PingRequest without = new PingRequest((byte)1);
+        
+        with.addIPRequest();
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        with.write(baos);
+        
+        byte [] data = baos.toByteArray();
+        DatagramPacket pack = new DatagramPacket(data,data.length,
+                new InetSocketAddress(InetAddress.getLocalHost(),RouterService.getPort()));
+        
+        sock.send(pack);
+        
+        Thread.sleep(100);
+        DatagramPacket read = new DatagramPacket(new byte[100],100);
+        sock.receive(read);
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(read.getData());
+        
+        PingReply replyWith = (PingReply)Message.read(bais);
+        
+        assertNotNull(replyWith.getMyInetAddress());
+        assertEquals(InetAddress.getLocalHost(),replyWith.getMyInetAddress());
+        assertEquals(20000,replyWith.getMyPort());
+        
+        // test a ping without
+        baos = new ByteArrayOutputStream();
+        without.write(baos);
+        
+        data = baos.toByteArray();
+        pack = new DatagramPacket(data,data.length,
+                new InetSocketAddress(InetAddress.getLocalHost(),RouterService.getPort()));
+        
+        sock.send(pack);
+        
+        Thread.sleep(100);
+        read = new DatagramPacket(new byte[100],100);
+        sock.receive(read);
+        bais = new ByteArrayInputStream(read.getData());
+        
+        PingReply replyWithout = (PingReply)Message.read(bais);
+        
+        assertNull(replyWithout.getMyInetAddress());
+        assertEquals(0,replyWithout.getMyPort());
         
     }
     
