@@ -1851,9 +1851,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Add the URN of this file to the cache so that it won't
         //be hashed again when added to the library -- reduces
         //the time of the 'Saving File' state.
-        if(bucketHash != null) {
+        if(fileHash != null) {
             Set urns = new HashSet(1);
-            urns.add(bucketHash);
+            urns.add(fileHash);
             File file = completeFile;
             try {
                 file = FileUtils.getCanonicalFile(completeFile);
