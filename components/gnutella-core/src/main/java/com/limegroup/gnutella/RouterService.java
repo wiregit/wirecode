@@ -32,8 +32,7 @@ import com.limegroup.gnutella.util.*;
  * <ul> 
  * <li><b>Connecting and disconnecting</b>: connect, disconnect,
  *     connectToHostBlocking, connectToHostAsynchronously, 
- *     connectToGroup, reduceConnections, removeConnection,
- *     getNumConnections
+ *     connectToGroup, removeConnection, getNumConnections
  * <li><b>Searching and downloading</b>: query, browse, score, matchesType,
  *     isMandragoreWorm, download
  * <li><b>Notification of SettingsManager changes</b>:
@@ -373,13 +372,6 @@ public class RouterService
 		// Delegate to connection manager
 		manager.disconnect();
     }
-
-	/**
-	 * Lowers the number of connections for "low-power" mode.
-	 */
-	//public void reduceConnections() {
-	//manager.reduceConnections();
-	//}
 
     /**
      * Closes and removes the given connection.

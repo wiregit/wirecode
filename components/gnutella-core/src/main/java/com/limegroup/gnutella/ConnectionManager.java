@@ -409,14 +409,6 @@ public class ConnectionManager {
         return _keepAlive;
     }
 
-	/**
-	 * this method reduces the number of connections
-	 */
-	public synchronized void reduceConnections() {
-		int newKeepAlive = Math.min(_keepAlive, 2);
-		setKeepAlive(newKeepAlive);
-	}
-
     /**
      * Reset how many connections you want and start kicking more off
      * if required.  This IS synchronized because we don't want threads
