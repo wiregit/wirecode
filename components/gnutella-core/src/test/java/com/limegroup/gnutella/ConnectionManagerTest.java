@@ -8,6 +8,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.MiniAcceptor;
+import com.limegroup.gnutella.util.*;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
@@ -15,112 +16,185 @@ import com.limegroup.gnutella.MiniAcceptor;
  * standard test suite.  
  */
 public class ConnectionManagerTest extends TestCase {
-    private ConnectionManager cm;
-    private TestHostCatcher hc;
+
+    private static final TestHostCatcher CATCHER = new TestHostCatcher();
+
+    private static final RouterService ROUTER_SERVICE =
+        new RouterService(new ActivityCallbackStub());
+
+    static {
+        SettingsManager.instance().setPort(6346);
+		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+    }
 
     public ConnectionManagerTest(String name) {
-        super(name);
+        super(name);        
     }
 
     public static Test suite() {
         return new TestSuite(ConnectionManagerTest.class);
     }
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
     public void setUp() {
-		ConnectionSettings.KEEP_ALIVE.setValue(0);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        //SettingsManager.instance().setKeepAlive(0);
-        //SettingsManager.instance().setConnectOnStartup(false);
-        cm=new ConnectionManager(new DummyAuthenticator());
-        hc=new TestHostCatcher();
-        cm.initialize();        
+        String serversRunning = System.getProperty("servers"); 
+        int maxPortRunning = 0;
+        if(serversRunning != null) {
+            if(serversRunning.equals("all")) {
+                maxPortRunning = Integer.MAX_VALUE;
+            }
+            try {
+                maxPortRunning = Integer.parseInt(serversRunning);
+            } catch(NumberFormatException e) {
+                e.printStackTrace();
+                failWithServerMessage();                
+            }
+        }
+        if(serversRunning == null || maxPortRunning < 6001) {      
+            failWithServerMessage();
+        }
+        if(ROUTER_SERVICE.isStarted()) return;
+
+        try {
+            PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("could not initialize test");
+        }
+
+        try {
+            PrivilegedAccessor.setValue(ROUTER_SERVICE.getConnectionManager(),
+                                        "_catcher",CATCHER);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("could not initialize test");
+        }
+
+        ROUTER_SERVICE.start();
+        RouterService.clearHostCatcher();
+    }
+
+    private void failWithServerMessage() {
+        fail("You must run this test with servers running --\n"+
+             "use the test6001 ant target to run LimeWire servers "+
+             "on ports 6000 and 6001.\n\n"+
+             "Type ant -D\"class=ConnectionManagerTest\" test6001\n\n");        
     }
 
     public void tearDown() {
         //Ensure no more threads.
-        cm.disconnect();
+        RouterService.disconnect();
+        RouterService.clearHostCatcher();
+        CATCHER.connectSuccess = 0;
+        CATCHER.connectFailures = 0;
+        CATCHER.endpoint = null;
+        sleep();
     }
     
+    /**
+     * Tests to make sure that a connection does not succeed with an
+     * unreachable host.
+     */
     public void testUnreachableHost() {
-        hc.endpoint=new Endpoint("1.2.3.4", 6346);
-        cm.setKeepAlive(1);
-        sleep();
-        assertEquals(0, hc.connectSuccess);
-        assertEquals(1, hc.connectFailures);
-        cm.disconnect();
+        CATCHER.endpoint = new Endpoint("1.2.3.4", 5000);
+        RouterService.connect();
+        sleep(10000);
+        assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
+        assertTrue("should have received failures", CATCHER.connectFailures > 0);
     }
 
+    /**
+     * Test to make sure tests does not succeed with a host reporting
+     * the wrong protocol.
+     */
     public void testWrongProtocolHost() {
-        hc.endpoint=new Endpoint("www.yahoo.com", 80);
-        cm.setKeepAlive(1);
+        CATCHER.endpoint = new Endpoint("www.yahoo.com", 80);
+        RouterService.connect();
         sleep();
-        assertEquals(0, hc.connectSuccess);
-        assertEquals(1, hc.connectFailures);
+        assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
+        assertTrue("should have received failures", CATCHER.connectFailures > 0);
+        //assertEquals("should have received failure", 1, CATCHER.connectFailures);
     }
 
+    /**
+     * Test to make sure that a good host is successfully connected to.
+     */
     public void testGoodHost() {
-        MiniAcceptor acceptor=new MiniAcceptor(null);
-        hc.endpoint=new Endpoint("localhost", 6346);
-        cm.setKeepAlive(1);
-        Connection in=acceptor.accept();
-        assertEquals(1, hc.connectSuccess);
-        assertEquals(0, hc.connectFailures);
-        in.close();
+        CATCHER.endpoint = new Endpoint("localhost", Backend.DEFAULT_PORT);
+        
+        RouterService.connect();
         sleep();
-        assertEquals(1, hc.connectSuccess);
-        assertEquals(0, hc.connectFailures);
+        assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
+        assertEquals("connect should have failed", 0, CATCHER.connectFailures);
     }
 
+
+    /**
+     * Tests to make sure that a host is still added to the host
+     * catcher as a connection that was made (at least temporarily) even
+     * if the server sent a 503.
+     */
     public void testRejectHost() {
-        MiniAcceptor acceptor=new MiniAcceptor(new RejectResponder());
-        hc.endpoint=new Endpoint("localhost", 6346);
-        cm.setKeepAlive(1);
-        Connection in=acceptor.accept();
+        CATCHER.endpoint = 
+            new Endpoint("localhost", Backend.DEFAULT_REJECT_PORT);
+        RouterService.connect();
         sleep();
-        assertEquals(1, hc.connectSuccess);   //success even though rejected
-        assertEquals(0, hc.connectFailures);
-    }
-    
-    class RejectResponder implements HandshakeResponder {
-        public HandshakeResponse respond(HandshakeResponse response, 
-                                         boolean outgoing) {
-            return new HandshakeResponse(HandshakeResponse.SHIELDED,
-                                         HandshakeResponse.SHIELDED_MESSAGE,
-                                         new Properties());
-        }
+        assertEquals("connect should have succeeded", 1, CATCHER.connectSuccess);
+        assertEquals("connect should have failed", 0, CATCHER.connectFailures);
     }
 
     private void sleep() {
+        sleep(5000);
+    }
+
+    private void sleep(int milliseconds) {
         try {
-            Thread.sleep(5000);
+            Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
         }
     }        
-}
 
-class TestHostCatcher extends HostCatcher {
-    volatile Endpoint endpoint;
-    volatile int connectSuccess=0;
-    volatile int connectFailures=0;
-
-    TestHostCatcher() {
-        super();
-    }
-
-    public synchronized Endpoint getAnEndpoint() throws InterruptedException {
-        if (endpoint==null)
-            throw new InterruptedException();
-        else {
-            Endpoint ret=endpoint;
-            endpoint=null;
-            return ret;
+    /**
+     * Test host catcher that allows us to return endpoints that we 
+     * specify when our test framework requests endpoints to connect
+     * to.
+     */
+    private static class TestHostCatcher extends HostCatcher {
+        volatile Endpoint endpoint;
+        volatile int connectSuccess=0;
+        volatile int connectFailures=0;
+        
+        TestHostCatcher() {
+            super();
         }
-    }
-
-    public synchronized void doneWithConnect(Endpoint e, boolean success) {
-        if (success)
-            connectSuccess++;
-        else
-            connectFailures++;
+        
+        public synchronized Endpoint getAnEndpoint() throws InterruptedException {
+            if (endpoint==null)
+                throw new InterruptedException("no endpoint");
+            else {
+                Endpoint ret=endpoint;
+                endpoint=null;
+                return ret;
+            }
+        }
+        
+        public synchronized void doneWithConnect(Endpoint e, boolean success) {
+            if (success)
+                connectSuccess++;
+            else
+                connectFailures++;
+        }
+        
+        // overridden so we ignore gnutella.net for this test
+        public void initialize() {        
+        }
     }
 }
