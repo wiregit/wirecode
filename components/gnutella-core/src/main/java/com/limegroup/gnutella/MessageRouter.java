@@ -34,8 +34,11 @@ public abstract class MessageRouter
     private RouteTable _queryRouteTable = new RouteTable(2048);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers
+     * Because client GUID's can be re-mapped to different connections, we
+     * must force RouteTable to used FixedsizeForgetfulHashMap instead of
+     * the lighter ForgetfulHashMap.
      */
-    private RouteTable _pushRouteTable = new RouteTable(2048);
+    private RouteTable _pushRouteTable = new RouteTable(2048, true);
 
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.
