@@ -543,9 +543,7 @@ public class Connection implements IpPort {
 			String connectLine = readLine();
 			Assert.that(connectLine != null, "null connectLine");
 			if (! connectLine.startsWith(GNUTELLA_06)) {
-                if(CommonUtils.recordStats()) {
-                    HandshakingStat.OUTGOING_BAD_CONNECT.incrementStat();
-                }
+                HandshakingStat.OUTGOING_BAD_CONNECT.incrementStat();
                 throw new IOException("Bad connect string");
             }
 				
@@ -564,34 +562,30 @@ public class Connection implements IpPort {
             if (code != HandshakeResponse.OK &&  
                 code != HandshakeResponse.UNAUTHORIZED_CODE) {
                 if(code == HandshakeResponse.SLOTS_FULL) {
-                    if(CommonUtils.recordStats()) {
-                        if(theirResponse.isLimeWire()) {
-                            if(theirResponse.isUltrapeer()) {
-                                HandshakingStat.
-                                    OUTGOING_LIMEWIRE_ULTRAPEER_REJECT.
-                                        incrementStat();
-                            } else {
-                                HandshakingStat.
-                                    OUTGOING_LIMEWIRE_LEAF_REJECT.
-                                        incrementStat();
-                            }
+                    if(theirResponse.isLimeWire()) {
+                        if(theirResponse.isUltrapeer()) {
+                            HandshakingStat.
+                                OUTGOING_LIMEWIRE_ULTRAPEER_REJECT.
+                                    incrementStat();
                         } else {
-                            if(theirResponse.isUltrapeer()) {
-                                HandshakingStat.
-                                    OUTGOING_OTHER_ULTRAPEER_REJECT.
-                                        incrementStat();
-                            } else {
-                                HandshakingStat.
-                                    OUTGOING_OTHER_LEAF_REJECT.
-                                        incrementStat();
-                            }                            
-                        } 
-                    }
+                            HandshakingStat.
+                                OUTGOING_LIMEWIRE_LEAF_REJECT.
+                                    incrementStat();
+                        }
+                    } else {
+                        if(theirResponse.isUltrapeer()) {
+                            HandshakingStat.
+                                OUTGOING_OTHER_ULTRAPEER_REJECT.
+                                    incrementStat();
+                        } else {
+                            HandshakingStat.
+                                OUTGOING_OTHER_LEAF_REJECT.
+                                    incrementStat();
+                        }                            
+                    } 
                     throw NoGnutellaOkException.SERVER_REJECT;
                 } else {
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.OUTGOING_SERVER_UNKNOWN.incrementStat();
-                    }
+                    HandshakingStat.OUTGOING_SERVER_UNKNOWN.incrementStat();
                     throw NoGnutellaOkException.createServerUnknown(code);
                 }
             }
@@ -611,9 +605,7 @@ public class Connection implements IpPort {
             if(code == HandshakeResponse.OK) {
                 if(HandshakeResponse.OK_MESSAGE.equals(
                     ourResponse.getStatusMessage())){
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.SUCCESSFUL_OUTGOING.incrementStat();
-                    }
+                    HandshakingStat.SUCCESSFUL_OUTGOING.incrementStat();
                     //a) Terminate normally if we wrote "200 OK".
                     return;
                 } else {
@@ -623,9 +615,7 @@ public class Connection implements IpPort {
             } else {                
                 //c) Terminate abnormally if we wrote anything else.
                 if(code == HandshakeResponse.SLOTS_FULL) {
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
-                    }
+                    HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
                     throw NoGnutellaOkException.CLIENT_REJECT;
                 } 
                 else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
@@ -635,9 +625,7 @@ public class Connection implements IpPort {
                     throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
                 }
                 else {
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
-                    }
+                    HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
                     throw NoGnutellaOkException.createClientUnknown(code);
                 }
             }
@@ -710,14 +698,10 @@ public class Connection implements IpPort {
             if((code != HandshakeResponse.OK) && 
                (code != HandshakeResponse.UNAUTHORIZED_CODE)) {
                 if(code == HandshakeResponse.SLOTS_FULL) {
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
-                    }
+                    HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
                     throw NoGnutellaOkException.CLIENT_REJECT;
                 } else {
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
-                    }
+                    HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
                     throw NoGnutellaOkException.createClientUnknown(code);
                 }
             }
@@ -736,9 +720,7 @@ public class Connection implements IpPort {
             }
 			
             if (! connectLine.startsWith(GNUTELLA_06)) {
-                if(CommonUtils.recordStats()) {
-                    HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
-                }
+                HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
                 throw new IOException("Bad connect string");
             }
                 
@@ -756,15 +738,11 @@ public class Connection implements IpPort {
                 	// if it's the crawler, we throw an exception to make sure  
                 	// we correctly disconnect
                 	if(isCrawler) {
-                        if(CommonUtils.recordStats()) {
-                            HandshakingStat.CRAWLER_CONNECTION.incrementStat();
-                        }
+                        HandshakingStat.CRAWLER_CONNECTION.incrementStat();
                 		throw new IOException("connection from crawler -- " +
                             "disconnect");
                 	}
-                    if(CommonUtils.recordStats()) {
-                        HandshakingStat.SUCCESSFUL_INCOMING.incrementStat();
-                    }
+                    HandshakingStat.SUCCESSFUL_INCOMING.incrementStat();
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
                 }
@@ -776,17 +754,13 @@ public class Connection implements IpPort {
                     continue;
             }
             
-            if(CommonUtils.recordStats()) {
-                HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
-            }
+            HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
             //c) Terminate abnormally
             throw NoGnutellaOkException.
                 createServerUnknown(theirResponse.getStatusCode());
         }        
         
-        if(CommonUtils.recordStats()) {
-            HandshakingStat.INCOMING_NO_CONCLUSION.incrementStat();
-        }
+        HandshakingStat.INCOMING_NO_CONCLUSION.incrementStat();
         //If we didn't successfully return out of the method, throw an exception
         //to indicate that handshaking didn't reach any conclusion.  The values
         //here are kind of a hack.

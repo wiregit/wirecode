@@ -23,13 +23,8 @@ public class I18NConvert {
         try {
             //instantiates an implementation 
             //of abstract class AbstractI18NConverter
-            //depeneding on JVM (118 or not)
-            if(CommonUtils.isJava118()) {
-                _convertDelegator = new I18NConvert118();
-            } else {
-                _convertDelegator = new I18NConvertICU();
-                _convertDelegator.getNorm("touch ICU code");
-            }
+            _convertDelegator = new I18NConvertICU();
+            _convertDelegator.getNorm("touch ICU code");
         }
         catch(IOException te) {
             ErrorService.error(te);
@@ -42,18 +37,14 @@ public class I18NConvert {
     }
 
     private void convertTo118() {
-        //if the error was in the ICU code
-        //then try to revert to I18NConvert118
-        if(!CommonUtils.isJava118()) {
-            try {
-                _convertDelegator = new I18NConvert118();
-            }
-            catch(IOException e) {
-                throw new ExceptionInInitializerError(e);
-            }
-            catch(ClassNotFoundException cnf) {
-                throw new ExceptionInInitializerError(cnf);
-            }
+        try {
+            _convertDelegator = new I18NConvert118();
+        }
+        catch(IOException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+        catch(ClassNotFoundException cnf) {
+            throw new ExceptionInInitializerError(cnf);
         }
     }
 

@@ -155,8 +155,6 @@ public class FileUtils
         String cmds[] = null;
         if( CommonUtils.isWindows() )
             SystemUtils.setWriteable(fName);
-        else if ( CommonUtils.isMacClassic() )
-            cmds = null; // TODO: fill in.
         else if ( CommonUtils.isOS2() )
             cmds = null; // Find the right command for OS/2 and fill in
         else {

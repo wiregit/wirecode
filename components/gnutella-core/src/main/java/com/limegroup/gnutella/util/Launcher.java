@@ -48,27 +48,16 @@ public final class Launcher {
 	 */
 	private static boolean _macClassesLoadedSuccessfully = true;
 
-	/** 
-	 * The getFileCreator method of com.apple.mrj.MRJFileUtils 
-	 */
-	private static Method _getFileCreator;
-
 	/**
 	 * The openURL method of com.apple.mrj.MRJFileUtils.
 	 */
 	private static Method _openURL;
 
-	/**
-	 * The findApplication method of com.apple.mrj.MRJFileUtils for locating
-	 * the applications associated with specific creator codes on the Mac.
-	 */
-	private static Method _findApplication;
-
 	/** 
 	 * Loads the necessary Mac classes if running on Mac.
 	 */
 	static {
-	    if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
+	    if(CommonUtils.isMacOSX()) {
 			try {
 				loadMacClasses();		
 			} catch(IOException ioe) {
@@ -99,7 +88,7 @@ public final class Launcher {
 		if(CommonUtils.isWindows()) {
 			return openURLWindows(url);
 		}	   
-		else if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
+		else if(CommonUtils.isMacOSX()) {
 			openURLMac(url);
 		}
 		else {
@@ -185,9 +174,6 @@ public final class Launcher {
 		   !extCheckString.endsWith(".com")) {
 			if(CommonUtils.isWindows()) {
 				return launchFileWindows(path);
-			}	   
-			else if(CommonUtils.isMacClassic()) {
-				launchFileMacClassic(file);
 			}
 			else if(CommonUtils.isMacOSX()) {
 				launchFileMacOSX(path);
@@ -214,25 +200,6 @@ public final class Launcher {
 		return new WindowsLauncher().launchFile(path);
 	}
 
-	/** 
-	 * Launches the given file on a Mac with and OS between 8.5 and 9.1.
-	 *
-	 * @param file the <tt>File</tt> instance denoting the abstract pathname 
-	 *            of the file to launch
-	 *
-	 * @throws IOException  if the call to Runtime.exec throws an IOException
-	 */
-	private static void launchFileMacClassic(final File file) throws IOException {
-		if(!_macClassesLoadedSuccessfully) throw new IOException();
-		File appFile    = getMacApplication(file);
-		String appPath  = appFile.getCanonicalPath();
-		String filePath = file.getCanonicalPath();	   
-		try {
-			Runtime.getRuntime().exec(new String[] {appPath, filePath});
-		} catch(SecurityException se) {
-		}
-	}
-
 	/**
 	 * Launches a file on OSX, appending the full path of the file to the
 	 * "open" command that opens files in their associated applications
@@ -247,26 +214,6 @@ public final class Launcher {
 	    Runtime.getRuntime().exec(new String[]{"open", file});
 	}
 
-	/**
-	 * Returns the path to the associated application on the Mac.
-	 *
-	 * @param file the abstract pathname of the file to launch
-	 * @return the path to the application associated with the specified file
-	 *         on the Mac, <tt>null</tt> if the application could not be 
-	 *         found for some reason
-	 */
-	private static File getMacApplication(final File file) throws IOException {	
-		try {
-			Object fileType = _getFileCreator.invoke(null, new Object[] {file});
-			Object appPath  = _findApplication.invoke(null, new Object[] {fileType});
-			return (File)appPath;
-		} catch(IllegalAccessException iae) {
-			throw new IOException();
-		} catch (InvocationTargetException ite) {
-			throw new IOException();
-		}
-	}
-
 	/** 
 	 * Loads specialized classes for the Mac needed to launch files.
 	 *
@@ -279,21 +226,11 @@ public final class Launcher {
 	private static void loadMacClasses() throws IOException {
 		try {
 			Class mrjFileUtilsClass = Class.forName("com.apple.mrj.MRJFileUtils");
-			Class mrjOSType = Class.forName("com.apple.mrj.MRJOSType");
 
-			String fcName = "getFileCreator";
-			Class[] fcParams = {File.class};
-			_getFileCreator = mrjFileUtilsClass.getDeclaredMethod(fcName, 
-																  fcParams);	
 			String openURLName = "openURL";
 			Class[] openURLParams = {String.class};
 			_openURL = mrjFileUtilsClass.getDeclaredMethod(openURLName, 
 														   openURLParams);
-			String faName = "findApplication";
-			Class[] faParams = {mrjOSType};
-			_findApplication  = mrjFileUtilsClass.getDeclaredMethod(faName, 
-																	faParams);
-
 		} catch (ClassNotFoundException cnfe) {
 			throw new IOException();
 		} catch (NoSuchMethodException nsme) {

@@ -119,11 +119,6 @@ public final class CommonUtils {
 	 */
     private static boolean _supportsTray = false;
 
-	/**
-	 * Variable for whether or not we're on Mac 9.1 or below.
-	 */
-	private static boolean _isMacClassic = false;
-
 	/** 
 	 * Variable for whether or not we're on MacOSX.
 	 */
@@ -157,10 +152,6 @@ public final class CommonUtils {
     private static final char[] ILLEGAL_CHARS_WINDOWS = { 
 		'?', '*', '\\', '<', '>', '|', '\"', ':'
 	};
-	/**
-	 * Variable for whether or not the JVM is 1.1.8.
-	 */
-	private static boolean _isJava118 = false;
 
 	/**
 	 * Cached constant for the HTTP Server: header value.
@@ -224,14 +215,8 @@ public final class CommonUtils {
 		if(os.startsWith("mac os")) {
 			if(os.endsWith("x")) {
 				_isMacOSX = true;
-			} else {
-				_isMacClassic = true;
-			}			
+			}
 		}
-		
-		if(CommonUtils.getJavaVersion().startsWith("1.1.8")) {
-			_isJava118 = true;
-		} 
 		
 		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
 			HTTP_SERVER = "LimeWire/" + LIMEWIRE_VERSION;
@@ -438,11 +423,7 @@ public final class CommonUtils {
 	 *         <tt>false</tt> otherwise
 	 */
 	public static boolean isUltrapeerOS() {
-		if(_isWindows98 || _isWindows95 || _isWindowsMe || _isMacClassic ||
-		   _isWindowsNT) {
-			return false;
-		}
-		return true;
+	    return !(_isWindows98 || _isWindows95 || _isWindowsMe || _isWindowsNT);
 	}
 
 	/**
@@ -484,17 +465,6 @@ public final class CommonUtils {
 	 */
 	public static boolean isWindowsXP() {
 		return _isWindowsXP;
-	}
-
-
-	/** 
-	 * Returns whether or not the os is Mac 9.1 or earlier.
-	 *
-	 * @return <tt>true</tt> if the application is running on a Mac version
-	 *         prior to OSX, <tt>false</tt> otherwise
-	 */
-	public static boolean isMacClassic() {
-		return _isMacClassic;
 	}
 
     /**
@@ -554,7 +524,7 @@ public final class CommonUtils {
         } catch(NoClassDefFoundError error) {
             return false;
         }
-    }   
+    }
 
 	/** 
 	 * Returns whether or not the os is any Mac os.
@@ -563,7 +533,7 @@ public final class CommonUtils {
 	 *  or any previous mac version, <tt>false</tt> otherwise
 	 */
 	public static boolean isAnyMac() {
-		return _isMacClassic || _isMacOSX;
+		return _isMacOSX;
 	}
 
 	/** 
@@ -592,16 +562,6 @@ public final class CommonUtils {
 	 */
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
-	}   
-
-	/**
-	 * Returns whether or not the current JVM is a 1.1.8 implementation.
-	 *
-	 * @return <tt>true</tt> if we are running on 1.1.8, <tt>false</tt>
-	 *  otherwise
-	 */
-	public static boolean isJava118() {
-		return _isJava118;
 	}
 
 	/**
@@ -1131,20 +1091,6 @@ public final class CommonUtils {
                 name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
         }
         return name;
-    }
-
-    /**
-     * Utility method for determining whether or not we should record 
-     * statistics.  This can depend on the operating system or other factors.
-     * For example, the OS 9 implementation of Java 118 appears not to handle
-     * classloading correctly, and therefore cannot properly load the statistics
-     * recording classes.
-     * 
-     * @return <tt>true</tt> if we should record statistics, otherwise 
-     *  <tt>false</tt>
-     */
-    public static boolean recordStats() {
-        return !CommonUtils.isJava118();
     }
     
     /*
