@@ -149,11 +149,23 @@ public class HTTPUploader implements Runnable {
 	    uploadError("can't opeInputStreamReader n connection");
 	    return;
 	}
+	catch (Exception e) {
+	    uploadError("Unknown error occured:");
+	    e.printStackTrace();
+	    return;
+	}
 	try {
 	    _ostream = conn.getOutputStream();
 	}
 	catch (IOException e) {
 	    uploadError("can't open output stream");
+	    e.printStackTrace();
+	    return;
+	}
+	catch (Exception e) {
+	    uploadError("Unknown error occured:");
+	    e.printStackTrace();
+	    return;
 	}
 			
     }
