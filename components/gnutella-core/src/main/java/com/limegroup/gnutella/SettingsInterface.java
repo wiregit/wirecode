@@ -241,7 +241,6 @@ public interface SettingsInterface
     /** List of hosts to try on quick connect */
     public static final String[] DEFAULT_QUICK_CONNECT_HOSTS
     = {"router.limewire.com:6346",
-       "64.61.25.139:6346",
        "gnutellahosts.com:6346",
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
