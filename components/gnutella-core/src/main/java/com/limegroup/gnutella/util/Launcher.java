@@ -159,9 +159,7 @@ public class Launcher {
 			}
 		}
 		else {
-			String msg = "LimeWire will not launch the specified "+
-			"file for security reasons.";
-			throw new SecurityException(msg);
+			throw new SecurityException();
 		}
 		return -1;		
 	}
