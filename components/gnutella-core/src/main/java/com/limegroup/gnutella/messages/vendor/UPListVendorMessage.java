@@ -65,21 +65,31 @@ public class UPListVendorMessage extends VendorMessage {
 				request.getNumberLeaves() < endpointsLeaf.size())
 			endpointsLeaf = endpointsLeaf.subList(0,request.getNumberLeaves());
 		
+		
+		//serialize the Endpoints to a byte []
+		byte [] result = new byte[(endpointsUP.size()+endpointsLeaf.size())*6+2];
+		
+		result[0] = (byte)endpointsUP.size();
+		result[1] = (byte)endpointsLeaf.size();
+		
 		//cat the two lists
 		endpointsUP.addAll(endpointsLeaf);
 		
-		//serialize the Endpoints to a byte []
-		StringBuffer res = new StringBuffer();
-		synchronized(res) {
-			res.append((byte)endpointsUP.size());
-			res.append((byte)endpointsLeaf.size());
-			iter = endpointsUP.iterator();
-			while (iter.hasNext()) {
-				Endpoint e = (Endpoint) iter.next();
-				res.append(packIPAddress(e.getInetAddress(),e.getPort()));
-			}
+		int index = 2;
+		iter = endpointsUP.iterator();
+		while(iter.hasNext()) {
+			//pack each entry into a 6 byte array and add it to the result.
+			Endpoint e = (Endpoint)iter.next();
+			System.arraycopy(
+					packIPAddress(e.getInetAddress(),e.getPort()),
+					0,
+					result,
+					index,
+					6);
+			index+=6;
 		}
-		return res.toString().getBytes();
+		//TODO: add check for outofbounds
+		return result;
 	}
 	
 	
@@ -108,28 +118,49 @@ public class UPListVendorMessage extends VendorMessage {
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ULTRAPEER_LIST, version, payload);
 		
+		_ultrapeers = new LinkedList();
+		_leaves = new LinkedList();
+		
 		// check if the payload is legal length
-		byte numberUP = payload[0];
-		byte numberLeaves = payload[1];
+		int numberUP = payload[0];
+		int numberLeaves = payload[1];
 		if (payload.length!= (numberUP+numberLeaves)*6+2) //evil evil
-			throw new BadPacketException();
+			throw new BadPacketException("size is "+payload.length+ 
+					" but the # of UPs is " + numberUP +
+					" and the # of leaves is " + numberLeaves +
+					" , so the size should have been "+ (numberUP+numberLeaves)*6+2);
 		
 		//parse the up ip addresses
 		for (int i = 2;i<numberUP*6;i+=6) {
+			
 			byte [] current = new byte[6];
 			System.arraycopy(payload,i,current,0,6);
+			
 			QueryReply.IPPortCombo combo = 
 	            QueryReply.IPPortCombo.getCombo(current);
-			_ultrapeers.add(new Endpoint(combo.getAddress(),combo.getPort()));
+			
+			if (combo == null || combo.getInetAddress() == null)
+				throw new BadPacketException("parsing of ip:port failed. "+
+						" dump of current byte block: "+current);
+			
+			_ultrapeers.add(new Endpoint(combo.getInetAddress().getAddress(),
+								combo.getPort()));
 		}
 		
 		//parse the leaf ip addresses
 		for (int i = numberUP*6+2;i<payload.length;i+=6) {
 			byte [] current = new byte[6];
 			System.arraycopy(payload,i,current,0,6);
+			
 			QueryReply.IPPortCombo combo = 
 	            QueryReply.IPPortCombo.getCombo(current);
-			_leaves.add(new Endpoint(combo.getAddress(),combo.getPort()));
+			
+			if (combo == null || combo.getInetAddress() == null)
+				throw new BadPacketException("parsing of ip:port failed. "+
+						" dump of current byte block: "+current);
+			
+			_leaves.add(new Endpoint(combo.getInetAddress().getAddress(),
+								combo.getPort()));
 		}
 		
 		//leave the check whether we got as many UPs as requested elsewhere.
