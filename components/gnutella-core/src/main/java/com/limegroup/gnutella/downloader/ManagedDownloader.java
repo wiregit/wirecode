@@ -543,8 +543,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // the number of requeries i've done...
         int numRequeries = 0;
-        // per query, the number of waits i've allowed...
-        int numRetries = 0;
+        // switch that determines whether or not we should wait for a busy host
+        boolean shouldWaitForRetry = false;
         // time i last woke up....
         long lastWakeUpTime = 0;
         // now....
@@ -579,7 +579,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                     int status=tryAllDownloads2(bucket);
                     if (status==COMPLETE) {
-                        //Success! 
+                        //Success!
                         setState(COMPLETE);
                         manager.remove(this, true);
                         return;
@@ -602,9 +602,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 manager.yieldSlot(this);
 
-                //Wait or abort.
+                // General flow of control of this subsection of code:
+                // * If I have a retry and i should try it, go head and wait for
+                // it, but wake up early if new results come in..
+                // * If I have a retry by i shouldn't wait OR if i don't have a
+                // retry, then see if you should send a requery out, send the
+                // requery out if necessary, and if you don't have a retry sleep
+                // or if you do then set shouldWaitForRetry to true so you can
+                // try it next iteration....
                 if (waitForRetry &&
-                    (numRetries++ < RETRY_ATTEMPTS)) {
+                    (shouldWaitForRetry)) {
+                    shouldWaitForRetry = false;
                     synchronized (this) {
                         retriesWaiting=0;
                         for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
@@ -614,7 +622,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                     long time=calculateWaitTime();
                     setState(WAITING_FOR_RETRY, time);
-                    Thread.sleep(time);
+                    // wait for a retry, but if you get a new result in earlier
+                    // feel free to wake up early and try it....
+                    reqLock.lock(time); 
                 } else {
                     if (stopped) {
                         setState(ABORTED);
@@ -628,28 +638,30 @@ public class ManagedDownloader implements Downloader, Serializable {
                         long timeSlept = nowTime - lastWakeUpTime;
 
                         if (timeSlept < waitTime) {
-                            // ok, sleep more....
+                            // have not transpired waitTime, so sleep more...
                             waitTime -= timeSlept;
-                            setState(WAITING_FOR_RESULTS, waitTime);
                         }
                         else {
                             numRequeries++;
                             manager.sendQuery(allFiles);
-                            
+
                             waitTime = getMinutesToWaitForRequery(numRequeries);
                             waitTime *= (60 * 1000);                        
-
-                            // reset numRetries for next batch of results for
-                            // next query
-                            numRetries = 0;                        
                         }
 
-                        // i may have sent a query, either way prepare to sleep
-                        setState(WAITING_FOR_RESULTS, (long) waitTime);
                         // take the current time....
                         nowTime = Calendar.getInstance().getTime().getTime();
-                        // sleep....
-                        reqLock.lock((long) waitTime);
+
+                        if (!waitForRetry) {
+                            // no busy hosts to try....
+                            // i may have sent a query, either way prepare to 
+                            // sleep
+                            setState(WAITING_FOR_RESULTS, (long) waitTime);
+                            // sleep....
+                            reqLock.lock((long) waitTime);
+                        }
+                        else // sleep, but wait for retries during sleep...
+                            shouldWaitForRetry = true;
                     }
                     else {
                         setState(GAVE_UP);
