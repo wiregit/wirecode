@@ -5,6 +5,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.routing.*;
 import junit.framework.*;
 import com.sun.java.util.collections.*;
 import java.lang.reflect.*;
@@ -20,10 +21,50 @@ public final class MessageRouterTest extends BaseTestCase {
     private static MessageRouter ROUTER;
 
     /**
-     * Constant for the number of connections that the test 
-     * connection manager should maintain.
+     * Constant for the number of Ultrapeer connections that the 
+     * test connection manager should maintain.
      */
     private static final int NUM_CONNECTIONS = 20;
+
+    /**
+     * Constant for the number of leaf connections that the test 
+     * connection manager should maintain.
+     */
+    private static final int NUM_LEAF_CONNECTIONS = 30;
+
+    /**
+     * Constant array for the keywords that I should have (this node).
+     */
+    private static final String[] MY_KEYWORDS = {
+        "me", 
+    };
+
+    /**
+     * Constant array for the keywords for Ultrapeers to use.
+     */
+    private static final String[] ULTRAPEER_KEYWORDS = {
+        "qwe", "wer", "ert", "rty", "tyu", 
+        "yui", "uio", "iop", "opa ", "pas", 
+        "asd", "sdf", "dfg", "fgh", "ghj", 
+        "hjk", "jkl", "klz", "lzx", "zxc", 
+        "xcv", "cvb", "vbn", "bnm", "qwer",
+        "wert", "erty", "rtyu", "tyui", "yuio",        
+    };
+
+    /**
+     * Constant array for the keywords for leaves to use.
+     */
+    private static final String[] LEAF_KEYWORDS = {
+        "this", "is", "a", "test", "for", 
+        "query", "routing", "in", "all", "its", 
+        "forms", "including", "both", "leaves", "and", 
+        "Ultrapeers", "which", "should", "both", "work", 
+        "like", "we", "expect", "them", "to", 
+        "at", "least", "in", "theory", "and", 
+        "hopefully", "in", "fact", "as", "well", 
+        "but", "it's", "hard", "to", "know", 
+    };
+
 
     public MessageRouterTest(String name) {
         super(name);
@@ -43,6 +84,58 @@ public final class MessageRouterTest extends BaseTestCase {
         ROUTER = new MetaEnabledMessageRouter(new ActivityCallbackStub(), 
                                               new FileManagerStub());
         ROUTER.initialize();
+    }
+
+    public void tearDown() {
+        LeafConnection.resetCounter();
+        UltrapeerConnection.resetCounter();
+    }
+
+    /**
+     * Test to make sure that the query route tables are forwarded 
+     */
+    public void testForwardQueryRouteTables() throws Exception {
+        TestConnectionManager tcm = new TestConnectionManager(6);
+        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
+        Class[] params = new Class[] {};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardQueryRouteTables",
+                                         params);        
+        
+    }
+
+    /**
+     * Tests the method for adding query routing entries to the
+     * QRP table for this node, adding the leaves' QRP tables if
+     * we're an Ultrapeer.
+     */
+    public void testAddQueryRoutingEntries() throws Exception {
+        TestConnectionManager tcm = 
+            new TestConnectionManager(NUM_CONNECTIONS);
+        FileManager fm = new TestFileManager();
+        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);        
+        PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
+        Class[] params = new Class[] {QueryRouteTable.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "addQueryRoutingEntries",
+                                         params);             
+        QueryRouteTable qrt = new QueryRouteTable();
+        m.invoke(ROUTER, new Object[] {qrt});
+        for(int i=0; i<MY_KEYWORDS.length; i++) {
+            QueryRequest qr = QueryRequest.createQuery(MY_KEYWORDS[i]);
+            assertTrue("should contain the given keyword: "+qr, 
+                       qrt.contains(qr));
+        }
+
+        for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
+            QueryRequest qr = QueryRequest.createQuery(LEAF_KEYWORDS[i]);
+            assertTrue("should contain the given keyword: "+qr, 
+                       qrt.contains(qr));
+        }
     }
 
     /**
@@ -68,52 +161,88 @@ public final class MessageRouterTest extends BaseTestCase {
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumNewConnectionQueries());
+    }
 
-        // make sure we send a query from an old connection to new 
-        // connections if new connections are available.
-
+    /**
+     * Test to make sure that queries from old connections are forwarded
+     * to new connections if only new connections are available.
+     */
+    public void testForwardOldQueriesToNewConnections() throws Exception {
         // reset the connection manager
-        tcm = new TestConnectionManager(NUM_CONNECTIONS);
+        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test");      
-        rh = new OldConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardLimitedQueryToUltrapeers",
+                                         params);        
+        QueryRequest qr = QueryRequest.createQuery("test");      
+        ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", 5, tcm.getNumQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 5, 
                      tcm.getNumNewConnectionQueries());
+    }
 
-
+    /** 
+     * Test to make sure we send a query from an old connection to new 
+     * connections if new connections are available, but that we
+     * still check the routing tables when the connections are new
+     * and the query is on the last hop.
+     */
+    public void testOldConnectionQueryLastHopForwardingToNewConnection() 
+        throws Exception {
         // make sure we send a query from an old connection to new 
-        // connections if new connections are available, but that we
-        // still check the routing tables when the connections are new
-        // and the query is on the last hop.
+        // connections if new connections are available.
 
         // reset the connection manager
-        tcm = new TestConnectionManager(NUM_CONNECTIONS);
+        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test", (byte)1);      
-        rh = new OldConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardLimitedQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", 0, tcm.getNumQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumNewConnectionQueries());
+    }
 
-        // make sure we send a query from an old connection to old 
-        // connections even when it's the last hop
+    /** 
+     * Test to make sure we send a query from an old connection to an
+     * old connection even when it's the last hop -- that we ignore
+     * last-hop QRP on old connections.
+     */
+    public void testOldConnectionQueriesIgnoreLastHopQRP() 
+        throws Exception {
+        // make sure we send a query from an old connection to new 
+        // connections if new connections are available.
 
-        // reset the connection manager to use all old connections
-        tcm = new TestConnectionManager(0);
+        // reset the connection manager
+        TestConnectionManager tcm = new TestConnectionManager(0);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test", (byte)1);      
-        rh = new OldConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardLimitedQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
+        // make sure we send a query from an old connection to old 
+        // connections even when it's the last hop
         assertEquals("unexpected number of queries sent", 5, 
                      tcm.getNumQueries());
         assertEquals("unexpected number of queries sent", 5, 
@@ -125,7 +254,7 @@ public final class MessageRouterTest extends BaseTestCase {
     /**
      * Test to make sure that the method to forward query requests
      * from new-style (high out-degree) hosts to others is working
-     * correctly
+     * correctly when only some of the connections are new.
      */
     public void testForwardQueryToUltrapeers() throws Exception {
         TestConnectionManager tcm = new TestConnectionManager(4);
@@ -147,16 +276,26 @@ public final class MessageRouterTest extends BaseTestCase {
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 4, 
                      tcm.getNumNewConnectionQueries());
+    }
 
-        // test that we send the query to everyone when all of the 
-        // connections are new
-
+    /**
+     * Test to make sure that the method to forward query requests
+     * from new-style (high out-degree) hosts to others is working
+     * correctly when all of the connections are new
+     */
+    public void testForwardQueryToAllNewUltrapeers() throws Exception {
         // reset the connection manager using all new connections
-        tcm = new TestConnectionManager(NUM_CONNECTIONS);
+        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test");      
-        rh = new NewConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test");      
+        ReplyHandler rh = new NewConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumQueries());
@@ -164,16 +303,26 @@ public final class MessageRouterTest extends BaseTestCase {
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumNewConnectionQueries());
+    }
 
-        // test that we send the query to everyone when all of the 
-        // connections are old
-
+    /**
+     * Test to make sure that the method to forward query requests
+     * from new-style (high out-degree) hosts to others is working
+     * correctly when none of the connections are new.
+     */
+    public void testForwardQueryToNoNewUltrapeers() throws Exception {
         // reset the connection manager using all old connections
-        tcm = new TestConnectionManager(0);
+        TestConnectionManager tcm = new TestConnectionManager(0);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test");      
-        rh = new NewConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test");      
+        ReplyHandler rh = new NewConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumQueries());
@@ -182,16 +331,26 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumNewConnectionQueries());
 
-        // test that queries are correctly processed when they're the 
-        // last hop, and they're being sent to new nodes that use
-        // ultrapeer query routing
+    }
 
+    /**
+     * Test to make sure that the method to forward query requests
+     * from new-style (high out-degree) hosts to others is working
+     * correctly when the request is on its last hop
+     */
+    public void testForwardQueryToNewUltrapeersOnLastHop() throws Exception {
         // reset the connection manager using all new connections
-        tcm = new TestConnectionManager(NUM_CONNECTIONS);
+        TestConnectionManager tcm = new TestConnectionManager(NUM_CONNECTIONS);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test", (byte)1);      
-        rh = new NewConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        ReplyHandler rh = new NewConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
 
         // the query should not have been sent along any of the connections,
@@ -202,16 +361,27 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumNewConnectionQueries());
 
-        // test that queries are correctly processed when they're the 
-        // last hop, and they're being sent to old nodes that don't use
-        // ultrapeer query routing
+    }
 
+    /**
+     * Test to make sure that the method to forward query requests
+     * from new-style (high out-degree) hosts to others is working
+     * correctly when all of the connections are old and the query
+     * is on the last hop.
+     */
+    public void testForwardQueryToOldUltrapeersOnLastHop() throws Exception {
         // reset the connection manager using all new connections
-        tcm = new TestConnectionManager(0);
+        TestConnectionManager tcm = new TestConnectionManager(0);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test", (byte)1);      
-        rh = new NewConnection(10);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
+        ReplyHandler rh = new NewConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
 
         // the query should not have been sent along any of the connections,
@@ -250,16 +420,23 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals("unexpected number of queries sent", 3, 
                      tcm.getNumNewConnectionQueries());        
 
-
-        // make sure that queries from leaves are simply sent to
-        // only three hosts even when we have more connections hosts
-        tcm = new TestConnectionManager(5, false);
+    }
+    
+    /**
+     * Tests the method for originating queries from leaves to make sure
+     * that we only send the query to 3 hosts even when we have more.
+     */
+    public void testOriginateLeafQueryLimit() throws Exception {  
+        Class[] params = new Class[]{QueryRequest.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "originateLeafQuery",
+                                         params);          
+        TestConnectionManager tcm = new TestConnectionManager(5, false);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        qr = QueryRequest.createQuery("test");      
-
-        
-        rh = new OldConnection(10);
+        QueryRequest qr = QueryRequest.createQuery("test");      
+        ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr});
         assertEquals("unexpected number of queries sent", 3, tcm.getNumQueries());
         assertEquals("unexpected number of queries sent", 0, 
@@ -276,9 +453,14 @@ public final class MessageRouterTest extends BaseTestCase {
     private static final class TestConnectionManager extends ConnectionManager {
 
         /**
-         * The list of <tt>Connection</tt> instances
+         * The list of ultrapeer <tt>Connection</tt> instances
          */
-        private final List CONNECTIONS;
+        private final List CONNECTIONS = new LinkedList();
+
+        /**
+         * The list of leaf <tt>Connection</tt> instances
+         */
+        private final List LEAF_CONNECTIONS = new LinkedList();
 
         /**
          * Constant for whether or not this should be considered an
@@ -308,13 +490,17 @@ public final class MessageRouterTest extends BaseTestCase {
          */
         TestConnectionManager(int numNewConnections, boolean ultrapeer) {
             super(new DummyAuthenticator());
-            CONNECTIONS = new LinkedList();
             for(int i=0; i<NUM_CONNECTIONS; i++) {
                 if(i < numNewConnections) {
-                    CONNECTIONS.add(new NewConnection(15));
+                    CONNECTIONS.add(new UltrapeerConnection());
                 } else {
                     CONNECTIONS.add(new OldConnection(15));                    
                 }
+            }
+
+            // now, give ourselves 30 leaves
+            for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
+                LEAF_CONNECTIONS.add(new LeafConnection());
             }
             ULTRAPEER = ultrapeer;
         }
@@ -324,6 +510,10 @@ public final class MessageRouterTest extends BaseTestCase {
          */
         public List getInitializedConnections2() {
             return CONNECTIONS;
+        }
+
+        public List getInitializedClientConnections2() {
+            return LEAF_CONNECTIONS;
         }
 
         public boolean isSupernode() {
@@ -421,12 +611,6 @@ public final class MessageRouterTest extends BaseTestCase {
             _numQueries++;
             QueryRequest qr = (QueryRequest)msg;
             int ttl = qr.getTTL();
-
-            //if(ttl > headers().getMaxTTL()) {
-                // the TTL is higher than we specified
-            //  throw new IllegalArgumentException("ttl too high: "+ttl);
-            //}
-
             _totalTTL += ttl;
         }
 
@@ -448,10 +632,19 @@ public final class MessageRouterTest extends BaseTestCase {
      * testing the horizon calculation and testing the new search
      * architecture.
      */
-    private static final class NewConnection extends TestConnection {        
+    private static class NewConnection extends TestConnection {    
+       
+        private static int counter = 0;
+
+        private final ManagedConnectionQueryInfo QUERY_INFO =
+            new ManagedConnectionQueryInfo();
+        
+        protected final QueryRouteTable QRT = new QueryRouteTable();
 
         NewConnection(int connections) {
             super(connections);
+            QUERY_INFO.lastReceived = QRT;
+            counter++;
         }
 
         public boolean isGoodConnection() {
@@ -460,6 +653,48 @@ public final class MessageRouterTest extends BaseTestCase {
 
         public boolean isUltrapeerQueryRoutingConnection() {
             return true;
+        }
+
+        public ManagedConnectionQueryInfo getQueryRouteState() {
+            return QUERY_INFO;
+        }
+    }
+
+    /**
+     * Specialized class that uses special keywords for Ultrapeer routing
+     * tables.
+     */
+    private static final class UltrapeerConnection extends NewConnection {
+
+        private static int counter = 0;
+
+        UltrapeerConnection() {
+            super(15);
+            QRT.add(ULTRAPEER_KEYWORDS[counter]);
+            counter++;
+        }        
+
+        private static void resetCounter() {
+            counter = 0;
+        }
+    }
+
+    /**
+     * Specialized class that uses special keywords for leaf routing
+     * tables.
+     */
+    private static final class LeafConnection extends NewConnection {
+
+        private static int counter = 0;
+
+        LeafConnection() {
+            super(15);
+            QRT.add(LEAF_KEYWORDS[counter]);
+            counter++;
+        }        
+
+        private static void resetCounter() {
+            counter = 0;
         }
     }
 
@@ -476,6 +711,20 @@ public final class MessageRouterTest extends BaseTestCase {
 
         public boolean isGoodConnection() {
             return false;
+        }
+    }
+
+    /**
+     * Test file manager that returns specialized keywords for QRP testing.
+     */
+    private static final class TestFileManager extends MetaFileManager {
+        
+        private final List KEYWORDS = Arrays.asList(MY_KEYWORDS);
+
+        TestFileManager() {}
+
+        public List getKeyWords() {
+            return KEYWORDS;
         }
     }
 }
