@@ -164,6 +164,44 @@ public abstract class MessageRouter
         _pushRouteTable.removeReplyHandler(connection);
     }
 
+        /**
+     * The handler for all message types.  Processes a message based on the 
+     * message type.
+     */
+    public void handleMessage(Message m, ManagedConnection receivingConnection)
+    {
+//        //if crawler ping, send back pongs of neighbors.
+//        if (isCrawlerPing(m)) 
+//        {
+//            sendCrawlerPingReplies((PingRequest)m, receivingConnection);
+//            return;
+//        }
+
+        // Increment hops and decrease TTL
+        m.hop();
+
+        if(m instanceof PingRequest) 
+            handlePingRequest((PingRequest)m, receivingConnection);
+        else if (m instanceof PingReply) 
+            handlePingReply((PingReply)m, receivingConnection);
+        else if (m instanceof QueryRequest)
+            handleQueryRequestPossibleDuplicate(
+                (QueryRequest)m, receivingConnection);
+        else if (m instanceof QueryReply)
+            handleQueryReply((QueryReply)m, receivingConnection);
+        else if (m instanceof PushRequest)
+            handlePushRequest((PushRequest)m, receivingConnection);
+        else if (m instanceof RouteTableMessage)
+            handleRouteTableMessage((RouteTableMessage)m,
+                                    receivingConnection);
+
+        //This may trigger propogation of query route tables.  We do this AFTER
+        //any handshake pings.  Otherwise we'll think all clients are old
+        //clients.
+        forwardQueryRouteTables();      
+    }
+    
+    
     /**
      * The handler for PingRequests received in
      * ManagedConnection.loopForMessages().  Checks the routing table to see
@@ -190,6 +228,7 @@ public abstract class MessageRouter
             handleQueryRequest(queryRequest, receivingConnection);
     }
 
+    
     /**
      * The default handler for PingRequests received in
      * ManagedConnection.loopForMessages().  This implementation updates stats,
@@ -216,7 +255,8 @@ public abstract class MessageRouter
 
         respondToPingRequest(pingRequest, _acceptor);
     }
-
+    
+    
     /**
      * The default handler for QueryRequests received in
      * ManagedConnection.loopForMessages().  This implementation updates stats,

@@ -486,21 +486,24 @@ public class ManagedConnection
                 continue;
             }
 
-            // Increment hops and decrease TTL
-            m.hop();
-
-            if(m instanceof PingRequest)
-                _router.handlePingRequestPossibleDuplicate(
-                    (PingRequest)m, this);
-            else if (m instanceof PingReply)
-                _router.handlePingReply((PingReply)m, this);
-            else if (m instanceof QueryRequest)
-                _router.handleQueryRequestPossibleDuplicate(
-                    (QueryRequest)m, this);
-            else if (m instanceof QueryReply)
-                _router.handleQueryReply((QueryReply)m, this);
-            else if (m instanceof PushRequest)
-                _router.handlePushRequest((PushRequest)m, this);
+            //call MessageRouter to handle and process the message
+            _router.handleMessage(m, this);
+            
+//            // Increment hops and decrease TTL
+//            m.hop();
+//
+//            if(m instanceof PingRequest)
+//                _router.handlePingRequestPossibleDuplicate(
+//                    (PingRequest)m, this);
+//            else if (m instanceof PingReply)
+//                _router.handlePingReply((PingReply)m, this);
+//            else if (m instanceof QueryRequest)
+//                _router.handleQueryRequestPossibleDuplicate(
+//                    (QueryRequest)m, this);
+//            else if (m instanceof QueryReply)
+//                _router.handleQueryReply((QueryReply)m, this);
+//            else if (m instanceof PushRequest)
+//                _router.handlePushRequest((PushRequest)m, this);
         }
     }
 
