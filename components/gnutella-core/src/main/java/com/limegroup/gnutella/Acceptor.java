@@ -31,7 +31,7 @@ public class Acceptor extends Thread {
      */
     private volatile ServerSocket _socket=null;
     private volatile int _port=-1;
-    private Object _socketLock=new Object();
+    private final Object SOCKET_LOCK = new Object();
 
     /**
      * The real address of this host--assuming there's only one--used for pongs
@@ -54,8 +54,16 @@ public class Acceptor extends Thread {
      */
     private static byte[] _address = new byte[4];
 
-    private IPFilter _filter=new IPFilter();;
+	/**
+	 * <tt>IPFilter</tt> that allow LimeWire to only accept connections from
+	 * certain hosts.
+	 */
+    private IPFilter _filter = new IPFilter();;
     
+	/**
+	 * Variable for whether or not we have accepted an incoming connection --
+	 * used to determine firewall status.
+	 */
 	private volatile boolean _acceptedIncoming = false;
 
 
@@ -137,10 +145,10 @@ public class Acceptor extends Thread {
                     _socket.close();
                 } catch (IOException e) { }
             }
-            synchronized (_socketLock) {
+            synchronized (SOCKET_LOCK) {
                 _socket=null;
                 _port=0;
-                _socketLock.notify();
+                SOCKET_LOCK.notify();
             }
 
             //Shut off UDPService also!
@@ -188,10 +196,10 @@ public class Acceptor extends Thread {
                 } catch (IOException e) { }
             }
             //c) Replace with new sock.  Notify the accept thread.
-            synchronized (_socketLock) {
+            synchronized (SOCKET_LOCK) {
                 _socket=newSocket;
                 _port=port;
-                _socketLock.notify();
+                SOCKET_LOCK.notify();
             }
 
             debug("Acceptor.setListeningPort(): I am ready.");
@@ -273,7 +281,7 @@ public class Acceptor extends Thread {
                 //waiting, IOException will be thrown, forcing us to
                 //release the lock.
                 Socket client=null;
-                synchronized (_socketLock) {
+                synchronized (SOCKET_LOCK) {
                     if (_socket!=null) {
                         try {
                             client=_socket.accept();
@@ -285,7 +293,7 @@ public class Acceptor extends Thread {
                         // be available.  So, just wait for that to happen and
                         // go around the loop again.
                         try {
-                            _socketLock.wait();
+                            SOCKET_LOCK.wait();
                         } catch (InterruptedException e) {
                         }
                         continue;
