@@ -230,23 +230,25 @@ public class HostCatcher {
     public boolean add(PingReply pr, ReplyHandler receivingConnection) {
         //Convert to endpoint
         ExtendedEndpoint endpoint;
+        boolean supportsUnicast = false;
         try {
-			boolean supportsUnicast = pr.supportsUnicast();
+			supportsUnicast = pr.supportsUnicast();
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
 											pr.getDailyUptime());
-			if(supportsUnicast) {
-				try {
-					UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
-												 pr.getPort());
-				} catch(UnknownHostException e) {
-					// nothing we can do if the host is not recognized -- this
-					// should never happen for raw IP addresses, as there is
-					// no DNS lookup anyway after Java 1.1 (1.1.8 does NOT
-					// do a DNS lookup).
-				}
-			}
         } catch (BadPacketException bpe) {
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort());
+        }
+
+        if(supportsUnicast) {
+            try {
+                UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
+                                             pr.getPort());
+            } catch(UnknownHostException e) {
+                // nothing we can do if the host is not recognized -- this
+                // should never happen for raw IP addresses, as there is
+                // no DNS lookup anyway after Java 1.1 (1.1.8 does NOT
+                // do a DNS lookup).
+            }
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
