@@ -411,18 +411,20 @@ public class QueryRouteTable {
             try {
                 boolean wasInfinity=(!bitTable.get(nextPatch));
                 if (data[i] == KEYWORD_PRESENT) {
-                    resizedQRT = null;
                     bitTable.set(nextPatch);
                 }
                 else if (data[i] == KEYWORD_ABSENT) {
-                    resizedQRT = null;
                     bitTable.clear(nextPatch);
                 }
-//                boolean isInfinity=(!bitTable.get(nextPatch));
-//                if (wasInfinity && !isInfinity)
+                boolean isInfinity=(!bitTable.get(nextPatch));
+                if (wasInfinity && !isInfinity) {
+                    resizedQRT = null;
 //                    bitEntries++;  //added entry
-//                else if (!wasInfinity && isInfinity)
+                }
+                else if (!wasInfinity && isInfinity) {
+                    resizedQRT = null;
 //                    bitEntries--;  //removed entry
+                }
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
