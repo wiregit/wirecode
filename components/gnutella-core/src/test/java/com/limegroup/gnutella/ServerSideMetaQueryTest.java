@@ -385,4 +385,27 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     }
 
+
+    public void testStarvingMetaQuery() throws Exception {
+        drainAll();
+        {
+        // first test a normal query with several meta flags
+        QueryRequest query = 
+            new QueryRequest(GUID.makeGuid(), (byte)3, "susheel", "", null,
+                             null, null, false, Message.N_TCP, false, 0, 
+                             0 | QueryRequest.AUDIO_MASK);
+        
+        testUP[0].send(query);
+        testUP[0].flush();
+
+        Thread.sleep(250);
+
+        // we should get no responses because of the filter
+        QueryReply reply = 
+            (QueryReply)getFirstInstanceOfMessageType(testUP[0],
+                                                      QueryReply.class);
+        assertNull(reply);
+        }
+    }
+
 }
