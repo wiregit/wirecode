@@ -45,7 +45,7 @@ public class RemoteFileDesc implements Serializable {
 	 *  INVARIANT: _xmlDocs != null -> _xmlDocs.length != 0
 	 */
     private LimeXMLDocument[] _xmlDocs;
-	private Set _urns;
+	private Set /* of URN*/  _urns;
 
     /**
      * Boolean indicating whether or not the remote host has browse host 

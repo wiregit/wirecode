@@ -1325,47 +1325,20 @@ public class ManagedDownloader implements Downloader, Serializable {
 		// If an AlternateLocationCollection already existed with that
 		// SHA1, it reuses it.  Otherwise, it creates it new.
         synchronized (this) {
-            for (Iterator iter=files.iterator(); iter.hasNext(); ) {
-                tempRFD = (RemoteFileDesc)iter.next();
-
-				URN sha1 = tempRFD.getSHA1Urn();
-
-				// Don't add a location to the alternate location list 
-				// if the RFD doesn't have a SHA1
-				if(sha1 == null)
-				    continue;
+            tempRFD = (RemoteFileDesc)files.get(0);
+        }        
+        URN sha1 = tempRFD.getSHA1Urn();
 				 
-				// If no alternate location collection existed already,
-				// or one existed but this is the first new RFD,
-				// and current SHA1 is different than it,
-				// create a new collection.
-                if(totalAlternateLocations == null ||
-                   (firstSHA1RFD && 
-                    !totalAlternateLocations.getSHA1().equals(sha1))
-                   ) {
-                    totalAlternateLocations =
+        // If no alternate location collection existed already, or one existed
+        // but this is the first new RFD, and current SHA1 is different than it,
+        // create a new collection.
+        //Sumeet:TODO1: Check if this needs to be synchronized on 
+        //totalAlternateLocations
+        if( sha1!=null && 
+            (totalAlternateLocations == null || 
+             !totalAlternateLocations.getSHA1().equals(sha1)) )
+            totalAlternateLocations=
                         AlternateLocationCollection.createCollection(sha1);
-                }
-                
-                firstSHA1RFD = false;
-                
-				if(!sha1.equals(totalAlternateLocations.getSHA1Urn())) {
-					// if the SHA1s don't match, keep going
-					continue;
-				}
-				try {
-					AlternateLocation location = 
-						AlternateLocation.createAlternateLocation(tempRFD);
-					totalAlternateLocations.addAlternateLocation(location);
-				} catch( IOException e ) {
-                }  
-			}
-			
-			// if none had a URN, null out totalAltLocs.
-			if( firstSHA1RFD )
-			    totalAlternateLocations = null;
-        }
-		
         
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
@@ -1880,7 +1853,7 @@ public class ManagedDownloader implements Downloader, Serializable {
       File incompleteFile) throws IOException {
         HTTPDownloader ret;
         //Establish normal downloader.              
-        ret = new HTTPDownloader(rfd, incompleteFile,totalAlternateLocations);
+        ret = new HTTPDownloader(rfd, incompleteFile);
         // Note that connectTCP can throw IOException
         // (and the subclassed CantConnectException)
         try {
@@ -1944,8 +1917,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
-        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
-		  totalAlternateLocations);
+        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile);
         
         //Socket.getInputStream() throws IOX if the connection is closed.
         //So this connectTCP *CAN* throw IOX.
@@ -2082,8 +2054,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //the downloader
                 synchronized(this) {
                     addAlternateLocations(dloader.getAlternateLocations(),
-                                          dloader.getRemoteFileDesc().getSize()
-                                         );
+                                        dloader.getRemoteFileDesc().getSize());
                 }
                 //Update the needed list unless any of the following happened: 
                 // 1. We tried to assign a grey region - which means needed 
