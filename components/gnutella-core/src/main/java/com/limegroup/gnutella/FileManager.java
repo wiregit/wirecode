@@ -1215,8 +1215,7 @@ public abstract class FileManager {
         //an already case-changed string.  Both search & urnSearch
         //do thise kind of match, so we canonicalise the case for them.
         str = _index.canonicalCase(str);        
-        matches = search( str,
-                          matches);
+        matches = search( str, matches);
         if(request.getQueryUrns().size() > 0) {
             matches = urnSearch(request.getQueryUrns().iterator(),matches);
         }
@@ -1226,28 +1225,24 @@ public abstract class FileManager {
 		}
 
         List responses = new LinkedList();
-
-        boolean busy = 
-            RouterService.getUploadManager().isBusy() &&
-            RouterService.getUploadManager().isQueueFull();
-        for (IntSet.IntSetIterator iter=matches.iterator(); 
-             iter.hasNext();) { 
+        
+        // Iterate through our hit indexes to create a list of results.
+        for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
             if(desc == null) {
                 Assert.that(false, 
                             "unexpected null in FileManager for query:\n"+
                             request);
-            } if(!busy || 
-                 desc.getAltLocsSize() < 10) {
-                desc.incrementHitCount();
-                
-                RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
-                Response resp = new Response(desc);
-                if(includeXML)
-                    addXMLToResponse(resp, desc);
-                responses.add(resp);
             } 
+            
+            desc.incrementHitCount();
+            
+            RouterService.getCallback().handleSharedFileUpdate(desc.getFile());
+            Response resp = new Response(desc);
+            if(includeXML)
+                addXMLToResponse(resp, desc);
+            responses.add(resp);
         }
         return (Response[])responses.toArray(new Response[responses.size()]);
     }
