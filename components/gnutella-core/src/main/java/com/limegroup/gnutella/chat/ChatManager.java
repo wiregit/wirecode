@@ -54,13 +54,16 @@ public class ChatManager {
 
 		// do a check to see it the host has been blocked
 		String host = socket.getInetAddress().getHostAddress();
-		if ( _blockedHosts.contains(host) ) {
-  			try {
+		SettingsManager sm = SettingsManager.instance();
+		String[] bannedIPs = sm.getBannedIps();
+		List bannedList = Arrays.asList(bannedIPs);
+		if (bannedList.contains(host) ) {
+			try {
   				socket.close();
   			} catch (IOException e) {
   			}
   			return;
-  		}
+		}
 
 		try {
 			InstantMessenger im = new InstantMessenger(socket, this, 
@@ -104,14 +107,28 @@ public class ChatManager {
 
 	/** blocks incoming connections from a particular ip address  */
 	public void blockHost(String host) {
+		SettingsManager sm = SettingsManager.instance();
+		String[] bannedIPs = sm.getBannedIps();
+		Arrays.sort(bannedIPs);		
 		synchronized (this) {
-			if ( ! _blockedHosts.contains(host) )	
-				_blockedHosts.add(host);
+			if ( Arrays.binarySearch(bannedIPs, host) < 0 ) {
+				String[] more_banned = new String[bannedIPs.length+1];
+				System.arraycopy(bannedIPs, 0, more_banned, 0, 
+								 bannedIPs.length);
+				more_banned[bannedIPs.length] = host;
+				sm.setBannedIps(more_banned);
+			}
 		}
 	}
 	
 	public void unblockHost(String host) {
-		_blockedHosts.remove(host);
+		SettingsManager sm = SettingsManager.instance();
+		String[] bannedIPs = sm.getBannedIps();
+		List bannedList = Arrays.asList(bannedIPs);
+		synchronized (this) {
+			if (bannedList.remove(host) )
+				sm.setBannedIps((String[])bannedList.toArray() );
+		}
 	}
 
 	// Private Classes
