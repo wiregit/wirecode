@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ErrorService;
@@ -19,6 +21,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
@@ -30,12 +33,14 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
@@ -108,7 +113,23 @@ public class DownloadTest extends BaseTestCase {
         dm = rs.getDownloadManager();
         dm.initialize();
         dm.scheduleWaitingPump();
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(true));
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
+        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+            public boolean isConnected() {
+                return true;
+            }
+        };
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        
         RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        
+        assertTrue(RouterService.isConnected());
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
@@ -886,7 +907,7 @@ public class DownloadTest extends BaseTestCase {
 
         //Prepare to check the alternate locations
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
+        AlternateLocation dAlt = AlternateLocation.create(rfd1);
            
         URN sha1 = rfd1.getSHA1Urn();
         URN uSHA1 = uploader1.getReportedSHA1();
@@ -923,8 +944,8 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
 
-        AlternateLocation al1 = AlternateLocation.create(rfd1.getUrl());
-        AlternateLocation al2 = AlternateLocation.create(rfd2.getUrl());
+        AlternateLocation al1 = AlternateLocation.create(rfd1);
+        AlternateLocation al2 = AlternateLocation.create(rfd2);
         
         assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
         assertTrue("uploader didn't recieve alt", alt2.hasAlternateLocations());
@@ -958,9 +979,9 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
-        URL url2 = rfd2.getUrl();
+        
         AlternateLocation al2 =
-			AlternateLocation.create(url2);
+			AlternateLocation.create(rfd2);
         ualt.add(al2);
 
         uploader1.setAlternateLocations(ualt);
@@ -1006,11 +1027,10 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection ualt = 
                          AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
-        URL url2 = rfd2.getUrl();
-        URL url3 = rfd3.getUrl();        
+
         AlternateLocation al1 =	AlternateLocation.create(rfd1);
-        AlternateLocation al2 =	AlternateLocation.create(url2);
-        AlternateLocation al3 =	AlternateLocation.create(url3);
+        AlternateLocation al2 =	AlternateLocation.create(rfd2);
+        AlternateLocation al3 =	AlternateLocation.create(rfd3);
         ualt.add(al2);
         ualt.add(al3);
 
@@ -1082,7 +1102,7 @@ public class DownloadTest extends BaseTestCase {
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
         uploader1.setAlternateLocations(ualt);
-        
+
         tGeneric(rfds);
         
         //Check to check the alternate locations

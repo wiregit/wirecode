@@ -38,7 +38,24 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         return buildTestSuite(ManagedDownloaderTest.class);
     }
     
+    public static void globalSetUp() throws Exception{
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(true));
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
+        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+            public boolean isConnected() {
+                return true;
+            }
+        };
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        
+        assertTrue(RouterService.isConnected());
+    }
+    
     public void setUp() {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
         fileman = new FileManagerStub();
@@ -438,7 +455,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         }
         
         public void setSHA1(URN sha1) throws Exception{
-        	PrivilegedAccessor.setValue(this,"sha1",sha1);
+        	PrivilegedAccessor.setValue(this,"downloadSHA1",sha1);
         }
         
         public void setFM(FileManager fm) throws Exception{
