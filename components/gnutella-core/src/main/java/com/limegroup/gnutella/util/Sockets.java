@@ -85,12 +85,14 @@ public class Sockets {
                 _setKeepAliveMethod.invoke(socket, 
                     new Object[] { on ? Boolean.TRUE : Boolean.FALSE });
                 return true;
-            } catch (Exception ignored) { 
-                //I don't like generic "catch Exception"'s, but I think it's
-                //clearer than listing the zillion cases from above.  This
-                //should never happen, but we can go on to the emulation step
-                //below.
-            }                    
+            } catch(IllegalAccessException e) {
+                // this should not happen, and we want to know if it does
+                ErrorService.error(e);
+            } catch(InvocationTargetException e) {
+                // this should be a SocketException, indicating an 
+                // underlying protocol error, which should happen,
+                // for example, if the socket has disconnected
+            }
         }
         return false;
     }
