@@ -22,6 +22,8 @@ import org.w3c.dom.DOMException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.xml.LimeXMLUtils;
+
 
 class UpdateCollection {
     
@@ -282,7 +284,7 @@ class UpdateCollection {
         String button1 = getAttributeText(attr, "button1");
         String button2 = getAttributeText(attr, "button2");
         String title = getAttributeText(attr, "title");
-        String msg = lang.getTextContent();
+        String msg = LimeXMLUtils.getTextContent(lang);
         
         if(id == null || msg == null || msg.equals("")) {
             LOG.error("Missing id or message.");

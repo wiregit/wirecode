@@ -104,6 +104,15 @@ public class LimeXMLUtils
     }
     
     /**
+     * Gets the text content of the child nodes.
+     * This is the same as Node.getTextContent(), but exists on all
+     * JDKs.
+     */
+    public static String getTextContent(Node node) {
+        return getText(node.getChildNodes());
+    }
+    
+    /**
      * Collapses a list of CDATASection, Text, and predefined EntityReference
      * nodes into a single string.  If the list contains other types of nodes,
      * those other nodes are ignored.
