@@ -10,9 +10,9 @@ import com.sun.java.util.collections.*;
  *
  * @author Gregorio Roper 
  */
-class IPList {
+public class IPList {
     /** The list of IP's. */
-    private Vector /* of IP */ ips = new Vector();
+    private List /* of IP */ ips = new LinkedList();
 
     public IPList () {}
 
@@ -29,7 +29,7 @@ class IPList {
         }
         
         if (!ips.contains(ip)) {// don't add the same IP more than once
-            ips.addElement(ip);
+            ips.add(ip);
         }
     }
 
