@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.handshaking;
 
+import com.limegroup.gnutella.*;
 import java.util.Properties;
+import com.sun.java.util.collections.*;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -15,14 +17,15 @@ import java.util.Properties;
  * 2) Create an instance with a custom status code, status message, and the
  *    headers used in the response.
  */
-public class HandshakeResponse {
+public final class HandshakeResponse {
+
     /**
      * The "default" status code in a connection handshake indicating that
      * the handshake was successful and the connection can be established.
      */
     public static final int OK = 200;
     
-     /**
+    /**
      * The "default" status message in a connection handshake indicating that
      * the handshake was successful and the connection can be established.
      */
@@ -150,7 +153,7 @@ public class HandshakeResponse {
      * @param headers the headers to use in the response.
      */
     public HandshakeResponse(String statusLine, Properties headers) { 
-        try{
+        try {
             //get the status code and message out of the status line
             int statusMessageIndex = statusLine.indexOf(" ");
             this.statusCode = Integer.parseInt(statusLine.substring(0, 
@@ -167,7 +170,107 @@ public class HandshakeResponse {
         
         this.HEADERS = headers;
     }
-    
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createAcceptResponse(Properties headers) {
+        // add nodes from far away if we can in an attempt to avoid
+        // cycles
+        addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
+        return new HandshakeResponse(headers);
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createRejectResponse(Properties headers) {
+        addConnectedUltrapeers(RouterService.getConnectionManager(), headers);
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
+                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     headers);        
+    }
+
+    /**
+     * Adds the addresses of connected Ultrapeers for X-Try-Ultrapeer
+     * headers.  This is useful particularly when we reject the connection,
+     * as we do not care about cycles in that case.
+     *
+     * @param cm the <tt>ConnectionManager</tt> that provides data for
+     *  the headers -- this may seem an odd design, since we always have
+     *  access to the ConnectionManager, but this makes testing easier
+     * @param headers the headers we're sending to the connecting node
+     */
+    private static void addConnectedUltrapeers(ConnectionManager cm,
+                                               Properties headers) {
+        StringBuffer hostString = new StringBuffer();
+
+        //Also add neighbouring ultrapeers
+        Set connectedSupernodeEndpoints = cm.getSupernodeEndpoints();
+
+        //if nothing to add, return
+        if(connectedSupernodeEndpoints.size() < 0)
+            return;
+        
+        int i = 0;
+        for(Iterator iter = connectedSupernodeEndpoints.iterator();
+            iter.hasNext(); i++) {
+            if(i == 10) break;
+            //get the next endpoint
+            Endpoint endpoint =(Endpoint)iter.next();
+
+            //append the host information
+            hostString.append(endpoint.getHostname());
+            hostString.append(":");
+            hostString.append(endpoint.getPort());
+            if(iter.hasNext()) {
+                hostString.append(Constants.ENTRY_SEPARATOR);
+            }
+        }
+
+        //add the connected Ultrapeers to the handshake headers
+        headers.put(ConnectionHandshakeHeaders.X_TRY_SUPERNODES, 
+                    hostString.toString());        
+    }
+
+    /**
+     * Adds the addresses of high-hops Ultrapeers to the given set
+     * of headers, if those Ultrapeers are available.
+     *
+     * @param hc the <tt>HostCatcher</tt> for obtaining Ultrapeer
+     *  hosts to return -- this is a slightly odd design, but 
+     *  passing the host catcher as a parameter here makes testing
+     *  a little easier
+     * @param header the set of headers to add the Ultrapeers to
+     */
+    private static void addHighHopsUltrapeers(HostCatcher hc,
+                                              Properties headers) {
+        StringBuffer hostString = new StringBuffer();
+
+        //add Ultrapeer endpoints from the hostcatcher.
+        Iterator iter = hc.getUltrapeerHosts(10);
+        while(iter.hasNext()) {
+            Endpoint curHost = (Endpoint)iter.next();
+            hostString.append(curHost.getHostname());
+            hostString.append(":");
+            hostString.append(curHost.getPort());
+            if(iter.hasNext()) {
+                hostString.append(Constants.ENTRY_SEPARATOR);
+            }
+        }
+
+        headers.put(ConnectionHandshakeHeaders.X_TRY_SUPERNODES,
+                    hostString.toString());
+    }
+
     /** 
      * Returns the response code.
      */
