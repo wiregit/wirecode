@@ -46,7 +46,7 @@ public class I18NSendReceiveTest
     }
 
     public static Test suite() {
-        return buildTestSuite(I18NSendReceive.class);
+        return buildTestSuite(I18NSendReceiveTest.class);
     }
 
     
