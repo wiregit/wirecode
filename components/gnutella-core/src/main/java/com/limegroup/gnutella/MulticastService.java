@@ -140,9 +140,14 @@ public final class MulticastService implements Runnable {
                 // leave the group if we're shutting off the service.
                 if (multicastSocket == null 
                  && _socket != null
-                 && _group != null
-                 && !_socket.isClosed() ) {
-                    _socket.leaveGroup(_group);
+                 && _group != null) {
+                    try {
+                        _socket.leaveGroup(_group);
+                    } catch(IOException ignored) {
+                        // ideally we would check if the socket is closed,
+                        // which would prevent the exception from happening.
+                        // but that's only available on 1.4 ... 
+                    }                        
                 }
                 _socket = (MulticastSocket) multicastSocket;
                 _receiveLock.notify();
