@@ -246,11 +246,10 @@ public class LimeXMLDocument{
         //if this string contains 2 sets of __ and the second set it at the 
         //end then we know it that the root has attributes.
         boolean end = n.endsWith(XMLStringUtils.DELIMITER);
-        int c=0;
-        c = n.indexOf(XMLStringUtils.DELIMITER);//firt delimiter
-        c = n.indexOf(XMLStringUtils.DELIMITER,c);//second
-        c = n.indexOf(XMLStringUtils.DELIMITER,c);//should be -1 for root att
-        if(end && c==-1)
+        StringTokenizer tok = new StringTokenizer(n,XMLStringUtils.DELIMITER);
+        int c = tok.countTokens();
+        //System.out.println("Sumeet: "+n+","+c);
+        if(end && c==2)
             rootAtts = true;
         else 
             rootAtts = false;
