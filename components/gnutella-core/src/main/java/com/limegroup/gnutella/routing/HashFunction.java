@@ -2,6 +2,7 @@ package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.ByteOrder;
 
 /** 
  * The official platform-independent hashing function for query-routing.  The
@@ -52,10 +53,23 @@ public class HashFunction {
      *     @requires 1<=bits<=32 
      */    
     public static int hash(String x, int n) {
-        //TODO: This is just a temporary hack.  The real algorithm obviously shouldn't
-        //be tied to the JDK.  Note that we don't just return x.hashCode()%bits;
-        //that wouldn't allow resizing of tables.
-        return hashSlow(x.hashCode(), n);
+        //TODO2: can you do this without allocations?
+
+        //Get the bytes of x, padding with zeroes so length is a multiple of 4.
+        byte[] bytes=x.getBytes();        
+        byte[] bytes4=null;
+        if (bytes.length%4==0)
+            bytes4=bytes;
+        else {
+            bytes4=new byte[bytes.length+(4-(bytes.length%4))];
+            System.arraycopy(bytes, 0, bytes4, 0, bytes.length);
+        }
+        //XOR every 4 bytes together.
+        int xor=0;
+        for (int i=0; i<bytes4.length; i+=4)
+            xor=xor^ByteOrder.leb2int(bytes4, i);
+        //And fit number to n.
+        return hashSlow(xor, n);
     }       
 
     /** 
@@ -76,6 +90,7 @@ public class HashFunction {
     public static void main(String args[]) {
         //TODO: we should verify the scaling property described in the header
         //above.
+        System.out.println("Informal scaling tests:");
         System.out.println(hash("Hello", 256));
         System.out.println(hash("Hallo", 256));
         System.out.println(hash("Hellu", 256));
@@ -87,6 +102,22 @@ public class HashFunction {
         System.out.println(hash("Hello", 512));
         System.out.println(hash("Hallo", 512));
         System.out.println(hash("Hellu", 512));
+        System.out.println();                           
+
+        System.out.println("Testing keywords:");
+        test("Music");
+        test("Real");
+        test("Nixon");
+        test("");
+        test("a");
+        test("ab");
+        test("abc");
+    }
+
+    private static void test(String s) {
+        System.out.println(s+": "+hash(s, 256));
+        s=s.toLowerCase();
+        System.out.println(s+": "+hash(s, 256));
     }
 
 
