@@ -76,6 +76,8 @@ public class ConnectionWatchdog implements Runnable {
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
+            if (! c.isKillable())
+                continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
         }
 
@@ -90,6 +92,8 @@ public class ConnectionWatchdog implements Runnable {
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
+            if (! c.isKillable())
+                continue; //e.g., Clip2 reflector
             Object state=snapshot.get(c);
             if (state==null)
                 continue;  //this is a new connection
@@ -119,6 +123,8 @@ public class ConnectionWatchdog implements Runnable {
         HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
         for (Iterator iter=connections.iterator(); iter.hasNext();) {
             ManagedConnection c=(ManagedConnection)iter.next();
+            if (! c.isKillable())
+                continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
             c.setHorizonEnabled(false);
             router.sendPingRequest(new PingRequest((byte)2), c);
@@ -133,6 +139,8 @@ public class ConnectionWatchdog implements Runnable {
         //haven't made progress are killed.
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
+            if (! c.isKillable())
+                continue; //e.g., Clip2 reflector
             c.setHorizonEnabled(true);
             Object state=snapshot.get(c);
             if (state==null)

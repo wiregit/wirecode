@@ -212,6 +212,16 @@ public abstract class MessageRouter
     {
         _numQueryRequests++;
 
+        //Hack! If this is the indexing query from a Clip2 reflector, mark the
+        //connection as unkillable so the ConnectionWatchdog will not police it
+        //any more.
+        if ((receivingConnection.getNumMessagesReceived()<=2)
+                && (queryRequest.getHops()<=1)  //actually ==1 will do
+                && (queryRequest.getQuery().equals("    "))) {
+            receivingConnection.setKillable(false);
+        }
+
+        
         if(queryRequest.getTTL() > 0)
             broadcastQueryRequest(queryRequest, receivingConnection,
                                   _manager);

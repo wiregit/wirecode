@@ -100,6 +100,9 @@ public class ManagedConnection
      * with a more general priority-based scheme later.
      */
     private boolean _isRouter=false;
+    /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
+     *  because this is a connection to a Clip2 reflector. */
+    private boolean _isKillable=true;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -599,5 +602,19 @@ public class ManagedConnection
      *  router.limewire.com.  */
     public boolean isRouterConnection() {
         return this._isRouter;
+    }
+
+
+    public void setKillable(boolean killable) {
+        this._isKillable=killable;
+    }
+
+    /** 
+     * Returns true if this should not be policed by the ConnectionWatchdog,
+     * e.g., because this is a connection to a Clip2 reflector. Default value:
+     * true.
+     */
+    public boolean isKillable() {
+        return _isKillable;
     }
 }
