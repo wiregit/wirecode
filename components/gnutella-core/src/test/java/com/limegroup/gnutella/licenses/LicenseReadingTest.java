@@ -82,7 +82,7 @@ public final class LicenseReadingTest extends BaseTestCase {
         assertFalse(l.isVerified());
         // don't validate -- don't wanna hit the web.
         assertEquals("http://creativecommons.org/licenses/sampling+/1.0/",
-                     l.getLicenseDeed().toString());
+                     l.getLicenseDeed(null).toString());
         assertEquals("http://ccmixter.org/file/Wired/61", l.getLicenseURI().toString());
     }
     
@@ -107,9 +107,6 @@ public final class LicenseReadingTest extends BaseTestCase {
 	                 amd.getLicense());
 
 
-        // TODO:  Test ccverifytest1.ogg
-        //        Right now JOrbisFile construction is failing on it.
-        /*
  	    f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
 	    assertTrue(f.exists());
 	    
@@ -124,11 +121,10 @@ public final class LicenseReadingTest extends BaseTestCase {
 	        foundLicense |= nv.getName().equals("audios__audio__license__");
 	    }
 	    assertTrue(foundLicense);
-	    assertEquals("2002 BM Relocation Program. Licensed to the public under " +
-	                 "http://creativecommons.org/licenses/by-sa/1.0/ verify at " +
+	    assertEquals("2003 Okapi Guitars. Licensed to the public under " +
+	                 "http://creativecommons.org/licenses/by-nc-sa/1.0/ verify at " +
 	                 "http://creativecommons.org/technology/verifytest/", 
 	                 amd.getLicense());
-        */
     }
 }
             

@@ -125,6 +125,16 @@ public final class LicenseFactoryTest extends BaseTestCase {
         l3.verify(null);
         l4.verify(null);
         
+        // first do some sanity checks.
+        assertTrue(l1.isValid(urn1));
+        assertTrue(l2.isValid(urn2));
+        assertFalse(l1.isValid(urn2));
+        assertFalse(l2.isValid(urn1));
+        assertFalse(l3.isValid(urn3));
+        assertFalse(l4.isValid(urn4));
+        assertTrue(l3.isValid(null));
+        assertTrue(l4.isValid(null));
+        
         // these are fine.
         assertTrue(LicenseFactory.isVerifiedAndValid(urn1, vf1));
         assertTrue(LicenseFactory.isVerifiedAndValid(urn2, vf2));
@@ -169,14 +179,18 @@ public final class LicenseFactoryTest extends BaseTestCase {
             return "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
                    "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
                    "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
-                   "  <Work rdf:about=\"" + urn.httpStringValue() + "\"/>" +
+                   "  <Work rdf:about=\"" + urn.httpStringValue() + "\">" +
+                   "     <license rdf:resource=\"http://creativecommons.org/licenses/by/2.0/\" />" +
+                   "  </Work>" +
                    "</rdf:RDF>";
         } else {
             return "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
                    "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
                    "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
                    "  <Work rdf:about=\"" + 
-                   urn.httpStringValue().substring(0, urn.httpStringValue().length()-1) + "X\"/>" +
+                   urn.httpStringValue().substring(0, urn.httpStringValue().length()-1) + "X\">" +
+                   "     <license rdf:resource=\"http://creativecommons.org/licenses/by/2.0/\" />" +
+                   "  </Work>" +
                    "</rdf:RDF>";
         }
     }

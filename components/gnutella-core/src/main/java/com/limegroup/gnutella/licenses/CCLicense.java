@@ -393,8 +393,11 @@ class CCLicense implements License, Serializable, Cloneable {
     
     /**
      * Verifies the body of the verification page.
+     *
+     * If 'parseWork' is true, this looks for works.  Otherwise
+     * it looks only for Licenses.
      */
-    protected void doVerification(String body) {
+    protected void doVerification(String body, boolean parseWork) {
         if(LOG.isTraceEnabled())
             LOG.trace("Attempting to verify: " + body);
             
@@ -418,7 +421,7 @@ class CCLicense implements License, Serializable, Cloneable {
         NodeList children = doc.getChildNodes();
         for(int i = 0; i < children.getLength(); i++) {
             Node child = (Node)children.item(i);
-            if(child.getNodeName().equals("Work"))
+            if(parseWork && child.getNodeName().equals("Work"))
                 parseWorkItem(child);
             else if(child.getNodeName().equals("License"))
                 parseLicenseItem(child);
@@ -580,7 +583,7 @@ class CCLicense implements License, Serializable, Cloneable {
                 }
                 
                 if(body != null)
-                    doVerification(body);
+                    doVerification(body, false);
              }
         }
     }
@@ -596,7 +599,7 @@ class CCLicense implements License, Serializable, Cloneable {
         }
         
         public void run() {
-            doVerification(getBody(licenseLocation.toString()));
+            doVerification(getBody(licenseLocation.toString()), true);
             lastVerifiedTime = System.currentTimeMillis();
             updateLicenseDetails();
             verified = VERIFIED;

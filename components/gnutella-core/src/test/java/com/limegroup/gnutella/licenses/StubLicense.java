@@ -38,16 +38,39 @@ class StubLicense extends CCLicense {
             return uri;
     }
     
-    protected String getBody() {
-        return page;
+    protected String getBody(String url) {
+        if(url.equals(getLicenseURI().toString()))
+            return page;
+        else
+            return null;
     }
     
     public void verify(VerificationListener listener) {
-        super.verify(listener);
-        try {
-            Thread.sleep(500);
-        } catch(InterruptedException ie) {
-            ErrorService.error(ie);
+        VerificationListener waiter = new Listener(listener);
+        synchronized(waiter) {
+            super.verify(waiter);
+            try {
+                waiter.wait();
+            } catch(InterruptedException ie) {
+                ErrorService.error(ie);
+            }
+        }
+    }
+    
+    private static class Listener implements VerificationListener {
+        private VerificationListener vl;
+        
+        Listener(VerificationListener vl) {
+            this.vl = vl;
+        }
+        
+        public void licenseVerified(License l) {
+            if(vl != null)
+                vl.licenseVerified(l);
+
+            synchronized(this) {
+                notify();
+            }
         }
     }
 }
