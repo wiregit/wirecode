@@ -542,11 +542,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             
             // Find any matching file-desc for this URN.
             FileDesc fd = fileManager.getFileDescForUrn(hash);
-            // Retrieve the alternate locations (without adding ourself)
-            AlternateLocationCollection alc =
-                fd.getAlternateLocationCollectionWithoutSelf();
-            // Add the collection of locations to our files.
-            addAlternateLocations(alc, (int)size);
+            if( fd != null ) {
+                // Retrieve the alternate locations (without adding ourself)
+                AlternateLocationCollection alc =
+                    fd.getAlternateLocationCollectionWithoutSelf();
+                // Add the collection of locations to our files.
+                addAlternateLocations(alc, (int)size);
+            }
         }
     }
 

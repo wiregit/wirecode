@@ -897,7 +897,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
-        debug("-Testing swarming of rfds ignoring alt ...");
+        debug("-Testing a shared partial funnels alt locs to downloader");
         
         int capacity=SettingsManager.instance().getConnectionSpeed();
         SettingsManager.instance().setConnectionSpeed(
@@ -958,6 +958,68 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         assertEquals("u1 did too much work", STOP_AFTER, u1);
         assertEquals("u2 did too much work", STOP_AFTER, u2);
+        assertGreaterThan("u3 did no work", 0, u3);
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }
+    
+    public void testResumeFromPartialWithAlternateLocations() throws Exception {
+        debug("-Testing alt locs from partial bootstrap resumed download");
+        
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+            SpeedConstants.MODEM_SPEED_INT);
+            
+        final int RATE=200;
+        //second half of file + 1/8 of the file
+        final int STOP_AFTER = TestFile.length()/10;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        uploader3.setRate(RATE);
+        final RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        final RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        AlternateLocation al1 = AlternateLocation.createAlternateLocation(rfd1);
+        AlternateLocation al2 = AlternateLocation.createAlternateLocation(rfd2);
+        AlternateLocation al3 = AlternateLocation.createAlternateLocation(rfd3);
+        AlternateLocationCollection alcs =
+            AlternateLocationCollection.createCollection(TestFile.hash());
+        alcs.addAlternateLocation(al2);
+        alcs.addAlternateLocation(al3);
+        
+        IncompleteFileManager ifm = dm.getIncompleteFileManager();
+        // put the hash for this into IFM.
+        File incFile = ifm.getFile(rfd1);
+        incFile.createNewFile();
+        // add the entry, so it's added to FileManager.
+        ifm.addEntry(incFile, new VerifyingFile(true));
+        
+        // Get the IncompleteFileDesc and add these alt locs to it.
+        FileDesc fd =
+            RouterService.getFileManager().getFileDescForUrn(TestFile.hash());
+        assertNotNull(fd);
+        assertInstanceof(IncompleteFileDesc.class, fd);
+        fd.addAlternateLocation(al1);
+        fd.addAlternateLocationCollection(alcs);
+        
+        tResume(incFile);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tu3: "+u3+"\n");
+        debug("\tTotal: "+(u1+u2+u3)+"\n");
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are started at different times.
+
+        assertEquals("u1 did wrong work", STOP_AFTER, u1);
+        assertEquals("u2 did wrong work", STOP_AFTER, u2);
         assertGreaterThan("u3 did no work", 0, u3);
         SettingsManager.instance().setConnectionSpeed(capacity);
     }    
@@ -1183,7 +1245,26 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             VerifyingFile vf=ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);
         }
-    }    
+    }
+    
+    /**
+     * Performs a generic resume download test.
+     */
+    private static void tResume(File incFile) throws Exception {
+        Downloader download = null;
+        
+        download = dm.download(incFile);
+        
+        waitForComplete(false);
+        if (isComplete())
+            debug("pass"+"\n");
+        else
+            fail("FAILED: complete corrupt");
+
+        IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        VerifyingFile vf = ifm.getEntry(incFile);
+        assertNull("verifying file should be null", vf);
+    }
 
 	/*
     private static URL rfdURL(RemoteFileDesc rfd) {
