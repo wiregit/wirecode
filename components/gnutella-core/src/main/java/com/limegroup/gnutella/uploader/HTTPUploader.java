@@ -52,6 +52,8 @@ public class HTTPUploader implements Uploader {
 	 */
 	private Map _alternateLocations = null;
 
+	private FileDesc _fileDesc;
+
     private final FileManager _fileManager;
 
     private final BandwidthTrackerImpl bandwidthTracker=
@@ -94,7 +96,7 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
-		FileDesc desc;
+		//FileDesc desc;
 		boolean indexOut = false;
 		boolean ioexcept = false;
 
@@ -102,9 +104,9 @@ public class HTTPUploader implements Uploader {
 			// This line can't be moved, or FileNotFoundUploadState
 			// will have a null pointer exception.
 			_ostream = _socket.getOutputStream();
-			desc = _fileManager.get(_index);
-			_fileSize = desc._size;
-			_urn = desc.getSHA1Urn();
+			_fileDesc = _fileManager.get(_index);
+			_fileSize = _fileDesc._size;
+			_urn = _fileDesc.getSHA1Urn();
 		} catch (IndexOutOfBoundsException e) {
 			// this is an unlikely case, but if for
 			// some reason the index is no longer valid.
@@ -135,10 +137,10 @@ public class HTTPUploader implements Uploader {
 		_guid = guid;
 		_port = port;
         _fileManager = fm;
-		FileDesc desc;
+		//FileDesc desc;
 		try {
-			desc = _fileManager.get(_index);
-			_fileSize = desc._size;
+			_fileDesc = _fileManager.get(_index);
+			_fileSize = _fileDesc._size;
 			setState(CONNECTING);
 		} catch (IndexOutOfBoundsException e) {
 			setState(PUSH_FAILED);
@@ -343,7 +345,7 @@ public class HTTPUploader implements Uploader {
 	 *
 	 * @return the requested <tt>URN</tt>
 	 */
-	public URN getRequestedURN() {return _requestedURN;}
+	public URN getRequestedUrn() {return _requestedURN;}
 	/****************** private methods *******************/
 
 
@@ -501,14 +503,11 @@ public class HTTPUploader implements Uploader {
 				userAgent = str.substring(11).trim();
 			}
 
-			else if(indexOfIgnoreCase(str, HTTPConstants.CONTENT_URN_HEADER) != -1) {
+			else if(indexOfIgnoreCase(str, HTTPConstants.CONTENT_URN_HEADER)!=-1) {
 				_requestedURN = HTTPUploader.readContentURN(str);
 			}
-			else if(indexOfIgnoreCase(str, HTTPConstants.ALTERNATE_LOCATION_HEADER) != -1) {
-				if(_alternateLocations == null) {
-					_alternateLocations = new HashMap();
-				}
-				HTTPUploader.readAlternateLocations(_alternateLocations, str);
+			else if(indexOfIgnoreCase(str, HTTPConstants.ALTERNATE_LOCATION_HEADER)!=-1) {
+				HTTPUploader.readAlternateLocations(this._fileDesc, str);
 			}
 		}
 
@@ -559,13 +558,15 @@ public class HTTPUploader implements Uploader {
 	/**
 	 * Reads alternate location header.  The header can contain only one
 	 * alternate location, or it can contain many in the same header.
-	 * This method adds them all to the <tt>Map</tt> of alternate 
-	 * locations for the uploader.
+	 * This method adds them all to the <tt>FileDesc</tt> for this
+	 * uploader.  This will not allow more than 20 alternate locations
+	 * for a single file.
 	 *
-	 * @param MAP the <tt>Map</tt> to insert alternate locations into
+	 * @param FILE_DESC the <tt>FileDesc</tt> to insert alternate 
+	 *  locations into
 	 * @param ALT_HEADER the full alternate locations header
 	 */
-	private static void readAlternateLocations(final Map MAP,
+	private static void readAlternateLocations(final FileDesc FILE_DESC,
 											   final String ALT_HEADER) {
 		int colonIndex = ALT_HEADER.indexOf(":");
 		if(colonIndex == -1) {
@@ -579,20 +580,23 @@ public class HTTPUploader implements Uploader {
 		// to 20
 		int i=0;
 		while(st.hasMoreTokens() && (i<20)) {
-			storeAlternateLocation(MAP, st.nextToken().trim());
+			HTTPUploader.storeAlternateLocation(FILE_DESC, 
+												st.nextToken().trim());
 			i++;
 		}
 	}
 
 	/**
 	 * Reads an individual alternate location and adds a new 
-	 * <tt>AlternateLocation</tt> instance to the specified <tt>Map</tt>.
+	 * <tt>AlternateLocation</tt> instance to the specified 
+	 * <tt>FileDesc</tt>.
 	 *
-	 * @param MAP the <tt>Map</tt> to insert alternate locations into
+	 * @param FILE_DESC the <tt>FileDesc</tt> to insert alternate locations 
+	 *  into
 	 * @param LOCATION the string representation of the individual alternate 
-	 * location to add
+	 *  location to add
 	 */
-	private static void storeAlternateLocation(final Map MAP,
+	private static void storeAlternateLocation(final FileDesc FILE_DESC,
 											   final String LOCATION) {
 		// note that this removes other "whitespace" characters besides
 		// space and tab, which is not strictly correct
@@ -605,7 +609,7 @@ public class HTTPUploader implements Uploader {
 			// just return without adding it.
 			return;
 		}
-		MAP.put(al.toString(), al);
+		FILE_DESC.addAlternateLocation(al);
 	}
 
 	/**
@@ -686,12 +690,12 @@ public class HTTPUploader implements Uploader {
 		"lime%20capital%20management%2003.mpg "+
 		"2002-04-09T20:32:33Z";
 		
-		Map newMAP = new HashMap();
-		HTTPUploader.readAlternateLocations(newMAP, alt0);
-		HTTPUploader.readAlternateLocations(newMAP, alt1);
-		System.out.println("MAP: ");
-		System.out.println(newMAP); 
-		System.out.println("size: "+newMAP.size()); 
+		FileDesc newFileDesc = new FileDesc();
+		HTTPUploader.readAlternateLocations(newFileDesc, alt0);
+		HTTPUploader.readAlternateLocations(newFileDesc, alt1);
+		System.out.println("FileDesc: ");
+		System.out.println(newFileDesc); 
+		System.out.println("size: "+newFileDesc.size()); 
 	}
 	*/
 }
