@@ -138,15 +138,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
         if(LOG.isDebugEnabled())
             LOG.debug("xmlCollectionString = " + xmlCollectionString);
 
-        List allDocsArray = null;
-        try {
-            allDocsArray = 
-                LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
-                                                   responsesLength);
-        }
-        catch (IllegalArgumentException bad) {
-            return false;
-        }
+        List allDocsArray = 
+            LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
+                                               responsesLength);
         
         for(int i = 0; i < responsesLength; i++) {
             Response response = responses[i];

@@ -24,8 +24,7 @@ public final class LimeXMLDocumentHelper{
      * we want to get LimeXMLDocuments out of it
      */
     public static List getDocuments(String aggregrateXMLStr, 
-                                    int totalResponseCount)
-        throws IllegalArgumentException {
+                                    int totalResponseCount) {
         if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
             return DataUtils.EMPTY_LIST;
 
@@ -77,9 +76,8 @@ public final class LimeXMLDocumentHelper{
                 catch (SchemaNotFoundException snfx) {
                     continue;//ignoring these exceptions has the same effect
                 }
-                if (currIndex >= docs.length)
-                    throw new IllegalArgumentException("Bad Index");
-                docs[currIndex]=currDoc;
+                if (currIndex < docs.length)
+                    docs[currIndex]=currDoc;
             }
             retList.add( docs);
         }
