@@ -1091,7 +1091,7 @@ public class QueryRequest extends Message implements Serializable{
                 minSpeed |= SPECIAL_FIREWALL_MASK;
             // if i'm firewalled and can do solicited, mark the query for fw
             // transfer capability.
-            if (isFirewalled && UDPService.instance().canReceiveSolicited())
+            if (isFirewalled && UDPService.instance().canDoFWT())
                 minSpeed |= SPECIAL_FWTRANS_MASK;
             // THE DEAL:
             // if we can NOT receive out of band replies, we want in-band XML -

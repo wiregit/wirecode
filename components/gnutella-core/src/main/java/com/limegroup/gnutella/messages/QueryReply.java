@@ -1124,7 +1124,7 @@ public class QueryReply extends Message implements Serializable{
 	boolean testingFwt = SearchSettings.FWT_ONLY.getValue();    
 
         if (getSupportsFWTransfer() && 
-            UDPService.instance().canReceiveSolicited()) {
+            UDPService.instance().canDoFWT()) {
             iFirewalled = false;
             heFirewalled = NO;
 	    if (testingFwt)

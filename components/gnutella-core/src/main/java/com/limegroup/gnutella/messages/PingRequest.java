@@ -15,6 +15,11 @@ public class PingRequest extends Message {
      */
     private byte[] payload = null;
     
+    /**
+     * The GGEP blocks carried in this ping - parsed when necessary
+     */
+    private GGEP [] _ggeps;
+    
     /////////////////Constructors for incoming messages/////////////////
     /**
      * Creates a normal ping from data read on the network
@@ -48,6 +53,7 @@ public class PingRequest extends Message {
      */
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
+        _ggeps=new GGEP[1];
         addLocale();
     }
     
@@ -159,7 +165,35 @@ public class PingRequest extends Message {
             GGEP ggep = new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
                      ApplicationSettings.LANGUAGE.getValue());
+            _ggeps[0]=ggep;
             ggep.write(baos);
+            baos.write(0);
+            
+            payload = baos.toByteArray();
+            updateLength(payload.length);
+        }
+        catch(IOException e) {
+            ErrorService.error(e);
+        }
+    }
+    
+    /**
+     * marks this ping request as requesting a pong carrying ip:port
+     * info.
+     */
+    public void addIPRequest() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+
+            // Since existing clients are hard-coded to expect the locale GGEP
+            // at offset 0, we add the request to that block
+            if (_ggeps==null)
+                _ggeps=new GGEP[1];
+            if (_ggeps[0]==null)
+                _ggeps[0]=new GGEP(false);
+            
+            _ggeps[0].put(GGEP.GGEP_HEADER_IPPORT);
+            _ggeps[0].write(baos);
             baos.write(0);
             
             payload = baos.toByteArray();
@@ -176,11 +210,16 @@ public class PingRequest extends Message {
     public String getLocale() {
         if(payload != null) { //payload can be null
             try {
-                GGEP ggepBlock = new GGEP(payload, 0, null);
-                if(ggepBlock.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
-                    return ggepBlock.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
-                else
-                    return ApplicationSettings.DEFAULT_LOCALE.getValue(); 
+                
+                if (_ggeps==null)
+                    _ggeps = GGEP.read(payload,0);
+                
+                for (int i = 0;i<_ggeps.length;i++) 
+                    if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
+                    	return _ggeps[i].getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                    
+                
+                return ApplicationSettings.DEFAULT_LOCALE.getValue();
             }
             catch(BadGGEPBlockException ignored) {}
             catch(BadGGEPPropertyException ignoredToo) {}
@@ -188,6 +227,26 @@ public class PingRequest extends Message {
         }
         else 
             return ApplicationSettings.DEFAULT_LOCALE.getValue();
+    }
+    
+    /**
+     * @return whether this ping wants a reply carrying IP:Port info.
+     */
+    public boolean requestsIP() {
+       if (payload==null)
+           return false;
+       
+       try{
+           if (_ggeps==null)
+               _ggeps = GGEP.read(payload,0);
+           for (int i=0;i<_ggeps.length;i++) 
+               if (_ggeps[i].hasKey(GGEP.GGEP_HEADER_IPPORT))
+                   return true;
+           
+       }catch(BadGGEPBlockException ignored) {}
+       
+       return false;
+       
     }
     //Unit tests: tests/com/limegroup/gnutella/messages/PingRequestTest.java
 }

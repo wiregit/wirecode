@@ -3,10 +3,12 @@ package com.limegroup.gnutella.messages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.guess.QueryKey;
@@ -553,6 +555,59 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         PingReply prStreamed = (PingReply) Message.read(bais);
         assertTrue(prStreamed.getQueryKey().equals(qk));
             
+    }
+    
+    public void testIpRequestPong() throws Exception {
+        RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        
+        // a pong carrying an ip:port
+        Endpoint e = new Endpoint("1.2.3.4",5);
+        PingReply p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        p.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        PingReply fromNet = (PingReply)Message.read(bais);
+        
+        assertEquals("1.2.3.4",fromNet.getMyInetAddress().getHostAddress());
+        assertEquals(5,fromNet.getMyPort());
+        
+        // a pong carrying invalid port
+        e = new Endpoint("1.2.3.4",5) {
+            public int getPort() {
+                return 0;
+            }
+        };
+        
+        p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        baos = new ByteArrayOutputStream();
+        p.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingReply)Message.read(bais);
+        
+        assertNull(fromNet.getMyInetAddress());
+        assertEquals(0,fromNet.getMyPort());
+        
+        //a pong carrying private ip
+        e = new Endpoint("192.168.0.1",20);
+        p = PingReply.create(GUID.makeGuid(),(byte)1,e);
+        baos = new ByteArrayOutputStream();
+        p.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingReply)Message.read(bais);
+        
+        assertNull(fromNet.getMyInetAddress());
+        assertEquals(0,fromNet.getMyPort());
+        
+        // a pong not carrying ip:port
+        p = PingReply.create(GUID.makeGuid(),(byte)1);
+        baos = new ByteArrayOutputStream();
+        p.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        fromNet = (PingReply)Message.read(bais);
+        
+        assertNull(fromNet.getMyInetAddress());
+        assertEquals(0,fromNet.getMyPort());
     }
     
     private final void addIP(byte[] payload) {

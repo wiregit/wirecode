@@ -42,6 +42,16 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Constant for the port number of this pong.
      */
     private final int PORT;
+    
+    /**
+     * The address this pong claims to be my external address
+     */
+    private final InetAddress _myIP;
+    
+    /**
+     * The port this pong claims to be my external port
+     */
+    private final int _myPort;
 
     /**
      * Constant for the number of shared files reported in the pong.
@@ -139,6 +149,30 @@ public class PingReply extends Message implements Serializable, IpPort {
                         ApplicationSettings.LANGUAGE.getValue()),
                        RouterService.getConnectionManager()
                        .getNumLimeWireLocalePrefSlots()));
+    }
+    
+    /**
+     * creates a new PingReply for this host with the specified GUID, ttl and
+     * puts in the ggep extention indicating the remote host's return address.
+     */
+    public static PingReply create(byte [] guid, byte ttl,IpPort returnAddr) {
+        return create(guid,
+                ttl,
+                RouterService.getPort(),
+                RouterService.getAddress(),
+                (long)RouterService.getNumSharedFiles(),
+                (long)RouterService.getSharedFileSize()/1024,
+                RouterService.isSupernode(),
+                newGGEPWithLocaleAndAddress
+                (Statistics.instance().calculateDailyUptime(),
+                 RouterService.isSupernode(),
+                 UDPService.instance().isGUESSCapable(),
+                 (ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                  ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                  ApplicationSettings.LANGUAGE.getValue()),
+                 RouterService.getConnectionManager()
+                 .getNumLimeWireLocalePrefSlots(),
+                 returnAddr));
     }
 
     /**
@@ -482,7 +516,8 @@ public class PingReply extends Message implements Serializable, IpPort {
             ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
             throw new BadPacketException("invalid address: " + ipString);
         }
-        InetAddress ip;
+        InetAddress ip,myIp;
+        int myPort;
         try {
             ip = InetAddress.getByName(NetworkUtils.ip2string(payload, 2));
         } catch (UnknownHostException e) {
@@ -516,6 +551,31 @@ public class PingReply extends Message implements Serializable, IpPort {
                     throw new BadPacketException("GGEP error : creating from"
                                                  + " network : client locale");
                 }
+            }
+            
+            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
+                byte []data=null;
+                try{
+                    data = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                }catch(BadGGEPPropertyException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+                
+                if (data==null || data.length!=6) 
+                    throw new BadPacketException("Pong had IPPORT header but bad data");
+                
+                byte [] myip = new byte[4];
+                System.arraycopy(data,0,myip,0,4);
+                
+                try{
+                    myIp = InetAddress.getByAddress(myip);
+                }catch(UnknownHostException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+                
+                myPort = ByteOrder.leb2short(data,4);
+                
             }
         }
 
@@ -555,7 +615,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         String locale /** def. val from settings? */
             = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
         int slots = -1; //-1 didn't get it.
-
+        InetAddress myIP=null;
+        int myPort=0;
+        
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
             if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
@@ -634,8 +696,46 @@ public class PingReply extends Message implements Serializable, IpPort {
                     //ignore. we won't assign it.
                 }
             }
+            
+            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
+                byte []data=null;
+                try{
+                    data = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                }catch(BadGGEPPropertyException bad) {
+                    Assert.that(false,"creating a PingReply with invalid GGEP field");
+                    //this should have been checked earlier
+                }
+                
+                
+                byte [] myip = new byte[4];
+                System.arraycopy(data,0,myip,0,4);
+                
+                if (NetworkUtils.isValidAddress(myip))
+                    try{
+                        myIP = InetAddress.getByAddress(myip);
+                        myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
+
+
+                        if (NetworkUtils.isPrivateAddress(myIP) ||
+                            !NetworkUtils.isValidPort(myPort) ) {
+                            // liars, or we are behind a NAT and there is LAN outside
+                            // either way we can't use it
+                            myIP=null;
+                            myPort=0;
+                        }
+                    
+                    }catch(UnknownHostException bad) {
+                        //keep the ip address null and the port 0
+                    }
+                
+
+                
+            }
 
         }
+        _myIP=myIP;
+        _myPort=myPort;
 
         HAS_GGEP_EXTENSION = ggep != null;
         DAILY_UPTIME = dailyUptime;
@@ -713,6 +813,23 @@ public class PingReply extends Message implements Serializable, IpPort {
         payload[2] = (byte)slots;
         g.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
               payload);
+        
+        return g;
+    }
+    
+    private static GGEP
+    	newGGEPWithLocaleAndAddress(int dailyUptime,boolean isUltrapeer,
+    	        boolean isGuessCapable, String locale, int slots, IpPort address) {
+        
+        GGEP g = newGGEPWithLocale(dailyUptime,isUltrapeer,
+                isGuessCapable,locale,slots);
+        
+        byte []payload = new byte[6];
+        System.arraycopy(address.getInetAddress().getAddress(),
+                	0,payload,0,4);
+        ByteOrder.short2leb((short)address.getPort(),payload,4);
+        
+        g.put(GGEP.GGEP_HEADER_IPPORT,payload);
         
         return g;
     }
@@ -1093,6 +1210,13 @@ public class PingReply extends Message implements Serializable, IpPort {
         return IP;
     }
 
+    public InetAddress getMyInetAddress() {
+        return _myIP;
+    }
+    
+    public int getMyPort() {
+        return _myPort;
+    }
     
     /**
      * access the client_locale

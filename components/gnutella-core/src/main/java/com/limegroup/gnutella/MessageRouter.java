@@ -934,7 +934,7 @@ public abstract class MessageRouter {
             if ((request.isFirewalledSource() &&
                  !RouterService.acceptedIncomingConnection()) &&
                 !(request.canDoFirewalledTransfer() &&
-                  UDPService.instance().canReceiveSolicited())
+                  UDPService.instance().canDoFWT())
                 )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);
@@ -2260,9 +2260,8 @@ public abstract class MessageRouter {
             // external address is valid (needed for input into the reply)
             final boolean fwTransfer = 
                 queryRequest.canDoFirewalledTransfer() && 
-                UDPService.instance().canReceiveSolicited() &&
-                !RouterService.acceptedIncomingConnection() &&
-                NetworkUtils.isValidAddress(RouterService.getExternalAddress());
+                UDPService.instance().canDoFWT() &&
+                !RouterService.acceptedIncomingConnection();
             
 			if ( mcast ) {
                 ttl = 1; // not strictly necessary, but nice.

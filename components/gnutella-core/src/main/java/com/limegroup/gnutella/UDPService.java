@@ -88,7 +88,43 @@ public class UDPService implements Runnable {
         _lastConnectBackTime = 
              System.currentTimeMillis() - Acceptor.INCOMING_EXPIRE_TIME;
     }
+    
+    /** Whether our NAT assigns stable ports for successive connections 
+     * LOCKING: this
+     */
+    private boolean _portStable = true;
+    
+    /** The last reported port as seen from the outside 
+     *  LOCKING: this
+     */
+    private int _lastReportedPort = ConnectionSettings.PORT.getValue();
 
+    /** The last reported address as seen from the outside 
+     * LOCKING: this
+     */
+    private byte[] _lastReportedIP;
+    
+    
+    /**
+     * if our isp changed our ip, this holds the previous value
+     * LOCKING: this
+     */
+    private byte[] _previousIP;
+
+    /**
+     * Whether we have discovered our external tcp address.
+     * Used to differentiate between initial connection to the network
+     * and subsequent address changes by the ISP.
+     * LOCKING: this
+     */
+    private boolean _tcpAddressInitialized;
+    
+    
+    /**
+     * Whether we have received a Pong carrying our address.
+     * LOCKING: this
+     */
+    private boolean _receivedIPPong;
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -207,6 +243,8 @@ public class UDPService implements Runnable {
         //a) Close old socket (if non-null) to alert lock holders...
         if (_socket != null) 
             _socket.close();
+        
+        
         //b) Replace with new sock.  Notify the udpThread.
         synchronized (_receiveLock) {
             synchronized (_sendLock) {
@@ -218,6 +256,14 @@ public class UDPService implements Runnable {
                     _socketSetOnce = false;
                 // if the input is null, then the service will shut off ;) .
                 _socket = (DatagramSocket) datagramSocket;
+                
+                // set the port in the FWT records
+                if (_socket!=null)
+                    synchronized(this) {
+                        _lastReportedIP=_socket.getLocalAddress().getAddress();
+                        _lastReportedPort=_socket.getLocalPort();
+                        _portStable=true;
+                    }
                 _receiveLock.notify();
                 _sendLock.notify();
             }
@@ -273,28 +319,8 @@ public class UDPService implements Runnable {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
                     if(message == null) continue;                    
-                    if (!isGUESSCapable()) {
-                        if (message instanceof PingRequest) {
-                            GUID guid = new GUID(message.getGUID());
-                            if(isValidForIncoming(CONNECT_BACK_GUID, guid,
-                                                  datagram))
-                                _acceptedUnsolicitedIncoming = true;
-                            _lastUnsolicitedIncomingTime =
-                                System.currentTimeMillis();
-                        }
-                        else if (message instanceof PingReply) {
-                            GUID guid = new GUID(message.getGUID());
-                            if(isValidForIncoming(SOLICITED_PING_GUID, guid,
-                                                  datagram))
-                                _acceptedSolicitedIncoming = true;
-                        }
-                    }
-                    // ReplyNumberVMs are always sent in an unsolicited manner,
-                    // so we can use this fact to keep the last unsolicited up
-                    // to date
-                    if (message instanceof ReplyNumberVendorMessage)
-                        _lastUnsolicitedIncomingTime = 
-                            System.currentTimeMillis();
+                    
+                    updateState(message,datagram);
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
@@ -308,6 +334,56 @@ public class UDPService implements Runnable {
         } catch(Throwable t) {
             ErrorService.error(t);
         }
+	}
+	
+	private void updateState(Message message,DatagramPacket datagram) {
+	    if (!isGUESSCapable()) {
+            if (message instanceof PingRequest) {
+                GUID guid = new GUID(message.getGUID());
+                if(isValidForIncoming(CONNECT_BACK_GUID, guid,
+                                      datagram))
+                    _acceptedUnsolicitedIncoming = true;
+                _lastUnsolicitedIncomingTime =
+                    System.currentTimeMillis();
+            }
+            else if (message instanceof PingReply) {
+                GUID guid = new GUID(message.getGUID());
+                if(!isValidForIncoming(SOLICITED_PING_GUID, guid, datagram ))
+                    return;
+                
+                _acceptedSolicitedIncoming = true;
+                
+                PingReply r = (PingReply)message;
+                if (r.getMyInetAddress() != null) {
+                    
+                    byte [] newAddr = r.getMyInetAddress().getAddress();
+                    
+                    synchronized(this){ 
+                        
+                        _receivedIPPong=true;
+                        
+                        // we may receive a late pong after the isp has
+                        // changed our address.  We should not let that pong
+                        // affect us. (port is unaffected)
+                        if (_previousIP==null || 
+                                !Arrays.equals(_previousIP,newAddr)) 
+                            _lastReportedIP=newAddr;
+                    
+                        if (_lastReportedPort!=r.getMyPort()) {
+                            _portStable=false;
+                            _lastReportedPort=r.getMyPort();
+                        }
+                    }
+                }
+                
+            }
+        }
+        // ReplyNumberVMs are always sent in an unsolicited manner,
+        // so we can use this fact to keep the last unsolicited up
+        // to date
+        if (message instanceof ReplyNumberVendorMessage)
+            _lastUnsolicitedIncomingTime = 
+                System.currentTimeMillis();
 	}
 	
 	/**
@@ -592,7 +668,68 @@ public class UDPService implements Runnable {
 	public boolean canReceiveSolicited() {
         return _acceptedSolicitedIncoming;
 	}
+	
+	/**
+	 * 
+	 * @return whether this node can do Firewall-to-firewall transfers.
+	 * If we are not connected, or haven't received a pong yet,
+	 * see if we ever disabled fwt in the past.
+	 * If we are, the criteria are:
+	 *   - we can accept solicited udp
+	 *   - our port does not change and is the same as our tcp port
+	 *   - our ip address is the same as our address as seen from tcp 
+	 *   connections.
+	 */
+	public boolean canDoFWT(){
+	    if (!RouterService.isConnected())
+	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	    
+	    boolean ret = true;
+	    synchronized(this) {     	
+	        if (!_receivedIPPong)
+	            return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	        
+	        ret= 
+	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
+	            canReceiveSolicited() && 
+	    		_portStable &&
+	    		_lastReportedPort==RouterService.getPort() &&
+	    		_lastReportedIP!=null &&
+	    		Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
+	    }
+	    
+	    if (!ret)
+	        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+	    
+	    return ret;
+	}
 
+	/**
+	 * called by Acceptor when we discover our external address. 
+	 * Used to initialize our address.  
+	 * Since the isp may change our ip address,  we reset our FWT status.
+	 */
+	synchronized void updateExternalAddr(byte [] addr) {
+	    
+	    // before we have connected to the network, our _lastReportedIP
+	    // will have been initialized by the udp pongs.  We do not 
+	    // want to lose that information.
+
+        // if our tcp address changes after we have connected to the 
+        // network and we were able to do FWT, we need to update our 
+	    // state since any newly received pongs will disable FWT.
+	    
+	    if (!_tcpAddressInitialized) {
+	        if (_lastReportedIP==null ||
+	                NetworkUtils.isPrivateAddress(_lastReportedIP))
+	            _lastReportedIP=addr;
+	        _tcpAddressInitialized=true;
+	    }
+	    else {
+	        _previousIP=_lastReportedIP;
+	        _lastReportedIP=addr;
+	    }
+	}
 	/**
 	 * Sets whether or not this node is capable of receiving SOLICITED
      * UDP packets.  This is useful for testing UDPConnections.
@@ -699,6 +836,12 @@ public class UDPService implements Runnable {
             // good to use the solicited guid
             PingRequest pr = new PingRequest(getSolicitedGUID().bytes(),
                                              (byte)1, (byte)0);
+            
+            // unless we know for sure we cannot do FWT, request a test
+            if (!RouterService.acceptedIncomingConnection() &&
+                    canDoFWT())
+                pr.addIPRequest();
+            
             send(pr, ep.getAddress(), ep.getPort());
         }
     }

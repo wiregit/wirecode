@@ -984,7 +984,7 @@ public class DownloadManager implements BandwidthTracker {
     private boolean sendPushTCP(final RemoteFileDesc file, final byte[] guid) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
-                         UDPService.instance().canReceiveSolicited() &&
+                         UDPService.instance().canDoFWT() &&
                         !RouterService.acceptedIncomingConnection();
 
     	// try sending to push proxies...
@@ -992,7 +992,7 @@ public class DownloadManager implements BandwidthTracker {
     	    return true;
     	    
         // if push proxies failed, but we need a fw-fw transfer, give up.
-        if(shouldDoFWTransfer || !RouterService.acceptedIncomingConnection())
+        if(shouldDoFWTransfer && !RouterService.acceptedIncomingConnection())
             return false;
 
         PushRequest pr = 

@@ -1393,4 +1393,8 @@ public class RouterService {
     public static boolean canReceiveUnsolicited() {
     	return udpService.canReceiveUnsolicited();
     }
+    
+    public static boolean canDoFWT() {
+        return udpService.canDoFWT();
+    }
 }

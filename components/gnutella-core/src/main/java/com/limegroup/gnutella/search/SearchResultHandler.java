@@ -189,7 +189,7 @@ public final class SearchResultHandler {
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!RouterService.acceptedIncomingConnection() ||
                 NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
-               !(UDPService.instance().canReceiveSolicited() && 
+               !(UDPService.instance().canDoFWT() && 
                  qr.getSupportsFWTransfer())
                )  {
                LOG.debug("Ignoring from firewall funkiness");
