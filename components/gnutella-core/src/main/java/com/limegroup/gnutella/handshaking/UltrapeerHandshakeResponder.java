@@ -54,15 +54,10 @@ public class UltrapeerHandshakeResponder
             return HandshakeResponse.createRejectResponse(new Properties());
 		}
 
-		//Did the server request we become a leaf?
-		String neededS = response.getHeaders().
-            getProperty(HeaderNames.X_ULTRAPEER_NEEDED);
-
 		Properties ret = new Properties();
-		if (neededS!=null && 
-			!Boolean.valueOf(neededS).booleanValue() && 
-			isNotBearshare(response) &&
-			_manager.allowLeafDemotion()) {
+        if(!response.ultrapeerNeeded() &&
+           isNotBearshare(response) &&
+           _manager.allowLeafDemotion()) {
 			//Fine, we'll become a leaf.
 			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
@@ -116,7 +111,7 @@ public class UltrapeerHandshakeResponder
 	 */
 	private boolean isNotBearshare(HandshakeResponse headers) {
         String userAgent = headers.getUserAgent();
-		if(userAgent == null) return false;
+		if(userAgent == null) return true;
 		return !userAgent.startsWith("BearShare");
 	}
     
@@ -141,7 +136,7 @@ public class UltrapeerHandshakeResponder
 		boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
 
         //Reject if not allowed now and guidance not possible.
-        return !(response.isSupernodeConnection() && allowedAsLeaf);
+        return !(response.isUltrapeer() && allowedAsLeaf);
     }
 }
 
