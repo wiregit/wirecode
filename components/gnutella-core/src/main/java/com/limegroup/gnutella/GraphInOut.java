@@ -96,6 +96,7 @@ public static void makeDotFile(Map graph)
 		Map.Entry e = (Map.Entry) iterator.next();
 
 		//output the node
+		//no need to do this
 		out.println(getIdentifier((Endpoint)e.getKey()) + "");
 
 		//Get the iterator over the connected nodes
@@ -148,7 +149,8 @@ private static String getIdentifier(Endpoint ep)
 	//append port num to make it unique
 	id += "_" + ep.getPort();
 
-	return id;
+	//prepend some alphabet and return
+	return "a" + id;
 }
 
 }

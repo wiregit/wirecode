@@ -116,7 +116,22 @@ try
 
 	while(((new Date()).getTime() - startTime) < TIME_TO_WAIT_FOR_PONGS)
 	{
-		message = connection.receive();
+		try
+		{
+			message = connection.receive();
+		}
+		catch(IOException ioe)
+		{
+			//break out of the inner while loop
+			//we will open some other connection
+			break;
+		}	
+		catch(BadPacketException bpe)
+		{
+			//go to the end of the while loop
+			//we will receive next packet
+			continue;
+		}
 		if(message == null)
 		{
 			//Sleep for some time
@@ -126,7 +141,7 @@ try
 			//continue to the beginning of the while loop
 			continue;
 		}	
-		//System.out.println("Message received " + message);	
+		System.out.println("Message received " + message);	
 
 
 
@@ -151,10 +166,21 @@ try
 
 				
 				//Add info to the graph
-				synchronized(parent.graphMutex)
+				//Add only if the remote endpoint is not same as the endpoint to which we
+				//conected
+				if(!endpoint.equals(remoteEndPoint))
 				{
-				HashSet connectedNodes = (HashSet)graph.get(endpoint);
-				connectedNodes.add(remoteEndPoint);
+					synchronized(parent.graphMutex)
+					{
+						HashSet connectedNodes = (HashSet)graph.get(endpoint);
+						connectedNodes.add(remoteEndPoint);
+					}
+
+					//add the host to the queue, as we will need to traverse this also
+					synchronized(hostQueue)
+					{
+						hostQueue.addFirst(remoteEndPoint);
+					}
 				}
 				
 			}
