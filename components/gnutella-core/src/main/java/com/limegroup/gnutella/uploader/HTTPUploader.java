@@ -41,13 +41,21 @@ public class HTTPUploader implements Runnable {
 
     private int _state;
 
+    private int _uploadBegin;
+    private int _uploadEnd;
+
+
     public HTTPUploader(Socket s, String file, 
-			int index, ConnectionManager m) {
+			int index, ConnectionManager m, 
+			int begin, int end) {
 
 
 	_state = NOT_CONNECTED;
 
 	_okay = false;
+
+	_uploadBegin = begin;
+	_uploadEnd = end;
 
 	file = file.trim();
 
@@ -116,11 +124,16 @@ public class HTTPUploader implements Runnable {
 	
     
     public HTTPUploader(String protocal, String host, 
-			  int port, String file, ConnectionManager m ) {
+			  int port, String file, 
+			ConnectionManager m, 
+			int begin, int end ) {
 
 	_state = NOT_CONNECTED;
 
 	_okay = false;
+
+	_uploadBegin = begin;
+	_uploadEnd = end;
 
 	_host = host;
 	_filename = file;
@@ -244,6 +257,17 @@ public class HTTPUploader implements Runnable {
 	    _ostream.write(str.getBytes());
 	    str = "Content-length:"+ _sizeOfFile + "\r\n";
 	    _ostream.write(str.getBytes());
+	    
+	    int end;
+	    if (_uploadEnd != 0)
+		end = _uploadEnd;
+	    else 
+		end = _sizeOfFile;
+
+	    str = "Content-range:" + _uploadBegin + "-" + end + "\r\n";
+		
+	    _ostream.write(str.getBytes());
+		
 	    str = "\r\n";
 	    _ostream.write(str.getBytes());
 
@@ -276,6 +300,13 @@ public class HTTPUploader implements Runnable {
 	byte[] buf = new byte[1024];
 	while (true) {
 	    try {
+
+		_fis.skip(_uploadBegin);
+
+		if ((_uploadEnd != 0) && 
+		    (_uploadEnd == _amountRead ))
+		    break;
+		     
 		c = _fis.read(buf);
 	    }
 	    catch (IOException e) {

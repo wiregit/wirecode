@@ -14,15 +14,11 @@ import java.util.*;
 
 public class HTTPDownloader implements Runnable {
 
-
     public static final int NOT_CONNECTED = 0;
     public static final int CONNECTED = 1;
     public static final int ERROR = 2;
     public static final int COMPLETE = 3;
 
-    private int BUFFSIZE = 1024;
-    private int MIN_BUFF = 1024;
-    private int MAX_BUFF = 64 * 1024;
 
     private InputStream _istream;
     private String _filename;
@@ -32,7 +28,6 @@ public class HTTPDownloader implements Runnable {
     private ActivityCallback _callback;
     private Socket _socket;
     private String _downloadDir;
-    private BufferedInputStream _bis;
     private FileOutputStream _fos;
 
     String _protocol;
@@ -41,14 +36,12 @@ public class HTTPDownloader implements Runnable {
     int _index;
     byte[] _guid;    
     private ByteReader _br;
-    private boolean _okay;
     private int _mode;
 
     private int _state;
 
     private boolean _resume;
-    private int _finalAmount;
-    private int _initialAmount;
+
 
     /** 
      * The list of all files we've requested via push messages.  Only
@@ -64,7 +57,6 @@ public class HTTPDownloader implements Runnable {
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=3*60;  //3 minutes
     
-
     /* 
      * Server side download in response to incoming PUT request.
      * 
@@ -95,20 +87,79 @@ public class HTTPDownloader implements Runnable {
 	boolean found=requested.remove(prf);
 	if (! found)
 	    throw new IllegalAccessException();
-
+	
 	_guid=clientGUID;
-	_state = NOT_CONNECTED;
-	_okay = false;
+	construct(file, m);
 	_mode = 1;
+	_socket = s;
+
+    }
+
+    /* The client side get */
+    public HTTPDownloader(String protocol, String host, 
+			  int port, int index, String file, 
+			  ConnectionManager m, byte[] guid ) {
+			
+	construct(file, m);
+	_mode = 2;
+	_socket = null;
+	_protocol = protocol;
+	_host = host;
+	_index = index;
+	_port = port;
+	_guid = guid;
+
+    }
+
+    public void setDownloadInfo(HTTPDownloader down) {
+	
+	_protocol = down.getProtocal();
+	_host = down.getHost();
+	_index = down.getIndex();
+	_port = down.getPort();
+	_guid = down.getGUID();
+
+    } 
+
+    public void setDownloadInfo(String protocol, String host, 
+				int port, int index, String file, 
+				ConnectionManager m, byte[] guid ) {
+	
+	_protocol = protocol;
+	_host = host;
+	_index = index;
+	_port = port;
+	_guid = guid;
+
+    }
+
+    public String getProtocal() {return _protocol;}
+    public String getHost() {return _host;}
+    public int getIndex() {return _index;}
+    public int getPort() {return _port;}
+    public byte[] getGUID() {return _guid;}
+    public String getFileName() {return _filename;}
+    public int getContentLength() {return _sizeOfFile;}
+    public int getAmountRead() {return _amountRead;}
+    public int getState() {return _state;}
+    public void setResume() {_resume = true;}
+
+    public InetAddress getInetAddress() {
+	if (_socket != null) 
+	    return _socket.getInetAddress();
+	return null;
+    }
+
+    public void construct(String file, ConnectionManager m) {
+	_state = NOT_CONNECTED;
 	_filename = file;
 	_amountRead = 0;
 	_sizeOfFile = -1;
-	_socket = s;
 	_manager = m;
 	_callback = _manager.getCallback();
 	_downloadDir = "";
-	_index=index;
     }
+    
 
     /** Sends an HTTP GET request, i.e., "GET /get/0/sample.txt HTTP/1.0"  
      *  (Response will be read later in readHeader()). */
@@ -138,48 +189,18 @@ public class HTTPDownloader implements Runnable {
 	    out.flush();
 	} catch (IOException e) {
 	    _state = ERROR;
-	    _okay = false;
 	    return;
 	}
-	_okay = true;
     }
-      
-
-  
-
-
-    /* The client side get */
-    public HTTPDownloader(String protocol, String host, 
-			  int port, int index, String file, 
-			  ConnectionManager m, byte[] guid ) {
-			
-	_state = NOT_CONNECTED;
-	_okay = false;
-	_mode = 2;
-	_filename = file;
-	_amountRead = 0;
-	_sizeOfFile = -1;
-	_socket = null;
-	_manager = m;
-	_callback = _manager.getCallback();
-	_downloadDir = "";
-
-	_protocol = protocol;
-	_host = host;
-	_index = index;
-	_port = port;
-	_guid = guid;
-
-    }
+   
 
     public void initTwo() {
-
+	
 	URLConnection conn;
 
 	String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
 
 	try {
-
 	    URL url = new URL(_protocol, _host, _port, furl);
 	    conn = url.openConnection();
 	    conn.connect();
@@ -200,12 +221,63 @@ public class HTTPDownloader implements Runnable {
 	}
 
 	_state = CONNECTED;
-	_okay = true;
 
     }
     
-    public int getState() {
-	return _state;
+    public void run() {
+
+	_callback.addDownload(this);
+	
+	if (_mode == 1)
+	    initOne();
+	else if (_mode ==2)
+	    initTwo();
+	else if (_mode == 3) {
+	    // do nothing...
+	}
+	else 
+	    return;
+
+	 if (_state == CONNECTED) {
+	    doDownload();
+	    _callback.removeDownload(this);
+	 }
+    }
+    
+    public void resume() {
+	
+	_mode = 3;
+	
+	SettingsManager set = SettingsManager.instance();
+	_downloadDir = set.getSaveDirectory();
+	String pathname = _downloadDir + _filename;
+	File myFile = new File(pathname);
+	
+	if (!myFile.exists()) {
+  	    // allert an error
+	    _state = ERROR;
+	    return;
+	}
+	
+  	URLConnection conn;
+	
+  	String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
+
+	long start = myFile.length() + 1;
+	
+	String startRange = java.lang.String.valueOf(start);
+
+  	try {
+  	    URL url = new URL(_protocol, _host, _port, furl);
+	    conn = url.openConnection();
+	    conn.setRequestProperty("Range", "bytes="+ startRange + "-");
+  	}  
+	catch (Exception e) {
+	    _state = ERROR;
+	    return;
+	}
+	_resume = true;
+
     }
 
     /** 
@@ -249,6 +321,7 @@ public class HTTPDownloader implements Runnable {
 	PushRequest push = new PushRequest(messageGUID, ttl, clientGUID, 
   					   _index, myIP, myPort);
 	
+
 	try {
 	    //ROUTE the push to the appropriate connection, if possible.
 	    Connection c=_manager.pushRouteTable.get(clientGUID);
@@ -263,65 +336,43 @@ public class HTTPDownloader implements Runnable {
 	    _state = ERROR;
 	    return;
 	}
-
-    }
-
-    public String getFileName() {
-	return _filename;
-    }
-
-    public int getContentLength() {
-	return _sizeOfFile;
     }
     
-    public int getAmountRead() {
-	return _amountRead;
-    }
+    public void sendPushRequest(String hostname, int index, 
+				int port, byte[] cguid) {
 
-    /* need to change this */
-    public InetAddress getInetAddress() {
+	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
+	String a = tokenizer.nextToken();
+	String b = tokenizer.nextToken();
+	String c = tokenizer.nextToken();
+	String d = tokenizer.nextToken();
 	
-	if (_socket == null) 
-	    return null;
-	else 
-	    return _socket.getInetAddress();
+	int a1 = Integer.parseInt(a);
+	int b1 = Integer.parseInt(b);
+	int c1 = Integer.parseInt(c);
+	int d1 = Integer.parseInt(d);
+	byte[] ip = {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
+
+	byte[] guid = GUID.fromHexString(_manager.ClientId);
+
+	// last 16 bytes of the query reply message...
+	byte[] clientGUID = cguid;
+
+	byte ttl = SettingsManager.instance().getTTL();
+
+	// am i passing the right guid's? 
+
+	PushRequest push = new PushRequest(guid, ttl, clientGUID, 
+  					   index, ip, port);
 	
-    }
-
-    public void run() {
-
-	_callback.addDownload(this);
-
-	if (_mode == 1)
-	    initOne();
-	else if (_mode ==2)
-	    initTwo();
-	else
-	    return;
-
-	 if (_okay) {
-	    doDownload();
-	    _callback.removeDownload(this);
-	 }
-
-	 
-    }
-
-    
-
-   
-    public void exit() {
 	try {
-	    _br.close();
-	    _fos.close();
+	    _manager.sendToAll(push);
 	}
-	catch (IOException e) {
+	catch (Exception e) {
+	    _state = ERROR;
+	    return;
 	}
-    }
-    
 
-    public void setResume() {
-	_resume = true;
     }
 
     public void doDownload() {
@@ -359,21 +410,10 @@ public class HTTPDownloader implements Runnable {
 	int c = -1;
 	
 	byte[] buf = new byte[1024]; 
-	
-	int amountToRead = _finalAmount - _initialAmount;
-
-	
-	//  System.out.println("amountToRead: " + amountToRead);
-//  	System.out.println("_initialAmount: " + _initialAmount);
-//  	System.out.println("_finalAmount: " + _finalAmount);
-
-	//TODO3: Note we ignore the file length.  In the rare case that the
-	//remote host doesn't close the connection, this will loop forever.
-	//However, this may be the sensible thing to do since many clients may
-	//get Content-length wrong.
+		
 	while (true) {
 	    
-	    if (_amountRead == amountToRead) {
+	    if (_amountRead == _sizeOfFile) {
 		_state = COMPLETE;		
 		break;
 	    }
@@ -425,14 +465,13 @@ public class HTTPDownloader implements Runnable {
 	boolean foundLength = false;
 	boolean foundRangeInitial = false;
 	boolean foundRangeFinal = false;
-	
-	//TODO1: what if Content-length is not the last header?
-	//Better to look for the blank line after headers.
+		
 	while (!str.equals("")) {
 	    
 	    str = _br.readLine();
 	    
 	    if (str.indexOf("Content-length:") != -1) {
+
 		String sub;
 		try {
 		    sub=str.substring(15);
@@ -440,9 +479,7 @@ public class HTTPDownloader implements Runnable {
 		    _state = ERROR;
 		    return;
 		}
-		    
-		sub = sub.trim();
-		
+		sub = sub.trim(); 
 		try {
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
 		}
@@ -450,41 +487,14 @@ public class HTTPDownloader implements Runnable {
 		    _state = ERROR;
 		    return;
 		}
-
+		
 		foundLength = true;;
 	    }
-
-	    if (str.indexOf("Range: bytes=") != -1) {
-		String sub = str.substring(13);
-		sub = sub.trim();   // remove the white space
-		char c;
-		c = sub.charAt(0);  // get the first character
-		if (c == '-') {  // - n
-		    String second = sub.substring(1);
-		    second = second.trim();
-		    _finalAmount = java.lang.Integer.parseInt(second);
-		    foundRangeFinal = true;
-		}
-		else {                // m - n or 0 - 
-		    int dash = sub.indexOf("-");
-
-		    String first = sub.substring(0, dash);
-		    first = first.trim();
-
-		    _initialAmount = java.lang.Integer.parseInt(first);
-		    foundRangeInitial = true;
-
-		    String second = sub.substring(dash+1);
-		    second = second.trim();
-
-		    if (!second.equals("")) {
-			_finalAmount = java.lang.Integer.parseInt(second);
-			foundRangeFinal = true;
-		    }
-		}
-		
+	    
+	    if (str.indexOf("Content-range:") != -1) {
+		_resume = true;
 	    }
-	
+	    
 	    
 	}
 	
@@ -492,30 +502,18 @@ public class HTTPDownloader implements Runnable {
 	    _state = ERROR;
 	}
 
-	if (!foundRangeInitial) {
-	    _initialAmount = 0;
-	}
-	
-	if (!foundRangeFinal) {
-	    _finalAmount = _sizeOfFile;
-	}
-	
     }
     
     public void shutdown()
     {
 	try {
 	    _istream.close();
-	} catch (Exception e) {
-	}
-	try {
 	    _fos.close();
-	} catch (Exception e) {
-	}
-	try {
 	    _socket.close();
-	} catch (Exception e) {
+	} 
+	catch (Exception e) {
 	}
+
     }
 
 
@@ -572,3 +570,4 @@ class PushRequestedFile {
 	    +(new GUID(clientGUID).toString())+", "+ips+">";
     }
 }
+

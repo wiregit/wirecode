@@ -568,7 +568,7 @@ public class Connection implements Runnable {
 			String file = desc._name;
 			
 			HTTPUploader up = new 
-			    HTTPUploader("http", h, port, file, manager);
+			    HTTPUploader("http", h, port, file, manager, 0, 0);
 
 			up.run();
 

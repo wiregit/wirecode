@@ -17,6 +17,10 @@ public class HTTPManager {
     private String _filename;
     private int _index;
     private ConnectionManager _manager;
+    private InputStream _istream;
+    private ByteReader _br;
+    private int _uploadBegin;
+    private int _uploadEnd;
 
     /** 
      * @requires If isPush, "GIV " was just read from s.  
@@ -34,13 +38,11 @@ public class HTTPManager {
 	String command;
 	FileManager fm = FileManager.getFileManager();
 
-	try {                          /* try to read the HTTP header */ 
-	    InputStream is = _socket.getInputStream();
-	    InputStreamReader isr = new InputStreamReader(is); 
-	    in = new BufferedReader(isr); 
-	    command = in.readLine();   /* read in the first line */
+	try {
+	    _istream = _socket.getInputStream();
+	    _br = new ByteReader(_istream);
+	    command = _br.readLine();   /* read in the first line */
 	}
-
 	catch (IOException e) {          /* if there is a problem reading */
 	    throw e;                     /* must alert the appropriate */
 	}                                /* person */ 
@@ -63,18 +65,14 @@ public class HTTPManager {
 		throw new IOException();	    
 
 	    _filename = parse[2].substring(0, parse[2].lastIndexOf("HTTP"));
-	    //String parse_two[] = HTTPUtil.stringSplit(parse[2], 'H'); 
-	                             /* concerned this is way hackey */
-	    //  NO KIDDING YOU DUFUS!!!!  Your lucky I found this ever.
-	    //  So is the whole concept here
-	    //_filename = parse_two[0];
-	
 
 	    _index = java.lang.Integer.parseInt(parse[1]);
 	                                       /* is there a better way? */
 
+	    readRange();
+
 	    HTTPUploader uploader;
-	    uploader = new HTTPUploader(s, _filename, _index, _manager);
+	    uploader = new HTTPUploader(s, _filename, _index, _manager, _uploadBegin, _uploadBegin);
 	    Thread t = new Thread(uploader);
 	    t.setDaemon(true);
 	    t.start();
@@ -116,6 +114,49 @@ public class HTTPManager {
 	    throw new IOException();
 	}
     }    
+    
+    public void readRange() {
+	
+	String str = " ";;
+	
+	_uploadBegin = 0;
+	_uploadEnd = 0;
+
+
+	while (!str.equals("")) {
+
+	    str = _br.readLine();
+	    
+	    if (str.indexOf("Range: bytes=") != -1) {
+		String sub = str.substring(13);
+		sub = sub.trim();   // remove the white space
+		char c;
+		c = sub.charAt(0);  // get the first character
+		if (c == '-') {  // - n
+		    String second = sub.substring(1);
+		    second = second.trim();
+		    _uploadEnd = java.lang.Integer.parseInt(second);
+		}
+		else {                // m - n or 0 - 
+		    int dash = sub.indexOf("-");
+		    
+		    String first = sub.substring(0, dash);
+		    first = first.trim();
+		    
+		    _uploadBegin = java.lang.Integer.parseInt(first);
+		    
+		    String second = sub.substring(dash+1);
+		    second = second.trim();
+		    
+		    if (!second.equals("")) {
+			_uploadEnd = java.lang.Integer.parseInt(second);
+		    }
+		}
+		
+	    }
+	}
+	
+    }
 
     public void shutdown() {
 
