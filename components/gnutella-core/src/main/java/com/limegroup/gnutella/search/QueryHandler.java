@@ -136,8 +136,8 @@ public final class QueryHandler {
 	 * @throw <tt>IllegalArgumentException</tt> if the ttl is not within
 	 *  what is considered reasonable bounds
 	 */
-	private QueryRequest createQuery(byte ttl) {
-		if(ttl < 1 || ttl > 8) 
+	public QueryRequest createQuery(byte ttl) {
+		if(ttl < 1 || ttl > 6) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
 		return new QueryRequest(GUID.bytes(), ttl, 0, QUERY, XML_QUERY, false, 
 								URN_TYPES, QUERY_URNS, null,
@@ -263,7 +263,7 @@ public final class QueryHandler {
 
 	/**
 	 * Send the initial "probe" query to get an idea of how widely di
-	 */.
+	 */
 	private void sendProbeQuery() {
 		System.out.println("QueryHandler::sendProbeQuery"); 
 		List connections = CONNECTION_MANAGER.getInitializedConnections();
