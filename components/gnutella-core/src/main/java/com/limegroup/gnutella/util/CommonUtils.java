@@ -359,7 +359,7 @@ public final class CommonUtils {
 		    try {
 		        short userDomainCode = -32763;
 		        userPrefsDir = 
-		            MRJFileUtils.findFolder(userDomainCode, 
+		            MRJFileUtils.findFolder(
 		    							    new MRJOSType("pref"));
 		        settingsDir = new File(userPrefsDir, ".limewire");
 		    } catch(FileNotFoundException e) {
