@@ -143,6 +143,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 //          }
     }
 
+    // requeries are gone now - now we only have user-driven queries (sort of
+    // like requeries but not automatic.
     public void testNewRequery() throws Exception {
         RemoteFileDesc[] rfds={
             newRFD("Susheel_Daswani_Neil_Daswani.txt",
@@ -157,18 +159,17 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         QueryRequest qr=downloader.newRequery2();
         assertNotNull("Couldn't make query", qr);
-        // We are no longer including query string when we have URN's 
-        //assertEquals("daswani susheel",  //"susheel daswani" also ok
-        //             qr.getQuery());
+        assertTrue(qr.getQuery().equals("daswani susheel") ||
+                   qr.getQuery().equals("susheel daswani"));
         assertEquals(224, qr.getMinSpeed());
-        assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
+        // the guid should be a lime guid but not a lime requery guid
+        assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
+                   !(GUID.isLimeRequeryGUID(qr.getGUID())));
         assertEquals("", qr.getRichQuery());
         Set urns=qr.getQueryUrns();
         assertEquals(1, urns.size());
         assertTrue(urns.contains(URN.createSHA1Urn(
             "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
-        //assertTrue(urns.contains(URN.createSHA1Urn(
-        //    "urn:sha1:LSTHGIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
     }
 
     /** Catches a bug with earlier keyword intersection code. */
@@ -247,8 +248,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   new ActivityCallbackStub());
             //Wait for it to download until error.
             try { Thread.sleep(6000); } catch (InterruptedException e) { }
-            assertEquals("should be waiting for results",
-                         Downloader.WAITING_FOR_RESULTS, 
+            // no more auto requeries - so the download should be waiting for
+            // input from the user
+            assertEquals("should be waiting for user",
+                         Downloader.WAITING_FOR_USER, 
                          downloader.getState());
             assertEquals("should have read 100 bytes", 100, 
                          downloader.getAmountRead());
@@ -259,7 +262,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                 fail("No other downloads!", e);
             }
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
-            assertEquals(Downloader.WAITING_FOR_RESULTS, 
+            // you would think we'd expect wating for results here, but instead
+            // we will wait for connections (since we have no one to query)
+            assertEquals(Downloader.WAITING_FOR_CONNECTIONS, 
                          downloader.getState());
             assertEquals(100, 
                          downloader.getAmountRead());
