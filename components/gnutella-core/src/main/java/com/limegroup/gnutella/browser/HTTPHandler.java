@@ -25,16 +25,6 @@ public class HTTPHandler {
 	/**
      *  Create and execute the handler without a new thread.
      */
-	public static HTTPHandler create( Socket socket, String line ) {
-
-    	HTTPHandler handler = new HTTPHandler(socket, line);
-		handler.handle();
-		return(handler);
-	}
-
-	/**
-     *  Create and execute the handler without a new thread.
-     */
 	public static HTTPHandler createPage( Socket socket, String content ) {
 
     	HTTPHandler handler = new HTTPHandler(socket, null);
@@ -47,28 +37,6 @@ public class HTTPHandler {
 		_line        = line;
 		_inErrorState = false;
     }
-
-    /**
-     *  Handle a file request
-     */
-    public void handle() {
-
-		// Setup streams 
-		setupIO();
-
-		// Get Path
-        String rpath = getRelativePath(_line);
-		int rloc  = rpath.indexOf("?");
-
-		File   apath;
-		if ( rloc > 0 )
-		    apath = new File(ROOT, rpath.substring(0,rloc));
-		else
-		    apath = new File(ROOT, rpath);
-
-		// Process Request
-	    processRequest(apath, rpath);
-	}
 
     /**
      *  Return a precreated page
@@ -123,39 +91,7 @@ public class HTTPHandler {
 
 		if ( _inErrorState ) 
 			writeError();
-        else if ( apath.isFile() )
-            uploadFile(apath);
-        else if ( apath.isDirectory() )
-            /* Do nothing for directory listing for now */;
 	}
-
-    /**
-     *  Read in and return a file.  Note that this is for small files 
-	 *  as it reads the whole thing into memory first.
-     */
-	public void uploadFile(File apath) {
-
-		FileInputStream in;
-        int             length  = (int)apath.length();
-		byte[]          content = new byte[length];
-
-
-        try {
-			writeHeader(length, getMimeType(apath.toString()));
-            in = new FileInputStream(apath);
-            in.read(content);
-            in.close();
-            _ostream.write(content);
-
-        } catch( IOException e ) {
-			_inErrorState =true;
-		}
-
-		try {
-		    _ostream.close();
-        } catch( IOException e ) {
-		}
-    }
 
     /**
      *  Echo back a page.

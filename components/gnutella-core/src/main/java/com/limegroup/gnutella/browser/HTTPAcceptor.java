@@ -265,10 +265,8 @@ public class HTTPAcceptor implements Runnable {
 		if (str == null) {
 			throw new IOException();
 		}
-
 		str.trim();
 		str = URLDecoder.decode(str);
-
 		if (str.indexOf("magnet10") > 0) {
 			int loc = 0;
 			if ((loc = str.indexOf(MAGNET_DEFAULT)) > 0) {
@@ -281,9 +279,6 @@ public class HTTPAcceptor implements Runnable {
 				//System.out.println("Pause called:"+str);
 		        try { Thread.sleep(250); } catch(Exception e) {};
 				returnNoContent(socket);
-			} else {
-			    // upload browsed files
-		        HTTPHandler.create(socket, str);
 			}
         } else if (str.indexOf(MAGNETDETAIL) >= 0) {
             int loc = 0;
