@@ -12,6 +12,47 @@ import com.limegroup.gnutella.*;
  * Obsoletes the old SocketOpener class.
  */
 public class Sockets {
+
+	/**
+	 * Cached <tt>Constructor</tt> for <tt>InetSocketAddress</tt>s.
+	 */
+	private static Constructor _inetAddressConstructor;
+
+	/**
+	 * Cached <tt>Socket</tt> class.
+	 */
+	private static Class _socketClass;
+
+	/**
+	 * Cached <tt>SocketAddress</tt> class.
+	 */
+	private static Class _socketAddressClass;
+
+	// statically initialize the socket classes we can so that
+	// we don't have it inefficiently look them up each time
+	static {
+		if(CommonUtils.isJava14OrLater()) {
+			try {
+				Class socketAddress = 
+					Class.forName("java.net.InetSocketAddress");
+				_inetAddressConstructor = 
+					socketAddress.getConstructor(new Class[] { 
+						String.class, Integer.TYPE 
+					});
+				_socketClass = Class.forName("java.net.Socket");
+				_socketAddressClass = Class.forName("java.net.SocketAddress");
+			} catch(Exception e) {
+				// should never happen on 1.4, so display error if it does
+				ErrorService.error(e);
+			}
+		} 
+	}
+
+	/**
+	 * Ensure this cannot be constructed.
+	 */
+	private Sockets() {}
+
     /**
      * Sets the SO_KEEPALIVE option on the socket, if this platform supports it.
      * (Otherwise, it does nothing.)  
@@ -74,29 +115,21 @@ public class Sockets {
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
             try {
-                Class inetSocketAddress=
-                    Class.forName("java.net.InetSocketAddress");
-                Constructor inetSocketAddressCtor=
-                    inetSocketAddress.getConstructor(
-                        new Class[] { String.class, Integer.TYPE });
-                Object addr=inetSocketAddressCtor.newInstance(
+                Object ret = _socketClass.newInstance();
+
+				Object addr = _inetAddressConstructor.newInstance(
                     new Object[] { host, new Integer(port) });
 
-                Class socket=Class.forName("java.net.Socket");
-                Object ret=socket.newInstance();
-
-                Class socketAddress=Class.forName("java.net.SocketAddress");
-                Method connect=socket.getMethod("connect", 
-                    new Class[] { socketAddress, Integer.TYPE });
+                Method connect = _socketClass.getMethod("connect", 
+                    new Class[] { _socketAddressClass, Integer.TYPE });
                 connect.invoke(ret, 
                     new Object[] { addr, new Integer(timeout) });
-
                 return (Socket)ret;
-            } catch (InvocationTargetException ioException) {
+            } catch (InvocationTargetException e) {
                 //ioException.getTargetException() should be an instance of
                 //IOexception, but this is safer.
-                throw new IOException(); 
-            } catch (Exception ignored) {
+                throw new IOException(e.getMessage()); 
+            } catch (Exception e) {
                 //I don't like generic "catch Exception"'s, but I think it's
                 //clearer than listing the zillion cases from above.  This
                 //should never happen, but we can go on to the emulation step
