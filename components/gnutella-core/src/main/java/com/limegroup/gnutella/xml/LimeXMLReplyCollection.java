@@ -539,13 +539,13 @@ public class LimeXMLReplyCollection {
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap) {
             oldDoc = (LimeXMLDocument)mainMap.put(hash,newDoc);
+            if(oldDoc == null) 
+                Assert.that(false, 
+                            "attempted to replace doc that did not exist!!");
             removeKeywords(oldDoc);
             addKeywords(newDoc);
         }
-        
-        if(oldDoc == null)  {
-            Assert.that(false, "attempted to replace doc that did not exist!!");
-        }
+       
         fd.replaceLimeXMLDocument(oldDoc, newDoc);
         return oldDoc;
     }
