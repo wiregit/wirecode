@@ -4,7 +4,7 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
-import com.limegroup.gnutella.gui.Utilities;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * The list of all connections.  Accepts new connections and creates
@@ -195,7 +195,7 @@ public class ConnectionManager {
              //whole deal -- intializing, looking for and responding to a
              //PingRequest.  It's all synchronous, because we have a dedicated
              //thread right here.
-			if(Utilities.isWindows()) {
+			if(CommonUtils.isWindows()) {
 				new RejectConnection(socket, _catcher);
 			}
             
