@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.tests;
+package com.limegroup.gnutella.uploader;
 
 import junit.framework.*;
 import junit.extensions.*;
@@ -48,9 +48,10 @@ public class UploadTest extends TestCase {
   			assertTrue("unexpected exception: "+e, false);
   		}
 		port = 6346;
-		File testDir = new File("com/limegroup/gnutella/tests");
+        //This assumes we're running in the limewire/tests directory
+		File testDir = new File("com/limegroup/gnutella/uploader/data");
 		if(!testDir.isDirectory()) {
-			testDir = new File("core/com/limegroup/gnutella/tests");
+			testDir = new File("com/limegroup/gnutella/uploader/data");
 		}
 		assertTrue("shared directory could not be found", testDir.isDirectory());
 		assertTrue("test file should be in shared directory", 
