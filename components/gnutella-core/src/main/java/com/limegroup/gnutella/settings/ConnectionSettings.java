@@ -40,5 +40,12 @@ public final class ConnectionSettings extends AbstractSettings {
 	public static final BooleanSetting USE_GWEBCACHE =
 		CFG_FACTORY.createBooleanSetting("USE_GWEBCACHE", true);
 
+	/**
+	 * Setting for whether or not to activate the connection watchdog
+	 * thread.  Particularly useful in testing.
+	 */
+	public static final BooleanSetting WATCHDOG_ACTIVE =
+		CFG_FACTORY.createBooleanSetting("WATCHDOG_ACTIVE", true);
+
 }
 
