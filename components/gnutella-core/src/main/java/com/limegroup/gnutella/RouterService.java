@@ -140,9 +140,24 @@ public final class RouterService {
 	 *  making callbacks
 	 */
   	public RouterService(ActivityCallback callback) {
+        this(callback, 
+		    new MetaEnabledMessageRouter(callback, fileManager));
+    }
+
+	/**
+	 * Creates a new <tt>RouterService</tt> instance with special message
+     * handling code.  Typically this constructor is only used for testing.
+	 *
+	 * @param callback the <tt>ActivityCallback</tt> instance to use for
+	 *  making callbacks
+     * @param router the <tt>MessageRouter</tt> instance to use for handling
+     *  all messages
+	 */
+  	public RouterService(ActivityCallback callback, MessageRouter router) {
+        //TODO: expand parameter list to allow for easy testing with stubs for
+        //FileManager, Acceptor, etc.
 		RouterService.callback = callback;
-  		RouterService.router = 
-		    new MetaEnabledMessageRouter(callback, fileManager);
+  		RouterService.router = router;
 
 		// Now, link all the pieces together, starting the various threads.
 		router.initialize();

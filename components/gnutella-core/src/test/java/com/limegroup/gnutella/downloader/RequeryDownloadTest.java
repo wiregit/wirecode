@@ -55,23 +55,30 @@ public class RequeryDownloadTest extends TestCase {
 
     public static Test suite() {
         return new TestSuite(RequeryDownloadTest.class);
-        //return new RequeryDownloadTest("testRequeryDownload");
+        //return new RequeryDownloadTest("testRequeryScheduling");
     }
 
     public void setUp() {
         (new File(filename)).delete();
         SettingsManager.instance().setKeepAlive(0);
         SettingsManager.instance().setConnectOnStartup(false);
+        SettingsManager.instance().setLocalIsPrivate(false);
+        SettingsManager.instance().setPort(0);
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
         } catch (IOException e) {
             fail("Couldn't create saved directory");
         }
         createSnapshot();
-        mgr=new DownloadManager();
         router=new TestMessageRouter();
-        mgr.initialize();
-        router.initialize();
+        RouterService rs=new RouterService(new ActivityCallbackStub(), router);
+        mgr=rs.getDownloadManager();
+        try {
+            rs.setListeningPort(SettingsManager.instance().getPort());
+        } catch (IOException e) {
+            fail ("Couldn't set listening port");
+        }
+
         boolean ok=mgr.readSnapshot(snapshot);
         assertTrue("Couldn't read snapshot file", ok);
         uploader=new TestUploader("uploader 6666", 6666);
@@ -215,7 +222,7 @@ public class RequeryDownloadTest extends TestCase {
         router.handleQueryReply(reply, stubConnection);
 
         //Make sure the downloader does the right thing with the response.
-        try { Thread.sleep(500); } catch (InterruptedException e) { }
+        try { Thread.sleep(1000); } catch (InterruptedException e) { }
         if (shouldDownload) {
             //a) Match: wait for download to start, then complete.
             while (downloader.getState()!=Downloader.COMPLETE) {            
@@ -308,8 +315,8 @@ public class RequeryDownloadTest extends TestCase {
     
     /** Tests that requeries are sent fairly and at appropriate rate. */
     public void testRequeryScheduling() {
-        ManagedDownloader.TIME_BETWEEN_REQUERIES=100; //0.1 seconds
-        DownloadManager.TIME_BETWEEN_REQUERIES=500;   //0.5 seconds
+        ManagedDownloader.TIME_BETWEEN_REQUERIES=200; //0.1 seconds
+        DownloadManager.TIME_BETWEEN_REQUERIES=1000;   //1 second
 
         Downloader downloader1=null;
         Downloader downloader2=null;
@@ -322,7 +329,7 @@ public class RequeryDownloadTest extends TestCase {
 
         //Got right number of requeries?
         List broadcasts=router.broadcasts;
-        try { Thread.sleep(4000); } catch (InterruptedException e) { }
+        try { Thread.sleep(8000); } catch (InterruptedException e) { }
         assertTrue(broadcasts.size()>=7);    //should be 8, plus fudge factor
         assertTrue(broadcasts.size()<=9);
         //Are they balanced?  Check for approximate fairness.
