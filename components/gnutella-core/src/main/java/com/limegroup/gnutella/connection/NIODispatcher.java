@@ -328,8 +328,8 @@ public final class NIODispatcher implements Runnable {
 			// do nothing if there are no new writers
 			if(WRITERS.isEmpty()) return;
 			for(Iterator iter = WRITERS.iterator(); iter.hasNext();) {
-				Connection conn = (Connection)iter.next();
-                register(conn, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+                register((Connection)iter.next(), 
+                    SelectionKey.OP_WRITE | SelectionKey.OP_READ);
 			}
 			WRITERS.clear();
 		}
