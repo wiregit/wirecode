@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.mp3;
 
 import java.io.*;
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
@@ -41,6 +42,8 @@ public final class ID3Reader {
     private static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
         
+    private static List frameIDs = null;
+
     /**
      * This class should never be constructed.
      */
@@ -223,6 +226,11 @@ public final class ID3Reader {
     private static ID3Data parseID3v2Data(File file) {
         ID3Data data = new ID3Data();
         
+        if(frameIDs==null) {
+            makeFrameIDs();
+            ID3v2.setFramesToCheck(frameIDs);
+        }
+
         ID3v2 id3v2Parser = null;
         try {
             id3v2Parser = new ID3v2(file);
@@ -234,6 +242,7 @@ public final class ID3Reader {
             return data;
         }
         
+
         Vector frames = null;
         try {
             frames = id3v2Parser.getFrames();
@@ -246,9 +255,10 @@ public final class ID3Reader {
         for(Iterator iter=frames.iterator() ; iter.hasNext() ; ) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
             String frameID = frame.getID();
+            
             byte[] contentBytes = frame.getContent();
             String frameContent = null;
-            
+
             if (contentBytes.length > 0) {
                 try {
                     String enc = (frame.isISOLatin1()) ? ISO_LATIN_1 : UNICODE;
@@ -325,6 +335,18 @@ public final class ID3Reader {
         }
         return data;
     }
+
+    private static void makeFrameIDs() {
+        frameIDs= new ArrayList();
+        frameIDs.add(ID3Editor.TITLE_ID);
+        frameIDs.add(ID3Editor.ARTIST_ID);
+        frameIDs.add(ID3Editor.ALBUM_ID);
+        frameIDs.add(ID3Editor.YEAR_ID);
+        frameIDs.add(ID3Editor.TRACK_ID);
+        frameIDs.add(ID3Editor.COMMENT_ID);
+        frameIDs.add(ID3Editor.GENRE_ID);
+    }
+
 
     /**
      * Appends the key/value & a "\" to the string buffer.
