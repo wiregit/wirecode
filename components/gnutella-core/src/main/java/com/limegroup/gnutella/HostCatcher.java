@@ -997,11 +997,9 @@ public class HostCatcher {
         // Just gnutella.net
         try {
             read(HOST_FILE);
-        } catch (FileNotFoundException e) {
-            LOG.error(HOST_FILE, e);
         } catch (IOException e) {
-            LOG.error(HOST_FILE, e);
-        }    
+            LOG.debug(HOST_FILE, e);
+        }
     }
 
     /**
