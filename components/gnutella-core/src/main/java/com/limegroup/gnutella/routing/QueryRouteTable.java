@@ -451,11 +451,13 @@ public class QueryRouteTable {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" on a bitTable of size "
                                              + bitTableLength);
-            if (data[i] == keywordPresent) {
+            // All negative values indicate presence
+            if (data[i] < 0) {
                 bitTable.set(nextPatch);
                 resizedQRT = null;
             }
-            else if (data[i] == keywordAbsent) {
+            // All positive values indicate absence
+            else if (data[i] > 0) {
                 bitTable.clear(nextPatch);
                 resizedQRT = null;
             }
