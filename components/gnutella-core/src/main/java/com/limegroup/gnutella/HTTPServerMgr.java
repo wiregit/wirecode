@@ -36,6 +36,8 @@ public class HTTPServerMgr implements Runnable {
 
     public void download() {
 
+	System.out.println("doing the download...");
+
 	try {
 
 	    InputStream istream = _socket.getInputStream();

@@ -13,21 +13,43 @@ import java.net.*;
 
 public class HTTPClientMgr implements Runnable {
 
+    private static int BUFFSIZE = 1024;
+
     private Socket _socket;
     private BufferedWriter _out;
-    
-    String _filename;
-    int _index;
+    private String _filename;
+    private int _index;
+    private int _sizeOfFile;
+    private int _amountRead;
+    private FileManager _fmanager;
+    private FileDesc _fdesc;
 
-    private static int BUFFSIZE = 1024;
 
     public HTTPClientMgr(Socket s, String filename, int index) {
 	
-	_socket = s;
-
+	_socket = s;                    /* initialize variables */
 	_filename = filename;
-
 	_index = index;
+	_amountRead = 0;
+
+	_fmanager = FileManager.getFileManager();
+	_fdesc = null;
+
+	try {	                         /* look for the file */
+	    _fdesc = (FileDesc)_fmanager._files.get(_index);
+	}                                /* if its not found... */
+	catch (ArrayIndexOutOfBoundsException e) {
+	    doNoSuchFile();              /* send an HTTP error */
+	    return;
+	}
+                                         /* check to see if the index */
+	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
+	    doNoSuchFile();
+  	    return;
+  	}
+
+	_sizeOfFile = _fdesc._size;
+
 
     }
 
@@ -35,6 +57,14 @@ public class HTTPClientMgr implements Runnable {
 
 	upload();
 
+    }
+
+    public int getContentLength() {
+	return _sizeOfFile;
+    }
+
+    public int getAmountRead() {
+	return _amountRead;
     }
 
     public void upload() {
@@ -54,41 +84,14 @@ public class HTTPClientMgr implements Runnable {
   	    return;
   	}
 
-	                                 /* used for writing to the socket */
-
-	FileManager fmanager = FileManager.getFileManager();
-
-	FileDesc fd = null;
-
-	try {
-	                                 /* look for the file */
-	    fd = (FileDesc)fmanager._files.get(_index);
-	                                 
-	}                                /* if its not found... */
-                                         
-	catch (ArrayIndexOutOfBoundsException e) {
-	    
-	    doNoSuchFile();              /* send an HTTP error */
-
-	    return;
-
-	}
-
-	if (! fd._name.equals(_filename.trim())) { /* check to see if the index */
-	                                   /* matches the name */
-	    doNoSuchFile();
-		
-  	    return;
-
-  	}
-
   	BufferedReader fin = null;
+
 	try {/* used for writing to the socket */
 	    
 	                                   /* TODO1: this is potentially a */
   	                                   /* security flaw.  */
 	                                   /* Double-check this is right!! */  	  
-	    File file = new File(fd._path);  /* _path is the full name */
+	    File file = new File(_fdesc._path);  /* _path is the full name */
 
   	    fin = new BufferedReader(new FileReader(file));
 
@@ -105,7 +108,7 @@ public class HTTPClientMgr implements Runnable {
 	    _out.write("Server: Gnutella \r\n");
 	    String type = getMimeType();       /* write this method later  */
 	    _out.write("Content-type:" + type + "\r\n"); 	
-	    _out.write("Content-length: "+ fd._size + "\r\n");
+	    _out.write("Content-length: "+ _sizeOfFile + "\r\n");
 	    _out.write("\r\n");
 	}
 
@@ -126,6 +129,8 @@ public class HTTPClientMgr implements Runnable {
 		if (got==-1)
 		    break;
 		
+		_amountRead += got;
+
 		_out.write(buf, 0, got);        /* write to network. */
 		
 	    }
