@@ -1863,10 +1863,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 UrnCache.instance().addUrns(file, urns);
         }
 
-        long cTime = buckets.getCreationTimeForBucket(bucketNumber);
         FileDesc fileDesc = 
-            fileManager.addFileIfShared(completeFile, getXMLDocuments(), 
-                                        cTime);  
+		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
 		if(validAlts != null && 

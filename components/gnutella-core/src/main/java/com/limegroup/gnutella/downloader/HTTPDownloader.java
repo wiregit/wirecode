@@ -838,7 +838,6 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (NumberFormatException e) {
             throw new ProblemReadingHeaderException();
         }
-        rfd.setCreationTime(milliSeconds);
     }
     
     /////////////////////////////// Download ////////////////////////////////

@@ -239,24 +239,6 @@ class RemoteFileDescGrouper implements Serializable {
         return sha1s[n];
     }
 
-    /** @return gets the creation time as read off the network - may return
-     *  -1.  it prefers 'older' times if there are conflicting values.
-     */
-    synchronized long getCreationTimeForBucket(int n) {
-        if (n <0 || n>=buckets.size())
-            throw new IllegalArgumentException("index: " + n + 
-                                              ", size: " + buckets.size());
-        long retVal = -1;
-        Iterator iter = ((List)buckets.get(n)).iterator();
-        while (iter.hasNext()) {
-            RemoteFileDesc currRFD = (RemoteFileDesc) iter.next();
-            if ((currRFD.getCreationTime() > 0) &&
-                ((retVal == -1) || (currRFD.getCreationTime() < retVal)))
-                retVal = currRFD.getCreationTime();
-        }
-        return retVal;
-    }
-
     /** Returns the URN for the bucket with the most entries.
      */
     synchronized URN getBestURN() {
