@@ -42,6 +42,17 @@ public final class NetworkUtils {
     }
 
     /**
+     * Returns whether or not the two ip addresses share the same
+     * first octet in their address.  
+     *
+     * @param addr0 the first address to compare
+     * @param addr1 the second address to compare
+     */
+    public static boolean isCloseIP(byte[] addr0, byte[] addr1) {
+        return addr0[0] == addr1[0];        
+    }
+
+    /**
      * Checks to see if the given address is a firewalled address.
      * 
      * @param address the address to check
@@ -69,6 +80,21 @@ public final class NetworkUtils {
         } else {
             return false; // otherwise, it's not private
         }
+    }
+
+    /**
+     * Utility method for determing whether or not the given 
+     * address is private.  Delegates to 
+     * <tt>isPrivateAddress(byte[] address)</tt>.
+     *
+     * @return <tt>true</tt> if the specified address is private,
+     *  otherwise <tt>false</tt>
+     * @throws <tt>UnknownHostException</tt> if the address is 
+     *  unknown in the <tt>InetAddress</tt> lookup
+     */
+    public static boolean isPrivateAddress(String address) 
+        throws UnknownHostException {
+        return isPrivateAddress(InetAddress.getByName(address).getAddress());
     }
 
     /** 
