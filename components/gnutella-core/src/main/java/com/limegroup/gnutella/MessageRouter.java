@@ -779,6 +779,9 @@ public abstract class MessageRouter
                 receivingConnection.setQueryRouteState(qi);
             }
             if (qi.lastReceived==null) {
+                //TODO3: it's somewhat silly to allocate a new table and then
+                //immediately replace its state with RESET.  Probably best to
+                //have QueryRouteTable lazily allocate memory.
                 qi.lastReceived=new QueryRouteTable(
                     QueryRouteTable.DEFAULT_TABLE_SIZE,
                     QueryRouteTable.DEFAULT_INFINITY);
@@ -854,7 +857,7 @@ public abstract class MessageRouter
             if (c2==c)
                 continue;
             ManagedConnectionQueryInfo qi=c2.getQueryRouteState();
-            if (qi!=null)
+            if (qi!=null && qi.lastReceived!=null)
                 ret.addAll(qi.lastReceived);
         }
         return ret;
