@@ -32,7 +32,7 @@ public class FileManager {
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in a shared directory with a shareable extension. */
-    private ArrayList /* of FileDesc */ _files;
+    private List /* of FileDesc */ _files;
 
     /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
@@ -44,7 +44,7 @@ public class FileManager {
     /** an index mapping appropriately case-normalized URN strings to
      * the indices in _files.  */
 
-    private Hashtable /* String -> IntSet  */ _urnIndex;
+    private Map /* String -> IntSet  */ _urnIndex;
     
     /** The set of extensions to share, sorted by StringComparator. 
      *  INVARIANT: all extensions are lower case. */
@@ -62,12 +62,6 @@ public class FileManager {
      * string 'a' with suffix 'b' removed.  INVARIANT: all keys in this are
      * canonicalized files, sorted by a FileComparator. */
     private Map /* of File -> IntSet */ _sharedDirectories;
-
-	/**
-	 * Constant member for the <tt>FileDescLoader</tt> instance that handles
-	 * the creation and loading of <tt>FileDesc</tt> instances.
-	 */
-	private final FileDescLoader _fileDescLoader;
 
     /** The thread responsisble for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
@@ -116,7 +110,6 @@ public class FileManager {
         _urnIndex = new Hashtable();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
-		_fileDescLoader = new FileDescLoader(this);
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -627,7 +620,7 @@ public class FileManager {
 			return false;
 		_size += fileLength;
 		int fileIndex = _files.size();
-		FileDesc fileDesc = _fileDescLoader.createFileDesc(file, fileIndex);
+		FileDesc fileDesc = new FileDesc(file, fileIndex);
 		_files.add(fileDesc);
 		_numFiles++;
 		
@@ -669,7 +662,7 @@ public class FileManager {
      * @effects enters the given FileDesc into the _urnIndex under all its 
      * reported URNs
      */
-    public synchronized void updateUrnIndex(FileDesc fileDesc) {
+    private synchronized void updateUrnIndex(FileDesc fileDesc) {
 		Iterator iter = fileDesc.getUrns().iterator();
 		while (iter.hasNext()) {
 			URN urn = (URN)iter.next();
@@ -882,7 +875,6 @@ public class FileManager {
                     continue;                    
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
-                //Response r= desc.responseFor(request);
                 ret[j] = new Response(desc);
                 j++;
             }
@@ -1013,14 +1005,8 @@ public class FileManager {
                     if(fd.containsUrn(urn)) {
                         // still valid
                         if(ret==null) ret = new IntSet();
-                        ret.add(fd._index);
-                    } else {
-                        // was invalid; consider rehashing
-                        if(!fd.hasSHA1Urn()) {
-							//backgroundCalculateAndUpdate(fd);
-							_fileDescLoader.loadFileDesc(fd);
-                        }
-                    }
+                        ret.add(fd.getIndex());
+                    } 
                 }
             }
         }
