@@ -107,8 +107,10 @@ public class BestCandidates {
 			
 			//and my ttl 2 best with the other guy's ttl 1 best
 			
-			if (newCandidates[1]==null)
+			if (newCandidates[1]==null){
+				propagateChange();
 				return; //he doesn't have one, retain mine
+			}
 			
 			if (instance._best[2]==null ||
 			 comp.compare(instance._best[2], newCandidates[1]) < 0 ||
@@ -146,8 +148,9 @@ public class BestCandidates {
 	 * other people's.
 	 */
 	private static void propagateChange(){
-		if (instance._best[0]!=null)
+		if (instance._best[0]!=null) 
 			_advertiser.setMsg(new BestCandidatesVendorMessage(instance._best));
+		
 	} 
 	
 	/**
