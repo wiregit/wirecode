@@ -4,7 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 
@@ -176,6 +176,16 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
+
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+           PrivilegedAccessor.setValue(LEAF, "_messageReader", 
+                TestNIOMessageReader.createReader(LEAF));
+           PrivilegedAccessor.setValue(ULTRAPEER_1, "_messageReader", 
+               TestNIOMessageReader.createReader(ULTRAPEER_1));
+           PrivilegedAccessor.setValue(ULTRAPEER_2, "_messageReader", 
+               TestNIOMessageReader.createReader(ULTRAPEER_2));
+        }
         
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
