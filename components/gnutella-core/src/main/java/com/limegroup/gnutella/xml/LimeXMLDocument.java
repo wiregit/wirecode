@@ -48,25 +48,6 @@ public class LimeXMLDocument implements Serializable {
      */
     private String identifier;
     private String action="";
-    
-    /**
-     * The possibly null FileDesc that this document is associated with.
-     */
-    private transient FileDesc fd;
-    
-    /**
-     * Returns the possibly null FileDesc associated with this XML doc.
-     */
-    public FileDesc getFileDesc() {
-        return fd;
-    }
-    
-    /**
-     * Sets the FileDesc associated with this XML doc.
-     */
-    public void setFileDesc(FileDesc fd) {
-        this.fd = fd;
-    }
 
     public void setIdentifier(String id) {
         identifier = id;
