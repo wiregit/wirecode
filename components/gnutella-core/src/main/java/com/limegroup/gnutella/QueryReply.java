@@ -274,6 +274,10 @@ public class QueryReply extends Message implements Serializable{
         int left=getResultCount();
         responses=new Response[left];
 
+
+		
+
+
         try {
             //For each record...
             for ( ; left > 0; left--) {
@@ -290,7 +294,7 @@ public class QueryReply extends Message implements Serializable{
 				//Search for first single null terminator.
 				int j=i;
 				for ( ; ; j++) {
-					if (payload[j]==(byte)0)
+					if (payload[j]==(byte)0) 
 						break;
 				}
 				
@@ -302,46 +306,48 @@ public class QueryReply extends Message implements Serializable{
 				//Search for remaining null terminator.
 				int l = j+1;
 				for ( j=j+1; ; j++) {
-					if (payload[j]==(byte)0)
+					if (payload[j]==(byte)0) 
 						break;
 				}
 				
 				int blen = j-l; 
 				
 				if (blen > 0) {
-					String myMeta = new String(payload, l, blen);
-					// add the meta information to the response[]
-					myResponse.setMeta(myMeta);
-					// i=j+1;
-					// j+= blen;
+					//  String myMeta = new String(payload, l, blen);
+//  					// add the meta information to the response[]
+//  					myResponse.setMeta(myMeta);
+//  					// i=j+1;
+//  					// j+= blen;
+//  					System.out.println("myMeta: " + myMeta);
 				}
-
-
 				i = j+1;
             }
 			
 
+
 			// Maybe the meta info is here?
 			if (i < payload.length-16) {
-				i+=16;  // two nulls + 16 bit guid
+				// i+=16;  // two nulls + 16 bit guid
 				// there is extra data!
-				int metaLength = payload.length - i;
-				byte[] metaData = new byte[metaLength];
-				for (int k = 0; k < metaLength; k++) {
-					metaData[k] = payload[i+k];
-				}
-				PerPacketMetaInfo ppmi = new PerPacketMetaInfo(metaData);
-				ppmi.print();
-			}
-			
-			// is there going to be a problem detecting bad packets?
+				int metaLength = payload.length -16 - i;
+				// int metaLength = i - 16;
+  				char[] metaData = new char[metaLength];
+  				for (int k = 0; k < metaLength; k++) {
+  					// metaData[k] = payload[i+k];
+  					//metaData[k] = payload[k];
+  					// System.out.print(metaData[k] + " ");
+  					metaData[k] = (char)payload[i+k];
+  				}
 
-         //     if (i<payload.length-16)
-//              throw new BadPacketException("Extra data after "
-//                               +"double null terminators");
-//              else if (i>payload.length-16)
-//              throw new BadPacketException("Missing null terminator "
-//                               +"filename");
+				//  System.out.println("");
+//  				System.out.println("metaData: " + new String(metaData) );
+				// PerPacketMetaInfo ppmi = new PerPacketMetaInfo(metaData);
+				// ppmi.print();
+
+				i+= 16;
+
+			}
+
 
 
 
