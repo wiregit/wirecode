@@ -110,7 +110,8 @@ public final class UDPService implements Runnable {
 					InputStream in = new ByteArrayInputStream(data);
 					Message message = Message.read(in);		
 					if(message == null) continue;
-					sendAcknowledgement(datagram, message.getGUID());
+                    if (message instanceof QueryRequest)
+                        sendAcknowledgement(datagram, message.getGUID());
 					router.handleUDPMessage(message, datagram);					
 				} catch(BadPacketException e) {
 					continue;
