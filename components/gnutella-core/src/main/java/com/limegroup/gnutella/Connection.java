@@ -376,7 +376,7 @@ public class Connection implements Runnable {
 				byte ttl = (byte)(m.getHops() +1);
 				int port = manager.getListeningPort();
 				byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-				long speed = 0;
+				long speed = SettingsManager.instance().getConnectionSpeed();
 				byte[] clientGUID = manager.ClientId.getBytes();
 
 				QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
