@@ -329,7 +329,11 @@ public class ExternalControl {
 			if(start == 0) continue; // no '=', ignore.
 		    cmdstr = keystr.substring(start);
 			keystr = keystr.substring(0,start-1);
-            cmdstr=URLDecoder.decode(cmdstr);
+            try {
+                cmdstr = URLDecoder.decode(cmdstr);
+            } catch (IOException e1) {
+                continue;
+            }
 			// Process any numerical list of cmds
 			if ( (periodLoc = keystr.indexOf(".")) > 0 ) {
 				try {
