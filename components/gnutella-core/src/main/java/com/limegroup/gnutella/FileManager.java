@@ -168,7 +168,7 @@ public class FileManager{
 		sb = sb.append(q.charAt(i));
 	    }
 	}//for
-	String query = sb.toString();
+	String query = sb.toString().toLowerCase();
 	try{
 	    pattern = compiler.compile(query);}
 	catch(MalformedPatternException e){
@@ -176,7 +176,8 @@ public class FileManager{
 	    for(int i=0; i < _numFiles; i++) {
 		FileDesc desc = (FileDesc)_files.get(i);
 		//System.out.println("Rob:"+query);
-		String file_name = desc._name;
+		String fileName = desc._name;
+		String file_name = fileName.toLowerCase();
 		if (file_name.indexOf(query) != -1) 
 		    response_list.add(_files.get(i));
 	    }
@@ -185,7 +186,8 @@ public class FileManager{
 	for(int i=0; i < _numFiles; i++){
 	    FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
 	    //System.out.println("Sumeet: "+query);
-	    String file_name = desc._name;
+	    String fileName = desc._name;
+	    String file_name = fileName.toLowerCase();
 	    input = new PatternMatcherInput(file_name);
 	    if (matcher.contains(input,pattern))
 		response_list.add(_files.get(i));
