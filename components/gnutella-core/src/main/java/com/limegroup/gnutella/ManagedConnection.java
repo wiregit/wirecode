@@ -373,21 +373,10 @@ public class ManagedConnection
                 //Gnutella protocol version in GUID).
                 if (!_receivedFirstPing) 
                     checkForOlderClient(m); 
-                if (!isHandshake(m)) //if handshake, just continue;
-                    _router.handlePingRequest((PingRequest)m, this);
+                //if (!isHandshake(m)) //if handshake, just continue;  TODO: why?
+                //    _router.handlePingRequest((PingRequest)m, this);
             }
-            else if (m instanceof PingReply) {
-                _router.handlePingReply((PingReply)m, this);
-            }
-            else if (m instanceof QueryRequest)
-                _router.handleQueryRequestPossibleDuplicate(
-                    (QueryRequest)m, this);
-            else if (m instanceof QueryReply)
-                _router.handleQueryReply((QueryReply)m, this);
-            else if (m instanceof PushRequest)
-                _router.handlePushRequest((PushRequest)m, this);
-            else if (m instanceof RouteTableMessage)
-                _router.handleRouteTableMessage((RouteTableMessage)m, this);
+            _router.handleMessage(m, this);
         }
     }
 

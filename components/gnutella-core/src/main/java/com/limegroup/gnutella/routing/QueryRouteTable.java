@@ -21,7 +21,7 @@ public class QueryRouteTable {
     /** The suggested default table size. */
     public static final int DEFAULT_TABLE_SIZE=8192;
     /** The suggested default max table TTL. */
-    public static final int DEFAULT_TABLE_TTL=2;
+    public static final int DEFAULT_TABLE_TTL=5;
 
     //TODO: formalize specifications.  Write rep invariant.  Specify add*
     //methods to allow adding of random keywords because of collisions.
@@ -172,9 +172,9 @@ public class QueryRouteTable {
         return buf.iterator();
     }
 
-    /** True if o is a QueryRouteTable with the same entries of this.
-     *  TODO: document more. */
+    /** True if o is a QueryRouteTable with the same entries of this. */
     public boolean equals(Object o) {
+        //TODO: two qrt's can be equal even if they have different TTL ranges.
         if (! (o instanceof QueryRouteTable))
             return false;
 

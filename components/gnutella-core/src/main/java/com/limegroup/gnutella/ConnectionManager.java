@@ -375,8 +375,6 @@ public class ConnectionManager {
         else
             pr = new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
         connection.send(pr);
-        if (connection.isOutgoing())            
-            _router.forwardQueryRouteTables();
     }
 
     /**

@@ -61,18 +61,4 @@ public class ManagedConnectionQueryInfo {
     public QueryRouteTable getQueryRouteTable() {
         return qrt;
     }
-
-    ///////////////////////////// Timer interface //////////////////////
-
-    /** Returns true if we can send a route table update along this
-     *  connection. */
-    public boolean needsUpdate() {
-        return System.currentTimeMillis()>nextUpdateTime;        
-    }
-
-    /** Sets this to allow an update in 'time' milliseconds. */
-    public void resetUpdateTime(long time) {
-        nextUpdateTime=System.currentTimeMillis()+time;
-    }
-
 }

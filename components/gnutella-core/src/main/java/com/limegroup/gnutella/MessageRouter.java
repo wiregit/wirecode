@@ -46,6 +46,14 @@ public abstract class MessageRouter
      */
     private HashMap /* ManagedConnection -> ManagedConnectionQueryInfo */ 
         _queryInfoTable = new HashMap();
+    /**
+     * The time when we should next broadcast route table updates.
+     */
+    private long nextQueryUpdateTime=0l;
+    /**
+     * The time to wait between route table updates, in milliseconds.
+     */
+    private long QUERY_ROUTE_UPDATE_TIME=1000*15;  //15 seconds for testing
 
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
@@ -173,6 +181,38 @@ public abstract class MessageRouter
         _querySourceTable.removeReplyHandler(connection);
         _pushSourceTable.removeReplyHandler(connection);
     }
+
+
+    /** Dispatches the message m based on its function code. */
+    public void handleMessage(Message m, ManagedConnection receivingConnection) {
+        //This may trigger propogation of query route tables.  We do this BEFORE
+        //handling the message so that queries are answered on low traffic
+        //networks.  Note that it may delay the message m, however.
+        forwardQueryRouteTables();
+
+
+        //TODO3:  switch on opcode instead.
+        if (m instanceof PingRequest) {
+            //if (!isHandshake(m)) //if handshake, just continue;
+            //  handlePingRequest((PingRequest)m, receivingConnection);
+            handlePingRequest((PingRequest)m, receivingConnection);
+        }
+        else if (m instanceof PingReply) {
+            handlePingReply((PingReply)m, receivingConnection);
+        }
+        else if (m instanceof QueryRequest)
+            handleQueryRequestPossibleDuplicate((QueryRequest)m,
+                                                receivingConnection);
+        else if (m instanceof QueryReply)
+            handleQueryReply((QueryReply)m, receivingConnection);
+        else if (m instanceof PushRequest)
+            handlePushRequest((PushRequest)m, receivingConnection);
+        else if (m instanceof RouteTableMessage)
+            handleRouteTableMessage((RouteTableMessage)m,
+                                    receivingConnection);        
+
+    }
+
 
     /**
      * The handler for QueryRequests received in
@@ -540,10 +580,10 @@ public abstract class MessageRouter
                 synchronized (_queryInfoTable) {
                     ManagedConnectionQueryInfo qi=
                         (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
-                    if (qi==null)
+                    if (qi==null) 
                         c.send(queryRequest);
-                    else if (qi.contains(queryRequest))
-                        c.send(queryRequest);                    
+                    else if (qi.contains(queryRequest)) 
+                        c.send(queryRequest);              
                 }
             }
         }
@@ -776,7 +816,7 @@ public abstract class MessageRouter
      */
     public void handleRouteTableMessage(RouteTableMessage m,
                                         ManagedConnection receivingConnection) {
-        synchronized (_queryInfoTable) { //TODO?
+        synchronized (_queryInfoTable) { 
             //Mutate query route table associated with receivingConnection.  
             //(This is legal.)  Create a new one if none exists.
             ManagedConnectionQueryInfo qi=
@@ -787,10 +827,8 @@ public abstract class MessageRouter
                 _queryInfoTable.put(receivingConnection, qi);            
             }
             qi.update(m);    
-            System.out.println("Receiving "+m+" from "+receivingConnection);
-
-            //Propogate tables to those connection that need it.
-            forwardQueryRouteTables();
+            if (m instanceof ResetTableMessage)
+                System.out.println("Receiving update from "+receivingConnection+"...");
         }
     }
 
@@ -802,34 +840,28 @@ public abstract class MessageRouter
      */    
     public void forwardQueryRouteTables() {
         synchronized (_queryInfoTable) {
+            //Check time.  Skip or update.
+            long time=System.currentTimeMillis();
+            if (time<nextQueryUpdateTime) 
+                return;
+            nextQueryUpdateTime=time+QUERY_ROUTE_UPDATE_TIME;
+
+            System.out.println("Propogating route tables");
+
             //For all connections to new hosts c needing an update...
             //TODO3: use getInitializedConnections2?
             List list=_manager.getInitializedConnections();
-            for(int i=0; i<list.size(); i++) {
+            for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
-                ManagedConnectionQueryInfo qi=
-                    (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
-                if (qi==null) {
-                    qi=new ManagedConnectionQueryInfo();
-                    _queryInfoTable.put(c, qi);
-                }
-                //TODO2: don't send to older connections
-                if (!qi.needsUpdate())
-                    continue;
-                //This is a really important part.  It prevents infinite loops
-                //of messages. 
-                qi.resetUpdateTime(10000);
-                
                 //Create table to send on this connection...
                 QueryRouteTable table=createRouteTable(c);
-                
+                System.out.println("  Sending "+table+" to "+c);
+
                 //..and send each piece.
-                //TODO1: use incremental and interleaved update
-                //TODO1: send RESET message first time?  See QueryRouteTable.
+                //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(null); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
                     c.send(m);
-                    System.out.println("Sending "+m+" to "+c);
                 }
             }
         }
