@@ -57,6 +57,10 @@ public interface SettingsInterface
     public String     getConnectString();
     public String     getConnectOkString();
 
+	/** allowing browsers to download from us */
+	public boolean    getAllowBrowser();
+
+
    /** The current version of LimeWire.  This is read-only. */
     public String getCurrentVersion();
     public String getLastVersionChecked();
@@ -74,6 +78,10 @@ public interface SettingsInterface
     /** returns the path where the properties and host
      *  host list file get saved*/
     public String getPath();
+
+	/* allow web browsers to download */
+	public void setAllowBrowser(boolean allow)
+		throws IllegalArgumentException;
 
     /** set the user time to live */
     public void setTTL(byte ttl)
@@ -195,6 +203,7 @@ public interface SettingsInterface
 
     public void setWrite(boolean b);
 
+	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
     /** Default setting for the soft maximum time to live */
@@ -275,6 +284,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
 
     // The property key name constants
+	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
     public static final String MAX_TTL        = "MAX_TTL";

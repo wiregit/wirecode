@@ -20,9 +20,6 @@ public class HTTPManager {
     private ByteReader _br;
     private int _uploadBegin;
     private int _uploadEnd;
-	
-	private boolean _readFromBrowser = false;
-	
 
     /**
      * @requires If isPush, "GIV " was just read from s.
@@ -142,23 +139,14 @@ public class HTTPManager {
         }
     }
 
-	public void setReadFromBrowser(boolean b) {
-		_readFromBrowser = b;
-	}
-	
-
     public void readRange() throws IOException {
         String str = " ";
 
         _uploadBegin = 0;
         _uploadEnd = 0;
 
-		System.out.println("in readRange");
-
         while (true) {
             str = _br.readLine();
-
-			System.out.println("mgr - Str: " + str);
 
             if ( (str==null) || (str.equals("")) ){
                 break;
@@ -192,11 +180,13 @@ public class HTTPManager {
             }
 
 			// check for netscape and internet explorer
+			// in the User-Agent field of the header information
 			if (str.indexOf("Mozilla") != -1) {
 				// if we are not supposed to read from them
 				// throw an exception
-				if (!_readFromBrowser)
+				if (SettingsManager.instance().getAllowBrowser() == false)
 					throw new IOException("Web Browser");
+
 			}
 
         }

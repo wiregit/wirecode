@@ -34,6 +34,7 @@ public class SettingsManager implements SettingsInterface
 
     boolean write_ = false;
     /** Variables for the various settings */
+	private static boolean  allowBroswer_;
     private static byte     ttl_;
     private static byte     softmaxttl_;
     private static byte     maxttl_;
@@ -177,6 +178,16 @@ public class SettingsManager implements SettingsInterface
                 if(key.equals(TTL)) {
                     setTTL(Byte.parseByte(p));
                 }
+				else if(key.equals(ALLOW_BROWSER)) {
+					boolean bs;  
+					if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        return;
+                    setAllowBrowser(bs);
+				}
                 else if(key.equals(SOFT_MAX_TTL)) {
                     setSoftMaxTTL(Byte.parseByte(p));
                 }
@@ -422,6 +433,7 @@ public class SettingsManager implements SettingsInterface
      * these. */
     private void loadDefaults()
     {
+		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
         setMaxTTL(DEFAULT_MAX_TTL);
         setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
         setTTL(DEFAULT_TTL);
@@ -488,6 +500,8 @@ public class SettingsManager implements SettingsInterface
     /******************************************************
      *************  START OF ACCESSOR METHODS *************
      ******************************************************/
+
+	public boolean getAllowBrowser() {return allowBroswer_;}
 
     /** returns the time to live */
     public byte getTTL(){return ttl_;}
@@ -1163,6 +1177,17 @@ public class SettingsManager implements SettingsInterface
             c = "false";
         forceIPAddress_ = force;
         props_.put(FORCE_IP_ADDRESS, c);
+    }
+
+
+    public void setAllowBrowser(boolean allow) {
+        String c;
+        if (allow == true)
+            c = "true";
+        else
+            c = "false";
+        allowBroswer_ = allow;
+        props_.put(ALLOW_BROWSER, c);
     }
 
     public void setForcedIPAddress(byte[] address) {
