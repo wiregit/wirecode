@@ -431,16 +431,20 @@ public class HTTPDownloader implements Runnable {
 
     public void doDownload() {
         readHeader();
-
+	
         SettingsManager set = SettingsManager.instance();
 
         _downloadDir = set.getSaveDirectory();
 
-        String pathname = _downloadDir + _filename;
+	String incompleteDir = set.getIncompleteDirectory();
 
+        String pathname = incompleteDir +  _filename;
         File myFile = new File(pathname);
 
-        if ((myFile.exists()) && (!_resume)) {
+	String path = _downloadDir + _filename;
+        File myTest = new File(path);
+
+        if ((myTest.exists()) && (!_resume)) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
                 _state = ERROR;
@@ -503,8 +507,12 @@ public class HTTPDownloader implements Runnable {
             return;
         }
 
-        if ( _amountRead == _sizeOfFile )
+        if ( _amountRead == _sizeOfFile ) {
+	    String pname = _downloadDir + _filename;
+	    myFile.renameTo(new File(pname));
             _state = COMPLETE;
+	}
+
         else
             _state = ERROR;
     }
