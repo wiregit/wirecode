@@ -28,7 +28,7 @@ import java.io.*;
  *                              |
  *                             LEAF
  */
-public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class UltrapeerRoutingTest extends BaseTestCase {
 
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
@@ -281,10 +281,10 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 		LEAF.flush();
 
 		assertTrue("ultrapeer2 should not have received the query", 
-				   !drainQuery(ULTRAPEER_2));
+				   !drain(ULTRAPEER_2));
 
 		assertTrue("ultrapeer1 should not have received the query", 
-				   !drainQuery(ULTRAPEER_1));
+				   !drain(ULTRAPEER_1));
 		
 	}
 
@@ -437,14 +437,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	/**
 	 * Tests broadcasting of queries from ULTRAPEER_2.
 	 */
-    public void testBroadcastFromUltrapeer2() 
-             throws Exception  {
-        //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
-        //                   +", no forwarding to leaf");
-        //drain(ULTRAPEER_1);
-        //drain(LEAF);
-
-        //QueryRequest qr = new QueryRequest(TTL, 0, "crap", false);
+    public void testBroadcastFromUltrapeer2() throws Exception  {
 		QueryRequest qr = QueryRequest.createQuery("crap");
         ULTRAPEER_2.send(qr);
         ULTRAPEER_2.flush();
@@ -462,14 +455,8 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	/**
 	 * Tests the broadcasting of queries from ultrapeer 2 to the leaf.
 	 */
-    public void testBroadcastFromUltrapeer2ToLeaf() 
-		throws Exception {
-        //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
-        //                   +", with forwarding to leaf");
-        //drain(ULTRAPEER_1);
-        //drain(LEAF);
+    public void testBroadcastFromUltrapeer2ToLeaf() throws Exception {
 
-        //QueryRequest qr = new QueryRequest(TTL, 0, "test", false);
         QueryRequest qr = QueryRequest.createQuery("test");
         ULTRAPEER_2.send(qr);
         ULTRAPEER_2.flush();
@@ -492,14 +479,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * In particular, this tests to make sure that the leaf correctly
 	 * receives the query.
 	 */
-    public void testBroadcastFromUltrapeerToBoth() 
-             throws Exception {
-        //System.out.println("-Testing normal broadcast from ULTRAPEER_2 connnection"
-        //                   +", with forwarding to leaf");
-        //drain(LEAF);
-        //drain(ULTRAPEER_2);
-
-        //QueryRequest qr=new QueryRequest(TTL, 0, "susheel test", false);
+    public void testBroadcastFromUltrapeerToBoth() throws Exception {
         QueryRequest qr= QueryRequest.createQuery("susheel test");
         ULTRAPEER_1.send(qr);
         ULTRAPEER_1.flush();
@@ -523,11 +503,6 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * this tests to make sure that leaves do not receive ping broadcasts.
 	 */
     public void testPingBroadcast() throws Exception {
-        //System.out.println("-Testing ping broadcast from ULTRAPEER_2 connnection"
-        //                   +", no forwarding to leaf, with reply");
-        //drain(ULTRAPEER_2);
-        //drain(LEAF);
-
         //Send ping
         Message m=new PingRequest((byte)7);
         ULTRAPEER_1.send(m);
@@ -560,13 +535,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests the broadcasting of big pings -- pings that include GGEP extensions,
 	 * and so have a payload -- between the various hosts.
 	 */
-    public void testBigPingBroadcast() 
-             throws Exception {
-        //System.out.println("-Testing big ping broadcast from leaf connnection"
-        //                   +", no payload forwarding to ULTRAPEER_2, with big reply");
-        //drain(ULTRAPEER_2);
-        //drain(ULTRAPEER_1);
-
+    public void testBigPingBroadcast() throws Exception {
         //1a. Send big ping (not GGEP...which should be ok)
         byte[] payload= new byte[16];
         byte c = 65; //'A'
@@ -688,17 +657,14 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 
 
 
-
-    public void testMisroutedPong() 
-             throws Exception {
-        //System.out.println("-Testing misrouted normal pong"
-        //                   +", not forwarded to leaf");
-        drain(ULTRAPEER_2);
-        drain(LEAF);
-
-        Message m=new PingReply(GUID.makeGuid(), 
-                                (byte)7, 6399, new byte[4], 
-                                0, 0, false);                                
+	/**
+	 * Tests to make sure that pongs that had no entry in the routing
+	 * tables (that had no corresponding ping) are not forwarded.
+	 */
+    public void testMisroutedPong() throws Exception {
+        Message m = new PingReply(GUID.makeGuid(), 
+								  (byte)6, 7399, new byte[4], 
+								  0, 0, false);                                
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();
               
@@ -708,24 +674,22 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 				   !drain(LEAF));
     }
 
-    public void testUltrapeerPong() 
-             throws Exception {
-        //System.out.println("-Testing misrouted ultrapeer pong"
-        //                   +", forwarded to leaf");
-        drain(ULTRAPEER_2);
-        drain(LEAF);
-
+	/**
+	 * Tests that Ultrapeer pongs are correctly sent to leaves to
+	 * provide them with distributed host data.
+	 */
+    public void testUltrapeerPong() throws Exception {
         byte[] guid=GUID.makeGuid();
         byte[] ip={(byte)18, (byte)239, (byte)0, (byte)143};
         Message m=new PingReply(guid, 
-                                (byte)7, 6399, ip, 
+                                (byte)7, 7399, ip, 
                                 0, 0, true);                                
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();
               
         m=LEAF.receive(TIMEOUT);
-        assertTrue("expected a query hit", m instanceof PingReply);
-        assertEquals("unexpected port", 6399, ((PingReply)m).getPort());        
+        assertTrue("expected a pong", m instanceof PingReply);
+        assertEquals("unexpected port", 7399, ((PingReply)m).getPort());        
 
 		assertTrue("should not have drained ultrapeer successfully", 
 				   !drain(ULTRAPEER_2));
@@ -736,12 +700,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 	 * Tests that duplicate queries are not forwarded if the connection that
 	 * originated the connection is dropped.
 	 */
-    public void testDropAndDuplicate() 
-		throws Exception {
-        //System.out.println("-Testing that duplicates are dropped "
-        //                   +"when original connection closed");
-
-
+    public void testDropAndDuplicate() throws Exception {
         //Send query request from leaf, received by ultrapeer (and ULTRAPEER_2)
         //QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
         QueryRequest qr = QueryRequest.createQuery("crap");
@@ -791,29 +750,6 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
         }
     }
 
-    /** 
-	 * Tries to receive any outstanding queries on c.
-	 *
-     * @return <tt>true</tt> if this got a message, otherwise <tt>false</tt>
-	 */
-    private static boolean drainQuery(Connection c) throws IOException {
-        boolean ret=false;
-        while (true) {
-            try {
-                Message m = c.receive(TIMEOUT);
-				if(m instanceof QueryRequest) {
-					ret = true;
-				} 
-                //System.out.println("Draining "+m+" from "+c);
-            } catch (InterruptedIOException e) {
-				// we read a null message or received another 
-				// InterruptedIOException, which means a messages was not 
-				// received
-                return ret;
-            } catch (BadPacketException e) {
-            }
-        }
-    }
 
 	/**
 	 * Asserts that the given message is a query, printing out the 
