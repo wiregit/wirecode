@@ -946,6 +946,9 @@ public abstract class MessageRouter {
      */
     protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
                                                Connection source) {
+        
+        if (!source.isSupernodeSupernodeConnection()) return;
+
         GUID guidToUse = udp.getConnectBackGUID();
         int portToContact = udp.getConnectBackPort();
         InetAddress addrToContact = udp.getConnectBackAddress();
@@ -1012,6 +1015,8 @@ public abstract class MessageRouter {
      */
     protected void handleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
                                                 Connection source) {
+        if (!source.isSupernodeSupernodeConnection()) return;
+
         final int portToContact = tcp.getConnectBackPort();
         final String addrToContact =tcp.getConnectBackAddress().getHostAddress();
 

@@ -167,6 +167,7 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
 		sleep();
+        UDP_ACCESS.close();
 	}
 
 	private static void sleep() {
@@ -245,6 +246,53 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         assertNotNull(msvm);
         assertGreaterThan(0, msvm.supportsTCPConnectBackRedirect());
         assertGreaterThan(0, msvm.supportsUDPConnectBackRedirect());
+    }
+
+    public void testUDPConnectBackRedirect() throws Exception {
+        drainAll();
+        
+        GUID cbGuid = new GUID(GUID.makeGuid());
+        UDPConnectBackRedirect udp = 
+            new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
+                                       UDP_ACCESS.getLocalPort());
+        
+        LEAF.send(udp);
+        LEAF.flush();
+        
+        // we should NOT get a ping request over our UDP socket....
+        UDP_ACCESS.setSoTimeout(1000);
+        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+        try {
+            UDP_ACCESS.receive(pack);
+            assertTrue(false);
+        }
+        catch (IOException good) {
+        }
+
+        cbGuid = new GUID(GUID.makeGuid());
+        udp = new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
+                                         UDP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_1.send(udp);
+        ULTRAPEER_1.flush();
+
+        // we should get a ping reply over our UDP socket....
+        while (true) {
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                Message m = Message.read(in);
+                if (m instanceof PingRequest) {
+                    PingRequest reply = (PingRequest) m; 
+                    assertEquals(new GUID(reply.getGUID()), cbGuid);
+                    break;
+                }
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get reply", false);
+            }
+        }
     }
 
 
