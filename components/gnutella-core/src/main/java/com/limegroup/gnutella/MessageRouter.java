@@ -1794,7 +1794,7 @@ public abstract class MessageRouter {
             numResponses-= arraySize;
 
 			// see if there are any open slots
-			boolean busy = um.isQueueFull();
+			boolean busy = um.isServiceable();
             boolean uploaded = um.hadSuccesfulUpload();
 
 			// see if we have accepted an incoming connection during this session
