@@ -115,7 +115,7 @@ public class BootstrapServerManager {
         addDefaultsIfNeeded();
         //For now we only send updates if the "ip=" parameter is null,
         //regardless of whether we have a url.
-        if (myIP!=null)
+        if (myIP!=null && !myIP.isPrivateIP())
             requestAsync(new UpdateRequest(myIP), "GWebCache update");
     }
 
