@@ -4,11 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.zip.*;
 import java.util.Properties;
-import java.util.Enumeration;
-
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushProxyInterface;
@@ -153,11 +148,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private volatile boolean _closed = false;
 
-    /** 
-     * The headers read from the connection.
-     */
-    private final Properties HEADERS_READ = new Properties();
-
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
@@ -170,32 +160,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     private HandshakeResponse _headersWritten = 
         HandshakeResponse.createEmptyResponse();        
 
-    /** 
-     * For outgoing Gnutella 0.6 connections, the properties written
-     * after "GNUTELLA CONNECT".  Null otherwise. 
-     */
-    private final Properties REQUEST_HEADERS;
-
-    /** 
-     * For outgoing Gnutella 0.6 connections, a function calculating the
-     * properties written after the server's "GNUTELLA OK".  For incoming
-     * Gnutella 0.6 connections, the properties written after the client's
-     * "GNUTELLA CONNECT".
-     * Non-final so that the responder can be garbage collected after we've
-     * concluded the responding (by setting to null).
-     */
-    private HandshakeResponder RESPONSE_HEADERS;
-
-    /** The list of all properties written during the handshake sequence,
-     *  analogous to HEADERS_READ.  This is needed because
-     *  RESPONSE_HEADERS lazily calculates properties according to what it
-     *  read. */
-    private final Properties HEADERS_WRITTEN = new Properties();
-
-    /**
-     * Gnutella 0.6 connect string.
-     */
-    private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
 
     /**
      * Gnutella 0.6 accept connection string.
@@ -226,12 +190,21 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     private long _connectionTime = Long.MAX_VALUE;
 
 
-    /** if I am a Ultrapeer shielding the given connection */
-    private Boolean _isLeaf=null;
-    /** if I am a leaf connected to a supernode  */
-    private Boolean _isUltrapeer=null;
-    /** if I am an Ultrapeer peering to another Ultrapeer */
-    private Boolean _isUltrapeerToUltrapeer=null;
+    /** 
+     * if I am a Ultrapeer shielding the given connection. 
+     */
+    private Boolean _isLeaf = null;
+    
+    /** 
+     * if I am a leaf connected to a supernode.  
+     */
+    private Boolean _isUltrapeer = null;
+    
+    
+    /** 
+     * if I am an Ultrapeer peering to another Ultrapeer. 
+     */
+    private Boolean _isUltrapeerToUltrapeer = null;
 
     /**
      * The "soft max" ttl to use for this connection.
@@ -307,16 +280,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private MessageReader _messageReader;
 
-    /**
-     * Handle to the header writer for this connection.
-     */
-    private HeaderWriter _headerWriter;
-    
-    /**
-     * Handle to the header reader for this connection.
-     */
-    //private HeaderReader _headerReader;
-
     
     /**
      * Handle to the statistics recording class for this connection.
@@ -358,6 +321,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * for bootstrap servers.  
      */
     private static final int CONNECT_TIMEOUT = 6000;  //6 seconds
+    
+    private final Handshaker HANDSHAKER;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -424,7 +389,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     public Connection(String host, int port,
                       Properties requestHeaders,
                       HandshakeResponder responseHeaders) {
-
         if(host == null) {
             throw new NullPointerException("null host");
         }
@@ -441,10 +405,20 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         _host = host;
         _port = port;
         OUTGOING = true;
-        REQUEST_HEADERS = requestHeaders;
-        RESPONSE_HEADERS = responseHeaders;            
+        //REQUEST_HEADERS = requestHeaders;
+        //RESPONSE_HEADERS = responseHeaders;            
         if(!CommonUtils.isJava118()) {
             ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+        }
+        
+        if(ConnectionSettings.USE_NIO.getValue())  {
+            HANDSHAKER = 
+                NIOHandshaker.createHandshaker(this, 
+                    requestHeaders, responseHeaders);
+        } else  {
+            HANDSHAKER = 
+                BIOHandshaker.createHandshaker(this,
+                    requestHeaders, responseHeaders);
         }
     }
 
@@ -474,10 +448,18 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         _port = socket.getPort();
         _socket = socket;
         OUTGOING = false;
-        RESPONSE_HEADERS = responseHeaders; 
-        REQUEST_HEADERS = null;
+        //RESPONSE_HEADERS = responseHeaders; 
+        //REQUEST_HEADERS = null;
         if(!CommonUtils.isJava118()) {
             ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
+        }
+
+        if(ConnectionSettings.USE_NIO.getValue())  {
+            HANDSHAKER = 
+                NIOHandshaker.createHandshaker(this, null, responseHeaders);
+        } else  {
+            HANDSHAKER = 
+                BIOHandshaker.createHandshaker(this, null, responseHeaders);
         }
     }
 
@@ -510,32 +492,57 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public void initialize(int timeout) 
         throws IOException, NoGnutellaOkException, BadHandshakeException {
-
-        if(isOutgoing())
-            _socket = Sockets.connect(_host, _port, timeout);
-
-        // Check to see if close() was called while the socket was initializing
+        if(isOutgoing())  {
+            if(ConnectionSettings.USE_NIO.getValue()) {
+                _socket = Sockets.connectNIO(_host, _port, timeout);
+                if(!_socket.isConnected())  {
+                    NIODispatcher.instance().addConnector(this);
+                }
+            } else {
+                _socket = Sockets.connect(_host, _port, timeout);
+            }
+        }
+        
         if (_closed) {
             throw CONNECTION_CLOSED;
         } 
-        
+
         // Check to see if this is an attempt to connect to ourselves
+        // TODO: make sure Socket.getInetAddress() works fine even when it's 
+        // not fully connected
         InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
             _socket.getInetAddress().equals(localAddress) &&
             _port == ConnectionSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
+        }      
+
+        // TODO: switch to new method of doing this on the main line
+        RouterService.getAcceptor().setAddress( localAddress );  
+        
+        // If we're not using NIO, then we know the socket is already
+        // fully connected, and we can go ahead with the handshake
+        if(!ConnectionSettings.USE_NIO.getValue())  {
+            blockingHandshake();              
+        } else if(isOutgoing())  {
+            HANDSHAKER.write();
         }
-
-        // Set the Acceptors IP address
-        RouterService.getAcceptor().setAddress( localAddress );
-
+    }
+    
+    /**
+     * Specialized method for blocking IO that sets up the streams and performs
+     * any other special handling needed to set up blocking IO.  This also 
+     * completes the blocking connection handshake.
+     * 
+     * @throws IOException if there are any IO errors setting up the IO streams,
+     *  completing the handshake, etc
+     */
+    private void blockingHandshake() throws IOException  {
         try {
-            
             _in = new BufferedInputStream(_socket.getInputStream());
             _out = new ThrottledOutputStream(
                 new BufferedOutputStream(_socket.getOutputStream()), 
-                _throttle);
+                    _throttle);
         } catch (NullPointerException e) {
             //Apparently Socket.getInput/OutputStream throws
             //NullPointerException if the socket is closed on JVMs prior to 
@@ -548,29 +555,19 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             //close();
             throw new IOException("could not establish connection");
         }
-
-        if(ConnectionSettings.USE_NIO.getValue()) {
-            _headerWriter = NIOHeaderWriter.createWriter(this);            
-        } else {
-            _headerWriter = BIOHeaderWriter.createWriter(this);
-        }
-
-        if(ConnectionSettings.USE_NIO.getValue()) {
-            NIODispatcher.instance().addReader(this);     
-        }
-        
-        //In all the line reading code below, we are somewhat lax in
-        //distinguishing between '\r' and '\n'.  Who cares?
-        if(isOutgoing())
-            initializeOutgoing();
-        else
-            initializeIncoming();
-
-        _headerWriter = null;
-        //_headerReader = null;
-
-        _headers = HandshakeResponse.createResponse(HEADERS_READ);
-        _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
+        HANDSHAKER.handshake(); 
+        handshakeComplete();
+    }
+    
+    /**
+     * Notifies this connection that handshaking has completed and the 
+     * connection is ready to process Gnutella messages.
+     */
+    public void handshakeComplete() throws IOException  {
+        _headers = 
+            HandshakeResponse.createResponse(HANDSHAKER.getHeadersRead());
+        _headersWritten = 
+            HandshakeResponse.createResponse(HANDSHAKER.getHeadersWritten());
 
         _connectionTime = System.currentTimeMillis();
 
@@ -584,39 +581,42 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             // we give these an extra hop because they might be sending
             // us traffic from their leaves
             _softMax++;
-        } 
+        }
         
-        //wrap the streams with inflater/deflater
-        // These calls must be delayed until absolutely necessary (here)
-        // because the native construction for Deflater & Inflater 
-        // allocate buffers outside of Java's memory heap, preventing 
-        // Java from fully knowing when/how to GC.  The call to end()
-        // (done explicitly in the close() method of this class, and
-        //  implicitly in the finalization of the Deflater & Inflater)
-        // releases these buffers.
-        if(isWriteDeflated()) {
-            _deflater = new Deflater();
-            _out = new CompressingOutputStream(_out, _deflater);
-        }            
-        if(isReadDeflated()) {
-            _inflater = new Inflater();
-            _in = new UncompressingInputStream(_in, _inflater);
+        if(!ConnectionSettings.USE_NIO.getValue())  {
+            //wrap the streams with inflater/deflater
+            // These calls must be delayed until absolutely necessary (here)
+            // because the native construction for Deflater & Inflater 
+            // allocate buffers outside of Java's memory heap, preventing 
+            // Java from fully knowing when/how to GC.  The call to end()
+            // (done explicitly in the close() method of this class, and
+            //  implicitly in the finalization of the Deflater & Inflater)
+            // releases these buffers.
+            if(isWriteDeflated()) {
+                _deflater = new Deflater();
+                _out = new CompressingOutputStream(_out, _deflater);
+            }            
+            if(isReadDeflated()) {
+                _inflater = new Inflater();
+                _in = new UncompressingInputStream(_in, _inflater);
+            }
         }
                    
         // remove the reference to the RESPONSE_HEADERS, since we'll no
         // longer be responding.
         // This does not need to be in a finally clause, because if an
         // exception was thrown, the connection will be removed anyway.
-        RESPONSE_HEADERS = null;
-        
+        //RESPONSE_HEADERS = null;
+
         // create the read/write classes for messages
         _messageWriter = new MessageWriterProxy(this); 
         _messageReader = new MessageReaderProxy(this);
         
-         
+                     
         // check for updates from this host  
-        UpdateManager.instance().checkAndUpdate(this);          
+        UpdateManager.instance().checkAndUpdate(this);               
     }
+    
 
     /**
      * Accessor for whether or not this connection has been initialized.
@@ -632,221 +632,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return _socket != null;
     }
 
-    /** 
-     * Sends and receives handshake strings for outgoing connections,
-     * throwing exception if any problems. 
-     * 
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException any other error.  
-     */
-    private void initializeOutgoing() throws IOException {
-        //1. Send "GNUTELLA CONNECT/0.6" and headers
-        _headerWriter.writeHeader(GNUTELLA_CONNECT_06+CRLF);
-        sendHeaders(REQUEST_HEADERS);   
-        
-        //conclude the handshake (This may involve exchange of 
-        //information multiple times with the host at the other end).
-        concludeOutgoingHandshake();
-    }
-    
-    /**
-     * Responds to the responses/challenges from the host on the other
-     * end of the connection, till a conclusion reaches. Handshaking may
-     * involve multiple steps. 
-     *
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException any other error.  
-     */
-    private void concludeOutgoingHandshake() throws IOException {
-        //This step may involve handshaking multiple times so as
-        //to support challenge/response kind of behaviour
-        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++) {
-
-            //2. Read "GNUTELLA/0.6 200 OK"  
-            String connectLine = readLine();
-            Assert.that(connectLine != null, "null connectLine");
-            if (! connectLine.startsWith(GNUTELLA_06))
-                throw new IOException("Bad connect string");
-            
-            //3. Read the Gnutella headers. 
-            readHeaders();
-
-            //Terminate abnormally if we read something other than 200 or 401.
-            HandshakeResponse theirResponse = 
-                HandshakeResponse.createResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(), 
-                    HEADERS_READ);
-            Assert.that(theirResponse != null, "null theirResponse");
-
-            int code = theirResponse.getStatusCode();
-            if (code != HandshakeResponse.OK &&  
-                code != HandshakeResponse.UNAUTHORIZED_CODE) {
-                if(code == HandshakeResponse.SLOTS_FULL) {
-                    throw NoGnutellaOkException.SERVER_REJECT;
-                } else {
-                    throw NoGnutellaOkException.createServerUnknown(code);
-                }
-            }
-
-            //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
-            //   and headers.
-            Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");
-            HandshakeResponse ourResponse = 
-                RESPONSE_HEADERS.respond(theirResponse, true);
-
-            Assert.that(ourResponse != null, "null ourResponse");
-            _headerWriter.writeHeader(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.props());
-
-            code = ourResponse.getStatusCode();
-            //Consider termination...
-            if(code == HandshakeResponse.OK) {
-                if(HandshakeResponse.OK_MESSAGE.equals(
-                    ourResponse.getStatusMessage())){
-                    //a) Terminate normally if we wrote "200 OK".
-                    return;
-                } else {
-                    //b) Continue loop if we wrote "200 AUTHENTICATING".
-                    continue;
-                }
-            } else {                
-                //c) Terminate abnormally if we wrote anything else.
-                if(code == HandshakeResponse.SLOTS_FULL) {
-                    throw NoGnutellaOkException.CLIENT_REJECT;
-                } else {
-                    throw NoGnutellaOkException.createClientUnknown(code);
-                }
-            }
-        }
-            
-        //If we didn't successfully return out of the method, throw an exception
-        //to indicate that handshaking didn't reach any conclusion.  The values
-        //here are kind of a hack.
-        throw NoGnutellaOkException.UNRESOLVED_SERVER;
-    }
-    
-    /** 
-     * Sends and receives handshake strings for incoming connections,
-     * throwing exception if any problems. 
-     * 
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException if there's an unexpected connect string or
-     *  any other problem
-     */
-    private void initializeIncoming() throws IOException {
-        //Dispatch based on first line read.  Remember that "GNUTELLA " has
-        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.6"
-        String connectString = readLine();
-        if (notLessThan06(connectString)) {
-            //1. Read headers (connect line has already been read)
-            readHeaders();
-            //Conclude the handshake (This may involve exchange of information
-            //multiple times with the host at the other end).
-            concludeIncomingHandshake();
-        } else {
-            throw new IOException("Unexpected connect string: "+connectString);
-        }
-    }
-
-    
-    /**
-     * Responds to the handshake from the host on the other
-     * end of the connection, till a conclusion reaches. Handshaking may
-     * involve multiple steps.
-     * 
-     * @exception NoGnutellaOkException one of the participants responded
-     *  with an error code other than 200 OK (possibly after several rounds
-     *  of 401's)
-     * @exception IOException any other error.  May wish to retry at 0.4
-     */
-    private void concludeIncomingHandshake() throws IOException {
-        //Respond to the handshake.  This step may involve handshaking multiple
-        //times so as to support challenge/response kind of behaviour
-        for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++){
-            //2. Send our response and headers.
-
-            // is this an incoming connection from the crawler??
-            boolean isCrawler = _headers.isCrawler();
-            
-            //Note: in the following code, it appears that we're ignoring
-            //the response code written by the initiator of the connection.
-            //However, you can prove that the last code was always 200 OK.
-            //See initializeIncoming and the code at the bottom of this
-            //loop.
-            HandshakeResponse ourResponse = 
-                RESPONSE_HEADERS.respond(_headers, false);
-
-            _headerWriter.writeHeader(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.props());                   
-            //Our response should be either OK or UNAUTHORIZED for the handshake
-            //to proceed.
-            int code = ourResponse.getStatusCode();
-            if((code != HandshakeResponse.OK) && 
-               (code != HandshakeResponse.UNAUTHORIZED_CODE)) {
-                if(code == HandshakeResponse.SLOTS_FULL) {
-                    throw NoGnutellaOkException.CLIENT_REJECT;
-                } else {
-                    throw NoGnutellaOkException.createClientUnknown(code);
-                }
-            }
-                    
-            //3. read the response from the other side.  If we asked the other
-            //side to authenticate, give more time so as to receive user input
-            String connectLine;
-            if(ourResponse.getStatusCode() 
-               == HandshakeResponse.UNAUTHORIZED_CODE){
-                connectLine = readLine(USER_INPUT_WAIT_TIME);  
-                readHeaders(USER_INPUT_WAIT_TIME); 
-                _headers = HandshakeResponse.createResponse(HEADERS_READ);
-            }else{
-                connectLine = readLine();  
-                readHeaders();
-            }
-            
-            if (! connectLine.startsWith(GNUTELLA_06))
-                throw new IOException("Bad connect string");
-
-            HandshakeResponse theirResponse = 
-                HandshakeResponse.createResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(),
-                    HEADERS_READ);
-
-
-            //Decide whether to proceed.
-            code = ourResponse.getStatusCode();
-            if(code == HandshakeResponse.OK) {
-                if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
-                    // if it's the crawler, we throw an exception to make sure we 
-                    // correctly disconnect
-                    if(isCrawler) {
-                        throw new IOException("crawler connection-disconnect");
-                    }
-                    //a) If we wrote 200 and they wrote 200 OK, stop normally.
-                    return;
-                }
-            } else {
-                Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
-                            "Response code: "+code);
-                if(theirResponse.getStatusCode()==HandshakeResponse.OK)
-                    //b) If we wrote 401 and they wrote "200...", keep looping.
-                    continue;
-            }
-            //c) Terminate abnormally
-            throw NoGnutellaOkException.
-                createServerUnknown(theirResponse.getStatusCode());
-        }        
-        
-        //If we didn't successfully return out of the method, throw an exception
-        //to indicate that handshaking didn't reach any conclusion.  The values
-        //here are kind of a hack.
-        throw NoGnutellaOkException.UNRESOLVED_CLIENT;
-    }
     
     /** 
      * Call this method when the Connection has been initialized and accepted
@@ -975,168 +760,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     public Deflater getDeflater() {
         return _deflater;
     }
-    
-    /** Returns true iff line ends with "CONNECT/N", where N
-     *  is a number greater than or equal "0.6". */
-    private static boolean notLessThan06(String line) {
-        int i=line.indexOf(CONNECT);
-        if (i<0)
-            return false;
-        try {
-            Float F = new Float(line.substring(i+CONNECT.length()));
-            float f= F.floatValue();
-            return f>=0.6f;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Writes the properties in props to network, including the blank line at
-     * the end.  Throws IOException if there are any problems.
-     * @param props The headers to be sent. Note: null argument is 
-     * acceptable, if no headers need to be sent (still the trailer will
-     * be sent
-     * @modifies network 
-     */
-    private void sendHeaders(Properties props) throws IOException {
-        if(props != null) {
-            Enumeration enum=props.propertyNames();
-            while (enum.hasMoreElements()) {
-                String key=(String)enum.nextElement();
-                String value=props.getProperty(key);
-                // Overwrite any domainname with true IP address
-                if ( HeaderNames.REMOTE_IP.equals(key) )
-                    value=getInetAddress().getHostAddress();
-                if (value==null)
-                    value="";
-                _headerWriter.writeHeader(key+": "+value+CRLF);   
-                HEADERS_WRITTEN.put(key, value);
-            }
-        }
-        //send the trailer
-        _headerWriter.closeHeaderWriting();
-        //writeLine(CRLF);
-    }
-
-
-    /**
-     * Reads the properties from the network into HEADERS_READ, throwing
-     * IOException if there are any problems. 
-     *     @modifies network 
-     */
-    private void readHeaders() throws IOException {
-        readHeaders(Constants.TIMEOUT);
-        _headers = HandshakeResponse.createResponse(HEADERS_READ);
-    }
-    
-    /**
-     * Reads the properties from the network into HEADERS_READ, throwing
-     * IOException if there are any problems. 
-     * @param timeout The time to wait on the socket to read data before 
-     * IOException is thrown
-     * @return The line of characters read
-     * @modifies network
-     * @exception IOException if the characters cannot be read within 
-     * the specified timeout
-     */
-    private void readHeaders(int timeout) throws IOException {
-        //TODO: limit number of headers read
-        while (true) {
-            //This doesn't distinguish between \r and \n.  That's fine.
-            String line=readLine(timeout);
-            if (line==null)
-                throw new IOException("unexpected end of file"); //unexpected EOF
-            if (line.equals(""))
-                return;                    //blank line ==> done
-            int i=line.indexOf(':');
-            if (i<0)
-                continue;                  //ignore lines without ':'
-            String key=line.substring(0, i);
-            String value=line.substring(i+1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key) && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
-                try {
-                    ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(value);
-                } catch (IllegalArgumentException ex) {
-                }
-            }
-            HEADERS_READ.put(key, value);
-        }
-    }
-
-    /**
-     * Writes s to out, with no trailing linefeeds.  Called only from
-     * initialize().  
-     *    @requires _socket, _out are properly set up */
-    /*
-    private void writeLine(String s) throws IOException {
-        if(s == null || s.equals("")) {
-            throw new NullPointerException("null or empty string: "+s);
-        }
-
-        //TODO: character encodings?
-        byte[] bytes=s.getBytes();
-        if(!CommonUtils.isJava118()) {
-            BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(
-                bytes.length);
-        }        
-        _out.write(bytes);
-        _out.flush();
-    }
-    */
-    
-    /**
-     * Reads and returns one line from the network.  A line is defined as a
-     * maximal sequence of characters without '\n', with '\r''s removed.  If the
-     * characters cannot be read within TIMEOUT milliseconds (as defined by the
-     * property manager), throws IOException.  This includes EOF.
-     * @return The line of characters read
-     * @requires _socket is properly set up
-     * @modifies network
-     * @exception IOException if the characters cannot be read within 
-     * the specified timeout
-     */
-    private String readLine() throws IOException {
-        return readLine(Constants.TIMEOUT);
-    }
-
-    /**
-     * Reads and returns one line from the network.  A line is defined as a
-     * maximal sequence of characters without '\n', with '\r''s removed.  If the
-     * characters cannot be read within the specified timeout milliseconds,
-     * throws IOException.  This includes EOF.
-     * @param timeout The time to wait on the socket to read data before 
-     * IOException is thrown
-     * @return The line of characters read
-     * @requires _socket is properly set up
-     * @modifies network
-     * @exception IOException if the characters cannot be read within 
-     * the specified timeout
-     */
-    private String readLine(int timeout) throws IOException {
-        int oldTimeout=_socket.getSoTimeout();
-        // _in.read can throw an NPE if we closed the connection,
-        // so we must catch NPE and throw the CONNECTION_CLOSED.
-        try {
-            _socket.setSoTimeout(timeout);
-            //if(!_socket.getChannel().isOpen()) {
-                
-            //}
-            String line=(new ByteReader(_in)).readLine();
-            if (line==null)
-                throw new IOException("read null line");
-            if(!CommonUtils.isJava118()) {
-                BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(
-                    line.length());
-            }
-            return line;
-        } catch(NullPointerException e) {
-            throw CONNECTION_CLOSED;
-        } finally {
-            //Restore socket timeout.
-            _socket.setSoTimeout(oldTimeout);
-        }
-    }
    
     
 
@@ -1219,18 +842,30 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         send(pushRequest);
     }  
 
-
+    //public boolean read() throws IOException {
+      //  if(_headerReader == null) {
+        //    return _messageReader.read();
+        //} 
+        //return _headerReader.read();
+    //}
+    
     public boolean write() throws IOException {
-        if(_headerWriter == null) {
+        if(HANDSHAKER.handshakeComplete()) {
             return _messageWriter.write();
         } 
-        return _headerWriter.write();
+        return HANDSHAKER.write();
+    }
+    
+    public void read() throws IOException, BadPacketException  {
+        if(HANDSHAKER.handshakeComplete()) {
+            _messageReader.read();
+        } 
+        HANDSHAKER.read();        
     }
 
     public void setWriteRegistered(boolean registered) {
-        if(_headerWriter != null) {
-            _headerWriter.setWriteRegistered(registered);
-        }
+        HANDSHAKER.setWriteRegistered(registered);
+
 
         _messageWriter.setWriteRegistered(registered);
     }
@@ -1441,15 +1076,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return NetworkUtils.isLocalAddress(_socket.getInetAddress());
     }
 
-    /**
-     * Returns the value of the given outgoing (written) connection property, or
-     * null if no such property.  For example, getProperty("X-Supernode") tells
-     * whether I am a supernode or a leaf node.  If I wrote a property multiple
-     * time during connection, returns the latest.
-     */
-    public String getPropertyWritten(String name) {
-        return HEADERS_WRITTEN.getProperty(name);
-    }
 
     /**
      * @return true until close() is called on this Connection
@@ -1698,8 +1324,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             return false;
 
         //...and am I a leaf node?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
+        String value = HANDSHAKER.getHeaderWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1729,8 +1354,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             return false;
 
         //...and am I a leaf node?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
+        String value = HANDSHAKER.getHeaderWritten(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1789,12 +1413,12 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             return false;
 
         //...and am I a supernode?
-        String value=getPropertyWritten(
-            HeaderNames.X_ULTRAPEER);
-        if (value==null)
+        String value = HANDSHAKER.getHeaderWritten(HeaderNames.X_ULTRAPEER);
+        if (value==null)  {
             return false;
-        else if (!Boolean.valueOf(value).booleanValue())
+        } else if (!Boolean.valueOf(value).booleanValue())  {
             return false;
+        }
 
         //...and do both support QRP?
         return isQueryRoutingEnabled();
@@ -1948,7 +1572,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
          if(this.isOutgoing())
              domainsAuthenticated = getDomainsAuthenticated();
          else
-             domainsAuthenticated = getPropertyWritten(
+             domainsAuthenticated = HANDSHAKER.getHeaderWritten(
                  HeaderNames.X_DOMAINS_AUTHENTICATED);
 
          //for unauthenticated connections
@@ -1991,58 +1615,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     public ConnectionStats stats() {
         return STATS;
     }
-    
-
-    /**
-     * Handles core Gnutella request/reply protocol.  This call
-     * will run until the connection is closed.  Note that this is called
-     * from the run methods of several different thread implementations
-     * that are inner classes of ConnectionManager.  This allows a single
-     * thread to be used for initialization and for the request/reply loop.
-     *
-     * @requires this is initialized
-     * @modifies the network underlying this, manager
-     * @effects receives request and sends appropriate replies.
-     *
-     * @throws IOException passed on from the receive call; failures to forward
-     *         or route messages are silently swallowed, allowing the message
-     *         loop to continue.
-     */
-    /*
-    public void loopForMessages() throws IOException {
-        if(CommonUtils.isJava14OrLater() && 
-           ConnectionSettings.USE_NIO.getValue()) {
-           // anything to do here??
-        } else {
-            MessageRouter router = RouterService.getMessageRouter();
-            while (true) {
-                Message m=null;
-                try {
-                    m = receive();
-                    if (m==null)
-                        continue;
-                } catch (BadPacketException e) {
-                    // Don't increment any message counters here.  It's as if
-                    // the packet never existed
-                    continue;
-                }
-    
-                // Run through the route spam filter and drop accordingly.
-                if (isSpam(m)) {
-                    if(!CommonUtils.isJava118()) {
-                        ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
-                            addMessage(m);
-                    }
-                    stats().countDroppedMessage();
-                    continue;
-                }
-    
-                //call MessageRouter to handle and process the message
-                router.handleMessage(m, this);            
-            }
-        }
-    }
-    */
 
 
     
@@ -2076,6 +1648,21 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /** FOR TESTING PURPOSES ONLY! */
     public boolean runnerDied() {
         return _runnerDied;
+    }
+
+    /**
+     * @return
+     */
+    public int getPort() {
+        return _port;
+    }
+
+    /**
+     * 
+     */
+    public Handshaker handshaker() {
+        return HANDSHAKER;
+        
     }
 
     // Technically, a Connection object can be equal in various ways...
