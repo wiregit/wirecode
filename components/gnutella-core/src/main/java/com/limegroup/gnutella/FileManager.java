@@ -43,6 +43,13 @@ public class FileManager {
     public int getSize() {return _size;}
     public int getNumFiles() {return _numFiles;}
 
+    public void reset() {
+	_size = 0;
+	_numFiles = 0;
+	_files = new ArrayList();
+	_extensions = null;
+    }
+
     public Response[] query(QueryRequest request) {
 	String str = request.getQuery();
 	ArrayList list = search(str);
