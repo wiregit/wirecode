@@ -147,10 +147,15 @@ public final class UploadManager implements BandwidthTracker {
             String oldFileName = "";
             HTTPRequestMethod currentMethod=method;
             StalledUploadWatchdog watchdog = new StalledUploadWatchdog();
+            InputStream iStream = null;
             //do uploads
             while(true) {
                 //parse the get line
-                HttpRequestLine line = parseHttpRequest(socket);
+                if(iStream == null) {
+                    iStream = //socket.getInputStream();
+                      new BufferedInputStream(socket.getInputStream());
+                }
+                HttpRequestLine line = parseHttpRequest(socket, iStream);
 
                 debug(" successfully parsed request");
                 
@@ -174,10 +179,14 @@ public final class UploadManager implements BandwidthTracker {
                 //completely solve the problem, but reduces it considerably.
                 removeFromList(uploader);
                 
-                uploader = new HTTPUploader(currentMethod, fileName, 
-									  socket, line._index,uploader,watchdog);
+                uploader = new HTTPUploader(currentMethod,
+                                            fileName, 
+									        socket,
+									        line._index,
+									        uploader,
+									        watchdog);
                 
-                uploader.readHeader();
+                uploader.readHeader(iStream);
                 
                 debug(uploader+" HTTPUploader created and read all headers");
                 boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
@@ -208,7 +217,8 @@ public final class UploadManager implements BandwidthTracker {
                                         getPersistentHTTPConnectionTimeout());
                 //dont read a word of size more than 4 
                 //as we will handle only the next "GET" request
-                String word = IOUtils.readWord(socket.getInputStream(), 4);
+                String word = IOUtils.readWord(
+                    iStream, 4);
                 debug(uploader+" next request arrived ");
                 socket.setSoTimeout(oldTimeout);
                 if (word.equals("GET"))
@@ -443,7 +453,8 @@ public final class UploadManager implements BandwidthTracker {
                     Socket s = GIVuploader.connect();
 
                     //read GET or HEAD and delegate appropriately.
-                    String word = IOUtils.readWord(s.getInputStream(), 4);
+                    String word = IOUtils.readWord(
+                        s.getInputStream(), 4);
                     if (word.equals("GET"))
                         acceptUpload(HTTPRequestMethod.GET, s, forceAllow);
                     else if (word.equals("HEAD"))
@@ -850,13 +861,14 @@ public final class UploadManager implements BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> instance over which we're reading
 	 * @return the <tt>HttpRequestLine</tt> struct for the HTTP request
 	 */
-	private HttpRequestLine parseHttpRequest(Socket socket)
+	private HttpRequestLine parseHttpRequest(Socket socket, 
+	                                         InputStream iStream)
       throws IOException {
 
 		// Set the timeout so that we don't do block reading.
         socket.setSoTimeout(Constants.TIMEOUT);
 		// open the stream from the socket for reading
-		ByteReader br = new ByteReader(socket.getInputStream());
+		ByteReader br = new ByteReader(iStream);
 		
         // read the first line. if null, throw an exception
         String str = br.readLine();

@@ -84,6 +84,11 @@ public final class HTTPUploader implements Uploader {
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
 	 */
 	private HTTPRequestMethod _method;
+	
+	/**
+	 * Whether or not to record stats.
+	 */
+	private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 	/**
 	 * Consructor for a "normal" non-push upload.  Note that this can
@@ -241,7 +246,7 @@ public final class HTTPUploader implements Uploader {
 			// try to create the socket.
 			_socket = new Socket(_hostName, _port);
 			// open a stream for writing to the socket
-			_ostream = _socket.getOutputStream();
+			_ostream = _socket.getOutputStream();		
 			// ask chris about Assert
 			Assert.that(_fileName != null);  
 			// write out the giv
@@ -405,9 +410,8 @@ public final class HTTPUploader implements Uploader {
 	 */
 	void setAmountUploaded(int amount) {
 		int newData = amount - _amountRead;
-		if(newData > 0) {
-			if(!CommonUtils.isJava118()) 
-				BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
+		if(RECORD_STATS && newData > 0) {
+            BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
 		}
 		_amountRead = amount;
 	}
@@ -431,8 +435,8 @@ public final class HTTPUploader implements Uploader {
         default:
             return false;
         }
-	}
-
+	}	 
+	 
     /** The byte offset where we should start the upload. */
 	int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
@@ -520,15 +524,16 @@ public final class HTTPUploader implements Uploader {
      * Reads the HTTP header sent by the requesting client -- note that the
 	 * 'GET' portion of the request header has already been read.
 	 *
+	 * @param iStream the input stream to read the headers from.
 	 * @throws <tt>IOException</tt> if there are any io issues while reading
 	 *  the header
 	 */
-	public void readHeader() throws IOException {
+	public void readHeader(InputStream iStream) throws IOException {
         _uploadBegin = 0;
         _uploadEnd = 0;
 		_clientAcceptsXGnutellaQueryreplies = false;
         
-		ByteReader br = new ByteReader(_socket.getInputStream());
+		ByteReader br = new ByteReader(iStream);
         
         try {
         	while (true) {
@@ -538,7 +543,7 @@ public final class HTTPUploader implements Uploader {
                 if ( (str==null) || (str.equals("")) ) 
                     break;
 
-                if(!CommonUtils.isJava118()) 
+                if(RECORD_STATS) 
 					BandwidthStat.
                         HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 debug("HTTPUploader.readHeader(): str = " +  str);

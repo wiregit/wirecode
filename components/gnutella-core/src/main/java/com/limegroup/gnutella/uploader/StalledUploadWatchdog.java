@@ -74,7 +74,9 @@ public final class StalledUploadWatchdog implements Runnable {
     public synchronized void run() {
         isScheduled = false;
         // we deactivated, don't do anything.
-        if(nextCheckTime == -1) return;
+        if(nextCheckTime == -1) {
+            return;
+        }
         
         long now = System.currentTimeMillis();
         // if this was called before we should be checking,
@@ -91,6 +93,7 @@ public final class StalledUploadWatchdog implements Runnable {
                 //this can be ignored because we're going to close
                 //the connection anyway.
             }
+            ostream = null;
         }
     }
 }

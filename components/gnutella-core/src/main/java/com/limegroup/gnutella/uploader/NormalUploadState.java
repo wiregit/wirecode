@@ -136,9 +136,11 @@ public final class NormalUploadState implements HTTPMessage {
 			ostream.write("\r\n");
 			
 			_stalledChecker.activate(network);			
-			network.write(ostream.toString().getBytes());			
-			if( _stalledChecker.deactivate() )
-			    throw new IOException("stalled uploader");
+			network.write(ostream.toString().getBytes());
+			// we do not need to check the return value because
+			// if it was stalled, an IOException would have been thrown
+			// causing us to fall out to the catch clause
+			_stalledChecker.deactivate();
 			
 			_uploader.setState(_uploader.COMPLETE);
 		} catch(IOException e) {
@@ -169,11 +171,16 @@ public final class NormalUploadState implements HTTPMessage {
      * @exception IOException If there is any I/O problem while uploading file
      */
     private void upload(OutputStream ostream) throws IOException {
+        // construct the buffer outside of the loop, so we don't
+        // have to reconstruct new byte arrays every BLOCK_SIZE.
+        byte[] buf = new byte[BLOCK_SIZE];
         while (true) {
             THROTTLE.setRate(getUploadSpeed());
 
             int c = -1;
-            byte[] buf = new byte[THROTTLE.request(BLOCK_SIZE)];
+            // request the bytes from the throttle
+            // BLOCKING (only if we need to throttle)
+            THROTTLE.request(BLOCK_SIZE);
             int burstSent=0;            
             c = _fis.read(buf);
             if (c == -1)
@@ -184,9 +191,10 @@ public final class NormalUploadState implements HTTPMessage {
             try {
                 _stalledChecker.activate(ostream);
                 ostream.write(buf, 0, c);
-                // if it closed the stream
-                if( _stalledChecker.deactivate() )
-                    throw new IOException("stalled uploader");
+    			// we do not need to check the return value because
+    			// if it was stalled, an IOException would have been thrown
+    			// causing us to fall out to the catch clause
+    			_stalledChecker.deactivate();
             } catch (java.net.SocketException e) {
                 throw new IOException("socketexception");
             }

@@ -98,29 +98,22 @@ public class ByteReader {
 
 		StringBuffer sBuffer = new StringBuffer();
         int c = -1; //the character just read
-
-		while (true) {
-			c = _istream.read();
-
-			// if we reached an EOF ...
-			if (c == -1)
-				return null;
-
-			// if this was a \r character, ignore it.
-			if ( c == R ) {
-				continue;
+        boolean keepReading = true;
+        
+		do {
+			c = _istream.read();			
+			switch(c) {
+			    // if this was a \n character, break out of the reading loop
+			    case  N: keepReading = false;
+			             break;
+			    // if this was a \r character, ignore it.
+			    case  R: continue;
+			    // if we reached an EOF ...
+			    case -1: return null;			             
+                // if it was any other character, append it to the buffer.
+			    default: sBuffer.append((char)c);
 			}
-
-			// if this was a \n character, break out of the reading loop
-			else if ( c == N ) {
-				break;
-			}
-
-            // if it was any other character, append it to the buffer.
-			else {
-			    sBuffer.append((char)c);
-			}
-		}
+        } while(keepReading);
 
 		// return the string we have read.
 		return sBuffer.toString();
