@@ -26,16 +26,22 @@ public class MetaFileManager extends FileManager {
         super();
     }
 
-    public synchronized Response[] query(QueryRequest request) {        
-        String rich = request.getRichQuery();
-        Response[] normals=super.query(request);//normal text query.
-        addAudioMetadata(normals);
-        RichQueryHandler richHandler = RichQueryHandler.instance();
-        Response[] metas=richHandler.query(rich,this);
-        if (metas == null)// the rich query is malformed OR non-existent
-            return normals;
-        Response[] result = union(normals,metas);
-        return result;
+    public synchronized Response[] query(QueryRequest request) {
+        // only return XML if the source wants it OR it is a LW....
+        if (request.desiresXMLResponses() || 
+            GUID.isLimeGUID(request.getGUID())) {
+            String rich = request.getRichQuery();
+            Response[] normals=super.query(request);//normal text query.
+            addAudioMetadata(normals);
+            RichQueryHandler richHandler = RichQueryHandler.instance();
+            Response[] metas=richHandler.query(rich,this);
+            if (metas == null)// the rich query is malformed OR non-existent
+                return normals;
+            Response[] result = union(normals,metas);
+            return result;
+        }
+        else
+            return super.query(request);
     }
 
     /**
