@@ -1075,6 +1075,15 @@ public class ManagedConnection
     // End statistics accessors
     //
 
+    /** Returns the vendor string reported by this connection, i.e., 
+     *  the USER_AGENT property, or null if it wasn't set.
+     *  @return the vendor string, or null if unknown */
+    public String getUserAgent() {
+        return getProperty(
+            com.limegroup.gnutella.handshaking.
+                ConnectionHandshakeHeaders.USER_AGENT);
+    }
+
     /** Returns true if this is as a special "router" connection, e.g. to
      *  router.limewire.com.  */
     public boolean isRouterConnection() {
