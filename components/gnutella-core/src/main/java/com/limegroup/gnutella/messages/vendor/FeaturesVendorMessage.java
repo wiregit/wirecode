@@ -60,6 +60,12 @@ public class FeaturesVendorMessage extends VendorMessage {
 			_properties.put(name,value);
 		}
 		
+		parseFields();
+	}
+	
+	private final void parseFields() throws BadPacketException{
+		if (_properties==null)
+			return;
 		try {
 			_filesShared=Integer.parseInt(_properties.getProperty(FILES_SHARED));
 			_bandwith = Integer.parseInt(_properties.getProperty(BANDWIDTH));
@@ -76,6 +82,9 @@ public class FeaturesVendorMessage extends VendorMessage {
 	 */
 	public FeaturesVendorMessage() {
 		super(F_LIME_VENDOR_ID, F_FEATURES, VERSION, derivePayload(getProperties()));
+		try{
+			parseFields();
+		}catch(BadPacketException ignored) {} //we don't care when sending out.
 	}
 	
 	/**
@@ -84,6 +93,10 @@ public class FeaturesVendorMessage extends VendorMessage {
 	 */
 	public FeaturesVendorMessage(Properties props) {
 		super(F_LIME_VENDOR_ID, F_FEATURES, VERSION, derivePayload(props));
+		_properties = props;
+		try{
+			parseFields();
+		}catch(BadPacketException ignored) {ignored.printStackTrace();} //this is only for testing.
 	}
 	
 	private static byte[] derivePayload(Properties props) {

@@ -56,7 +56,7 @@ public class CandidateAdvertiser implements Runnable {
 		for (Iterator iter = RouterService.getConnectionManager().getInitializedConnections().iterator();iter.hasNext();) {
 			ManagedConnection current = (ManagedConnection)iter.next();
 			if (current.isGoodUltrapeer() &&
-					current.remoteHostSupportsBestCandidates() >= 1);
+					current.remoteHostSupportsBestCandidates() >= 1);	
 				current.send(vm);
 		}
 	}
@@ -99,6 +99,9 @@ public class CandidateAdvertiser implements Runnable {
 					
 				}
 		}
+		//couldn't elect anybody.
+		if (best==null)
+			return null;
 		
 		//return the selected candidate
 		Candidate ret = null;
