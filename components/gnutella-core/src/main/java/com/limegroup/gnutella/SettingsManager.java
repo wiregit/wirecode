@@ -165,6 +165,7 @@ public class SettingsManager {
 		= "com.limegroup.gnutella.gui.Main";
 
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
+    private final boolean DEFAULT_PLAYER_ENABLED      = true;
 	private final String DEFAULT_LANGUAGE             = "en";
 	private final String DEFAULT_COUNTRY              = "US";
 
@@ -294,6 +295,11 @@ public class SettingsManager {
 	private final String CHAT_ENABLED = "CHAT_ENABLED";
 
 	/**
+	 * Constant key for whether or not the internal player is enabled.
+	 */
+	private final String PLAYER_ENABLED = "PLAYER_ENABLED";
+
+	/**
 	 * Constant key for the language we're currently using.
 	 */
 	private final String LANGUAGE = "LANGUAGE";
@@ -393,6 +399,7 @@ public class SettingsManager {
     private volatile int      _uploadsPerPerson;
 
 	private volatile boolean  _chatEnabled;          
+	private volatile boolean  _playerEnabled;          
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -597,6 +604,16 @@ public class SettingsManager {
                     else
                         break;
                     setChatEnabled(bs);
+				}
+				else if(key.equals(PLAYER_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setPlayerEnabled(bs);
 				}
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
@@ -943,6 +960,7 @@ public class SettingsManager {
 		setAppHeight(DEFAULT_APP_HEIGHT);
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
+		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
 
 		setLanguage(DEFAULT_LANGUAGE);
 		setCountry(DEFAULT_COUNTRY);
@@ -1049,6 +1067,9 @@ public class SettingsManager {
 
 	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
+
+	/** Returns true if the player is enabled */
+	public boolean getPlayerEnabled() {return _playerEnabled;}
 
     /** 
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
@@ -2226,6 +2247,19 @@ public class SettingsManager {
 		String s = String.valueOf(chatEnabled);
 		PROPS.put(CHAT_ENABLED, s);
 	}
+
+
+	/**
+	 * Sets whether or not player should be enabled.
+	 *
+	 * @param playerEnabled specified whether or not player is enabled
+	 */
+	public void setPlayerEnabled(boolean playerEnabled) {
+		_playerEnabled = playerEnabled;
+		String s = String.valueOf(playerEnabled);
+		PROPS.put(PLAYER_ENABLED, s);
+	}
+
 
     public void setMaxSimDownload(int max) {
 		_maxSimDownload = max;
