@@ -46,7 +46,7 @@ public final class SearchResultHandler {
 	 */
     private long lastTime;
 
-	private final Map GUID_MAP = new HashMap();
+	//private final Map GUID_MAP = new HashMap();
 
     /**
 	 * Creates a new <tt>SearchResultPipeliner</tt> instance.
@@ -78,36 +78,36 @@ public final class SearchResultHandler {
         }
     }
 
-	public void addGuid(GUID key) {
-		synchronized(GUID_MAP) {
-			if(GUID_MAP.containsKey(key)) return;
-			GUID_MAP.put(key, new Integer(0));
-		}
-	}
+// 	public void addGuid(GUID key) {
+// 		synchronized(GUID_MAP) {
+// 			if(GUID_MAP.containsKey(key)) return;
+// 			GUID_MAP.put(key, new Integer(0));
+// 		}
+// 	}
 
-	public void removeGuid(GUID key) {
-		synchronized(GUID_MAP) {
-			GUID_MAP.remove(key);
-		}
-	}
+// 	public void removeGuid(GUID key) {
+// 		synchronized(GUID_MAP) {
+// 			GUID_MAP.remove(key);
+// 		}
+// 	}
 
-	public int getNumResults(GUID key) {
-		synchronized(GUID_MAP) {
-			Integer results = (Integer)GUID_MAP.get(key);
-			return results.intValue();
-		}
-	}
+// 	public int getNumResults(GUID key) {
+// 		synchronized(GUID_MAP) {
+// 			Integer results = (Integer)GUID_MAP.get(key);
+// 			return results.intValue();
+// 		}
+// 	}
 
-	private void addResult(GUID key) {
-		synchronized(GUID_MAP) {
-			if(!GUID_MAP.containsKey(key))
-				throw new IllegalArgumentException("GUID not in map: "+key);
-			Integer results = (Integer)GUID_MAP.get(key);
-			int newResults = results.intValue();
-			newResults++;
-			GUID_MAP.put(key, new Integer(newResults));
-		}
-	}
+// 	private void addResult(GUID key) {
+// 		synchronized(GUID_MAP) {
+// 			if(!GUID_MAP.containsKey(key))
+// 				throw new IllegalArgumentException("GUID not in map: "+key);
+// 			Integer results = (Integer)GUID_MAP.get(key);
+// 			int newResults = results.intValue();
+// 			newResults++;
+// 			GUID_MAP.put(key, new Integer(newResults));
+// 		}
+// 	}
 
 	/**
 	 * Private class for processing replies as they come in -- does some
@@ -253,7 +253,7 @@ public final class SearchResultHandler {
             }
 						
 			RouterService.getCallback().handleQueryResult(data, response, docs);
-			addResult(new GUID(replyGUID));
+
         } //end of response loop
         return true;
     }
