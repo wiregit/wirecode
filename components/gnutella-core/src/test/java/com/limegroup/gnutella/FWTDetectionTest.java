@@ -207,6 +207,55 @@ public class FWTDetectionTest extends BaseTestCase {
     }
     
     /**
+     * tests the scenario where we have a forced port different from our 
+     * external port
+     */
+    public void testForcedPort() throws Exception {
+        int localPort = RouterService.getAcceptor().getPort(false);
+        ConnectionSettings.FORCED_PORT.setValue(1000);
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(InetAddress.getLocalHost().getHostAddress());
+        assertEquals(1000,RouterService.getPort());
+        assertNotEquals(1000,localPort);
+        cmStub.setConnected(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        UDPService.instance().setReceiveSolicited(true);
+        assertEquals(RouterService.getPort(),UDPService.instance().getStableUDPPort());
+        
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
+        
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
+        
+        //we should receive a udp ping requesting ip
+        assertTrue(ponger1.listen().requestsIP());
+        
+        //send one pong which carries our local ip address
+        ponger1.reply(new Endpoint(RouterService.getExternalAddress(),localPort));
+        
+        Thread.sleep(1000);
+        
+        // now we should be able to do FWT, and our port should be our local port
+        cmStub.setConnected(true);
+        assertTrue(UDPService.instance().canDoFWT());
+        assertEquals(localPort,UDPService.instance().getStableUDPPort());
+        
+        
+        // reset the value of num received pongs and send another pong, 
+        // carrying our forced address
+        PrivilegedAccessor.setValue(UDPService.instance(),"_numReceivedIPPongs",
+                new Integer(0));
+        ponger1.reply(new Endpoint(RouterService.getExternalAddress(),1000));
+        
+        assertTrue(UDPService.instance().canDoFWT());
+        assertEquals(1000,UDPService.instance().getStableUDPPort());
+        
+        //clean up
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
+    }
+    
+    /**
      * tests scenarios where we can and can't do solicited
      */
     public void testSolicited() throws Exception{

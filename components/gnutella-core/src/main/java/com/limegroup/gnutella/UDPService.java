@@ -687,6 +687,8 @@ public class UDPService implements Runnable {
 	        if (LOG.isTraceEnabled()) {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
+	                    " our external port "+RouterService.getPort()+
+	                    " our non-forced port "+RouterService.getAcceptor().getPort(false)+
 	                    " number of received IP pongs "+_numReceivedIPPongs+
 	                    " valid external addr "+NetworkUtils.isValidAddress(
 	                            RouterService.getExternalAddress()));
@@ -723,16 +725,29 @@ public class UDPService implements Runnable {
 	
 	/**
 	 * @return the stable UDP port as seen from the outside.
-	 * If we haven't received at least 2 IPpongs, we use the router service port.
+	 *   If we have received more than one IPPongs and they report
+	 * the same port, we return that.
+	 *   If we have received just one IPpong, and if its address 
+	 * matches either our local port or external port, return that.
+	 *   If we have not received any IPpongs, return whatever 
+	 * RouterService thinks our port is.
 	 */
 	public int getStableUDPPort() {
-	    
+
+	    int localPort = RouterService.getAcceptor().getPort(false);
+	    int forcedPort = RouterService.getPort();
+
 	    synchronized(this) {
 	        if (_portStable && _numReceivedIPPongs > 1)
 	            return _lastReportedPort;
+
+		if (_numReceivedIPPongs == 1 &&
+			(localPort == _lastReportedPort || 
+				forcedPort == _lastReportedPort))
+		    return _lastReportedPort;
 	    }
-	    
-	    return RouterService.getPort();
+
+	    return forcedPort; // we haven't received an ippong.
 	}
 
 	/**
