@@ -139,6 +139,8 @@ public class QueryRequest extends Message implements Serializable{
 	 *
 	 * @param sha1 the <tt>URN</tt> of the file to search for
 	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
+	 *  is <tt>null</tt>
 	 */
 	public static QueryRequest createRequery(URN sha1) {
         if(sha1 == null) {
@@ -158,8 +160,18 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param sha1 the <tt>URN</tt> of the file to search for
 	 * @param ttl the time to live (ttl) of the query
 	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 * @throws <tt>NullPointerException</tt> if the <tt>sha1</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the ttl value is
+	 *  negative or greater than the maximum allowed value
 	 */
 	public static QueryRequest createRequery(URN sha1, byte ttl) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
+        } 
+		if(ttl <= 0 || ttl > 7) {
+			throw new IllegalArgumentException("invalid TTL: "+ttl);
+		}
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
 		return new QueryRequest(newQueryGUID(true), ttl, 0, "\\", "", 
@@ -173,11 +185,18 @@ public class QueryRequest extends Message implements Serializable{
 	 *
 	 * @param query the query string
 	 * @return a new <tt>QueryRequest</tt> for the specified query
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
 	public static QueryRequest createRequery(String query) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
+		if(query.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
 		return new QueryRequest(newQueryGUID(true), (byte)6, 0, query, "",
 								true, UrnType.ANY_TYPE_SET, EMPTY_SET,
 								!RouterService.acceptedIncomingConnection());
@@ -189,13 +208,47 @@ public class QueryRequest extends Message implements Serializable{
 	 *
 	 * @param query the file name to search for
 	 * @return a new <tt>QueryRequest</tt> for the specified query
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
 	 */
 	public static QueryRequest createQuery(String query) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
+		if(query.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
 		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, "", 
                                 false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
+								!RouterService.acceptedIncomingConnection());
+	}
+
+	/**
+	 * Creates a new query for the specified file name, with no XML.
+	 *
+	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt> or if the <tt>xmlQuery</tt> argument is 
+	 *  <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 */
+	public static QueryRequest createQuery(String query, String xmlQuery) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+		if(xmlQuery == null) {
+			throw new NullPointerException("null xml query");
+		}
+		if(query.length() == 0 && xmlQuery.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
+		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, 
+								xmlQuery, false, UrnType.ANY_TYPE_SET, 
+								EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection());
 	}
 
@@ -206,8 +259,23 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param query the file name to search for
 	 * @param ttl the time to live (ttl) of the query
 	 * @return a new <tt>QueryRequest</tt> for the specified query and ttl
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
+	 * @throws <tt>IllegalArgumentException</tt> if the ttl value is
+	 *  negative or greater than the maximum allowed value
 	 */
 	public static QueryRequest createQuery(String query, byte ttl) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+		if(query.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
+		if(ttl <= 0 || ttl > 7) {
+			throw new IllegalArgumentException("invalid TTL: "+ttl);
+		}
 		return new QueryRequest(newQueryGUID(false), ttl, 0, query, "",
 								false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection());
@@ -222,15 +290,29 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param xmlQuery the xml query string
 	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
 	 *  query, and guid
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
+	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
+	 *  not 16 or if both the query strings are empty
 	 */
 	public static QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
+		if(guid == null) {
+			throw new NullPointerException("null guid");
+		}
+		if(guid.length != 16) {
+			throw new IllegalArgumentException("invalid guid length");
+		}
         if(query == null) {
             throw new NullPointerException("null query");
         }
         if(xmlQuery == null) {
             throw new NullPointerException("null xml query");
         }
+		if(query.length() == 0 && xmlQuery.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
 		return new QueryRequest(guid, (byte)6, 0, query, xmlQuery, false,
 								UrnType.ANY_TYPE_SET, EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection()); 
@@ -242,12 +324,21 @@ public class QueryRequest extends Message implements Serializable{
      *
      * @param query the query string
      * @param key the query key
+	 * @return a new <tt>QueryRequest</tt> instance with the specified 
+	 *  query string and query key
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt> or if the <tt>key</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
+	 *  argument is zero-length (empty)
      */
     public static QueryRequest 
         createQueryKeyQuery(String query, QueryKey key) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
+		if(query.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
         if(key == null) {
             throw new NullPointerException("null query key");
         }
