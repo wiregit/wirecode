@@ -4,7 +4,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
-
+import com.limegroup.gnutella.SettingsManager;
 
 
 /**
@@ -314,6 +314,19 @@ public final class Launcher {
 	 *                      throws an InterruptedException
 	 */
 	private static void launchFileUnix(String path) throws IOException {
+        String browser = SettingsManager.instance().getBrowser();
+        if ( browser  == "netscape" ) {
+            launchFileUnixWithNetscape(path);
+        } else {
+            String[] strs = {browser,
+                             path};
+            Process process = Runtime.getRuntime().exec(strs);
+        }
+    }
+
+
+	private static void launchFileUnixWithNetscape(String path) 
+        throws IOException {
 		// First, attempt to open the file in a 
 		// currently running session of Netscape
 		// NOT SURE THIS WILL WORK FOR NON-HTML FILES!!
