@@ -1300,7 +1300,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         String fileName = getFileName();
         try {
             // if we're downloading a theme file, save in the theme dir.
-            if( fileName.toLowerCase().endsWith(".lwtp") )
+            if( fileName.toLowerCase().endsWith("." + ThemeSettings.EXTENSION))
                 saveDir = ThemeSettings.THEME_DIR_FILE;
             else 
                 saveDir=SettingsManager.instance().getSaveDirectory();
