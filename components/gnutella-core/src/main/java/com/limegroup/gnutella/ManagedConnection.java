@@ -295,15 +295,15 @@ public class ManagedConnection
               isRouter ? 
                   null :
                   (manager.isSupernode() ? 
-                      (Properties)(new SupernodeProperties(router, host)) : 
-                      (Properties)(new ClientProperties(router, host))),
+                      (Properties)(new SupernodeProperties(host)) : 
+                      (Properties)(new ClientProperties(host))),
               isRouter ? 
                   null : 
                   (manager.isSupernode() ?
                       (HandshakeResponder)
-                      (new SupernodeHandshakeResponder(manager, router, host)) :
+                      (new SupernodeHandshakeResponder(manager, host)) :
                       (HandshakeResponder)
-                      (new ClientHandshakeResponder(manager, router, host))),
+                      (new ClientHandshakeResponder(manager, host))),
               !isRouter);
         
         _router = router;
@@ -325,9 +325,9 @@ public class ManagedConnection
         super(socket, 
             manager.isSupernode() ? 
             (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
-                router, socket.getInetAddress().getHostAddress())) : 
+                socket.getInetAddress().getHostAddress())) : 
             (HandshakeResponder)(new ClientHandshakeResponder(manager,
-                router, socket.getInetAddress().getHostAddress())));
+                socket.getInetAddress().getHostAddress())));
         _router = router;
         _manager = manager;
     }
