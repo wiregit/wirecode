@@ -16,28 +16,31 @@ public class QueryKeyTest extends TestCase {
 
     public void testConstruction() {
         try {
-            QueryKey.getQueryKey(new byte[3]);
+            QueryKey.getQueryKey(new byte[3], false);
             assertTrue(false);
         }
         catch (IllegalArgumentException ignored) {}
         try {
-            QueryKey.getQueryKey(new byte[17]);
+            QueryKey.getQueryKey(new byte[17], false);
             assertTrue(false);
         }
         catch (IllegalArgumentException ignored) {}
         
         byte[] qk = new byte[8];
         (new Random()).nextBytes(qk);
-        QueryKey key1 = null, key2 = null;
+        QueryKey key1 = null, key2 = null, key3 = null;
         try {
-            key1 = QueryKey.getQueryKey(qk);
-            key2 = QueryKey.getQueryKey(qk);
+            key1 = QueryKey.getQueryKey(qk, true);
+            key2 = QueryKey.getQueryKey(qk, true);
+            key3 = QueryKey.getQueryKey(qk, false);
         }
         catch (IllegalArgumentException ignored) {
             assertTrue(false);
         }
         assertTrue(key1.equals(key2));
+        assertTrue(!key1.equals(key3));
         assertTrue(key1.hashCode() == key2.hashCode());
+        assertTrue(key1.hashCode() != key3.hashCode());
     }
 
     public void testSimpleGeneration() {

@@ -105,7 +105,7 @@ public class GUESSServerSideTest extends TestCase {
         QueryRequest crapQuery = 
             new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
                              false, null, null, 
-                             QueryKey.getQueryKey(fakeQueryKey));
+                             QueryKey.getQueryKey(fakeQueryKey, true));
         send(crapQuery, address, port);
         try {
             receive();

@@ -323,7 +323,7 @@ public class PingReplyTest extends TestCase {
         GUID guid = new GUID(GUID.makeGuid());
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
         try {
-            qk = QueryKey.getQueryKey(randBytes);
+            qk = QueryKey.getQueryKey(randBytes, true);
         }
         catch (Exception crap) {
             assertTrue(false);

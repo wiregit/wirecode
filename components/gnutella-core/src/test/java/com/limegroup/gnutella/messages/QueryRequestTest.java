@@ -141,7 +141,7 @@ public final class QueryRequestTest extends TestCase {
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
                 (new Random()).nextBytes(bytes);
-                QueryKey qk = QueryKey.getQueryKey(bytes);
+                QueryKey qk = QueryKey.getQueryKey(bytes, true);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(false); // do COBS
@@ -178,7 +178,8 @@ public final class QueryRequestTest extends TestCase {
 							 "set 2: "+print(queryUrnTypes), 
 							 curUrnTypeSet,
 							 queryUrnTypes);
-                assertTrue("query keys should be equal",
+                assertTrue("query keys should be equal\nqk = " + qk + 
+                           "\nqr = " + qr.getQueryKey(),
                            qk.equals(qr.getQueryKey()));
 			}		   
 		} catch(IOException e) {
@@ -312,7 +313,7 @@ public final class QueryRequestTest extends TestCase {
 		queryUrns.add(HugeTestUtils.URNS[4]);
 
 		byte[] guid = QueryRequest.newQueryGUID(isRequery);
-        QueryKey qk = QueryKey.getQueryKey(guid);
+        QueryKey qk = QueryKey.getQueryKey(guid, true);
 		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
                                            richQuery, isRequery, 
                                            requestedUrnTypes, queryUrns, qk);
