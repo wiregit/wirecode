@@ -523,7 +523,6 @@ public final class RouterService {
      */
     public static void setListeningPort(int port) throws IOException {
         acceptor.setListeningPort(port);
-		udpService.resetPort();
     }
 
     /**

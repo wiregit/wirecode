@@ -242,15 +242,6 @@ public final class UDPService implements Runnable {
 	}
 
 	/**
-	 * Notifies the UDP socket that the port has been changed, requiring
-	 * the UDP socket to be recreated.
-	 */
-	public synchronized void resetPort() {
-		if(_udpThread.isAlive()) _udpThread.interrupt();
-	}
-
-
-	/**
 	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
      * This method should not be called if the client is not GUESS enabled.
      *
