@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.gui.*;
 
 import java.util.*;
-import java.net.*;
+import java.net.*; 
 import java.io.*;
+import java.text.NumberFormat;
 
 /**
  * A class used to gather statistics for an alpha test and send the statistics
@@ -22,7 +22,7 @@ public class StatisticsRecorder
      */
     private static final long WAIT_TIME = 30 * 60 * 1000; //30 minutes
     private static final String SERVLET_URL = 
-        "http://content.limewire.com:8081/update/servlet/AlphaTestStatsHandler";
+        "http://sparky.limewire.com:8081/update/servlet/AlphaTestStatsHandler";
     /**
      * The next time to send the statistics to the server.  Initialize to 
      * current time + WAIT_TIME so that the first time the statistics are sent
@@ -45,6 +45,14 @@ public class StatisticsRecorder
      */
     private static HashMap statistics = new HashMap();
     private static Object statisticsLock = new Object();
+
+    /**
+     * Used for formatting of decimal numbers in display strings.
+     */
+    private static NumberFormat nf = NumberFormat.getInstance();
+    static {
+        nf.setMaximumFractionDigits(2);
+    }
 
     /**
      * Adds the value to the statistic (specified by name).  If the statistic
@@ -144,7 +152,7 @@ public class StatisticsRecorder
     /**
      * Thread which sends the statistics recorded to the server.  Basically, 
      * creates a URL connection to a web server (via servlet) and then sends 
-     * the statistical data with the clientID last (to be printed first).
+     * the statistical data with the clientID last (to be printed first).  
      */
     private static class StatisticsSenderThread extends Thread
     {
@@ -195,8 +203,10 @@ public class StatisticsRecorder
                     {
                         PercentageStatisticValue percentValue = 
                             (PercentageStatisticValue)value;
-                        statValue = new String(percentValue.calculatePercent() + 
-                                               " " + value.getMetric());
+                        String percent = nf.format(
+                            percentValue.calculatePercent());
+                        statValue = new String(percent + " " +
+                            value.getMetric());
                     }
                     else if (value.isAverageStatistic())
                         statValue = new String(value.calculateAverage() + " " + 
@@ -207,6 +217,9 @@ public class StatisticsRecorder
                     sendBuffer.append(statName + "=" + 
                         URLEncoder.encode(statValue) + "\n");
                 }
+
+                //now, clear the hash map so the statistics are reset.
+                statistics.clear();
             }
 
             return sendBuffer.toString();
@@ -220,12 +233,12 @@ public class StatisticsRecorder
  */
 class StatisticValue
 {
-    private int sum;
+    protected int sum;
     /**
      * If the statistic is one that measures the mean or average value,
      * then we'll need to use the count and average needed to calculate it.
      */
-    protected int count;
+    private int count;
     private boolean averageNeeded;
     /**
      * Metric used (e.g., "KB", "bytes/sec", etc. )
@@ -320,7 +333,7 @@ class PercentageStatisticValue extends StatisticValue
     }
 
     /**
-     * getTotal doesn't make any sense for a percentage statistics
+     * getTotal doesn't make any sense for a percentage statistic
      */
     int getTotal() 
     {
@@ -328,16 +341,16 @@ class PercentageStatisticValue extends StatisticValue
     }
 
     /**
-     * Calculate the percentage statistic.  If total count is 0, then 
+     * Calculate the percentage statistic.  If total sum is 0, then 
      * return 0, avoiding the divide by zero error.
      */
     double calculatePercent()
     {
         //check for possible divide by zero error
-        if (count == 0) 
+        if (sum == 0) 
             return 0;
         
-        double percent = (double)percentCount / (double)count;
+        double percent = (double)percentCount / (double)sum;
         return percent * 100;
     }
 }
