@@ -31,11 +31,14 @@ public class HTTPUploader implements Runnable {
     
     FileInputStream _fis;
 
+    private boolean _okay;
 
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
 
 	// System.out.println("In the first upload constructor");
+
+	_okay = false;
 
 	file = file.trim();
 
@@ -93,11 +96,15 @@ public class HTTPUploader implements Runnable {
 	    uploadError("unable to open file");
 	}
 
+	_okay = true;
+
     }
 	
     
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
+
+	_okay = false;
 
 	_host = host;
 	_filename = file;
@@ -167,6 +174,8 @@ public class HTTPUploader implements Runnable {
 	    // e.printStackTrace();
 	    return;
 	}
+
+	_okay = true;
 			
     }
 
@@ -241,10 +250,11 @@ public class HTTPUploader implements Runnable {
     public void run() {
 
 	//	System.out.println("In the upload run");
-	
-	_callback.addUpload(this);
-	doUpload();
-	_callback.removeUpload(this);
+	if (_okay) {
+	    _callback.addUpload(this);
+	    doUpload();
+	    _callback.removeUpload(this);
+	}
     }
 
     public void doUpload() {
