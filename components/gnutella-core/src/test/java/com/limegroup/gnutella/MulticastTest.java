@@ -208,7 +208,7 @@ public class MulticastTest extends BaseTestCase {
         reroutePush(qr.getClientGUID());
                 
         // okay, now we have a QueryReply to convert to an RFD.
-        RemoteFileDesc[] rfdArray = qr.toRemoteFileDescArray(true);
+        RemoteFileDesc[] rfdArray = qr.toRemoteFileDescArray();
         assertEquals("should only be one rfd", 1, rfdArray.length);
         RemoteFileDesc rfd = rfdArray[0];
         
@@ -270,7 +270,7 @@ public class MulticastTest extends BaseTestCase {
         reroutePush(qr.getClientGUID());
         
         // okay, now we have a QueryReply to convert to an RFD.
-        RemoteFileDesc rfds[] = qr.toRemoteFileDescArray(true);
+        RemoteFileDesc rfds[] = qr.toRemoteFileDescArray();
         
         // clear the data to make it easier to look at again...
         MESSAGE_ROUTER.multicasted.clear();
