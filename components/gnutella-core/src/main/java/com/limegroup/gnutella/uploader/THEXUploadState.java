@@ -21,8 +21,9 @@ import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Set;
 
 /**
- * This class calculates the TigerTree hash of any file on the fly and sends
- * the hash in compliance to the THEX proposal:
+ * Sends the THEX tree as an HTTP message.
+ *
+ * The tree is in compliance with the THEX protocol at
  * http://open-content.net/specs/draft-jchapweske-thex-02.html
  * 
  * @author Gregorio Roper
@@ -106,7 +107,7 @@ public class THEXUploadState implements HTTPMessage {
      */
     public void writeMessageBody(OutputStream os) throws IOException {
         OutputStream slowStream = new ThrottledOutputStream(os, THROTTLE);
-        // the tree might be large, but the watchdogs require two minutes,
+        // the tree might be large, but the watchdogs allows two minutes,
         // so this is okay, since if an entire tree wasn't written in two
         // minutes, there is a problem.
         WATCHDOG.activate(os);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tigertree;
 
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Iterator;
 
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
@@ -48,7 +49,9 @@ class HashTreeNodeManager {
         switch(tree.getDepth()) {
         case 0:
             // trees of depth 0 have only one row.
-            return tree.getNodes();
+            List outer = new ArrayList(1);
+            outer.add(tree.getNodes());
+            return outer;
         case 1: case 2:
             // trees of depth 1 & 2 are really easy to calculate, so
             // always do those on the fly.        

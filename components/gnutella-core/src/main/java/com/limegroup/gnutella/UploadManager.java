@@ -1188,6 +1188,7 @@ public final class UploadManager implements BandwidthTracker {
             // handle the standard get request
             return UploadManager.parseTraditionalGet(str);
         } catch (IOException ioe) {
+            LOG.debug(ioe);
             // this means the request was malformed somehow.
             // instead of closing the connection, we tell them
             // by constructing a HttpRequestLine with a fake

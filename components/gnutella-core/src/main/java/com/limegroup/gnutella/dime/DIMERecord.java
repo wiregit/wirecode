@@ -236,7 +236,6 @@ public class DIMERecord {
         byte[] type = readInformation(typeLength, in);
         byte[] data = readInformation(dataLength, in);
         
-        
         try {
             return new DIMERecord(header[0], header[1],
                                   options, id, type, data);

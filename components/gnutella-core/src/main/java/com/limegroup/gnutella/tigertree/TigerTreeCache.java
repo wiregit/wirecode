@@ -229,8 +229,12 @@ public final class TigerTreeCache implements Serializable {
 
         public void run() {
             try {
-                HashTree tree = HashTree.createHashTree(FD);
-                addHashTree(FD.getSHA1Urn(), tree);
+                URN sha1 = FD.getSHA1Urn();
+                // if it was scheduled multiple times, ignore latter times.
+                if(TigerTreeCache.instance().getHashTree(sha1) == null) {
+                    HashTree tree = HashTree.createHashTree(FD);
+                    addHashTree(sha1, tree);
+                }
             } catch(IOException ignored) {}
         }
     }

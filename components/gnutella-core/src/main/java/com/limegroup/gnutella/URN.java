@@ -237,13 +237,16 @@ public final class URN implements HTTPHeaderValue, Serializable {
     private static URN createSHA1UrnFromBitprint(final String bitprintString)
         throws IOException {
         // extract the BASE32 encoded SHA1 from the bitprint
-        String str =
+        int dotIdx = bitprintString.indexOf(DOT);
+        if(dotIdx == -1)
+            throw new IOException("invalid bitprint: " + bitprintString);
+
+        String sha1 =
             bitprintString.substring(
-                bitprintString.indexOf(':', 13) + 9,
-                bitprintString.indexOf(DOT));
+                bitprintString.indexOf(':', 4) + 1, dotIdx);
 
         return createSHA1UrnFromString(
-            UrnType.URN_NAMESPACE_ID + UrnType.SHA1_STRING + str);
+            UrnType.URN_NAMESPACE_ID + UrnType.SHA1_STRING + sha1);
     }
     
 	/**
