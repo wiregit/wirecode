@@ -290,11 +290,6 @@ public class ManagedConnection extends Connection
     private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
 
     /**
-     * The next time to schedule the _guidMap for clearing.
-     */
-    private long _nextClearTime = 0;
-
-    /**
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
@@ -806,7 +801,10 @@ public class ManagedConnection extends Connection
         synchronized (_outputQueueLock) {
             super.close();
             _outputQueueLock.notify();
-        }        
+        }
+        // release pointer to our _guidMap so it can be gc()'ed
+        if (_guidMap != null)
+            GuidMapExpirer.removeMap(_guidMap);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1035,15 +1033,11 @@ public class ManagedConnection extends Connection
         // 2) set up mappings between the guids
         if (_guidMap == null) {
             _guidMap = new Hashtable();
-            _nextClearTime = System.currentTimeMillis() + TIMED_GUID_LIFETIME;
+            GuidMapExpirer.addMapToExpire(_guidMap);
         }
         GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
                                                   TIMED_GUID_LIFETIME);
         _guidMap.put(tGuid, new GUID(origGUID));
-        if (System.currentTimeMillis() >= _nextClearTime) {
-            GuidMapExpirer.addMapToExpire(_guidMap);
-            _nextClearTime = System.currentTimeMillis() + TIMED_GUID_LIFETIME;
-        }
 
         OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
         return query;
@@ -1616,6 +1610,10 @@ public class ManagedConnection extends Connection
             toExpire.add(expiree);
         }
 
+        public static synchronized void removeMap(Map expiree) {
+            toExpire.remove(expiree);
+        }
+
         public void run() {
             synchronized (this) {
                 // iterator through all the maps....
@@ -1629,10 +1627,6 @@ public class ManagedConnection extends Connection
                             if (((GUID.TimedGUID) keyIter.next()).shouldExpire())
                                 keyIter.remove();
                     }
-                    // now that you've expired hosts, remove the reference
-                    // so as to free the memory (the connection will re-add
-                    // it later if needs be)
-                    iter.remove();
                 }
             }
         }

@@ -500,6 +500,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                 new QueryStatusResponse(new GUID(queryRec.getGUID()), 
                                         MAX_RESULTS);
             sendF(LEAF[0], resp);
+            Thread.sleep(500);  // let it process
 
             Response[] res = new Response[1];
             for (int j = 0; j < res.length; j++)
@@ -561,40 +562,56 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         List expireList = (List) PrivilegedAccessor.getValue(guidMapExpirer, 
                                                              "toExpire");
         assertNotNull(expireList);
-        if (expireList.size() > 0) 
-            Thread.sleep(EXPIRE_TIME*2);
-        assertTrue(expireList.isEmpty());
+        Thread.sleep(EXPIRE_TIME*2);  // old guids should be expired...
+        synchronized (expireList) {
+            assertEquals(1, expireList.size());
+            // iterator through all the maps and confirm they are empty
+            Iterator iter = expireList.iterator();
+            while (iter.hasNext()) {
+                Map currMap = (Map) iter.next();
+                synchronized (currMap) {
+                    assertTrue(currMap.isEmpty());
+                }
+            }
+        }
 
         // now add a few queries and make sure some are expired but others not
         {
         QueryRequest query = QueryRequest.createQuery("sumeet");
         sendF(LEAF[0], query);
+        Thread.sleep(500);
         QueryStatusResponse resp = 
             new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
         sendF(LEAF[0], resp);
-        Thread.sleep(1000);
+        Thread.sleep(500);
         }
-        if (expireList.isEmpty()) Thread.sleep(EXPIRE_TIME);
         {
         QueryRequest query = QueryRequest.createQuery("berlin");
         sendF(LEAF[0], query);
+        Thread.sleep(500);
         QueryStatusResponse resp = 
             new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
         sendF(LEAF[0], resp);
-        Thread.sleep(1000);
+        Thread.sleep(500);
         }
-        if (expireList.isEmpty()) Thread.sleep(EXPIRE_TIME);
-        {
-        QueryRequest query = QueryRequest.createQuery("greg");
-        sendF(LEAF[0], query);
-        QueryStatusResponse resp = 
-            new QueryStatusResponse(new GUID(query.getGUID()), MAX_RESULTS);
-        sendF(LEAF[0], resp);
-        Thread.sleep(1000);
+        Thread.sleep(EXPIRE_TIME*2);
+        
+        synchronized (expireList) {
+            // iterator through all the maps and confirm they are empty
+            Iterator iter = expireList.iterator();
+            while (iter.hasNext()) {
+                Map currMap = (Map) iter.next();
+                synchronized (currMap) {
+                    assertTrue(currMap.isEmpty());
+                }
+            }
         }
- 
-        assertFalse(expireList.isEmpty());
-
+        
+        // close the leaf and make sure the MC purges it's guidmap
+        LEAF[0].close();
+        ROUTER_SERVICE.query(GUID.makeGuid(), "stanford");
+        Thread.sleep(2000);
+        assertTrue(expireList.isEmpty());       
     }
  
    
