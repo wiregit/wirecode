@@ -73,8 +73,7 @@ public class PushEndpoint {
 		int hashcode = _guid.hashCode();
 		
 		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
-			QueryReply.PushProxyContainer cur = 
-				(QueryReply.PushProxyContainer) iter.next();
+			PushProxyInterface cur = (PushProxyInterface)iter.next();
 			hashcode = 37 *hashcode+cur.hashCode();
 		}
 		_hashcode = hashcode;
