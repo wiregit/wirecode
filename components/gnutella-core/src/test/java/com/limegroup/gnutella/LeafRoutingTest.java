@@ -40,6 +40,11 @@ public class LeafRoutingTest extends TestCase {
         return new TestSuite(LeafRoutingTest.class);
     }    
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+
     public void testLegacy() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
@@ -56,13 +61,13 @@ public class LeafRoutingTest extends TestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         ActivityCallback callback=new ActivityCallbackStub();
-        FileManager files=new FileManagerStub();
-        MessageRouter router=new MessageRouterStub();
+        //FileManager files=new FileManagerStub();
+        //MessageRouter router=new MessageRouterStub();
         RouterService rs=new RouterService(callback);
-        assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
+        assertEquals("unexpected port", PORT, settings.getPort());
         rs.start();
         rs.clearHostCatcher();
-        assertTrue(PORT==settings.getPort());
+        assertEquals("unexpected port", PORT, settings.getPort());
 
         //Run tests
         try {
@@ -82,8 +87,6 @@ public class LeafRoutingTest extends TestCase {
             e.printStackTrace();
 			fail("unexpected exception: "+e);
         }
-        
-        //System.out.println("Done");
      }
 
      ////////////////////////// Initialization ////////////////////////
@@ -154,7 +157,7 @@ public class LeafRoutingTest extends TestCase {
 
      private static void replyToPing(Connection c, boolean ultrapeer) 
              throws IOException, BadPacketException {
-         Message m=c.receive(500);
+         Message m=c.receive(1000);
          assertTrue(m instanceof PingRequest);
          PingRequest pr=(PingRequest)m;
          byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
@@ -223,7 +226,7 @@ public class LeafRoutingTest extends TestCase {
             //System.out.println("X-Try: "+hosts);
             assertTrue("No hosts", hosts!=null);
             Set s=list2set(hosts);
-            assertTrue(s.size()==2);
+            assertEquals("unexpected set size", 2, s.size());
             assertTrue(s.contains(new Endpoint(oldIP, 6352)));
             assertTrue(s.contains(new Endpoint(oldIP, 6353)));
 
@@ -232,7 +235,7 @@ public class LeafRoutingTest extends TestCase {
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertTrue(hosts!=null);
             s=list2set(hosts);
-            assertTrue(s.size()==4);
+            assertEquals("unexpected set size", 4, s.size());
             byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
             assertTrue(s.contains(new Endpoint(ultrapeerIP, 6350)));
             assertTrue(s.contains(new Endpoint(ultrapeerIP, 6351)));
