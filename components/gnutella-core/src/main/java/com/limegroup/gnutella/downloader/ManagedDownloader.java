@@ -1955,9 +1955,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             int connected;
             http11 = rfd.isHTTP11();
             while(true) { //while queued, connect and sleep if we queued
-                int[] a = {-1,-1};//reset the sleep value, and queue position
-                connected = assignAndRequest(dloader,a,http11);
-                boolean addQueued = killQueuedIfNecessary(connected,a[1]);
+                int[] qInfo ={-1,-1};//reset the sleep value, and queue position
+                connected = assignAndRequest(dloader,qInfo,http11);
+                boolean addQueued = killQueuedIfNecessary(connected,qInfo[1]);
                 //an uploader we want to stay connected with
                 if(connected == 4)
                     continue; // and has partial ranges
@@ -1969,9 +1969,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     return true; //manager! keep churning more threads
                 }
                 if(connected==1) {//we have a queued thread, sleep
-                    Assert.that(a[0]>-1&&a[1]>-1,"inconsistent queue data");
+                    Assert.that(qInfo[0]>-1&&qInfo[1]>-1,
+                                                    "inconsistent queue data");
                     try {
-                        Thread.sleep(a[0]);//value from QueuedException
+                        Thread.sleep(qInfo[0]);//value from QueuedException
                     } catch (InterruptedException ix) {
                         debug("worker: interrupted while asleep in "+
                               "queue" + dloader);
@@ -2060,11 +2061,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return true;
             }
             Iterator iter = queuedThreads.keySet().iterator();
+            int highest = queuePos;
             while(iter.hasNext()) {
                 Object o = iter.next();
                 int currQueue = ((Integer)queuedThreads.get(o)).intValue();
-                if(currQueue > queuePos) //queuePos==-1 for downloading threads
+                if(currQueue > highest) { //queuePos==-1 for downloading threads
                     killThread=(Thread)o;
+                    highest = currQueue;
+                }
             }
             if(killThread == null) //no kill candidate
                 return false;
