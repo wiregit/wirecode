@@ -95,12 +95,12 @@ public final class QueryHandler {
 	/**
 	 * Constant list of connections that have already been queried.
 	 */
-	private final List QUERIED_CONNECTIONS = new LinkedList();
+	private final List QUERIED_CONNECTIONS = new ArrayList();
 
     /**
      * <tt>List</tt> of TTL=1 probe connections that we've already used.
      */
-    private final List QUERIED_PROBE_CONNECTIONS = new LinkedList();
+    private final List QUERIED_PROBE_CONNECTIONS = new ArrayList();
 
 	/**
 	 * The time the query started.
@@ -316,8 +316,14 @@ public final class QueryHandler {
         // 3) If we haven't yet satisfied the query, keep trying
         else {
             // otherwise, just send a normal query
-            _theoreticalHostsQueried += 
-                sendQuery(_connectionManager.getInitializedConnections());             
+            int newHosts = 
+                sendQuery(_connectionManager.getInitializedConnections());
+            if(newHosts == 0) {
+                // if we didn't query any new hosts, wait awhile for new
+                // connections to potentially appear
+                _nextQueryTime = System.currentTimeMillis() + 6000;
+            }   
+            _theoreticalHostsQueried += newHosts;
         }
     }
 
@@ -368,17 +374,25 @@ public final class QueryHandler {
             mc = curConnection;
         }
 
+        int remainingConnections = 
+            Math.max(length+QUERIED_PROBE_CONNECTIONS.size(), 0);
+
+        // return if we don't have any connections to query at this time
+        if(remainingConnections == 0) return 0;
+
         boolean probeConnection = false;
         if(mc == null) {
             // if we have no connections to query, simply return for now
             if(QUERIED_PROBE_CONNECTIONS.isEmpty()) return 0;
-            mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.get(0);
+
+            // we actually remove this from the list to make sure that
+            // QUERIED_CONNECTIONS and QUERIED_PROBE_CONNECTIONS do
+            // not have any of the same entries, as this connection
+            // will be added to QUERIED_CONNECTIONS
+            mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
             probeConnection = true;
         }
-                            
-        // pretend we have fewer connections than we do
-        // in case they go away in the future
-        int remainingConnections = Math.max(length-2, 1);
+                           
 			
         int results = RESULT_COUNTER.getNumResults();
         double resultsPerHost = 
