@@ -564,7 +564,6 @@ public class Connection {
         _messageReader = MessageReader.createReader();
         
         if(CommonUtils.isJava14OrLater()) {
-            System.out.println("Connection::initialize:: making non-blocking");
             _socket.getChannel().configureBlocking(false);
 			NIODispatcher.instance().addReader(this);
         }
