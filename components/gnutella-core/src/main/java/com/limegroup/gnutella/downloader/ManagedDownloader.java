@@ -2025,9 +2025,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * (meaning queuePos is -1) or connectCode is 1(meaning queuePos is the the
      * remote position of this thread) AND a thread has a worse position than
      * queuePos.  
-     * @return true if there is no need to kill any threads, or if the
-     * currentThread is already in the queuedThreads, or if we did kill a thread
-     * worse than this thread. 
+     * @return true if this thread should be kept around, false otherwise --
+     * explicitly, there is no need to kill any threads, or if the currentThread
+     * is already in the queuedThreads, or if we did kill a thread worse than
+     * this thread.  
      */
     private boolean killQueuedIfNecessary(int connectCode, int queuePos) {
         //check integrity constriants first
@@ -2045,11 +2046,19 @@ public class ManagedDownloader implements Downloader, Serializable {
             return false;
         //Either I am queued or downloading, find the highest queued thread
         Thread killThread = null;
+        Thread currentThread = Thread.currentThread();
         synchronized(this) {            
-            if(getNumDownloaders() < getSwarmCapacity())
-                return true;//no need to kill a thread, but pretend like we did
-            if(queuedThreads.containsKey(Thread.currentThread()))
-               return true;//we are already in there, pretend we killed a thread
+            if(getNumDownloaders() < getSwarmCapacity()) {//need not kill anyone
+                if(connectCode==1) //queued thread with no replacement required
+                    queuedThreads.put(currentThread,new Integer(queuePos));
+                return true;
+            }
+            if(queuedThreads.containsKey(currentThread)) {
+                //we are already in there, update position if we're still queued
+                if(connectCode==1)
+                    queuedThreads.put(currentThread,new Integer(queuePos));
+                return true;
+            }
             Iterator iter = queuedThreads.keySet().iterator();
             while(iter.hasNext()) {
                 Object o = iter.next();
@@ -2063,7 +2072,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             killThread.interrupt();
             //OK. I should add myself to queuedThreads if I am queued
             if(connectCode == 1)
-                queuedThreads.put(Thread.currentThread(),new Integer(queuePos));
+                queuedThreads.put(currentThread,new Integer(queuePos));
             return true;
         }        
     }
