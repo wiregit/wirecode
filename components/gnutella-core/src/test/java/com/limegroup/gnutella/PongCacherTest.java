@@ -1,12 +1,19 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.security.*;
-import junit.framework.*;
 import java.net.InetAddress;
-import com.sun.java.util.collections.*;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.security.ServerAuthenticator;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.BucketQueue;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.UltrapeerConnectionManager;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 
 /**
  * Tests the <tt>PongCacher</tt> class that maintains a cache of the best most
@@ -14,6 +21,11 @@ import com.sun.java.util.collections.*;
  */
 public final class PongCacherTest extends BaseTestCase {
 
+    /**
+     * Cached constant for the vendor GGEP extension.
+     */
+    private static final byte[] CACHED_VENDOR = new byte[5];
+    
     private static final PongCacher PC = PongCacher.instance();
 
     public PongCacherTest(String name) {
@@ -38,58 +50,44 @@ public final class PongCacherTest extends BaseTestCase {
 
     public static void globalSetUp() throws Exception {
         RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
-        //PC.start();
     }
 
     /**
-     * Tests the method that determines whether or not we need pongs
-     * for the cacher.
+     * Test to make sure that expiring of pongs is working correctly.
+     * @throws Exception
      */
-    public void testNeedsPongs() throws Exception {
-        ConnectionManager cm = 
-            new LeafConnectionManager(new ServerAuthenticator());
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
+    public void testPongExpiring() throws Exception {
+        // Trick us into thinking we're an Ultrapeer.
+        PrivilegedAccessor.setValue(RouterService.class, "manager",
+            new TestManager());
         
-        // we should not need pongs when we're not an Ultrapeer.
-        assertTrue("should not have needed a pong", 
-                   !PongCacher.instance().needsPongs());
-        cm = new UltrapeerConnectionManager(new ServerAuthenticator());
-        PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
-
-        // we should not need pongs when we're not an Ultrapeer.
-        assertTrue("should need a pong when none have been added yet", 
-                   PongCacher.instance().needsPongs());
-
-        PongCacher.instance().
-            addPong(PingReply.create(new GUID().bytes(), (byte)5));
+        // Create a pong with the correct GGEP for our cacher to accept it.
+        GGEP ggep = newGGEP(10, true, true);
+        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)2, 
+            10, new byte[]{20,2,4,3}, 10, 10, true, ggep);
         
-        // we should still need a pong when there aren't enough yet
-        assertTrue("should need a pong when there still aren't very many", 
-                   PongCacher.instance().needsPongs());
+        PongCacher.instance().addPong(pr);
+        
+        // Make sure we get the pong successfully.
+        List pongs = PongCacher.instance().getBestPongs();
+        assertEquals("should be 1 pong",1,pongs.size());
+        Iterator iter = pongs.iterator();
+        PingReply retrievedPong = (PingReply)iter.next();
+        assertEquals("unexpected pong", pr, retrievedPong);
 
-        // make sure we completely saturate the cacher with pongs
-        for(int j=0; j<10; j++) {
-            for(int i=0; i<PongCacher.NUM_HOPS; i++) {
-                PingReply curPong = 
-                    PingReply.create(new GUID().bytes(), (byte)i);
-                for(int z=0; z<i; z++) {
-                    curPong.hop();
-                }
-                PongCacher.instance().addPong(curPong);
-            }
-        }
-
-        // we should not need pongs when the cacher's full
-        assertTrue("should not need any pongs", 
-                   !PongCacher.instance().needsPongs());
-
-        Thread.sleep(3000);
-
-        // we should need pongs whenever we haven't gotten a new one for
-        // awhile
-        assertTrue("should need pongs since they're stale", 
-                   PongCacher.instance().needsPongs());
-
+        // Make sure we still get the pong successfully on a second pass.
+        pongs = PongCacher.instance().getBestPongs();
+        assertEquals("should be 1 pong",1,pongs.size());
+        iter = pongs.iterator();
+        retrievedPong = (PingReply)iter.next();
+        assertEquals("unexpected pong", pr, retrievedPong);
+        
+        // Finally, make sure the pong expires on a sleep -- add a bit to the
+        // sleep to avoid thread scheduling craziness.
+        Thread.sleep(PongCacher.EXPIRE_TIME+800);
+        pongs = PongCacher.instance().getBestPongs();
+        assertEquals("list should be empty", 0, pongs.size());
+        
     }
 
     /**
@@ -140,9 +138,6 @@ public final class PongCacherTest extends BaseTestCase {
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_PONGS_PER_HOP+1, pongs.size());
-
-        BucketQueue queue = 
-            (BucketQueue)PrivilegedAccessor.getValue(PC, "PONGS");
 
 
         Iterator iter = pongs.iterator();
@@ -195,6 +190,85 @@ public final class PongCacherTest extends BaseTestCase {
         
         assertEquals("unexpected bucket queue size", 
                      PongCacher.NUM_PONGS_PER_HOP, bq.size(0));
+    }
+    
+    /** Returns the GGEP payload bytes to encode the given uptime */
+    private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
+                                boolean isGUESSCapable) {
+        GGEP ggep=new GGEP(true);
+        
+        if (dailyUptime >= 0)
+            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+        
+        if (isGUESSCapable && isUltrapeer) {
+            // indicate guess support
+            byte[] vNum = {
+                convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
+                                     CommonUtils.getGUESSMinorVersionNumber())};
+            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
+        }
+        
+        if (isUltrapeer) { 
+            // indicate UP support
+            addUltrapeerExtension(ggep);
+        }
+        
+        // all pongs should have vendor info
+        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
+
+        return ggep;
+    }
+
+
+    /**
+     * Adds the ultrapeer GGEP extension to the pong.  This has the version of
+     * the Ultrapeer protocol that we support as well as the number of free
+     * leaf and Ultrapeer slots available.
+     * 
+     * @param ggep the <tt>GGEP</tt> instance to add the extension to
+     */
+    private static void addUltrapeerExtension(GGEP ggep) {
+        byte[] payload = new byte[3];
+        // put version
+        payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
+                                          CommonUtils.getUPMinorVersionNumber()
+                                          );
+        payload[1] = (byte)10;
+        payload[2] = (byte)10;
+
+        // add it
+        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
+    }
+
+    /** 
+     * puts major as the high order bits, minor as the low order bits.
+     * @exception IllegalArgumentException thrown if major/minor is greater 
+     *  than 15 or less than 0.
+     */
+    private static byte convertToGUESSFormat(int major, int minor) 
+        throws IllegalArgumentException {
+        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
+            throw new IllegalArgumentException();
+        // set major
+        int retInt = major;
+        retInt = retInt << 4;
+        // set minor
+        retInt |= minor;
+
+        return (byte) retInt;
+    }
+    
+    private static class TestManager extends ConnectionManager {
+        /**
+         * @param authenticator
+         */
+        public TestManager() {
+            super(null);
+        }
+
+        public boolean isSupernode() {
+            return true;
+        }
     }
 }
 
