@@ -134,7 +134,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         // confirm a GIV
         currLine = reader.readLine();
         String givLine = "GIV 0:" + 
-        (new GUID(RouterService.getMessageRouter()._clientGUID)).toHexString();
+            (new GUID(RouterService.getMessageRouter()._clientGUID)).toHexString();
         assertTrue(currLine.startsWith(givLine));
 
         // everything checks out!
@@ -175,7 +175,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // wait a while for Leaf to process result
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         assertTrue(((MyActivityCallback)getCallback()).getRFD() != null);
 
         // tell the leaf to download the file, should result in push proxy

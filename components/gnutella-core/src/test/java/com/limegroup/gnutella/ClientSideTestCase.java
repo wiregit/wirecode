@@ -64,7 +64,7 @@ public abstract class ClientSideTestCase
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*", localIP});        
+            new String[] {"127.*.*.*", "192.168.*.*", "10.254.*.*", localIP});        
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
