@@ -304,12 +304,11 @@ public class UpdateManager {
         if(deleteOld) {
             boolean renamed = nf.renameTo(f);//dont update latestVersion
             if(!renamed) {
+                isValid = false;
                 nf.delete();
                 throw new IOException();
-            } else {
-                // everything went a-okay, we have a valid file.
-                isValid = true;
-            }
+            } else 
+                isValid = true; //everything went a-okay, we have a valid file.
         } 
         else { //delete the file. The .ver file will be unpacked
             nf.delete();
