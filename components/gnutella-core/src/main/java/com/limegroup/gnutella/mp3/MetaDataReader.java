@@ -25,6 +25,9 @@ public class MetaDataReader {
 		List nameValList = data.toNameValueList();
 		if(nameValList.isEmpty())
 			throw new IOException("invalid/no data.");
+		
+		if(LimeXMLSchemaRepository.instance().getSchema(AudioMetaData.schemaURI) == null)
+             throw new IOException("no audio schema");
 
 		return new LimeXMLDocument(nameValList, LimeXMLUtils.getSchemaURI(file));
 	}
