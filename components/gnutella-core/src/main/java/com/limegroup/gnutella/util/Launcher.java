@@ -3,6 +3,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -10,6 +11,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
+
+import com.limegroup.gnutella.gui.Utilities;
 
 /**
  * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may be redistributed
@@ -305,10 +308,20 @@ public class Launcher {
 			break;
 		case WINDOWS_NT: // this also gets called for Windows 2000
 			File f = new File(path);
-			//if(f.isFile())
-			//System.out.println("Launcher::found the file: "+path);
-			command = "cmd /c "+"\""+ checkChars(path)+"\"";
-			Runtime.getRuntime().exec(command);
+			if(f.isFile()) {
+				//System.out.println("Launcher::found the file: "+path);
+				FileInputStream fis = new FileInputStream(f);
+				String hex = Integer.toHexString(fis.read());
+				hex += Integer.toHexString(fis.read());
+
+				if(hex.equals("4d5a")) {
+					Utilities.showError("LimeWire will not launch executable files "+
+										"for security reasons.");
+					return;
+				}
+				command = "cmd /c "+"\""+ checkChars(path)+"\"";
+				Runtime.getRuntime().exec(command);				
+			}
 			break;
 		case WINDOWS_9x:
 			
