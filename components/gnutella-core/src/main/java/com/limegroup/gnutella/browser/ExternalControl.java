@@ -161,9 +161,19 @@ public class ExternalControl {
 	 */
 	private static boolean testForLimeWire(String arg) {
 		Socket socket = null;
+		int port = ConnectionSettings.PORT.getValue();
+		// Check to see if the port is valid.
+		// If it is not, revert it to the default value.
+		// This has the side effect of possibly allowing two 
+		// LimeWires to start if somehow the existing one
+		// set its port to 0, but that should not happen
+		// in normal program flow.
+		if( !NetworkUtils.isValidPort(port) ) {
+		    ConnectionSettings.PORT.revertToDefault();
+		    port = ConnectionSettings.PORT.getValue();
+        }   
 		try {
-			socket = Sockets.connect(LOCALHOST, 
-		      ConnectionSettings.PORT.getValue(), 500);
+			socket = Sockets.connect(LOCALHOST, port, 500);
 		} catch (IOException e) {
 		    return false;
 		}
