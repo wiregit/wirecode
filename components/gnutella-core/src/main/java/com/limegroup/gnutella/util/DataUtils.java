@@ -154,8 +154,16 @@ public final class DataUtils {
             throw new IOException("cannot unpack values");
         
         int []ret = new int[number];
-        // the offset here is in bits
-        offset= offset * 8;
+        
+        // if the size is 8, parse the fast way
+        if (size == 8) {
+            for (int i = 0;i < number;i++)
+                ret[i] = data[offset+i] & 0xFF;
+            return ret;
+        }
+        
+        // otherwise, the slow way
+        offset= offset * 8;// the offset here is in bits
         for (int i = 0; i < number; i++) {
             int element=0;
             for (int j = 0; j < size; j++) {
