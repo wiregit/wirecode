@@ -631,65 +631,74 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Completes the download process, possibly sending off requeries
      * that may later restart it.
+     *
+     * This essentially pumps the state of the download to different
+     * areas, depending on what is required or what has already occurred.
      */
     private void completeDownload() {
         boolean complete = isCompleted();
+        long now = System.currentTimeMillis();
+
+        // Notify the manager that this download is done.
         manager.remove(this, complete);
+
+        LOG.trace("MD<" + getFileName() + "> completed download, state: " + getState() + ", numQueries: " + numQueries + ", lastQuerySent: " + lastQuerySent);
+
         // if this is all completed, nothing else to do.
         if(complete)
-            return;
-            
-        // First thing to try is iterative GUESSing.
+            ; // all done.
+
+        // Try iterative GUESSing...
         // If that sent some queries, don't do anything else.
-        if(tryGUESSing())
-            return;
-            
-        int state = getState();
-        LOG.trace("MD<" + getFileName() + "> completed download, state: " + state + ", numQueries: " + numQueries + ", lastQuerySent: " + lastQuerySent);
+        else if(tryGUESSing())
+            ; // all done for now.
 
-        // If busy, try waiting for that busy host.
-        if (state == WAITING_FOR_RETRY) {
+       // If busy, try waiting for that busy host.
+        else if (getState() == WAITING_FOR_RETRY)
             setState(WAITING_FOR_RETRY, calculateWaitTime());
-            return;
-        }
         
-        long now = System.currentTimeMillis();
-        if(now - lastQuerySent < TIME_BETWEEN_REQUERIES) {
-            setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
-            return;
-        }
-
+        // If we sent a query recently, then we don't want to send another,
+        // nor do we want to give up.  Just continue waiting for results
+        // from that query.
+        else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES)
+            setState(WAITING_FOR_RESULTS,
+                     TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
+            
         // If we're at our requery limit, give up.
-        if( numQueries >= REQUERY_ATTEMPTS ) {
+        else if( numQueries >= REQUERY_ATTEMPTS )
             setState(GAVE_UP);
-            return;
-        }
-    
+            
         // If we want to send the requery immediately, do so.
-        if(shouldSendRequeryImmediately(numQueries)) {
-            if(!hasStableConnections())
-                setState(WAITING_FOR_CONNECTIONS, 750);
-            else
-                sendRequery();
-        } else { // Otherwise, wait for the user to initiate us.
+        else if(shouldSendRequeryImmediately(numQueries))
+            sendRequery();
+            
+        // Otherwise, wait for the user to initiate the query.            
+        else
             setState(WAITING_FOR_USER);
-        }
         
-        LOG.trace("!!MD<" + getFileName() + "> completed download, state: " + state + ", numQueries: " + numQueries);        
+        LOG.trace("!!MD<" + getFileName() + "> completed download, state: " + getState() + ", numQueries: " + numQueries);        
     }
     
     /**
      * Attempts to send a requery.
      */
     private void sendRequery() {
-        try {
-            if(manager.sendQuery(this, newRequery(numQueries))) {
-                lastQuerySent = System.currentTimeMillis();
-                numQueries++;
-                setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+        // If we don't have stable connections, wait until we do.
+        if(!hasStableConnections()) {
+            lastQuerySent = -1; // mark as wanting to requery.
+            setState(WAITING_FOR_CONNECTIONS);
+        } else {
+            try {
+                if(manager.sendQuery(this, newRequery(numQueries))) {
+                    lastQuerySent = System.currentTimeMillis();
+                    numQueries++;
+                    setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+                } else {
+                    lastQuerySent = -1; // mark as wanting to requery.
+                }
+            } catch(CantResumeException cre) {
+                // oh well.
             }
-        } catch(CantResumeException cre) {
-            // oh well.
         }
     }
     
@@ -701,18 +710,28 @@ public class ManagedDownloader implements Downloader, Serializable {
         case WAITING_FOR_RETRY:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
+            // If we're finished waiting on busy hosts,
+            // stable connections, or GUESSing,
+            // but we're still inactive, then we queue ourselves
+            // and wait till we get restarted.
             if(getRemainingStateTime() <= 0)
                 setState(QUEUED);
             break;
         case WAITING_FOR_RESULTS:
+            // If we have new sources but are still inactive,
+            // then queue ourselves and wait to restart.
             if(hasNewSources())
                 setState(QUEUED);
+            // Otherwise, we've ran out of time waiting for results,
+            // so give up.
             else if(getRemainingStateTime() <= 0)
                 setState(GAVE_UP);
-            break;        
+            break;
         case WAITING_FOR_USER:
         case GAVE_UP:
         case QUEUED:
+            // If we're waiting for the user to do something,
+            // have given up, or are queued, there's nothing to do.
             break;
         default:
             Assert.that(false, "invalid state: " + getState());
@@ -934,10 +953,15 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Determines if we should send a requery immediately, or wait for user
      * input.
+     *
+     * 'lastQuerySent' being equal to -1 indicates that the user has already
+     * clicked resume, so we do want to send immediately.
      */
     protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        // MD's never want to requery without user input.
-        return false;
+        if(lastQuerySent == -1)
+            return true;
+        else
+            return false;
     }
 
     /** Subclasses should override this method when necessary.
@@ -1225,7 +1249,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             // manager and we can't grab that lock if we're synchronized on
             // this.  since we can't guarantee we won't be holding this' lock,
             // we leave it up to manager to start us off if we have new sources
-            // and restart us if necessary.
         }
         
         return true;
@@ -1404,15 +1427,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             //Ignore request if already in the download cycle.
             if (!isInactive())
                 return false;
+                
+            LOG.trace("RESUMING, state: " + getState());
     
             // if we were waiting for the user to start us, then try to send the
             // requery.
-            if(state == WAITING_FOR_USER) {
-                if(!hasStableConnections())
-                    setState(WAITING_FOR_CONNECTIONS);
-                else
-                    sendRequery();
-            }
+            if(getState() == WAITING_FOR_USER)
+                sendRequery();
         }
         
         // Notify the manager that we want to resume.
@@ -1569,6 +1590,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 		// TODO: Note that on a private network, these conditions might
 		//       be too strict.
+		
+		LOG.debug("nmessages: " + RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) + 
+		          ", active: " + RouterService.getActiveConnectionMessages());
 
 		// Wait till your connections are stable enough to get the minimum 
 		// number of messages

@@ -64,7 +64,8 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
         ret.initialize(new DownloadManagerStub(), 
                        new FileManagerStub(), 
-                       new ActivityCallbackStub(), false);
+                       new ActivityCallbackStub());
+        ret.startDownload();
         return ret;
     }
 
@@ -107,7 +108,8 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
         in.close();
         downloader.initialize(new DownloadManagerStub(),
                               new FileManagerStub(),
-                              new ActivityCallbackStub(), true);
+                              new ActivityCallbackStub());
+        downloader.startDownload();
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }

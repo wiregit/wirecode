@@ -104,9 +104,18 @@ public class DownloadManager implements BandwidthTracker {
      *       to check if files exist
      */
     public void initialize() {
-        this.callback = RouterService.getCallback();
-        this.router = RouterService.getMessageRouter();
-        this.fileManager = RouterService.getFileManager();
+        initialize(
+                   RouterService.getCallback(),
+                   RouterService.getMessageRouter(),
+                   RouterService.getFileManager()
+                  );
+    }
+    
+    protected void initialize(ActivityCallback callback, MessageRouter router,
+                              FileManager fileManager) {
+        this.callback = callback;
+        this.router = router;
+        this.fileManager = fileManager;
     }
 
     /**
