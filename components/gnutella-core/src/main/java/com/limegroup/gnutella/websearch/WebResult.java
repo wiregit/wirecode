@@ -18,4 +18,23 @@ public class WebResult {
     public String toString() {
         return _title+", "+_description+", "+_bidPrice+", "+_clickURL;
     }
+    
+    public String getTitle() {
+        return _title;
+    }
+
+    public String getDescription() {
+        return _description;
+    }
+
+    public String getBidPrice() {
+        return _bidPrice;
+    }
+
+    public String getClickUrl() {
+        return _clickURL;
+    }
+
+
+    
 }
