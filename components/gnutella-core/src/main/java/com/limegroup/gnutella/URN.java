@@ -204,7 +204,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if the NSS is valid, <tt>false</tt> otherwise
 	 */
 	private static boolean isValidNamespaceSpecificString(final String nss) {
-		int length = NSS.length();
+		int length = nss.length();
 
 		// checks to make sure that it either is the length of a 32 
 		// character SHA1 NSS, or is the length of a 72 character
