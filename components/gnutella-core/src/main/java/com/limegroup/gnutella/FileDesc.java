@@ -1,14 +1,16 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-
-import com.bitzi.util.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.util.Date;
-import java.security.*;
-import java.util.Enumeration;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+
+import com.sun.java.util.collections.Collections;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Set;
 
 /**
  * This class contains data for an individual shared file.  It also provides
