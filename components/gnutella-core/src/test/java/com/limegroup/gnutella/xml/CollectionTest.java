@@ -105,15 +105,19 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // test keyword generation
         List keywords = collection.getKeyWords();
-        assertEquals("Wrong keyword count!",
-                         6, keywords.size());
+
+        assertEquals("Wrong keyword count!",8, keywords.size());
+
+        //Note: the Test1 and Test2 both contain the keyword "Movie", so we
+        //check only 7 keywords while there are 8 entries
         assertTrue("Correct keywords not in map!", 
                           (keywords.contains("othertfield") && 
                            keywords.contains("otherafield")  &&
                            keywords.contains("Other")  &&
                            keywords.contains("tfield")  &&
                            keywords.contains("afield")  &&
-                           keywords.contains("Vocal") )
+                           keywords.contains("Vocal")  &&
+                           keywords.contains("Movie") )
                           );
         
     }
@@ -274,14 +278,15 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test keyword generation
         List keywords = audioCollection.getKeyWords();
         assertEquals("Wrong keyword count!",
-                         6, keywords.size());
+                         8, keywords.size());
         assertTrue("Correct keywords not in map!", 
                           (keywords.contains("othertfield") && 
                            keywords.contains("otherafield")  &&
                            keywords.contains("Other")  &&
                            keywords.contains("tfield")  &&
                            keywords.contains("afield")  &&
-                           keywords.contains("Vocal") )
+                           keywords.contains("Vocal") &&
+                           keywords.contains("Movie") )
                           );
         keywords = videoCollection.getKeyWords();
         assertEquals("Wrong keyword count!",
