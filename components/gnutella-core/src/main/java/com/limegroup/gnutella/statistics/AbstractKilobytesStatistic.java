@@ -13,18 +13,32 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 */
 	private static final int BYTES_PER_KILOBYTE = 1024;
 
-	// inherit doc comment
+	/** 
+	 * Overridden to report the average for this statistic in kilobyes.
+	 *
+	 * @return the average for this statistic in kilobytes per unit of
+	 *  measurement (KB/s)
+	 */
 	public double getAverage() {
 		if(_totalStatsRecorded == 0) return 0;
 		return (double)((_total/_totalStatsRecorded)/BYTES_PER_KILOBYTE);
 	}
 
-	// inherit doc comment
+	/** 
+	 * Overridden to report the maximum for this statistic in kilobyes.
+	 *
+	 * @return the maximum for a recorded time period for this statistic 
+	 *  in kilobytes 
+	 */
 	public double getMax() {
 		return (double)(_max/BYTES_PER_KILOBYTE);
 	}
 
-	// inherit doc comment
+	/** 
+	 * Overridden to report the total for this statistic in kilobytes.
+	 *
+	 * @return the total for this statistic in kilobytes 
+	 */
 	public double getTotal() {
 		return (double)(_total/BYTES_PER_KILOBYTE);
 	}
