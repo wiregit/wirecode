@@ -61,8 +61,15 @@ public class HostCatcher {
     /** The number of normal pongs to store. */
     static final int NORMAL_SIZE=400;
 
-    /** The number of permanent locations to store in gnutella.net */
-    static final int PERMANENT_SIZE=GOOD_SIZE;
+    /**
+     * The number of permanent locations to store in gnutella.net 
+     * This MUST NOT BE GREATER THAN NORMAL_SIZE.  This is because when we read
+     * in endpoints, we add them as NORMAL_PRIORITY.  If we have written
+     * out more than NORMAL_SIZE hosts, then we guarantee that endpoints
+     * will be ejected from the ENDPOINT_QUEUE upon startup.
+     * 
+     */
+    static final int PERMANENT_SIZE = NORMAL_SIZE;
 
     /**
      * Constant for the index of good priority hosts (Ultrapeers)
@@ -179,7 +186,6 @@ public class HostCatcher {
 							   BootstrapServerManager.UPDATE_DELAY_MSEC);
     }
 
-
     /**
      * Reads in endpoints from the given file.  This is called by initialize, so
      * you don't need to call it manually.  It is package access for
@@ -190,6 +196,7 @@ public class HostCatcher {
      */
     synchronized void read(File hostFile) throws FileNotFoundException, 
 												 IOException {
+        LOG.trace("entered HostCatcher.read(File)");
         BufferedReader in = null;
         try {
             in = new BufferedReader(new FileReader(hostFile));
@@ -220,6 +227,7 @@ public class HostCatcher {
                     in.close();
             } catch(IOException e) {}
         }
+        LOG.trace("left HostCatcher.read(File)");
     }
 
 	/**
@@ -366,8 +374,9 @@ public class HostCatcher {
                 //rep. invariant.
                 ENDPOINT_SET.add(e);
                 Object ejected=ENDPOINT_QUEUE.insert(e, priority);
-                if (ejected!=null)
-                    ENDPOINT_SET.remove(ejected);                             
+                if (ejected!=null) {
+                    ENDPOINT_SET.remove(ejected);
+                }         
 
                 //If this is not full, notify the callback.  If this is full,
                 //the GUI's display of the host catcher will differ from this.
@@ -456,20 +465,26 @@ public class HostCatcher {
             //will not do anything if we're currently connecting to a GWebCache.
             //TODO: do we need rate-limiting code?
             if (getNumHosts()==0) {
+                LOG.debug("getNumHosts() == 0, fetching endpoints");
                 gWebCache.fetchEndpointsAsync();
             }
             //If there are no good, fresh ultrapeer pongs--these exclude
             //gnutella.net entries--schedule a fetch in GWEBCACHE_DELAY
             //milliseconds if it's still needed then.
             else if (getNumUltrapeerHosts()==0) {
+                LOG.debug("getNumUltrapeerHosts() == 0");
                 long now=System.currentTimeMillis();
                 //Be patient; maybe some gnutella.net entries will work.
                 if (now < nextAllowedFetchTime) {
                     nextAllowedFetchTime=Math.min(
                         nextAllowedFetchTime, now+GWEBCACHE_DELAY);
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("delaying fetch time till " + 
+                                  nextAllowedFetchTime);
                 } 
                 //Give up and use GWebCache.
                 else {
+                    LOG.debug("fetching more endpoints");
                     gWebCache.fetchEndpointsAsync();
                     nextAllowedFetchTime=Long.MAX_VALUE;
                 }
@@ -529,6 +544,7 @@ public class HostCatcher {
      */
     private ExtendedEndpoint getAnEndpointInternal()
             throws NoSuchElementException {
+        //LOG.trace("entered getAnEndpointInternal");
         if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
             ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
@@ -681,13 +697,9 @@ public class HostCatcher {
         try {
             read(HOST_FILE);
         } catch (FileNotFoundException e) {
-            if(LOG.isErrorEnabled()) {
-                LOG.error(HOST_FILE);
-            }
+            LOG.error(HOST_FILE, e);
         } catch (IOException e) {
-            if(LOG.isErrorEnabled()) {
-                LOG.error(HOST_FILE);
-            }
+            LOG.error(HOST_FILE, e);
         }    
     }
 
