@@ -104,7 +104,7 @@ public class UltrapeerHandshakeResponder
 		if (reject(response, ret)) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
-            return HandshakeResponse.createRejectIncomingResponse(response);
+            return HandshakeResponse.createUltrapeerRejectIncomingResponse(response);
 		}
 		
 		//We do this last, to prevent reject connections from being deflated,
@@ -116,7 +116,7 @@ public class UltrapeerHandshakeResponder
         // accept the connection, and let the connecting node know about 
         // Ultrapeers that are as many hops away as possible, to avoid 
         // cycles.
-        return HandshakeResponse.createAcceptIncomingResponse(ret);
+        return HandshakeResponse.createAcceptIncomingResponse(response, ret);
 	}
     
     /** 
