@@ -1,10 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.connection.MessageReader;
 
 /** Handles all stuff necessary for browsing of networks hosts. 
     Has a instance component, one per browse host, and a static Map of instances
@@ -187,20 +190,22 @@ public class BrowseHostHandler {
         debug("BHH.browseExchange(): read HTTP seemingly OK.");
 
         // ok, everything checks out, proceed and read QRs...
-        Message m = null;
+        SocketChannel channel=socket.getChannel();
+        channel.configureBlocking(true);
+        Assert.that(channel!=null, "Socket wasn't created from channel");
+        MessageReader reader=new MessageReader(channel);
         while(true) {
+            Message m=null;
             try {
-                m = null;
-                m = Message.read(in);
+                m=reader.read();
             }
             catch (BadPacketException bpe) {
             }
             catch (IOException bpe) {
-                // thrown when stream is closed
+                break;
             }
             if(m == null) 
-                //we are finished reading the stream
-                return;
+                continue;   //half a message; finish read
             else {
                 if(m instanceof QueryReply) {
                     debug("BHH.browseExchange(): read a QR");        
