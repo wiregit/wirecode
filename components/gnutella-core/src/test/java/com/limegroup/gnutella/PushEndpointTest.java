@@ -92,4 +92,48 @@ public class PushEndpointTest extends BaseTestCase {
     	assertEquals(four.getProxies().size(),sent.size());
     	
     }
+    
+    /**
+     * tests externalization to http header values.
+     */
+    public void testExternalizationHTTP() throws Exception {
+    	GUID guid1 = new GUID(GUID.makeGuid());
+    	GUID guid2 = new GUID(GUID.makeGuid());
+    	
+    	PushProxyInterface ppi1 = new QueryReply.PushProxyContainer("1.2.3.4",1234);
+    	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",1235);
+    	PushProxyInterface ppi3 = new QueryReply.PushProxyContainer("1.2.3.6",1235);
+    	PushProxyInterface ppi4 = new QueryReply.PushProxyContainer("1.2.3.7",1235);
+    	PushProxyInterface ppi5 = new QueryReply.PushProxyContainer("1.2.3.8",1235);
+    	PushProxyInterface ppi6 = new QueryReply.PushProxyContainer("1.2.3.9",1235);
+		
+    	Set set1 = new HashSet();
+    	Set set6 = new HashSet();
+    	
+    	set1.add(ppi1); 
+    	set6.add(ppi1);set6.add(ppi2);set6.add(ppi3);set6.add(ppi4);
+    	set6.add(ppi5);set6.add(ppi6);
+    	
+    	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
+    	
+    	String httpString = one.httpStringValue();
+    	
+    	
+    	PushEndpoint one_prim = new PushEndpoint(httpString);
+    	
+    	assertEquals(one.hashCode(),one_prim.hashCode());
+    	assertEquals(one,one_prim);
+    	
+    	//now test a bigger endpoint
+       	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6);
+    	httpString = six.httpStringValue();
+    	
+    	PushEndpoint four = new PushEndpoint(httpString);
+    	assertNotEquals(six,four);
+    	
+    	Set sent = new HashSet(set6);
+    	sent.retainAll(four.getProxies());
+    	assertEquals(four.getProxies().size(),sent.size());
+    	
+    }
 }

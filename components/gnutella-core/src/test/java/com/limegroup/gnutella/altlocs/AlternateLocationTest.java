@@ -357,6 +357,67 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
             AlternateLocation.create("limewire.org", urn);
             fail("IOException expected");
         } catch(IOException expected) {}
+        
+        //try some firewalled locs
+        GUID clientGUID = new GUID(GUID.makeGuid());
+        String httpString=clientGUID.toHexString()+";1.2.3.4:15;1.2.3.5:16";
+        
+        PushAltLoc pal = (PushAltLoc)AlternateLocation.create(
+        		httpString,urn);
+        
+        assertTrue(Arrays.equals(
+        		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
+        assertEquals(2,pal.getPushAddress().getProxies().size());
+        
+        assertEquals(httpString,pal.httpStringValue());
+        
+        //try some valid push proxies, some invalid ones
+        pal = (PushAltLoc) AlternateLocation.create(httpString+";0.1.2.3:100000;1.2.3.6:17",urn);
+    	
+        assertTrue(Arrays.equals(
+        		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
+        assertEquals(3,pal.getPushAddress().getProxies().size());
+        
+        
+        
+        //try some valid push proxies and an empty one
+        pal = (PushAltLoc) AlternateLocation.create(httpString+";;1.2.3.6:17",urn);
+    	
+        assertTrue(Arrays.equals(
+        		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
+        assertEquals(3,pal.getPushAddress().getProxies().size());
+        
+        
+        
+        //try an altloc with no push proxies
+        try{
+        	pal = (PushAltLoc) AlternateLocation.create(clientGUID.toHexString()+";",urn);
+        	fail("created a push altloc without any proxies");
+        }catch(IOException expected ){}
+        
+        //try some invalid ones
+        try {
+        	pal = (PushAltLoc) AlternateLocation.create("asdf2345dgalshlh",urn);
+        	fail("created altloc from garbage");
+        }catch(IOException expected) {}
+        
+        try {
+        	pal = (PushAltLoc) AlternateLocation.create("",urn);
+        	fail("created altloc from empty string");
+        }catch(IOException expected) {}
+        
+        try {
+        	pal = (PushAltLoc) AlternateLocation.create(null,urn);
+        	fail("created altloc from null string");
+        }catch(IOException expected) {}
+        
+        try {
+        	pal = (PushAltLoc) AlternateLocation.create(
+        			clientGUID.toHexString()+";"+ "1.2.3.4/:12",urn);
+        	fail("created altloc from invalid address string");
+        }catch(IOException expected) {}
+        
+        
     }
 
     public void testDemotedEquals() throws Exception {
