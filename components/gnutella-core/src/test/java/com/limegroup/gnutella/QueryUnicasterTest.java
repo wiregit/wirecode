@@ -48,7 +48,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     
     public void testConstruction() {
         QueryUnicaster qu = QueryUnicaster.instance();
-        assertTrue(qu.getUnicastEndpoints().size() == 0);
+        assertEquals("unexpected amount of unicast endpoints",
+            0, qu.getUnicastEndpoints().size());
     }
 
 
@@ -73,9 +74,11 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 
         // add a Query
 		QueryRequest qr = QueryRequest.createQuery("Susheel", (byte)2);
-        assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
+		assertEquals("unexpected number of queries",
+		    0, QueryUnicaster.instance().getQueryNumber() );
         QueryUnicaster.instance().addQuery(qr, null);
-        assertTrue(QueryUnicaster.instance().getQueryNumber() == 1);
+        assertEquals("unexpected number of queries",
+            1, QueryUnicaster.instance().getQueryNumber() );
 
         // give udpLoopers time to execute
         // get messages from vector, should be a message or a ping
@@ -91,7 +94,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             numMessages++;
             if (currMessage instanceof QueryRequest) {
                 QueryRequest currQR = (QueryRequest) currMessage;
-                assertTrue(currQR.getQuery().equals("Susheel"));
+                assertEquals("unexpected query", "Susheel", currQR.getQuery() );
                 numQRs++;
             }
             else if (currMessage instanceof PingRequest) {
@@ -100,15 +103,16 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                     numQKReqs++;
             }
             else
-                assertTrue("A different message encountered! : " + 
-                           currMessage, 
-                           false);  // this should never happen!
+                fail("unexpected message: " + currMessage);
         }
-        assertTrue(numMessages == (numPings + numQRs));
+        assertEquals("unexpected number of messages", numMessages, numPings + numQRs);
         // can't send a Query without sending a Ping....
-        assertTrue(numQRs <= numPings);
-        assertTrue(numQRs > 0);
-        assertTrue(numQRs <= numQKReqs);
+        assertLessThanOrEquals("unexpected number of QRs",
+            numPings, numQRs);
+        assertGreaterThan("unexpected number of QRs",
+            0, numQRs);
+        assertLessThanOrEquals("unexpected number of QRs",
+            numQKReqs, numQRs);
         debug("QueryUnicasterTest.testQueries(): numMessages = " +
               numMessages);
         debug("QueryUnicasterTest.testQueries(): numQRs = " +
@@ -181,7 +185,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         // but should do the job...
         try {
             Thread.sleep(3 * 1000);
-            assertTrue(QueryUnicaster.instance().getQueryNumber() == 0);
+            assertEquals("unexpected number of queries",
+                0, QueryUnicaster.instance().getQueryNumber() );
         }
         catch (InterruptedException ignored) {}
         int numMessages = 0, numQRs = 0, numPings = 0;
@@ -197,14 +202,12 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                 numPings++;
             }
             else
-                assertTrue("A different message encountered! : " + 
-                           currMessage, 
-                           false);  // this should never happen!
+                 fail("unexpected message: " + currMessage);
         }
-        assertTrue(numMessages == (numPings + numQRs));
-        assertTrue("numQRs = " + numQRs, numQRs < 11); // 15 * 25 >> 250
-        assertTrue(QueryUnicaster.instance().getUnicastEndpoints().size() >
-                   0);
+        assertEquals("unexpected number of messages", numMessages, numPings + numQRs);
+        assertLessThan("unexpected number of QRs", 11, numQRs); // 15 * 25 >> 250
+        assertGreaterThan("unexpected endpoint size",
+            0, QueryUnicaster.instance().getUnicastEndpoints().size() );
         debug("QueryUnicasterTest.testQueries(): numMessages = " +
               numMessages);
         debug("QueryUnicasterTest.testQueries(): numQRs = " +
