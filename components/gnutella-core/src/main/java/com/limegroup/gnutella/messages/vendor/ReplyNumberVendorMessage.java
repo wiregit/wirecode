@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/12".
@@ -71,5 +72,18 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         return false;
     }
 
+    /** Overridden purely for stats handling.
+     */
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        if (RECORD_STATS)
+            SentMessageStatHandler.UDP_REPLY_NUMBER.addMessage(this);
+    }
+
+    /** Overridden purely for stats handling.
+     */
+    public void recordDrop() {
+        super.recordDrop();
+    }
 
 }

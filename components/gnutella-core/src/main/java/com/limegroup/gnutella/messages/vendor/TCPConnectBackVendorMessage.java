@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
@@ -59,4 +60,20 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
             throw new BadPacketException("Couldn't write to a ByteStream!!!");
         }
     }
+
+    /** Overridden purely for stats handling.
+     */
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        if (RECORD_STATS)
+            SentMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(this);
+    }
+
+    /** Overridden purely for stats handling.
+     */
+    public void recordDrop() {
+        super.recordDrop();
+    }
+
+
 }

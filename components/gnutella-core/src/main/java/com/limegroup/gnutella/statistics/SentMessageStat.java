@@ -239,4 +239,46 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic MULTICAST_FILTERED_MESSAGES = 
 	    new FilteredSentMessageStat();	    
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella hops flow messages sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_HOPS_FLOW = 
+	    new TCPSentMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella meta-vendor messages sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_MESSAGES_SUPPORTED = 
+	    new TCPSentMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella TCP ConnectBack messages sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_TCP_CONNECTBACK = 
+	    new TCPSentMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella UDP ConnectBack sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_UDP_CONNECTBACK = 
+	    new TCPSentMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella ReplyNumber VM sent over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_REPLY_NUMBER = 
+	    new UDPSentMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella LimeACK VM sent over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_LIME_ACK = 
+	    new UDPSentMessageStat();
 }

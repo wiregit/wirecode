@@ -248,4 +248,48 @@ public class LimeSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic MULTICAST_FILTERED_MESSAGES = 
 	    new FilteredLimeSentMessageStatBytes();	    
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella hops flow messages sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_HOPS_FLOW = 
+	    new TCPLimeSentMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella meta-vendor messages sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_MESSAGES_SUPPORTED = 
+	    new TCPLimeSentMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella TCP ConnectBack messages sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_TCP_CONNECTBACK = 
+	    new TCPLimeSentMessageStatBytes();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella UDP ConnectBack sent over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_UDP_CONNECTBACK = 
+	    new TCPLimeSentMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella ReplyNumber VM sent over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_REPLY_NUMBER = 
+	    new UDPLimeSentMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella LimeACK VM sent over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_LIME_ACK = 
+	    new UDPLimeSentMessageStatBytes();
+
+
 }

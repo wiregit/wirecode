@@ -291,5 +291,56 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStat.MULTICAST_DUPLICATE_QUERIES,
 									   LimeReceivedMessageStatBytes.MULTICAST_DUPLICATE_QUERIES,
 									   "RECEIVED_MULTICAST_DUPLICATE_QUERIES");									   
+
+	public static final ReceivedMessageStatHandler UDP_LIME_ACK = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_LIME_ACK,
+                                       ReceivedMessageStatBytes.UDP_LIME_ACK,
+                                       LimeReceivedMessageStat.UDP_LIME_ACK,
+                                       LimeReceivedMessageStatBytes.UDP_LIME_ACK,
+                                       "RECEIVED_UDP_LIME_ACK");
+
+    
+	public static final ReceivedMessageStatHandler TCP_HOPS_FLOW = 
+        new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_HOPS_FLOW,
+                                       ReceivedMessageStatBytes.TCP_HOPS_FLOW,
+                                       LimeReceivedMessageStat.TCP_HOPS_FLOW,
+                                       LimeReceivedMessageStatBytes.TCP_HOPS_FLOW,
+                                       "RECEIVED_UDP_HOPS_FLOW");
+    
+
+	public static final ReceivedMessageStatHandler TCP_TCP_CONNECTBACK = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_TCP_CONNECTBACK,
+                                       ReceivedMessageStatBytes.TCP_TCP_CONNECTBACK,
+                                       LimeReceivedMessageStat.TCP_TCP_CONNECTBACK,
+                                       LimeReceivedMessageStatBytes.TCP_TCP_CONNECTBACK, 
+                                       "RECEIVED_TCP_TCP_CONNECTBACK");
+
+
+	public static final ReceivedMessageStatHandler TCP_UDP_CONNECTBACK = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_UDP_CONNECTBACK,
+                                       ReceivedMessageStatBytes.TCP_UDP_CONNECTBACK,
+                                       LimeReceivedMessageStat.TCP_UDP_CONNECTBACK,
+                                       LimeReceivedMessageStatBytes.TCP_UDP_CONNECTBACK, 
+                                       "RECEIVED_TCP_UDP_CONNECTBACK");
+
+
+	public static final ReceivedMessageStatHandler TCP_MESSAGES_SUPPORTED = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_MESSAGES_SUPPORTED,
+                                       ReceivedMessageStatBytes.TCP_MESSAGES_SUPPORTED,
+                                       LimeReceivedMessageStat.TCP_MESSAGES_SUPPORTED,
+                                       LimeReceivedMessageStatBytes.TCP_MESSAGES_SUPPORTED,
+                                       "RECEIVED_TCP_MESSAGES_SUPPORTED");
+    
+
+	public static final ReceivedMessageStatHandler UDP_REPLY_NUMBER = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_REPLY_NUMBER,
+                                       ReceivedMessageStatBytes.UDP_REPLY_NUMBER,
+                                       LimeReceivedMessageStat.UDP_REPLY_NUMBER,
+                                       LimeReceivedMessageStatBytes.UDP_REPLY_NUMBER,
+                                       "RECEIVED_UDP_REPLY_NUMBER");
+
+
 	
+
+
 }

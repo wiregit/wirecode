@@ -244,4 +244,49 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   SentMessageStatBytes.MULTICAST_FILTERED_MESSAGES,
 								   LimeSentMessageStat.MULTICAST_FILTERED_MESSAGES,
 								   LimeSentMessageStatBytes.MULTICAST_FILTERED_MESSAGES);								   
+
+	public static final SentMessageStatHandler UDP_LIME_ACK = 
+	    new SentMessageStatHandler(SentMessageStat.UDP_LIME_ACK,
+								   SentMessageStatBytes.UDP_LIME_ACK,
+								   LimeSentMessageStat.UDP_LIME_ACK,
+								   LimeSentMessageStatBytes.UDP_LIME_ACK);
+
+
+	public static final SentMessageStatHandler TCP_HOPS_FLOW = 
+	    new SentMessageStatHandler(SentMessageStat.TCP_HOPS_FLOW,
+								   SentMessageStatBytes.TCP_HOPS_FLOW,
+								   LimeSentMessageStat.TCP_HOPS_FLOW,
+								   LimeSentMessageStatBytes.TCP_HOPS_FLOW);
+
+
+	public static final SentMessageStatHandler TCP_TCP_CONNECTBACK = 
+	    new SentMessageStatHandler(SentMessageStat.TCP_TCP_CONNECTBACK,
+								   SentMessageStatBytes.TCP_TCP_CONNECTBACK,
+								   LimeSentMessageStat.TCP_TCP_CONNECTBACK,
+								   LimeSentMessageStatBytes.TCP_TCP_CONNECTBACK);
+
+
+	public static final SentMessageStatHandler TCP_UDP_CONNECTBACK = 
+	    new SentMessageStatHandler(SentMessageStat.TCP_UDP_CONNECTBACK,
+								   SentMessageStatBytes.TCP_UDP_CONNECTBACK,
+								   LimeSentMessageStat.TCP_UDP_CONNECTBACK,
+								   LimeSentMessageStatBytes.TCP_UDP_CONNECTBACK);
+
+
+	public static final SentMessageStatHandler TCP_MESSAGES_SUPPORTED = 
+	    new SentMessageStatHandler(SentMessageStat.TCP_MESSAGES_SUPPORTED,
+								   SentMessageStatBytes.TCP_MESSAGES_SUPPORTED,
+								   LimeSentMessageStat.TCP_MESSAGES_SUPPORTED,
+								   LimeSentMessageStatBytes.TCP_MESSAGES_SUPPORTED);
+
+
+	public static final SentMessageStatHandler UDP_REPLY_NUMBER = 
+	    new SentMessageStatHandler(SentMessageStat.UDP_REPLY_NUMBER,
+								   SentMessageStatBytes.UDP_REPLY_NUMBER,
+								   LimeSentMessageStat.UDP_REPLY_NUMBER,
+								   LimeSentMessageStatBytes.UDP_REPLY_NUMBER);
+
+
+
+
 }

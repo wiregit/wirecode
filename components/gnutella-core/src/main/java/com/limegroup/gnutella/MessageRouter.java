@@ -251,16 +251,28 @@ public abstract class MessageRouter {
             handlePatchTableMessage((PatchTableMessage)msg,
                                     receivingConnection);            
         }
-        else if (msg instanceof MessagesSupportedVendorMessage) 
+        else if (msg instanceof MessagesSupportedVendorMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(msg);
             receivingConnection.handleVendorMessage((VendorMessage) msg);
-        else if (msg instanceof HopsFlowVendorMessage)
+        }
+        else if (msg instanceof HopsFlowVendorMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);
             receivingConnection.handleVendorMessage((VendorMessage) msg);
-        else if (msg instanceof TCPConnectBackVendorMessage)
+        }
+        else if (msg instanceof TCPConnectBackVendorMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
             handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
                                         receivingConnection);
-        else if (msg instanceof UDPConnectBackVendorMessage)
+        }
+        else if (msg instanceof UDPConnectBackVendorMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                                         receivingConnection);
+        }
 
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -317,6 +329,8 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		} else if(msg instanceof LimeACKVendorMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, datagram);
         }
         
@@ -1673,9 +1687,10 @@ public abstract class MessageRouter {
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
     protected abstract List createQueryReply(byte[] guid, byte ttl, int port, 
-                                             byte[] ip , long speed, Response[] res,
-                                             byte[] clientGUID, boolean notIncoming,
-                                             boolean busy, boolean uploaded, 
+                                             byte[] ip , long speed, 
+                                             Response[] res, byte[] clientGUID, 
+                                             boolean notIncoming, boolean busy, 
+                                             boolean uploaded, 
                                              boolean measuredSpeed, 
                                              boolean supportsChat,
                                              boolean isFromMcast);

@@ -282,4 +282,46 @@ public class ReceivedMessageStat extends AdvancedStatistic {
      */
     public static final Statistic MULTICAST_DUPLICATE_QUERIES =
         new DuplicateQueriesReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella hops flow messages received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_HOPS_FLOW = 
+	    new TCPReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella meta-vendor messages received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_MESSAGES_SUPPORTED = 
+	    new TCPReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella TCP ConnectBack messages received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_TCP_CONNECTBACK = 
+	    new TCPReceivedMessageStat();
+	    
+	/**
+	 * <tt>Statistic</tt> for Gnutella UDP ConnectBack received over 
+	 * TCP.
+	 */
+	public static final Statistic TCP_UDP_CONNECTBACK = 
+	    new TCPReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella ReplyNumber VM received over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_REPLY_NUMBER = 
+	    new UDPReceivedMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella LimeACK VM received over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_LIME_ACK = 
+	    new UDPReceivedMessageStat();
 }

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.*;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
 
 /** The message that lets other know what messages you support.  Everytime you
@@ -235,6 +236,20 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                 hashCode += (int) 37*vendorID[i];
             return hashCode;
         }
+    }
+
+    /** Overridden purely for stats handling.
+     */
+    protected void writePayload(OutputStream out) throws IOException {
+        super.writePayload(out);
+        if (RECORD_STATS)
+            SentMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(this);
+    }
+
+    /** Overridden purely for stats handling.
+     */
+    public void recordDrop() {
+        super.recordDrop();
     }
 
 }
