@@ -321,15 +321,15 @@ public class QueryRouteTable {
         QueryRouteTable other=(QueryRouteTable)o;
         if (this.table.length!=other.table.length)
             return false;
-        if (this.bitTableLength!=other.bitTableLength)
-            return false;
+        //        if (this.bitTableLength!=other.bitTableLength)
+        //            return false;
 
         for (int i=0; i<this.table.length; i++) {
             if (this.table[i]!=other.table[i])
                 return false;
         }
-        if (!this.bitTable.equals(other.bitTable))
-            return false;
+        //        if (!this.bitTable.equals(other.bitTable))
+        //            return false;
 
         return true;
     }
