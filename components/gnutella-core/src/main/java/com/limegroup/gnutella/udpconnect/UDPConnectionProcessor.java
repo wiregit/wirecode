@@ -797,15 +797,14 @@ public class UDPConnectionProcessor {
     private synchronized void validateAckedData() {
         long currTime = System.currentTimeMillis();
 
-        if (_sendWindow.acksAppearToBeMissing(currTime, 3)) {
+        if (_sendWindow.acksAppearToBeMissing(currTime, 2)) {
 
             // if the older blocks ack have been missing for a while
             // resend them.
 
             // Calculate a good time to wait
             int rto      = _sendWindow.getRTO();
-            int adjRTO   = (rto * 5) / 2;
-            int waitTime = rto / 2;
+            int adjRTO   = (rto * 2);
 
             long start   = _sendWindow.getWindowStart();
 
@@ -1148,7 +1147,8 @@ public class UDPConnectionProcessor {
             if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
 
                 // Scale back on the writing speed if you are hitting limits
-                _writeRegulator.hitZeroWindow();
+                if ( _receiverWindowSpace <= 0 ) { 
+                    _writeRegulator.hitZeroWindow();
             }
 
             // Initially ensure waitTime is not too low

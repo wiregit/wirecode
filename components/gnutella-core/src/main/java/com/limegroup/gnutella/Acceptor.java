@@ -464,6 +464,8 @@ public class Acceptor implements Runnable {
                 InetAddress localAddress = client.getLocalAddress();
                 setAddress( localAddress );                
 
+                if (true) return;
+
 				// we have accepted an incoming socket -- only record
                 // that we've accepted incoming if it's definitely
                 // not from our local subnet and we aren't connected to
