@@ -810,4 +810,8 @@ public class RouterService
         return manager.isSupernode();
     }
 
+    public boolean hasClientSupernodeConnection() {
+        return manager.hasClientSupernodeConnection();
+    }
+
 }
