@@ -20,6 +20,7 @@ public final class HugeTestSuite {
 		suite.addTest(UrnTest.suite());
 		suite.addTest(AlternateLocationTest.suite());
 		suite.addTest(UrnFactoryTest.suite());
+		suite.addTest(FileDescTester.suite());
 		return suite;
 	}
 }
