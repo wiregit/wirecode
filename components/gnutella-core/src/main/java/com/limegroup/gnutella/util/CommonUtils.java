@@ -218,7 +218,7 @@ public final class CommonUtils {
         return _minorVersionNumber;
     }
 
-    static int getMajorVersionNumberInternal(String version) {
+    private static int getMajorVersionNumberInternal(String version) {
         if (!version.equals("@version@")) {
             try {
                 int firstDot = version.indexOf(".");
@@ -233,7 +233,7 @@ public final class CommonUtils {
     }
 
 
-    static int getMinorVersionNumberInternal(String version) {
+    private static int getMinorVersionNumberInternal(String version) {
         if (!version.equals("@version@")) {
             try {
                 int firstDot = version.indexOf(".");
@@ -248,7 +248,6 @@ public final class CommonUtils {
         // in case this is a mainline version or NFE was caught (strange)
         return 7;
     }
-
 
 	/**
 	 * Returns a version number appropriate for upload headers.
@@ -690,7 +689,74 @@ public final class CommonUtils {
             retval = 0;
         }
         return retval;
-    }        
+    }  
+
+
+	/**
+	 * Copies the specified resource file into the current directory from
+	 * the jar file. If the file already exists, no copy is performed.
+	 *
+	 * @param fileName the name of the file to copy, relative to the jar 
+	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+	 */
+	public static void copyResourceFile(final String fileName) {
+		copyResourceFile(fileName, null);
+	}  
+
+	/**
+	 * Copies the specified resource file into the current directory from
+	 * the jar file. If the file already exists, no copy is performed.
+	 *
+	 * @param fileName the name of the file to copy, relative to the jar 
+	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+	 */
+    public static void copyResourceFile(final String fileName, File newFile) {
+		if(newFile == null) newFile = new File(fileName);
+
+		// return quickly if the dll is already there, no copy necessary
+		if( newFile.exists() ) return;
+		String parentString = newFile.getParent();
+		File parentFile = new File(parentString);
+		if(!parentFile.isDirectory()) {
+			parentFile.mkdirs();
+		}
+
+		ClassLoader cl = CommonUtils.class.getClassLoader();			
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;            
+		try {
+			//load resource using my class loader or system class loader
+			//Can happen if Launcher loaded by system class loader
+			InputStream is =  
+				cl != null
+				?  cl.getResource(fileName).openStream()
+				:  ClassLoader.getSystemResource(fileName).openStream();
+			
+			//buffer the streams to improve I/O performance
+			final int bufferSize = 2048;
+			bis = new BufferedInputStream(is, bufferSize);
+			bos = 
+				new BufferedOutputStream(new FileOutputStream(newFile), 
+										 bufferSize);
+			byte[] buffer = new byte[bufferSize];
+			int c = 0;
+			
+			do { //read and write in chunks of buffer size until EOF reached
+				c = bis.read(buffer, 0, bufferSize);
+				bos.write(buffer, 0, c);
+			}
+			while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
+			
+		} catch(Exception e) {	
+			//if there is any error, delete any portion of file that did write
+			newFile.delete();
+		} finally {
+			try {
+				if(bis != null) bis.close();
+				if(bos != null) bos.close();
+			} catch(IOException ioe) {}	// all we can do is try to close the streams
+		} 
+	}
         
 
 
