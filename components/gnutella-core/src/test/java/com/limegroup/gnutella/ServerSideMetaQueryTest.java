@@ -94,7 +94,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
     //////////////////////////////////////////////////////////////////
 
     public static Integer numUPs() {
-        return new Integer(4);
+        return new Integer(3);
     }
     
     private static byte[] myIP() {
@@ -370,14 +370,14 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
                              QueryRequest.LIN_PROG_MASK |
                              QueryRequest.IMAGE_MASK);
         
-        testUP[3].send(query);
-        testUP[3].flush();
+        testUP[1].send(query);
+        testUP[1].flush();
 
         Thread.sleep(250);
 
         // we should get a reply with 1 responses
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[3],
+            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();
@@ -503,14 +503,14 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
                              FeatureSearchData.WHAT_IS_NEW, false,
                              0 | QueryRequest.LIN_PROG_MASK);
         
-        testUP[3].send(query);
-        testUP[3].flush();
+        testUP[1].send(query);
+        testUP[1].flush();
 
         Thread.sleep(250);
 
         // we should get no responses because of the filter
         QueryReply reply = 
-            (QueryReply)getFirstInstanceOfMessageType(testUP[3],
+            (QueryReply)getFirstInstanceOfMessageType(testUP[1],
                                                       QueryReply.class);
         assertNotNull(reply);
         List results = reply.getResultsAsList();

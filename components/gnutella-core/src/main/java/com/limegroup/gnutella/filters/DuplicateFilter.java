@@ -165,8 +165,11 @@ public class DuplicateFilter extends SpamFilter {
         }
 
         //Look up query in both sets.  Add it to new set if not already there.
-        QueryPair qp=new QueryPair(
-            qr.getQuery(), qr.getHops(), qr.getRichQuery(), qr.getQueryUrns() );
+        QueryPair qp=new QueryPair(qr.getQuery(),
+                                   qr.getHops(),
+                                   qr.getRichQuery(),
+                                   qr.getQueryUrns(),
+                                   qr.getMetaMask() );
         if (oldQueries.contains(qp)) {
             return false;
         } else {
@@ -198,12 +201,15 @@ final class QueryPair {
     LimeXMLDocument xml;
     Set URNs;
     int cachedHash = 0;
+    int metaMask;
     
-    QueryPair(String query, int hops, LimeXMLDocument xml, Set URNs) {
+    QueryPair(String query, int hops, LimeXMLDocument xml,
+              Set URNs, int metaMask) {
         this.query=query;
         this.hops=hops;
         this.xml = xml;
         this.URNs = URNs;
+        this.metaMask = metaMask;
     }
 
     /*
@@ -228,7 +234,8 @@ final class QueryPair {
             return false;
             
         QueryPair other=(QueryPair)o;
-        return (this.hops==other.hops) && 
+        return this.hops==other.hops && 
+               this.metaMask == other.metaMask && 
                this.URNs.equals(other.URNs) &&
                this.query.equals(other.query) &&
                (xml == null ? other.xml == null : xml.equals(other.xml));
@@ -242,6 +249,7 @@ final class QueryPair {
     		    cachedHash = (37*cachedHash) + xml.hashCode();
     		cachedHash = (37*cachedHash) + URNs.hashCode();
     		cachedHash = (37*cachedHash) + hops;
+    		cachedHash = (37*cachedHash) + metaMask;
         }    		
 		return cachedHash;
     }

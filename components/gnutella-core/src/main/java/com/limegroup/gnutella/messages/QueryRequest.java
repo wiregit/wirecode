@@ -1574,8 +1574,11 @@ public class QueryRequest extends Message implements Serializable{
             return ((_metaMask.intValue() & LIN_PROG_MASK) > 0);
         return true;
     }
-
-    private int getMetaMask() {
+    
+    /**
+     * Returns the mask of allowed programs.
+     */
+    public int getMetaMask() {
         if (_metaMask != null)
             return _metaMask.intValue();
         return 0;
