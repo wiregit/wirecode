@@ -1076,7 +1076,9 @@ public class DownloadManager implements BandwidthTracker {
         }   
 
         //2. Parse and return the fields.
-        try {            
+        try {
+            // just make sure the GIV is gone
+            if (command.startsWith("GIV ")) command = command.substring(4);
             //a) Extract file index.  IndexOutOfBoundsException
             //   or NumberFormatExceptions will be thrown here if there's
             //   a problem.  They're caught below.

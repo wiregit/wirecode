@@ -544,7 +544,6 @@ public class UDPService implements Runnable {
 	 * @return <tt>true</tt> if this node has accepted a SOLICITED UDP packet.
 	 */	
 	public boolean canReceiveSolicited() {
-System.out.println("return Accepting solicited: "+ _acceptedSolicitedIncoming);
         return _acceptedSolicitedIncoming;
 	}
 
