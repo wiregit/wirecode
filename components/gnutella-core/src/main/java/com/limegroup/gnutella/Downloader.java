@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import java.net.InetAddress;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import java.io.File;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -117,5 +118,10 @@ public interface Downloader extends BandwidthTracker {
 	 *         component since the last time this method was called
 	 */
 	public int getNewBytesTransferred();
+
+    /** call this method if you need to add a newly downloaded file to the
+        FileManager repository.
+    */
+    public void addFileToFM(File f, String hash);
     
 }
