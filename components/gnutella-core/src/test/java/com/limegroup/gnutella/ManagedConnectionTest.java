@@ -349,7 +349,7 @@ class TestManagedConnection extends ManagedConnection {
               new MessageRouterStub(), new ConnectionManagerStub());
     }
     
-    protected boolean hasQueued() {
+    public boolean hasQueued() {
         if (blocked)
             return true;
         else
