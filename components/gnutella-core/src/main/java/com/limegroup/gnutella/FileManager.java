@@ -315,15 +315,12 @@ public class FileManager{
         //Don't allocate until needed
         ArrayList response_list=null;
 
-        //TODO2: instead of doing this each time, modify StringUtils.matches
-        //TODO2: make "a b" match "a*b" AND "b*a"
-        query=query.toLowerCase();
         for(int i=0; i < _files.size(); i++) {
             FileDesc desc = (FileDesc)_files.get(i);
             if (desc==null)
                 continue;
-            String file_name = desc._nameLowerCase;
-            if (StringUtils.contains(file_name, query)) {
+            String file_name = desc._nameLowerCase; //_name will do too
+            if (StringUtils.contains(file_name, query, true)) {
                 if (response_list==null)
                     response_list=new ArrayList();
                 response_list.add(_files.get(i));
