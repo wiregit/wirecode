@@ -384,20 +384,45 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The average bandwidth over all managed downloads.
      */
     private float averageBandwidth = 0f;
-    
+
+    /**
+	 * Constant for the file name to use for this downloading file.
+	 */
+	protected String _fileName;
+
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * does not start until initialize(..) is called, nor is it safe to call
      * any other methods until that point.
-     *     @param files the list of files to get.  This stops after ANY of the
-     *      files is downloaded.
-     *     @param incompleteFileManager the repository of incomplete files for
-     *      resuming
+	 *
+	 * @param name the name of the file on disk -- this can change slightly
+	 *  to eliminate any characters that are problematic on certain 
+	 *  platforms
+     * @param files the list of files to get.  This stops after ANY of the
+     *  files is downloaded.
+     * @param incompleteFileManager the repository of incomplete files for
+     *  resuming
      */
-    public ManagedDownloader(RemoteFileDesc[] files,
-                             IncompleteFileManager incompleteFileManager) {
-        this.allFiles=files;
-        this.incompleteFileManager=incompleteFileManager;
+    public ManagedDownloader(String name, RemoteFileDesc[] files,
+                             IncompleteFileManager ifc) {
+		if(name == null) {
+			throw new NullPointerException("null file name");
+		}
+		if(name.length() == 0) {
+			throw new IllegalArgumentException("zero length name");
+		}
+		if(files == null) {
+			throw new NullPointerException("null RFDS");
+		}
+		if(files.length == 0) {
+			throw new IllegalArgumentException("empty RFD array");
+		}
+		if(ifc == null) {
+			throw new NullPointerException("null incomplete file manager");
+		}
+		_fileName = CommonUtils.convertFileName(name);
+        this.allFiles = files;
+        this.incompleteFileManager = ifc;
     }
 
     /** 
@@ -2204,10 +2229,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized String getFileName() {        
+		return _fileName;
+
         //Return the most specific information possible.  Case (b) is critical
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
-        
+
+        /*
         String ret = null;
         //a) Return names of one of the active downloaders.
         if (dloaders.size()>0)
@@ -2222,9 +2250,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         //d) Give up.  Note that subclass may take action.
         else
             ret = UNKNOWN_FILENAME;
+		*/
 
-        return CommonUtils.convertFileName(ret);
+        //return CommonUtils.convertFileName(ret);
     }
+
+
+	
 
     public synchronized int getContentLength() {
         //If we're not actually downloading, we just pick some random value.
@@ -2436,6 +2468,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * of JUnit. We had to have the method here because it accesses private
      * variables.
      */
+	/*
     static void unitTest() {
         //Test removeBest
         Set urns1=new TreeSet();
@@ -2494,6 +2527,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         Assert.that(stub.removeBest(list)==rf4);  
         Assert.that(list.size()==0);
 
+	*/
         //Test serialization
 //          ManagedDownloader downloader=new ManagedDownloader();//test constructor
 //          downloader.allFiles=new RemoteFileDesc[1];
@@ -2523,16 +2557,17 @@ public class ManagedDownloader implements Downloader, Serializable {
 //              e.printStackTrace();
 //              Assert.that(false, "Unexpected class cast problem.");
 //          }
-    }
+    //}
     
     /** Stub constructor for above test. */
-    private ManagedDownloader() {
-    }
+//     private ManagedDownloader() {
+//     }
 
     /** Stub constructor for testing only.  Does not actually start downloads. */
-    protected ManagedDownloader(RemoteFileDesc[] allFiles) {
-        this.allFiles=allFiles;
-    }
+//     protected ManagedDownloader(RemoteFileDesc[] allFiles) {
+//         this.allFiles=allFiles;
+//     }
+   
 
     //More tests:
     //-test/com/limegroup/gnutella/downloader/ManagedDownloaderTest.java

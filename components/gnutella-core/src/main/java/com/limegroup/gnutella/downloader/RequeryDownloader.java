@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
@@ -13,7 +14,7 @@ import java.io.*;
  * matching the current set of RemoteFileDesc's.
  */
 public class RequeryDownloader extends ManagedDownloader 
-        implements Serializable {
+	implements Serializable {
     /** Ensure backwards downloads.dat compatibility. */
     static final long serialVersionUID = 8241301635419840924L;
 
@@ -37,7 +38,7 @@ public class RequeryDownloader extends ManagedDownloader
      */
     public RequeryDownloader(IncompleteFileManager incompleteFileManager,
                              AutoDownloadDetails add) {
-        super(new RemoteFileDesc[0], incompleteFileManager);
+        super("WISHLIST DOWNLOADER",new RemoteFileDesc[0], incompleteFileManager);
         Assert.that(add != null, 
                     "Instantiated with a null AutoDownloadDetail!");
         _add = add;
@@ -87,7 +88,7 @@ public class RequeryDownloader extends ManagedDownloader
      * been started, only allows those RemoteFileDesc's that actually match 
      * the download.
      */
-    protected boolean allowAddition(RemoteFileDesc other) {        
+    protected boolean allowAddition(RemoteFileDesc other) {
         if (_hasFile)
             return super.allowAddition(other);
         else {
@@ -100,12 +101,13 @@ public class RequeryDownloader extends ManagedDownloader
                 if (_add.addDownload(other)) {
                     _add.commitDownload(other);
                     _hasFile = true;
+					_fileName = CommonUtils.convertFileName(other.getFileName());
                     return true;
                 } else {
                     return false;
                 }
             }
-        }    
+        }
     }
 
 

@@ -65,7 +65,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param filename the final file name, or null if unknown
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
-     * @exception IllegalArgumentException both urn and textQuery are null 
      */
     public MagnetDownloader(DownloadManager manager,
                             FileManager filemanager,
@@ -74,12 +73,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
                             URN urn,
                             String textQuery,
                             String filename,
-                            String [] defaultURLs)
-            throws IllegalArgumentException {
+                            String [] defaultURLs) {
         //Initialize superclass with no locations.  We'll add the default
         //location when the download control thread calls tryAllDownloads.
-        super(new RemoteFileDesc[0],
-              ifm );
+        super("MAGNET DOWNLOAD", new RemoteFileDesc[0],ifm );
 
         this._textQuery=textQuery;
         this._urn=urn;

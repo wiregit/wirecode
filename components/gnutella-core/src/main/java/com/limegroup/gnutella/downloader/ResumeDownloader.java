@@ -47,7 +47,7 @@ public class ResumeDownloader extends ManagedDownloader
                             File incompleteFile,
                             String name,
                             int size) {
-        super(new RemoteFileDesc[0], incompleteFileManager);
+        super(name, new RemoteFileDesc[0], incompleteFileManager);
         this._incompleteFile=incompleteFile;
         this._name=name;
         this._size=size;
@@ -84,13 +84,6 @@ public class ResumeDownloader extends ManagedDownloader
             other.getFileName(), other.getSize(), other.getSHA1Urn());
     }
 
-    /**
-     * Overrides ManagedDownloader to display a reasonable file name even
-     * when no locations have been found.
-     */
-    public synchronized String getFileName() {        
-        return _name;
-    }
 
     /**
      * Overrides ManagedDownloader to display a reasonable file size even
