@@ -43,6 +43,8 @@ final class ProbeQuery {
 
         TTL_1_PROBES = lists[0];
         TTL_2_PROBES = lists[1];        
+        System.out.println("ProbeQuery::ProbeQuery::"+TTL_1_PROBES.size()); 
+        System.out.println("ProbeQuery::ProbeQuery::"+TTL_2_PROBES.size()); 
     }
     
 
@@ -100,11 +102,17 @@ final class ProbeQuery {
     }
 
     /**
-     * Helper method that creates the list of nodes to query for the probe.
-     * This list will vary in size depending on how popular the content appears
+     * Helper method that creates the lists of nodes to query for the probe.
+     * These lists will vary in size depending on how popular the content appears
      * to be.
+     *
+     * @param connections the <tt>List</tt> of connections to use in determining
+     *  which ones to probe
+     * @param query the <tt>QueryRequest</tt> instance to use in checking for hits
+     *  in the query routing tables for the given connections
      */
     private static LinkedList[] createProbeLists(List connections, QueryRequest query) {
+        System.out.println("ProbeQuery::createProbeLists::"+connections.size()); 
         Iterator iter = connections.iterator();
         
         LinkedList missConnections = new LinkedList();
@@ -126,7 +134,16 @@ final class ProbeQuery {
                 oldConnections.add(mc);
             }
         }
+        if(query.getHops() == 0) {
+            System.out.println(query.getQuery()+
+                               " hitConnections:  "+hitConnections.size()+
+                               " missConnections: "+missConnections.size()+
+                               " oldConnections:  "+oldConnections.size()); 
+        }
+<<<<<<< ProbeQuery.java
+=======
 
+>>>>>>> 1.1.2.8
         // final list of connections to query
         LinkedList[] returnLists = new LinkedList[2];
         LinkedList ttl1List = new LinkedList();

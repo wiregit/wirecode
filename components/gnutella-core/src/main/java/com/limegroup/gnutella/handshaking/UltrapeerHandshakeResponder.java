@@ -80,7 +80,7 @@ public class UltrapeerHandshakeResponder
 		
 		//give own IP address
 		ret.put(HeaderNames.LISTEN_IP,
-				Message.ip2string(RouterService.getAddress())+":"
+				NetworkUtils.ip2string(RouterService.getAddress())+":"
 				+ RouterService.getPort());
 		
 		

@@ -57,7 +57,7 @@ public final class IPFilter extends SpamFilter {
     }
 
     private static String ip2string(byte[] ip) {
-        //Hack.  Ideally we'd call Message.ip2string.
+        //Hack.  Ideally we'd call NetworkUtils.ip2string.
         return (new Endpoint(ip, 0)).getHostname();
     }
 }
