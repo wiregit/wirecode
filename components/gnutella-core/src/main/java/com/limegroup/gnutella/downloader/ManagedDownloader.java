@@ -1081,6 +1081,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file.
      */
     private void informMesh(RemoteFileDesc rfd, boolean good) {
+        URN bucketHash = null;
+        IncompleteFileDesc ifd = null;
+        //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
+        // of the AlternateLocationCollection, they must use seperate
+        // AlternateLocation objects.
+        AlternateLocation loc = null;
+        AlternateLocation forFD = null;
+
         //TODO2: unsplit the lock when we don't need the debugging info
         synchronized(this) {
         if(!rfd.isAltLocCapable())
@@ -1088,7 +1096,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             
         // Verify that the bucket itself has a hash.  If it does not,
         // we should not have been getting locations in the first place.
-        URN bucketHash = buckets.getURNForBucket(bucketNumber);
+        bucketHash = buckets.getURNForBucket(bucketNumber);
         Assert.that(bucketHash != null, "null bucketHash.");
         
         // Now verify that the SHA1 of the RFD matches the SHA1 of the
@@ -1102,11 +1110,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( validAlts == null )
             validAlts = AlternateLocationCollection.create(bucketHash);
         
-        //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
-        // of the AlternateLocationCollection, they must use seperate
-        // AlternateLocation objects.
-        AlternateLocation loc = null;
-        AlternateLocation forFD = null;
         try {
             loc = AlternateLocation.create(rfd);
             forFD = AlternateLocation.create(rfd);
@@ -1125,7 +1128,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         }
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
-        IncompleteFileDesc ifd = null;
         if( fd != null && fd instanceof IncompleteFileDesc) {
             ifd = (IncompleteFileDesc)fd;
             if(!bucketHash.equals(ifd.getSHA1Urn())) {
