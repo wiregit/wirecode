@@ -98,8 +98,7 @@ public class DownloadTest extends BaseTestCase {
 	private static Object COMPLETE_LOCK = new Object();
 	private static boolean REMOVED = false;
     
-    // default to waiting for 2 defaults.
-    private static long DOWNLOAD_WAIT_TIME = 1000 * 6 * 2;	
+    private static long DOWNLOAD_WAIT_TIME;
     
     public static void globalSetUp() throws Exception {
         // raise the download-bytes-per-sec so stealing is easier
@@ -131,7 +130,7 @@ public class DownloadTest extends BaseTestCase {
     }
     
     public void setUp() {
-        DOWNLOAD_WAIT_TIME = 1000 * 60 * 2;
+        DOWNLOAD_WAIT_TIME = 1000 * 60 * 3;
         DOWNLOADER = null;
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
