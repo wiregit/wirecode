@@ -113,6 +113,9 @@ public class UDPConnectionProcessor {
     /** The Window for sending and acking data */
 	private DataWindow        _sendWindow;
 
+    /** The WriteRegulator controls the amount of waiting time between writes */
+    private WriteRegulator    _writeRegulator;
+
     /** The Window for receiving data */
     private DataWindow        _receiveWindow;
 
@@ -272,6 +275,8 @@ public class UDPConnectionProcessor {
 
         // Create the delayed connection components
         _sendWindow      = new DataWindow(DATA_WINDOW_SIZE, 1);
+        _writeRegulator  = new WriteRegulator(_sendWindow); 
+
 		// TODO: keep up to date
         _chunkLimit      = _sendWindow.getWindowSpace();  
     }
@@ -653,6 +658,9 @@ log("------unscheduled");
 log2("Soft resend data:"+ start+ " rto:"+rto+
 " uS:"+_sendWindow.getUsedSpots());
 
+            // Scale back on the writing speed if you are hitting limits
+            _writeRegulator.hitResendTimeout();
+
             DataRecord drec;
             int        blockNum;
             int        numResent = 0;
@@ -900,13 +908,19 @@ log("calling getPending");
 		}
 		
 		// Compute how long to wait
-		// For now just leave it very simple  
 		// TODO: Simplify experimental algorithm and plug it in
-		long waitTime = (long)_sendWindow.getRTO() / 6l;
+		//long waitTime = (long)_sendWindow.getRTO() / 6l;
+        long currTime = System.currentTimeMillis();
+        long waitTime = _writeRegulator.getSleepTime(currTime);
+
         if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
             // If send window getting small
             // then wait longer
-            waitTime *= SMALL_WINDOW_MULTIPLE;                
+            waitTime *= SMALL_WINDOW_MULTIPLE;
+
+            // Scale back on the writing speed if you are hitting limits
+            _writeRegulator.hitZeroWindow();
+
         }
 		if (waitTime == 0) 
 			waitTime = DEFAULT_RTO_WAIT_TIME;
