@@ -936,7 +936,9 @@ public class QueryReply extends Message implements Serializable{
                                                    clientGUID, (int) speed,
                                                    supportsChat, 
                                                    qual,
-												   supportsBrowseHost);
+												   supportsBrowseHost,
+												   currResp.getDocument(),
+												   currResp.getUrns());
         }
         
         return retArray;
