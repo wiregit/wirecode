@@ -56,6 +56,10 @@ public final class QueryUnicaster {
      */
     private FixedSizeList _pingList;
 
+    /** A List of query GUIDS to purge.
+     */
+    private List _qGuidsToRemove;
+
     /** The last time I sent a broadcast ping.
      */
     private long _lastPingTime = 0;
@@ -127,6 +131,7 @@ public final class QueryUnicaster {
         _queryHosts = new LinkedList();
         _pingList = new FixedSizeList(25);
         _querySets = new Hashtable();
+        _qGuidsToRemove = new Vector();
 
         // start service...
         _querier = new Thread() {
@@ -142,12 +147,13 @@ public final class QueryUnicaster {
      *  it.  Then sleep and try some more later...
      */
     private void queryLoop() {
+        UDPService udpService = UDPService.instance();
+
         while (_shouldRun) {
             try {
                 waitForQueries();
                 GUESSEndpoint toQuery = getUnicastHost();
-                List toRemove = new ArrayList();
-                UDPService udpService = UDPService.instance();
+                purgeGuidsInternal(); // in case any were added while asleep
 
                 synchronized (_queries) {
                     Iterator iter = _queries.values().iterator();
@@ -157,7 +163,8 @@ public final class QueryUnicaster {
                             (currQB._hostsQueried.size() > 
                              QueryBundle.MAX_QUERIES)
                             )
-                            toRemove.add(currQB);
+                            // query is now stale....
+                            _qGuidsToRemove.add(new GUID(currQB._qr.getGUID()));
                         else if (currQB._hostsQueried.contains(toQuery))
                             ; // don't send another....
                         else {
@@ -171,16 +178,29 @@ public final class QueryUnicaster {
                     }
                 }
                 
-                // purge stale queries...
-                Iterator removee = toRemove.iterator();
-                while (removee.hasNext()) {
-                    QueryBundle currQB = (QueryBundle) removee.next();
-                    _queries.remove(new GUID(currQB._qr.getGUID()));
+                // purge stale queries, hold lock so you don't miss any...
+                synchronized (_qGuidsToRemove) {
+                    purgeGuidsInternal();
+                    _qGuidsToRemove.clear();
                 }
 
                 Thread.sleep(ITERATION_TIME);
             }
             catch (InterruptedException ignored) {}
+        }
+    }
+
+    /** A quick purging of query GUIDS from the _queries Map.  The
+     *  queryLoop uses this to so it doesn't have to hold the _queries
+     *  lock for too long.
+     */
+    private void purgeGuidsInternal() {
+        synchronized (_qGuidsToRemove) {
+            Iterator removee = _qGuidsToRemove.iterator();
+            while (removee.hasNext()) {
+                GUID currGuid = (GUID) removee.next();
+                _queries.remove(currGuid);
+            }
         }
     }
 
@@ -297,7 +317,7 @@ public final class QueryUnicaster {
      */
     void purgeQuery(GUID queryGUID) {
         debug("QueryUnicaster.purgeQuery(GUID): entered.");
-        _queries.remove(queryGUID);
+        _qGuidsToRemove.add(queryGUID);
         debug("QueryUnicaster.purgeQuery(GUID): returning.");
     }
 
