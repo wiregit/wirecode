@@ -37,6 +37,10 @@ public class ServerSideWhatIsNewTest
 
     private static MyActivityCallback callback;
 
+    private static File berkeley = null;
+    private static File susheel = null;
+
+
     public ServerSideWhatIsNewTest(String name) {
         super(name);
     }
@@ -63,13 +67,15 @@ public class ServerSideWhatIsNewTest
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
-        File berkeley = 
+        berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
+        susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir
         CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        berkeley = new File(_sharedDir, "berkeley.txt");
+        susheel = new File(_sharedDir, "susheel.txt");
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -205,6 +211,60 @@ public class ServerSideWhatIsNewTest
         assertTrue(((CapabilitiesVM)m).supportsWhatIsNew());
 
         // client side seems to follow the setup process A-OK
+    }
+
+
+    public void testCreationTimeCacheInitialState() throws Exception {
+        // wait for fm to finish
+        for (int i = 0; (i < 15) && (rs.getNumSharedFiles() < 2); i++)
+            Thread.sleep(1000);
+
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        FileManager fm = rs.getFileManager();
+        URN berkeleyURN = fm.getURNForFile(berkeley);
+        URN susheelURN = fm.getURNForFile(susheel);
+
+        {
+            Map urnToLong = 
+                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            assertEquals(2, urnToLong.size());
+            assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
+            assertNotNull(""+urnToLong, urnToLong.get(susheelURN));
+        }
+
+        {
+            Map longToUrns =
+                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            if (longToUrns.size() == 1) {
+                Iterator iter = longToUrns.entrySet().iterator();
+                Set urnSet = (Set)((Map.Entry)iter.next()).getValue();
+                assertTrue(urnSet.contains(berkeleyURN));
+                assertTrue(urnSet.contains(susheelURN));
+                assertEquals(2, urnSet.size());
+            }
+            else if (longToUrns.size() == 2) {
+                Iterator iter = longToUrns.entrySet().iterator();
+                Set urnSet = (Set)((Map.Entry)iter.next()).getValue();
+                assertTrue(
+                           ( urnSet.contains(berkeleyURN) && 
+                             !urnSet.contains(susheelURN) )
+                           ||
+                           ( !urnSet.contains(berkeleyURN) && 
+                             urnSet.contains(susheelURN) )
+                           );
+                assertEquals(1, urnSet.size());
+                urnSet = (Set)((Map.Entry)iter.next()).getValue();
+                assertTrue(
+                           ( urnSet.contains(berkeleyURN) && 
+                             !urnSet.contains(susheelURN) )
+                           ||
+                           ( !urnSet.contains(berkeleyURN) && 
+                             urnSet.contains(susheelURN) )
+                           );
+                assertEquals(1, urnSet.size());
+            }
+            else assertTrue("Bad Cache!", false);
+        }
     }
 
 
