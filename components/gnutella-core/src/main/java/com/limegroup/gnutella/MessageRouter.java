@@ -539,9 +539,7 @@ public abstract class MessageRouter
 										 ReplyHandler receivingConnection,
 										 ConnectionManager manager)
     {
-
-        boolean shouldUnicastRequest = _manager.isSupernode() && UNICAST_MODE;
-        if (shouldUnicastRequest) 
+        if (UNICAST_MODE) 
             unicastQueryRequest(queryRequest);
         else {
             // Note the use of initializedConnections only.
