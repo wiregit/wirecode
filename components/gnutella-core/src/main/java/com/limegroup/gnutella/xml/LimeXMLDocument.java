@@ -299,8 +299,10 @@ public class LimeXMLDocument{
      *  canonicalized field name (placeholder), and its corresponding value in
      *  the XML Document.  This list is ORDERED according to the schema URI of
      *  this document.  
+     *  @exception SchemaNotFoundException Thrown if you called this without 
+     *  providing a valid XML schema.  So please make sure your schema is ok.
      */
-    public List getOrderedNameValueList() {
+    public List getOrderedNameValueList() throws SchemaNotFoundException {
         List retList = new LinkedList();
 
         if (schemaUri != null) {
@@ -318,7 +320,11 @@ public class LimeXMLDocument{
                                                   retObj));
                 }
             }
+            else
+                throw new SchemaNotFoundException();
         }
+        else
+            throw new SchemaNotFoundException();
             
         return retList;
     }
@@ -330,18 +336,31 @@ public class LimeXMLDocument{
         return (String)fieldToValue.get(fieldName);
     }
     
-    /**
-     * Returns an XML string that will be re-created as this document 
-     * when it is re-assembled in another machine. 
-     */
 
-    public String getXMLString() {        
+    /**
+     * @return an XML string that will be re-created as this document 
+     * when it is re-assembled in another machine. 
+     * @exception SchemaNotFoundException DO NOT CALL THIS METHOD unless
+     * you know that getSchemaURI() returns a valid xml schema.  Set it 
+     * yourself with setSchemaURI().
+     */
+    public String getXMLString() throws SchemaNotFoundException {        
         //return XMLString;
         String ret = constructXML(getOrderedNameValueList(),schemaUri);
         return ret;
     }
     
-    public String getXMLStringWithIdentifier(){
+
+
+    /**
+     * @return an XML string that will be re-created as this document 
+     * when it is re-assembled in another machine. this xml string contains
+     * the filename identifier too (as an attribute).
+     * @exception SchemaNotFoundException DO NOT CALL THIS METHOD unless
+     * you know that getSchemaURI() returns a valid xml schema.  Set it 
+     * yourself with setSchemaURI().
+     */
+    public String getXMLStringWithIdentifier() throws SchemaNotFoundException {
         String ret = constructXML(getOrderedNameValueList(),schemaUri);
         //Insert the identifier name in the xmlString
         int index = ret.indexOf(">");//end of the header string

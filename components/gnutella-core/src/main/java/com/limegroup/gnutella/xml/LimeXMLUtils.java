@@ -340,10 +340,19 @@ public class LimeXMLUtils
         Iterator iterator = xmlDocuments.iterator();
         while(iterator.hasNext() && i < responseArray.length)
         {
-            String responseString = 
-                    ((LimeXMLDocument)iterator.next()).getXMLString();
+            String responseString = "";
             
-            System.out.println("response = " + responseString);
+            try {
+                responseString = 
+                ((LimeXMLDocument)iterator.next()).getXMLString();            
+                System.out.println("response = " + responseString);
+            }
+            catch (SchemaNotFoundException snfe) {
+                System.out.println("LimeXMLUtils.getResponseArray():" +
+                                   " could not get response XML String!");
+                snfe.printStackTrace();
+            }
+
             //make response out of the string
             //use the length of the string as size
             //and whole string as the file name

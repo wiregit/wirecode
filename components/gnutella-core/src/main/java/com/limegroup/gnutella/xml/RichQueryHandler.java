@@ -75,7 +75,10 @@ public class RichQueryHandler{
         for(int i=0; i<s;i++){
             LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
             String subjectFile = currDoc.getIdentifier();//returns null if none
-            metadata = currDoc.getXMLString();
+            try {
+                metadata = currDoc.getXMLString();
+            }
+            catch (SchemaNotFoundException snfe) {};
             if(subjectFile==null){//pure data (data about NO file)
                 index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
                 name = metadata.substring(22,33);//after <?xml version="1.0"?>
