@@ -5,6 +5,7 @@ package com.limegroup.gnutella.upelection;
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 
+import java.net.*;
 /**
  * contains the current list of best candidates.  Singleton and thread-safe.
  * Although the leaf info is serializable, there is no need for this class
@@ -100,6 +101,20 @@ public class BestCandidates {
 	public static void update(Candidate myLeaf) {
 		synchronized(instance) {
 			instance._best[0] = myLeaf;
+		}
+	}
+	
+	/**
+	 * removes a candidate from the list if they fail to respond
+	 * to a promotion request
+	 * @param e an Endpoint representing the candidate
+	 */
+	public static void fail(Endpoint e) {
+		InetAddress address = e.getInetAddress();
+		synchronized(instance) {
+			for (int i =0;i<instance._best.length;i++)
+				if (instance._best[i].getInetAddress().equals(address))
+					instance._best[i]=null;
 		}
 	}
 	
