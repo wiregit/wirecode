@@ -71,13 +71,18 @@ public class StandardMessageRouter
 
         //We mark our ping replies if currently in the supernode state.
         boolean markPong=_manager.isSupernode();
+        //Daily average uptime.  If too slow, use FRACTIONAL_UPTIME property.
+        //This results in a GGEP extension, which will be stripped before
+        //sending it to older clients.
+        int dailyUptime=Statistics.instance().calculateDailyUptime();
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
                                             acceptor.getPort(),
                                             acceptor.getAddress(),
                                             num_files,
                                             kilobytes,
-                                            markPong);
+                                            markPong,
+                                            dailyUptime);
 
         try
         {
@@ -94,6 +99,9 @@ public class StandardMessageRouter
      * connection
      */
     private void handleCrawlerPing(PingRequest m) {
+        //TODO: why is this any different than the standard pong?  In other
+        //words, why no ultrapong marking, proper address calculation, etc?
+        
         //send the pongs for leaves
         List /*<ManagedConnection>*/ leafConnections 
             = _manager.getInitializedClientConnections2();
