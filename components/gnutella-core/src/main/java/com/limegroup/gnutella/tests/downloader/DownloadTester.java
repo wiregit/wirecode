@@ -483,10 +483,7 @@ public class DownloadTester {
 
     /** Cleans up the complete file */
     private static void cleanup() {
-        boolean deleted = false;
-        while(!deleted) {//have to do this because windows locks up the file
-            deleted = file.getAbsoluteFile().delete();
-        }
+        file.delete();
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
