@@ -28,6 +28,12 @@ public class NormalUploadState implements UploadState {
     /** @see HTTPUploader#getUploadEnd */
     private int _uploadEnd;
 
+	/**
+	 * The <tt>URN</tt> instance for this upload, which could always
+	 * remain null.
+	 */
+	private URN _urn;
+
     /** Flag indicating whether we should close the connection after serving
      * the request or not */
     private boolean _closeConnection = false;
@@ -50,6 +56,7 @@ public class NormalUploadState implements UploadState {
             _amountRead = _uploader.amountUploaded();
             _uploadBegin =  _uploader.getUploadBegin();
             _uploadEnd =  _uploader.getUploadEnd();
+			_urn = _uploader.getUrn();
             
             //guard clause
             if(_fileSize < _uploadBegin)
@@ -232,7 +239,7 @@ public class NormalUploadState implements UploadState {
 		_ostream.write(str.getBytes());
 		str = "Content-length:"+ (_uploadEnd - _uploadBegin) + "\r\n";
 		_ostream.write(str.getBytes());
-		
+
 		// Version 0.5 of limewire misinterpreted Content-range
 		// to be 1 - n instead of 0 - (n-1), but because this is
 		// an optional field in the regular case, we don't need
@@ -243,6 +250,10 @@ public class NormalUploadState implements UploadState {
 		if (_uploadBegin != 0) {
 			str = "Content-range: bytes " + _uploadBegin  +
 			"-" + ( _fileSize - 1 )+ "/" + _fileSize + "\r\n";
+			_ostream.write(str.getBytes());
+		}
+		if(_urn != null) {
+			str = HTTPConstants.CONTENT_URN_HEADER + _urn + HTTPConstants.CRLF;
 			_ostream.write(str.getBytes());
 		}
 		 str = "\r\n";
