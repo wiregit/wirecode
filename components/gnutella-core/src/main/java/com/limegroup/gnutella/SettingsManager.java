@@ -853,9 +853,6 @@ public final class SettingsManager {
                         break;
                     setForceIPAddress(bs);
                 }
-                else if(key.equals(FORCED_IP_ADDRESS_STRING)){
-                    setForcedIPAddressString(p);
-                }
                 else if(key.equals(FORCED_PORT)){
                     setForcedPort(Integer.parseInt(p));
                 }
@@ -1008,7 +1005,11 @@ public final class SettingsManager {
         setBasicInfoForQuery(DEFAULT_BASIC_INFO_FOR_QUERY);
         setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
         setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
-        setForcedIPAddressString(DEFAULT_FORCED_IP_ADDRESS_STRING);
+        try {
+            setForcedIPAddressString(DEFAULT_FORCED_IP_ADDRESS_STRING);
+        } catch(UnknownHostException e) {
+            // not much we can do
+        }
         setForcedPort(DEFAULT_FORCED_PORT);
         setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
@@ -2367,43 +2368,41 @@ public final class SettingsManager {
      *
      * @param address an IP address in dotted quad (e.g., 1.2.3.4)
      *  or symbolic form (e.g., sparky.limewire.com)
-     * @exception IllegalArgumentException address wasn't
-     *   in a valid format.
+     * @exception <tt>UnknownHostException</tt> if the address wasn't
+     *  in a valid format
      */
     public void setForcedIPAddressString(String address)
-            throws IllegalArgumentException {
-        try {
-			if(address.equals(DEFAULT_FORCED_IP_ADDRESS_STRING)) {
-				_forcedIPAddress = new byte[4];
-				_forcedIPAddress[0] = 0;
-				_forcedIPAddress[1] = 0;
-				_forcedIPAddress[2] = 0;
-				_forcedIPAddress[3] = 0;
-			} else {
-				InetAddress ia = InetAddress.getByName(address);
-				_forcedIPAddress = ia.getAddress();
-			}
-            PROPS.put(FORCED_IP_ADDRESS_STRING, address);
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException();
+        throws UnknownHostException {
+
+        if(address.equals(DEFAULT_FORCED_IP_ADDRESS_STRING)) {
+            _forcedIPAddress = new byte[4];
+            _forcedIPAddress[0] = 0;
+            _forcedIPAddress[1] = 0;
+            _forcedIPAddress[2] = 0;
+            _forcedIPAddress[3] = 0;
+        } else {
+            InetAddress ia = InetAddress.getByName(address);
+            _forcedIPAddress = ia.getAddress();
         }
+        PROPS.put(FORCED_IP_ADDRESS_STRING, address);
     }
 
     /**
      * Sets the port to use when forcing the ip address.
      *
      * @param port the port to use for forcing the ip address
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public void setForcedPort(int port) {
         // if the entered port is outside accepted
         // port numbers, throw the exception
-        if(port > 65536 || port < 1)
-            throw new IllegalArgumentException();
-        else {
-            _forcedPort = port;
-            String s = Integer.toString(_forcedPort);
-            PROPS.put(FORCED_PORT, s);
-        }
+        if(!NetworkUtils.isValidPort(port)) 
+            throw new IllegalArgumentException("invalid port: "+port);
+
+
+        _forcedPort = port;
+        String s = Integer.toString(_forcedPort);
+        PROPS.put(FORCED_PORT, s);
     }
 
 	/**
