@@ -15,9 +15,6 @@ public final class ThemeSettings {
 
 	private static final Properties DEFAULT_PROPS = new Properties();
 
-
-	
-
 	/**
 	 * Handle to the <tt>SettingsFactory</tt> for theme settings.
 	 */
@@ -684,7 +681,48 @@ public final class ThemeSettings {
 	public static final IntSetting PLAYING_SONG_COLOR_B = 
 		FACTORY.createIntSetting("PLAYING_SONG_COLOR_B", 0);
 
+	/**
+	 * Setting for the search ip address color red value.
+	 */
+	public static final IntSetting SEARCH_IP_COLOR_R = 
+		FACTORY.createIntSetting("SEARCH_IP_COLOR_R", 0);
+
+	/**
+	 * Setting for the search ip address color green value.
+	 */
+	public static final IntSetting SEARCH_IP_COLOR_G = 
+		FACTORY.createIntSetting("SEARCH_IP_COLOR_G", 0);
+
+	/**
+	 * Setting for the search ip address color blue value.
+	 */
+	public static final IntSetting SEARCH_IP_COLOR_B = 
+		FACTORY.createIntSetting("SEARCH_IP_COLOR_B", 0);
+
+
+
+	/**
+	 * Setting for the search ip private address color red value.
+	 */
+	public static final IntSetting SEARCH_PRIVATE_IP_COLOR_R = 
+		FACTORY.createIntSetting("SEARCH_PRIVATE_IP_COLOR_R", 255);
+
+	/**
+	 * Setting for the search ip private address color green value.
+	 */
+	public static final IntSetting SEARCH_PRIVATE_IP_COLOR_G = 
+		FACTORY.createIntSetting("SEARCH_PRIVATE_IP_COLOR_G", 0);
+
+	/**
+	 * Setting for the search ip private address color blue value.
+	 */
+	public static final IntSetting SEARCH_PRIVATE_IP_COLOR_B = 
+		FACTORY.createIntSetting("SEARCH_PRIVATE_IP_COLOR_B", 0);
+
+
+	/*
 	public static void main(String[] args) {
 		ThemeSettings.reload();
 	}	
+	*/
 }
