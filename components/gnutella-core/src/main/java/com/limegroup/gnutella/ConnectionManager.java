@@ -1545,7 +1545,6 @@ public class ConnectionManager {
 	 *  for messages
 	 */
 	private void startConnection(Connection conn) throws IOException {
-        System.out.println("ConnectionManager::startConnection");
 	    Thread.currentThread().setName("MessageLoopingThread");
 
 		if(conn.isGUESSUltrapeer()) {
