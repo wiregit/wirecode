@@ -190,17 +190,18 @@ public class LimeXMLDocumentHelper{
         int z = attributes.size();
         for(int i=0;i<z;i++){
             Node att = (Node)attributes.get(i);
-            String attName = LimeXMLUtils.encodeXML(
-                                                    att.getNodeName().toLowerCase());
-            String attVal = att.getNodeValue();
+            String attName = att.getNodeName().toLowerCase();
+            String attVal = LimeXMLUtils.encodeXML(att.getNodeValue());
             retString = retString+" "+attName+"=\""+attVal+"\"";
         }
-        String val = LimeXMLUtils.encodeXML(node.getNodeValue());
+        String val = node.getNodeValue();
         List children=LimeXMLUtils.getElements(node.getChildNodes());
         int y=children.size();
         boolean hasValue;
-        if(val!=null && !val.equals(""))
+        if(val!=null && !val.equals("")) {
+            val = LimeXMLUtils.encodeXML(val);
             hasValue = true;
+        }
         else 
             hasValue= false;
         if(y==0 && !hasValue)
