@@ -205,9 +205,9 @@ public class UTest implements ActivityCallback, ErrorCallback {
 					len = istream.read(bdata);
 
 					for (int j = 0; j < len; j++) {
-						if ( bdata[i+j] != ((i+j) % 256) ) {
+						if ( bdata[j] != ((i+j) % 256) ) {
 							log2("Error on read expected: "+(i+j)
-							  +" received: "+bdata[i+j]);
+							  +" received: "+bdata[j]);
 							break;
 						} 
 						if ( ((i+j) % 1024) == 0 ) 
@@ -234,9 +234,9 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				len = istream.read(bdata);
 
 				for (int j = 0; j < len; j++) {
-					if ( bdata[i+j] != ((i+j) % 256) ) {
+					if ( bdata[j] != ((i+j) % 256) ) {
 						log2("Error on echo expected: "+(i+j)
-						  +" received: "+bdata[i+j]);
+						  +" received: "+bdata[j]);
 						break;
 					} 
 					if ( ((i+j) % 1024) == 0 ) 
