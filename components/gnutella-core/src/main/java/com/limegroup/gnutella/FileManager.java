@@ -1066,31 +1066,21 @@ public abstract class FileManager {
     /** 
      * If oldName isn't shared, returns false.  Otherwise removes "oldName",
      * adds "newName", and returns true iff newName is actually shared.  The new
-     * file may or may not have the same index as the original.<p>
-     * 
-     * This method does not call the addSharedFile callback method.  It exists
-     * to make it easier for the GUI to rename a file without getting a
-     * confusing callback.  Note that this doesn't affect the disk.
-     *
+     * file may or may not have the same index as the original.
+     * Note that this does not change the disk.
      * @modifies this 
      */
     public synchronized boolean renameFileIfShared(File oldName,
                                                    File newName) {
-        //As a temporary hack, we just disable callbacks, remove old,
-        //re-add new, and restore callback.
-        ActivityCallback savedCallback=_callback;
-        _callback=null;
-        try {
-            FileDesc removed=removeFileIfShared(oldName);
-            if (removed == null)
-                return false;
-            FileDesc fd = addFileIfShared(newName);
-            if (fd == null)
-                return false;
-            return true;
-        } finally {
-            _callback=savedCallback;
-        }
+        FileDesc fd = (FileDesc)_fileToFileDesc.get(oldName);
+        if( fd == null )
+            return false;
+        List xmlDocs = new LinkedList();
+        xmlDocs.addAll(fd.getLimeXMLDocuments());            
+        fd = removeFileIfShared(oldName);
+        Assert.that( fd != null, "invariant broken.");
+        fd = addFileIfShared(newName, xmlDocs);
+        return (fd != null);
     }
 
 
