@@ -94,19 +94,18 @@ public class BucketQueue implements Cloneable {
      * @exception IllegalArgumentException priority is not a legal priority, 
      *  as determined by this' constructor
      */
-    public Object insert(Object o, int priority) 
-            throws IllegalArgumentException {
+    public Object insert(Object o, int priority) {
         repOk();
-        try {
-            Object ret=buckets[priority].addFirst(o);
-            if (ret==null)
-                size++;     //Maintain invariant
-            return ret;
-        } catch (IndexOutOfBoundsException e) {
+        if(priority > buckets.length) {
             throw new IllegalArgumentException("Bad priority: "+priority);
-        } finally {
-            repOk();
         }
+
+        Object ret = buckets[priority].addFirst(o);
+        if (ret == null)
+            size++;     //Maintain invariant
+
+        repOk();
+        return ret;
     }
 
     /**
@@ -170,11 +169,11 @@ public class BucketQueue implements Cloneable {
      *  as determined by this' constructor
      */
     public int size(int priority) throws IllegalArgumentException {
-        try {
-            return buckets[priority].getSize();
-        } catch (IndexOutOfBoundsException e) {
+        if(priority > buckets.length) {
             throw new IllegalArgumentException("Bad priority: "+priority);
         }
+
+        return buckets[priority].getSize();
     }
 
     public boolean isEmpty() {
