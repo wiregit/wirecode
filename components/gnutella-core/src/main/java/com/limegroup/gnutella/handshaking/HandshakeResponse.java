@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 import java.util.Properties;
 import com.sun.java.util.collections.*;
@@ -83,6 +84,13 @@ public final class HandshakeResponse {
      * Message indicating that we are trying to authenticate
      */
     public static final String AUTHENTICATING = "AUTHENTICATING";
+
+    /**
+     * ??? TODO: check about this error code...
+     */
+    public static final int LOCALE_NO_MATCH = 577;
+    public static final String LOCALE_NO_MATCH_MESSAGE 
+        = "Service Not Available";
 
     /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
@@ -196,6 +204,12 @@ public final class HandshakeResponse {
      */
     private final boolean IS_OLD_LIMEWIRE;
 
+    
+    /**
+     * Locale 
+     */
+    private final String LOCALE_PREF;
+
     /**
      * Constant for the number of hosts to return in X-Try-Ultrapeer headers.
      */
@@ -250,8 +264,7 @@ public final class HandshakeResponse {
             (getMaxTTL() < 5) &&
             isDynamicQueryConnection();
         
-        GOOD_ULTRAPEER = isGoodLeaf(); // && supportsProbeQueries();
-        
+        GOOD_ULTRAPEER = isGoodLeaf(); // && supportsProbeQueries();        
         
         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
@@ -268,6 +281,12 @@ public final class HandshakeResponse {
                 toLowerCase().startsWith("limewire");
         IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
         oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
+
+        String loc  = extractStringHeaderValue(headers, 
+                                               HeaderNames.X_LOCALE_PREF);
+        LOCALE_PREF = (loc.equals(""))?
+            ApplicationSettings.DEFAULT_LOCALE.getValue():
+            loc;
     }
     
     /**
@@ -468,6 +487,11 @@ public final class HandshakeResponse {
                                      HandshakeResponse.SHIELDED_MESSAGE);        
     }
 
+    static HandshakeResponse createLeafRejectLocaleOutgoingResponse() {
+        return new HandshakeResponse(HandshakeResponse.LOCALE_NO_MATCH,
+                                     HandshakeResponse.LOCALE_NO_MATCH_MESSAGE);
+    }
+
     /**
      * Creates a new String of hosts, limiting the number of hosts to add to
      * the default value of 10.  This is particularly used for the 
@@ -556,29 +580,50 @@ public final class HandshakeResponse {
         if(hr.isUltrapeer()) {
             hosts.addAll(
                 RouterService.getHostCatcher().
-                    getUltrapeersWithFreeUltrapeerSlots());
+                getUltrapeersWithFreeUltrapeerSlots(hr.getLocalePref()));
         } else {
             hosts.addAll(
                 RouterService.getHostCatcher().
-                    getUltrapeersWithFreeLeafSlots());
+                getUltrapeersWithFreeLeafSlots(hr.getLocalePref()));
         }
         
         // If we don't have enough hosts for the X-Try-Ultrapeers header, add
         // hosts that we're connected to.
+        
+        //is this efficient?
         if(hosts.size() < 10) {
-            List connections = 
-                RouterService.getConnectionManager().getInitializedConnections();
-            Iterator iter = connections.iterator();
-            for(int i=0; iter.hasNext() && i<(10-hosts.size()); i++) {
-                IpPort host = (IpPort)iter.next();
+            //we first try to get the connections that match the locale.
+            List conns = 
+                RouterService.getConnectionManager().
+                getInitializedConnectionsMatchLocale(hr.getLocalePref());
+            Iterator itr = conns.iterator();
+            for(int i = hosts.size(); itr.hasNext() && i < 10; i++) {
+                IpPort host = (IpPort)itr.next();
                 hosts.add(host);
             }
+            
+            //if we still don't have enough hosts, get them from the list
+            //of all initialized connection
+            if(hosts.size() < 10) {
+                //list returned is unmmodifiable
+                conns =
+                    new LinkedList
+                    (RouterService.getConnectionManager()
+                     .getInitializedConnections());
+                //returned list may contain duplicates
+                conns.removeAll(hosts);
+                itr = conns.iterator();
+                for(int i = hosts.size();itr.hasNext() && i < 10; i++) {
+                    IpPort host = (IpPort)itr.next();
+                    hosts.add(host);
+                }
+            }
         }
-    
-        headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
+        
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS,
+                    createEndpointString(hosts));
         return headers;
     }
-    
 
     /** 
      * Returns the response code.
@@ -927,6 +972,13 @@ public final class HandshakeResponse {
 	public boolean isCrawler() {
 		return IS_CRAWLER;
 	}
+
+    /**
+     * access the locale pref. advertised by the client
+     */
+    public String getLocalePref() {
+        return LOCALE_PREF;
+    }
 
     /**
      * Convenience method that returns whether or not the given header 

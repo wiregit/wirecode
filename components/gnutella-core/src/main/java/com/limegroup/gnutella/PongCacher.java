@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
 
 /**
@@ -34,10 +35,15 @@ public final class PongCacher {
     public static final int EXPIRE_TIME = 6000;
 
     /**
+     * Constant for expiring locale specific pongs
+     */
+    public static final int EXPIRE_TIME_LOC = 15*EXPIRE_TIME;
+
+    /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
-    private static final BucketQueue PONGS =
-        new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+    private static final Map PONGS = new HashMap();
+    //new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -59,37 +65,101 @@ public final class PongCacher {
      *
      * @return the <tt>List</tt> of cached pongs -- continually updated
      */
-    public List getBestPongs() {
-        synchronized(PONGS) {
-            Iterator iter = PONGS.iterator();
-            int i = 0;
-            List pongs = new LinkedList();
-            List removeList = null;
+    public List getBestPongs(String loc) {
+        synchronized(PONGS) { 
+            List pongs = new LinkedList(); //list to return
             long curTime = System.currentTimeMillis();
-            for(;iter.hasNext() && i<NUM_HOPS; i++) {
-                PingReply pr = (PingReply)iter.next();
+            //first we try to populate "pongs" with those pongs
+            //that match the locale 
+            List removeList = 
+                addBestPongs(loc, pongs, curTime, 0);
+            //remove all stale pongs that were reported for the
+            //locale
+            removePongs(loc, removeList);
+
+            //if the locale that we were searching for was not the default
+            //"en" locale and we do not have enough pongs in the list
+            //then populate the list "pongs" with the default locale pongs
+            if(!ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc)
+               && pongs.size() < NUM_HOPS) {
+
+                //get the best pongs for default locale
+                removeList = 
+                    addBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
+                                 pongs,
+                                 curTime,
+                                 pongs.size());
                 
-                // If the pong is very old, purge it.
-                if(curTime - pr.getCreationTime() > EXPIRE_TIME) {
-                    if(removeList == null) {
-                        removeList = new LinkedList();
-                    }
-                    removeList.add(pr);
-                } else {
-                    pongs.add(pr);
-                }
+                //remove any pongs that were reported as stale pongs
+                removePongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
+                            removeList);
             }
-            
-            if(removeList != null) {
-                iter = removeList.iterator();
-                while(iter.hasNext()) {
-                    PingReply pr = (PingReply)iter.next();
-                    PONGS.removeAll(pr);
-                }
-            }
+
             return pongs;
         }
     }
+    
+    /** 
+     * adds good pongs to the passed in list "pongs" and
+     * return a list of pongs that should be removed.
+     */
+    private List addBestPongs(String loc, List pongs, 
+                              long curTime, int i) {
+        //set the expire time to be used.
+        //if the locale that is passed in is "en" then just use the
+        //normal expire time otherwise use the longer expire time
+        //so we can have some memory of non english locales
+        int exp_time = 
+            (ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc))?
+            EXPIRE_TIME :
+            EXPIRE_TIME_LOC;
+        
+        //check if there are any pongs of the specific locale stored
+        //in PONGS.
+        List remove = null;
+        if(PONGS.containsKey(loc)) { 
+            //get all the pongs that are of the specific locale and
+            //make sure that they are not stale
+            BucketQueue bq = (BucketQueue)PONGS.get(loc);
+            Iterator iter = bq.iterator();
+            for(;iter.hasNext() && i < NUM_HOPS; i++) {
+                PingReply pr = (PingReply)iter.next();
+                
+                //if the pongs are stale put into the remove list
+                //to be returned.  Didn't pass in the remove list
+                //into this function because we may never see stale
+                //pongs so we won't need to new a linkedlist
+                //this may be a premature and unnecessary opt.
+                if(curTime - pr.getCreationTime() > exp_time) {
+                    if(remove == null) 
+                        remove = new LinkedList();
+                    remove.add(pr);
+                }
+                else {
+                    pongs.add(pr);
+                }
+            }
+        }
+        
+        return remove;
+    }
+
+    
+    /**
+     * removes the pongs with the specified locale and those
+     * that are in the passed in list l
+     */
+    private void removePongs(String loc, List l) {
+        if(l != null) {
+            BucketQueue bq = (BucketQueue)PONGS.get(loc);
+            Iterator iter = l.iterator();
+            while(iter.hasNext()) {
+                PingReply pr = (PingReply)iter.next();
+                bq.removeAll(pr);
+            }
+        }
+    }                             
+
 
     /**
      * Adds the specified <tt>PingReply</tt> instance to the cache of pongs.
@@ -97,7 +167,6 @@ public final class PongCacher {
      * @param pr the <tt>PingReply</tt> to add
      */
     public void addPong(PingReply pr) {
-        
         // if we're not an Ultrapeer, we don't care about caching the pong
         if(!RouterService.isSupernode()) return;
 
@@ -107,7 +176,16 @@ public final class PongCacher {
         // if the hops are too high, ignore it
         if(pr.getHops() >= NUM_HOPS) return;
         synchronized(PONGS) {
-            PONGS.insert(pr, pr.getHops());
+            //check the map for the locale and create or retrieve the set
+            if(PONGS.containsKey(pr.getClientLocale())) {
+                BucketQueue bq = (BucketQueue)PONGS.get(pr.getClientLocale());
+                bq.insert(pr, pr.getHops());
+            }
+            else {
+                BucketQueue bq = new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+                bq.insert(pr, pr.getHops());
+                PONGS.put(pr.getClientLocale(), bq);
+            }
         }
     }
 }

@@ -53,6 +53,15 @@ public final class NoGnutellaOkException extends IOException {
                                   HandshakeResponse.SLOTS_FULL);
 
     /**
+     * reject exception for the case when a connection is rejected 
+     * due to unmatching locales
+     */
+    public static final NoGnutellaOkException CLIENT_REJECT_LOCALE =
+        new NoGnutellaOkException(false,
+                                  HandshakeResponse.LOCALE_NO_MATCH,
+                                  FATAL_CLIENT_MSG + 
+                                  HandshakeResponse.LOCALE_NO_MATCH);
+    /**
      * Cached <tt>NoGnutellaOkException</tt> for the case where
      * the handshake never resolved successfully on the cleint
      * side.

@@ -1798,9 +1798,8 @@ public abstract class MessageRouter {
                 RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
-
 		boolean supportsUnicast = reply.supportsUnicast();
-
+        
         //Then, if a marked pong from an Ultrapeer that we've never seen before,
         //send to all leaf connections except replyHandler (which may be null),
         //irregardless of GUID.  The leafs will add the address then drop the

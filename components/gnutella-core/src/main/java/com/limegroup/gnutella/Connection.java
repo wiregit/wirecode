@@ -190,7 +190,7 @@ public class Connection implements IpPort {
      * Non-final so that the responder can be garbage collected after we've
      * concluded the responding (by setting to null).
      */
-    private HandshakeResponder RESPONSE_HEADERS;
+    protected HandshakeResponder RESPONSE_HEADERS;
 
     /** The list of all properties written during the handshake sequence,
      *  analogous to HEADERS_READ.  This is needed because
@@ -550,7 +550,7 @@ public class Connection implements IpPort {
                 throw new IOException("Bad connect string");
             }
 				
-			
+
 			//3. Read the Gnutella headers. 
 			readHeaders();
 
@@ -628,7 +628,14 @@ public class Connection implements IpPort {
                         HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
                     }
                     throw NoGnutellaOkException.CLIENT_REJECT;
-                } else {
+                } 
+                else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
+                    //if responder's locale preferencing was set 
+                    //and didn't match the locale this code is used.
+                    //(currently in use by the dedicated connectionfetcher)
+                    throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
+                }
+                else {
                     if(CommonUtils.recordStats()) {
                         HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
                     }
@@ -1879,6 +1886,12 @@ public class Connection implements IpPort {
         return "CONNECTION: host=" + _host  + " port=" + _port;
     }
     
+    /**
+     * access the locale pref. of the connected servent
+     */
+    public String getLocalePref() {
+        return _headers.getLocalePref();
+    }
 
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is

@@ -144,6 +144,19 @@ public class ConnectionManager {
     private final List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
+    /**
+     * dedicated ConnectionFetcher used by leafs to fetch a 
+     * locale matching connection
+     * NOTE: currently this is only used by leafs which will try
+     * to connect to one connection which matches the locale of the 
+     * client.
+     */
+    private ConnectionFetcher _dedicatedPrefFetcher;
+    
+    /**
+     * boolean to check if a locale matching connection is needed.
+     */
+    private volatile boolean _needPref = true;
 
     /**
      * List of all connections.  The core data structures are lists, which allow
@@ -189,6 +202,8 @@ public class ConnectionManager {
     private volatile int _shieldedConnections = 0;
     private volatile int _nonLimeWireLeaves = 0;
     private volatile int _nonLimeWirePeers = 0;
+    /** number of peers that matches the local locale pref. */
+    private volatile int _localeMatchingPeers = 0; 
 
     /**
      * For authenticating users
@@ -416,7 +431,7 @@ public class ConnectionManager {
     private boolean hasFreeLeafSlots() {
         return getNumFreeLeafSlots() > 0;
     }
-    
+
     /**
      * Returns whether this (probably) has a connection to the given host.  This
      * method is currently implemented by iterating through all connections and
@@ -524,11 +539,23 @@ public class ConnectionManager {
      */
     public int getNumFreeLimeWireNonLeafSlots() {
         return Math.max(0, 
-                 getNumFreeNonLeafSlots() - 
-                 Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
-               );
+                        getNumFreeNonLeafSlots() 
+                        - Math.max(0, RESERVED_NON_LIMEWIRE_PEERS - _nonLimeWirePeers)
+                        - getNumLimeWireLocalePrefSlots()
+                        );
     }
 
+    /**
+     * @return the number of locale reserved slots to be filled
+     *
+     * An ultrapeer may not have Free LimeWire Non Leaf Slots but may still
+     * have free slots that are reserved for locales
+     */
+    public int getNumLimeWireLocalePrefSlots() {
+        return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                        - _localeMatchingPeers);
+    }
+    
 	/**
 	 * Returns whether or not the client has an established connection with
 	 * another Gnutella client.
@@ -634,7 +661,7 @@ public class ConnectionManager {
         return getNumInitializedConnections() < _keepAlive
             || (isSupernode() 
 				&& getNumInitializedClientConnections() < 
-				   UltrapeerSettings.MAX_LEAVES.getValue());
+                UltrapeerSettings.MAX_LEAVES.getValue());
     }
     
     /**
@@ -661,11 +688,9 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
-
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
-		
 
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
@@ -750,14 +775,34 @@ public class ConnectionManager {
             // to connect to.
             // Thus, we only worry about the case we're connecting to
             // another ultrapeer (internally or externally generated)
-            
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
-            
+            int locale_num = 0;
+
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
                 return false;
             }
-            
+
+            if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+                //if locale matches and we haven't satisfied the
+                //locale reservation then we force return a true
+                if(checkLocale(hr.getLocalePref()) &&
+                   _localeMatchingPeers 
+                   < ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                   ) {
+                    return true;
+                }
+                
+                //this number will be used at the end to figure out
+                //if the connection should be allowed
+                //(the reserved slots is to make sure we have at least
+                // NUM_LOCALE_PREF locale connections but we could have more so
+                // we get the max)
+                locale_num = 
+                    getNumLimeWireLocalePrefSlots();
+            }
+
+
             // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
             // for non-limewire peers to ensure that the network
             // is well connected.
@@ -770,7 +815,8 @@ public class ConnectionManager {
             
             // Otherwise, allow only if we've left enough room for the quota'd
             // number of non-limewire peers.
-            return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers)
+            return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers 
+                    + locale_num)
                    < ULTRAPEER_CONNECTIONS;
         }
 		return false;
@@ -890,6 +936,22 @@ public class ConnectionManager {
      */
     public List getInitializedConnections() {
         return _initializedConnections;
+    }
+
+    /**
+     * return a list of initialized connection that matches the parameter
+     * String loc.
+     * create a new linkedlist to return.
+     */
+    public List getInitializedConnectionsMatchLocale(String loc) {
+        List matches = new LinkedList();
+        for(Iterator itr= _initializedConnections.iterator();
+            itr.hasNext();) {
+            Connection conn = (Connection)itr.next();
+            if(loc.equals(conn.getLocalePref()))
+                matches.add(conn);
+        }          
+        return matches;
     }
     
     /**
@@ -1131,6 +1193,8 @@ public class ConnectionManager {
                     _shieldedConnections++;
                 if(!c.isLimeWire())
                     _nonLimeWirePeers++;
+                if(checkLocale(c.getLocalePref()))
+                    _localeMatchingPeers++;
             } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
@@ -1169,8 +1233,9 @@ public class ConnectionManager {
             remove(c);
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
+                //add to catcher with the locale info.
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getPort()), true);
+                                          c.getPort()), true, c.getLocalePref());
             }   
         }
     }
@@ -1272,6 +1337,8 @@ public class ConnectionManager {
                     _shieldedConnections--;                
                 if(!c.isLimeWire())
                     _nonLimeWirePeers--;
+                if(checkLocale(c.getLocalePref()))
+                    _localeMatchingPeers--;
             }
         }else{
             //check in _initializedClientConnections
@@ -1333,6 +1400,27 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
+        if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+            //if it's a leaf and locale preferencing is on
+            //we will create a dedicated preference fetcher
+            //that tries to fetch a connection that matches the
+            //clients locale
+            if(RouterService.isShieldedLeaf() 
+               && _needPref 
+               && _dedicatedPrefFetcher == null) {
+                _dedicatedPrefFetcher = new ConnectionFetcher(true);
+                Runnable interrupted = new Runnable() {
+                        public void run() {
+                            if (_dedicatedPrefFetcher == null)
+                                return;
+                            _dedicatedPrefFetcher.interrupt();
+                            _dedicatedPrefFetcher = null;
+                        }
+                    };
+                // shut off this guy if he didn't have any luck
+                RouterService.schedule(interrupted, 15 * 1000, 0);
+            }
+        }
         //How many connections do we need?  To prefer ultrapeers, we try to
         //achieve NUM_CONNECTIONS ultrapeer connections.  But to prevent
         //fragmentation with clients that don't support ultrapeers, we'll give
@@ -1382,7 +1470,6 @@ public class ConnectionManager {
         else {
             multiple = 2;
             neededConnections -= 5 + RESERVED_NON_LIMEWIRE_PEERS;
-            
         }
             
         int need = Math.min(20, multiple*neededConnections) 
@@ -1444,7 +1531,10 @@ public class ConnectionManager {
             }
 
             _initializingFetchedConnections.add(mc);
-            _fetchers.remove(fetcher);
+            if(fetcher == _dedicatedPrefFetcher)
+                _dedicatedPrefFetcher = null;
+            else
+                _fetchers.remove(fetcher);
             connectionInitializing(mc);
             // No need to adjust connection fetchers here.  We haven't changed
             // the need for connections; we've just replaced a ConnectionFetcher
@@ -1521,7 +1611,6 @@ public class ConnectionManager {
         Properties headers = connection.headers().props();
         //return if no headers to process
         if(headers == null) return;
-        
         //update the addresses in the host cache (in case we received some
         //in the headers)
         updateHostCache(connection.headers());
@@ -1611,8 +1700,8 @@ public class ConnectionManager {
 
         //get the ultrapeers, and add those to the host cache
         String hostAddresses = headers.getXTryUltrapeers();
-    
-         
+        
+        
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
             Constants.ENTRY_SEPARATOR);
@@ -1672,7 +1761,6 @@ public class ConnectionManager {
             processConnectionHeaders(c);
         }
 
-		
         //If there's not space for the connection, reject it.  This mechanism
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes ManagedConnections are handled by headers
@@ -1682,7 +1770,7 @@ public class ConnectionManager {
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
-
+        
         //For incoming connections, add it to the GUI.  For outgoing connections
         //this was done at the top of the method.  See note there.
         if (! c.isOutgoing()) {
@@ -1813,7 +1901,8 @@ public class ConnectionManager {
      * responsible for recording the death.
      */
     private class ConnectionFetcher extends ManagedThread {
-
+        //set if this connectionfetcher is a preferencing fetcher
+        private boolean _pref = false;
         /**
          * Tries to add a connection.  Should only be called from a thread
          * that has the enclosing ConnectionManager's monitor.  This method
@@ -1821,8 +1910,12 @@ public class ConnectionManager {
          * locking requirement.
          */
         public ConnectionFetcher() {
-            setName("ConnectionFetcher");
+            this(false);
+        }
 
+        public ConnectionFetcher(boolean pref) {
+            setName("ConnectionFetcher");
+            _pref = pref;
             // Kick off the thread.
             setDaemon(true);
             start();
@@ -1836,12 +1929,14 @@ public class ConnectionManager {
                 do {
                     endpoint = _catcher.getAnEndpoint();
                 } while ( !IPFilter.instance().allow(endpoint.getAddress()) || 
-                          isConnectedTo(endpoint.getAddress()) );                      
-    
+                          isConnectedTo(endpoint.getAddress()) );              
+                
                 Assert.that(endpoint != null);
                 _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(
                     endpoint.getAddress(), endpoint.getPort());
+                //set preferencing
+                connection.setLocalePreferencing(_pref);
 
                 // If we've been trying to connect for awhile, check to make 
                 // sure the user's internet connection is live.  We only do 
@@ -1868,10 +1963,20 @@ public class ConnectionManager {
                     initializeFetchedConnection(connection, this);
                     _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
+                    if(_pref) // if pref connection succeeded
+                        _needPref = false;
                 } catch (NoGnutellaOkException e) {
                     _lastSuccessfulConnect = System.currentTimeMillis();
-                    _catcher.doneWithConnect(endpoint, true);
-                    _catcher.putHostOnProbation(endpoint);
+                    if(e.getCode() == HandshakeResponse.LOCALE_NO_MATCH) {
+                        //if it failed because of a locale matching issue
+                        //readd to hostcatcher??
+                        _catcher.add(endpoint, true,
+                                     connection.getLocalePref()); 
+                    }
+                    else {
+                        _catcher.doneWithConnect(endpoint, true);
+                        _catcher.putHostOnProbation(endpoint);
+                    }
                     throw e;                    
                 } catch (IOException e) {
                     _catcher.doneWithConnect(endpoint, false);
@@ -1971,4 +2076,17 @@ public class ConnectionManager {
             _catcher.recoverHosts();
         }
     }
+
+    /**
+     * Utility method to see if the passed in locale matches
+     * that of the local client. As of now, we assume that
+     * those clients not advertising locale as english locale
+     */
+    private boolean checkLocale(String loc) {
+        if(loc == null)
+            loc = /** assume english if locale is not given... */
+                ApplicationSettings.DEFAULT_LOCALE.getValue();
+        return ApplicationSettings.LANGUAGE.getValue().equals(loc);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import java.util.Properties;
 import java.io.IOException;
 import com.limegroup.gnutella.statistics.HandshakingStat;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
  * A very simple responder to be used by leaf-nodes during the
@@ -11,6 +12,8 @@ import com.limegroup.gnutella.statistics.HandshakingStat;
  */
 public final class LeafHandshakeResponder 
     extends AuthenticationHandshakeResponder {
+    
+    private boolean _pref = false;
     
     /**
      * Creates a new instance of LeafHandshakeResponder
@@ -46,6 +49,18 @@ public final class LeafHandshakeResponder
             if( RECORD_STATS )
                 HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
+        }
+
+        //check if this is a preferenced connection
+        if(_pref) {
+            /* TODO: ADD STAT
+              if(RECORD_STATS)
+              HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
+            */
+            if(!ApplicationSettings.LANGUAGE.getValue()
+               .equals(response.getLocalePref())) {
+                return HandshakeResponse.createLeafRejectLocaleOutgoingResponse();
+            }
         }
         
         if(!response.isGoodUltrapeer()) {
@@ -95,5 +110,14 @@ public final class LeafHandshakeResponder
         //b) We're not a leaf yet, so accept the incoming connection
         return HandshakeResponse.createAcceptIncomingResponse(hr, ret);
     }
+
+    /**
+     * set preferencing
+     */
+    public void setLocalePreferencing(boolean b) {
+        _pref = b;
+    }
 }
+
+
 

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.io.IOException;
 import java.net.*;
 
@@ -262,6 +263,13 @@ public final class UDPReplyHandler implements ReplyHandler {
      */
     public boolean isStable() {
         return false;
+    }
+
+    /**
+     * implementation of interface. this is not used.
+     */
+    public String getLocalePref() {
+        return ApplicationSettings.DEFAULT_LOCALE.getValue();
     }
 
 	/**

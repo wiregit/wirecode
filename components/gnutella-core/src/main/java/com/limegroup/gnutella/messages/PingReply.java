@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.io.*;
 import java.net.*;
 
@@ -104,6 +105,15 @@ public class PingReply extends Message implements Serializable, IpPort {
                                          CommonUtils.getMinorVersionNumber());
     }
 
+    /**
+     * Constant for the locale
+     */
+    private String CLIENT_LOCALE;
+    
+    /**
+     * the number of free preferenced slots 
+     */
+    private int FREE_LOCALE_SLOTS;
 
     /**
      * Creates a new <tt>PingReply</tt> for this host with the specified
@@ -113,13 +123,20 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param ttl the time to live for this message
      */
     public static PingReply create(byte[] guid, byte ttl) {
-        return create(guid, ttl, RouterService.getPort(),
+        return create(guid,
+                      ttl,
+                      RouterService.getPort(),
                       RouterService.getAddress(),
                       (long)RouterService.getNumSharedFiles(),
                       (long)RouterService.getSharedFileSize()/1024,
                       RouterService.isSupernode(),
-                      Statistics.instance().calculateDailyUptime(),
-                      UDPService.instance().isGUESSCapable());
+                      newGGEPWithLocale
+                      (Statistics.instance().calculateDailyUptime(),
+                       RouterService.isSupernode(),
+                       UDPService.instance().isGUESSCapable(),
+                       ApplicationSettings.LANGUAGE.getValue(),
+                       RouterService.getConnectionManager()
+                       .getNumLimeWireLocalePrefSlots()));
     }
 
     /**
@@ -307,6 +324,44 @@ public class PingReply extends Message implements Serializable, IpPort {
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
                       newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
+    
+    /**
+     * creates a new PingReply with the specified locale
+     *
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kbytes to the nearest power of 2 not less than 8.
+     * @param dailyUptime my average daily uptime, in seconds, e.g., 
+     *  3600 for one hour per day.  Negative values mean "don't know".
+     *  GGEP extension blocks are allocated if dailyUptime is non-negative.  
+     * @param isGuessCapable guess capable
+     * @param locale the locale 
+     * @param slots the number of locale preferencing slots available
+     */
+    public static PingReply
+        create(byte[] guid, byte ttl,
+               int port, byte[] ip, long files, long kbytes,
+               boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
+               String locale, int slots) {
+        return create(guid,
+                      ttl,
+                      port,
+                      ip,
+                      files,
+                      kbytes,
+                      isUltrapeer,
+                      newGGEPWithLocale(dailyUptime, isUltrapeer, 
+                                        isGuessCapable, locale, slots));
+    }
 
     /**
      * Returns a new <tt>PingReply</tt> instance with all the same data
@@ -317,11 +372,20 @@ public class PingReply extends Message implements Serializable, IpPort {
      *  and all of the data from this <tt>PingReply</tt>
      */
     public PingReply mutateGUID(byte[] guid) {
-        return PingReply.create(guid, 
-                                getTTL(), getPort(),
-                                getIPBytes(), getFiles(), getKbytes(),
-                                isUltrapeer(), getDailyUptime(),
-                                supportsUnicast());        
+        if(CLIENT_LOCALE != null && !"".equals(CLIENT_LOCALE))
+            return PingReply.create(guid,
+                                    getTTL(), getPort(),
+                                    getIPBytes(), getFiles(), getKbytes(),
+                                    isUltrapeer(), getDailyUptime(),
+                                    supportsUnicast(),
+                                    getClientLocale(),
+                                    getNumFreeLocaleSlots());
+        else //don't create newGGEPWithLocale if locale was not specified
+            return PingReply.create(guid, 
+                                    getTTL(), getPort(),
+                                    getIPBytes(), getFiles(), getKbytes(),
+                                    isUltrapeer(), getDailyUptime(),
+                                    supportsUnicast());        
     }
 
     /**
@@ -443,6 +507,20 @@ public class PingReply extends Message implements Serializable, IpPort {
                 throw new BadPacketException("invalid vendor length: "+
                                              vendorBytes.length);
             }
+
+            if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
+                try {
+                    byte[] clocale = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                }
+                catch(BadGGEPPropertyException e) {
+                    if(RECORD_STATS)
+                        ReceivedErrorStat.PING_REPLY_INVALID_GGEP
+                            .incrementStat();
+                    throw new BadPacketException("GGEP error : creating from"
+                                                 + " network : client locale");
+                }
+            }
         }
 
         return new PingReply(guid, ttl, hops, payload, ggep, ip);
@@ -478,6 +556,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         int freeUltrapeerSlots = -1;
         QueryKey key = null;
         
+        String locale /** def. val from settings? */
+            = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
+        int slots = -1; //-1 didn't get it.
+
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
             if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
@@ -535,7 +617,7 @@ public class PingReply extends Message implements Serializable, IpPort {
             if(ggep.hasKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_UP_SUPPORT);
-                    if(bytes.length == 3) {
+                    if(bytes.length >= 3) {
                         freeLeafSlots = bytes[1];
                         freeUltrapeerSlots = bytes[2];
                     }
@@ -545,6 +627,18 @@ public class PingReply extends Message implements Serializable, IpPort {
                     // simply don't assign it
                 }
             }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                    locale = new String(bytes, 0, 2);
+                    slots = ByteOrder.ubyte2int(bytes[2]);
+                }
+                catch(BadGGEPPropertyException e) {
+                    //ignore. we won't assign it.
+                }
+            }
+
         }
 
         HAS_GGEP_EXTENSION = ggep != null;
@@ -556,6 +650,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         QUERY_KEY = key;
         FREE_LEAF_SLOTS = freeLeafSlots;
         FREE_ULTRAPEER_SLOTS = freeUltrapeerSlots;
+        CLIENT_LOCALE = locale;
+        FREE_LOCALE_SLOTS = slots;
     }
 
 
@@ -604,6 +700,25 @@ public class PingReply extends Message implements Serializable, IpPort {
             Assert.that(false, "Couldn't encode QueryKey" + queryKey);
             return null;
         }
+    }
+
+    /** creates a new GGEP with the parameters, including the locale */
+    private static GGEP 
+        newGGEPWithLocale(int dailyUptime, boolean isUltrapeer, 
+                          boolean isGuessCapable, String locale, int slots) {
+        
+        GGEP g = newGGEP(dailyUptime,
+                         isUltrapeer,
+                         isGuessCapable);
+        byte[] payload = new byte[3];
+        byte[] s = locale.getBytes();
+        payload[0] = s[0];
+        payload[1] = s[1];
+        payload[2] = (byte)slots;
+        g.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
+              payload);
+        
+        return g;
     }
 
     /**
@@ -972,7 +1087,8 @@ public class PingReply extends Message implements Serializable, IpPort {
             ", free leaf slots: "+hasFreeLeafSlots()+
             ", vendor: "+VENDOR+" "+VENDOR_MAJOR_VERSION+"."+
                 VENDOR_MINOR_VERSION+
-            ", "+super.toString()+")";
+            ", "+super.toString()+
+            ", locale : " + CLIENT_LOCALE + ")";
     }
 
     /**
@@ -983,6 +1099,18 @@ public class PingReply extends Message implements Serializable, IpPort {
      */ 
     public InetAddress getInetAddress() {
         return IP;
+    }
+
+    
+    /**
+     * access the client_locale
+     */
+    public String getClientLocale() {
+        return CLIENT_LOCALE;
+    }
+
+    public int getNumFreeLocaleSlots() {
+        return FREE_LOCALE_SLOTS;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest

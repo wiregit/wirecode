@@ -275,7 +275,7 @@ public class ManagedConnection extends Connection
      * connection.
      */
     private QueryRouteTable _lastQRPTableSent;
-    
+
     /**
      * Holds the mappings of GUIDs that are being proxied.
      * We want to construct this lazily....
@@ -555,6 +555,7 @@ public class ManagedConnection extends Connection
     private void send(Message m, int priority) {
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
+
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time....
         if ((softMaxHops > -1) &&
@@ -564,7 +565,6 @@ public class ManagedConnection extends Connection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
             _outputQueue[priority].add(m);
@@ -1520,7 +1520,6 @@ public class ManagedConnection extends Connection
     }
     
 
-    
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
@@ -1571,6 +1570,15 @@ public class ManagedConnection extends Connection
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}
+
+    /**
+     * set preferencing for the responder
+     * (The preference of the Responder is used when creating the response 
+     * (in Connection.java: conclude..))
+     */
+    public void setLocalePreferencing(boolean b) {
+        RESPONSE_HEADERS.setLocalePreferencing(b);
+    }
 
     /** Class-wide expiration mechanism for all ManagedConnections.
      *  Only expires on-demand.

@@ -86,13 +86,14 @@ public final class HandshakeResponseTest extends BaseTestCase {
                 "addXTryHeader",
                 new Class[]{HandshakeResponse.class, 
                 Properties.class});
-        
         // First, check to make sure that we add connected hosts when we don't
-        // have any hosts in the host catcher.
+        // have any hosts in the host catcher. 
         RouterService.getHostCatcher().clear();
         assertEquals(0, RouterService.getHostCatcher().getNumHosts());
         List ipPorts = new LinkedList();
-        ipPorts.add(new Endpoint("24.67.85.4", 6346));
+        ipPorts.add(new Connection("24.67.85.4", 6346,
+                                   new Properties(),
+                                   new UltrapeerHandshakeResponder("24.67.85.4")));
         PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
             "_initializedConnections", ipPorts);
         

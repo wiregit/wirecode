@@ -297,8 +297,9 @@ public class BootstrapServerManager {
                 //need to force a higher priority to prevent repeated fetching.
                 //(See HostCatcher.expire)
 
+                //we don't know locale of host so using Endpoint
                 RouterService.getHostCatcher().add(host, 
-                    HostCatcher.CACHE_PRIORITY);
+                                                   HostCatcher.CACHE_PRIORITY);
                 responses++;
                 _responsesAdded++;
             } catch (IllegalArgumentException bad) { 

@@ -231,6 +231,8 @@ public abstract class ClientSideTestCase
             props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }
 
     private static class OldResponder implements HandshakeResponder {
@@ -239,6 +241,8 @@ public abstract class ClientSideTestCase
             Properties props=new Properties();
             return HandshakeResponse.createResponse(props);
         }
+        
+        public void setLocalePreferencing(boolean b) {}
     }
 }
 

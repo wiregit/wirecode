@@ -69,4 +69,10 @@ public interface HandshakeResponder {
      */
     public HandshakeResponse respond(HandshakeResponse response, 
          boolean outgoing) throws IOException;
+
+    /**
+     * optional method.
+     * note: should this throw an UnsupportedOperationException
+     */
+    public void setLocalePreferencing(boolean b);
 }

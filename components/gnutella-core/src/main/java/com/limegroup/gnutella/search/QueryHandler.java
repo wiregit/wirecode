@@ -4,6 +4,7 @@ package com.limegroup.gnutella.search;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
 
 /**
@@ -159,6 +160,13 @@ public final class QueryHandler {
      */
     private boolean _probeQuerySent;
 
+    /**
+     * used to preference which connections to use when searching
+     * if the search comes from a leaf with a certain locale preference
+     * then those connections (of this ultrapeer) which match the 
+     * locale will be used before the other connections.
+     */
+    private String _prefLocale;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -192,7 +200,7 @@ public final class QueryHandler {
 
 		REPLY_HANDLER = handler;
         RESULT_COUNTER = counter;
-        
+        _prefLocale = handler.getLocalePref();
 	}
 
 
@@ -409,20 +417,43 @@ public final class QueryHandler {
      * @return the number of new hosts theoretically reached by this
      *  query iteration
      */
-    private int sendQuery(List ultrapeers) {
-        // weed out any stale data from the lists of queried connections --
-        // remove any elements that are not in our more up-to-date list
-        // of connections.
-        QUERIED_CONNECTIONS.retainAll(ultrapeers);
-        QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
+    private int sendQuery(List ultrapeersAll) {
 
+        //we want to try to use all connections in ultrapeersLocale first.
+        List ultrapeers = /** method returns a copy */
+            _connectionManager.getInitializedConnectionsMatchLocale
+            (_prefLocale);
+        
+        //if we did get a list of connections that matches the locale
+        //of the query
+        if(!ultrapeers.isEmpty()) {
+            QUERIED_CONNECTIONS.retainAll(ultrapeers);
+            QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
+        
+            ultrapeers.removeAll(QUERIED_CONNECTIONS);
+            ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
+            //at this point ultrapeers could become empty
+        }
+                
+        if(ultrapeers.isEmpty()) { 
+            //either we used up all the returned ultrapeers or
+            //there were no locale matching ultrapeers connections to begin with
+            //so now use any ultrapeer connection
+            ultrapeers = ultrapeersAll;
 
-        // now, remove any connections we've used from our current list
-        // of connections to try
-        ultrapeers.removeAll(QUERIED_CONNECTIONS);
-        ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
-        
-        
+            // weed out any stale data from the lists of queried connections --
+            // remove any elements that are not in our more up-to-date list
+            // of connections.
+            QUERIED_CONNECTIONS.retainAll(ultrapeers);
+            QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
+            
+            
+            // now, remove any connections we've used from our current list
+            // of connections to try
+            ultrapeers.removeAll(QUERIED_CONNECTIONS);
+            ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
+        }
+
 		int length = ultrapeers.size();
         byte ttl = 0;
         ManagedConnection mc = null;

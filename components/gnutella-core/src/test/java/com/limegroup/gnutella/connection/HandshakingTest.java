@@ -218,6 +218,8 @@ public final class HandshakingTest extends BaseTestCase {
 			throws IOException {
 			return HandshakeResponse.createResponse(new Properties());
 		}		
+        
+        public void setLocalePreferencing(boolean b) {}
 	}
 
 	/**

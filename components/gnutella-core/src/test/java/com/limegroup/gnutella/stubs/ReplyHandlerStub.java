@@ -98,6 +98,11 @@ public class ReplyHandlerStub implements ReplyHandler {
     public boolean isStable() {
         return true;
     }
+
+    public String getLocalePref() {
+        return "en";
+    }
+
 }
 
 

@@ -257,6 +257,15 @@ public abstract class AuthenticationHandshakeResponder
         //return the user information
         return user;
     }
+
+    /**
+     * optional method empty impl.
+     * Should override if preferencing is wanted.
+     */
+    public void setLocalePreferencing(boolean b) {
+        //should this throw UnsupportedOperationException?
+    }
+     
         
     /**
      * Returns the corresponding handshake to be sent
