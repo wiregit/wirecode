@@ -64,7 +64,7 @@ public final class URNFactory {
 	 * @throws <tt>IOException</tt> if there was an error constructing
 	 *  the <tt>URN</tt>
 	 */
-	public static URN createUrn(final String urnString) 
+	public static URN createSHA1Urn(final String urnString) 
 		throws IOException {
 		return new URN(urnString);
 	}
@@ -124,6 +124,27 @@ public final class URNFactory {
 								  "THE GIVEN SERVICE REQUEST LINE");
 		}
 		return new URN(urnStr);		
+	}
+
+	/**
+	 * Creates a new <tt>URN</tt> instance from the X-Gnutella-Content-URN
+	 * HTTP header of the form specified in the HUGE v0.94 specification.
+	 *
+	 * @param header the full HTTP header line
+	 * @return a new <tt>URN</tt> instance for the URN string contained in
+	 *  the header
+	 * @throws <tt>IOException</tt> if the HTTP header string is not in a 
+	 *  valid form, such as when it does not contain the 
+	 *  X-Gnutella-Content-URN header or when it does not contain an URN
+	 *  of the expected form
+	 */
+	public static URN createUrnFromContentUrnHttpHeader(final String header) 
+		throws IOException {
+		int index = header.indexOf(HTTPHeaderName.CONTENT_URN.httpStringValue());
+		if(index == -1) {
+			throw new IOException("INVALID FORMAT FOR CONTENT URN HEADER");
+		}
+		return new URN(header.substring(index+1));
 	}
 
 	/**
