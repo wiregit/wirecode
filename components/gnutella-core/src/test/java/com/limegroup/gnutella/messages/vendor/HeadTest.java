@@ -369,6 +369,10 @@ public class HeadTest extends BaseTestCase {
 		assertNotNull(pong1.getAltLocs());
 		assertNotNull(pong2.getAltLocs());
 		assertLessThan(PACKET_SIZE,pong2.getPayload().length);
+		assertEquals(_alCollectionComplete.getAltLocsSize(),pong1.getTotalLocs(true));
+		assertEquals(0,pong1.getSkippedLocs(true));
+		assertEquals(_alCollectionIncomplete.getAltLocsSize(),pong2.getTotalLocs(true));
+		assertEquals(0,pong2.getSkippedLocs(true));
 		
 		//now test if no locs will fit because of too many ranges
 		_partial.setRangesByte(_rangesJustFit.toBytes());
@@ -398,6 +402,8 @@ public class HeadTest extends BaseTestCase {
 		assertNull(pong1.getRanges());
 		assertNull(pong1.getAltLocs());
 		assertNotNull(pong1.getPushLocs());
+		assertEquals(1,pong1.getTotalLocs(false));
+		assertEquals(0,pong1.getSkippedLocs(false));
 		
 		RemoteFileDesc dummy = 
 			new RemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 
@@ -481,6 +487,8 @@ public class HeadTest extends BaseTestCase {
 	    assertTrue(tmp.isEmpty());
 	    for (Iterator iter = digestLocs.iterator();iter.hasNext();)
 	        assertFalse(pong.getAltLocs().contains(iter.next()));
+	    assertEquals(5,pong.getSkippedLocs(true));
+	    assertEquals(_alCollectionComplete.getAltLocsSize(),pong.getTotalLocs(true));
 	    
 	    
 	    // try a headping with an altloc and pushloc digest

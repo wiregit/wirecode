@@ -32,7 +32,6 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.CountingGGEP;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
 import com.limegroup.gnutella.util.IntervalSet;
@@ -152,6 +151,11 @@ public class HeadPong extends VendorMessage {
 	 * the firewalled altlocs that were sent, if any
 	 */
 	private Set _pushLocs;
+	
+	/**
+	 * stats for the mesh
+	 */
+	private short _totalLocs, _totalPushLocs, _skippedLocs, _skippedPushLocs;
 	
 	/**
 	 * the queue status, can be negative
@@ -469,6 +473,14 @@ public class HeadPong extends VendorMessage {
 	        byte [] altlocs = _ggep.getBytes((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(altlocs);
 	        _altLocs = readLocs(new DataInputStream(bais));
+	        
+	        //also extract some stats if they're available
+	        if ((_ggepFeatures & GGEPHeadConstants.ALT_MESH_STAT) != 0) {
+	            byte []stat = 
+	                _ggep.getBytes((char)GGEPHeadConstants.ALT_MESH_STAT+GGEPHeadConstants.DATA);
+	            _totalLocs = ByteOrder.leb2short(stat,0);
+	            _skippedLocs = ByteOrder.leb2short(stat,2);
+	        }
 	    } catch (BadGGEPPropertyException bad){}
 	    catch(BadPacketException bad){}
 	    catch(IOException bad){}
@@ -498,6 +510,14 @@ public class HeadPong extends VendorMessage {
 	        byte [] pushlocs = _ggep.getBytes((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(pushlocs);
 	        _pushLocs = readPushLocs(new DataInputStream(bais));
+	        
+	        // also extract some stats if they're available
+	        if ((_ggepFeatures & GGEPHeadConstants.PUSH_MESH_STAT) != 0) {
+	            byte []stat = 
+	                _ggep.getBytes((char)GGEPHeadConstants.PUSH_MESH_STAT+GGEPHeadConstants.DATA);
+	            _totalPushLocs = ByteOrder.leb2short(stat,0);
+	            _skippedPushLocs = ByteOrder.leb2short(stat,2);
+	        }
 	    } catch (BadGGEPPropertyException bad){}
 	    catch(BadPacketException bad){}
 	    catch(IOException bad){}
@@ -556,15 +576,31 @@ public class HeadPong extends VendorMessage {
 	/**
 	 * @return how many direct or push altlocs collided on the filter the host is replying to
 	 */
-	public int getSkippedLocs(boolean direct) {
-	    return -1;
+	public short getSkippedLocs(boolean direct) {
+	    if (direct) {
+	        if (_altLocs == null)
+	            readAltLocs();
+	        return _skippedLocs;
+	    } else {
+	        if (_pushLocs == null)
+	            readPushLocs();
+	        return _skippedPushLocs;
+	    }
 	}
 	
 	/**
 	 * @return how many direct or push altlocs total the other host knows about
 	 */
-	public int getLeftLocs(boolean direct) {
-	    return -1;
+	public short getTotalLocs(boolean direct) {
+	    if (direct) {
+	        if (_altLocs == null)
+	            readAltLocs();
+	        return _totalLocs;
+	    } else {
+	        if (_pushLocs == null)
+	            readPushLocs();
+	        return _totalPushLocs;
+	    }
 	}
 	
 	/**
