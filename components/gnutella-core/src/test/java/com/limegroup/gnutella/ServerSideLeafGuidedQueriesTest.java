@@ -336,7 +336,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    public void testBasicMechanism() throws Exception {
+    public void testLeafIsDone() throws Exception {
         drainAll();
 
         // we want to make sure that the leaf correctly guides the queries to
@@ -371,6 +371,72 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         assertTrue(nQuery == null);
         
     }
+
+
+    public void testUPRoutedEnough() throws Exception {
+        drainAll();
+
+        // we want to make sure that the UP stops the query when enough results
+        // have been routed
+
+        // send a query from the leaf
+        QueryRequest query = QueryRequest.createQuery("berkeley");
+        LEAF.send(query);
+        LEAF.flush();
+
+        // one or more of the UPs should get it....
+        Thread.sleep(3000);
+        QueryRequest nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+            // send 10 results from this Ultrapeer....
+            for (int j = 0; (j < 10) && (nQuery != null); j++)
+                routeResultsToUltrapeer(nQuery.getGUID(), ULTRAPEERS[i]);
+        }
+
+        assertTrue(nQuery != null);
+
+        // UPs should get more queries
+        Thread.sleep(3000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++)
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+
+        assertNotNull(nQuery);
+
+        // now send enough results, we shouldn't get no more queries yo
+        routeResultsToUltrapeers(query.getGUID(), 200);
+
+        // we shouldn't get no more queries yo
+        Thread.sleep(3000);
+        nQuery = null;
+        for (int i = 0; (i < ULTRAPEERS.length); i++)
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+
+        assertTrue(nQuery == null);
+    }
+
+
+    private void routeResultsToUltrapeers(byte[] guid, int numResults) 
+        throws Exception {
+        Random rand = new Random();
+        for (int i = 0; i < numResults; i++) {
+            int index = rand.nextInt(ULTRAPEERS.length);
+            routeResultsToUltrapeer(guid, ULTRAPEERS[index]);
+        }
+    }
+
+    private void routeResultsToUltrapeer(byte[] guid, Connection source) 
+        throws Exception {
+        byte[] ip = new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
+        byte[] clientGUID = GUID.makeGuid();
+        Response[] resp = new Response[] {new Response(0, 10, "berkeley")};
+        QueryReply reply = new QueryReply(guid, (byte)3, 6346, ip, 0, resp,
+                                          clientGUID, false);
+        source.send(reply);
+        source.flush();
+    }
+
     
 
 }

@@ -607,15 +607,11 @@ public final class QueryHandler {
 
         // if the leaf has reported results that is greater or equal to what it
         // needs, OR the leaf has never reported results and we've routed what
-        // it needs, OR the leaf has reported results and we've routed 75 over
-        // what we think it needs, then return true
+        // it needs, then return true
 		if((_numResultsReportedByLeaf >= RESULTS) || 
            ((_numResultsReportedByLeaf == 0) &&
             (RESULT_COUNTER.getNumResults() >= RESULTS)
-            ) ||
-           ((_numResultsReportedByLeaf > 0) &&
-            (RESULT_COUNTER.getNumResults() >= (RESULTS+75))
-            )
+            ) 
            )
             return true;
 
