@@ -70,6 +70,8 @@ public class StandardMessageRouter extends MessageRouter {
 
         //We mark our ping replies if currently in the supernode state.
         boolean markPong=RouterService.isSupernode();
+        //We should indicate GUESS support....
+        boolean isGUESSCapable=UDPService.instance().isGUESSCapable();
         //Daily average uptime.  If too slow, use FRACTIONAL_UPTIME property.
         //This results in a GGEP extension, which will be stripped before
         //sending it to older clients.
@@ -81,7 +83,8 @@ public class StandardMessageRouter extends MessageRouter {
                                             num_files,
                                             kilobytes,
                                             markPong,
-                                            dailyUptime);
+                                            dailyUptime,
+                                            isGUESSCapable);
 
         try {
             sendPingReply(pingReply);

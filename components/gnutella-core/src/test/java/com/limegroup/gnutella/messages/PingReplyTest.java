@@ -187,7 +187,7 @@ public class PingReplyTest extends TestCase {
     public void testGGEPEncodeDecode() {
         //Create pong
         PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   0l, 0l, true, 523);        
+                                   0l, 0l, true, 523, true);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
             pr.write(baos);
@@ -265,11 +265,87 @@ public class PingReplyTest extends TestCase {
         }
     }
 
+    /** Test the raw bytes of an encoded GGEP'ed pong.  Then checks that
+     *  these can be decoded.  Note that this will need to be changed if
+     *  more extensions are added. */
+    public void testGGEPEncodeDecodeNoGUESS() {
+        //Create pong
+        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
+                                   0l, 0l, true, 523, false);        
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        try {
+            pr.write(baos);
+        } catch (IOException e) {
+            assertTrue("Couldn't write stream.", false);
+        }
+
+        //Encode and check raw bytes.
+        //UDP is the last extension, so it is DUPTIME and then UDP.  should take
+        //this into account....
+        byte[] bytes=baos.toByteArray(); 
+        int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
+        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
+        int upLength=GGEP.GGEP_HEADER_UP_SUPPORT.length();
+        int ggepLength=1   //magic number
+                      +1   //"DUPTIME" extension flags
+                      +idLength //ID
+                      +1   //data length
+                      +2   //data bytes
+                      +1   //"UP" extension flags
+                      +upLength // ID
+                      +1   // data length
+                      +3  // data bytes
+                      +1   //"VC" extension flags
+                      +vcLength // ID
+                      +1   // data length
+                      +5;  // data bytes
+        assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
+        int offset=23+14;                              //GGEP offset
+        assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
+        assertTrue("Got: "+(0xFF&bytes[offset+1]), 
+                   bytes[offset+1]==(byte)(0x00 | idLength)); //extension flags
+        assertTrue(bytes[offset+2]==(byte)'D');
+        assertTrue(bytes[offset+3]==(byte)'U');
+        assertTrue(bytes[offset+2+idLength+4]==(byte)'U');
+        assertTrue(bytes[offset+2+idLength+5]==(byte)'P');
+        assertTrue(bytes[offset+2+idLength+4+upLength+5]==(byte)'V');
+        assertTrue(bytes[offset+2+idLength+4+upLength+6]==(byte)'C');
+        assertTrue(bytes[offset+2+idLength+4+upLength+8]==(byte)'L');
+        assertTrue(bytes[offset+2+idLength+4+upLength+9]==(byte)'I');
+        assertTrue(bytes[offset+2+idLength+4+upLength+10]==(byte)'M');
+        assertTrue(bytes[offset+2+idLength+4+upLength+11]==(byte)'E');
+        assertTrue(bytes[offset+2+idLength+4+upLength+12]==39);
+        //...etc.
+        assertTrue(bytes[bytes.length-2-(5+upLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
+        assertTrue(bytes[bytes.length-1-(5+upLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
+
+
+        //Decode and check contents.
+        try {
+            Message m=Message.read(new ByteArrayInputStream(bytes));
+            PingReply pong=(PingReply)m;
+            assertTrue(m instanceof PingReply);
+            assertTrue(pong.getPort()==6349);
+            assertTrue(pong.hasGGEPExtension());
+            assertTrue(pong.getDailyUptime()==523);
+            assertTrue(pong.supportsUnicast()==false);
+            assertTrue(pong.getVendor().equals("LIME"));
+            assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
+                       pong.getVendorMajorVersion()==2);
+            assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
+                       pong.getVendorMinorVersion()==7);
+        } catch (BadPacketException e) {
+            fail("Couldn't extract uptime");
+        } catch (IOException e) {
+            fail("IO problem");
+        }
+    }
+
     public void testStripGGEP2() {
         byte[] guid=GUID.makeGuid();
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
         PingReply pr1=new PingReply(guid, (byte)3, 6349, ip,
-                                    13l, 14l, false, 4321);           
+                                    13l, 14l, false, 4321, false);           
         PingReply pr2=(PingReply)pr1.stripExtendedPayload();
         assertTrue(Arrays.equals(pr1.getGUID(), pr2.getGUID()));
         assertEquals(pr1.getHops(), pr2.getHops());
