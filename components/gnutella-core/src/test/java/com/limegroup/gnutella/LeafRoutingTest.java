@@ -175,7 +175,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         //    Thread.sleep(6000);
         //} catch (InterruptedException e) { }
         byte[] guid=rs.newQueryGUID();
-        rs.query(guid, "crap", 0);
+        rs.query(guid, "crap");
         //System.out.println("-Testing broadcast from leaf");
 
         while (true) {

@@ -119,7 +119,7 @@ public class UDPServiceTest extends com.limegroup.gnutella.util.BaseTestCase {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {}
 			ROUTER_SERVICE.query(ROUTER_SERVICE.newQueryGUID(), 
-								 curName, 0, null);
+								 curName, null);
 			while(_reply == null) {
 				Thread.sleep(100);
 			}
