@@ -55,4 +55,15 @@ interface ReplyHandler {
      * a reply.
      */
     boolean isOpen();
+
+	/**
+	 * Returns whether or not this reply handler is a leaf -- whether 
+	 * or not the host on the other end of this connection is a leaf 
+	 * of this (necessarily) Ultrapeer.
+	 *
+	 * @return <tt>true</tt> if the host on the other end of this 
+	 *  connection is a leaf, making this an Ultrapeer, <tt>false</tt> 
+	 *  otherwise
+	 */
+	boolean isLeafConnection();
 }
