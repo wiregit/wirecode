@@ -191,9 +191,13 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         Object m=router.broadcasts.get(0);
         assertInstanceof("m should be a query request", QueryRequest.class, m);
         QueryRequest qr=(QueryRequest)m;
-        // First query is not a requery
-        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("should not have queried for filename", "\\", qr.getQuery());
+        // no more requeries
+        assertTrue((GUID.isLimeGUID(qr.getGUID())) &&
+                   !(GUID.isLimeRequeryGUID(qr.getGUID())));
+        // since filename is the first thing ever submitted it should always
+        // query for allFiles[0].getFileName()
+        assertEquals("should have queried for filename", filename, 
+                     qr.getQuery());
         assertNotNull("should have some requested urn types", 
             qr.getRequestedUrnTypes() );
         assertEquals("unexpected amount of requested urn types",
@@ -267,7 +271,11 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
 
         //Now wait a few seconds and make sure a requery of right type was sent.
         Thread.sleep(6*1000);
-        assertEquals("unexpected router.broadcasts size", 1, router.broadcasts.size());
+        assertEquals(downloader.getState(), Downloader.WAITING_FOR_USER);
+        downloader.resume();
+        Thread.sleep(200); // give the downloader a chance to send the query
+        assertEquals("unexpected router.broadcasts size", 1, 
+                     router.broadcasts.size());
         Object m=router.broadcasts.get(0);
         assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         QueryRequest qr=(QueryRequest)m;
@@ -347,13 +355,18 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         downloader2=mgr.download("yyyyy", null, guid2, null);
 
         //Got right number of requeries?
-		// Note that the first query will kick off immediately now
+        // no more requeries - the user has to spawn them. sooo...
         List broadcasts=router.broadcasts;
-        Thread.sleep(8000);
+        for (int i = 0; i < 10; i++) {
+            Thread.sleep(333);
+            downloader1.resume();
+            downloader2.resume();
+        }
 		downloader1.stop();
 		downloader2.stop();
-        assertEquals("unexpected # of broadcasts: ", 
-            8, broadcasts.size(), 1); //should be 8, plus fudge factor
+        // take into account fudge factor
+        assertEquals("unexpected # of broadcasts: ", 20, broadcasts.size(), 
+                     2); //should be 20 because 10 resumes per
         //Are they balanced?  Check for approximate fairness.
         int xCount=0;
         int yCount=0;
