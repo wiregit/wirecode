@@ -23,12 +23,12 @@ public class SimpleFileManager extends FileManager {
         ;
     }
     
-    public FileDesc addFileIfShared(File f, List docs) {
-        return addFileIfShared(f);
+    protected FileDesc addFileIfShared(File f, List docs, boolean notify) {
+        return addFileIfShared(f, notify);
     }
     
     public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
         return true;
-    }    
+    }
 }
 

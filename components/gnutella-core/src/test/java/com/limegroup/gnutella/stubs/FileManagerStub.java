@@ -74,8 +74,8 @@ public class FileManagerStub extends FileManager {
     	_descs = new Vector();
     }
     
-    public FileDesc addFileIfShared(File f, List docs) {
-        return addFileIfShared(f);
+    protected FileDesc addFileIfShared(File f, List docs, boolean notify) {
+        return addFileIfShared(f, notify);
     }
 }
 

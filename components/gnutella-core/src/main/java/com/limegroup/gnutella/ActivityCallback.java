@@ -115,7 +115,14 @@ public interface ActivityCallback
      *  exists. 
      */
     public void addSharedFile(final FileDesc file, final File parent);
-
+    
+    /**
+     * Notifies the GUI when a FileDesc was either added, removed, 
+     * changed or renamed. This event is triggered by FileManager
+     * or MetaFileManager.
+     */
+    public void handleFileManagerEvent(FileManagerEvent evt);
+    
     /**
      * Notifies the GUI that the given shared file has new information.
      *
