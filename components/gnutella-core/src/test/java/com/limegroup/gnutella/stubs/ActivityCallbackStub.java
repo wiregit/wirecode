@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.websearch.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.*;
 import java.io.*;
@@ -59,4 +60,5 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void fileManagerLoaded() {}
     public void indicateNewVersion() {}
     public void showError(String message, String messageKey) {}
+    public void addWebResult(WebResult wr) {}    
 }

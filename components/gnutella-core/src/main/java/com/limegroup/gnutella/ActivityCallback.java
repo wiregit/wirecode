@@ -5,6 +5,7 @@ import java.io.File;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.websearch.WebResult;
 
 import com.sun.java.util.collections.Set;
 
@@ -188,5 +189,7 @@ public interface ActivityCallback
     public void indicateNewVersion();
 
     public void showError(String message, String messageKey);
+
+    public void addWebResult(WebResult webResult);
 
 }

@@ -116,6 +116,7 @@ public class WebSearchHandler {
             System.out.println(title+", "+desc+", "+bidPrice+", "+clickURL);
             WebResult result = new WebResult(title, desc, bidPrice, clickURL);
             //TODO: add these WebResults to the GUI
+            RouterService.getCallback().addWebResult(result);
         }
         } catch(Exception e) {
             e.printStackTrace();

@@ -5,6 +5,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.websearch.WebResult;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -269,5 +270,7 @@ public class Main implements ActivityCallback, ErrorCallback {
     public void indicateNewVersion() {}
 
     public void showError(String message, String messageKey) {}
+    
+    public void addWebResult(WebResult wr) {} 
 }
 
