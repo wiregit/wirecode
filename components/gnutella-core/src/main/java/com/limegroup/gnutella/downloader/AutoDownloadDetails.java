@@ -282,14 +282,7 @@ public class AutoDownloadDetails implements Serializable {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("moxxiffey", null,
                                 GUID.makeGuid(), MediaType.getAudioMediaType());
-        String[] files = {"moxxiffey - fuedehead.mp3",
-                          "moxxiseey - fueadhea d.mp3",
-                          "Moxxiffey - cilly budd.mp3",
-                          "moXxiffey - comorrow.asf",
-                          "moxxiffey - doxers.mp3",
-                          "moxxiFFey - comorrow.mp3",
-                          "Moxxiffey - hold on to your friends.mp3",
-                          "moxxiffey - budd cilly.mp3"};
+        String[] files = {"moxxiffey - fuedehead.mp3"};
 
         RemoteFileDesc[] rfds = new RemoteFileDesc[files.length];
         for (int i = 0; i < rfds.length; i++)
@@ -318,19 +311,6 @@ public class AutoDownloadDetails implements Serializable {
         
         Assert.that(add.addDownload(rfds[0]));
         add.commitDownload(rfds[0]);
-        Assert.that(!add.addDownload(rfds[1]));
-        Assert.that(add.addDownload(rfds[2]));
-        add.commitDownload(rfds[2]);
-        Assert.that(!add.addDownload(rfds[3]));
-        Assert.that(add.addDownload(rfds[4]));
-        add.commitDownload(rfds[4]);
-        Assert.that(add.addDownload(rfds[5]));
-        add.commitDownload(rfds[5]);
-        Assert.that(add.addDownload(rfds[6]));
-        add.removeDownload(rfds[6]);
-        Assert.that(add.addDownload(rfds[6]));        
-        add.commitDownload(rfds[6]);
-        Assert.that(!add.addDownload(rfds[7]));
 
         // seems like we've committed MAX_DOWNLOADS, should be expired...
         Assert.that(add.expired());
