@@ -453,17 +453,6 @@ public abstract class MessageRouter {
 
 		if(counter != null) {  // query is new (probe or normal)
 
-			//Hack! If this is the indexing query from a Clip2 reflector, mark 
-            //the connection as unkillable so the ConnectionWatchdog will not 
-            //police it any more.
-            //TODO: get rid of this at some point, doesn't seem to be valid
-            //anymore.
- 			if ((receivingConnection.getNumMessagesReceived()<=2)
-                 && (request.getHops()<=1)  //actually ==1 will do
-                 && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
- 				receivingConnection.setKillable(false);
- 			}
-
             // 1a: set the TTL of the query so it can be potentially extended  
             if (isProbeQuery) 
                 _queryRouteTable.setTTL(request.getGUID(), (byte)1);
@@ -478,18 +467,11 @@ public abstract class MessageRouter {
 
             // only allow extension of TTL 1's, not in general.
             if ((request.getTTL() > 0) && 
-                _queryRouteTable.getTTL(request.getGUID()) == 1) {
-
-                // TODO: small problem here - two threads may serially call
-                // getTTL and think they need to set, so RouteTable should 
-                // provide a getAndSetTTL method
-                // 2a
-                _queryRouteTable.setTTL(request.getGUID(),
-                                        (byte)(request.getTTL()+1));
+                _queryRouteTable.getAndSetTTL(request.getGUID(), (byte)1, 
+                                              (byte)(request.getTTL()+1))) 
                 // rebroadcast out but don't locally evaluate....
                 handleQueryRequest(request, receivingConnection, counter, 
                                    false);
-            }
             else  // 2b1: not a correct extension, so call it a duplicate....
                 tallyDupQuery(request);
         }

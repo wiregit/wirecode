@@ -217,6 +217,27 @@ public final class RouteTable {
             return entry.getTTL();
     }
 
+
+    /** Synchronizes a TTL get test with a set test.
+     *  @param getTTL the ttl you want getTTL() to be in order to setTTL().
+     *  @param setTTL the ttl you want to setTTL() if getTTL() was correct.
+     *  @return true if the TTL was set as you desired.
+     *  @throws IllegalArgumentException if getTTL or setTTL is less than 1, or
+     *  if setTTL < getTTL
+     */
+    public synchronized boolean getAndSetTTL(byte[] guid, byte getTTL, 
+                                             byte setTTL) {
+        if ((getTTL < 1) || (setTTL < getTTL))
+            throw new IllegalArgumentException("Bad ttl input (get/set): " +
+                                               getTTL + "/" + setTTL);
+        if (getTTL(guid) == getTTL) {
+            setTTL(guid, setTTL);
+            return true;
+        }
+        return false;
+    }
+
+
     /**
      * Looks up the reply route for a given guid.
      *
