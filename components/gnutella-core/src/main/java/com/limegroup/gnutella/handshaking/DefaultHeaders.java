@@ -66,6 +66,8 @@ public abstract class DefaultHeaders extends Properties {
         
         props.put(HeaderNames.X_PONG_CACHING, "0.1");
         
+        props.put("X-OS", "Mac Classic");
+        
 //        UpdateManager updateManager = UpdateManager.instance();
 //        String latestVersion = updateManager.getVersion();
 //        // only send if we had a valid file on disk & its not @version@.
