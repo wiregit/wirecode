@@ -15,6 +15,22 @@ public class UrnType implements Serializable {
 	private static final long serialVersionUID = -8211681448456483713L;
 
 	/**
+	 * Identifier string for the SHA1 type.
+	 */
+	public static final String SHA1_STRING = "sha1:";
+
+
+	/**
+	 * The <tt>UrnType</tt> for SHA1 hashes.
+	 */
+	public static final UrnType SHA1 = new UrnType(SHA1_STRING);
+
+	/**
+	 * The <tt>UrnType</tt> for specifying any URN type.
+	 */
+	public static final UrnType ANY_TYPE = new UrnType("");
+
+	/**
 	 * Constant for specifying SHA1 URNs in replies.
 	 */
 	public static transient final Set SHA1_SET = new HashSet();		
@@ -37,10 +53,6 @@ public class UrnType implements Serializable {
 	 */
 	private static final String COLON = ":";
 
-	/**
-	 * Identifier string for the SHA1 type.
-	 */
-	public static final String SHA1_STRING = "sha1:";
 
 	/**
 	 * Constant for the leading URN string identifier, as specified in
@@ -179,16 +191,4 @@ public class UrnType implements Serializable {
 		if(type == null) return false;
 		return true;
 	}
-
-	// the enum constants
-
-	/**
-	 * The <tt>UrnType</tt> for SHA1 hashes.
-	 */
-	public static final UrnType SHA1 = new UrnType(SHA1_STRING);
-
-	/**
-	 * The <tt>UrnType</tt> for specifying any URN type.
-	 */
-	public static final UrnType ANY_TYPE = new UrnType("");
 }
