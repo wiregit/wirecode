@@ -198,7 +198,9 @@ public class QueryRequest extends Message implements Serializable{
 			// extensions
             boolean addDelimiterBefore = false;
 			
-            byte[] richQueryBytes = richQuery.getBytes("UTF-8");
+            byte[] richQueryBytes = null;
+            if(richQuery!=null)
+                richQueryBytes = richQuery.getBytes("UTF-8");
             
 			// add the rich query
             addDelimiterBefore = 
