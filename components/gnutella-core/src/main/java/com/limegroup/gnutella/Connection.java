@@ -1879,6 +1879,12 @@ public class Connection implements IpPort {
         return "CONNECTION: host=" + _host  + " port=" + _port;
     }
     
+    /**
+     * access the locale pref. of the connected servent
+     */
+    public String getLocalePref() {
+        return _headers.getLocalePref();
+    }
 
     // Technically, a Connection object can be equal in various ways...
     // Connections can be said to be equal if the pipe the information is

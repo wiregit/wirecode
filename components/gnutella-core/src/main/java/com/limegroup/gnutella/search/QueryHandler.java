@@ -4,6 +4,7 @@ package com.limegroup.gnutella.search;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
 
 /**
@@ -409,7 +410,14 @@ public final class QueryHandler {
      * @return the number of new hosts theoretically reached by this
      *  query iteration
      */
-    private int sendQuery(List ultrapeers) {
+    private int sendQuery(List ultrapeersAll) {
+        List ultrapeers = /** method returns a copy */
+            _connectionManager.getInitializedConnectionsMatchLocale
+            (ApplicationSettings.LANGUAGE.getValue());
+        
+        ultrapeersAll.removeAll(ultrapeers);
+        ultrapeers.addAll(ultrapeersAll); 
+
         // weed out any stale data from the lists of queried connections --
         // remove any elements that are not in our more up-to-date list
         // of connections.

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.text.ParseException;
 
 /**
@@ -73,6 +74,10 @@ public class ExtendedEndpoint extends Endpoint {
     private Buffer /* of Long */ connectSuccesses=new Buffer(HISTORY_SIZE);
     /** Same as connectSuccesses, but for failed connections. */
     private Buffer /* of Long */ connectFailures=new Buffer(HISTORY_SIZE);
+
+    private String client_locale = 
+        ApplicationSettings.DEFAULT_LOCALE.getValue();
+    
     
     /**
      * Creates a new ExtendedEndpoint with uptime data read from a ping reply.
@@ -95,6 +100,25 @@ public class ExtendedEndpoint extends Endpoint {
         this.timeRecorded=now();
     }
 
+    /**
+     * creates a new ExtendedEndpoint with the specified locale.
+     */
+    public ExtendedEndpoint(String host, int port, int dailyUptime,
+                            String locale) {
+        super(host, port);
+        this.dailyUptime = dailyUptime;
+        this.timeRecorded = now();
+        client_locale = locale;
+    }
+
+    /**
+     * creates a new ExtendedEndpoint with the specified locale
+     */
+    public ExtendedEndpoint(String host, int port, String locale) {
+        this(host, port);
+        client_locale = locale;
+    }
+    
     ////////////////////// Mutators and Accessors ///////////////////////
 
     /** Returns the system time (in milliseconds) when this' was created. */
@@ -136,6 +160,20 @@ public class ExtendedEndpoint extends Endpoint {
      *   a Long, in descending order. */
     public Iterator /* Long */ getConnectionFailures() {
         return connectFailures.iterator();
+    }
+
+    /**
+     * accessor for the locale of this endpoint
+     */
+    public String getClientLocale() {
+        return client_locale;
+    }
+
+    /**
+     * set the locale
+     */
+    public void setClientLocale(String l) {
+        client_locale = l;
     }
 
     private void recordConnectionAttempt(Buffer buf, long now) {
@@ -193,6 +231,8 @@ public class ExtendedEndpoint extends Endpoint {
         write(out, getConnectionSuccesses());
         out.write(FIELD_SEPARATOR);
         write(out, getConnectionFailures());
+        out.write(FIELD_SEPARATOR);
+        out.write(client_locale);
         out.write(EOL);
     }
 

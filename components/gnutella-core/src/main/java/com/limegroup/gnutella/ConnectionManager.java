@@ -189,6 +189,8 @@ public class ConnectionManager {
     private volatile int _shieldedConnections = 0;
     private volatile int _nonLimeWireLeaves = 0;
     private volatile int _nonLimeWirePeers = 0;
+    /** number of peers that matches the local locale pref. */
+    private volatile int _localeMatchingPeers = 0; 
 
     /**
      * For authenticating users
@@ -665,6 +667,18 @@ public class ConnectionManager {
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
+
+        //if locale pref on and doesn't match client locale
+        if(ConnectionSettings.USE_LOCALE_PREF.getValue()
+           && !checkLocale(hr.getLocalePref())) {
+            //if num connections haven't been met and there isn't room
+            //for extra connections
+            if(ULTRAPEER_CONNECTIONS <
+               (ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                - _localeMatchingPeers)
+               + getNumInitializedConnections()) 
+                return false;
+        }
 		
 
         //Old versions of LimeWire used to prefer incoming connections over
@@ -891,6 +905,19 @@ public class ConnectionManager {
     public List getInitializedConnections() {
         return _initializedConnections;
     }
+
+    /**
+     */
+    public List getInitializedConnectionsMatchLocale(String loc) {
+        List matches = new ArrayList();
+        for(Iterator itr= _initializedConnections.iterator();
+            itr.hasNext();) {
+            Connection conn = (Connection)itr.next();
+            if(loc.equals(conn.getLocalePref()))
+                matches.add(conn);
+        }          
+        return matches;
+    }
     
     /**
      * @requires returned value not modified
@@ -1112,6 +1139,8 @@ public class ConnectionManager {
                     _shieldedConnections++;
                 if(!c.isLimeWire())
                     _nonLimeWirePeers++;
+                if(checkLocale(c.getLocalePref()))
+                    _localeMatchingPeers++;
             } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
@@ -1253,6 +1282,8 @@ public class ConnectionManager {
                     _shieldedConnections--;                
                 if(!c.isLimeWire())
                     _nonLimeWirePeers--;
+                if(checkLocale(c.getLocalePref()))
+                    _localeMatchingPeers--;
             }
         }else{
             //check in _initializedClientConnections
@@ -1952,4 +1983,17 @@ public class ConnectionManager {
             _catcher.recoverHosts();
         }
     }
+
+    /**
+     * Utility method to see if the passed in locale matches
+     * that of the local client. As of now, we assume that
+     * those clients not advertising locale as english locale
+     */
+    private boolean checkLocale(String loc) {
+        if(loc == null)
+            loc = /** assume english if locale is not given... */
+                ApplicationSettings.DEFAULT_LOCALE.getValue();
+        return ApplicationSettings.LANGUAGE.getValue().equals(loc);
+    }
+
 }

@@ -3,8 +3,9 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
-
+ 
 import java.io.*;
 import java.text.ParseException;
 
@@ -125,6 +126,16 @@ public class HostCatcher implements HostListener {
      */
     private final Set FREE_LEAF_SLOTS_SET = new HashSet();    
 
+    
+    /**
+     * map of locale (string) to sets (of endpoints).
+     */
+    private final Map LOCALE_2_SET =  new HashMap();
+    
+    /**
+     * number of endpoints to keep in the locale set
+     */
+    private static final int NUM_2_KEEP_LOCALE_SET = 100;
 
     /** The list of pongs with the highest average daily uptimes.  Each host's
      * weight is set to the uptime.  These are most likely to be reachable
@@ -398,7 +409,11 @@ public class HostCatcher implements HostListener {
         } else {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
         }
-
+        
+        //if the PingReply had locale information then set it in the endpoint
+        if(!pr.getClientLocale().equals(""))
+            endpoint.setClientLocale(pr.getClientLocale());
+        
         if(!isValidHost(endpoint)) return false;
         
         if(pr.supportsUnicast()) {
@@ -406,6 +421,7 @@ public class HostCatcher implements HostListener {
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
 
+        addToLocaleMap(endpoint);
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
             
@@ -453,6 +469,25 @@ public class HostCatcher implements HostListener {
         addPermanent(host);
         notify();
     }
+
+    /**
+     * add the endpoint to the map which matches locales to a set of 
+     * endpoints
+     */
+    private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
+        String loc = endpoint.getClientLocale();
+        if(LOCALE_2_SET.containsKey(loc)) {
+            Set s = (Set)LOCALE_2_SET.get(loc);
+            if(s.add(endpoint) && s.size() > NUM_2_KEEP_LOCALE_SET)
+                s.remove(s.iterator().next());
+        }
+        else {
+            Set s = new HashSet();
+            s.add(endpoint);
+            LOCALE_2_SET.put(loc, s);
+        }
+    }
+
 
     /**
      * Adds an address to this, possibly ejecting other elements from the cache.
@@ -713,28 +748,38 @@ public class HostCatcher implements HostListener {
         // If we're already an ultrapeer and we know about hosts with free
         // ultrapeer slots, try them.
         if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+            /*
             Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
+            */
+            return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
+                                    
         } 
         // Otherwise, if we're already a leaf and we know about ultrapeers with
         // free leaf slots, try those.
         else if(RouterService.isShieldedLeaf() && 
                 !FREE_LEAF_SLOTS_SET.isEmpty()) {
+            /*
             Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
+            */
+            return preferenceWithLocale(FREE_LEAF_SLOTS_SET);
         } 
         // Otherwise, assume we'll be a leaf and we're trying to connect, since
         // this is more common than wanting to become an ultrapeer and because
         // we want to fill any remaining leaf slots if we can.
         else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+            /*
             Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
+            */
+            return preferenceWithLocale(FREE_ULTRAPEER_SLOTS_SET);
         } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
@@ -746,6 +791,33 @@ public class HostCatcher implements HostListener {
             return e;
         } else
             throw new NoSuchElementException();
+    }
+
+    
+    /**
+     */
+    private ExtendedEndpoint preferenceWithLocale(Set s) {
+
+        String loc = ApplicationSettings.LANGUAGE.getValue();
+
+        if(LOCALE_2_SET.containsKey(loc)) {
+            Set locales = (Set)LOCALE_2_SET.get(loc);
+            Set retain = new HashSet(s);
+            retain.retainAll(locales);
+
+            if(retain.size() != 0) { //preferenced 
+                Iterator itr = retain.iterator();
+                ExtendedEndpoint ee = (ExtendedEndpoint)itr.next();
+                locales.remove(ee);
+                s.remove(ee);
+                return ee;
+            }//else we just return the first endpoint in the passed in set
+        }
+        
+        Iterator iter = s.iterator();
+        ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+        iter.remove();
+        return ee;
     }
 
     /**
@@ -786,13 +858,26 @@ public class HostCatcher implements HostListener {
      *  have advertised they have free ultrapeer slots
      */
     public synchronized Collection getUltrapeersWithFreeUltrapeerSlots() {
+        
+        /*
         Set copy = new HashSet();
         Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
         for(int i=0; iter.hasNext() && i<10; i++) {
             copy.add(iter.next());
         }
         return copy;
+        */
+
+        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
+                                        ApplicationSettings.LANGUAGE.getValue());
     }
+
+    public synchronized Collection 
+        getUltrapeersWithFreeUltrapeerSlots(String locale) {
+        return getPreferencedCollection(FREE_ULTRAPEER_SLOTS_SET,
+                                        locale);
+    }
+    
 
     /**
      * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
@@ -803,12 +888,53 @@ public class HostCatcher implements HostListener {
      *  have advertised they have free leaf slots
      */
     public synchronized Collection getUltrapeersWithFreeLeafSlots() {
+        /*
         Set copy = new HashSet();
         Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
         for(int i=0; iter.hasNext() && i<10; i++) {
             copy.add(iter.next());
         }
         return copy;
+        */
+        
+        return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
+                                        ApplicationSettings.LANGUAGE.getValue());
+    }
+    
+    public synchronized Collection
+        getUltrapeersWithFreeLeafSlots(String locale) {
+        return getPreferencedCollection(FREE_LEAF_SLOTS_SET,
+                                        locale);
+    }
+
+    /**
+     */
+    private Collection getPreferencedCollection(Set s, String loc) {
+        if(loc == null || loc.equals(""))
+            loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
+        int i = 0;
+        Set returnSet = new HashSet();
+        Set copy;
+        Iterator itr;
+
+        if(LOCALE_2_SET.containsKey(loc)) { //try to preference
+            Set locales = (Set)LOCALE_2_SET.get(loc);
+            copy = new HashSet(s);
+            copy.retainAll(locales);
+            itr = copy.iterator();
+            for(;itr.hasNext() && i < 10; i++) 
+                returnSet.add(itr.next());
+        }
+
+        if(i < 10) {
+            copy = new HashSet(s);
+            copy.removeAll(returnSet); //make sure we don't have duplicates
+            itr = copy.iterator();
+            for(;itr.hasNext() && i < 10; i++)
+                returnSet.add(itr.next());
+        }
+        
+        return returnSet;
     }
 
 

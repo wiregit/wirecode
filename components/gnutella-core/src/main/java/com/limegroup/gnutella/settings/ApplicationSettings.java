@@ -172,4 +172,10 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final BooleanSetting CHECK_AGAIN = 
         FACTORY.createBooleanSetting("CHECK_AGAIN", true);        
+
+    /**
+     * the default locale to use if not specified
+     */
+    public static final StringSetting DEFAULT_LOCALE = 
+        FACTORY.createStringSetting("DEFAULT_LOCALE", "en");
 }

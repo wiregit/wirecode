@@ -189,6 +189,20 @@ public final class ConnectionSettings extends LimeProps {
     public static final BooleanSetting USE_NIO =
         FACTORY.createBooleanSetting("USE_NIO", true);
           
+
+    /**
+     * setting for locale preferencing
+     */
+    public static final BooleanSetting USE_LOCALE_PREF =
+        FACTORY.createBooleanSetting("USE_LOCALE_PREF", true);
+
+    /**
+     * number of slots to reserve for those connections that
+     * match the local locale
+     */
+    public static final IntSetting NUM_LOCALE_PREF =
+        FACTORY.createIntSetting("NUM_LOCALE_PREF", 3);
+
     /**
      * Helper method left from Settings Manager
      *

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.io.*;
 
 /**
@@ -47,6 +48,7 @@ public class PingRequest extends Message {
      */
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
+        addLocale();
     }
 
     /**
@@ -151,5 +153,42 @@ public class PingRequest extends Message {
         return (getHops() == 1 && getTTL() == 0);
     }
 
+    /**
+     */
+    private void addLocale() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            GGEP ggep = new GGEP(true);
+            ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
+                     ApplicationSettings.LANGUAGE.getValue());
+            ggep.write(baos);
+            baos.write(0);
+            
+            payload = baos.toByteArray();
+            updateLength(payload.length);
+        }
+        catch(IOException e) {
+            ErrorService.error(e);
+        }
+    }
+
+    /**
+     */
+    public String getLocale() {
+        if(payload != null) { //payload can be null
+            try {
+                GGEP ggepBlock = new GGEP(payload, 0, null);
+                if(ggepBlock.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
+                    return ggepBlock.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                else
+                    return ApplicationSettings.DEFAULT_LOCALE.getValue(); 
+            }
+            catch(BadGGEPBlockException ignored) {}
+            catch(BadGGEPPropertyException ignoredToo) {}
+            return ApplicationSettings.DEFAULT_LOCALE.getValue();
+        }
+        else 
+            return ApplicationSettings.DEFAULT_LOCALE.getValue();
+    }
     //Unit tests: tests/com/limegroup/gnutella/messages/PingRequestTest.java
 }
