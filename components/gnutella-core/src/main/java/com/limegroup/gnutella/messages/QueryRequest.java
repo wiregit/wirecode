@@ -800,11 +800,11 @@ public class QueryRequest extends Message implements Serializable{
         if(QUERY_URNS.size() != 0) {
             throw new BadPacketException("cannot accept URN queries");
         }
-        if(QUERY.length() > 20) {
+        if(QUERY.length() > 30) {
             throw new BadPacketException("query too big: "+QUERY.length());
         }        
 
-        if(XML_QUERY.length() > 40) {
+        if(XML_QUERY.length() > 60) {
             throw new BadPacketException("XML query too big: "+XML_QUERY.length());
         }
 
