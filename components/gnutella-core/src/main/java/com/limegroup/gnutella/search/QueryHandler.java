@@ -174,9 +174,6 @@ public final class QueryHandler {
 	 *  is <tt>null</tt>
 	 */
 	public void sendQuery() {
-		//System.out.println("QueryHandler::sendQuery::enough results: "+
-		//			   hasEnoughResults()); 
-
 		// do not allow the route table entry to be null
 		if(_routeTableEntry == null) {
 			throw new NullPointerException("null route table entry");
@@ -203,41 +200,26 @@ public final class QueryHandler {
 			if(QUERIED_REPLY_HANDLERS.contains(mc)) continue;
 			
 			int hostsQueried = QUERIED_REPLY_HANDLERS.size();
-
-			byte ttl;
-			int delay;
-//  			if(hostsQueried < 3) {
-//  				ttl = 2;
-//  				if(hostsQueried == 2) {
-//  					if(results < 2) {
-//  						delay = 3000;
-//  					} else {
-//  						delay = 6000;
-//  					}
-//  				} else {
-//  					delay = 200;
-//  				}
-//  			} else {
-				// assume there's minimal overlap between the connections
-				// we queried before and the new ones
-				int remainingConnections = length - hostsQueried - 2;
-				remainingConnections = Math.max(remainingConnections, 1);
-				
-				double resultsPerHost = 
-					(double)results/(double)_theoreticalHostsQueried;
 			
-				int resultsNeeded = RESULTS - results;
-				
-				int hostsToQuery = 100000;
-				if(resultsPerHost != 0) {
-					hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
-				}
-				
-				int hostsToQueryPerConnection = 
-					hostsToQuery/remainingConnections;
-				ttl = calculateNewTTL(hostsToQueryPerConnection);
-				delay = 1500;//(ttl)*1000;
-				//} 
+			// assume there's minimal overlap between the connections
+			// we queried before and the new ones -- pretend we have
+			// fewer connections than we do
+			int remainingConnections = length - hostsQueried - 2;
+			remainingConnections = Math.max(remainingConnections, 1);
+			
+			double resultsPerHost = 
+				(double)results/(double)_theoreticalHostsQueried;
+			
+			int resultsNeeded = RESULTS - results;
+			
+			int hostsToQuery = 100000;
+			if(resultsPerHost != 0) {
+				hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
+			}
+			
+			int hostsToQueryPerConnection = 
+				hostsToQuery/remainingConnections;
+			byte ttl = calculateNewTTL(hostsToQueryPerConnection);
 			
 
 			System.out.println("QueryHandler::sendQuery::ttl: "+ttl+" "+this+
@@ -253,7 +235,7 @@ public final class QueryHandler {
 
 			// adjust the next query time according to the ttl of what we
 			// just sent
-			_nextQueryTime = System.currentTimeMillis()+delay;
+			_nextQueryTime = System.currentTimeMillis()+1500;
 
 			adjustTheoreticalHostsQueried(ttl);
 
