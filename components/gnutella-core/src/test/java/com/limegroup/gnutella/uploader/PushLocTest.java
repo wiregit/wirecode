@@ -64,6 +64,9 @@ public class PushLocTest extends BaseTestCase {
 
 	/** Our listening port for pushes. */
 	private static final int callbackPort = 6671;
+	
+	private static BufferedReader in;
+	private static BufferedWriter out;
 
 	private UploadManager upMan;
 
@@ -173,6 +176,12 @@ public class PushLocTest extends BaseTestCase {
 			": "+ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE.httpStringValue();
 		FWAWTFeatures= HTTPHeaderName.FEATURES+
 			": "+ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue();
+		
+		Socket s = new Socket("localhost",PORT);
+		in = new BufferedReader(
+				new InputStreamReader(s.getInputStream()));
+		out = new BufferedWriter(
+				new OutputStreamWriter(s.getOutputStream()));
 	}
 
 	private static void copyFile(File one, File two) throws Exception {
@@ -316,17 +325,25 @@ public class PushLocTest extends BaseTestCase {
 			}
 		}
 	}
+	
+	public void tearDown() {
+	    try {
+			in.close();
+		}catch(IOException ignored){}
+		try {
+			out.close();
+		}catch(IOException ignored){}
+		
+		try {
+		    Thread.sleep(700);
+		}catch(InterruptedException iex){}
+	}
 
 	/**
 	 * tests whether the status flag is set properly
 	 */
 	public void testFlagSetProperly() throws Exception {
 		
-		Socket s = new Socket("localhost",PORT);
-		BufferedReader in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		BufferedWriter out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
 		
 		//first don't send the feature header that indicates interest.
 		
@@ -344,76 +361,48 @@ public class PushLocTest extends BaseTestCase {
 		assertFalse(u.wantsFAlts());
 		assertEquals(0,u.wantsFWTAlts());
 		
-		try {
-			in.close();
-		}catch(IOException ignored){}
-		try {
-			out.close();
-		}catch(IOException ignored){}
-		
-		Thread.sleep(700);
+	}
+	
+	public void testFAWTFlagSetProperly() throws Exception{
 		
 		//repeat with the "fawt" feature sent.
-		
+	    UploadManager umanager = RouterService.getUploadManager();
 		assertEquals(0,umanager.uploadsInProgress());
-		s = new Socket("localhost",PORT);
-		in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
-		
 		
 		sendHeader(fileName,FAWTFeatures, out);
 		
 		Thread.sleep(700);
 		
 		assertEquals(1,umanager.uploadsInProgress());
-		
-		u = (HTTPUploader)l.get(0);
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		HTTPUploader u = (HTTPUploader)l.get(0);
 		
 		assertTrue(u.wantsFAlts());
 		assertEquals(0,u.wantsFWTAlts());
 		
-		try {
-			in.close();
-		}catch(IOException ignored){}
-		try {
-			out.close();
-		}catch(IOException ignored){}
-		Thread.sleep(500);
+	}
 		
 		//repeat with the "fwawt" feature sent.
-		
+	public void testFWTFlagSetProperly() throws Exception {
+	    UploadManager umanager = RouterService.getUploadManager();
 		assertEquals(0,umanager.uploadsInProgress());
-		s = new Socket("localhost",PORT);
-		in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
 		
 		sendHeader(fileName,FWAWTFeatures, out);
 		
 		Thread.sleep(700);
 		
 		assertEquals(1,umanager.uploadsInProgress());
-		
-		u = (HTTPUploader)l.get(0);
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		HTTPUploader u = (HTTPUploader)l.get(0);
 		
 		assertTrue(u.wantsFAlts());
 		assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
-		
-		try {
-			in.close();
-		}catch(IOException ignored){}
-		try {
-			out.close();
-		}catch(IOException ignored){}
 	}
 
 	/**
 	 * tests whether the right alternate locations are sent in responses.
 	 */
-	public void testProperHeadersSent () throws Exception {
+	public void testNoHeadersSent () throws Exception {
 		
 		//make sure the FD has got some push altlocs.
 		FileDesc fd = RouterService.getFileManager().get(0);
@@ -443,12 +432,6 @@ public class PushLocTest extends BaseTestCase {
 		//send a set of headers without the FALT header.  The response should
 		//not contain any firewalled altlocs.
 		
-		Socket s = new Socket("localhost",PORT);
-		BufferedReader in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		BufferedWriter out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
-		
 		sendHeader(fileName,HTTPHeaderName.ALT_LOCATION+":", out);
 		
 		Thread.sleep(500);
@@ -475,24 +458,45 @@ public class PushLocTest extends BaseTestCase {
 						fail("responded with Falt locations without being prompted");
 				}
 		}catch(IOException expected){}
-			
-		try {
-			in.close();
-		}catch(IOException ignored){}
-		try {
-			out.close();
-		}catch(IOException ignored){}
 		
-		Thread.sleep(700);
+		//clean up for next test
+		fd.remove(direct);fd.remove(direct);
+		fd.remove(push);fd.remove(push);
+		fd.remove(pushFwt);fd.remove(pushFwt);
+			
+	}
+	
+	public void testFAWTHeadersSent() throws Exception{
+		//make sure the FD has got some push altlocs.
+		FileDesc fd = RouterService.getFileManager().get(0);
+		
+		assertNotNull(fd);
+		assertEquals(0,fd.getAltLocsSize());
+		
+		URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+		PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		
+		
+		fd.add(direct);
+		fd.add(push);
+		fd.add(pushFwt);
+		
+	    UploadManager umanager = RouterService.getUploadManager();
+		
+		assertEquals(0,umanager.uploadsInProgress());
+		
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		
 		assertEquals(0,l.size());
 		
 		//now repeat with the fawt header sent.  We should get back two firewalled altlocs.
-		
-		s = new Socket("localhost",PORT);
-		in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
 		
 		sendHeader(fileName,FAWTFeatures+":", out);
 		
@@ -500,9 +504,9 @@ public class PushLocTest extends BaseTestCase {
 		
 		assertEquals(1,umanager.uploadsInProgress());
 		
-		u = (HTTPUploader)l.get(0);
+		HTTPUploader u = (HTTPUploader)l.get(0);
 		
-		b = (Boolean)PrivilegedAccessor.getValue(u,"_wantsFalts");
+		Boolean b = (Boolean)PrivilegedAccessor.getValue(u,"_wantsFalts");
 		
 		assertTrue(b.booleanValue());
 		
@@ -529,27 +533,46 @@ public class PushLocTest extends BaseTestCase {
 		assertEquals(2,returned.getAltLocsSize());
 		assertTrue(returned.contains(push));
 		assertTrue(returned.contains(pushFwt));
-	
 		
+		//clean up for next test
+		fd.remove(direct);fd.remove(direct);
+		fd.remove(push);fd.remove(push);
+		fd.remove(pushFwt);fd.remove(pushFwt);
+	
+	}
 		
 		//now send with the FWAWT header sent.  We should get only one
 		// altloc in the response
 		
-		try {
-			in.close();
-		}catch(IOException ignored){}
-		try {
-			out.close();
-		}catch(IOException ignored){}
 		
-		Thread.sleep(700);
-		assertEquals(0,l.size());
+	public void testFWTHeadersSent() throws Exception {	
+
+//	  make sure the FD has got some push altlocs.
+		FileDesc fd = RouterService.getFileManager().get(0);
 		
-		s = new Socket("localhost",PORT);
-		in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
+		assertNotNull(fd);
+		assertEquals(0,fd.getAltLocsSize());
+		
+		URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+		PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		
+		
+		fd.add(direct);
+		fd.add(push);
+		fd.add(pushFwt);
+		
+	    UploadManager umanager = RouterService.getUploadManager();
+		
+		assertEquals(0,umanager.uploadsInProgress());
+		
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
 		
 		sendHeader(fileName,FWAWTFeatures, out);
 		
@@ -557,9 +580,9 @@ public class PushLocTest extends BaseTestCase {
 		
 		assertEquals(1,umanager.uploadsInProgress());
 		
-		u = (HTTPUploader)l.get(0);
+		HTTPUploader u = (HTTPUploader)l.get(0);
 		
-		b = (Boolean)PrivilegedAccessor.getValue(u,"_wantsFalts");
+		Boolean b = (Boolean)PrivilegedAccessor.getValue(u,"_wantsFalts");
 		
 		assertTrue(b.booleanValue());
 		
@@ -568,8 +591,8 @@ public class PushLocTest extends BaseTestCase {
 		
 		assertEquals(1,fwtVersion);
 		
-		present = false;
-		header=null;
+		boolean present = false;
+		String header=null;
 		try {
 			while(true) {
 				header = readLine(in);
@@ -585,7 +608,8 @@ public class PushLocTest extends BaseTestCase {
 		
 		assertTrue(present);
 		assertNotNull(header);
-		returned.clear();
+		AlternateLocationCollection returned = 
+		    AlternateLocationCollection.create(sha1);
 		parseHeader(header,returned);
 		assertEquals(1,returned.getAltLocsSize());
 		
@@ -597,20 +621,9 @@ public class PushLocTest extends BaseTestCase {
 		fd.remove(push);fd.remove(push);
 		fd.remove(pushFwt);fd.remove(pushFwt);
 		
-		try {
-			in.close();
-		}catch(IOException ignored){}
-		try {
-			out.close();
-		}catch(IOException ignored){}
-		
-		Thread.sleep(700);
-		assertEquals(0,l.size());
 	}
 	
-	
-	
-	
+		
 	/**
 	 * tests that the uploader properly stores falts given by downloaders.
 	 */
@@ -620,21 +633,32 @@ public class PushLocTest extends BaseTestCase {
 		
 		assertNotNull(fd);
 		assertEquals(0,fd.getPushAlternateLocationCollection().getAltLocsSize());
+
 		
-		Socket s = new Socket("localhost",PORT);
-		BufferedReader in = new BufferedReader(
-				new InputStreamReader(s.getInputStream()));
-		BufferedWriter out = new BufferedWriter(
-				new OutputStreamWriter(s.getOutputStream()));
+		assertNotNull(fd);
+		assertEquals(0,fd.getAltLocsSize());
+		
+		URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+		PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+		
+		
+		
+	    UploadManager umanager = RouterService.getUploadManager();
+		
+		assertEquals(0,umanager.uploadsInProgress());
+		
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
 		
 		
 		//generate a header that contains one push loc and one direct loc.
 		GUID guid = new GUID(GUID.makeGuid());
-		AlternateLocation push = AlternateLocation.create(
-				guid.toHexString()+";1.2.3.4:5",fd.getSHA1Urn());
-		
-		AlternateLocation direct = 
-			AlternateLocation.create("1.2.3.4:5",fd.getSHA1Urn());
 		
 		String header = HTTPHeaderName.ALT_LOCATION+":"+direct.httpStringValue()+
 			"\n\r"+HTTPHeaderName.FALT_LOCATION+":"+push.httpStringValue();
@@ -644,11 +668,11 @@ public class PushLocTest extends BaseTestCase {
 		
 		Thread.sleep(500);
 		
-		UploadManager umanager = RouterService.getUploadManager();
+		
 		
 		assertEquals(1,umanager.uploadsInProgress());
 		
-		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
 		
 		HTTPUploader u = (HTTPUploader)l.get(0);
 		
