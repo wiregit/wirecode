@@ -12,9 +12,7 @@ public class SupernodeHandshakeResponder
     extends AuthenticationHandshakeResponder
 {
     
-    ConnectionManager _manager;
-    
-    MessageRouter _router;
+    private ConnectionManager _manager;
     
     /**
      * Creates a new instance of ClientHandshakeResponder
@@ -25,11 +23,10 @@ public class SupernodeHandshakeResponder
      * @param host The host with whom we are handshaking
      */
     public SupernodeHandshakeResponder(ConnectionManager manager, 
-        MessageRouter router, String host)
+		String host)
     {
         super(manager, host);
         this._manager = manager;
-        this._router = router;
     }
     
     //inherit doc comment
@@ -40,7 +37,7 @@ public class SupernodeHandshakeResponder
         if(!outgoing)
         {
             //Incoming connection....
-            Properties ret=new SupernodeProperties(_router, getRemoteIP());
+            Properties ret=new SupernodeProperties(getRemoteIP());
             
             //guide the incoming connection to be a supernode/clientnode
             ret.put(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
