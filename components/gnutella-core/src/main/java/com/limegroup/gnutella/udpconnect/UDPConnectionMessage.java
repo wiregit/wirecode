@@ -161,7 +161,6 @@ public abstract class UDPConnectionMessage extends Message {
         guid[3] = (byte)((sequenceNumber & 0x00ff));
         int end = GUID_DATA_START + guidDataLength;
         for ( int i = GUID_DATA_START; i < end; i++ ) {
-System.out.println("gd: "+data[i - GUID_DATA_START]);
             guid[i] = data[i - GUID_DATA_START];
         }
         return guid;

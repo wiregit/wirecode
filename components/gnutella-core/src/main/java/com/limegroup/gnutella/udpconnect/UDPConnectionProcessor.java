@@ -581,17 +581,17 @@ log("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
      *  If no acks are pending, then do nothing.
      */
     private synchronized void scheduleAckIfNeeded() {
-System.out.println("------scheduleAckIfNeeded");
+log("------scheduleAckIfNeeded");
         DataRecord drec = _sendWindow.getOldestUnackedBlock();
         if ( drec != null ) {
             int rto         = _sendWindow.getRTO();
 			if (rto == 0) 
 				rto = (int) DEFAULT_RTO_WAIT_TIME;
             long waitTime    = drec.sentTime + ((long)rto);
-System.out.println("------scheduled");
+log("------scheduled");
             scheduleAckTimeoutEvent(waitTime);
         } else {
-System.out.println("------unscheduled");
+log("------unscheduled");
             unscheduleAckTimeoutEvent();
         }
     }
