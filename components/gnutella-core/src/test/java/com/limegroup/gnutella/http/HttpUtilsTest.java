@@ -33,10 +33,10 @@ public final class HttpUtilsTest extends TestCase {
 	public void testExtractHeaderValue() {
 		String value = "value";
 		String[] headers = {
-			HTTPHeaderName.CONTENT_RANGE+":"+value,
-			HTTPHeaderName.CONTENT_RANGE+": "+value,
+			HTTPHeaderName.CONTENT_RANGE+":"   +value,
+			HTTPHeaderName.CONTENT_RANGE+": "  +value,
 			HTTPHeaderName.CONTENT_LENGTH+":  "+value,
-			HTTPHeaderName.CONTENT_TYPE+":  "+value
+			HTTPHeaderName.CONTENT_TYPE+":  "  +value
 		};
 		for(int i=0; i<headers.length; i++) {
 			String curValue = HTTPUtils.extractHeaderValue(headers[i]);
