@@ -47,7 +47,7 @@ public class FileManager {
 	_size = 0;
 	_numFiles = 0;
 	_files = new ArrayList();
-	_extensions = new String[0];
+	// _extensions = new String[0];
     }
 
     public Response[] query(QueryRequest request) {
@@ -66,16 +66,13 @@ public class FileManager {
 
     public void setExtensions(String str) {   
 	/* recieves a semi-colon separated list of extensions */
-	System.out.println("setExtensions: " +str);
 	_extensions =  HTTPUtil.stringSplit(str, ';');
+	int length = _extensions.length;
     }
 
     public boolean hasExtension(String filename) {
 	int length = _extensions.length;
-	System.out.println("FileManager::hasExtension: length: " + length);
-	
 	for (int i = 0; i < length; i++) {
-	    System.out.println("extension: " + _extensions[i]);
 	    if (filename.indexOf(_extensions[i]) != -1)
 		return true;
 	}
@@ -87,11 +84,9 @@ public class FileManager {
     public synchronized void addFile(String path) { /* the addFile method adds */ 
 	File myFile = new File(path);  /* just one single file to */
 	String name = myFile.getName();     /* the name of the file */
-	System.out.println("FileManager::addFile: " +name);
 	int n = (int)myFile.length();       /* the list, and increments */
 	_size += n;                         /* the appropriate info */
 	if (hasExtension(name)) {
-	    System.out.println("FileManager::addFile:has extension");
 	    _files.add(new FileDesc(_numFiles, name, path,  n));
 	    _numFiles++;
 	}
