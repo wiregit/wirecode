@@ -65,6 +65,7 @@ public class UltrapeerRoutingTest extends TestCase {
 		UltrapeerSettings.MAX_LEAVES.setValue(10);
 		ConnectionSettings.KEEP_ALIVE.setValue(6);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        settings.setSoftMaxTTL((byte)6);
         //settings.setEverSupernodeCapable(true);
         //settings.setDisableSupernodeMode(false);
         //settings.setForceSupernodeMode(true);
