@@ -319,5 +319,28 @@ public class StringUtils {
         return valueSet;
     }
     
+    /**
+     * Replaces all occurrences of old_str in str with new_str
+     *
+     * @param str the String to modify
+     * @param old_str the String to be replaced
+     * @param new_str the String to replace old_str with
+     *
+     * @return the modified str.
+     */
+    public static String replace(String str, String old_str, String new_str) {
+		int o = 0;
+		StringBuffer buf = new StringBuffer();
+		for (int i = str.indexOf(old_str) ; i > -1 ; i = str.indexOf(old_str, i+1)) {
+			if (i > o ) {
+				buf.append (str.substring(o, i));
+			}
+			buf.append (new_str);
+			o = i+old_str.length();
+		}
+		buf.append (str.substring(o, str.length()));
+		return buf.toString();
+    }
+
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
 }

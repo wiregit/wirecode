@@ -183,7 +183,6 @@ public final class SettingsManager {
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
-    private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
 	private final String DEFAULT_COUNTRY              = "";
 	private final String DEFAULT_LOCALE_VARIANT       = "";
@@ -346,11 +345,6 @@ public final class SettingsManager {
 	 * Constant key for whether or not the internal player is enabled.
 	 */
 	private final String PLAYER_ENABLED = "PLAYER_ENABLED";
-
-	/**
-	 * Constant key for what the user defined browser should be.
-	 */
-	private final String BROWSER = "BROWSER";
 
 	/**
 	 * Constant key for whether or not the Monitor Tab is enabled.
@@ -704,9 +698,6 @@ public final class SettingsManager {
                         break;
                     setPlayerEnabled(bs);
 				}
-				else if(key.equals(BROWSER)) {
-                    setBrowser(p);
-				}
 				else if(key.equals(MONITOR_VIEW_ENABLED)) {
 					boolean bs;
                     if (p.equals("true"))
@@ -1059,7 +1050,6 @@ public final class SettingsManager {
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
 		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
-		setBrowser(getDefaultBrowser());
 
         //defaults for tabs...
         setMonitorViewEnabled(DEFAULT_MONITOR_VIEW_ENABLED);
@@ -1233,16 +1223,6 @@ public final class SettingsManager {
         if (CommonUtils.isMacClassic())
             return false;
         return _playerEnabled;
-    }
-
-	/** Returns the command name for the browser */
-	public String getBrowser() {
-        return getStringValue(BROWSER);
-    }
-
-	/** Returns the command name for the default browser */
-    public String getDefaultBrowser() {
-        return DEFAULT_BROWSER;
     }
 
 	/** Returns true if the Monitor Tab should be enabled */
@@ -2315,15 +2295,6 @@ public final class SettingsManager {
 		_playerEnabled = playerEnabled;
 		String s = String.valueOf(playerEnabled);
 		PROPS.put(PLAYER_ENABLED, s);
-	}
-
-	/**
-	 * Sets the string for the browser.
-	 *
-	 * @param browser is the command to execute for the browser
-	 */
-	public void setBrowser(String browser) {
-		PROPS.put(BROWSER, browser);
 	}
 
 	/**

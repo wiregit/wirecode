@@ -4,7 +4,9 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
-import com.limegroup.gnutella.SettingsManager;
+import java.util.StringTokenizer;
+import com.limegroup.gnutella.settings.URLHandlerSettings;
+import com.limegroup.gnutella.MediaType;
 
 
 /**
@@ -61,14 +63,6 @@ public final class Launcher {
 	 */
 	private static Method _findApplication;
 		
-	/** 
-	 * The shell parameters for Netscape that opens a given URL in 
-	 * an already-open copy of Netscape on many command-line systems. 
-	 */
-	private static final String NETSCAPE_REMOTE_PARAMETER = "-remote";
-	private static final String NETSCAPE_OPEN_PARAMETER_START = "openURL(";
-	private static final String NETSCAPE_OPEN_PARAMETER_END = ")";
-	   
 	/**
 	 * Launcher class for opening applications on windows.
 	 */
@@ -314,38 +308,38 @@ public final class Launcher {
 	 *                      throws an InterruptedException
 	 */
 	private static void launchFileUnix(String path) throws IOException {
-        String browser = SettingsManager.instance().getBrowser();
-        if ( browser  == "netscape" ) {
-            launchFileUnixWithNetscape(path);
-        } else {
-            String[] strs = {browser,
-                             path};
+	    String handler;
+	    if (MediaType.getAudioMediaType().matches(path)) {
+	    	handler = URLHandlerSettings.AUDIO_PLAYER.getValue();
+	    } else if (MediaType.getVideoMediaType().matches(path)) {
+	    	handler = URLHandlerSettings.VIDEO_PLAYER.getValue();
+	    } else if (MediaType.getImageMediaType().matches(path)) {
+	    	handler = URLHandlerSettings.IMAGE_VIEWER.getValue();
+	    } else {
+	    	handler = URLHandlerSettings.BROWSER.getValue();
+	    }
+
+		
+        if (handler.indexOf("$URL$") != -1) {
+			System.out.println("starting " + handler);
+			StringTokenizer tok = new StringTokenizer (handler);
+			String[] strs = new String[tok.countTokens()];
+			for (int i = 0; tok.hasMoreTokens(); i++) {
+				strs[i] = StringUtils.replace(tok.nextToken(), "$URL$", path);
+				
+				System.out.print(" "+strs[i]);
+			}
+			try {
+				Process process = Runtime.getRuntime().exec(strs);
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("starting " + handler);
+            String[] strs = {handler, path};
             Process process = Runtime.getRuntime().exec(strs);
         }
     }
-
-
-	private static void launchFileUnixWithNetscape(String path) 
-        throws IOException {
-		// First, attempt to open the file in a 
-		// currently running session of Netscape
-		// NOT SURE THIS WILL WORK FOR NON-HTML FILES!!
-		String[] strs = {"netscape", 
-						 NETSCAPE_REMOTE_PARAMETER,
-						 NETSCAPE_OPEN_PARAMETER_START, 
-						 path,
-						 NETSCAPE_OPEN_PARAMETER_END};
-		Process process = Runtime.getRuntime().exec(strs);
-		try {
-			int exitCode = process.waitFor();
-			if (exitCode != 0) 	// if Netscape was not open
-				Runtime.getRuntime().exec(new String[] {"netscape", path});
-			
-		} catch (InterruptedException ie) {
-			throw new IOException("InterruptedException launching browser: " 
-								  + ie.getMessage());
-		}
-	}
 }
 
 

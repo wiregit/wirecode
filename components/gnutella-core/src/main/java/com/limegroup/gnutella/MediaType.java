@@ -115,6 +115,12 @@ public class MediaType implements Serializable {
         return (getDefaultMediaTypes())[4]; /* VIDEO */
     }
     
+    // do we really need this static method ?
+    public static MediaType getImageMediaType() {
+        // index should match the above constructor
+        return (getDefaultMediaTypes())[5]; /* IMAGE */
+    }
+
     /** Returns an array of default media types. */
     private static MediaType[] getTypes() {
         MediaType any = new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE,
