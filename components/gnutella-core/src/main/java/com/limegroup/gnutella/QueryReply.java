@@ -71,7 +71,7 @@ public class QueryReply extends Message implements Serializable{
     private static final byte SPEED_MASK=(byte)0x10;
 
     /** The xml chunk that contains metadata about xml responses*/
-    private String _xmlCollectionString = "";
+    private byte[] _xmlBytes = new byte[0];
 
 
     /** Creates a new query reply.  The number of responses is responses.length
@@ -85,7 +85,7 @@ public class QueryReply extends Message implements Serializable{
     public QueryReply(byte[] guid, byte ttl,
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID) {
-        this(guid, ttl, port, ip, speed, responses, clientGUID, "",
+        this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
              false, false, false, false, false);
     }
 
@@ -108,7 +108,7 @@ public class QueryReply extends Message implements Serializable{
             byte[] clientGUID,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed) {
-        this(guid, ttl, port, ip, speed, responses, clientGUID, "",
+        this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
              true, needsPush, isBusy, finishedUpload, measuredSpeed);
     }
 
@@ -125,20 +125,25 @@ public class QueryReply extends Message implements Serializable{
      *  upload
      * @param measuredSpeed true iff speed is measured, not as reported by the
      *  user
-     * @param xmlCollectionString The (non-null) String containing aggregated
+     * @param xmlBytes The (non-null) byte[] containing aggregated
      * and indexed information regarding file metadata.  In terms of byte-size, 
-     * this should not be bigger than 65535 bytes.  Anything larger will be 
-     * truncated.
+     * this should not be bigger than 65535 bytes.  Anything larger will result
+     * in an Exception being throw.  This String is assumed to consist of
+     * compressed data.
+     * @exception java.lang.Exception Thrown if xmlBytes.length > XML_MAX_SIZE
      */
     public QueryReply(byte[] guid, byte ttl, 
             int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID, String xmlCollectionString,
+            byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed) {
+            boolean finishedUpload, boolean measuredSpeed) 
+    throws Exception {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
-             xmlCollectionString, true, needsPush, isBusy, 
+             xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed);
-        _xmlCollectionString = xmlCollectionString;
+        if (xmlBytes.length > XML_MAX_SIZE)
+            throw new Exception();
+        _xmlBytes = xmlBytes;
     }
 
 
@@ -148,15 +153,21 @@ public class QueryReply extends Message implements Serializable{
      */
     private QueryReply(byte[] guid, byte ttl, 
              int port, byte[] ip, long speed, Response[] responses,
-             byte[] clientGUID, String xmlCollectionString,
+             byte[] clientGUID, byte[] xmlBytes,
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               11 +                             // 11 bytes of header
               rLength(responses) +             // file records size
-              qhdLength(includeQHD, xmlCollectionString) + 
+              qhdLength(includeQHD, xmlBytes) + 
                                                // conditional xml-style QHD len
               16);                             // 16-byte footer
+
+        // you aren't going to send this.  it will throw an exception above in
+        // the appropriate constructor....
+        if (xmlBytes.length > XML_MAX_SIZE)
+            return;  
+
         Assert.that((port&0xFFFF0000)==0);
         Assert.that(ip.length==4);
         Assert.that((speed&0xFFFFFFFF00000000l)==0);
@@ -213,16 +224,15 @@ public class QueryReply extends Message implements Serializable{
                 | (finishedUpload ? UPLOADED_MASK : 0)
                 | (measuredSpeed ? SPEED_MASK : 0));
 
-            //c) PART 2: size of XMLCollectionString + 1.
-            int xmlSize = (xmlCollectionString.getBytes()).length + 1;
+            //c) PART 2: size of xmlBytes + 1.
+            int xmlSize = xmlBytes.length + 1;
             if (xmlSize > XML_MAX_SIZE)
                 xmlSize = XML_MAX_SIZE;  // yes, truncate!
             ByteOrder.short2leb(((short) xmlSize), payload, i);
             i += 2;
 
             //d) actual xml.
-            byte[] xmlCollectionBytes = xmlCollectionString.getBytes();
-            System.arraycopy(xmlCollectionBytes, 0, 
+            System.arraycopy(xmlBytes, 0, 
                              payload, i, xmlSize-1);
             // adjust i...
             i += xmlSize-1;
@@ -277,14 +287,14 @@ public class QueryReply extends Message implements Serializable{
      *  even include a QHD.
      */
     private static int qhdLength(boolean includeQHD, 
-                                 String xmlCollectionString) {
+                                 byte[] xmlBytes) {
         int retInt = 0;
         if (includeQHD) {
             retInt += 4; // 'LIME'
             retInt += 1; // 1 byte for size of public area
             retInt += COMMON_PAYLOAD_LEN; 
             // size of xml string, max XML_MAX_SIZE
-            int numBytes = (xmlCollectionString.getBytes()).length;
+            int numBytes = xmlBytes.length;
             if ((numBytes + 1) > XML_MAX_SIZE)
                 retInt += XML_MAX_SIZE;
             else
@@ -309,8 +319,8 @@ public class QueryReply extends Message implements Serializable{
     /** Return the associated xml metadata string if the queryreply
      *  contained one.
      */
-    public String getXMLCollectionString() {
-        return _xmlCollectionString;
+    public byte[] getXMLBytes() {
+        return _xmlBytes;
     }
 
 
@@ -634,14 +644,17 @@ public class QueryReply extends Message implements Serializable{
                 temp = ByteOrder.ubyte2int(payload[i++]);
                 b = temp << 8;
                 int xmlSize = a | b;
-                if (xmlSize > 1)
-                    _xmlCollectionString = new String(payload, 
-                                                      payload.length-16-xmlSize, 
-                                                      xmlSize-1);
+                if (xmlSize > 1) {
+                    int xmlInPayloadIndex = payload.length-16-xmlSize;
+                    _xmlBytes = new byte[xmlSize-1];
+                    System.arraycopy(payload, xmlInPayloadIndex,
+                                     _xmlBytes, 0,
+                                     (xmlSize-1));
+                }
                 else
-                    _xmlCollectionString = "";
+                    _xmlBytes = new byte[0];
             }
-            
+
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
             this.vendor=vendorT.toUpperCase();
@@ -677,13 +690,12 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
-    
+
     public static boolean debugOn = false;
     public static void debug(String out) {
         if (debugOn) 
             System.out.println(out);
     }
-
 
     /** Unit test.  TODO: these badly need to be factored. */
     /*
@@ -799,8 +811,8 @@ public class QueryReply extends Message implements Serializable{
             byte[] name = r.getNameBytes();
             Assert.that(name[0]=='A',"sumeet test c");
             Assert.that(r.getName().equals("A"),"Sumeet test1");
-            Assert.that(qr.getXMLCollectionString().equals("SUSH"),
-                        "Susheel test1");
+            Assert.that((new String(qr.getXMLBytes())).equals("SUSH"),
+                        "SUSH is not " + (new String(qr.getXMLBytes())));
         }catch(BadPacketException e){
             System.out.println("MetaResponse not created well!");
         }
