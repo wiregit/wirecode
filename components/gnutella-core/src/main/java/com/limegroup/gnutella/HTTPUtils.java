@@ -102,7 +102,6 @@ public final class HTTPUtils {
 	public static String extractHeaderValue(final String header) {
 		int index = header.indexOf(":");
 		if(index == 0) return null;
-		return header.substring(index+2).trim();
+		return header.substring(index+1).trim();
 	}
-	
 }
