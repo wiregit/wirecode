@@ -42,11 +42,17 @@ public class ChordLookupService
 	 try{
 	    // WARNING: don't fool around with this property. There is
 	    // invariably just ONE seednode per chord.
+	    String seedNode=System.getProperty("edu.ucr.cs.chord.SeedNode");
+	    if(seedNode==null || seedNode.equals("")) return;
 
 	    if("true".equals(System.getProperty("edu.ucr.cs.chord.SeedNode")))
 	    {
 	       _lookup=new LocalFileLookupNode(DEFAULT_CHORD_PORT);
 	       connected=true;
+	    }
+	    else {
+	       connect(Integer.parseInt(seedNode.substring(seedNode.indexOf(":")+1)),
+		       seedNode.substring(0,seedNode.indexOf(":")));
 	    }
 	 }catch(Exception e){e.printStackTrace();}
       }
