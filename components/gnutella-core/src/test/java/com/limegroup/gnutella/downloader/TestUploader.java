@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
@@ -31,6 +32,16 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.RoundRobinQueue;
+
+/**
+ * Callback for whenever this uploader starts or finishes to serve
+ * an http11 request.
+ */
+interface HTTP11Listener {
+	public void thexRequestStarted();
+	public void requestStarted();
+	public void requestHandled();
+}
 
 public class TestUploader extends AssertComparisons {    
     
@@ -153,6 +164,11 @@ public class TestUploader extends AssertComparisons {
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
+    
+    /**
+     * a callback to notify every time we start an http11 request
+     */
+    HTTP11Listener _httpListener;
 
     /**
      * The sum of the number of bytes we need to upload across all requests.  If
@@ -292,6 +308,7 @@ public class TestUploader extends AssertComparisons {
         sendContentLength = true;
         queueOnThex = false;
         useBadThexResponseHeader = false;
+        _httpListener = null;
     }
 
     public int amountUploaded() {
@@ -395,6 +412,10 @@ public class TestUploader extends AssertComparisons {
      */
     public void setHTTP11(boolean yes) {
         respondWithHTTP11 = yes;
+    }
+    
+    public void setHTTPListener(HTTP11Listener listener) {
+    	_httpListener = listener;
     }
     
     /**
@@ -547,6 +568,7 @@ public class TestUploader extends AssertComparisons {
     
     
     private void handleRequest(Socket socket) throws IOException {
+    	
         //Find the region of the file to upload.  If a Range request is present,
         //use that.  Otherwise, send the whole file.  Skip all other headers.
         //TODO2: Later we should also check the validity of the requests
@@ -644,6 +666,8 @@ public class TestUploader extends AssertComparisons {
         }
         
         if(thexReq && sendThexTree && !queue) {
+        	if (_httpListener != null)
+        		_httpListener.thexRequestStarted();
             LOG.debug("sending thex tree.");
             sendThexTree = false;
             sendThexTree(output);
@@ -651,8 +675,13 @@ public class TestUploader extends AssertComparisons {
             LOG.debug("done sending thex tree.");
         } else {    
             //Send the data.
+        	if (_httpListener != null)
+        		_httpListener.requestStarted();
             send(output, start, stop);
         }
+        
+        if (_httpListener != null)
+        	_httpListener.requestHandled();
     }
     
     private void sendThexTree(OutputStream out) throws IOException {

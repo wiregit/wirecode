@@ -55,6 +55,7 @@ import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -323,6 +324,98 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
+    }
+    
+    /**
+     * tests http11 downloads and the gray area allocation.
+     */
+    public void testTHEXDownload11() throws Exception {
+        LOG.debug("-Testing chunk allocation in a thex download...");
+        
+        
+        final RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
+        final IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        RemoteFileDesc[] rfds = {rfd};
+        
+        HTTP11Listener grayVerifier = new HTTP11Listener() {
+        	private int requestNo;
+        	public void requestHandled(){}
+        	public void thexRequestStarted() {}
+        	
+        	// checks whether we request chunks at the proper offset, etc.
+        	public void requestStarted() {
+        		
+        		Interval i = null;
+        		try {
+        			IntervalSet leased = null;
+        			File incomplete = null;
+        			incomplete = ifm.getFile(rfd);
+        			assertNotNull(incomplete);
+        			VerifyingFile vf = ifm.getEntry(incomplete);
+            		assertNotNull(vf);
+            		leased = (IntervalSet)
+    					PrivilegedAccessor.getValue(vf,"leasedBlocks");
+            		assertNotNull(leased);
+            		List l = leased.getAllIntervalsAsList();
+            		assertEquals(1,l.size());
+    				i = (Interval)l.get(0);
+        		} catch (Exception bad) {
+        			fail(bad);
+        		}
+        		
+        		switch(requestNo) {
+        			case 0: 
+        				// first request, we should have 0-99999 gray
+        				assertEquals(0,i.low);
+        				assertEquals(99999,i.high);
+        				break;
+        			case 1:
+        				// on the second request we have 100K-256K
+        				assertEquals(100000,i.low);
+        				assertEquals(256*1024 -1,i.high);
+        				break;
+        			case 2:
+        				// 256K-512K
+        				assertEquals(256*1024,i.low);
+        				assertEquals(512*1024 -1, i.high);
+        				break;
+        			case 3:
+        				// 512K-768K
+        				assertEquals(512*1024,i.low);
+        				assertEquals(768*1024 -1, i.high);
+        				break;
+        			case 4:
+        				// 768K-1,000,000
+        				assertEquals(768*1024,i.low);
+        				assertEquals(999999, i.high);
+        				break;
+        		}
+        		requestNo++;
+        		
+        	}
+        };
+        
+        uploader1.setHTTPListener(grayVerifier);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        
+        Downloader download=null;
+
+        download=RouterService.download(rfds, Collections.EMPTY_LIST, false, null);
+
+        waitForComplete(false);
+        assertEquals(6,uploader1.getRequestsReceived());
+        if (isComplete())
+            LOG.debug("pass"+"\n");
+        else
+            fail("FAILED: complete corrupt");
+
+        
+        for (int i=0; i<rfds.length; i++) {
+            File incomplete=ifm.getFile(rfds[i]);
+            VerifyingFile vf=ifm.getEntry(incomplete);
+            assertNull("verifying file should be null", vf);
+        }
     }
     
     public void testSimplePushDownload() throws Exception {
