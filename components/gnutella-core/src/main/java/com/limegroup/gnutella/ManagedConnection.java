@@ -285,24 +285,6 @@ public class ManagedConnection
      */
     private static int _numTCPConnectBackRequests = 0;
 
-    /** 
-     * Creates an outgoing connection. 
-     *
-     * @param host the address to connect to in symbolic or dotted-quad format
-     *  If host names a special bootstrap server, e.g., "router.limewire.com",
-     *  this may take special action, like trying "router4.limewire.com" instead
-     *  with a 0.4 handshake.
-     * @param port the port to connect to
-     * @param router where to report messages
-     * @param where to report my death.  Also used for reject connections.
-     */
-    //ManagedConnection(String host,
-	//                int port,
-    //                  MessageRouter router,
-    //                  ConnectionManager manager) {
-    //    this(translateHost(host), port, router, manager, isRouter(host));
-    //}
-
     /**
      * Creates an outgoing connection.  The connection is considered a special
      * LimeWire router connection iff isRouter==true.  In this case host should
@@ -323,8 +305,7 @@ public class ManagedConnection
 			   (Properties)(new ClientProperties(host))),
 			  (manager.isSupernode() ?
 			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
-			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)),
-              true);
+			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)));
         
         _router = router;
         _manager = manager;
@@ -1213,7 +1194,11 @@ public class ManagedConnection
                 ConnectionHandshakeHeaders.USER_AGENT);
     }
 
-	// implements ReplyHandler interface -- inherit doc comment
+	/**
+	 * Returns the number of intra-Ultrapeer connections this node maintains.
+	 * 
+	 * @return the number of intra-Ultrapeer connections this node maintains
+	 */
 	public int getNumIntraUltrapeerConnections() {
 		String connections = getProperty(ConnectionHandshakeHeaders.X_DEGREE);
 		if(connections == null) {
@@ -1222,7 +1207,16 @@ public class ManagedConnection
 		}
 		
 		// TODO: use something else here!!!
-		return Integer.valueOf(connections).intValue();
+		try {
+			return Integer.valueOf(connections).intValue();
+		} catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	// implements ReplyHandler interface -- inherit doc comment
+	public boolean isHighDegreeConnection() {
+		return getNumIntraUltrapeerConnections() > 20;
 	}
 
 	/**
