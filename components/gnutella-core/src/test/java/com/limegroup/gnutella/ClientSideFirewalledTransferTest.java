@@ -11,6 +11,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
+import com.limegroup.gnutella.udpconnect.SynMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -50,7 +51,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     // THIS TEST SHOULD BE RUN FIRST!!
     public void testPushProxySetup() throws Exception {
         DatagramPacket pack = null;
-        UDP_ACCESS = new DatagramSocket();
+        UDP_ACCESS = new DatagramSocket(9000);
 
         // send a MessagesSupportedMessage
         testUP[0].send(MessagesSupportedVendorMessage.instance());
@@ -162,12 +163,25 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         testUP[0].send(pr);
         testUP[0].flush();
 
-        // we should NOT get a incoming GIV
+        // we should get an incoming UDP transmission
+        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+        try {
+            UDP_ACCESS.receive(pack);
+        }
+        catch (IOException bad) {
+            fail("Did not get SYN", bad);
+        }
+        InputStream in = new ByteArrayInputStream(pack.getData());
+        // as long as we don't get a ClassCastException we are good to go
+        SynMessage syn = (SynMessage) Message.read(in);
+
+        // but we should NOT get a incoming GIV
         try {
             Socket givSock = ss.accept();
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
+
     }
 
 
