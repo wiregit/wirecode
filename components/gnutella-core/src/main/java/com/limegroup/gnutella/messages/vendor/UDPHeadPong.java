@@ -38,7 +38,7 @@ import com.sun.java.util.collections.*;
  * 4 bytes - vendor id
  * 1 byte - queue status
  * n*8 bytes - n intervals (if requested && file partial && fits in packet)
- * the rest - altlocs (if requested && fits in packet) 
+ * the rest - altlocs (if requested) 
  */
 public class UDPHeadPong extends VendorMessage {
 	
@@ -166,7 +166,8 @@ public class UDPHeadPong extends VendorMessage {
 		
 		//parse any included altlocs
 		if ((_features & UDPHeadPing.ALT_LOCS) == UDPHeadPing.ALT_LOCS) {
-			byte [] altlocs = new byte[dais.available()];
+			int size = dais.readByte();
+			byte [] altlocs = new byte[size];
 			dais.readFully(altlocs);
 			_altLocs = new HashSet();
 			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
@@ -265,14 +266,18 @@ public class UDPHeadPong extends VendorMessage {
 		
 		if (altlocs!= null && altlocs.hasAlternateLocations() &&
 				ping.requestsAltlocs()) {
-			byte [] altbytes = altlocs.toBytes();
 			
-			if (caos.getAmountWritten() + altbytes.length <= PACKET_SIZE)
-				caos.write(altbytes);
-			else {
-				//altlocs will not fit - say we didn't send them
+			int toPack = (PACKET_SIZE - (caos.getAmountWritten()+1) ) /6;
+			
+			byte [] altbytes = altlocs.toBytes(toPack);
+			
+			if (altbytes ==null){
+				//altlocs will not fit or none available - say we didn't send them
 				features = (byte) ( features & ~UDPHeadPing.ALT_LOCS);
 				baos.toByteArray()[0] = features;
+			} else { 
+				caos.write((byte)altbytes.length);
+				caos.write(altbytes);
 			}
 				
 		}
