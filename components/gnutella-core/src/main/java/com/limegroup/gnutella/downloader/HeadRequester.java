@@ -53,7 +53,7 @@ final class HeadRequester implements Runnable {
 						 URN resourceName,
 						 AlternateLocationCollector collector,
 						 AlternateLocationCollection totalAlts) {
-		HOSTS = Collections.unmodifiableList(hosts);
+		HOSTS = new LinkedList(hosts);
 		RESOURCE_NAME = resourceName;
 		COLLECTOR = collector;
 		TOTAL_ALTS = totalAlts;
