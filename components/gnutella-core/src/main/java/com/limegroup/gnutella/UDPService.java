@@ -245,7 +245,14 @@ public final class UDPService implements Runnable {
             if(_socket == null) // just drop it, don't wait - FOR NOW.  when we
                                 // thread this, we will wait...
                 return;
-            _socket.send(dg);
+            try {
+                _socket.send(dg);
+            } catch(IOException ioe) {
+                //If we're full, just drop it.  UDP is unreliable like that.
+                if( "No buffer space available".equals(ioe.getMessage()) )
+                    return;
+                throw ioe;
+            }
         }
 	}
 
