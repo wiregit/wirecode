@@ -44,7 +44,12 @@ public class SmartDownloader extends HTTPDownloader {
 		_smartDownload = true;
 		_keepTrying = true;
 		Arrays.sort(_remoteFiles);
-		_qDownloads = new BinaryHeap(_remoteFiles);
+
+		int size = _remoteFiles.length; 
+		_qDownloads = new BinaryHeap(size);
+
+		for (int i = 0; i < size; i++) 
+			_qDownloads.insert(_remoteFiles[i]);
 
 	}
 
@@ -77,10 +82,10 @@ public class SmartDownloader extends HTTPDownloader {
 
 		while (_keepTrying) {
 			
-			size = _qDownloads.capacity();
+			size = _qDownloads.size();
 			
 			if (size == 0)
-				break;
+				return;
 
 			print();
 
@@ -88,14 +93,15 @@ public class SmartDownloader extends HTTPDownloader {
 				
 				// get a host (file) from the queue
 				file = (RemoteFileDesc)_qDownloads.extractMax();
+				
 				// 1. try to connect
 				if ( tryConnect(file) ) {
-					// 2. try to download
-					if ( tryDownload(file) ) {
-						_keepTrying = false;;
-						break;
-					}
-				}
+  					// 2. try to download
+					  if ( tryDownload(file) ) {
+  						_keepTrying = false;;
+  						break;
+  					}
+  				}
 				
 			}
 			
@@ -103,8 +109,8 @@ public class SmartDownloader extends HTTPDownloader {
 				// wait..
 				try {
 					Thread.sleep(calculateWait());
-				} catch (InterruptedException e) {
-				}
+  				} catch (InterruptedException e) {
+  				}
 			}
 
 		}
