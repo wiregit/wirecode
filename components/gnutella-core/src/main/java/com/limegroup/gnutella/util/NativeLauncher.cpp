@@ -11,7 +11,7 @@
 extern "C"
 	/** @effects launches a file with its associated application on Windows. */
 JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_NativeLauncher_nativeLaunchFileWindows
-	(JNIEnv *env, jobject object, jstring fileName) {
+	(JNIEnv *env, jclass jc, jstring fileName) {
 	const char* cFileName;
 	cFileName = env->GetStringUTFChars(fileName, NULL);
 	ShellExecute(NULL, "open", cFileName, "", "", 3);
