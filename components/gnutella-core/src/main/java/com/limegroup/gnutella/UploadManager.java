@@ -1068,6 +1068,10 @@ public final class UploadManager implements BandwidthTracker {
             //tokenize the string to separate out file information part
             //and the http information part
             StringTokenizer st = new StringTokenizer(requestLine);
+
+            if(st.countTokens() < 2) {
+                throw new IOException("invalid request: "+requestLine);
+            }
             //file information part: /get/0/sample.txt
             String fileInfoPart = st.nextToken().trim();
             //http information part: HTTP/1.0
@@ -1126,9 +1130,7 @@ public final class UploadManager implements BandwidthTracker {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
 			throw new IOException();
-		} catch (java.util.NoSuchElementException nsee) {
-            throw new IOException();
-        }
+		}
 	}
 
 	/**
