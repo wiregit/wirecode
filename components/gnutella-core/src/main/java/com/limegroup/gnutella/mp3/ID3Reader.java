@@ -95,88 +95,22 @@ public final class ID3Reader {
     }
 
     /**
-     * Attempts to read an ID3 tag from the specified file.
-     * @return an null if the document has no ID3 tag
+     * Generates an XML description of the file's id3 data.
      * @param id3Only true if String we return is the only document associated
      * with the file. 
      */
     public static String readDocument(File file, boolean id3Only) 
                                                             throws IOException {
-        Object[] info = parseFile(file);
-        String title = (String) info[0];
-        String artist = (String) info[1];
-        String album = (String) info[2];
-        String year = year = (String) info[3];        
-        String comment = (String) info[5];
-        short track = ((Short) info[4]).shortValue();
-        String genre = (String)info[6];
-        int bitrate = ((Integer) info[7]).intValue();
-        int seconds = ((Integer) info[8]).intValue();
-
-        StringBuffer strB = new StringBuffer();
-        if(id3Only) {
-            appendStrings("<audios noNamespaceSchemaLocation=\"",
-                          schemaURI,
-                          strB);
-            strB.append("><audio ");
-            String filename = file.getCanonicalPath();
-            //str = str+"\""+" identifier=\""+filename+"\">";
-            appendStrings(" identifier=\"", filename, strB);
-        }
-        //end of head
-        if(!title.equals(""))
-            appendStrings(" title=\"", title, strB);
-        if(!artist.equals(""))
-            appendStrings(" artist=\"", artist, strB);
-        if(!album.equals(""))
-            appendStrings(" album=\"", album, strB);
-        if(track>0)
-            appendStrings(" track=\"", ""+track, strB);
-        if(!genre.equals(""))
-            appendStrings(" genre=\"", genre, strB);
-        if(!year.equals(""))
-            appendStrings(" year=\"", year, strB);
-        if(!comment.equals(""))
-            appendStrings(" comments=\"", comment, strB);
-        if(bitrate > 0)
-            appendStrings(" bitrate=\"", ""+bitrate, strB);
-        if(seconds > 0)
-            appendStrings(" seconds=\"", ""+seconds, strB);
-        if(id3Only) {
-            //str = str+"</audio>";
-            strB.append("/>");
-            strB.append("</audios>");
-        }
-
-        return strB.toString();
+        ID3Data data = parseFile(file);
+        return data.toXML(file.getCanonicalPath(), id3Only);
     }
 
-
+    /**
+     * Generates a LimeXMLDocument of the file's id3 data.
+     */
     public static LimeXMLDocument readDocument(File file) throws IOException {
-        Object[] info = parseFile(file);
-        short track = ((Short) info[4]).shortValue();
-        int bitrate = ((Integer) info[7]).intValue();
-        int seconds = ((Integer) info[8]).intValue();
-
-        List nameValList = new ArrayList();
-        if(info[0]!=null && !((String)info[0]).equals(""))
-            nameValList.add(new NameValue(TITLE_KEY, info[0]));
-        if(info[1]!=null && !((String)info[1]).equals(""))
-            nameValList.add(new NameValue(ARTIST_KEY, info[1]));
-        if(info[2]!=null && !((String)info[2]).equals(""))
-            nameValList.add(new NameValue(ALBUM_KEY, info[2]));
-        if(info[3]!=null && !((String)info[3]).equals(""))
-            nameValList.add(new NameValue(YEAR_KEY, info[3]));
-        if(info[5]!=null && !((String)info[5]).equals(""))
-            nameValList.add(new NameValue(COMMENTS_KEY, info[5]));
-        if(track > 0)
-            nameValList.add(new NameValue(TRACK_KEY, ""+track));
-        if(info[6]!=null && !info[6].equals("") )
-            nameValList.add(new NameValue(GENRE_KEY, info[6]));
-        if(bitrate > 0)
-            nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
-        if(seconds > 0) 
-            nameValList.add(new NameValue(SECONDS_KEY, ""+seconds));
+        ID3Data data = parseFile(file);
+        List nameValList = data.toNameValueList();
         if(nameValList.isEmpty())
             throw new IOException("invalid/no data.");
 
@@ -184,219 +118,162 @@ public final class ID3Reader {
     }
 
     /**
-     * @return a Object[] with the following order: title, artist, album, year,
-     * track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, 5 and 6 are
-     * Strings.  Index 4 is a Short.  Indices 7 and 8 are Integers.  
-     * <p>
+     * Returns ID3Data for the file.
+     *
      * LimeWire would prefer to use ID3V2 tags, so we try to parse the ID3V2
      * tags first, and if we were not able to find some tags using v2 we get it
      * using v1 if possible 
      */
-    private static Object[] parseFile(File file) throws IOException {
-        Object[] retObjs = new Object[9];
+    private static ID3Data parseFile(File file) throws IOException {
+        ID3Data data = parseID3v2Data(file);
         
-        String nonValueString = "";
-        Short nonValueShort = new Short((short)-1);
-        // default vals...
-        retObjs[0] = nonValueString; //title
-        retObjs[1] = nonValueString; //artist
-        retObjs[2] = nonValueString; //album
-        retObjs[3] = nonValueString; //year
-        retObjs[5] = nonValueString; //comment
-        retObjs[4] = nonValueShort; //track
-        retObjs[6] = nonValueString; //genre        
-
-        if(parseID3v2Data(file, retObjs) )
-            return retObjs;
+        MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
+        data.setBitrate(mp3Info.getBitRate());
+        data.setLength((int)mp3Info.getLengthInSeconds());
         
-        RandomAccessFile randomAccessFile = null;
-        
-        try {
-            randomAccessFile = new RandomAccessFile(file, "r");
-            long length = randomAccessFile.length();
-    
-            // short circuit to bitrate if not ID3 tag can be properly read...
-            // We need to read at least 128 bytes
-            if(length >= 128) {
-    
-                randomAccessFile.seek(length - 128);
-                byte[] buffer = new byte[30];
-                
-                // Read ID3 Tag, return null if not present
-                randomAccessFile.readFully(buffer, 0, 3);
-                String tag = new String(buffer, 0, 3);
-                
-                if (tag.equals("TAG")) {
-                
-                    // We have an ID3 Tag, now get the parts
-                    // Title
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    if(nonValueString.equals(retObjs[0]))
-                        retObjs[0] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 30));
-                    
-                    // Artist
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    if(nonValueString.equals(retObjs[1]))
-                    retObjs[1] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 30));
-                    
-                    // Album
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    if(nonValueString.equals(retObjs[2]))
-                        retObjs[2] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 30));
-                    
-                    // Year
-                    randomAccessFile.readFully(buffer, 0, 4);
-                    if(nonValueString.equals(retObjs[3]))
-                        retObjs[3] = new String(buffer, 0, 
-                                               getTrimmedLength(buffer, 4));
-                    
-                    // Comment and track
-                    randomAccessFile.readFully(buffer, 0, 30);
-                    int commentLength;
-                    if(buffer[28] == 0)
-                    {
-                        if(nonValueShort.equals(retObjs[4]))
-                            retObjs[4] = 
-                            new Short((short)ByteOrder.ubyte2int(buffer[29]));
-                        commentLength = 28;
-                    }
-                    else
-                    {
-                        if(nonValueShort.equals(retObjs[4]))
-                            retObjs[4] = new Short((short)0);
-                        commentLength = 3;
-                    }
-                    if(nonValueString.equals(retObjs[5]))
-                        retObjs[5] = new String(buffer, 0,
-                                                getTrimmedLength(buffer, 
-                                                                commentLength));
-                    
-                    // Genre
-                    randomAccessFile.readFully(buffer, 0, 1);
-                    if(nonValueString.equals(retObjs[6]))
-                        retObjs[6] = 
-                        getGenreString((short)ByteOrder.ubyte2int(buffer[0]));
-                }
-            }
-    
-            MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
-            // Bitrate
-            retObjs[7] = new Integer(mp3Info.getBitRate());
-            // Length
-            retObjs[8] = new Integer((int) mp3Info.getLengthInSeconds());
-        } finally {
-            if( randomAccessFile != null )
-                randomAccessFile.close();
+        if(data.isComplete()) {
+            return data;
+        } else {
+            ID3Data v1 = parseID3v1Data(file);
+            data.mergeID3Data(v1);
+            return data;
         }
-        return retObjs;
     }
 
     /**
-     * @param audioTags this array emulates pass by reference
-     * @return true if all the tags were read, false otherwise
+     * Parses the file's id3 data.
      */
-    private static boolean parseID3v2Data(File file, Object[] audioTags) {
-        boolean ret = true;
+    private static ID3Data parseID3v1Data(File file) {
+        ID3Data data = new ID3Data();
+        
+        // not long enough for id3v1 tag?
+        if(file.length() < 128)
+            return data;
+        
+        RandomAccessFile randomAccessFile = null;        
+        try {
+            randomAccessFile = new RandomAccessFile(file, "r");
+            long length = randomAccessFile.length();
+            randomAccessFile.seek(length - 128);
+            byte[] buffer = new byte[30];
+            
+            // If tag is wrong, no id3v1 data.
+            randomAccessFile.readFully(buffer, 0, 3);
+            String tag = new String(buffer, 0, 3);
+            if(!tag.equals("TAG"))
+                return data;
+            
+            // We have an ID3 Tag, now get the parts
+
+            randomAccessFile.readFully(buffer, 0, 30);
+            data.setTitle(getString(buffer, 30));
+            
+            randomAccessFile.readFully(buffer, 0, 30);
+            data.setArtist(getString(buffer, 30));
+
+            randomAccessFile.readFully(buffer, 0, 30);
+            data.setAlbum(getString(buffer, 30));
+            
+            randomAccessFile.readFully(buffer, 0, 4);
+            data.setYear(getString(buffer, 4));
+            
+            randomAccessFile.readFully(buffer, 0, 30);
+            int commentLength;
+            if(buffer[28] == 0) {
+                data.setTrack((short)ByteOrder.ubyte2int(buffer[29]));
+                commentLength = 28;
+            } else {
+                data.setTrack((short)0);
+                commentLength = 3;
+            }
+            data.setComment(getString(buffer, commentLength));
+            
+            // Genre
+            randomAccessFile.readFully(buffer, 0, 1);
+            data.setGenre(
+                getGenreString((short)ByteOrder.ubyte2int(buffer[0])));
+        } catch(IOException ignored) {
+        } finally {
+            if( randomAccessFile != null )
+                try {
+                    randomAccessFile.close();
+                } catch(IOException ignored) {}
+        }
+        return data;
+    }
+    
+    /**
+     * Helper method to generate a string from an id3v1 filled buffer.
+     */
+    private static String getString(byte[] buffer, int length) {
+        return new String(buffer, 0, getTrimmedLength(buffer, length));
+    }
+
+    /**
+     * Generates ID3Data from id3v2 data in the file.
+     */
+    private static ID3Data parseID3v2Data(File file) {
+        ID3Data data = new ID3Data();
+        
         MP3File mp3File = null;
         try {
             mp3File = new MP3File(file.getParentFile(), file.getName());
         } catch (ID3v2Exception idvx) { //can't go on
-            return false;
+            return data;
         } catch (NoMP3FrameException nmfx) {//can't go on
-            return false;
+            return data;
         } catch (IOException iox) {
-            return false;
+            return data;
         }
-        //keep track of how many fields we have populated
-        int fieldCount = 0;
-        //1. title 
-        String str = "";
+
         try {
-            str = mp3File.getTitle().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
-        }
-        if(str!=null && !"".equals(str)) {
-            fieldCount++;
-            audioTags[0] = str;
-        }
-        //2. artist 
+            data.setTitle(mp3File.getTitle().getTextContent());
+        } catch(FrameDamagedException ignored) {}
+        
         try {
-            str = mp3File.getArtist().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
-        }
-        if(str!=null && !"".equals(str)) {
-            fieldCount++;
-            audioTags[1] = str;
-        }
-        //3. album
+            data.setTitle(mp3File.getArtist().getTextContent());
+        } catch(FrameDamagedException ignored) {}
+        
         try {
-            str = mp3File.getAlbum().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
-        }
-        if(str!=null && !"".equals(str)) {
-            fieldCount++;
-            audioTags[2] = str;
-        }
-        //4. year
+            data.setTitle(mp3File.getAlbum().getTextContent());
+        } catch(FrameDamagedException ignored) {}
+
         try {
-            str = mp3File.getYear().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
-        }
-        if(str!=null && !"".equals(str)) {
-            fieldCount++;
-            audioTags[3] = str;
-        }
-        //5. comment
+            data.setYear(mp3File.getYear().getTextContent());
+        } catch(FrameDamagedException ignored) {}
+        
         try {
-            str = mp3File.getComments().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
-        }
-        if(! "".equals(str)) {
-            fieldCount++;
-            audioTags[5] = str;
-        }
-        //6. track
+            data.setComment(mp3File.getComments().getTextContent());
+        } catch(FrameDamagedException ignored) {}
+
         try {
-            str = mp3File.getTrack().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
+            data.setTrack(
+                Short.parseShort(mp3File.getTrack().getTextContent()));
         }
-        if(str!=null && !"".equals(str)) {
-            fieldCount++;
-            audioTags[4] = new Short(str);
-        }
-        //7. genre
+        catch(FrameDamagedException ignored) {}
+        catch(NumberFormatException nfe) {}
+        
         try {
-            str = mp3File.getGenre().getTextContent();
-        } catch(FrameDamagedException ignored) {
-            str = "";
-        }
-        if(str!=null && !"".equals(str)) {
-            fieldCount++;
+            String genre = mp3File.getGenre().getTextContent();
             //ID3v2 frame for genre has the byte used in ID3v1 encoded within it
             //-- we need to parse that out
-            int index = str.indexOf(")");
+            int index = genre.indexOf(")");
             //Note: It's possible that the user entered her own genre in which
             //case there could be spurious braces, the id3v2 braces enclose
             //values between 0 -127 so the index of the closing brace should be
             //either 2, 3 or 4
             if(index == -1 || !(index==2 || index==3 || index==4) )
-                audioTags[6] = str;
+                data.setGenre(genre);
             else 
-                audioTags[6] = str.substring(index+1);
-            
-        }
-        return fieldCount == 7;
+                data.setGenre(genre.substring(index+1));
+        } catch(FrameDamagedException ignored) {}
+        
+        return data;
     }
 
+    /**
+     * Appends the key/value & a "\" to the string buffer.
+     */
     private static void appendStrings(String key, String value,
                                                         StringBuffer appendTo) {
         appendTo.append(key);
@@ -554,6 +431,178 @@ public final class ID3Reader {
         case 125: return "Dance Hall";
         default: return "";
         }
+    }
+    
+    /**
+     * Simple class to encapsulate information about ID3 tags.
+     * Can write the data to a NameValue list or an XML string.
+     */
+    private static class ID3Data {
+        private String title;
+        private String artist;
+        private String album;
+        private String year;
+        private String comment;
+        private short track = -1;
+        private String genre;
+        private int bitrate = -1;
+        private int length = -1;
+        
+        void setTitle(String title) {
+            this.title = title;
+        }
+        
+        void setArtist(String artist) {
+            this.artist = artist;
+        }
+        
+        void setAlbum(String album) {
+            this.album = album;
+        }
+        
+        void setYear(String year) {
+            this.year = year;
+        }
+        
+        void setComment(String comment) {
+            this.comment = comment;
+        }
+        
+        void setTrack(short track) {
+            this.track = track;
+        }
+        
+        void setGenre(String genre) {
+            this.genre = genre;
+        }
+        
+        void setBitrate(int bitrate) {
+            this.bitrate = bitrate;
+        }
+        
+        void setLength(int length) {
+            this.length = length;
+        }
+        
+        /**
+         * Updates this' information with data's information
+         * for any fields that are currently unspecified.
+         */
+        void mergeID3Data(ID3Data data) {
+            if(!isValid(title))
+                title = data.title;
+            if(!isValid(artist))
+                artist = data.artist;
+            if(!isValid(album))
+                album = data.album;
+            if(!isValid(year))
+                year = data.year;
+            if(!isValid(comment))
+                comment = data.comment;
+            if(!isValid(track))
+                track = data.track;
+            if(!isValid(genre))
+                genre = data.genre;
+            if(!isValid(bitrate))
+                bitrate = data.bitrate;
+            if(!isValid(length))
+                length = data.length;
+        }
+        
+        /**
+         * Determines if all fields are valid.
+         */
+        boolean isComplete() {
+            return isValid(title)
+                && isValid(artist)
+                && isValid(album)
+                && isValid(year)
+                && isValid(comment)
+                && isValid(track)
+                && isValid(genre)
+                && isValid(bitrate)
+                && isValid(length);
+        }
+
+        /**
+         * Writes the data to a NameValue list.
+         */
+        List toNameValueList() {
+            List list = new ArrayList();
+            add(list, title, TITLE_KEY);
+            add(list, artist, ARTIST_KEY);
+            add(list, album, ALBUM_KEY);
+            add(list, year, YEAR_KEY);
+            add(list, comment, COMMENTS_KEY);
+            add(list, track, TRACK_KEY);
+            add(list, genre, GENRE_KEY);
+            add(list, bitrate, BITRATE_KEY);
+            add(list, length, SECONDS_KEY);
+            return list;
+        }
+        
+        /**
+         * Writes the data to an XML string.
+         *
+         * If ID3Only is true, the data is a complete XML string, otherwise
+         * it is an excerpt of an XML string.
+         */
+        String toXML(String path, boolean id3Only) {
+            StringBuffer strB = new StringBuffer();
+            if(id3Only) {
+                appendStrings("<audios noNamespaceSchemaLocation=\"",
+                              schemaURI,
+                              strB);
+                strB.append("><audio ");
+                appendStrings(" identifier=\"", path, strB);
+            }
+
+
+            if(isValid(title))
+                appendStrings(" title=\"", title, strB);
+            if(isValid(artist))
+                appendStrings(" artist=\"", artist, strB);
+            if(isValid(album))
+                appendStrings(" album=\"", album, strB);
+            if(isValid(track))
+                appendStrings(" track=\"", ""+track, strB);
+            if(isValid(genre))
+                appendStrings(" genre=\"", genre, strB);
+            if(isValid(year))
+                appendStrings(" year=\"", year, strB);
+            if(isValid(comment))
+                appendStrings(" comments=\"", comment, strB);
+            if(isValid(bitrate))
+                appendStrings(" bitrate=\"", ""+bitrate, strB);
+            if(isValid(length))
+                appendStrings(" seconds=\"", ""+length, strB);
+
+            if(id3Only) {
+                strB.append("/>");
+                strB.append("</audios>");
+            }
+
+            return strB.toString();
+        }
+        
+        private void add(List list, String value, String key) {
+            if(isValid(value))
+                list.add(new NameValue(key, value.trim()));
+        }
+        
+        private void add(List list, int value, String key) {
+            if(isValid(value))
+                list.add(new NameValue(key, "" + value));
+        }
+        
+        private boolean isValid(String s) {
+            return s != null && !s.trim().equals("");
+        }
+        
+        private boolean isValid(int i) {
+            return i >= 0;
+        }
+                
     }
 
 }
