@@ -17,11 +17,12 @@ import com.sun.java.util.collections.*;
 public class HTTPDownloader implements Runnable {
 
     public static final int NOT_CONNECTED = 0;
-    public static final int CONNECTED = 1;
-    public static final int ERROR = 2;
-    public static final int COMPLETE = 3;
+    public static final int CONNECTED     = 1;
+    public static final int ERROR         = 2;
+    public static final int COMPLETE      = 3;
 	/** Push initialization */
-    public static final int REQUESTING = 4;
+    public static final int REQUESTING    = 4;
+    public static final int QUEUED        = 5;
 
 
     private InputStream _istream;
@@ -177,6 +178,7 @@ public class HTTPDownloader implements Runnable {
     /** Sends an HTTP GET request, i.e., "GET /get/0/sample.txt HTTP/1.0"  
      *  (Response will be read later in readHeader()). */
     public void initOne() {
+
 	try {
 	    _istream = _socket.getInputStream();
 	    _br = new ByteReader(_istream);
@@ -215,6 +217,8 @@ public class HTTPDownloader implements Runnable {
 	URLConnection conn;
 
 	String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
+
+	_state = NOT_CONNECTED;
 
 	try {
 	    URL url = new URL(_protocol, _host, _port, furl);
@@ -282,11 +286,13 @@ public class HTTPDownloader implements Runnable {
     public void run() {
 	
 	if (_mode == 1){
-	    _callback.addDownload(this);
+	    if ( _state != QUEUED )
+	        _callback.addDownload(this);
 	    initOne();
 	}
 	else if (_mode == 2) {
-	    _callback.addDownload(this);
+	    if ( _state != QUEUED )
+	        _callback.addDownload(this);
 	    initTwo();
 	}
 	else if (_mode == 3) {
@@ -303,6 +309,10 @@ public class HTTPDownloader implements Runnable {
  
     public void resume() {
 	_mode = 3;
+    }
+
+    public void setQueued() {
+	_state = QUEUED;
     }
 
   

@@ -473,7 +473,7 @@ public class SettingsManager implements SettingsInterface
     public boolean getUseQuickConnect(){return useQuickConnect_;}
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}    
     public int getParallelSearchMax(){return parallelSearchMax_;}    
-    public int getMaxSimDownload(){return parallelSearchMax_;}    
+    public int getMaxSimDownload(){return maxSimDownload_;}    
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;} 
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
     public int getSearchAnimationTime(){ return searchAnimationTime_; }

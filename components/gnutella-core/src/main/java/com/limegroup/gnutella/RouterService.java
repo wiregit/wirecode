@@ -350,21 +350,49 @@ public class RouterService
     }
 
     /**
-     * Create a download request
+     * Initialize a download request
      */
-    public void tryDownload(String ip, int port, int index, String fname, 
-      byte[] bguid) {
-	//String file = "/get/" + String.valueOf(index) + "/" + fname;
+    public HTTPDownloader initDownload(String ip, int port, int index, 
+      String fname, byte[] bguid) {
 
         HTTPDownloader down = new
             HTTPDownloader("http", ip, port, index, fname, manager, bguid);
 
+	return( down );
+    }
+
+    /**
+     * Kickoff a download request
+     */
+    public void kickoffDownload(HTTPDownloader down) {
 	Thread t = new Thread(down);
 
 	t.setDaemon(true);
 
 	t.start();
-	
+    }
+
+    /**
+     * Create and kickoff a download request
+     */
+    public void tryDownload(String ip, int port, int index, String fname, 
+      byte[] bguid) {
+
+        HTTPDownloader down = initDownload(ip, port, index, fname, bguid);
+
+        kickoffDownload(down);
+    }
+
+    /**
+     * Create a queued download request
+     */
+    public void queueDownload(String ip, int port, int index, String fname, 
+      byte[] bguid) {
+
+        HTTPDownloader down = initDownload(ip, port, index, fname, bguid);
+
+        down.setQueued();
+	manager.getCallback().addDownload( down );
     }
 
     /**
@@ -374,9 +402,7 @@ public class RouterService
     {
 	mgr.resume();
 
-	Thread t = new Thread(mgr);
-	t.setDaemon(true);
-	t.start();
+        kickoffDownload(mgr);
     }
 	
 }
