@@ -57,14 +57,23 @@ public final class FileDesc {
     //
     // Query handling
     
+	/**
+	 * Returns a new <tt>Response</tt> instance for the data in this
+	 * <tt>FileDesc</tt> for the given <tt>QueryRequest</tt>.
+	 *
+	 * @param qr the <tt>QueryRequest</tt> instance to create a 
+	 *  <tt>Response</tt> for
+	 * @return a new <tt>Response</tt> instance for this <tt>FileDesc</tt>
+	 *  and the given <tt>QueryRequest</tt>
+	 */
     public Response responseFor(QueryRequest qr) {
-        Response r = new Response(_index,_size,_name);
-        if(_urns==null) return r;
+        Response response = new Response(_index,_size,_name);
+        if(_urns==null) return response;
         
         /** Popular approach: return all URNs **/
         Iterator allUrns = _urns.iterator();
         while(allUrns.hasNext()) {
-            r.addUrn(((URN)allUrns.next()).getURNString());
+            response.addUrn(((URN)allUrns.next()));
         }
         
         /** 
@@ -84,7 +93,7 @@ public final class FileDesc {
             }
         }
         /**/
-        return r;
+        return response;
         
     }
     
@@ -119,12 +128,9 @@ public final class FileDesc {
 			urn = URNFactory.createSHA1URN(_file);
 		} catch(IOException e) {
 			return;
-		}
-		String urnStr = urn.getURNString();
-		if(urnStr == null) return;
-		
+		}		
 		if(_urns==null) _urns = new HashSet();		
-		_urns.add(urnStr);
+		_urns.add(urn);
 	}
     
     /**
@@ -144,7 +150,7 @@ public final class FileDesc {
         // now check if given urn matches
         Iterator iter = _urns.iterator();
         while(iter.hasNext()){
-            if (urn.equals(((URN)iter.next()).getURNString())) {
+            if (urn.equals((URN)iter.next())) {
                 return true;
             }
         }
