@@ -30,34 +30,28 @@ public final class NetworkUtils {
     /**
      * The list of invalid addresses.
      */
-    private static final IPList INVALID_ADDRESSES = new IPList();
+    private static final byte [] INVALID_ADDRESSES_BYTE = 
+        new byte[]{(byte)0,(byte)255};
     
     /**
      * The list of private addresses.
      */
-    private static final IPList PRIVATE_ADDRESSES = new IPList();
+    private static final int [][] PRIVATE_ADDRESSES_BYTE =
+        new int[][]{
+            {0xFF000000,0},
+            {0xFF000000,127 << 24},
+            {0xFF000000,256 << 24},
+            {0xFF000000,10 << 24},
+            {0xFFF00000,(172 << 24) | (16 << 16)},
+            {0xFFFF0000,(169 << 24) | (254 << 16)},
+            {0xFFFF0000,(192 << 24) | (168 << 16)}};
+    
     
     /**
      * The list of local addresses.
      */
-    private static final IPList LOCAL_ADDRESSES = new IPList();
+    private static final byte LOCAL_ADDRESS_BYTE = (byte)127;
     
-    static {
-        INVALID_ADDRESSES.add("0.*/8");
-        INVALID_ADDRESSES.add("255.*/8");
-        
-        PRIVATE_ADDRESSES.add("0.*/8");
-        PRIVATE_ADDRESSES.add("127.*/8");
-        PRIVATE_ADDRESSES.add("255.*/8");
-        PRIVATE_ADDRESSES.add("10.*/8");
-        PRIVATE_ADDRESSES.add("172.16.*/12");
-        PRIVATE_ADDRESSES.add("169.254.*/16");
-        PRIVATE_ADDRESSES.add("192.168.*/16");
-        
-        LOCAL_ADDRESSES.add("127.*/8");
-    }
-
-
     /**
      * Ensure that this class cannot be constructed.
      */
@@ -79,7 +73,8 @@ public final class NetworkUtils {
 	 * Returns whether or not the specified address is valid.
 	 */
 	public static boolean isValidAddress(byte[] addr) {
-	    return !INVALID_ADDRESSES.contains(new IP(addr));
+	    return addr[0]!=INVALID_ADDRESSES_BYTE[0] &&
+	    	addr[0]!=INVALID_ADDRESSES_BYTE[1];
     }
     
     /**
@@ -105,7 +100,7 @@ public final class NetworkUtils {
 	 */
 	public static boolean isLocalAddress(InetAddress addr) {
 	    try {
-	        if( LOCAL_ADDRESSES.contains(new IP(addr.getAddress())) )
+	        if( addr.getAddress()[0]==LOCAL_ADDRESS_BYTE )
 	            return true;
 
             InetAddress address = InetAddress.getLocalHost();
@@ -176,8 +171,20 @@ public final class NetworkUtils {
     public static boolean isPrivateAddress(byte[] address) {
         if( !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() )
             return false;
-            
-        return PRIVATE_ADDRESSES.contains(new IP(address));
+        
+        
+        int addr = ((address[0] & 0xFF) << 24) | 
+        			((address[1] & 0xFF)<< 16) | 
+        			((address[2] & 0xFF) << 8) |
+        			(address[3] & 0xFF);
+        
+        for (int i =0;i< 7;i++){
+            if ((addr & PRIVATE_ADDRESSES_BYTE[i][0]) ==
+                	PRIVATE_ADDRESSES_BYTE[i][1])
+                return true;
+        }
+        
+        return false;
     }
 
     /**
