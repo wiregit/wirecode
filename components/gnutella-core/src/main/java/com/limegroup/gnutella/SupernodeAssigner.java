@@ -188,6 +188,12 @@ public final class SupernodeAssigner {
             return;
         }
 
+        // Ignore this check if we're already an Ultrapeer -- 
+        // we already know we're Ultrapeer-capable in that
+        // case
+        if(RouterService.isSupernode()) {
+            return;
+        }
         boolean isUltrapeerCapable = 
             //Is upstream OR downstream high enough?
             (_maxUpstreamBytesPerSec >= 
@@ -212,7 +218,7 @@ public final class SupernodeAssigner {
 		// it up as an Ultrapeer -- it will just get forced to be one
 		_isTooGoodToPassUp = isUltrapeerCapable &&
 			(curTime - RouterService.getLastQueryTime() > 5*60*1000) &&
-			(BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 2);
+			(BandwidthStat.HTTP_UPSTREAM_BANDWIDTH.getAverage() < 1);
 
         // if this is ultrapeer capable, make sure we record it
         if(isUltrapeerCapable) {
