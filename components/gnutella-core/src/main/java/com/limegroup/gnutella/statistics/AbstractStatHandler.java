@@ -15,33 +15,33 @@ public abstract class AbstractStatHandler {
 	 * The <tt>Statistic</tt> that should be incremented for each new 
 	 * message.
 	 */
-	private final Statistic NUMBER_STAT;
+	public final Statistic NUMBER_STAT;
 
 	/**
 	 * The <tt>Statistic</tt> for the number of bytes for this message
 	 * type.  For each new message added, the number of bytes are added
 	 * to this <tt>Statistic</tt>.
 	 */
-	private final Statistic BYTE_STAT;
+	public final Statistic BYTE_STAT;
 
 
 	/**
 	 * <tt>Statistic</tt> for the number of the given message that came 
 	 * from other LimeWires.
 	 */
-	private final Statistic LIME_NUMBER_STAT;
+	public final Statistic LIME_NUMBER_STAT;
 
 	/**
 	 * <tt>Statistic</tt> for the bytes of the given message that came 
 	 * from other LimeWires.
 	 */
-	private final Statistic LIME_BYTE_STAT;
+	public final Statistic LIME_BYTE_STAT;
 
 	/**
 	 * <tt>Statistic</tt> for the bandwidth stat to also record message
 	 * data to.
 	 */
-	private final Statistic BANDWIDTH_BYTE_STAT;
+	public final Statistic BANDWIDTH_BYTE_STAT;
 
 	/**
 	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
