@@ -1,8 +1,8 @@
 /**
- * auth: afisk
- * file: CommonUtils.java
- * desc: This class handles common utility functions that many classes
- *       may want to access.
+ * This class handles common utility functions that many classes
+ * may want to access.
+ *
+ * @author Adam Fisk
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
@@ -14,7 +14,7 @@ import java.util.Properties;
 public class CommonUtils {
 
 	// constant for the current version of LimeWire
-	private static final String LIMEWIRE_VERSION = "1.4";
+	private static final String LIMEWIRE_VERSION = "1.4b";
 	
 	// variable for the system properties
 	private static Properties _props;

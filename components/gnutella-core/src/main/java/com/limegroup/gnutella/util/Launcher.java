@@ -96,9 +96,8 @@ public class Launcher {
 	public static void initialize() {
 		if(CommonUtils.isWindows()) {
 			String libraryPath = CommonUtils.getCurrentDirectory();
-			libraryPath += File.separator;
-			libraryPath += NATIVE_LAUNCHER_NAME;
-			File nativeLauncherLibrary = new File(libraryPath);
+			File nativeLauncherLibrary = new File(libraryPath, 
+												  NATIVE_LAUNCHER_NAME);
 			
 			// return if the dll is already there
 			if(nativeLauncherLibrary.exists()) return;
@@ -114,7 +113,9 @@ public class Launcher {
 				is.close();
 				fos.close();
 			} catch(FileNotFoundException fnfe) {
+				nativeLauncherLibrary.delete();
 			} catch(IOException ioe) {
+				nativeLauncherLibrary.delete();
 			}
 		}
 

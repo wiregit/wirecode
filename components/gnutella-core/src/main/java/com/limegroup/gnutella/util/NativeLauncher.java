@@ -6,12 +6,14 @@
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-//package com.limegroup.gnutella.util;
-
-//import com.limegroup.gnutella.util.CommonUtils;
-
 
 public class NativeLauncher {
+
+	/**
+	 * flag for whether or not we succssfully loaded the native
+	 * library.
+	 */
+	private boolean _loadSucceeded = true;
 
 	public NativeLauncher() {
 		// load the native libary only if we're on Windows
@@ -19,19 +21,11 @@ public class NativeLauncher {
 		if(os.indexOf("Windows") != -1) {
 			try {
 				System.loadLibrary("NativeLauncher");
-			} catch(UnsatisfiedLinkError ule) {}
+			} catch(UnsatisfiedLinkError ule) {
+				_loadSucceeded = false;
+			}
 		}
 	}
-
-//  	static {
-//  		// load the native libary only if we're on Windows
-//  		String os = System.getProperty("os.name");
-//  		if(os.indexOf("Windows") != -1) {
-//  			try {
-//  				System.loadLibrary("NativeLauncher");
-//  			} catch(UnsatisfiedLinkError ule) {}
-//  		}
-//  	}
 
 	/**
 	 * launches the file with it's associated application on Windows. 
@@ -39,6 +33,7 @@ public class NativeLauncher {
 	 *  specify a valid file pathname or a valid URL.
 	 */
 	public int launchFileWindows(String name) {
+		if(!_loadSucceeded) return -1;
 		int launchCode = -1;
 		try {
 			launchCode = nativeLaunchFileWindows(name);
