@@ -171,7 +171,13 @@ public class ApplicationSettings extends LimeProps {
 	 * A boolean flag for whether or not we should check again for an update.
 	 */
     public static final BooleanSetting CHECK_AGAIN = 
-        FACTORY.createBooleanSetting("CHECK_AGAIN", true);        
+        FACTORY.createBooleanSetting("CHECK_AGAIN", true);
+        
+    /**
+     * Setting for whether or not to create an additional manual GC thread.
+     */
+    public static final BooleanSetting AUTOMATIC_MANUAL_GC =
+        FACTORY.createBooleanSetting("AUTOMATIC_MANUAL_GC", CommonUtils.isMacOSX());
 
     /**
      * the default locale to use if not specified

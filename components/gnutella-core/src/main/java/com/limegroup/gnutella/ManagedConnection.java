@@ -499,6 +499,22 @@ public class ManagedConnection extends Connection
         return _lastQRPTableReceived == null ?
             0 : _lastQRPTableReceived.getSize();
     }
+    
+    /**
+     * Accessor for the last QueryRouteTable's Empty Units.
+     */
+    public int getQueryRouteTableEmptyUnits() {
+        return _lastQRPTableReceived == null ?
+            -1 : _lastQRPTableReceived.getEmptyUnits();
+    }
+    
+    /**
+     * Accessor for the last QueryRouteTable's Units In Use.
+     */
+    public int getQueryRouteTableUnitsInUse() {
+        return _lastQRPTableReceived == null ?
+            -1 : _lastQRPTableReceived.getUnitsInUse();
+    }
 
     /**
      * Throttles the super's OutputStream.  This works quite well with

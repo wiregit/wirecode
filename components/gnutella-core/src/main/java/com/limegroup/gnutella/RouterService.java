@@ -359,9 +359,36 @@ public class RouterService {
             SavedFileManager.instance();
             LOG.trace("STOP SavedFileManager");
             
+            if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
+                startManualGCThread();
+            
             LOG.trace("STOP RouterService.");
         }
 	}
+	
+	/**
+	 * Starts a manual GC thread.
+	 */
+	private void startManualGCThread() {
+	    Thread t = new ManagedThread(new Runnable() {
+	        public void run() {
+	            while(true) {
+	                try {
+	                    Thread.sleep(5 * 60 * 1000);
+	                } catch(InterruptedException ignored) {}
+	                LOG.trace("Running GC");
+	                System.gc();
+	                LOG.trace("GC finished, running finalizers");
+	                System.runFinalization();
+	                LOG.trace("Finalizers finished.");
+                }
+            }
+        }, "ManualGC");
+        t.setDaemon(true);
+        t.start();
+        LOG.trace("Started manual GC thread.");
+    }
+	                
 
     /**
      * Used to determine whether or not the backend threads have been
