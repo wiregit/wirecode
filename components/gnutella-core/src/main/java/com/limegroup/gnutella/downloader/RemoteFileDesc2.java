@@ -17,7 +17,7 @@ public class RemoteFileDesc2 extends URLRemoteFileDesc {
     /** Pseudo copy constructor.  Initializes this to be exactly like rfd,
      *  but with the isUnreachable field set to false and the time field
      *  set to the current time. */
-    public RemoteFileDesc2(RemoteFileDesc rfd, boolean isUnreachable) {
+    public RemoteFileDesc2(RemoteFileDesc rfd) {
         //Note that the runtime type of rfd may be either RemoteFileDesc or
         //URLRemoteFileDesc.  In the former case, the URL stored in this is the
         //value calculated on the fly by RemoteFileDesc.getUrl().  In the latter
@@ -36,18 +36,6 @@ public class RemoteFileDesc2 extends URLRemoteFileDesc {
 			  rfd.getUrns(),
 			  rfd.isReplyToMulticast(),
               rfd.getUrl());
-        this._isUnreachable=isUnreachable;
-        this._timeStamp=System.currentTimeMillis();
-    }
-
-    /** Returns true if this unreachable.  A return value of false
-     *  does not necessarily mean this is reachable. */
-    public boolean isUnreachable() {
-        return _isUnreachable;
-    }
-
-    /** Returns the system time that this was created. */
-    public long getCreationTime() {
-        return _timeStamp;
     }
 }
+
