@@ -254,6 +254,20 @@ public class LimeXMLSchema
                 return null;
         }
     }//end of private innner class
-    
-    
+
+    /**
+     * Utility method to be used in the gui to display schemas
+     */
+    public static String getDisplayString(String schemaURI)
+    {
+        int start = schemaURI.lastIndexOf("/");
+        //TODO3: Are we sure that / is the correct delimiter???
+        int end = schemaURI.lastIndexOf(".");
+        String schemaStr;
+        if(start == -1 || end == -1)
+            schemaStr = schemaURI;
+        else
+            schemaStr= schemaURI.substring(start+1,end);
+        return schemaStr;
+    }
 }
