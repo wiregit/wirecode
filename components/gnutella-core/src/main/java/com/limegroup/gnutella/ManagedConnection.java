@@ -933,6 +933,11 @@ public class ManagedConnection
                 ret.setProperty(
                     ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
                 
+                //guide the incoming connection to be a supernode/clientnode
+                ret.setProperty(
+                    ConnectionHandshakeHeaders.SUPERNODE_NEEDED,
+                    (new Boolean(_manager.supernodeNeeded())).toString());
+                
                 //also add some host addresses in the response 
                 String hostAddresses = getHostAddresses(_manager);
                 //set the property
