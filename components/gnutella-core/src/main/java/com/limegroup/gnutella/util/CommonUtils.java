@@ -1,4 +1,4 @@
-package core.com.limegroup.gnutella.util;
+package com.limegroup.gnutella.util;
 
 import java.util.Properties;
 import java.io.*;
@@ -9,7 +9,7 @@ import java.net.*;
  * may want to access.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class CommonUtils_1 {
+public class CommonUtils {
 
 	/** 
 	 * Constant for the current version of LimeWire.
@@ -76,7 +76,7 @@ public class CommonUtils_1 {
 	/**
 	 * Make sure the constructor can never be called.
 	 */
-	private CommonUtils_1() {}
+	private CommonUtils() {}
 
 	/**
 	 * Initialize the settings statically. 
