@@ -15,7 +15,7 @@ public final class CommonUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static final String LIMEWIRE_VERSION = "2.0.2";
+	private static final String LIMEWIRE_VERSION = "2.0.5";
 	
 	/** 
 	 * Constant for the java system properties.
