@@ -2691,7 +2691,8 @@ public abstract class MessageRouter {
     	int port = datagram.getPort();
     	if (_udpHeadRequests.add(host)) {
     		
-    		if (ping.getClientGuid() != null)
+    		if (ping.getClientGuid() != null && 
+    				!Arrays.equals(ping.getClientGuid().bytes(),RouterService.getMyGUID()))
     			routeHeadPing(ping,datagram);
     		else {
     			HeadPong pong = new HeadPong(ping);
@@ -2714,9 +2715,6 @@ public abstract class MessageRouter {
        //drop the ping if no entry 
        if (pingee == null) 
            return; 
-       
-       // strip the forward feature
-       ping = HeadPing.createForwardPing(ping);
        
        //don't bother routing if this is intended for me. 
        if (pingee instanceof ForMeReplyHandler)  
