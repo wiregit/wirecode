@@ -10,10 +10,30 @@ import com.limegroup.gnutella.search.*;
  * sent whose reply is for me.
  */
 public final class ForMeReplyHandler implements ReplyHandler {
-	
+
+	/**
+	 * Instance following singleton.
+	 */
+	private static final ReplyHandler INSTANCE =
+		new ForMeReplyHandler();
+
 	private final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
+
+	/**
+	 * Singleton accessor.
+	 *
+	 * @return the <tt>ReplyHandler</tt> instance for this node
+	 */
+	public static ReplyHandler instance() {
+		return INSTANCE;
+	}
 	   
+	/**
+	 * Private constructor to ensure that only this class can construct
+	 * itself.
+	 */
+	private ForMeReplyHandler() {}
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
         SettingsManager settings = SettingsManager.instance();
@@ -120,6 +140,8 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		return false;
 	}
 	
+
+	// inherit doc comment
 	public boolean isKillable() {
 		return false;
 	}
