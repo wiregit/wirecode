@@ -6,7 +6,7 @@ import java.io.*;
 
 
 /** Immutable IP/port pair. */
-public class Endpoint {
+public class Endpoint implements Cloneable{
     String hostname;
     int port;
     
@@ -30,5 +30,11 @@ public class Endpoint {
 	//This is good enough, since one host rarely has multiple ports.
 	return hostname.hashCode();
     }
+
+
+	protected Object clone()
+	{
+		return new Endpoint(new String(hostname), port);
+	}
 }
 
