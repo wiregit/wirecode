@@ -410,9 +410,12 @@ public class ConnectionManager {
      */
     private boolean isRouterConnection(ManagedConnection connection) {
         String host = connection.getOrigHost();
+        int port = connection.getOrigPort();
+        String conn = new String(host + ":" + port);
+        
         String[] routers = SettingsManager.instance().getQuickConnectHosts();
         for (int i = 0; i < routers.length; i++) {
-            if (host.equals(routers[i]))
+            if (conn.equals(routers[i]))
                 return true;
         }
 

@@ -115,8 +115,7 @@ public class ConnectionWatchdog implements Runnable {
      *  take several seconds.
      */
     private void killIfStillDud(List connections) {
-        //Take a snapshot of each connection, then send a ping.  Ideally we'd
-        //use a TTL of 1, but Gnotella doesn't respond with TTL's less than 2.
+        //Take a snapshot of each connection, then send a ping of TTL 1.
         //The horizon statistics for the connection are temporarily disabled
         //during this process.  In the rare chance that legitimate pongs 
         //(other than in response to my ping), they will be ignored.
@@ -126,7 +125,7 @@ public class ConnectionWatchdog implements Runnable {
             if (! c.isKillable())
                 continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
-            router.sendPingRequest(new PingRequest((byte)2), c);
+            router.sendPingRequest(new PingRequest((byte)1), c);
         }
         
         //Wait a tiny amount of time.

@@ -85,7 +85,7 @@ class RejectConnection extends Connection {
         Iterator iter = _hostCatcher.getNPingReplies(this, 
             MessageRouter.MAX_PONGS_TO_RETURN);
         while (iter.hasNext()) {
-            cachedPingReply = ((MainCacheEntry)iter.next()).getPingReply();
+            cachedPingReply = (PingReply)iter.next();
             PingReply newReply = new PingReply(m.getGUID(), (byte)1,
                 cachedPingReply.getPort(), cachedPingReply.getIPBytes(),
                 cachedPingReply.getFiles(), cachedPingReply.getKbytes());
