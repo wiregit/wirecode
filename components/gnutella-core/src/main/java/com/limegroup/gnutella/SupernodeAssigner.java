@@ -50,8 +50,14 @@ public final class SupernodeAssigner {
 	private final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hr
 
 	/**
+	 * Constant for the minimum current uptime in seconds that a node must 
+	 * have for us to attempt to switch them from a leaf to an Ultrapeer
+	 */
+	private final int MINIMUM_CURRENT_UPTIME_FORCE = 150 * 60; //2.5 hr
+
+	/**
 	 * Constant value for whether or not the operating system qualifies
-	 * this node for supernode status.
+	 * this node for Ultrapeer status.
 	 */
 	private boolean SUPERNODE_OS = CommonUtils.isSupernodeOS();
 	
@@ -115,6 +121,22 @@ public final class SupernodeAssigner {
 	 */
 	private static volatile boolean _isTooGoodToPassUp = false;
 
+	/**
+	 * Variable for the last time we attempted to become an Ultrapeer.
+	 */
+	private long _lastAttempt = 0L;
+
+	/**
+	 * Number of times we've tried to become an Ultrapeer.
+	 */
+	private int _ultrapeerTries = 0;
+
+	/**
+	 * Constant for the amount of time to wait between attempts to become an 
+	 * Ultrapeer.
+	 */
+	private int RETRY_TIME = 90*60*1000; // 90 minutes
+
     /** 
 	 * Creates a new <tt>SupernodeAssigner</tt>. 
 	 *
@@ -129,7 +151,7 @@ public final class SupernodeAssigner {
                              ConnectionManager manager) {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
-        this._manager = manager;
+        _manager = manager;
         _wasSupernodeCapable = _manager.isSupernode();
     }
     
@@ -183,40 +205,72 @@ public final class SupernodeAssigner {
             //AND am I a capable OS?
 			SUPERNODE_OS;
 
+		long curTime = System.currentTimeMillis();
+
 		// check if this node has such good values that we simply can't pass
 		// it up as an Ultrapeer -- it will just get forced to be one
-
-		boolean isTooGoodToPassUp =
+		_isTooGoodToPassUp = 
 			//are upstream and downstream high enough?
-            (_maxUpstreamBytesPerSec >= 
-			 MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND*4 &&
-             _maxDownstreamBytesPerSec >= 
-			 MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND*4 &&
+			(_maxUpstreamBytesPerSec >= 
+			 MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND*2 &&
+			 _maxDownstreamBytesPerSec >= 
+			 MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND*2 &&
 			 //AND I'm not a modem (in case estimate wrong)
 			 (SETTINGS.getConnectionSpeed() > SpeedConstants.CABLE_SPEED_INT) &&
 			 //AND is my average uptime OR current uptime high enough?
-			 (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME*6 ||
-			  _currentUptime >= MINIMUM_CURRENT_UPTIME*2) &&
+			 (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
+			  _currentUptime >= MINIMUM_CURRENT_UPTIME_FORCE) &&
 			 //AND am I not firewalled?
 			 ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
 			 //AND I have accepted incoming messages over UDP
 			 //RouterService.isGUESSCapable() &&
 			 //AND am I a capable OS?
-			 CommonUtils.isWindows2000orXP() ||
-			 CommonUtils.isSolaris() ||
-			 CommonUtils.isLinux());
+			 SUPERNODE_OS &&
+			 // and we haven't initiated a search in 5 minutes
+			 (curTime - RouterService.getLastQueryTime() > 5*60*1000)
+			 );
 
 		// TODO:: add HTTP upload bandwidth used as a factor
-        
+		// TODO:: add a TEST for this class
+
         // if this is supernode capable, make sure we record it
         if(isSupernodeCapable) {
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		}
 
-		if(isTooGoodToPassUp) {
-			_isTooGoodToPassUp = true;
-			RouterService.getConnectionManager().attemptToBecomeAnUltrapeer();
+		if(_isTooGoodToPassUp && shouldTryToBecomeAnUltrapeer(curTime)) {
+			_ultrapeerTries++;
+
+			// try to become an Ultrapeer -- how persistent we are depends on
+			// how many times we've tried, and so how long we've been
+			// running for
+			final int demotes = 4 * _ultrapeerTries;
+			Runnable ultrapeerRunner = 
+				new Runnable() {
+					public void run() {
+						RouterService.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
+					}
+				};
+			Thread ultrapeerThread = 
+				new Thread(ultrapeerRunner, "UltrapeerAttemptThread");
+			ultrapeerThread.setDaemon(true);
+			ultrapeerThread.start();
 		}
+	}
+	
+	/**
+	 * Checks whether or not we should try again to become an Ultrapeer.
+	 *
+	 * @param curTime the current time in milliseconds
+	 * @return <tt>true</tt> if we should try again to become an Ultrapeer,
+	 *  otherwise <tt>false</tt>
+	 */
+	private boolean shouldTryToBecomeAnUltrapeer(long curTime) {
+		if(curTime - _lastAttempt < RETRY_TIME) {
+			return false;
+		}
+		_lastAttempt = curTime;
+		return true;
 	}
 
 	/**
