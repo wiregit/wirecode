@@ -531,10 +531,10 @@ public class HTTPUploader implements Uploader {
 				userAgent = str.substring(11).trim();
 			}
 
-			else if(indexOfIgnoreCase(str, HTTPConstants.CONTENT_URN_HEADER)!=-1) {
+			else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str)) {
 				_requestedURN = HTTPUploader.readContentUrn(str);
 			}
-			else if(indexOfIgnoreCase(str, HTTPConstants.ALTERNATE_LOCATION_HEADER)!=-1) {
+			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
 				if(_alternateLocationCollection == null) {
 					_alternateLocationCollection = new AlternateLocationCollection();
 				}
