@@ -55,15 +55,13 @@ import com.limegroup.gnutella.util.CommonUtils;
  *          property, we simply added the accessor:<p>
  *  
  *          public boolean getConnectOnStartup() {
- *              Boolean b = 
- *                  Boolean.valueOf(PROPS.getProperty(CONNECT_ON_STARTUP));
- *              return b.booleanValue();
+ * 		        return getBooleanValue(CONNECT_ON_STARTUP);
  *          }<p>
  *
  *          and the mutator:<p>
  *
  *          public void setConnectOnStartup(boolean connect) {
- *              PROPS.put(CONNECT_ON_STARTUP, new Boolean(connect).toString());
+ *              setBooleanValue(CONNECT_ON_STARTUP, connect);
  *          }<p>
  *
  *          Notice that this is where the constant key for the property
@@ -1662,8 +1660,9 @@ public final class SettingsManager {
 	 *         established, <tt>false</tt> otherwise
 	 */
 	public boolean getEverAcceptedIncoming() {
-		Boolean b = Boolean.valueOf(PROPS.getProperty(EVER_ACCEPTED_INCOMING));
-		return b.booleanValue();
+		return getBooleanValue(EVER_ACCEPTED_INCOMING);
+		//Boolean b = Boolean.valueOf(PROPS.getProperty(EVER_ACCEPTED_INCOMING));
+		//return b.booleanValue();
 	}
 
 	/**
@@ -1832,8 +1831,7 @@ public final class SettingsManager {
 	 *  startup, <tt>false</tt> otherwise
 	 */
 	public boolean getConnectOnStartup() {
-		Boolean b = Boolean.valueOf(PROPS.getProperty(CONNECT_ON_STARTUP));
-		return b.booleanValue();
+		return getBooleanValue(CONNECT_ON_STARTUP);
 	}
     
     /******************************************************
@@ -2732,8 +2730,7 @@ public final class SettingsManager {
 	 *                   should be shown in the future
 	 */
 	public void setShowTrayDialog(final boolean showDialog) {
-		Boolean b = new Boolean(showDialog);
-		PROPS.put(SHOW_TRAY_DIALOG, b.toString());
+		setBooleanValue(SHOW_TRAY_DIALOG, showDialog);
 	}
 
 	/**
@@ -2744,8 +2741,7 @@ public final class SettingsManager {
 	 *                 should be minimized to the tray 
 	 */
 	public void setMinimizeToTray(final boolean minimize) {
-		Boolean b = new Boolean(minimize);
-		PROPS.put(MINIMIZE_TO_TRAY, b.toString());
+		setBooleanValue(MINIMIZE_TO_TRAY, minimize);
 	}	
 
 	/**
@@ -2768,8 +2764,7 @@ public final class SettingsManager {
 	 *                         client has ever accepted an incoming connection
 	 */
 	public void setEverAcceptedIncoming(final boolean acceptedIncoming) {
-		Boolean b = new Boolean(acceptedIncoming);
-		PROPS.put(EVER_ACCEPTED_INCOMING, b.toString());
+		setBooleanValue(EVER_ACCEPTED_INCOMING, acceptedIncoming);
 	}
 
 	/**
@@ -2952,12 +2947,82 @@ public final class SettingsManager {
 	 * @param connect specifies whether or not to connect on startup
 	 */
 	public void setConnectOnStartup(boolean connect) {
-		PROPS.put(CONNECT_ON_STARTUP, new Boolean(connect).toString());
+		setBooleanValue(CONNECT_ON_STARTUP, connect);
 	}
     
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
+
+	/**
+	 * Sets the <tt>boolean</tt> value for the specified key as a
+	 * <tt>String</tt> entry.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param BOOL the <tt>boolean</tt> value to set
+	 */
+	private void setBooleanValue(final String KEY, final boolean BOOL) {
+		PROPS.put(KEY, new Boolean(BOOL).toString());
+	}
+
+	/**
+	 * Sets the <tt>int</tt> value for the specified key as a
+	 * <tt>String</tt> entry.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param INT the <tt>int</tt> value to set
+	 */
+	private void setIntValue(final String KEY, final int INT) {
+		PROPS.put(KEY, Integer.toString(INT));
+	}
+
+	/**
+	 * Sets the <tt>String</tt> value for the specified key.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param STR the <tt>String</tt> value to set
+	 */
+	private void setStringValue(final String KEY, final String STR) {
+		PROPS.put(KEY, STR);
+	}
+
+	
+
+	/**
+	 * Returns the <tt>boolean</tt> value for the specified
+	 * key.
+	 * 
+	 * @param KEY the key for the desired value
+	 * @return the <tt>boolean</tt> value associated with the
+	 *  specified key
+	 */
+	private boolean getBooleanValue(final String KEY) {
+		return Boolean.valueOf(PROPS.getProperty(KEY)).booleanValue();
+	}
+	
+	/**
+	 * Returns the <tt>String</tt> value associated with the
+	 * specified key.
+	 *
+	 * @param KEY the key for the desired value
+	 * @return the <tt>String</tt> value associated with the
+	 *  specified key
+	 */
+	private String getStringValue(final String KEY) {
+		return PROPS.getProperty(KEY);
+	}
+
+	/**
+	 * Returns the <tt>int</tt> value associated with the
+	 * specified key.
+	 *
+	 * @param KEY the key for the desired value
+	 * @return the <tt>int</tt> value associated with the
+	 *  specified key
+	 */
+	private int getIntValue(final String KEY) {
+		return Integer.parseInt(PROPS.getProperty(KEY));
+	}
 
 
     /** 
