@@ -982,6 +982,26 @@ public class ConnectionManager {
     }
 
     /**
+     * Sends a TCPConnectBack request to (up to) 4 connected Ultrapeers.
+     * @returns false if no requests were sent, otherwise true.
+     */
+    public boolean sendTCPConnectBackRequests() {
+        boolean retVal = false;
+        final Message cb = 
+            new TCPConnectBackVendorMessage(RouterService.getPort());
+        Iterator ultrapeers = getInitializedConnections().iterator();
+        for (int sent = 0; (sent < 2) && ultrapeers.hasNext();) {
+            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+            if (currMC.remoteHostSupportsTCPConnectBack() >= 0) {
+                currMC.send(cb);
+                retVal = true;
+                sent++;
+            }
+        }
+        return retVal;
+    }
+
+    /**
      * Sends a QueryStatusResponse message to as many Ultrapeers as possible.
      *
      * @param 

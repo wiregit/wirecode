@@ -26,6 +26,9 @@ import org.apache.commons.logging.Log;
 public class Acceptor implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
+    private static long INCOMING_EXPIRE_TIME = 60 * 60 * 1000; // 1 hour
+    private static long WAIT_TIME_AFTER_REQUESTS = 20 * 1000; // 20 seconds
+    private static long TIME_BETWEEN_VALIDATES = 15 * 60 * 1000; // 15 mins
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -80,6 +83,18 @@ public class Acceptor implements Runnable {
 	 */
 	private volatile boolean _acceptedIncoming = false;
 	
+    /**
+     * Keep track of the last time _acceptedIncoming was set - we want to
+     * revalidate it every so often.
+     */
+    private volatile long _lastIncomingTime = 0;
+
+    /**
+     * The last time you did a connect back check.  It is set to the time
+     * we start up since we try once when we start up.
+     */
+    private volatile long _lastConnectBackTime = System.currentTimeMillis();
+
 	/**
 	 * Whether or not to record stats.
 	 */
@@ -142,6 +157,8 @@ public class Acceptor implements Runnable {
 		Thread at = new ManagedThread(this, "Acceptor");
 		at.setDaemon(true);
 		at.start();
+        RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES,
+                               TIME_BETWEEN_VALIDATES);
 	}
 	
 	/**
@@ -336,7 +353,7 @@ public class Acceptor implements Runnable {
 	 * by default, and true as soon as a connection is established.
 	 */
 	public boolean acceptedIncoming() {
-		return _acceptedIncoming;
+        return _acceptedIncoming;
 	}
 
 
@@ -434,7 +451,7 @@ public class Acceptor implements Runnable {
 				InetAddress address = client.getInetAddress();
                 if (isBannedIP(address.getHostAddress())) {
 			        if( RECORD_STATS )
-			            HTTPStat.BANNED_REQUESTS.incrementStat();                    
+			            HTTPStat.BANNED_REQUESTS.incrementStat();
                     client.close();
                     continue;
                 }
@@ -447,10 +464,13 @@ public class Acceptor implements Runnable {
                 // that we've accepted incoming if it's definitely
                 // not from our local subnet and we aren't connected to
                 // the host already.
-                if(!_acceptedIncoming && isOutsideConnection(address)) {
-                    _acceptedIncoming = true;
-                    ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(
-                        _acceptedIncoming);
+                if(isOutsideConnection(address)) {
+                    synchronized (Acceptor.class) {
+                        _acceptedIncoming = true;
+                        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(
+                            _acceptedIncoming);
+                        _lastIncomingTime = System.currentTimeMillis();
+                    }
                 }
                 
                 //Dispatch asynchronously.
@@ -621,5 +641,38 @@ public class Acceptor implements Runnable {
      */
     public boolean isBannedIP(String ip) {        
         return !IPFilter.instance().allow(ip);
+    }
+
+    private class IncomingValidator implements Runnable {
+        public IncomingValidator() {}
+        public void run() {
+            // clear and revalidate if 1) we haven't had in incoming in an hour
+            // or 2) we've never had incoming and we haven't checked in an hour
+            final long currTime = System.currentTimeMillis();
+            final ConnectionManager cm = RouterService.getConnectionManager();
+            if (
+                (_acceptedIncoming && //1)
+                 ((currTime - _lastIncomingTime) > INCOMING_EXPIRE_TIME)) 
+                || 
+                (!_acceptedIncoming && //2)
+                 ((currTime - _lastConnectBackTime) > INCOMING_EXPIRE_TIME))
+                ) {
+                // send a connectback request to a few peers and clear
+                // _acceptedIncoming IF some requests were sent.
+                if(cm.sendTCPConnectBackRequests())  {
+                    _lastConnectBackTime = System.currentTimeMillis();
+                    Runnable checkThread = new Runnable() {
+                            public void run() {
+                                synchronized (Acceptor.class) {
+                                    if (_lastIncomingTime < currTime)
+                                        _acceptedIncoming = false;
+                                }
+                            }
+                        };
+                    RouterService.schedule(checkThread, 
+                                           WAIT_TIME_AFTER_REQUESTS, 0);
+                }
+            }
+        }
     }
 }
