@@ -648,9 +648,21 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             }
         }
 
-        // create the read/write classes for messages
-        _messageWriter = new MessageWriterProxy(this); 
-        _messageReader = new MessageReaderProxy(this, HANDSHAKER);
+        // Create the message writer, specializing the writer for blocking or
+        // non-blocking writes.
+        if(ConnectionSettings.USE_NIO.getValue()) {
+            _messageWriter = NIOMessageWriter.createWriter(this);       
+        } else {
+            _messageWriter = BIOMessageWriter.createWriter(this);
+        }  
+
+        // Create the message reader, specializing the reader for blocking or
+        // non-blocking reads.
+        if(ConnectionSettings.USE_NIO.getValue()) {
+            _messageReader = NIOMessageReader.createReader(this, HANDSHAKER);       
+        } else {
+            _messageReader = BIOMessageReader.createReader(this);
+        }
         
                      
         // check for updates from this host  
