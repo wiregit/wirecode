@@ -86,7 +86,7 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
-	private static final String NATIVE_LAUNCHER_NAME = "LimeWire.dll";
+	private static final String WINDOWS_LIBRARY_NAME = "LimeWire.dll";
 
 
 	/** 
@@ -97,12 +97,13 @@ public class Launcher {
 		if(CommonUtils.isWindows()) {
 			String libraryPath = CommonUtils.getCurrentDirectory();
 			File nativeLauncherLibrary = new File(libraryPath, 
-												  NATIVE_LAUNCHER_NAME);
+												  WINDOWS_LIBRARY_NAME);
 			
 			// return if the dll is already there
 			if(nativeLauncherLibrary.exists()) return;
 
-			InputStream is = ClassLoader.getSystemResourceAsStream(NATIVE_LAUNCHER_NAME);
+			ClassLoader cl = Launcher.class.getClassLoader();
+			InputStream is = cl.getResourceAsStream(WINDOWS_LIBRARY_NAME); 
 			if(is == null) return;
 			try {
 				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
