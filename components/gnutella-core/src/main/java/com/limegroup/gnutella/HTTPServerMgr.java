@@ -114,8 +114,16 @@ public class HTTPServerMgr implements Runnable {
 		}
 		
 	    }
+	}
+	catch (Exception e) {
 	    
+	    _callback.error("Unable to read HTTP Header info");
+	    return;
 	    
+	}
+
+	try {
+	    	    
 	    if (_sizeOfFile != -1) {
 
 		FileOutputStream myFile = new FileOutputStream(_filename);
@@ -137,7 +145,7 @@ public class HTTPServerMgr implements Runnable {
 	
 	catch (Exception e) {
 	    
-	    e.printStackTrace();
+	    _callback.error("Unable to write to file");
 	    
 	}
 	
