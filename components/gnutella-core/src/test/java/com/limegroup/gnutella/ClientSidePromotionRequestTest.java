@@ -77,15 +77,34 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 		}
 	}
 	
+	
+	/**
+	 * tests the scenario where a leaf receives a promotion request
+	 * but the requesting UP fails to ACK it.
+	 */
+	public void testPromotingTimeout() throws Exception {
+		performTest(true);
+	}
+	/**
+	 * tests the scenario where a leaf receives a promotion request and 
+	 * promotes itself.
+	 */
 	public void testPromotingLeaf() throws Exception {
-		
-		
-		//assert we are a leaf on startup
+		performTest(false);
+	}
+	
+
+	private void performTest(boolean timeout) throws Exception {
+//		assert we are a leaf on startup
 		assertFalse(RouterService.isSupernode());
 		
 		assertEquals(32,ConnectionSettings.NUM_CONNECTIONS.getValue());
 		
-		_acceptor = new MiniAcceptor(new UPResponder(),8000);
+		//lower the timeout
+		PrivilegedAccessor.setValue(RouterService.getPromotionManager(),"REQUEST_TIMEOUT", new Long(1000));
+		
+		if (_acceptor == null)
+			_acceptor = new MiniAcceptor(new UPResponder(),8000);
 		try{Thread.sleep(500);}catch(InterruptedException iex){}
 		
 		_socket = new DatagramSocket(8000,InetAddress.getByName("127.0.0.1"));
@@ -116,6 +135,11 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 		//create the remote response
 		PromotionACKVendorMessage response = new PromotionACKVendorMessage();
 		
+		//at this point, if we want to timeout, wait some time.
+		
+		if(timeout) {
+			Thread.sleep(2000);
+		}
 		
 		//send it through the proper channel
 		
@@ -126,24 +150,24 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 		_socket.connect(_socket.getLocalAddress(),SERVER_PORT);
 		_socket.send(packet);
 		
-		//RouterService.getMessageRouter().handleUDPMessage(response,ping);
-		
+		//sleep some time
 		try {Thread.sleep(2500);}catch(InterruptedException iex){}
 		
 		//make sure we have only one connection and that its supernode2supernode
 		assertEquals(1,RouterService.getConnectionManager().getNumInitializedConnections());
+		
 		ManagedConnection ourConn = (ManagedConnection) 
 			RouterService.getConnectionManager().getInitializedConnections().get(0);
 		
-		assertTrue(ourConn.isSupernodeSupernodeConnection());
+		assertTrue(timeout ? ourConn.isClientSupernodeConnection():
+					ourConn.isSupernodeSupernodeConnection());
 		
 		//can't check whether we have promoted ourselves from within test environment.
 		//will do it on a live node.
 		_socket.close();
 		
+		
 	}
-	
-
 	/**
 	 * a tiny UP responder which contains only the agent info.
 	 *
