@@ -66,4 +66,17 @@ interface ReplyHandler {
 	 *  otherwise
 	 */
 	boolean isLeafConnection();
+
+	/**
+	 * Accessor for the reported number of intra-Ultrapeer connections
+	 * this connection attempts to maintain.  If the node is not an
+	 * Ultrapeer, this returns 0.  If it is an Ultrapeer but does not
+	 * support this header, we assume that it tries to maintain 6 intra-
+	 * Ultrapeer connections.
+	 *
+	 * @return the number of intra-Ultrapeer connections the connected node
+	 *  attempts to maintain, as reported in the X-Degree handshake header
+	 *  or guessed at otherwise
+	 */
+	int getNumIntraUltrapeerConnections();
 }

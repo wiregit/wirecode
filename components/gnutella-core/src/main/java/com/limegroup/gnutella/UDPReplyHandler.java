@@ -146,6 +146,18 @@ public final class UDPReplyHandler implements ReplyHandler {
 		return false;
 	}
 
+	/** 
+	 * Implements <tt>ReplyHandler</tt> interface -- always returns -1, since
+	 * we don't know how many intra-Ultrapeer connections a UDP host
+	 * maintains.
+	 *
+	 * @return -1, since we don't know how many intra-Ultrapeer connections 
+	 *  a UDP host maintains.
+	 */
+	public int getNumIntraUltrapeerConnections() {
+		return -1;
+	}
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

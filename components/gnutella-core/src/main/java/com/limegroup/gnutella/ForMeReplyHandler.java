@@ -133,6 +133,17 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	public boolean isLeafConnection() {
 		return !RouterService.isSupernode();
 	}
+
+	/** 
+	 * Implements <tt>ReplyHandler</tt> interface -- returns the number of
+	 * intra-Ultrapeer connections this host maintains.
+	 *
+	 * @return returns the number of intra-Ultrapeer connections this host 
+	 *  maintains
+	 */
+	public int getNumIntraUltrapeerConnections() {
+		return ConnectionManager.MIN_CONNECTIONS_FOR_SUPERNODE;
+	}
 }
 
 
