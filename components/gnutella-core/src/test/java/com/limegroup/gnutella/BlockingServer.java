@@ -153,6 +153,7 @@ public class BlockingServer {
                 while(_writesToPerform > 0) {
                     os.write(WRITE_BYTES);
                     os.flush();
+                    _writesToPerform--;
                 }
             }
         }
