@@ -462,10 +462,16 @@ public class FileManager {
                 _index.getPrefixedBy(query, i, j);
             if (iter.hasNext()) {
                 //Got match.  Union contents of the iterator and store in
-                //matches.
-                IntSet matches=new IntSet();
+                //matches.  As an optimization, if this is the only keyword and
+                //there is only one set returned, return that set without copying.
+                IntSet matches=null;
                 while (iter.hasNext()) {                
                     IntSet s=(IntSet)iter.next();
+                    if (matches==null) {
+                        if (i==0 && j==query.length() && !(iter.hasNext()))
+                            return s;
+                        matches=new IntSet();
+                    }
                     matches.addAll(s);
                 }
 
