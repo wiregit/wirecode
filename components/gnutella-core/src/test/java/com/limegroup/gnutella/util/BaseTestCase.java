@@ -11,10 +11,11 @@ import com.limegroup.gnutella.stubs.*;
 public class BaseTestCase extends TestCase implements ErrorCallback {
     
     protected static File _baseDir;
-    protected File _sharedDir;
-    protected File _savedDir;
-    protected File _incompleteDir;
-    protected File _settingsDir;
+    protected static File _sharedDir;
+    protected static File _savedDir;
+    protected static File _incompleteDir;
+    protected static File _settingsDir;
+    protected static Class _testClass;
     protected Thread _testThread;
     protected TestResult _testResult;
     
@@ -36,6 +37,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      */    
     public BaseTestCase(String name) {
         super(name);
+        _testClass = getClass();
     }
     
     /**
@@ -44,6 +46,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
     public static TestSuite buildTestSuite(Class cls) {
+        _testClass = cls;
         return new LimeTestSuite(cls);
     }
     
@@ -54,6 +57,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
     public static TestSuite buildTestSuite(Class cls, String test) {
+        _testClass = cls;
         return buildTestSuite(cls, new String[]{test});
     }
     
@@ -65,6 +69,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * @return <tt>TestSuite</tt> object that can be returned by suite method
      */
     public static TestSuite buildTestSuite(Class cls, String[] tests) {
+        _testClass = cls;
         TestSuite suite = new LimeTestSuite();
         for (int ii = 0; ii < tests.length; ii++) {
             suite.addTest(suite.createTest(cls, tests[ii]));
@@ -214,6 +219,14 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     }
     
     /**
+     * Called statically before any settings.
+     */
+    public static void beforeAllTestsSetUp() throws Throwable {
+        setupSettings();
+        setupUniqueDirectories();
+    }
+    
+    /**
      * Called after each test's tearDown.
      * Used to remove directories and possibly other things.
      */
@@ -224,7 +237,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
     /**
      * Runs after all tests are completed.
      */
-    public static void afterAllTestsTearDown() {
+    public static void afterAllTestsTearDown() throws Throwable {
         cleanFiles(_baseDir, true);
         shutdownBackends();
     }
@@ -233,19 +246,34 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Sets up settings to a pristine environment for this test.
      * Ensures that no settings are saved.
      */
-    public void setupSettings() {
+    public static void setupSettings() {
         SettingsManager.instance(); // initialize SettingsManager
         AbstractSettings.setShouldSave(false);
         AbstractSettings.revertToDefault();
     }
     
     /**
+     * Creates a new directory prepended by the given name.
+     */
+    public static File createNewDirectory(String name) {
+        File f = new File(name);
+        
+        int append = 1;
+        while ( f.exists() ) {
+            f = new File(name + "_" + append);
+            append++;
+        }
+        
+        return f;
+    }
+    
+    /**
      * Sets this test up to have unique directories.
      */
-    public void setupUniqueDirectories() throws Exception {
+    public static void setupUniqueDirectories() throws Exception {
         
-        if( _baseDir == null ) {        
-            _baseDir = new File( this.getClass().getName() + "_" + hashCode() );
+        if( _baseDir == null ) {
+            _baseDir = createNewDirectory( _testClass.getName() );
         }
         _savedDir = new File(_baseDir, "saved");
         _sharedDir = new File(_baseDir, "shared");

@@ -44,6 +44,11 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
         _testResult = result;
         ErrorService.setErrorCallback(this);
         Backend.setErrorCallback(this);
+        try {
+            BaseTestCase.beforeAllTestsSetUp();
+        } catch(Throwable t) {
+            error(t);
+        }
         runStaticMethod(preTestName);
         try {
             super.run(result);
@@ -52,7 +57,11 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
             ErrorService.setErrorCallback(this);
             Backend.setErrorCallback(this);
             runStaticMethod(postTestName);
-            BaseTestCase.afterAllTestsTearDown();
+            try {
+                BaseTestCase.afterAllTestsTearDown();
+            } catch(Throwable t) {
+                error(t);
+            }                
         }
     }
     
