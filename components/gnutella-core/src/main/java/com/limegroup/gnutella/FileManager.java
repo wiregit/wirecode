@@ -416,6 +416,12 @@ public class FileManager {
         } 
     }
 
+    /** Returns true if the load thread has been interrupted an this should stop
+     *  loading files. */
+    protected boolean loadThreadInterrupted() {
+        return _loadThreadInterrupted;
+    }
+
     /** Clears this', reloads this' extensions, generates an array of
      *  directories, and then indexes the generated directories files.
      *  NOTE TO SUBCLASSES: extend this method as needed, it shall be
@@ -438,7 +444,7 @@ public class FileManager {
             StringUtils.split(SettingsManager.instance().getExtensions().trim(),
                               ';');
             for (int i=0; 
-                 (i<extensions.length) && !_loadThreadInterrupted;
+                 (i<extensions.length) && !loadThreadInterrupted();
                  i++)
                 _extensions.add(extensions[i].toLowerCase());
 
@@ -481,14 +487,14 @@ public class FileManager {
         {
             // Add each directory as long as we're not interrupted.
             int i=0;
-            while (i<directories.length && !_loadThreadInterrupted) {
+            while (i<directories.length && !loadThreadInterrupted()) {
                 addDirectory(directories[i], null);      
                 i++;
             }
             
             // Compact the index once.  As an optimization, we skip this
             // if loadSettings has subsequently been called.
-            if (! _loadThreadInterrupted)
+            if (! loadThreadInterrupted())
                 trim();                    
         }
 
@@ -539,7 +545,7 @@ public class FileManager {
         //in _sharedDirectories.  Again, this is not strictly necessary for
         //correctness.
         List /* of File */ directories=new ArrayList();
-        for (int i=0; i<n && !_loadThreadInterrupted; i++) {
+        for (int i=0; i<n && !loadThreadInterrupted(); i++) {
             if (file_list[i].isDirectory())     /* the recursive call */
                 directories.add(file_list[i]);
             else                                /* add the file with the */
@@ -547,7 +553,7 @@ public class FileManager {
         }
         //Now add directories discovered in previous pass.
         Iterator iter=directories.iterator();
-        while (iter.hasNext() && !_loadThreadInterrupted)
+        while (iter.hasNext() && !loadThreadInterrupted())
             addDirectory((File)iter.next(), directory);
     }
 
@@ -615,7 +621,7 @@ public class FileManager {
         
         //Calculate hash OUTSIDE of lock.
         Set urns=FileDesc.calculateAndCacheURN(file);  
-        if (_loadThreadInterrupted)
+        if (loadThreadInterrupted())
             return false;
 
         synchronized (this) {

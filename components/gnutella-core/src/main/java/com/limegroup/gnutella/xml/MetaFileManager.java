@@ -173,7 +173,7 @@ public class MetaFileManager extends FileManager {
     protected void loadSettingsBlocking(boolean notifyOnClear){
         // let FileManager do its work....
         super.loadSettingsBlocking(notifyOnClear);
-        if (Thread.currentThread().isInterrupted())
+        if (loadThreadInterrupted())
             return;
         synchronized(metaLocker){
             if (!initialized){//do this only on startup
@@ -188,7 +188,7 @@ public class MetaFileManager extends FileManager {
                 LimeXMLSchemaRepository schemaRepository = 
                       LimeXMLSchemaRepository.instance();                
 
-                if (Thread.currentThread().isInterrupted())
+                if (loadThreadInterrupted())
                     return;
 
                 //now the schemaRepository contains all the schemas.
@@ -197,7 +197,7 @@ public class MetaFileManager extends FileManager {
                 int len = schemas.length;
                 LimeXMLReplyCollection collection;  
                 for(int i=0;
-                    (i<len) && !Thread.currentThread().isInterrupted();
+                    (i<len) && !loadThreadInterrupted();
                     i++){
                     //One ReplyCollection per schema
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
@@ -210,7 +210,7 @@ public class MetaFileManager extends FileManager {
             }//end of if, we may be initialized, may have been interrupted 
             // fell through...
             /* We never set it to true.
-              if (!Thread.currentThread().isInterrupted())
+              if (!loadThreadInterrupted())
               initialized = true;
             */
             //showXMLData();
@@ -259,7 +259,7 @@ public class MetaFileManager extends FileManager {
                       ArrayList(Arrays.asList(man.getDirectories()));
 
         int k=0;
-        while(k < dirs.size()) {
+        while(k<dirs.size() && !loadThreadInterrupted()) {
             //String dir = (String)dirs.get(k);
             //File currDir = new File(dir);
             File currDir = (File)dirs.get(k);
@@ -277,7 +277,7 @@ public class MetaFileManager extends FileManager {
             int size = 0;
             if (files != null)
                 size = files.length;
-            for(int i=0;i<size;i++){
+            for(int i=0;i<size && !loadThreadInterrupted();i++){
                     String name="";
                     String hash="";
                     try{
