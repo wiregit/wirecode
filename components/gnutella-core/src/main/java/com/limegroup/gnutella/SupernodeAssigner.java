@@ -72,7 +72,8 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-	private final int TIMER_DELAY = 5 * 60 * 1000; //5 minutes
+    private final int TIMER_DELAY = 50 * 60 * 1000;
+//	private final int TIMER_DELAY = 5 * 60 * 1000; //5 minutes
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
@@ -99,9 +100,9 @@ public final class SupernodeAssigner implements Runnable {
 	private BandwidthTracker _downloadTracker;
     
     /**
-     * A reference to the router service
+     * A reference to the Connection Manager
      */
-    private RouterService _routerService;
+    private ConnectionManager _manager;
 
 	/**
 	 * Variable for the current uptime of this node.
@@ -135,13 +136,14 @@ public final class SupernodeAssigner implements Runnable {
 	 *                      tracking bandwidth used for uploads
 	 * @param downloadTracker the <tt>BandwidthTracker</tt> instance for
 	 *                        tracking bandwidth used for downloads
+     * @param manager Reference to the ConnectionManager for this node
 	 */
     public SupernodeAssigner(final BandwidthTracker uploadTracker, 
 							 final BandwidthTracker downloadTracker,
-                             RouterService routerService) {
+                             ConnectionManager manager) {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
-        this._routerService = routerService;
+        this._manager = manager;
 		ActionListener timerListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				collectBandwidthData();
@@ -220,11 +222,10 @@ public final class SupernodeAssigner implements Runnable {
         
         //check if the state changed
         boolean isSupernodeCapable = isSupernodeCapable();
-        if(isSupernodeCapable != _wasSupernodeCapable){
-            _routerService.disconnect();
-            SETTINGS.setSupernodeMode(isSupernodeCapable);
-            SETTINGS.setKeepAlive(4);
-            _routerService.connect();
+        if((isSupernodeCapable != _wasSupernodeCapable) &&
+            !SETTINGS.hasSupernodeOrClientnodeStatusForced()){
+                SETTINGS.setSupernodeMode(isSupernodeCapable);
+                _manager.reconnect();
         }
             _wasSupernodeCapable = isSupernodeCapable;
 	}

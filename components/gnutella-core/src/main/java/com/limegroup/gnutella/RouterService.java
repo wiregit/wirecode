@@ -101,7 +101,7 @@ public class RouterService
                                    fileManager);
 		
 		Thread supernodeThread = 
-		    new Thread(new SupernodeAssigner(uploadManager, downloader, this));
+		    new Thread(new SupernodeAssigner(uploadManager, downloader, manager));
 		supernodeThread.setDaemon(true);
 		supernodeThread.start();
 
