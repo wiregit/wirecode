@@ -129,9 +129,6 @@ public class RouterService
         return false;
     }
 
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
-                                           (byte)1};
-
     /**
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established.
@@ -148,26 +145,8 @@ public class RouterService
      * the connection is not established.
      */
     public void connectToHostAsynchronously(String hostname, int portnum) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases for this machine.
-        byte[] cIP = null;
-        try {
-            cIP=InetAddress.getByName(hostname).getAddress();
-        } catch(UnknownHostException e) {
-            return;
-        }
-        if ((Arrays.equals(cIP, LOCALHOST)) &&
-            (portnum==acceptor.getPort())) {
-                return;
-        } else {
-            byte[] managerIP=acceptor.getAddress();
-            if (Arrays.equals(cIP, managerIP)
-                && portnum==acceptor.getPort())
-                return;
-        }
-
-        manager.createConnectionAsynchronously(hostname, portnum);
+        if (!Acceptor.isMe(hostname, portnum))
+            manager.createConnectionAsynchronously(hostname, portnum);
     }
 
 
