@@ -707,5 +707,16 @@ public class LimeXMLDocument implements Serializable {
 		} 
 		return hashCode;
 	}
+	
+	/**
+	 * Returns the XML identifier for the string.
+	 */
+	public String toString() {
+	    try {
+	        return getXMLString();
+	    } catch(SchemaNotFoundException snfe) {
+	        return "no schema.";
+        }
+    }
 }
 
