@@ -623,7 +623,7 @@ public class UploadManager implements BandwidthTracker {
 			return false;
 		}
 		String idString = GET_LINE.substring(slash1Index, slash2Index);
-		return idString.equalsIgnoreCase(UploadManager.URI_RES);
+		return idString.equalsIgnoreCase("uri-res");
 	}
 
 	private static GETLine parseTraditionalGet(final String GET_LINE) 
@@ -673,16 +673,6 @@ public class UploadManager implements BandwidthTracker {
 		}
 	}
 
-	private static final String GET = "GET";
-	private static final String URI_RES = "uri-res";
-	private static final String NAME_TO_RESOURCE = "N2R?"; 
-	private static final String HTTP = "HTTP"; 
-	private static final String URN = "urn:";
-	private static final String SHA1 = "sha1";
-	private static final String BITPRINT = "bitprint";
-	private static final String HTTP10 = "HTTP/1.0";
-	private static final String HTTP11 = "HTTP/1.1";
-
 	/**
 	 * Parses the get line for a URN request, throwing an exception if 
 	 * there are any errors in parsing.
@@ -694,13 +684,11 @@ public class UploadManager implements BandwidthTracker {
 	private GETLine parseURNGet(final String GET_LINE) 
 		throws IOException {		
 
-		// it's possible that we should be throwing exceptions here at, as
-		// they're expensive and being used here really for normal flow
-		// control
-		if(!isValidURNGetRequest(GET_LINE)) {
-			throw new IOException("INVALID URN REQUEST SYNTAX");
+		//URN urn = this.getURN(GET_LINE);
+		URN urn = URNFactory.createSHA1URNFromGetRequest(GET_LINE);
+		if(urn == null) {
+			throw new IOException("NO ERROR CREATING URN");
 		}
-		String urn    = this.getURN(GET_LINE);
 		FileDesc desc = _fileManager.getFileDescForURN(urn);
 		if(desc == null) {
 			throw new IOException("NO MATCHING FILEDESC FOR URN");
@@ -712,231 +700,6 @@ public class UploadManager implements BandwidthTracker {
 		String fileName = desc._name;
 		boolean isHTTP11 = this.isHTTP11Request(GET_LINE);
 		return new GETLine(fileIndex, fileName, isHTTP11);		
-	}
-
-	/**
-	 * Returns whether or not the get request is valid, as specified in
-	 * HUGE v. 0.93 and IETF RFC 2169.
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the reques is valid, <tt>false</tt> otherwise
-	 */
-	private boolean isValidURNGetRequest(final String GET_LINE) {
-		return (this.isValidSize(GET_LINE) &&
-				this.isValidGet(GET_LINE) &&
-				this.isValidUriRes(GET_LINE) &&
-				this.isValidResolutionProtocol(GET_LINE) && 
-				this.isValidURN(GET_LINE) &&
-				this.isValidHTTPSpecifier(GET_LINE));				
-	}
-
-	/** 
-	 * Returns whether or not the specified get request meets size 
-	 * requirements.
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the get request starts with "GET "
-	 *  (case-insensitive), <tt>false</tt> otherwise
-	 */
-	private final boolean isValidSize(final String GET_LINE) {
-		int size = GET_LINE.length();
-		if((size != 67) && (size != 111)) {
-			return false;
-		}
-		return true;
-	}
-
-
-	/**
-	 * Returns whether or not the get request corresponds with the standard 
-	 * start of a get request.
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the get request starts with "GET "
-	 *  (case-insensitive), <tt>false</tt> otherwise
-	 */
-	private final boolean isValidGet(final String GET_LINE) {
-		int firstSpace = GET_LINE.indexOf(" ");
-		if(firstSpace == -1) {
-			return false;
-		}
-		String getStr = GET_LINE.substring(0, firstSpace);
-		if(!getStr.equalsIgnoreCase(UploadManager.GET)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Returns whether or not the get request corresponds with the standard 
-	 * uri-res request
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the get request includes the standard "uri-res"
-	 *  (case-insensitive) request, <tt>false</tt> otherwise
-	 */
-	private final boolean isValidUriRes(final String GET_LINE) {
-		int firstSlash = GET_LINE.indexOf("/");
-		if(firstSlash == -1) {
-			return false;
-		}
-		int secondSlash = GET_LINE.indexOf("/", firstSlash+1);
-		if(secondSlash == -1) {
-			return false;
-		}
-		String uriStr = GET_LINE.substring(firstSlash+1, secondSlash);
-		if(!uriStr.equalsIgnoreCase(UploadManager.URI_RES)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Returns whether or not the specified "resolution protocol" is valid.
-	 * We currently only support N2R, which specifies "Given a URN, return the
-	 * named resource."
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the resolution protocol is valid, <tt>false</tt>
-	 *  otherwise
-	 */
-	private boolean isValidResolutionProtocol(final String GET_LINE) {
-		int nIndex = GET_LINE.indexOf("2");
-		if(nIndex == -1) {
-			return false;
-		}
-		String n2r = GET_LINE.substring(nIndex-1, nIndex+3);
-
-		// we could add more protocols to this check
-		if(!n2r.equalsIgnoreCase(UploadManager.NAME_TO_RESOURCE)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Returns a <tt>String</tt> containing the URN for the get request.  For
-	 * a typical SHA1 request, this will return a 41 character URN, including
-	 * the 32 character hash value.  For a full description of what qualifies
-	 * as a valid URN, see RFC2141 ( http://www.ietf.org ).<p>
-	 *
-	 * The broad requirements of the URN are that it meet the following 
-	 * syntax: <p>
-	 *
-	 * <URN> ::= "urn:" <NID> ":" <NSS>  <p>
-	 * 
-	 * where phrases enclosed in quotes are required and where "<NID>" is the
-	 * Namespace Identifier and "<NSS>" is the Namespace Specific String.
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return a <tt>String</tt> containing the URN for the get request
-	 * @throws <tt>IOException</tt> if there is an error parsing out the URN
-	 *  from the line
-	 */
-	private boolean isValidURN(final String GET_LINE) {
-		int colon1Index = GET_LINE.indexOf(":");
-		if(colon1Index == -1) {
-			return false;
-		}
-
-		// get the "urn:" substring so we can make sure it's there,
-		// ignoring case
-		String urnStr = GET_LINE.substring(colon1Index-3, colon1Index+1);
-
-		// get the last colon -- this should separate the <NID>
-		// from the <NIS>
-		int colon2Index = GET_LINE.indexOf(":", colon1Index+1);
-
-		// get the space index that cannot be included in either the
-		// NID or the NSS and that must separate the NSS and the
-		// HTTP version
-		int spaceIndex = GET_LINE.indexOf(" ", colon2Index);
-		
-		if((colon2Index == -1) || 
-		   !urnStr.equalsIgnoreCase(UploadManager.URN) ||
-		   !isValidNID(GET_LINE.substring(colon1Index+1, colon2Index)) ||
-		   !isValidNSS(GET_LINE.substring(colon2Index+1, spaceIndex))) {
-			return false;
-		}		
-		return true;
-	}
-
-
-	/**
-	 * Returns whether or not the specified Namespace Identifier String (NID) 
-	 * is a valid NID.
-	 *
-	 * @param NID the Namespace Identifier String for a URN
-	 * @return <tt>true</tt> if the NID is valid, <tt>false</tt> otherwise
-	 */
-	private boolean isValidNID(final String NID) {					
-		// we should add other namespace identifiers to this check as
-		// they become registered
-		if(!NID.equalsIgnoreCase(UploadManager.SHA1) &&
-		   !NID.equalsIgnoreCase(UploadManager.BITPRINT)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Returns whether or not the specified Namespace Specific String (NSS) 
-	 * is a valid NSS.
-	 *
-	 * @param NSS the Namespace Specific String for a URN
-	 * @return <tt>true</tt> if the NSS is valid, <tt>false</tt> otherwise
-	 */
-	private boolean isValidNSS(final String NSS) {
-		int length = NSS.length();
-
-		// checks to make sure that it either is the length of a 32 
-		// character SHA1 NSS, or is the length of a 72 character
-		// bitprint NSS
-		if((length != 32) && (length != 72)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Returns whether or not the HTTP specifier for the URN get request
-	 * is valid.
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the HTTP specifier is valid, <tt>false</tt>
-	 *  otherwise
-	 */
-	private boolean isValidHTTPSpecifier(final String GET_LINE) {
-		int spaceIndex = GET_LINE.lastIndexOf(" ");
-		if(spaceIndex == -1) {
-			return false;
-		}
-		String httpStr = GET_LINE.substring(spaceIndex+1);
-		if(!httpStr.equalsIgnoreCase(UploadManager.HTTP10) &&
-		   !httpStr.equalsIgnoreCase(UploadManager.HTTP11)) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Returns a <tt>String</tt> containing the URN for the get request.  For
-	 * a typical SHA1 request, this will return a 41 character URN, including
-	 * the 32 character hash value.
-	 *
-	 * @param GET_LINE the <tt>String</tt> instance containing the get request
-	 * @return a <tt>String</tt> containing the URN for the get request
-	 * @throws <tt>IOException</tt> if there is an error parsing out the URN
-	 *  from the line
-	 */
-	private String getURN(final String GET_LINE) 
-		throws IOException {
-		int qIndex     = GET_LINE.indexOf("?") + 1;
-		int spaceIndex = GET_LINE.indexOf(" ", qIndex);		
-		if((qIndex == -1) || (spaceIndex == -1)) {
-			throw new IOException("ERROR PARSING URN FROM GET REQUEST");
-		}
-		return GET_LINE.substring(qIndex, spaceIndex);
 	}
 
 	/**
@@ -1057,92 +820,4 @@ public class UploadManager implements BandwidthTracker {
         Assert.that(upman.measuredUploadSpeed()==80);
     }
     */
-
-	// unit test for the validating of GET requests
-	public static void main(String[] args) {
-		String [] validURNS = {
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /URI-RES/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/n2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2r?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/n2r?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HtTP/1.0",
-		    "GET /uri-res/N2R?urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
-		    "GET /uri-res/N2R?urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.1"
-		};
-
-		String [] invalidURNS = {
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
-		    "GET /urires/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		    "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJcdirnZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
-		    "GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		    "GET/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:bitprint::PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1::PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPF HTTP/1.0",
-		    "GET /uri-res/N2R?ur:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R? urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?  urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?                                                    "+
-			"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/ N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urnsha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0 ",
-		    " GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0 ",
-			" ",
-			"GET",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC HTTP/1.0",
-		};
-		UploadManager um = new UploadManager();
-		boolean encounteredFailure = false;
-		System.out.println("TESTING THAT VALID URN GET REQUESTS PASS..."); 
-		for(int i=0; i<validURNS.length; i++) {
-			if(um.isValidURNGetRequest(validURNS[i]) != true) {
-				if(!encounteredFailure) {
-					System.out.println(  ); 
-					System.out.println("VALID URN TEST FAILED");
-				}
-				encounteredFailure = true;
-				System.out.println(); 
-				System.out.println("FAILED ON URN: ");
-				System.out.println(validURNS[i]); 
-			}
-		}
-		if(!encounteredFailure) {
-			System.out.println("TEST PASSED"); 
-		}
-		System.out.println(); 
-		System.out.println("TESTING THAT INVALID URN GET REQUESTS FAIL..."); 
-		for(int i=0; i<invalidURNS.length; i++) {
-			if(um.isValidURNGetRequest(invalidURNS[i]) == true) {
-				if(!encounteredFailure) {
-					System.out.println("INVALID URN TEST FAILED");
-				}
-				encounteredFailure = true;
-				System.out.println(); 
-				System.out.println("FAILED ON URN "+i+":");
-				System.out.println(invalidURNS[i]); 
-			}			
-		}
-		if(!encounteredFailure) {
-			System.out.println("TEST PASSED"); 
-		}
-		System.out.println(); 
-		if(!encounteredFailure) {
-			System.out.println("ALL TESTS PASSED"); 
-		}
-	}
 }
