@@ -8,6 +8,9 @@ import com.sun.java.util.collections.*;
  * The fixed size is intentional, not the result of laziness; use this 
  * data structure when you want to use a fix amount of resources.
  * This is not thread-safe.
+ * For a minimal amount of efficiency, the internal buffer is only
+ * allocated on the first insertion or retrieval, allowing lots of
+ * Buffers to be created that may not be used.
  */
 public final class IntBuffer implements Cloneable {
     /**
@@ -31,7 +34,7 @@ public final class IntBuffer implements Cloneable {
      *            size>=2
      */
     private final int size;
-    private final int buf[];
+    private int buf[];
     private int head;
     private int tail;
 
@@ -44,7 +47,8 @@ public final class IntBuffer implements Cloneable {
         Assert.that(size>=1);
         //one element of buf unused
         this.size = size+1;
-        buf = new int[size+1];
+        // lazily initialized to preserver memory.
+        //buf = new int[size+1];
         head = 0;
         tail = 0;
     }
@@ -55,10 +59,17 @@ public final class IntBuffer implements Cloneable {
         this.head=other.head;
         this.tail=other.tail;
 
-        this.buf=new int[other.buf.length];
-        System.arraycopy(other.buf, 0,
-                         this.buf, 0,
-                         other.buf.length);
+        if(other.buf != null) {
+            this.buf=new int[other.buf.length];
+            System.arraycopy(other.buf, 0,
+                             this.buf, 0,
+                             other.buf.length);
+        }
+    }
+    
+    private void initialize() {
+        if(buf == null)
+            buf = new int[size + 1];
     }
 
 	/*
@@ -126,13 +137,14 @@ public final class IntBuffer implements Cloneable {
     /** Returns the j s.t. buf[j]=this[i]. */
     private int index(int i) throws IndexOutOfBoundsException {        
         if (i<0 || i>=getSize())
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("index: " + i + ", size: " + getSize());
         return (i+head) % size;
     }
 
     /** If i<0 or i>=getSize(), throws IndexOutOfBoundsException.
       * Else returns this[i] */
     public int get(int i) throws IndexOutOfBoundsException {
+        initialize();
         return buf[index(i)];
     }
 
@@ -142,6 +154,7 @@ public final class IntBuffer implements Cloneable {
      *  and does not modify this.  Else this[i]=o.
      */
     public void set(int i, int value) throws IndexOutOfBoundsException {
+        initialize();
         buf[index(i)] = value;
     }
 
@@ -160,6 +173,7 @@ public final class IntBuffer implements Cloneable {
      *  if none was removed.
      */
     public int addFirst(int x) {
+        initialize();
 		int ret = -1;
         if (isFull())
             ret=removeLast();
@@ -176,6 +190,7 @@ public final class IntBuffer implements Cloneable {
      *  if none was removed.
      */
     public int addLast(int x) {
+        initialize();
 		int ret = -1;
         if (isFull())
             ret=removeFirst();

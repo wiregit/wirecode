@@ -7,6 +7,9 @@ import com.sun.java.util.collections.*;
  * A very simple fixed-size double-ended queue, i.e., a circular buffer.
  * The fixed size is intentional, not the result of laziness; use this 
  * data structure when you want to use a fix amount of resources.
+ * For a minimal amount of efficiency, the internal buffer is only
+ * allocated on the first insertion or retrieval, allowing lots of
+ * Buffers to be created that may not be used.
  * This is not thread-safe.
  */
 public class Buffer implements Cloneable {
@@ -30,7 +33,7 @@ public class Buffer implements Cloneable {
      *            0<=head, tail<size
      *            size>=2
      */
-    private int size;
+    private final int size;
     private Object buf[];
     private int head;
     private int tail;
@@ -44,7 +47,8 @@ public class Buffer implements Cloneable {
         Assert.that(size>=1);
         //one element of buf unused
         this.size=size+1;
-        buf=new Object[size+1];
+        // lazily allocate buffer.
+        //buf=new Object[size+1];
         head=0;
         tail=0;
     }
@@ -55,10 +59,18 @@ public class Buffer implements Cloneable {
         this.head=other.head;
         this.tail=other.tail;
 
-        this.buf=new Object[other.buf.length];
-        System.arraycopy(other.buf, 0,
-                         this.buf, 0,
-                         other.buf.length);
+        if(other.buf != null) {
+            this.buf=new Object[other.buf.length];
+            System.arraycopy(other.buf, 0,
+                            this.buf, 0,
+                            other.buf.length);
+        }
+    }
+    
+    /** Initializes the internal buf if necessary. */
+    private void initialize() {
+        if(buf == null)
+            buf = new Object[size+1];
     }
 
     /** Returns true iff this is empty. */
@@ -111,13 +123,14 @@ public class Buffer implements Cloneable {
     /** Returns the j s.t. buf[j]=this[i]. */
     private int index(int i) throws IndexOutOfBoundsException {        
         if (i<0 || i>=getSize())
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("index: " + i);
         return (i+head) % size;
     }
 
     /** If i<0 or i>=getSize(), throws IndexOutOfBoundsException.
       * Else returns this[i] */
     public Object get(int i) throws IndexOutOfBoundsException {
+        initialize();
         return buf[index(i)];
     }
 
@@ -127,6 +140,7 @@ public class Buffer implements Cloneable {
      *  and does not modify this.  Else this[i]=o.
      */
     public void set(int i, Object o) throws IndexOutOfBoundsException {
+        initialize();
         buf[index(i)]=o;
     }
 
@@ -143,6 +157,7 @@ public class Buffer implements Cloneable {
      *  if none was removed.
      */
     public Object addFirst(Object x) {
+        initialize();
         Object ret=null;
         if (isFull())
             ret=removeLast();
@@ -159,6 +174,7 @@ public class Buffer implements Cloneable {
      *  if none was removed.
      */
     public Object addLast(Object x) {
+        initialize();
         Object ret=null;
         if (isFull())
             ret=removeFirst();
@@ -298,6 +314,8 @@ public class Buffer implements Cloneable {
      * @requires this not modified will iterator in use.
      */
     public Iterator iterator() {
+        // will either throw NoSuchElementException
+        // or already be initialized.
         return new BufferIterator();
     }
 
@@ -324,7 +342,6 @@ public class Buffer implements Cloneable {
             ensureNoModifications();
             if (!hasNext()) 
                 throw new NoSuchElementException();
-
             Object ret=buf[i];
             i=increment(i);
             return ret;

@@ -247,7 +247,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * @return the <tt>File</tt> instance for this <tt>FileDesc</tt>
 	 */
 	public File getFile() {
-		return new File(FILE.getAbsolutePath());
+	    return FILE;
 	}
 
 	/**

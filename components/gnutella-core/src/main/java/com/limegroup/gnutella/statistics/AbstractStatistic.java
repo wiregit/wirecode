@@ -25,7 +25,7 @@ public abstract class AbstractStatistic implements Statistic {
 	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
      * an empty buffer until stats are actually recorded.
 	 */
-	protected IntBuffer _buffer = new IntBuffer(1);
+	protected final IntBuffer _buffer = new IntBuffer(HISTORY_LENGTH);
 
 	/**
 	 * Long for the statistic currently being added to.
@@ -194,7 +194,6 @@ public abstract class AbstractStatistic implements Statistic {
 	 */
 	protected final void initializeBuffer() {
 		if(_buffer.isEmpty()) {
-			_buffer = new IntBuffer(HISTORY_LENGTH);
 			for(int i=0; i<HISTORY_LENGTH; i++) {
 				_buffer.addLast(0);
 			}
