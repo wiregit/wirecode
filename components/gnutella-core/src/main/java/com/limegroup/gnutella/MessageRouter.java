@@ -19,8 +19,6 @@ import java.net.*;
 public abstract class MessageRouter
 {
 
-    public static final boolean UNICAST_MODE = true;
-
     protected ConnectionManager _manager;
 
     /**
@@ -459,7 +457,7 @@ public abstract class MessageRouter
     public void broadcastQueryRequest(QueryRequest request)
     {
         _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
-        if (UNICAST_MODE && RouterService.isGUESSCapable()) {
+        if (RouterService.isGUESSCapable()) {
             unicastQueryRequest(request);
 		} else {
             broadcastQueryRequest(request, null);
