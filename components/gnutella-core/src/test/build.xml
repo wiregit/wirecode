@@ -1,7 +1,7 @@
 <project name="Gnutella" default="build tests" basedir="." >
 
   <!-- set global properties for this basedir -->
-  <property name="builddir"    value="." />
+  <property name="builddir"    value="build" />
   <property name="messages"    value="com/limegroup/gnutella/messages" /> 
   <property name="util"        value="com/limegroup/gnutella/util" /> 
   <property name="lib"         value="../gui/lib/"/>
