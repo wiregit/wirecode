@@ -23,6 +23,7 @@ import org.xml.sax.InputSource;
 
 // for compression
 import java.util.zip.*;
+import java.util.Locale;
 import com.limegroup.gnutella.Assert;
 
 // for hashing
@@ -336,8 +337,8 @@ public class LimeXMLUtils
                 } 
                 // we used to do a .equalsIgnoreCase, but that is a little too
                 // rigid.  so do a ignore case prefix match.
-                String queryValueLC = queryValue.toLowerCase();
-                String replyDocValueLC = replyDocValue.toLowerCase();
+                String queryValueLC = queryValue.toLowerCase(Locale.US);
+                String replyDocValueLC = replyDocValue.toLowerCase(Locale.US);
                 if(replyDocValueLC.startsWith(queryValueLC))
                     matchCount++;
             }
@@ -373,7 +374,7 @@ public class LimeXMLUtils
     public static boolean isMP3File(String in) {
         boolean retVal = false;
 
-        in = in.toLowerCase();
+        in = in.toLowerCase(Locale.US);
         if (in.endsWith(".mp3"))
             retVal = true;
         
@@ -504,7 +505,7 @@ public class LimeXMLUtils
      */
     public static String capitalizeFirst(String str)
     {
-        String first = str.substring(0,1).toUpperCase();
+        String first = str.substring(0,1).toUpperCase(Locale.US);
         String last = str.substring(1); 
         String retStr = first+last;
         return retStr.replace('_',' ');

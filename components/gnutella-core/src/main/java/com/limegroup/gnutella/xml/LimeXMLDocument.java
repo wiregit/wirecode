@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
+import java.util.Locale;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
 import org.apache.xerces.parsers.DOMParser;
@@ -183,7 +184,7 @@ public class LimeXMLDocument implements Serializable {
         for(int i=0; i< size; i++){
             Node att = (Node)attributes.get(i);
             String attName = att.getNodeName();
-            String lowerAttName = attName.toLowerCase();
+            String lowerAttName = attName.toLowerCase(Locale.US);
             if (lowerAttName.indexOf("schemalocation") >= 0)
                 schemaUri = att.getNodeValue();
             else if (lowerAttName.indexOf(XML_ID_ATTRIBUTE_STRING) >= 0) {

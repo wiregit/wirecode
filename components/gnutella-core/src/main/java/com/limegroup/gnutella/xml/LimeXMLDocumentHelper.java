@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.util.Locale;
 import org.apache.xerces.parsers.DOMParser;
 import org.xml.sax.*;
 import org.w3c.dom.*;
@@ -270,13 +271,13 @@ public final class LimeXMLDocumentHelper{
      * we are looking for, and returns the value of that attribute
      */
     private static String getAttributeValue(Node element,String targetName){
-        String lowerTargetName = targetName.toLowerCase();
+        String lowerTargetName = targetName.toLowerCase(Locale.US);
         List atts=LimeXMLUtils.getAttributes(element.getAttributes());
         String retString="";
         int z = atts.size();        
         for(int i=0;i<z;i++){
             Node att = (Node)atts.get(i);
-            String lowerAttName = att.getNodeName().toLowerCase();            
+            String lowerAttName = att.getNodeName().toLowerCase(Locale.US);
             if(lowerAttName.indexOf(lowerTargetName)>=0)
                 retString=att.getNodeValue();
         }
