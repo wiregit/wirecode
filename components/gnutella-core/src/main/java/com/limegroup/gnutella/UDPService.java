@@ -338,7 +338,7 @@ public class UDPService implements Runnable {
                                     // changed our address.  We should not let that pong
                                     // affect us. (port is unaffected)
                                     
-                                    if (_previousIP!=null && 
+                                    if (_previousIP==null || 
                                             !Arrays.equals(_previousIP,newAddr)) 
                                         _lastReportedIP=newAddr;
                                 
