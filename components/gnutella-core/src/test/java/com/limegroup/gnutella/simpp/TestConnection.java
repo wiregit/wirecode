@@ -26,6 +26,8 @@ public class TestConnection {
 
     private int _capabilitySimppNo;
 
+    private boolean _causeError;
+
     /**
      * When creating a TestConnection you want to specify 4 things
      * @param port The port on which the TestConnection should connect to LW
@@ -49,6 +51,7 @@ public class TestConnection {
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
         _capabilitySimppNo = capabilitySimpp;
+        _causeError = false;
     }
 
     public void start() {
@@ -59,7 +62,8 @@ public class TestConnection {
                     _socket = new Socket("localhost", SimppManagerTest.PORT);
                     establishConnection();
                 } catch (IOException iox) {
-                    ErrorService.error(iox);
+                    if(!_causeError) //if not expected, show errorservice
+                        ErrorService.error(iox);
                 }        
             }//end of run
         };
@@ -131,6 +135,8 @@ public class TestConnection {
 
         //send back the simppdata if reqd. 
         if( _sendSimppData) {//we dont want 
+            if(_causeError)
+                throw new IOException();
             Message simppVM = new SimppVM(_simppData);
             simppVM.write(os);
             os.flush();
@@ -155,6 +161,10 @@ public class TestConnection {
 
     public void setSendSimppData(boolean sendData) {
         _sendSimppData = sendData;
+    }
+    
+    public void setCauseError(boolean err) {
+        _causeError = err;
     }
 
     public void setExpectSimppRequest(boolean expected) {
