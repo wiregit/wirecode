@@ -50,7 +50,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=200000;      //200 KB
+    private static final int MIN_SPLIT_SIZE=100000;      //100 KB
     /** Returns the amount of time to wait in milliseconds before retrying,
      *  based on tries.  This is also the time to wait for * incoming pushes to
      *  arrive, so it must not be too small.  A value of * tries==0 represents
@@ -617,12 +617,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             if (biggest==null)
                 throw new NoSuchElementException();
-            int start=biggest.getInitialReadingPoint()
-                     +biggest.getAmountToRead()/2;
-            int stop=biggest.getInitialReadingPoint()
-                     +biggest.getAmountToRead();
-            if ((stop-start) < MIN_SPLIT_SIZE)
+            //Note that getAmountToRead() and getInitialReadingPoint() are
+            //constant.  getAmountRead() is not, so we "capture" it into a
+            //variable.
+            int amountRead=biggest.getAmountRead();
+            int left=biggest.getAmountToRead()-amountRead;;
+            if (left < MIN_SPLIT_SIZE)
                 throw new NoSuchElementException();
+            int start=biggest.getInitialReadingPoint()+amountRead+left/2;
+            int stop=biggest.getInitialReadingPoint()+biggest.getAmountToRead();
             dloader=findConnectable(files, start, stop, busy);
             dloader.stopAt(stop);
             biggest.stopAt(start);
@@ -742,7 +745,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             downloader.doDownload();
         } catch (IOException e) {
         } finally {
-            System.out.println("    WORKER: terminating from "+downloader);
+            int stop=downloader.getInitialReadingPoint()+downloader.getAmountRead();
+            System.out.println("    WORKER: terminating from "+downloader
+                               +" at "+stop);
             //In order to reuse this location again, we need to know the
             //RemoteFileDesc.  TODO: use measured speed.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();
