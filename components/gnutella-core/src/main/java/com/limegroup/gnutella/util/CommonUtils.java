@@ -17,7 +17,17 @@ public final class CommonUtils {
 	 * Constant for the current version of LimeWire.
 	 */
 	private static final String LIMEWIRE_VERSION = "@version@";
-	
+
+    /**
+     * The cached value of the major revision number.
+     */
+    private static Integer _majorVersionNumber = null;
+
+    /**
+     * The cached value of the minor revision number.
+     */
+    private static Integer _minorVersionNumber = null;
+
     /**
      * The vendor code for QHD and GWebCache.  WARNING: to avoid character
      * encoding problems, this is hard-coded in QueryReply as well.  So if you
@@ -148,6 +158,57 @@ public final class CommonUtils {
 	public static String getLimeWireVersion() {
 		return LIMEWIRE_VERSION;
 	}
+
+    /** Gets the major version of LimeWire.
+     */
+    public static int getMajorVersionNumber() {    
+        if (_majorVersionNumber == null) 
+            _majorVersionNumber =
+            new Integer(getMajorVersionNumberInternal(LIMEWIRE_VERSION));
+        return _majorVersionNumber.intValue();
+    }
+    
+    /** Gets the minor version of LimeWire.
+     */
+    public static int getMinorVersionNumber() {
+        if (_minorVersionNumber == null) 
+            _minorVersionNumber =
+            new Integer(getMinorVersionNumberInternal(LIMEWIRE_VERSION));
+        return _minorVersionNumber.intValue();
+    }
+
+    static int getMajorVersionNumberInternal(String version) {
+        if (!version.equals("@version@")) {
+            try {
+                int firstDot = version.indexOf(".");
+                String majorStr = version.substring(0, firstDot);
+                _majorVersionNumber = new Integer(majorStr);
+                return _majorVersionNumber.intValue();
+            }
+            catch (NumberFormatException nfe) {
+            }
+        }
+        // in case this is a mainline version or NFE was caught (strange)
+        return 2;
+    }
+
+
+    static int getMinorVersionNumberInternal(String version) {
+        if (!version.equals("@version@")) {
+            try {
+                int firstDot = version.indexOf(".");
+                String minusMajor = version.substring(firstDot+1);
+                int secondDot = minusMajor.indexOf(".");
+                String minorStr = minusMajor.substring(0, secondDot);
+                _minorVersionNumber = new Integer(minorStr);
+                return _minorVersionNumber.intValue();
+            }
+            catch (NumberFormatException nfe) {
+            }
+        }
+        // in case this is a mainline version or NFE was caught (strange)
+        return 7;
+    }
 
 	/**
 	 * Returns a version number appropriate for upload headers.
