@@ -118,28 +118,14 @@ public final class QueryHandler {
 	 * Private constructor to ensure that only this class creates new
 	 * <tt>QueryFactory</tt> instances.
 	 */
-	private QueryHandler(byte[] guid, String query, String xmlQuery, 
-						 byte hops, byte[] payload) {
-		GUID = guid;
-		QUERY = query;
-		XML_QUERY = xmlQuery;
-		HOPS = hops;
-		PAYLOAD = payload;
-	}
-
-	/**
-	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
-	 * for the given set of query criteria.
-	 *
-	 * @param guid the guid for all <tt>QueryRequest</tt> instances  
-	 *  generated from this query handler
-	 * @param query the query string
-	 * @param xmlQuery the xml query string
-	 */
-	public static QueryHandler createHandler(byte[] guid, String query, 
-											 String xmlQuery) {
-		return new QueryHandler(guid, query, xmlQuery, (byte)0, EMPTY_PAYLOAD);
-	}
+ 	private QueryHandler(byte[] guid, String query, String xmlQuery, 
+ 						 byte hops, byte[] payload) {
+ 		GUID = guid;
+ 		QUERY = query;
+ 		XML_QUERY = xmlQuery;
+ 		HOPS = hops;
+ 		PAYLOAD = payload;
+ 	}
 
 
 	/**
@@ -149,7 +135,7 @@ public final class QueryHandler {
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
 	 */
-	public static QueryHandler createHandler(QueryRequest query) {		
+	public static QueryHandler createHandler(QueryRequest query) {	
 		return new QueryHandler(query.getGUID(), query.getQuery(), 
 								query.getRichQuery(), query.getHops(),
 								query.getPayload());
