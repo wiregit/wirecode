@@ -155,7 +155,7 @@ final class ProbeQuery {
         
         // if the file appears to be very popular, send it to only one host
         if(popularity == 1.0) {
-            ttl1List.add((ManagedConnection)hitConnections.removeFirst());
+            ttl1List.add(hitConnections.removeFirst());
             return returnLists;
         }
 
