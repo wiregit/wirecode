@@ -46,12 +46,59 @@ public class RemoteFileDesc implements Serializable {
 	private boolean _browseHostEnabled;
 
 	/**
+	 * Constant for the <tt>URL</tt> of the remote file.
+	 */
+	private final URL REMOTE_URL;
+
+	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
 	 * because Collections.EMPTY_SET is not serializable in the collections
 	 * 1.1 implementation.
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
+
+	/**
+	 * Constructor that creates a URL for the remote file without caring 
+	 * about the index, the file name, XML documents, etc.
+	 */
+	public RemoteFileDesc(URL url, Response response, QueryReply reply) {
+		if(url == null) {
+			throw new NullPointerException("cannot accept null url");
+		} else if(response == null) {
+			throw new NullPointerException("cannot accept null response");
+		} else if(reply == null) {
+			throw new NullPointerException("cannot accept null reply");
+		} 
+		REMOTE_URL = url;
+		_host      = url.getHost();
+		_port      = url.getPort();
+
+		_urns     = Collections.unmodifiableSet(response.getUrns());		
+		_filename = response.getName();
+		_index    = response.getIndex();
+		_size     = (int)response.getSize();
+		_xmlDocs  = new LimeXMLDocument[] {response.getDocument()};
+
+		_speed      = (int)reply.getSpeed();
+		_clientGUID = reply.getClientGUID();
+		boolean acceptedIncoming = 
+			RouterService.instance().acceptedIncomingConnection();
+		_quality = reply.calculateQualityOfService(!acceptedIncoming);
+
+		boolean chatEnabled;
+		try {
+			chatEnabled = reply.getSupportsChat();
+		} catch(BadPacketException e) {
+			chatEnabled = false;
+		}
+		_chatEnabled = chatEnabled;
+		try {
+			_browseHostEnabled = reply.getSupportsBrowseHost();
+		} catch(BadPacketException e) {
+			_browseHostEnabled = false;
+		}
+	}
 
 
 	/** 
@@ -72,11 +119,12 @@ public class RemoteFileDesc implements Serializable {
 	 *  browse host
 	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
+	 * @param url the <tt>URL</tt> for the file
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns) {
+						  LimeXMLDocument xmlDoc, Set urns, URL url) {
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -97,6 +145,7 @@ public class RemoteFileDesc implements Serializable {
 		else {
 			_urns = Collections.unmodifiableSet(urns);
 		}
+		REMOTE_URL = url;
 	}
 
     private void readObject(ObjectInputStream stream) 
@@ -224,19 +273,8 @@ public class RemoteFileDesc implements Serializable {
 	 *
 	 * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
 	 */
-	public URL getUrl() {
-		try {
-			String fileName = "";
-			URN urn = getSHA1Urn();
-			if(urn == null) {
-				fileName = "/get/"+_index+"/"+_filename;
-			} else {
-				fileName = "/uri-res/N2R?"+urn.httpStringValue();
-			}
-			return new URL("http", _host, _port, fileName);
-		} catch(MalformedURLException e) {
-			return null;
-		}
+	public final URL getUrl() {
+		return REMOTE_URL;
 	}
 
 	public final boolean isPrivate() {
@@ -276,6 +314,8 @@ public class RemoteFileDesc implements Serializable {
 				(_urns == null ? other._urns == null :
 				 _urns.equals(other._urns)));		
     }
+
+	// TODO: override hashCode()
 
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
