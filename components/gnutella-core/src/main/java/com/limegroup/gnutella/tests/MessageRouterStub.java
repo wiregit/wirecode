@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {
 
     protected  void respondToPingRequest(PingRequest pingRequest,
-                                                 Acceptor acceptor) { 
+                                         Acceptor acceptor,
+                                         ManagedConnection connection) { 
     }
 
 
@@ -14,6 +16,11 @@ public class MessageRouterStub extends MessageRouter {
                                                   Acceptor acceptor,
                                                   byte[] clientGUID) {
     }
+
+    protected  void addQueryRoutingEntries(QueryRouteTable qrt) {
+
+    }
+
 
     protected  void handlePingReplyForMe(
         PingReply pingReply,

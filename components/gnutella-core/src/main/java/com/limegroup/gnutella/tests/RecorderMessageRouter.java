@@ -86,7 +86,7 @@ public RecorderMessageRouter(ActivityCallback callback)
 /** 
 * Handles ping requests
 */
-protected void handlePingRequest(PingRequest pingRequest,
+public void handlePingRequest(PingRequest pingRequest,
                                  ManagedConnection receivingConnection) 
 {
     addMessage(pingRequest);
