@@ -779,46 +779,54 @@ public class RouterService {
             Statistics.instance().shutdown();
             
             //Update firewalled status
-            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(
-                acceptedIncomingConnection());
+            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
 
             //Write gnutella.net
             try {
                 catcher.write();
             } catch (IOException e) {}
-            finally {
-                SettingsHandler.save();
-            }
-            //Cleanup any preview files.  Note that these will not be deleted if
-            //your previewer is still open.
-            File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-            if (incompleteDir == null) { return; } // if we could not get the incomplete directory, simply return.
             
-            String[] files=incompleteDir.list();
+            // save limewire.props & other settings
+            SettingsHandler.save();            
             
-            if(files == null) return;
+            cleanupPreviewFiles();
             
-            for (int i=0; i<files.length; i++) {
-                if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
-                    File file=new File(incompleteDir, files[i]);
-                    file.delete();  //May or may not work; ignore return code.
-                }
-            }
-            
-            //Write download state
             downloader.writeSnapshot();
             
-            //save cookies
             Cookies.instance().save();
             
-            //persist urn cache
             UrnCache.instance().persistCache();
+
             CreationTimeCache.instance().persistCache();
+
             TigerTreeCache.instance().persistCache();
+
             LicenseFactory.persistCache();
             
         } catch(Throwable t) {
             ErrorService.error(t);
+        }
+    }
+    
+    /**
+     * Deletes all preview files.
+     */
+    private static void cleanupPreviewFiles() {
+        //Cleanup any preview files.  Note that these will not be deleted if
+        //your previewer is still open.
+        File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+        if (incompleteDir == null)
+            return; // if we could not get the incomplete directory, simply return.
+        
+        
+        File[] files = incompleteDir.listFiles();
+        if(files == null)
+            return;
+        
+        for (int i=0; i<files.length; i++) {
+            String name = files[i].getName();
+            if (name.startsWith(IncompleteFileManager.PREVIEW_PREFIX))
+                files[i].delete();  //May or may not work; ignore return code.
         }
     }
 

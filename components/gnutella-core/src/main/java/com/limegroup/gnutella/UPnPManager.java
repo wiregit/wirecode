@@ -400,11 +400,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		    public void run() {
 		        try{
 		            LOG.debug("waiting for UPnP cleaners to finish");
-		            cleaner.join();
+		            cleaner.join(30000); // wait at most 30 seconds.
 		        }catch(InterruptedException ignored){}
 		        LOG.debug("UPnP cleaners done");
 		    }
 		};
+		waiter.setName("shutdown mapping waiter");
 		
 		try {
 		    Runtime.getRuntime().addShutdownHook(waiter);
@@ -413,6 +414,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		cleaner.setName("shutdown mapping cleaner");
 		cleaner.setDaemon(true);
 		cleaner.start();
+		Thread.yield(); // let it start.
 	}
 	
 	public void finalize() {
