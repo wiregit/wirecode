@@ -547,7 +547,7 @@ public class NIOHandshaker extends AbstractHandshaker {
             
             // we're all done with reading the request -- next we need to read
             // their response
-            return new IncomingResponseReadState();
+            return new IncomingResponseReadStatusState();
             
         }
         
@@ -638,9 +638,64 @@ public class NIOHandshaker extends AbstractHandshaker {
      * This class handles reading the final response to an incoming handshake
      * request -- the final state of incoming handshakes.
      */
-    private final class IncomingResponseReadState 
+    private final class IncomingResponseReadStatusState 
         implements HandshakeReadState  {
 
+        /**
+         * Variable for the response read from the remote host attempting to
+         * handshake. 
+         */
+        private String _responseStatus;
+        
+        /**
+         * Reads the incoming response status line.  If this line is read 
+         * completely, we move to reading the headers.  Otherwise, we stay in
+         * this state until the response status line is successfully read.
+         */
+        public HandshakeReadState read() throws IOException {
+            if(_ourResponse.getStatusCode() 
+               == HandshakeResponse.UNAUTHORIZED_CODE){
+      
+                // TODO: allow the timeout here
+                _responseStatus = 
+                    _headerReader.readConnect(USER_INPUT_WAIT_TIME);  
+            } else {
+                _responseStatus = _headerReader.readConnect(); 
+            }
+            
+            if(_responseStatus == null) {
+                // TODO1: add writer??  Make sure we correctly add writers in 
+                // all states.
+                
+                return this;
+            }
+
+            if (!_responseStatus.startsWith(GNUTELLA_06)) {
+                throw new IOException("Bad connect string");
+            }
+            return new IncomingResponseReadHeaderState(_responseStatus);
+        }
+            
+    }
+    
+    /**
+     * This class handles reading the final response to an incoming handshake
+     * request -- the final state of incoming handshakes.
+     */
+    private final class IncomingResponseReadHeaderState 
+        implements HandshakeReadState  {
+
+        /**
+         * Constant for the response status  read from the remote host 
+         * attempting to handshake. 
+         */
+        private final String RESPONSE_STATUS;
+
+
+        IncomingResponseReadHeaderState(String responseStatus) {
+            RESPONSE_STATUS = responseStatus;
+        }
+        
         /**
          * Reads an incoming handshake response -- the final state for incoming
          * connection handshakes.
@@ -653,30 +708,29 @@ public class NIOHandshaker extends AbstractHandshaker {
         public HandshakeReadState read() throws IOException {
             // Read the response from the other side.  If we asked the other
             // side to authenticate, give more time so as to receive user input
-            String connectLine;
             if(_ourResponse.getStatusCode() 
                == HandshakeResponse.UNAUTHORIZED_CODE){
                    
-                // TODO: what happens if these calls fail??
-                connectLine = _headerReader.readConnect(USER_INPUT_WAIT_TIME);  
-                readHeaders(USER_INPUT_WAIT_TIME); 
+                // TODO: what happens if these calls fail?? 
+                if(!readHeaders(USER_INPUT_WAIT_TIME)) {
+                    return this;
+                } 
             } else {
-                connectLine = _headerReader.readConnect(); 
-                
+
                 // TODO1:: Major issue here.  What if this call fails?  We also
                 // need to handle any leftover data that we've read -- this is
                 // really the key case where we can read too much, and probably
                 // will!!
-                readHeaders();
+                if(!readHeaders()) {
+                    return this;
+                }
             }
     
-            if (! connectLine.startsWith(GNUTELLA_06)) {
-                throw new IOException("Bad connect string");
-            }
+
 
             HandshakeResponse theirResponse = 
                 HandshakeResponse.createResponse(
-                    connectLine.substring(GNUTELLA_06.length()).trim(),
+                    RESPONSE_STATUS.substring(GNUTELLA_06.length()).trim(),
                         HEADERS_READ);
 
 
