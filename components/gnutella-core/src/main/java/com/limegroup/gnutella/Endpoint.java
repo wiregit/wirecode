@@ -167,7 +167,7 @@ public class Endpoint implements Cloneable, Serializable,
         return kbytes;
     }
 
-    private void normalizeFilesAndSize()
+    public void normalizeFilesAndSize()
     {
         //normalize files
         try
