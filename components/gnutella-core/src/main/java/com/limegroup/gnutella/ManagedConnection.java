@@ -108,19 +108,19 @@ public class ManagedConnection
     private static final int PRIORITY_OTHER=6;       
     {
         _outputQueue[PRIORITY_WATCHDOG]   
-            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PUSH]
-            = new MessageQueue(true, QUEUE_SIZE, 3, false, QUEUE_TIME);
+            = new SimpleMessageQueue(3, QUEUE_TIME, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_QUERY_REPLY]  //sorted
-            = new MessageQueue(true, QUEUE_SIZE, 2, true,  QUEUE_TIME); 
+            = new PriorityMessageQueue(2, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY]      
-            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PING_REPLY] 
-            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PING]       
-            = new MessageQueue(true, QUEUE_SIZE, 1, false, QUEUE_TIME);
+            = new SimpleMessageQueue(1, QUEUE_TIME, QUEUE_SIZE, true);
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
-            = new MessageQueue(false,QUEUE_SIZE, 1, false, Integer.MAX_VALUE);
+            = new SimpleMessageQueue(1, Integer.MAX_VALUE, QUEUE_SIZE, false);
     }                                                             
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
@@ -407,7 +407,8 @@ public class ManagedConnection
         int priority=calculatePriority(m);
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
-            int dropped=_outputQueue[priority].add(m);
+            _outputQueue[priority].add(m);
+            int dropped=_outputQueue[priority].resetDropped();
             _numSentMessagesDropped+=dropped;
             _queued+=1-dropped;
             _lastPriority=priority;
@@ -512,10 +513,13 @@ public class ManagedConnection
                     Message m=null;
                     synchronized (_outputQueueLock) {
                         m=(Message)queue.removeNext(); 
+                        int dropped=queue.resetDropped();
+                        _numSentMessagesDropped+=dropped;
+                        _queued-=(m==null?0:1)+dropped;  //maintain invariant
+                        if (_queued==0)
+                            emptied=true;                        
                         if (m==null)
                             break;
-                        if (--_queued==0)
-                            emptied=true;
                     }
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
