@@ -217,7 +217,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * The "soft max" ttl to use for this connection.
      */
-    private byte _softMax;
+    private byte _softMax = ConnectionSettings.SOFT_MAX.getValue();
 
     /**
      * Variable for the next time to allow a ping.  Volatile to avoid
@@ -627,12 +627,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
                 _in = new UncompressingInputStream(_in, _inflater);
             }
         }
-                   
-        // remove the reference to the RESPONSE_HEADERS, since we'll no
-        // longer be responding.
-        // This does not need to be in a finally clause, because if an
-        // exception was thrown, the connection will be removed anyway.
-        //RESPONSE_HEADERS = null;
 
         // create the read/write classes for messages
         _messageWriter = new MessageWriterProxy(this); 
@@ -643,7 +637,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         UpdateManager.instance().checkAndUpdate(this);   
         
         _initialized = true ;  
-        
         
         RouterService.getConnectionManager().
             handleConnectionInitialization(this);    
@@ -1011,7 +1004,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             throw new IllegalStateException("Not initialized");
         }
         if(!_socket.isConnected()) { 
-            throw new IllegalStateException("not connected");
+            throw new IllegalStateException("not connected "+this);
         }
         return _socket.getInetAddress();
     }
@@ -1694,7 +1687,10 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     
     // overrides Object.toString
     public String toString() {
-        return "CONNECTION: host=" + _host  + " port=" + _port; 
+        return "CONNECTION: host=" + _host + " port=" + _port +
+            " outgoing=" + isOutgoing() + 
+            " ultrapeer= " + isSupernodeConnection()+
+            " leaf: " + isLeafConnection(); 
     }
 
     /** 
