@@ -1275,7 +1275,7 @@ public abstract class MessageRouter {
 
 			// TODO: What happens if we get a TTL=0 query that's not intended
 			// for us?  At first glance, it looks like we keep forwarding it!
-            if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
+            if(!shouldDropReply(rrp, queryReply.getTTL()) ||
 			   rh == FOR_ME_REPLY_HANDLER) {
                 
                 rh.handleQueryReply(queryReply, handler);
@@ -1305,9 +1305,23 @@ public abstract class MessageRouter {
      * hits.  This ensures that hits that are closer to the query originator
      * -- hits for which we've already done most of the work, are not 
      * dropped unless we've routed a really large number of bytes for that
-     * guid.
+     * guid.  This method also checks that hard number of results that have
+     * been sent for this GUID.  If this number is greater than a specified
+     * limit, we simply drop the reply.
+     *
+     * @param rrp the <tt>ReplyRoutePair</tt> containing data about what's 
+     *  been routed for this GUID
+     * @param ttl the time to live of the query hit
+     * @return <tt>true if the reply should be dropped, otherwise <tt>false</tt>
      */
-    private static boolean shouldDropReply(int bytesRouted, int ttl) {
+    private static boolean shouldDropReply(RouteTable.ReplyRoutePair rrp, byte ttl) {
+        int resultsRouted = rrp.getResultsRouted();
+
+        // drop the reply if we've already sent more than the specified number
+        // of results for this GUID
+        if(resultsRouted > 100) return true;
+
+        int bytesRouted = rrp.getBytesRouted();
         // send replies with ttl above 2 if we've routed under 50K 
         if(ttl > 2 && bytesRouted < 50    * 1024) return false;
         // send replies with ttl 0 if we've routed under 50K, as this 
