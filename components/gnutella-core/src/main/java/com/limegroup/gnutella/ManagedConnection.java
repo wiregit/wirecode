@@ -550,6 +550,8 @@ public class ManagedConnection
                         if (m==null)
                             break;
                     }
+
+					// TODO:: THIS SEND IS NOT CURRENTLY RECORDED IN STATISTICS
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
@@ -647,6 +649,8 @@ public class ManagedConnection
                     PingReply pr = new PingReply(m.getGUID(),(byte)1,
                         bestEndPoint.getPort(),
                         bestEndPoint.getHostBytes(), 0, 0);
+					
+					SentMessageStat.TCP_PING_REPLIES.incrementStat();
                     // the ttl is 1; and for now the number of files
                     // and kbytes is set to 0 until chris stores more
                     // state in the hostcatcher
@@ -734,7 +738,8 @@ public class ManagedConnection
             
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
-            
+
+            SentMessageStat.TCP_PING_REPLIES.incrementStat();
             //send the message
             super.send(pr);
         }
@@ -893,7 +898,7 @@ public class ManagedConnection
      */
     public void handlePingReply(PingReply pingReply,
                                 ReplyHandler receivingConnection) {
-		SentMessageStat.TCP_PING_REQUESTS.incrementStat();
+		SentMessageStat.TCP_PING_REPLIES.incrementStat();
         send(pingReply);
     }
 
