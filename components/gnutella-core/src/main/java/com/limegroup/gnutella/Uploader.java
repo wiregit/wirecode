@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.net.*;
 
 /**
- * This is the Uploader interface.  There is a stop
- * method, but no start.  
- * 
+ * This interface outlines the basic functionality for a class that 
+ * performs uploads.
  */
-
 public interface Uploader extends BandwidthTracker {
 
 	public static final int CONNECTING       = 0;
@@ -60,6 +58,11 @@ public interface Uploader extends BandwidthTracker {
      * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP
      */
     public int getState();
+
+	/**
+	 * Sets the state of this uploader.
+	 */
+	public void setState(int state);
 
 	public void start();
 
