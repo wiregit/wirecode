@@ -573,13 +573,6 @@ public class GGEP extends Object {
         }
         return buf.toString().toUpperCase();
     }
-
-
-    private static final boolean debugOn = false;
-    private void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
 }
 
 

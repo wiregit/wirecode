@@ -404,17 +404,6 @@ public class QueryReply extends Message implements Serializable{
     public void setGUID(GUID guid) {
         super.setGUID(guid);
     }
-    
-    /** Returns the number of bytes necessary to represent responses
-     *  in the payload .
-     */
-    private static int rLength(Response[] responses) {
-        int ret=0;
-        for (int i=0; i<responses.length; i++) {
-            ret += responses[i].getLength();
-        }
-        return ret;
-    }
 
 	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
