@@ -195,6 +195,17 @@ public final class UDPReplyHandler implements ReplyHandler {
     }
 
     /**
+     * Returns <tt>false</tt>, since we don't know whether a host 
+     * communicating via UDP supports pong caching or not.
+     *
+     * @return <tt>false</tt> since we don't know if this node supports
+     *  pong caching or not
+     */
+    public boolean supportsPongCaching() {
+        return false;
+    }
+
+    /**
      * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
      * Since this ping is over UDP, we'll always allow it.
      *

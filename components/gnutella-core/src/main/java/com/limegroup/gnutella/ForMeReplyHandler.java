@@ -204,6 +204,16 @@ public final class ForMeReplyHandler implements ReplyHandler {
     }
 
     /**
+     * Returns <tt>true</tt>, since we always support pong caching.
+     *
+     * @return <tt>true</tt> since this node always supports pong 
+     *  caching (since it's us)
+     */
+    public boolean supportsPongCaching() {
+        return true;
+    }
+
+    /**
      * Returns whether or not to allow new pings from this <tt>ReplyHandler</tt>.
      * Since this ping is from us, we'll always allow it.
      *
