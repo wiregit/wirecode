@@ -37,7 +37,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     /** Our backend. */
     TestBootstrapServerManager bman;
     TestHostCatcher catcher;
-    /** Our servers. They're stored in the backend in order s1-s3, but we
+    /**
+     * Our servers. They're stored in the backend in order s3-s1.
+     * For urlfile retrievals, we try them in order s3-s2-s1 (done by
+     * BootstrapServerManager), but for all others we force it to
      *  "randomly" try them s3-s1; see TestBootstrapServerManager.randServer()*/
     BootstrapServer url1, url2, url3;
     TestBootstrapServer s1, s2, s3;
@@ -51,15 +54,16 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         catcher = new TestHostCatcher();
         PrivilegedAccessor.setValue(RouterService.class, "catcher", catcher);
         bman = new TestBootstrapServerManager();
-        bman.addBootstrapServer(url1);
-        bman.addBootstrapServer(url2);
         bman.addBootstrapServer(url3);
+        bman.addBootstrapServer(url2);
+        bman.addBootstrapServer(url1);
+        //bman.bootstrapServersAdded(); NOT CALLED BECAUSE IT SHUFFLES
 
         //Prepare servers
         s1=new TestBootstrapServer(SERVER_PORT);
-        s2=new TestBootstrapServer(SERVER_PORT+1);
         s3=new TestBootstrapServer(SERVER_PORT+2);
 
+        s2=new TestBootstrapServer(SERVER_PORT+1);
         StringBuffer response=new StringBuffer();
         for (int i=0; i<RESPONSES_PER_SERVER; i++)
             response.append("1.2.3."+i+":6346"+(i<5 ? "\r\n" : "\n"));
@@ -128,9 +132,9 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         //Check that we got the right results.  First make sure we kept the old
         //server list...
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
-        assertEquals(url2, iter.next());
         assertEquals(url3, iter.next());
+        assertEquals(url2, iter.next());
+        assertEquals(url1, iter.next());
         //...and added new servers.
         for (int i=0; i<RESPONSES_PER_SERVER; i++) {
             assertTrue(iter.hasNext());
@@ -146,9 +150,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         bman.fetchEndpointsAsync();
         sleep();
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
-        assertTrue(! iter.hasNext());
+        assertEquals(url1, iter.next());
+        if(iter.hasNext())
+            fail("had another: " + iter.next());
         //We could also check sX.getRequest() and catcher.list, but that's
         //covered by previous tests.
     }
@@ -159,8 +164,8 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         bman.fetchEndpointsAsync();
         sleep();
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
+        assertEquals(url1, iter.next());
         if(iter.hasNext())
             fail("had another: " + iter.next());
     }
@@ -173,9 +178,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         sleep();
 
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
-        assertTrue(! iter.hasNext());
+        assertEquals(url1, iter.next());
+        if(iter.hasNext())
+            fail("had another: " + iter.next());
     }
 
     public void testRemoveBadIPHosts() {
@@ -186,9 +192,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         sleep();
 
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
-        assertTrue(! iter.hasNext());
+        assertEquals(url1, iter.next());
+        if(iter.hasNext())
+            fail("had another: " + iter.next());
     }
 
     /** Test servers that send HTML for HOSTFILE requestss. */
@@ -200,9 +207,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         sleep();
 
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
-        assertTrue(! iter.hasNext());
+        assertEquals(url1, iter.next());
+        if(iter.hasNext())
+            fail("had another: " + iter.next());
 
         assertEquals(RESPONSES_PER_SERVER, catcher.list.size());
         for (int i=0; i<RESPONSES_PER_SERVER; i++) 
@@ -224,8 +232,8 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         sleep();
 
         Iterator iter=bman.getBootstrapServers();
-        assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
+        assertEquals(url1, iter.next());
         assertTrue(! url3.equals(iter.next()));
     }
 
@@ -244,6 +252,8 @@ public class BootstrapServerManagerTest extends BaseTestCase {
         //Force _lastConnectable to be url3
         bman.fetchEndpointsAsync();
         sleep();
+        
+        bman.randomServer(); // pretend we contacted s3 so we can contact s2
         
         s2.setResponseData("Ok\r\n");   //Test funny case; not required by spec
         bman.sendUpdatesAsync(new Endpoint("18.239.0.145", 6348));
@@ -286,14 +296,15 @@ public class BootstrapServerManagerTest extends BaseTestCase {
             assertEquals(0, catcher.list.size());
             Iterator iter=bman.getBootstrapServers();
             assertEquals(url1, iter.next());
-            assertTrue(! iter.hasNext());
+            if(iter.hasNext())
+                fail("had another: " + iter.next());
         } finally {
             BootstrapServerManager.MAX_HOSTS_PER_REQUEST = old;
         }
     }
 
     public void testAddBootstrapServer() {
-        for (int i=0; i<1000; i++) {
+        for (int i=0; i<5000; i++) {
             try {
                 BootstrapServer server=new BootstrapServer(
                     "http://18.239.0.144:"+(i+80)+"/script.jsp");
@@ -308,7 +319,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
                  iter.next()) { 
             count++; 
         }
-        assertEquals(200, count);   //e.g., BootstrapServer.MAX_BOOTSTRAP_SERVERS        
+        assertEquals(1000, count);   //e.g., BootstrapServer.MAX_BOOTSTRAP_SERVERS        
         //We could also test the replacement policy, but that's a bit of a pain.
     }
 
@@ -331,8 +342,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
                  iter.hasNext(); 
                  iter.next()) { 
             count++; 
-        }        
-        assertGreaterThan(100, count);
+        }
+        // start with our defaults, add 3 for s3->s1, subtract failed hosts.
+        assertEquals(DefaultBootstrapServers.urls.length + 3 -
+                     bman.failed, count);
 
         //Make sure this actually got some endpoints.  Note: this requires a
         //network connection, as it actually uses GWebCache.
@@ -380,6 +393,8 @@ class TestHostCatcher extends HostCatcher {
 
 /** A BootstrapServerManager that tries host in a round-robin fashion. */
 class TestBootstrapServerManager extends BootstrapServerManager {
+    
+    public int failed = 0;
 
     public TestBootstrapServerManager() {
         super();
@@ -388,13 +403,17 @@ class TestBootstrapServerManager extends BootstrapServerManager {
     /** The LAST value given out, or -1 if none.  Starts with s3 and works down
      *  to avoid problems when unreachable ers are removed from list by
      *  BootstrapServerManager. */
-    private int i=-1;
-    protected int randomServer() {
-        if (i<=0)
-            i=super.size()-1;
+    private int i = -1;
+    public int randomServer() {
+        if (i >= size() || i < 0)
+            return (i = 0);
         else 
-            //i=Math.min(i-1, super.size()-1);    //i--, but make sure valid index    
-            i--;
-        return i;
+            return ++i;
+    }
+    
+    protected void removeServer(BootstrapServer server) {
+        super.removeServer(server);
+        i--;
+        failed++;
     }
 }

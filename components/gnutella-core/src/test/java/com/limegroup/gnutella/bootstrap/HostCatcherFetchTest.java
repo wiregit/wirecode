@@ -39,6 +39,7 @@ public class HostCatcherFetchTest extends BaseTestCase {
         gWebCache=new RecordingBootstrapServerManager();
 
         hc=new HostCatcher();
+        hc.initialize();
 
         //Mutate HostCatcher to use this.
         PrivilegedAccessor.setValue(hc, "gWebCache", gWebCache);
@@ -50,20 +51,13 @@ public class HostCatcherFetchTest extends BaseTestCase {
         //Initially catcher is empty.  Calling getAnEndpoint will block, so
         //start thread to add a crap result.
         assertEquals("initial hostfiles not empty.", 0, gWebCache.hostfiles);
-        
-        Thread responder=new Thread() {
-            public void run() {
-                //we must yield to ensure that getAnEndpoint
-                //is called before the endpoint is added to
-                //the hostCatcher, forcing a call to the gWebCache
-                yield();
-                hc.add(new Endpoint("1.1.1.1", 6346), false);
-            }
-        };
-        responder.start();
 
         //Now make sure that exactly one fetch was issued.
-        assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
+        try {
+            interrupt(10);
+            assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
+            fail("didn't get interrupted exception");
+        } catch(InterruptedException expected) {}
         assertEquals("first look at hostfiles", 1, gWebCache.hostfiles);
         
         // now add something to the hostCatcher and make sure
@@ -72,15 +66,13 @@ public class HostCatcherFetchTest extends BaseTestCase {
         assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
         assertEquals("second look at hostfiles", 1, gWebCache.hostfiles);
         
-        //and now that hostcatcher is empty, it should hit it again.
-        responder = new Thread() {
-            public void run() {
-                yield();
-                hc.add(new Endpoint("1.1.1.3", 6346), false);
-            }
-        };
-        responder.start();
-        assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
+        // make sure we tell the scheduled fetcher it's okay to fetch again
+        hc.recoverHosts();
+        try {
+            interrupt(10);
+            assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
+            fail("no exception");
+        } catch(InterruptedException expected) {}
         assertEquals("third look at hostfiles", 2, gWebCache.hostfiles);
     }
 
@@ -97,22 +89,49 @@ public class HostCatcherFetchTest extends BaseTestCase {
         assertNotNull(hc.getAnEndpoint());
         assertNotNull(hc.getAnEndpoint());
         assertEquals(0, gWebCache.hostfiles);
+        
 
-        //But after a few seconds, we allow another fetch because there are
-        //no good pongs.
-        final int FUDGE_FACTOR=200;
-        sleep(HostCatcher.GWEBCACHE_DELAY+FUDGE_FACTOR);
+        //Make sure we use up all our endpoints before we
+        //hit a gwebcache, because it's always bad to hit a gwebcache
+        sleep(15 * 1000);
         assertNotNull(hc.getAnEndpoint());
-        assertEquals(1, gWebCache.hostfiles);
+        assertEquals(0, gWebCache.hostfiles);
         assertNotNull(hc.getAnEndpoint());
-        assertEquals(1, gWebCache.hostfiles);
+        assertEquals(0, gWebCache.hostfiles);
     
         //Same after another few seconds.
-        sleep(HostCatcher.GWEBCACHE_DELAY+FUDGE_FACTOR);
+        sleep(15 * 1000);
         assertNotNull(hc.getAnEndpoint());
-        assertEquals(2, gWebCache.hostfiles);
+        assertEquals(0, gWebCache.hostfiles);
         assertNotNull(hc.getAnEndpoint());
-        assertEquals(2, gWebCache.hostfiles);
+        assertEquals(0, gWebCache.hostfiles);
+        
+        //get the other endpoints.
+        for(int i = 6; i < 20; i++)
+            assertNotNull(hc.getAnEndpoint());
+            
+        // now we should hit the gwebcache.
+        try {
+            hc.recoverHosts();
+            interrupt(10);
+            hc.getAnEndpoint();
+            fail("got an endpoint");
+        } catch(InterruptedException expected) {}
+        assertEquals(1, gWebCache.hostfiles);
+    }
+    
+    private void interrupt(final int secs) {
+        final Thread thisThread = Thread.currentThread();
+        Thread responder=new Thread() {
+            public void run() {
+                // sleep & then interrupt the endpoint get.
+                try {
+                    sleep(secs * 1000);
+                } catch(InterruptedException ignored) {}
+                thisThread.interrupt();
+            }
+        };
+        responder.start();
     }
 
     private void sleep(int msecs) throws Exception {
@@ -131,6 +150,9 @@ class RecordingBootstrapServerManager extends BootstrapServerManager {
     }
 
     public synchronized void fetchBootstrapServersAsync() { urlfiles++; }
-    public synchronized void fetchEndpointsAsync() { hostfiles++; }
+    public synchronized int fetchEndpointsAsync() {
+            hostfiles++;
+            return FETCH_SCHEDULED;
+    }
     public synchronized void sendUpdatesAsync(Endpoint myIP) { updates++; }
 }

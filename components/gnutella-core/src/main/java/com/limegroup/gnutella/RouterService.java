@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.downloader.*;
@@ -973,7 +974,16 @@ public class RouterService {
 	public static boolean isConnected() {
 		return manager.isConnected();
 	}
-
+	
+	/**
+	 * Returns whether or not this client is currently fetching
+	 * endpoints from a GWebCache.
+	 *
+	 * @return <tt>true</tt> if the client is fetching endpoints.
+	 */
+	public static boolean isFetchingEndpoints() {
+	    return BootstrapServerManager.instance().isEndpointFetchInProgress();
+    }
 
     /**
      * Returns the number of files being shared locally.

@@ -30,10 +30,54 @@ public class BootstrapServerManager {
     private static final Log LOG =
         LogFactory.getLog(BootstrapServerManager.class);
 
+    /**
+     * Constant instance of the boostrap server.
+     */
+    private static final BootstrapServerManager INSTANCE =
+        new BootstrapServerManager(); 
+        
+    // Constants used as return values for fetchEndpointsAsync
+    /**
+     * GWebCache use is turned off.
+     */
+    public static final int CACHE_OFF = 0;
+    
+    /**
+     * A fetch was scheduled.
+     */
+    public static final int FETCH_SCHEDULED = 1;
+    
+    /**
+     * The fetch wasn't scheduled because one is in progress.
+     */
+    public static final int FETCH_IN_PROGRESS = 2;
+    
+    /**
+     * Too many endpoints were already fetch, the fetch wasn't scheduled.
+     */
+    public static final int FETCHED_TOO_MANY = 3;
+    
+    /**
+     * All caches were already contacted atleast once.
+     */
+    public static final int NO_CACHES_LEFT = 4;
+    
+    /**
+     * The maximum amount of responses to accept before we tell
+     * the user that we've already hit a lot of things.
+     */
+    private static final int MAX_RESPONSES = 50;
+    
+    /**
+     * The maximum amount of gWebCaches to hit before we tell
+     * the user that we've already hit a lot of things.
+     */
+    private static final int MAX_CACHES = 5;
+
     /** The minimum number of endpoints/urls to fetch at a time. */
     private static final int ENDPOINTS_TO_ADD=10;
     /** The maximum number of bootstrap servers to retain in memory. */
-    private static final int MAX_BOOTSTRAP_SERVERS=200;
+    private static final int MAX_BOOTSTRAP_SERVERS=1000;
     /** The maximum number of hosts to try per request.  Prevents us from
      *  consuming all hosts if disconnected.  Non-final for testing. */
     public static int MAX_HOSTS_PER_REQUEST=20;
@@ -49,26 +93,32 @@ public class BootstrapServerManager {
      *  INVARIANT: _servers.size()<MAX_BOOTSTRAP_SERVERS
      */        
     private final List /* of BootstrapServer */ SERVERS=new ArrayList();
+    
     /** The last bootstrap server we successfully connected to, or null if none.
      *  Used for sending updates.  _lastConnectable will generally be in
      *  SERVERS, though this is not strictly required because of SERVERS'
      *  random replacement strategy.  _lastConnectable should be nulled if we
      *  later unsuccessfully try to reconnect to it. */
     private BootstrapServer _lastConnectable;
-
-    /** Source of randomness for picking servers. 
+    
+    /** Source of randomness for picking servers.
      *  TODO: this is thread-safe, right? */
-    private Random12 _rand=new Random12();
+    private Random12 _rand=new Random12();    
+    
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
-    private boolean _hostFetchInProgress=false;
-
+    private volatile boolean _hostFetchInProgress=false;
+    
     /**
-     * Constant instance of the boostrap server.
+     * The index of the last server we connected to in the list
+     * of servers.
      */
-    private static final BootstrapServerManager INSTANCE =
-        new BootstrapServerManager();
-
+    private volatile int _lastIndex = 0;
+    
+    /**
+     * The total amount of endpoints we've added to HostCatcher so far.
+     */
+    private volatile int _responsesAdded = 0;
 
     /**
      * Accessor for the <tt>BootstrapServerManager</tt> instance.
@@ -90,10 +140,35 @@ public class BootstrapServerManager {
     public synchronized void addBootstrapServer(BootstrapServer server) {
 		if(server == null) 
 			throw new NullPointerException("null bootstrap server not allowed");
-        if (! SERVERS.contains(server))
+        if (!SERVERS.contains(server))
             SERVERS.add(server);
-        if (SERVERS.size()>MAX_BOOTSTRAP_SERVERS) 
-            SERVERS.remove(randomServer());
+        if (SERVERS.size()>MAX_BOOTSTRAP_SERVERS) {
+            removeServer((BootstrapServer)SERVERS.get(0));
+        }
+    }
+    
+    /**
+     * Notification that all bootstrap servers have been added.
+     */
+    public synchronized void bootstrapServersAdded() {
+        addDefaultsIfNeeded();
+        Collections.shuffle(SERVERS);
+    }
+    
+    /**
+     * Resets information related to the caches & endpoints we've fetched.
+     */
+    public synchronized void resetData() {
+        _lastIndex = 0;
+        _responsesAdded = 0;
+        Collections.shuffle(SERVERS);
+    }
+    
+    /**
+     * Determines whether or not an endpoint fetch is in progress.
+     */
+    public boolean isEndpointFetchInProgress() {
+        return _hostFetchInProgress;
     }
 
     /**
@@ -124,13 +199,25 @@ public class BootstrapServerManager {
      * exhausting all caches.  Does nothing if another endpoint request is in
      * progress.  Uses the "hostfile=1" message.
      */
-    public synchronized void fetchEndpointsAsync() {
-		if(!ConnectionSettings.USE_GWEBCACHE.getValue()) return;
+    public synchronized int fetchEndpointsAsync() {
+		if(!ConnectionSettings.USE_GWEBCACHE.getValue())
+		    return CACHE_OFF;
+
         addDefaultsIfNeeded();
+
         if (! _hostFetchInProgress) {
+            if(_responsesAdded >= MAX_RESPONSES && _lastIndex >= MAX_CACHES)
+               return FETCHED_TOO_MANY;
+            
+            if(_lastIndex >= size())
+                return NO_CACHES_LEFT;
+            
             _hostFetchInProgress=true;  //unset in HostfileRequest.done()
             requestAsync(new HostfileRequest(), "GWebCache hostfile");
+            return FETCH_SCHEDULED;
         }
+
+        return FETCH_IN_PROGRESS;
     }
 
     /** 
@@ -157,7 +244,8 @@ public class BootstrapServerManager {
     private void addDefaultsIfNeeded() {
         if (SERVERS.size()>0)
             return;
-        DefaultBootstrapServers.addDefaults(this);        
+        DefaultBootstrapServers.addDefaults(this);
+        Collections.shuffle(SERVERS);
     }
 
 
@@ -177,7 +265,7 @@ public class BootstrapServerManager {
             //For now, we just remove the host.  
             //Eventually we put it on probation.
             synchronized (BootstrapServerManager.this) {
-                SERVERS.remove(server);
+                removeServer(server);        
                 if (_lastConnectable==server)
                     _lastConnectable=null;
             }
@@ -188,6 +276,8 @@ public class BootstrapServerManager {
 												   String line);
         /** Should we go on to another host? */
         protected abstract boolean needsMoreData();
+        /** The next server to contact */
+        protected abstract BootstrapServer nextServer();
         /** Called when this is done.  Default: does nothing. */
         protected void done() { }
     }
@@ -208,8 +298,9 @@ public class BootstrapServerManager {
                 //(See HostCatcher.expire)
 
                 RouterService.getHostCatcher().add(host, 
-                    HostCatcher.CACHE_PRIORITY);       
+                    HostCatcher.CACHE_PRIORITY);
                 responses++;
+                _responsesAdded++;
             } catch (IllegalArgumentException bad) { 
                 //One strike and you're out; skip servers that send bad data.
                 handleError(server);
@@ -221,6 +312,27 @@ public class BootstrapServerManager {
         protected void done() {
             _hostFetchInProgress=false;
         }
+        
+        /**
+         * Fetches the next server in line.
+         */
+        protected BootstrapServer nextServer() {
+            BootstrapServer e = null;
+            synchronized (this) {
+                if(_lastIndex >= SERVERS.size()) {
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("Used up all servers, last: " + _lastIndex);
+                } else {
+                    e = (BootstrapServer)SERVERS.get(_lastIndex);
+                    _lastIndex++;
+                }
+            }
+            return e;
+        }            
+        
+        public String toString() {
+            return "hostfile request";
+        }   
     }
 
     private final class UrlfileRequest extends GWebCacheRequest {
@@ -231,7 +343,7 @@ public class BootstrapServerManager {
         protected void handleResponseData(BootstrapServer server, String line) {
             try {
                 BootstrapServer e=new BootstrapServer(line);
-                //Ensure url in this.  If list is too big, remove random
+                //Ensure url in this.  If list is too big, remove an
                 //element.  Eventually we may remove "worst" element.
                 synchronized (BootstrapServerManager.this) {
                     addBootstrapServer(e);
@@ -248,6 +360,17 @@ public class BootstrapServerManager {
         }
         protected boolean needsMoreData() {
             return responses<ENDPOINTS_TO_ADD;
+        }
+        
+        protected BootstrapServer nextServer() {
+            if(SERVERS.size() == 0)
+                return null;
+            else
+                return (BootstrapServer)SERVERS.get(randomServer());
+        }
+        
+        public String toString() {
+            return "urlfile request";
         }
     }
 
@@ -295,6 +418,16 @@ public class BootstrapServerManager {
         protected boolean needsMoreData() {
             return !gotResponse;
         }
+        protected BootstrapServer nextServer() {
+            if(SERVERS.size() == 0)
+                return null;
+            else
+                return (BootstrapServer)SERVERS.get(randomServer());
+        }
+        
+        public String toString() {
+            return "update request";
+        }
     }
 
 
@@ -329,16 +462,13 @@ public class BootstrapServerManager {
 		if(request == null) {
 			throw new NullPointerException("blocking request to null cache");
 		}
+		
         for (int i=0; request.needsMoreData() && i<MAX_HOSTS_PER_REQUEST; i++) {
-            //Pick a random server.  We may visit the same server twice, but
-            //that's improbable.  Alternative: shuffle list and remove first.
-            BootstrapServer e;
-            synchronized (this) {
-                if (SERVERS.size()==0)
-                    break;
-                e=(BootstrapServer)SERVERS.get(randomServer());
-            }
-            requestFromOneHost(request, e);
+            BootstrapServer e = request.nextServer();
+            if(e == null)
+                break;
+            else
+                requestFromOneHost(request, e);
         }
     }
                                         
@@ -355,10 +485,16 @@ public class BootstrapServerManager {
             LOG.trace("requesting: " + request + " from " + server);
 		
         BufferedReader in = null;
-        String connectTo = server.getURL().toString()
+        String urlString = server.getURL().toString();
+        String connectTo = urlString
                  +"?client="+CommonUtils.QHD_VENDOR_NAME
                  +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                  +"&"+request.parameters();
+        // add the guid if it's our cache, so we can see if we're hammering
+        // from a single client, or if it's a bunch of clients behind a NAT
+        if(urlString.indexOf(".limewire.com/") > -1)
+            connectTo += "&clientGUID=" + 
+                         ApplicationSettings.CLIENT_ID.getValue();
         HttpMethod get;
         try {
             get = new GetMethod(connectTo);
@@ -374,7 +510,7 @@ public class BootstrapServerManager {
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                              "close");
         get.setFollowRedirects(true);
-        HttpClient client = HttpClientManager.getNewClient();
+        HttpClient client = HttpClientManager.getNewClient(30*1000, 10*1000);
         try {
             HttpClientManager.executeMethodRedirecting(client, get);
             InputStream is = get.getResponseBodyAsStream();
@@ -432,15 +568,22 @@ public class BootstrapServerManager {
         }
     }
 
-    /** Returns an random valid index of SERVERS.  Protected so we can override
-     *  in test cases.  PRECONDITION: SERVERS.size>0. */
-    protected int randomServer() {
-        return _rand.nextInt(SERVERS.size());
-    }
-
     /** Returns the number of servers in this. */
     protected synchronized int size() {
         return SERVERS.size();
     }
-
+    
+     /** Returns an random valid index of SERVERS.  Protected so we can override
+      *  in test cases.  PRECONDITION: SERVERS.size>0. */
+    protected int randomServer() {
+        return _rand.nextInt(SERVERS.size());
+    }
+    
+    /**
+     * Removes the server.
+     */
+    protected synchronized void removeServer(BootstrapServer server) {
+        SERVERS.remove(server);
+        _lastIndex = Math.max(0, _lastIndex - 1);
+    }
 }
