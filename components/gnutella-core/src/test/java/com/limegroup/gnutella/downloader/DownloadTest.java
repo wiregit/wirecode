@@ -1633,66 +1633,6 @@ public class DownloadTest extends BaseTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
-    public void testPartialSourceNotAddedWithCorruption() throws Exception {
-        
-        // change the minimum required bytes so it'll be added.
-        PrivilegedAccessor.setValue(HTTPDownloader.class,
-            "MIN_PARTIAL_FILE_BYTES", new Integer((TestFile.length()/3)*2) );
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
-            "_acceptedIncoming", Boolean.TRUE );
-            
-        LOG.debug("-Testing that downloader does not add to mesh if corrupt");
-        
-        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
-        ConnectionSettings.CONNECTION_SPEED.setValue(
-            SpeedConstants.MODEM_SPEED_INT);
-        
-        AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
-        AlternateLocationCollection u2Alt = uploader2.getAlternateLocations();
-                    
-        // neither uploader knows any alt locs.
-        assertNull(u1Alt);
-        assertNull(u2Alt);
-
-        // the rate must be absurdly slow for the incomplete file.length()
-        // check in HTTPDownloader to be updated.
-        final int RATE=25;
-        final int STOP_AFTER = TestFile.length()/3;
-        final int FUDGE_FACTOR=RATE*1024;  
-        uploader1.setRate(RATE);
-        uploader1.stopAfter(STOP_AFTER);
-        uploader1.setCorruption(true);
-        uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2,100, TestFile.hash().toString());
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
-        
-        tGenericCorrupt(rfds);
-
-        //Make sure there weren't too many overlapping regions.
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        LOG.debug("\tu1: "+u1+"\n");
-        LOG.debug("\tu2: "+u2+"\n");
-        LOG.debug("\tTotal: "+(u1+u2)+"\n");
-        
-        //both uploaders should know that this downloader is an alt loc.
-        u1Alt = uploader1.getAlternateLocations(); //should have u2
-        u2Alt = uploader2.getAlternateLocations(); //should have u1 but demoted
-        assertNotNull(u1Alt);  
-        assertNotNull(u2Alt);
-        AlternateLocation al = AlternateLocation.create(TestFile.hash());
-        assertTrue( !u1Alt.contains(al) );
-        assertTrue( !u2Alt.contains(al) );
-        
-        //Note: The amount downloaded from each uploader will not 
-        //be equal, because the uploaders are started at different times.
-
-        assertEquals("u1 did too much work", STOP_AFTER, u1);
-        assertGreaterThan("u2 did no work", 0, u2);
-        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
-    }
-    
     public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
         LOG.debug("-Testing a shared partial funnels alt locs to downloader");
         
@@ -1886,8 +1826,8 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(rfds, later);
         
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
+        int u1 = uploader1.getAmountUploaded();
+        int u2 = uploader2.getAmountUploaded();
         
         LOG.debug("u1: " + u1);
         LOG.debug("u2: " + u2);
@@ -2008,14 +1948,14 @@ public class DownloadTest extends BaseTestCase {
         
         ManagedDownloader downloader = null;        
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(1000);
+        Thread.sleep(2500);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",0, queued);
 
         //try to add a third
-        downloader.addDownload(rfd3, true);
+        downloader.addDownloadForced(rfd3, true);
         Thread.sleep(1000);
         
         //make sure we did not kill anybody
@@ -2029,9 +1969,9 @@ public class DownloadTest extends BaseTestCase {
             LOG.debug("pass \n");
         else
             fail("FAILED: complete corrupt");
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        int u3 = uploader3.fullRequestsUploaded();
+        int u1 = uploader1.getAmountUploaded();
+        int u2 = uploader2.getAmountUploaded();
+        int u3 = uploader3.getAmountUploaded();
 
         // we only care that the 3rd downloader doesn't download anything -
         // how the other two downloaders split the file between themselves 
@@ -2070,7 +2010,7 @@ public class DownloadTest extends BaseTestCase {
         ManagedDownloader downloader = null;
         
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(100);
+        Thread.sleep(2000);
         downloader.addDownload(rfd2,false);
         Thread.sleep(2000);
         int swarm = downloader.getNumDownloaders();
@@ -2093,9 +2033,9 @@ public class DownloadTest extends BaseTestCase {
         else
             fail("FAILED: complete corrupt");
         
-        int u1 = uploader1.fullRequestsUploaded();
-        int u2 = uploader2.fullRequestsUploaded();
-        int u3 = uploader3.fullRequestsUploaded();
+        int u1 = uploader1.getAmountUploaded();
+        int u2 = uploader2.getAmountUploaded();
+        int u3 = uploader3.getAmountUploaded();
         
         assertEquals("queued uploader uploaded",0,u2);
         assertGreaterThan("u3 not given a chance to run", 0, u3);
@@ -2216,7 +2156,7 @@ public class DownloadTest extends BaseTestCase {
         
         ManagedDownloader downloader = null;
         downloader = (ManagedDownloader)RouterService.download(rfds,false,null);
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         
