@@ -310,6 +310,17 @@ public class BootstrapServerManagerTest extends TestCase {
         assertTrue(catcher.list.size()>10);
     }
 
+    public void testRedirect() {
+        s3.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url1);
+        s3.setResponseData("You have been redirected.");
+        bman.fetchEndpointsAsync();
+        sleep();
+        assertTrue(s3.getRequest()!=null);  //original location
+        assertTrue(s1.getRequest()!=null);  //was redirected here
+        assertTrue(s2.getRequest()==null);  //didn't go here
+        assertTrue(catcher.list.size()==RESPONSES_PER_SERVER);
+    }
+
     private void sleep() {
         //Wait 0.5 second--that should be long enough for request to happen.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
