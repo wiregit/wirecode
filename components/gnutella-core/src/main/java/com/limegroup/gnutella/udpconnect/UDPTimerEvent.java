@@ -8,7 +8,7 @@ import com.sun.java.util.collections.Comparable;
 public abstract class UDPTimerEvent implements Comparable {
 
     /** The currently scheduled time. */
-    protected long _eventTime;
+    protected volatile long _eventTime;
 
    /**
     *  Create a timer event with a default time.

@@ -26,11 +26,11 @@ public class UDPConnectionProcessor {
     private Chunk             _trailingChunk;
 
     /** The limit on space for data to be written out */
-    private int               _chunkLimit;
+    private volatile int      _chunkLimit;
 
     /** The receivers windowSpace defining amount of data that receiver can
         accept */
-    private int               _receiverWindowSpace;
+    private volatile int      _receiverWindowSpace;
 
     /** Record the desired connection timeout on the connection */
     private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
@@ -139,7 +139,7 @@ public class UDPConnectionProcessor {
 	private boolean           _waitingForDataSpace;
 
     /** Flag that the writeEvent is shutdown waiting for data to write */
-	private boolean 		  _waitingForDataAvailable;
+	private volatile boolean  _waitingForDataAvailable;
 
     /** Scheduled event for ensuring that data is acked or resent */
     private UDPTimerEvent     _ackTimeoutEvent;
@@ -341,6 +341,7 @@ public class UDPConnectionProcessor {
 
             // Notify the scheduler that there is a new write event/time
             _scheduler.scheduleEvent(_writeDataEvent);
+log2("scheduleWriteDataEvent");
         }
     }
 
@@ -370,6 +371,7 @@ public class UDPConnectionProcessor {
      */
     public void wakeupWriteEvent() {
         if ( _waitingForDataAvailable ) {
+log2("wakupWriteEvent");
             _waitingForDataAvailable = false;
             _safeWriteWakeup.updateTime(System.currentTimeMillis()+2);
             _scheduler.scheduleEvent(_safeWriteWakeup);
