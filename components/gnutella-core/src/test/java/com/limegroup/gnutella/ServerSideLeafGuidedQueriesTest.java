@@ -37,7 +37,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 	 * The timeout value for sockets -- how much time we wait to accept 
 	 * individual messages before giving up.
 	 */
-    private static final int TIMEOUT = 2000;
+    private static final int TIMEOUT = 300;
 
 	/**
 	 * The default TTL to use for request messages.
@@ -62,14 +62,9 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     private static Connection LEAF;
 
     /**
-     * Ultrapeer connection.
+     * The Ultrapeer connections.
      */
-    private static Connection ULTRAPEER_1;
-
-    /**
-	 * Second Ultrapeer connection
-     */
-    private static Connection ULTRAPEER_2;
+    private static Connection ULTRAPEERS[] = new Connection[30];
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -96,17 +91,12 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 						   new EmptyResponder()
 						   );
         
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+        for (int i = 0; i < ULTRAPEERS.length; i++)
+            ULTRAPEERS[i] = new Connection("localhost", PORT,
+                                           new UltrapeerHeaders("localhost"),
+                                           new EmptyResponder()
+                                           );
 
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
     }
 
     public static void setSettings() throws Exception {
@@ -158,8 +148,8 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 		ROUTER_SERVICE.disconnect();
 		sleep();
 		LEAF.close();
-		ULTRAPEER_1.close();
-		ULTRAPEER_2.close();
+        for (int i = 0; i < ULTRAPEERS.length; i++)
+            ULTRAPEERS[i].close();
 		sleep();
 	}
 
@@ -171,15 +161,12 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 	 * Drains all messages 
 	 */
  	private static void drainAll() throws Exception {
- 		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
- 		}
- 		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
- 		if(LEAF.isOpen()) {
+        for (int i = 0; i < ULTRAPEERS.length; i++) {
+            if (ULTRAPEERS[i].isOpen())
+                drain(ULTRAPEERS[i]);
+        }
+ 		if(LEAF.isOpen())
  			drain(LEAF);
- 		}
  	}
 
 	/**
@@ -187,11 +174,10 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 	 */
     private static void connect() throws Exception {
 		buildConnections();
-        //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
 
-        //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
+        // init all UPs        
+        for (int i = 0; i < ULTRAPEERS.length; i++)
+            ULTRAPEERS[i].initialize();
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
@@ -204,23 +190,25 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 			LEAF.flush();
         }
 
-        // for Ultrapeer 1
-        qrt = new QueryRouteTable();
-        qrt.add("leehsus");
-        qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flush();
+        // for Ultrapeers
+        for (int i = 0; i < ULTRAPEERS.length; i++) {
+            qrt = new QueryRouteTable();
+            qrt.add("leehsus");
+            qrt.add("berkeley");
+            for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
+                ULTRAPEERS[i].send((RouteTableMessage)iter.next());
+                ULTRAPEERS[i].flush();
+            }
         }
-
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
+        
+        for (int i = 0; i < ULTRAPEERS.length; i++)
+            assertTrue("ULTRAPEER " + i + 
+                       " should be connected", ULTRAPEERS[i].isOpen());
 		assertTrue("LEAF should be connected", LEAF.isOpen());
 
 		// make sure we get rid of any initial ping pong traffic exchanges
 		sleep();
 		drainAll();
-		//sleep();
 		drainAll();
 		sleep();
     }
@@ -349,6 +337,12 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
+    public void testBasicMechanism() {
+        // we want to make sure that the leaf correctly guides the queries to
+        // stop.
+
+        
+    }
     
 
 }
