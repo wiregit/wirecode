@@ -447,7 +447,9 @@ public class UDPConnectionProcessor {
 
             // Notify the scheduler that there is a new write event/time
             _scheduler.scheduleEvent(_writeDataEvent);
-            LOG.debug("scheduleWriteDataEvent");
+            if(LOG.isDebugEnabled())  {
+                LOG.debug("scheduleWriteDataEvent :"+time);
+            }
         }
     }
 
