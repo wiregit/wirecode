@@ -14,7 +14,7 @@ public class CommonUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static final String LIMEWIRE_VERSION = "1.7";
+	private static final String LIMEWIRE_VERSION = "Supernode Alpha";
 	
 	/** 
 	 * Variable for the java system properties.
