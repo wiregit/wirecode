@@ -181,8 +181,9 @@ public abstract class MessageRouter {
     /**
      * keeps a list of the people who have requested our connection lists.
      * used to make sure we don't get ping-flooded.
+     * not final so that tests won't take forever.
      */
-    private final FixedSizeExpiringSet _UDPListRequestors = new FixedSizeExpiringSet(200, 5*1000);
+    private FixedSizeExpiringSet _UDPListRequestors = new FixedSizeExpiringSet(200, 5*1000);
 
     /**
      * Creates a MessageRouter.  Must call initialize before using.
