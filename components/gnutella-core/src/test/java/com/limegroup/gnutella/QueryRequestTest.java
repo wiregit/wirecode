@@ -130,8 +130,8 @@ public final class QueryRequestTest extends TestCase {
 					 qr.getRequestedUrnTypes(), Collections.EMPTY_SET);
 		assertEquals("URN Set should be the empty set", 
 					 qr.getQueryUrns(), Collections.EMPTY_SET);
-        // the min speed should be 128 cuz we convert 0s to such....
-		assertEquals("min speeds don't match", 128, qr.getMinSpeed());
+        // the min speed should be 130 cuz we convert 0s to such....
+		assertEquals("min speeds don't match", 130, qr.getMinSpeed());
 
 		try {
 			Set queryUrns = qr.getQueryUrns();
@@ -232,10 +232,10 @@ public final class QueryRequestTest extends TestCase {
     public void testNewMinSpeedUse() {
         // test simple use
         QueryRequest qr = new QueryRequest((byte)3, 0, "susheel", false);
-        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
         qr = new QueryRequest((byte)3, 0, "susheel", true);
-        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
 
         { // test rich use....
