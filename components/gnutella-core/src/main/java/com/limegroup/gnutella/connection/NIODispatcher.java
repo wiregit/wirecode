@@ -132,11 +132,9 @@ public final class NIODispatcher implements Runnable {
 						// TODO:: don't use Message Router
 						RouterService.getMessageRouter().handleMessage(msg, (ManagedConnection)key.attachment());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						//e.printStackTrace();
+						// TODO record stats for this
 					} catch (BadPacketException e) {
-						// TODO Auto-generated catch block
-						//e.printStackTrace();
+						// TODO record stats for this
 					}
 				}
 			}
