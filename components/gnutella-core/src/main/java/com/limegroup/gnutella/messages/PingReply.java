@@ -398,7 +398,7 @@ public class PingReply extends Message implements Serializable {
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 byte[] bytes = 
                     ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                return QueryKey.getQueryKey(bytes);
+                return QueryKey.getQueryKey(bytes, false);
             }
         }
         catch (IllegalArgumentException malformedQueryKey) {

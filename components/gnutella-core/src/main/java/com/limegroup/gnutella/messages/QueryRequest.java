@@ -318,7 +318,7 @@ public class QueryRequest extends Message implements Serializable{
             if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 byte[] qkBytes = 
                 ggepBlock.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                retQK = QueryKey.getQueryKey(qkBytes);
+                retQK = QueryKey.getQueryKey(qkBytes, false);
             }
         }        
         catch (BadGGEPBlockException ignored) {}
