@@ -3,6 +3,8 @@ package com.limegroup.gnutella.settings;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.*;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
 import java.io.*;
 
 /**
@@ -86,31 +88,16 @@ public final class ThemeSettings extends LimeProps {
         new File(THEME_DIR_FILE, DEFAULT_PRO_THEME_NAME);
     
     /**
-     * The array of all theme files that should be copied by default
-     * from the themes jar file.
-     */
-    private static final String[] THEMES = {
-        DEFAULT_THEME_NAME,
-        DEFAULT_PRO_THEME_NAME,
-        DEFAULT_OSX_THEME_NAME,
-        WINDOWS_LAF_THEME_NAME,
-        "black_theme."+EXTENSION,
-    };
-    
-    /**
      * Statically expand any zip files in our jar if they're newer than the
      * ones on disk.
      */
-    
     static {
         File themesJar = new File("themes.jar");
-        if(!themesJar.isFile()) {
-            themesJar = new File(new File("lib"), "themes.jar");
-        }
         
         // workaround for when the jar file is only in your classpath --
         // this uses the default theme instead of the jar to check
         // the timestamp -- added by Jens-Uwe Mager
+        // this also is used for running LimeWire from CVS
         if(!themesJar.isFile()) {
             String url =
             ThemeSettings.class.getClassLoader().
@@ -122,17 +109,33 @@ public final class ThemeSettings extends LimeProps {
                 themesJar = new File(url);
             }
         }
+        
         if(themesJar.isFile()) {
-            long jarMod = themesJar.lastModified();
-            for(int i=0; i<THEMES.length; i++) {
-                File zipFile = new File(THEME_DIR_FILE, THEMES[i]);
-                if(zipFile.isFile()) {
-                    long zipMod = zipFile.lastModified();
-                    if(jarMod > zipMod) {           
-                        copyZipWithNewTimestamp(THEMES[i], zipFile);
+            ZipFile zf = null;
+            try {            
+                long jarMod = themesJar.lastModified();
+                zf = new ZipFile(themesJar);
+                Enumeration entries = zf.entries();
+                while(entries.hasMoreElements()) {
+                    ZipEntry ze = (ZipEntry)entries.nextElement();
+                    String name = ze.getName();
+                    if(!name.endsWith(".lwtp"))
+                        continue;
+                    File existingFile = new File(THEME_DIR_FILE, name);
+                    if(existingFile.isFile()) {
+                        if(jarMod > existingFile.lastModified())
+                            copyZipWithNewTimestamp(name, existingFile);
+                    } else if(!existingFile.exists()) {
+                        copyZipWithNewTimestamp(name, existingFile);
                     }
-                } else if(!zipFile.exists()) {
-                    copyZipWithNewTimestamp(THEMES[i], zipFile);
+                }
+            } catch(IOException ioe) {
+                ErrorService.error(ioe);
+            } finally {
+                if(zf != null) {
+                    try {
+                        zf.close();
+                    } catch(IOException ignored) {}
                 }
             }
         }
