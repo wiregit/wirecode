@@ -352,7 +352,7 @@ public class UDataFileCreator {
                         int codeInt = Integer.parseInt(splitUp[i], 16);
 
                         if(!ex.get(codeInt)) {
-                            up = char2code((String)casF.get(splitUp[i]));
+                            up = char2code((String)casF.get(code2char(splitUp[i])));
                             if(up != null)
                                 dek.append(up + " ");
                             else {
@@ -370,7 +370,7 @@ public class UDataFileCreator {
                     }
                     u.deKomp = dek.toString().trim();
                 }
-
+                
             }
         }
     }
